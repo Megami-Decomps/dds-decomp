@@ -557,13 +557,13 @@ typedef struct SdfAssetEntry {
     u32 pad00;             /* 0x00 */
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
-    u32 unk0C;             /* 0x0C */
+    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
     u32 unk10;             /* 0x10 */
     u32 unk14;             /* 0x14 */
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
     u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
-    u32 mode;              /* 0x24 */
+    u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */
     u8 pad30[8];           /* 0x30 */

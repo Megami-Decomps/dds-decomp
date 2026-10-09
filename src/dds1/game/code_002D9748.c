@@ -809,9 +809,9 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
-    drawEntry->unk0C = asset->secondaryColor;
+    drawEntry->secondaryColor = asset->secondaryColor;
     packetMode = asset->secondaryMode;
-    drawEntry->mode = packetMode;
+    drawEntry->secondaryMode = packetMode;
     drawEntry->alphaState = D_00398198[packetMode];
     if (texture != NULL) {
         drawEntry->secondaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
