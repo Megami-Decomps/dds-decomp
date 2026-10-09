@@ -154,15 +154,6 @@ extern u8 D_003B1DF0[];
 
 extern u8 D_003B1EB0[];
 
-typedef struct EffPCPNode {
-    u8 pad0[4];
-    struct EffPCPNode *next;
-    u8 pad8[4];
-    struct EffPCPNode *child;
-    u8 pad10[0x60];
-    u8 vector70[0x10];
-} EffPCPNode;
-
 /* Shared trail allocation is 0x3C; each referencing task owns one u32 frame.
    The private trail is a different 0x38-byte record, without unk24. */
 typedef struct EffPCPSharedTrail {
@@ -627,15 +618,18 @@ extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 typedef struct EffPCPSprayWork {
-    u8 pad00[0x10];
+    f32 pos[4];       /* 0x00 vector loaded by the pulse updater */
     f32 scale;        /* 0x10 */
     u32 color;        /* 0x14 */
     u32 count;        /* 0x18 particle count */
-    u32 unk1C;        /* 0x1C */
-    u32 id[10];       /* 0x20 */
-    f32 angle[10];    /* 0x48 random start angles */
+    s32 frame;        /* 0x1C current update frame */
+    s32 startFrame[10]; /* 0x20 */
+    f32 rotationY[10];  /* 0x48 random start angles */
     EffParamWork *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
+
+typedef char EffPCPSprayWork_size_must_be_0x98[
+    (sizeof(EffPCPSprayWork) == 0x98) ? 1 : -1];
 
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
@@ -5025,11 +5019,11 @@ EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
     work->scale = 1.0f;
     work->color = 0x80808080;
     work->count = 10;
-    work->unk1C = 0;
+    work->frame = 0;
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
-        work->id[i] = i;
-        work->angle[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->startFrame[i] = i;
+        work->rotationY[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamCreateFromTable(src, 0);
     return work;
@@ -5039,75 +5033,42 @@ EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     EffPCPSprayWork *work = sdfAllocSizeClassBlock(0x98);
     u32 i;
 
-    work->unk1C = 0;
+    work->frame = 0;
     work->scale = src->scale;
     work->count = src->count;
     work->color = 0x80808080;
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
-        work->id[i] = i;
-        work->angle[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->startFrame[i] = i;
+        work->rotationY[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamWorkDuplicate(src->handle[0]);
     return work;
 }
 
-void effDestroyIndexedResources(s32 *obj) {
+void effDestroyIndexedResources(EffPCPSprayWork *work) {
     u32 i;
 
-    for (i = 0; i < (u32)obj[6]; i++) {
-        if (obj[0x1C + i] != 0) {
-            effDispatchParameterDataAndFreeWork((EffParamWork *)obj[0x1C + i]);
+    for (i = 0; i < work->count; i++) {
+        if (work->handle[i] != 0) {
+            effDispatchParameterDataAndFreeWork(work->handle[i]);
         }
     }
-    sdfReleaseChipBlock(obj);
+    sdfReleaseChipBlock(work);
 }
 
-void effPcpCaptureNodeVectors(EffPCPNode *node) {
-    EffPCPNode *child;
+void effPcpCaptureNodeVectors(SdfDrawNode *node) {
+    SdfDrawNode *child;
 
-        VU0_STORE_VF(vf10, node->vector70);
-    child = node->child;
+    VU0_STORE_VF(vf10, node->scale);
+    child = node->children;
     if (child != NULL) {
         do {
             effPcpCaptureNodeVectors(child);
             child = child->next;
-        } while (child != node->child);
+        } while (child != node->children);
     }
 }
-
-typedef struct EffPCPPulseWork {
-    u128 pos;               /* 0x00 */
-    f32 scale;              /* 0x10 */
-    u32 mask;               /* 0x14 */
-    u32 count;              /* 0x18 */
-    s32 frame;              /* 0x1C */
-    s32 startFrame[10];     /* 0x20 */
-    f32 rotY[10];           /* 0x48 */
-    EffParamWork *handle[10];   /* 0x70 */
-} EffPCPPulseWork;
-
-typedef struct EffPCPPulseHead {
-    u8 pad00[0xC];
-    EffPCPNode **roots;     /* 0x0C */
-} EffPCPPulseHead;
-
-typedef struct EffPCPPulseModel {
-    EffPCPPulseHead *head;  /* 0x00 */
-} EffPCPPulseModel;
-
-typedef struct EffPCPPulseChild {
-    u8 pad00[0x30];
-    u8 active;              /* 0x30 */
-} EffPCPPulseChild;
-
-typedef struct EffPCPPulseData {
-    u32 flags;              /* 0x00 */
-    u8 pad04[0x14];
-    EffPCPPulseModel *model; /* 0x18 */
-    u8 pad1C[4];
-    EffPCPPulseChild *child[4]; /* 0x20 */
-} EffPCPPulseData;
 
 typedef struct EffPCPPulseBattle {
     u8 pad00[0x110];
@@ -5120,17 +5081,17 @@ extern void func_00340DC8(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
-extern void sdfModelUpdateCurrentFrameTransforms(void *model);
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
-void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
+void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
     u32 i = 0;
     u32 count;
-    EffPCPPulseData *data;
-    EffPCPPulseModel *model;
-    EffPCPPulseChild *child;
-    EffPCPNode *root;
+    MdlCtx *data;
+    SdfModel *model;
+    Motion *child;
+    SdfDrawNode *root;
     f32 vec[4];
     s32 j;
 
@@ -5144,7 +5105,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
             continue;
         }
         data = effParamWorkGetData(work->handle[i]);
-        func_00340DC8(0.0f, work->rotY[i], 0.0f);
+        func_00340DC8(0.0f, work->rotationY[i], 0.0f);
         if (func_001695C8() && (((EffPCPPulseBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x400)) {
             VU0_LOAD_VF(vf11, D_00414610);
             effMiscQuatMultiplyVU();
@@ -5154,18 +5115,18 @@ void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
         VEC3_SPLAT(vec, work->scale * work->scale);
         VU0_LOAD_VF(vf10, vec);
         mdlStoreTertiaryVectorVU(data);
-        mdlBroadcastMasked(data, work->mask);
-        VU0_LOAD_VF(vf10, work);
+        mdlBroadcastMasked(data, work->color);
+        VU0_LOAD_VF(vf10, work->pos);
         mdlStorePrimaryVectorVU(data);
         for (j = 0; j != 4; j++) {
-            child = data->child[j];
-            if (child != NULL && child->active) {
+            child = data->slots[j];
+            if (child != NULL && child->state) {
                 sdfMotionUpdate(child);
             }
         }
-        if (!(data->flags & 1)) {
-            model = data->model;
-            root = model->head->roots[0];
+        if (!(data->flags & MDL_SKIP_TRANSFORMS)) {
+            model = data->inner;
+            root = ((SdfDrawNode **)model->list->buffer)[0];
             VEC3_SPLAT(vec, 1.0f / work->scale);
             VU0_LOAD_VF(vf10, vec);
             effPcpCaptureNodeVectors(root);
@@ -5180,11 +5141,11 @@ void effPcpCopyCaptureNodeVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effPcpSetSprayColor(EffPCPPulseWork *work, u32 value) {
-    work->mask = value;
+void effPcpSetSprayColor(EffPCPSprayWork *work, u32 value) {
+    work->color = value;
 }
 
-void effPcpSetSprayScale(EffPCPPulseWork *work, f32 val) {
+void effPcpSetSprayScale(EffPCPSprayWork *work, f32 val) {
     work->scale = val;
 }
 
