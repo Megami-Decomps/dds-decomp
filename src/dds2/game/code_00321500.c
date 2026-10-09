@@ -7,7 +7,6 @@
 #define MNU_STATE_COMPLETED    1
 #define MNU_STATE_VALUE_GATED  2
 #define MNU_STATE_WAIT_PENDING 8
-#define MNU_REGISTRY_TAG_PREFIX 0x02010000
 
 
 extern u32 mnuActiveEffectEntry;
@@ -30,7 +29,7 @@ extern MenuRegistryParameters *D_004390E4;
 
 extern u32 D_004390E8;
 
-extern u32 D_004390DC;
+extern MenuMovementRecord18 *D_004390DC;
 
 extern u32 D_004390E0;
 
@@ -50,24 +49,6 @@ extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
 extern u32 mnuGetActiveEffectWorkEntry(void);
-
-typedef struct MenuMovementRecord18 {
-    union {
-        u8 pad00[0xA];
-        struct {
-            u8 pad00To04[4];
-            u32 parameterTag;
-            u8 pad08[2];
-            u16 movementScale;
-            u8 pad0C[0xC];
-        };
-    };
-} MenuMovementRecord18;
-
-typedef char MenuMovementRecordLayoutAssert[
-    (sizeof(MenuMovementRecord18) == 0x18 &&
-     (unsigned long)&((MenuMovementRecord18 *)0)->parameterTag == 4 &&
-     (unsigned long)&((MenuMovementRecord18 *)0)->movementScale == 0xA) ? 1 : -1];
 
 typedef struct ShortRecord {
     u8 kind;
@@ -237,15 +218,15 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
-extern MenuRuntimeRecord *func_00321F18(MenuRuntimeList *);
+extern MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *);
 extern MenuRuntimeCallback D_0043899C;
 extern f64 cos(f64);
 extern f64 sin(f64);
 
-MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
+MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
                            s32 offsetX, s32 offsetY, s32 direction,
                            s16 speed, s16 remaining, f32 angle) {
-    MenuRuntimeRecord *record = func_00321F18(list);
+    MenuRuntimeRecord *record = mnuAcquireRuntimeRecordSlot(list);
 
     if (record == NULL) {
         return NULL;
@@ -286,12 +267,13 @@ MenuRuntimeList *func_00321ED8(void) {
     return &D_0045C880;
 }
 
-void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
+/* Clears only record storage; the list header and activeCount are unchanged. */
+void mnuClearRuntimeRecordStorage(MenuRuntimeList *list) {
     memset(list->records, 0, list->capacity * sizeof(*list->records));
 }
 
 
-MenuRuntimeRecord *func_00321F18(MenuRuntimeList *list) {
+MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *list) {
     MenuRuntimeRecord *record;
     s32 i;
     u32 count;
@@ -445,14 +427,14 @@ MenuRegistry *mnuGetMenuRecordRegistryEntry(u32 taggedIndex) {
     return &D_004390D0[index];
 }
 
-void func_00322510(u32 records, u32 count) {
+void func_00322510(MenuMovementRecord18 *records, u32 count) {
     D_004390DC = records;
     D_004390E0 = count;
 }
 
-u8 *func_00322520(u32 taggedIndex) {
-    u16 index = taggedIndex;
-    return (u8 *)D_004390DC + index * 24;
+MenuMovementRecord18 *func_00322520(u32 movementRecordIndex) {
+    u16 index = movementRecordIndex;
+    return &D_004390DC[index];
 }
 
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count) {
@@ -490,7 +472,8 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
 u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
     MenuRegistry *registryEntry;
     MenuRegistryTable *registryTable;
-    if ((((MenuWorkEntry *)taggedRecord)->tag & 0xffff0000) != MNU_REGISTRY_TAG_PREFIX) {
+    if ((((MenuWorkEntry *)taggedRecord)->tag & MNU_WORK_TAG_CLASS_MASK) !=
+        MNU_WORK_TAG_REGISTRY_TABLE) {
         return 0;
     }
     registryEntry = mnuGetMenuRecordRegistryEntry(((MenuWorkEntry *)taggedRecord)->tag);
@@ -754,7 +737,7 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     if (entry->flagsBits.updated) {
         entry->flagsBits.updated = 0;
         if (!entry->flagsBits.unk5) {
-            if ((entry->tag & 0xFFFF0000) == 0x02010000) {
+            if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
                 registry = mnuGetMenuRecordRegistryEntry(entry->tag);
                 if (entry->remaining <= (registry->unk08 >> 1)) {
                     entry->flagsBits.unk5 = 1;
@@ -763,7 +746,7 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
         }
     }
     if (entry->flagsBits.finished) {
-        if ((entry->tag & 0xFFFF0000) == 0x01000000) {
+        if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE) {
             entry->flags |= 0x4000;
             D_004389A4(entry, context);
         } else {
@@ -838,13 +821,13 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
     s32 i;
     u32 tag = work->tag;
 
-    switch (tag & 0xFFFF0000) {
-    case 0x01000000: {
-        MenuMovementRecord18 *fixed = (MenuMovementRecord18 *)func_00322520(tag);
+    switch (tag & MNU_WORK_TAG_CLASS_MASK) {
+    case MNU_WORK_TAG_MOVEMENT_TABLE: {
+        MenuMovementRecord18 *fixed = func_00322520(tag);
         parameters = mnuGetMenuRegistryParametersByIndex(fixed->parameterTag);
         break;
     }
-    case 0x02010000: {
+    case MNU_WORK_TAG_REGISTRY_TABLE: {
         MenuRegistry *registry;
         if (work->remaining == 0) {
             return NULL;
@@ -880,7 +863,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
             if (bottom < y - radiusY || y + radiusY < top) {
                 continue;
             }
-            if ((work->tag & 0xFFFF0000) == 0x01000000 && kind == 3) {
+            if ((work->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE && kind == 3) {
                 D_004389AC(record, work, context);
                 return record;
             }
@@ -1020,7 +1003,7 @@ s32 func_00324070(MenuWorkEntry *input) {
 
         right = left + parameters->hitWidth;
         bottom = top + parameters->hitHeight;
-        inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
+        inputRecord = func_00322520(input->tag);
         parameters = mnuGetMenuRegistryParametersByIndex(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
         inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
@@ -1059,7 +1042,7 @@ void mnuInitializeActiveEffectWorkEntry(u32 entry) {
     memset((void *)entry, 0, 0x48);
     func_003242D0((MenuWorkEntry *)entry, 0);
     ((MenuWorkEntry *)entry)->flags |= 0x4010;
-    ((MenuWorkEntry *)entry)->tag = 0x1000000;
+    ((MenuWorkEntry *)entry)->tag = MNU_WORK_TAG_MOVEMENT_TABLE;
     ((MenuWorkEntry *)entry)->remaining = 1;
     ((MenuWorkEntry *)entry)->scale0 = 1.5707963f;
     mnuActiveEffectEntry = entry;
@@ -1251,7 +1234,7 @@ s32 func_00324840(void) {
     u32 kindMask = 0;
     s8 *input = (s8 *)D_0045C890;
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
-    MenuMovementRecord18 *progress = (MenuMovementRecord18 *)func_00322520((u16)work->tag);
+    MenuMovementRecord18 *progress = func_00322520((u16)work->tag);
 
     if (work->inputCountdown > 0) {
         work->inputCountdown--;
