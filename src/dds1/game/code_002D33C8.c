@@ -590,9 +590,9 @@ SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag) {
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
     dmaHeader |= packedAddress;
-    referenceNode->unk0 = dmaHeader;
-    referenceNode->unk10 = 0;
-    referenceNode->unk8 = sourceTag->vifCommands;
+    referenceNode->dmaTag = dmaHeader;
+    referenceNode->nextTag = 0;
+    referenceNode->vifCommands = sourceTag->vifCommands;
     return referenceNode;
 }
 
@@ -635,30 +635,26 @@ void sdfConnectPacketLists(SdfListHead *previousList, SdfListHead *incomingList)
     tailTag->address = incomingList->first & SDF_DMA_ADDRESS_MASK;
 }
 
-typedef struct SdfRefNode {
-    u8 pad00[0x10];
-    u64 chain; /* 0x10: NEXT tag chaining to the previous head */
-} SdfRefNode;
-
-/* Prepend the second reference, then the first: the resulting order is first, second, payload. */
+/* Prepend the second reference, then the first: first, second, payload.
+ * Patch only the NEXT header's low doubleword; its VIF half stays zero. */
 void sdfChainReferenceNodes(SdfListHead *list) {
-    SdfRefNode *referenceNode;
+    SdfDmaNode *referenceNode;
     u32 priorHeadAddress;
     u32 sourceTagAddress;
 
     sourceTagAddress = list->secondReferenceSource;
     if (sourceTagAddress != 0) {
-        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
         list->first = (u32)referenceNode;
-        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
+        *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
     sourceTagAddress = list->firstReferenceSource;
     if (sourceTagAddress != 0) {
-        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
         list->first = (u32)referenceNode;
-        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
+        *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
 }
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
@@ -922,16 +918,16 @@ void func_002D4CC8(s32 source, u32 packet, s32 variant) {
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
