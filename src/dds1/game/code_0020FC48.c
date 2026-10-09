@@ -123,7 +123,7 @@ typedef struct BattleRuntimeState {
     s32 gridHeight;
     s32 cellWidth;
     s32 cellHeight;
-    void *ownedData;
+    u8 *ownedData;
     u8 unk_3C[4];
     RefObj *resource;
     void *request;
@@ -1224,7 +1224,7 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 
 extern SdfTex *kwlnHeldTextureReference;
 
-void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+void func_00211A60(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1236,7 +1236,7 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 horizontal[4];
     s32 vertical[4];
 
-    sdfConsCreateDrawPacket((SdfListHead *)list, kwlnHeldTextureReference, (primitive >> 9) & 1);
+    sdfConsCreateDrawPacket(list, kwlnHeldTextureReference, (primitive >> 9) & 1);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1249,7 +1249,7 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
+    sdfQueueTexturedQuad(list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
@@ -1263,7 +1263,7 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern s32 kwlnGetDrawBufferIndex(void);
 
-void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
+void func_00211B88(SdfListHead *list, s32 primitive, s32 color, f32 scale, s32 depth) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1279,7 +1279,7 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
 
     packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary((SdfListHead *)list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
+    sdfAppendDmaPrimary(list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1292,7 +1292,7 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
+    sdfQueueTexturedQuad(list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
@@ -1315,10 +1315,10 @@ extern void func_002D4CC8(const void *, void *, s32);
 
 extern u32 btlMulColor(u32, u32);
 
-extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
+extern void func_00211D40(SdfListHead *, s32, u32, s32, f32, f32, f32);
 
 /* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
-void func_002121E8(s32 list, u32 color, s32 depth) {
+void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
     SdfPacket *tag;
     SdfPacket *registers;
     u32 tint;
@@ -1329,7 +1329,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
+    sdfAppendDmaTagToList(list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
@@ -1339,7 +1339,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     registers[1].unk8 = 0x48;
     registers[1].unk10 = 0x44;
     registers[1].unk18 = 0x43;
-    sdfAppendPacket((void *)list, (s32)registers);
+    sdfAppendPacket(list, (u32)registers);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
@@ -1349,7 +1349,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     registers[1].unk8 = 0x47;
     registers[1].unk10 = 0x54;
     registers[1].unk18 = 0x42;
-    sdfAppendPacket((void *)list, (s32)registers);
+    sdfAppendPacket(list, (u32)registers);
     tint = btlMulColor(0x3C808080, color);
     func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 5.0f, 2.0f);
     func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
@@ -1364,7 +1364,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
+    sdfAppendDmaTagToList(list, (u32)tag);
 }
 
 extern f32 func_002F9F60(f32);
@@ -1383,13 +1383,13 @@ void btlInitVisibilityGrid(void) {
     btlRuntimeState.unk_3C[0] = 0;
     for (y = 0; y < btlRuntimeState.gridHeight; y++) {
         for (x = 0; x < btlRuntimeState.gridWidth; x++) {
-            ((s8 *)btlRuntimeState.ownedData)[y * btlRuntimeState.gridWidth + x] = -0x80;
+            btlRuntimeState.ownedData[y * btlRuntimeState.gridWidth + x] = 0x80;
         }
     }
 }
 
 void btlReleaseOwnedData(void) {
-    void *data = btlRuntimeState.ownedData;
+    u8 *data = btlRuntimeState.ownedData;
     if (data != 0) {
         sdfReleaseChipBlock(data);
         btlRuntimeState.ownedData = 0;
@@ -1398,7 +1398,7 @@ void btlReleaseOwnedData(void) {
 
 extern f32 D_00360F30[];
 
-void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+void func_00212680(SdfListHead *packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
     s32 i;
@@ -1406,18 +1406,18 @@ void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 colo
     x += 0x7000;
     y += 0x7900;
     for (i = 0; i < 6; i++) {
-        sdfQueueFlatTriangle((SdfListHead *)(u32)packets, color, primitive, x, y,
+        sdfQueueFlatTriangle(packets, color, primitive, x, y,
             x + (s32)(D_00360F30[i * 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 1] * heightScale),
             x + (s32)(D_00360F30[i * 2 + 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 3] * heightScale),
             depth, NULL);
     }
 }
 
-extern void effAppendTexturedTrianglePacket(s32, s32, s32,
+extern void effAppendTexturedTrianglePacket(SdfListHead *, s32, s32,
     s32, s32, f32, f32, s32, s32, f32, f32, s32, s32, f32, f32, s32);
 
 /* The textured cell uses the same six-triangle rim as the flat cell above. */
-void btlDrawTexturedGridCell(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+void btlDrawTexturedGridCell(SdfListHead *packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
     s32 x0;
@@ -1461,15 +1461,15 @@ void btlInitFadeColors(void) {
 
 extern SdfPoolNode D_00325708;
 
-extern void func_00212998(u32, u32, u32, u32, u32, s32);
+extern void func_00212998(SdfListHead *, u32, u32, u32, u32, s32);
 
 s32 btlUpdateFadeIn(void) {
-    u32 packets = (u32)sdfCreateResetPacketList();
+    SdfListHead *packets = sdfCreateResetPacketList();
     if ((btlRuntimeState.color18 & 0xFF000000) != 0x80000000) {
         btlRuntimeState.color18 += 0x10000000;
     }
     func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
-    D_00325708.append(&D_00325708, (SdfListHead *)packets);
+    D_00325708.append(&D_00325708, packets);
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
         btlRuntimeState.color1C -= 0x08000000;

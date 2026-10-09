@@ -497,17 +497,17 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9EA0);
 typedef struct SceneCheckArgs {
     u16 mode;
     u16 pad2;
-    s32 first;
-    s32 second;
+    BtlUnit *first;
+    BtlUnit *second;
 } SceneCheckArgs;
 
-extern s32 func_001ABDE8();
+extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 func_001ABA40();
+extern s32 func_001ABA40(BtlUnit *, s32);
 
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
-s32 btlCheckScenePairResult(s32 self, SceneCheckArgs *args) {
+s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
     s32 base;
     s32 resultA = 0;
     s32 resultB = 0;

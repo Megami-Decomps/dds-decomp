@@ -4869,8 +4869,6 @@ void effPcpSetSprayScale(EffPCPSprayWork *work, f32 val) {
     work->scale = val;
 }
 
-extern void effEventCopyFileRecordHeader(void *dst, const void *src);
-
 /* Placement block handed to every spawned event entry. */
 typedef struct EffPCPEventPlace {
     f32 pos[7];

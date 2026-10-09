@@ -139,7 +139,49 @@ INCLUDE_RODATA(const s32, "game/code_0028E568", D_004272C8);
 
 INCLUDE_ASM(const s32, "game/code_0028E568", func_0028EF50);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", func_0028F128);
+extern s32 mdlFlagTest(s32);
+extern void *memcpy(void *, const void *, u32);
+extern const u16 D_004272F8[14][2];
+extern const u16 D_00427330[4][2];
+extern const u16 D_00427340[8][2];
+extern const u16 D_00427360[8][2];
+extern const s8 D_00427380[9];
+
+s32 func_0028F128(u16 nodeId, s8 member) {
+    u16 memberFlags[14][2];
+    u16 flagsA[4][2];
+    u16 flagsB[8][2];
+    u16 flagsC[8][2];
+    s8 memberOffsets[9];
+    u32 i;
+
+    memcpy(memberFlags, D_004272F8, sizeof(memberFlags));
+    memcpy(flagsA, D_00427330, sizeof(flagsA));
+    memcpy(flagsB, D_00427340, sizeof(flagsB));
+    memcpy(flagsC, D_00427360, sizeof(flagsC));
+    memcpy(memberOffsets, D_00427380, sizeof(memberOffsets));
+    for (i = 0; i < 14; i++) {
+        if (memberFlags[i][0] == nodeId) {
+            return mdlFlagTest(memberFlags[i][1] + memberOffsets[member]);
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (flagsA[i][0] == nodeId) {
+            return mdlFlagTest(flagsA[i][1]);
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        if (flagsB[i][0] == nodeId) {
+            return mdlFlagTest(flagsB[i][1]);
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        if (flagsC[i][0] == nodeId) {
+            return mdlFlagTest(flagsC[i][1]);
+        }
+    }
+    return 0;
+}
 
 /* Select a menu row whose mantra profile cannot advance at the current model
  * state; if none qualifies, search party profiles against the active rank set. */

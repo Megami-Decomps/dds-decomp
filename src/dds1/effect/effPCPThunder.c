@@ -2388,7 +2388,6 @@ extern void effInitializeColorState(struct EffectColorState *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
-extern void effEventCopyFileRecordHeader(void *, const void *);
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
@@ -2814,7 +2813,7 @@ void func_001681C0(EffPcpThunderGroup *group) {
                 delta[2] = start[2] - place.unk00[2];
                 sdfConvertEulerAnglesToQuaternionVU(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
-                effEventCopyFileRecordHeader((FileRecordHeader *)slot->eventNode, (const FileRecordHeader *)&place);
+                effEventCopyFileRecordHeader(slot->eventNode, &place);
                 effEventUpdateEffectParameters(slot->eventNode);
             }
             effThunderDrawHistoryAndEndCap(slot->fragment);
