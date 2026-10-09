@@ -146,7 +146,7 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
-extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
@@ -430,7 +430,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
 /* Create the five panel items owned by this group and clear its selection. */
-MenuPanelGroup *mnuCreatePanelGroup(s32 parent) {
+MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
     MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -864,7 +864,7 @@ MenuPanelItem *mnuCreatePanelItem(void) {
     return panelItem;
 }
 
-void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, EffectSlotSet *gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 2, 1, 3, 4};
 
     itfGridStorePosition(&item->groupGridSlots[0], gridObject, 3);
