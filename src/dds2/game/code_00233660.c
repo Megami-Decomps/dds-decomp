@@ -278,9 +278,8 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void effCopyVector(s32 handle, f32 *src);
-
-extern void billInvokeCallback(s32 handle);
+extern void effCopyVector(void *dst, void *src);
+extern void billInvokeCallback(BillObj *billboard);
 
 
 
@@ -838,7 +837,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
             if (chunkRecord != NULL) {
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
 
-                resourceItem->payload.part.handle = (s32)(u32)createPart(partSlot);
+                resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
                 resourceItem->payload.part.mapPositionRecord = chunkRecord;
                 resourceItem->payload.part.anchorScale = optionalAnchorScale;
@@ -985,10 +984,10 @@ void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
 void mdlDestroyResourceItem(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind((BillObj *)(u32)item->payload.part.handle);
+        billDispatchByKind((BillObj *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_EFFECT:
-        effDestroyNode((EffNode *)(u32)item->payload.part.handle);
+        effDestroyNode((EffNode *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyRelease(item->payload.part.track);
@@ -1037,20 +1036,20 @@ void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f3
 void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
     SdfModel *model = owner->inner;
     f32 position[4];
-    s32 resourceHandle;
+    void *resourceInstance;
 
     switch (anchorRecord->type) {
     case MDL_RESOURCE_BILLBOARD:
         mdlResolveAnchorPosition(model, anchorRecord, position);
-        resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVector(resourceHandle, position);
-        billInvokeCallback(resourceHandle);
+        resourceInstance = anchorRecord->payload.part.instance;
+        effCopyVector(resourceInstance, position);
+        billInvokeCallback((BillObj *)resourceInstance);
         break;
     case MDL_RESOURCE_EFFECT:
         mdlResolveAnchorPosition(model, anchorRecord, position);
-        resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVectorToNodeInstance((EffNode *)(u32)resourceHandle, position);
-        effUpdateNode((EffNode *)(u32)resourceHandle);
+        resourceInstance = anchorRecord->payload.part.instance;
+        effCopyVectorToNodeInstance((EffNode *)resourceInstance, position);
+        effUpdateNode((EffNode *)resourceInstance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
@@ -1065,10 +1064,10 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
 void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildParameter(item->payload.part.handle, frame);
+        billSetChildParameter((BillObj *)item->payload.part.instance, frame);
         return;
     case MDL_RESOURCE_EFFECT:
-        effSetNodeParameterValue((EffNode *)(u32)item->payload.part.handle, frame);
+        effSetNodeParameterValue((EffNode *)item->payload.part.instance, frame);
         break;
     }
 }
@@ -1077,10 +1076,10 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildScaleComponents((struct BillObj *)item->payload.part.handle, amount, amount);
+        billSetChildScaleComponents((struct BillObj *)item->payload.part.instance, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
-        effApplyNodeScale((EffNode *)(u32)item->payload.part.handle, amount);
+        effApplyNodeScale((EffNode *)item->payload.part.instance, amount);
         break;
     }
 }
