@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
@@ -25,7 +26,7 @@ extern ScrComGlobals *datGameState;
 extern s8 sdfPadButtonStates[];
 extern char D_0039F4D8[];
 extern char D_0039F4E8[];
-extern char D_0039F508[];
+extern const char D_0039F508[];
 extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
@@ -294,7 +295,24 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4D8);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4E8);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010DE70);
+const char D_0039F508[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
+
+s32 func_0010DE70(void) {
+    ScrVecW direction;
+
+    direction.x = bfWaitReadArgFloat(1);
+    direction.y = bfWaitReadArgFloat(2);
+    direction.z = bfWaitReadArgFloat(3);
+    direction.w = 0;
+    if (ffabsf(direction.x) <= 0.01f &&
+        ffabsf(direction.y) <= 0.01f &&
+        ffabsf(direction.z) <= 0.01f) {
+        evtPrintDeveloperConsoleMessage(D_0039F508);
+        return 1;
+    }
+    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);
+    return 1;
+}
 
 s32 scrCmdStorePositionVector(void)
 {
