@@ -458,10 +458,10 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *, s32, s32);
+extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *, s32, s32);
 
 /* Synchronize four motion channels, retaining their last applied timeline key. */
-void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
+void evtViewerSyncModelMotionChannels(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                    EvtRuntime *viewer, s32 mode) {
     EffectObjectData *data = object->data;
     MdlCtx *model = (MdlCtx *)data->modelHolder->resourceHandle;
@@ -478,9 +478,9 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
         if (motion == NULL) {
             continue;
         }
-        key = evtViewerFindLatestMatchingGlyph(track, frame, channel);
+        key = evtViewerFindLatestMatchingMotionKey(track, frame, channel);
         if (key == NULL) {
-            if (mode == 0 && track->cachedKey[channel] == key) {
+            if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
             motion = mdlFindNodeById(model, channel);
@@ -508,7 +508,7 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                 motion = mdlFindNodeById(model, channel);
                 sdfMotionResume(motion);
             }
-            track->cachedKey[channel] = NULL;
+            track->motionKeyCache[channel] = NULL;
             if (channel != 0) {
                 motion = mdlFindNodeById(model, channel);
                 sdfMotionSuspend(motion);
@@ -520,7 +520,7 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
             s32 loopEnabled;
             s32 count;
 
-            if (mode == 0 && track->cachedKey[channel] == key) {
+            if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
             loopEnabled = key->p0C.sb[2] == 0;
@@ -555,7 +555,7 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                 motion = mdlFindNodeById(model, channel);
                 sdfMotionResume(motion);
             }
-            track->cachedKey[channel] = key;
+            track->motionKeyCache[channel] = key;
         }
     }
 }
@@ -582,7 +582,7 @@ void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
                     node = node->next;
                 }
                 if (found != NULL) {
-                    func_0022EB10(position, (EffWorldNode *)object, node, viewer, 0);
+                    evtViewerSyncModelMotionChannels(position, (EffWorldNode *)object, node, viewer, 0);
                 }
                 object = (s32)((EffWorldNode *)object)->next;
             } while (object != 0);
@@ -929,22 +929,22 @@ void func_0022FA60(EvtRuntime *viewer) {
 
 s32 evtViewerTestIndexedCondition(u32 condition);
 
-/* Returns the latest eligible kind-5 key at/before position for channel, or
- * NULL. The condition must pass; equal-frame ties retain the first key visited. */
-EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *group, s32 position, s32 channel) {
+/* Returns the latest eligible kind-5 motion key at/before frame for channel,
+ * or NULL. Its condition must pass; equal-frame ties retain the first key. */
+EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel) {
     s32 bestFrame = -1;
     EvtRuntimeChild *best = NULL;
-    EvtRuntimeChild *glyph = group->children;
+    EvtRuntimeChild *key = group->children;
 
-    if (glyph != NULL) {
+    if (key != NULL) {
         do {
-            if (position >= glyph->frame && bestFrame < glyph->frame && glyph->p08.sb[0] == 5 &&
-                glyph->p0C.sb[0] == channel && evtViewerTestIndexedCondition(glyph->p10.sh[0]) == 1) {
-                bestFrame = glyph->frame;
-                best = glyph;
+            if (frame >= key->frame && bestFrame < key->frame && key->p08.sb[0] == 5 &&
+                key->p0C.sb[0] == channel && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                bestFrame = key->frame;
+                best = key;
             }
-            glyph = glyph->next;
-        } while (glyph != NULL);
+            key = key->next;
+        } while (key != NULL);
     }
     return best;
 }
@@ -985,7 +985,7 @@ void func_0022FB30(s32 mode, u32 frame, EvtRuntime *viewer) {
             track = track->next;
         }
         if (found != NULL) {
-            func_0022EB10(frame, object, track, viewer, 1);
+            evtViewerSyncModelMotionChannels(frame, object, track, viewer, 1);
         }
         object = object->next;
     }
