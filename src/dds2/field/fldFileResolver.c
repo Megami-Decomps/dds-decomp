@@ -205,7 +205,7 @@ extern u32 fldSwayMode;
 
 extern u32 fldSkyDrawState;
 
-extern u32 fldAreaLoadRequest;
+extern struct FileRequest *fldAreaLoadRequest;
 
 
 extern u8 D_00435BB4;
@@ -218,7 +218,7 @@ extern s32 strcmp(const char *a, const char *b);
 
 extern u32 fldAreaCachedResource;
 
-extern u32 fldAreaPackedArchive;
+extern struct FileRequest *fldAreaPackedArchive;
 
 extern u8 D_00436020[];
 
@@ -1081,7 +1081,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_0035C860(path, D_004130D8, directory, area, floor);
-        fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
+        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
     }
@@ -1119,34 +1119,23 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_00435BB4 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_0035C860(path, D_004130D8, directory, area, room);
-    fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
+    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
 }
 
-typedef struct FldDisplayNode {
-    struct FldDisplayNode *next;
-    u8 pad04[4];
-    u32 displayObject;
-} FldDisplayNode;
-
-typedef struct FldDisplayWork {
-    u8 pad00[0x60];
-    FldDisplayNode *objects;
-} FldDisplayWork;
-
 void fldFreeDisplayObjects(void) {
     if (fldAreaLoadRequest != 0) {
-        FldDisplayNode *node = ((FldDisplayWork *)fldAreaLoadRequest)->objects;
+        PacWork *work = ((FilePacRequest *)fldAreaLoadRequest)->packet.queueHead;
 
-        if (node != 0) {
+        if (work != 0) {
             do {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->displayObject);
-                node = node->next;
-            } while (node != 0);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
+                work = work->next;
+            } while (work != 0);
         }
-        func_002C7CE8(fldAreaLoadRequest);
-        fldAreaLoadRequest = 0;
+        func_002C7CE8((u32)fldAreaLoadRequest);
+        fldAreaLoadRequest = NULL;
     }
     fldPendingArea = 0;
     fldPendingFloor = 0;
@@ -1160,7 +1149,7 @@ u32 fldPollAreaResourceLoad(void) {
 
     if (resourceFlag != 0) {
         if (resourceFlag == 1) {
-            if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+            if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
                 fldAreaState.resourceFlag = 0;
                 D_00435BB4 = 0;
             }
@@ -1175,7 +1164,7 @@ u32 fldGetResourceReadyFlag(void) {
 
 u8 fldIsAreaResourceReady(void) {
     if (fldAreaLoadRequest != 0) {
-        if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+        if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
             return 1;
         }
     }
@@ -1186,7 +1175,7 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (fldAreaState.resourceArea != area || fldAreaState.resourceFloor != room) {
         return 0;
     }
-    if (fldAreaLoadRequest != 0 && fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+    if (fldAreaLoadRequest != 0 && fileRequestIsReady(fldAreaLoadRequest) != 0) {
         return 1;
     }
     return fldAreaState.resourceFlag != 0;
@@ -1311,8 +1300,8 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
-        fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
-        func_002C81D0((struct FileRequest *)fldAreaPackedArchive);
+        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
+        func_002C81D0(fldAreaPackedArchive);
         request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
@@ -1361,7 +1350,7 @@ void fldReleaseAreaResourceCache(void) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)cachedResource);
         fldAreaCachedResource = 0;
     }
-    cachedResource = fldAreaPackedArchive;
+    cachedResource = (u32)fldAreaPackedArchive;
     if (cachedResource != 0) {
         func_002C7CE8(cachedResource);
         fldAreaPackedArchive = 0;
@@ -1428,7 +1417,7 @@ extern FldTransferChunk *D_00435FB8;
 
 extern u32 D_00435FBC;
 
-extern FldDisplayWork *D_00435FC8;
+extern struct FileRequest *D_00435FC8;
 
 extern s32 D_00435FDC;
 
@@ -1442,7 +1431,7 @@ extern u32 fldCachedRoomKF2ResourceAllocation;
 
 void fldReleaseFieldResources(void) {
     s32 i;
-    FldDisplayNode *node;
+    PacWork *work;
 
     fldReleaseBackgroundBuffer();
     fldPlayPendingSounds();
@@ -1524,19 +1513,19 @@ void fldReleaseFieldResources(void) {
         fldAreaState.cachedArea = fldAreaState.area;
     }
     if (D_00435FC8 != 0) {
-        node = D_00435FC8->objects;
+        work = ((FilePacRequest *)D_00435FC8)->packet.queueHead;
         i = 0;
-        if (node != 0) {
+        if (work != 0) {
             do {
                 if (i > 0) {
-                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->displayObject);
+                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
                 }
-                node = node->next;
+                work = work->next;
                 i++;
-            } while (node != 0);
+            } while (work != 0);
         }
-        func_002C7CE8(D_00435FC8);
-        D_00435FC8 = 0;
+        func_002C7CE8((u32)D_00435FC8);
+        D_00435FC8 = NULL;
     }
 }
 
