@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
@@ -2474,7 +2475,7 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     if (unit->effectState != 2) {
         return 1;
     }
-    return unit->ext->owner->first->state == 5;
+    return unit->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -5007,7 +5008,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 extern void mdlStoreTertiaryVectorVU(void *work);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_002D9238(void *table, void *model);
-extern s32 sdfMotionUpdate(void *motion);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {
