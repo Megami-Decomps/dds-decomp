@@ -915,25 +915,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
 
-typedef struct SdfSceneNode {
-    SdfPacketPatchLink link; /* Native next/callback prefix at 0/4. */
-    SdfGraphObj *view; /* 0x8 */
-    u8 padC[4];
-    SdfGsPacketHeader header; /* 0x10 */
-    SdfGsDrawDefaultsRegisters drawDefaults;       /* 0x30 */
-    SdfGsContextRegisters contextOne; /* 0x70 */
-    SdfGsContextRegisters contextTwo; /* 0xB0 */
-    SdfGsCenteredBoundsRegisters centeredBounds;    /* 0xF0 */
-    SdfGsSceneBlendRegisters blendState;       /* 0x140 */
-    u64 framePacketWords[4]; /* 0x180 */
-    SdfTexBuf texturePackets[2]; /* 0x1A0 */
-} SdfSceneNode;
 
-typedef char SdfSceneNode_size_must_be_0x220[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
-typedef char SdfSceneNode_view_at_8[
-    ((u32)&((SdfSceneNode *)0)->view == 8) ? 1 : -1];
-typedef char SdfSceneNode_payload_at_10[
-    ((u32)&((SdfSceneNode *)0)->header == 0x10) ? 1 : -1];
 
 extern void sdfRefreshSceneNodePackets();
 
