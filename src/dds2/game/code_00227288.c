@@ -83,7 +83,7 @@ extern BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
 extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
-extern s32 fldGetSceneGroupEntry(s32 entryIndex);
+extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 
 void func_00227288(void) {
     btlUpdateLinkedEffectUnitTransforms();
@@ -624,7 +624,7 @@ void btlQueueLinkedActorModelStateTasks(ActionStateLink *action) {
         task->ownerId = action->unit->owner;
         btlStartTask(task);
 
-        sceneAction = (ActionStateLink *)fldGetSceneGroupEntry(0);
+        sceneAction = fldGetSceneGroupEntry(0);
         if (sceneAction != 0 && (sceneAction->pendingFlags & 8) != 0 &&
             (sceneAction->unit->status.flags & 0x200) != 0) {
             task = btlCreateCommandSoundTask((s32)sceneAction, 9);
