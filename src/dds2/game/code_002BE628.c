@@ -3140,7 +3140,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00380708.append((SdfListHead *)&D_00380708, packetList);
+    D_00380708.append(&D_00380708, packetList);
     if (D_0037F510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_00437CB8, D_00437CBC);
         return evtCreateBattleStageTestCamera;

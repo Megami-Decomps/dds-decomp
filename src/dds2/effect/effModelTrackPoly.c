@@ -495,7 +495,7 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         }
     }
     if (data->kind < 4) {
-        D_003B2040[data->kind]->append((SdfListHead *)D_003B2040[data->kind], list);
+        D_003B2040[data->kind]->append(D_003B2040[data->kind], list);
     } else {
         list2 = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list2);
@@ -507,7 +507,7 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         packet[4] = 6;
         packet[5] = 0x42;
         sdfAppendPacket(list2, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, list2);
+        D_00380248.append(&D_00380248, list2);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -516,6 +516,6 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, list);
+        D_00380248.append(&D_00380248, list);
     }
 }

@@ -149,7 +149,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
             sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
         }
     }
-    D_00354D00[work->mode]->append((SdfListHead *)D_00354D00[work->mode], packet);
+    D_00354D00[work->mode]->append(D_00354D00[work->mode], packet);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);

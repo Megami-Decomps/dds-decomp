@@ -73,7 +73,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
     quad->vertices[3].depth = 0;
     quad->vertices[3].xyzControl = 0;
     sdfAppendPacket(list, (u32)drawPacket);
-    D_003803C8.append((SdfListHead *)&D_003803C8, list);
+    D_003803C8.append(&D_003803C8, list);
 }
 
 

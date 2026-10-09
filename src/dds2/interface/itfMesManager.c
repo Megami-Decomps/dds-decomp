@@ -1043,7 +1043,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
                                                  bounds[1] >> 3,
                                                  bounds[2] >> 4,
                                                  bounds[3] >> 3));
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packetList);
     return 0;
 }
 

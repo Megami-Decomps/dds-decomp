@@ -310,7 +310,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((struct EffectDispatchState *)drawPacket), 0);
         sdfAppendPacket(list, (u32)drawPacket);
-        D_003803E8.append((SdfListHead *)&D_003803E8, list);
+        D_003803E8.append(&D_003803E8, list);
     }
 }
 
@@ -408,7 +408,7 @@ void effDrawBlurListWithFramePacket(void *list) {
 
     func_0032DB78(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
-    D_003803E8.append((SdfListHead *)&D_003803E8, list);
+    D_003803E8.append(&D_003803E8, list);
 }
 
 extern u32 func_001200E0(void);

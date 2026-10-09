@@ -496,7 +496,7 @@ void func_001602F8(void) {
         vertex->corner[1].mask = 0xFF0000;
         vertex->corner[1].flag = 0;
         sdfAppendPacket(list, (u32)sprite);
-        D_00324B88.append((SdfListHead *)&D_00324B88, list);
+        D_00324B88.append(&D_00324B88, list);
     }
     D_003BB01C = (u32)D_003BB01C + 1;
     alpha = (128 - (u32)((f32)(u32)D_003BB01C * 128.0f /
@@ -523,7 +523,7 @@ void func_001602F8(void) {
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
     sdfAppendPacket(list, (u32)sprite);
-    D_00325588.append((SdfListHead *)&D_00325588, list);
+    D_00325588.append(&D_00325588, list);
 }
 
 void func_00160690(void) {

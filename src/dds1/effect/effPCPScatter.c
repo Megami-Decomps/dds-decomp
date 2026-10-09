@@ -1136,7 +1136,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         sdfAppendPacket(packet, func_0015FE20(D_003D6580));
     }
     surface = D_00354B80[pool->unk10];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Acquire a new texture owner and store it in the pool. */

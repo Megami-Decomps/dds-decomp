@@ -4620,7 +4620,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = 0x72801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -4639,7 +4639,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = 0x51801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     func_002D9748(overlay, model->inner);
     if (unit->status.flags & 2) {
@@ -4659,7 +4659,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = D_00359CF0[i];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     mdlSetAllResourceFrames(model, frame);
     for (item = model->resourceItems; item != NULL; item = item->next) {
@@ -4747,7 +4747,7 @@ void func_001D6FB0(BtlUnit *unit) {
     packet = (u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket((SdfListHead *)packet, D_003980E0.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
-    D_00359D20[0]->append((SdfListHead *)D_00359D20[0], (SdfListHead *)packet);
+    D_00359D20[0]->append(D_00359D20[0], (SdfListHead *)packet);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -4764,7 +4764,7 @@ void func_001D6FB0(BtlUnit *unit) {
     packet = (u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket((SdfListHead *)packet, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
-    D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
+    D_00359D30[0]->append(D_00359D30[0], (SdfListHead *)packet);
     func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 

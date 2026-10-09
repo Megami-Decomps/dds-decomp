@@ -690,7 +690,7 @@ void func_0019EE58(ItfMesState *panel) {
         itfSendTablePacket(list, 0, 0);
     }
     surface = &kwlnDrawSurfaces[panel->unk10];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
@@ -735,7 +735,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
         itfSendTablePacket((SdfListHead *)packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[object->unk10];
-    surface->append((SdfListHead *)surface, (SdfListHead *)packet);
+    surface->append(surface, (SdfListHead *)packet);
 }
 
 
@@ -799,7 +799,7 @@ void func_0019F770(UiSprite *sprite) {
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList((SdfListHead *)packet);
     itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, (SdfListHead *)packet);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packet);
+    D_00325708.append(&D_00325708, (SdfListHead *)packet);
 }
 
 void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
@@ -978,7 +978,7 @@ s32 sndUpdateTestMsgTask(void) {
         sdfInitPacketList((SdfListHead *)mem);
         itfSendTablePacket((SdfListHead *)mem, 0, 0);
         itfQueueTextureBoundQuadPacket(D_00358318, D_00358328, D_00358338, 0xFFF, sndTestMessageTexture, 0, (SdfListHead *)mem);
-        D_003255A8.append((SdfListHead *)&D_003255A8, (SdfListHead *)mem);
+        D_003255A8.append(&D_003255A8, (SdfListHead *)mem);
         return 0;
     }
     return 0;
@@ -1021,7 +1021,7 @@ s32 func_0019FCC8(void) {
     sdfAppendPacket((SdfListHead *)list,
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)list);
+    D_00325708.append(&D_00325708, (SdfListHead *)list);
     if (D_00324510.cancel < 0) {
         return -1;
     }
@@ -1180,7 +1180,7 @@ s32 func_0019FF60(void) {
     sdfAppendPacket(list,
         func_0011D3E8((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
     if ((s8)D_00324510.unk32 < 0) {
         kwlnDrawOverlayEnabled ^= 1;

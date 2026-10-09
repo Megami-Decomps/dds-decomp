@@ -117,7 +117,6 @@ extern SdfPacketSlot D_0040B308[];
 
 extern SdfResource *sdfResourceListHead;
 
-void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
 void sdfConnectPacketLists();
 
@@ -576,39 +575,39 @@ void sdfAppendCallPacket(SdfListHead *list, u32 packetAddress) {
 }
 
 /* Prepend a nonempty packet list, connecting its DMA tail to the former first list. */
-void sdfPrependPacketList(SdfListHead *destinationList, SdfListHead *incomingList) {
+void sdfPrependPacketList(SdfPoolNode *destinationList, SdfListHead *incomingList) {
     SdfListHead *firstList;
 
     if (incomingList->last == 0) {
         return;
     }
-    firstList = (SdfListHead *)destinationList->first;
+    firstList = destinationList->first;
     if (firstList == NULL) {
-        destinationList->last = (u32)incomingList;
+        destinationList->last = incomingList;
     } else {
         sdfConnectPacketLists(incomingList, firstList);
     }
     incomingList->nextList = firstList;
-    destinationList->first = (u32)incomingList;
+    destinationList->first = incomingList;
 }
 
-void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
-    u32 *last;
+void sdfAppendPacketList(SdfPoolNode *list, SdfListHead *item) {
+    SdfListHead *last;
 
     if (item->first != 0) {
-        last = (u32 *)list->last;
+        last = list->last;
         if (last == NULL) {
-            list->first = (u32)item;
+            list->first = item;
         }
         else {
-            *last = (u32)item;
+            last->nextList = item;
             sdfConnectPacketLists(last);
         }
-        list->last = (u32)item;
+        list->last = item;
     }
 }
 
-s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
+s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
     if (mode == 1) {
         sdfPrependPacketList(list, packet);
     }
@@ -705,7 +704,7 @@ SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *head = NULL;
 
     for (; node != NULL; node = node->next) {
-        node->prepend((SdfListHead *)node, 0, NULL);
+        node->prepend(node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
                 sdfConnectPacketLists(tail, node->first);
