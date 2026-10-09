@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
@@ -10,9 +11,6 @@
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_002DA420(void *, f32);
-extern void func_002DA3D8(void *, u32);
-extern void func_002DA3C0(void *, u32);
-extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 #include "par_table.h"
 #include "par_kind_api.h"
@@ -475,9 +473,9 @@ u8 *billCloneUnitObject(u8 *source) {
         ((EffUnitObject *)source)->billboard);
     ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(((EffUnitObject *)instance)->resource, 1.0f);
-    func_002DA3D8(((EffUnitObject *)instance)->resource, 0x80808080);
-    func_002DA3C0(((EffUnitObject *)instance)->resource, 0x80808080);
-    func_002DA3F0(((EffUnitObject *)instance)->resource, 0x80808080);
+    sdfSetPrimaryStateWordSecond(((EffUnitObject *)instance)->resource, 0x80808080);
+    sdfSetPrimaryStateWordFirst(((EffUnitObject *)instance)->resource, 0x80808080);
+    sdfSetPrimaryStateWordThird(((EffUnitObject *)instance)->resource, 0x80808080);
     EE_MMI_UNIT_MATRIX(instance + EFF_MATRIX_BYTES);
     EE_MMI_UNIT_MATRIX(instance);
     return instance;

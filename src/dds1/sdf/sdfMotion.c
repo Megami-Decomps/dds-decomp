@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -56,10 +57,6 @@ typedef struct FuncTab {
 } FuncTab;
 
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
-void func_002DA3C0(void *a0, s32 a1);
-void func_002DA3D8(void *a0, s32 a1);
-void func_002DA3F0(void *a0, s32 a1);
-void func_002DA408(void *a0, s32 a1);
 void func_002DA420(void *a0, f32 a1);
 Blk *sdfEnsurePrimaryTextSubParam(void *a0);
 void sdfCopyPrimaryTextScalars(void *a0, void *a1);
@@ -638,7 +635,7 @@ void func_002DC418(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3D8(a0->target, sdfMotionInterpolateKeyColor(&b));
+    sdfSetPrimaryStateWordSecond(a0->target, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -650,7 +647,7 @@ void func_002DC458(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
     sdfFindMotionKeyInterval(a0, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->capturedWord, key, weight, 0.5f);
-    func_002DA3D8(a0->target, color);
+    sdfSetPrimaryStateWordSecond(a0->target, color);
 }
 
 void sdfCopyTrackStateToBinding(SdfMotionIndexedValueBinding *a0) {
@@ -669,7 +666,7 @@ void func_002DC578(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3C0(a0->target, sdfMotionInterpolateKeyColor(&b));
+    sdfSetPrimaryStateWordFirst(a0->target, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -681,7 +678,7 @@ void func_002DC5B8(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
     sdfFindMotionKeyInterval(a0, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->capturedWord, key, weight, 0.5f);
-    func_002DA3C0(a0->target, color);
+    sdfSetPrimaryStateWordFirst(a0->target, color);
 }
 
 void sdfMotionReadBoundTrackInteger(SdfMotionIndexedValueBinding *a0) {
@@ -700,7 +697,7 @@ void func_002DC6D8(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA3F0(a0->target, sdfMotionInterpolateKeyColor(&b));
+    sdfSetPrimaryStateWordThird(a0->target, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -712,7 +709,7 @@ void func_002DC718(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
     sdfFindMotionKeyInterval(a0, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->capturedWord, key, weight, 0.5f);
-    func_002DA3F0(a0->target, color);
+    sdfSetPrimaryStateWordThird(a0->target, color);
 }
 
 void func_002DC7C8(SdfMotionIndexedValueBinding *a0) {
@@ -731,7 +728,7 @@ void func_002DC838(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA408(a0->target, sdfMotionInterpolateKeyColor(&b));
+    sdfSetPrimaryStateWordFourth(a0->target, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -743,7 +740,7 @@ void func_002DC878(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
     sdfFindMotionKeyInterval(a0, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->capturedWord, key, weight, 0.5f);
-    func_002DA408(a0->target, color);
+    sdfSetPrimaryStateWordFourth(a0->target, color);
 }
 
 void sdfMotionCopyTrackValueToBinding(SdfMotionIndexedValueBinding *a0) {
