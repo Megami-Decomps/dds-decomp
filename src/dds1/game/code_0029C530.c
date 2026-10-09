@@ -9000,7 +9000,7 @@ void func_002BB868(void) {
     effPollFileQueueRecord(0xb);
 }
 
-extern s32 effClassifyResourceMask(s32);
+extern u16 effClassifyResourceMask(s32);
 
 typedef struct EffFileQueryInfo {
     u8 pad0[0xFC];
@@ -9356,7 +9356,7 @@ void effResetFileResourceManager(void) {
     D_003BD160 = 0;
 }
 
-s32 effClassifyResourceMask(s32 flags) {
+u16 effClassifyResourceMask(s32 flags) {
     switch (flags) {
         case 1:   return 1;
         case 2:   return 2;
