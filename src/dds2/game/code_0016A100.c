@@ -29,11 +29,8 @@ extern u8 D_003B0190[];
 extern u8 D_003B01A0[];
 
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 
 extern u32 effBattleMiscGetTableEntry(s32 index);

@@ -122,7 +122,6 @@ extern void fldSetSecondarySceneFlag(void);
 extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
@@ -2314,7 +2313,6 @@ void func_002878D8(s32 initialMotionIndex) {
 }
 
 extern u8 *D_003BAA20;
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
 f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
@@ -2343,7 +2341,6 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE60 + 8) = 0;
 }
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */

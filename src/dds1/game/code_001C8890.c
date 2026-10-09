@@ -3610,7 +3610,6 @@ extern void dds3ClearObjectFlags(void *, s32);
 
 extern void dds3SetObjectFlags(void *, s32);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
@@ -4252,13 +4251,9 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
-extern void mdlLoadRotationQuaternionVU(MdlCtx *);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
@@ -6507,7 +6502,6 @@ u32 btlFindListIndex(BtlIndexList *list, void *entry) {
     return -1;
 }
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 

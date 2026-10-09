@@ -76,9 +76,7 @@ extern s32 btlGetRuntime(void);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
-extern void mdlLoadTertiaryVectorVU(MdlCtx *model);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *model);
 
 extern void btlBossDebugPrintf(const char *, ...);
 
