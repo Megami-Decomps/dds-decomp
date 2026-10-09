@@ -74,7 +74,7 @@ typedef struct MenuWorkFlagBits {
     u32 finished : 1;
     u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
     u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
-    u32 unk5 : 1;
+    u32 halfRemainingCountReached : 1; /* bit 5: latched at half the initial remaining count */
     u32 unk6 : 8;
     u32 inputDisabled : 1;
     u32 mode : 4;

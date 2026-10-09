@@ -47,7 +47,7 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
     mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
     if (registry->parameterIndex == 0x22) {
         if (entry->flagsBits.modelMotionStarted == 0) {
-            if (entry->flagsBits.unk5 == 1) {
+            if (entry->flagsBits.halfRemainingCountReached == 1) {
                 MnuModelNode *node = entry->object.modelNode;
                 if (work->round == 0) {
                     node->model->first->frameStep = 1.0f;
