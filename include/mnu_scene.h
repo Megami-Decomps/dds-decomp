@@ -44,7 +44,7 @@ typedef struct MenuSceneMetadata {
     s32 state;
     u8 pad1C[4];
     s32 messageShadeFrames;
-    s32 attachedEffect;
+    struct MenuProgressHost *attachedEffect;
     u32 attachedEffectControl;
     u16 entryId;
     u8 pad02E[0x19E];
