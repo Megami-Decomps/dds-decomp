@@ -2510,23 +2510,23 @@ extern u32 D_003980F0[];
 
 void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = (u32)sdfAllocatePacketList(0);
+        SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket((SdfListHead *)packet, (SdfTexResource *)D_003980F0[0],
+        sdfCreateResourcePacket(packet, (SdfTexResource *)D_003980F0[0],
                                 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-        descriptor->append(descriptor, (SdfListHead *)packet);
+        descriptor->append(descriptor, packet);
     }
 }
 
 void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = (u32)sdfAllocatePacketList(0);
+        SdfListHead *packet = sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket((SdfListHead *)packet, (SdfTexResource *)D_003980F0[0],
+        sdfCreateDescriptorPacket(packet, (SdfTexResource *)D_003980F0[0],
                                   0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-        descriptor->append(descriptor, (SdfListHead *)packet);
+        descriptor->append(descriptor, packet);
     }
 }
 

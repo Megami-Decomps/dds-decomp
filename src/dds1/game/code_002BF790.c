@@ -541,7 +541,7 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
-extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
+extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
@@ -553,7 +553,7 @@ void func_002C0628(void) {
     VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
     for (i = 0; i < 2; i++) {
         sdfInitPacketList(&D_003DFAB0[i]);
-        sdfConsAppendProgramReferencePacket((s32)&D_003DFAB0[i], &D_003DFAF0[i]);
+        sdfConsAppendProgramReferencePacket(&D_003DFAB0[i], &D_003DFAF0[i]);
         sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &sdfSceneProjectionParameters, sdfViewMatrix);
         sdfAppendPacket(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
         sdfInitPacketList(&D_003DFB30[i]);

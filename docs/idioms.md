@@ -5928,3 +5928,40 @@ through `$9`; it is not a residual register. Use the existing six-formal
 receives a named `s32 drawContext` formal even though that provider does
 not consume it. This contract change leaves both its dispatcher and
 label-plate machine code unchanged.
+
+
+## Draw-packet payload getters forward opaque pointers
+
+`billGetWorkTransformMatrix` (`0015F810` in DDS1, `00167400` in DDS2)
+is the same eight-byte leaf in both games: `jr ra` with
+`addiu v0,a0,32` in the delay slot. Every C consumer passes the
+`void *` draw packet returned by `effCreateSizedDrawPacket` and uses
+the payload after its 32-byte header. The getter therefore takes and
+returns `void *`, using byte-pointer arithmetic internally; it does not
+take an `EffectDispatchState *` or shuttle a software pointer through
+`s32`. Blur callers interpret that opaque payload as their real quad.
+This does not change the SDK allocator's address-word return or the
+`u32` packet-address argument to `sdfAppendPacket`.
+
+
+## CPU list wrappers preserve the list owner, not its DMA address words
+
+`evtBuildFrameStatePacketList` returns the `SdfListHead *` created by
+`sdfCreateResetPacketList`; its frame callers append that same owner to
+their `SdfPoolNode`. The background resource/descriptor builders retain
+the list returned by `sdfAllocatePacketList` as `SdfListHead *` too.
+`sdfConsAppendProgramReferencePacket` receives that CPU list owner as
+its first argument and a `DmaPacketHeader *` as its second argument.
+Only the second argument is converted to the genuine packet-address
+word submitted to `sdfAppendReferencePacket`. Neither the software
+list wrappers nor their callers need an integer-to-pointer round trip.
+Keep encoded program addresses, DMA tag words, and allocator/range
+address-word interfaces unchanged.
+
+The image-outline and textured-quad/triangle appenders likewise receive a
+`SdfListHead *`; the packet allocated inside each appender still becomes
+a hardware address word in the second `sdfAppendPacket` argument. The
+two `itfDrawPulsingTestOverlay` functions keep their reset-list result
+as that pointer through packet appends and the surface callback. These
+closures change no allocator, GS/DMA word, statement order, or callback.
+

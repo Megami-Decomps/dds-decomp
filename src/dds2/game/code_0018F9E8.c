@@ -8,8 +8,7 @@
 
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
-struct EffectDispatchState;
-extern s32 billGetWorkTransformMatrix(struct EffectDispatchState *effect);
+extern void *billGetWorkTransformMatrix(void *packet);
 extern SdfPoolNode D_003803C8;
 
 void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsCoordinates) {
@@ -32,7 +31,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
     sdfAppendPacket(list, (u32)packet);
     sdfConsCreateDrawPacket(list, (SdfTex *)resource, 1);
     drawPacket = effCreateSizedDrawPacket(1, 0x200);
-    quad = (BlurPacketQuad *)billGetWorkTransformMatrix((struct EffectDispatchState *)drawPacket);
+    quad = (BlurPacketQuad *)billGetWorkTransformMatrix(drawPacket);
     quad->color[0] = params->color[0];
     quad->color[1] = params->color[1];
     quad->color[2] = params->color[2];

@@ -230,7 +230,7 @@ typedef struct SdfMsg {
 extern void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *, s32, s32, s32, s32);
 extern void func_002E1708(u32);
 extern void func_002E1710(u32);
-extern s32 evtBuildFrameStatePacketList(s32);
+extern SdfListHead *evtBuildFrameStatePacketList(s32);
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
@@ -364,17 +364,17 @@ s32 func_00101E40(void) {
 
     }
     {
-        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(0);
+        SdfListHead *stateList = evtBuildFrameStatePacketList(0);
         SdfPoolNode *const state0 = &kwlnDrawSurfaces[81];
         state0->append(state0, stateList);
     }
     {
-        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(1);
+        SdfListHead *stateList = evtBuildFrameStatePacketList(1);
         SdfPoolNode *const state1 = &kwlnDrawSurfaces[93];
         state1->append(state1, stateList);
     }
     {
-        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(2);
+        SdfListHead *stateList = evtBuildFrameStatePacketList(2);
         SdfPoolNode *const state2 = &kwlnDrawSurfaces[95];
         state2->append(state2, stateList);
     }

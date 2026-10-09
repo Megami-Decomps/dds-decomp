@@ -575,13 +575,13 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
 
 /* Scale the longer preview side to at most 256 texels, preserving division
  * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
-void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
+void kwlnDrawImageOutline(SdfListHead *packetList, SdfTex *image) {
     s32 width = image->width;
     s32 height = image->height;
     s32 drawWidth;
     s32 drawHeight;
 
-    sdfConsCreateDrawPacket((SdfListHead *)packetList, image, 0);
+    sdfConsCreateDrawPacket(packetList, image, 0);
     drawWidth = width * 0x10;
     drawHeight = height * 8;
     if (width < height) {
@@ -599,7 +599,7 @@ void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
     if (height == KWLN_PREVIEW_WRAP_TEXELS) {
         height--;
     }
-    sdfAppendTexturedLinePacket((SdfListHead *)packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
+    sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
@@ -920,13 +920,13 @@ extern u8 sdfViewMatrix[];
 extern u8 D_00384790[];
 extern SdfLightSources D_0037FB10;
 extern f32 D_0037FB20[4];
-extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
+extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfInitPacketList(&D_00380870[bufferIndex].initialList);
-    sdfConsAppendProgramReferencePacket((s32)&D_00380870[bufferIndex].initialList,
+    sdfConsAppendProgramReferencePacket(&D_00380870[bufferIndex].initialList,
                                         &D_00380870[bufferIndex].programReference);
     sdfInitPacketList(&D_00380870[bufferIndex].sceneList);
     sdfClearLinkedPacketList(&D_00380870[bufferIndex].linkedList);
@@ -1189,10 +1189,10 @@ void kwlnCancelConfiguredFadeFrames(void) {
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001057B0);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
-s32 evtBuildFrameStatePacketList(s32 stateIndex) {
-    s32 packetList = (s32)sdfCreateResetPacketList();
+SdfListHead *evtBuildFrameStatePacketList(s32 stateIndex) {
+    SdfListHead *packetList = sdfCreateResetPacketList();
 
-    sdfAppendPacket((SdfListHead *)packetList, (u32)(D_0043DDA0 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
+    sdfAppendPacket(packetList, (u32)(D_0043DDA0 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
     return packetList;
 }
 
