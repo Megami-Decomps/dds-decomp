@@ -1688,11 +1688,11 @@ SdfDrawNode *sdfCreateDrawNode(void) {
 }
 
 void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
-    void *workspace = (void *)root->address;
+    void *workspace = root->workspace;
 
     if (workspace == NULL) {
         workspace = (void *)sdfAllocSizeClassBlock(0x100);
-        root->address = (u32)workspace;
+        root->workspace = workspace;
     }
     return workspace;
 }
@@ -1721,8 +1721,8 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
 
 void sdfReleaseFreeRoot(SdfDrawNode *root) {
     sdfFreeNodeLists(root);
-    sdfReleaseChipBlock((void *)root->address);
-    root->address = 0;
+    sdfReleaseChipBlock(root->workspace);
+    root->workspace = NULL;
     sdfReleaseChipBlock(root);
 }
 
