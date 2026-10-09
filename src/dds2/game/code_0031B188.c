@@ -437,7 +437,6 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
 }
 
 extern void fileQueueUpdate(FileQueue *queue);
-extern void func_002D49B8(FileQueue *queue, u32 color);
 extern u32 D_0040AE10[];
 
 /* Advance active effect queues, honoring their delay and optional position step. */
@@ -453,7 +452,7 @@ void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
         for (recordIndex = 0; recordIndex < list->count; recordIndex++, record++) {
             if (record->flags & 1) {
                 if (listIndex == 1) {
-                    func_002D49B8(record->queue, 0x40808080);
+                    fileQueueSetColor(record->queue, 0x40808080);
                 }
                 if (flags & 1) {
                     if (record->delay == 0) {

@@ -503,7 +503,6 @@ extern void fileQueueSetPosition(FileQueue *queue, void *vec);
 extern void fileQueueSetRotation(FileQueue *queue, void *rot);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void fileQueueSetScale(FileQueue *queue, f32 scale);
-extern void func_00294938(FileQueue *queue, u32 color);
 
 extern FileJob *fileQueueFindById(FileQueue *, u32);
 extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);
@@ -4299,7 +4298,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
-    func_00294938(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4392,7 +4391,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
-    func_00294938(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4494,7 +4493,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00294938);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileQueueSetColor);
 
 void fileQueueCopyRotationFromSource(void *dst, void *src) {
     s128 vec;
