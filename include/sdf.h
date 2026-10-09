@@ -433,6 +433,8 @@ typedef struct SdfDmaNode {
 
 typedef char SdfDmaNode_size_must_be_0x20[
     sizeof(SdfDmaNode) == 0x20 ? 1 : -1];
+typedef char SdfDmaNode_alignment_must_be_0x10[
+    __alignof__(SdfDmaNode) == 0x10 ? 1 : -1];
 typedef char SdfDmaNode_vifCommands_at_8[
     ((u32)&((SdfDmaNode *)0)->vifCommands == 8) ? 1 : -1];
 typedef char SdfDmaNode_nextTag_at_0x10[
