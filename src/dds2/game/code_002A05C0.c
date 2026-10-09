@@ -616,6 +616,9 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
     return ready;
 }
 
+extern u8 D_00455DB0[];
+
+/* Install the fixed title track and queue its compressed frames under the lock. */
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_004285F0);
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428600);
@@ -624,7 +627,17 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428610);
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428628);
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A2198);
+void func_002A2198(void) {
+    WaitSema(mnuTitleStreamSemaphore);
+    mnuTitleStreamStatus.decoder = D_00454D58;
+    mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
+    mnuTitleStreamStatus.control = 2;
+    mnuTitleStreamStatus.repeatFrame = 0;
+    mnuTitleStreamStatus.frameBytes = MNU_SOUND_FRAME_BYTES_MEDIUM;
+    D_00454D58[2] = 2;
+    mnuStoreTaskResult("/soundat3/b_bgm2-2.at3");
+    SignalSema(mnuTitleStreamSemaphore);
+}
 
 
 typedef struct MnuTitleStreamEntry {
@@ -636,7 +649,7 @@ typedef struct MnuTitleStreamEntry {
 
 extern MnuTitleStreamEntry D_003E0B60[];
 
-extern u8 D_00455DB0[];
+
 
 extern char D_00428650[];
 

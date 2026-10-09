@@ -87,8 +87,8 @@ typedef struct FrFontSystem {
     s32 glyphCount;
     struct MemNode *itemPool;
     struct MemNode *glyphPool;
-    void *textureHead0;
-    void *textureHead1;
+    struct SdfTexResource *textureHead0;
+    struct SdfTexResource *textureHead1;
     FrFontAtlas atlas;
     u32 imageBuffers[6];
     u8 pad190[4];
