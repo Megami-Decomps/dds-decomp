@@ -40,11 +40,6 @@ extern MnuVariantSpritePlacement D_0036B7F0[];
 
 typedef struct ScrVmOperand ScrVmOperand;
 
-typedef struct MenuGridCoordinate {
-    s16 x;
-    s16 y;
-    u8 pad04[8];
-} MenuGridCoordinate;
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -217,7 +212,7 @@ s32 func_00253018(SdfGrid *grid) {
     MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
         mnuSceneResourceContext, 1);
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)grid->cursor->value;
-    MenuGridCoordinate *coordinates = (MenuGridCoordinate *)grid->userData;
+    MnuMantraNodeState *coordinates = (MnuMantraNodeState *)grid->userData;
     s32 x = coordinates[entry->sceneId].x;
     s32 y = coordinates[entry->sceneId].y;
 
@@ -293,17 +288,17 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
 }
 
 extern void func_002CBB48(SdfGrid *grid);
-extern void func_00253208(s32 context, s32 sceneId, s32 *x, s32 *y);
+extern void func_00253208(MenuSceneWork *work, s32 sceneId, s32 *x, s32 *y);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
 extern SdfGridCell *func_002CC0D0(SdfGrid *grid);
 
 
-void func_00253558(s32 context) {
-    SdfGrid *grid = ((MenuSceneWork *)context)->gridHandle;
+void func_00253558(MenuSceneWork *work) {
+    SdfGrid *grid = work->gridHandle;
     SdfGridCell *cursor = grid->cursor;
     MnuMantraGridEntry *selected = (MnuMantraGridEntry *)(u32)cursor->value;
     u16 entryId = selected->sceneId;
-    MenuGridCoordinate *entries = (MenuGridCoordinate *)grid->userData;
+    MnuMantraNodeState *entries = (MnuMantraNodeState *)grid->userData;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
     s32 scene;
@@ -312,10 +307,10 @@ void func_00253558(s32 context) {
     func_002CBB48(grid);
     scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
-    func_00253208(context, *(s32 *)(field + 0x70), NULL, NULL);
+    func_00253208(work, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
-            ((MenuSceneWork *)context)->gridHandle, x, y) == NULL) {
-        func_002CC0D0(((MenuSceneWork *)context)->gridHandle);
+            work->gridHandle, x, y) == NULL) {
+        func_002CC0D0(work->gridHandle);
     }
 }
 

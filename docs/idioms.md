@@ -5298,3 +5298,46 @@ at `+10`. Keep the established `B060` bank origin instead of inventing
 a biased record view. These owner completions do not claim that either
 still-assembly EXP state controller has been matched.
 
+
+## Mantra grid custom data is the scene-owned node array
+
+DDS1's grid factory passes `MenuSceneWork.nodes` at `+004` as the
+SDK grid's word-backed `userData`. The initializer at `00253208` clears
+`0x480` bytes (96 twelve-byte records), fills IDs 1 through 88, and writes
+signed halfword X/Y, their decimal remainders, and the state word at `+08`
+(`002532E8`, `00253354`, `0025335C`, `00253360`, `00253368`).
+The same primary `MnuMantraNodeState` replaces the separate coordinate,
+neighbor-status and prerequisite-status prefixes. Grid and scene extents
+remain `0x34` and `0x5B0`; the factory no longer constructs a raw `+4` view.
+
+The connector at `00258258` receives this array as its ninth argument,
+not the independent `D_0036B7F0` sprite-placement table. Its `LBU +2`
+reads the low byte of node Y, not a newly invented sprite rank field.
+The initializer and reset interfaces retain `MenuSceneWork *`, matching
+the real pointers supplied by all callers; SDK word getters still decode
+their own generic retained values at the existing boundaries. Completing
+this owner does not certify the still-assembly connector or initializer.
+
+## Model viewer position-draw flag retains signed byte storage
+
+DDS1 `mdlViewerEnd` reads the primary `MdlViewState.unk0E` flag with
+`LB` at `0021DCB8` and `0021DD18`. Keep this unit-local field as `s8`;
+its menu consumer and all other existing C functions remain byte-exact.
+This type correction does not claim that the viewer callback itself
+has been matched: its current honest C candidate still differs.
+
+
+## Shooting input tilt is integer storage with floating-point arithmetic
+
+DDS2's `00318660` controller reads shooting work `+90` as a signed word,
+converts it to float, changes it by `1.0f` against the `+/-20.0f` limits,
+then converts back to a word. Keep that field as `s32`, not `f32`.
+The adjacent `+94` selector is a signed halfword populated from the menu
+work flag word's mode bits; the existing round stays at `+96`.
+
+The same controller both extracts bits and performs full-word `OR 4` and
+`OR 0x20` at `+70`. A documented union exposes that flag word alongside
+the existing pause/initialized bitfields without changing their names or
+the `0x1E0` allocation. This completes the canonical owner, not the
+still-assembly controller. Credit PiM's released `6017625724` investigation
+for the earlier private identification of these fields.

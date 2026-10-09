@@ -97,11 +97,6 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_00259B40);
 
-typedef struct MantraPrerequisiteState {
-    u32 unk00;
-    u32 unk04;
-    s32 state;
-} MantraPrerequisiteState;
 
 typedef struct MantraPrerequisiteRecord {
     u32 unk00;
@@ -116,7 +111,7 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern u32 mnuGetSelectedNodeValue(void);
-extern u32 func_00258508(s8, MnuMantraGridEntry *, MantraPrerequisiteState *, MnuProfileProgress *);
+extern u32 func_00258508(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
 extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -127,7 +122,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     u32 prerequisiteFlags[4];
     MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;
-    MantraPrerequisiteState *states;
+    MnuMantraNodeState *states;
     MantraPrerequisiteRecord *record;
     MenuSceneWork *display;
     s8 i;
@@ -140,7 +135,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
         return;
     }
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    states = (MantraPrerequisiteState *)(u32)grid->userData;
+    states = (MnuMantraNodeState *)(u32)grid->userData;
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
     alpha = display->displayAlpha;

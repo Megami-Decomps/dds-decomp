@@ -37,9 +37,26 @@ typedef struct MantraPulseAnimationWork {
     s16 alpha[4];
 } MantraPulseAnimationWork;
 
+/* Scene-owned grid records: 00253208 writes four halfwords and the state word. */
+typedef struct MnuMantraNodeState {
+    s16 x;
+    s16 y;
+    s16 xRemainder;
+    s16 yRemainder;
+    s32 state;
+} MnuMantraNodeState;
+
+typedef char MnuMantraNodeStateLayoutAssert[
+    (sizeof(MnuMantraNodeState) == 0x0C &&
+     (u32)&((MnuMantraNodeState *)0)->y == 2 &&
+     (u32)&((MnuMantraNodeState *)0)->xRemainder == 4 &&
+     (u32)&((MnuMantraNodeState *)0)->yRemainder == 6 &&
+     (u32)&((MnuMantraNodeState *)0)->state == 8)
+        ? 1 : -1];
+
 typedef struct MenuSceneWork {
     struct SdfMemBlock *allocation; /* 0x000: retained general-heap owner */
-    u8 pad004[0x480];
+    MnuMantraNodeState nodes[96]; /* 0x004: grid userData; 0x480 bytes */
     SdfGrid *gridHandle; /* 0x484 */
     MnuGridFeedbackState gridFeedback; /* 0x488 */
     s32 gridFrame; /* 0x490: pulse-grid animation frame */
@@ -71,6 +88,8 @@ typedef struct MenuSceneWork {
 
 typedef char MenuSceneWorkLayoutAssert[
     (sizeof(MenuSceneWork) == 0x5B0 &&
+     (u32)&((MenuSceneWork *)0)->nodes == 4 &&
+     sizeof(((MenuSceneWork *)0)->nodes) == 0x480 &&
      (u32)&((MenuSceneWork *)0)->gridHandle == 0x484 &&
      (u32)&((MenuSceneWork *)0)->gridFeedback == 0x488 &&
      (u32)&((MenuSceneWork *)0)->gridFrame == 0x490 &&
