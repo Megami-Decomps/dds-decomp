@@ -12,29 +12,29 @@
 
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
-EffWorldNode *evtCreateScriptObject(s32 a, void *b, MotionTable *c, EffWorldNode *d, const char *e) {
+EffWorldNode *evtCreateScriptObject(s32 key, SdfItemListRef *itemList, MotionTable *motionTable, EffWorldNode *fallbackModelObject, const char *name) {
     EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
     EvtScriptModelWork *work = object->data;
 
-    work->motionTable = c;
-    object->key = a;
-    object->value = e;
-    work->fallbackModelObject = d;
-    work->itemList = b;
+    work->motionTable = motionTable;
+    object->key = key;
+    object->value = name;
+    work->fallbackModelObject = fallbackModelObject;
+    work->itemList = itemList;
     work->loadedModelResource = NULL;
     return object;
 }
 
 /* Create a script object with its loaded resource already supplied. */
-EffWorldNode *evtCreateScriptObjectWithResource(s32 a, void *b, MotionTable *c, void *d, const char *e) {
+EffWorldNode *evtCreateScriptObjectWithResource(s32 key, SdfItemListRef *itemList, MotionTable *motionTable, void *loadedModelResource, const char *name) {
     EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
     EvtScriptModelWork *work = object->data;
 
-    object->key = a;
-    work->loadedModelResource = d;
-    work->itemList = b;
-    work->motionTable = c;
-    object->value = e;
+    object->key = key;
+    work->loadedModelResource = loadedModelResource;
+    work->itemList = itemList;
+    work->motionTable = motionTable;
+    object->value = name;
     return object;
 }
 

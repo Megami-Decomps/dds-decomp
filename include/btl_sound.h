@@ -64,6 +64,43 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
+/* Per-unit command-effect link, allocated at exactly 0x10 bytes. */
+typedef struct SoundLink {
+    struct BtlUnit *owner; /* 0x00 */
+    BattleEffect *effectHandle; /* 0x04 */
+    SoundResourceNode *effect; /* 0x08 */
+    u16 commandEffectId; /* 0x0C: selected datCommandRecords entry's +0x2E value. */
+    u16 pad0E[1];
+} SoundLink;
+
+typedef char SoundLink_size_must_be_0x10[(sizeof(SoundLink) == 0x10) ? 1 : -1];
+typedef char SoundLink_commandEffectId_offset_must_be_0x0C[
+    ((u32)&((SoundLink *)0)->commandEffectId == 0x0C) ? 1 : -1];
+
+/* Per-unit model-resource link, allocated at exactly 0x14 bytes. */
+typedef struct SoundResourceLink {
+    struct BtlUnit *owner; /* 0x00 */
+    BattleEffect *effectHandle; /* 0x04 */
+    SoundResourceNode *effect; /* 0x08 */
+    u32 opaque0C; /* 0x0C: retained for the title-specific link updater. */
+    u8 refreshRequested; /* 0x10 */
+    u8 pad11[3];
+} SoundResourceLink;
+
+typedef char SoundResourceLink_size_must_be_0x14[
+    (sizeof(SoundResourceLink) == 0x14) ? 1 : -1];
+typedef char SoundResourceLink_opaque0C_offset_must_be_0x0C[
+    ((u32)&((SoundResourceLink *)0)->opaque0C == 0x0C) ? 1 : -1];
+typedef char SoundResourceLink_refreshRequested_offset_must_be_0x10[
+    ((u32)&((SoundResourceLink *)0)->refreshRequested == 0x10) ? 1 : -1];
+
+SoundLink *sndAllocLink(struct BtlUnit *owner);
+void sndFreeLink(SoundLink *link);
+void btlUpdateUnitCommandEffect(SoundLink *link);
+SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
+void sndFreeResourceLink(SoundResourceLink *link);
+void btlMarkTaskReady(SoundResourceLink *link);
+
 /* Effect callbacks dereference these words as units, while the selector
  * provider stores their encoded keys (DDS1 001F1588 / DDS2 0020220C). */
 typedef union ActorEffectOwner {
@@ -145,8 +182,6 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
 struct ActiveSoundNode;
-struct SoundResourceLink;
-struct SoundLink;
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);
@@ -159,8 +194,6 @@ s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
-struct SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
-struct SoundLink *sndAllocLink(struct BtlUnit *owner);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
@@ -210,6 +243,14 @@ typedef char SoundFileTaskArgs_index_offset_must_be_C[
 #endif
 typedef char SoundFileTaskArgs_filename_offset_must_be_10[
     ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
+
+/* Known SoundLoadNode/SoundFileNode phase bits; other flag bits stay opaque. */
+enum {
+    SOUND_FILE_STATE_REQUEST_PENDING = 0x01,
+    SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED = 0x02,
+    SOUND_FILE_STATE_SPU_LOAD_PENDING = 0x08,
+    SOUND_FILE_STATE_COMPLETE = 0x10
+};
 
 s32 sndLoadDataFile(const SoundDataFileArgs *data);
 struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);

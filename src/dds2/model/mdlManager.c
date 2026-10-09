@@ -149,7 +149,7 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     groupNode->modelContext = NULL;
     for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
         groupNode->slots[slotIndex].flags = 0;
-        groupNode->slots[slotIndex].data = NULL;
+        groupNode->slots[slotIndex].motionTable = NULL;
         groupNode->slots[slotIndex].resourceHandle = 0;
     }
     groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
@@ -227,14 +227,14 @@ void btlReleaseAllEntities(void) {
 
 /* Create and attach the motion for the selected resource record. */
 Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
-    MotionTable *resource = owner->sub->slots[index].data;
-    s16 slot = owner->sub->slots[index].slot;
-    Motion *object = sdfCreateMotion(owner->inner, resource);
+    MotionTable *motionTable = owner->sub->slots[index].motionTable;
+    s16 motionSlotIndex = owner->sub->slots[index].motionSlotIndex;
+    Motion *object = sdfCreateMotion(owner->inner, motionTable);
 
     object->searchId = index;
-    owner->slots[slot] = object;
-    object->slotIndex = slot;
-    if (slot == 0) {
+    owner->slots[motionSlotIndex] = object;
+    object->slotIndex = motionSlotIndex;
+    if (motionSlotIndex == 0) {
         owner->first = object;
     }
     return object;
@@ -286,7 +286,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
     MdlCtx *ctx;
 
     if (owner != NULL) {
-        if (owner->slots[index].data == NULL) {
+        if (owner->slots[index].motionTable == NULL) {
             return;
         }
         for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
@@ -297,7 +297,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
                 sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
             }
         }
-        owner->slots[index].data = NULL;
+        owner->slots[index].motionTable = NULL;
         owner->slots[index].resourceHandle = 0;
     }
 }
@@ -315,9 +315,9 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex,
 
     mdlReleaseOwnerSlotResources(owner, index);
     slot = &owner->slots[index];
-    slot->slot = slotIndex;
+    slot->motionSlotIndex = slotIndex;
     slot->motionIndex = motionIndex;
-    slot->data = data;
+    slot->motionTable = data;
     slot->resourceHandle = resourceHandle;
     slot->flags = 0;
     if (mode & 0x100) {
@@ -336,8 +336,8 @@ void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
     BattleGroupNode *entity;
 
     btlCreateGroupNode(group, id, mode, setup->resourceList, setup->itemList, setup->requestAllocation);
-    if (setup->motionData != NULL) {
-        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->motionData, setup->motionResource);
+    if (setup->motionTable != NULL) {
+        mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->motionTable, setup->motionResource);
     }
     if (setup->partInfo != NULL) {
         entity = btlFindGroupedEntity(group, id);
@@ -434,7 +434,7 @@ void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
  * the group job. This callback completes the additional file request. */
 void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
-    request->payload.motionData = sdfRelocatePackedResourceWordsFromHeader(
+    request->payload.motionTable = sdfRelocatePackedResourceWordsFromHeader(
         (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
@@ -617,7 +617,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     ctx->current.h.id = -1;
     ctx->current.h.motionIndex = -1;
     for (i = 0; i != 8; i++) {
-        if (node->slots[i].data != NULL && (node->slots[i].flags & 1)) {
+        if (node->slots[i].motionTable != NULL && (node->slots[i].flags & 1)) {
             motionOwnerCreateObjectForRecord(ctx, i);
             if (i > 0) {
                 if (node->slots[i].motionIndex >= 0) {

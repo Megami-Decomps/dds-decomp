@@ -217,25 +217,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 variant;
-    u16 unk_0E;
-} SoundLink;
-
-extern void btlUpdateUnitCommandEffect(SoundLink *);
-
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u32 variant;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
@@ -368,8 +349,6 @@ extern void *btlAllocTask(s32);
 extern void *btlAllocTask(s32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
-
-extern void btlMarkTaskReady(SoundResourceLink *);
 
 extern void btlSetUnitPosition(BtlUnit *object, void *position);
 
@@ -6010,7 +5989,7 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
     SoundResourceLink *node = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
     node->owner = owner;
     node->effectHandle = 0;
-    node->variant = 0;
+    node->opaque0C = 0;
     node->effect = 0;
     return node;
 }
@@ -6034,7 +6013,7 @@ SoundLink *sndAllocLink(BtlUnit *owner) {
     SoundLink *node = sdfAllocAndClearQuadwords(sizeof(SoundLink));
     node->owner = owner;
     node->effectHandle = 0;
-    node->variant = 0;
+    node->commandEffectId = 0;
     node->effect = 0;
     return node;
 }
@@ -6067,7 +6046,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }
-        link->variant = effectId;
+        link->commandEffectId = effectId;
     } else if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
         link->effect->referenceCount--;
@@ -6499,7 +6478,7 @@ void sndStartFileLoad(SoundFileTaskArgs *request) {
     SoundLoadNode *node = request->node;
 
     request->request = fileQueueDefaultCallbackRequest(request->filename);
-    node->flags |= 1;
+    node->flags |= SOUND_FILE_STATE_REQUEST_PENDING;
     node->position = (request->blockIndex + 0x200) << 16;
     node->state = 2;
     btlBossDebugPrintf("btl:sound file load start[%s]\n", request->filename);
@@ -6521,7 +6500,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         btlBossDebugPrintf(D_003A50D8);
         return 0;
     }
-    if ((node->flags & 2) == 0) {
+    if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
         if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
             s32 data;
@@ -6531,17 +6510,19 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_002E9450(data, size);
-                node->flags |= 8;
+                node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
                 /* The packed position stores the sound block number in its upper halfword. */
                 btlBossDebugPrintf(D_003A5110, (u16)(node->position >> 16), size);
             }
-            node->flags = (node->flags & ~1) | 2;
+            node->flags = (node->flags & ~SOUND_FILE_STATE_REQUEST_PENDING) |
+                          SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED;
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
         sdfReleaseResourceAllocation(request->resourceAllocation);
         filePollEntryCleanup(request->request);
-        node->flags = (node->flags & ~8) | 0x10;
+        node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
+                      SOUND_FILE_STATE_COMPLETE;
         return 1;
     }
     return 0;

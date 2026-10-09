@@ -5,8 +5,10 @@
 #include "dat_affinity.h"
 #include "dat_stat.h"
 
+struct SdfMemBlock;
+
 /* The first 0x30 bytes also form compact save metadata; GBWK retains the
- * runtime scene handle at +0x30. */
+ * backing allocation descriptor at +0x30. */
 typedef struct DatStateHeader {
     u8 magic[3];
     u8 version;
@@ -22,7 +24,7 @@ typedef struct DatStateHeader {
     u32 unk24;
     u32 unk28;
     u32 unk2C;
-    s32 backingAllocation;
+    struct SdfMemBlock *backingAllocation;
     u32 firstTick;
     u32 secondTick;
     s32 currency;
