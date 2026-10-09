@@ -469,8 +469,6 @@ typedef struct FldVec4 {
 
 extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 
-extern u32 dds3GetObjectBaseResourceHandle(void *object);
-
 extern void dds3ClearObjectFlags();
 
 extern FldVec4 D_00413DE8;
@@ -3183,7 +3181,7 @@ void func_0014D0E8(void) {
         switch (fldObjectSlots[i].unk8) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
-                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
                 fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
@@ -3211,14 +3209,14 @@ void func_0014D0E8(void) {
                     break;
                 }
             } else {
-                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 if (resource->first->state == 5) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+            resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
             if (resource->first->state == 5) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
@@ -3227,7 +3225,7 @@ void func_0014D0E8(void) {
             break;
         case 2:
             if (fldTestSceneControlFlags(0x40)) {
-                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].unk8 = 3;
@@ -4013,7 +4011,7 @@ s32 func_0014F980(s32 index, s32 reserved) {
         PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
         effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
         effObjSetInnerSecondVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
-        model = (MdlCtx *)dds3GetObjectBaseResourceHandle((void *)fldSparkObjectEntries[slot].objectHandle);
+        model = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSparkObjectEntries[slot].objectHandle);
         model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
         fldSparkObjectEntries[slot].unk4 = index;
@@ -4034,7 +4032,7 @@ void fldFreeSparkSlot(s32 index) {
         vec.v[2] = fldSparkSlots[index].pos[2];
         effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
-        flags = (s32 *)dds3GetObjectBaseResourceHandle((void *)obj);
+        flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
