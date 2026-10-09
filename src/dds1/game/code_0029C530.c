@@ -9104,8 +9104,8 @@ extern EffectFileHeader D_0038C758;
 u32 fileLoadEffectSlotA(void) {
     u8 fileInfo[0x110];
     FileJobPayload *job;
-    u8 *entry;
-    u8 *resource;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -9121,17 +9121,16 @@ u32 fileLoadEffectSlotA(void) {
                       D_00383F18.mode);
         fileJobCopyCommandIntoSecondaryData(job, (const char *)fileInfo,
                       effClassifyResourceMask(((EffFileQueryInfo *)fileInfo)->resourceMask));
-        entry = (u8 *)fileAppendJob(effFileQueue, (u32)job);
+        entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_003DF9A0, entry, 0x80);
-        effQueuedFileHandle = ((FileJob *)entry)->id;
-        resource = (u8 *)effFindAssetData(entry);
-        strcpy(((FileJob *)entry)->name, ((EffFileResourceRecord *)resource)->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileResourceRecord *)effFindAssetData((u8 *)entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
-        memcpy(((EffFileResourceRecord *)resource)->buffer, fileData,
-               ((EffFileResourceRecord *)resource)->size);
-        D_003BD064 = effCreateBattleCameraJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        memcpy(resource->buffer, fileData, resource->size);
+        D_003BD064 = effCreateBattleCameraJob((u8 *)resource);
+        effQueuedFileObject = effFindAssetObject((u8 *)entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
