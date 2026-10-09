@@ -36,7 +36,8 @@ typedef struct CampVisualWork {
     MenuWindowContainer *skillFlagRoot; /* 0x104 */
     u8 pad108[0x10];
     MenuScrollPanel *scrollPanel; /* 0x118: retained scroll-panel allocation */
-    u8 pad11C[0xB0B4];
+    u8 pad11C[0xAFF0];
+    MenuFadeFields transition; /* 0xB10C */
     u32 titleFadingOut;    /* 0xB1D0 */
     u32 titleOpacity;      /* 0xB1D4 */
     u32 titleSlide;        /* 0xB1D8 */
@@ -114,7 +115,28 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB0E0);
+extern void func_002AAE80(KwlnTask *);
+extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
+extern char D_003E69B0[];
+extern char D_003E6F18[];
+
+s32 func_002AB0E0(KwlnTask *task) {
+    CampVisualWork *context = (CampVisualWork *)kwlnTaskGetUserValue(task);
+    s32 state;
+    s32 layer = 0x53;
+
+    func_002AAE80(task);
+    state = mnuInitializeCampMenuWhenResourcesReady(task);
+    if (state == 0) {
+        return state;
+    }
+    mnuCreateStaffImageSprite(0);
+    func_002AA9D8(0, context->skillFlagRoot->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+                  1, 0, (u32)D_003E6F18, 8, layer);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, layer);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)context->drawContext);
+    return menuSetHandler((void *)context, 1, (void *)task);
+}
 
 s32 mnuFinishStaffConfigPopup(KwlnTask *callback) {
     s32 context;
