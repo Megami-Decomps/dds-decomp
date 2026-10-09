@@ -221,6 +221,8 @@ class DelayRoleTracer(Tracer):
         self.live = []
         self.fill_count = self.live_count = self.trial_count = self.eager_count = 0
         self.scan_count = 0
+        self.population = None
+        self.population_complete = False
 
     def log(self, event, **kwargs):
         if self.seq >= 12000:
@@ -262,8 +264,49 @@ class DelayRoleTracer(Tracer):
 
     def selected_hooks(self, enabled):
         for address, (name, _) in HOOKS.items():
-            if name in DECISIONS or name.startswith("live_") or name == "opposite_ready":
+            if name in DECISIONS or name == "opposite_ready":
                 self.bp(address, name) if enabled else self.remove(address)
+        self.live_hooks(enabled or self.population is not None)
+
+    def live_hooks(self, enabled):
+        for address, (name, _) in HOOKS.items():
+            if name.startswith("live_") and name != "live_enter":
+                self.bp(address, name) if enabled else self.remove(address)
+
+    def shared_tail_sequence(self, pointer):
+        """Identify the new wrapper by unchanged watched members, never its UID."""
+        if not pointer or self.r.u32(pointer) & 0xffff != 0x2b:
+            return None
+        pattern = self.r.u32(pointer + 28)
+        if self.r.u32(pattern) & 0xffff != 0x21:
+            return None
+        vector = self.r.u32(pattern + 4)
+        count = self.r.u32(vector)
+        wanted = self.watch["target_chain_uids"]
+        if count != len(wanted) or not 2 <= count <= 16:
+            return None
+        pointers = [self.r.u32(vector + 4 + 4 * i) for i in range(count)]
+        members = [self.uid(p) for p in pointers]
+        if set(members) != set(wanted) or len(set(members)) != count:
+            return None
+        # Delay wrapping may update notes and links, but not these input patterns.
+        for p, uid in zip(pointers, members):
+            insn = self.instruction(p)
+            if (insn["kind"] != self.wanted[uid]["kind"]
+                    or decoded_features(insn["pattern"]) != self.wanted[uid]["input_features"]):
+                return None
+        return {"representation": "delay_sequence", "member_uids": members}
+
+    def cache_state(self, frame):
+        pointer = self.r.u32(frame - 0x58)
+        if not pointer:
+            return {"present": False}
+        block = signed(self.r.u32(pointer + 24))
+        ticks = self.r.u32(0x0824e728)
+        return {"present": True, "target_uid": self.r.u32(pointer), "basic_block": block,
+                "cached_tick": self.r.u32(pointer + 28),
+                "current_tick": self.r.u32(ticks + 4 * block) if block >= 0 else None,
+                "argument_register_live": 4 in self.bitset(pointer + 8)}
 
     def verify_input(self, first):
         found, seen = {}, set()
@@ -303,19 +346,22 @@ class DelayRoleTracer(Tracer):
             self.remove(pc)
             self.verify_input(self.args(r, 1)[0])
             self.dynamic_return(self.r.u32(r["esp"]), "dbr_exit")
-            for address in (0x08166ee6, 0x0816656c, 0x08166dd2):
+            for address in (0x08166ee6, 0x0816656c, 0x08166dd2, 0x081d23e4):
                 self.bp(address, HOOKS[address][0])
             self.log("dbr_enter", function=self.function, branch_uid=self.watch["branch_uid"],
-                     argument_uid=self.watch["argument_uid"], source_role=self.watch["source_role"])
+                     argument_uid=self.watch["argument_uid"], source_role=self.watch["source_role"],
+                     target_chain_uids=self.watch["target_chain_uids"])
             return
         if name == "dbr_exit":
             if self.fill or self.live:
                 raise RuntimeError("unfinished selected delay/live calculation")
             coverage = (self.eager_count > 0 and self.fill_count > 0
-                        and self.live_count > 0 and self.trial_count > 0)
+                        and self.live_count > 0 and self.trial_count > 0
+                        and self.population_complete)
             self.log("dbr_exit", coverage_complete=coverage, eager_choices=self.eager_count,
                      fill_calls=self.fill_count, live_calls=self.live_count,
-                     argument_trials=self.trial_count, live_scan_steps=self.scan_count)
+                     argument_trials=self.trial_count, live_scan_steps=self.scan_count,
+                     first_shared_tail_population_complete=self.population_complete)
             if not coverage:
                 raise RuntimeError("missing watched argument or opposing-live-set decision coverage")
             self.completed = True
@@ -357,9 +403,42 @@ class DelayRoleTracer(Tracer):
             self.selected_hooks(False)
             self.fill = None
             return
-        if not self.fill:
+        if name == "live_enter":
+            args = self.args(r, 3)
+            if not self.fill and not self.live:
+                if self.population_complete:
+                    return
+                identity = self.shared_tail_sequence(args[1])
+                if identity is None:
+                    return
+                self.population = {"population_id": 1, "root_frame": r["esp"] - 4,
+                                   "target_uid": self.uid(args[1]), "recomputed": False}
+                self.live_hooks(True)
+                return_pc = self.r.u32(r["esp"])
+                caller = {0x08166619: "fill_slots_opposite", 0x081661b5: "simple_scan_other_target",
+                          0x081d31a6: "recursive_live"}.get(return_pc, "other_resource_caller")
+                self.log("population_enter", owner_kind="shared_tail_population", population_id=1,
+                         target_uid=self.uid(args[1]), target_identity=identity, caller=caller,
+                         caller_branch_uid=(self.uid(self.r.u32(frame + 8))
+                                            if return_pc == 0x08166619 else None))
+            if len(self.live) >= 16 or self.live_count >= 128:
+                raise RuntimeError("opposing-live calculation bound exceeded")
+            self.live_count += 1
+            owner = "shared_tail_population" if self.population else "actor_fill"
+            fill_id = self.fill["call_id"] if self.fill else None
+            state = {"live_id": self.live_count, "frame": r["esp"] - 4,
+                     "target_uid": self.uid(args[1]), "resources_pointer": args[2],
+                     "owner_kind": owner, "call_id": fill_id,
+                     "population_id": 1 if self.population else None}
+            parent = self.live[-1]["live_id"] if self.live else None
+            self.live.append(state)
+            self.log(name, call_id=fill_id, live_id=self.live_count,
+                     owner_kind=owner, population_id=state["population_id"],
+                     parent_live_id=parent, target_uid=state["target_uid"])
+            return
+        if not self.fill and not self.population:
             raise RuntimeError("ungated delayed-branch decision hook")
-        fill_id = self.fill["call_id"]
+        fill_id = self.fill["call_id"] if self.fill else None
         if name == "opposite_ready":
             self.log(name, call_id=fill_id, resources=self.resources(frame - 0x14))
             return
@@ -371,18 +450,6 @@ class DelayRoleTracer(Tracer):
                          argument=self.instruction(r["esi"]),
                          opposite_needed=self.resources(frame - 0x14))
             return
-        if name == "live_enter":
-            if len(self.live) >= 16 or self.live_count >= 128:
-                raise RuntimeError("opposing-live calculation bound exceeded")
-            args = self.args(r, 3)
-            self.live_count += 1
-            state = {"live_id": self.live_count, "frame": r["esp"] - 4,
-                     "target_uid": self.uid(args[1]), "resources_pointer": args[2]}
-            parent = self.live[-1]["live_id"] if self.live else None
-            self.live.append(state)
-            self.log(name, call_id=fill_id, live_id=self.live_count,
-                     parent_live_id=parent, target_uid=state["target_uid"])
-            return
         if not self.live or self.live[-1]["frame"] != frame:
             raise RuntimeError("live-resource frame stack mismatch")
         state = self.live[-1]
@@ -391,7 +458,13 @@ class DelayRoleTracer(Tracer):
             self.log(name, **fields, basic_block=signed(self.r.u32(frame - 0x54)),
                      cache_entry_present=bool(self.r.u32(frame - 0x58)))
         elif name in {"live_cache_hit", "live_recompute", "live_unknown_block"}:
-            self.log(name, **fields)
+            if self.population and frame == self.population["root_frame"]:
+                if name == "live_cache_hit":
+                    raise RuntimeError("first watched shared-tail population was already cached")
+                if name == "live_recompute":
+                    self.population["recomputed"] = True
+            self.log(name, **fields, **({"cache": self.cache_state(frame)}
+                                       if name == "live_cache_hit" else {}))
         elif name == "live_scan":
             self.scan_count += 1
             if self.scan_count > 8000:
@@ -403,8 +476,19 @@ class DelayRoleTracer(Tracer):
         elif name == "live_before_forward":
             self.log(name, **fields, resources=self.resources(state["resources_pointer"]))
         elif name == "live_exit":
-            self.log(name, **fields, resources=self.resources(state["resources_pointer"]))
+            self.log(name, **fields, resources=self.resources(state["resources_pointer"]),
+                     cache=self.cache_state(frame) if state["target_uid"] is not None else {"present": False})
             self.live.pop()
+            if self.population and frame == self.population["root_frame"]:
+                cache = self.cache_state(frame)
+                if (self.live or not self.population["recomputed"] or not cache["present"]
+                        or cache["target_uid"] != self.population["target_uid"]):
+                    raise RuntimeError("first shared-tail population lacks verified cache write")
+                self.log("population_exit", owner_kind="shared_tail_population", population_id=1,
+                         cache=cache, uncached_population_complete=True)
+                self.population = None
+                self.population_complete = True
+                self.live_hooks(self.fill is not None)
         else:
             raise RuntimeError("unknown delayed-branch hook " + name)
 
@@ -459,7 +543,16 @@ def summarize_decisions(archive):
             or len(finishes) != 1 or finishes[0].get("coverage_complete") is not True):
         raise ValueError("delay log lacks complete role/input/completion gates")
     calls, live, decisions, returned, provenance = {}, {}, [], [], []
+    populations, population_results = {}, []
+    dbr_entry = next(e for e in events if e["event"] == "dbr_enter")
     live_details, active_live = {}, []
+    def cache_summary(cache):
+        allowed = {"present", "target_uid", "basic_block", "cached_tick", "current_tick",
+                   "argument_register_live"}
+        result = {key: value for key, value in cache.items() if key in allowed}
+        if any(value is not None and type(value) not in (int, bool) for value in result.values()):
+            raise ValueError("invalid cache identity metadata")
+        return result
     def observe_transition(detail, key, current, observed_at_uid=None):
         prior = detail.get("_previous_" + key)
         if prior is not None and prior[1] != current and "first_" + key + "_transition" not in detail:
@@ -469,7 +562,30 @@ def summarize_decisions(archive):
         detail["_previous_" + key] = (observed_at_uid, current)
     for e in events:
         kind = e["event"]
-        if kind == "fill_enter":
+        if kind == "population_enter":
+            identity = e.get("target_identity", {})
+            expected = dbr_entry.get("target_chain_uids", [])
+            members = identity.get("member_uids", [])
+            if (e.get("owner_kind") != "shared_tail_population" or e.get("population_id") != 1
+                    or populations or population_results or calls or active_live
+                    or identity.get("representation") != "delay_sequence"
+                    or not expected or set(members) != set(expected) or len(members) != len(expected)):
+                raise ValueError("unqualified or duplicate shared-tail population owner")
+            populations[1] = e
+        elif kind == "population_exit":
+            if (e.get("owner_kind") != "shared_tail_population" or e.get("population_id") not in populations
+                    or active_live or e.get("uncached_population_complete") is not True):
+                raise ValueError("population return without complete qualified ownership")
+            entered = populations.pop(e["population_id"])
+            cache = e.get("cache", {})
+            if cache.get("present") is not True or cache.get("target_uid") != entered["target_uid"]:
+                raise ValueError("population result does not establish its exact cache key")
+            population_results.append({"population_id": 1, "target_uid": entered["target_uid"],
+                                       "caller": entered["caller"],
+                                       "caller_branch_uid": entered.get("caller_branch_uid"),
+                                       "target_member_uids": entered["target_identity"]["member_uids"],
+                                       "cache": cache_summary(cache)})
+        elif kind == "fill_enter":
             if e["call_id"] in calls:
                 raise ValueError("duplicate selected fill")
             calls[e["call_id"]] = e
@@ -481,7 +597,12 @@ def summarize_decisions(archive):
                              "owned": bool(entered["own_thread"]),
                              "filled": e["has_delay_list"], "annulled": e["must_annul"]})
         elif kind == "live_enter":
-            if e["live_id"] in live_details or e["call_id"] not in calls:
+            owner = e.get("owner_kind", "actor_fill")
+            ownership = ((owner == "actor_fill" and e["call_id"] in calls
+                          and e.get("population_id") is None)
+                         or (owner == "shared_tail_population" and e.get("call_id") is None
+                             and e.get("population_id") in populations))
+            if e["live_id"] in live_details or not ownership:
                 raise ValueError("duplicate or unowned live calculation")
             if e["parent_live_id"] != (active_live[-1] if active_live else None):
                 raise ValueError("live calculation nesting mismatch")
@@ -490,6 +611,7 @@ def summarize_decisions(archive):
             live_details[e["live_id"]] = {
                 "live_id": e["live_id"], "parent_live_id": e["parent_live_id"],
                 "call_id": e["call_id"], "target_uid": e["target_uid"],
+                "owner_kind": owner, "population_id": e.get("population_id"),
                 "routes": [], "scanned_instructions": 0}
         elif kind in {"live_block", "live_cache_hit", "live_recompute", "live_unknown_block",
                       "live_scan", "live_before_forward"}:
@@ -501,6 +623,8 @@ def summarize_decisions(archive):
                 detail["cache_entry_present"] = e["cache_entry_present"]
             elif kind in {"live_cache_hit", "live_recompute", "live_unknown_block"}:
                 detail["routes"].append(kind.removeprefix("live_"))
+                if "cache" in e:
+                    detail["cache_at_hit"] = cache_summary(e["cache"])
             elif kind == "live_scan":
                 current = 4 in e["current_live"]
                 detail.setdefault("initial_argument_register_live", current)
@@ -519,14 +643,18 @@ def summarize_decisions(archive):
             active_live.pop()
             entry = live.pop(e["live_id"])
             live_details[e["live_id"]]["returned_argument_register_live"] = 4 in e["resources"]["registers"]
+            if "cache" in e:
+                live_details[e["live_id"]]["cache_at_return"] = cache_summary(e["cache"])
             if entry["parent_live_id"] is None:
                 provenance.append({"call_id": e["call_id"],
+                                   "owner_kind": entry.get("owner_kind", "actor_fill"),
                                    "argument_register_live": 4 in e["resources"]["registers"]})
         elif kind == "argument_decision":
             decisions.append({"check": e["check"], "result": e["result"],
                               "argument_register_live_on_opposite_path":
                                   4 in e["opposite_needed"]["registers"]})
-    if calls or live or active_live or not decisions or not provenance:
+    if (calls or live or active_live or populations or not decisions or not provenance
+            or (finishes[0].get("first_shared_tail_population_complete") is True and not population_results)):
         raise ValueError("incomplete selected decision or live-mask coverage")
     clean_live = [{key: value for key, value in detail.items() if not key.startswith("_")}
                   for detail in live_details.values()]
@@ -537,6 +665,7 @@ def summarize_decisions(archive):
                                for e in events if e["event"] == "eager_choice"],
             "argument_decisions": decisions, "fill_outcomes": returned,
             "opposing_live_results": provenance,
+            "first_shared_tail_population": population_results[0] if population_results else None,
             "live_provenance": clean_live[:32],
             "live_provenance_count": len(clean_live),
             "omitted_live_provenance": max(0, len(clean_live) - 32),
