@@ -328,7 +328,7 @@ s32 itfMesScriptSetMessageRange(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-SdfTex *itfMesGetGlobalWindowValue(void) {
+SdfTex *itfMesGetWindowTexture(void) {
     return itfMesWork.windowTexture;
 }
 
