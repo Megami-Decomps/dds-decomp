@@ -4,7 +4,6 @@
 #include "common.h"
 
 struct EffectSlotSet;
-struct BdWork;
 struct SdfMemBlock;
 struct EffMappedResource;
 struct EffMappedRecord;
@@ -54,8 +53,16 @@ struct EffectSlotSet *effCreateResourceSlotSet(struct EffectSlotSet *source, u32
 u32 effReleaseSlotWorkAllocation(struct EffectSlotSet *owner);
 void effInitializeAllSlotWork(struct EffectSlotSet *owner);
 void effAttachSlotWorkOwner(struct EffectSlotSet *owner, s32 slotIndex,
-                            struct BdWork *entry);
+                            void *payload);
 void effResetSlotWork(struct EffectSlotSet *owner, u32 slotIndex);
+/* Payloads may be full work entries or 0x6C-byte alternate records. */
+u32 effSetMaterialSlots(struct EffectSlotSet *owner, s32 slotIndex,
+                        u32 materialFlags, void *payload);
+#ifdef VERSION_DDS2
+s32 effSetSlotOverrideWork(struct EffectSlotSet *owner, u32 slotIndex, void *payload);
+#else
+u32 effSetSlotOverrideWork(struct EffectSlotSet *owner, s32 slotIndex, void *payload);
+#endif
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);
 void effResolveAndReleaseSelectedResource(struct EffectSlotSet *owner, s32 slot);
 void effInitializeSlotWork(struct EffectSlotSet *owner, s32 slotIndex);
