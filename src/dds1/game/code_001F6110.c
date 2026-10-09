@@ -2607,12 +2607,12 @@ typedef struct BtlResourceDescriptor {
     BtlResourceEntry *selectedEntry; /* 0x34 */
     BtlResourceEntry *cachedEntry; /* 0x38: last entry whose preview was updated */
     SdfTex *texture;        /* 0x3C: owned or borrowed preview texture */
-    s32 ownsHandle;         /* 0x40 */
+    s32 textureCategory;    /* 0x40: TMX is owned; GENERAL is borrowed. */
     BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;
 
 /* Initialize a browser descriptor at the first entry of the borrowed list.
- * The native constructor leaves ownsHandle untouched. */
+ * The native constructor leaves textureCategory untouched. */
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
 
@@ -2739,7 +2739,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                 s32 category;
                 category = selectedEntry->category;
                 switch (category) {
-                case 1:
+                case BTL_RESOURCE_ENTRY_CATEGORY_TMX:
                     if (selectedEntry->id == 0) {
                         char resourceName[0x70];
                         btlFormatSelectedResourceName(descriptor, resourceName);
@@ -2748,17 +2748,17 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                         btlReplaceResourceHandle(descriptor, (void *)(u32)selectedEntry->id);
                     }
                     selectedEntry = descriptor->selectedEntry;
-                    descriptor->previewActive = descriptor->ownsHandle = 1;
+                    descriptor->previewActive = descriptor->textureCategory = 1;
                     break;
-                case 8: {
+                case BTL_RESOURCE_ENTRY_CATEGORY_GENERAL: {
                     SdfTex *texture = effGetBillResourceTexture(selectedEntry->value);
-                    descriptor->ownsHandle = category;
+                    descriptor->textureCategory = category;
                     descriptor->texture = texture;
                     descriptor->previewActive = 1;
                     selectedEntry = descriptor->selectedEntry;
                     break;
                 }
-                case 2:
+                case BTL_RESOURCE_ENTRY_CATEGORY_P2A:
                 default:
                     descriptor->previewActive = 0;
                     break;
@@ -2818,7 +2818,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
 /* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     SdfTex *texture = descriptor->texture;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
     }
     sdfReleaseChipBlock(descriptor);
@@ -2879,7 +2879,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
     u32 loadedResource;
     SdfTex *texture = descriptor->texture;
     struct SdfMemBlock *allocation;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }
@@ -2893,7 +2893,7 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
     SdfTex *texture = descriptor->texture;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }

@@ -9976,7 +9976,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
             count = func_00159BB0();
             for (i = 0; i < count; i++) {
                 func_0035C860(name, "GENERAL %d", i);
-                btlAppendEntry(effResourceBankEntries, name, 8, i, 0);
+                btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
             }
         }
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
