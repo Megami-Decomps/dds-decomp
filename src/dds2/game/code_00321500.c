@@ -47,7 +47,7 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-void func_003214D0(u32, s32);
+void func_003214D0(u32, u32);
 s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
