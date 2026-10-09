@@ -2806,7 +2806,45 @@ void func_0012D3D8(void) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012D528);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DB70);
+extern void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye);
+extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
+extern void effObjFetchInnerSecondVecNorm(u32);
+void func_0012DB70(void) {
+    f32 nearPoint[4];
+    f32 farPoint[4];
+    s32 *world = fldGetPlayerSceneStateAddress();
+    EffWorldNode *node;
+    f32 angle;
+
+    effObjFetchInnerSecondVecNorm(fldPlayerObject);
+    angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+    nearPoint[0] = fldLookAtNearPoint[0] + (fldAreaState.x - fldLookAtNearPoint[0]);
+    nearPoint[1] = fldLookAtNearPoint[1] + ((fldAreaState.y + fldCameraFollowRows[fldAreaState.rowIdx].y) - fldLookAtNearPoint[1]);
+    nearPoint[2] = fldLookAtNearPoint[2] + (fldAreaState.z - fldLookAtNearPoint[2]);
+    fldAreaState.angle = angle;
+    fldAreaState.targetAngle = angle;
+    dds3SetCameraVector((EffWorldNode *)(u32)*world, (u128 *)nearPoint);
+    dds3LoadOrBuildObjectMatrix((EffWorldNode *)fldPlayerObject);
+    farPoint[3] = 1.0f;
+    farPoint[0] = fldAreaState.focusPos[0];
+    farPoint[1] = fldAreaState.focusPos[1];
+    farPoint[2] = fldAreaState.focusPos[2];
+    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    farPoint[0] = fldLookAtFarPoint[0] + (farPoint[0] - fldLookAtFarPoint[0]);
+    farPoint[1] = fldLookAtFarPoint[1] + (farPoint[1] - fldLookAtFarPoint[1]);
+    farPoint[2] = fldLookAtFarPoint[2] + (farPoint[2] - fldLookAtFarPoint[2]);
+    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    PCP_COPY_VECTOR(fldLookAtNearPoint, nearPoint);
+    PCP_COPY_VECTOR(fldLookAtFarPoint, farPoint);
+    node = (EffWorldNode *)(u32)*world;
+    node->ops->update(node);
+    fldAreaState.dist = fsqrtf((nearPoint[0] - farPoint[0]) * (nearPoint[0] - farPoint[0]) +
+                               (nearPoint[1] - farPoint[1]) * (nearPoint[1] - farPoint[1]) +
+                               (nearPoint[2] - farPoint[2]) * (nearPoint[2] - farPoint[2]));
+    fldAreaState.negatedAngle = fldGetNormalizedComplementaryAngle(farPoint[0], farPoint[2], nearPoint[0], nearPoint[2]) + 180.0f;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012DD70);
 
