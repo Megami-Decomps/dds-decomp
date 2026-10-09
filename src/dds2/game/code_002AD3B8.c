@@ -983,7 +983,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, (s32)context->spriteArg2);
+    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, context->spriteArg2);
     context->spriteHandle = mnuCreateSpriteState(context->spriteArg0,
                                                  context->spriteArg1,
                                                  context->group);
