@@ -6241,6 +6241,7 @@
 0x002D0F08	sdfGraphRecreateBuffers	inferred	Releases existing graph buffers and allocates three using dimensions and modes from the graph.
 0x002D0F90	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x00329E40, input-family pairing. [names_qp10.tsv]
 0x002D1020	sdfGraphResetDeviceForCurrentMode	inferred	Resets the GS using interlace settings from the current display mode and marks graph state for reset.
+0x002D1080	sdfGraphWakeDisplayThread	inferred	Wakes the graph worker for channel 1, enables interrupts, and returns zero.
 0x002D10B0	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
 0x002D10C8	sdfCaptureDeferredGsImage	inferred	U0
 0x002D1318	sdfSwapBufferSlots	inferred	replaces buffer index in the two slot bytes with its complement

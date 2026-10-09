@@ -6965,6 +6965,7 @@ sndMidiTrackState = 0x0047AA40;
 sndTrackBalanceEntries = 0x0047ABD0;
 sdfGraphApplyModeDefaults = 0x00329CE0; // type:func
 sdfGraphResetDeviceForCurrentMode = 0x00329ED0; // type:func
+sdfGraphWakeDisplayThread = 0x00329F30; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -11221,7 +11222,6 @@ func_00328FA8 = 0x00328FA8; // type:func
 func_00329230 = 0x00329230; // type:func
 func_00329600 = 0x00329600; // type:func
 func_00329C20 = 0x00329C20; // type:func
-func_00329F30 = 0x00329F30; // type:func
 func_0032A230 = 0x0032A230; // type:func
 func_0032A440 = 0x0032A440; // type:func
 func_0032A9D8 = 0x0032A9D8; // type:func

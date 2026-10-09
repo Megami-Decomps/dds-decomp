@@ -370,7 +370,7 @@
 
 /* Interrupt-enable sequence: finish preceding stores before enabling handlers.
  * Independent retail sites: DDS2 func_00345268 (+0x14), func_00345298
- * (+0x7C), and func_00329F30 (+0x18); DDS1 func_002D2140 uses it too. */
+ * (+0x7C), and sdfGraphWakeDisplayThread (+0x18); DDS1 func_002D2140 uses it too. */
 #define EE_ENABLE_INTERRUPTS_SYNC() __asm__ volatile ("sync\n\tei")
 
 /* Expand packed RGB5 channels into byte lanes (PEXT5), before replicating
