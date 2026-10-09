@@ -21,7 +21,7 @@ extern void itfMesShiftPanelVertically(ItfMesState *, s32);
 extern void itfMesSetChildChainFlags(FrFontGlyph *, u8);
 extern s32 itfMesNthClearBit(s32, u32);
 extern s32 sndSeqSelectPoll(ItfMesState *);
-extern void func_0019E4F8(ItfMesState *);
+extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 func_00195ED8();
 
@@ -268,7 +268,7 @@ void btlUpdateFadeIndicator(ItfMesState *panel);
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *object) {
     itfMesUpdatePanelFades(object);
     func_0019E320(object);
-    func_0019E4F8(object);
+    itfUpdateSoundSelectionTransition(object);
     btlUpdateFadeIndicator(object);
 }
 
@@ -341,7 +341,7 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E320);
 
-void func_0019E4F8(ItfMesState *panel) {
+void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
     ItfMesEntryBlock *entry = &panel->entryBlock;
     u32 flags = panel->flags;
@@ -544,7 +544,7 @@ void btlUpdateFadeIndicator(ItfMesState *panel) {
 
 extern void itfMesRenderActivePanelSprites(ItfMesState *);
 extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
-extern void func_0019EE58(ItfMesState *);
+extern void itfDrawSelectedSoundRow(ItfMesState *);
 extern void func_0019F0F8(ItfMesState *);
 
 /* Draw the panel's glyph layers, advance its selection state and fade. */
@@ -591,7 +591,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
         if (panel->unk12 == 3) {
             func_0019F0F8(panel);
         } else {
-            func_0019EE58(panel);
+            itfDrawSelectedSoundRow(panel);
         }
     }
 }
@@ -623,7 +623,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfSendTablePacket(SdfListHead *, s32, s32);
 
-void func_0019EE58(ItfMesState *panel) {
+void itfDrawSelectedSoundRow(ItfMesState *panel) {
     DrawColorRec uv;
     DrawColorRec color;
     DrawVertex bounds[2];
@@ -1128,7 +1128,7 @@ extern char D_003BB280[];
 extern char D_003BB288[];
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
-s32 func_0019FF60(void) {
+s32 kwlnUpdateBlurDebugMenu(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;

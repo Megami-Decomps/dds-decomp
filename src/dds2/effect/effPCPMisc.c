@@ -4100,7 +4100,7 @@ void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
 }
 
 /* Preserve the resource query before applying its growth and fade timeline. */
-void func_00187CD8(EffPCPGrowWork *work) {
+void effPcpStepScaledThunderTimeline(EffPCPGrowWork *work) {
     s32 frame;
     s32 duration;
     s32 fadeIn;

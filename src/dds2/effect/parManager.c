@@ -410,8 +410,8 @@ void func_00161B38(ParSystem *system, s32 index, const f32 *origin, u32 color, P
 
 extern void func_001638D8(ParSystem *system, s32 index);
 
-/* Triangle-cell variant of func_00161D08: three vertices per history segment. */
-void func_00161D08(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+/* Triangle-cell variant of parDrawHistoryCentreStrip: three vertices per history segment. */
+void parDrawHistoryCentreStrip(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
     ParHistory *history = &source->records[index];
     ParCell *cell = &system->cells[index];
     u128 *vertex = cell->history;

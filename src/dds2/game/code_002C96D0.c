@@ -653,7 +653,7 @@ void fileDrawPulsingSaveHighlight(void) {
     D_003E8008[2] = angle;
     wave = sdfSinPoly((f32)((angle + 0x5A) % 360) / 180.0f * 3.1415899f);
     D_003E8008[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
-    func_00108EC0(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_003E8008[3] << 24) | 0xAEC014,
+    evtSubmitTexturedGradientQuad(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_003E8008[3] << 24) | 0xAEC014,
                   (D_003E8008[3] << 24) | 0xAEC014, (D_003E8008[3] << 24) | 0xAEC014,
                   (D_003E8008[3] << 24) | 0xAEC014, itfMesGetWindowTexture());
 }
@@ -661,8 +661,8 @@ void fileDrawPulsingSaveHighlight(void) {
 void fileDrawSaveWindow(void) {
     evtSetDrawSurfaceIndex(0x56);
     evtSubmitPrimaryAlphaBlendMode(0);
-    func_00108EC0(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
-    func_00108EC0(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
+    evtSubmitTexturedGradientQuad(0x112, 0x113, 0x98, 0x34, 0x14A, 0x1C5, 0x98, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
+    evtSubmitTexturedGradientQuad(0x56, 0x113, 0xBC, 0x34, 0x14A, 0x1C5, 1, 0x34, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D78));
     fileCursorPulseUpdate();
     fileDrawCursorPulse(0x17E, 0x118, 0x56);
     D_00437D44++;
@@ -2323,9 +2323,9 @@ s32 func_002CD028(s32 work) {
         D_00437D00++;
     }
     if (D_00437D30 == 0) {
-        func_00108EC0(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D74));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D74));
     } else {
-        func_00108EC0(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D74));
+        evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D74));
     }
     evtSetDrawSurfaceIndex(0x55);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 2, 0, 0, 1, 1);
@@ -2408,13 +2408,13 @@ s32 func_002CD028(s32 work) {
             detailColor = func_002CF978(detailColor, fileLoadMenuState.unkC, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
-        func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D5C));
+        evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D5C));
         if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE) {
-            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D64));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D64));
         } else if (fileSlotDisplayStates[slot] == FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE) {
-            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D6C));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D6C));
         } else if (fileSavePreviewRecords[slot].status > 0) {
-            func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D68));
+            evtSubmitTexturedGradientQuad(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D68));
         } else if (mcdOriginalTitleFileMode != 0 && fileSavePreviewRecords[slot].status == 0) {
             mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, D_003E8BD0);
         }
@@ -2424,19 +2424,19 @@ s32 func_002CD028(s32 work) {
                 trailAlpha = 16;
                 if (D_00437D00 > 0) {
                     for (trail = 0; trail < D_00437D00; trail++, trailAlpha -= 2) {
-                        func_00108EC0(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D60));
+                        evtSubmitTexturedGradientQuad(0x1F, y - trail * 4, 0x1BB, trail * 4 + 16, 3, 3, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D60));
                     }
                 } else if (D_00437D00 < 0) {
                     trailAlpha = 32;
                     for (trail = 0; trail < -D_00437D00; trail++, trailAlpha -= 4) {
-                        func_00108EC0(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D60));
+                        evtSubmitTexturedGradientQuad(0x1F, y + 0x58, 0x1BB, trail * 4 + 16, 3, 0x5B - trail * 4, 0x1BB, trail * 4 + 16, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (trailAlpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D60));
                     }
                 }
             }
             if (fileSlotDisplayStates[slot] != FILE_SLOT_DISPLAY_SAVE_PRESENT) {
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
-                    func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_00437D60));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_00437D60));
                 }
             } else {
                 u32 bannerColor;
@@ -2451,7 +2451,7 @@ s32 func_002CD028(s32 work) {
                     mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, D_003E8658);
                 }
                 bannerColor = (alpha << 24) | 0x808080;
-                func_00108EC0(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct SdfTex *)(u32)(D_00437D78));
+                evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct SdfTex *)(u32)(D_00437D78));
                 preview = &fileSavePreviewRecords[slot];
                 if (preview->newCycle == 0) {
                     if (mcdOriginalTitleFileMode == 0) {
@@ -2483,7 +2483,7 @@ s32 func_002CD028(s32 work) {
                 fileDrawMenuImageAtPoint(0x1BD, y + 0x15, titleColor, text);
                 if (fileSelectedSlotIndex == slot) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
-                    func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_00437D60));
+                    evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct SdfTex *)(u32)(D_00437D60));
                 }
                 if (fileSavePreviewRecords[slot].newCycle == 0) {
                     if (mcdOriginalTitleFileMode != 0) {
@@ -2528,7 +2528,7 @@ s32 func_002CD028(s32 work) {
             portrait = 7;
             break;
                             }
-                            func_00108EC0(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(D_003E7FA8[portrait]));
+                            evtSubmitTexturedGradientQuad(partyIndex * 60 + 0x80, y + 0x23, 0x32, 0x3E, 1, 1, 0x32, 0x3E, partyColor, partyColor, partyColor, partyColor, (struct SdfTex *)(u32)(D_003E7FA8[portrait]));
                             func_0035C860(text, D_00437DA8, fileSavePreviewRecords[slot].levels[partyIndex]);
                             fileDrawMenuImageAtPoint(partyIndex * 60 + 0x98, y + 0x51, titleColor, text);
                         }
@@ -2536,7 +2536,7 @@ s32 func_002CD028(s32 work) {
                 }
                 if (fileSavePreviewRecords[slot].stateWords[2] & 0x80000000) {
                     u32 badgeColor = (alpha << 24) | 0x808080;
-                    func_00108EC0(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, (struct SdfTex *)(u32)(D_00437D70));
+                    evtSubmitTexturedGradientQuad(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, (struct SdfTex *)(u32)(D_00437D70));
                 }
             }
         }
@@ -2546,20 +2546,20 @@ s32 func_002CD028(s32 work) {
     if (D_00437D28 > 0) {
         u32 arrowColor;
 
-        func_00108EC0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
         wave = sdfSinPoly((f32)((D_003E7FF8.angle + 90) % 360) / 180.0f * 3.1415899f);
         D_003E7FF8.upAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (D_003E7FF8.upAlpha << 24) | 0x808080;
-        func_00108EC0(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
+        evtSubmitTexturedGradientQuad(0xF8, 0x50, 0xF, 0x22, 0x35, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
     }
     if (D_00437D28 < 7) {
         u32 arrowColor;
 
-        func_00108EC0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00437D70));
         wave = sdfSinPoly((f32)((D_003E7FF8.angle + 90) % 360) / 180.0f * 3.1415899f);
         D_003E7FF8.downAlpha = (s32)((wave + 1.0f) * 0.5f * 176.0f + 16.0f);
         arrowColor = (D_003E7FF8.downAlpha << 24) | 0x808080;
-        func_00108EC0(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
+        evtSubmitTexturedGradientQuad(0xF8, 0x18B, 0xF, 0x22, 0x47, 2, 0xF, 0x22, arrowColor, arrowColor, arrowColor, arrowColor, (struct SdfTex *)(u32)(D_00437D70));
     }
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 1);
@@ -2605,9 +2605,9 @@ s32 fileDrawMenuFrame(s32 task) {
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     if (D_00437CF4 != 0) {
-        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+        evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                       (struct SdfTex *)(u32)(D_00437D74));
-        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+        evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                       (struct SdfTex *)(u32)(D_00437D78));
     }
     if (D_00437CF8 != 0) {
@@ -2620,7 +2620,7 @@ s32 fileDrawMenuFrame(s32 task) {
         } else {
             alpha = 0x50;
         }
-        func_00108EC0(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, (alpha * 0x80 / 100 << 24) | 0x808080,
+        evtSubmitTexturedGradientQuad(0, 0, 0x200, 0x1C0, 0, 0, 0x200, 0x1C0, (alpha * 0x80 / 100 << 24) | 0x808080,
                       (alpha * 0x80 / 100 << 24) | 0x808080, (alpha * 0x80 / 100 << 24) | 0x808080,
                       (alpha * 0x80 / 100 << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D74));
     }
@@ -2943,7 +2943,7 @@ void fileDrawSlotIcon(s32 index, s32 x, s32 y, s32 alpha) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108EC0(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
+    evtSubmitTexturedGradientQuad(x, y, 0x16, 0x10, uv[index][0], uv[index][1], 0x16, 0x10, (alpha << 24) | 0x808080,
                   (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (alpha << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D70));
 }
 
@@ -3031,7 +3031,7 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
 
         if (mode < 2) {
             if (mode >= 0) {
-                func_00108EC0(x + fileCursorPulseState.pos[i][0] + offsets[i][0],
+                evtSubmitTexturedGradientQuad(x + fileCursorPulseState.pos[i][0] + offsets[i][0],
                              y + fileCursorPulseState.pos[i][1] + offsets[i][1],
                              27, 26,
                              texturePositions[mode][0], texturePositions[mode][1],

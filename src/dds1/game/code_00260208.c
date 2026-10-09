@@ -597,7 +597,7 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *task) {
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
-extern void func_001A1530(BrsRewardSummary *);
+extern void btlSnapshotResultRewards(BrsRewardSummary *);
 extern s32 brsBuildRewardRows(BrsRewardBatch *, BrsRewardSummary *);
 extern s32 brsBuildLevelUpList(BrsRewardBatch *);
 extern s32 brsBuildProfileCapList(BrsRewardBatch *);
@@ -623,7 +623,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     evtCreateMessageWindowIfMissing(D_0036C858);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
-    func_001A1530(rewards);
+    btlSnapshotResultRewards(rewards);
     party = work->partyProgress.rows;
     rewardState = &work->rewardState;
     brsBuildRewardRows(rewardState, rewards);

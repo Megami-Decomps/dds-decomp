@@ -1616,7 +1616,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     descriptor->append(descriptor, command);
 }
 
-void func_0012B690(s32 x, s32 y, s32 width, s32 height,
+void evtSubmitTexturedRectPacket(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
     SdfListHead *list;
@@ -2382,7 +2382,7 @@ void func_0012D3E0(void) {
     surface->append(surface, packetList);
 }
 
-void func_0012D5C0(s32 mode) {
+void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     SdfListHead *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
@@ -2452,7 +2452,7 @@ void func_0012D5C0(s32 mode) {
     surface->append(surface, packetList);
 }
 
-void func_0012D7E0(s32 alpha) {
+void fldSubmitOverlayStateAndSprite(s32 alpha) {
     SdfListHead *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;
@@ -2876,7 +2876,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-void func_0012E958(s32 alpha, s32 offset) {
+void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -3037,7 +3037,7 @@ extern s32 D_004360B8;
 extern s32 D_003897C0[];
 
 
-void func_0012F908(void) {
+void fldInterpolateCameraEndpoints(void) {
     union {
         u128 q;
         f32 f[4];
@@ -3239,7 +3239,7 @@ extern void fldRestoreSceneModelColors(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern void func_0012FA58(void);
 extern void func_001302A0(void);
-extern void func_0012F908(void);
+extern void fldInterpolateCameraEndpoints(void);
 
 s32 fldUpdateCameraFollow(void) {
     FldAreaWork *cam;
@@ -3266,7 +3266,7 @@ s32 fldUpdateCameraFollow(void) {
             func_001302A0();
             break;
         case 4:
-            func_0012F908();
+            fldInterpolateCameraEndpoints();
             break;
         }
         fldUpdateCameraProximity();

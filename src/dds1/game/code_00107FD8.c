@@ -523,7 +523,7 @@ void func_00108F00(void) {
     }
 }
 
-void func_00108FA0(s32 x, s32 y, s32 width, s32 height,
+void kwlnDrawTexturedColorQuad(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
     SdfListHead *list;
@@ -626,7 +626,7 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
 }
 
 /* Submit three packed vertex colors and XY pairs at the default depth. */
-void func_001093F8(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
     s32 coords[3][2];
     s32 command;
     s32 packet;

@@ -320,7 +320,7 @@ void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 }
 
 /* Move a departing actor behind the remaining occupied party records. */
-void func_001A2258(BtlUnit *unit) {
+void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
     DatPartyRecord saved;
     DatGameState *scanState = datGameState;
     s32 originalIndex;
@@ -632,7 +632,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
     return 0;
 }
 
-s32 func_001A3638(void) {
+s32 btlMarkInactiveActorCandidates(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *eligible[16];
     BtlUnit *unit;
@@ -965,7 +965,7 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-f32 func_001A47F0(BtlTask *task) {
+f32 btlGetActorEffectScale(BtlTask *task) {
     BtlState *battle;
     BtlUnit *unit;
 
@@ -1421,7 +1421,7 @@ void func_001A5690(void) {
     }
 }
 
-void func_001A57A0(void) {
+void btlRestorePartySlotSnapshots(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 slot;
     BtlUnit *unit;
@@ -2191,7 +2191,7 @@ const char D_003A1C88[] = "btl:escape=%d%%[ratio=%.2f]\n";
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 func_001A8640(BtlUnit *actor) {
+s32 btlRollEscapeChance(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *enemy;
     s32 noEligibleEnemy;
