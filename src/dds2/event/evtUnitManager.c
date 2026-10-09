@@ -19,7 +19,7 @@ extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
 extern void effObjAddInnerFirstVec(void *obj, void *vec);
@@ -1029,7 +1029,7 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     if (unit->flags & 0x10) {
         dds3PreparePathVectorPair(unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
-        func_00340DC8(0.0f, 3.14159265f, 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
         effObjSetInnerSecondVec(unit->effObj, v);

@@ -104,7 +104,7 @@ u32 fldGetPlayerSceneState(void);
 
 
 f32 bfWaitReadArgFloat(s32 idx);
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
@@ -767,9 +767,9 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     }
     degreesToRadians = 0.017453293f;
     pitch = bfWaitReadArgFloat(1) * degreesToRadians;
-    func_00340DC8(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
     VU0_MOVE_VF(vf11, vf10);
-    func_00340DC8(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
     effObjSetInnerSecondVec(unit, quaternion);

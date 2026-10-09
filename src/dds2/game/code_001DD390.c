@@ -8501,7 +8501,7 @@ extern void func_001FC5E0(BtlLinkedCommand *, BtlCamState *,
                          const BtlCameraTimedInstruction *, const s32 *,
                          const BtlCameraParameterRecord *, f32 *);
 
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern f32 D_003BDC60[4];
 
@@ -8675,7 +8675,7 @@ void func_001FD400(BtlLinkedCommand *command, BtlCamState *pose,
                 case 5:
                     if (command->flags & 0x200) value[0] = -value[0];
                     if (value[0] != 0.0f && 0.0f <= D_003BDC70[2]) value[1] = -value[1];
-                    func_00340DC8(value[1], value[0], value[2]);
+                    sdfConvertEulerAnglesToQuaternionVU(value[1], value[0], value[2]);
                     effMiscQuaternionToMatrixVU();
                     VU0_LOAD_VF(vf10, D_003BDC70);
                     VU0_APPLY_MATRIX(vf10, vf10);

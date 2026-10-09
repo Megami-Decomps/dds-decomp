@@ -120,7 +120,7 @@ extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
 extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
-extern void func_002E7F20(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
@@ -2296,7 +2296,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
 void evtStageTestApplyEntryRotation(MdlCtx *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
-    func_002E7F20(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
+    sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
     mdlUpdateContextRotationBasisFromQuaternion(model);
 }

@@ -82,7 +82,7 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
 extern f32 func_002FA1C0(f32);
 extern f32 func_002FA1F0(f32, f32);
-extern void func_002E7F20(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
@@ -4992,7 +4992,7 @@ void camAimRotation(CamAim *obj, void *dst)
     if ((flags & 0x40) == 0) {
         pitch = -func_002FA1C0(-v[1]);
     }
-    func_002E7F20(pitch, func_002FA1F0(v[0], v[2]), 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, func_002FA1F0(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, obj->quat);
