@@ -7,6 +7,7 @@ struct SdfListHead;
 struct SdfDmaNode;
 
 struct SdfListHead *sdfAllocatePacketList(s32 (*allocator)(s32));
+struct SdfListHead *sdfCreateResetPacketList(void);
 void sdfInitPacketList(struct SdfListHead *list);
 
 void sdfAppendPacket(struct SdfListHead *list, u32 packetAddress);
