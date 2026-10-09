@@ -1442,21 +1442,21 @@ void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *r
         switch (field) {
         case 0:
             sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
-                y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadataValue));
+                y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadata.value));
             break;
         case 1:
-            if (runtime->frameGroup->metadataByte1 < 3) {
+            if (runtime->frameGroup->metadata.extra1 < 3) {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
-                    D_00368AB0[runtime->frameGroup->metadataByte1]));
+                    D_00368AB0[runtime->frameGroup->metadata.extra1]));
             } else {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
-                    runtime->entryName[runtime->frameGroup->metadataByte2]));
+                    runtime->entryName[runtime->frameGroup->metadata.extra2]));
             }
             break;
         case 2:
-            if (runtime->frameGroup->metadataByte1 == 0) {
+            if (runtime->frameGroup->metadata.extra1 == 0) {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC298));
             } else {
@@ -2113,7 +2113,7 @@ s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->horizontalOffset -= 8;
         }
 
-        switch (group->metadataByte1) {
+        switch (group->metadata.extra1) {
         case 0:
             break;
         case 1: {
@@ -2136,7 +2136,7 @@ s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
         }
 
         if (status == -1) {
-            switch (group->metadataByte1) {
+            switch (group->metadata.extra1) {
             case 0:
                 break;
             case 1: {
@@ -3704,9 +3704,9 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         header[0] = *(u8 *)group;
         header[1] = group->metadataFlag;
         *(u16 *)&header[2] = (u16)group->entryHeader;
-        *(u16 *)&header[4] = group->metadataValue;
-        header[6] = group->metadataByte1;
-        header[7] = group->metadataByte2;
+        *(u16 *)&header[4] = group->metadata.value;
+        header[6] = group->metadata.extra1;
+        header[7] = group->metadata.extra2;
         func_0023D5B0(output, header, sizeof(header));
     }
 }
