@@ -1905,7 +1905,127 @@ void func_001E3E58(BtlLinkedCommand *action, BtlCamState *pose,
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E4180);
+extern f32 func_001F6E28(BtlIndexList *, f32 *, f32 *);
+
+/* Native pointer-form transfer with a complete 16-byte memory operand. */
+static inline void btlDefeatCameraStoreVector(f32 *dst) {
+    __asm__ volatile (
+        ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder"
+        : "=m" (*(PcpVectorCopyF32 *)dst) : "r" (dst));
+}
+
+
+void func_001E4180(BtlLinkedCommand *action, BtlCamState *pose,
+                   BtlUnit *startActor, BtlIndexList *indices, s8 mode) {
+    typedef s32 (*CameraArrangementCallback)(BtlLinkedCommand *, BtlCamState *, s32);
+    struct {
+        f32 center[4];
+        f32 edge[4];
+        f32 interpolated[4];
+    } vectors __attribute__((aligned(16)));
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    CameraArrangementCallback callback = runtime->defeatCameraHook;
+    u32 count;
+    u32 i;
+    u32 sideFlags;
+    f32 span;
+    f32 height;
+    f32 depth;
+    f32 length;
+    f32 tangent;
+    f32 fov;
+
+    if (callback != NULL && callback(action, pose, 1) != 0) {
+        return;
+    }
+
+    if (mode == 0) {
+        func_001E3E58(action, pose, startActor, 1);
+        i = 0;
+        count = btlGetIndexListCount(indices);
+        if ((u32)(s32)mode < count) {
+            for (; i < count; i++) {
+                BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(indices, (s32)i);
+                if ((entry->status.flags & 0x20) != 0) {
+                    btlInterpolateVectorStep(pose->position);
+                    btlDefeatCameraStoreVector(vectors.interpolated);
+                    func_001F66D8(0x200, NULL, NULL);
+                    btlDefeatCameraStoreVector(pose->position);
+                    pose->position[1] = 0.0f;
+                    pose->position[2] *= 0.5f;
+                    __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (pose->position), "m" (*(const PcpVectorCopyF32 *)(pose->position)));
+                    __asm__ volatile (".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (vectors.interpolated), "m" (*(const PcpVectorCopyF32 *)(vectors.interpolated)));
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(pose->distance);
+                    VU0_NORMALIZE_VF10();
+                    btlDefeatCameraStoreVector(pose->direction);
+                    btlAdjustCameraDirectionForDefaultPlane(pose);
+                    return;
+                }
+            }
+        }
+        return;
+    }
+    fov = action->camera.fov;
+    pose->fov = fov;
+    sideFlags = 0;
+    i = 0;
+    count = btlGetIndexListCount(indices);
+    for (; i < count; i++) {
+        BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(indices, (s32)i);
+        sideFlags |= entry->status.flags & 0x600;
+    }
+    if (mode == 0) {
+        span = func_001F66D8((s32)sideFlags, &height, &depth);
+    } else {
+        span = func_001F6E28(indices, &height, &depth);
+    }
+    btlDefeatCameraStoreVector(vectors.center);
+    if (mode == 0 || runtime->cameraPresetMode == 3) {
+        span += ffabsf(vectors.center[0]);
+        vectors.center[0] = 0.0f;
+        vectors.center[1] = -(height + depth) * 0.5f;
+    } else {
+        vectors.center[1] = -height * 0.75f;
+        span *= 1.25f;
+    }
+
+    func_001F66D8(0x400, NULL, &depth);
+    btlDefeatCameraStoreVector(vectors.edge);
+    vectors.edge[0] = 0.0f;
+    if (depth > 150.0f) {
+        vectors.edge[1] = -depth * 0.45f;
+    } else {
+        vectors.edge[1] = -depth * 0.25f;
+    }
+    if (mode == 0) {
+        if (action->camera.direction[0] > 0.0f) {
+            func_002DD688(27.5f * 0.017453293f);
+        } else {
+            func_002DD688(-(27.5f * 0.017453293f));
+        }
+    }
+
+    __asm__ volatile (".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (vectors.edge), "m" (*(const PcpVectorCopyF32 *)(vectors.edge)));
+    __asm__ volatile (".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (vectors.center), "m" (*(const PcpVectorCopyF32 *)(vectors.center)));
+    VU0_LERP_VF10(0.5f);
+    btlDefeatCameraStoreVector(pose->position);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    VU0_NORMALIZE_VF10();
+    if (mode == 0) {
+        VU0_ROTATE_VEC(vf10, vf10);
+    }
+    btlDefeatCameraStoreVector(pose->direction);
+
+    tangent = func_002F9F60(27.5f * 0.017453293f);
+    length /= tangent;
+    fov *= 1.3333333f;
+    tangent = func_002FA148(fov * 0.5f);
+    length += span / tangent;
+    pose->distance = length;
+    btlAdjustCameraDirectionForDefaultPlane(pose);
+}
 
 /* vu0 routine: measure camera clearance from the actor's adjusted muzzle position. */
 void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
