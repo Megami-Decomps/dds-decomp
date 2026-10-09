@@ -407,7 +407,63 @@ void func_00161B38(ParSystem *system, s32 index, const f32 *origin, u32 color, P
     effBillSetEntryValue(system, index, color);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161D08);
+extern void func_001638D8(ParSystem *system, s32 index);
+
+/* Triangle-cell variant of func_00161D08: three vertices per history segment. */
+void func_00161D08(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+    ParHistory *history = &source->records[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertex = cell->history;
+    u32 count = history->count;
+    f32 point[4];
+    f32 localOrigin[4];
+
+    if (count >= 2) {
+        s32 segments;
+        s32 i;
+        s32 lastIndex;
+        s32 ring;
+
+        PCP_COPY_VECTOR(localOrigin, origin);
+        segments = count - 1;
+        cell->vertexCount = segments * 3;
+        ring = history->nextIndex;
+        lastIndex = source->capacity - 1;
+        ring = ring == 0 ? lastIndex : ring - 1;
+        point[0] = localOrigin[0] + history->points[ring][0];
+        point[1] = localOrigin[1] + history->points[ring][1];
+        point[2] = localOrigin[2] + history->points[ring][2];
+        point[3] = 0;
+        for (i = 0; i < segments; i++) {
+            VU0_LOAD_VF(vf10, point);
+            ring = ring == 0 ? lastIndex : ring - 1;
+            point[0] = localOrigin[0] + history->points[ring][0];
+            point[1] = localOrigin[1] + history->points[ring][1];
+            point[2] = localOrigin[2] + history->points[ring][2];
+            VU0_LOAD_VF(vf12, point);
+            VU0_MOVE_VF(vf11, vf12);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LOAD_VF(vf11, D_00451F30);
+            VU0_CROSS_XYZ(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, D_00451F40);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_MOVE_VF(vf2, vf10);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_MOVE_VF(vf12, vf2);
+            VU0_STORE_VF_UNCLOBBERED(vf10, vertex + 1);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_ADD(vf10, vf10, vf12);
+            VU0_STORE_VF_UNCLOBBERED(vf10, vertex);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_SUB(vf11, vf11, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf11, vertex + 2);
+            vertex += 3;
+        }
+        func_001638D8(system, index);
+    }
+    effBillSetEntryValue(system, index, color);
+}
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
 u32 effParModulateColors(u32 colorA, u32 colorB) {
