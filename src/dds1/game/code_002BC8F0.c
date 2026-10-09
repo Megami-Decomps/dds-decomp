@@ -15,10 +15,6 @@
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern void effResetSlotWork(u32, u32);
-
-
-
 extern u32 fileGetResourceHandle(void);
 
 
@@ -146,7 +142,6 @@ typedef struct EffectResourceEntry {
     u32 resourceOffset;
 } EffectResourceEntry;
 
-extern void effInitializeAllSlotWork(s32);
 
 extern u16 D_003BC944;
 
@@ -524,8 +519,8 @@ u32 effDestroyPackedBatch(EffMappedResource *batch) {
     return 1;
 }
 
-u32 effReleaseSlotWorkAllocation(s32 work) {
-    sdfReleaseResourceAllocation(((EffectSlotSet *)work)->workAllocation);
+u32 effReleaseSlotWorkAllocation(EffectSlotSet *owner) {
+    sdfReleaseResourceAllocation(owner->workAllocation);
     return 1;
 }
 
@@ -554,32 +549,32 @@ void effInitializeSlotPhase(EffTimedState *effect) {
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD3D8);
 
 /* Initialize the normal slot entry at the unchanged 0xA0-byte stride. */
-void effInitializeSlotWork(s32 work, s32 slotIndex) {
-    func_002BD3D8((void *)work, slotIndex, &((EffectSlotSet *)work)->workEntries[slotIndex]);
+void effInitializeSlotWork(EffectSlotSet *owner, s32 slotIndex) {
+    func_002BD3D8(owner, slotIndex, &owner->workEntries[slotIndex]);
 }
 
 /* Reset every normal work slot in source order. */
-void effInitializeAllSlotWork(s32 work) {
+void effInitializeAllSlotWork(EffectSlotSet *work) {
     u32 slotIndex;
-    for (slotIndex = 0; slotIndex < ((EffectSlotSet *)work)->count; slotIndex++) {
+    for (slotIndex = 0; slotIndex < work->count; slotIndex++) {
         effResetSlotWork(work, slotIndex);
     }
 }
 
 /* Store the owner and slot index before invoking the work initializer. */
-void effAttachSlotWorkOwner(void *owner, s32 slotIndex, BdWork *entry) {
+void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, BdWork *entry) {
     entry->owner = owner;
     entry->slotIndex = slotIndex;
     func_002BD3D8(owner, slotIndex, entry);
 }
 
 /* Clear the complete normal slot, then restore owner/index and initialize it. */
-void effResetSlotWork(u32 work, u32 slotIndex) {
+void effResetSlotWork(EffectSlotSet *work, u32 slotIndex) {
     BdWork *entry;
 
-    entry = &((EffectSlotSet *)work)->workEntries[slotIndex];
+    entry = &work->workEntries[slotIndex];
     memset(entry, 0, EFF_SLOT_WORK_BYTES);
-    effAttachSlotWorkOwner((void *)work, slotIndex, entry);
+    effAttachSlotWorkOwner(work, slotIndex, entry);
 }
 
 /* Acquire missing selected handles or clear slots; clearAllSlots does not release textures.
@@ -638,11 +633,11 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *set) {
             set->textureReferences[i] = 0;
         }
     }
-    effInitializeAllSlotWork((s32)set);
+    effInitializeAllSlotWork(set);
 }
 
-u8 effHasFirstTextureHandle(s32 set) {
-    return **(s32 **)(set + 0x24) != 0;
+u8 effHasFirstTextureHandle(EffectSlotSet *set) {
+    return set->textureReferences[0] != NULL;
 }
 
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
@@ -697,13 +692,11 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
         sourceOffset = entries[1];
         memcpy(&set->descriptions[index],
             resource + sourceOffset, 0x80);
-        effResetSlotWork((u32)set, index);
+        effResetSlotWork(set, index);
         entries += 2;
     }
     return set;
 }
-
-extern void effResetSlotWork(u32, u32);
 
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
@@ -725,7 +718,7 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     if (effect->count != 0) {
         do {
             memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
-            effResetSlotWork((u32)effect, index);
+            effResetSlotWork(effect, index);
             index++;
         } while (index < effect->count);
     }
@@ -741,7 +734,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
         sdfReleaseResourceAllocation(set->textureAllocation);
     }
     sdfReleaseResourceAllocation(set->descriptionAllocation);
-    effReleaseSlotWorkAllocation((u32)set);
+    effReleaseSlotWorkAllocation(set);
     sdfReleaseChipBlock(set);
     return 1;
 }
@@ -777,7 +770,7 @@ u32 effClampSlotPhaseAtEnd(s32 work, s32 index, EffTimedState *effect) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork(work, index);
+                effInitializeSlotWork((EffectSlotSet *)work, index);
             }
             return 0;
         }
@@ -793,7 +786,7 @@ u32 effClampSlotPhaseAtStart(s32 work, s32 index, EffTimedState *effect) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork(work, index);
+                effInitializeSlotWork((EffectSlotSet *)work, index);
             }
             return 0;
         }
@@ -853,7 +846,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
 
 u32 effSetSlotOverrideWork(s32 work, s32 index, void *value) {
     if (((EffectSlotSet *)work)->workEntries[index].alternate.address == 0) {
-        effAttachSlotWorkOwner((void *)work, index, (BdWork *)value);
+        effAttachSlotWorkOwner((EffectSlotSet *)work, index, (BdWork *)value);
     }
     ((EffectSlotSet *)work)->workEntries[index].alternate.address = (s32)value;
     return 1;
@@ -864,7 +857,7 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     u32 i;
     EffTimedState *states;
     if (((EffectSlotSet *)work)->workEntries[index].alternate.asset == NULL) {
-        effAttachSlotWorkOwner((void *)work, index, asset);
+        effAttachSlotWorkOwner((EffectSlotSet *)work, index, asset);
     }
     ((EffectSlotSet *)work)->workEntries[index].alternate.asset = asset;
     states = asset->states;
