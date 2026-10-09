@@ -15,8 +15,6 @@ extern u8 D_004389D8;
 
 extern u8 D_0043913C;
 
-void sdfGraphApplyModeDefaults(void *arg0, s32 arg1, s32 arg2);
-
 extern SdfGraphObj D_0040B290;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
@@ -76,13 +74,7 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     sceGsPutDispEnv(&D_004681D0);
 }
 
-/* Display-mode defaults row; the u16 at +0xA selects interlace. */
-typedef struct SdfGraphModeInterlace {
-    u16 interlace;
-    u8 pad02[10];
-} SdfGraphModeInterlace;
-
-extern SdfGraphModeInterlace D_0040B26A[];
+extern SdfGraphModeDefaults D_0040B260[];
 extern u8 D_004389D9;
 extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 
@@ -90,7 +82,7 @@ extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
-    u16 interlace = D_0040B26A[D_004389D8].interlace;
+    u16 interlace = D_0040B260[D_004389D8].interlace;
 
     switch (interlace) {
     case 0:
@@ -125,4 +117,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389D9);
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfGsImageUploadSemaphore);
-

@@ -291,7 +291,73 @@ f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
     return direction;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030F2A8", func_003103C8);
+extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
+
+/* Sample the Bernstein-weighted control points after building binomial coefficients. */
+struct SdfMemBlock *func_003103C8(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
+    struct SdfMemBlock *outputBlock;
+    struct SdfMemBlock *coefficientBlock;
+    f32 *coefficients;
+    Vector4 *output;
+    Vector4 *sample;
+    s32 i;
+    s32 j;
+
+    coefficientBlock = sdfAllocGeneralBlock(degree + 1);
+    coefficients = (f32 *)sdfMemoryGetBlockAddress(coefficientBlock);
+    outputBlock = sdfAllocGeneralBlock(sampleCount + 2);
+    output = (Vector4 *)sdfMemoryGetBlockAddress(outputBlock);
+
+    for (i = 0; i <= degree; i++) {
+        coefficients[i] = 1.0f;
+        for (j = 1; j <= i; j++) {
+            coefficients[i] = (coefficients[i] * (f32)(degree - j + 1)) / (f32)j;
+        }
+    }
+
+    i = 0;
+    output[0].x = controlPoints[0].x;
+    output[0].y = controlPoints[0].y;
+    output[0].z = controlPoints[0].z;
+
+    if (sampleCount >= 0) {
+        sample = output;
+        do {
+            f32 t = (f32)i / (f32)sampleCount;
+            f32 x = 0.0f;
+            f32 y = 0.0f;
+            f32 z = 0.0f;
+
+            j = 0;
+            if (degree >= 0) {
+                Vector4 *point = controlPoints;
+                f32 *coefficient = coefficients;
+                do {
+                    f32 powers = sdfPowFloatByTruncatedExponent(t, (f32)j);
+                    f32 weight;
+
+                    powers *= sdfPowFloatByTruncatedExponent(1.0f - t, (f32)(degree - j));
+                    weight = *coefficient * powers;
+                    x += point->x * weight;
+                    y += point->y * weight;
+                    z += point->z * weight;
+                    point++;
+                    coefficient++;
+                    j++;
+                } while (j <= degree);
+            }
+
+            sample->x = x;
+            sample->y = y;
+            sample->z = z;
+            sample++;
+            i++;
+        } while (i <= sampleCount);
+    }
+
+    sdfReleaseResourceAllocation(coefficientBlock);
+    return outputBlock;
+}
 
 /* Compare integer steps as floats; exponents below one leave the result at 1.0f. */
 float sdfPowFloatByTruncatedExponent(float base, float exponent) {

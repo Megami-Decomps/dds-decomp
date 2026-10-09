@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
@@ -10820,7 +10821,7 @@ void sndLoadSysEffLb(void) {
         D_003BDE18[i].unk4 = 0;
         D_003BDE18[i].unk8 = 0;
     }
-    func_002C7CE8(archive);
+    func_002C7CE8((void *)archive);
 }
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */

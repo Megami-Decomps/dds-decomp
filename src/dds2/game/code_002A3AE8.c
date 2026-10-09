@@ -354,7 +354,36 @@ void mnuTitlePickRandomSlot(PickList *list) {
 
 extern void func_002A44C0(PickList *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A44C0);
+extern s16 D_003E38F0[32][2];
+extern u8 D_00437A50[];
+
+/* Draw the pick list sprites and advance each entry's fade step; drop entries that finished. */
+void func_002A44C0(PickList *work, s32 drawContext) {
+    u8 palette[5];
+    s32 i;
+
+    memcpy(palette, D_00437A50, sizeof(palette));
+    for (i = 0; i < work->count; i++) {
+        s32 j;
+
+        mnuDrawSprite(D_003E38F0[work->entry[i].id][0],
+                      D_003E38F0[work->entry[i].id][1],
+                      0, work->control.pos / 4, 0,
+                      palette[(s8)work->entry[i].unk1], drawContext);
+        if (work->entry[i].unk2 != 0) {
+            work->entry[i].unk2--;
+        } else {
+            work->entry[i].unk1++;
+            work->entry[i].unk2 = 10;
+            if (work->entry[i].unk1 >= 5) {
+                for (j = i + 1; j < work->count; j++) {
+                    memcpy(&work->entry[j - 1], &work->entry[j], sizeof(PickEntry));
+                }
+                work->count--;
+            }
+        }
+    }
+}
 
 void mnuPairedSlideBarSetState(PickList *work, s32 state) {
     switch (state) {

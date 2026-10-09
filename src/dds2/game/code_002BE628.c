@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -12,6 +13,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
+#include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
@@ -3115,7 +3117,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        sdfPacReleasePacketQueueNodes(taskWork->payload);
+        sdfPacReleasePacketQueueNodes((PacState *)taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;
@@ -3123,8 +3125,8 @@ s32 btlDestroyStageTask(taskWork)
     return 1;
 }
 
-void func_002C7CE8(void) {
-    btlDestroyStageTask();
+s32 func_002C7CE8(void *request) {
+    return btlDestroyStageTask(request);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C58);

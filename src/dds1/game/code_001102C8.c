@@ -90,7 +90,7 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
     s32 listIndex;
 
     if (data != NULL) {
-        data->unk00 = -1;
+        data->areaRoomKey = -1;
         data->drawEnabled = 1;
         data->resource = 0;
         data->slots = NULL;

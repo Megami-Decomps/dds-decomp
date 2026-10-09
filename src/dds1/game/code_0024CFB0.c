@@ -73,7 +73,6 @@ extern void func_0024A2D8(s32 arg0);
 
 extern void func_0024DD78(void);
 extern void *dds3GetWorldSecondaryObject(void);
-extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
 extern void itfPanelSetStatus(s32, s32);
