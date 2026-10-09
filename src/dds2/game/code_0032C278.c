@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
@@ -1068,126 +1069,126 @@ void sdfAppendInitializedPacket(s32 listAddress, void (*initialize)(s32), s32 pa
     sdfAppendPacket(listAddress, packetAddress);
 }
 /* Set primary-context TEST and ALPHA values; 0x44 is blend data, not a register ID. */
-void sdfInitPrimaryAlphaBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = SDF_GS_ALPHA_TEST;
-    packet->unk8 = SDF_GS_TEST_1;
-    packet->unk10 = SDF_GS_DEFAULT_ALPHA;
-    packet->unk18 = SDF_GS_ALPHA_1;
+void sdfInitPrimaryAlphaBlendRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = SDF_GS_ALPHA_TEST;
+    packet->test.registerId = SDF_GS_TEST_1;
+    packet->alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->alpha.registerId = SDF_GS_ALPHA_1;
 }
 
 /* Set the same TEST/ALPHA values for the secondary GS context. */
-void sdfInitSecondaryAlphaBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = SDF_GS_ALPHA_TEST;
-    packet->unk8 = SDF_GS_TEST_2;
-    packet->unk10 = SDF_GS_DEFAULT_ALPHA;
-    packet->unk18 = SDF_GS_ALPHA_2;
+void sdfInitSecondaryAlphaBlendRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = SDF_GS_ALPHA_TEST;
+    packet->test.registerId = SDF_GS_TEST_2;
+    packet->alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->alpha.registerId = SDF_GS_ALPHA_2;
 }
 
 /* Transfer a GIF tag and two primary-context A+D register writes with FLUSHE/DIRECT. */
-void sdfBuildPrimaryAlphaBlendDmaPacket(SdfPacket *packet) {
-    sdfInitPrimaryAlphaBlendRegisters(packet + 1);
-    packet->unk0 = SDF_ALPHA_DMA_QWORDS;
-    packet->unk8 = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
-    packet->unk10 = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
-    packet->unk18 = SDF_GIF_REGISTER_AD;
+void sdfBuildPrimaryAlphaBlendDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitPrimaryAlphaBlendRegisters(&packet->registers);
+    packet->header.dmaTag = SDF_ALPHA_DMA_QWORDS;
+    packet->header.vifCommands = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->header.gifTag = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
 }
 
 /* Transfer the corresponding secondary-context A+D pair without changing tag encoding. */
-void sdfBuildSecondaryAlphaBlendDmaPacket(SdfPacket *packet) {
-    sdfInitSecondaryAlphaBlendRegisters(packet + 1);
-    packet->unk0 = SDF_ALPHA_DMA_QWORDS;
-    packet->unk8 = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
-    packet->unk10 = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
-    packet->unk18 = SDF_GIF_REGISTER_AD;
+void sdfBuildSecondaryAlphaBlendDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitSecondaryAlphaBlendRegisters(&packet->registers);
+    packet->header.dmaTag = SDF_ALPHA_DMA_QWORDS;
+    packet->header.vifCommands = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->header.gifTag = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
 }
 
-void sdfSetPrimaryTestBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x717FB;
-    packet->unk8 = 0x47;
-    packet->unk10 = 0x44;
-    packet->unk18 = 0x42;
+void sdfSetPrimaryTestBlendRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x717FB;
+    packet->test.registerId = 0x47;
+    packet->alpha.value = 0x44;
+    packet->alpha.registerId = 0x42;
 }
-void sdfSetSecondaryTestBlendRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x717FB;
-    packet->unk8 = 0x48;
-    packet->unk10 = 0x44;
-    packet->unk18 = 0x43;
-}
-
-void sdfBuildPrimaryTestBlendPacket(SdfPacket *packet) {
-    sdfSetPrimaryTestBlendRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfSetSecondaryTestBlendRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x717FB;
+    packet->test.registerId = 0x48;
+    packet->alpha.value = 0x44;
+    packet->alpha.registerId = 0x43;
 }
 
-void sdfBuildSecondaryTestBlendPacket(SdfPacket *packet) {
-    sdfSetSecondaryTestBlendRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfBuildPrimaryTestBlendPacket(SdfGsBlendPacket *packet) {
+    sdfSetPrimaryTestBlendRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
 }
 
-void sdfInitPrimaryAlphaAdditiveRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x71801;
-    packet->unk8 = 0x47;
-    packet->unk10 = 0x48;
-    packet->unk18 = 0x42;
+void sdfBuildSecondaryTestBlendPacket(SdfGsBlendPacket *packet) {
+    sdfSetSecondaryTestBlendRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
 }
 
-void sdfInitSecondaryAlphaAdditiveRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x71801;
-    packet->unk8 = 0x48;
-    packet->unk10 = 0x48;
-    packet->unk18 = 0x43;
+void sdfInitPrimaryAlphaAdditiveRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x71801;
+    packet->test.registerId = 0x47;
+    packet->alpha.value = 0x48;
+    packet->alpha.registerId = 0x42;
 }
 
-void sdfBuildPrimaryAlphaAdditiveDmaPacket(SdfPacket *packet) {
-    sdfInitPrimaryAlphaAdditiveRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfInitSecondaryAlphaAdditiveRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x71801;
+    packet->test.registerId = 0x48;
+    packet->alpha.value = 0x48;
+    packet->alpha.registerId = 0x43;
 }
 
-void sdfBuildSecondaryAlphaAdditiveDmaPacket(SdfPacket *packet) {
-    sdfInitSecondaryAlphaAdditiveRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfBuildPrimaryAlphaAdditiveDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitPrimaryAlphaAdditiveRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
 }
 
-void sdfInitPrimaryAlphaSubtractiveRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x71801;
-    packet->unk8 = 0x47;
-    packet->unk10 = 0x42;
-    packet->unk18 = 0x42;
+void sdfBuildSecondaryAlphaAdditiveDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitSecondaryAlphaAdditiveRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
 }
 
-void sdfInitSecondaryAlphaSubtractiveRegisters(SdfPacket *packet) {
-    packet->unk0 = 0x71801;
-    packet->unk8 = 0x48;
-    packet->unk10 = 0x42;
-    packet->unk18 = 0x43;
+void sdfInitPrimaryAlphaSubtractiveRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x71801;
+    packet->test.registerId = 0x47;
+    packet->alpha.value = 0x42;
+    packet->alpha.registerId = 0x42;
 }
 
-void sdfBuildPrimaryAlphaSubtractiveDmaPacket(SdfPacket *packet) {
-    sdfInitPrimaryAlphaSubtractiveRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfInitSecondaryAlphaSubtractiveRegisters(SdfGsBlendRegisters *packet) {
+    packet->test.value = 0x71801;
+    packet->test.registerId = 0x48;
+    packet->alpha.value = 0x42;
+    packet->alpha.registerId = 0x43;
 }
 
-void sdfBuildSecondaryAlphaSubtractiveDmaPacket(SdfPacket *packet) {
-    sdfInitSecondaryAlphaSubtractiveRegisters(packet + 1);
-    packet->unk0 = 3;
-    packet->unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8002);
-    packet->unk18 = 0xE;
+void sdfBuildPrimaryAlphaSubtractiveDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitPrimaryAlphaSubtractiveRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
+}
+
+void sdfBuildSecondaryAlphaSubtractiveDmaPacket(SdfGsBlendPacket *packet) {
+    sdfInitSecondaryAlphaSubtractiveRegisters(&packet->registers);
+    packet->header.dmaTag = 3;
+    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.gifRegisters = 0xE;
 }
 
 void sdfInitializeTextureFlushRegister(u64 *packet) {

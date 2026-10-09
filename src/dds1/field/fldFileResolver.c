@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -2571,7 +2572,7 @@ void fldStartQuadPacketList(s32 quadState) {
     packetList = (u32)sdfCreateResetPacketList();
     ((FldQuadState *)quadState)->packetList = packetList;
     packet = sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
+    sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)packet);
     sdfAppendPacket((SdfListHead *)((FldQuadState *)quadState)->packetList, packet);
 }
 

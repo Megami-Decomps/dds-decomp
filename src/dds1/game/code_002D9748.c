@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -69,13 +70,9 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
-extern void sdfBuildPrimaryTestBlendPacket(void *);
 
-extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
-extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
@@ -127,10 +124,10 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].header);
-    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].header);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].header);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
+    sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)&ctx->groups[0].header);
+    sdfBuildPrimaryTestBlendPacket((SdfGsBlendPacket *)&ctx->groups[1].header);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[2].header);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[3].header);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
         packet->header.firstVifCode = 0x11000000;

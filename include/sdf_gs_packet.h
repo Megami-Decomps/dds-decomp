@@ -68,11 +68,16 @@ typedef struct SdfGsRegisterWrite {
     u64 registerId;
 } SdfGsRegisterWrite;
 
-/* Fixed packets allocated by the paired composite-quad renderers. */
-typedef struct SdfGsBlendPacket {
-    SdfGsPacketHeader header;
+/* TEST and ALPHA form the two A+D writes shared by the blend builders. */
+typedef struct SdfGsBlendRegisters {
     SdfGsRegisterWrite test;
     SdfGsRegisterWrite alpha;
+} SdfGsBlendRegisters;
+
+/* Fixed packets allocated by the paired blend and composite-quad renderers. */
+typedef struct SdfGsBlendPacket {
+    SdfGsPacketHeader header;
+    SdfGsBlendRegisters registers;
 } SdfGsBlendPacket;
 
 typedef struct SdfGsTexturePacket {
@@ -86,14 +91,18 @@ typedef char SdfGsPacketHeader_size_must_be_0x20[
     (sizeof(SdfGsPacketHeader) == 0x20) ? 1 : -1];
 typedef char SdfGsRegisterWrite_size_must_be_0x10[
     (sizeof(SdfGsRegisterWrite) == 0x10) ? 1 : -1];
+typedef char SdfGsBlendRegisters_size_must_be_0x20[
+    (sizeof(SdfGsBlendRegisters) == 0x20) ? 1 : -1];
+typedef char SdfGsBlendRegisters_alpha_at_0x10[
+    ((u32)&((SdfGsBlendRegisters *)0)->alpha == 0x10) ? 1 : -1];
 typedef char SdfGsBlendPacket_size_must_be_0x40[
     (sizeof(SdfGsBlendPacket) == 0x40) ? 1 : -1];
 typedef char SdfGsTexturePacket_size_must_be_0x50[
     (sizeof(SdfGsTexturePacket) == 0x50) ? 1 : -1];
 typedef char SdfGsBlendPacket_test_at_0x20[
-    ((u32)&((SdfGsBlendPacket *)0)->test == 0x20) ? 1 : -1];
+    ((u32)&((SdfGsBlendPacket *)0)->registers.test == 0x20) ? 1 : -1];
 typedef char SdfGsBlendPacket_alpha_at_0x30[
-    ((u32)&((SdfGsBlendPacket *)0)->alpha == 0x30) ? 1 : -1];
+    ((u32)&((SdfGsBlendPacket *)0)->registers.alpha == 0x30) ? 1 : -1];
 typedef char SdfGsTexturePacket_sampling_at_0x20[
     ((u32)&((SdfGsTexturePacket *)0)->sampling == 0x20) ? 1 : -1];
 typedef char SdfGsTexturePacket_texture_at_0x30[
