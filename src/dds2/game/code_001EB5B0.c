@@ -5977,10 +5977,10 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     if (--owner->work.refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
             if (owner->work.fileRequests[i] != 0) {
-                filePollEntryCleanup((struct FileRequest *)(u32)owner->work.fileRequests[i]);
+                filePollEntryCleanup(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->work.resourceHandles[i]));
+                sdfReleaseResourceAllocation(owner->work.resourceHandles[i]);
             }
         }
         if (owner->next != 0) {
@@ -6093,8 +6093,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->unk_08]);
-            size = sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->unk_08]);
+            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
             func_002A27A8(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->unk288 = 0;
@@ -6176,14 +6176,13 @@ void func_00205160(void) {
             for (slot = 0; slot < 0x1D; slot++) {
                 if (owner->work.fileRequests[slot] != 0) {
                     if (fileIsRequestReadyInCurrentMode(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
+                            owner->work.fileRequests[slot]) != 0) {
                         u32 resource = fileGetResourceHandle(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]);
+                            owner->work.fileRequests[slot]);
 
-                        struct FileRequest *completedRequest =
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot];
+                        struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
-                        owner->work.resourceHandles[slot] = resource;
+                        owner->work.resourceHandles[slot] = (struct SdfMemBlock *)resource;
                         filePollEntryCleanup(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
@@ -6230,11 +6229,10 @@ void func_00205160(void) {
             for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
                 if (owner->flags & 4) {
                     SoundSlotWork *work = &owner->work;
-                    struct SdfMemBlock *block =
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot];
+                    struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemoryGetBlockSize(block);
                     u32 address = sdfMemoryGetBlockAddress(
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot]);
+                        work->resourceHandles[owner->work.pendingSlot]);
 
                     func_003422F8((s32)address, size);
                     owner->flags = (owner->flags & ~4) | 8;
