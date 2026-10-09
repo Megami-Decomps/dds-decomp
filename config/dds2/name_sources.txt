@@ -6040,6 +6040,7 @@
 0x0032B500	sdfTexSubmitPixelsForFormat	inferred	Selects dimensions from texture format before submitting pixel data. [names_reviewed9.tsv]
 0x0032B558	sdfTexUploadSecondaryResource	inferred	Uploads secondary texture data when a secondary resource exists. [names_reviewed8.tsv]
 0x0032B5D8	sdfTexCreateResourceWithReference	inferred	Allocates a texture and reference, attaches resource pointers and links it. [names_reviewed8.tsv]
+0x0032B6B0	sdfTexClone	inferred	Copies an SdfTex descriptor, creates clone-reference state, resets transient buffers and rebuilds texture storage.
 0x0032B800	sdfTexAllocHead	inferred	readability/matching review (QP16)
 0x0032B8D8	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x0032B908	sdfTexAllocatePaletteData	inferred	Sets the texture palette byte size from its CLUT fields, allocates that retained palette buffer, and is called by file-header loading and clone setup.

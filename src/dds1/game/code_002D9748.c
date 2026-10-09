@@ -93,7 +93,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];
-extern SdfTex *func_002D2800(SdfTex *);
+extern SdfTex *sdfTexClone(SdfTex *);
 extern void func_002D33C8(u32, s32, f32);
 
 /* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
@@ -410,7 +410,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
     itemCount = source->usedCount;
     clone = sdfCreateConfiguredBufferedResourceList(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        ((u32 *)clone->buffer)[itemIndex] = (u32)func_002D2800((SdfTex *)((u32 *)source->buffer)[itemIndex]);
+        ((u32 *)clone->buffer)[itemIndex] = (u32)sdfTexClone((SdfTex *)((u32 *)source->buffer)[itemIndex]);
     }
     clone->usedCount = itemCount;
     return clone;
