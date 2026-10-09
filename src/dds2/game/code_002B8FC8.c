@@ -1824,12 +1824,13 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
     }
 }
 
-void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color) {
+void mnuConfigurePanelResource(MenuScrollPanel *menu, struct EffectSlotSet *model,
+                               u32 value, u32 color) {
     mnuActivatePendingPanelResource(menu);
     menu->color = color;
-    menu->pending.set = (EffectSlotSet *)model;
+    menu->pending.set = model;
     menu->pending.index = value;
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)model, value, menu->handles[0], 0, 3);
+    effConfigureIndexedSlotResource(model, value, menu->handles[0], 0, 3);
 }
 
 u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
