@@ -478,7 +478,7 @@ typedef struct SdfAsset {
     u8 pad00[6];
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
-    void *entries[2];
+    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
     u32 unk10;
     u32 unk14;
     u32 secondaryColor; /* 0x18 */
@@ -497,6 +497,8 @@ typedef struct SdfAsset {
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(SdfAsset) == 0x48) ? 1 : -1];
+typedef char SdfAsset_drawEntries_offset_must_be_0x08[
+    ((u32)&((SdfAsset *)0)->drawEntries == 0x08) ? 1 : -1];
 typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
     ((u32)&((SdfAsset *)0)->dirtyFlags == 0x06) ? 1 : -1];
 typedef char SdfAsset_primarySubParam_offset_must_be_0x38[
@@ -698,7 +700,7 @@ typedef struct SdfFlagListWork {
     f32 (*vertices)[4];
     u32 *colors;
     SdfFlagListParams params;
-    u32 resource;
+    SdfMemBlock *allocation;
 } SdfFlagListWork;
 
 typedef char SdfColorTrack_size_must_be_0x24[(sizeof(SdfColorTrack) == 0x24) ? 1 : -1];
@@ -717,7 +719,10 @@ typedef char SdfAlphaTrack_fields_offset[((unsigned long)&((SdfAlphaTrack *)0)->
 typedef char SdfFlagListParams_size_must_be_0x40[(sizeof(SdfFlagListParams) == 0x40) ? 1 : -1];
 typedef char SdfFlagListMark_size_must_be_0x08[(sizeof(SdfFlagListMark) == 0x08) ? 1 : -1];
 typedef char SdfFlagListWork_size_must_be_0x58[(sizeof(SdfFlagListWork) == 0x58) ? 1 : -1];
+typedef char SdfFlagListWork_allocation_offset_must_be_0x54[
+    ((unsigned long)&((SdfFlagListWork *)0)->allocation == 0x54) ? 1 : -1];
 
+SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *);
 void sdfResetFlagListEntries(SdfFlagListWork *);
 void sdfReleaseFlagListResource(SdfFlagListWork *);
 SdfFlagListWork *sdfInitializeFlagListFromResource(void *);
@@ -735,12 +740,10 @@ void itfSetPackedRgbAlpha(SdfFlagListWork *, u32);
 void itfCopyColorFields(SdfFlagListWork *, const SdfFlagListParams *);
 
 #ifdef VERSION_DDS1
-SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *);
 void func_002CEC40(SdfFlagListWork *);
 void func_002CF248(SdfFlagListWork *);
 void effUpdateSelectionEntryState(SdfFlagListWork *);
 #elif defined(VERSION_DDS2)
-SdfFlagListWork *func_00316528(const SdfFlagListParams *);
 void func_00316680(SdfFlagListWork *);
 void func_00316C88(SdfFlagListWork *);
 void func_002DEC08(SdfFlagListWork *);
