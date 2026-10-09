@@ -4970,6 +4970,7 @@
 0x002D0EC8	fileRestoreSlotFlagsToState	inferred	DDS2 twin of DDS1 fileRestoreSlotFlagsToState @ 0x290E50 (legacy ShadowRowSlotFlags_RestoreToGameState)
 0x002D0FB8	fileTestSlotFlagsBit	inferred	DDS1 0x00290F40 twin (named there already)
 0x002D1038	fileTestSavedSlotFlags	inferred	queries fileTestSlotFlagsBit on global save buffer [names_R_FuncNames2.tsv]
+0x002D1058	fileCreateConfigTask	inferred	Allocates and retains the file-config task, creates its five-row menu list, and requests mode-specific effect resources before returning the task address.
 0x002D11F8	fileConfigTaskDestroy	inferred	cleanup callback passed to kwlnTaskCreate in mnuCreateConfigTasks; frees list, five slots and the task memory [names_M75_Large2.tsv]
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
 0x002D13F0	fileConsumeConfigTaskReady	inferred	returns one while config task state=1, clears final state=2 [names_R_FuncNames2.tsv]
