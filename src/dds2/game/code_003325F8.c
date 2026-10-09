@@ -593,7 +593,7 @@ void sdfCopyPrimaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
 }
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
-void func_00333460(SdfAsset *param, u32 packedColor) {
+void sdfSetAssetSecondaryColor(SdfAsset *param, u32 packedColor) {
     param->secondaryColor = packedColor;
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
@@ -705,7 +705,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_COLOR_PRESENT) {
-        func_00333460(asset, *(u32 *)parameterCursor);
+        sdfSetAssetSecondaryColor(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {

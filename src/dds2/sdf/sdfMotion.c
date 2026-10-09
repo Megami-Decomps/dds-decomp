@@ -78,7 +78,6 @@ extern void *D_0040B3E0[];
 
 typedef SdfMotionTextParamSnapshot Blk;
 
-extern void func_00333460(SdfAsset *asset, u32 packedColor);
 
 void sdfInvokeMotionObjectCallback(VObj *object) {
     object->vtable->invoke();
@@ -848,7 +847,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreateSecondaryColorBinding(Motion *motio
 void sdfMotionApplySecondaryColorKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_00333460(motion->target, sdfMotionInterpolateKeyColor(buffer));
+    sdfSetAssetSecondaryColor(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured output colour toward the keyed colour by weight. */
@@ -860,7 +859,7 @@ void sdfMotionBlendSecondaryColorKey(SdfMotionIndexedValueBinding *output, f32 t
     sdfFindMotionKeyInterval(output, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, output->capturedWord, key, weight, 0.5f);
-    func_00333460(output->target, color);
+    sdfSetAssetSecondaryColor(output->target, color);
 }
 
 void sdfMotionCaptureSecondaryColor(SdfMotionIndexedValueBinding *output) {

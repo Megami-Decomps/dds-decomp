@@ -57,7 +57,6 @@ typedef struct FuncTab {
 } FuncTab;
 
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
-void func_002DA5B0(SdfAsset *asset, u32 packedColor);
 void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
@@ -854,7 +853,7 @@ void sdfMotionApplySecondaryColorKey(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA5B0(a0->target, sdfMotionInterpolateKeyColor(&b));
+    sdfSetAssetSecondaryColor(a0->target, sdfMotionInterpolateKeyColor(&b));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
@@ -866,7 +865,7 @@ void sdfMotionBlendSecondaryColorKey(SdfMotionIndexedValueBinding *a0, f32 t, f3
     sdfFindMotionKeyInterval(a0, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, a0->capturedWord, key, weight, 0.5f);
-    func_002DA5B0(a0->target, color);
+    sdfSetAssetSecondaryColor(a0->target, color);
 }
 
 void sdfMotionCaptureSecondaryColor(SdfMotionIndexedValueBinding *a0) {
