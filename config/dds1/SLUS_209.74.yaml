@@ -186,7 +186,7 @@ segments:
       - [0x129B38, c, game/code_00228B38]
       - [0x12B248, c, game/code_0022A248]
       - [0x12CE28, c, event/evtEventViewer]  # Nocturne __FILE__
-      - [0x12DBA0, c, game/code_0022CBA0]
+      - [0x12E420, c, game/code_0022D420]  # evtEventViewer ends after its timeline dispatcher
       - [0x133F88, c, event/evtPolygonMovie]  # Nocturne __FILE__
       - [0x136150, c, event/evtPicture]  # Nocturne __FILE__
       - [0x136270, c, game/code_00235270]
@@ -372,7 +372,7 @@ segments:
       - [0x2ADB78, .rodata, game/code_00228B38]
       - [0x2ADCA0, .rodata, game/code_0022A248]
       - [0x2ADEF0, .rodata, event/evtEventViewer]
-      - [0x2AE010, .rodata, game/code_0022CBA0]
+      - [0x2AE0C0, .rodata, game/code_0022D420]
       - [0x2AEB30, .rodata, event/evtPolygonMovie]
       - [0x2AEDD0, .rodata, game/code_00235270]
       - [0x2B0200, .rodata, event/evtEventPack]
@@ -491,7 +491,7 @@ segments:
       - [0x2BB184, .lit4, game/code_00228058]
       - [0x2BB190, .lit4, game/code_00228B38]
       - [0x2BB1C0, .lit4, game/code_0022A248]
-      - [0x2BB1E0, .lit4, game/code_0022CBA0]
+      - [0x2BB1E0, .lit4, game/code_0022D420]
       - [0x2BB1EC, .lit4, game/code_00235270]
       - [0x2BB250, .lit4, game/code_00242608]
       - [0x2BB268, .lit4, game/code_00250E88]
@@ -577,7 +577,7 @@ segments:
       - [0x2BCDB8, .sdata, game/code_00228058]
       - [0x2BCDD0, .sdata, game/code_00228B38]
       - [0x2BCDEC, .sdata, game/code_0022A248]
-      - [0x2BCE78, .sdata, game/code_0022CBA0]
+      - [0x2BCE78, .sdata, game/code_0022D420]
       - [0x2BCF78, .sdata, event/evtPolygonMovie]
       - [0x2BCF80, .sdata, game/code_00235270]
       - [0x2BD368, .sdata, event/evtEventPack]

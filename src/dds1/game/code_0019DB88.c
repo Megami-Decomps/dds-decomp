@@ -1010,18 +1010,18 @@ extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 func_0019FCC8(void) {
     SifCommand packet;
-    s32 list;
+    SdfListHead *list;
     f32 radiansToDegrees = 57.2957795f;
 
-    list = (s32)sdfCreateResetPacketList();
-    sdfAppendPacket((SdfListHead *)list,
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list,
                     func_0011D3E8(0x8500, 0x79C0, 0xFEFFFF,
                                   0xA80, 0x120, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
-    sdfAppendPacket((SdfListHead *)list,
+    sdfAppendPacket(list,
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
-    D_00325708.append(&D_00325708, (SdfListHead *)list);
+    D_00325708.append(&D_00325708, list);
     if (D_00324510.cancel < 0) {
         return -1;
     }

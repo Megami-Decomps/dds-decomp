@@ -4600,7 +4600,7 @@ extern s32 sdfAllocPacketAligned(s32 size);
  * model is created (and the update ends) on the first frame it is missing. */
 void func_001D6FB0(BtlUnit *unit) {
     MdlCtx *info;
-    u32 packet;
+    SdfListHead *list;
 
     if ((unit->status.flags & 2) == 0) {
         return;
@@ -4609,10 +4609,10 @@ void func_001D6FB0(BtlUnit *unit) {
         return;
     }
     unit->mirror->unk32C = sdfAllocPacketAligned(0x70000);
-    packet = (u32)sdfAllocatePacketList(0);
-    sdfCreateResourcePacket((SdfListHead *)packet, D_003980E0.buffers[2],
+    list = sdfAllocatePacketList(0);
+    sdfCreateResourcePacket(list, D_003980E0.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
-    D_00359D20[0]->append(D_00359D20[0], (SdfListHead *)packet);
+    D_00359D20[0]->append(D_00359D20[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -4626,10 +4626,10 @@ void func_001D6FB0(BtlUnit *unit) {
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
-    packet = (u32)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket((SdfListHead *)packet, D_003980E0.buffers[2],
+    list = sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket(list, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
-    D_00359D30[0]->append(D_00359D30[0], (SdfListHead *)packet);
+    D_00359D30[0]->append(D_00359D30[0], list);
     func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 

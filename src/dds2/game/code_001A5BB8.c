@@ -1195,18 +1195,18 @@ extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 btlEditCameraFieldOfView(void) {
     SifCommand packet;
-    s32 list;
+    SdfListHead *list;
     f32 radiansToDegrees = 57.2957795f;
 
-    list = (s32)sdfCreateResetPacketList();
-    sdfAppendPacket((SdfListHead *)list,
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list,
                     (u32)func_0011F250(0x8500, 0x79C0, 0xFEFFFF,
                                        0xA80, 0x120, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
-    sdfAppendPacket((SdfListHead *)list,
+    sdfAppendPacket(list,
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
-    D_00380708.append(&D_00380708, (SdfListHead *)list);
+    D_00380708.append(&D_00380708, list);
     if (D_0037F543[0] < 0) {
         return -1;
     }

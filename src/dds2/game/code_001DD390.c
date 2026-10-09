@@ -2765,7 +2765,7 @@ extern s32 sdfAllocPacketAligned(s32);
 
 void func_001E3E20(BtlUnit *unit) {
     MdlCtx *info;
-    s32 packet;
+    SdfListHead *list;
 
     if ((unit->status.flags & 2) == 0) {
         return;
@@ -2774,10 +2774,10 @@ void func_001E3E20(BtlUnit *unit) {
         return;
     }
     unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
-    packet = (s32)(u32)sdfAllocatePacketList(0);
-    sdfCreateResourcePacket((SdfListHead *)packet, D_0040B290.buffers[2],
+    list = sdfAllocatePacketList(0);
+    sdfCreateResourcePacket(list, D_0040B290.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
-    D_003B6BE0[0]->append(D_003B6BE0[0], (SdfListHead *)packet);
+    D_003B6BE0[0]->append(D_003B6BE0[0], list);
     info = unit->ext->owner;
     if (unit->unk344 == 0) {
         unit->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -2791,10 +2791,10 @@ void func_001E3E20(BtlUnit *unit) {
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
-    packet = (s32)(u32)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket((SdfListHead *)packet, D_0040B290.buffers[2],
+    list = sdfAllocatePacketList(0);
+    sdfCreateDescriptorPacket(list, D_0040B290.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
-    D_003B6BF0[0]->append(D_003B6BF0[0], (SdfListHead *)packet);
+    D_003B6BF0[0]->append(D_003B6BF0[0], list);
     func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
 }
 
