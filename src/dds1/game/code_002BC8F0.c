@@ -34,9 +34,6 @@ extern u32 D_003BD124;
 
 extern s32 effQueuedResourceNameRecord;
 
-extern s32 effResourceBankEntries;
-
-extern s32 effResourceBankDescriptor;
 
 extern s32 D_003BD098;
 
