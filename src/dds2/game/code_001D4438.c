@@ -370,8 +370,6 @@ extern s128 D_003B6B80;
 
 extern u8 D_003BD7D0[];
 
-extern void evtSetUnitNormalizedDirection(struct EvtUnit *, s32);
-
 typedef struct XformData {
     s128 vec0;
     s128 vec1;
@@ -686,7 +684,7 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
 extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
-extern void evtSetUnitAlphaTransition(u32, s32, u32);
+
 extern void func_002A27A8(s32, s32, u8);
 extern void func_001AB160(BtlUnit *);
 extern s32 func_001E6428(s32 owner, s32 option);

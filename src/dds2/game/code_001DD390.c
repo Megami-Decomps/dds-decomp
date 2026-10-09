@@ -172,8 +172,6 @@ extern s128 D_003B6B80;
 
 extern u8 D_003BD7D0[];
 
-extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
-
 /* Two camera vectors are written at work+0x50 and work+0x60 by btlInitializeSceneLightingAndTint. */
 typedef struct BtlCameraVectors {
     u8 pad00[0x50];
@@ -265,8 +263,6 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 
 extern s64 func_00201520(SceneLightRestoreArgs *);
-
-extern void evtSetUnitStatusFlags(EvtUnit *);
 
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
@@ -500,10 +496,6 @@ extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
 
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
 
-extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
-
-extern void evtUnitSetStoredParameter(EvtUnit *, s32);
-
 extern void evtSetTransitionMotionScale(EvtUnit *, f32);
 
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
@@ -572,8 +564,6 @@ extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 extern SdfFlagListParams D_003BDCC8;
 
 extern void mnuReleaseSoundBufferLocked(void);
-
-extern void evtSetUnitAlphaTransition(EvtUnit *, s32, u32);
 
 extern void func_002A27A8(s32, s32, u8);
 
@@ -2631,8 +2621,6 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
     PCP_COPY_VECTOR(dst, unit->orientation);
 }
-
-extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if (unit->status.flags & 2) {

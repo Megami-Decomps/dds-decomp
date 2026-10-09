@@ -45,7 +45,6 @@ extern u16 mdlGetContextResourceId(MdlCtx *);
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);
-extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color);
 
 typedef struct EffBattleUnitRgbCommand {
     u32 color;
@@ -78,9 +77,9 @@ typedef struct EffBattleUnitColorCommand {
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern void evtSetUnitStatusFlags(EvtUnit *);
+
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
-extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
+
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);

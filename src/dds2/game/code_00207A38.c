@@ -1,5 +1,6 @@
 #include "kwln_sprite.h"
 #include "common.h"
+#include "evt_unit.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -754,9 +755,9 @@ void btlUpdateUnitActors(void) {
         }
     }
 }
-extern void evtSetUnitStatusFlags(struct EvtUnit *);
-extern void evtSetUnitNormalizedDirection(struct EvtUnit *, s32);
-extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
+
+
+
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern u32 kwlnDrawControlFlags;
 

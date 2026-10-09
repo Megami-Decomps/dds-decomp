@@ -114,8 +114,7 @@ extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
-extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
-extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
+
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
@@ -145,13 +144,9 @@ extern u8 D_00421B70[];
 
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
-extern void evtSetUnitStatusFlags(EvtUnit *unit);
-
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
-
-extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
@@ -1278,7 +1273,6 @@ u32 evtOpSetUnitGradientColors(void) {
     return 1;
 }
 
-extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 const char D_00421A30[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
 u32 func_0023FF90(void) {

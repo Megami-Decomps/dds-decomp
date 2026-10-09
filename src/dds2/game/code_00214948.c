@@ -216,8 +216,6 @@ extern s32 func_001E2E58(BtlUnit *, s32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void evtUnitSetStoredParameter(EvtUnit *, s32);
-
 extern void evtSetTransitionMotionScale(EvtUnit *, f32);
 
 extern void evtStoreUnitMotionShortParameters(void *, s32, s32);
@@ -4826,8 +4824,6 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
 }
 
 extern f32 *D_0037F770[];
-
-extern void evtSetUnitRgbTransition(struct EvtUnit *unit, s32 duration, u32 color);
 
 void btlRestoreLinkedActorSceneColor(void) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;

@@ -39,8 +39,7 @@ extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
-extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
-extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
+
 
 extern u32 evtWindowMotionUnit;
 extern s32 D_003BBDB0;
@@ -88,7 +87,7 @@ extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg
 extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern s32 func_003003F0();
 extern u8 D_003AC480[];
-extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
+
 extern void *memset(void *dst, s32 c, u32 n);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 extern void effObjSetInnerFirstVec(void *object, void *vector);
@@ -132,7 +131,7 @@ extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
-extern void evtSetUnitStatusFlags(EvtUnit *unit);
+
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
