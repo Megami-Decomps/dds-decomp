@@ -5383,7 +5383,40 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B8650);
+void func_001B8650(BtlUnit *object, s32 unused, s8 value) {
+    s32 count = 0;
+    u8 slot = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    KwlnTask *task;
+    BattleActorPanelWork *work;
+
+    for (; node != NULL; node = node->next) {
+        if (btlHasRequiredActorStatusBits(node) != 0) {
+            slot = node->lookupId;
+            if (object->identity == node->identity) {
+                break;
+            }
+            count++;
+        }
+    }
+    if (count < 3) {
+        task = kwlnTaskGetTaskByName(D_003BB3B0);
+        if (task != NULL) {
+            work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+            work->activeEntries[slot].presentation.transitionState = 2;
+            work->activeEntries[slot].presentation.secondaryPresentationValue = value;
+            work->activeEntries[slot].presentation.trianglePhase[4] = 90;
+            work->activeEntries[slot].presentation.trianglePhase[5] = 180;
+            work->activeEntries[slot].presentation.trianglePhase[6] = 0;
+            work->activeEntries[slot].presentation.trianglePhase[7] = 90;
+            work->activeEntries[slot].presentation.trianglePhase[0] = 90;
+            work->activeEntries[slot].presentation.trianglePhase[1] = 0;
+            work->activeEntries[slot].presentation.trianglePhase[2] = 180;
+            work->activeEntries[slot].presentation.trianglePhase[3] = 90;
+        }
+    }
+}
 
 void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *sceneObject) {
     s32 count = 0;
