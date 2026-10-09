@@ -335,11 +335,32 @@ s32 evtCommandAttachLightToUnitPath(void) {
 
 extern char D_003AC750[];
 
+extern s32 evtCheckWorldObjectResourceScale(void *object);
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
+s32 func_00226540(void) {
+    void *object = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    s32 status;
+
+    if (object == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFECT_PATH_WAIT not found eff!\n");
+        return 1;
+    }
+    status = evtCheckWorldObjectResourceScale(object);
+    switch (status) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    case -1:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 /* Return the named world-chain node's key to the script VM. */
 s32 evtCommandReadSecondaryWorldIdValue(void) {
@@ -689,7 +710,30 @@ s32 func_00226E98(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226F38);
+s32 func_00226F38(void) {
+    void *object;
+    s32 status;
+
+    if (scrReadIntParameter(0) < 0) {
+        object = (void *)fldGetPlayerSceneState();
+    } else {
+        object = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+    }
+    if (object == NULL) {
+        return 1;
+    }
+    status = evtCheckWorldObjectResourceScale(object);
+    switch (status) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    case -1:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
 s32 evtCommandCreateWorldEffectObject(void) {
@@ -918,7 +962,31 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC908);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC928);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00227648);
+s32 func_00227648(void) {
+    void *object = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
+    s32 status;
+
+    if (object == NULL) {
+        object = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
+        if (object == NULL) {
+            func_003003F0(D_003AC8E8, scrReadIntParameter(0));
+            func_003003F0(D_003AC8F8, scrReadIntParameter(1));
+            func_003003F0("e OBJ_PATH_WAIT : obj==NULL\n");
+            return 1;
+        }
+    }
+    status = evtCheckWorldObjectResourceScale(object);
+    switch (status) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    case -1:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 s32 evtCommandEnableSolarAdvance(void)
 {
