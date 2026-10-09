@@ -225,33 +225,27 @@ BtlRuntimeTask *sndCreateEarringTask(void) {
     return task;
 }
 
-typedef struct BtlAt3LoadArgs {
-    s32 loadHandle;
-    s32 state;
-    s32 index;
-} BtlAt3LoadArgs;
-
 extern char D_00419468[]; /* "/soundat3/%s.at3" */
 
-s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
+s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    s32 resource;
+    struct SdfMemBlock *resource;
     s32 data;
     s32 size;
     if (args->state == 0) {
-        func_0035C860(path, D_00419468, D_003E0F60[args->index].fileName);
-        args->loadHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        func_0035C860(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
-    } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->loadHandle) != 0) {
+    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
-        data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->loadHandle);
-        filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
-        func_002A27A8(data, size, D_003E0F60[args->index].volume);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
+        resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+        data = sdfResourceRetainAddress(resource);
+        size = (s32)fileGetResourceSize(args->request);
+        filePollEntryCleanup(args->request);
+        func_002A27A8(data, size, D_003E0F60[args->entryIndex].volume);
+        sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
     }
@@ -261,16 +255,16 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
 
 BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
-    SoundTaskArgs *args;
+    Atrac3LoadTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->unk_08 = value;
-    args->option = 0;
-    args->value = 0;
+    args->entryIndex = value;
+    args->state = 0;
+    args->request = 0;
     return task;
 }
 
