@@ -534,7 +534,6 @@ void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
@@ -1914,4 +1913,3 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
-

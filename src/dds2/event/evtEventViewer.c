@@ -395,7 +395,6 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
 }
 
 struct PolyMovieObject;
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern s32 effObjBindOwnerBillEntry(struct EffectObj *, struct EffectObj *, s32);
 extern s32 effObjBindValidatedOwner(struct EffectObj *, struct EffectObj *);
 extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
@@ -585,4 +584,3 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
-

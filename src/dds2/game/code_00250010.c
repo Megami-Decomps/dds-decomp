@@ -1105,7 +1105,6 @@ s32 func_00253938(s32 x, s32 y, EvtRuntime *ctx) {
 extern char D_004376A8[]; /* "P%d:" */
 extern char D_004376B0[]; /* "   %s" */
 extern EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *runtime);
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, char *name);
 
 /* The pending-node's signed slot indices begin at +0xC (also used in DDS1). */
 void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -4107,4 +4106,3 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C0);
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C8);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377D0);
-

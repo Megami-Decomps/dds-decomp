@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 
 struct NodeB;

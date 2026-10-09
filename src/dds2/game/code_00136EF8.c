@@ -252,7 +252,6 @@ extern FldRoomState fldRoomRecords[];
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
-extern EffWorldNode *dds3FindObjectChainNodeByName();
 
 typedef struct FldNpcMotion {
     s32 defaultMotionId;
@@ -2056,4 +2055,3 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldFieldTaskHandle);
-

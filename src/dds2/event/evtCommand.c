@@ -324,7 +324,6 @@ s32 func_002411A0(void) {
 }
 
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *id);
 
 /* Return the named world-chain node's key to the script VM. */
 s32 evtCommandReadSecondaryWorldIdValue(void) {
@@ -1289,4 +1288,3 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FB0);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FC8);
-
