@@ -818,7 +818,67 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawAndAdvancePanelGroup);
+extern void mnuDrawAndAdvancePanelItem(s32, s32, s32, s32, u32, MenuPanelItem *, u32);
+
+/* Draw the five party stats, including the sequel's candidate-value colors. */
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
+                                 MenuPanelGroup *group, s32 mode, s32 drawFlags) {
+    s32 index;
+    s32 selectionMode;
+    u32 textMode;
+    s32 currentValue;
+    s32 proposedValue;
+    s32 itemBonus;
+    s32 offset = 0;
+
+    for (index = 0; index < 5; index++) {
+        mnuSetGroupPair(group->entries[index], entry->baseStats[index],
+                        group->entries[index]->option);
+        if (group->selection == index) {
+            selectionMode = 1;
+        } else {
+            selectionMode = ((s32)group->selection < 0) ? 0 : 2;
+        }
+        textMode = 0;
+        switch (mode) {
+        case 1:
+            itemBonus = ptyGetCombinedRecordAndSlotValue(entry->itemId, index);
+            currentValue = group->entries[index]->value18 + group->entries[index]->value24;
+            proposedValue = group->entries[index]->value18 + itemBonus;
+            if (currentValue >= 100) {
+                currentValue = 99;
+            }
+            if (proposedValue >= 100) {
+                proposedValue = 99;
+            }
+            textMode = currentValue < proposedValue;
+            if (currentValue == proposedValue) {
+                textMode = 2;
+            }
+            if (proposedValue < currentValue) {
+                textMode = 3;
+            }
+            break;
+        case 2:
+            if ((s32)group->entries[index]->value28 > 0) {
+                textMode = 4;
+            }
+            break;
+        }
+        group->entries[index]->initialValue = group->initialValue;
+        mnuDrawAndAdvancePanelItem(x, y + offset, depth, selectionMode, textMode,
+                                   group->entries[index], drawFlags);
+        offset += 200;
+    }
+    func_00306CD0(x + 0xE0, y + 0x3A8, 0, group->initialValue, 0,
+                  group->texture, 6, drawFlags);
+    if (group->initialValue < 0x100) {
+        group->initialValue += 0x10;
+    }
+    if (group->initialValue > 0x100) {
+        group->initialValue = 0x100;
+    }
+}
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
     mnuSetPanelItemSelection(group->entries[index], selection);
