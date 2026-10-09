@@ -158,9 +158,15 @@ typedef struct MnuShootingWork {
     struct FileRequest *packageRequest; /* 0x64 */
     u32 unk68;
     u32 unk6C;
-    u32 unk70Bit0 : 1;
-    u32 initialized : 1;
-    u32 unk70Rest : 30;
+    /* The pause bitfield and round transitions share this complete flag word. */
+    union {
+        u32 flags;
+        struct {
+            u32 unk70Bit0 : 1;
+            u32 initialized : 1;
+            u32 unk70Rest : 30;
+        };
+    };
     s32 currentScore;               /* 0x74 */
     s32 peakScore;
     s32 pendingScore;
@@ -169,7 +175,8 @@ typedef struct MnuShootingWork {
     s16 completed;
     s16 countdown;
     s32 updateCount;
-    u8 pad90[6];
+    s32 unk90;                     /* integer input tilt; arithmetic uses floats */
+    s16 unk94;                     /* selected mode copied from menu work flags */
     s16 round;                      /* 0x96 */
     s16 phase;
     s16 result;
@@ -199,6 +206,11 @@ typedef char ShootingPackageOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->queueCopies == 0x4C &&
      (unsigned long)&((MnuShootingWork *)0)->packageRequest == 0x64 &&
      (unsigned long)&((MnuShootingWork *)0)->packageDataRequest == 0x1DC) ? 1 : -1];
+
+typedef char ShootingInputOffsetsAssert[
+    ((unsigned long)&((MnuShootingWork *)0)->flags == 0x70 &&
+     (unsigned long)&((MnuShootingWork *)0)->unk90 == 0x90 &&
+     (unsigned long)&((MnuShootingWork *)0)->unk94 == 0x94) ? 1 : -1];
 
 typedef char ShootingPoolOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&

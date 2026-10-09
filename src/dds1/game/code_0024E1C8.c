@@ -994,7 +994,7 @@ extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
 extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
 extern SdfGridCell *func_002CC0D0(SdfGrid *);
-extern void func_00253208(s32, s32, s32 *, s32 *);
+extern void func_00253208(MenuSceneWork *, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 extern void func_002512F0(s32, s32);
 
@@ -1005,13 +1005,13 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     s32 fieldAddress;
 
     sceneWork->gridHandle = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
-                                          (u8 *)sceneWork + 4, 0);
+                                          sceneWork->nodes, 0);
     sdfSetShortPairValues(sceneWork->gridHandle, 1, 1);
     sceneWork->gridHandle->releaseCell = mnuFreeTaskData;
     sceneWork->gridHandle->drawCell = mnuDrawMantraEntryStatus;
     resourceTaskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
-    func_00253208((s32)sceneWork, *(s32 *)(fieldAddress + 0x70),
+    func_00253208(sceneWork, *(s32 *)(fieldAddress + 0x70),
                   &selectedCoordinates[0], &selectedCoordinates[1]);
     if (sdfGridSelectFilledCell(sceneWork->gridHandle,
                                 selectedCoordinates[0], selectedCoordinates[1]) == NULL) {

@@ -7405,7 +7405,7 @@ typedef struct EffFileJobRequest {
     u8 pad14[4];
     u16 resourceMode;
     u8 pad1A[2];
-    u32 relatedResource;
+    const char *secondaryCommandPath;
 } EffFileJobRequest;
 
 u32 effCreateBattleCameraJob(u8 *request) {
@@ -7436,8 +7436,8 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJo
         if (request->output != NULL) {
             fileJobSetPrimaryData(job, request->output, request->size, request->transferMode);
         }
-        if (request->relatedResource != 0) {
-            fileJobCopyCommandIntoSecondaryData(job, (const char *)request->relatedResource, request->resourceMode);
+        if (request->secondaryCommandPath != 0) {
+            fileJobCopyCommandIntoSecondaryData(job, request->secondaryCommandPath, request->resourceMode);
         } else {
             u32 value = 0;
             fileJobSetSecondaryData(job, &value, 4, 4);
