@@ -3350,8 +3350,8 @@ void effDestroyClassWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCreateClassWorkFromRequest(s32 work) {
-    effCreateClassWork(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
+EffClassWork *effCloneClassWork(EffClassWork *work) {
+    return effCreateClassWork(work->kind, work->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {

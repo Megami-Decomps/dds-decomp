@@ -5197,7 +5197,7 @@
 0x002E7300	effCreateClassWork	inferred	allocates the complete class work and copied kind-selected payload, creates its resource, and initializes it
 0x002E73F0	effCreateClassWorkFromFile	inferred	File-job callback resolves primary buffer and creates class work for request kind. [names_R_FuncNames4.tsv]
 0x002E7420	effDestroyClassWork	inferred	Calls kind-indexed resource destructor and frees class work. [names_R_FuncNames4.tsv]
-0x002E7468	effCreateClassWorkFromRequest	inferred	Creates class work using kind and source fields in the request. [names_R_FuncNames4.tsv]
+0x002E7468	effCloneClassWork	inferred	Creates a new class-work owner from the existing work kind and copied payload, returning it to the file child dispatcher.
 0x002E7488	effInitializeClassFrame	inferred	Calls kind-indexed initialization callback and resets work frame to zero. [names_R_FuncNames4.tsv]
 0x002E74D0	effAdvanceClassFrame	inferred	Runs kind-indexed frame callback and increments frame; DDS2 skips when global pause flag is set. [names_R_FuncNames4.tsv]
 0x002E7530	effRunClassPostFrame	inferred	Calls second kind-indexed per-frame work callback. [names_R_FuncNames4.tsv]
