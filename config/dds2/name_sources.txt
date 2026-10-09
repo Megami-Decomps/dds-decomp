@@ -6090,6 +6090,7 @@
 0x0032EE88	sdfBuildTriPacket104	inferred	GIF packet with 0x104 flag and three vertex pairs
 0x0032EF30	sdfQueueFlatTriangle	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:1165:func_0032EF30; Allocates a DMA/VIF packet containing three same-color XY vertices and appends it to the list.; source=revalidated-unapplied-names_R_Names31.tsv:34 [names_qp12_apply.tsv]
 0x0032F038	sdfBuildPacket104x4	inferred	GIF packet with 0x104 flag and four vertex pairs
+0x0032F108	sdfQueueFlatQuad	inferred	Allocates a DMA/VIF packet for four same-color XYZ vertices and appends it to the supplied list; paired native callers confirm this queue role.
 0x0032F230	sdfBuildPacket10C	inferred	GIF packet with 0x10C flag
 0x0032F428	sdfWriteGouraudQuadPacket	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:1236:func_0032F428; Writes PRIM IIP/TRISTRIP with four independent RGBAQ and XYZ vertices.; source=revalidated-unapplied-names_R_Names31.tsv:35 [names_qp12_apply.tsv]
 0x0032F540	sdfQueueGouraudQuad	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:1253:func_0032F540; Allocates the DMA/VIF envelope for a four-color quad and appends the completed packet.; source=revalidated-unapplied-names_R_Names31.tsv:36 [names_qp12_apply.tsv]

@@ -1466,9 +1466,9 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
                          depth, 0);
 }
 
-void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
-    sdfBuildPacketE((SdfListHead *)(u32)packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
-                  0x8700, 0x9000, 0x8700, color, 0);
+void btlBuildOverlayQuadPacket(SdfListHead *list, s32 primitive, s32 color, s32 depth) {
+    sdfQueueFlatQuad(list, color, primitive, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
+                     0x8700, 0x9000, 0x8700, depth, 0);
 }
 
 void btlInitLightParams(void) {

@@ -6355,7 +6355,7 @@
 0x002D5EB0	sdfAppendTexturedLinePacket	inferred	Allocates and appends packet containing UV and XYZ for two vertices. [names_reviewed8.tsv]
 0x002D5FD8	sdfBuildTriPacket104	inferred	Byte-identical dds2 twin 0x0032EE88; GIF packet with 0x104 flag and three vertex pairs [names_conflicts.tsv]
 0x002D6080	sdfQueueFlatTriangle	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1101:func_002D6080; Allocates a DMA/VIF packet containing three same-color XY vertices and appends it to the list.; source=revalidated-unapplied-names_R_Names31.tsv:34 [names_qp12_apply.tsv]
-0x002D6258	sdfBuildPacketE	inferred	0x50-byte packet builder around func_002D6188
+0x002D6258	sdfQueueFlatQuad	inferred	Allocates a DMA/VIF packet for four same-color XYZ vertices and appends it to the supplied list; paired native callers confirm this queue role.
 0x002D6450	sdfBuildPacketF	inferred	0x60-byte packet builder around func_002D6380
 0x002D6578	sdfWriteGouraudQuadPacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1176:func_002D6578; Writes PRIM IIP/TRISTRIP with four independent RGBAQ and XYZ vertices.; source=revalidated-unapplied-names_R_Names31.tsv:35 [names_qp12_apply.tsv]
 0x002D6690	sdfQueueGouraudQuad	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1193:func_002D6690; Allocates the DMA/VIF envelope for a four-color quad and appends the completed packet.; source=revalidated-unapplied-names_R_Names31.tsv:36 [names_qp12_apply.tsv]
