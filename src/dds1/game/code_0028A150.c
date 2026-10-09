@@ -3064,7 +3064,7 @@ typedef struct FileConfigList {
 
 /* Save/config task context: its four resource slots start at +0x10. */
 typedef struct FileConfigTask {
-    void *memory;   /* 0x00 */
+    struct SdfMemBlock *backingAllocation; /* 0x00: descriptor owning this task */
     s32 state;      /* 0x04 */
     s32 ticks;
     struct MenuList *frame; /* 0x0C: owned save/config list */
@@ -3106,7 +3106,7 @@ s32 func_00290FE0(s32 mode) {
     block = sdfAllocGeneralBlock(0x3C);
     task = (FileConfigTask *)sdfResourceRetainAddress(block);
     memset(task, 0, 0x3C);
-    task->memory = block;
+    task->backingAllocation = block;
     task->state = mode;
     task->ticks = 0;
     task->result = 0;
@@ -3168,7 +3168,7 @@ void fileConfigTaskDestroy(void) {
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
-        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->memory);
+        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->backingAllocation);
         fileConfigTaskWork = 0;
         fileConfigTaskState = 0;
     }
