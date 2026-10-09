@@ -97,7 +97,21 @@ u32 func_00265598(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002653A0", ptyComputeTotalExp);
+extern s32 D_0036F40C[];
+
+u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta) {
+    s32 unitId = unit->unitId;
+    s32 total = 0;
+    s32 level;
+
+    for (level = 1; level <= unit->level + levelDelta; level++) {
+        if (level < 100) {
+            total += D_0036F40C[unitId * 100 + level - 1];
+        }
+    }
+    return total;
+}
+
 
 #define BRS_ACTIVE_PARTY_FLAG 2
 #define BRS_AP_BLOCKED_FLAG 0x40
