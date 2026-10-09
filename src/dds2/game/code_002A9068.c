@@ -588,7 +588,20 @@ typedef struct TitleEffectHandles {
     u32 finalGroup;  /* 0xF0 */
 } TitleEffectHandles;
 
-INCLUDE_ASM(const s32, "game/code_002A9068", mnuReleaseTitleEffectResourceGroups);
+/* Release the title-effect sprites, then the A/B groups, the nine additional groups and the final group. */
+s64 mnuReleaseTitleEffectResourceGroups(TitleEffectHandles *work) {
+    s32 groupCountdown;
+    u32 *groupCursor;
+
+    mnuReleaseTitleEffectSprites((StaffSlots *)work->sprites);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)work->groupA);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)work->groupB);
+    groupCursor = work->additional;
+    for (groupCountdown = 8; groupCountdown >= 0; groupCountdown--) {
+        effDestroyResourceSlotSet((struct EffectSlotSet *)*groupCursor++);
+    }
+    return (s32)effDestroyResourceSlotSet((struct EffectSlotSet *)work->finalGroup);
+}
 
 INCLUDE_ASM(const s32, "game/code_002A9068", mnuInitializeCampMenuWhenResourcesReady);
 
