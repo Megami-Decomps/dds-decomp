@@ -6363,7 +6363,54 @@ void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
     *handle = taskHandle;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B88F8);
+void func_001B88F8(BtlUnit *unit, s8 style, s8 phase, s32 unused, BattlePanelColors *colors) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+
+    if ((unit->flags & 0x20) || (unit->partyRecord.status & 0x4000)) {
+        colors->values[0] = 0x80282222;
+        colors->values[1] = 0x802C242A;
+        colors->values[2] = 0x802C242A;
+        colors->values[3] = 0x802C243E;
+        return;
+    }
+    if (phase < 3) {
+        if (phase > 0) {
+            switch (style) {
+            case 0:
+                colors->values[0] = 0x80808080;
+                colors->values[1] = 0x80808080;
+                colors->values[2] = 0x80808080;
+                colors->values[3] = 0x80808080;
+                break;
+            case 1:
+                colors->values[0] = 0x80808080;
+                colors->values[1] = 0x806C9064;
+                colors->values[2] = 0x806C9064;
+                colors->values[3] = 0x80C0FF40;
+                break;
+            case 2:
+            default:
+                colors->values[0] = 0x80787878;
+                colors->values[1] = 0x80645874;
+                colors->values[2] = 0x80482880;
+                colors->values[3] = 0x804C2894;
+                break;
+            }
+            return;
+        }
+    }
+    if (btlCountSceneSlots() <= 0 || state->mode != 1) {
+        colors->values[0] = 0x80808080;
+        colors->values[1] = 0x80808080;
+        colors->values[2] = 0x80808080;
+        colors->values[3] = 0x80808080;
+    } else {
+        colors->values[0] = 0x80383232;
+        colors->values[1] = 0x803C343A;
+        colors->values[2] = 0x803C343A;
+        colors->values[3] = 0x803C344E;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8A80);
 

@@ -3338,8 +3338,8 @@ at `+0x45`. DDS1 stores these into the primary `FldAreaWork` fields at
 ## Result fade rows and profile icons
 
 `BrsSkillPackageWork` owns five `0x28`-byte fade rows at `+0xDA0` in DDS1
-and `+0xAF10` in DDS2. Their state and opacity fields are at row
-`+0x14/+0x1C` and `+0x10/+0x18`, respectively. DDS2's profile-icon
+and `+0xAF20` in DDS2. Their background state and opacity fields are at
+row `+0x14/+0x1C` and `+0/+8`, respectively. DDS2's profile-icon
 renderer reads the existing `0x68`-byte `profileAnimation` rows at
 `+0x4C/+0x50`; it does not need a second overlapping title-menu view.
 The fade updates remain ASM: direct canonical accesses fold the row base
@@ -4401,29 +4401,22 @@ literal copy inlines while its final 32-byte copy calls `memcpy`.
 Use a size local only when it represents a genuine reused extent, not a
 dummy temporary introduced solely to inhibit builtin expansion.
 
-## Result background and portrait helpers encode different row origins
+## Result background and portrait fields share a primary row
 
 DDS2 `0029DF18` forms `AF10 + index * 0x28` and accesses background
-state/opacity at +0x10/+0x18. Conservatively retain that encoded background
-bank origin. Direct primary-field C still folds these members into an
-`AF20` base with +0/+8 accesses, leaving the same four-word difference;
-this occurs with either owner origin and does not prove the original type.
-The portrait helper `0029E478` instead forms `AF20 + index * 0x28`,
-with state/opacity/position at +0x14/+0x1C/+0x20/+0x24.
-These active bytes can be grouped physically, but that does not prove an
-original combined array. Moving the portrait fields relative to `AF10`
-would put some beyond the 0x28 element; do not invent a second view or
-next-row indexing to route around the unresolved staggered ownership.
+state/opacity at `+0x10/+0x18`. The portrait writer `0029E478` forms
+`AF20 + index * 0x28`: its ready byte, opacity and integer coordinates
+are at `+0x14/+0x1C/+0x20/+0x24`. All these real fields fit one canonical
+`0x28`-byte `BrsFadeAnimation` beginning at `AF20`, with background fields
+at `+0/+8`. No shifted second view, overlapping union, sixth entry or
+next-row indexing is needed. Its five entries end at `AFE8`; the following
+`0x78` bytes preserve the `B060` level bank and complete `B704` owner.
 
-DDS1 has the analogous distinct encoded bases `DA0` (background fields
-+0x14/+0x1C) and `DB0` (portrait fields +0x18/+0x20/+0x24/+0x28).
-Its claimed skill-icon completion remains unchanged. DDS2's primary
-`BrsFadeAnimation` therefore exposes only its evidenced background fields;
-the `B060` level bank and `B704` owner extent are unchanged.
+The native background writer's earlier biased address remains a body
+matching residue, not grounds to move the primary origin or cast around
+the fields. Both native fade writers stay ASM. DDS1's separate `DA0`/`DB0`
+encoded origins and existing layout are unchanged by this DDS2 closure.
 
-All 17 actual result-header includers gated 596 match/0 differ after this
-background-only correction and restoration of the unrelated `D_00415130`
-split; no context, rodata or undefined-symbol row remained.
 
 ## DDS2 named state records own the copied initial tag
 
