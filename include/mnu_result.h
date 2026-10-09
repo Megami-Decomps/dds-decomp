@@ -205,19 +205,21 @@ typedef struct BrsSkillPackageWork {
     };
 #else
     MenuCampEffect campEffect;
-    s8 opacityReady;
-    u8 padAEA9[7];
-    s32 teardownHandle;
-    u32 opacity;
-    s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
-    s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
-    u8 padAEBA[0x66];
-    BrsFadeAnimation fadeAnimation[5];
-    u8 padAFE8[0x78];
-    BrsProgressAnimation levelAnimation[5];
-    u8 padB268[0x138];
-    BrsProgressAnimation profileAnimation[5];
-    u8 padB5A8[0x138];
+    struct {
+        s8 opacityReady;
+        u8 padAEA9[7];
+        s32 teardownHandle;
+        u32 opacity;
+        s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
+        s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
+        u8 padAEBA[0x66];
+        BrsFadeAnimation fadeAnimation[5];
+        u8 padAFE8[0x78];
+        BrsProgressAnimation levelAnimation[5];
+        u8 padB268[0x138];
+        BrsProgressAnimation profileAnimation[5];
+        u8 padB5A8[0x138];
+    };
 #endif
     s32 fadeProgress;
     u32 selectionInitialized;
