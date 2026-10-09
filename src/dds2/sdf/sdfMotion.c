@@ -677,12 +677,12 @@ void sdfMotionReadBoundTrackInteger(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk10;
 }
 
-void *func_00335528(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B450, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B450, options);
+    return binding;
 }
 
 void sdfMotionApplyPrimaryWordThirdKey(SdfMotionIndexedValueBinding *motion, f32 t1) {

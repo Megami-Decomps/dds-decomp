@@ -7351,3 +7351,4 @@
 0x002CEAE8	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.
 0x002DC3B8	sdfMotionCreatePrimaryWordSecondBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word second, registering its apply/blend/capture callbacks.
 0x002DC518	sdfMotionCreatePrimaryWordFirstBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word first, registering its apply/blend/capture callbacks.
+0x002DC678	sdfMotionCreatePrimaryWordThirdBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word third, registering its apply/blend/capture callbacks.
