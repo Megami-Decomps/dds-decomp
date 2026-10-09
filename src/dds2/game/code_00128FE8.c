@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -11,6 +12,7 @@
 #include "sdf_primitive.h"
 #include "dds3obj.h"
 #include "fld.h"
+#include "fld_waypoint.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -274,10 +276,6 @@ extern void *memset(void *s, s32 c, u32 n);
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
-
-extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
-
-extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 
 /* Packed quad input: geometry fields precede the live packet origin and depth.
  * Preserve the unclassified words for the opaque renderer. */
@@ -1131,15 +1129,17 @@ u8 fldHasAreaResourceNameChanged(void) {
 
 extern void fldCopyInfoTable(FldInfTable *);
 
-extern void fldSetNpcPalette(u32);
+struct FldNpcPalette;
+extern void fldSetNpcPalette(struct FldNpcPalette *source);
 
-extern void fldUploadSkyBuffer();
+struct FldSkyBuffer;
+extern void fldUploadSkyBuffer(struct FldSkyBuffer *source);
 
-extern void fldCopyActorWaypointTable(u32);
+extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
 
-extern void fldSetSceneRecordChunk(u32, u32);
+extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
 
 extern void fldCacheMapLabelLengths();
 
@@ -1162,17 +1162,17 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
-                fldSetNpcPalette((u32)work->dataCursor);
+                fldSetNpcPalette((struct FldNpcPalette *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
-                fldUploadSkyBuffer(work->dataCursor);
+                fldUploadSkyBuffer((struct FldSkyBuffer *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
-                fldCopyActorWaypointTable((u32)work->dataCursor);
+                fldCopyActorWaypointTable((FldWaypointBlock *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
@@ -1186,8 +1186,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk((s32)(u32)work->dataCursor,
-                                       work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
                 break;
             }
         }
@@ -2430,7 +2429,8 @@ void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
+        sdfCreateResourcePacket((SdfListHead *)packet, (SdfTexResource *)D_0040B2A0[0],
+                                0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }
@@ -2440,7 +2440,8 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
+        sdfCreateDescriptorPacket((SdfListHead *)packet, (SdfTexResource *)D_0040B2A0[0],
+                                  0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }
@@ -3448,7 +3449,48 @@ s32 func_001322D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132408);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void fldPlayMenuSound(s32 soundId);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
+
+s32 func_00132408(void) {
+    FldAreaWork *work = &fldAreaState;
+    MdlCtx *model;
+
+    if (work->unk190 > 0) {
+        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+            fldPlayMenuSound(0x22);
+            kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
+            kwlnPadStartMotor(0, 1, 6);
+            kwlnPadStartMotor(1, 0x96, 6);
+            work->unk190 = 0;
+            fldSetSceneControlFlags(0x40);
+            return -1;
+        }
+
+        model = (MdlCtx *)fldCameraModelObject;
+        if (model->current.h.arg != 4) {
+            model->first->frameStep = 1.0f;
+            mdlAddEntryPlain(model, 0, 4);
+            fldPlaceAreaDamageEffect(fldAreaState.x, fldAreaState.y, fldAreaState.z);
+            fldPlayMenuSound(0x22);
+            kwlnPadStartMotor(0, 1, 15);
+            kwlnPadStartMotor(1, 0x64, 15);
+            model = (MdlCtx *)fldCameraModelObject;
+        }
+
+        if (model->first->state == 5) {
+            fldAreaState.unk190 = 0;
+            fldSetSceneControlFlags(0x40);
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 

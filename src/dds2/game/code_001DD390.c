@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -2931,8 +2932,6 @@ extern SdfGraphObj D_0040B290;
 extern SdfPoolNode *D_003B6BE0[];
 extern SdfPoolNode *D_003B6BF0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfCreateResourcePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
-extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 void func_001E3E20(BtlUnit *unit) {
     MdlCtx *info;
@@ -2946,7 +2945,8 @@ void func_001E3E20(BtlUnit *unit) {
     }
     unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
     packet = (s32)(u32)sdfAllocatePacketList(0);
-    sdfCreateResourcePacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
+    sdfCreateResourcePacket((SdfListHead *)packet, D_0040B290.buffers[2],
+                            0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
     D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
     info = unit->ext->owner;
     if (unit->unk344 == 0) {
@@ -2962,7 +2962,8 @@ void func_001E3E20(BtlUnit *unit) {
         return;
     }
     packet = (s32)(u32)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
+    sdfCreateDescriptorPacket((SdfListHead *)packet, D_0040B290.buffers[2],
+                              0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
     D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
     func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
 }

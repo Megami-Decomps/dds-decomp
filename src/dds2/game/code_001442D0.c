@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
+#include "fld_scene_record.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -219,10 +220,6 @@ extern u32 fldArchiveLoadPending;
 
 extern u32 fldFixedArchiveLoadPhase;
 
-extern u32 fldSceneRecords;
-
-extern s32 fldSceneRecordResource;
-
 extern u32 fldSceneReady;
 
 extern u32 D_00436364;
@@ -404,37 +401,6 @@ extern s32 fldSceneBgmArchivePhase;
 extern s32 sndFindPackedTrackLoadStatus(s32);
 
 extern void sndEnsureMidiBankResident(s32);
-
-extern s32 fldSceneRecordCount;
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} FldPoint;
-
-typedef struct FldIcon {
-    u32 kind;
-    FldPoint *position;
-} FldIcon;
-
-typedef struct {
-    char *name;
-    u32 nodeIndex;
-    FldIcon *icons;
-    u32 iconCount;
-    s32 floor;
-    FldPoint *pointA; /* 0x14 */
-    FldPoint *pointB; /* 0x18 */
-} FldItem; /* 0x1C bytes */
-
-typedef struct {
-    char *name;
-    FldItem *items;
-    u32 count;
-    SdfItemListRef *model; /* 0xC */
-    FldPoint *pos;     /* 0x10 */
-} FldSceneRecord; /* 0x14 bytes */
 
 extern s32 fldFindRecordItem(s32 scene, u32 index);
 
@@ -1131,15 +1097,15 @@ void func_00145698(void) {
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
     func_0035C860(path, (const char *)D_00413700, directory, fldAreaState.area);
-    fldSceneRecordResource = (s32)(u32)sdfReadNamedResource(path, &resourceHandle, 0);
+    fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
     header = func_00129D60(transferStart);
-    fldSceneRecords = ((SceneHeader *)header)->rows;
+    fldSceneRecords = (FldSceneRecord *)(u32)((SceneHeader *)header)->rows;
     fldSceneRecordCount = ((SceneHeader *)header)->count;
 }
 
-void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
+void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
     /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
@@ -1147,19 +1113,17 @@ void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
         s32 count; /* 0x08: number of scene rows */
     } SceneHeader;
     if (D_00389780[0] < 0xC8) {
-        s32 source = chunk;
-        s32 resource = resourceId;
-        s32 transferStart = source + 8;
+        u8 *transferStart = chunk + 8;
 
-        fldSceneRecordResource = resource;
-        fldRelocatePackedTransferChunk(chunk, transferStart);
+        fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
+        fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
-            s32 header = func_00129D60(transferStart);
+            s32 header = func_00129D60((s32)(u32)transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
             s32 count = ((SceneHeader *)header)->count;
 
             fldSceneRecordCount = count;
-            fldSceneRecords = rows;
+            fldSceneRecords = (FldSceneRecord *)(u32)rows;
         }
     }
 }
@@ -1173,7 +1137,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (fldSceneRecordResource != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldSceneRecordResource);
+        sdfQueueGeneralAllocationRelease(fldSceneRecordResource);
     }
     fldSceneRecordResource = 0;
     fldSceneRecords = 0;
@@ -1239,7 +1203,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);
 
 s32 fldFindRecordItem(s32 scene, u32 index) {
     s32 result = 1;
-    FldSceneRecord *rec = (FldSceneRecord *)fldSceneRecords;
+    FldSceneRecord *rec = fldSceneRecords;
     s32 i;
     u32 j;
     FldItem *item;
@@ -1303,7 +1267,7 @@ void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
 
 s32 fldGetMaxItemValue(void) {
     s32 max = 0;
-    FldSceneRecord *rec = (FldSceneRecord *)fldSceneRecords;
+    FldSceneRecord *rec = fldSceneRecords;
     s32 i;
     u32 j;
     FldItem *item;
@@ -1339,12 +1303,6 @@ extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f3
 extern s32 func_00123EE0(s32, f32, f32);
 extern s32 fldGetFloorFlag(s32, s32, s32);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
-typedef char FldPoint_size_must_be_C[(sizeof(FldPoint) == 0xC) ? 1 : -1];
-typedef char FldIcon_size_must_be_8[(sizeof(FldIcon) == 8) ? 1 : -1];
-typedef char FldItem_size_must_be_1C[(sizeof(FldItem) == 0x1C) ? 1 : -1];
-typedef char FldSceneRecord_size_must_be_14[(sizeof(FldSceneRecord) == 0x14) ? 1 : -1];
-
-
 typedef struct FrFontGlyph FrFontGlyph;
 extern FrFontGlyph *D_00438ED4;
 extern s32 D_00436240;
@@ -1491,7 +1449,7 @@ void func_00146250(void) {
     }
 
     selectedFloor = D_00436288 - 1;
-    record = (FldSceneRecord *)fldSceneRecords;
+    record = fldSceneRecords;
     for (i = 0; i < fldSceneRecordCount; i++, record++) {
         item = record->items;
         for (j = 0; j < record->count; j++, item++) {
@@ -1518,7 +1476,7 @@ void func_00146250(void) {
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
 
-    record = (FldSceneRecord *)fldSceneRecords;
+    record = fldSceneRecords;
     selectedFloor = D_00436288 - 1;
     for (i = 0; i < fldSceneRecordCount; i++, record++) {
         item = record->items;
@@ -1622,7 +1580,7 @@ void func_00146250(void) {
 
     if (D_00436298 >= 128) {
         selectedFloor = D_00436288 - 1;
-        record = (FldSceneRecord *)fldSceneRecords;
+        record = fldSceneRecords;
         for (i = 0; i < fldSceneRecordCount; i++, record++) {
             sceneX = 0.0f;
             sceneZ = 0.0f;
@@ -2295,7 +2253,7 @@ void fldLoadSceneModelsAndCamera(void) {
     s32 iz;
     s32 i;
 
-    rec = (FldSceneRecord *)fldSceneRecords;
+    rec = fldSceneRecords;
     for (i = 0; i < fldSceneRecordCount; i++, rec++) {
         D_003A5470[i] = sdfModelCreateWithAlternateItems(0, rec->model);
         ((FldPoint *)D_0044F818)[i].x = rec->pos->x;
@@ -2625,12 +2583,12 @@ void func_0014AC40(s32 index) {
 }
 
 s32 fldFindPreviousMarkedValue(s32 limit) {
-    s32 group = fldSceneRecords;
+    FldSceneRecord *group = fldSceneRecords;
     s32 best = -1;
     s32 groupIndex = 0;
 
-    for (groupIndex = 0; groupIndex < (s32)fldSceneRecordCount; groupIndex++, group += 0x14) {
-        u32 entryCount = ((FldSceneRecord *)group)->count;
+    for (groupIndex = 0; groupIndex < (s32)fldSceneRecordCount; groupIndex++, group++) {
+        u32 entryCount = group->count;
         u32 entryIndex;
 
         for (entryIndex = 0; entryIndex < entryCount;) {
@@ -2642,7 +2600,7 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
                 }
             }
             entryIndex++;
-            entryCount = ((FldSceneRecord *)group)->count;
+            entryCount = group->count;
         }
     }
     if (best == -1) {
@@ -2652,12 +2610,12 @@ s32 fldFindPreviousMarkedValue(s32 limit) {
 }
 
 s32 fldFindNextMarkedValue(s32 limit) {
-    s32 group = fldSceneRecords;
+    FldSceneRecord *group = fldSceneRecords;
     s32 best = 999;
     s32 groupIndex = 0;
 
-    for (groupIndex = 0; groupIndex < (s32)fldSceneRecordCount; groupIndex++, group += 0x14) {
-        u32 entryCount = ((FldSceneRecord *)group)->count;
+    for (groupIndex = 0; groupIndex < (s32)fldSceneRecordCount; groupIndex++, group++) {
+        u32 entryCount = group->count;
         u32 entryIndex;
 
         for (entryIndex = 0; entryIndex < entryCount;) {
@@ -2669,7 +2627,7 @@ s32 fldFindNextMarkedValue(s32 limit) {
                 }
             }
             entryIndex++;
-            entryCount = ((FldSceneRecord *)group)->count;
+            entryCount = group->count;
         }
     }
     if (best == 999) {
@@ -2680,10 +2638,10 @@ s32 fldFindNextMarkedValue(s32 limit) {
 
 void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z) {
     s32 i;
-    s32 entry = fldSceneRecords;
-    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry += 0x14) {
+    FldSceneRecord *entry = fldSceneRecords;
+    for (i = 0; i < (s32)fldSceneRecordCount; i++, entry++) {
         if (i == index) {
-            FldPoint *position = ((FldSceneRecord *)entry)->pos;
+            FldPoint *position = entry->pos;
             *x = position->x;
             *z = position->z;
             return;
@@ -2709,7 +2667,7 @@ void fldGetVisibleSceneBounds(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     *maxZ = 0.0f;
     *maxX = 0.0f;
     *minZ = 0.0f;
-    rec = (FldSceneRecord *)fldSceneRecords;
+    rec = fldSceneRecords;
     for (; room < fldSceneRecordCount; room++, rec++) {
         item = rec->items;
         for (i = 0; i < rec->count; i++, item++) {

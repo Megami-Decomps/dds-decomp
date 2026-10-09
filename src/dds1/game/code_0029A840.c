@@ -21,11 +21,6 @@ extern s32 btlGetRuntime(void);
 
 extern struct EffExpandedList *func_0029C230(u32);
 
-extern void *fileResolvePrimaryBuffer();
-
-extern u32 *fileResolveSecondaryBuffer(void *);
-
-
 typedef struct EffTexTable {
     u8 pad_00[0xC];
     SdfTex **entries; // 0x0C
@@ -144,8 +139,8 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
-        *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
-        data = fileResolveSecondaryBuffer(source);
+        *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer((FileJobPayload *)source);
+        data = fileResolveSecondaryBuffer((FileJobPayload *)source);
         if (data != 0) {
             owner->model = effLoadViewerModelWithVUState(data, ((FileJob *)source)->slots[1].size);
             VU0_SET_ONES_XYZ(vf10);

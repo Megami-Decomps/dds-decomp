@@ -10,7 +10,7 @@ extern void (*sdfTickCallback)(void);
 
 extern MenuProgressParameters D_0045C860;
 
-extern MenuRuntimeCallback D_0043899C;
+extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 
 extern void mnuFreeOptionalBlock(u32);
 
@@ -218,7 +218,7 @@ void func_003214C0(MenuRuntimeRecord *record) {
 }
 
 void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
-    D_0043899C = callback;
+    mnuRuntimeRecordInitializationCallback = callback;
 }
 
 void func_003214D0(u32 unused, s32 resource) {
@@ -228,5 +228,5 @@ void func_003214D0(u32 unused, s32 resource) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00320FD0", D_0043899C);
+INCLUDE_SDATA(const s32, "game/code_00320FD0", mnuRuntimeRecordInitializationCallback);
 

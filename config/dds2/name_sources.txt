@@ -5387,6 +5387,7 @@
 0x002F9048	effBillboardMotionResourceCreate	inferred	body calls effCreateMotionResource, billCreateIndexed [names_R_FuncNames7.tsv]
 0x002F9118	effBillboardMotionResourceInitialize	inferred	body calls effCreateMotionResource, billSetBillboardMode [names_R_FuncNames7.tsv]
 0x002F9180	effDestroyBillboardAndOwnedAssetWork	inferred	Dispatches destruction of the billboard and queues its asset for release. [names_reviewed14.tsv]
+0x002F9608	effCreateResourceInstance	inferred	Paired with DDS1 at 0x002B43E0; allocates the runtime resource owner, creates its child resource, and initializes it.
 0x002F96D0	effCreateActiveResourceFromFile	inferred	Resolves primary and secondary file buffers and creates kind-selected active effect resource. [names_reviewed5.tsv]
 0x002F9780	effDuplicateActiveResource	inferred	Clones an active effect resource using its registered duplicate callback. [names_reviewed14.tsv]
 0x002F9860	effClearCallbackFrame	inferred	Invokes optional effect-kind callback when enabled and clears the work frame at +0x28.
@@ -5395,6 +5396,7 @@
 0x002F99B0	effCopyActiveResourceVector	inferred	Copies a vector into the active resource work header. [names_reviewed8.tsv]
 0x002F99C0	effCopyActiveResourceSecondaryVector	inferred	Copies a vector into the second vector slot of active resource work. [names_reviewed8.tsv]
 0x002F99D8	effSetActiveResourceColor	inferred	Writes the provided color to active resource's color field. [names_reviewed8.tsv]
+0x002F99E0	effSetActiveResourceScale	inferred	Stores the runtime resource owner scale float at offset 0x20; registered alongside its vector and color setters.
 0x002F9C38	effCloneParticleSharedResource	inferred	Allocates particle effect, copies source payload and replaces shared billboard or reference. [names_reviewed5.tsv]
 0x002F9DE8	effResetParticleStateWord	inferred	Clears one word in shared particle work before the particle runtime routines. [names_reviewed8.tsv]
 0x002FA390	effInitializeParticleDirection	inferred	Seeds a direction from configured or randomized components, normalizes it with VU0 and initializes particle angular speed.
@@ -5890,6 +5892,8 @@
 0x00322480	dds3MeasureRecordBlock	inferred	Computes eight bytes per record plus eight bytes per record's first-word count.
 0x003224E0	mnuBindMenuRecordRegistry	inferred	Stores base pointer and count of the first menu-record registry; no tag semantics established. [names_reviewed18.tsv]
 0x003224F0	mnuGetMenuRecordRegistryEntry	inferred	Indexes the first menu-record registry with a narrowed 16-bit index. [names_reviewed18.tsv]
+0x00322510	mnuBindMovementRecordTable	inferred	Stores the supplied MenuMovementRecord18 base and setup count; getters use a low-16-bit index and 0x18-byte stride.
+0x00322520	mnuGetMovementRecordByIndex	inferred	Narrows the supplied tag to its low 16 bits and returns the corresponding 0x18-byte movement record without checking the stored count.
 0x00322540	mnuBindMenuRegistryParameters	inferred	binds the externally supplied 0x30-byte menu parameter table and stores its supplied count
 0x00322550	mnuGetMenuRegistryParametersByIndex	inferred	masks the index to its low byte and returns table base plus index times 0x30 without checking the stored count
 0x00322570	mnuFindFirstFixedKindShortRecord	inferred	Scans a short-record list and returns the first record with the constant kind, else NULL. [names_reviewed17.tsv]
@@ -6501,6 +6505,7 @@
 0x003E9DD8	effBlockResourceOperations	inferred	Matched paired operation table: block resource create/duplicate/reset/update/draw wrappers dispatch through this EffResourceOps array; paired with DDS1 D_0037ED08.
 0x003E9E60	effModelBlockOperations	inferred	Kind-indexed model-block operation table; paired effect source reads payloadSize and dispatches create, clone, initialize, destroy, update, and draw callbacks. Native code uses 0x1C-byte kind strides and accesses create at +4, clone at +0xC, and initialize at +0. Paired with DDS1 0x0037ED90.
 0x003E9F08	effModelResourceOperations	inferred	confidence=high; src/dds2/game/code_002DE248.c:D_003E9F08; type=model-resource operation record[]; refs=effCreateModelResource,effResetModelResourceUpdateCount; Per-kind records provide payload sizes, child-resource creation and effect initialization/reset callbacks. [names_qp9.tsv]
+0x003EA018	effRuntimeResourceOperations	inferred	Runtime-gated active-resource operation table used for per-kind payload size, create, clone, destroy, initialize, update, and draw dispatch. Native callers index records by kind with 0x1C-byte strides; paired with DDS1 0x0037EEE0. Callback argument forms are title-specific.
 0x003FF4B0	effBattleCameraSnapshotSelection	inferred	confidence=high; matched_users=src/dds2/game/code_002DE248.c:effLoadBattleCameraSnapshot, src/dds2/game/code_002DE248.c:effStoreBattleCameraSnapshot; Snapshot load/store switches its available camera selection table/count and clamps the selected entry. [names_qp9.tsv]
 0x00400018	effMappingState	inferred	confidence=high; src/dds2/game/code_002DE248.c:D_00400018; type=EffectMapping; refs=effResetMappingFlags,effMapObjectWithTemporaryMappingTable; Stores active mapping table, table count and control flags; temporarily swaps tables during mapping. [names_qp9.tsv]
 0x00400970	fldLocalMapFirstCameraVector	inferred	confidence=high; data D_00400970; matched-C-users=3; src/dds2/game/code_0030B838.c:218:sdfInitInnerVectors; src/dds2/game/code_0030B838.c:233:sdfLatchBaseVectorsForSelection; src/dds2/game/code_0030B7D0.c:22:fldCreateLocalMapCamera; First vector passed into local-map camera construction and first-vector setter; data-twin=D_003900A0, supported by 3 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:169336.; seed-placeholder=D_00400970; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
@@ -6746,6 +6751,12 @@
 0x004388C4	sdfActiveCounterRuntime	inferred	high confidence; src/dds2/game/code_0030B838.c sdfDestroyActiveCounterRuntime(): sdfCounterDestroyRuntime(D_004388C4); Instruction-aligned data counterpart of DDS1 D_003BD274 in the matched sdfDestroyActiveCounterRuntime() twin. Active counter runtime passed to destruction and dereferenced by display-value accessors. [names_reviewed26.tsv]
 0x00438940	dds3SoundSlotPool	inferred	confidence=high; src/dds2/game/code_0031B188.c:dds3InitSoundSlotPool; Allocated header plus 100 sound slots; header retains allocation handle. [names_qp9.tsv]
 0x0043895C	itfFadeTint	inferred	confidence=high; src/dds2/game/code_0031E430.c:itfFadeSetTint; Packed tint supplied to indexed fade glyph drawing. [names_qp9.tsv]
+0x0043899C	mnuRuntimeRecordInitializationCallback	inferred	Callback stored by mnuSetRuntimeRecordInitializationCallback and invoked after a runtime record is initialized; the current default points to the no-op func_003214C0.
+0x004389A0	mnuWorkEntryStartCallback	inferred	Callback stored by mnuSetWorkEntryStartCallback and dispatched when a work entry has pendingStart; default points to the no-op func_003224B0.
+0x004389A4	mnuWorkEntryFinishOrDeactivateCallback	inferred	Callback stored by mnuSetWorkEntryFinishOrDeactivateCallback and dispatched on finished/deactivation paths; default points to the no-op func_003224B0.
+0x004389A8	mnuActiveWorkVisitorCallback	inferred	Callback stored by mnuSetActiveWorkVisitor and invoked for active pooled entries plus the active effect entry; default points to the no-op func_003224B0.
+0x004389AC	mnuRuntimeWorkHitCallback	inferred	Callback stored by mnuSetRuntimeWorkHitCallback and invoked for overlapping work/runtime records; default points to the no-op func_003224B8.
+0x004389B0	mnuRuntimeRecordPairCallback	inferred	Callback stored by mnuSetRuntimeRecordPairCallback and invoked for a runtime-record pair; default points to the no-op func_003224C0.
 0x004389C8	sdfThreadWakeTick	inferred	confidence=high; matched_users=src/dds2/game/code_00336B48.c:sdfPadBuildButtonStates, src/dds2/game/code_00328AC8.c:sdfWakeQueuedThreadWaiters; Wake loop increments this tick and pad repeat processing uses it as its clock; same DDS1 role. [names_qp9.tsv]
 0x004389DA	sdfCurrentBufferIndex	inferred	high confidence; src/dds2/game/code_00329F60.c sdfWaitAndSelectBuffer(): s8 buffer = D_004389DA ^ 1; Instruction-aligned data counterpart of DDS1 D_003BD2EA in the matched sdfWaitAndSelectBuffer() twin. Current double-buffer index is toggled before selecting a free packet buffer. [names_reviewed26.tsv]
 0x004389DC	sdfGsImageUploadSemaphore	inferred	confidence=high; src/dds2/game/code_0019B840.c:D_004389DC; type=volatile s32; refs=sdfUploadGsImageUnderSemaphore,func_0019BD48; Both GS-image upload paths acquire and release this semaphore around the upload. [names_qp9.tsv]
@@ -6836,7 +6847,13 @@
 0x004390C4	mnuResourceRecordCount	inferred	Count of the bound MenuResourceRecord table used as the resource iteration bound.
 0x004390C8	mnuWorkEntryPool	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuRegisterWorkEntryPool; Base pointer registered with count; reset clears count * 72 bytes. [names_qp9.tsv]
 0x004390CC	mnuWorkEntryPoolCount	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuRegisterWorkEntryPool; Registered number of 72-byte work entries. [names_qp9.tsv]
+0x004390D0	mnuMenuRecordRegistryBase	inferred	Base pointer set by mnuBindMenuRecordRegistry and indexed by low 16 bits as 0x1C-byte MenuRegistry rows.
+0x004390D4	mnuMenuRecordRegistrySetupCount	inferred	Count word supplied to mnuBindMenuRecordRegistry; retained but not checked by the getter.
 0x004390D8	mnuActiveEffectEntry	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuInitializeActiveEffectWorkEntry; Stores the initialized MenuWorkEntry selected as the active effect entry. [names_qp9.tsv]
+0x004390DC	mnuMovementRecordTableBase	inferred	Base pointer set by mnuBindMovementRecordTable and indexed by low 16 bits as 0x18-byte MenuMovementRecord18 rows.
+0x004390E0	mnuMovementRecordTableSetupCount	inferred	Count word supplied to mnuBindMovementRecordTable; retained but not checked by the getter.
+0x004390E4	mnuMenuRegistryParametersBase	inferred	Base pointer set by mnuBindMenuRegistryParameters and indexed by low 8 bits as 0x30-byte MenuRegistryParameters rows.
+0x004390E8	mnuMenuRegistryParametersSetupCount	inferred	The binder stores its supplied count in the first u32 of this existing 8-byte symbol; the trailing word is unknown, and the getter does not check this count.
 0x004390F8	sdfTrackedThreadSemaphore	inferred	high confidence; src/dds2/game/code_00328778.c sdfStartTrackedThread(): WaitSema(D_004390F8); Instruction-aligned data counterpart of DDS1 D_003BD998 in the matched sdfStartTrackedThread() twin. Semaphore taken while linking tracked thread nodes and while waking the tracked list. [names_reviewed26.tsv]
 0x004390FC	sdfTrackedThreadHead	inferred	high confidence; src/dds2/game/code_00328778.c sdfStartTrackedThread(): node->next = D_004390FC; Instruction-aligned data counterpart of DDS1 D_003BD99C in the matched sdfStartTrackedThread() twin. Head of the tracked thread-node list updated before starting a newly created thread. [names_reviewed26.tsv]
 0x00439100	sdfThreadWakeWorkerId	inferred	confidence=high; data D_00439100; matched-C-users=2; src/dds2/game/code_00328AC8.c:18:sdfWakeThreadOnCompletionEvent; src/dds2/game/code_00328AC8.c:65:sdfStartQueuedThreadWakeWorker; Created queued-waiter worker thread ID is stored here and woken on completion events; data-twin=D_003BD9A0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/sbss.sbss.s:1139.; seed-placeholder=D_00439100; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]

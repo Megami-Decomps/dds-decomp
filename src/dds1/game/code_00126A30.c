@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -1068,11 +1069,11 @@ u8 fldHasAreaResourceNameChanged(void) {
 }
 
 
-extern void fldSetNpcPalette();
-extern void fldUploadSkyBuffer();
-extern void fldCopyActorWaypointTable();
+extern void fldSetNpcPalette(void *source);
+extern void fldUploadSkyBuffer(void *source);
+extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
-extern void fldSetSceneRecordChunk(u32, u32);
+extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
 extern void fldCacheMapLabelLengths();
 
 void fldLoadAreaPackedResources(void) {
@@ -1118,8 +1119,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk((s32)(u32)work->dataCursor,
-                                       work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
                 break;
             }
         }
@@ -2324,14 +2324,13 @@ void fldReleaseBackgroundBuffer(void) {
 }
 
 extern u32 D_003980F0[];
-extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
-extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
 void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
+        sdfCreateResourcePacket((SdfListHead *)packet, (SdfTexResource *)D_003980F0[0],
+                                0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }
@@ -2341,7 +2340,8 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
+        sdfCreateDescriptorPacket((SdfListHead *)packet, (SdfTexResource *)D_003980F0[0],
+                                  0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }
@@ -3320,7 +3320,43 @@ s32 func_0012FD00(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+
+s32 func_0012FE30(void) {
+    FldAreaWork *work = &fldAreaState;
+    MdlCtx *model;
+
+    if (work->unk184 > 0) {
+        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+            kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
+            kwlnPadStartMotor(0, 1, 6);
+            kwlnPadStartMotor(1, 0x96, 6);
+            work->unk184 = 0;
+            fldSetSceneControlFlags(0x40);
+            return -1;
+        }
+
+        model = (MdlCtx *)fldCameraModelObject;
+        if (model->current.h.arg != 4) {
+            model->first->frameStep = 1.0f;
+            mdlAddEntryPlain(model, 0, 4);
+            kwlnPadStartMotor(0, 1, 30);
+            kwlnPadStartMotor(1, 0x96, 30);
+            model = (MdlCtx *)fldCameraModelObject;
+        }
+
+        if (model->first->state == 5) {
+            fldAreaState.unk184 = 0;
+            fldSetSceneControlFlags(0x40);
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FF48);
 

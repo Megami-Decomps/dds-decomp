@@ -142,7 +142,7 @@ extern u32 D_003BD8EC;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void *fileWaitContinuation;
 
@@ -478,8 +478,8 @@ typedef struct LoadObj {
     u32 selector;       /* 0x0C: secondary job buffer operation */
     u8 pad10[0x24];
     void *deviceHandle; /* 0x34 */
-    u32 unk38;          /* 0x38 */
-    u32 unk3C;          /* 0x3C */
+    FileJobPayload **jobs; /* 0x38: child file-job payloads */
+    struct SdfMemBlock *jobAllocation;          /* 0x3C */
     struct EffExpandedList *referenceHolder; /* 0x40 */
     void *recordWork;     /* 0x44: created by fileAllocateGridRecordSlots */
     s16 unk48;          /* 0x48 */
@@ -4869,8 +4869,8 @@ LoadObj *fileLoadObjectCreate(void *owner) {
     obj->scale = 1.0f;
     obj->recordWork = NULL;
     obj->deviceHandle = NULL;
-    obj->unk38 = 0;
-    obj->unk3C = 0;
+    obj->jobs = 0;
+    obj->jobAllocation = 0;
     obj->unk48 = 1;
     return obj;
 }
@@ -4927,13 +4927,13 @@ void effLoadObjectDestroy(LoadObj *obj) {
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    if (obj->unk3C != 0) {
+    if (obj->jobAllocation != 0) {
         u32 count = ((FileSlotTable *)obj->recordWork)->count;
         u32 i;
         for (i = 0; i < count; i++) {
-            fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
+            fileJobDestroy(obj->jobs[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->unk3C));
+        sdfReleaseResourceAllocation(obj->jobAllocation);
     }
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder(obj->referenceHolder);
@@ -4977,22 +4977,22 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (count == 0) {
             return;
         }
-        if (dst->unk3C != 0) {
+        if (dst->jobAllocation != 0) {
             for (i = 0; i < count; i++) {
-                fileJobDestroy(((FileJobPayload **)dst->unk38)[i]);
+                fileJobDestroy(dst->jobs[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->unk3C));
-            dst->unk38 = 0;
-            dst->unk3C = 0;
+            sdfReleaseResourceAllocation(dst->jobAllocation);
+            dst->jobs = 0;
+            dst->jobAllocation = 0;
         }
         size = count * 4;
         if (size == 0) {
             return;
         }
-        dst->unk3C = (u32)sdfAllocGeneralBlock(size);
-        dst->unk38 = sdfResourceRetainAddress((struct SdfMemBlock *)(dst->unk3C));
+        dst->jobAllocation = sdfAllocGeneralBlock(size);
+        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
-            ((FileJobPayload **)dst->unk38)[i] = fileJobCreateChild(*(FileJobPayload **)src->unk38);
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
         break;
     }
@@ -5056,21 +5056,21 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
     u32 i;
     s32 size;
 
-    if (obj->unk3C != 0) {
+    if (obj->jobAllocation != 0) {
         for (i = 0; i < count; i++) {
-            fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
+            fileJobDestroy(obj->jobs[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->unk3C));
-        obj->unk38 = 0;
-        obj->unk3C = 0;
+        sdfReleaseResourceAllocation(obj->jobAllocation);
+        obj->jobs = 0;
+        obj->jobAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        obj->unk3C = (u32)sdfAllocGeneralBlock(size);
-        obj->unk38 = sdfResourceRetainAddress((struct SdfMemBlock *)(obj->unk3C));
-        *(FileJobPayload **)obj->unk38 = fileJobCreateFromJob(job);
+        obj->jobAllocation = sdfAllocGeneralBlock(size);
+        obj->jobs = (FileJobPayload **)sdfResourceRetainAddress(obj->jobAllocation);
+        obj->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
-            ((FileJobPayload **)obj->unk38)[i] = fileJobCreateChild(*(FileJobPayload **)obj->unk38);
+            obj->jobs[i] = fileJobCreateChild(obj->jobs[0]);
         }
     }
 }

@@ -42,6 +42,12 @@ typedef struct FileJobPayload {
 typedef char FileJobPayload_size_must_be_0x2C[
     (sizeof(FileJobPayload) == 0x2C) ? 1 : -1];
 
+void *fileResolvePrimaryBuffer(FileJobPayload *job);
+void *fileResolveSecondaryBuffer(FileJobPayload *job);
+FileJobPayload *fileJobCreateFromJob(FileJobPayload *request);
+FileJobPayload *fileJobCreateChild(FileJobPayload *request);
+void fileJobDestroy(FileJobPayload *job);
+
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
     u32 unk0;
