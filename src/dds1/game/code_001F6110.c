@@ -2304,7 +2304,7 @@ void btlBossDebugPrintfN(s32 arg0, s32 arg1, s32 arg2, s32 arg3, ...) {
 void func_001FB130(s32 x, s32 y, s32 style, const char *text) {
 }
 
-void func_001FB138(void) {
+void func_001FB138(s32 x, s32 y, s32 width, s32 height) {
 }
 
 void func_001FB140(void) {
