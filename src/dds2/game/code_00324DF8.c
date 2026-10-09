@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
+#include "sdf_resource.h"
 
 typedef struct SdfMat4 {
     f32 m[16];
@@ -16,7 +17,6 @@ typedef struct SdfVec4 {
 extern f32 sdfVec3Normalize(f32 *);
 
 
-extern void *sdfAllocateBlockBySizeThreshold(s32 stackBytes);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 extern void *func_0035A828(u32);

@@ -113,7 +113,6 @@ extern s32 D_003BDA94;
 extern s32 D_003BDAB4;
 extern s32 iWakeupThread(s32 threadId);
 extern s32 sceIpuSync(s32, s32);
-extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
 extern void sdfSoundInitFormattedNode(SdfStreamFrameNode *, SoundFormat *, SdfStreamRead, u32);
 extern s32 D_003BDA9C;
@@ -1057,7 +1056,6 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
 }
 
 extern SdfStreamFrameNode *D_003BDAA4;
-extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
