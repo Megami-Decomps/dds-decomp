@@ -1077,7 +1077,35 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
 
 extern f32 func_001A47F0(BtlTask *);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E0100);
+void func_001E0100(BtlLinkedCommand *action, BtlCamState *pose) {
+    BtlUnit *user;
+    BtlUnit *target;
+    s32 frames;
+    s32 idle;
+    s32 eligible;
+
+    if (action->motionProgress == 0 && (s32)btlGetIndexListCount(action->targetList) < 2) {
+        user = action->task->unit;
+        target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+        frames = func_001D6050(user, user->unkEC);
+        frames = (s32)((f32)frames / func_001A47F0(action->task));
+        if (action->state == frames && (target->status.flags & 0x200)) {
+            idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
+            eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
+            if (idle == 0 && eligible == 0) {
+                return;
+            }
+            btlCopyMotionTransform(&action->frontCamera, pose);
+            btlCopyMotionTransform(&action->backCamera, pose);
+            action->backCamera.distance += idle != 0 ? 500.0f : 300.0f;
+            action->motionProgress = 1;
+            action->motionParameter = 10.0f;
+            action->flags = (action->flags & ~0x14) | 0x41;
+            action->state = 0;
+            btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+        }
+    }
+}
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
