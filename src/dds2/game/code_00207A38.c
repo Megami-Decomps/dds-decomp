@@ -3121,19 +3121,6 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     sdfReleaseChipBlock(descriptor);
 }
 
-/* Header of the 0x38-byte resource-name record; trailing bytes hold the name. */
-typedef struct BtlResourceNameRecord {
-    s32 word00;     /* 0x00: initialized to 8 */
-    s32 word04;     /* 0x04: initialized to 8 */
-    u32 selectionStatus; /* 0x08: pending, accepted, or canceled */
-    s32 word0C;     /* 0x0C */
-    s32 nameLength; /* 0x10: length of text written at 0x21 */
-    u32 word14;     /* 0x14: initialized to 9 */
-    s32 word18;     /* 0x18 */
-    char extension[5];       /* 0x1C: four-character extension plus terminator */
-    char resourceName[0x17]; /* 0x21: remaining bytes in the 0x38-byte allocation */
-} BtlResourceNameRecord;
-
 void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
     s32 *headerWords = owner;
     headerWords[0] = firstWord;
@@ -3141,7 +3128,8 @@ void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
 }
 
 u32 func_0020DFC0(s32 recordAddress) {
-    return ((BtlResourceNameRecord *)recordAddress)->word14;
+    const u32 *recordWords = (const u32 *)recordAddress;
+    return recordWords[5];
 }
 
 u32 func_0020DFC8(const void *owner) {
@@ -3211,13 +3199,13 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
     struct BtlResourceNameRecord *record;
 
     record = (struct BtlResourceNameRecord *)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
-    record->word14 = 9;
-    record->word00 = 8;
-    record->word04 = 8;
+    record->maximumNameLength = 9;
+    record->x = 8;
+    record->y = 8;
     record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
     record->nameLength = 0;
-    record->word0C = 0;
-    record->word18 = 0;
+    record->selection = 0;
+    record->overwritePromptActive = 0;
     strcpy(record->extension, extension);
     return record;
 }
@@ -3229,8 +3217,8 @@ void func_0020E368(void *allocation) {
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
 
 void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord) {
-    record->word00 = firstWord;
-    record->word04 = secondWord;
+    record->x = firstWord;
+    record->y = secondWord;
 }
 
 u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record) {
