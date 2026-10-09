@@ -423,12 +423,22 @@ typedef struct SdfDmaSrc {
     u64 vifCommands;
 } SdfDmaSrc;
 
-/* DMA node with a 128-bit command (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
+/* REF tag and VIF commands followed by the trailing chain tag (0x20).
+ * The complete trailing quadword is cleared before its NEXT header is patched. */
 typedef struct SdfDmaNode {
-    u64 unk0;
-    u64 unk8;
-    int __attribute__((mode(TI))) unk10;
+    u64 dmaTag;
+    u64 vifCommands;
+    int __attribute__((mode(TI))) nextTag;
 } SdfDmaNode;
+
+typedef char SdfDmaNode_size_must_be_0x20[
+    sizeof(SdfDmaNode) == 0x20 ? 1 : -1];
+typedef char SdfDmaNode_alignment_must_be_0x10[
+    __alignof__(SdfDmaNode) == 0x10 ? 1 : -1];
+typedef char SdfDmaNode_vifCommands_at_8[
+    ((u32)&((SdfDmaNode *)0)->vifCommands == 8) ? 1 : -1];
+typedef char SdfDmaNode_nextTag_at_0x10[
+    ((u32)&((SdfDmaNode *)0)->nextTag == 0x10) ? 1 : -1];
 
 /* Resource entry with word at +0xC (0x10); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResEntry {
