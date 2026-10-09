@@ -21,7 +21,7 @@ typedef struct PcpFlashScalingOrbitParams {
     f32 maxScale;
     f32 tilt;
     f32 angularStep;
-    u32 unk44;
+    u32 drawMode;
 } PcpFlashScalingOrbitParams;
 
 typedef struct PcpFlashAccumulatingParams {
@@ -43,7 +43,7 @@ typedef struct PcpFlashAccumulatingParams {
     f32 tilt;
     f32 increment;
     f32 radialStep;
-    u32 unk4C;
+    u32 drawMode;
 } PcpFlashAccumulatingParams;
 
 typedef struct PcpFlashOrbitArcParams {
@@ -67,7 +67,7 @@ typedef struct PcpFlashOrbitArcParams {
     f32 unk48;
     f32 unk4C;
     f32 angularStep;
-    u32 unk54;
+    u32 drawMode;
 } PcpFlashOrbitArcParams;
 
 typedef struct PcpFlashFadingOrbitParams {
@@ -89,7 +89,7 @@ typedef struct PcpFlashFadingOrbitParams {
     f32 maxScale;
     f32 tilt;
     f32 angularStep;
-    u32 unk4C;
+    u32 drawMode;
 } PcpFlashFadingOrbitParams;
 
 typedef struct PcpFlashRotatingQuadParams {
@@ -110,7 +110,7 @@ typedef struct PcpFlashRotatingQuadParams {
     f32 acrossSpan;
     f32 maxScale;
     f32 angularStepRange;
-    u32 unk48;
+    u32 drawMode;
 } PcpFlashRotatingQuadParams;
 
 typedef struct PcpFlashRadialTriangleParams {
@@ -127,7 +127,7 @@ typedef struct PcpFlashRadialTriangleParams {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u32 unk38;
+    u32 drawMode;
 } PcpFlashRadialTriangleParams;
 
 typedef struct PcpFlashRadialStripParams {
@@ -149,7 +149,7 @@ typedef struct PcpFlashRadialStripParams {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u32 unk4C;
+    u32 drawMode;
     u8 pad50[0x80];
 } PcpFlashRadialStripParams;
 
@@ -168,7 +168,7 @@ typedef struct PcpFlashOffsetRadialParams {
     f32 initialRadialSpeed;
     f32 radialDamping;
     f32 originOffset;
-    u32 unk3C;
+    u32 drawMode;
 } PcpFlashOffsetRadialParams;
 
 /* The rotating-streak factory copies this 0x40-byte parameter prefix into
@@ -188,7 +188,7 @@ typedef struct PcpFlashStreakParams {
     f32 acrossSpan;
     f32 maxScale;
     f32 rotationStepRange;
-    u32 unk3C;
+    u32 drawMode;
 } PcpFlashStreakParams;
 
 /* Paired Flash runtime owners and their variable particle records.
@@ -221,7 +221,7 @@ struct PcpFlashStreakWork {
     f32 acrossSpan;
     f32 maxScale;
     f32 rotationStepRange;
-    u32 unk3C;
+    u32 drawMode;
     PcpFlashRotatingParticle *parts;
     s32 updateCount;
     u32 tintColor;
@@ -259,7 +259,7 @@ struct PcpFlashScalingOrbitWork {
     f32 maxScale;
     f32 tilt;
     f32 angularStep;
-    u32 unk44;
+    u32 drawMode;
     PcpFlashOrbitParticle *parts;
     u32 updateCount;
     u32 tintColor;
@@ -301,7 +301,7 @@ struct PcpFlashAccumulatingWork {
     f32 tilt;
     f32 increment;
     f32 radialStep;
-    u32 unk4C;
+    u32 drawMode;
     PcpFlashAccumulatingParticle *parts;
     u32 unk54;
     u32 tintColor;
@@ -348,7 +348,7 @@ struct PcpFlashOrbitArcWork {
     f32 unk48;
     f32 unk4C;
     f32 angularStep;
-    u32 unk54;
+    u32 drawMode;
     PcpFlashMotionParticle *parts;
     u32 unk5C;
     u32 tintColor;
@@ -394,7 +394,7 @@ struct PcpFlashRotatingQuadWork {
     f32 acrossSpan;
     f32 maxScale;
     f32 angularStepRange;
-    u32 unk48;
+    u32 drawMode;
     PcpFlashRotatingQuadParticle *parts;
     u32 updateCount;
     u32 tintColor;
@@ -419,7 +419,7 @@ struct PcpFlashRadialTriangleWork {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u32 unk38;
+    u32 drawMode;
     PcpFlashMotionParticle *parts;
     s32 updateCount;
     u32 tintColor;
@@ -462,7 +462,7 @@ struct PcpFlashRadialStripWork {
     f32 initialRadius;
     f32 initialRadialSpeed;
     f32 radialDamping;
-    u32 unk4C;
+    u32 drawMode;
     u8 pad50[0x80];
     PcpFlashRadialStripParticle *parts;
     u32 updateCount;
@@ -493,7 +493,7 @@ struct PcpFlashFadingOrbitWork {
     f32 maxScale;
     f32 tilt;
     f32 angularStep;
-    u32 unk4C;
+    u32 drawMode;
     PcpFlashOrbitParticle *parts;
     u32 updateCount;
     u32 tintColor;
@@ -519,7 +519,7 @@ struct PcpFlashOffsetRadialWork {
     f32 initialRadialSpeed;
     f32 radialDamping;
     f32 originOffset;
-    u32 unk3C;
+    u32 drawMode;
     PcpFlashMotionParticle *parts;
     s32 updateCount;
     u32 tintColor;
@@ -597,6 +597,44 @@ typedef char PcpFlashTrianglePulseParamsCountOffsetCheck[
     ((u32)&((PcpFlashTrianglePulseParams *)0)->particleCount) == 0x10 ? 1 : -1];
 typedef char PcpFlashTrianglePulseParamsDrawModeOffsetCheck[
     ((u32)&((PcpFlashTrianglePulseParams *)0)->drawMode) == 0x2C ? 1 : -1];
+
+/* Native constructors copy each field unchanged into EffRecordPool.drawMode. */
+typedef char PcpFlashStreakParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashStreakParams *)0)->drawMode) == 0x3C ? 1 : -1];
+typedef char PcpFlashScalingOrbitParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashScalingOrbitParams *)0)->drawMode) == 0x44 ? 1 : -1];
+typedef char PcpFlashAccumulatingParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashAccumulatingParams *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashOrbitArcParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashOrbitArcParams *)0)->drawMode) == 0x54 ? 1 : -1];
+typedef char PcpFlashRotatingQuadParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRotatingQuadParams *)0)->drawMode) == 0x48 ? 1 : -1];
+typedef char PcpFlashRadialTriangleParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRadialTriangleParams *)0)->drawMode) == 0x38 ? 1 : -1];
+typedef char PcpFlashRadialStripParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRadialStripParams *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashFadingOrbitParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashFadingOrbitParams *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashOffsetRadialParamsDrawModeOffsetCheck[
+    ((u32)&((PcpFlashOffsetRadialParams *)0)->drawMode) == 0x3C ? 1 : -1];
+typedef char PcpFlashStreakWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashStreakWork *)0)->drawMode) == 0x3C ? 1 : -1];
+typedef char PcpFlashScalingOrbitWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashScalingOrbitWork *)0)->drawMode) == 0x44 ? 1 : -1];
+typedef char PcpFlashAccumulatingWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashAccumulatingWork *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashOrbitArcWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashOrbitArcWork *)0)->drawMode) == 0x54 ? 1 : -1];
+typedef char PcpFlashRotatingQuadWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRotatingQuadWork *)0)->drawMode) == 0x48 ? 1 : -1];
+typedef char PcpFlashRadialTriangleWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRadialTriangleWork *)0)->drawMode) == 0x38 ? 1 : -1];
+typedef char PcpFlashRadialStripWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashRadialStripWork *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashFadingOrbitWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashFadingOrbitWork *)0)->drawMode) == 0x4C ? 1 : -1];
+typedef char PcpFlashOffsetRadialWorkDrawModeOffsetCheck[
+    ((u32)&((PcpFlashOffsetRadialWork *)0)->drawMode) == 0x3C ? 1 : -1];
 
 typedef char PcpFlashColorSlotSizeCheck[sizeof(PcpFlashColorSlot) == 0x0C ? 1 : -1];
 typedef char PcpFlashQuadColorSlotSizeCheck[sizeof(PcpFlashQuadColorSlot) == 0x14 ? 1 : -1];
