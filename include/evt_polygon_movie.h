@@ -5,6 +5,7 @@
 #include "sdf.h"
 
 struct KwlnTask;
+struct EvtRuntime;
 
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
  * evtPolygonMovieAllocWork. Movie parsing, asynchronous resource loading,
@@ -114,7 +115,7 @@ PolyMovieWork *func_00234DA8(s32 eventId, s32 sceneId, s32 mode);
 void func_0023EF90(PolyMovieWork *work, void *viewer);
 #elif VERSION_DDS2
 PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode);
-void func_0025A280(PolyMovieWork *work, void *viewer);
+s32 func_0025A280(PolyMovieWork *work, struct EvtRuntime *viewer);
 #endif
 
 #endif

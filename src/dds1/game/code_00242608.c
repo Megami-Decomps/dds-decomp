@@ -153,11 +153,11 @@ void mnuShopScrollList(EvtRuntime *scene, s32 delta) {
         return;
     }
     for (key = track->children; key != NULL; key = key->next) {
-        absoluteFrame = key->frame + track->metadataValue + delta;
-        if (absoluteFrame < track->metadataValue) {
+        absoluteFrame = key->frame + track->metadata.value + delta;
+        if (absoluteFrame < track->metadata.value) {
             key->frame = 0;
         } else if (scene->headerThird < absoluteFrame) {
-            key->frame = (u16)scene->headerThird - (u16)track->metadataValue - 1;
+            key->frame = (u16)scene->headerThird - (u16)track->metadata.value - 1;
         } else {
             key->frame = key->frame + delta;
         }
@@ -192,8 +192,8 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
     while (track != NULL) {
         for (key = track->children; key != NULL; key = key->next) {
             offset = key->frame;
-            base = track->metadataValue;
-            ubase = (u16)track->metadataValue;
+            base = track->metadata.value;
+            ubase = (u16)track->metadata.value;
             absoluteFrame = offset + base;
             if (absoluteFrame < threshold) {
                 continue;
@@ -255,7 +255,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     for (track = scene->groups; track != NULL; track = track->next) {
         key = track->children;
         while (key != NULL) {
-            if (key->frame + track->metadataValue < threshold) {
+            if (key->frame + track->metadata.value < threshold) {
                 key = key->next;
             } else {
                 func_0022BFD8(scene, track, key);
@@ -503,7 +503,7 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeC
     if (track == 0) {
         return;
     }
-    base = track->metadataValue;
+    base = track->metadata.value;
     *out2 = track->children;
     while (*out2 != 0) {
         if (value < (*out2)->frame + base) {
@@ -610,12 +610,12 @@ void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue) {
                     scene->selectedEntry = 0;
                     return;
                 }
-                scene->selectedEntry = ((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE]))->entryValue;
+                scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
                 return;
             }
         }
     } else {
-        scene->selectedEntry = ((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE]))->entryValue;
+        scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
     }
 }
 
