@@ -9,8 +9,6 @@
 #define MNU_STATE_WAIT_PENDING 8
 
 
-extern u32 mnuActiveEffectEntry;
-
 extern MenuRuntimePairCallback mnuRuntimeRecordPairCallback;
 
 extern MenuRuntimeWorkCallback mnuRuntimeWorkHitCallback;
@@ -48,8 +46,6 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-extern u32 mnuGetActiveEffectWorkEntry(void);
-
 typedef struct MenuLengthData {
     u8 pad0[4];
     u16 firstCount;
@@ -289,7 +285,7 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
     for (i = 0; i < list->capacity; i++, record++) {
         if (record->state.word & MNU_WORK_ACTIVE) {
             if ((record->state.kind & 0xF) >= 4) {
-                work = (MenuWorkEntry *)mnuGetActiveEffectWorkEntry();
+                work = mnuGetActiveEffectWorkEntry();
                 record->baseX = work->x0;
                 record->baseY = mnuEvaluateTimedValue(work);
             }
@@ -696,7 +692,7 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
             mnuActiveWorkVisitorCallback(entry, (struct MnuShootingWork *)context);
         }
     }
-    mnuActiveWorkVisitorCallback((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
+    mnuActiveWorkVisitorCallback(mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
 }
 
 void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
@@ -1004,19 +1000,19 @@ void mnuSetInputActionSnapshot(u8 *src) {
     memcpy(D_0045C890, src, sizeof(D_0045C890));
 }
 
-u32 mnuGetActiveEffectWorkEntry(void) {
+MenuWorkEntry *mnuGetActiveEffectWorkEntry(void) {
     return mnuActiveEffectEntry;
 }
 
 s32 func_003242D0(MenuWorkEntry *entry, u32 mode);
 
-void mnuInitializeActiveEffectWorkEntry(u32 entry) {
-    memset((void *)entry, 0, 0x48);
-    func_003242D0((MenuWorkEntry *)entry, 0);
-    ((MenuWorkEntry *)entry)->flags |= 0x4010;
-    ((MenuWorkEntry *)entry)->tag = MNU_WORK_TAG_MOVEMENT_TABLE;
-    ((MenuWorkEntry *)entry)->remaining = 1;
-    ((MenuWorkEntry *)entry)->scale0 = 1.5707963f;
+void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry) {
+    memset(entry, 0, 0x48);
+    func_003242D0(entry, 0);
+    entry->flags |= 0x4010;
+    entry->tag = MNU_WORK_TAG_MOVEMENT_TABLE;
+    entry->remaining = 1;
+    entry->scale0 = 1.5707963f;
     mnuActiveEffectEntry = entry;
 }
 
@@ -1202,7 +1198,7 @@ extern void sdfVectorScale(f32 factor, f32 *vector);
 
 
 s32 func_00324840(void) {
-    MenuWorkEntry *work = (MenuWorkEntry *)mnuActiveEffectEntry;
+    MenuWorkEntry *work = mnuActiveEffectEntry;
     u32 kindMask = 0;
     s8 *input = (s8 *)D_0045C890;
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
