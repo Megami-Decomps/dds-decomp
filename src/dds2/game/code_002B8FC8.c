@@ -978,10 +978,11 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
     panel->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
 
-void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth) {
+void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second,
+                               u32 third, EffectSlotSet *spriteResource) {
     MenuListDefaults defaults = D_0042AF00;
     menu->resource =
-        mnuCreateWindowSpriteResources(first, second, third, (EffectSlotSet *)fourth,
+        mnuCreateWindowSpriteResources(first, second, third, spriteResource,
                                        defaults.indices, 3);
 }
 
