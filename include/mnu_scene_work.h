@@ -126,4 +126,10 @@ typedef char MantraPulseAnimationWorkSizeAssert[
      (u32)&((MantraPulseAnimationWork *)0)->alpha == 0x08)
         ? 1 : -1];
 
+#ifndef VERSION_DDS2
+/* Scene callback table owner factory and matching release callback. */
+MenuSceneWork *mnuCreateSceneWork(void);
+void mnuReleaseSceneContext(s32 unused, MenuSceneWork *scene);
+#endif
+
 #endif
