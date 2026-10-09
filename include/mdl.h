@@ -14,6 +14,14 @@ typedef struct MdlCtx MdlCtx;
 struct MdlPartEntry;
 struct EffTrackPolyWork;
 
+/* Known resource-item kinds; the owner stores this domain in a halfword. */
+typedef enum MdlResourceKind {
+    MDL_RESOURCE_BILLBOARD = 0,
+    MDL_RESOURCE_EFFECT = 1,
+    MDL_RESOURCE_TRACK_POLY = 2,
+    MDL_RESOURCE_OBJECT = 3
+} MdlResourceKind;
+
 typedef struct MdlObjectAttachment {
     MdlCtx *owner;
     s32 objectAddress;
@@ -26,7 +34,7 @@ typedef struct MdlObjectAttachment {
  * to MdlCtx's list at +0x14. The part and object payloads share that allocation. */
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next;
-    u16 type;
+    u16 type; /* MdlResourceKind value, with native halfword storage. */
     s16 subtype;
     union {
         struct {

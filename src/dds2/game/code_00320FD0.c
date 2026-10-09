@@ -4,7 +4,7 @@
 
 extern MenuResourceRecord *mnuResourceRecords;
 
-extern s32 D_004390C4;
+extern s32 mnuResourceRecordCount;
 
 extern void (*sdfTickCallback)(void);
 
@@ -204,7 +204,7 @@ void mnuResetResourceProgressCounters(void) {
 
 void mnuBindResourceRecordTable(MenuResourceRecord *records, s32 count) {
     mnuResourceRecords = records;
-    D_004390C4 = count;
+    mnuResourceRecordCount = count;
 }
 
 /* The externally owned table stores 28-byte records. */

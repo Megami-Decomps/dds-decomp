@@ -4,6 +4,9 @@
 #include "btl_task_condition.h"
 #include "btl_action.h"
 #include "btl.h"
+#include "btl_model_record.h"
+#include "evt_unit.h"
+#include "mdl.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "pcp_vu0.h"
@@ -13,9 +16,9 @@
 struct SdfModel;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-extern void effObjFetchInnerFirstVec(s32);
-extern s32 sdfLoadMapRecordPositionVector(struct SdfModel *, s32);
-extern void func_0011E280(s32, f32, f32, f32, f32);
+extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
+extern void func_0011E280(f32, f32, f32, f32, s32);
 extern void func_001BCB88(s8, s32);
 
 extern s32 btlGetRuntime();
@@ -95,7 +98,58 @@ INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC7D8);
 void func_001FC990(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC998);
+/* Actor-status providers select one complete 0x270-byte model record. */
+/* Use a map anchor for X/Z while retaining the actor's own height. */
+void func_001FC998(BtlUnit *unit) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 ownPosition[4] __attribute__((aligned(16)));
+    f32 radius;
+    f32 x, y, z;
+    MdlCtx *model;
+    BtlActorStatusRecord *status;
+    s32 alpha;
+
+    if ((unit->flags & 8) != 0) {
+        if ((unit->flags & 2) == 0) {
+            return;
+        }
+        if (unit->unkCC != 0) {
+            return;
+        }
+        model = unit->ext->owner;
+        alpha = ((u8 *)&unit->overlayColor)[3];
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        switch (status->shadowKind) {
+        case 0:
+            return;
+        case 1:
+            radius = 50.0f;
+            break;
+        case 2:
+            radius = 100.0f;
+            break;
+        case 3:
+            radius = 200.0f;
+            break;
+        case 4:
+            radius = 300.0f;
+            break;
+        default:
+            radius = 0.0f;
+            break;
+        }
+        effObjFetchInnerFirstVec(unit->effectObject);
+        VU0_STORE_VF(vf10, ownPosition);
+        if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
+            VU0_LOAD_VF(vf10, ownPosition);
+        }
+        VU0_STORE_VF(vf10, position);
+        x = position[0];
+        y = ownPosition[1];
+        z = position[2];
+        func_0011E280(x, y, z, radius, alpha);
+    }
+}
 
 
 INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FCAC0);
