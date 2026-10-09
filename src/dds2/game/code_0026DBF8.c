@@ -1,6 +1,7 @@
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
@@ -344,7 +345,6 @@ typedef struct MantraFileRequest {
     MantraFileEntry *entries;
 } MantraFileRequest;
 
-extern void func_002C7CE8(void *);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
                                 TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);

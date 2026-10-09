@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -3124,8 +3125,8 @@ s32 btlDestroyStageTask(taskWork)
     return 1;
 }
 
-void func_002C7CE8(void) {
-    btlDestroyStageTask();
+s32 func_002C7CE8(void *request) {
+    return btlDestroyStageTask(request);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C58);

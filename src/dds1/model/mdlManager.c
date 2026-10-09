@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "mdl_resource_table.h"
 #include "sdf_motion.h"

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"

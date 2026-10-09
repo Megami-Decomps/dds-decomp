@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
 #include "evt_world.h"
@@ -2659,7 +2660,6 @@ extern void *memset(void *dst, s32 value, s32 size);
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
-extern void func_002C7CE8(void *);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);

@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"

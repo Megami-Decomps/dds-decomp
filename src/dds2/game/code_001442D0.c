@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_model_scalars.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -2949,7 +2950,6 @@ void fldUpdateMenuResourceEffects(void) {
 }
 
 
-extern void func_002C7CE8(void *);
 
 
 typedef struct FldLbNode {
