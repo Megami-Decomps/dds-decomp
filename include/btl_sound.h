@@ -105,9 +105,16 @@ typedef struct TimedUnitEffectArgs {
 
 typedef struct EffectLoadArgs {
     SoundResourceNode *effect;
-    void *loadHandle;
+    struct FileRequest *request;
     const char *name;
 } EffectLoadArgs;
+
+typedef char EffectLoadArgs_size_must_be_0x0C[
+    (sizeof(EffectLoadArgs) == 0x0C) ? 1 : -1];
+typedef char EffectLoadArgs_request_offset_must_be_4[
+    ((u32)&((EffectLoadArgs *)0)->request == 4) ? 1 : -1];
+typedef char EffectLoadArgs_name_offset_must_be_8[
+    ((u32)&((EffectLoadArgs *)0)->name == 8) ? 1 : -1];
 
 struct ActiveSoundNode;
 struct SoundResourceLink;
