@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -116,8 +117,6 @@ extern SdfPoolNode *D_003B1520[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(ScatterRenderState *);
 struct SdfTextParam;
@@ -145,11 +144,11 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     VU0_LOAD_MATRIX(object->matrix);
     VU0_LOAD_MATRIX_B(matrix);
     sdfComposeVuMatrixFromRegisters();
-    sdfConsAppendVuPacket((s32)packet, 0);
+    sdfConsAppendVuPacket(packet, 0);
     if (object->sharedResource != NULL) {
         func_003332E8((struct SdfTextParam *)object->asset, (u32)object->sharedResource->textureHandle);
     }
-    sdfConsAppendAssetPacket((s32)packet, (void *)object->asset, 0);
+    sdfConsAppendAssetPacket(packet, (void *)object->asset, 0);
     count = (s32)object->particleCount;
     D_00452050.parameters = D_003B14C0;
     for (index = 0; index < count; index++) {
