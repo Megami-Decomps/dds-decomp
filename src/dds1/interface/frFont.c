@@ -424,7 +424,55 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
     return frFontLinkGlyphAfterPrevious(previousGlyph, newGlyphChain);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001951C8);
+/* Decode text into child glyphs appended to an existing or newly pooled head. */
+FrFontGlyph *func_001951C8(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph) {
+    FrFontGlyph *head = existingGlyph;
+    FrFontChildGlyph *previous;
+    FrFontChildGlyph *glyph;
+    u32 length = 0;
+    u32 i;
+    u16 code;
+
+    if (fontIndex >= 0) {
+        D_003BB17C = fontIndex;
+    }
+    if (frFontWork.entries[D_003BB17C].resource == NULL) {
+        return NULL;
+    }
+    if (text != NULL) {
+        length = strlen(text);
+    }
+    if (head == NULL) {
+        head = itfDequeueMemNode(frFontWork.glyphPool);
+        frFontWork.glyphCount++;
+        frFontInitGlyph(head);
+    }
+    previous = head->lastChild;
+    glyph = NULL;
+    for (i = 0; i < length; i++) {
+        code = (u8)text[i];
+        if (code >= 0x80) {
+            i++;
+            code = (code << 8) | (u8)text[i];
+        }
+        glyph = frFontCreateGlyphFromCode(code, D_003BB17C, (u8)firstOption, (u8)secondOption);
+        if (previous == NULL) {
+            head->firstChild = glyph;
+        } else {
+            previous->next = glyph;
+        }
+        head->advance += glyph->advance;
+        head->childCount++;
+        glyph->previous = previous;
+        previous = glyph;
+    }
+    if (glyph != NULL) {
+        head->lastChild = glyph;
+        head->parentDimensionsOrRenderWord.parentDimensions.cellAdvance = glyph->cellDimensions.cellWidth;
+        head->parentDimensionsOrRenderWord.parentDimensions.cellHeight = glyph->cellDimensions.cellHeight;
+    }
+    return head;
+}
 
 /* Double the masked input byte and saturate the stored byte at 0x80.
  * Keep the original signed constant used for the saturated byte assignment. */

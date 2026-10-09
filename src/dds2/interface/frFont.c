@@ -432,7 +432,58 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
     return frFontLinkGlyphAfterPrevious(previousGlyph, newGlyphChain);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019CE78);
+/* Build a glyph chain for a byte string, appending to a supplied head. */
+FrFontGlyph *func_0019CE78(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head) {
+    u32 length = 0;
+    u32 offset;
+    u32 code;
+    FrFontChildGlyph *previous;
+    FrFontChildGlyph *created;
+
+    if (fontIndex >= 0) {
+        D_00436570 = fontIndex;
+    }
+    if (frFontWork.entries[D_00436570].resource == NULL) {
+        return NULL;
+    }
+    if (text != NULL) {
+        length = strlen(text);
+    }
+    if (head == NULL) {
+        head = itfDequeueMemNode(frFontWork.glyphPool);
+        frFontWork.glyphCount++;
+        frFontInitGlyph(head);
+    }
+    previous = head->lastChild;
+    offset = 0;
+    created = NULL;
+    if (length != 0) {
+        do {
+            code = (u8)text[offset];
+            if (code >= 0x80) {
+                offset++;
+                code = (u8)text[offset] | (code << 8);
+            }
+            created = frFontCreateGlyphFromCode(code, D_00436570, firstOption & 0xFF, secondOption & 0xFF);
+            if (previous == NULL) {
+                head->firstChild = created;
+            } else {
+                previous->next = created;
+            }
+            offset++;
+            head->advance += created->advance;
+            head->childCount++;
+            created->previous = previous;
+            previous = created;
+        } while (offset < length);
+    }
+    if (created != NULL) {
+        head->lastChild = created;
+        head->parentDimensionsOrRenderWord.parentDimensions.cellAdvance = created->cellDimensions.cellWidth;
+        head->parentDimensionsOrRenderWord.parentDimensions.cellHeight = created->cellDimensions.cellHeight;
+    }
+    return head;
+}
 
 /* Double the masked input byte and saturate the stored byte at 0x80.
  * Keep the original signed constant used for the saturated byte assignment. */
