@@ -1361,13 +1361,13 @@ void func_00205730(BtlUnit *source) {
         height = effect->height;
         position[2] = translatedZ;
         position[1] = height;
-        effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
 
         VU0_LOAD_VF(vf10, source->rotation);
         VU0_LOAD_VF(vf11, D_003A5D50);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        effObjSetInnerSecondVec(effect->actor->effectObject, (u128 *)rotation);
+        effObjSetInnerRotation(effect->actor->effectObject, (u128 *)rotation);
     }
 
     effect->actor->status.stateFlags |= 0x180;
@@ -1735,7 +1735,7 @@ void func_00206450(void) {
         if ((selected->status.flags & 2) == 0) {
             return;
         }
-        effObjFetchInnerFirstVec(selected->effectObject);
+        effObjFetchInnerPosition(selected->effectObject);
         VU0_STORE_VF(vf10, (u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
@@ -1750,7 +1750,7 @@ void func_00206450(void) {
             effect->height = limit;
         }
         vector[1] = effect->height;
-        effObjSetInnerFirstVec(actor->effectObject, (u128 *)vector);
+        effObjSetInnerPosition(actor->effectObject, (u128 *)vector);
         return;
     }
 
@@ -1770,7 +1770,7 @@ void func_00206450(void) {
                 if (flags & 1) {
                     if (flags & 0x200) {
                         if (flags & 2) {
-                            effObjFetchInnerFirstVec(unit->effectObject);
+                            effObjFetchInnerPosition(unit->effectObject);
                             VU0_STORE_VF(vf10, (u128 *)vector);
                             if (vector[1] < ceiling) {
                                 height = effect->height + effect->speed;
@@ -1781,10 +1781,10 @@ void func_00206450(void) {
                                     effect->height = zero;
                                 }
                                 vector[1] = effect->height;
-                                effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
+                                effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
                             } else {
                                 vector[1] = 0.0f;
-                                effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
+                                effObjSetInnerPosition(unit->effectObject, (u128 *)vector);
                             }
                         }
                     }

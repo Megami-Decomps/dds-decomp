@@ -127,7 +127,7 @@ void func_001FC998(BtlUnit *unit) {
             radius = 0.0f;
             break;
         }
-        effObjFetchInnerFirstVec(unit->effectObject);
+        effObjFetchInnerPosition(unit->effectObject);
         VU0_STORE_VF(vf10, ownPosition);
         if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
             VU0_LOAD_VF(vf10, ownPosition);

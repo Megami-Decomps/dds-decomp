@@ -218,7 +218,7 @@ void func_0020EA18(BtlUnit *unit) {
         break;
     }
 
-    effObjFetchInnerFirstVec((EffWorldNode *)unit->effectObject);
+    effObjFetchInnerPosition((EffWorldNode *)unit->effectObject);
     VU0_STORE_VF(vf10, actorPosition);
     if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
         VU0_LOAD_VF(vf10, actorPosition);

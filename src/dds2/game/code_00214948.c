@@ -1867,7 +1867,7 @@ void btlAttachActionEffectToUnit(BtlUnit *unit) {
     position[0] = 0.0f;
     position[1] = 10000.0f;
     position[2] = -10000.0f;
-    effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+    effObjSetInnerPosition(unit->effectObject, (u128 *)position);
 }
 
 void btlCommitSelectedUnit(void) {
@@ -2112,7 +2112,7 @@ void btlResetActionEffectOnUnit(void) {
         vec[2] = -10000.0f;
         unit->status.flags &= ~8;
         unit->status.stateFlags |= 0x180;
-        effObjSetInnerFirstVec(unit->effectObject, (u128 *)vec);
+        effObjSetInnerPosition(unit->effectObject, (u128 *)vec);
     }
 }
 
@@ -6652,13 +6652,13 @@ void func_00226AB0(BtlUnit *source) {
         height = effect->linked.height;
         position[2] = translatedZ;
         position[1] = height;
-        effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
 
         VU0_LOAD_VF(vf10, source->rotation);
         VU0_LOAD_VF(vf11, D_0041B4D0);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        effObjSetInnerSecondVec(effect->linked.actor->effectObject, (u128 *)rotation);
+        effObjSetInnerRotation(effect->linked.actor->effectObject, (u128 *)rotation);
     }
 
     effect->linked.actor->status.stateFlags |= 0x180;
@@ -6790,14 +6790,14 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             mainUnit->resourceIndex == 0x12E && (mainUnit->status.flags & 2)) {
             func_001E3108(mainUnit, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec(mainUnit->effectObject,
+            effObjSetInnerPosition(mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->status.flags & 0xE0) && !(mainUnit->status.flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->status.flags & 2)) {
             func_001E3108(twin, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec(twin->effectObject,
+            effObjSetInnerPosition(twin->effectObject,
                 (u128 *)position);
         }
     } else {

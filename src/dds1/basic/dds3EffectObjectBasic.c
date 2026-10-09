@@ -287,8 +287,8 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     }
     obj->key = worldCounter;
     dds3EnsureSlotData(obj);
-    effObjSetInnerFirstVec(obj, firstVec);
-    effObjSetInnerSecondVec(obj, secondVec);
+    effObjSetInnerPosition(obj, firstVec);
+    effObjSetInnerRotation(obj, secondVec);
     effObjInnerVecBackup(obj->inner);
     data = obj->data;
     data->flags = 0;

@@ -3262,15 +3262,15 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
         source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
             base = source->data;
-            effObjSetInnerFirstVec(target, (u128 *)base);
+            effObjSetInnerPosition(target, (u128 *)base);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
             base += 4;
                         VU0_LOAD_VF(vf11, base);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
-            effObjSetInnerSecondVec(target, (u128 *)quaternion);
-            effObjFetchInnerFirstVec(target);
+            effObjSetInnerRotation(target, (u128 *)quaternion);
+            effObjFetchInnerPosition(target);
             VU0_STORE_VF(vf10, target->inner->smoothedPosition);
         }
     }
