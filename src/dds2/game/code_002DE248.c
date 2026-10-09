@@ -9879,7 +9879,7 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
     if (effResourceBankEntries == 0) {
         effResourceBankEntries = btlScanDirectory(path, flags);
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
-        btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         slot->state = func_0020DFC8(effResourceBankDescriptor);
@@ -10000,7 +10000,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
             }
         }
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
-        btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         status->state = func_0020DFC8(effResourceBankDescriptor);

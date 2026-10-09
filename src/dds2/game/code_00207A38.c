@@ -3120,10 +3120,9 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     sdfReleaseChipBlock(descriptor);
 }
 
-void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
-    s32 *headerWords = owner;
-    headerWords[0] = firstWord;
-    headerWords[1] = secondWord;
+void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32 y) {
+    descriptor->word00 = x;
+    descriptor->word04 = y;
 }
 
 u32 func_0020DFC0(s32 recordAddress) {
