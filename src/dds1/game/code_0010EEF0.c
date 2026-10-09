@@ -242,7 +242,7 @@ f32 effObjGetInnerFloat(EffWorldNode *node) {
     return node->inner->radius;
 }
 
-void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector) {
+void effObjSetInnerPosition(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->position;
 
@@ -251,7 +251,7 @@ void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector) {
+void effObjSetInnerRotation(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->rotation;
 
@@ -260,7 +260,7 @@ void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector) {
+void effObjSetInnerScale(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->scale;
 
@@ -269,27 +269,27 @@ void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector) {
     PCP_COPY_VECTOR(dst, vector);
 }
 
-void effObjFetchInnerFirstVec(EffWorldNode *node) {
+void effObjFetchInnerPosition(EffWorldNode *node) {
     u8 *p = (u8 *)&node->inner->position;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     VU0_SET_W_ONE(vf10);
 }
 
-void effObjFetchInnerSecondVecNorm(EffWorldNode *node) {
+void effObjFetchInnerRotationNormalized(EffWorldNode *node) {
     u8 *p = (u8 *)&node->inner->rotation;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
     effMiscNormalizeVU();
 }
 
-void effObjFetchInnerThirdVec(EffWorldNode *node) {
+void effObjFetchInnerScale(EffWorldNode *node) {
     u8 *p = (u8 *)&node->inner->scale;
 
     VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
-void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
+void effObjAddInnerPosition(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     u8 *src = (u8 *)&inner->position;
     u8 *dst;
@@ -302,7 +302,7 @@ void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
     VU0_STORE_VF10_BASE_OFF(dst, inner, 0x40);
 }
 
-void effObjQuatMulInnerSecondVec(EffWorldNode *node, u128 *vector) {
+void effObjMultiplyInnerRotation(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
@@ -313,7 +313,7 @@ void effObjQuatMulInnerSecondVec(EffWorldNode *node, u128 *vector) {
     VU0_STORE_VF($vf10, &inner->rotation);
 }
 
-void effObjMulInnerThirdVec(EffWorldNode *node, void *vector) {
+void effObjMultiplyInnerScale(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     u8 *src = (u8 *)&inner->scale;
     u8 *dst;

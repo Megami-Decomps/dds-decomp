@@ -20,8 +20,7 @@ ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object) {
 
 
 extern void dds3EnsureSlotData(void *object);
-extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
-extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
+
 extern void effObjInnerVecBackup(ObjectTransform *node);
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern s32 dds3RegisterObjectInHandlerIndex(void *object);
@@ -33,8 +32,8 @@ EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVect
     if (obj != NULL) {
         obj->key = a;
         dds3EnsureSlotData(obj);
-        effObjSetInnerFirstVec(obj, firstVector);
-        effObjSetInnerSecondVec(obj, secondVector);
+        effObjSetInnerPosition(obj, firstVector);
+        effObjSetInnerRotation(obj, secondVector);
         effObjInnerVecBackup(obj->inner);
         data = ((EffectObjectData *)obj->data);
         data->handle = (ObjBase *)-1;

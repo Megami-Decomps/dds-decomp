@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "btl_resource_name.h"
 #include "sdf_chip.h"
 #include "btl_task_state.h"
@@ -17,7 +18,7 @@
 struct SdfModel;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
+
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void func_0011E280(f32, f32, f32, f32, s32);
 extern void func_001BCB88(s8, s32);
@@ -126,7 +127,7 @@ void func_001FC998(BtlUnit *unit) {
             radius = 0.0f;
             break;
         }
-        effObjFetchInnerFirstVec(unit->effectObject);
+        effObjFetchInnerPosition(unit->effectObject);
         VU0_STORE_VF(vf10, ownPosition);
         if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
             VU0_LOAD_VF(vf10, ownPosition);

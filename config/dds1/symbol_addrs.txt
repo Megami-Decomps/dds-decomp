@@ -2,6 +2,15 @@
 _start = 0x00100008; // type:func
 // Pad port table in .sdata (pad init reads it as its own 4-byte object)
 // "FREE CAMERA" follows func_00287258's last vector constant in .rodata; its own item (D_003BC7B8 points at it)
+effObjSetInnerPosition = 0x0010F6E0; // type:func
+effObjSetInnerRotation = 0x0010F710; // type:func
+effObjSetInnerScale = 0x0010F740; // type:func
+effObjFetchInnerPosition = 0x0010F770; // type:func
+effObjFetchInnerRotationNormalized = 0x0010F788; // type:func
+effObjFetchInnerScale = 0x0010F7A8; // type:func
+effObjAddInnerPosition = 0x0010F7C0; // type:func
+effObjMultiplyInnerRotation = 0x0010F7F8; // type:func
+effObjMultiplyInnerScale = 0x0010F848; // type:func
 D_003B2560 = 0x003B2560; // type:asciz
 // Two s8 globals open game/code_002C5FD8's .sdata at 0x3BD280 (code_002C3868 reads the first);
 // splitting the unit at 0x3BD281 linked D_003BD281 one byte low
@@ -392,15 +401,6 @@ effObjInnerVecInit = 0x0010F660; // type:func
 effObjInnerVecBackup = 0x0010F688; // type:func
 effObjSetInnerFloat = 0x0010F6C0; // type:func
 effObjGetInnerFloat = 0x0010F6D0; // type:func
-effObjSetInnerFirstVec = 0x0010F6E0; // type:func
-effObjSetInnerSecondVec = 0x0010F710; // type:func
-effObjSetInnerThirdVec = 0x0010F740; // type:func
-effObjFetchInnerFirstVec = 0x0010F770; // type:func
-effObjFetchInnerSecondVecNorm = 0x0010F788; // type:func
-effObjFetchInnerThirdVec = 0x0010F7A8; // type:func
-effObjAddInnerFirstVec = 0x0010F7C0; // type:func
-effObjQuatMulInnerSecondVec = 0x0010F7F8; // type:func
-effObjMulInnerThirdVec = 0x0010F848; // type:func
 dds3BuildVuTransformFromComponents = 0x0010F880; // type:func
 dds3LoadOrBuildObjectMatrix = 0x0010F8D8; // type:func
 dds3TestObjectSphereOverlap = 0x0010F948; // type:func

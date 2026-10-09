@@ -3291,7 +3291,27 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001B8BB0);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B8CB8);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B91F0);
+extern const BattlePanelColors D_003A2D00;
+
+void func_001B91F0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    BattlePanelColors colors = D_003A2D00;
+    s32 x = work->activeEntries[slot].position[0];
+    s32 y = work->activeEntries[slot].position[1];
+    s32 state = work->activeEntries[slot].presentation.pendingSceneState;
+    u32 color;
+    s32 i;
+
+    if (state > 0 && (state < 4 || state == 5)) {
+        color = work->activeEntries[slot].presentation.unkF0 | 0x80808000;
+        for (i = 3; i >= 0; i--) {
+            colors.values[i] = color;
+        }
+        func_002BF438((x + work->activeEntries[slot].presentation.cursorOffset[0]) << 4,
+                      (y + work->activeEntries[slot].presentation.cursorOffset[1]) << 3, 0,
+                      colors.values, 0, btlResourceBlock->resA, work->activeEntries[slot].presentation.cursorOption,
+                      0x53);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2C70);
 

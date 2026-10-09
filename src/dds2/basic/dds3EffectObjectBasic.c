@@ -42,10 +42,6 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 extern void dds3EnsureSlotData(void *obj);
 
-extern void effObjSetInnerFirstVec(void *obj, void *vec);
-
-extern void effObjSetInnerSecondVec(void *obj, void *vec);
-
 extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
 extern void effMagatuhiSetControlPointParams(void *, const void *);
@@ -283,8 +279,8 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     }
     obj->worldCounter = worldCounter;
     dds3EnsureSlotData(obj);
-    effObjSetInnerFirstVec(obj, firstVec);
-    effObjSetInnerSecondVec(obj, secondVec);
+    effObjSetInnerPosition((EffWorldNode *)obj, (u128 *)firstVec);
+    effObjSetInnerRotation((EffWorldNode *)obj, (u128 *)secondVec);
     effObjInnerVecBackup(obj->params);
     data = obj->data;
     data->flags = 0;
@@ -909,4 +905,3 @@ INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A68);
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A80);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00412A98);
-

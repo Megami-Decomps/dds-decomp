@@ -80,8 +80,6 @@ extern void evtResetObjectPendingValue(EffWorldNode *object);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern void effObjSetInnerFirstVec(void *object, void *vector);
-
 extern f32 bfWaitReadArgFloat(s32 idx);
 
 /* World object views used by the model-parameter opcodes. */
@@ -107,10 +105,8 @@ typedef struct EvtSourceVec {
     f32 rotationW;      /* 0x1C */
 } EvtSourceVec;
 
-extern void effObjSetInnerThirdVec(void *object, void *vector);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
-extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
@@ -658,7 +654,7 @@ u32 evtSetWorldUnitFirstVector(void) {
     vector[0] = bfWaitReadArgFloat(1);
     vector[1] = bfWaitReadArgFloat(2);
     vector[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerFirstVec(unit, vector);
+    effObjSetInnerPosition(unit, (u128 *)vector);
     return 1;
 }
 
@@ -687,7 +683,7 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerSecondVec(unit, v);
+    effObjSetInnerRotation(unit, (u128 *)v);
     return 1;
 }
 
@@ -708,7 +704,7 @@ u32 evtSetWorldUnitThirdVector(void) {
     vector[0] = bfWaitReadArgFloat(1);
     vector[1] = bfWaitReadArgFloat(2);
     vector[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerThirdVec(unit, vector);
+    effObjSetInnerScale(unit, (u128 *)vector);
     return 1;
 }
 
@@ -1058,8 +1054,7 @@ f32 evtGetShortestAngleDelta(f32 a, f32 b) {
     return b - a;
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *object);
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -1094,12 +1089,12 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     }
 
     sourceVector = (f32 *)source->data;
-    effObjFetchInnerFirstVec(actor);
+    effObjFetchInnerPosition(actor);
     VU0_STORE_VF(vf10, actorPosition);
     PCP_COPY_VECTOR_F32(sourcePosition, sourceVector);
 
     if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
-        effObjFetchInnerSecondVecNorm(actor);
+        effObjFetchInnerRotationNormalized(actor);
         referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
         unit->referenceAngleCacheFlags |= EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID;
         unit->cachedReferenceAngleDegrees = -(referenceAngle * 57.29577637f);
@@ -1166,7 +1161,7 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
     if (actor == NULL) {
         return 1;
     }
-    effObjFetchInnerSecondVecNorm(actor);
+    effObjFetchInnerRotationNormalized(actor);
     referenceAngle = -(effMiscComputeQuaternionRotatedReferenceAngle() * 57.29577637f);
     sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
@@ -1585,7 +1580,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerSecondVec(obj, v);
+        effObjSetInnerRotation(obj, (u128 *)v);
     }
     return 1;
 }
@@ -1622,4 +1617,3 @@ u32 evtOpCopyModelTransformFromSource(void) {
 INCLUDE_SDATA(const s32, "game/code_0023D658", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "game/code_0023D658", D_004371F0);
-

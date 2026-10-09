@@ -4344,8 +4344,6 @@ u32 btlIsUnitModelStateFive(BtlUnit *object) {
     return object->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 void btlSetUnitPosition(BtlUnit *object, void *position) {
     f32 world[4] __attribute__((aligned(16)));
     s32 context;
@@ -4360,7 +4358,7 @@ void btlSetUnitPosition(BtlUnit *object, void *position) {
     VU0_STORE_VF(vf10, world);
     if (((u32)object->status.flags & 2) != 0) {
         world[2] += *(f32 *)((u8 *)object + 0x88);
-        effObjSetInnerFirstVec(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)world);
+        effObjSetInnerPosition(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)world);
     }
 }
 
@@ -4489,8 +4487,6 @@ extern u8 D_003A3B70[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
 void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     u8 vector[16];
     if ((object->status.stateFlags & 0x100) != 0) {
@@ -4506,7 +4502,7 @@ void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     effMiscQuatMultiplyVU();
     VU0_STORE_VF_UNCLOBBERED(vf10, vector);
     if (((u32)object->status.flags & 2) != 0) {
-        effObjSetInnerSecondVec(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)vector);
+        effObjSetInnerRotation(*(EffWorldNode **)((u8 *)object + 0x31C), (u128 *)vector);
     }
 }
 
@@ -4540,18 +4536,13 @@ void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xffffff) | 0x80000000, scalar);
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
-
-
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return;
     }
-    effObjFetchInnerFirstVec(unit->effectObject);
+    effObjFetchInnerPosition(unit->effectObject);
     mdlStorePrimaryVectorVU(unit->ext->owner);
-    effObjFetchInnerSecondVecNorm(unit->effectObject);
+    effObjFetchInnerRotationNormalized(unit->effectObject);
     mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
     sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
 }
@@ -5889,7 +5880,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         }
         actor = task->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerFirstVec(actor->effectObject);
+            effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
             pos[0] += scale;
         } else {
@@ -5897,18 +5888,18 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
             pos[0] += scale;
             pos[2] += task->unit->zOffset;
         }
-        effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)pos);
+        effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
         task->amplitude *= 0.85f;
     } else {
         BtlUnit *actor = task->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerFirstVec(actor->effectObject);
+            effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         } else {
             func_001D6300((u8 *)actor, pos);
             pos[2] += task->unit->zOffset;
         }
-        effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)pos);
+        effObjSetInnerPosition(task->unit->effectObject, (u128 *)pos);
         return 1;
     }
     task->tick += 1;
@@ -5998,14 +5989,14 @@ u32 func_001D9C28(BtlPositionEffectArgs *task) {
         if (task->amount <= 0.01f) {
             func_001D6300((u8 *)task->unit, position);
             position[2] += task->unit->zOffset;
-            effObjSetInnerFirstVec(task->unit->effectObject, position);
+            effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     func_001D6300((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->zOffset;
-    effObjSetInnerFirstVec(task->unit->effectObject, position);
+    effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
 }
@@ -6949,8 +6940,8 @@ void func_001DC0E8(void) {
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
-        effObjSetInnerFirstVec(camera, (u128 *)position);
-        effObjSetInnerSecondVec(camera, (u128 *)D_00359EB0);
+        effObjSetInnerPosition(camera, (u128 *)position);
+        effObjSetInnerRotation(camera, (u128 *)D_00359EB0);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
@@ -12749,7 +12740,42 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     ++source->effectLink.referenceCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F1CC8);
+s32 func_001F1CC8(SoundEffectSourceArgs *args) {
+    BtlUnit *owner;
+    u32 flags;
+
+    btlGetRuntime();
+    owner = args->owner.unit;
+
+    if (args->effect == NULL) {
+        args->effect = func_00160958(args->source->resourceHandle, 0, owner, 0);
+        args->effect->flags |= 1;
+    }
+    if (args->frameCount < 12) {
+        args->effect->color = ((u32)((f32)args->frameCount * 128.0f / 12.0f) << 24) | 0x808080;
+    } else if (btlFindTaskByHandle(args->resource) == 0) {
+        if (args->fadeOutFrame != 12) {
+            args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / 12.0f) * 128.0f) << 24) | 0x808080;
+            args->fadeOutFrame++;
+        } else {
+            return 1;
+        }
+    } else {
+        args->effect->color = 0x80808080;
+    }
+    effBTLFieldColorSetSelectors((s32)owner, (u32)owner, 0, 0);
+    flags = owner->status.flags;
+    if (flags & 4) {
+        args->effect->flags |= 8;
+    } else {
+        args->effect->flags &= ~8;
+    }
+    if (flags & 2) {
+        func_00160D88(args->effect);
+    }
+    args->frameCount++;
+    return 0;
+}
 
 extern s32 func_001F1CC8(SoundEffectSourceArgs *);
 
