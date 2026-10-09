@@ -557,7 +557,44 @@ void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EA2E0);
+extern char D_003BD4F0[];
+extern char D_003BD4F8[];
+extern char D_003BD500[];
+extern char D_003BD508[];
+extern char D_003BD510[];
+extern char D_003BD518[];
+extern char D_003BD520[];
+
+void func_002EA2E0(const u8 *data, s32 size) {
+    s32 column = 0;
+    s32 i;
+
+    while (size > 0) {
+        if (column == 0) {
+            sdfPrintFormattedDevMessage(D_003BD4F0, data);
+            column = (u32)data & 0xF;
+            for (i = column; i > 0; i--) {
+                sdfPrintFormattedDevMessage(D_003BD4F8);
+            }
+        } else if (column == 8) {
+            sdfPrintFormattedDevMessage(D_003BD500);
+        } else {
+            sdfPrintFormattedDevMessage(D_003BD508);
+        }
+        sdfPrintFormattedDevMessage(D_003BD510, *data++);
+        column++;
+        if (column == 0x10) {
+            column = 0;
+            sdfPrintFormattedDevMessage(D_003BD518);
+        }
+        size--;
+    }
+    if (column == 0) {
+        sdfPrintFormattedDevMessage(D_003BD518);
+    } else {
+        sdfPrintFormattedDevMessage(D_003BD520);
+    }
+}
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4880);
 
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B48A0);
