@@ -164,6 +164,8 @@ typedef enum SdfStreamAudioMode {
 
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
 struct SdfStreamInputDmaTag;
+struct MovObj;
+struct SoundFormat;
 
 typedef struct SdfStreamFrameNode {
     struct SdfStreamFrameNode *streamPrev;
@@ -203,8 +205,8 @@ typedef struct SdfStreamFrameNode {
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
-    u32 source;
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext; /* Owner context passed to the read callback. */
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
@@ -243,10 +245,16 @@ typedef char SdfStreamFrameNode_inputDmaChain_offset_must_be_0x4C[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaChain == 0x4C) ? 1 : -1];
 typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
     ((u32)&((SdfStreamFrameNode *)0)->scratchBuffer == 0x54) ? 1 : -1];
+typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
+    ((u32)&((SdfStreamFrameNode *)0)->readContext == 0x60) ? 1 : -1];
 
-typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
 
 void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *, u8 *, s32);
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 void sdfAdvanceStreamPlayback(s32 cadence);
 
 typedef struct SdfMovieDescriptor {
