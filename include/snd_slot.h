@@ -16,8 +16,17 @@ typedef struct SoundSlotWork {
     struct SdfMemBlock *resourceHandles[0x1D];
 } SoundSlotWork;
 
+/* SoundSlotOwner flag bits observed across file and packed-track loading. */
+typedef enum SoundSlotOwnerFlag {
+    SOUND_SLOT_FILE_LOAD_PENDING = 1,
+    SOUND_SLOT_FILES_READY = 2,
+    SOUND_SLOT_TRACK_LOAD_REQUESTED = 4,
+    SOUND_SLOT_TRACK_LOADING = 8,
+    SOUND_SLOT_TRACK_READY = 0x10
+} SoundSlotOwnerFlag;
+
 typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    u32 flags; /* SoundSlotOwnerFlag masks; other bits remain unclassified. */
     s32 category;
     s32 id;
     SoundSlotWork work;
