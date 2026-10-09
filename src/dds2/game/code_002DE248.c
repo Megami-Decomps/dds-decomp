@@ -6272,10 +6272,10 @@ typedef struct EffSpanConfig {
 } EffSpanConfig;
 
 
-void effSeedParticleSpanParameters(u8 *work) {
+void effSeedParticleSpanParameters(EffModelResource *work) {
     u32 index = 0;
-    EffSpanTable *table = ((EffModelResource *)work)->childResource;
-    EffSpanConfig *config = ((EffModelResource *)work)->source;
+    EffSpanTable *table = work->childResource;
+    EffSpanConfig *config = work->source;
     u32 total = table->total;
     u32 per = config->perSpan;
     u32 spans = total / per;
@@ -6375,18 +6375,18 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
 
 extern void effReleaseModelPointSetAsset(s32);
 
-void effReleaseParticleList(u32 *list) {
-    EffSpanRecord *entry = ((EffSpanTable *)list)->records;
+void effReleaseParticleList(EffSpanTable *list) {
+    EffSpanRecord *entry = list->records;
     u32 i;
 
-    for (i = 0; i < ((EffSpanTable *)list)->count; i++) {
+    for (i = 0; i < list->count; i++) {
         effReleaseModelPointSetAsset((s32)entry->pointSet);
         if (entry->references != 0) {
             effReleaseResourceRefs(entry->references);
         }
         entry++;
     }
-    sdfReleaseResourceAllocation(((EffSpanTable *)list)->allocation);
+    sdfReleaseResourceAllocation(list->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F4960);
