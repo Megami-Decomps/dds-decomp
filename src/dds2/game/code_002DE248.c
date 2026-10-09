@@ -815,44 +815,49 @@ void func_002DEC78(SdfFlagListWork *work, u32 value) {
     work->unk04 = value;
 }
 
-u32 *effDuplicatePayloadHeader(src)
-    void *src;
-{
-    u32 *p = (u32 *)sdfAllocSizeClassBlock(0x14);
-    p[0] = 0;
-    memcpy(p + 1, src, 16);
-    return p;
+typedef struct EffSelectionHeaderWork {
+    s32 frame;
+    s32 payload[4];
+} EffSelectionHeaderWork;
+
+typedef char EffSelectionHeaderWorkSizeCheck[(sizeof(EffSelectionHeaderWork) == 0x14) ? 1 : -1];
+
+EffSelectionHeaderWork *effDuplicatePayloadHeader(const void *source) {
+    EffSelectionHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffSelectionHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
 void effCreateSelectionHeaderFromFile(void *work) {
-    u64 resource;
+    void *resource;
 
     resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicatePayloadHeader(resource);
 }
 
-void effReleaseSelectionHeaderAllocation(u32 allocation) {
+void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSelectionHeaderFromWork(s32 work) {
-    effDuplicatePayloadHeader(work + 4);
+void effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
+    effDuplicatePayloadHeader(work->payload);
 }
 
-void effSelectionFrameReset(u32 *counter) {
-    *counter = 0;
+void effSelectionFrameReset(EffSelectionHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effSelectionFrameAdvance(s32 *counter) {
+void effSelectionFrameAdvance(EffSelectionHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        evtSelStateCreate(counter[1], (s16)counter[2], counter[3], counter[4]);
-        frame = *counter;
+        evtSelStateCreate(counter->payload[0], (s16)counter->payload[1], counter->payload[2], counter->payload[3]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
