@@ -251,7 +251,6 @@ EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 extern void sdfProjectVuVectorToScreen();

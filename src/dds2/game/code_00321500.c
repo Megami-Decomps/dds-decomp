@@ -40,9 +40,9 @@ extern u32 D_004390D4;
 
 extern void (*sdfTickCallback)(void);
 
-extern u8 D_0045C870[];
+extern MenuRuntimeList D_0045C870;
 
-extern u8 D_0045C880[];
+extern MenuRuntimeList D_0045C880;
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
@@ -97,15 +97,6 @@ typedef struct MenuLengthData {
     s32 *firstRecords;
     s32 *secondRecords;
 } MenuLengthData;
-
-typedef struct MenuRuntimeList {
-    MenuRuntimeRecord *records;
-    s32 capacity;
-    u32 activeCount;
-    u32 unk0C;
-} MenuRuntimeList;
-
-
 
 struct MenuRegistryTable {
     u32 flags;
@@ -276,23 +267,23 @@ MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
 
 
 void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
-    memset(D_0045C870, 0, sizeof(MenuRuntimeList));
-    ((MenuRuntimeList *)D_0045C870)->records = records;
-    ((MenuRuntimeList *)D_0045C870)->capacity = capacity;
+    memset(&D_0045C870, 0, sizeof(D_0045C870));
+    D_0045C870.records = records;
+    D_0045C870.capacity = capacity;
 }
 
 void func_00321E70(MenuRuntimeRecord *records, s32 capacity) {
-    memset(D_0045C880, 0, sizeof(MenuRuntimeList));
-    ((MenuRuntimeList *)D_0045C880)->records = records;
-    ((MenuRuntimeList *)D_0045C880)->capacity = capacity;
+    memset(&D_0045C880, 0, sizeof(D_0045C880));
+    D_0045C880.records = records;
+    D_0045C880.capacity = capacity;
 }
 
 MenuRuntimeList *func_00321EC8(void) {
-    return (MenuRuntimeList *)D_0045C870;
+    return &D_0045C870;
 }
 
 MenuRuntimeList *func_00321ED8(void) {
-    return (MenuRuntimeList *)D_0045C880;
+    return &D_0045C880;
 }
 
 void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
@@ -396,12 +387,12 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
 }
 
 void func_003223F8(void) {
-    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C870);
+    mnuAdvanceMovingRuntimeRecords(&D_0045C870);
 }
 
 
 void func_00322418(void) {
-    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C880);
+    mnuAdvanceMovingRuntimeRecords(&D_0045C880);
 }
 
 

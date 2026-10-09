@@ -68,7 +68,6 @@ extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
-extern void sdfInitPacketList(void *);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
