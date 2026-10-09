@@ -2968,27 +2968,6 @@ s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
 
 typedef struct BtlUnit BtlUnit;
 
-typedef struct BtlEffect {
-    u8 pad0[0x10];
-    f32 vec10[4];
-    u8 pad20[0x10];
-    f32 vec30[4];
-    f32 vec40[4];
-    f32 f50;
-    u8 pad54[0x6C];
-    f32 vecC0[4];
-    f32 vecD0[4];
-    f32 fE0;
-    u8 padE4[0x2C];
-    u32 flags;
-    ActionStateLink *task;
-    u8 pad118[0x18];
-    s32 unk130;
-    s32 index134;
-    u8 pad138[0x1C];
-    f32 unk154;
-} BtlEffect;
-
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
@@ -3089,8 +3068,8 @@ void btlPrepareDefeatEffectCamera(u8 *obj) {
                   -253.6f, -2272.8f, -0.009f, -0.038f, -0.013f, 0.99f, 40.0f, 15.0f);
 }
 
-void btlSetCameraPresetForBossUnitMode(BtlEffect *fx) {
-    switch (fx->task->unit->partyRecord.unitId) {
+void btlSetCameraPresetForBossUnitMode(BtlLinkedCommand *fx) {
+    switch (fx->link->unit->partyRecord.unitId) {
     case 0x111:
         btlSetEffectCameraKeys((s32)fx, 533.4f, -167.8f, -1104.7f, -0.052f, 0.285f, -0.028f, 0.947f, 430.5f,
                       -91.7f, -1373.1f, -0.089f, 0.198f, -0.03f, 0.967f, 40.0f, 15.0f);
@@ -3118,7 +3097,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
 
 s32 btlSetLinkedDefeatCameraPresetA(command, camera, rotate)
 BtlLinkedCommand *command;
-BtlEffect *camera;
+BtlCamState *camera;
 s32 rotate;
 {
     u16 *runtime = (u16 *)btlGetRuntime();
@@ -3144,15 +3123,15 @@ s32 rotate;
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
     case 0:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, -1401.0f, -931.0f, -2245.4f,
+        btlInitMotionTransformFromComponents(camera, -1401.0f, -931.0f, -2245.4f,
             0.103f, -0.19f, -0.032f, 0.967f, 40.0f);
         break;
     case 1:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, 131.1f, -940.3f, -2451.9f,
+        btlInitMotionTransformFromComponents(camera, 131.1f, -940.3f, -2451.9f,
             0.107f, 0.012f, -0.01f, 0.985f, 40.0f);
         break;
     case 2:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, 971.8f, -875.7f, -2539.8f,
+        btlInitMotionTransformFromComponents(camera, 971.8f, -875.7f, -2539.8f,
             0.099f, 0.118f, 0.0f, 0.979f, 40.0f);
         break;
     }
@@ -3174,9 +3153,9 @@ s32 rotate;
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->vec10);
+        VU0_LOAD_VF(vf10, camera->direction);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->vec10);
+        VU0_STORE_VF(vf10, camera->direction);
     }
     return 1;
 }
@@ -5429,7 +5408,7 @@ s32 func_00224500(s32 object) {
     return 0;
 }
 
-s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlEffect *camera, s32 rotate) {
+s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     u16 *runtime = (u16 *)btlGetRuntime();
     BtlUnit *unit;
     u32 kind;
@@ -5453,15 +5432,15 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlEffect *camera
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
     case 0:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, -785.9f, -20.1f, -1457.7f,
+        btlInitMotionTransformFromComponents(camera, -785.9f, -20.1f, -1457.7f,
             -0.108f, -0.2f, 0.008f, 0.965f, 40.0f);
         break;
     case 1:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, 25.4f, -36.7f, -1778.6f,
+        btlInitMotionTransformFromComponents(camera, 25.4f, -36.7f, -1778.6f,
             -0.081f, 0.014f, -0.015f, 0.988f, 40.0f);
         break;
     case 2:
-        btlInitMotionTransformFromComponents((BtlCamState *)camera, 622.8f, -36.7f, -1458.3f,
+        btlInitMotionTransformFromComponents(camera, 622.8f, -36.7f, -1458.3f,
             -0.093f, 0.166f, -0.036f, 0.972f, 40.0f);
         break;
     }
@@ -5483,9 +5462,9 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlEffect *camera
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
-        VU0_LOAD_VF(vf10, camera->vec10);
+        VU0_LOAD_VF(vf10, camera->direction);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, camera->vec10);
+        VU0_STORE_VF(vf10, camera->direction);
     }
     return 1;
 }
@@ -5520,8 +5499,8 @@ s32 btlSelectRaisedCameraFromActionFlags(ActionUnit *unit) {
     return 0;
 }
 
-s32 func_00224DF0(ActionUnit *unit) {
-    u32 flags = datActionAnimationRecords[unit->action].flags;
+s32 func_00224DF0(BtlLinkedCommand *unit) {
+    u32 flags = datActionAnimationRecords[unit->actionCode].flags;
 
     if (flags & 0x4000) {
         btlFlagAllUnitDefeatCandidatesTask();
@@ -5531,15 +5510,15 @@ s32 func_00224DF0(ActionUnit *unit) {
         } else {
             func_002240C0((u32)unit);
         }
-        unit->pendingAction = 0;
+        unit->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        btlSetLinkedDefeatCameraPresetB(unit, unit, 0);
+        btlSetLinkedDefeatCameraPresetB(unit, &unit->camera, 0);
     } else if (flags & 0x8) {
-        if (btlGetIndexListCount(((ActionStateLink *)unit->stateFlags)->indexWork.indices) == 1) {
+        if (btlGetIndexListCount(unit->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
             btlRaiseActionCameraPoints((u32)unit);
-            unit->pendingAction = 0;
+            unit->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             func_002240C0((u32)unit);
