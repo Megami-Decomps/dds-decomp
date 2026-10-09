@@ -2969,7 +2969,7 @@
 0x0020D448	btlScanDirectory	inferred	lists entries of a dir by extension filter bitmask (tmx,p2a,pb,ep,epl,tlp,f2)
 0x0020DA28	btlCreateResourceDescriptor	inferred	allocates the 0x48 BtlResourceDescriptor consumed by btlDestroyResourceDescriptor [names_M36_SmallSweep5.tsv]
 0x0020DAB8	btlUpdateAndDrawResourceBrowser	inferred	Handles browser navigation, updates the selected entry preview and submits the visible browser rows; returns the selection status.
-0x0020DFB0	btlSetResourceNameHeaderPair	inferred	Stores two argument words in resource-name record header at offsets 0 and 4. [names_R_FuncNames6.tsv]
+0x0020DFB0	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x0020E1E0	btlDrawResourcePreview	inferred	Paired native function builds and submits the resource preview panel from the descriptor texture.
 0x0020E300	btlCreateResourceNameRecord	inferred	Allocates and initializes 0x38-byte battle resource-name record then copies its name. [names_R_FuncNames6.tsv]
 0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
@@ -5197,7 +5197,7 @@
 0x002E7300	effCreateClassWork	inferred	allocates the complete class work and copied kind-selected payload, creates its resource, and initializes it
 0x002E73F0	effCreateClassWorkFromFile	inferred	File-job callback resolves primary buffer and creates class work for request kind. [names_R_FuncNames4.tsv]
 0x002E7420	effDestroyClassWork	inferred	Calls kind-indexed resource destructor and frees class work. [names_R_FuncNames4.tsv]
-0x002E7468	effCreateClassWorkFromRequest	inferred	Creates class work using kind and source fields in the request. [names_R_FuncNames4.tsv]
+0x002E7468	effCloneClassWork	inferred	Creates a new class-work owner from the existing work kind and copied payload, returning it to the file child dispatcher.
 0x002E7488	effInitializeClassFrame	inferred	Calls kind-indexed initialization callback and resets work frame to zero. [names_R_FuncNames4.tsv]
 0x002E74D0	effAdvanceClassFrame	inferred	Runs kind-indexed frame callback and increments frame; DDS2 skips when global pause flag is set. [names_R_FuncNames4.tsv]
 0x002E7530	effRunClassPostFrame	inferred	Calls second kind-indexed per-frame work callback. [names_R_FuncNames4.tsv]
@@ -5246,9 +5246,9 @@
 0x002EABA8	effSetRenderResourceMatrixComponent	inferred	Sets render resource matrix component. [names_reviewed5.tsv]
 0x002EABB0	effRandomizeParticleFields	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described randomizeEffectParticleFields behavior.
 0x002EAC38	effCreateAlphaRampPointSetRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4162:func_002EAC38; Allocates a chip-backed point-set row table and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x002EB908	effResetBillboardFrameDispatchCounters	inferred	Walks every billboard frame entry and resets its dispatch counter. [names_reviewed16.tsv]
-0x002EBB88	effReleaseBillFrameEntries	inferred	Iterates billboard frame entries, releases each effect work and frees their header. [names_reviewed5.tsv]
-0x002EBBF8	effReleaseTrackEntriesA	inferred	loop over header entries calling func_002EDEC0 (siblings EBB88, EC300, EB4xx)
+0x002EB908	effResetRadialClassResourceFrames	inferred	Resets dispatch counters for every class-resource child in the radial entry list.
+0x002EBB88	effDestroyRadialClassResourceEntries	inferred	Destroys each class-resource child and releases the radial entry-list allocation.
+0x002EBBF8	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
 0x002EBC58	effUpdateRadialClassInstances	inferred	Fam_Tail
 0x002EBE28	effSeedBillScaleRange	inferred	Randomizes start and end scale and seeds each billboard frame with negative random start. [names_reviewed5.tsv]
 0x002EBF40	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4343:func_002EBF40; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -6950,3 +6950,5 @@
 0x00476480	sdfPadPorts	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_00476480[i]); Instruction-aligned data counterpart of DDS1 D_003F9B00 in the matched sdfPadUpdatePorts() twin. Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x0020DFC8	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
+0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.

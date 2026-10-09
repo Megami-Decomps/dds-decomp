@@ -4,6 +4,7 @@
 #include "scr.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_picture.h"
 #include "evt_event_pack.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
@@ -43,8 +44,6 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDes
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
 
-extern void evtSetContextFlag(KwlnTask *);
-extern void evtClearContextFlag(KwlnTask *);
 extern void fldSetFadeTarget(s32, s32, s32);
 extern void evtBeginSkyParameterTransition(s32, s32);
 
@@ -69,8 +68,6 @@ s32 func_00228058(void) {
 }
 
 extern char D_003ACA78[];
-extern KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
-extern KwlnTask *evtCreateTask(s32, const char *);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
