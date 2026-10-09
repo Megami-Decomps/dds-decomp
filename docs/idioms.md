@@ -5965,3 +5965,11 @@ two `itfDrawPulsingTestOverlay` functions keep their reset-list result
 as that pointer through packet appends and the surface callback. These
 closures change no allocator, GS/DMA word, statement order, or callback.
 
+
+## Battle panel corner clearing retains the retail redundant test
+
+DDS1 `func_001B05D0` retains the corner-1/3 test at `0x001B079C`
+even though both arms clear the low color byte. This is native work,
+not an invented scheduling branch. Its 37 x/y/texture triples and four
+initial colors are function-local initializers replacing only that
+function's own `D_003A2608` and `D_003A27C8` data inclusions.

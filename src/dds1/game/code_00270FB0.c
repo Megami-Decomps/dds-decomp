@@ -216,7 +216,7 @@ void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resour
                                    u32 unused, PartyPanel *partyPanel) {
     mnuInitPageWindow(container, partyPanel, resources->baseResources[3], 7,
                       resources->baseResources[4], 0, resources->baseResources[0], 0x11);
-    func_0027FAA8((u32)container, (u32)resources->baseResources[0]);
+    mnuDrawPartyPageGauges((u32)container, (u32)resources->baseResources[0]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);

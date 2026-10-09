@@ -289,7 +289,7 @@ extern EffResourceRectWork *effGetCh75Work(void);
 extern EvtViewerDrawVector kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
-EvtRuntimeChild *func_00246108(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     CampDisplayDefaults display;
     EvtBlendKey layout;
     f32 first, second;

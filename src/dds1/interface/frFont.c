@@ -1103,7 +1103,7 @@ s32 func_00195E60(FrFontGlyph *glyph) {
     return count;
 }
 
-s32 func_00195ED8(s32 requestedLine, FrFontGlyph *glyph) {
+s32 frFontMeasureGlyphStripWidth(s32 requestedLine, FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 bottom;
     s32 currentY;

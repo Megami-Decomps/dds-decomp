@@ -271,7 +271,7 @@ extern char D_00417AF0[];
 
 extern char D_00417B10[];
 
-extern void func_001E1BB8(u8 *, u32, u32);
+extern void btlBindUnitModel(u8 *, u32, u32);
 
 extern char D_00417B30[];
 
@@ -1754,7 +1754,7 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 
-/* Native actor-model setup providers used by func_001E1BB8. */
+/* Native actor-model setup providers used by btlBindUnitModel. */
 extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 
 extern void *dds3GetWorldObject(void);
@@ -1771,7 +1771,7 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
 extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
 
-void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
+void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
     BtlUnit *unit = (BtlUnit *)unitAddress;
     BtlUnit *reused = NULL;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3222,7 +3222,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
-        func_001E1BB8(object, effect, model);
+        btlBindUnitModel(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitAlphaTransition(((BtlUnit *)object)->ext, 0, 0);
@@ -3244,7 +3244,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
             return 0;
         }
-        func_001E1BB8(object, effect, model);
+        btlBindUnitModel(object, effect, model);
         btlReleaseModelAssetByMode(object, effect, model);
         btlBossDebugPrintf(D_00417B30, effect, model, object);
     }
@@ -3382,7 +3382,7 @@ u32 func_001E50E0(BtlModelChangeArgs *args) {
         btlReleaseActorModelResources(unit);
         btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
         btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
-        func_001E1BB8((u8 *)unit, resourceKind, resourceId);
+        btlBindUnitModel((u8 *)unit, resourceKind, resourceId);
         btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
         if (args->duration == 0) {
             kwlnDrawControlFlags |= 0x2000000;
@@ -4078,7 +4078,7 @@ typedef struct BtlPositionEffectArgs {
     f32 velocity;
 } BtlPositionEffectArgs;
 
-u32 func_001E6BF8(BtlPositionEffectArgs *task) {
+u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
     s32 flags;
@@ -4152,7 +4152,7 @@ BtlRuntimeTask *func_001E6E18(BtlUnit *unit) {
     BtlPositionEffectArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->callback = func_001E6BF8;
+    task->callback = btlAdvanceActorPositionEffectTask;
     task->taskId = 0x1E;
     task->ownerId = unit->owner;
     task->onStart = 0;
@@ -4413,7 +4413,7 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
 }
 
 /* Update motion completion, alpha transitions, and the selected-unit color pulse. */
-void func_001E7648(void) {
+void btlUpdateActiveActorModelState(void) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlActorStatusRecord *status;
@@ -4492,7 +4492,7 @@ extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
 extern void btlUpdateUnitCommandEffect(struct SoundLink *);
 
-extern void func_0020EA18(BtlUnit *);
+extern void btlDrawActorGroundDisc(BtlUnit *);
 
 void btlUpdateActorModelColorAndLinks(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -4532,7 +4532,7 @@ void btlUpdateActorModelColorAndLinks(void) {
             func_002034A8(unit->link31C);
             btlUpdateUnitCommandEffect(unit->link320);
             if (!(work->commandRestrictFlags & 0x10000)) {
-                func_0020EA18(unit);
+                btlDrawActorGroundDisc(unit);
             }
         }
     }
@@ -5186,7 +5186,7 @@ extern void dds3EnsureSlotData(void *);
 extern void func_001129C8(EffWorldNode *, s32);
 
 /* vu0 routine: add the battle origin to the default camera position. */
-void func_001E9410(void) {
+void btlInitializeWorldCamera(void) {
     f32 position[4];
     EffWorldNode *camera;
     CameraData *data;

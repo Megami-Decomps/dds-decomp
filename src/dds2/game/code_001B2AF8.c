@@ -870,7 +870,7 @@ extern const char D_004157C8[];
 /* The empty native provider still receives the calculated chance word. */
 extern void func_0011EBF8();
 
-s32 func_001B4210(void) {
+s32 btlRollSurpriseAttack(void) {
     f32 levelScale[9];
     BtlState *state;
     u32 partyLevel;
@@ -3842,7 +3842,7 @@ extern const BattleActorPanelInitialPositions D_00416780;
 extern s32 func_001C1F10(KwlnTask *);
 extern void btlReleaseStwrPanelResource(KwlnTask *);
 
-void func_001C1520(void) {
+void btlInitializeStaffActorPanels(void) {
     BattleActorPanelInitialPositions positions = D_00416780;
     BtlState *battle;
     struct SdfMemBlock *allocation;
@@ -4232,7 +4232,7 @@ extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 
 
 extern const char *btlCommandPanelTaskNameRef;
-extern void func_001C3A38(BattleActorPanelWork *, s8);
+extern void btlClearClosingActorRowPulses(BattleActorPanelWork *, s8);
 extern void btlUpdateActorSlotStates(u8 *, s8);
 extern void func_001C3DB0(ActionStateLink *, BattleActorPanelWork *, s8);
 
@@ -4268,7 +4268,7 @@ void func_001C35F0(ActionStateLink *actor, s8 mode, s8 value) {
         return;
     }
     work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
-    func_001C3A38(work, mode);
+    btlClearClosingActorRowPulses(work, mode);
     btlUpdateActorSlotStates((u8 *)work, 0);
     work->activeEntries[slot].presentation.presentationState = 2;
     work->activeEntries[slot].presentation.presentationValue = value;
@@ -4302,7 +4302,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
-                func_001C3A38((BattleActorPanelWork *)entry, mode);
+                btlClearClosingActorRowPulses((BattleActorPanelWork *)entry, mode);
             }
             offset = slot * 0x290 + 0x10;
             slotEntry = (UiSlotRow *)(entry + offset);
@@ -4377,7 +4377,7 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
     }
 }
 
-void func_001C3A38(BattleActorPanelWork *work, s8 mode) {
+void btlClearClosingActorRowPulses(BattleActorPanelWork *work, s8 mode) {
     s32 slot;
     s32 remaining;
 
@@ -5954,7 +5954,7 @@ typedef struct SceneCheckArgs {
 
 extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 func_001ABA40(BtlUnit *, s32);
+extern s32 btlCheckCommandVitalCost(BtlUnit *, s32);
 
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
@@ -5966,7 +5966,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
     if (args->first != 0) {
         resultA = func_001ABDE8(args->first, args->first, self, args->second, args->mode);
         if (resultA == 6 && base == 0) {
-            if (func_001ABA40(args->first, args->mode) == 0) {
+            if (btlCheckCommandVitalCost(args->first, args->mode) == 0) {
                 resultA = 0;
             }
         }
@@ -5974,7 +5974,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
     if (args->second != 0) {
         resultB = func_001ABDE8(args->second, args->second, self, args->first, args->mode);
         if (resultB == 6 && base == 0) {
-            if (func_001ABA40(args->second, args->mode) == 0) {
+            if (btlCheckCommandVitalCost(args->second, args->mode) == 0) {
                 resultB = 0;
             }
         }
@@ -7257,7 +7257,7 @@ extern void btlLoadResourceBlock(void);
 
 extern void btlStartRegisteredChildTask(void);
 
-extern void func_001C1520(void);
+extern void btlInitializeStaffActorPanels(void);
 
 
 void fldCreateSceneCleanupTask(void) {
@@ -7272,7 +7272,7 @@ void fldCreateSceneCleanupTask(void) {
     scene->sceneStatus = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
-    func_001C1520();
+    btlInitializeStaffActorPanels();
     func_001C16B0(1);
     fldBeginSceneTransition();
 }

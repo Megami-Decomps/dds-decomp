@@ -49,7 +49,7 @@ extern s32 func_00230978(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 func_001B4040();
-extern s32 func_001B4210();
+extern s32 btlRollSurpriseAttack();
 extern void func_0022AF90();
 extern void func_00229728();
 extern void btlSelectSceneAudioTrack();
@@ -141,7 +141,7 @@ extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
 extern void btlSyncModelFlagFromEventThresholds();
 extern void btlResetTitleStreamOnBattleFlag();
-extern void func_001E9410();
+extern void btlInitializeWorldCamera();
 extern void btlSpawnBattleWorldAction();
 extern void btlCreateRainEffect();
 extern s32 btlReleaseScriptResourceA();
@@ -218,7 +218,7 @@ extern char *D_004367CC;
 extern char *D_004368B0;
 extern void btlLoadResourceBlock(void);
 extern void btlStartRegisteredChildTask(void);
-extern void func_001C1520(void);
+extern void btlInitializeStaffActorPanels(void);
 extern void func_001C16B0(s32);
 
 extern void itfMesClearFlags();
@@ -571,7 +571,7 @@ extern char D_00417AF0[];
 
 extern char D_00417B10[];
 
-extern void func_001E1BB8(u8 *, u32, u32);
+extern void btlBindUnitModel(u8 *, u32, u32);
 
 extern char D_00417B30[];
 
@@ -610,7 +610,7 @@ extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 func_001FB908(BtlLinkedCommand *, BtlCamState *, s8, s8);
+extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
 typedef struct SoundCursor {
     u16 unk_00;
@@ -656,7 +656,7 @@ extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 
 extern void func_002A27A8(s32, s32, u8);
-extern void func_001AB160(BtlUnit *);
+extern void btlMoveActorOutOfActiveParty(BtlUnit *);
 extern s32 func_001E6428(s32 owner, s32 option);
 
 
@@ -1831,7 +1831,7 @@ extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void func_001AA898(DatPartyRecord *record, s32 index);
 extern DatEnemyRecord *datEnemyRecords;
 
-void func_001DACF8(ActionStateLink *action) {
+void btlStartAlternateModelChange(ActionStateLink *action) {
     BtlState *state;
     BtlUnit *unit;
     DatPartyRecord *party;
@@ -2041,7 +2041,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     if (fldReleaseIdleSceneActorResources(task->unit) != 0) {
         if (unit->status.flags & 0x200) {
             func_001AA868(&unit->partyRecord.flags, 8);
-            func_001AB160(unit);
+            btlMoveActorOutOfActiveParty(unit);
         }
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);

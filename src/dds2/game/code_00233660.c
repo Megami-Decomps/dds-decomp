@@ -1266,7 +1266,7 @@ void func_00235568(void) {
 
 extern const char *D_003C8780[];
 
-void func_00235628(void) {
+void mdlDrawViewerOptionLabels(void) {
     const char **label;
     u32 i;
 
@@ -1410,7 +1410,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421248);
 
-void func_00235970(void) {
+void mdlHandleViewerAssetSelection(void) {
     s32 pageStep;
     s32 motionIndex;
     s32 entryCount;
@@ -1511,7 +1511,7 @@ extern char D_004370A0[];
 extern char D_004370A8[];
 
 /* Draw the pending resource details and the current selection in each model node. */
-void func_00235C20(void) {
+void mdlDrawViewerAssetSelection(void) {
     SifCommand packet;
     char basename[32];
     s32 panelTop;
@@ -1619,8 +1619,8 @@ void func_00235C20(void) {
 }
 
 u32 mdlRunViewerAssetSelectionTask(void) {
-    func_00235970();
-    func_00235C20();
+    mdlHandleViewerAssetSelection();
+    mdlDrawViewerAssetSelection();
     return 0;
 }
 
@@ -2150,7 +2150,7 @@ void mdlUpdateViewerSettingsInput(void) {
         case 9:
             PCP_COPY_VECTOR(&D_003C87C0, &D_00453620);
             PCP_COPY_VECTOR(&D_003C87D0, &D_00453630);
-            func_00238BD8();
+            mdlSaveViewerPresentationConfig();
             break;
         }
         break;
@@ -2351,7 +2351,7 @@ void mdlUpdateViewerMarkEditorInput(void) {
 
 extern const char D_00421420[];
 extern const char D_004370F0[];
-void func_00237D08(void) {
+void mdlDrawViewerEffectRecordList(void) {
     MdlViewState *state = &mdlViewerState;
     MdlCtx *resource;
     MdlRecord *firstList;
@@ -2490,7 +2490,7 @@ void func_00237D08(void) {
 
 u32 mdlRunViewerEffectEditorTask(void) {
     mdlUpdateViewerMarkEditorInput();
-    func_00237D08();
+    mdlDrawViewerEffectRecordList();
     return 0;
 }
 
@@ -2714,7 +2714,7 @@ void mdlLoadViewerPresentationConfig(void) {
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
 extern s32 func_0035C860(char *, const char *, ...);
 
-void func_00238BD8(void) {
+void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;
     struct FileRequest *request;

@@ -307,7 +307,7 @@ extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
  * enabled key of the same kind. */
-void func_0022E288(EvtRuntimeGroup *track, s32 time) {
+void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
     u32 objectMode = 0;
     u32 unitMode = 2;
     s32 pass;

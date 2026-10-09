@@ -23,7 +23,7 @@ extern u32 D_003BBDF0;
 
 void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
 
-s32 func_0022AB90(void);
+s32 evtUpdateScriptTestSelection(void);
 
 extern s32 evtSolarOverlayFadeCounter;
 
@@ -158,7 +158,7 @@ u32 func_0022AB60(void) {
 
 /* Return the same update callback installed by evtStartTestTask. */
 void *evtGetTestTaskUpdateCallback(void) {
-    return (void *)func_0022AB90;
+    return (void *)evtUpdateScriptTestSelection;
 }
 
 extern s32 sdfAllocPacketAligned(s32);
@@ -174,7 +174,7 @@ extern const char D_003ACC68[];
 extern const char D_003ACC78[];
 extern const char D_003ACC88[];
 
-s32 func_0022AB90(void) {
+s32 evtUpdateScriptTestSelection(void) {
     char path[0x40];
     SdfListHead *list;
 
@@ -236,7 +236,7 @@ void evtDestroyTestTaskScripts(void) {
 
 void evtStartTestTask(void) {
     D_003BA8EC = 0x80000000;
-    kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, func_0022AB90, evtDestroyTestTaskScripts, 0);
+    kwlnTaskCreate(D_003ACD18, 0x2AF9, 1, 1, evtUpdateScriptTestSelection, evtDestroyTestTaskScripts, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0022A248", D_003ACD18);

@@ -302,7 +302,7 @@ extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
 
 /* Sample a Bezier curve of the given degree: binomial coefficients first, then the Bernstein
  * weighted sum of the control points for sampleCount + 1 evenly spaced parameters. */
-struct SdfMemBlock *func_002C8FE8(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
+struct SdfMemBlock *sdfSampleBernsteinCurve(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
     struct SdfMemBlock *outputBlock;
     struct SdfMemBlock *coefficientBlock;
     f32 *coefficients;

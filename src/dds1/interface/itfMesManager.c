@@ -53,7 +53,7 @@ void itfMesDestroyWindow(s32 window);
 
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
-s32 func_0019C9F0(s32 window, s32 arg1, s32 arg2);
+s32 itfMesSetOptionValue(s32 window, s32 arg1, s32 arg2);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
@@ -116,7 +116,7 @@ extern void itfClearDrawStateWords();
 
 extern void itfResetBattleFadeState();
 
-extern s32 func_00195ED8();
+extern s32 frFontMeasureGlyphStripWidth();
 
 extern UiSprite *func_00199828(s32 kind, u32 payload);
 
@@ -343,7 +343,7 @@ s32 itfMesScriptSetMessageRange(void) {
     }
     first = scrReadIntParameter(0);
     second = scrReadIntParameter(1);
-    func_0019C9F0(window, first, second);
+    itfMesSetOptionValue(window, first, second);
     return 1;
 }
 
@@ -461,7 +461,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     func_00196088(0x1000, 0x4B0, optionBlock->glyphChain);
     rowsHeight = optionBlock->rowCount * ITF_MES_OPTION_ROW_SPACING * 8;
     for (rowIndex = 0; rowIndex < optionBlock->rowCount; rowIndex++) {
-        rowWidth = func_00195ED8(rowIndex, optionBlock->glyphChain);
+        rowWidth = frFontMeasureGlyphStripWidth(rowIndex, optionBlock->glyphChain);
         if (maxRowWidth < rowWidth) {
             maxRowWidth = rowWidth;
         }
@@ -843,7 +843,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
 }
 
 /* Set or append the option with `id` in the window's option list; ids 1, 6, 7 and >= 16 are rejected. */
-s32 func_0019C9F0(s32 window, s32 id, s32 value) {
+s32 itfMesSetOptionValue(s32 window, s32 id, s32 value) {
     ItfMesBlk40 *optionBlock = &itfWindowSlots[window].mes->blk40;
     ItfMesOption *option = NULL;
     s32 index;

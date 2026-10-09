@@ -1608,7 +1608,7 @@ s32 func_001A9130(void) {
 
 
 
-u64 *func_001A9580(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
+u64 *sdfCreateGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
 
     packet[0] = 7;
@@ -1644,7 +1644,7 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
 
 extern f32 sdfSinPoly(f32);
 
-extern u64 *func_001A9580(u32, u32, u32, u32, u32, u32, u32);
+extern u64 *sdfCreateGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
 void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     u32 color = 0;
@@ -1666,7 +1666,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
     sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket(list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    sdfAppendPacket(list, (u32)sdfCreateGradientQuadPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -1702,7 +1702,7 @@ extern s32 btlUpdateAutoMusic(void);
 
 extern s32 btlUpdateTintAndWorldLight(void);
 
-extern void func_00205160(void);
+extern void btlUpdateMotionSoundLoading(void);
 
 extern s32 btlUpdateScene(void);
 
@@ -1710,7 +1710,7 @@ extern s32 func_001D3ED8(void);
 
 extern s32 btlUpdateActionSeqs(void);
 
-extern s32 func_001E7648(void);
+extern s32 btlUpdateActiveActorModelState(void);
 
 extern s32 func_0020D108(void);
 
@@ -1728,11 +1728,11 @@ s32 btlUpdateActiveBattleFrame(KwlnTask *task) {
         btlUpdateFadeColor();
         btlUpdateAutoMusic();
         btlUpdateTintAndWorldLight();
-        func_00205160();
+        btlUpdateMotionSoundLoading();
         btlUpdateScene();
         func_001D3ED8();
         btlUpdateActionSeqs();
-        func_001E7648();
+        btlUpdateActiveActorModelState();
         func_0020D108();
         btlSweepFinishedTasks();
         func_001E9130();
@@ -2059,7 +2059,7 @@ void btlResetActorEntryState(void) {
     memset((void *)(btlRuntime + 0x2DC), 0, 12);
 }
 
-s32 func_001AA400(BrsRewardSummary *rewards) {
+s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
     u32 i;
 
     if (btlIsRuntimeAllocated() == 0) {
@@ -2359,7 +2359,7 @@ void func_001AAC50(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
 
-void func_001AB160(BtlUnit *unit) {
+void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     DatPartyRecord saved;
     DatGameState *scanState = datGameState;
     s32 originalIndex;
@@ -2393,7 +2393,7 @@ void func_001AB160(BtlUnit *unit) {
 extern const char D_00415130[];
 
 /* Swap the actor's roster entry, refresh its stats, and mark the active entry. */
-void func_001AB510(BtlUnit *actor, u8 targetIndex) {
+void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     DatPartyRecord previous;
 
     if (actor->unk2E4 != targetIndex) {
@@ -2463,7 +2463,7 @@ s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot) {
     return value;
 }
 
-s32 func_001ABA40(BtlUnit *unit, s32 command) {
+s32 btlCheckCommandVitalCost(BtlUnit *unit, s32 command) {
     s32 result = 0;
     u32 cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
 
@@ -2520,7 +2520,7 @@ s32 func_001ABB10(BtlUnit *unit, s32 command) {
     if (datCommandRecords[command].flags & 4) {
         return 0;
     }
-    return func_001ABA40(unit, command);
+    return btlCheckCommandVitalCost(unit, command);
 }
 
 s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUnit *second,
@@ -3722,7 +3722,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415308);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415318);
 
-void func_001AED98(void) {
+void btlPushSavedPartyUnitStates(void) {
     s32 count = 0;
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -4053,7 +4053,7 @@ typedef struct BtlAnimationModeRow {
 } BtlAnimationModeRow;
 
 /* Sort same-side targets for the selected animation, or perform thirteen swaps. */
-void func_001B0DB0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
+void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
     BtlUnit *pair[2];
     f32 muzzle[2][4];
     u32 randomIndices[2];

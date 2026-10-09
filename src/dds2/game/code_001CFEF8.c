@@ -66,7 +66,7 @@ extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern s32 func_001B4040();
 
-extern s32 func_001B4210();
+extern s32 btlRollSurpriseAttack();
 
 extern void func_0022AF90();
 
@@ -147,7 +147,7 @@ extern void btlSyncModelFlagFromEventThresholds();
 
 extern void btlResetTitleStreamOnBattleFlag();
 
-extern void func_001E9410();
+extern void btlInitializeWorldCamera();
 
 extern void btlSpawnBattleWorldAction();
 
@@ -193,7 +193,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
     if (func_001B4040() == 0) {
-        if (func_001B4210() == 0) {
+        if (btlRollSurpriseAttack() == 0) {
             ((BtlState *)scene)->encounterKind = 0;
         } else {
             ((BtlState *)scene)->encounterKind = 2;
@@ -231,7 +231,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
     f32 *origin;
     if (btlCountTasksForOwner(0x8000000000000001LL) == 0) {
         btlResetTitleStreamOnBattleFlag();
-        func_001E9410();
+        btlInitializeWorldCamera();
         btlSpawnBattleWorldAction();
         btlCreateRainEffect(scene->background.ids.major, scene->background.ids.minor);
         if (scene->commandRestrictFlags & 0x40000) {
@@ -314,7 +314,7 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
 extern s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *);
 
-void func_001D08A8(BtlState *scene) {
+void btlQueueSceneActorModelEntry(BtlState *scene) {
     BtlUnit *unit;
     BtlUnit *tail;
     BtlRuntimeTask *task;
@@ -820,7 +820,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
     return 0;
 }
 
-extern void func_001AED98(void);
+extern void btlPushSavedPartyUnitStates(void);
 extern void btlSetTaskPhase5(void);
 extern s32 func_001B7830(void);
 extern s32 btlDestroyTaskC(void);
@@ -854,7 +854,7 @@ void func_001D18D8(BtlState *scene) {
     u32 participants;
     u32 i;
 
-    func_001AED98();
+    btlPushSavedPartyUnitStates();
     if (scene->eventReady != 5) {
         func_001C7DB8(0, 8);
         btlSetTaskPhase5();
@@ -1417,7 +1417,7 @@ extern s32 mdlFlagTest(s32);
 extern void fldInitSceneFadeRecords(void);
 
 /* Initialize scene slots from selected actors and mode-specific modifiers. */
-void func_001D30E0(void) {
+void fldInitializeSceneSlots(void) {
     ActionStateLink *selected[13];
     BtlState *scene = (BtlState *)btlGetRuntime();
     ActionStateLink *task;
@@ -1680,7 +1680,7 @@ void fldInitializeSceneGroups(void) {
     fldSortGroupByPriority(scene->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(scene->groupSecondary, FLD_SCENE_SECONDARY_TASK_COUNT);
     btlSortSceneGroupByPriorityDesc(scene->groupTertiary, FLD_SCENE_TERTIARY_TASK_COUNT);
-    func_001D30E0();
+    fldInitializeSceneSlots();
 }
 
 /* Move a member behind its occupied successors; native membership/bounds are unchecked. */

@@ -87,7 +87,7 @@ extern s8 dds3AdminReadPreviousSignedSample(void);
 
 extern EffectList *mnuAllocateValueRecord(u32);
 
-extern void func_0027AD80(void *);
+extern void mnuLoadBackdropAssetsAndTintSlots(void *);
 
 extern void evtCreateMessageWindowIfMissing(s32);
 
@@ -117,7 +117,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
         menu->resourceQueue = mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&menu->partyPanel);
-    func_0027AD80(menu->background);
+    mnuLoadBackdropAssetsAndTintSlots(menu->background);
     evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
     func_00271368(menu);
     func_002717D8(menu);
@@ -186,7 +186,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
 
 extern void mnuHandleCampFieldSkillInput();
 
-extern void func_002728F8();
+extern void mnuDrawStaffCampImageScreen();
 
 extern s32 func_002729C8(s32);
 
@@ -202,7 +202,7 @@ void mnuCreateCampTasks(void) {
 
     menuAddress = (s32)mnuCreateStaffCampWork();
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
-    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002728F8, 0, menuAddress);
+    drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawStaffCampImageScreen, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, menuAddress);
     func_00101A80(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, menuAddress));
     func_00101A80(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));

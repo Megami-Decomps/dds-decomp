@@ -18,7 +18,7 @@ extern struct EffectSlotSet *D_003BC520;
 extern void func_002BF4E0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Fade the fixed dispatch frame, then its five-tick-delayed foreground icon. */
-void func_0025DF68(s32 contextAddress, s32 progress) {
+void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
     struct EffectSlotSet *texture = D_003BC520;
     s32 ticks;
     s32 scale;
@@ -212,7 +212,7 @@ extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char D_003BC500[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
-void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
+void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
                    struct MenuListNode *node, s32 drawArg) {
     MnuShopListContext *context = (MnuShopListContext *)list->context;
     s32 row = node->index - list->head->index;

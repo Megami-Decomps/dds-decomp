@@ -2096,7 +2096,7 @@ s32 mdlIsDebugTimeGraph(void) {
     return kwlnTaskGetTaskByName("DebugTimeGrph") != 0;
 }
 
-extern void func_0021E068(void);
+extern void mdlSaveViewerPresentationConfig(void);
 
 /* Debug menu: page 0 selects an action, pages 1-4 edit the color channels and value steps. */
 void mdlUpdateViewerSettingsInput(void) {
@@ -2131,7 +2131,7 @@ void mdlUpdateViewerSettingsInput(void) {
         case 9:
             PCP_COPY_VECTOR(&D_00367A10, &D_003D7B20);
             PCP_COPY_VECTOR(&D_00367A20, &D_003D7B30);
-            func_0021E068();
+            mdlSaveViewerPresentationConfig();
             break;
         }
         break;
@@ -2332,7 +2332,7 @@ void mdlUpdateViewerMarkEditorInput(void) {
 
 extern const char D_003ABEB0[];
 extern const char D_003BBCB0[];
-void func_0021D198(void) {
+void mdlDrawViewerEffectRecordList(void) {
     MdlViewState *state = &mdlViewerState;
     MdlCtx *resource;
     MdlRecord *firstList;
@@ -2471,7 +2471,7 @@ void func_0021D198(void) {
 
 u32 mdlRunViewerEffectEditorTask(void) {
     mdlUpdateViewerMarkEditorInput();
-    func_0021D198();
+    mdlDrawViewerEffectRecordList();
     return 0;
 }
 
@@ -2675,7 +2675,7 @@ void mdlLoadViewerPresentationConfig(void) {
 
 const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
 extern s32 func_003014F0(char *, const char *, ...);
-void func_0021E068(void) {
+void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;
     struct FileRequest *request;

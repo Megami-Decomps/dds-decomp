@@ -172,7 +172,7 @@ extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void func_001200E8(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
-void func_0020EA18(BtlUnit *unit) {
+void btlDrawActorGroundDisc(BtlUnit *unit) {
     f32 position[4] __attribute__((aligned(16)));
     f32 actorPosition[4] __attribute__((aligned(16)));
     f32 radius;

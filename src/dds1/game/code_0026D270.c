@@ -11,7 +11,7 @@ extern u32 func_0026BED0(void);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 extern f32 sdfSinPoly(f32);
 
-void func_0026D270(void) {
+void mnuDrawMovieMenuBackdrop(void) {
     f32 factor;
     f32 alpha;
 
@@ -105,7 +105,7 @@ INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D660);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-void func_0026D808(void) {
+void mnuDrawMovieChoiceTransition(void) {
     s32 i;
     s32 elapsed;
     s32 alpha;

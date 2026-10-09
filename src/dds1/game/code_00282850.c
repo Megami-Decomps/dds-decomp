@@ -95,7 +95,7 @@ extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
 
 
-extern void func_00284108(MenuEffectPair *, s32, s32 *, s32, s32, EffectSlotSet *, const s32 *);
+extern void mnuInitPairedPanelResources(MenuEffectPair *, s32, s32 *, s32, s32, EffectSlotSet *, const s32 *);
 
 
 extern void evtStageTestCreateModelEffect(s32);
@@ -644,7 +644,7 @@ s32 mnuRateByThreshold(MenuEffectPair *owner) {
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 
 /* Split the scaled grid width by its rate category and clear the paired grid. */
-void func_00283D10(MenuEffectPair *owner) {
+void mnuUpdatePairedEffectBounds(MenuEffectPair *owner) {
     s32 span = (owner->resourceSets[1]->workEntries[0].geometry.bounds[2]
                 * owner->quantizedSpan) / 100;
     s32 rate = mnuRateByThreshold(owner);
@@ -676,7 +676,7 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     s32 *settings;
     s32 setting;
 
-    func_00283D10(pair);
+    mnuUpdatePairedEffectBounds(pair);
     mnuSetPairedEffectPositions(pair);
     settings = pair->settings;
     setting = 0;
@@ -694,7 +694,7 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
-void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
+void mnuDrawAlternatingRatioBarEffects(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
                    s32 surface) {
     s32 rate = mnuRateByThreshold(owner);
     u32 scale;
@@ -764,7 +764,7 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
     }
 }
 
-void func_00284108(MenuEffectPair *pair, s32 initialValue, s32 *settings,
+void mnuInitPairedPanelResources(MenuEffectPair *pair, s32 initialValue, s32 *settings,
                    s32 positionY, s32 span, EffectSlotSet *source, const s32 *table) {
     memset(pair, 0, sizeof(*pair));
     pair->quantizedSpan = span;
@@ -813,9 +813,9 @@ void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, 
     s32 tableB[9] = {6, 0, 0xD, 0xD, 2, 1, 0xB, 9, 7};
 
     if (y == 1) {
-        func_00284108(x, y, depth, color, variant, texture, tableA);
+        mnuInitPairedPanelResources(x, y, depth, color, variant, texture, tableA);
     } else {
-        func_00284108(x, y, depth, color, variant, texture, tableB);
+        mnuInitPairedPanelResources(x, y, depth, color, variant, texture, tableB);
     }
 }
 

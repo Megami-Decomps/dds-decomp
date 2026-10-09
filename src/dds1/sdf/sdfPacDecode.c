@@ -43,7 +43,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
-void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
+void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
 void sdfPacFinalizeRelocatedPayload(PacState *state);
 void sdfPacCompleteResourcePacket(PacState *state);
@@ -370,7 +370,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
 
 /* Point the resource buffer at one allocation packet: keep it in packet memory, or allocate a
  * block and copy (raw) or decode (compressed) the payload into it. */
-void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
+void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
     state->resourceBuffer = buffer;
     buffer->remainingBytes = packet->payloadSize - PAC_HEADER_BYTES;
     if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
@@ -412,7 +412,7 @@ void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet
     {
         void *allocation = sdfAllocSizeClassBlock(0x10);
         state->slot.resource = allocation;
-        func_002EE6F8(state, packet, allocation);
+        sdfPacStartResourceChunk(state, packet, allocation);
     }
     state->onComplete = sdfPacCompleteResourcePacket;
 }
@@ -420,7 +420,7 @@ void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet
 
 /* Start the next allocation entry at its inline descriptor. */
 void sdfPacStartNextAllocationEntry(PacState *state) {
-    func_002EE6F8(state, &state->slot.list->entry, &state->slot.list->buffer);
+    sdfPacStartResourceChunk(state, &state->slot.list->entry, &state->slot.list->buffer);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 

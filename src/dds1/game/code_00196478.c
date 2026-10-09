@@ -130,7 +130,7 @@ typedef struct TextVector {
     s32 w;
 } TextVector;
 
-extern s32 func_00197068(FrFontCtx *args);
+extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
 u32 itfReadEncodedTextLead(FrFontCtx *args) {
@@ -392,7 +392,7 @@ u32 func_00196BE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00196BE8);
 
-s32 func_00196ED0(s32 code, FrFontCtx *stream) {
+s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
     u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
@@ -454,7 +454,7 @@ s32 func_00196ED0(s32 code, FrFontCtx *stream) {
     return 0;
 }
 
-s32 func_00197068(FrFontCtx *stream) {
+s32 itfScanEncodedTextControls(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
     u8 *bytes = stream->encodedText;
@@ -469,7 +469,7 @@ s32 func_00197068(FrFontCtx *stream) {
             break;
         }
         if ((value & 0xF0) == 0xF0) {
-            s32 result = func_00196ED0(value, stream);
+            s32 result = itfSkipEncodedTextOpcode(value, stream);
 
             if (result == 1) {
                 break;
@@ -515,7 +515,7 @@ s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub) {
     args.encodedTextOffset = 0;
     args.pendingCreate = 1;
     args.pendingPosition = 1;
-    return func_00197068(&args);
+    return itfScanEncodedTextControls(&args);
 }
 
 /* Return the selected resource header's cell width; index is unchecked. */
@@ -779,7 +779,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 
 extern u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 func_00195E60(FrFontGlyph *text);
-extern s32 func_00195ED8(s32 line, FrFontGlyph *text);
+extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
 FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
@@ -808,7 +808,7 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
         s32 i;
         s32 width;
         for (i = 0; i < func_00195E60(handle); i++) {
-            width = func_00195ED8(i, handle);
+            width = frFontMeasureGlyphStripWidth(i, handle);
             if (maxWidth < width) {
                 maxWidth = width;
             }

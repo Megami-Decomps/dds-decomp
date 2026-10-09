@@ -20,7 +20,7 @@
 extern s32 btlGetRuntime(void);
 
 
-extern struct EffExpandedList *func_0029C230(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 typedef struct EffTexTable {
     u8 pad_00[0xC];
@@ -293,7 +293,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     return owner;
 }
 
-void func_0029AE88(EffModelOwner *owner) {
+void effApplyDefaultPartyTint(EffModelOwner *owner) {
     SdfListHead *list;
     u64 *packet;
     SdfPoolNode *surface;
@@ -351,7 +351,7 @@ void effMarkFloorModelForUpdate(EffModelOwner *work) {
     work->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) == 0) {
-            func_0029AE88(work);
+            effApplyDefaultPartyTint(work);
         }
     } else if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) != 0) {
         work->flags = previous | 0x31;
@@ -405,7 +405,7 @@ void effSweepFloorModelList(void) {
             next = node->next;
             if (!(node->object->flags & 8)) {
                 if ((node->object->flags & 0x31) == 1) {
-                    func_0029AE88(node->object);
+                    effApplyDefaultPartyTint(node->object);
                 }
                 node->object->flags &= ~0x20;
             } else {
@@ -743,7 +743,7 @@ typedef struct EffExpandedSource {
 } EffExpandedSource;
 
 /* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
-struct EffExpandedList *func_0029C230(u32 sourceAddress) {
+struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     EffExpandedSource *source = (EffExpandedSource *)sourceAddress;
     u32 count = source->count;
     EffExpandedEntry *sourceEntry = source->entries;

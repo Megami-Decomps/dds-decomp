@@ -65,13 +65,13 @@ extern s32 func_0026C4B8(void);
 extern void func_0026D108(void);
 extern void func_0026C7E0(void);
 extern s32 mnuPollMovieMenuInputAndTimeout(void);
-extern void func_0026D270(void);
+extern void mnuDrawMovieMenuBackdrop(void);
 extern void mnuSelectMenuListCursorByAdvance(s32 amount);
 extern void mnuTitleResetSequenceTimers(void);
 extern void func_002E96D8(u32 trackId);
 extern void func_0026CAB0(void);
 extern s32 func_0026D660(void);
-extern void func_0026D808(void);
+extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern u32 func_0026BED0(void);
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData,
@@ -352,16 +352,16 @@ s32 func_0026B1F0(KwlnTask *task) {
         menuAction = mnuPollMovieMenuInputAndTimeout();
         if (menuAction != -1) {
             if (menuAction != 1) {
-                func_0026D270();
+                mnuDrawMovieMenuBackdrop();
             } else {
                 mnuSelectMenuListCursorByAdvance(0);
-                func_0026D270();
+                mnuDrawMovieMenuBackdrop();
                 mnuMovieMenuState->state = 0x1E;
                 mnuMovieMenuState->cursor = 0;
                 mnuTitleResetSequenceTimers();
             }
         } else {
-            func_0026D270();
+            mnuDrawMovieMenuBackdrop();
             mnuMovieMenuState->state = 0x1B;
             mnuMovieMenuState->cursor = 0;
             kwlnFadeInStart(0, 0, 0, 0xF);
@@ -372,7 +372,7 @@ s32 func_0026B1F0(KwlnTask *task) {
         func_0026B1C0();
         if (mnuMovieMenuState->cursor < 0x78) {
             func_0026C7E0();
-            func_0026D270();
+            mnuDrawMovieMenuBackdrop();
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {
             mnuDrawMovieMenuBackgroundQuad(0x80);
@@ -397,13 +397,13 @@ s32 func_0026B1F0(KwlnTask *task) {
         menuAction = func_0026D660();
         switch (menuAction) {
         case 1:
-            func_0026D808();
+            mnuDrawMovieChoiceTransition();
             mnuMovieMenuState->state = 0x1F;
             mnuMovieMenuState->cursor = 0;
             kwlnFadeInStart(0, 0, 0, 0xF);
             break;
         case 2:
-            func_0026D808();
+            mnuDrawMovieChoiceTransition();
             mnuMovieMenuState->state = 0x20;
             mnuMovieMenuState->cursor = 0;
             mnuClearGlobalMenuStateFields();
@@ -411,7 +411,7 @@ s32 func_0026B1F0(KwlnTask *task) {
             mnuMovieMenuState->cursor = 0;
             break;
         default:
-            func_0026D808();
+            mnuDrawMovieChoiceTransition();
             break;
         }
         break;

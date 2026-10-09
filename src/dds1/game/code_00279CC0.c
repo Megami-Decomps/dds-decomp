@@ -382,7 +382,7 @@ extern u32 D_0037CD18[];
 extern u32 D_0037CD20[];
 
 /* Load the base sprite banks synchronously, bind the payloads, and reset the fifth bank's saved corner colors. */
-void func_0027AD80(MenuAssets *assets) {
+void mnuLoadBackdropAssetsAndTintSlots(MenuAssets *assets) {
     s32 i;
     s32 j;
 

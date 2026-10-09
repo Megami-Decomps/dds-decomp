@@ -868,7 +868,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
-    func_001AA400(rewards);
+    btlCaptureRewardSummary(rewards);
     party = work->partyProgress.rows;
     rewardState = &work->rewardState;
     func_0029D008(rewardState, rewards);

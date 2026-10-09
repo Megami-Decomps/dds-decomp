@@ -5543,7 +5543,7 @@ extern s32 btlCanUseActorCategoryFlag4(s32);
 
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern char D_0041ADA8[];
 
@@ -5569,7 +5569,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
                 return 1;
             }
         }
-        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        btlPrepareHeightScaledActionCameraPose(command, &command->frontCamera, &command->backCamera);
         return 1;
     }
     if (modeA != 1 || modeB == 1) {
@@ -5883,7 +5883,7 @@ s32 btlLiftLinkedTargetAndUpdateMotion(BtlLinkedCommand *object) {
 
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern void func_001E3108(void *, f32 *);
 
@@ -5916,7 +5916,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
                 return 1;
             }
         }
-        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        btlPrepareHeightScaledActionCameraPose(command, &command->frontCamera, &command->backCamera);
         return 1;
     }
     if (command->actionCode == 0x105 || command->actionCode == 0x12D) {
@@ -6378,7 +6378,7 @@ s32 btlLiftUnitForLinkedTarget(BtlLinkedCommand *object) {
 
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     s32 cameraKind;
@@ -6404,7 +6404,7 @@ s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
                 return 1;
             }
         }
-        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        btlPrepareHeightScaledActionCameraPose(command, &command->frontCamera, &command->backCamera);
         return 1;
     }
     if (modeA != 1 || modeB == 1) {
