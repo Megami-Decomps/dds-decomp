@@ -694,12 +694,12 @@ void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
 
 void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
     if (list->last == 0) {
-        list->first = (u32)node;
+        list->first = (SdfPacketPatchLink *)node;
     }
     else {
-        *(u32 *)list->last = (u32)node;
+        *(u32 *)list->last = (SdfPacketPatchLink *)node;
     }
-    list->last = (u32)node;
+    list->last = (SdfPacketPatchLink *)node;
     *node = 0;
 }
 
@@ -713,7 +713,7 @@ void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node) 
         chain->head = node;
     }
     else {
-        *(u32 *)chain->tail->last = node->last;
+        chain->tail->last->next = node->last;
     }
     chain->tail = node;
 }
@@ -967,9 +967,9 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     if (list != NULL && list->last != 0) {
         slot->packetList = list;
         if (chain != NULL) {
-            slot->callbackHead = (void *)(u32)chain->head->first;
+            slot->callbackHead = chain->head->first;
             if (slot->callbackHead != NULL) {
-                *(u32 *)chain->tail->last = 0;
+                chain->tail->last->next = NULL;
             }
         }
         slot->queuedBufferIndex = sdfCurrentBufferIndex;
