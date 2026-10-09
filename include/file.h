@@ -72,6 +72,10 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
 struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
 struct FileQueue *fileQueueClone(struct FileQueue *source);
 void fileQueueDestroy(struct FileQueue *queue);
+void fileQueueSetPosition(struct FileQueue *queue, const f32 position[4]);
+void fileQueueSetRotation(struct FileQueue *queue, const f32 rotation[4]);
+void fileQueueSetScale(struct FileQueue *queue, f32 scale);
+void fileQueueUpdate(struct FileQueue *queue);
 
 /* Queue flags describe payload sharing and secondary-buffer links. */
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1

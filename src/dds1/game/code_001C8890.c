@@ -11563,8 +11563,8 @@ void btlUpdateJobPositionFromModel(s32 *args) {
     } else {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
     }
-    fileQueueSetPosition((s32)node->queue, pos);
-    fileQueueUpdate((s32)node->queue);
+    fileQueueSetPosition(node->queue, pos);
+    fileQueueUpdate(node->queue);
 }
 
 void sndDestroyFileQueueWrapper(u32 arg0) {

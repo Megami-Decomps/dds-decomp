@@ -525,11 +525,6 @@ extern u8 D_0037F660[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
-extern void fileQueueSetPosition(FileQueue *queue, void *vec);
-extern void fileQueueSetRotation(FileQueue *queue, void *rot);
-
-extern void fileQueueSetScale(FileQueue *queue, f32 scale);
-
 
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
@@ -4784,8 +4779,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
         }
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
     fileQueueSetColor(queue, 0x80808080);
     return queue;
@@ -4883,8 +4878,8 @@ FileQueue *fileQueueClone(FileQueue *source) {
         fileQueueAppend(queue, job);
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
     fileQueueSetColor(queue, 0x80808080);
     return queue;
@@ -4899,7 +4894,7 @@ void fileQueueNotifyAllJobsComplete(u8 *owner) {
     ((FileQueue *)owner)->updateFrame = 0;
 }
 
-void fileQueueSetPosition(FileQueue *queue, void *vec)
+void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
 {
     f32 rot[16];
     f32 base[4];
@@ -4933,7 +4928,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
     }
 }
 
-void fileQueueSetRotation(FileQueue *queue, void *rot)
+void fileQueueSetRotation(FileQueue *queue, const f32 rot[4])
 {
     f32 quat[4];
     f32 pos[4];
