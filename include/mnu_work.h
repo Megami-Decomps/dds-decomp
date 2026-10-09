@@ -207,6 +207,10 @@ typedef void (*MenuRuntimeCallback)(MenuRuntimeRecord *);
 typedef void (*MenuRuntimeWorkCallback)(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
 typedef void (*MenuRuntimePairCallback)(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
 
+extern MenuWorkEntry *mnuActiveEffectEntry;
+MenuWorkEntry *mnuGetActiveEffectWorkEntry(void);
+void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry);
+
 /* Resource-progress records use a 0x1C-byte stride. */
 typedef struct MenuResourceRecord {
     u32 flags;
