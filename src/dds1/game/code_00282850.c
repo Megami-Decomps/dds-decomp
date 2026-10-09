@@ -23,10 +23,10 @@
 #include "kwln_task_lifecycle.h"
 
 struct FrFontGlyph;
-extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC7A0[];
 
@@ -510,7 +510,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
         variant = 0x12;
     }
     rangeIndex = mnuLookupRangeEntry(rangeId);
-    func_002BF4E0(x, y, depth, color, 1, drawArg, rangeIndex * 2 + variant, texture);
+    func_002BF4E0(x, y, depth, color, 1, (EffectSlotSet *)(u32)drawArg, rangeIndex * 2 + variant, texture);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
@@ -672,7 +672,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
 
     switch (owner->updateState) {
     case 0:
-        func_002BF4E0(x, y - 8, z, scale, 0, (s32)owner->leftGrid, 0, surface);
+        func_002BF4E0(x, y - 8, z, scale, 0, owner->leftGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->leftGrid, 0);
         if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
             effInitializeSlotWork(owner->rightGrid, 0);
@@ -690,7 +690,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
         }
 
         func_002BF4E0(x + owner->resourceSets[1]->workEntries[0].geometry.bounds[2] + xOffset,
-                     y - 0x40, z, scale, 0, (s32)owner->rightGrid, 0, surface);
+                     y - 0x40, z, scale, 0, owner->rightGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->rightGrid, 0);
         if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
             effInitializeSlotWork(owner->leftGrid, 0);
@@ -870,17 +870,17 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     u32 color;
 
     func_002BF4E0(x, y, depth, opacity, 0,
-                 (s32)item->groupGridSlots[0].set, item->groupGridSlots[0].index, layer);
+                 item->groupGridSlots[0].set, item->groupGridSlots[0].index, layer);
     func_00284C48(x, y, depth, opacity, mode, item, layer);
     func_002BF4E0(x, y, depth, opacity, 0,
-                 (s32)item->groupGridSlots[1].set, item->groupGridSlots[1].index, layer);
+                 item->groupGridSlots[1].set, item->groupGridSlots[1].index, layer);
     func_002BF4E0(x, y, depth, opacity, 0,
-                 (s32)item->groupGridSlots[4].set, item->groupGridSlots[4].index, layer);
+                 item->groupGridSlots[4].set, item->groupGridSlots[4].index, layer);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
         func_002BF4E0(x, y, depth, opacity, 0,
-                     (s32)item->gridSlots[0].set, item->gridSlots[0].index, layer);
+                     item->gridSlots[0].set, item->gridSlots[0].index, layer);
         func_002BF4E0(x, y, depth, opacity, 0,
-                     (s32)item->gridSlots[4].set, item->gridSlots[4].index, layer);
+                     item->gridSlots[4].set, item->gridSlots[4].index, layer);
     }
 
     value = item->value18;
@@ -892,7 +892,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     }
     color = uiBlendColors(color, color & ~0xFF, opacity);
     func_003014F0(buffer, D_003BC7A0, value);
-    glyph = (struct FrFontGlyph *)func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
+    glyph = func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
     frFontDrawGlyphChain(glyph, 1, layer);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
@@ -949,7 +949,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
 
     if (progress == capacity) {
         func_002BF4E0(x + 0x2A0, y - 0x30, z, opacity, 0,
-                     (s32)panel->completed.set, panel->completed.index, surface);
+                     panel->completed.set, panel->completed.index, surface);
         return;
     }
     slots = panel->fill.set;
@@ -958,7 +958,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
                  - slots->workEntries[index].sourceWidth * percent / 100;
     slots->workEntries[index].parameters[2] = -croppedWidth;
     slots->workEntries[index].geometry.bounds[2] = (slots->workEntries[index].sourceWidth - croppedWidth) << 4;
-    func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
+    func_002BF4E0(x, y, z, opacity, 0, slots, index, surface);
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
         itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
@@ -971,7 +971,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
             slots->workEntries[index].geometry.bounds[2] =
                 offset + (slots->workEntries[index].sourceWidth << 4);
             func_002BF4E0(x + tile - baseShift, y, z, opacity, 0x21,
-                         (s32)slots, index, surface);
+                         slots, index, surface);
             x += offset;
             offset += 0x80;
         }
