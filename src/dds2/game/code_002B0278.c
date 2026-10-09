@@ -641,7 +641,31 @@ void mnuDestroyPartySelectionWindow(s32 context) {
 
 /* Snapshot the five party entries and cap the menu's displayed slot count. */
 extern void mnuCopyPartyEntries();
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyPartyEntries);
+/* Snapshot five party entries; at most three active slots are displayed. */
+void mnuCopyPartyEntries(context)
+    s32 context;
+{
+    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+    DatPartyRecord *entryCursor = menuWork->current;
+    s32 entryIndex;
+    s32 partyFlagsByteOffset = (s32)&((DatGameState *)0)->party;
+    s32 partyCopyByteOffset = 0;
+
+    menuWork->activeCount = 0;
+    for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
+        *entryCursor = *(DatPartyRecord *)(partyCopyByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party);
+        if (((DatPartyRecord *)((s32)datGameState + partyFlagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+            menuWork->activeCount = menuWork->activeCount + 1;
+        }
+        partyFlagsByteOffset += sizeof(DatPartyRecord);
+        entryCursor++;
+        partyCopyByteOffset += sizeof(DatPartyRecord);
+    }
+    if (menuWork->activeCount >= MNU_STAFF_DISPLAY_OVERFLOW) {
+        menuWork->activeCount = MNU_STAFF_DISPLAY_LIMIT;
+    }
+    menuWork->selection = 0;
+}
 
 /* Move a current party entry into the selected backup slot and refresh its panel. */
 extern void *memcpy(void *, const void *, u32);
@@ -685,7 +709,34 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources. */
 extern void mnuRestorePartyEntriesAndRefresh();
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuRestorePartyEntriesAndRefresh);
+/* Notify active snapshot entries, restore the backup, then refresh panel resources.
+ * The final loop counts down while copying backup entries forward. */
+void mnuRestorePartyEntriesAndRefresh(context)
+    s32 context;
+{
+    PartyMenuData *menuWork = (PartyMenuData *)((MenuContext *)context)->party;
+    DatPartyRecord *entryCursor = menuWork->current;
+    s32 entryCounter;
+    s32 backupByteOffset;
+    MenuPageWindow *panelWork;
+
+    for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
+        if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+            mnuAssignSelectedPartyEntry(entryCounter, -3, 1, (MenuContext *)context);
+        }
+        entryCursor++;
+    }
+    backupByteOffset = 0;
+    for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
+        *(DatPartyRecord *)(backupByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party) = *(DatPartyRecord *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
+        backupByteOffset += sizeof(DatPartyRecord);
+    }
+    panelWork = &((MenuContext *)context)->partyWindow;
+    mnuReleasePartyPanelTextures(panelWork);
+    mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
+    mnuReleaseAndRefreshWindowSlots(panelWork);
+    mnuRefreshPartyPanelBars(panelWork);
+}
 
 /* Count active entries in the five-slot party array, capped at three. */
 s32 mnuCountActiveSlots(void) {

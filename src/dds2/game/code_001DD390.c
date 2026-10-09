@@ -8611,7 +8611,56 @@ BtlUnit *btlFindActiveActorById(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001FDD20);
+f32 func_001FDD20(f32 *first, f32 radius, f32 secondRadius, f32 *second) {
+    f32 center[4];
+    f32 larger[4];
+    f32 smaller[4];
+    f32 direction[4];
+    f32 largerRadius;
+    f32 smallerRadius;
+    f32 distance;
+    f32 result;
+
+    if (first == NULL || second == NULL || radius == 0.0f || secondRadius == 0.0f) {
+        return 0.0f;
+    }
+    if (secondRadius < radius) {
+        VU0_LOAD_VF(vf10, first);
+        VU0_STORE_VF_UNCLOBBERED(vf10, larger);
+        VU0_LOAD_VF(vf10, second);
+        VU0_STORE_VF_UNCLOBBERED(vf10, smaller);
+        largerRadius = radius;
+        smallerRadius = secondRadius;
+    } else {
+        VU0_LOAD_VF(vf10, first);
+        VU0_STORE_VF_UNCLOBBERED(vf10, smaller);
+        VU0_LOAD_VF(vf10, second);
+        VU0_STORE_VF_UNCLOBBERED(vf10, larger);
+        largerRadius = secondRadius;
+        smallerRadius = radius;
+    }
+    VU0_LOAD_VF(vf10, smaller);
+    VU0_LOAD_VF(vf11, larger);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    result = distance;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    radius = largerRadius - smallerRadius;
+    if (result < radius) {
+        radius = radius * 0.5f + largerRadius;
+    } else {
+        radius = (distance + largerRadius + smallerRadius) * 0.5f;
+    }
+    VU0_LOAD_VF(vf10, direction);
+    VU0_SCALAR_OP(radius - largerRadius, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_LOAD_VF(vf11, larger);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    VU0_LOAD_VF(vf10, center);
+    result = radius;
+    return result;
+}
 
 f32 btlGetUnitTargetDistance(BtlUnit *unit, u8 mode, f32 *target, f32 radius) {
     f32 saved[4];
