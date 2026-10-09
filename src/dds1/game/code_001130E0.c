@@ -503,7 +503,7 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 
     memset(zero, 0, 0x10);
     zero[3] = 1.0f;
-    obj = dds3AppendWorldObjectNode(6);
+    obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_TRANSFORM);
     obj->key = (u32)a;
     dds3EnsureSlotData(obj);
     effObjSetInnerRotation(obj, second);

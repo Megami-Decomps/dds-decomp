@@ -25,7 +25,7 @@ typedef struct ActionSub {
 
 
 EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(0xB);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_B);
 
     obj->value = (const char *)d;
     ((ActionSub *)obj->data)->unk10 = 0;
@@ -47,7 +47,7 @@ u32 dds3GetPathStateValueById(u32 id) {
 }
 
 EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(0xD);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_D);
 
     obj->data = work;
     obj->key = a;
@@ -77,7 +77,7 @@ void dds3SamplePathKeyframeInterval(u32 *segment, f32 *weight, Dds3PathKeyframes
 }
 
 EffWorldNode *evtSpawnActionObj10(s32 a, void *work, s32 c) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(0x10);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_ACTION_10);
 
     obj->key = a;
     obj->value = (const char *)c;

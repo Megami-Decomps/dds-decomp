@@ -254,7 +254,6 @@ extern s64 func_001F0B90(void);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
-extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern u32 sndFinishEarringPlayback(void);
 
@@ -6581,25 +6580,28 @@ u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename
     return task;
 }
 
-s32 sndLoadDataFile(s32 *data) {
+s32 sndLoadDataFile(const SoundDataFileArgs *data) {
     char filename[0x70];
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode(data[0], (s32)filename);
+    sndFormatResourceNameFromUnitMode(data->unit, filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
 
-void *sndCreateDataFileLoadTask(u8 *owner) {
-    u8 *task = btlAllocTask(4);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = sndLoadDataFile;
-    *(u16 *)(task + 0x20) = 0x56;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
-    *(u32 *)btlGetTaskArguments(task) = (u32)owner;
+BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundDataFileArgs));
+    SoundDataFileArgs *args;
+
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = sndLoadDataFile;
+    task->taskId = 0x56;
+    task->ownerId = unit->identity;
+    task->onStart = NULL;
+    args = btlGetTaskArguments(task);
+    args->unit = unit;
     return task;
 }
 
@@ -6617,8 +6619,8 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *node) {
     return (temp_v0 & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 arg0, s32 arg1) {
-    func_003014F0(arg1, D_003A5158, D_003BB6B0, (arg0 + 0x200) & 0xffff);
+void sndFormatResourceNameFromIndex(s32 index, char *output) {
+    func_003014F0(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A50D8);
@@ -6631,8 +6633,8 @@ INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5138);
 
 INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5158);
 
-void sndFormatResourceNameFromUnitMode(s32 arg0, s32 arg1) {
-    func_003014F0(arg1, "MDD_%03X.ADB", *(u16 *)(arg0 + 0x124));
+void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
+    func_003014F0(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
 }
 
 s32 sndMapResourceType(s32 sound, s32 index) {

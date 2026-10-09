@@ -3724,7 +3724,7 @@
 0x0021A1D0	mdlDispatchResourceEntry	inferred	Dispatches model resource entry kinds to update, billboard and animation handlers.
 0x0021A268	mdlApplyResourceEntries	inferred	mdl model resources and viewer in game/code_00218B48.c
 0x0021A2E0	mdlDestroyResourceItem	inferred	mdl model resources and viewer in game/code_00218B48.c
-0x0021A368	mdlRemoveResourceSubtype	inferred	Unlinks and destroys each model resource item with the requested subtype.
+0x0021A368	mdlRemoveResourcesForMotionSlot	inferred	Releases and unlinks all model resource items owned by the requested motion slot.
 0x0021A3D8	mdlResolveAnchorPosition	inferred	Finds model draw node and computes anchor position using matrix and scale. [names_reviewed7.tsv]
 0x0021A490	mdlDispatchViewerAnchorRecord	inferred	Switches anchor record type to apply position, update effect or initialize linked object. [names_reviewed7.tsv]
 0x0021A560	mdlSetResourceFrame	inferred	Dispatches the requested frame to the matching model resource type.
