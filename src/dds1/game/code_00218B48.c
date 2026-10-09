@@ -207,7 +207,7 @@ void func_00101A80(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
-void func_00218768(s32, s32, s32, s32);
+extern PacWork *func_00218768(PacWork *, s32, s32, s32);
 
 
 extern u32 D_003BA8EC;
@@ -232,24 +232,17 @@ extern s32 D_003BBB6C;
 
 extern s32 D_003BBB70;
 
-/* Native 0x40-byte package request; the package helpers fill handle at +0x30. */
-typedef struct MdlPackageRequest {
-    u8 pad00[0x30];
-    s32 handle;
-    u8 pad34[0xC];
-} MdlPackageRequest;
-
 /* Load a viewer package; flag 2 enables the extra request-preparation step. */
 void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, s32 requestSecond) {
-    MdlPackageRequest request;
+    PacState request;
 
-    sdfPacInitializeDispatchPacket((PacState *)&request, 0);
+    sdfPacInitializeDispatchPacket(&request, 0);
     if (flags & 2) {
-        sdfPacUsePacketPayloadMemory((PacState *)&request);
+        sdfPacUsePacketPayloadMemory(&request);
     }
-    sdfPacFeedInput((PacState *)&request, (u8 *)requestFirst, requestSecond);
-    func_00218768(request.handle, first, second, flags);
-    sdfPacReleasePacketQueueNodes((PacState *)&request);
+    sdfPacFeedInput(&request, (u8 *)requestFirst, requestSecond);
+    func_00218768(request.queueHead, first, second, flags);
+    sdfPacReleasePacketQueueNodes(&request);
 }
 
 void func_00218BE8(void *memory) {
