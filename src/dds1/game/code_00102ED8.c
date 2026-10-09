@@ -97,7 +97,6 @@ extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern s32 sdfCreateResetPacketList(void);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003C2620[];
 extern s32 D_003BA724;
@@ -1074,7 +1073,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105890);
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
 s32 evtBuildFrameStatePacketList(s32 stateIndex) {
-    s32 packetList = sdfCreateResetPacketList();
+    s32 packetList = (s32)sdfCreateResetPacketList();
 
     sdfAppendPacket((SdfListHead *)packetList, (u32)(D_003C2620 + stateIndex * KWLN_FRAME_STATE_BYTES + kwlnGetDrawBufferIndex() * KWLN_FRAME_BUFFER_BYTES));
     return packetList;

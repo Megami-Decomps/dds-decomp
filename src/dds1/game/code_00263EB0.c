@@ -6,7 +6,7 @@
 
 extern void func_0024DD78(void);
 extern u8 *D_003BAA70;
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern u8 brsGetLevelStepCrossedBy(s32, s32);
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 func_003014F0(char *, const char *, ...);

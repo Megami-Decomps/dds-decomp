@@ -733,7 +733,7 @@ extern char D_003BB1F0[];
 extern void func_003014F0(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
 extern u16 *txtFormatNumberU16(s32 value, u16 *dst);
-void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, u32 sourceAddress);
+void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText);
 
 /* Copy one of the built-in interface strings into a window replacement slot. */
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector) {
@@ -748,42 +748,42 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
     switch (selector) {
     case 0:
         func_003014F0(formatted, D_003BB1F0, value);
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)formatted);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, formatted);
         break;
     case 1:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA74 + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA74 + value * 0x11));
         break;
     case 14:
         memset(converted14, 0, sizeof(converted14));
         itfConvertText(converted14, (char *)D_003BAA74 + value * 0x11);
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted14);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, converted14);
         break;
     case 8:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA88 + value * 7);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA88 + value * 7));
         break;
     case 2:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA70 + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA70 + value * 0x11));
         break;
     case 15:
         memset(converted15, 0, sizeof(converted15));
         itfConvertText(converted15, (char *)D_003BAA70 + value * 0x11);
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted15);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, converted15);
         break;
     case 11:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA90 + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA90 + value * 0x11));
         break;
     case 12:
         memset(converted12, 0, sizeof(converted12));
         itfConvertText(converted12, (char *)D_003BAA90 + value * 0x11);
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted12);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, converted12);
         break;
     case 3:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA84 + value * 0x19);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA84 + value * 0x19));
         break;
     case 13:
         memset(converted13, 0, sizeof(converted13));
         itfConvertText(converted13, (char *)D_003BAA84 + value * 0x19);
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)converted13);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, converted13);
         break;
     case 4:
         converted = (char *)number;
@@ -800,29 +800,28 @@ void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 select
             ((u16 *)converted)[0] = 0xA680;
             ((u16 *)converted)[1] = 0;
         }
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)number);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, number);
         break;
     case 5:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003BAA8C + value * 0x11);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_003BAA8C + value * 0x11));
         break;
     case 6:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_00347C68[value]);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_00347C68[value]);
         break;
     case 7:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_003482A8[value]);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, D_003482A8[value]);
         break;
     case 9:
-        itfMesCopyStringToWindowTableSlot(window, slotIndex, (u32)D_0032ACA8[value]);
+        itfMesCopyStringToWindowTableSlot(window, slotIndex, (const void *)(D_0032ACA8[value]));
         break;
     case 10:
         break;
     }
 }
 
-/* Replace a text slot with a copied NUL-terminated string; sourceAddress
- * remains a raw address in the existing interface. */
-void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, u32 sourceAddress) {
-    func_0019D460((u32)itfWindowSlots[window].mes, slotIndex, sourceAddress, 0);
+/* Replace a text slot with a copied NUL-terminated encoded string. */
+void itfMesCopyStringToWindowTableSlot(s32 window, u32 slotIndex, const void *sourceText) {
+    func_0019D460((u32)itfWindowSlots[window].mes, slotIndex, sourceText, 0);
 }
 
 /* Legacy short-arity entry point: retain its one-argument copier call.
@@ -962,7 +961,6 @@ extern char D_003BB218[];
 extern char D_003BB220[];
 extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 sdfCreateResetPacketList(void);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
@@ -1047,7 +1045,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
         }
     }
 
-    packetList = (SdfListHead *)sdfCreateResetPacketList();
+    packetList = sdfCreateResetPacketList();
     kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
     menuItemFormat = D_003BB218;
     menuItemY = 0x7A00;

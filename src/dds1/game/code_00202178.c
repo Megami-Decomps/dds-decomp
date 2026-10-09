@@ -880,7 +880,7 @@ extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
-void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
+void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, f32 sideScale, f32 backLift, f32 frontLift, s8 mirror, s8 swapRoles) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -3928,11 +3928,232 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
+extern u32 func_001DD2C0(BtlLinkedCommand *);
+extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
+extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_0020B190(u8 *, void *);
+extern char D_003A6338[];
+extern char D_003A6358[];
+
+/* Choose category-specific battle camera keys after the generic action policy. */
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6338);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6358);
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020BE30);
+s32 func_0020BE30(BtlLinkedCommand *command, s32 any200, s32 any400) {
+    s32 selector = (s8)any200;
+    s32 mode = (s8)any400;
+    BtlTask *task;
+    BtlUnit *target;
+    u32 count;
+    u32 shot;
+    s32 variant;
+
+    if (btlIsActorCategoryMarked(command)) {
+        return 0;
+    }
+    task = command->task;
+    if (task->unit->flags & 0x200) {
+        count = btlGetIndexListCount(task->indexWork.indices);
+        if (selector == 1 && mode == 0) {
+            return 0;
+        }
+        if (count == 1 && selector == 0 && mode == 1) {
+            target = btlGetIndexListEntry(task->indexWork.indices, 0);
+            if (!(target->flags & 0x400)) {
+                return 0;
+            }
+            func_0020B190((u8 *)command, target);
+            return 1;
+        }
+        if (count >= 2 && selector == 0 && mode == 1) {
+            if (func_001DD2C0(command)) {
+                btlFlagAllUnitDefeatCandidatesTask();
+                shot = effMiscRandMod(0, 3);
+                switch (shot) {
+                case 0:
+                    func_003003F0(D_003A6338);
+                    btlSetEffectCameraKeys(command, -2.4f, -166.1f, -1323.8f, -0.092f, 0.024f, -0.017f, 0.986f,
+                        19.0f, -158.9f, -1948.8f, -0.075f, 0.013f, -0.016f, 0.988f, 40.0f, 20.0f);
+                    return 1;
+                case 1:
+                    func_003003F0(D_003A6358);
+                    btlSetEffectCameraKeys(command, 82.1f, -569.4f, -1408.9f, 0.079f, 0.029f, -0.011f, 0.987f,
+                        1016.8f, -1654.4f, -1595.3f, 0.228f, 0.219f, 0.038f, 0.939f, 40.0f, 25.0f);
+                    return 1;
+                case 2:
+                    func_003003F0("G:2++++++++++++++++++++++++++\n");
+                    btlSetEffectCameraKeys(command, 51.9f, -580.2f, -1718.4f, 0.078f, 0.021f, -0.017f, 0.987f,
+                        -1026.1f, -35.1f, -1465.1f, -0.119f, -0.228f, 0.008f, 0.957f, 40.0f, 25.0f);
+                    return 1;
+                }
+                return 0;
+            }
+            if (btlCanUseLinkedActor(command)) {
+                variant = 0;
+                if (!btlCanUseActorCategoryFlag2(command)) {
+                    variant = effMiscRandMod(0, 2);
+                }
+            } else {
+                variant = 1;
+            }
+            if (variant == 0) {
+                btlFlagAllUnitDefeatCandidatesTask();
+                shot = effMiscRandMod(0, 4);
+                switch (shot) {
+                case 0:
+                    func_003003F0("TP1:0++++++++++++++++++++++++++\n");
+                    btlSetEffectCameraKeys(command, 891.3f, -1997.4f, -1332.2f, 0.288f, 0.215f, 0.053f, 0.922f,
+                        -618.2f, -1542.5f, -1768.2f, 0.195f, -0.121f, -0.039f, 0.963f, 40.0f, 30.0f);
+                    return 1;
+                case 1:
+                    func_003003F0("TP1:1++++++++++++++++++++++++++\n");
+                    btlSetEffectCameraKeys(command, -415.1f, -1905.1f, -1588.0f, 0.271f, -0.082f, -0.036f, 0.949f,
+                        522.0f, -1223.8f, -1859.6f, 0.138f, 0.107f, 0.004f, 0.975f, 40.0f, 30.0f);
+                    return 1;
+                case 2:
+                    func_003003F0("TP1:2++++++++++++++++++++++++++\n");
+                    btlSetEffectCameraKeys(command, 1233.9f, -30.9f, -1556.3f, -0.118f, 0.274f, -0.044f, 0.944f,
+                        204.4f, -65.2f, -2079.3f, -0.072f, 0.051f, -0.013f, 0.987f, 40.0f, 30.0f);
+                    return 1;
+                case 3:
+                    func_003003F0("TP1:3++++++++++++++++++++++++++\n");
+                    btlSetEffectCameraKeys(command, -1185.4f, -122.8f, -1094.8f, -0.114f, -0.293f, 0.021f, 0.940f,
+                        -705.7f, -449.3f, -1733.9f, -0.018f, -0.130f, -0.011f, 0.982f, 40.0f, 30.0f);
+                    return 1;
+                }
+                return 0;
+            }
+            func_003003F0("ITP-P:++++++++++++++++++++++++++\n");
+            btlFlagAllUnitDefeatCandidatesTask();
+            btlSetLinkedDefeatCameraPresetA(command, &command->camera, 0);
+            return 1;
+        }
+        btlChooseRandomPresetCameraKeys(command);
+        return 1;
+    }
+
+    if (btlCanUseLinkedActor(command)) {
+        variant = 0;
+        if (!btlCanUseActorCategoryFlag2(command)) {
+            variant = effMiscRandMod(0, 2);
+        }
+    } else {
+        variant = 1;
+    }
+    switch (task->unit->partyRecord.unitId) {
+    case 0x11B:
+        if (command->actionCode == 0x1A5) {
+            return 1;
+        }
+        if (command->actionCode == 0x1AD) {
+            btlClearAllUnitDefeatCandidates();
+            btlFlagMatchingUnitsDefeatCandidate(0x200);
+            btlFlagUnitDefeatCandidate(command->task->unit);
+            return 1;
+        }
+        count = btlGetIndexListCount(task->indexWork.indices);
+        if (count == 1 && selector == 1 && mode == 0) {
+            if (variant != 0) {
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 0.8f, -0.5f, 0.075f, 0, 0);
+                command->frontCamera.distance += 500.0f;
+                command->backCamera.distance += 500.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            } else {
+                goto genericSingleTargetCamera;
+            }
+            return 1;
+        }
+        btlChooseRandomPresetCameraKeys(command);
+        return 1;
+    case 0x13D:
+    case 0x13E:
+    case 0x13F:
+    case 0x140:
+    case 0x141:
+    case 0x142:
+        count = btlGetIndexListCount(task->indexWork.indices);
+        if (count == 1 && selector == 1 && mode == 0) {
+            if (variant == 0) {
+            genericSingleTargetCamera:
+                func_001E0398(command, &command->frontCamera, &command->backCamera);
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                return 1;
+            }
+            switch (task->unit->partyRecord.unitId) {
+            case 0x13D:
+            case 0x13E:
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.0f, -1.0f, 1.75f, 0, 0);
+                command->frontCamera.distance += 900.0f;
+                break;
+            case 0x13F:
+            case 0x140:
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.0f, -0.5f, 1.0f, 0, 0);
+                command->frontCamera.distance += 600.0f;
+                break;
+            case 0x141:
+            case 0x142:
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.0f, -0.5f, 0.0f, 0, 0);
+                command->frontCamera.distance += 500.0f;
+                break;
+            }
+            command->backCamera.distance = command->frontCamera.distance + 100.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            return 1;
+        }
+        if (count >= 2 && selector == 1 && mode == 0) {
+            if (variant == 0) {
+                func_001E0718(command, &command->frontCamera, &command->backCamera);
+                return 0;
+            }
+            btlFaceActionParticipantsTowardLinkedTarget(command);
+            btlFlagAllUnitDefeatCandidatesTask();
+            switch (task->unit->partyRecord.unitId) {
+            case 0x13D:
+                btlSetEffectCameraKeys(command, -347.7f, -80.3f, -929.3f, -0.140f, -0.221f, 0.022f, 0.955f,
+                    -419.4f, -82.7f, -1130.2f, -0.109f, -0.222f, 0.015f, 0.958f, 40.0f, 25.0f);
+                return 1;
+            case 0x13E:
+                btlSetEffectCameraKeys(command, 443.7f, -62.9f, -1006.9f, -0.122f, 0.278f, -0.045f, 0.942f,
+                    547.0f, -73.2f, -1172.8f, -0.108f, 0.278f, -0.040f, 0.943f, 40.0f, 25.0f);
+                return 1;
+            case 0x13F:
+                btlSetEffectCameraKeys(command, -378.7f, -229.4f, -1106.2f, -0.036f, -0.221f, -0.005f, 0.965f,
+                    -506.4f, -391.2f, -1185.2f, 0.049f, -0.253f, -0.026f, 0.956f, 40.0f, 25.0f);
+                return 1;
+            case 0x140:
+                btlSetEffectCameraKeys(command, 656.9f, -433.1f, -1115.8f, 0.051f, 0.339f, 0.006f, 0.929f,
+                    529.2f, -230.9f, -1152.3f, 0.0f, 0.283f, -0.011f, 0.949f, 40.0f, 25.0f);
+                return 1;
+            case 0x141:
+                btlSetEffectCameraKeys(command, 461.0f, -536.0f, -816.9f, 0.185f, 0.377f, 0.064f, 0.895f,
+                    540.6f, -628.6f, -1031.5f, 0.205f, 0.330f, 0.061f, 0.909f, 40.0f, 25.0f);
+                return 1;
+            case 0x142:
+                btlSetEffectCameraKeys(command, -546.6f, -577.9f, -879.0f, 0.179f, -0.364f, -0.080f, 0.901f,
+                    -546.6f, -382.9f, -879.0f, 0.112f, -0.368f, -0.053f, 0.912f, 40.0f, 25.0f);
+                return 1;
+            }
+            return 0;
+        }
+        btlChooseRandomPresetCameraKeys(command);
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 extern void func_0020B190(u8 *, void *);
 
@@ -3975,20 +4196,6 @@ u32 func_0020CB28(s32 action) {
     }
     return result;
 }
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6398);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A63C0);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A63E8);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6410);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A6438);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", jtbl_003A6460);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", jtbl_003A6480);
 
 INCLUDE_SDATA(const s32, "game/code_00202178", D_003BB880);
 

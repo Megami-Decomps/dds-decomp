@@ -52,7 +52,6 @@ extern u16 D_00438FF0;
 extern SdfPoolNode D_003805A8;
 extern SdfPoolNode D_00380708;
 extern char D_0042A428[];
-extern s32 sdfCreateResetPacketList(void);
 extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 extern s32 mnuMovieViewer(void);
@@ -354,7 +353,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
         }
     }
     mnuCommitPendingMovieDrawValues();
-    packets = (SdfListHead *)sdfCreateResetPacketList();
+    packets = sdfCreateResetPacketList();
     sdfAppendPacket(packets, func_0011F250(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
     sdfCreatePacketA(packets, 0x80A03000, 0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7180, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x79C0, (mnuMovieDrawSources.cursor & 7) * 0xC0 + 0x7240, (mnuMovieDrawSources.cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
     sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, 0xFF0080, 0, "%08X", mnuMovieDrawSources.wordSource));
