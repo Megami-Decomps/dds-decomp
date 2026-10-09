@@ -8491,7 +8491,7 @@ void effPollResourceBank(s32 flags, void *out) {
                 do {
                     char name[0x70];
                     func_003014F0(name, "GENERAL %d", i);
-                    btlAppendEntry(effResourceBankEntries, name, 8, i, 0);
+                    btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
                     i++;
                 } while (i < count);
             }
