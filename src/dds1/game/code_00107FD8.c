@@ -200,8 +200,44 @@ extern void *D_003BD768;
 
 extern char D_0039E238[]; /* "DebugTimeGrph" */
 
+extern f32 *D_00324770[];
+extern s16 D_003BD6C8[4];
+extern s16 D_003BD6D0[4];
+extern u32 D_003C2BA0[4];
+extern u32 D_003C2BB0[4];
+
 /* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightColorTarget);
+void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
+    u32 startColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedStartColor;
+    u32 packedTargetColor;
+    f32 *light = D_00324770[lightIndex];
+    u32 blendFlag;
+
+    if (light != NULL) {
+        blendFlag = 4 << (lightIndex * 2);
+        if (blendFrames == 0) {
+            kwlnDrawControlFlags &= ~blendFlag;
+            VU0_LOAD_VF(vf10, color);
+            VU0_CLEAR_W(vf10);
+            VU0_STORE_VF(vf10, D_00324770[lightIndex]);
+        } else {
+            D_003BD6D0[lightIndex] = blendFrames;
+            D_003BD6C8[lightIndex] = 0;
+            kwlnDrawControlFlags |= blendFlag;
+            VU0_LOAD_VF(vf10, light);
+            EE_MMI_RGBA_PACK(packedStartColor);
+            startColorWords[0] = packedStartColor;
+            D_003C2BA0[lightIndex] = startColorWords[0];
+            VU0_LOAD_VF(vf10, color);
+            VU0_CLEAR_W(vf10);
+            EE_MMI_RGBA_PACK_UNCLOBBERED(packedTargetColor);
+            targetColorWords[0] = packedTargetColor;
+            D_003C2BB0[lightIndex] = targetColorWords[0];
+        }
+    }
+}
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
 INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightDirectionTarget);
