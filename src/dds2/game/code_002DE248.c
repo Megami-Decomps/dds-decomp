@@ -11870,12 +11870,13 @@ void func_00305EB0(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY,
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_00306030);
 
-extern void func_00306030(u32, u32, u32, u32, u32, u32, u32, u32,
+extern void func_00306030(u32, u32, u32, u32, u32, const u32 *, const u32 *, u32,
                           f32, u32, u32, u32, u32, u32);
 
-void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g, u32 h,
+void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e,
+                   const u32 *textureCoordinates, const u32 *cornerColors, u32 h,
                    f32 rotation, u32 x, u32 y, u32 width, u32 height) {
-    func_00306030(a, b, c, d, e, f, g, h, rotation, x, y, 1, width, height);
+    func_00306030(a, b, c, d, e, textureCoordinates, cornerColors, h, rotation, x, y, 1, width, height);
 }
 
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
