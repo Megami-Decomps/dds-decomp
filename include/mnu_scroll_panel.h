@@ -7,7 +7,7 @@ struct EffMappedResource;
 
 #ifndef VERSION_DDS2
 typedef struct MenuSpriteRef {
-    s32 sprite;
+    struct EffectSlotSet *sprite;
     s32 effect;
 } MenuSpriteRef;
 #endif
