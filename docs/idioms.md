@@ -5265,3 +5265,36 @@ Retain those unused formals while leaving the genuine empty bodies alone.
 This finite caller-evidenced closure does not match the still-assembly
 diagnostic controllers or claim that the disabled drawers consume input.
 
+
+## Field trigger shapes are variable-sized tagged records
+
+The `0013EB30` action constructor places an eight-byte kind-0 sphere
+record (kind and radius) immediately before its sixteen-byte task
+descriptor. The descriptor's shape pointer refers back to that prefix.
+The room binder reads two dimensions for kind 1 and three for kind 2;
+those plane and box records occupy twelve and sixteen bytes respectively.
+`FldTriggerShape` therefore names their real serialized variants in a
+kind-tagged union, rather than treating every shape as an oversized box.
+The existing three facing probes consume its common kind word exactly.
+The complete constructor candidate remains private and non-matching;
+its separate `0x30`-byte transform and two primary `FldFileResource`
+descriptors are not replaced with partial descriptor views.
+
+## Result EXP flash counters retain signed scalar storage
+
+`00266E28` and `0029E820` increment the level-up flash frame through
+`0..15`, subtract `0x10` from its opacity, and add eight to the row
+opacity. Their lower clamps use `BLEZ` and their upper clamps use signed
+`SLTI`; these are signed integer counters, not packed color words.
+The DDS1 primary `BrsProgressAnimation.alpha` at `+1C` and
+`iconOpacity` at `+48` are therefore `s32`. Its byte at `+41` is
+set during level-up and cleared when the flash fades out.
+The DDS2 counterparts occupy `+2D`, `+30` and `+34` inside the same
+complete `0x68`-byte progress row.
+
+DDS2's native `B050 + index * 68` base followed by a `+10` byte access
+reaches the canonical `B060` row's `drawPhase`, not its separate `state`
+at `+10`. Keep the established `B060` bank origin instead of inventing
+a biased record view. These owner completions do not claim that either
+still-assembly EXP state controller has been matched.
+
