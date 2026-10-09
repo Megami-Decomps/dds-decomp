@@ -106,7 +106,6 @@ segments:
       - [0x17F08, c, basic/dds3PathBasic]  # Nocturne __FILE__
       - [0x18438, c, game/code_00117438]
       - [0x1A098, c, newdata/datCalc]  # Nocturne __FILE__
-      - [0x1A900, c, game/code_00119900]
       - [0x1DE88, c, game/code_0011CE88]  # P4 transfer
       - [0x1DEB8, c, game/code_0011CEB8]
       - [0x1E290, c, misc/l2d]  # Nocturne __FILE__
@@ -537,7 +536,6 @@ segments:
       - [0x2BB9D0, .sdata, game/code_001130E0]
       - [0x2BB9E0, .sdata, game/code_00117438]
       - [0x2BBA08, .sdata, newdata/datCalc]
-      - [0x2BBA34, .sdata, game/code_00119900]
       - [0x2BBAD0, .sdata, game/code_0011CEB8]
       - [0x2BBAD8, .sdata, misc/l2d]
       - [0x2BBAE0, .sdata, game/code_0011D3A0]
