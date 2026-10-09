@@ -1964,8 +1964,8 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].block);
-    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].block);
+    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].resourceAddress);
+    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].resourceAddress);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->unkC0;
@@ -2700,23 +2700,23 @@ void fldParseMixLb(void) {
             break;
         case 10:
             value = node->value;
-            fldAreaState.mapResources[0].unk0 = value;
-            fldAreaState.mapResources[0].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[0].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 11:
             value = node->value;
-            fldAreaState.mapResources[1].unk0 = value;
-            fldAreaState.mapResources[1].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[1].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 12:
             value = node->value;
-            fldAreaState.mapResources[2].unk0 = value;
-            fldAreaState.mapResources[2].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[2].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 13:
             value = node->value;
-            fldAreaState.mapResources[3].unk0 = value;
-            fldAreaState.mapResources[3].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[3].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         }
     }
