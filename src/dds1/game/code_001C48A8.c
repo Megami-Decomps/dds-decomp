@@ -348,7 +348,7 @@ void func_001C50C0(s32 sceneAddress) {
     delay = 1;
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
-            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
+            if (!(unit->status.stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
                 if (!(scene->commandRestrictFlags & 4) && btlIsActorModeActionCodeAllowed(unit)) {
                     lastFade = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 8);
                 } else {
@@ -388,7 +388,7 @@ void func_001C50C0(s32 sceneAddress) {
     havePrimary = 0;
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
-            if (unit->flags & 0x1000) {
+            if (unit->status.flags & 0x1000) {
                 load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->unkDC, unit->displaySpecies, 0);
             } else {
                 load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->modelId, unit->modelVariant, 0);
@@ -407,7 +407,7 @@ void func_001C50C0(s32 sceneAddress) {
                 firstPrimary = chain;
                 havePrimary = 1;
             }
-            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
+            if (!(unit->status.stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
                 lastFade = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)unit, 4, 6);
                 lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startDelay = 1;
@@ -547,7 +547,7 @@ void fldAdvanceSceneVariant(BattleSceneWork *scene) {
 extern void btlTickActorEntryCountdowns(u8 *);
 extern void btlClearNodeFlags(void);
 extern void btlClearActorSelectedEntryIndex(BtlUnit *);
-extern void btlRefreshUnitMotionSelection(u8 *);
+extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 
 s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
@@ -564,7 +564,7 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
     }
     while (node != NULL) {
         if ((node->flags & 8) != 0) {
-            if ((node->unit->flags & 1) != 0 && node->state >= 3u) {
+            if ((node->unit->status.flags & 1) != 0 && node->state >= 3u) {
                 ready = 0;
                 break;
             }
@@ -577,7 +577,7 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
             u32 flags;
 
             unit = node->unit;
-            flags = unit->flags;
+            flags = unit->status.flags;
             if ((flags & actorFlagMask) != 0) {
                 if ((flags & 1) != 0) {
                     if ((flags & 0xE0) != 0) {
@@ -596,21 +596,21 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
             if ((node->flags & 8) != 0) {
                 unit = node->unit;
                 {
-                    u32 flags = unit->flags;
+                    u32 flags = unit->status.flags;
 
                     if ((flags & 1) != 0) {
                         if ((flags & 0xE0) != 0) {
                             continue;
                         }
-                        unit->flags = flags & ~0x10u;
+                        unit->status.flags = flags & ~0x10u;
                         btlTickActorEntryCountdowns((u8 *)unit);
                         if ((unit->partyRecord.status & 0x122F) != 0) {
                             btlDispatchStateHandler(node, 4);
                         }
-                        if ((unit->flags & actorFlagMask) != 0) {
+                        if ((unit->status.flags & actorFlagMask) != 0) {
                             btlClearNodeFlags();
                             btlClearActorSelectedEntryIndex(unit);
-                            btlRefreshUnitMotionSelection((u8 *)unit);
+                            btlRefreshUnitMotionSelection(unit);
                         }
                     }
                 }
@@ -624,7 +624,7 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
             BtlUnit *lastReadyUnit = NULL;
 
             for (unit = scene->actors; unit != NULL; unit = unit->next) {
-                u32 flags = unit->flags;
+                u32 flags = unit->status.flags;
                 u32 marked = flags & 0x400;
 
                 flags &= 1;
@@ -707,7 +707,7 @@ void func_001C5B90(BattleSceneWork *scene) {
         if (task != NULL) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
-            if (task->unit->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
+            if (task->unit->status.flags & FLD_SCENE_ACTOR_PRIMARY_BIT) {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
             } else {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
@@ -1039,7 +1039,7 @@ s32 *fldGetActorSceneGroupResource(s32 *task) {
     if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return (s32 *)((BattleSceneWork *)scene)->groupHandles;
     }
-    actorGroupBits = ((BtlTask *)task)->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = ((BtlTask *)task)->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
         groupEntries = (s32 *)((BattleSceneWork *)scene)->groupPrimary;
@@ -1085,7 +1085,7 @@ s32 fldClassifyActorSceneGroup(s32 *task) {
     if (((BtlTask *)task)->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) {
         return FLD_SCENE_HANDLE_TASK_COUNT;
     }
-    actorGroupBits = ((BtlTask *)task)->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    actorGroupBits = ((BtlTask *)task)->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT: return FLD_SCENE_PRIMARY_TASK_COUNT;
     case FLD_SCENE_ACTOR_SECONDARY_BIT: return FLD_SCENE_SECONDARY_TASK_COUNT;
@@ -1137,7 +1137,7 @@ void fldSortGroupByPriority(BtlTask **group, s32 entryCount) {
 
 /* Map an exact actor-group bit pattern to its group ID; combined bits return zero. */
 s32 fldGetSceneGroupIndexByActorFlags(BtlTask *task) {
-    u32 actorGroupBits = task->unit->flags & FLD_SCENE_ACTOR_GROUP_MASK;
+    u32 actorGroupBits = task->unit->status.flags & FLD_SCENE_ACTOR_GROUP_MASK;
     s32 groupId;
     switch (actorGroupBits) {
     case FLD_SCENE_ACTOR_PRIMARY_BIT:
@@ -1175,7 +1175,7 @@ void func_001C7690(void) {
         for (i = 0; scene->groupPrimary[i] != NULL; i++) {
             task = scene->groupPrimary[i];
             if ((task->flags & 8) != 0) {
-                flags = task->unit->flags;
+                flags = task->unit->status.flags;
                 if ((flags & 0x200) != 0) {
                     if ((flags & 0xE0) == 0) {
                         if ((flags & 1) != 0) {
@@ -1194,7 +1194,7 @@ void func_001C7690(void) {
         for (i = 0; scene->groupSecondary[i] != NULL; i++) {
             task = scene->groupSecondary[i];
             if ((task->flags & 8) != 0) {
-                flags = task->unit->flags;
+                flags = task->unit->status.flags;
                 if ((flags & 0x400) != 0) {
                     if ((flags & 0xE0) == 0) {
                         if ((flags & 1) != 0) {
@@ -1414,7 +1414,7 @@ void btlRotateGroupUntilTaskFirst(BtlTask *task) {
     u32 rotationCount;
 
     if (task != 0 && (task->flags & FLD_SCENE_TASK_BOUND_BIT) != 0 && task->unit != 0 &&
-        (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) == 0 && (task->unit->flags & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
+        (task->flags & FLD_SCENE_TASK_HANDLE_GROUP_BIT) == 0 && (task->unit->status.flags & FLD_SCENE_ACTOR_PRIMARY_BIT) != 0) {
         rotationCount = 0;
         scene = (BattleSceneWork *)btlGetRuntime();
         fldSortGroupByPriority(scene->groupPrimary, FLD_SCENE_PRIMARY_TASK_COUNT);
@@ -1457,7 +1457,7 @@ void fldUpdateSceneGroupTask(s32 taskValue) {
 
     if ((task->flags & 0x40) == 0) {
         actor = task->unit;
-        kind = (actor->flags & 0x200) != 0 ? 1 : 2;
+        kind = (actor->status.flags & 0x200) != 0 ? 1 : 2;
         if (task == *(BtlTask **)fldGetActorSceneGroupResource((s32 *)task) &&
             scene->variant == kind) {
             scene->flags |= 8;
@@ -1569,8 +1569,8 @@ void func_001C8330(void) {
                 scene->flags |= 0x400;
             } else {
                 task = *(BtlTask **)fldGetSceneGroupResource(scene->slots[0].group);
-                if (task == 0 || (task->unit->flags & 0xE0) != 0 || task->state != 2 ||
-                    (task->unit->flags & 0x30400000) != 0) {
+                if (task == 0 || (task->unit->status.flags & 0xE0) != 0 || task->state != 2 ||
+                    (task->unit->status.flags & 0x30400000) != 0) {
                     return;
                 }
                 scene->currentTask = task;
@@ -1715,14 +1715,14 @@ void btlClearSceneTaskActiveFlag(s32 taskAddress) {
 }
 
 /* Bind the actor, select a valid secondary-group action, and mark the task bound. */
-void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
+void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, BtlUnit *actorAddress) {
     u32 flags;
 
-    flags = *(u32 *)(actorAddress + 0x110);
-    *(s32 *)(taskAddress + 0x18) = actorAddress;
+    flags = (u32)actorAddress->status.flags;
+    ((BtlTask *)taskAddress)->unit = actorAddress;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
-        *(u16 *)(actorAddress + 0x124) <= 0x17F) {
-        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)(actorAddress + 0x124)].unk15;
+        *(u16 *)((u8 *)actorAddress + 0x124) <= 0x17F) {
+        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)((u8 *)actorAddress + 0x124)].unk15;
     }
     flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
     *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = flags | FLD_SCENE_TASK_BOUND_BIT;

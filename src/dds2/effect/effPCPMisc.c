@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 #include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -3172,10 +3173,6 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 }
 
 
-typedef struct EffPCPAimBattle {
-    u8 pad00[0x110];
-    u32 flags;             /* 0x110 */
-} EffPCPAimBattle;
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 func_001695C8(void);
@@ -3204,7 +3201,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         return;
     }
     if (func_001695C8() && work->frame == 0) {
-        func_00208000(((EffPCPAimBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x600, NULL, NULL);
+        func_00208000(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
         btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
@@ -5017,10 +5014,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
     }
 }
 
-typedef struct EffPCPPulseBattle {
-    u8 pad00[0x110];
-    u32 flags;              /* 0x110 */
-} EffPCPPulseBattle;
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
@@ -5053,7 +5046,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         }
         data = effParamWorkGetData(work->handle[i]);
         func_00340DC8(0.0f, work->rotationY[i], 0.0f);
-        if (func_001695C8() && (((EffPCPPulseBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x400)) {
+        if (func_001695C8() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             VU0_LOAD_VF(vf11, D_00414610);
             effMiscQuatMultiplyVU();
         }
