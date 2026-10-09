@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
@@ -137,7 +138,6 @@ void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
 }
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 EffWorldNode *evtSpawnActionObj11(s32 key, void *data, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x11);

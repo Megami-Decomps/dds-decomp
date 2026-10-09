@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "evt_task.h"
@@ -118,7 +119,6 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
 extern s32 mdlCheckNodeByte30(MdlCtx *arg0, s32 arg1);
 
-extern void dds3RemoveWorldObjectNode(void *arg0);
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 

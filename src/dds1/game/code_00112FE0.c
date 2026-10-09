@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_object.h"
 
 
@@ -18,7 +19,6 @@ ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object) {
 
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 extern void dds3EnsureSlotData(void *object);
 extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
