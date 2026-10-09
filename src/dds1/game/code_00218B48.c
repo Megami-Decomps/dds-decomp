@@ -19,6 +19,7 @@
 #include "sdf_pac_state.h"
 #include "eff.h"
 #include "eff_node_descriptor.h"
+#include "eff_node.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
@@ -737,7 +738,7 @@ void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
 }
 
 void mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    effCloneSourceWithTypeHandler((u32)entry->object);
+    effCloneSourceWithTypeHandler((EffNode *)(u32)entry->object);
     entry->state = entry->state + 1;
 }
 
