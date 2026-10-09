@@ -5,6 +5,13 @@
 
 struct SdfMemBlock;
 
+/* The deferred worker releases pixels only for the selected owned heap. */
+enum {
+    SDF_UPLOAD_BORROWED = 0,
+    SDF_UPLOAD_GENERAL_HEAP = 1,
+    SDF_UPLOAD_CHIP_HEAP = 2
+};
+
 /* Pixel upload inputs shared by texture and font-atlas producers. */
 typedef struct SdfImageUploadRequest {
     void *pixels;

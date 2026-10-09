@@ -66,8 +66,6 @@ extern void frFontEnsureSlotLoaded(s32, const char *);
 #define FR_FONT_IMAGE_BUFFER_COUNT 6
 #define FR_FONT_IMAGE_WORD_BYTES 4
 #define FR_FONT_PIXEL_FORMAT 0x14
-#define FR_FONT_UPLOAD_BORROWED 0
-#define FR_FONT_UPLOAD_OWNED 2
 #define FR_FONT_ATLAS_POSITION_SHIFT 4
 #define FR_FONT_ATLAS_DEST_SHIFT 6
 #define FR_FONT_RESOURCE_CLONE_BYTES 0x120
@@ -296,9 +294,9 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     cachedItem->refs = 1;
     cachedItem->list = atlasNode;
     if (ownsPixels == 0) {
-        uploadRequest.allocationMode = FR_FONT_UPLOAD_BORROWED;
+        uploadRequest.allocationMode = SDF_UPLOAD_BORROWED;
     } else {
-        uploadRequest.allocationMode = FR_FONT_UPLOAD_OWNED;
+        uploadRequest.allocationMode = SDF_UPLOAD_CHIP_HEAP;
     }
     uploadRequest.pixels = pixels;
     uploadRequest.format = FR_FONT_PIXEL_FORMAT;
