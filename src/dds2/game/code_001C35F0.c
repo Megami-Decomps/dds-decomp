@@ -276,7 +276,43 @@ void btlAdvancePendingSceneSlotStates(u8 *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3DB0);
+typedef struct UiSlotMatchRow {
+    u8 pad00[0x18];
+    u8 state;
+    u8 pad19;
+    u8 groupIndex; /* index of the matching primary group */
+} UiSlotMatchRow;
+
+void func_001C3DB0(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    UiSlotMatchRow *row;
+    s32 group;
+    s32 offset;
+    u8 slot;
+
+    for (; node != NULL; node = node->nextActor) {
+        if (btlHasRequiredActorStatusBits(node) == 0) {
+            continue;
+        }
+        group = 0;
+        slot = node->lookupId;
+        if (battle->groupPrimary[0] != NULL) {
+            while (group < 20 && battle->groupPrimary[group] != NULL) {
+                if (battle->groupPrimary[group]->unit->owner == node->owner) {
+                    offset = slot * 0x290 + 0xE0;
+                    row = (UiSlotMatchRow *)((u8 *)work + offset);
+                    row->groupIndex = group;
+                    if (keepActive == 0 || (u32)(row->state - 1) >= 2) {
+                        row->state = 3;
+                    }
+                    break;
+                }
+                group++;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3EC0);
 
