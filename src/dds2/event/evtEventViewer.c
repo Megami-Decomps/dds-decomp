@@ -388,7 +388,9 @@ struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer) {
         return NULL;
     }
     return (struct EffectObj *)dds3FindIndexedObjectChainNodeByName(
-        (EffWorldNode *)dds3GetWorldObject(), 7, (const u8 *)viewer->entryName[index]);
+        (EffWorldNode *)dds3GetWorldObject(),
+        EFF_WORLD_KIND_EFFECT_OBJECT,
+        (const u8 *)viewer->entryName[index]);
 }
 
 struct PolyMovieObject;
@@ -417,22 +419,22 @@ void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, E
         return;
     }
     switch (owner->kindTag >> 24) {
-    case 5:
+    case EFF_WORLD_KIND_FOLLOW_MODEL:
         if (type >= 0) {
             effObjBindOwnerBillEntry((struct EffectObj *)obj,
                                     (struct EffectObj *)owner, type);
             break;
         }
         /* A negative entry selects the normal owner link instead. */
-    case 4:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 17:
+    case EFF_WORLD_KIND_CAMERA:
+    case EFF_WORLD_KIND_EFFECT_TRANSFORM:
+    case EFF_WORLD_KIND_EFFECT_OBJECT:
+    case EFF_WORLD_KIND_RESOURCE_OWNER:
+    case EFF_WORLD_KIND_LIGHT:
+    case EFF_WORLD_KIND_TRANSFORM_SOURCE:
         effObjBindValidatedOwner((struct EffectObj *)obj, (struct EffectObj *)owner);
         break;
-    case 16:
+    case EFF_WORLD_KIND_ACTION_10:
         evtStageRelinkOwnedNodeResource(owner, (void *)obj);
         movie = dds3GetObjectOwnedHandle(obj)->slots[1];
         if (viewer->flags & 1) {
