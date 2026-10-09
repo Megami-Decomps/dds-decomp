@@ -121,7 +121,6 @@ extern s8 mnuPanelTaskCompletionState;
 
 extern void mnuShopReleaseWindowSprites();
 
-extern void sdfReleaseChipBlock();
 
 
 extern void mnuShopReleaseWindowAndEffectResources();

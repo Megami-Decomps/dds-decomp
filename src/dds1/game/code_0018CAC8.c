@@ -46,7 +46,6 @@ extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 func_00310320(s32 directory, EffDirEnt *entry);
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
-extern void sdfReleaseChipBlock(void *arg0);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);

@@ -26,7 +26,6 @@ typedef struct EvtGroupRec {
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void sdfReleaseChipBlock(void *ptr);
 void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 

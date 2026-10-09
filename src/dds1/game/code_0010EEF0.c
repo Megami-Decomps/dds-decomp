@@ -12,7 +12,6 @@ extern s32 scrReadIntParameter(s32);
 extern void scrSetIntegerReturnValue(s32);
 extern void func_00119B08(s32);
 
-extern void sdfReleaseChipBlock(void *p);
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
 

@@ -1290,7 +1290,6 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Release the texture and owner only when the decremented reference count equals zero. */
 void effPcpScatterResRelease(PcpScatterRes *res) {

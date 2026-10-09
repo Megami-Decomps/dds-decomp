@@ -11,7 +11,6 @@
 
 
 
-void sdfReleaseChipBlock(void *memory);
 
 
 void func_00101A80(KwlnTask *parent, KwlnTask *child);

@@ -31,7 +31,6 @@ extern void func_00101368(KwlnTask* task, s32 arg1);
 extern void kwlnUnlinkListNode(KwlnTask* task);
 
 
-extern void sdfReleaseChipBlock(void* ptr);
 
 extern void func_003003F0();
 

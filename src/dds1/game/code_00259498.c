@@ -10,7 +10,6 @@
 #include "mnu_scene_work.h"
 #include "sdf_chip.h"
 
-extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
 
 

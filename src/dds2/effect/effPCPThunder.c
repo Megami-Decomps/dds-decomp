@@ -1944,7 +1944,6 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed);
 
-extern void sdfReleaseChipBlock(void *block);
 
 void effThunderGroupRelease(EffThunderGroup *group) {
     s32 i;
