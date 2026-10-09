@@ -806,7 +806,54 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D590);
+/* Like func_0026D7E8, but a mode of 1 rejects the node and the profile caps alone decide. */
+s32 func_0026D590(u16 entry, s32 mode) {
+    EvtMantraNodePositionRecord *record;
+    s8 satisfiedNeighbors;
+    s32 partyIndex;
+
+    if (func_0028F128(entry, 0) != 0) {
+        return 1;
+    }
+    if (mode == 1) {
+        return 0;
+    }
+    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)entry);
+    if (record == NULL) {
+        return 0;
+    }
+
+    satisfiedNeighbors = 0;
+    for (partyIndex = 0; partyIndex < EVT_PARTY_SLOT_COUNT; partyIndex++) {
+        s32 slot;
+
+        if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
+            DatPartyRecord *party = &datGameState->party[partyIndex];
+            for (slot = 0; slot < 6; slot++) {
+                EvtMantraNodePositionRecord **neighborSlot = &record->neighbors[slot];
+                EvtMantraNodePositionRecord *neighbor = *neighborSlot;
+
+                if (neighbor != NULL) {
+                    if ((neighbor->packedHeader & 0xF) == 1) {
+                        u32 cap = ptyGetProfileRecordCap((u16)(*neighborSlot)->id);
+
+                        if (cap == ptyGetProfileRecordValue(party, (u16)(*neighborSlot)->id)) {
+                            satisfiedNeighbors |= 1 << slot;
+                        }
+                    } else {
+                        satisfiedNeighbors |= 1 << slot;
+                    }
+                } else {
+                    satisfiedNeighbors |= 1 << slot;
+                }
+            }
+            if (satisfiedNeighbors == 0x3F) {
+                return 1;
+            }
+        }
+    }
+    return satisfiedNeighbors == 0x3F;
+}
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D710);
 

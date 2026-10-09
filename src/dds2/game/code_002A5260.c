@@ -91,7 +91,7 @@ extern void mnuStopTitleMovieDraw(void);
 
 extern void func_003458E8(u32);
 
-extern void func_002A5A78();
+extern s32 func_002A5A78();
 
 void mnuMarkTitleStreamResetPending(void);
 
@@ -252,7 +252,15 @@ void mnuUpdateTitlePageByMode(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
+/* Draw a list row's sprite pair: the base sprite, then the highlight on the cursor node. */
+func_002A5A78(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
+    s32 index = node->index;
+
+    mnuDrawSprite(0, 0, 0, 0x80, 0, index + 0xC, priority);
+    if (list->cursor == node) {
+        mnuDrawSprite(0, 0, 0, 0x80, 0, index + 6, priority);
+    }
+}
 
 extern s8 D_0037F510[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
