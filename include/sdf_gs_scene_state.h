@@ -23,4 +23,23 @@ typedef char SdfGsCenteredBoundsRegisters_xyz2_at_0x30[
 void sdfBuildCenteredViewBoundsPacket(SdfGsCenteredBoundsRegisters *packet,
     s32 width, s32 height, s32 unused0, s32 unused1);
 
+/* Shared A+D state for GS primitive modes, color clamping, dithering and TEXA. */
+typedef struct SdfGsDrawDefaultsRegisters {
+    SdfGsRegisterWrite prmodecont;
+    SdfGsRegisterWrite colclamp;
+    SdfGsRegisterWrite dthe;
+    SdfGsRegisterWrite texa;
+} SdfGsDrawDefaultsRegisters;
+
+typedef char SdfGsDrawDefaultsRegisters_size_must_be_0x40[
+    (sizeof(SdfGsDrawDefaultsRegisters) == 0x40) ? 1 : -1];
+typedef char SdfGsDrawDefaultsRegisters_colclamp_at_0x10[
+    ((u32)&((SdfGsDrawDefaultsRegisters *)0)->colclamp == 0x10) ? 1 : -1];
+typedef char SdfGsDrawDefaultsRegisters_dthe_at_0x20[
+    ((u32)&((SdfGsDrawDefaultsRegisters *)0)->dthe == 0x20) ? 1 : -1];
+typedef char SdfGsDrawDefaultsRegisters_texa_at_0x30[
+    ((u32)&((SdfGsDrawDefaultsRegisters *)0)->texa == 0x30) ? 1 : -1];
+
+void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet);
+
 #endif
