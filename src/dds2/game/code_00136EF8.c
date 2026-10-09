@@ -73,7 +73,6 @@ extern u32 D_0038BD50[];
 
 extern ScrData *scrFindNamedProcessNode(char *name);
 
-extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 
 
 
@@ -195,7 +194,6 @@ extern s32 D_004361B0;
 
 extern s32 D_004361B4;
 
-extern s32 evtStartSceneResourceTask();
 
 extern s32 D_004361BC;
 

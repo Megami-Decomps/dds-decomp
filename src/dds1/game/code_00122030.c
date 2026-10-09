@@ -1479,8 +1479,6 @@ extern void func_00145B18(void);
 
 extern void func_00121B88(s32, s32, f32, f32, f32);
 
-extern void evtStartSceneResourceTask(u64, void *);
-
 /* Gate next-floor input on camp/readiness flags, then start the native scene
  * transition or its delayed fade path. All return paths retain zero. */
 s32 fldUpdateNextFloorTransition(void) {
@@ -1504,7 +1502,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                evtStartSceneResourceTask((u64)dds3GetWorldObject(), D_0039FCC8);
+                evtStartSceneResourceTask(dds3GetWorldObject(), D_0039FCC8);
             }
         }
     } else {
@@ -1552,7 +1550,7 @@ s32 fldDispatchPendingSceneResource(void) {
     }
     fldAreaState.unk100 = 0;
     if ((D_003BAB3C & 2) && *(s8 *)D_0032C9A0 != 0) {
-        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), D_0032C9A0);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), D_0032C9A0);
         overrideFlags = D_003BAB3C;
         if (!(overrideFlags & 1)) {
             D_0032C9A0[0] = 0;
@@ -1561,11 +1559,11 @@ s32 fldDispatchPendingSceneResource(void) {
         return 1;
     }
     if (sceneWork->primaryState == 0 && sceneWork->resourceName[0] != 0) {
-        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), sceneWork->resourceName);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), sceneWork->resourceName);
         return 1;
     }
     if (fldAreaState.fallbackResourceName != 0) {
-        evtStartSceneResourceTask((u64)dds3GetWorldSecondaryObject(), fldAreaState.fallbackResourceName);
+        evtStartSceneResourceTask(dds3GetWorldSecondaryObject(), fldAreaState.fallbackResourceName);
         return 1;
     }
     return 0;
