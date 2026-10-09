@@ -826,10 +826,7 @@ typedef struct EffectSlotDescription {
     s32 presetMode;
     u8 pad30[4];
     u32 rect[4];
-    s32 xOffset;
-    s32 yOffset;
-    s32 width;
-    s32 height;
+    s32 bounds[4];       /* 0x44: x offset, y offset, width, height in grid units. */
     s32 colors[4];
     u32 cornerColors[4]; /* 0x64: reordered into the live/saved corner colors. */
     s32 widthOverride;   /* 0x74: zero selects the source bounds' width. */
