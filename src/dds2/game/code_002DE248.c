@@ -8796,7 +8796,7 @@ typedef struct EffFileJobRequest {
     struct SdfMemBlock *allocation;
     u16 resourceMode;
     u8 pad1A[2];
-    u32 relatedResource;
+    const char *secondaryCommandPath;
 } EffFileJobRequest;
 
 FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
@@ -8813,8 +8813,8 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source)
             fileJobSetPrimaryData(job, descriptor->output,
                           (s32)descriptor->size, descriptor->transferMode);
         }
-        if (descriptor->relatedResource != 0) {
-            fileJobCopyCommandIntoSecondaryData(job, (const char *)descriptor->relatedResource,
+        if (descriptor->secondaryCommandPath != 0) {
+            fileJobCopyCommandIntoSecondaryData(job, descriptor->secondaryCommandPath,
                           descriptor->resourceMode);
         } else {
             s32 zero = 0;
