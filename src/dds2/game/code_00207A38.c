@@ -4,6 +4,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_scene_fade.h"
+#include "btl_resource_browser.h"
 #include "eff_ref_obj.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -2883,7 +2884,7 @@ void btlDestroyEntryList(BtlResourceEntryList *list) {
 }
 
 /* Append a named browser entry without changing the current scan order. */
-void btlAppendEntry(BtlResourceEntryList *list, char *name, s32 category, s32 value, s32 id) {
+void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, s32 value, s32 id) {
     BtlResourceEntry *entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
     BtlResourceEntry *tail;
     entry->category = category;
@@ -3131,17 +3132,19 @@ typedef struct BtlResourceNameRecord {
     char name[0x1C]; /* 0x1C */
 } BtlResourceNameRecord;
 
-void btlSetResourceNameHeaderPair(s32 recordAddress, s32 firstWord, s32 secondWord) {
-    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
-    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
+void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
+    s32 *headerWords = owner;
+    headerWords[0] = firstWord;
+    headerWords[1] = secondWord;
 }
 
 u32 func_0020DFC0(s32 recordAddress) {
     return ((BtlResourceNameRecord *)recordAddress)->word14;
 }
 
-u32 func_0020DFC8(s32 recordAddress) {
-    return ((BtlResourceNameRecord *)recordAddress)->word08;
+u32 func_0020DFC8(const void *owner) {
+    const u32 *headerWords = owner;
+    return headerWords[2];
 }
 
 /* Format prefix + selected name; return its resource category, not its id. */

@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
 #include "eff_class_work_api.h"
@@ -110,9 +111,9 @@ extern u32 D_003BD124;
 
 extern s32 effQueuedResourceNameRecord;
 
-extern s32 effResourceBankEntries;
+extern struct BtlResourceEntryList *effResourceBankEntries;
 
-extern s32 effResourceBankDescriptor;
+extern struct BtlResourceDescriptor *effResourceBankDescriptor;
 
 extern s32 D_003BD098;
 
@@ -176,15 +177,7 @@ extern void effFillSurfaceGridColorGradient(u32, u32 *);
 
 extern void effReleaseSurfaceGridBuffers(s32);
 
-extern s32 btlScanDirectory(s32, s32);
-
 extern s32 func_00151FC0(void);
-
-extern void btlAppendEntry(s32, char *, s32, s32, s32);
-
-extern s32 btlCreateResourceDescriptor(s32);
-
-extern void btlSetResourceNameHeaderPair(s32, s32, s32);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfQueueAssetRelease(SdfAsset *asset);
@@ -195,14 +188,6 @@ extern EffPacketParams D_003DC9E0;
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
-
-extern void func_001FBA38(s32);
-
-extern s32 func_001FBF48(s32);
-
-extern s32 btlFormatSelectedResourceName(s32, void *);
-
-extern s32 btlGetResourcePathVariant(s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
@@ -8394,7 +8379,7 @@ void effPollResourceBankSlot(char *path, u32 slot, void *record) {
     EffBankSelection *selection = record;
 
     if (effResourceBankEntries == 0) {
-        effResourceBankEntries = btlScanDirectory((s32)path, slot);
+        effResourceBankEntries = btlScanDirectory(path, slot);
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
         return;

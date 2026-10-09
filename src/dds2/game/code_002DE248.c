@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
 #include "itf_draw_grid.h"
@@ -442,9 +443,9 @@ extern s32 D_004386F0;
 
 extern void *effQueuedFileObject;
 
-extern s32 effResourceBankEntries;
+extern struct BtlResourceEntryList *effResourceBankEntries;
 
-extern s32 effResourceBankDescriptor;
+extern struct BtlResourceDescriptor *effResourceBankDescriptor;
 
 extern s32 effQueuedResourceNameRecord;
 
@@ -9867,9 +9868,9 @@ void effBattleResourceDescriptorRelease(void) {
     }
 }
 
-void effPollResourceBankSlot(char *path, u32 unused, EffResourceBankSlot *slot) {
+void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
     if (effResourceBankEntries == 0) {
-        effResourceBankEntries = btlScanDirectory();
+        effResourceBankEntries = btlScanDirectory(path, flags);
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
@@ -9975,7 +9976,6 @@ typedef struct EffBankStatus {
     s32 count;
 } EffBankStatus;
 
-extern void btlAppendEntry(s32, char *, s32, s32, s32);
 
 void effPollResourceBank(u32 mode, EffBankStatus *status) {
     if (effResourceBankEntries == 0) {
