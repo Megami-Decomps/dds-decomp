@@ -170,8 +170,6 @@ extern u32 *fileResolveSecondaryBuffer(void *);
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
-extern u32 effCreateResourceInstance(u16, void *, void *, u32);
-
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern u32 effCreateSurfaceGridNode(u32, u32);
@@ -7105,36 +7103,36 @@ void effApplyKeyframeAngle(u8 *work) {
     }
 }
 
-u8 *effAllocateResourcePayload(u16 kind, void *source) {
+EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effRuntimeResourceOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffActiveResource *)effect)->payload = effect + headerSize;
-    ((EffActiveResource *)effect)->color = 0x80808080;
-    ((EffActiveResource *)effect)->scale = 1.0f;
-    ((EffActiveResource *)effect)->kind.index = kind;
-    ((EffActiveResource *)effect)->frame = 0;
+    EffActiveResource *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind.index = kind;
+    effect->frame = 0;
     VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, effect + 0x10);
-    memcpy(((EffActiveResource *)effect)->payload, source, size);
+    VU0_STORE_VF($vf0, (u8 *)effect + 0x10);
+    memcpy(effect->payload, source, size);
     return effect;
 }
 
-u32 effCreateResourceInstance(u16 kind, void *source, void *secondary, u32 param) {
-    u8 *effect = effAllocateResourcePayload(kind, source);
+EffActiveResource *effCreateResourceInstance(u16 kind, void *source, void *secondary, u32 param) {
+    EffActiveResource *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
         if (effRuntimeResourceOperations[kind].createResource != NULL) {
-            ((EffActiveResource *)effect)->resource = effRuntimeResourceOperations[kind].createResource(source, secondary, param);
+            effect->resource = effRuntimeResourceOperations[kind].createResource(source, secondary, param);
         }
         if (effRuntimeResourceOperations[kind].initialize != NULL) {
             effRuntimeResourceOperations[kind].initialize(effect);
         }
     }
-    return (u32)effect;
+    return effect;
 }
 
-u32 effCreateActiveResourceFromFile(u8 *work) {
+EffActiveResource *effCreateActiveResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer(work);
     return effCreateResourceInstance(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
@@ -7150,19 +7148,19 @@ void effDestroyResourceInstance(EffActiveResource *work) {
     sdfReleaseChipBlock(work);
 }
 
-u8 *effDuplicateActiveResource(u8 *source) {
-    u8 *effect;
-    u32 kind = ((EffActiveResource *)source)->kind.index;
+EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
+    EffActiveResource *effect;
+    u32 kind = source->kind.index;
 
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
-        effect = (u8 *)effCreateResourceInstance(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload, 0, 0);
+        effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0);
     } else {
         u32 resource;
         u32 activeKind;
-        effect = effAllocateResourcePayload(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload);
-        resource = effRuntimeResourceOperations[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
-        activeKind = ((EffActiveResource *)source)->kind.index;
-        ((EffActiveResource *)effect)->resource = resource;
+        effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
+        resource = effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        activeKind = source->kind.index;
+        effect->resource = resource;
         if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
             effRuntimeResourceOperations[activeKind].initialize(effect);
         }
