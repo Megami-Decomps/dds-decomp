@@ -26,7 +26,6 @@ extern void func_003003F0(const char *format, ...);
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
-extern void dds3SetWorldObjectValue(EffWorldNode *, u32);
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
                                                        const SdfTextureOffsetListHeader *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);

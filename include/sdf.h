@@ -302,6 +302,7 @@ typedef struct SdfGraphObj {
     u8 auxiliaryFormat;
     SdfTexResource *buffers[3];
 } SdfGraphObj;
+void sdfGraphApplyModeDefaults(SdfGraphObj *graph, s32 mode, s32 initializeBuffers);
 /* A mode's 12-byte display defaults row, copied into SdfGraphObj. */
 typedef struct SdfGraphModeDefaults {
     s16 width;
@@ -309,11 +310,13 @@ typedef struct SdfGraphModeDefaults {
     s16 height;
     u16 bufferFormat;
     u16 auxiliaryFormat;
-    u8 pad0A[2];
+    u16 interlace;
 } SdfGraphModeDefaults;
 
 typedef char SdfGraphModeDefaults_size_must_be_0xC[
     (sizeof(SdfGraphModeDefaults) == 0xC) ? 1 : -1];
+typedef char SdfGraphModeDefaults_interlace_must_be_at_0xA[
+    ((u32)&((SdfGraphModeDefaults *)0)->interlace == 0xA) ? 1 : -1];
 
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
 typedef struct SdfTex {
@@ -420,12 +423,22 @@ typedef struct SdfDmaSrc {
     u64 vifCommands;
 } SdfDmaSrc;
 
-/* DMA node with a 128-bit command (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
+/* REF tag and VIF commands followed by the trailing chain tag (0x20).
+ * The complete trailing quadword is cleared before its NEXT header is patched. */
 typedef struct SdfDmaNode {
-    u64 unk0;
-    u64 unk8;
-    int __attribute__((mode(TI))) unk10;
+    u64 dmaTag;
+    u64 vifCommands;
+    int __attribute__((mode(TI))) nextTag;
 } SdfDmaNode;
+
+typedef char SdfDmaNode_size_must_be_0x20[
+    sizeof(SdfDmaNode) == 0x20 ? 1 : -1];
+typedef char SdfDmaNode_alignment_must_be_0x10[
+    __alignof__(SdfDmaNode) == 0x10 ? 1 : -1];
+typedef char SdfDmaNode_vifCommands_at_8[
+    ((u32)&((SdfDmaNode *)0)->vifCommands == 8) ? 1 : -1];
+typedef char SdfDmaNode_nextTag_at_0x10[
+    ((u32)&((SdfDmaNode *)0)->nextTag == 0x10) ? 1 : -1];
 
 /* Resource entry with word at +0xC (0x10); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResEntry {
@@ -452,16 +465,6 @@ typedef struct SdfResource {
     u8 pad08[0x18];
     s32 id;
 } SdfResource;
-
-/* Graphics packet header (0x10); DDS1/2 game/code_002D9748/003325F8.c. */
-typedef struct SdfNode {
-    u16 unk0;
-    u8 unk2;
-    u8 unk3;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-} SdfNode;
 
 /* Optional packed or five-float state block owned by an SdfAsset. */
 typedef union SdfSubParam {

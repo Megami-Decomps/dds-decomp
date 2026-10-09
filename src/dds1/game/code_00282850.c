@@ -4,12 +4,14 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
 #include "sdf_dev_state.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
@@ -94,7 +96,7 @@ extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
 
 
-extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
+extern void func_00284108(MenuEffectPair *, s32, s32 *, s32, s32, EffectSlotSet *, const s32 *);
 
 
 extern void evtStageTestCreateModelEffect(s32);
@@ -718,7 +720,41 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00284108);
+void func_00284108(MenuEffectPair *pair, s32 initialValue, s32 *settings,
+                   s32 positionY, s32 span, EffectSlotSet *source, const s32 *table) {
+    memset(pair, 0, sizeof(*pair));
+    pair->quantizedSpan = span;
+    pair->positionY = positionY;
+    pair->initialValue = initialValue;
+    pair->updateState = 0;
+    pair->settingIndex = 0;
+    pair->settings = settings;
+    pair->resourceSets[0] = effCreateResourceSlotSet(source, table[0], 1);
+    switch (initialValue) {
+    case 1:
+        pair->resourceSets[1] = effCreateResourceSlotSet(source, table[1], 1);
+        pair->resourceSets[2] = effCreateResourceSlotSet(source, table[2], 1);
+        pair->resourceSets[3] = effCreateResourceSlotSet(source, table[3], 1);
+        pair->resourceSets[4] = effCreateResourceSlotSet(source, table[4], 1);
+        pair->resourceSets[5] = effCreateResourceSlotSet(source, table[5], 1);
+        pair->resourceSets[6] = effCreateResourceSlotSet(source, table[6], 1);
+        pair->leftGrid = effCreateResourceSlotSet(source, table[7], 1);
+        pair->rightGrid = effCreateResourceSlotSet(source, table[8], 1);
+        break;
+    default:
+        pair->resourceSets[1] = effCreateResourceSlotSet(source, table[1], 1);
+        pair->resourceSets[2] = effCreateResourceSlotSet(source, table[2], 1);
+        pair->resourceSets[3] = effCreateResourceSlotSet(source, table[3], 1);
+        pair->resourceSets[4] = effCreateResourceSlotSet(source, table[4], 1);
+        pair->resourceSets[5] = effCreateResourceSlotSet(source, table[5], 1);
+        pair->resourceSets[6] = effCreateResourceSlotSet(source, table[6], 1);
+        pair->leftGrid = effCreateResourceSlotSet(source, table[7], 1);
+        pair->rightGrid = effCreateResourceSlotSet(source, table[8], 1);
+        break;
+    }
+    mnuCreatePairedEffects(pair);
+    mnuCyclePairedEffectSetting(pair);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2420);
 
@@ -2591,7 +2627,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        sdfPacReleasePacketQueueNodes(taskWork->payload);
+        sdfPacReleasePacketQueueNodes((PacState *)taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;

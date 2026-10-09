@@ -248,11 +248,11 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
         allocatePacket = sdfAllocPacketAligned;
     }
     packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
-    packet->node.unk4 = (u32)sdfPatchPacketResourceField;
+    packet->link.patch = sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
         (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
         resourceAddress, arg7, arg8);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
         (u32)packet + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
@@ -633,9 +633,9 @@ SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag) {
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
     dmaHeader |= packedAddress;
-    referenceNode->unk0 = dmaHeader;
-    referenceNode->unk10 = 0;
-    referenceNode->unk8 = sourceTag->vifCommands;
+    referenceNode->dmaTag = dmaHeader;
+    referenceNode->nextTag = 0;
+    referenceNode->vifCommands = sourceTag->vifCommands;
     return referenceNode;
 }
 
@@ -681,35 +681,31 @@ void sdfConnectPacketLists(previousList, incomingList)
     tailTag->address = incomingList->first & SDF_DMA_ADDRESS_MASK;
 }
 
-typedef struct SdfRefNode {
-    u8 pad00[0x10];
-    u64 chain; /* 0x10: NEXT tag chaining to the previous head */
-} SdfRefNode;
-
-/* Prepend the second reference, then the first: the resulting order is first, second, payload. */
+/* Prepend the second reference, then the first: first, second, payload.
+ * Patch only the NEXT header's low doubleword; its VIF half stays zero. */
 void sdfChainReferenceNodes(SdfListHead *list) {
-    SdfRefNode *referenceNode;
+    SdfDmaNode *referenceNode;
     u32 priorHeadAddress;
     u32 sourceTagAddress;
 
     sourceTagAddress = list->secondReferenceSource;
     if (sourceTagAddress != 0) {
-        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
         list->first = (u32)referenceNode;
-        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
+        *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
     sourceTagAddress = list->firstReferenceSource;
     if (sourceTagAddress != 0) {
-        referenceNode = (SdfRefNode *)sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
+        referenceNode = sdfCreateReferenceDmaNode((SdfDmaTag *)sourceTagAddress);
         priorHeadAddress = list->first & SDF_DMA_ADDRESS_MASK;
         list->first = (u32)referenceNode;
-        referenceNode->chain = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
+        *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
 }
 
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
-s32 sdfFlushPoolNodes(SdfPoolNode *node) {
+SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *tail = NULL;
     s32 head = 0;
 
@@ -729,7 +725,7 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
         ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
         ((SdfDmaTag *)tail->last)->address = 0;
     }
-    return head;
+    return (SdfListHead *)(u32)head;
 }
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
@@ -739,15 +735,15 @@ void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
     list->unkC = 0;
 }
 
-void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, SdfPacketPatchLink *node) {
     if (list->last == 0) {
-        list->first = (u32)node;
+        list->first = node;
     }
     else {
-        *(u32 *)list->last = (u32)node;
+        list->last->next = node;
     }
-    list->last = (u32)node;
-    *node = 0;
+    list->last = node;
+    node->next = NULL;
 }
 
 void sdfClearPacketChain(SdfPacketChain *chain) {
@@ -760,7 +756,7 @@ void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node) 
         chain->head = node;
     }
     else {
-        *(u32 *)chain->tail->last = node->last;
+        chain->tail->last->next = node->last;
     }
     chain->tail = node;
 }
@@ -906,8 +902,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
 
 typedef struct SdfSceneNode {
-    u8 pad00[4];
-    void (*handler)(); /* 0x4 */
+    SdfPacketPatchLink link; /* Native next/callback prefix at 0/4. */
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfPacket header;  /* 0x10 */
@@ -921,6 +916,10 @@ typedef struct SdfSceneNode {
 } SdfSceneNode;
 
 typedef char SdfSceneNode_size_must_be_0x220[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
+typedef char SdfSceneNode_view_at_8[
+    ((u32)&((SdfSceneNode *)0)->view == 8) ? 1 : -1];
+typedef char SdfSceneNode_payload_at_10[
+    ((u32)&((SdfSceneNode *)0)->header == 0x10) ? 1 : -1];
 
 extern void sdfRefreshSceneNodePackets();
 
@@ -928,7 +927,7 @@ extern void sdfRefreshSceneNodePackets();
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
-    node->handler = sdfRefreshSceneNodePackets;
+    node->link.patch = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
     node->regs[1] = SDF_GS_TEST_1;
@@ -942,7 +941,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
-void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, u32 *linkedNode) {
+void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, SdfPacketPatchLink *linkedNode) {
     sdfAppendLinkedPacketNode(linkedList, linkedNode);
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
@@ -964,16 +963,16 @@ void func_0032DB78(s32 source, u32 packet, s32 variant) {
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1E0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1E0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
@@ -1009,9 +1008,9 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     if (list != NULL && list->last != 0) {
         slot->packetList = list;
         if (chain != NULL) {
-            slot->callbackHead = (void *)(u32)chain->head->first;
+            slot->callbackHead = chain->head->first;
             if (slot->callbackHead != NULL) {
-                *(u32 *)chain->tail->last = 0;
+                chain->tail->last->next = NULL;
             }
         }
         slot->queuedBufferIndex = sdfCurrentBufferIndex;
@@ -1269,7 +1268,7 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
 void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
     packet->transfer[0].unk0 =
         (packet->transfer[0].unk0 & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->node.unk8]->baseAddress >> 6);
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
 extern SdfGraphObj D_0040B290;
@@ -1286,8 +1285,8 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
         allocPacket = sdfAllocPacketAligned;
     }
     packet = (SdfGraphCopyPacket *)allocPacket(0x70);
-    packet->node.unk8 = resourceIndexXor;
-    packet->node.unk4 = (u32)sdfPatchPacketResourceReference;
+    packet->resourceIndexXor = resourceIndexXor;
+    packet->link.patch = sdfPatchPacketResourceReference;
     drawPacket = &packet->drawHeader;
 
     sdfInitializeExtendedDrawPacket(
@@ -1295,7 +1294,7 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
         destination->format, destinationX, destinationY, D_0040B290.buffers[0]->word,
         D_0040B290.width, D_0040B290.bufferFormat, sourceX, sourceY, transferWidth,
         transferHeight, 2);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacket(drawList, (s32)drawPacket);
 }
 

@@ -8,6 +8,7 @@
 #include "dds3Admin.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "evt_unit.h"
 
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
@@ -25,7 +26,6 @@ void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
 
 
-void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void func_00111480(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);

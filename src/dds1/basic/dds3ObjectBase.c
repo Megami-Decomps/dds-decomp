@@ -6,6 +6,7 @@
 #include "eff_object.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "evt_unit.h"
 
 extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
@@ -17,7 +18,6 @@ void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
-void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void func_00111258(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);

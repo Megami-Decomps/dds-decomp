@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
@@ -1027,7 +1028,6 @@ BattleModelEntry *btlCreateModelEntry(void) {
 
 extern char D_003A68F8[];
 
-extern void func_00288788(void *);
 
 /* Only the final reference releases resources and unlinks the cache entry. */
 void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {

@@ -64,7 +64,6 @@ typedef struct {
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
 
 extern void evtCreateWorldObjectForKey(s32, s32);
 
