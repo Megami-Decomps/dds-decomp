@@ -23,6 +23,7 @@
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
+#include "eff_pcp_charge.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -145,26 +146,6 @@ typedef struct {
     } resource;
 } EffPCPCompactFadeWork;
 
-/* Large charge-style effect work (allocation 0x1354). The vector at 0xAF0
- * is copied as a quadword; construction clears its first three words.
- * Resource handles occupy the tail. */
-typedef struct {
-    f32 samplePositions[25][7][4]; /* 0x000: seven points in each captured row */
-    u32 vectorWords[4];          /* 0xAF0 */
-    u32 animationFrames[25][7];  /* 0xB00 */
-    f32 sampleScales[25][7];     /* 0xDBC */
-    u32 sampleAges[25][7];       /* 0x1078 */
-    u32 color;         /* 0x1334: configurable colour */
-    f32 scale;         /* 0x1338: configurable scale */
-    u32 historyCount;       /* 0x133C cleared on init */
-    u32 updateCount;       /* 0x1340 cleared on init */
-    u32 baseColor;    /* 0x1344 initialised to grey 0x80808080 */
-    EffParamWork *secondaryHandle; /* 0x1348: parameter block 1 */
-    EffParamWork *primaryHandle;   /* 0x134C: parameter block 0 */
-    SdfMemBlock *allocationHandle; /* 0x1350: backing allocation */
-} EffPCPChargeWork;
-
-typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0x1354) ? 1 : -1];
 
 
 
@@ -840,7 +821,7 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
     work->baseColor = 0x80808080;
 }
 
-EffPCPChargeWork *effCreateChargeWork(void *source) {
+EffPCPChargeWork *effPcpChargeCreateWork(void *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     work->allocationHandle = resource;
@@ -855,13 +836,15 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
     return work;
 }
 
-void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
+void effPcpChargeReleaseWork(EffPCPChargeWork *work) {
     effDispatchParameterDataAndFreeWork(work->primaryHandle);
     effDispatchParameterDataAndFreeWork(work->secondaryHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
+/* Duplicate the parameter owners into fresh history storage; sampled arrays
+ * are not copied from source. */
+EffPCPChargeWork *effPcpChargeCloneWork(EffPCPChargeWork *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     EffParamWork *firstHandle = source->primaryHandle;

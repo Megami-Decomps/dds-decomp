@@ -46,8 +46,6 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-extern void mnuSetPopupEntryFlagged(s32 *, char *);
-
 extern char D_0037CC20[];
 
 
