@@ -86,7 +86,6 @@ extern void mnuMarkTitleStreamResetPending(void);
 extern s32 func_0024D760(PolyMovieWork *ctx);
 
 struct EvtRuntime;
-void evtEventViewerReset(struct EvtRuntime *viewer);
 
 struct EffNode;
 
@@ -1935,8 +1934,6 @@ extern void kwlnCancelConfiguredFadeFrames();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
-extern void evtEventViewerReleaseGroups();
-extern void evtEventViewerShutdown();
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);

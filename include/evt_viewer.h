@@ -243,6 +243,10 @@ typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection ==
 typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
 
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
+void evtViewerDispatchFlagMode(EvtRuntime *viewer);
+void evtEventViewerReset(EvtRuntime *viewer);
+void evtEventViewerShutdown(EvtRuntime *viewer);
+void evtEventViewerReleaseGroups(EvtRuntime *viewer);
 void evtViewerSetMinimumFromCurrent(EvtRuntime *viewer);
 void evtViewerSetMaximumFromCurrent(EvtRuntime *viewer);
 void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source);

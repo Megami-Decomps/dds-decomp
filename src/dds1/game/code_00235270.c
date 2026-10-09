@@ -53,7 +53,6 @@ extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
@@ -5151,10 +5150,7 @@ extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
 extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
-extern void evtEventViewerShutdown(EvtRuntime *runtime);
 extern void evtDestroySecondaryWorldNode(void);
-extern void evtEventViewerReleaseGroups(EvtRuntime *runtime);
-extern void evtEventViewerReset(EvtRuntime *runtime);
 
 s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path0[0x80];
