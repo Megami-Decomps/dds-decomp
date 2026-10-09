@@ -9,7 +9,8 @@ struct WorldIndexNode;
 
 extern u32 func_0012A6F0(u32);
 
-extern u32 func_0012AC90(u32, u32, u32, u32, u32, u32);
+extern u32 func_0012AC90(u32, u32, u32, u32,
+                        const SdfTextureOffsetListHeader *, u32);
 
 
 
@@ -306,6 +307,6 @@ void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 arg1, 
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = func_0012AC90(arg1, arg2, arg3, arg4, (u32)textureOffsets, arg6);
+    handle = func_0012AC90(arg1, arg2, arg3, arg4, textureOffsets, arg6);
     data->indexedHandle = handle;
 }

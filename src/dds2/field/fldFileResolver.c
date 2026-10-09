@@ -7,6 +7,7 @@
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
 #include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
 
 
 extern FldFileResource *D_00438EC0;
@@ -1356,6 +1357,9 @@ void fldReleaseAreaResourceCache(void) {
 }
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012A6F0);
+
+extern u32 func_0012AC90(u32, u32, u32, u32,
+                        const SdfTextureOffsetListHeader *, u32);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012AC90);
 

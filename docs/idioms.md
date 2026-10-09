@@ -5770,3 +5770,26 @@ retail uses signed `slt` against the incremented tick, and its C setters
 store `6` or the signed load state. Keep one declaration per owning unit;
 the unused declarations left in DDS1 `code_0026BD58` are retired.
 
+## Field loaders borrow serialized texture-offset lists
+
+`func_00128780` and DDS2's `func_0012AC90` borrow a
+`const SdfTextureOffsetListHeader *` as their fifth argument. Their resource
+builder already has that canonical input type, and both world-object callers
+already receive the same typed list. Do not convert that pointer to an address
+word merely to satisfy an obsolete local declaration.
+
+Keep the six-word caller contract: DDS1 `0x110BA0` and DDS2 `0x110DC8`
+deliberately move the wrapper's seventh argument into the loader's sixth
+argument register in the call delay slot. The assembly-retained loader does
+not read that final word. This input-type closure does not claim either
+loader body is matching C.
+
+## Shooting pause choice uses a complete fade-number owner
+
+DDS2 `func_0031B080` passes `MnuShootingWork +0x14C` to both the
+`func_0031ED68` display-value setter and `mnuDrawFadeSequenceThree`. Their
+`FadeNumber.displayValue` access at `+0x18` identifies the work's `+0x164`
+word; the resetters clear the complete `0x1C` bytes. Keep this payload as
+`pauseFade`, not a byte pad cast to its fade-state prefix. This owner closure
+does not solve the retained caller's retail JAL-versus-sibling-jump frontier.
+

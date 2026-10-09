@@ -80,14 +80,14 @@ void func_0031AEB8(MnuShootingWork *object) {
         func_0031AF58(object);
         mnuPauseEffectQueueFrameAdvance();
         func_0031ADD8(object);
-        itfSetFadeMode((FadeEntry *)object->pad14C, 1, 8);
+        itfSetFadeMode(&object->pauseFade.fade, 1, 8);
         return;
     }
     if (!object->unk70Bit0) {
         func_0031AF60();
         mnuResumeEffectQueueFrameAdvance();
         func_0031AE48(object);
-        itfSetFadeMode((FadeEntry *)object->pad14C, 0, 8);
+        itfSetFadeMode(&object->pauseFade.fade, 0, 8);
     }
 }
 
