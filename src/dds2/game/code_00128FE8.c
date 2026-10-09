@@ -12,6 +12,8 @@
 #include "dds3obj.h"
 #include "fld.h"
 #include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
 
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1127,21 +1129,6 @@ u8 fldHasAreaResourceNameChanged(void) {
     return strcmp(D_00444950, buf) != 0;
 }
 
-typedef struct FldPackedEntry {
-    struct FldPackedEntry *next;
-    u8 pad04[4];
-    u32 blockHandle;
-    u32 payload;
-    u8 pad10[2];
-    u16 kind;
-} FldPackedEntry;
-
-typedef struct FldPackedArchive {
-    u8 pad00[0x60];
-    FldPackedEntry *entries;
-} FldPackedArchive;
-
-
 extern void fldCopyInfoTable(FldInfTable *);
 
 extern void fldSetNpcPalette(u32);
@@ -1158,42 +1145,49 @@ extern void fldCacheMapLabelLengths();
 
 void fldLoadAreaPackedResources(void) {
     char name[32];
-    FldPackedEntry *entry;
+    FilePacRequest *request;
+    PacWork *work;
 
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
         fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
         func_002C81D0((struct FileRequest *)fldAreaPackedArchive);
-        for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
-             entry = entry->next) {
-            switch (entry->kind) {
-            case 1:
-                fldCopyInfoTable((FldInfTable *)entry->payload);
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
+        request = (FilePacRequest *)fldAreaPackedArchive;
+        for (work = request->packet.queueHead; work != NULL; work = work->next) {
+            switch (*(u16 *)(work->packet + 2)) {
+            case FLD_PACKED_RESOURCE_INFO_TABLE:
+                fldCopyInfoTable((FldInfTable *)work->dataCursor);
+                sdfQueueGeneralAllocationRelease(
+                    (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
-            case 2:
-                fldSetNpcPalette(entry->payload);
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
+            case FLD_PACKED_RESOURCE_NPC_PALETTE:
+                fldSetNpcPalette((u32)work->dataCursor);
+                sdfQueueGeneralAllocationRelease(
+                    (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
-            case 3:
-                fldUploadSkyBuffer(entry->payload);
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
+            case FLD_PACKED_RESOURCE_SKY_BUFFER:
+                fldUploadSkyBuffer(work->dataCursor);
+                sdfQueueGeneralAllocationRelease(
+                    (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
-            case 4:
-                fldCopyActorWaypointTable(entry->payload);
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
+            case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
+                fldCopyActorWaypointTable((u32)work->dataCursor);
+                sdfQueueGeneralAllocationRelease(
+                    (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
-            case 5:
+            case FLD_PACKED_RESOURCE_RETAINED_COPY:
                 fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
-                    sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
+                    sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)work->resourceHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
-                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)entry->blockHandle),
-                       sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
+                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)work->resourceHandle),
+                       sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)work->resourceHandle));
+                sdfQueueGeneralAllocationRelease(
+                    (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
-            case 6:
-                fldSetSceneRecordChunk(entry->payload, entry->blockHandle);
+            case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
+                fldSetSceneRecordChunk((s32)(u32)work->dataCursor,
+                                       work->resourceHandle);
                 break;
             }
         }
