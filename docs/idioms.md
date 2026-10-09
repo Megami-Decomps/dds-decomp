@@ -5506,3 +5506,13 @@ reads the same unit's flags at `+0x110`. These providers are not methods of
 the old local `UiObject` view. The provider unit and the existing entry-query
 users in both games remain text- and data-exact after the parameter cutover.
 
+## Field spark dialog twins
+
+DDS1 `func_0014C648` and DDS2 `func_00150A60` share the twelve-phase
+spark/message transition controller. The dialog timer is the same physical
+member at DDS1 `FldSparkController.unk2C` and DDS2 `unk30`; the sequence
+resource is title-specific (`0x670010` versus `0x680010`). DDS1's retained
+request `D_003BAFE8` is a `FileRequest *`, while `D_003BAFEC` and
+`D_003BAFF0` are the resource-handle and loaded-data words. Keeping that
+request typed removes the integer/pointer adapters in both controller paths.
+
