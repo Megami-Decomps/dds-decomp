@@ -5748,6 +5748,7 @@
 0x002B4770	effCopyActiveResourceSecondaryVector	inferred	Copies a vector into the second vector slot of active resource work. [names_reviewed8.tsv]
 0x002B4788	effSetActiveResourceColor	inferred	Writes the provided color to active resource's color field. [names_reviewed8.tsv]
 0x002B4790	effSetActiveResourceScale	inferred	Stores the runtime resource owner scale float at offset 0x20; registered alongside its vector and color setters.
+0x002B4798	effCreateParticleSharedResourceFromFile	inferred	File-operation factory allocates the complete shared particle resource, copies the primary payload, and resolves its retained billboard or reference resource.
 0x002B4998	effReleaseParticleResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B49E8	effCloneParticleSharedResource	inferred	Allocates particle effect, copies source payload and replaces shared billboard or reference. [names_reviewed5.tsv]
 0x002B4B08	effReplaceSharedResource	inferred	eff effect resources and animation in game/code_0029A840.c

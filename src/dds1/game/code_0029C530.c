@@ -7312,7 +7312,7 @@ typedef char EffParticleSharedBillboardOffsetCheck[
 typedef char EffParticleSharedReferenceOffsetCheck[
     ((u32)&((EffParticleShared *)0)->reference == 0xA8) ? 1 : -1];
 
-EffParticleShared *func_002B4798(FileJobPayload *source) {
+EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
     EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
     void *buffer;
 
@@ -7363,7 +7363,7 @@ void effReleaseParticleResources(EffParticleShared *work) {
 void effReplaceSharedResource(EffParticleShared *, EffParticleShared *);
 
 EffParticleShared *effCloneParticleSharedResource(EffParticleShared *source) {
-    EffParticleShared *effect = func_002B4798(NULL);
+    EffParticleShared *effect = effCreateParticleSharedResourceFromFile(NULL);
     memcpy(effect->pad0C, source->pad0C, sizeof(effect->pad0C));
     effReplaceSharedResource(effect, source);
     return effect;
