@@ -2528,7 +2528,7 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color) {
     u32 tint[4];
     u32 packed[4];
 
-    node->flags |= 2;
+    node->flags |= SDF_DRAW_NODE_FLAG_USE_NODE_COLOR;
     node->color &= 0xFF000000;
     if (node->color > 0x3FFFFFF) {
         node->color -= 0x4000000;
@@ -2586,7 +2586,7 @@ void btlResetNamedChunkNodeTree(SdfDrawNode *node) {
 
     node->color = 0x80808080;
     child = node->children;
-    node->flags = node->flags & 0xfffd;
+    node->flags &= ~SDF_DRAW_NODE_FLAG_USE_NODE_COLOR;
     if (child != 0) {
         do {
             btlResetNamedChunkNodeTree(child);

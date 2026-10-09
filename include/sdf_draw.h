@@ -95,6 +95,9 @@ typedef struct SdfDrawNode {
     f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
 
+#define SDF_DRAW_NODE_FLAG_SKIP_RENDER 0x0001
+#define SDF_DRAW_NODE_FLAG_USE_NODE_COLOR 0x0002
+
 /* Two index/weight pairs stored in each 0x10-byte model slot entry. */
 typedef struct SdfSlotPair {
     s32 index;
