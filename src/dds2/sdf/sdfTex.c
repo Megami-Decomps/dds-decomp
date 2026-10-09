@@ -221,8 +221,8 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
 }
 
 /* Build the texture and its packet with variant zero. */
-SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress) {
-    return sdfTexCreateFromFileHeader(resourceAddress, 0);
+SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header) {
+    return sdfTexCreateFromFileHeader(header, 0);
 }
 
 /* Build the texture and its packet with variant one. */

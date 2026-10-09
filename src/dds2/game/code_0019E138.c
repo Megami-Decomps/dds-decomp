@@ -9,6 +9,7 @@
 #include "itf_mem_node.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
+#include "sdf_texture_file.h"
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -111,8 +112,6 @@ typedef struct MemRingHeader {
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 extern void sdfTexReleaseReference(SdfTex *);
 
@@ -1119,7 +1118,7 @@ void itfLoadBackgroundSprite(void) {
     u32 resource;
     SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((void *)resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resource));
     sdfReleaseResourceAllocation(fileAllocation);
 }
 
@@ -1320,7 +1319,7 @@ SdfTex *itfLoadTextureFromAsset(const char *path) {
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
-    textureHandle = sdfTexAcquireResourceTexture((void *)assetInfo[0]);
+    textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(assetInfo[0]));
     sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }

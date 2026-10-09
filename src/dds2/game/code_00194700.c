@@ -13,6 +13,7 @@ extern s8 D_0043643D;
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
+#include "sdf_texture_file.h"
 
 #define EFF_DISPATCH_RESULT_BYTES 8
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
@@ -25,8 +26,6 @@ extern s8 D_0043643D;
 #define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
@@ -536,7 +535,7 @@ void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
         work->textureHandle = NULL;
     }
     loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
-    texture = sdfTexAcquireResourceTexture((void *)resourceWords[0]);
+    texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceWords[0]));
     work->textureHandle = texture;
     sdfReleaseResourceAllocation(loadedResource);
 }

@@ -23,6 +23,7 @@
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
+#include "sdf_texture_file.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -1937,10 +1938,6 @@ void fldEnterSceneCamera(void) {
     D_00324980.camera.offsetY = 2118.0f;
 }
 
-
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
-
 /* Loads the scene's models into the menu slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
@@ -1964,8 +1961,8 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].resourceAddress);
-    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].resourceAddress);
+    D_003D40A0[0] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[0].resourceAddress));
+    D_003D40A0[1] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[1].resourceAddress));
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->unkC0;
@@ -2734,9 +2731,9 @@ void fldInitializeMenuResources(void) {
         D_003BAF4C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF48);
         D_003BAF3C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BD7F0);
         D_003BAF40 = 0;
-        D_003BAF30 = sdfTexAcquireResourceTexture((void *)D_003BD7D8);
-        D_003BAF34 = sdfTexAcquireResourceTexture((void *)D_003BD7E0);
-        D_003BAF38 = sdfTexAcquireResourceTexture((void *)D_003BD7E8);
+        D_003BAF30 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7D8));
+        D_003BAF34 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7E0));
+        D_003BAF38 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_003BD7E8));
     }
 }
 
@@ -3230,7 +3227,7 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFB0 = 0;
     func_003014F0(path, D_003A0810, field);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&resourceAddress, 0);
-    D_003BAFB4 = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    D_003BAFB4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
@@ -3355,7 +3352,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFBC = 0;
     func_003014F0(path, "/fld/f/pnl/ds%03d.tmx", id);
     handle = (s32)sdfReadNamedResource(path, (u32 *)&data, 0);
-    D_003BAFC4 = sdfTexAcquireResourceTexture((void *)data);
+    D_003BAFC4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
@@ -3378,7 +3375,7 @@ void fldLoadWeatherEffects(void) {
     s32 resourceAddress;
 
     handle = (s32)sdfReadNamedResource(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
-    fldWeatherLimitTexture = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    fldWeatherLimitTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = func_0014FE28(fldDamEffectData);

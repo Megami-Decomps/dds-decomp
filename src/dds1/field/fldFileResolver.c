@@ -5,6 +5,7 @@
 #include "fld.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "sdf_texture_file.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -328,7 +329,6 @@ extern u32 D_003BD7C0;
 extern u8 D_0032F260[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void fldResetRecordState(void);
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 extern u8 sdfProjectionMatrix[];
 extern u8 D_00324660[];
@@ -1438,7 +1438,7 @@ void fldInitDisplayObjects(void) {
         D_003BACEC = (u32)object;
         object->unk1C = 1.0f;
         D_003BD7C0 = (u32)sdfCreateAssetWithDrawEntries();
-        fldMarkerTexture = sdfTexAcquireResourceTexture(D_0032F260);
+        fldMarkerTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_0032F260));
     }
 }
 
@@ -3833,7 +3833,7 @@ void fldLoadSkyResource(s32 area) {
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
             fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
-            fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+            fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
 }
@@ -3860,7 +3860,7 @@ void fldUploadSkyBuffer(void *src) {
     fldReleaseSkyResources();
     if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && fldRainTextureResource == 0) {
         fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
-        fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+        fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
     }
 }
 
@@ -4632,7 +4632,7 @@ extern u32 fldRainTextureData;
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
-    fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+    fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);

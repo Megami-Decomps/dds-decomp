@@ -12,6 +12,7 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_texture_file.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 #define SDF_PAD_REPLY_BUFFER_BYTES 0x20
@@ -121,7 +122,6 @@ extern u128 *D_003EB860[][3];
 extern SdfTex *D_003BD37C;
 extern SdfTex *D_003BD380;
 extern SdfTex *D_003BD390;
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 extern s32 sdfAllocPacketAligned(s32);
@@ -1860,7 +1860,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        D_003BDA34 = sdfTexAcquireResourceTexture(D_00315BA0);
+        D_003BDA34 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00315BA0));
     }
 }
 

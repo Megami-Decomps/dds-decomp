@@ -9,6 +9,7 @@
 #include "itf_mem_node.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
+#include "sdf_texture_file.h"
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -41,8 +42,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 
 extern void sdfTexReleaseReference(SdfTex *);
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
@@ -992,7 +991,7 @@ void itfLoadBackgroundSprite(void) {
     u32 resource;
     SdfMemBlock *fileAllocation = sdfReadNamedResource("/sprite/bg00.tmx", &resource, 0);
 
-    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((void *)resource);
+    itfBackgroundSpriteTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resource));
     sdfReleaseResourceAllocation(fileAllocation);
 }
 
@@ -1203,7 +1202,7 @@ SdfTex *itfLoadTextureFromAsset(const char *path) {
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
     fileAllocation = sdfReadNamedResource(path, assetInfo, 0);
-    textureHandle = sdfTexAcquireResourceTexture((void *)assetInfo[0]);
+    textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(assetInfo[0]));
     sdfReleaseResourceAllocation(fileAllocation);
     return textureHandle;
 }

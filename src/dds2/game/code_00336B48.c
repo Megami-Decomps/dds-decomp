@@ -12,6 +12,7 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_texture_file.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 #define SDF_PAD_REPLY_BUFFER_BYTES 0x20
@@ -69,8 +70,6 @@ extern u32 D_00438A64;
 extern u32 D_00438A68;
 
 extern u32 D_00439194;
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 extern u8 D_00476250[];
@@ -1880,7 +1879,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
-        D_00439194 = (u32)sdfTexAcquireResourceTexture(D_00370B80);
+        D_00439194 = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00370B80));
     }
 }
 

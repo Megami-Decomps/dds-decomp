@@ -5,6 +5,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
+#include "sdf_texture_file.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -62,7 +63,6 @@ void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
-SdfTex *sdfTexAcquireResourceTexture(void *resource);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 func_002EEAE0(void *decoder, void *input, s32 available);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -331,7 +331,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot)));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot))));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
@@ -348,7 +348,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot)));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot))));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
