@@ -6217,6 +6217,7 @@
 0x00334A60	sdfMotionBlendDrawVectorWithCurrent	inferred	Blends vector keys, then blends with the current vector using the second weight. [names_reviewed6.tsv]
 0x00334B10	sdfMotionCreateInterpolatedQuaternionBinding	inferred	Allocates a draw binding whose callbacks interpolate three-angle keys, convert them to a quaternion, and update the node quaternion and matrix.
 0x00334B70	sdfMotionApplyInterpolatedEulerRotation	inferred	Interpolates three-component rotation keys, converts them to a quaternion, and writes the draw-node rotation matrix.
+0x00334C30	sdfMotionBlendInterpolatedEulerRotation	inferred	Interpolates three-component rotation keys, converts them to a quaternion, blends with the captured quaternion, and updates the draw-node matrix.
 0x00334D10	sdfMotionCreateScaleVectorBinding	inferred	Allocates motion work with handler table followed by the scale-vector interpolator. [names_reviewed6.tsv]
 0x00334D70	sdfMotionBlendScaleVector	inferred	Interpolates vec3 keys and writes the model scale-vector slot. [names_reviewed6.tsv]
 0x00334DF0	sdfMotionBlendScaleVectorWithCurrent	inferred	Interpolates vec3 keys then blends with the current vector into the scale slot. [names_reviewed6.tsv]
