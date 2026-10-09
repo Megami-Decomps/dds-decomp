@@ -1191,7 +1191,7 @@ void func_00126110(f32 *input) {
             mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
             fldResetCameraModelHandles();
         }
-        sdfSetTextFloatPairOverride(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+        sdfSetModelScalarOverrides(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
         fldSecondarySceneObject = 0;
 
         locationFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
@@ -1210,7 +1210,7 @@ void func_00126110(f32 *input) {
             fldSecondarySceneModelHandle = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSecondarySceneObject);
             effObjSetInnerFloat(fldSecondarySceneObject, 90.0f);
             mdlAddEntryFlagged((MdlCtx *)fldSecondarySceneModelHandle, 0, 0);
-            sdfSetTextFloatPairOverride(((MdlCtx *)fldSecondarySceneModelHandle)->inner, 15.0f, 0.0f);
+            sdfSetModelScalarOverrides(((MdlCtx *)fldSecondarySceneModelHandle)->inner, 15.0f, 0.0f);
             ((MdlCtx *)fldSecondarySceneModelHandle)->inner->flags |= 8;
         }
 

@@ -5,8 +5,8 @@
 
 struct SdfModel;
 
-void sdfSetTextFloatPairOverride(struct SdfModel *model, f32 first, f32 second);
-void sdfClearTextFloatPairOverride(struct SdfModel *model);
+void sdfSetModelScalarOverrides(struct SdfModel *model, f32 first, f32 second);
+void sdfClearModelScalarOverrides(struct SdfModel *model);
 f32 sdfGetFirstTextOverrideOrDefault(struct SdfModel *model);
 f32 sdfGetSecondTextOverrideOrDefault(struct SdfModel *model);
 

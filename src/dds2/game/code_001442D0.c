@@ -5326,7 +5326,7 @@ void func_00153D60(s32 gridX, s32 gridY, s32 slot) {
 
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle(object);
         mdlAddEntryFlagged(model, 0, 0);
-        sdfSetTextFloatPairOverride(model->inner, 15.0f, 0.0f);
+        sdfSetModelScalarOverrides(model->inner, 15.0f, 0.0f);
         D_00451DB0[slot].model = model;
         D_00451DB0[slot].object = object;
     }
@@ -5367,7 +5367,7 @@ void func_001540E8(void) {
     effObjSetInnerThirdVec(D_00435F1C, (u128 *)scale);
     D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
     mdlAddEntryFlagged(D_00435F20, 0, 0x11);
-    sdfSetTextFloatPairOverride(D_00435F20->inner, 15.0f, 0.0f);
+    sdfSetModelScalarOverrides(D_00435F20->inner, 15.0f, 0.0f);
     func_00136718();
     func_001526B8();
     func_00153FA0();

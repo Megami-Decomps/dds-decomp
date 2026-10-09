@@ -1052,7 +1052,7 @@ void func_00123FB8(u128 *transform) {
         mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
         fldResetCameraModelHandles();
     }
-    sdfSetTextFloatPairOverride(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+    sdfSetModelScalarOverrides(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
     dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
         func_00133640(0, 0);

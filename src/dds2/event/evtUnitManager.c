@@ -496,9 +496,9 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         overrideAux = 1;
     }
     if (overrideAux) {
-        sdfSetTextFloatPairOverride(unit->owner->inner, auxFirst, auxSecond);
+        sdfSetModelScalarOverrides(unit->owner->inner, auxFirst, auxSecond);
     } else {
-        sdfClearTextFloatPairOverride(unit->owner->inner);
+        sdfClearModelScalarOverrides(unit->owner->inner);
     }
 }
 
