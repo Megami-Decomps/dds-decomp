@@ -4762,25 +4762,25 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
         }
         effect->flags &= ~2;
     }
-    args->loadHandle = fileQueueDefaultCallbackRequest(args->name);
+    args->request = fileQueueDefaultCallbackRequest(args->name);
     effect->flags |= 1;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
 
 s32 sndPollEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
-    s32 resource;
+    struct SdfMemBlock *resource;
     if (effect->flags & 2) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->loadHandle) == 0) {
+    if (fileIsRequestReadyInCurrentMode(args->request) == 0) {
         return 0;
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
-    resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
-    effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
-    filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
+    resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+    effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress(resource));
+    sdfReleaseResourceAllocation(resource);
+    filePollEntryCleanup(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
