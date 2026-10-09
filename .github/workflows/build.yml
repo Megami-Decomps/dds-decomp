@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
 
       - name: Check diagnostic syntax
-        run: python3 -m py_compile experiments/kib-alpha-marker/diagnose.py
+        run: python3 -m py_compile experiments/kib-alpha-marker/diagnose.py experiments/kib-alpha-marker/trace.py
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
@@ -58,7 +58,7 @@ jobs:
           echo '{"status":"diagnostic_failed","stage":"retail_unavailable"}'
           exit 2
 
-      - name: Focused alpha-marker diagnostic
+      - name: Candidate alpha allocation trace
         if: steps.orig.outputs.available == 'true'
         timeout-minutes: 25
-        run: python3 experiments/kib-alpha-marker/diagnose.py
+        run: python3 experiments/kib-alpha-marker/trace.py
