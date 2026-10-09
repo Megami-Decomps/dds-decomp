@@ -33,7 +33,7 @@ typedef struct ModelInstanceList {
 } ModelInstanceList;
 
 typedef struct ModelInstanceWork {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     s32 count;
     ModelInstanceList *lists;
     u32 unkC;
@@ -43,6 +43,7 @@ typedef char ModelInstanceLayoutsAssert[
     (sizeof(ModelInstance) == 0x34 &&
      sizeof(ModelInstanceList) == 0x08 &&
      sizeof(ModelInstanceWork) == 0x10 &&
+     (unsigned long)&((ModelInstanceWork *)0)->allocation == 0x00 &&
      (unsigned long)&((ModelInstance *)0)->flags == 0x20 &&
      (unsigned long)&((ModelInstance *)0)->scale == 0x30 &&
      (unsigned long)&((ModelInstanceWork *)0)->lists == 0x08) ? 1 : -1];
@@ -109,7 +110,7 @@ typedef struct MnuEffectList {
 } MnuEffectList;
 
 typedef struct MnuEffectWork {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     s32 count;
     MnuEffectList *lists;
     u32 unkC;
@@ -123,6 +124,7 @@ typedef char MnuEffectLayoutsAssert[
      (unsigned long)&((MnuEffectRecord*)0)->delay==8 &&
      (unsigned long)&((MnuEffectRecord*)0)->positionStep==0x10 &&
      sizeof(MnuEffectList)==8 &&
+     (unsigned long)&((MnuEffectWork *)0)->allocation==0 &&
      sizeof(MnuEffectWork)==0x10)?1:-1];
 
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *, f32, f32, f32,
