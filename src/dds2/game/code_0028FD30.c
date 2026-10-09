@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -647,8 +648,6 @@ void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
 
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
-
 void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
@@ -950,7 +949,6 @@ void func_00292998(MnuStatusResource *object) {
     record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
 }
 
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconAtPosition(s32, s32, struct MantraDrawPool *pool);
 extern void func_00278EA8(struct MantraDrawPool *pool);
