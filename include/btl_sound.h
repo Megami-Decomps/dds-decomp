@@ -244,6 +244,14 @@ typedef char SoundFileTaskArgs_index_offset_must_be_C[
 typedef char SoundFileTaskArgs_filename_offset_must_be_10[
     ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
 
+/* Known SoundLoadNode/SoundFileNode phase bits; other flag bits stay opaque. */
+enum {
+    SOUND_FILE_STATE_REQUEST_PENDING = 0x01,
+    SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED = 0x02,
+    SOUND_FILE_STATE_SPU_LOAD_PENDING = 0x08,
+    SOUND_FILE_STATE_COMPLETE = 0x10
+};
+
 s32 sndLoadDataFile(const SoundDataFileArgs *data);
 struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
 void sndStartFileLoad(SoundFileTaskArgs *args);

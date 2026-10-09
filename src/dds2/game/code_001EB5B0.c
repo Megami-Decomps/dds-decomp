@@ -5674,7 +5674,7 @@ typedef struct SoundFileNode {
 void sndStartFileLoad(SoundFileTaskArgs *args) {
     SoundFileNode *node = args->node;
     args->request = fileQueueDefaultCallbackRequest(args->filename);
-    node->flags |= 1;
+    node->flags |= SOUND_FILE_STATE_REQUEST_PENDING;
     node->position = (args->frames + 0x200) << 16;
     node->mode = 2;
     btlBossDebugPrintf("btl:sound file load start[%s]\n", args->filename);
@@ -5686,7 +5686,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         btlBossDebugPrintf("btl:sound wait[motSE]\n");
         return 0;
     }
-    if ((node->flags & 2) == 0) {
+    if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
         if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
             s32 data;
@@ -5696,16 +5696,18 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_003422F8(data, size);
-                node->flags |= 8;
+                node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
                 btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", (u16)(node->position >> 16), size);
             }
-            node->flags = (node->flags & ~1) | 2;
+            node->flags = (node->flags & ~SOUND_FILE_STATE_REQUEST_PENDING) |
+                          SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED;
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
         sdfReleaseResourceAllocation(request->resourceAllocation);
         filePollEntryCleanup(request->request);
-        node->flags = (node->flags & ~8) | 0x10;
+        node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
+                      SOUND_FILE_STATE_COMPLETE;
         return 1;
     }
     return 0;
