@@ -877,7 +877,7 @@ typedef struct SdfSceneNode {
     SdfGraphObj *view;
     u8 pad0C[4];
     SdfPacket header;
-    u64 draw[8];
+    SdfGsDrawDefaultsRegisters drawDefaults;
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
     SdfGsCenteredBoundsRegisters centeredBounds;
@@ -972,7 +972,7 @@ void evtResetDisplayProjectionAndVectorState(void) {
 /* Scene-draw packet built by sdfBuildTextureScenePacket (0x170 bytes). */
 typedef struct KwlnTextureScenePacket {
     SdfPacket header;
-    u64 draw[8];
+    SdfGsDrawDefaultsRegisters drawDefaults;
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
     SdfGsCenteredBoundsRegisters centeredBounds;

@@ -861,15 +861,15 @@ void sdfBuildCenteredViewBoundsPacket(SdfGsCenteredBoundsRegisters *packet, s32 
 }
 
 /* Seed PRMODECONT, COLCLAMP, DTHE and TEXA drawing registers. */
-void sdfInitDrawPacket(u64 *packet) {
-    packet[0] = 1;
-    packet[1] = SDF_GS_PRMODECONT;
-    packet[2] = 1;
-    packet[3] = SDF_GS_COLCLAMP;
-    packet[4] = 0;
-    packet[5] = SDF_GS_DTHE;
-    packet[6] = SDF_GS_DEFAULT_TEXA;
-    packet[7] = SDF_GS_TEXA;
+void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet) {
+    packet->prmodecont.value = 1;
+    packet->prmodecont.registerId = SDF_GS_PRMODECONT;
+    packet->colclamp.value = 1;
+    packet->colclamp.registerId = SDF_GS_COLCLAMP;
+    packet->dthe.value = 0;
+    packet->dthe.registerId = SDF_GS_DTHE;
+    packet->texa.value = SDF_GS_DEFAULT_TEXA;
+    packet->texa.registerId = SDF_GS_TEXA;
 }
 
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
@@ -881,7 +881,7 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32
 
 typedef struct SdfSceneDrawPacket {
     SdfGsPacketHeader header; /* 0x00 */
-    u64 draw[8];         /* 0x20 */
+    SdfGsDrawDefaultsRegisters drawDefaults;         /* 0x20 */
     SdfGsContextRegisters contextOne; /* 0x60 */
     SdfGsContextRegisters contextTwo; /* 0xA0 */
     SdfGsCenteredBoundsRegisters centeredBounds;      /* 0xE0 */
@@ -917,7 +917,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     packet->regs[5] = SDF_GS_TEST_2;
     packet->regs[6] = SDF_GS_DEFAULT_ALPHA;
     packet->regs[7] = SDF_GS_ALPHA_2;
-    sdfInitDrawPacket(packet->draw);
+    sdfInitDrawPacket(&packet->drawDefaults);
 }
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
@@ -927,7 +927,7 @@ typedef struct SdfSceneNode {
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfGsPacketHeader header; /* 0x10 */
-    u64 draw[8];       /* 0x30 */
+    SdfGsDrawDefaultsRegisters drawDefaults;       /* 0x30 */
     SdfGsContextRegisters contextOne; /* 0x70 */
     SdfGsContextRegisters contextTwo; /* 0xB0 */
     SdfGsCenteredBoundsRegisters centeredBounds;    /* 0xF0 */
@@ -958,7 +958,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     node->regs[5] = SDF_GS_TEST_2;
     node->regs[6] = SDF_GS_DEFAULT_ALPHA;
     node->regs[7] = SDF_GS_ALPHA_2;
-    sdfInitDrawPacket(node->draw);
+    sdfInitDrawPacket(&node->drawDefaults);
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
