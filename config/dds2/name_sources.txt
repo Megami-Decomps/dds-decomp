@@ -5129,6 +5129,7 @@
 0x002E07C0	effSetBillboardMatrixComponent	inferred	Writes the matrix component used by this billboard work. [names_reviewed5.tsv]
 0x002E0840	effCreateBillFrameNode	inferred	vtable creator next to effClearBillFrames/func_002E08D0: allocates 0x18-byte entries + 0x10 header, refs via func_002E5C50(count, 0, handle) [names_M84_AllocNode.tsv]
 0x002E08D0	effReleaseBillFrameNode	inferred	Bill frame node destructor releases shared references and its backing allocation. [names_reviewed21.tsv]
+0x002E0900	billAdvanceFrameInstances	inferred	Kind-1 active update advances bill-frame instances using its EffBillFrameConfig, parent frame and child state.
 0x002E0F30	billUpdateFrameDrawColorAndTransform	inferred	Blends frame draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E1098	billResetCellIndices	inferred	Clears 16-byte per-cell buffer and resets each 28-byte cell entry index to -1.
 0x002E1110	billCreateCellNode	inferred	vtable creator next to billResetCellIndices/func_002E11A0: 0x1C-byte entries, kind 1 [names_M84_AllocNode.tsv]
@@ -5137,11 +5138,13 @@
 0x002E1A70	billResetParticleIndices	inferred	Clears per-particle 16-byte data and resets each 44-byte particle entry index to -1; same source shape as billResetCellIndices.
 0x002E1AE8	billCreateParticleNode	inferred	vtable creator next to billResetParticleIndices/func_002E1B80: 0x2C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x002E1B80	billReleaseParticleNode	inferred	Particle node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
+0x002E1BB0	billAdvanceParticleInstances	inferred	Kind-3 active update advances particle instances from EffBillParticleConfig and the parent frame/resource state.
 0x002E22C8	billUpdateParticleDrawColorAndTransform	inferred	Blends particle draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E24A8	billAllocateAnimatedTransformEntries	inferred	Allocates and retains the entry buffer used by both animated-transform creation and cloning. [names_reviewed5.tsv]
 0x002E25B0	billCreateAnimatedTransform	inferred	Allocates 24-byte animated-effect entries from descriptor, creates resource handle, then initializes alternating transform rows.
 0x002E2610	billCloneAnimatedTransform	inferred	Allocates animated-effect entries from owner descriptor, clones source resource, then initializes alternating transform rows.
 0x002E2670	billReleaseAlternatingTransformNode	inferred	Following alternating transform-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E26A0	billAdvanceAnimatedFrameTransforms	inferred	Kind-4 active update advances animated billboard transforms using EffBillAnimatedFrameConfig and parent frame/resource state.
 0x002E2C48	billUpdateAlternatingDrawColorAndTransform	inferred	Blends alternating-node draw colors and stores a quaternion-derived scaled transform matrix. [names_reviewed21.tsv]
 0x002E2DB0	billResetEmitterIndices	inferred	Clears emitter buffer and resets each 24-byte entry index to -1; shared verified billboard reset source.
 0x002E2E28	billAllocEmitterNode	inferred	allocator called by billCreateEmitterTransform/billCloneEmitterTransform: 0x18-byte entries + 0x10 header [names_M84_AllocNode.tsv]

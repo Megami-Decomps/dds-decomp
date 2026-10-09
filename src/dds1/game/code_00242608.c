@@ -1,4 +1,5 @@
 #include "dat_command.h"
+#include "itf_mes_window.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
@@ -60,7 +61,6 @@ extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
 extern struct EffectSlotSet *D_003BC520;
-extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];

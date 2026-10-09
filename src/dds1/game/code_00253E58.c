@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_task_work.h"
 #include "mnu_scene_work.h"
+#include "dsp_name.h"
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 extern TaskWork *mnuSceneResourceContext;
@@ -127,7 +128,74 @@ void func_00254778(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4) {
     func_0024E260(a0, a1, a2, a3, 0x49, a4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00253E58", func_00254810);
+typedef struct {
+    s8 spriteIndices[7];
+} DspUnitSpriteTable;
+
+typedef struct {
+    u8 pad00[0x38];
+    s32 shade; /* 0x38 */
+} DspEffectShade;
+
+typedef struct {
+    u8 pad00[0x828];
+    DspEffectShade *shade; /* 0x828 */
+} DspEffectRoot;
+
+typedef struct {
+    u8 pad00[4];
+    u16 unitId; /* 0x4 */
+} DspTablePartyRecord;
+
+typedef struct {
+    DspTablePartyRecord *partyRecord; /* 0x0 */
+    s32 profileId;                    /* 0x4: index into the 19-byte mantra-name rows */
+} DspTableProgress;
+
+typedef struct {
+    u8 pad00[0x1C];
+    struct { u8 pad00[0x70]; DspTableProgress *progress; } *selectedNode; /* 0x1C */
+    u8 pad20[0x10];
+    s32 *selectedValue; /* 0x30 */
+} DspTableUnit;
+
+typedef struct {
+    u8 pad00[0xC];
+    DspTableUnit *unit; /* 0xC */
+} DspTableWindowContext;
+
+typedef struct {
+    u8 pad00[0x24];
+    DspEffectRoot *effectRoot; /* 0x24 */
+} DspTableScene;
+
+extern DspUnitSpriteTable D_003BC440[];
+extern DspMantraName *D_003BAA78;
+extern void *memset(void *, s32, u32);
+extern u32 strlen(const char *);
+extern void effUpdateAttached(s32, s32, s32, DspEffectRoot *, s32);
+extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
+
+/* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */
+void func_00254810(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *windowContext, s32 drawContext) {
+    DspUnitSpriteTable sprites = D_003BC440[0];
+    DspTableUnit *unit = windowContext->unit;
+    s32 *selectedValue = unit->selectedValue;
+    DspTableProgress *progress = unit->selectedNode->progress;
+    DspTableScene *scene = (DspTableScene *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    u8 scratch[0x20];
+
+    selectedValue[1] = alpha;
+    func_0024E260(x, y, z, alpha, sprites.spriteIndices[progress->partyRecord->unitId] + 0x4A, drawContext);
+    scene->effectRoot->shade->shade = (s32)((f32)(alpha << 8) * 0.0078125f);
+    effUpdateAttached(0xD80, 0xC30, 1, scene->effectRoot, 0x53);
+    memset(scratch, 0, sizeof(scratch));
+    if (strlen((const char *)(D_003BAA78 + progress->profileId)) >= 5) {
+        frFontQueueTextAndOptionallyMeasure(x + 0xEF, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+    } else {
+        frFontQueueTextAndOptionallyMeasure(x + 0xF8, y + 0x15E, z, alpha | 0xA09DC300, 0, D_003BAA78 + progress->profileId, 0x80000000, drawContext);
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_00253E58", D_003BC440);
 

@@ -880,7 +880,27 @@ u32 sdfDevQueueOperationAndWait(void) {
     return sdfDevOperationReplyValue;
 }
 
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033EB80);
+/* Six-byte device prefix, accessed as a word and a halfword. */
+typedef struct DevPathPrefix {
+    s32 head;
+    u16 tail;
+} DevPathPrefix;
+
+/* Set the current device directory: prefix plus path, ending in a slash. */
+void func_0033EB80(char *path) {
+    s32 length = strlen(path);
+
+    ((DevPathPrefix *)D_0040B9D0)->head = ((DevPathPrefix *)D_00438AF0)->head;
+    ((DevPathPrefix *)D_0040B9D0)->tail = ((DevPathPrefix *)D_00438AF0)->tail;
+    memcpy(D_0040B9D0 + 6, path, length);
+    if (path[length - 1] != '/') {
+        D_0040B9D0[length + 6] = '/';
+        D_0040B9D0[length + 7] = 0;
+    } else {
+        D_0040B9D0[length + 6] = 0;
+    }
+}
+
 
 char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;

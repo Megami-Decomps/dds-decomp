@@ -482,6 +482,20 @@ typedef struct EffResourceOps {
     u32 payloadSize;           /* 0x18 */
 } EffResourceOps;
 
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    void * (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    void * (*cloneResource)(); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
+
+
 
 /* Native class operations: callbacks followed by the copied payload size.
  * Callback arity varies between creation and frame-notification paths. */
@@ -506,6 +520,20 @@ typedef struct EffClassResourceOps {
 
 typedef char EffClassResourceOps_size_must_be_0x18[
     (sizeof(EffClassResourceOps) == 0x18) ? 1 : -1];
+
+/* Block-resource callbacks receive the owning class work, not the payload. */
+typedef struct EffBlockOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    void *(*createResource)(); /* 0x04: preserve the existing generic result ABI */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    void *(*cloneResource)(); /* 0x0C: preserve the existing generic result ABI */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffBlockOps;
+
+typedef char EffBlockOps_size_must_be_0x1C[
+    (sizeof(EffBlockOps) == 0x1C) ? 1 : -1];
 
 struct EffModelResource;
 struct EffSpanConfig;
@@ -554,16 +582,16 @@ extern u8 D_0043875A;
 
 extern FileJobPayload *effQueuedFileHandle;
 
-extern EffResourceOps effActiveInstanceOperations[];
+extern EffActiveInstanceOps effActiveInstanceOperations[];
 
 
 extern EffClassOps effClassWorkOperations[];
 
 
-extern EffResourceOps effBlockResourceOperations[];
+extern EffBlockOps effBlockResourceOperations[];
 
 
-extern EffResourceOps effModelBlockOperations[];
+extern EffBlockOps effModelBlockOperations[];
 
 extern EffResourceOps effRuntimeResourceOperations[];
 
@@ -1659,7 +1687,7 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E0900);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceFrameInstances);
 
 typedef struct EffBillOutput {
     u32 textureId;      // 0x00
@@ -1828,7 +1856,7 @@ void billReleaseParticleNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceParticleInstances);
 
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -1957,7 +1985,7 @@ void billReleaseAlternatingTransformNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceAnimatedFrameTransforms);
 
 void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -2529,19 +2557,19 @@ EffClassWork *effCreateActiveResource(EffClassWork *obj) {
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].initialize();
+    effActiveInstanceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
 void effAdvanceActiveInstanceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        effActiveInstanceOperations[work->kind].update();
+        effActiveInstanceOperations[work->kind].update(work);
         work->frame++;
     }
 }
 
 void effDispatchActiveInstanceDraw(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].draw((void *)work);
+    effActiveInstanceOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawActiveInstance(EffClassWork *work) {
@@ -5524,7 +5552,7 @@ EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
 }
 
 void effDestroyBlockResourceWork(EffClassWork *obj) {
-    effBlockResourceOperations[obj->kind].destroyResource();
+    effBlockResourceOperations[obj->kind].destroyResource(obj);
     sdfReleaseChipBlock(obj);
 }
 
@@ -5539,19 +5567,19 @@ EffClassWork *effDuplicateActiveResourceB(EffClassWork *obj) {
 }
 
 void effResetBlockResourceFrame(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].initialize();
+    effBlockResourceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
 void effAdvanceBlockResourceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        effBlockResourceOperations[work->kind].update();
+        effBlockResourceOperations[work->kind].update(work);
         work->frame++;
     }
 }
 
 void effDrawBlockResourceWork(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].draw((void *)work);
+    effBlockResourceOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawBlockResource(EffClassWork *work) {
@@ -6058,7 +6086,7 @@ EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    effModelBlockOperations[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -6073,19 +6101,19 @@ EffClassWork *effRecreateActiveByClass(EffClassWork *obj) {
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    effModelBlockOperations[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
 void effAdvanceModelBlockFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        effModelBlockOperations[work->kind].update();
+        effModelBlockOperations[work->kind].update(work);
         work->frame++;
     }
 }
 
 void effDrawModelBlock(EffClassWork *work) {
-    effModelBlockOperations[work->kind].draw((void *)work);
+    effModelBlockOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawModelBlock(EffClassWork *work) {
