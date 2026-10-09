@@ -5835,7 +5835,6 @@ void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {
 
 /* The vector callers leave their second argument inherited through the
    unprototyped declarations and the K&R definitions below. */
-extern void fileAcquireRecord();
 extern void mnuRecordSetVector();
 extern void fileSetRecordSecondVector();
 
@@ -7794,9 +7793,7 @@ void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-void fileAcquireRecord(record)
-FileSlotTable *record;
-{
+void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
