@@ -10727,7 +10727,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, void * handle) {
 }
 
 typedef struct SoundHandleNode {
-    u32 handle;
+    struct FileQueue *queue;
     void *actor;
 } SoundHandleNode;
 
@@ -10735,7 +10735,7 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
     SoundEntry *entry = &D_003BDE18[index];
     node->actor = actor;
-    node->handle = (u32)fileCloneQueueEntries((struct FileQueue *)entry->unk4);
+    node->queue = fileCloneQueueEntries((struct FileQueue *)entry->unk4);
     return node;
 }
 
@@ -10745,21 +10745,23 @@ extern void fileQueueSetPosition(s32, f32 *);
 extern void fileQueueUpdate(s32);
 
 void btlUpdateJobPositionFromModel(s32 *args) {
+    SoundHandleNode *node = (SoundHandleNode *)args;
     f32 pos[4];
-    if (sdfLoadMapRecordPositionVector(((MdlCtx *)args[1])->inner, 1) == 0) {
-        mdlLoadPrimaryVectorVU((MdlCtx *)args[1]);
+    if (sdfLoadMapRecordPositionVector(((MdlCtx *)node->actor)->inner, 1) == 0) {
+        mdlLoadPrimaryVectorVU((MdlCtx *)node->actor);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
     } else {
         VU0_STORE_VF(vf10, pos);
     }
-    fileQueueSetPosition(args[0], pos);
-    fileQueueUpdate(args[0]);
+    fileQueueSetPosition((s32)node->queue, pos);
+    fileQueueUpdate((s32)node->queue);
 }
 
 void sndDestroyFileQueueWrapper(u32 queue) {
-    fileQueueDestroy((struct FileQueue *)*(u32 *)queue);
-    sdfReleaseChipBlock((void *)queue);
+    SoundHandleNode *node = (SoundHandleNode *)queue;
+    fileQueueDestroy(node->queue);
+    sdfReleaseChipBlock(node);
 }
 
 void func_00203EC0(void) {
