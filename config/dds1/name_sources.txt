@@ -3608,7 +3608,7 @@
 0x00211600	btlLoadModelPack	evidence	"btl:pack load start[%s][%X,%X]" / "btl:same pack find": creates or ref-counts a battle model entry (DDS2 twin func_0022CA60) [names_M69_Battle3.tsv]
 0x00211708	btlReleaseFoundModelEntry	inferred	Releases the model entry found by the battle lookup. [names_reviewed8.tsv]
 0x00211880	btlGetEntryState	inferred	btl battle control and actor operations in game/code_001FF030.c
-0x002118A8	btlReleaseEntryIfReady	inferred	finds the model entry for (kind,id) and returns func_002114E8(entry) (s8 ready check) [names_M56_D1Battle.tsv]
+0x002118A8	btlIsModelEntryReady	inferred	Finds the model cache entry by kind/id and returns its readiness status; returns zero when absent.
 0x002119A8	btlMulColor	inferred	channel-wise product of two packed RGBA colors
 0x00211A28	btlCopyPaletteLowByteToAlpha	inferred	Loops over 256 packed colors and copies each low byte into its high alpha byte without altering RGB. [names_reviewed18.tsv]
 0x00211CE8	btlBuildOverlayQuadPacket	inferred	Builds a fixed-vertex overlay packet with supplied color. [names_reviewed8.tsv]
