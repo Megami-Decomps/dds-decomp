@@ -2243,7 +2243,55 @@ s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00247190);
+extern void func_003014F0(char *, const char *, ...);
+extern char D_003BC3B8[];
+extern void evtCopyEntryStringToActiveWindow(s32 window, char *text);
+extern void evtSetMessageWindowOptionWhenOpen(s32 option);
+extern void evtStoreValueAndCaptureWindowPanelValue(s32 value);
+
+/* Format the buy/sell price in the message window; sells over the currency cap use the overflow message. */
+INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC390);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC398);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
+
+INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
+
+s32 func_00247190(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
+    char text[16];
+    s32 options[2] = {1, 3};
+    CampWindowParams *values = &scene->window->list->cursor->camp;
+    s32 operation;
+    s32 message;
+
+    if (scene->extraOption != 0) {
+        operation = scene->sprite->list->cursor->index + 1;
+    } else {
+        operation = options[scene->sprite->list->cursor->index];
+    }
+    message = 7;
+    scene->previousValue = datGameState->header.currency;
+    scene->elapsedFrames = 0;
+    if (operation == 3) {
+        message = (u32)(values->value * scene->counter + datGameState->header.currency) > 9999999 ? 0xC : 7;
+    }
+    func_003014F0(text, D_003BC3B8, values->value * scene->counter);
+    evtCopyEntryStringToActiveWindow(3, text);
+    dspSetActive(1);
+    dspStartEntry(message);
+    evtSetMessageWindowOptionWhenOpen(0);
+    evtStoreValueAndCaptureWindowPanelValue(0xB);
+    scene->window->list->drawCallback = func_0025F138;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002472D8);
 
@@ -2260,22 +2308,6 @@ extern u32 func_002CD800(u32);
 extern void mdlFlagSet(s32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
-INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC390);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC398);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
-
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B0);
-
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3C0);

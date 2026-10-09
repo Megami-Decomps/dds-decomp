@@ -679,6 +679,22 @@ The component type still matters for this old compiler's alias analysis;
 a record containing bytes does not automatically inherit the universal
 alias behavior of a direct character access.
 
+## `memset` as a builtin or a library call
+
+gcc 2.96 keeps `memset` a builtin under an implicit declaration, `extern int
+memset();`, `extern void *memset();` or the `size_t` prototype (a same-mode return
+type is accepted), so a small constant clear of an aligned pointer is inlined
+(`sw $0`). A declaration that conflicts with the builtin drops it:
+
+- `extern void memset();` (VOIDmode return): every call becomes a plain library call
+  with no result, which changes the scheduling around later calls in the unit.
+- `extern void *memset(void *dst, s32 value, s32 size);` (int size, not `size_t`):
+  library calls that still return a value. This is the declaration that keeps a
+  four-byte aligned clear a call while the unit's other memsets keep their
+  value-returning shape (DDS2 `code_002C96D0`, DDS1 `code_0028A150`).
+
+A `void *` or `char *` destination is never inlined, whatever the declaration.
+
 ## Struct assignment vs `memcpy`
 
 `*dst = *src` on a struct of `u32 word[N]` reproduces retail's `ldl/ldr`
@@ -1457,6 +1473,27 @@ So a loop that keeps `b` + test at the top needs its last `break` within the
 first ~30 insns of the loop. Example (DDS2 `func_0025FE70`): a `continue` chain
 followed by two separate `{ result = 1; break; }` exits; one merged
 `if (a || b) continue; result = 1; break;` rotates differently.
+
+### Loops that loop.c never optimises: a branch from outside into the test
+
+A loop that retail enters by a branch from outside straight into its bottom test,
+and that keeps loop invariants inside (`lui %hi(sym)` recomputed every iteration,
+constants re-materialised, `sll i,2; addu base` per iteration instead of a pointer
+giv), was skipped by loop.c entirely. jump.c redirected a branch that lies outside
+the loop notes into the loop's test, so loop.c saw a jump into the loop. Sources that
+do this:
+
+- the loop opens a `switch`'s `default:` arm, or an arm reached by the compare
+  chain of a non-jump-table switch: `switch (mode) { case 1: ...; break; default:
+  for (i = 0; i < 4; i++) ... }` (DDS2 `func_002D1058`, DDS1 `func_00290FE0`, DDS2
+  `func_002C1FF0` with the same loop in both arms, only the default copy
+  unoptimised). The jump-table cases and `if`/`else` arms are optimised normally.
+- the loop directly follows an early-return guard written as one `||` chain,
+  `if (a <= 0 || b < 0 || c < 0) return -1; for (...)`: the last compare branches
+  into the loop test with the counter init in its slot.
+
+Reusing one counter `i` across all loops of the function is ordinary C89. In
+`func_002D1058` it also gave retail's register for the index.
 
 `*out` as the loop cursor (DDS2 `func_0025E6F0`): `*out2 = track->first;
 while (*out2 != 0) { if (v < (*out2)->frame + base) break; *out2 = (*out2)->next; }`,

@@ -218,6 +218,14 @@ typedef struct EvtUnit {
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
 s32 evtReleaseUnitTransitionWork(EvtUnit *work);
 
+void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
+void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 duration);
+void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color);
+void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color);
+void evtSetUnitStatusFlags(EvtUnit *unit);
+EvtUnit *evtUnitGetNestedValue(EffWorldNode *unit);
+void evtUnitSetStoredParameter(EvtUnit *unit, s32 value);
+
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
 

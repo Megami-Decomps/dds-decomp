@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_unit.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_light.h"
@@ -10,7 +11,7 @@ extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
 struct EvtUnit;
-extern void evtSetUnitValueTransition(struct EvtUnit *unit, EffWorldNode *target, s32 duration);
+
 extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 
 

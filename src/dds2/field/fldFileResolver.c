@@ -146,10 +146,9 @@ typedef char FldUnitLightColor_size_must_be_0x10[(sizeof(FldUnitLightColor) == 0
 
 extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightColor D_0038BB60;
-extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
-extern void evtSetUnitStatusFlags(EvtUnit *);
+
+
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
-extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
 extern s32 fldCameraModelObject;
 extern s32 D_00389888[];

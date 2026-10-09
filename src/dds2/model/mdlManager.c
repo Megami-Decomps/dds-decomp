@@ -20,6 +20,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
 #include "mdl_resource_table.h"
 #include "evt_unit.h"
@@ -126,7 +127,7 @@ void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
 }
 
 /* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, s32 requestHandle) {
+void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, struct SdfMemBlock *requestAllocation) {
     BattleGroupNode *groupNode;
     BattleGroupNode *previousHead;
     s32 slotIndex;
@@ -142,7 +143,7 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     groupNode->type = entityType;
     groupNode->resourceList = resourceList;
     groupNode->itemList = itemList;
-    groupNode->requestHandle = requestHandle;
+    groupNode->requestAllocation = requestAllocation;
     groupNode->prev = NULL;
     groupNode->modelContext = NULL;
     for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
@@ -187,7 +188,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     if (ownsResources != 0) {
         sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
+        sdfQueueGeneralAllocationRelease(groupNode->requestAllocation);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
                 sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
@@ -327,13 +328,13 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex,
 }
 
 
-extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, void *, s32);
+extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, void *, struct SdfMemBlock *);
 
 
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
     BattleGroupNode *entity;
 
-    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->itemList, setup->requestHandle);
+    btlCreateGroupNode(group, id, mode, setup->resourceList, setup->itemList, setup->requestAllocation);
     if (setup->motionData != NULL) {
         mdlConfigureGroupedEntitySlot(group, id, mode, 0, 0, 0, setup->motionData, setup->motionResource);
     }
@@ -419,7 +420,7 @@ extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
 void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
-    request->payload.requestHandle = fileGetResourceHandle(resource);
+    request->payload.requestAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
     request->payload.itemList = sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
@@ -755,7 +756,6 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
-extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero

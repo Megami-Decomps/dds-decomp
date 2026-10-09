@@ -1,5 +1,6 @@
 #include "kwln_sprite.h"
 #include "common.h"
+#include "evt_unit.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -673,8 +674,6 @@ void btlUpdateUnitActors(void) {
     }
 }
 
-extern void evtSetUnitStatusFlags(u32);
-extern void evtSetUnitNormalizedDirection(u32, s32);
 
 void btlRefreshUnitEffects(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -683,9 +682,9 @@ void btlRefreshUnitEffects(void) {
         if (unit->status.flags & 2) {
             if (unit->status.stateFlags & 0x10) {
                 handle = (u32)unit->ext;
-                evtSetUnitStatusFlags(handle);
+                evtSetUnitStatusFlags((EvtUnit *)handle);
                 VU0_LOAD_VF(vf10, unit);
-                evtSetUnitNormalizedDirection(handle, 0);
+                evtSetUnitNormalizedDirection((EvtUnit *)handle, 0);
             }
         }
         unit = unit->next;

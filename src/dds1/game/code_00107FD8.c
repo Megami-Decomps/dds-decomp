@@ -200,8 +200,44 @@ extern void *D_003BD768;
 
 extern char D_0039E238[]; /* "DebugTimeGrph" */
 
+extern f32 *D_00324770[];
+extern s16 D_003BD6C8[4];
+extern s16 D_003BD6D0[4];
+extern u32 D_003C2BA0[4];
+extern u32 D_003C2BB0[4];
+
 /* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
-INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightColorTarget);
+void kwlnSetLightColorTarget(s32 blendFrames, s32 lightIndex, f32 *color) {
+    u32 startColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedStartColor;
+    u32 packedTargetColor;
+    f32 *light = D_00324770[lightIndex];
+    u32 blendFlag;
+
+    if (light != NULL) {
+        blendFlag = 4 << (lightIndex * 2);
+        if (blendFrames == 0) {
+            kwlnDrawControlFlags &= ~blendFlag;
+            VU0_LOAD_VF(vf10, color);
+            VU0_CLEAR_W(vf10);
+            VU0_STORE_VF(vf10, D_00324770[lightIndex]);
+        } else {
+            D_003BD6D0[lightIndex] = blendFrames;
+            D_003BD6C8[lightIndex] = 0;
+            kwlnDrawControlFlags |= blendFlag;
+            VU0_LOAD_VF(vf10, light);
+            EE_MMI_RGBA_PACK(packedStartColor);
+            startColorWords[0] = packedStartColor;
+            D_003C2BA0[lightIndex] = startColorWords[0];
+            VU0_LOAD_VF(vf10, color);
+            VU0_CLEAR_W(vf10);
+            EE_MMI_RGBA_PACK_UNCLOBBERED(packedTargetColor);
+            targetColorWords[0] = packedTargetColor;
+            D_003C2BB0[lightIndex] = targetColorWords[0];
+        }
+    }
+}
 
 /* Normalize the requested light direction; replace it immediately or prepare its blend. */
 INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnSetLightDirectionTarget);
@@ -588,7 +624,60 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
     evtSubmitGradientRectAtDepth(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
+/* Submit three packed vertex colors and XY pairs at the default depth. */
+void func_001093F8(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+    s32 coords[3][2];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    SdfPoolNode *descriptor;
+
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    coords[0][0] = x0 * 16;
+    coords[0][1] = y0 * 8;
+    coords[1][0] = x1 * 16;
+    coords[1][1] = y1 * 8;
+    coords[2][0] = x2 * 16;
+    coords[2][1] = y2 * 8;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0; i < 3; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(coords[i][0] + 0x7000) |
+            ((u64)(coords[i][1] + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, (u32)packet);
+    descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+}
+
 
 
 

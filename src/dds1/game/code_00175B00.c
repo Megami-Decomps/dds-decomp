@@ -181,7 +181,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
             }
         }
     }
-    surface = D_00354BF0[object->unk50];
+    surface = D_00354BF0[object->packetQueueIndex];
     surface->append((SdfListHead *)surface, packet);
 }
 
