@@ -49,7 +49,6 @@ u32 btlGetResourcePathVariant(struct BtlResourceDescriptor *descriptor);
 void btlDrawResourcePreview(struct BtlResourceDescriptor *descriptor);
 
 void btlSetResourceBrowserPosition(struct BtlResourceDescriptor *descriptor, s32 x, s32 y);
-u32 func_001FBF48(const void *owner);
-u32 func_0020DFC8(const void *owner);
+u32 btlGetResourceBrowserSelectionStatus(const struct BtlResourceDescriptor *descriptor);
 
 #endif

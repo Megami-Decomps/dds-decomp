@@ -3130,9 +3130,8 @@ u32 func_0020DFC0(s32 recordAddress) {
     return recordWords[5];
 }
 
-u32 func_0020DFC8(const void *owner) {
-    const u32 *headerWords = owner;
-    return headerWords[2];
+u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor) {
+    return descriptor->selectionStatus;
 }
 
 /* Format prefix + selected name; return its resource category, not its id. */
