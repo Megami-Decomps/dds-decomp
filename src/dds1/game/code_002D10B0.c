@@ -193,14 +193,14 @@ extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_002D5018(void);
-extern s32 func_002D1080(s32);
+extern s32 sdfGraphWakeDisplayThread(s32);
 extern void sceGsResetPath(void);
 
 void func_002D1380(void) {
     u32 startTicks;
 
     D_003BD2F1 = 0;
-    sdfAddHandler(1, 1, func_002D1080, -1, 0);
+    sdfAddHandler(1, 1, sdfGraphWakeDisplayThread, -1, 0);
     func_0030B638(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());

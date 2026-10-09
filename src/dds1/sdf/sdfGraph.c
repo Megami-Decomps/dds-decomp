@@ -106,7 +106,7 @@ void sdfGraphResetDeviceForCurrentMode(void) {
 }
 
 
-s32 func_002D1080(s32 channel) {
+s32 sdfGraphWakeDisplayThread(s32 channel) {
     if (channel == 1) {
         iWakeupThread(D_003BD9D8);
     }
