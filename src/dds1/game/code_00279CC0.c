@@ -397,7 +397,30 @@ void mnuRequestBaseAssets(MenuAssets *assets) {
 }
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuInitializeCampAssetSprites);
+s32 mnuInitializeCampAssetSprites(MenuAssets *assets) {
+    s32 i;
+    s32 j;
+
+    if (assets->sprites[0] == NULL) {
+        return 0;
+    }
+    if (assets->sprites[4] == NULL) {
+        return 0;
+    }
+    if (assets->material == NULL) {
+        return 0;
+    }
+    assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    mnuBindAssetEffectPayloads(assets);
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 4; j++) {
+            assets->sprites[4]->workEntries[i].savedColors[j] = 0x8080805A;
+        }
+    }
+    return 1;
+}
 
 void mnuReleaseAssets(MenuAssets *assets) {
     u32 i;
