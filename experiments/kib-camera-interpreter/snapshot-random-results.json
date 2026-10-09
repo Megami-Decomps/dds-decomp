@@ -1,0 +1,20 @@
+{
+  "game_base": "9e573143fa0ea1e013781dc904138e7c68273990",
+  "diagnostic_base": "1bce3c8a32351951f632cd3bde7535dfea3aeccc",
+  "matched": 515,
+  "data_issues": 2,
+  "context_issues": 0,
+  "other_issues": 0,
+  "target": {
+    "status": "diff",
+    "checker_bytes": 5240,
+    "differing_words": 573,
+    "full_object_bytes": 5240,
+    "context_differs": false
+  },
+  "ordinary_probe_target_bytes_equal": true,
+  "ordinary_probe_target_relocations_equal": true,
+  "target_relocations": 262,
+  "full_retail_check": false,
+  "runtime_test": false
+}
