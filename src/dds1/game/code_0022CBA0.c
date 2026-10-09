@@ -1795,7 +1795,6 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-extern u32 fileGetResourceHandle(void *file);
 extern s32 filePollEntryCleanup(void *file);
 
 void func_00232E20(PolyMovieWork *assets) {
@@ -1810,7 +1809,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->mainResource.request) == 0) {
             return;
         }
-        assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->mainResource.request);
+        assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->mainResource.request);
         assets->mainResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->mainResource.handle);
         filePollEntryCleanup(assets->mainResource.request);
         assets->mainResource.request = 0;
@@ -1822,7 +1821,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->secondaryResource.request) == 0) {
             return;
         }
-        assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->secondaryResource.request);
+        assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->secondaryResource.request);
         assets->secondaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->secondaryResource.handle);
         filePollEntryCleanup(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
@@ -1834,7 +1833,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->tertiaryResource.request) == 0) {
             return;
         }
-        assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->tertiaryResource.request);
+        assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->tertiaryResource.request);
         assets->tertiaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->tertiaryResource.handle);
         filePollEntryCleanup(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;
