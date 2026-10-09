@@ -2254,8 +2254,6 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
 }
 
 extern u64 sdfCheckPendingWorkWithInterrupts(void);
-extern MdlCtx *func_00217680(s32 resource, s32 modelId);
-
 /* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
 s32 func_002877A8(void) {
     StageTestSlot *slot = evtStageTestState.queue.slot;
@@ -2278,7 +2276,7 @@ s32 func_002877A8(void) {
             }
             if (ready != 0) {
                 if (evtStageTestState.mode != 1) {
-                    evtStageTestState.model = func_00217680(
+                    evtStageTestState.model = mdlCreateContextFromResourceKey(
                         slot->assetResource, slot->modelId);
                 }
                 if (mnuHasPendingBlockFlag(&evtStageTestState.queue.flags)) {

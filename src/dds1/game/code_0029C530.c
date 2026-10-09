@@ -529,10 +529,6 @@ extern void func_002B0B70(u8 *, void *);
 
 extern u16 D_003BC944;
 
-extern MdlCtx *func_00217680(s32, s32);
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
 extern void effInitModelVUState(MdlCtx *);
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
@@ -6466,7 +6462,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
     s32 x = mdlGetContextResourceGroup(work->assetId);
     s32 y = mdlGetContextResourceId(work->assetId);
-    MdlCtx *model = func_00217680(x, y);
+    MdlCtx *model = mdlCreateContextFromResourceKey(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
