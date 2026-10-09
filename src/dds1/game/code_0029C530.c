@@ -7204,20 +7204,20 @@ void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
     effDispatchEnabledCallback(work);
 }
 
-void effCopyActiveResourceVector(void *dst, void *src) {
+void effCopyActiveResourceVector(EffActiveResource *dst, const void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effCopyActiveResourceSecondaryVector(void *work, void *src) {
-    PCP_COPY_VECTOR(((EffActiveResource *)work)->orientation, src);
+void effCopyActiveResourceSecondaryVector(EffActiveResource *work, const void *src) {
+    PCP_COPY_VECTOR(work->orientation, src);
 }
 
 void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
     work->color = color;
 }
 
-void func_002B4790(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void func_002B4790(EffActiveResource *work, f32 value) {
+    work->scale = value;
 }
 
 /* Alternate particle handles share a header but occupy distinct slots. */
