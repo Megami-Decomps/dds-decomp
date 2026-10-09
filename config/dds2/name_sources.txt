@@ -6984,3 +6984,4 @@
 0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
 0x00157AC8	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.
 0x00316528	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.
+0x00335268	sdfMotionCreatePrimaryWordSecondBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word second, registering its apply/blend/capture callbacks.

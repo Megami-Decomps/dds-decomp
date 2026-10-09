@@ -617,12 +617,12 @@ void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
     binding->target = ((SdfAsset **)motion->owner->resources->buffer)[options];
 }
 
-void *func_00335268(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordSecondBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B420, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B420, options);
+    return binding;
 }
 
 void sdfMotionApplyPrimaryWordSecondKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
