@@ -4563,7 +4563,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->color = 0x80808080;
     node->opacity = 1.0f;
     node->active = 0;
-    node->transform = (u32)effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
+    node->trackSet = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
     node->resource = effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
@@ -4593,8 +4593,8 @@ void effReleaseModelResources(EffectStripNode *work) {
     if (work->resource != NULL) {
         billDispatchByKind(work->resource);
     }
-    if (work->transform != 0) {
-        effReleaseResourceRefs((u8 *)work->transform);
+    if (work->trackSet != NULL) {
+        effReleaseResourceRefs((u8 *)work->trackSet);
     }
     if (work->active != 0) {
         fileReleaseGridRecordHandle(work->active);
