@@ -75,7 +75,7 @@ extern s32 D_003BD340;
 extern s8 D_003BDA05;
 extern u8 sdfCurrentBufferIndex;
 
-extern void *sdfPendingQueueHead;
+extern SdfPendingNode *sdfPendingQueueHead;
 extern s8 sdfPendingQueueRotationActive;
 extern s32 sdfPendingQueueSlots[2];
 
@@ -304,18 +304,14 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry) {
     }
 }
 
-typedef struct SdfQueueNode {
-    struct SdfQueueNode *next;
-    struct SdfQueueNode *link;
-} SdfQueueNode;
-
-SdfQueueNode *sdfDetachQueue(void) {
-    SdfQueueNode *head = sdfPendingQueueHead;
-    SdfQueueNode *node;
+/* Detach the pending chain and clear each callback owner's pending node. */
+SdfPendingNode *sdfDetachQueue(void) {
+    SdfPendingNode *head = sdfPendingQueueHead;
+    SdfPendingNode *node;
 
     sdfPendingQueueHead = NULL;
     for (node = head; node != NULL; node = node->next) {
-        node->link->link = NULL;
+        node->owner->pending = NULL;
     }
     return head;
 }
