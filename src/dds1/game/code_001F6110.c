@@ -2924,9 +2924,9 @@ void func_001FC2E8(void *allocation) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
 
-void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord) {
-    record->x = firstWord;
-    record->y = secondWord;
+void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y) {
+    record->x = x;
+    record->y = y;
 }
 
 u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record) {

@@ -5,7 +5,7 @@
 #include "btl_resource_selection.h"
 
 typedef struct BtlResourceNameRecord {
-    s32 x; /* UI origin; no unit conversion is applied by the prompt. */
+    s32 x; /* UI origin for the name and overwrite prompts. */
     s32 y;
     u32 selectionStatus; /* Pending, accepted, or canceled. */
     s32 selection; /* Keyboard selection or overwrite yes/no choice. */
@@ -24,7 +24,7 @@ typedef char BtlResourceNameRecordNameOffsetCheck[
     ((u32)&((BtlResourceNameRecord *)0)->resourceName == 0x21) ? 1 : -1];
 
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension);
-void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord);
+void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y);
 void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *name);
 void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output);
 void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output);
