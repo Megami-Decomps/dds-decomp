@@ -3,11 +3,13 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "sdf_dev_state.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "eff_resource_slots.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -60,8 +62,6 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
-extern void sdfConsAppendVuPacket();
-extern void sdfConsAppendAssetPacket();
 extern void *func_0015FE20(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];
@@ -231,7 +231,6 @@ extern void func_00288788(void *);
 
 
 
-extern void *func_002BD9C0(u32, u32);
 
 /* Battle state: resource headers for texture slots 1 and 2. */
 
@@ -3872,7 +3871,7 @@ void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
     effCurrentRenderPacket = (u32)work;
     sdfInitPacketList(work);
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
+    sdfConsAppendVuPacket((SdfListHead *)effCurrentRenderPacket, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A78E0);
@@ -9485,7 +9484,7 @@ s32 effPollResourceList(EffectList *list) {
                     if (item->kind == 1) {
                         node = list->first;
                         buffer = item->buffer;
-                        *node->reference = func_002BD9C0(buffer, node->kind);
+                        *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
                         }

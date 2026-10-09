@@ -1079,7 +1079,7 @@ void func_0025F8B8(EffectSlotSet *object, MenuEffectResources *resources) {
     struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
-    mappedResource = effCreateMappedResource(dataAddress);
+    mappedResource = effCreateMappedResource((const u8 *)dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(2, mapArguments.values, 11, &resources->packet);
     mnuSetCampEffectResourceHandles(object, mappedResource, resources);

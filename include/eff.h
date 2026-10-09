@@ -5,6 +5,7 @@
 #include "sdf.h"
 
 struct EffNode;
+struct EffMappedRecord;
 
 struct EffRequest;
 struct SdfMemBlock;
@@ -752,7 +753,7 @@ typedef struct EffTimedState {
         s32 delayMax;
         u32 materialValue;
     };
-    u8 *source;
+    struct EffMappedRecord *source;
 } EffTimedState;
 
 /* Draw geometry is copied together; grid easing walks the bound coordinates. */
@@ -786,13 +787,18 @@ typedef struct BdWork {
     s32 sourceHeight;    /* 0x80 */
     u32 savedColors[4];  /* 0x84 */
     s32 slotOffset;      /* 0x94 */
-    s32 unk98;          /* 0x98: initialized from the source descriptor's final halfword. */
+    s32 remainingDescriptionUpdates; /* 0x98: update-call countdown before advancing a timed description. */
     union {
         s32 address;
         u32 bits;
-        struct BdWork *asset;
+        void *payload; /* Alternate payloads may be only 0x6C bytes. */
     } alternate;        /* 0x9C */
 } BdWork;
+
+/* Known continuation bit; other EffectSlotDescription.flags meanings remain unspecified. */
+enum EffectSlotDescriptionFlag {
+    EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION = 0x20,
+};
 
 /* Native 0x80-byte source descriptor; its bounds feed both grid and slot drawing. */
 typedef struct EffectSlotDescription {
@@ -812,13 +818,13 @@ typedef struct EffectSlotDescription {
     s32 widthOverride;   /* 0x74: zero selects the source bounds' width. */
     s32 heightOverride;  /* 0x78: zero selects the source bounds' height. */
     u16 initialDelay;    /* 0x7C: loaded into each timed state's delay before its +1. */
-    u16 unk7E;
+    u16 descriptionUpdateDelay; /* 0x7E: update-call delay loaded into the live work entry. */
 } EffectSlotDescription;
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
 typedef struct EffectSlotSet {
     struct SdfMemBlock *sourceAllocation;
-    u32 unk04;
+    u32 sharesTextureReferences;
     u32 count;
     struct SdfMemBlock *descriptionAllocation;
     EffectSlotDescription *descriptions;

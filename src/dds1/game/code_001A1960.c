@@ -400,7 +400,37 @@ void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
+/* Move a departing actor behind the remaining occupied party records. */
+void func_001A2258(BtlUnit *unit) {
+    DatPartyRecord saved;
+    DatGameState *scanState = datGameState;
+    s32 originalIndex;
+    s32 index;
+
+    originalIndex = unit->unk2C4;
+    memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
+    index = originalIndex;
+    if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
+        do {
+            memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
+            if (datGameState->party[index + 1].flags & 2) {
+                btlFindActiveActorByKind(index + 1)->unk2C4 = index;
+            }
+            index++;
+            if (index >= 4) {
+                break;
+            }
+            scanState = datGameState;
+        } while ((u16)(scanState->party[index + 1].flags & 1));
+    }
+    memcpy(&datGameState->party[index], &saved, sizeof(saved));
+    unit->partyRecord.flags &= ~2;
+    datGameState->party[index].flags &= ~2;
+    unit->unk2C4 = 6;
+    func_001A1CD0();
+    btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index,
+                       saved.unitId);
+}
 
 /* Swap complete records while keeping the actor in its original party slot. */
 void func_001A2608(BtlUnit *actor, u8 targetIndex) {
@@ -3293,14 +3323,16 @@ void btlPanelResourcesLoad(void) {
 }
 
 
-extern u32 func_002BD9C0(u32, u32);
 
 void btlLoadResourceBlock(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;

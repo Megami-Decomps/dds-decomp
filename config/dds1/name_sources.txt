@@ -1912,12 +1912,14 @@
 0x0017BE90	effPcpCreateChargeWorkFromTable	inferred	Extracts first parameter block and creates compact charge work. [names_reviewed8.tsv]
 0x0017BEB0	effPcpChargeRespawn	inferred	rebuild of the params block from the live work (words at 0x14..0x2C, resource at 0x34), calls func_0017BE00
 0x0017BF60	effPcpReleaseCompactBlurWork	inferred	Releases the work's blur resource then frees work. [names_reviewed6.tsv]
+0x0017BF90	effPcpUpdateCompactScatterWork	inferred	Updates the compact scatter resource owner, projected center, timeline opacity and frame.
 0x0017C158	effPcpCopyCompactBlurVector	inferred	Copies vector in compact blur resource work callback group. [names_reviewed8.tsv]
 0x0017C168	effPcpCompactSetColor	inferred	Stores packed color on compact effect work; the initializer uses that field for default gray. [names_reviewed6.tsv]
 0x0017C170	effPcpCreateCompactResourceWork	inferred	Allocates compact work, creates resource handle and copies flags and parameters. [names_reviewed6.tsv]
 0x0017C200	effPcpCreateChargeResourceWorkFromTable	inferred	Extracts first parameter block and creates charge work with its own resource. [names_reviewed8.tsv]
 0x0017C220	effPcpChargeLongRespawn	inferred	sibling of effPcpChargeRespawn that calls func_0017C170
 0x0017C2D0	effPcpReleaseSecondaryBlurWork	inferred	Releases second blur resource on work then frees work allocation. [names_reviewed6.tsv]
+0x0017C300	effPcpUpdateCompactScaleWork	inferred	Updates the compact scale resource owner, projected center, timeline opacity and frame.
 0x0017C4F0	effPcpCopyShortThunderFadeVector	inferred	Copies vector for short thunder-fade effect work. [names_reviewed8.tsv]
 0x0017C500	effPcpSetChargeResourceColor	inferred	src/dds1/effect/effPCPMisc.c:func_0017C500; Writes the charge-resource work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds1/data/data.data.s:65349: table record 0x00354140, color slot. [names_qp9.tsv]
 0x0017C508	effPcpInitShortThunderFadeWork	inferred	Creates thunder handle from parameters for the adjacent short-fade effect. [names_reviewed6.tsv]
@@ -2373,8 +2375,10 @@
 0x00193BB8	frFontDetachFirstResourceNode	inferred	confidence=high; src/dds1/interface/fmGslCont.c:func_00193BB8; Removes the first nonsentinel resource node, reconnects both neighbors and decrements the list node count. [names_qp9.tsv]
 0x00193C08	frFontListInsert	inferred	doubly-linked insert after D_003D68C0 head, bumps count at +0x18
 0x00193C38	frFontSetEntryFlag	inferred	sets flag bytes at table entry +0x10 pointer for index & 0xFF
+0x00193C70	frFontReverseWordBytes	inferred	Native paired ten-instruction helper reverses all four byte positions of an unsigned word using shifts, masks and ORs.
 0x00193C98	frFontHighestSetBitIndex	inferred	Returns floor(log2(value)) for nonzero values and zero for zero, not bit length.
 0x00193CD8	frFontBuildGsSetupPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00193C08.c:111:func_00193CD8; Builds fixed GS register setup packet used by font drawing.; twin=0x0019B968, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
+0x00193FD0	frFontDrawCachedGlyphRelative	inferred	Native paired wrapper adds glyph-relative X/Y, reads unsigned cell width/half-height and cached UV rectangle, then submits through the font atlas with enable one.
 0x00194038	sdfUploadGsImageUnderSemaphore	inferred	Creates GS image upload, executes it under a semaphore and waits for GS sync. [names_reviewed21.tsv]
 0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/game/code_00193C08.c:func_001940B8; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
 0x00194190	frFontEnsureSlotLoaded	inferred	src/dds1/game/code_00193C08.c func_00194190: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. [names_reviewed24.tsv]
@@ -5813,6 +5817,7 @@
 0x002BD378	effReleaseSlotWorkAllocation	inferred	Releases 0xa0-byte-per-slot work allocation kept at owner offset 0x14. [names_R_FuncNames4.tsv]
 0x002BD398	effGetSlotWorkOrOverride	inferred	Finds indexed slot work at 0x18 with 0xa0 stride, returns override pointer at +0x9c if present. [names_R_FuncNames4.tsv]
 0x002BD3B8	effInitializeSlotPhase	inferred	Sets phase to zero for flag 1, otherwise fixed-point 0x10000. [names_R_FuncNames4.tsv]
+0x002BD3D8	effInitializeSlotWorkFromDescription	inferred	Initializes one live slot work entry from its paired serialized description.
 0x002BD5A0	effInitializeSlotWork	inferred	Calls slot work initializer for entry at indexed 0xa0 stride. [names_R_FuncNames4.tsv]
 0x002BD5C8	effInitializeAllSlotWork	inferred	Initializes each allocated slot work entry in owner. [names_R_FuncNames4.tsv]
 0x002BD620	effAttachSlotWorkOwner	inferred	Stores parent owner and slot index in work then initializes work. [names_R_FuncNames4.tsv]
@@ -5822,6 +5827,7 @@
 0x002BD8F8	effHasFirstTextureHandle	inferred	Returns whether the first handle pointed to by offset 0x24 is nonzero. [names_R_FuncNames4.tsv]
 0x002BD908	effCreatePayload	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BD988	effDestroyPayload	inferred	Releases allocation at header offset 0 then frees 0x0c-byte payload header. [names_R_FuncNames4.tsv]
+0x002BD9C0	effCreateResourceSlotSetFromAllocation	inferred	Builds the slot owner and its descriptor, work and texture arrays from an allocation descriptor.
 0x002BDBC0	effCreateResourceSlotSet	inferred	eff allocates count 0x80/0xA0-byte slots and copies slot template from source (DDS2 twin func_00305348)
 0x002BDD60	effDestroyResourceSlotSet	inferred	Releases owned file/texture and slot buffers, then frees resource slot set. [names_R_FuncNames4.tsv]
 0x002BDDD0	effSetSlotResourceAndFlags	inferred	Stores slot flags and resource pointer, initializes flagged phase, increments attachment count. [names_R_FuncNames4.tsv]
@@ -5843,6 +5849,7 @@
 0x002BEDC8	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
 0x002BF198	effDrawTextureSlot	inferred	L13
 0x002BF790	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
+0x002BF828	itfUpdateGridSlotDescription	inferred	Decrements the current entry's update-call delay or advances its continued description sequence; paired DDS1/DDS2 native wrappers agree.
 0x002BF970	itfGridLookupValueOrDefault	inferred	Looks up a keyed widget value and falls back to its value at offset 0x28 when lookup returns zero.
 0x002BF9E0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
 0x002BFB50	itfGridCopyEntryQuad	inferred	Byte-identical dds2 twin 0x00307340; Copies four words from a grid entry's later record into its earlier record. [names_conflicts.tsv]

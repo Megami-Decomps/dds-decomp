@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
@@ -2790,7 +2791,7 @@ void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
 }
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
-void func_00183BE8(EffPCPCompactWork *work) {
+void effPcpUpdateCompactScatterWork(EffPCPCompactWork *work) {
     EffBlurScatterWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
@@ -2890,7 +2891,7 @@ void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
 }
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
-void func_00183F58(EffPCPCompactWork *work) {
+void effPcpUpdateCompactScaleWork(EffPCPCompactWork *work) {
     EffBlurScaleWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
@@ -4388,8 +4389,6 @@ extern SdfPoolNode *D_003B1FB8[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32));
-extern void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32));
 extern s32 func_00167A10(EffPCPBeamDrawParams *params);
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 
@@ -4414,8 +4413,8 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     VU0_ADD_XYZ(vf31, vf31, vf10);
     VU0_LOAD_MATRIX_B(scaleMatrix);
     sdfComposeVuMatrixFromRegisters();
-    sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, node->assetHandle, 0);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, node->assetHandle, 0);
     count = node->vertexCount;
     D_004520B0.colors = node->colors;
     D_004520B0.points = node->points;

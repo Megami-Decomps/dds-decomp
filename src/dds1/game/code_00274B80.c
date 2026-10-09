@@ -819,7 +819,6 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
 }
 
 extern u8 D_0037C3A8[];
-extern s32 effHasFirstTextureHandle(s32);
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
 extern void func_00272668();
@@ -829,7 +828,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
 
-    if (effHasFirstTextureHandle(work->resource) != 0) {
+    if (effHasFirstTextureHandle((EffectSlotSet *)(u32)work->resource) != 0) {
         mnuDrawStaffCampScreen(0, callback);
     } else {
         mnuDrawStaffCampScreen(1, callback);
