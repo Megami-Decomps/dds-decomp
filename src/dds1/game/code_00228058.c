@@ -50,7 +50,24 @@ extern void fldSetFadeTarget(s32, s32, s32);
 extern void evtBeginSkyParameterTransition(s32, s32);
 
 s32 scrReadIntParameter(s32 idx);
-INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
+extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern s32 evtCheckWorldObjectResourceScale(void *object);
+
+s32 func_00228058(void) {
+    s32 status = evtCheckWorldObjectResourceScale(
+        evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0)));
+
+    switch (status) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    case -1:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 extern char D_003ACA78[];
 extern KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
