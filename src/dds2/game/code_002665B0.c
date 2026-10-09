@@ -1760,7 +1760,7 @@ u32 func_00269C48(void) {
 }
 
 extern s32 func_002685F0(s32 action, s32 context);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];

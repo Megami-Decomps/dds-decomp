@@ -570,7 +570,7 @@ void mnuReleaseWorkResources(u8 *work) {
     mnuDestroyListState((struct MenuList *)((MenuTerminalWork *)work)->owner);
 }
 
-extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void evtCreateEventScriptProcess(s32);
 
@@ -720,7 +720,7 @@ s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
 extern s32 D_003BC3E4;
 extern char D_003AF590[];
 extern char D_003AF620[];
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 kwlnFadeIsActive(void);
 extern s32 evtIsActiveFlagSet(s32);
 
@@ -1652,7 +1652,7 @@ u32 func_0024B470(void) {
 }
 
 extern s32 func_0024A1D8(s32 action, s32 context);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);

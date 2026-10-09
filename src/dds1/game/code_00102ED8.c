@@ -1111,7 +1111,7 @@ void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
 
 /* Start the countdown with caller RGB. A zero duration also clears RGB via FadeClear.
  * The signed alpha byte -0x80 carries the raw maximum-alpha value 0x80. */
-void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration) {
+void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;
@@ -1144,7 +1144,7 @@ void kwlnFadeStartIn(s32 duration) {
 }
 
 /* Start the count-up with caller RGB; zero duration leaves maximum alpha. */
-void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration) {
+void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration) {
     kwlnFadeColor.r = red;
     kwlnFadeColor.g = green;
     kwlnFadeColor.b = blue;

@@ -904,7 +904,27 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
+s32 func_002295D8(BtlUnit *unit, s32 action, s32 unused) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return action;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((DatBattleSceneRecord *)(battle->battleMode *
+                    (s32)sizeof(DatBattleSceneRecord) +
+                    (u32)datBattleSceneRecords))->unitModes;
+    while (i < 11 && listedMode[i] != unit->partyRecord.unitId) {
+        i++;
+    }
+    if (i == 11) {
+        return action;
+    }
+    return action == 13 ? -1 : action;
+}
 
 s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     BtlState *battle;

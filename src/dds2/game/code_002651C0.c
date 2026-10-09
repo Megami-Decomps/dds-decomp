@@ -25,7 +25,7 @@ extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
-extern void kwlnFadeOutStart();
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];

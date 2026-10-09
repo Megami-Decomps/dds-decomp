@@ -3,17 +3,6 @@
 #include "mnu_sprite_resource.h"
 
 
-typedef struct {
-    s32 x;
-    s32 y;
-    s32 framesLeft;
-    s32 duration;
-    u8 direction;
-    s8 mode;
-    u8 generations;
-    u8 variant;
-} SpriteSpawnNode;
-
 
 extern SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
 extern f32 effMiscRandUnitFloat(void *);

@@ -26,18 +26,6 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 
 extern void func_0026DED0(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
-typedef struct SpriteSpawnNode {
-    s32 x;
-    s32 y;
-    s32 framesLeft;
-    s32 duration;
-    u8 direction;
-    s8 mode;
-    u8 generations;
-    u8 variant;
-} SpriteSpawnNode;
-typedef char SpriteSpawnNode_size[(sizeof(SpriteSpawnNode) == 0x14) ? 1 : -1];
-
 extern void func_0026DEA8();
 
 SdfList *mnuTickMovieGroup(MnuSpriteResourceGroup *owner, SdfList *group) {

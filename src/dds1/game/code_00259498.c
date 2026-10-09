@@ -385,7 +385,39 @@ MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant
     return resource;
 }
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025B888);
+extern char D_003AF9F0[];
+
+extern void *sdfAllocSizeClassBlock(s32);
+
+/* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
+SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
+    HexStepTable steps = *(HexStepTable *)D_003AF9F0;
+    SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
+
+    memset(node, 0, sizeof(SpriteSpawnNode));
+    if (parent != NULL) {
+        s8 direction = turn + parent->direction;
+
+        if (direction < 0) {
+            direction += 6;
+        }
+        if (direction >= 6) {
+            direction -= 6;
+        }
+        node->x = parent->x + steps.offsets[direction * 2];
+        node->y = parent->y + steps.offsets[direction * 2 + 1];
+        node->generations = parent->generations - 1;
+        node->direction = direction;
+        node->framesLeft = node->duration = group->owner - 5;
+    } else {
+        node->x = (s32)(effMiscRandUnitFloat(0) * 30.0f) * 26 + 16;
+        node->y = (s32)(effMiscRandUnitFloat(0) * 20.0f) * 18 + 50;
+        node->generations = group->sprite;
+        node->direction = 0;
+        node->framesLeft = node->duration = group->owner;
+    }
+    return node;
+}
 
 INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_sprite_resource.h"
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -19,7 +20,40 @@ void func_0026DD10(void) {
     mnuRequestIndexedMovieResource(0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DC50", func_0026DD30);
+extern char D_003AFEC8[];
+
+extern void *sdfAllocSizeClassBlock(s32);
+extern u32 effMiscRandMod(void *, u32);
+
+/* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
+SpriteSpawnNode *func_0026DD30(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
+    HexStepTable steps = *(HexStepTable *)D_003AFEC8;
+    SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
+
+    memset(node, 0, sizeof(SpriteSpawnNode));
+    if (parent != NULL) {
+        s8 direction = turn + parent->direction;
+
+        if (direction < 0) {
+            direction += 6;
+        }
+        if (direction >= 6) {
+            direction -= 6;
+        }
+        node->x = parent->x + steps.offsets[direction * 2];
+        node->y = parent->y + steps.offsets[direction * 2 + 1];
+        node->generations = parent->generations - 1;
+        node->direction = direction;
+        node->framesLeft = node->duration = group->owner - 5;
+    } else {
+        node->x = effMiscRandMod(NULL, 15) * 22 + 56;
+        node->y = effMiscRandMod(NULL, 10) * 36 + 189;
+        node->generations = group->sprite;
+        node->direction = 0;
+        node->framesLeft = node->duration = group->owner;
+    }
+    return node;
+}
 
 void func_0026DEA8(s32 unused, void *data) {
     if (data != NULL) {
