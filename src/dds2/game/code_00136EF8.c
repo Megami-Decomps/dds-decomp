@@ -12,6 +12,7 @@ extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "evt_world_source_transform.h"
 #include "fld.h"
 #include "evt_world.h"
 #include "scr.h"
@@ -1061,7 +1062,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 length;
     f32 dot;
     f32 angle;
-    f32 *source;
+    EvtWorldSourceTransformPrefix *source;
     s32 i;
     u32 kind;
 
@@ -1073,9 +1074,9 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
             switch (kind) {
             case 0:
                 source = entry->data;
-                position[0] = source[0];
-                position[1] = source[1];
-                position[2] = source[2];
+                position[0] = source->position.x;
+                position[1] = source->position.y;
+                position[2] = source->position.z;
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);
@@ -1126,6 +1127,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
 s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];
     f32 position[4];
+    EvtWorldSourceTransformPrefix *source;
     f32 dot;
     f32 angle;
     s32 i;
@@ -1138,7 +1140,8 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
             kind = ((FldTaskInfo *)D_0038BC50[i]->data)->shape->kind;
             switch (kind) {
             case 0:
-                PCP_COPY_VECTOR(position, entry->data);
+                source = entry->data;
+                PCP_COPY_VECTOR(position, &source->position);
                 VU0_LOAD_VF(vf10, actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 VU0_STORE_VF(vf30, dir);

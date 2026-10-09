@@ -12,6 +12,7 @@
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "kwln.h"
 #include "dat_state.h"
@@ -1117,7 +1118,6 @@ extern void func_001360B8(s16, s32);
 
 extern s32 func_00133B10(void);
 
-extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 
 extern char D_00412F00[];
 
@@ -1240,7 +1240,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             func_00136098(fldAreaState.commandEnabled);
         }
         func_00133B10();
-        evtSpawnActionObj11(dds3AdvanceWorldCounter(), D_0038A610, (s32)(u32)D_00435F50);
+        evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, (s32)(u32)D_00435F50);
     }
 }
 
