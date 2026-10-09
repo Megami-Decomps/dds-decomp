@@ -28,8 +28,34 @@ enum BtlResourceEntryCategory {
     BTL_RESOURCE_ENTRY_CATEGORY_F2 = 0x80,
 };
 
+struct BtlResourceEntry;
 struct BtlResourceEntryList;
-struct BtlResourceDescriptor;
+struct SdfTex;
+
+/* Browser viewport/selection and texture ownership; the entry list is borrowed. */
+typedef struct BtlResourceDescriptor {
+    s32 originX;            /* 0x00: horizontal browser origin */
+    s32 originY;            /* 0x04: vertical browser origin */
+    u32 selectionStatus;    /* 0x08: pending, accepted, or canceled */
+    s32 entryCount;         /* 0x0C */
+    u32 word10;             /* 0x10 */
+    u32 selectedIndex;      /* 0x14 */
+    u32 visibleIndex;       /* 0x18 */
+    u32 previewActive;      /* 0x1C */
+    u32 repeatDelay;        /* 0x20 */
+    u32 drawSurfaceIndex;   /* 0x24 */
+    u32 borderColor;        /* 0x28: line-strip color */
+    u32 fillColor;          /* 0x2C: sprite-fill color */
+    struct BtlResourceEntry *firstVisibleEntry; /* 0x30 */
+    struct BtlResourceEntry *selectedEntry; /* 0x34 */
+    struct BtlResourceEntry *cachedEntry; /* 0x38: last entry whose preview was updated */
+    struct SdfTex *texture;        /* 0x3C: owned or borrowed preview texture */
+    s32 textureCategory;    /* 0x40: TMX is owned; GENERAL is borrowed. */
+    struct BtlResourceEntryList *entryList; /* 0x44 */
+} BtlResourceDescriptor;
+
+typedef char BtlResourceDescriptor_size_must_be_0x48[
+    (sizeof(BtlResourceDescriptor) == 0x48) ? 1 : -1];
 
 s32 btlOpenPfsDebugDirectory(const char *directoryName);
 struct BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags);
