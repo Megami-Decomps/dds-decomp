@@ -715,9 +715,246 @@ f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *p
     return clearance;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013AC40);
+extern void fldToggleWorldNodeState(s32 enabled);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B0D0);
+typedef struct FldStopEntry {
+    u32 unk0;
+    const u8 *name;
+} FldStopEntry;
+
+s32 func_0013AC40(f32 *start, f32 *end, f32 *hitPoint) {
+    f32 origin[4];
+    f32 target[4];
+    f32 delta[4];
+    f32 probeStart[4];
+    f32 probeEnd[4];
+    f32 anchor[4];
+    ObjectTransform *transform;
+    EffWorldNode *secondary;
+    f32 startDistance;
+    f32 endDistance;
+    f32 total;
+    f32 ratio;
+    f32 clearance;
+    s32 found;
+    FldStopEntry *entry;
+    s32 relative;
+    s32 index;
+
+    found = -1;
+    secondary = dds3GetWorldSecondaryObject();
+    if (!((u32)(fldAreaState.area - 200) < 300)) {
+        fldToggleWorldNodeState(0);
+    }
+    origin[0] = start[0];
+    origin[1] = start[1];
+    origin[2] = start[2];
+    target[0] = end[0];
+    target[1] = end[1];
+    target[2] = end[2];
+    for (index = 0; index < fldValueRecordCount; index++) {
+        if (((FldValueRecord *)fldValueRecords)[index].mode == 1) {
+            if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x100)) {
+                continue;
+            }
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0xA01) {
+            continue;
+        }
+        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
+                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+            continue;
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+            relative = 1;
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            origin[0] -= transform->position[0];
+            origin[1] -= transform->position[1];
+            origin[2] -= transform->position[2];
+            target[0] -= transform->position[0];
+            target[1] -= transform->position[1];
+            target[2] -= transform->position[2];
+        } else {
+            relative = 0;
+        }
+        probeStart[0] = origin[0];
+        probeStart[1] = origin[1];
+        probeStart[2] = origin[2];
+        probeEnd[0] = target[0];
+        probeEnd[1] = target[1];
+        probeEnd[2] = target[2];
+        startDistance = fldDotVector(probeStart, ((FldValueRecord *)fldValueRecords)[index].normal) -
+                        ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        endDistance = fldDotVector(probeEnd, ((FldValueRecord *)fldValueRecords)[index].normal) -
+                      ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
+            startDistance = ffabsf(startDistance);
+            endDistance = ffabsf(endDistance);
+            total = startDistance + endDistance;
+            ratio = startDistance / total;
+            anchor[0] = probeStart[0];
+            anchor[1] = probeStart[1];
+            anchor[2] = probeStart[2];
+            delta[0] = probeEnd[0] - probeStart[0];
+            delta[1] = probeEnd[1] - probeStart[1];
+            delta[2] = probeEnd[2] - probeStart[2];
+            probeStart[0] += delta[0] * ratio;
+            probeStart[1] += delta[1] * ratio;
+            probeStart[2] += delta[2] * ratio;
+            clearance = fldGetPositionZoneClearance(((FldValueRecord *)fldValueRecords)[index].mode, ((FldValueRecord *)fldValueRecords)[index].count, 2.0f, probeStart, &((FldValueRecord *)fldValueRecords)[index]);
+            if (0.0f <= clearance) {
+                if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x400) {
+                    entry = &((FldStopEntry *)((FldValueRecord *)fldValueRecords)[index].stopData)
+                                [((FldValueRecord *)fldValueRecords)[index].face->stop];
+                    dds3SetObjectPayloadWord8(dds3FindIndexedObjectChainNodeByName(secondary, 6, entry->name), 4);
+                } else {
+                found = index;
+                ratio = (startDistance + clearance) / total;
+                delta[0] = probeEnd[0] - anchor[0];
+                delta[1] = probeEnd[1] - anchor[1];
+                delta[2] = probeEnd[2] - anchor[2];
+                anchor[0] += delta[0] * ratio;
+                anchor[1] += delta[1] * ratio;
+                anchor[2] += delta[2] * ratio;
+                probeStart[0] = anchor[0];
+                probeStart[1] = anchor[1];
+                probeStart[2] = anchor[2];
+                origin[0] = anchor[0];
+                origin[1] = anchor[1];
+                origin[2] = anchor[2];
+                }
+            }
+        }
+        if (relative) {
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            origin[0] += transform->position[0];
+            origin[1] += transform->position[1];
+            origin[2] += transform->position[2];
+            target[0] += transform->position[0];
+            target[1] += transform->position[1];
+            target[2] += transform->position[2];
+        }
+    }
+    hitPoint[0] = origin[0];
+    hitPoint[1] = origin[1];
+    hitPoint[2] = origin[2];
+    return found;
+}
+
+s32 func_0013B0D0(f32 *start, f32 *end, f32 *hitPoint) {
+    f32 origin[4];
+    f32 target[4];
+    f32 delta[4];
+    f32 probeStart[4];
+    f32 probeEnd[4];
+    f32 anchor[4];
+    ObjectTransform *transform;
+    f32 startDistance;
+    f32 endDistance;
+    f32 total;
+    f32 ratio;
+    f32 clearance;
+    s32 found;
+    s32 relative;
+    s32 index;
+
+    found = -1;
+    dds3GetWorldSecondaryObject();
+    origin[0] = start[0];
+    origin[1] = start[1];
+    origin[2] = start[2];
+    target[0] = end[0];
+    target[1] = end[1];
+    target[2] = end[2];
+    for (index = 0; index < fldValueRecordCount; index++) {
+        if (((FldValueRecord *)fldValueRecords)[index].mode == 1) {
+            if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x100)) {
+                continue;
+            }
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].face->attributes & 0xA01) {
+            continue;
+        }
+        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
+                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+            continue;
+        }
+        if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x8000)) {
+            continue;
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].face->special[0] != 4) {
+            continue;
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+            relative = 1;
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            origin[0] -= transform->position[0];
+            origin[1] -= transform->position[1];
+            origin[2] -= transform->position[2];
+            target[0] -= transform->position[0];
+            target[1] -= transform->position[1];
+            target[2] -= transform->position[2];
+        } else {
+            relative = 0;
+        }
+        probeStart[0] = origin[0];
+        probeStart[1] = origin[1];
+        probeStart[2] = origin[2];
+        probeEnd[0] = target[0];
+        probeEnd[1] = target[1];
+        probeEnd[2] = target[2];
+        startDistance = fldDotVector(probeStart, ((FldValueRecord *)fldValueRecords)[index].normal) -
+                        ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        endDistance = fldDotVector(probeEnd, ((FldValueRecord *)fldValueRecords)[index].normal) -
+                      ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
+            startDistance = ffabsf(startDistance);
+            endDistance = ffabsf(endDistance);
+            total = startDistance + endDistance;
+            ratio = startDistance / total;
+            anchor[0] = probeStart[0];
+            anchor[1] = probeStart[1];
+            anchor[2] = probeStart[2];
+            delta[0] = probeEnd[0] - probeStart[0];
+            delta[1] = probeEnd[1] - probeStart[1];
+            delta[2] = probeEnd[2] - probeStart[2];
+            probeStart[0] += delta[0] * ratio;
+            probeStart[1] += delta[1] * ratio;
+            probeStart[2] += delta[2] * ratio;
+            clearance = fldGetPositionZoneClearance(((FldValueRecord *)fldValueRecords)[index].mode, ((FldValueRecord *)fldValueRecords)[index].count, 2.0f, probeStart, &((FldValueRecord *)fldValueRecords)[index]);
+            if (0.0f <= clearance) {
+                found = index;
+                ratio = (startDistance + clearance) / total;
+                delta[0] = probeEnd[0] - anchor[0];
+                delta[1] = probeEnd[1] - anchor[1];
+                delta[2] = probeEnd[2] - anchor[2];
+                anchor[0] += delta[0] * ratio;
+                anchor[1] += delta[1] * ratio;
+                anchor[2] += delta[2] * ratio;
+                probeStart[0] = anchor[0];
+                probeStart[1] = anchor[1];
+                probeStart[2] = anchor[2];
+                origin[0] = anchor[0];
+                origin[1] = anchor[1];
+                origin[2] = anchor[2];
+            }
+        }
+        if (relative) {
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            origin[0] += transform->position[0];
+            origin[1] += transform->position[1];
+            origin[2] += transform->position[2];
+            target[0] += transform->position[0];
+            target[1] += transform->position[1];
+            target[2] += transform->position[2];
+        }
+    }
+    hitPoint[0] = origin[0];
+    hitPoint[1] = origin[1];
+    hitPoint[2] = origin[2];
+    return found;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013B4F8);
 
