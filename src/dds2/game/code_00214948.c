@@ -3075,7 +3075,110 @@ void btlSetSkillTaskResults(ActionStateLink *task, s32 flags, s32 otherFlags, s3
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021B828);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021C0C8);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
+extern BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *, BtlUnit *);
+
+void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite) {
+    BtlState *battle;
+    BattleActionState *state;
+    BtlUnit *unit;
+    BtlUnit *hero;
+    BtlOperandGroup *group;
+    BtlRuntimeTask *task;
+    u32 count;
+    u32 i;
+    s32 hasInactive;
+    s32 isFormation;
+    s32 delay;
+    s32 startDelay;
+
+    if (!(handle->pendingFlags & 8)) {
+        return;
+    }
+    hero = NULL;
+    battle = (BtlState *)btlGetRuntime();
+    state = &battle->effect->action;
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x400) {
+                s32 unitId = unit->partyRecord.unitId;
+
+                if (unitId != 0x111) {
+                    if (unitId < 0x112) {
+                        if (unitId == 0x110) {
+                            hero = unit;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (handle->unit->flags & 0x200) {
+        if (state->pending != 0 && hero != NULL) {
+            isFormation = handle->indexWork.slot == 0x19;
+            btlUpdateSpecialActorFormation();
+            delay = func_001E2E58(handle->unit, handle->indexWork.slot);
+            task = btlAllocateIndexedUnitEffectTask(hero, 0x10, 2, 1.0f);
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+            task->startCondition.value.handle = prerequisite;
+            if (delay < 7 || isFormation) {
+                startDelay = 0;
+            } else {
+                startDelay = delay - 6;
+            }
+            task->startDelay = startDelay;
+            task->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(task);
+            if (handle->indexWork.parameter == 0) {
+                handle->indexWork.stage = 1;
+                handle->indexWork.parameter = 0xD7;
+            }
+        }
+        i = 0;
+        group = handle->indexWork.groups;
+        count = btlGetIndexListCount(handle->indexWork.indices);
+        hasInactive = 0;
+        if (count != 0) {
+            do {
+                s32 unitId = ((BtlUnit *)btlGetIndexListEntry(handle->indexWork.indices, i++))->partyRecord.unitId;
+
+                if (unitId < 0x113) {
+                    if (unitId >= 0x111) {
+                        if (group->inactive != 0) {
+                            hasInactive = 1;
+                        }
+                    }
+                }
+                group++;
+            } while (i < count);
+        }
+        if (hasInactive != 0) {
+            task = btlCreateImmediateCompletionTask();
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+            task->startCondition.value.handle = completionOwner;
+            task->startDelay = 0x23;
+            task->ownerId = handle->unit->owner;
+            btlStartTask(task);
+        }
+    } else if ((handle->unit->flags & 0x400) && hero != NULL && handle->unit != NULL) {
+        s32 unitId = handle->unit->partyRecord.unitId;
+
+        if (unitId < 0x113) {
+            if (unitId >= 0x111) {
+                if (handle->indexWork.slot == 0xE && btlGetIndexListCount(handle->indexWork.indices) == 1) {
+                    unit = btlGetIndexListEntry(handle->indexWork.indices, 0);
+                    if (unit->flags & 0x200) {
+                        task = btlCreateUnitFaceBodyTask(hero, unit);
+                        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                        task->startCondition.value.handle = prerequisite;
+                        task->flags |= 2;
+                        btlStartTask(task);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void btlPrepareDefeatEffectCamera(u8 *obj) {
     btlFlagAllUnitDefeatCandidatesTask(obj);
