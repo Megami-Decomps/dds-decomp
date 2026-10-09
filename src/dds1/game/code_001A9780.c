@@ -2872,7 +2872,56 @@ void btlReleaseSelectionTaskBuffer(void) {
     btlSetTrackedTaskHandle(2, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B6308);
+/* Initial screen positions for the three active actor panels. */
+typedef struct BattleActorPanelInitialPositions {
+    s32 entries[3][2];
+} BattleActorPanelInitialPositions;
+
+extern const BattleActorPanelInitialPositions D_003A2C10;
+extern s32 func_001B6CF8(KwlnTask *);
+extern void btlReleaseStwrPanelResource(KwlnTask *);
+
+void func_001B6308(void) {
+    BattleActorPanelInitialPositions positions = D_003A2C10;
+    BtlState *battle;
+    struct SdfMemBlock *allocation;
+    BattleActorPanelWork *work;
+    s32 slot;
+    KwlnTask *task;
+
+    battle = (BtlState *)btlGetRuntime();
+    allocation = sdfAllocGeneralBlock(sizeof(*work));
+    work = (BattleActorPanelWork *)sdfResourceRetainAddress(allocation);
+    memset(work, 0, sizeof(*work));
+    work->allocation = allocation;
+    work->activeCount = btlCountEligibleLinkedActors(battle);
+    for (slot = 0; slot < 3; slot++) {
+        work->activeEntries[slot].presentation.hpBarPulse.alpha = 0x80;
+        work->activeEntries[slot].presentation.mpBarPulse.alpha = 0x80;
+        work->activeEntries[slot].position[0] = positions.entries[slot][0];
+        work->activeEntries[slot].position[1] = positions.entries[slot][1];
+        work->activeEntries[slot].basePosition[0] = positions.entries[slot][0];
+        work->activeEntries[slot].basePosition[1] = positions.entries[slot][1];
+        work->activeEntries[slot].presentation.hpPulseFrame = 0;
+        work->activeEntries[slot].presentation.mpPulseFrame = 0;
+        work->activeEntries[slot].presentation.unk08[0] = 0;
+        work->activeEntries[slot].presentation.unk08[1] = 180;
+        work->activeEntries[slot].presentation.highlightPhase[4] = 90;
+        work->activeEntries[slot].presentation.highlightPhase[5] = 180;
+        work->activeEntries[slot].presentation.highlightPhase[6] = 0;
+        work->activeEntries[slot].presentation.highlightPhase[7] = 90;
+        work->activeEntries[slot].presentation.highlightPhase[0] = 90;
+        work->activeEntries[slot].presentation.highlightPhase[1] = 0;
+        work->activeEntries[slot].presentation.highlightPhase[2] = 180;
+        work->activeEntries[slot].presentation.highlightPhase[3] = 90;
+        work->activeEntries[slot].presentation.hpState = 2;
+        work->activeEntries[slot].presentation.mpState = 2;
+    }
+    task = kwlnTaskCreate(D_003BB3B0, 0x2B0E, 1, 1, func_001B6CF8,
+                          btlReleaseStwrPanelResource, (u32)work);
+    func_00101A80(battle->scriptOwner, task);
+    btlSetTrackedTaskHandle(3, (s32)task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B6498);
 
@@ -2954,10 +3003,10 @@ void func_001B6850(BtlState *battle, BattleActorPanelWork *work) {
                         work->activeEntries[slot].presentation.fade += 0x20;
                         work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                             work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
-                        work->activeEntries[slot].baseX += 2;
+                        work->activeEntries[slot].basePosition[0] += 2;
                         limit = positions.entries[slot].x;
-                        work->activeEntries[slot].baseX = work->activeEntries[slot].baseX <= limit - 8 ? limit - 8 :
-                            work->activeEntries[slot].baseX < limit ? work->activeEntries[slot].baseX : limit;
+                        work->activeEntries[slot].basePosition[0] = work->activeEntries[slot].basePosition[0] <= limit - 8 ? limit - 8 :
+                            work->activeEntries[slot].basePosition[0] < limit ? work->activeEntries[slot].basePosition[0] : limit;
                         if (scene->state == 9) {
                             func_001B6498(1);
                         }
@@ -2978,7 +3027,7 @@ void func_001B6850(BtlState *battle, BattleActorPanelWork *work) {
                         work->activeEntries[slot].presentation.presentationState = 4;
                         work->activeEntries[slot].presentation.pendingSceneState = 5;
                         if (work->activeEntries[slot].presentation.fade <= 0) {
-                            work->activeEntries[slot].baseX = positions.entries[slot].x - 6;
+                            work->activeEntries[slot].basePosition[0] = positions.entries[slot].x - 6;
                         }
                         break;
                     }
