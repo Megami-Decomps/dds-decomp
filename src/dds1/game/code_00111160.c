@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "dds3_path.h"
 
 extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
@@ -106,11 +107,13 @@ s32 dds3AllocateClearedObjectWork(EffWorldNode *obj) {
     return 1;
 }
 
-void dds3ReleaseWorldSlotResource(EffWorldNode *obj) {
-    u32 *slot;
+extern void dds3ReleaseObjectResource(EffWorldNode *object);
 
-    slot = ((u32 *)obj->data);
-    dds3ReleaseObjectResource();
-    dds3ExchangeSlot(*slot, 0, 1);
-    sdfReleaseChipBlock(slot);
+void dds3ReleaseWorldSlotResource(EffWorldNode *object) {
+    Dds3SlotResource *resource;
+
+    resource = object->data;
+    dds3ReleaseObjectResource(object);
+    dds3ExchangeSlot(resource->target, 0, 1);
+    sdfReleaseChipBlock(resource);
 }

@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "mdl.h"
@@ -392,8 +393,8 @@ extern void mnuDestroyCampTasks(void), scrDestroyAllNamedProcesses(void);
 extern void fldReleaseMenuSlotsAfterWait(void);
 
 void fldSetSceneControlFlags(u32 mask);
-u32 func_001266D8(void);
-extern s32 dds3InvokeSlot1Handler(u32 object, void *context);
+s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target);
+extern s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update);
 extern void fldUpdateCameraTarget(void);
 extern void func_00139EC0(f32 *position);
 
@@ -2012,7 +2013,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3InvokeSlot1Handler(fldPlayerObject, func_001266D8);
+        dds3InvokeSlot1Handler((void *)fldPlayerObject, func_001266D8);
     }
     fldAreaState.unkE8 = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -2033,7 +2034,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
         fldClearSceneControlFlags(0x40);
-        dds3InvokeSlot1Handler(fldPlayerObject, 0);
+        dds3InvokeSlot1Handler((void *)fldPlayerObject, 0);
     }
     D_00389858[0] = 4;
 }
@@ -2234,7 +2235,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
-u32 func_001266D8(void) {
+s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
