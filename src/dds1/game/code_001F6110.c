@@ -2295,13 +2295,13 @@ void func_001FB158(void) {
 void func_001FB160(void) {
 }
 
-void func_001FB168(void) {
+void func_001FB168(f32 *position) {
 }
 
 void func_001FB170(void) {
 }
 
-void func_001FB178(void) {
+void func_001FB178(f32 *position, u32 color, s32 flags, f32 radius) {
 }
 
 void func_001FB180(void) {
@@ -2313,7 +2313,7 @@ void func_001FB188(void) {
 void func_001FB190(void) {
 }
 
-void func_001FB198(void) {
+void func_001FB198(f32 *from, f32 *to, u32 color) {
 }
 
 void func_001FB1A0(void) {
