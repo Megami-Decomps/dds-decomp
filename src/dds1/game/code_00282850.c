@@ -10,6 +10,7 @@
 #include "sdf_dev_state.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
@@ -2591,7 +2592,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        sdfPacReleasePacketQueueNodes(taskWork->payload);
+        sdfPacReleasePacketQueueNodes((PacState *)taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;
