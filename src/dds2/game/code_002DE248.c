@@ -208,7 +208,7 @@ extern void effComputeBattleCameraPositionVU(u8 *);
 
 
 typedef struct EffResourceBankSlot {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     char name[0x34];    // 0xC8
     s32 type;           // 0xFC
     s32 state;          // 0x100
@@ -9876,7 +9876,7 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
     } else {
         func_0020DAB8(effResourceBankDescriptor);
         slot->state = func_0020DFC8(effResourceBankDescriptor);
-        slot->type = btlFormatSelectedResourceName(effResourceBankDescriptor, slot);
+        slot->type = btlFormatSelectedResourceName(effResourceBankDescriptor, slot->fullName);
         slot->count = btlGetResourcePathVariant(effResourceBankDescriptor);
         btlTrimResourceName(effResourceBankDescriptor, slot->name);
         if (slot->state == 1) {
@@ -9970,7 +9970,7 @@ void effReleaseResourceBankDescriptors(void) {
 }
 
 typedef struct EffBankStatus {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;
     s32 state;
     s32 count;
@@ -9996,7 +9996,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
     } else {
         func_0020DAB8(effResourceBankDescriptor);
         status->state = func_0020DFC8(effResourceBankDescriptor);
-        status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status);
+        status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status->fullName);
         status->count = btlGetResourcePathVariant(effResourceBankDescriptor);
         if (status->state == 1) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
