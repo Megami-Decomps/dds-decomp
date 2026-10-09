@@ -123,7 +123,7 @@ void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern void func_002DAB80(u8 *, SdfSubParam *);
+extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];
 extern SdfTex *func_002D2800(SdfTex *);
 extern void func_002D33C8(u32, s32, f32);
@@ -789,8 +789,7 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats
  * and rotation, or the identity layout when the block is absent. */
-void func_002DAB80(u8 *out, SdfSubParam *param) {
-    SdfDrawTransform *transform = (SdfDrawTransform *)out;
+void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubParam *param) {
     f32 v0;
     f32 v1;
     f32 v2;
@@ -833,13 +832,12 @@ void func_002DAB80(u8 *out, SdfSubParam *param) {
 }
 
 void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, SdfAssetEntry *entry) {
-    func_002DAB80((u8 *)&entry->transforms[0], asset->primarySubParam);
+    sdfBuildSubParameterTransform(&entry->transforms[0], asset->primarySubParam);
 }
 
 /* Copy color, unchecked mode/palette state and optional GS texture words,
  * then apply the secondary scalar block to the entry's native location. */
 void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
-    u8 *entryBytes = (u8 *)drawEntry;
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
@@ -852,7 +850,7 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
         drawEntry->secondaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
         drawEntry->secondaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
     }
-    func_002DAB80(entryBytes + 0x80, asset->secondarySubParam);
+    sdfBuildSubParameterTransform(&drawEntry->transforms[1], asset->secondarySubParam);
 }
 
 /* Copy the source pair into the destination entry's two scalar slots. */
