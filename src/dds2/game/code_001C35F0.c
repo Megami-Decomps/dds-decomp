@@ -186,7 +186,36 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3A38);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3BB0);
+void func_001C3BB0(BattleActorPanelWork *work, s8 mode) {
+    s32 slot;
+    s32 remaining;
+
+    slot = 0;
+    remaining = 2;
+    do {
+        if ((u32)((u8)work->activeEntries[slot].presentation.presentationState - 1) < 2 &&
+            work->activeEntries[slot].presentation.presentationValue != 0) {
+            work->activeEntries[slot].presentation.presentationState = mode == 0 ? 3 : 4;
+        }
+        if (work->activeEntries[slot].presentation.hpState == 3) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpPulseFrame = 0;
+            memset(&work->activeEntries[slot].presentation.hpBarPulse, 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
+        }
+        if (work->activeEntries[slot].presentation.mpState == 3) {
+            work->activeEntries[slot].presentation.mpState = 0;
+            work->activeEntries[slot].presentation.mpPulseFrame = 0;
+            memset(&work->activeEntries[slot].presentation.mpBarPulse, 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
+        }
+        slot++;
+    } while (--remaining >= 0);
+}
 
 void btlUpdateActorSlotStates(u8 *context, s8 mode) {
     u8 *entry = context + 0x80;
