@@ -167,8 +167,29 @@ typedef char EffDrawableAssetWorkSizeCheck[(sizeof(EffDrawableAssetWork) == 0xC)
 typedef char EffDrawableAssetWorkAssetOffsetCheck[((u32)&((EffDrawableAssetWork *)0)->asset == 4) ? 1 : -1];
 
 typedef struct EffMotionResourceConfig {
-    u8 pad00[0x4C];
-    s16 mode;
+    s32 duration;
+    u32 growFrames;
+    f32 initialLength;
+    f32 lengthScale;
+    f32 pivot;
+    EffectVectorRequest start;
+    EffectVectorRequest end;
+    SdfColorTrack colorTrack;
+    /* Billboard setup reads the low signed half at +0x4C; surface dispatch
+     * reads the full serialized alpha-track surface word there. */
+    union {
+        SdfAlphaTrack alphaTrack;
+        struct {
+            u32 alpha;
+            s16 mode;
+            u16 reserved4E;
+            f32 fadeIn;
+            f32 fadeOut;
+        };
+    };
+    s16 startIndex;
+    s16 endIndex;
+    f32 scale;
 } EffMotionResourceConfig;
 
 typedef struct EffectBlock128 {
@@ -3459,7 +3480,7 @@ typedef struct EffExpandingRingParams0 {
 
 typedef char EffExpandingRingParams0_size[(sizeof(EffExpandingRingParams0) == 0x68) ? 1 : -1];
 
-void func_002E6F48(EffClassWork *work) {
+void effUpdateRadialFanVertices(EffClassWork *work) {
     EffExpandingRingParams0 *config = work->payload;
     EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
     f32 direction[4];
@@ -8045,7 +8066,7 @@ typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0
 
 
 
-void func_002F8040(EffActiveResource *resource)
+void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
 {
     MdlCtx **modelHandle = (MdlCtx **)resource->resource;
     EffModelCallbackConfig *config = (EffModelCallbackConfig *)resource->payload;
@@ -8423,7 +8444,114 @@ void effDestroyBillboardAndOwnedAssetWork(EffMotionResource *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F91D0);
+extern SdfPoolNode *D_003EA000[];
+
+/* vu0 routine: construct a growing textured strip between two requested positions. */
+void func_002F91D0(EffActiveResource *work) {
+    EffMotionResourceConfig *config = work->payload;
+    s32 frame = work->frame;
+    s32 duration = config->duration;
+    EffMotionResource *resource = work->resource;
+    BillSnapshot snapshot;
+    f32 first[4], second[4], orientation[4];
+    f32 positions[6][4];
+    f32 texcoords[3][4];
+    u32 baseColor[4], trackColor[4], blendedColor[4];
+    SdfListHead *packet;
+    SdfPoolNode *surface;
+    f32 distance, length, pivotLength, width, ratio, initial;
+    f32 left, nearZ, farZ, texSplit;
+    u32 color, packed, unit;
+
+    if (duration < frame || duration == 0) {
+        return;
+    }
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    effResolveRequestPositionIntoVu(&config->start, config->startIndex);
+    VU0_STORE_VF_UNCLOBBERED(vf10, first);
+    effResolveRequestPositionIntoVu(&config->end, config->endIndex);
+    VU0_STORE_VF_UNCLOBBERED(vf10, second);
+    VU0_LOAD_VF(vf11, first);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    distance *= config->lengthScale * config->scale;
+    width = config->scale * 120.0f;
+    ratio = (f32)frame / (f32)config->growFrames;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    }
+    initial = distance * config->initialLength;
+    length = initial + (distance - initial) * ratio;
+    pivotLength = length * config->pivot;
+    if (btlAimHorizontalDirectionVU(first, second)) {
+        VU0_STORE_VF_UNCLOBBERED(vf10, orientation);
+    } else {
+        VU0_STORE_VF_UNCLOBBERED(vf0, orientation);
+    }
+    VU0_LOAD_VF(vf10, orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, first);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    sdfConsAppendVuPacket(packet, 0);
+
+    left = -width;
+    nearZ = -pivotLength;
+    farZ = length - pivotLength;
+    texSplit = pivotLength / length;
+    D_004584C0.positions = (u128 *)positions;
+    D_004584C0.texcoords = (u32 *)texcoords;
+    positions[0][0] = left;
+    positions[0][1] = -1.0f;
+    positions[0][2] = nearZ;
+    positions[1][0] = width;
+    positions[1][1] = -1.0f;
+    positions[1][2] = nearZ;
+    positions[2][0] = left;
+    positions[2][1] = -1.0f;
+    positions[2][2] = 0;
+    positions[3][0] = width;
+    positions[3][1] = -1.0f;
+    positions[3][2] = 0;
+    positions[4][0] = left;
+    positions[4][1] = -1.0f;
+    positions[4][2] = farZ;
+    positions[5][0] = width;
+    positions[5][1] = -1.0f;
+    positions[5][2] = farZ;
+    texcoords[0][0] = 0;
+    texcoords[0][1] = 0;
+    texcoords[0][2] = 0;
+    texcoords[0][3] = 1.0f;
+    texcoords[1][0] = texSplit;
+    texcoords[1][1] = 0;
+    texcoords[1][2] = texSplit;
+    texcoords[1][3] = 1.0f;
+    texcoords[2][0] = 1.0f;
+    texcoords[2][1] = 0;
+    texcoords[2][2] = 1.0f;
+    texcoords[2][3] = 1.0f;
+
+    color = effSampleColorAlphaTracks(&config->colorTrack, &config->alphaTrack, frame, duration);
+    unit = 0x3C000000;
+    baseColor[0] = work->color;
+    EE_MMI_RGBA_UNPACK(baseColor, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    trackColor[0] = color;
+    EE_MMI_RGBA_UNPACK(trackColor, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK(packed);
+    blendedColor[0] = packed;
+    D_004584C0.unk08 = blendedColor[0];
+    billSetAnimationFrameForImmediateAdvance(resource->billboard, frame);
+    billCopyCurrentRecordToSnapshot(resource->billboard, &snapshot);
+    sdfSetAssetPrimaryTextureAddress(resource->asset, snapshot.texture);
+    sdfConsAppendAssetPacket(packet, resource->asset, 0);
+    sdfAppendPacket(packet, func_00167A10(&D_004584C0));
+    surface = D_003EA000[config->alphaTrack.surfaceIndex];
+    surface->append(surface, packet);
+}
 
 
 EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
@@ -9028,7 +9156,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
 }
 
 /* General-heap descriptors and retained buffer addresses are distinct owners. */
-u8 *func_002FB5C0(FileJobPayload *source) {
+u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(EffSharedEffectWork));
     EffSharedEffectWork *work = (EffSharedEffectWork *)sdfResourceRetainAddress(allocation);
     void *secondary;
@@ -9091,7 +9219,7 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
 
 s32 effCloneEffectRequest(u8 *src) {
-    u8 *dst = func_002FB5C0(0);
+    u8 *dst = effCreateSharedEffectResourceWork(0);
 
     ((EffSharedEffectWork *)dst)->data = ((EffSharedEffectWork *)src)->data;
     effShareReferenceCountedEffectObject((s32)dst, (s32)src);
@@ -10182,7 +10310,7 @@ INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D030);
 
 INCLUDE_RODATA(const s32, "game/code_002DE248", D_0042D048);
 
-s32 func_002FEDD0(void) {
+s32 effHandleDebugOrbitInput(void) {
     f32 vector[4];
     f32 step;
     f32 length;

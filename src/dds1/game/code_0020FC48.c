@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -955,7 +956,7 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 }
 
 /* Counter eligibility for a command against the selected party members. */
-u16 func_002111A0(s32 commandId, u32 memberMask) {
+u16 btlCheckPartyCommandCounterEligibility(s32 commandId, u32 memberMask) {
     u8 *entryList[5];
     s32 count = 0;
     s32 i;
@@ -1308,9 +1309,9 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
 extern u32 effGetWindTextureHandle(void);
 
-extern void func_002D4C80(const void *, void *, s32);
+extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
 
-extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern u32 btlMulColor(u32, u32);
 
@@ -1318,7 +1319,7 @@ extern void func_00211D40(SdfListHead *, s32, u32, s32, f32, f32, f32);
 
 /* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
 void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
-    SdfPacket *tag;
+    SdfDmaReferenceChainPacket *tag;
     SdfPacket *registers;
     u32 tint;
 
@@ -1326,8 +1327,8 @@ void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
         btlRuntimeState.resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)effGetWindTextureHandle());
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
-    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
+    tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
@@ -1361,8 +1362,8 @@ void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
     if (btlRuntimeState.phaseSpeed > -0.02f) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
-    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
+    tag = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), tag, 1);
     sdfAppendDmaTagToList(list, (u32)tag);
 }
 

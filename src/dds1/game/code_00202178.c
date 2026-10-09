@@ -81,7 +81,7 @@ extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 extern void btlBossDebugPrintf(const char *, ...);
 extern const char D_003A5D60[];
 
-extern s32 btlFindUnitByActor(s32);
+extern BtlTask *btlFindUnitByActor(BtlUnit *);
 
 extern void func_001A1990(DatPartyRecord *, s32);
 
@@ -3085,7 +3085,7 @@ s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
 
 void func_00208E10(BtlUnit *unit) {
     u8 *battleData;
-    u8 *entry;
+    BtlTask *entry;
     if ((unit->status.flags & 0x400) == 0) {
         return;
     }
@@ -3096,9 +3096,9 @@ void func_00208E10(BtlUnit *unit) {
     unit->unkB8 = 100.0f;
     unit->unkBC = 25.0f;
     if (((BtlBossEffectPayload *)battleData)->selectedId != unit->lookupId) {
-        entry = (u8 *)btlFindUnitByActor((s32)unit);
+        entry = btlFindUnitByActor(unit);
         if (entry != 0) {
-            *(u16 *)(entry + 4) = 0;
+            entry->actionNumber = 0;
             unit->partyRecord.unitId = 0x10f;
         }
     }
@@ -3208,7 +3208,7 @@ typedef struct BtlEffectTarget {
 
 s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 command) {
     BtlEffectTarget *effect = (BtlEffectTarget *)((BtlState *)btlGetRuntime())->effect;
-    s32 unit;
+    BtlTask *task;
     u32 blocked;
 
     if (!(actor->status.flags & 0x200)) {
@@ -3218,11 +3218,11 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
         return 0;
     }
     if (datCommandSelectors[command].kind != 1) {
-        unit = btlFindUnitByActor((s32)actor);
-        if (unit == 0) {
+        task = btlFindUnitByActor(actor);
+        if (task == 0) {
             return 0;
         }
-        blocked = func_001A3360((void *)unit, 0, 0);
+        blocked = func_001A3360(task, 0, 0);
     } else {
         blocked = datCommandRecords[command].targetType;
     }
@@ -3256,7 +3256,7 @@ s32 btlSwapRandomBossSelection(void) {
     BtlUnit *unit;
     BtlUnit *oldUnit;
     BtlUnit *newUnit;
-    s32 entry;
+    BtlTask *entry;
     u32 newId;
     u32 unitFlags;
 
@@ -3305,10 +3305,10 @@ s32 btlSwapRandomBossSelection(void) {
         oldUnit->partyRecord.status = 0;
         oldUnit->partyRecord.hp = oldUnit->partyRecord.maxHp;
         oldUnit->partyRecord.mp = oldUnit->partyRecord.maxMp;
-        entry = btlFindUnitByActor((s32)newUnit);
-        *(u16 *)(entry + 4) = 1;
-        entry = btlFindUnitByActor((s32)oldUnit);
-        *(u16 *)(entry + 4) = 0;
+        entry = btlFindUnitByActor(newUnit);
+        entry->actionNumber = 1;
+        entry = btlFindUnitByActor(oldUnit);
+        entry->actionNumber = 0;
     }
     btlBossDebugPrintf(D_003A5DB8, oldUnit->lookupId, newUnit->lookupId, oldUnit, newUnit);
     effect->options = ((effect->options & ~4) | 2) & ~1;
@@ -3572,7 +3572,8 @@ void btlArmEventResourceTrigger(void) {
     ((BtlEventTriggers *)data)->pending = 0;
 }
 
-extern void fldAppendSceneGroupHandle();
+extern void fldAppendSceneGroupHandle(void *);
+extern s32 effMiscRandMod(s32, s32);
 
 typedef struct BtlMarkState {
     u8 marked;  /* 0 */
@@ -3737,7 +3738,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
             func_001A1990(stats, mode == 0x119 ? 0x11A : 0x119);
             stats->flags |= 0x23;
             effectState->formCount++;
-            task = (BtlTask *)btlFindUnitByActor((s32)unit);
+            task = btlFindUnitByActor(unit);
             fldAppendSceneGroupHandle(task);
             task->indexWork.phase = 0x11;
             btlAppendIndexListEntry(task->indexWork.indices, task->unit);
@@ -3894,7 +3895,6 @@ s32 btlMapLinkedCommandResult(BtlUnit *unit, s32 arg1) {
     }
     return arg1;
 }
-
 INCLUDE_ASM(const s32, "game/code_00202178", func_0020A860);
 
 INCLUDE_ASM(const s32, "game/code_00202178", func_0020AB08);

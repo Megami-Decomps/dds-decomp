@@ -5973,3 +5973,43 @@ even though both arms clear the low color byte. This is native work,
 not an invented scheduling branch. Its 37 x/y/texture triples and four
 initial colors are function-local initializers replacing only that
 function's own `D_003A2608` and `D_003A27C8` data inclusions.
+
+## Model viewer surfaces use the canonical SDK pool owner
+
+`D_00325048` (DDS1) and `D_00380048` (DDS2) are the native interior
+symbols for `kwlnDrawSurfaces[40]`: each is `0x500` bytes after the
+array base, whose canonical `SdfPoolNode` entries are `0x20` bytes.
+Their callback at `+0x10` is therefore `append(SdfPoolNode *,
+SdfListHead *)`, not a separate viewer-device callback taking an
+integer list. Keep the typed native interior externs: using the array
+origin instead changes the compiler's addressing in all three viewer
+submission functions. Both games' list locals and callbacks remain
+byte-exact with the canonical owner and native symbols.
+
+The shop builders also retain their `sdfAllocatePacketList` result as
+`SdfListHead *`. Frame initialization passes `&scene.link` to the
+linked-payload helper, rather than casting the complete `SdfSceneNode`.
+
+## Viewer object creators consume the canonical timeline owners
+
+`evtViewerCreateObjectInFreeSlot` at DDS1 `0x0022C7F0` and DDS2
+`0x00247168` consumes an `EvtRuntimeGroup` and its `EvtRuntimeChild`,
+not separate command/parameter prefix views. Track type, resource and
+plain-mode byte are `type`, `resourceData` and `metadata.extra1`;
+the kind-specific byte/halfword parameters use the existing `p08`/`p0C`
+union members. Only the pre-existing integer-address SDK boundary
+(`func_001150B0` / `func_00115318`) converts `resourceData` to a word.
+The owner migration leaves both 600-byte creator bodies byte-exact.
+
+## DMA formatter output buffers are CPU pointers
+
+DDS1 `func_002D4C80` / `func_002D4CC8` and DDS2 `func_0032DB30` /
+`func_0032DB78` build reference-chain tags in a caller-provided
+`SdfDmaReferenceChainPacket *`. Their first argument is different:
+it remains the SDK source-address word, with the native
+offsets added before `sdfBuildDmaReferenceChain` encodes it. All C
+callers retain the allocated output buffer as the canonical pointer;
+only its eventual DMA submission converts it to a `u32` packet-address
+word. The allocator's address-word ABI, source offsets, tag encoding,
+and packet submission order remain unchanged.
+

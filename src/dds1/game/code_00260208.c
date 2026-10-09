@@ -32,7 +32,7 @@ enum {
 
 extern BrsIconRecord D_0036C728[];
 extern struct EffectSlotSet *D_003BC520;
-extern void func_002BF4E0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw a selected result icon and its fixed companion at the same opacity. */
 void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
@@ -42,11 +42,11 @@ void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     layer = D_003BC520;
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
-    func_002BF4E0(D_0036C728[iconIndex][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[iconIndex][BRS_ICON_X] << 4,
                   D_0036C728[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
                   D_0036C728[iconIndex][BRS_ICON_ID], option);
-    func_002BF4E0(D_0036C728[8][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[8][BRS_ICON_X] << 4,
                          D_0036C728[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
                          D_0036C728[8][BRS_ICON_ID], option);
@@ -62,7 +62,7 @@ void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
     layer = D_003BC520;
     normalized = (f32)value * 0.00390625f;
     selectedIndex = iconIndex + 3;
-    func_002BF4E0(D_0036C728[selectedIndex][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[selectedIndex][BRS_ICON_X] << 4,
                   D_0036C728[selectedIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(normalized * 256.0f), 0, layer,
                   D_0036C728[selectedIndex][BRS_ICON_ID], option);
@@ -76,7 +76,7 @@ void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
     companionX = (s32)((f32)D_0036C728[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
-    func_002BF4E0(companionX << 4,
+    effDrawSpriteWithCornerFade(companionX << 4,
                          D_0036C728[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
                          D_0036C728[8][BRS_ICON_ID], option);

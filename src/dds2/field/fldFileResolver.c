@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -352,10 +353,10 @@ extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern void func_0032DB30(s32, u32, s32);
+extern void func_0032DB30(s32, SdfDmaReferenceChainPacket *, s32);
 
 
-extern void func_0032DB78(s32, u32, s32);
+extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern f32 D_0038A980[][4];
 
@@ -931,7 +932,7 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern char D_004130A8[], D_004130B8[], D_004130C8[];
 
 /* Restore the room's named objects and enable their retained path controllers. */
-void func_00129940(void) {
+void fldActivateRoomFlagObjects(void) {
     char modelName[16];
     char collisionName[16];
     char pathName[16];
@@ -1384,7 +1385,7 @@ extern void fldLoadPlayerModel(void);
 extern void fldInitSparkTable(void);
 extern void fldInitializeMenuResources(void);
 extern void fldUpdateSparkSlots(void);
-extern void func_00129940(void);
+extern void fldActivateRoomFlagObjects(void);
 extern void func_00142B70(void);
 extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
 extern s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle);
@@ -1549,7 +1550,7 @@ u32 func_0012A6F0(const char *name) {
         fldLoadSceneRequestFiles((FldLoadRequest *)func_00129D60((s32)chunk));
     }
     fldCreateResourceScriptObjects();
-    func_00129940();
+    fldActivateRoomFlagObjects();
     if (sceneWork->unk58 != 0 && area < 200 && fldAreaCachedResource != 0) {
         D_00435FDC = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
         memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00435FDC),
@@ -2447,27 +2448,27 @@ void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
 }
 
 void fldSubmitPrimaryFramePacket(void) {
-    s32 command = sdfAllocPacketAligned(0x20);
-    s32 texture;
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
-    sdfInitPacketList((SdfListHead *)command);
-    texture = sdfAllocPacketAligned(0x40);
+    sdfInitPacketList(command);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
-    sdfAppendDmaTagToList((SdfListHead *)command, texture);
+    sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitAlternateFramePacket(void) {
-    s32 command = sdfAllocPacketAligned(0x20);
-    s32 texture;
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
-    sdfInitPacketList((SdfListHead *)command);
-    texture = sdfAllocPacketAligned(0x40);
+    sdfInitPacketList(command);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
-    sdfAppendDmaTagToList((SdfListHead *)command, texture);
+    sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
@@ -2524,7 +2525,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append(descriptor, (SdfListHead *)command);
 }
 
-void func_0012D3E0(void) {
+void fldSubmitTexturedOverlaySprite(void) {
     SdfListHead *packetList;
     SdfDmaNode *dmaPacket;
     s32 drawBufferIndex;

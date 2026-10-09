@@ -34,7 +34,7 @@ enum {
 
 
 
-extern void func_0032AC30(SdfImageUploadRequest *);
+extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
 
 
 
@@ -293,7 +293,7 @@ extern void sdfResizeDoubleBuffer(s32);
 extern void sdfResetPacketSlotState(void);
 extern void sdfRegisterTextureReleaseRequestHandler(void);
 
-void func_0032A440(s32 size) {
+void sdfInitializeGraphicsWorkers(s32 size) {
     s32 thread;
     SdfGraphObj *graph = &D_0040B290;
 
@@ -645,7 +645,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 
 
-void func_0032AC30(SdfImageUploadRequest *request) {
+void sdfTexQueueImageUpload(SdfImageUploadRequest *request) {
     SdfTextureQueue *queue = &sdfTextureQueueWork;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;
@@ -1020,7 +1020,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     request.height = height;
     request.x = 0;
     request.y = 0;
-    func_0032AC30(&request);
+    sdfTexQueueImageUpload(&request);
     return pixels + imageBytes;
 }
 

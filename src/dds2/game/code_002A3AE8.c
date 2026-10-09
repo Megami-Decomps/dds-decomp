@@ -273,7 +273,7 @@ typedef struct MovieMenuPulse {
 } MovieMenuPulse;
 
 /* Resize and draw the pulsing bar, then advance its alpha and phase. */
-void func_002A4208(MovieMenuPulse *pulse, s32 drawContext) {
+void mnuDrawExpandingMovieMenuPulseBar(MovieMenuPulse *pulse, s32 drawContext) {
     EffectSlotSet *sprites;
     s32 index;
     s32 amount;

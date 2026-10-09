@@ -294,7 +294,7 @@ f32 *sdfTransformDirectionByMatrix(f32 *direction, f32 *matrix) {
 extern float sdfPowFloatByTruncatedExponent(float base, float exponent);
 
 /* Sample the Bernstein-weighted control points after building binomial coefficients. */
-struct SdfMemBlock *func_003103C8(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
+struct SdfMemBlock *sdfSampleBernsteinCurve(Vector4 *controlPoints, s32 degree, s32 sampleCount) {
     struct SdfMemBlock *outputBlock;
     struct SdfMemBlock *coefficientBlock;
     f32 *coefficients;

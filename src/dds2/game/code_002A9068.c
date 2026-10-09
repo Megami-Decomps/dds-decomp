@@ -485,7 +485,7 @@ void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *reso
     func_002BCD90(container, records, resources->baseResources[0],
                  1, resources->baseResources[1], 0x2d,
                  resources->baseResources[1], 0x1d);
-    func_002BC498(container, (s32)resources->baseResources[1]);
+    mnuDrawPartyVitalPanelSequences(container, (s32)resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);

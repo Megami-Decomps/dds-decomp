@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "common.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -710,8 +711,8 @@ typedef char EffCompositeGsDescriptor_size_must_be_0x68[
 
 extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void func_0032DB30(s32, u32, s32);
-extern void func_0032DB78(s32, u32, s32);
+extern void func_0032DB30(s32, SdfDmaReferenceChainPacket *, s32);
+extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
 extern void func_0033B8B0(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
@@ -721,15 +722,15 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     SdfGsBlendPacket *state;
     SdfGsTexturePacket *textureState;
     u8 *geometry;
-    u32 framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     u64 restoreBlend;
     f32 halfWidth, halfHeight;
     f32 cosine, sine;
     f32 cornerX, cornerY;
 
-    framePacket = sdfAllocPacketAligned(0x40);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
-    sdfAppendDmaTagToList(list, framePacket);
+    sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
     state->header.dmaTag = 3;
@@ -838,9 +839,9 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
                   &source->primaryUv, &source->secondaryUv, &corners[0][0]);
     sdfAppendPacket(list, (u32)geometry);
 
-    framePacket = sdfAllocPacketAligned(0x40);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
-    sdfAppendDmaTagToList(list, framePacket);
+    sdfAppendDmaTagToList(list, (u32)framePacket);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
     state->header.dmaTag = 3;

@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -116,7 +117,7 @@ extern SdfPoolNode D_003253E8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern s32 func_0011E278();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
@@ -322,17 +323,17 @@ void effDrawBlurRectangle(EffBlurQuad *source)
     }
 }
 
-extern void func_002D4C80(s32 source, u32 packet, s32 variant);
+extern void func_002D4C80(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
 {
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
     u64 *samplingPacket, *textureAlphaPacket, *clampPacket;
     void *tag;
 
-    framePacket = (void *)sdfAllocPacketAligned(0x40);
-    func_002D4C80((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], (u32)framePacket, 1);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4C80((s32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], framePacket, 1);
     sdfAppendDmaTagToList(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
@@ -412,9 +413,9 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
 void effDrawBlurListWithFramePacket(void *list) {
-    void *packet = (void *)sdfAllocPacketAligned(0x40);
+    SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
 
-    func_002D4CC8(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
+    func_002D4CC8((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
     D_003253E8.append(&D_003253E8, list);
 }

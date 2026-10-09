@@ -317,7 +317,7 @@ typedef struct MnuSpritePlacement {
 extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];
 extern char D_003BC4C8[];
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
@@ -330,13 +330,13 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
     struct EffectSlotSet *resource;
 
     resource = D_0036C698[D_0036B510[19].resourceIndex];
-    func_002BF4E0((x + D_0036B510[19].x) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[19].x) << 4,
                   (y + D_0036B510[19].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,
                   D_0036B510[19].spriteIndex, context);
     resource = D_0036C698[D_0036B510[34].resourceIndex];
-    func_002BF4E0((x + D_0036B510[34].x) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[34].x) << 4,
                   (y + D_0036B510[34].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,

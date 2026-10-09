@@ -9,7 +9,7 @@ extern s32 mdlFlagTest(u32);
 extern void func_0026C900(void);
 
 
-extern s32 func_00297970(MenuTerminalContext *);
+extern s32 mnuDrawCampCommandTransition(MenuTerminalContext *);
 
 extern s32 evtGetMessageWindowControlState(void);
 
@@ -20,7 +20,7 @@ extern char D_00437850[];
 extern s32 func_00265038();
 extern s32 evtGetCapturedWindowPanelValue();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
-extern void func_00260020();
+extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
@@ -102,7 +102,7 @@ s32 evtMenuPollWindow(KwlnTask *callback) {
 s32 func_00265360(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     func_0025FD78((MenuTerminalContext *)context);
-    func_00297970((MenuTerminalContext *)context);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -146,7 +146,7 @@ s32 evtMenuPersistSelectedSlot(KwlnTask *task) {
     MenuTerminalWindowState *record;
     s32 slot;
     mnuShopReleaseWindowSprites(1, context);
-    func_00260020(context);
+    mnuBuildEnabledCampEntryWindow(context);
     for (node = context->ownedWindows[0]->list->first;
          node != 0 && node->camp.value != selectedId; node = node->next) {
         mnuAdvanceListCursorDefault(context->ownedWindows[0]->list);
@@ -163,7 +163,7 @@ INCLUDE_ASM(const s32, "game/code_002651C0", func_002655C0);
 s32 func_002657F8(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     func_0025FD78((MenuTerminalContext *)context);
-    func_00297970((MenuTerminalContext *)context);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 

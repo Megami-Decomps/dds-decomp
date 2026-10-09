@@ -274,7 +274,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE40);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
 
-void func_002357B8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawFloatValueEditorRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
         sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003ADE00,
@@ -320,7 +320,7 @@ typedef struct EvtPad {
 
 extern EvtPad D_00324510;
 
-extern void func_002357B8();
+extern void evtDrawFloatValueEditorRow();
 
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
  * replace fine steps before the value is clamped to the runtime limits. */
@@ -329,7 +329,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     f32 step;
 
     list = (s32)sdfCreateResetPacketList();
-    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, func_002357B8);
+    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 8) {
         return 0;
@@ -662,7 +662,7 @@ void evtDrawKeyboardRow(s32 list, s32 xPosition, s32 y, s32 row, EvtRuntime *wor
 }
 
 /* Draw the keyboard and edit the eight-character name when input is active. */
-s32 func_00236828(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateNameEntryDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 input;
     s32 length;
@@ -1458,7 +1458,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
     }
 }
 
-s32 func_00238A88(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 list;
@@ -1852,7 +1852,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA70);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
 
-s32 func_00239A90(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *packets;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *child;
@@ -2351,7 +2351,7 @@ void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtUpdateGroupListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeGroup *group;
     s32 count = 0;
     u32 packets;
@@ -2743,7 +2743,7 @@ extern char *D_00368B18[];
 /* Draw one row of the shadow-configuration menu. */
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEBB0);
 
-void func_0023BC30(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtDrawShadowSettingsRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
 
@@ -2775,7 +2775,7 @@ s32 func_0023BE40(s32 x, s32 y, EvtRuntime *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, func_0023BC30);
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, evtDrawShadowSettingsRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0x16) {
         return 0;
@@ -2950,7 +2950,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEC20);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEC30);
 
-s32 func_0023C248(EvtRuntime *runtime) {
+s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     EvtRuntimeChild *key;
     u8 *channel;
     s32 packetList;
@@ -3197,7 +3197,7 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC338);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC340);
 
-s32 func_0023CA60(EvtRuntime *runtime) {
+s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     EvtCameraColorPayload *key;
     s32 packetList;
     s32 selectedChannel;
@@ -3488,8 +3488,8 @@ extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
 extern s32 effEventAdvanceScaleBlurSetup(void);
 extern s32 effEventAdvanceScreenDrawSetup(void);
-extern s32 func_0023C248(EvtRuntime *runtime);
-extern s32 func_0023CA60(EvtRuntime *runtime);
+extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
+extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern void *D_003BB0C0;
 extern void *D_003BB14C;
 extern void *D_003BB130;
@@ -3529,10 +3529,10 @@ s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         }
         break;
     case 0x18:
-        status = func_0023C248(runtime);
+        status = evtEditEffectSpriteFrame(runtime);
         break;
     case 0x19:
-        status = func_0023CA60(runtime);
+        status = evtEditCameraColorKeyFrame(runtime);
         break;
     default:
         if (D_00324510.apply < 0) {

@@ -427,7 +427,7 @@ u8 func_00249198(void) {
 }
 
 
-extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Draw selected-row accents in eighth-pixel units, then the indexed panel. */
 void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct MenuList *list,
@@ -445,14 +445,14 @@ void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct Menu
         s32 base = (row * 21 + 0x76) << 3;
 
         index++;
-        func_002BF4E0(x - 0x40, base, 0, value, 0,
+        effDrawSpriteWithCornerFade(x - 0x40, base, 0, value, 0,
                       owner->batch, 0x16, drawContext);
-        func_002BF4E0(x + 0x4C0, base, 0, value, 0,
+        effDrawSpriteWithCornerFade(x + 0x4C0, base, 0, value, 0,
                       owner->batch, 0x17, drawContext);
-        func_002BF4E0(x + 0xB0, base + 0x18, 0, value, 0,
+        effDrawSpriteWithCornerFade(x + 0xB0, base + 0x18, 0, value, 0,
                       owner->batch, 0x15, drawContext);
     }
-    func_002BF4E0(x + 0x1C0, y + 0x68, 0, value, 0,
+    effDrawSpriteWithCornerFade(x + 0x1C0, y + 0x68, 0, value, 0,
                   owner->batch, index, drawContext);
 }
 
@@ -1083,7 +1083,7 @@ s32 func_0024A2D8(s32 state) {
 }
 
 extern s32 D_003AF688[3][2];
-extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Draw the terminal panels before advancing their 0..256 blend weight.
  * Reduced modes one/two set an endpoint immediately; normal opening adds twelve,
@@ -1107,7 +1107,7 @@ void func_0024A340(s32 close, s32 context) {
             }
         }
         for (i = 0, position = positions; i < 3; i++, position++) {
-            func_002BF4E0((*position)[0], (*position)[1], 0, work->panelFade,
+            effDrawSpriteWithCornerFade((*position)[0], (*position)[1], 0, work->panelFade,
                 1, (s32)work->secondResource, i, 0x53);
         }
         if (close == 0) {
@@ -1320,7 +1320,7 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
     scale = ((u32)(*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) << 8) /
         (*(u8 *)&work->batch->workEntries[index].savedColors[0]);
     if (work->mode != 2) {
-        func_002BF4E0(positions[1][0], positions[1][1], 0, scale, 0x81,
+        effDrawSpriteWithCornerFade(positions[1][0], positions[1][1], 0, scale, 0x81,
             work->batch, 4, MNU_TEXT_DRAW_PRIORITY);
     }
     itfDrawGridWithResolvedSlot(positions[3][0], positions[3][1], 0, 0x81,
@@ -1334,7 +1334,7 @@ void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
             (*(u8 *)&work->batch->workEntries[index].geometry.cornerColors[0]) | 0xA09DC300,
             work->selectedSlot, work->reduced);
     } else {
-        func_002BF4E0(positions[5][0], positions[5][1], 0, scale, 0x81,
+        effDrawSpriteWithCornerFade(positions[5][0], positions[5][1], 0, scale, 0x81,
             work->batch, 0x33, MNU_TEXT_DRAW_PRIORITY);
     }
 }

@@ -7028,7 +7028,7 @@ typedef struct EffFieldColorConfig {
     EffectVectorRequest direction; /* 0x08 */
 } EffFieldColorConfig;
 
-void func_002B3178(EffActiveResource *work) {
+void effInitializeFieldLightColors(EffActiveResource *work) {
     EffectVectorRequest request;
     EffFieldColorConfig *config;
     u32 handle;

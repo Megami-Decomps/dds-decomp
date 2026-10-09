@@ -23,10 +23,10 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 extern void func_00296B48(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
-extern s32 func_00298648(MenuTerminalContext *);
+extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
 extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00296D90(MenuTerminalContext *, s32);
-extern void func_00294EB8(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
 extern void func_00296430(s32, s32, s32, MenuTerminalContext *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
@@ -253,7 +253,7 @@ s32 mnuTickExtendedCommandPhase(MenuTerminalContext *work) {
 
 /* Draw the terminal's two panels through their change and reveal phases. */
 /* Retail 0x00297A38 and 0x00297A5C both clamp the same transition progress. */
-s32 func_00297970(MenuTerminalContext *scene) {
+s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
     s32 category;
     s32 frames;
     f32 progress;
@@ -312,7 +312,7 @@ s32 func_00297970(MenuTerminalContext *scene) {
         if (position > 1.0f) {
             position = 1.0f;
         }
-        func_00294EB8(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+        mnuDrawWindowBorderAndScrollBar(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
                       (s32)(opacity * 256.0f), 0x53);
         func_00295030(0, 0, 0, scene, (s32)(opacity * 256.0f), 0, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(opacity * 96.0f), 0x53);
@@ -344,7 +344,7 @@ s32 func_00297970(MenuTerminalContext *scene) {
         if (position > 1.0f) {
             position = 1.0f;
         }
-        func_00294EB8(0, (s32)(position * 64.0f) << 3, 0, scene,
+        mnuDrawWindowBorderAndScrollBar(0, (s32)(position * 64.0f) << 3, 0, scene,
                       (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         func_00295030(0, 0, 0, scene, (s32)((1.0f - progress) * 256.0f), 0, 0x53);
@@ -396,7 +396,7 @@ s32 func_00297970(MenuTerminalContext *scene) {
         break;
     case 8:
         progress = (f32)scene->commandFrames / 10.0f;
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00296430(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 0, 0x53);
@@ -418,7 +418,7 @@ s32 func_00297970(MenuTerminalContext *scene) {
         break;
     case 6:
     case 7:
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         progress = 1.0f - (f32)scene->gradientFade.blend * 0.00390625f;
         if (progress < 0.5f) {
@@ -487,7 +487,7 @@ s32 mnuTickCommandWaitPhase(MenuTerminalContext *work) {
 }
 
 /* Draw the selected terminal/shop page through its entry, change and exit phases. */
-s32 func_00298648(MenuTerminalContext *scene) {
+s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
     s32 category;
     f32 progress;
 
@@ -496,7 +496,7 @@ s32 func_00298648(MenuTerminalContext *scene) {
     func_00296D90(scene, 0xA09DC380);
     switch (scene->phase) {
     case 9:
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
@@ -518,7 +518,7 @@ s32 func_00298648(MenuTerminalContext *scene) {
         }
         break;
     case 10:
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         progress = 1.0f - progress;
@@ -541,7 +541,7 @@ s32 func_00298648(MenuTerminalContext *scene) {
         }
         break;
     case 12:
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00296298(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         func_00296C58(0, 0, 0, scene, 0x53);
@@ -563,7 +563,7 @@ s32 func_00298648(MenuTerminalContext *scene) {
         }
         break;
     case 11:
-        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
         func_00296298(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
@@ -652,7 +652,7 @@ void ptyClampExp(DatPartyRecord *unit) {
 
 /* Snapshot eligible party members, then apply the queued EXP and profile
  * rewards to each referenced unit. */
-void func_00299018(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch) {
+void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch) {
     s32 partyIndex;
     s32 partyOffset;
     s32 rewardOffset;
@@ -705,7 +705,7 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
                           BrsRewardBatch *rewardState) {
     gstApplyCounterDeltaTable(batch->icons);
     gstApplyBundleMacca(batch);
-    func_00299018(partyWork, rewardState);
+    brsApplyPartyRewards(partyWork, rewardState);
 }
 
 extern void evtStageTestInit(s32);
@@ -841,8 +841,8 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *context) {
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern char D_003D05C8[];
-extern s32 func_0029D008(BrsRewardBatch *, BrsRewardSummary *);
-extern s32 func_0029D2D8(BrsRewardBatch *);
+extern s32 brsBuildPartyRewardBatch(BrsRewardBatch *, BrsRewardSummary *);
+extern s32 brsBuildLevelUpList(BrsRewardBatch *);
 extern s32 brsBuildProfileCapList(BrsRewardBatch *);
 extern void func_0029DA98(BrsActiveProgressList *);
 
@@ -871,10 +871,10 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     btlCaptureRewardSummary(rewards);
     party = work->partyProgress.rows;
     rewardState = &work->rewardState;
-    func_0029D008(rewardState, rewards);
+    brsBuildPartyRewardBatch(rewardState, rewards);
     brsApplyRewardBundle(work, rewards, rewardState);
     primary = &work->primaryRewards;
-    func_0029D2D8(primary);
+    brsBuildLevelUpList(primary);
     secondary = &work->secondaryRewards;
     brsBuildProfileCapList(secondary);
     func_0029DA98(&work->partyProgress);
@@ -1033,7 +1033,7 @@ extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void func_00341C78(u32 sequence);
 extern void sndStartTrackDefault(s32 track);
 
-void func_00299B98(BrsSkillPackageWork *work, s32 selectLevelUp) {
+void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
     if (selectLevelUp == 0) {
         s32 *selectedIndex = &work->selectedRow;
         BrsRewardRow *row = &work->secondaryRewards.rows[(*selectedIndex)++];

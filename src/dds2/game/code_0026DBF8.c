@@ -319,7 +319,7 @@ typedef struct MantraBackgroundState {
     u16 clock;            /* 0x0A */
     f32 value;            /* 0x0C */
     u32 enabled;          /* 0x10 */
-    s32 selectedValue;    /* 0x14: one bit per node; func_00270568 tests it with srav (signed) */
+    s32 selectedValue;    /* 0x14: one bit per node; mnuDrawMantraBackgroundSelectionIcons tests it with srav (signed) */
     MantraBurstPool *burstPool; /* 0x18 */
 } MantraBackgroundState;
 
@@ -1243,7 +1243,7 @@ void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     mnuDrawMantraRotatedSprite(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
 }
 
-void func_00270568(MantraDrawItem *item) {
+void mnuDrawMantraBackgroundSelectionIcons(MantraDrawItem *item) {
     /* Retail copies 0x90 bytes of paired positions and 0x48 bytes of icons to the stack. */
     s16 positions[2][18][2] = {
         {
@@ -3229,7 +3229,7 @@ extern void func_0027FDC0(void);
 extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027B678(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_0027C558(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
+extern s32 mnuDrawMantraPanelATransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027E360(s32, s32, s32, s32, s32, u8 *, s32);
@@ -3277,7 +3277,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawMantraPanelCTransition,
         (MantraPanelDraw)func_0027B678,
         (MantraPanelDraw)mnuDrawMantraPulseIconWithFadeState,
-        func_0027C558,
+        mnuDrawMantraPanelATransition,
         (MantraPanelDraw)func_0027D3D8,
         (MantraPanelDraw)mnuDrawMantraPanelSpriteTransition,
         (MantraPanelDraw)func_0027E360,
@@ -3888,7 +3888,7 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
     return 0;
 }
 
-s32 func_0027C558(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+s32 mnuDrawMantraPanelATransition(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
                   MantraPanelAnimation *panel, u32 packet) {
     f32 panelFade;
     f32 sparkleFade;
@@ -4626,7 +4626,7 @@ struct MantraSparkleEmitter {
     s32 count;
 };
 
-MantraSparkle *func_00284818(MantraSparkleEmitter *);
+MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *);
 
 MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16 kind) {
     MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)sdfAllocSizeClassBlock(0xA8);
@@ -4635,11 +4635,11 @@ MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16 kind) {
     memset(emitter, 0, 0xA8);
     emitter->duration = effMiscRandUnitFloat(0) * 20.0f + 5.0f;
     emitter->kind = kind;
-    spark = func_00284818(emitter);
+    spark = mnuSpawnMantraSparkle(emitter);
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
-    spark = func_00284818(emitter);
+    spark = mnuSpawnMantraSparkle(emitter);
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
-    spark = func_00284818(emitter);
+    spark = mnuSpawnMantraSparkle(emitter);
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     return emitter;
 }
@@ -4664,7 +4664,7 @@ void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *emitte
 
     emitter->duration--;
     if (emitter->duration < 0) {
-        func_00284818(emitter);
+        mnuSpawnMantraSparkle(emitter);
         if (emitter->kind == 0) {
             emitter->duration = effMiscRandUnitFloat(0) * 10.0f + 5.0f;
         } else {
@@ -4708,7 +4708,7 @@ void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *emitte
     uiDrawUniformColorRect((x - 128) << 4, (y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
 }
 
-MantraSparkle *func_00284818(MantraSparkleEmitter *emitter) {
+MantraSparkle *mnuSpawnMantraSparkle(MantraSparkleEmitter *emitter) {
     MantraSparkle *spark = emitter->sparkle;
     u32 i;
 

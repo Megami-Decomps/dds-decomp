@@ -322,7 +322,7 @@ s32 btlUpdateActiveBattleFrame(void) {
         btlUpdateFadeColor();
         btlUpdateAutoMusic();
         btlUpdateTintAndWorldLight();
-        func_001F44C0();
+        btlPollMotionSoundResources();
         btlUpdateScene();
         func_001C8330();
         btlUpdateActionSeqs();

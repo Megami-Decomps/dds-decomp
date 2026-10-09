@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_resource.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -49,7 +50,7 @@ extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern void func_0032DB30(const void *, void *, s32);
+extern void func_0032DB30(s32, SdfDmaReferenceChainPacket *, s32);
 
 
 typedef struct GridAngleTable {
@@ -370,7 +371,7 @@ typedef struct GridFlushTable {
 } GridFlushTable;
 
 /* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
-s32 func_003078A8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridFlushTable *table;
     s32 phases[3];
     s32 deltas[2];
@@ -447,7 +448,7 @@ s32 func_003078A8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     return 0x10000 / totalDuration;
 }
 
-s32 func_00307A68(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridShrinkBoundsAndFadeThresholdAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -562,7 +563,7 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     return 0x10000 / table->cycleDivisor;
 }
 
-s32 func_00307EF8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridShrinkBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -648,7 +649,7 @@ extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
-void func_00308058(void) {
+void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
@@ -897,15 +898,15 @@ typedef struct GridPackedVertex {
     u64 depth;
 } GridPackedVertex;
 
-void func_00308AF0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                    const u32 *colors, u32 surfaceIndex);
 
 void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
     u32 vertexColors[2] = {color, color};
-    func_00308AF0(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
+    itfDrawGradientLine(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
 }
 
-void func_00308AF0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex)
 {
     s32 packet;
@@ -933,10 +934,10 @@ INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    void *texture;
+    SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -944,16 +945,16 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     }
 }
 
-extern void func_0032DB78(void *, void *, s32);
+extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     s32 surfaceIndex;
 {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    void *texture;
+    SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];

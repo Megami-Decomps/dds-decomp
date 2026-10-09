@@ -188,13 +188,13 @@ typedef struct MnuSpritePlacement {
 
 extern MnuSpritePlacement D_0036B510[];
 extern struct EffectSlotSet *D_0036C698[];
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
                               u16 unusedSceneId, s32 unusedContext) {
     struct EffectSlotSet *resource = D_0036C698[D_0036B510[41].resourceIndex];
 
-    func_002BF4E0((x + D_0036B510[41].x) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[41].x) << 4,
                   (y + D_0036B510[41].y) << 3, z,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
                   (s32)resource,

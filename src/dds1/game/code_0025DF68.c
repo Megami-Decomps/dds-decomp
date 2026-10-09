@@ -15,7 +15,7 @@ enum {
 
 extern BrsIconRecord D_0036C728[];
 extern struct EffectSlotSet *D_003BC520;
-extern void func_002BF4E0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Fade the fixed dispatch frame, then its five-tick-delayed foreground icon. */
 void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
@@ -36,13 +36,13 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
         fraction = 1.0f;
     }
     scale = (s32)(fraction * 256.0f);
-    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
                   D_0036C728[32][BRS_ICON_Y] << 3,
                   0, scale, 0, texture, D_0036C728[32][BRS_ICON_ID], 0x53);
-    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
                   D_0036C728[27][BRS_ICON_Y] << 3,
                   0, scale, 0, texture, D_0036C728[27][BRS_ICON_ID], 0x53);
-    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
                   D_0036C728[28][BRS_ICON_Y] << 3,
                   0, scale, 0, texture, D_0036C728[28][BRS_ICON_ID], 0x53);
     ticks = progress - 5;
@@ -54,7 +54,7 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
         fraction = 1.0f;
     }
     scale = (s32)(fraction * 256.0f);
-    func_002BF4E0(D_0036C728[0][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[0][BRS_ICON_X] << 4,
                   D_0036C728[0][BRS_ICON_Y] << 3,
                   0, scale, 0, texture, D_0036C728[0][BRS_ICON_ID], 0x53);
 }
@@ -63,7 +63,7 @@ extern void func_00260100(ShopScene *, s32);
 extern void func_0025E420(ShopScene *, s32, s32);
 
 /* Fade the shop frame, then its currency and pulsing foreground icon. */
-void func_0025E108(ShopScene *scene, s32 frame) {
+void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
     f32 elapsed = (f32)frame - 0.0f;
     struct EffectSlotSet *texture = D_003BC520;
     s32 ticks = (s32)elapsed;
@@ -83,13 +83,13 @@ void func_0025E108(ShopScene *scene, s32 frame) {
     }
     fraction = 1.0f - fraction;
     backgroundScale = (s32)(fraction * 256.0f);
-    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
                   D_0036C728[32][BRS_ICON_Y] << 3,
                   0, backgroundScale, 0, texture, D_0036C728[32][BRS_ICON_ID], 0x53);
-    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
                   D_0036C728[27][BRS_ICON_Y] << 3,
                   0, backgroundScale, 0, texture, D_0036C728[27][BRS_ICON_ID], 0x53);
-    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
                   D_0036C728[28][BRS_ICON_Y] << 3,
                   0, backgroundScale, 0, texture, D_0036C728[28][BRS_ICON_ID], 0x53);
 
@@ -106,7 +106,7 @@ void func_0025E108(ShopScene *scene, s32 frame) {
         s32 icon = D_0036C728[0][BRS_ICON_ID];
 
         foregroundScale = (s32)(fraction * 256.0f);
-        func_002BF4E0(x, y, 0, foregroundScale, 0, texture, icon, 0x53);
+        effDrawSpriteWithCornerFade(x, y, 0, foregroundScale, 0, texture, icon, 0x53);
     }
     func_0025E420(scene, foregroundScale, 0x53);
 }
@@ -115,16 +115,16 @@ void func_0025E108(ShopScene *scene, s32 frame) {
 void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
 
-    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,
                   D_0036C728[32][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[32][BRS_ICON_ID], mode);
-    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[27][BRS_ICON_X] << 4,
                   D_0036C728[27][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[27][BRS_ICON_ID], mode);
-    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[28][BRS_ICON_X] << 4,
                   D_0036C728[28][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[28][BRS_ICON_ID], mode);
-    func_002BF4E0(D_0036C728[0][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[0][BRS_ICON_X] << 4,
                   D_0036C728[0][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[0][BRS_ICON_ID], mode);
     func_0025E420(scene, 0x100, mode);
@@ -138,7 +138,7 @@ void func_0025E420(ShopScene *object, s32 scale, s32 mode) {
     f32 angle = (f32)phase / 120.0f * 6.2831852f;
     s32 offset = (s32)((f32)scale * sdfSinPoly(angle));
 
-    func_002BF4E0(D_0036C728[1][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[1][BRS_ICON_X] << 4,
                   D_0036C728[1][BRS_ICON_Y] << 3,
                   0, offset, 0, texture, D_0036C728[1][BRS_ICON_ID], mode);
 
@@ -156,16 +156,16 @@ void mnuDrawStatusIconAndCompanion(s32 x, s32 y, s32 z, ShopScene *context, s32 
     if (context->extraOption == 0) {
         iconIndex = 9;
     }
-    func_002BF4E0(x + (D_0036C728[iconIndex][BRS_ICON_X] << 4), y + (D_0036C728[iconIndex][BRS_ICON_Y] << 3), z, width, 0, layer, D_0036C728[iconIndex][BRS_ICON_ID], mode);
-    func_002BF4E0(D_0036C728[2][BRS_ICON_X] << 4, D_0036C728[2][BRS_ICON_Y] << 3, z, width, 0, layer, D_0036C728[2][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(x + (D_0036C728[iconIndex][BRS_ICON_X] << 4), y + (D_0036C728[iconIndex][BRS_ICON_Y] << 3), z, width, 0, layer, D_0036C728[iconIndex][BRS_ICON_ID], mode);
+    effDrawSpriteWithCornerFade(D_0036C728[2][BRS_ICON_X] << 4, D_0036C728[2][BRS_ICON_Y] << 3, z, width, 0, layer, D_0036C728[2][BRS_ICON_ID], mode);
 }
 
 void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
     struct EffectSlotSet *layer = D_003BC520;
 
-    func_002BF4E0(x + (D_0036C728[18][BRS_ICON_X] << 4), y + (D_0036C728[18][BRS_ICON_Y] << 3), 0, b, 0, layer, D_0036C728[18][BRS_ICON_ID], c);
-    func_002BF4E0(D_0036C728[17][BRS_ICON_X] << 4, D_0036C728[17][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[17][BRS_ICON_ID], c);
-    func_002BF4E0(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(x + (D_0036C728[18][BRS_ICON_X] << 4), y + (D_0036C728[18][BRS_ICON_Y] << 3), 0, b, 0, layer, D_0036C728[18][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(D_0036C728[17][BRS_ICON_X] << 4, D_0036C728[17][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[17][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(D_0036C728[22][BRS_ICON_X] << 4, D_0036C728[22][BRS_ICON_Y] << 3, 0, b, 0, layer, D_0036C728[22][BRS_ICON_ID], c);
 }
 
 extern s32 ptyCountBulletItem(s32);
@@ -180,10 +180,10 @@ void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mod
     struct EffectSlotSet *texture = D_003BC520;
     struct MenuList *list;
 
-    func_002BF4E0(D_0036C728[23][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[23][BRS_ICON_X] << 4,
                   D_0036C728[23][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[23][BRS_ICON_ID], mode);
-    func_002BF4E0(D_0036C728[24][BRS_ICON_X] << 4,
+    effDrawSpriteWithCornerFade(D_0036C728[24][BRS_ICON_X] << 4,
                   D_0036C728[24][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[24][BRS_ICON_ID], mode);
     list = scene->window->list;
@@ -332,12 +332,12 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
         break;
     }
     if (flags & 1) {
-        func_002BF4E0(D_0036C728[20][BRS_ICON_X] << 4, D_0036C728[20][BRS_ICON_Y] << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[20][BRS_ICON_X] << 4, D_0036C728[20][BRS_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
                       texture, D_0036C728[20][BRS_ICON_ID], option);
     }
     if (flags & 2) {
-        func_002BF4E0(D_0036C728[21][BRS_ICON_X] << 4, D_0036C728[21][BRS_ICON_Y] << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[21][BRS_ICON_X] << 4, D_0036C728[21][BRS_ICON_Y] << 3,
                       0, (u32)(alpha * 256.0f), 0,
                       texture, D_0036C728[21][BRS_ICON_ID], option);
     }
@@ -355,9 +355,9 @@ void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
     if (list->count != 0) {
         firstIndex = list->head->index;
         row = list->cursor->index - firstIndex;
-        func_002BF4E0(0x3D0, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x20, option);
-        func_002BF4E0(0xC90, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x21, option);
-        func_002BF4E0(D_0036C728[29][BRS_ICON_X] << 4,
+        effDrawSpriteWithCornerFade(0x3D0, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x20, option);
+        effDrawSpriteWithCornerFade(0xC90, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x21, option);
+        effDrawSpriteWithCornerFade(D_0036C728[29][BRS_ICON_X] << 4,
                       (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
                       0, 0x100, 0, texture,
                       D_0036C728[29][BRS_ICON_ID], option);
@@ -384,17 +384,17 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
         firstIndex = list->head->index;
         opacity = (f32)alpha * 0.00390625f;
         row = list->cursor->index - firstIndex;
-        func_002BF4E0(D_0036C728[19][BRS_ICON_X] << 4,
+        effDrawSpriteWithCornerFade(D_0036C728[19][BRS_ICON_X] << 4,
                       (D_0036C728[19][BRS_ICON_Y] + row * 21) << 3,
                       0, (u32)((1.0f - opacity) * 256.0f), 0, texture,
                       D_0036C728[19][BRS_ICON_ID], option);
-        func_002BF4E0(0x3D0, (152 + row * 21) << 3, 0,
+        effDrawSpriteWithCornerFade(0x3D0, (152 + row * 21) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x20, option);
-        func_002BF4E0(0xC90, (152 + row * 21) << 3, 0,
+        effDrawSpriteWithCornerFade(0xC90, (152 + row * 21) << 3, 0,
                       (u32)((1.0f - opacity) * 128.0f + 128.0f),
                       0, texture, 0x21, option);
-        func_002BF4E0(D_0036C728[29][BRS_ICON_X] << 4,
+        effDrawSpriteWithCornerFade(D_0036C728[29][BRS_ICON_X] << 4,
                       (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
                       0, (u32)(opacity * 256.0f), 0, texture,
                       D_0036C728[29][BRS_ICON_ID], option);
@@ -414,11 +414,11 @@ void func_0025FB30(s32 x, s32 y, s32 z, ShopScene *panel, s32 option) {
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->atLimit != 1) {
-        func_002BF4E0(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
             0, 0x100, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
     }
     if (panel->counter != 1) {
-        func_002BF4E0(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
             0, 0x100, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
     }
 }
@@ -429,11 +429,11 @@ void func_0025FC38(s32 x, s32 y, s32 z, ShopScene *panel, s32 scale, s32 option)
     s32 row = panel->window->list->cursor->index - firstIndex;
 
     if (panel->atLimit != 1) {
-        func_002BF4E0(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[30][BRS_ICON_X] << 4, (D_0036C728[30][BRS_ICON_Y] + row * 21) << 3,
             0, scale, 0, texture, D_0036C728[30][BRS_ICON_ID], option);
     }
     if (panel->counter != 1) {
-        func_002BF4E0(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
+        effDrawSpriteWithCornerFade(D_0036C728[31][BRS_ICON_X] << 4, (D_0036C728[31][BRS_ICON_Y] + row * 21) << 3,
             0, scale, 0, texture, D_0036C728[31][BRS_ICON_ID], option);
     }
 }
@@ -447,9 +447,9 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     struct MenuList *inner;
     FrFontGlyph *glyph;
 
-    func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
+    effDrawSpriteWithCornerFade(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
-    func_002BF4E0(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
+    effDrawSpriteWithCornerFade(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {
@@ -462,7 +462,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
 }
 
 void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
-    func_002BF4E0(x + (D_0036C728[26][BRS_ICON_X] << 4), y + (D_0036C728[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, D_0036C728[26][BRS_ICON_ID], c);
+    effDrawSpriteWithCornerFade(x + (D_0036C728[26][BRS_ICON_X] << 4), y + (D_0036C728[26][BRS_ICON_Y] << 3), z, b, 0, D_003BC520, D_0036C728[26][BRS_ICON_ID], c);
 }
 
 extern void sndSetSequenceVolumePan(s32, s32, s32);
@@ -472,7 +472,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     s32 value;
     FrFontGlyph *glyph;
 
-    func_002BF4E0(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
+    effDrawSpriteWithCornerFade(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     func_003014F0(text, D_003BC508, 0);
     glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
@@ -488,9 +488,9 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     struct MenuList *inner;
     FrFontGlyph *glyph;
 
-    func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
+    effDrawSpriteWithCornerFade(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
-    func_002BF4E0(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
+    effDrawSpriteWithCornerFade(D_0036C728[26][BRS_ICON_X] << 4, D_0036C728[26][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[26][BRS_ICON_ID], option);
     inner = object->list;
     if (inner->count != 0) {

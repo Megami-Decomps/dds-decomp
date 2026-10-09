@@ -5633,7 +5633,7 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     ++source->effectLink.referenceCount;
 }
 
-s32 func_001F1CC8(SoundEffectSourceArgs *args) {
+s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     BtlUnit *owner;
     u32 flags;
 
@@ -5670,7 +5670,7 @@ s32 func_001F1CC8(SoundEffectSourceArgs *args) {
     return 0;
 }
 
-extern s32 func_001F1CC8(SoundEffectSourceArgs *);
+extern s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *);
 
 void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
     SoundResourceNode *effect;
@@ -5696,7 +5696,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->identity;
     task->onStart = sndAddSourceReferences;
-    task->callback = func_001F1CC8;
+    task->callback = sndUpdateEffectSourceFade;
     task->onFinish = sndFinishEffectSourceTask;
     arguments = btlGetTaskArguments(task);
     arguments->source = effect;
@@ -6981,7 +6981,7 @@ u8 sndIsBattleBankLoaded(void) {
     return temp_v0 != 0;
 }
 
-void func_001F44C0(void) {
+void btlPollMotionSoundResources(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     SoundSlotOwner *owner;
     s32 tracksReady;

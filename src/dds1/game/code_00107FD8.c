@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_gs_blend.h"
 #include "ee_mmi.h"
 #include "sdf_packet_list.h"
@@ -492,15 +493,15 @@ extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern void func_002D4C80(const void *, void *, s32);
+extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
 
 
 void func_00108E60(void) {
     void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
-    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
     sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -508,14 +509,14 @@ void func_00108E60(void) {
     }
 }
 
-extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 void func_00108F00(void) {
     void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
-    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
     sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];

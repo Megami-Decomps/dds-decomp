@@ -4,7 +4,7 @@
 #include "mnu_list.h"
 #include "dat_state.h"
 
-extern s32 func_0028A018(DatPartyRecord *);
+extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
 extern s32 mdlFlagTest(s32);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
 extern s32 scrGetEntryRequirementFlags(u16);
@@ -156,7 +156,7 @@ void func_00289550(MnuStatusResource *object, s8 target) {
 /* The selection allocator reserves 0x16C bytes for 176 inline flag entries. */
 
 /* Skip unavailable neighbors after retreating the node selection. */
-void func_00289710(MnuStatusResource *object) {
+void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     MantraNodePos *position;
     MantraNodePos *initialPosition;
@@ -280,7 +280,7 @@ extern struct MantraDrawPool *mnuCreateMantraDrawPool(u32);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
 extern s32 mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
-extern void func_0026D988(MantraFlagResource **);
+extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
 extern void func_00315A50(void);
 extern void func_0028EF50(MnuStatusResource *);
 extern s32 func_0028F9A0(MnuStatusResource *);
@@ -316,7 +316,7 @@ void func_00289BA0(MnuStatusResource *object) {
             state->drawBits.hasQueuedMastery = 1;
             state->unitEntries[i].marked = 1;
             state->unitEntries[i].kind = 1;
-        } else if (func_0028A018(record) != 0) {
+        } else if (mtrChkMantraCompleteMaster(record) != 0) {
             state->drawBits.hasQueuedMastery = 1;
             state->unitEntries[i].nodeId = scrGetSelectedScriptEntryId(record);
             state->unitEntries[i].marked = 1;
@@ -324,7 +324,7 @@ void func_00289BA0(MnuStatusResource *object) {
         }
     }
     state->slots[5] = evtAllocateMantraSelectionWork(NULL, 0);
-    func_0026D988(state->slots);
+    mnuMergePartyMantraProfileCapStates(state->slots);
     func_00315A50();
     func_0028EF50(object);
     state->drawBits.hasSource = func_0028F9A0(object);
@@ -424,7 +424,7 @@ s32 mnuCheckRequiredMantraEntries(DatPartyRecord *unit) {
     return 1;
 }
 
-s32 func_0028A018(DatPartyRecord *unit) {
+s32 mtrChkMantraCompleteMaster(DatPartyRecord *unit) {
     u16 flagIds[6] = {0x9A0, 0x9A1, 0x9A2, 0x9A3, 0x9A4, 0x9A5};
     u8 flagIndices[9] = {0, 0, 1, 2, 3, 4, 5, 2, 1};
 
@@ -451,7 +451,7 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
     s32 index = 0;
     while (node != 0) {
-        if (func_0028A018((DatPartyRecord *)node->unk70) != 0) {
+        if (mtrChkMantraCompleteMaster((DatPartyRecord *)node->unk70) != 0) {
             return index;
         }
         node = node->next;
@@ -467,7 +467,7 @@ extern s32 func_0028B738(s32, s32, s32, s32, MnuStatusResource *, s32);
 extern s32 func_00293DB0(MnuStatusResource *);
 extern s32 func_0028CBF8(s32, s32, s32, s32, MnuStatusResource *, s32);
 
-s32 func_0028B1B0(MnuStatusResource *object) {
+s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
     MantraMenuWork *work;
     f32 ratio;
 
@@ -508,7 +508,7 @@ extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
-s32 func_0028B318(MnuStatusResource *object) {
+s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     s32 sound = 0;
     s32 result = 0;
@@ -639,7 +639,7 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028BB80);
 extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *);
 
 /* Mantra grid input, including directional repeat and page/confirm buttons. */
-s32 func_0028C8F8(MnuStatusResource *object) {
+s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     s32 sound = 0;
     s32 result = 0;
@@ -693,7 +693,7 @@ s32 func_0028C8F8(MnuStatusResource *object) {
         }
     }
     if (D_0037F510[0x28] < 0) {
-        func_00289710(object);
+        mnuSelectAvailableMantraNeighbor(object);
         sound = 4;
     } else if (D_0037F510[0x2A] < 0) {
         func_00289928(object);
@@ -974,7 +974,7 @@ void func_0028DFA0(s32 object) {
                     if (record->kind == 2) {
                         *flag = (*flag & 0xFFF0) | 2;
                     } else {
-                        if (func_00315C68(1, 2, unit, (u16)record->id, 0)) {
+                        if (prfReqEvaluateRules(1, 2, unit, (u16)record->id, 0)) {
                             *flag = (*flag & 0xFFF0) | 1;
                         } else {
                             *flag = (*flag & 0xFFF0) | 2;

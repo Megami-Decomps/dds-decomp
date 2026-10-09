@@ -194,7 +194,7 @@ extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
-extern s32 func_0019DBA8(s32 row, FrFontGlyph *glyph);
+extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
 
 extern UiSprite *func_001A1858(s32, u32);
 
@@ -270,7 +270,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     if (place->sprite == 0) {
         place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
-            place->sprite->unk20 = panel->blk14.glyphChain->x + func_0019DBA8(0, panel->blk14.glyphChain);
+            place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureLineWidth(0, panel->blk14.glyphChain);
         }
     }
     top = pos->y + place->bounds[1];
@@ -824,7 +824,7 @@ void func_001A6E88(ItfMesState *panel) {
     bottom = y + 0x88;
     bounds[0].x = x - 0x1D0;
     bounds[0].y = y + 0x20;
-    bounds[1].x = x + func_0019DBA8(selected, selection->glyphChain) + 0x1D0;
+    bounds[1].x = x + frFontMeasureLineWidth(selected, selection->glyphChain) + 0x1D0;
     bounds[1].y = bounds[0].y + 0x90;
     func_001A09C0(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
 
@@ -1497,7 +1497,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
 /* Retail 0x001A92F0 keeps the row < 4 select inside the four-row loop. */
-s32 func_001A9130(void) {
+s32 itfEditOverlayColor(void) {
     SifCommand packet;
     SdfListHead *list;
     s32 row;

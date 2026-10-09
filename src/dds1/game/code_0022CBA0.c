@@ -1170,7 +1170,7 @@ extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
 void func_00230140(EvtRuntime *);
 
-void func_0022FFC8(EvtRuntime *viewer) {
+void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
         return;
     }
@@ -1683,7 +1683,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     if (viewer->flags & 8) {
         evtViewerApplySelectedEntry(viewer);
     }
-    func_0022FFC8(viewer);
+    evtUpdateViewerMessageWindow(viewer);
     func_0022F418(viewer);
     mnuAdvanceShopMenuState((struct EvtRuntime *)viewer);
     if (viewer->flags & 8) {

@@ -480,7 +480,7 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
 extern s32 func_0034E820(s32, s32, ...);
 extern u64 D_00438FD0;
 
-s32 func_002A1790(u32 source, u32 words) {
+s32 mnuCopySoundStreamOnStatusChange(u32 source, u32 words) {
     u64 status = func_0034E820(1, 0x8100, 0);
 
     if ((D_00438FD0 & 0x1000000) == (status & 0x1000000)) {
@@ -628,7 +628,7 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428610);
 
 INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428628);
 
-void func_002A2198(void) {
+void mnuStartFixedSoundStream(void) {
     WaitSema(mnuTitleStreamSemaphore);
     mnuTitleStreamStatus.decoder = D_00454D58;
     mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
@@ -956,7 +956,7 @@ extern void mnuStopTitleMovieDraw(void);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern s32 func_002A30C0(KwlnTask *);
+extern s32 mnuUpdateTitleMenuTask(KwlnTask *);
 extern u32 D_00435CBC;
 
 KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
@@ -983,7 +983,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     mnuMovieMenuState->mode = mode;
     func_002A2AA0();
     D_00435CBC = 0x80000000;
-    return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, func_002A30C0, 0, 0);
+    return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
 }
 
 extern void func_003458E8(u32);
@@ -1167,13 +1167,13 @@ extern void mnuRestartRuntimeAfterViewer(s32);
 extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
 extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);
 extern void func_002A5040(SlideBarTimed *, SlideBar *, s32);
-extern void func_002A4208(MovieMenuPulse *, s32);
+extern void mnuDrawExpandingMovieMenuPulseBar(MovieMenuPulse *, s32);
 extern void mnuAdvancePairedSlideBars(SlideBarPair *, s32);
 extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
 extern void mnuAdvanceSlideBar(PickList *, s32);
 extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
 
-s32 func_002A30C0(KwlnTask *task) {
+s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
     s32 volume;
     s32 menuAction;
     s32 selectedItem;
@@ -1529,7 +1529,7 @@ s32 func_002A30C0(KwlnTask *task) {
     mnuAdvanceTimedSlideBar(&mnuMovieMenuState->timedA, 0x52);
     mnuAdvanceMultiSpriteSlideBar((SlideBar *)&mnuMovieMenuState->timedB, 0x52);
     func_002A5040(&mnuMovieMenuState->timedA, (SlideBar *)&mnuMovieMenuState->timedB, 0x52);
-    func_002A4208((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
+    mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
     mnuAdvancePairedSlideBars((SlideBarPair *)mnuMovieMenuState->movie, 0x52);
     mnuAdvanceSlideBarValue((SlideBar *)mnuMovieMenuState->barB, 0x52);
     mnuAdvanceSlideBar(&mnuMovieMenuState->paired, 0x53);

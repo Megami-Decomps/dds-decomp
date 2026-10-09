@@ -842,7 +842,7 @@ extern const char D_00437C28[];
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 /* Draw visible rows, preserving each row's glyph chain and callback state. */
-void func_002B9218(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
+void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
                    s32 fadeScale, u32 unusedFlags, MenuList *list, s32 drawArg) {
     char text[0x10];
     MenuListNode *node = list->head;
@@ -900,7 +900,7 @@ void func_002B9218(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
 
 /* Invoke the native window renderer at full fade with its size/flag arguments zeroed. */
 void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
-    func_002B9218(x, y, depth, 0, 0, MNU_FULL_FADE, 0, (MenuList *)(u32)menu, drawArg);
+    mnuDrawWindowListEntries(x, y, depth, 0, 0, MNU_FULL_FADE, 0, (MenuList *)(u32)menu, drawArg);
 }
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
@@ -1197,7 +1197,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);
     }
-    func_002B9218(x, y, depth, menu->width, menu->height,
+    mnuDrawWindowListEntries(x, y, depth, menu->width, menu->height,
                   fadeScale, menu->flags, menu->list, drawArg);
     if (menu->resource != 0) {
         mnuDrawWindowResourceSpriteRows(x, y, depth, menu, drawArg);
@@ -2155,7 +2155,7 @@ typedef struct MenuPanelSequenceSettings {
 extern MenuPanelSequenceSettings D_003E7878;
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
-void func_002BC498(MenuPageWindow *window, s32 texture) {
+void mnuDrawPartyVitalPanelSequences(MenuPageWindow *window, s32 texture) {
     u32 i;
 
     for (i = 0; i < 5; i++) {

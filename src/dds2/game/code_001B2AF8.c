@@ -299,7 +299,7 @@ typedef struct BattleEscapeParameters {
 
 const char D_004156B0[] = "btl:escape=%d%%[ratio=%.2f,sn=%d]\n";
 
-s32 func_001B2AF8(BtlUnit *actor) {
+s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *enemy;
     s32 noEligibleEnemy;

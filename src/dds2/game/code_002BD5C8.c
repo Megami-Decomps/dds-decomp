@@ -62,7 +62,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
 
-void func_002BDAA8(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
+void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteArg) {
     char text[0x10];
     s32 current;
     s32 required;
@@ -143,7 +143,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
             if (page->flags & 1) {
                 func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
-                func_002BDAA8(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
+                mnuDrawRemainingAndTotalCounts(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
             }
         } else {
             func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[1], 0, param);
@@ -186,7 +186,7 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
 
     color = (color & 0xFF) | 0xD7ABFA00;
     func_00314500(textId & 0xFFFF, 1, text);
-    item = (s32)(u32)func_0019CE78(text, 0, 0, 0, 0);
+    item = (s32)(u32)frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frFontSetChildColors((FrFontGlyph *)(u32)item, color);
     frFontSetGlyphPosition((struct FrFontGlyph *)(u32)item, x, y);
     frFontDrawGlyphChain((FrFontGlyph *)item, 1, param);
@@ -222,7 +222,7 @@ extern char D_00437C48[];
 extern void mnuDrawFadeIcons(s32, s32, s32, s32, MenuIconBundle *, s32);
 extern void mnuDrawIconRow(s32, s32, s32, s32, MenuSprites *, s32);
 
-void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
+void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
                    s32 partyIndex, u32 flags, s32 surface) {
     char text[0x40];
     DatPartyRecord *unit = &datGameState->party[partyIndex];

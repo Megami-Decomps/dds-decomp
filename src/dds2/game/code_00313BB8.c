@@ -116,7 +116,7 @@ extern u16 D_004052E8[][80];
 
 extern u16 D_004052F8[][80];
 
-extern void func_0011CA88(DatPartyRecord *);
+extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *);
 
 /* Native profile parameter data: 176 complete 0x24-byte records. */
 typedef struct PrfProfileParameters {
@@ -270,7 +270,7 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
         presetIndex++;
     } while (presetIndex < PTY_PRESET_POOL_SKILL_COUNT);
     if (mdlFlagTest(PTY_PRESET_POOL_EXTRA_GATE)) {
-        func_0011CA88(unit);
+        ptyRefreshEntryFromSavedTemplate(unit);
     }
 }
 
@@ -1032,7 +1032,7 @@ s32 func_00315C40(u32 index) {
 
 /* The evaluator masks its incoming requirement ID to the lower sixteen bits. */
 
-s32 func_00315C68(u32 state, u32 flags, DatPartyRecord *unit, u32 requirementId, u32 *mismatchCount) {
+s32 prfReqEvaluateRules(u32 state, u32 flags, DatPartyRecord *unit, u32 requirementId, u32 *mismatchCount) {
     PrfRequirementOperand *rules = NULL;
     u32 expected = 0;
     u32 count = 0;
@@ -1143,7 +1143,7 @@ s32 func_00315C68(u32 state, u32 flags, DatPartyRecord *unit, u32 requirementId,
 }
 
 s32 func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
-    return func_00315C68(mode, 0, unit, id, 0);
+    return prfReqEvaluateRules(mode, 0, unit, id, 0);
 }
 
 /* Read requirement flags for an unchecked profile ID. */
@@ -1173,7 +1173,7 @@ s32 func_00316020(DatPartyRecord *operand, u16 requirementId) {
 
     requirementId &= SCR_FLAG_ID_MASK;
     if ((scrGetEntryState(requirementId) & PRF_REQUIREMENT_RULES_BIT) != 0) {
-        if (func_00315C68(0, 0, operand, requirementId, &ruleResult) == 0) {
+        if (prfReqEvaluateRules(0, 0, operand, requirementId, &ruleResult) == 0) {
             return ruleResult != 0;
         }
     }

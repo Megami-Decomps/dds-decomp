@@ -2072,7 +2072,7 @@ INCLUDE_ASM(const s32, "game/code_001D4438", func_001DBE70);
 void btlRecordLinkedActorOutcome(ActionStateLink *unit) {
     BtlState *work = (BtlState *)btlGetRuntime();
     work->unk278 = work->unk278 + 1;
-    if (func_001B2AF8(unit->unit) != 0) {
+    if (btlTryEscapeWithPhaseAdjustment(unit->unit) != 0) {
         work->battleFlags |= 0x2000;
     } else {
         work->battleFlags |= 0x1000;

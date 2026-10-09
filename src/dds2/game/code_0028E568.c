@@ -105,7 +105,7 @@ extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, 
 extern void mnuStorePanelEntry(s32, s32);
 
 /* Mark the selected mantra node and start its panel animation. */
-void func_0028E568(MenuSearchObject *menu, u16 nodeId) {
+void mnuActivateMantraNode(MenuSearchObject *menu, u16 nodeId) {
     u32 selected;
     MantraLimitSlot *slot;
     u16 *entry;

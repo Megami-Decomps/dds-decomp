@@ -43,11 +43,11 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
     sdfReleaseResourceAllocation(resources->allocation);
 }
 
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern struct EffectSlotSet *D_0036C698[];
 
 void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
-    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)D_0036C698[0], 0x25, param);
+    effDrawSpriteWithCornerFade(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)D_0036C698[0], 0x25, param);
 }
 
 struct MovieCueNode {
@@ -211,7 +211,7 @@ extern s32 D_0036C6CC[];
 
 void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
-    func_002BF4E0((x + D_0036C268[placementIndex][2]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036C268[placementIndex][2]) << 4,
                   (y + D_0036C268[placementIndex][3]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -223,7 +223,7 @@ void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 
 void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 placementIndex, s32 flags, s32 context) {
-    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
+    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
                    D_0036C268[placementIndex][2]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] +
                    D_0036C268[placementIndex][3]) << 3,
@@ -238,7 +238,7 @@ void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
 void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
     if (D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX] != 0) {
-        func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
+        effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
                       (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET] + 15) << 3,
                       z,
                       (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -251,7 +251,7 @@ void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
 
 void func_0025C418(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
-    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -263,7 +263,7 @@ void func_0025C418(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
 
 void func_0025C4C8(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 spriteIndex, s32 flags, s32 context) {
-    func_002BF4E0((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),

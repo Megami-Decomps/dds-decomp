@@ -2150,14 +2150,15 @@ void btlDestroyAllActionSeqs(void) {
     }
 }
 
-s32 btlFindUnitByActor(s32 target) {
-    s32 context = btlGetRuntime();
-    s32 node = *(s32 *)(context + 0x224);
+BtlTask *btlFindUnitByActor(BtlUnit *target) {
+    BtlTask *node;
+
+    node = ((BtlState *)btlGetRuntime())->tasks;
     while (node != 0) {
-        if (*(s32 *)(node + 0x18) == target) {
+        if (node->unit == target) {
             return node;
         }
-        node = *(s32 *)(node + 0x16C);
+        node = node->next;
     }
     return 0;
 }

@@ -43,7 +43,7 @@ struct MenuListNode {
     u8 *items;
 };
 
-extern MenuList *func_002884C0(void);
+extern MenuList *mtrBuildUnitSelectionList(void);
 extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
@@ -349,7 +349,7 @@ u64 func_00287900(void) {
     u64 resourceAddress;
 
     resourceAddress = sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
-    func_0028B1B0(resourceAddress);
+    mnuDrawMantraPhaseOpacity(resourceAddress);
     return 0;
 }
 
@@ -464,7 +464,7 @@ extern void func_0028D070();
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
 
-s32 func_00287C20(void) {
+s32 mtrMantraEquipUpdate(void) {
     MnuStatusResource *work;
     MtrEquipState *equip;
     DatPartyRecord *selectedRecord;
@@ -718,7 +718,7 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
 extern MenuList *mnuCreateListState(s32, s32, s32);
 extern MenuListNode *mnuListAppendNode(MenuList *list, const void *value);
 
-MenuList *func_002884C0(void) {
+MenuList *mtrBuildUnitSelectionList(void) {
     MenuList *list;
     u16 slots[32];
     MenuListNode *node;
@@ -759,7 +759,7 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
 
     selectionState->state = 1;
     selectionState->timer = 0;
-    unitList = func_002884C0();
+    unitList = mtrBuildUnitSelectionList();
     unitList->userData = (u32)selectionState;
     resourceWork->list = unitList;
     resourceWork->flags.visible = 0;
@@ -870,7 +870,7 @@ s32 func_00288748(MnuStatusResource *resourceWork) {
 }
 
 extern void func_0026C900(void);
-extern s32 func_00288BD8(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
+extern s32 mtrDrawSelectionFadeAndScale(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
 extern s32 func_00288DD0(s32, s32, s32, s32, MnuStatusResource *, s32);
 
 /* Draw visible unit-selection work using a timer-based triangular alpha.
@@ -902,7 +902,7 @@ s32 func_00288920(MnuStatusResource *resourceWork) {
     } else {
         alpha = fadePhase * MTR_SELECTION_ALPHA_SCALE;
     }
-    func_00288BD8(0, 0, 0, alpha, resourceWork, 0x53, fadePhase);
+    mtrDrawSelectionFadeAndScale(0, 0, 0, alpha, resourceWork, 0x53, fadePhase);
     if (resourceWork->flags.visible) {
         func_00288DD0(0, 0, 1, alpha, resourceWork, 0x53);
     }
@@ -958,7 +958,7 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-s32 func_00288BD8(s32 x, s32 y, s32 depth, s32 alpha,
+s32 mtrDrawSelectionFadeAndScale(s32 x, s32 y, s32 depth, s32 alpha,
                   MnuStatusResource *resource, s32 drawArg, f32 phase) {
     f32 scale;
     f32 highlightProgress;

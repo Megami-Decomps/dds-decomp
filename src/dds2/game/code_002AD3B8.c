@@ -344,7 +344,7 @@ s32 mnuStaffImageExitD(KwlnTask *task) {
 
 extern char D_003E7450[];
 
-s32 func_002ADDA0(KwlnTask *task) {
+s32 mnuStaffUseSelectedItemTask(KwlnTask *task) {
     s32 item = 0;
     s32 itemExhausted = 0;
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
@@ -536,7 +536,7 @@ s32 mnuStaffListInput(KwlnTask *task) {
 }
 
 /* Handle staff-item selection, confirmation and popup input. */
-s32 func_002AE580(KwlnTask *task) {
+s32 mnuUpdateStaffPartySelectionState(KwlnTask *task) {
     extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
     extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
     extern char D_003E7434[];
@@ -809,7 +809,7 @@ s32 mnuHandleStaffSelectionListNavigation(KwlnTask *task) {
     return 1;
 }
 
-s32 func_002AF020(KwlnTask *task) {
+s32 mnuHandleStaffSelectionPageInput(KwlnTask *task) {
 
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
@@ -900,9 +900,9 @@ s32 func_002AF020(KwlnTask *task) {
 
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
 
-s32 func_002AF5E0(KwlnTask *task) {
+s32 mnuDrawStaffValuePage(KwlnTask *task) {
     extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-    extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
+    extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, s32, s32);
     extern s32 func_002AF2E0(s32, s32, s32, MenuStaffContext *);
     extern char D_0042AD08[];
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
@@ -943,7 +943,7 @@ s32 func_002AF5E0(KwlnTask *task) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
-            func_002BDAA8(0x770, 0xB98, 0x100, selectionId, (s32)context->spriteArg0, 0x2C);
+            mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, (s32)context->spriteArg0, 0x2C);
         }
     } else {
         func_00306CD0(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,

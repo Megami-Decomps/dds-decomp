@@ -46,7 +46,7 @@ typedef struct {
 
 void func_00228CA0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_002CAAC8(s32, s32, s32 *, s32, s32, s32);
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 D_0036832C[];
 extern s32 D_00367EE0[][3];
 extern SolarOverlayShape D_00368310[];
@@ -101,7 +101,7 @@ void func_00228CA0(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
 
         sprite->drawWidth = (s32)((f32)(sprite->width * scalePercent) / 100.0f) << 4;
         sprite->drawHeight = (s32)((f32)(sprite->height * D_00367EE0[layer][2]) / 100.0f) << 3;
-        func_002BF4E0((x + D_00367EE0[layer][0]) << 4,
+        effDrawSpriteWithCornerFade((x + D_00367EE0[layer][0]) << 4,
                       (y + D_00367EE0[layer][1]) << 3, z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }
@@ -131,7 +131,7 @@ void func_00228E20(s32 x, s32 y, s32 z, s32 alpha, s32 layer, s32 mode,
             (s32)((scale * (f32)sprite->width * (f32)scalePercent) / 100.0f) << 4;
         sprite->drawHeight =
             (s32)((scale * (f32)sprite->height * (f32)D_00367EE0[layer][2]) / 100.0f) << 3;
-        func_002BF4E0(((x + D_00367EE0[layer][0]) << 4) - (sprite->drawWidth / 2),
+        effDrawSpriteWithCornerFade(((x + D_00367EE0[layer][0]) << 4) - (sprite->drawWidth / 2),
                       ((y + D_00367EE0[layer][1]) << 3) - (sprite->drawHeight / 2), z,
                       (u32)((f32)(alpha << 8) * 0.0078125f), mode, (s32)context, layer, color);
     }

@@ -298,7 +298,7 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 }
 
 /* Step the local-map camera transition toward fixed preset 3. */
-s32 func_0030C0C0(void) {
+s32 fldAdvanceLocalMapCameraTransition(void) {
     f32 t;
     s32 index = 3;
 
@@ -455,7 +455,7 @@ extern s32 sdfCounterGetSelectionBoundaryFlags(void);
 extern void mnuSetMapTimerFlags(s32);
 
 /* Navigate the counter channels or restore the selection before confirming. */
-s32 func_0030C690(void) {
+s32 sdfPollCounterSelectionInput(void) {
     s32 index;
     s32 previousIndex;
 

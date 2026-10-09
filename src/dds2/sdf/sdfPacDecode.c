@@ -60,7 +60,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state);
 
 
 
-void func_003475A0(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
+void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 
 void sdfPacCompleteResourcePacket(PacState *state);
 
@@ -395,7 +395,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
 
 /* Point the resource buffer at one allocation packet: keep it in packet memory, or allocate a
  * block and copy (raw) or decode (compressed) the payload into it. */
-void func_003475A0(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
+void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
     state->resourceBuffer = buffer;
     buffer->remainingBytes = packet->payloadSize - PAC_HEADER_BYTES;
     if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
@@ -437,14 +437,14 @@ void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet
     {
         void *allocation = sdfAllocSizeClassBlock(0x10);
         state->slot.resource = allocation;
-        func_003475A0(state, packet, allocation);
+        sdfPacStartResourceChunk(state, packet, allocation);
     }
     state->onComplete = sdfPacCompleteResourcePacket;
 }
 
 /* Start the next allocation entry at its inline descriptor. */
 void sdfPacStartNextAllocationEntry(PacState *state) {
-    func_003475A0(state, &state->slot.list->entry, &state->slot.list->buffer);
+    sdfPacStartResourceChunk(state, &state->slot.list->entry, &state->slot.list->buffer);
     state->onComplete = sdfPacAdvanceAllocationEntry;
 }
 

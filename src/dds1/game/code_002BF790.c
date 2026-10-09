@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -827,15 +828,15 @@ INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1228);
 
 extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(const void *, void *, s32);
-extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    void *texture;
+    SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
@@ -845,10 +846,10 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    void *texture;
+    SdfDmaReferenceChainPacket *texture;
     sdfInitPacketList(list);
-    texture = sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];

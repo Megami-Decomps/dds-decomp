@@ -77,7 +77,7 @@ extern StaffTaskState *mnuMovieWork;
 /* Retail 0x003E4A7C is a scalar in non-small .data. */
 extern s32 D_003E4A7C __attribute__((section(".data")));
 extern u32 D_00437AB8;
-extern void func_002A6F88(StaffSparkleState *);
+extern void mnuDrawScrollingStaffBackdrop(StaffSparkleState *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -1089,7 +1089,7 @@ extern void uiConfigureSurfaceAlphaState(s32 context);
 extern void uiDrawSurfaceAtNearDepth(u32 context);
 extern void func_002A6D68(StaffSparkleState *state);
 
-void func_002A6F88(StaffSparkleState *state) {
+void mnuDrawScrollingStaffBackdrop(StaffSparkleState *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 lowerClip;
     s32 alpha;
@@ -1152,8 +1152,8 @@ void func_002A6F88(StaffSparkleState *state) {
     }
 }
 
-extern void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize);
-void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize) {
+extern void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s32 randomize);
+void mnuShuffleTitlePaletteSpriteOrder(MnuTitlePaletteTransition *transition, s32 randomize) {
     s32 skip = randomize != 0;
     u32 count;
     s32 i;
@@ -1184,7 +1184,7 @@ void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
         state->opacity = 0;
         mode = 0;
         state->phase = 0;
-        func_002A7260(state, 0);
+        mnuShuffleTitlePaletteSpriteOrder(state, 0);
         break;
     case 3:
         state->opacity = 0x200;
@@ -1213,7 +1213,7 @@ void mnuDrawAndAdvanceStaffImageBlend(MnuTitlePaletteTransition *state) {
     func_00306CD0(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
     if (frame == 255) {
         if (index == 0) {
-            func_002A7260(state, 1);
+            mnuShuffleTitlePaletteSpriteOrder(state, 1);
         }
         state->phase = index;
     }
@@ -1242,7 +1242,7 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 extern void func_00308F78(s32, u32);
-void func_002A75A8(StaffScrollTransition *state) {
+void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
 
@@ -1311,9 +1311,9 @@ s32 mnuUpdateStaffMoviePresentation(void) {
         mnuFadeSetState(&mnuMovieWork->slideBar, 3);
     }
     mnuAdvanceSpriteSlideBar(&mnuMovieWork->slideBar);
-    func_002A6F88(&mnuMovieWork->backdropState);
+    mnuDrawScrollingStaffBackdrop(&mnuMovieWork->backdropState);
     mnuDrawAndAdvanceStaffImageBlend(&mnuMovieWork->paletteTransition);
-    func_002A75A8(&mnuMovieWork->scrollTransition);
+    mnuAdvanceStaffTextScroll(&mnuMovieWork->scrollTransition);
     func_002A6858();
     return 0;
 }

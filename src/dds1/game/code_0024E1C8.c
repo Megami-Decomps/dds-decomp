@@ -63,7 +63,7 @@ extern MnuSpritePlacement D_0036B510[];
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern u16 D_0036BC68[][4];
 extern s32 D_0036C6AC[];
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
@@ -90,7 +90,7 @@ typedef struct MnuResourceTaskWork {
 
 void func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
                   s32 flags, s32 context) {
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -101,7 +101,7 @@ void func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementInde
 }
 
 void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -113,7 +113,7 @@ void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 conte
 
 void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                   s32 context) {
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -125,7 +125,7 @@ void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
 
 void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                   s32 context) {
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -140,7 +140,7 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
     (D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
         ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = rotation;
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -173,7 +173,7 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                       .sourceHeight)
             << 3;
     }
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -220,7 +220,7 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                       .sourceHeight)
             << 3;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036B510[placementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B510[placementIndex]
                                            [MNU_SPRITE_X_OFFSET]) *
                         scaleX)
                       << 4,
@@ -272,7 +272,7 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                                 .sourceHeight)
                      << 3;
     }
-    func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
+    effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -311,7 +311,7 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
                   (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -341,7 +341,7 @@ void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].sourceHeight) << 3;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex][MNU_SPRITE_X_OFFSET]) * scaleX) << 4,
                   (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_SPRITE_Y_OFFSET]) * scaleY) << 3,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
@@ -380,7 +380,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                       .sourceHeight)
             << 3;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036BC68[placementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036BC68[placementIndex]
                                            [MNU_SPRITE_X_OFFSET]) *
                         scaleX)
                       << 4,
@@ -424,7 +424,7 @@ void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 place
         resource->workEntries[6].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[6].sourceHeight) << 3;
     }
-    func_002BF4E0(
+    effDrawSpriteWithCornerFade(
         (s32)((f32)(x + D_0036BC68[placementIndex][MNU_SPRITE_X_OFFSET]) *
               scaleX) << 4,
         (s32)((f32)(y + D_0036BC68[placementIndex][MNU_SPRITE_Y_OFFSET]) *
@@ -455,7 +455,7 @@ void func_0024F0D0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     if (sprite == -1) {
         return;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036B7F0[placementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[placementIndex]
                                            [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
                   (s32)((f32)(y + D_0036B7F0[placementIndex]
                                            [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
@@ -477,7 +477,7 @@ void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
     if (sprite == -1) {
         return;
     }
-    func_002BF4E0((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
+    effDrawSpriteWithCornerFade((s32)((f32)(x + D_0036B7F0[coordinatePlacementIndex]
                                               [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
                   (s32)((f32)(y + D_0036B7F0[coordinatePlacementIndex]
                                               [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
@@ -501,7 +501,7 @@ void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         resource->workEntries[spriteIndex].geometry.bounds[3] =
             (s32)(scaleY * (f32)resource->workEntries[spriteIndex].sourceHeight) << 3;
     }
-    func_002BF4E0(
+    effDrawSpriteWithCornerFade(
         (s32)((f32)(x + D_0036B7F0[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
         (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
         z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,

@@ -44,7 +44,7 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
-extern void func_00313A58(u8 *);
+extern void sdfGridFollowCursorWithinMargins(u8 *);
 
 
 extern f32 sdfQuatDot(f32 *, f32 *);
@@ -357,7 +357,7 @@ u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *te
 }
 
 u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, void *glyphSource, s32 flag, s32 option) {
-    FrFontGlyph *handle = func_0019CE78(glyphSource, 0, type, 0, 0);
+    FrFontGlyph *handle = frFontBuildGlyphChain(glyphSource, 0, type, 0, 0);
     u32 result = 0;
     frFontSetChildColors(handle, colors);
     frFontSetGlyphPosition(handle, x << 4, y << 3);
