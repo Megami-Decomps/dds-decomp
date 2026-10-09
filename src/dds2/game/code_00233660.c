@@ -140,7 +140,7 @@ extern char D_00421278[];
 
 
 
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 typedef struct MdlCountNode {
     u8 pad00[4];
@@ -1375,7 +1375,7 @@ void mdlDrawViewerModelAndMotionSummary(void) {
             format = D_00421248;
         }
         formatted = sdfFormatSifPacket(&packet, format,
-                                       mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
+                                       mdlGetNodeMotionIndex(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
     sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
 }
@@ -1552,7 +1552,7 @@ void func_00235C20(void) {
                 s32 motionIndex;
 
                 referenceCount--;
-                motionIndex = mdlGetNodeField2C(mdlViewerState.resources[0], index);
+                motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], index);
                 if (mdlViewerState.unk0F == 0) {
                     format = D_00421238;
                 } else {
