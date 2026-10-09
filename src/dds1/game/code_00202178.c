@@ -941,13 +941,13 @@ u32 func_00204AC0(void) {
     return 0xffffffff;
 }
 
-s32 btlClassifyLinkedSkillRequest(s32 unused, s32 unit, s32 index) {
+s32 btlClassifyLinkedSkillRequest(BtlUnit *source, BtlUnit *unit, s32 index) {
     s32 result = 0;
-    if (!(((BtlUnit *)unit)->flags & 0x400)) {
+    if (!(unit->flags & 0x400)) {
         return result;
     }
     if (datCommandRecords[index].effectType == 2) {
-        if (btlWouldUiValueFallBelowQuarter((BtlUnit *)unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
+        if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
             return 1;
         }
         return 4;

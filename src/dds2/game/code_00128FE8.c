@@ -2850,6 +2850,7 @@ extern f32 D_0038BAD0[];
 extern s32 D_004360B4;
 extern s32 D_004360B8;
 extern s32 D_003897C0[];
+extern void effObjFetchInnerFirstVec(EffWorldNode *);
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 
 void func_0012F908(void) {
@@ -3421,7 +3422,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[2] = st->targetZ;
             effObjSetInnerFirstVec(fldPlayerObject, vec.f);
             st->positionPending = 0;
-            effObjFetchInnerFirstVec(fldPlayerObject);
+            effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
             dst = (u128 *)(*(u32 *)(fldPlayerObject + 0x1C) + 0x70);
             PCP_COPY_VECTOR(dst, &vec);
@@ -3531,7 +3532,7 @@ INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
 extern u32 fldGetSceneReadyFlag(void);
 extern void fldClearCameraObjectHighlightFlag(void);
-extern void func_001321F8(void);
+extern s32 func_001321F8(void);
 extern void func_00131B50(void);
 extern void func_00131478(s32, s32);
 extern void func_00132540(void);

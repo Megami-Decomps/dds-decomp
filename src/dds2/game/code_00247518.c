@@ -1086,8 +1086,7 @@ extern void sdfUnfreezeFloatCounter(void *counter);
 extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
-void func_0024A738(s32 mode, u32 frame, s32 viewerAddr) {
-    EvtRuntime *viewer = (EvtRuntime *)viewerAddr;
+void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
     EvtWorldTable *table;
     EffWorldNode *object;
     EvtRuntimeGroup *track;
@@ -1186,15 +1185,12 @@ updateMovie:
 
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
-void evtViewerDispatchFlagMode(u32 viewerAddr) {
-    s32 viewer;
-
-    viewer = (s32)viewerAddr;
-    if ((((EvtRuntime *)viewer)->flags & 1) != 0) {
-        func_0024A738(0, ((EvtRuntime *)viewer)->curFrame, viewerAddr);
+void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
+    if ((viewer->flags & 1) != 0) {
+        func_0024A738(0, viewer->curFrame, viewer);
         return;
     }
-    func_0024A738(1, ((EvtRuntime *)viewer)->curFrame, viewerAddr);
+    func_0024A738(1, viewer->curFrame, viewer);
 }
 
 /* Returns the address word of the nearest kind-2 key strictly after the current
