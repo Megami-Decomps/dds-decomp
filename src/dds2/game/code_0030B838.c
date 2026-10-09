@@ -175,8 +175,8 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
-    effObjSetInnerSecondVec((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
     ((EffWorldNode *)fldLocalMapCameraObject)->ops->update((EffWorldNode *)fldLocalMapCameraObject);
 }
 

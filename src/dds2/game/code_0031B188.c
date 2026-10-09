@@ -81,7 +81,7 @@ void func_0031B188(void) {
     EffWorldNode *camera;
 
     dds3SetCameraVector((EffWorldNode *)D_00438944, (u128 *)D_0040ABD0);
-    effObjSetInnerFirstVec((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
+    effObjSetInnerPosition((EffWorldNode *)D_00438944, (u128 *)D_0040ABC0);
     camera = (EffWorldNode *)D_00438944;
     camera->ops->update(camera);
     cameraData = (CameraData *)((EffWorldNode *)D_00438944)->data;

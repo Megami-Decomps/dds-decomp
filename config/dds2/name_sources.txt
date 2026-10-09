@@ -255,6 +255,15 @@
 0x0010F0A8	scrCommandAddPartyCurrency	inferred	Reads script parameter as currency delta and updates clamped party currency. [names_reviewed6.tsv]
 0x0010F490	dds3DrawObjectFlagDiagnostic	inferred	confidence=high; matched-C; src/dds2/game/code_0010F118.c:82:func_0010F490; Formats FLAG : 0x%08X from object-owned handle and appends diagnostic drawing packet.; twin=0x0010F268, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0010F640	dds3CreateWorldNodeForKind	inferred	confidence=high; src/dds2/game/code_0010F118.c:func_0010F640; Allocates and initializes a world-object node, selects its owner by kind, and invokes the kind-specific creation callback; called by dds3AppendWorldNode. [names_qp9.tsv]
+0x0010F908	effObjSetInnerPosition	inferred	Copy a16-byte position vector; set update-pending and clear matrix-cache-valid.
+0x0010F938	effObjSetInnerRotation	inferred	Copy a16-byte rotation vector with the same transform flags.
+0x0010F968	effObjSetInnerScale	inferred	Copy a16-byte scale vector with the same transform flags.
+0x0010F998	effObjFetchInnerPosition	inferred	Load position to VUvf10 and force W=1; no C/GPR return.
+0x0010F9B0	effObjFetchInnerRotationNormalized	inferred	Load rotation to VUvf10 and normalize all four components; no C/GPR return.
+0x0010F9D0	effObjFetchInnerScale	inferred	Load raw scale to VUvf10; no C/GPR return.
+0x0010F9E8	effObjAddInnerPosition	inferred	Add all four position-vector components and invalidate cached transform.
+0x0010FA20	effObjMultiplyInnerRotation	inferred	Quaternion-multiply the current rotation by the supplied vector and invalidate cached transform.
+0x0010FA70	effObjMultiplyInnerScale	inferred	Componentwise scale multiplication and transform invalidation.
 0x0010FAA8	dds3BuildVuTransformFromComponents	inferred	Builds a VU transform from quaternion, scale and translation vectors. [names_reviewed10.tsv]
 0x0010FB00	dds3LoadOrBuildObjectMatrix	inferred	Loads a cached object matrix or builds it and sets its valid flag. [names_reviewed8.tsv]
 0x0010FB70	dds3TestObjectSphereOverlap	inferred	src/dds2/game/code_0010FB00.c func_0010FB70: Computes position-vector distance and compares with sum of stored object radii. Twin of DDS1 func_0010F948. [names_reviewed24.tsv]

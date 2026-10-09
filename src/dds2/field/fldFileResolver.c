@@ -3051,7 +3051,7 @@ void func_0012F908(void) {
     farPoint.f[2] = D_0038BB00[2] * ratio + D_0038BB00[2] * remaining;
     PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
     PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
-    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, &farPoint.q);
+    effObjSetInnerPosition((EffWorldNode *)(u32)*world, &farPoint.q);
     node = (EffWorldNode *)(u32)*world;
     node->ops->update(node);
     D_004360B4++;
@@ -3074,7 +3074,7 @@ void func_001300A0(void) {
     EffWorldNode *node;
     f32 angle;
 
-    effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
+    effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
     angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
     nearPoint[0] = fldLookAtNearPoint[0] + (fldAreaState.x - fldLookAtNearPoint[0]);
     nearPoint[1] = fldLookAtNearPoint[1] + ((fldAreaState.y + fldCameraFollowRows[fldAreaState.rowIdx].y) - fldLookAtNearPoint[1]);
@@ -3087,11 +3087,11 @@ void func_001300A0(void) {
     farPoint[0] = fldAreaState.focusPos[0];
     farPoint[1] = fldAreaState.focusPos[1];
     farPoint[2] = fldAreaState.focusPos[2];
-    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    effObjSetInnerPosition((EffWorldNode *)(u32)*world, (u128 *)farPoint);
     farPoint[0] = fldLookAtFarPoint[0] + (farPoint[0] - fldLookAtFarPoint[0]);
     farPoint[1] = fldLookAtFarPoint[1] + (farPoint[1] - fldLookAtFarPoint[1]);
     farPoint[2] = fldLookAtFarPoint[2] + (farPoint[2] - fldLookAtFarPoint[2]);
-    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, (u128 *)farPoint);
+    effObjSetInnerPosition((EffWorldNode *)(u32)*world, (u128 *)farPoint);
     PCP_COPY_VECTOR(fldLookAtNearPoint, nearPoint);
     PCP_COPY_VECTOR(fldLookAtFarPoint, farPoint);
     node = (EffWorldNode *)(u32)*world;
@@ -3600,9 +3600,9 @@ void fldUpdateCameraTarget(void) {
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
-            effObjSetInnerFirstVec((EffWorldNode *)fldPlayerObject, (u128 *)vec.f);
+            effObjSetInnerPosition((EffWorldNode *)fldPlayerObject, (u128 *)vec.f);
             st->positionPending = 0;
-            effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
+            effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
             dst = (u128 *)(*(u32 *)(fldPlayerObject + 0x1C) + 0x70);
             PCP_COPY_VECTOR(dst, &vec);

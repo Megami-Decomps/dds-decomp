@@ -103,7 +103,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     f32 angleDelta;
     f32 step;
 
-    effObjFetchInnerFirstVec(obj);
+    effObjFetchInnerPosition(obj);
     VU0_STORE_VF(vf10, position);
     if (position[0] == targetPosition[0] &&
         position[2] == targetPosition[2]) {
@@ -113,7 +113,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     heading = -(sdfAtan2(position[0] - targetPosition[0],
                          position[2] - targetPosition[2]) *
                 EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX);
-    effObjFetchInnerSecondVecNorm(obj);
+    effObjFetchInnerRotationNormalized(obj);
     referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
     referenceAngle *= EFFECT_HEADING_RADIANS_TO_DEGREES;
     targetAngle = dds3ShortestAngleDelta(referenceAngle, heading);
@@ -278,9 +278,9 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     if (data->transitionWork != 0) {
         effObjInnerVecInit(&node);
         if (func_0023DA70(&node, obj) != 0) {
-            effObjMulInnerThirdVec(obj, &node.vec60);
-            effObjQuatMulInnerSecondVec(obj, &node.vec50);
-            effObjAddInnerFirstVec(obj, &node.vec40);
+            effObjMultiplyInnerScale(obj, &node.vec60);
+            effObjMultiplyInnerRotation(obj, &node.vec50);
+            effObjAddInnerPosition(obj, &node.vec40);
         }
     }
     model = (void *)data->modelHolder->resourceHandle;
@@ -515,8 +515,8 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     obj = dds3AppendWorldObjectNode(6);
     obj->key = (u32)a;
     dds3EnsureSlotData(obj);
-    effObjSetInnerSecondVec(obj, second);
-    effObjSetInnerFirstVec(obj, (u128 *)zero);
+    effObjSetInnerRotation(obj, second);
+    effObjSetInnerPosition(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
     ((EffectTransformData *)obj->data)->offset[0] = vec[0];
     ((EffectTransformData *)obj->data)->offset[1] = vec[1];
@@ -729,10 +729,10 @@ s32 func_00114150(EffWorldNode *object) {
     model = (SdfModel *)dds3GetObjectBaseResourceHandle(object);
     if (model != NULL) {
         effObjClearNodeFlags(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        effObjFetchInnerSecondVecNorm(object);
+        effObjFetchInnerRotationNormalized(object);
         VU0_STORE_VF(vf10, model->rotationQuaternion);
         dds3LoadOrBuildObjectMatrix(object);
-        effObjFetchInnerFirstVec(object);
+        effObjFetchInnerPosition(object);
         if (func_00143910(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
