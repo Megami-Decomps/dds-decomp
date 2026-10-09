@@ -62,7 +62,6 @@ void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *pack
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
-SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 func_002EEAE0(void *decoder, void *input, s32 available);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -371,7 +370,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture(resourceBuffer->cursor);
+        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)resourceBuffer->cursor);
         state->onComplete(state);
     }
 }
