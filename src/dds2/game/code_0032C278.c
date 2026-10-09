@@ -793,15 +793,15 @@ void sdfInitializeDmaReferenceTag(SdfGsPacketHeader *header, s32 payloadQwords) 
 }
 
 /* Emit a GIF header, a REF tag with masked count/address, and the trailing NEXT tag. */
-void sdfBuildDmaReferenceChain(u64 *packet, u32 sourceAddress, s32 qwordCount) {
-    packet[0] = SDF_DMA_CNT_ONE_WORD;
-    packet[1] = SDF_VIF_DIRECT_ONE_FLUSHE;
-    packet[2] = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
-    packet[3] = SDF_GIF_REGISTER_AD;
-    packet[4] = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
-    packet[5] = SDF_VIF_DIRECT_ONE_NOP;
-    packet[6] = SDF_DMA_TAG_NEXT_WORD;
-    packet[7] = 0;
+void sdfBuildDmaReferenceChain(SdfDmaReferenceChainPacket *packet, u32 sourceAddress, s32 qwordCount) {
+    packet->header.dmaTag = SDF_DMA_CNT_ONE_WORD;
+    packet->header.vifCommands = SDF_VIF_DIRECT_ONE_FLUSHE;
+    packet->header.gifTag = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->referenceTag = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
+    packet->referenceVifCommands = SDF_VIF_DIRECT_ONE_NOP;
+    packet->nextTag = SDF_DMA_TAG_NEXT_WORD;
+    packet->zeroTailWord = 0;
 }
 
 /* Emit FRAME/ZBUF/XYOFFSET/SCISSOR A+D pairs for the selected GS context.
@@ -968,18 +968,18 @@ void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *lin
 
 void func_0032DB30(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
+        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x180, 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 400, 1);
+    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 400, 1);
 }
 
 void func_0032DB78(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
+        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x70, 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
+    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0xb0, 1);
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
