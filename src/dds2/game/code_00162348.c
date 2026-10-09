@@ -788,7 +788,22 @@ void parFadeAlphaCell(ParSystem *system, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_001638D8);
 
-INCLUDE_ASM(const s32, "game/code_00162348", parFillVertexPairs);
+void parFillVertexPairs(ParSystem *system, u32 firstColor, u32 secondColor) {
+    s32 perCell = system->vertexWordCount >> 1;
+    s32 cellCount = system->cellCount;
+    s32 cellIndex;
+
+    for (cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+        u32 *vertices = system->cells[cellIndex].colors;
+        s32 i;
+
+        for (i = 0; i < perCell; i++) {
+            vertices[0] = firstColor;
+            vertices[1] = secondColor;
+            vertices += 2;
+        }
+    }
+}
 
 void parFadeAlphaAllCells(ParSystem *system, u32 color) {
     u32 perCell = system->vertexWordCount >> 1;
@@ -1206,7 +1221,25 @@ void parRiseFallStripCellAlpha(ParSystem *system, u32 centerWord, u32 middleWord
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", parFillCellVertexQuads);
+void parFillCellVertexQuads(ParSystem *system, u32 firstColor, u32 secondColor) {
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 cellCount = system->cellCount;
+
+    s32 cellIndex;
+
+    for (cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+        u32 *vertices = system->cells[cellIndex].colors;
+        s32 i;
+
+        for (i = 0; i < perCell; i++) {
+            vertices[2] = firstColor;
+            vertices[1] = firstColor;
+            vertices[3] = secondColor;
+            vertices[0] = secondColor;
+            vertices += 4;
+        }
+    }
+}
 
 void func_00164690(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 perCell = system->vertexWordCount >> 2;
