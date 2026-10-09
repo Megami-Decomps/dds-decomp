@@ -5321,7 +5321,7 @@
 0x00294A18	fileQueueCopyRotationFromSource	inferred	Extracts rotation vector from source and stores it on destination queue. [names_reviewed7.tsv]
 0x00294A50	fileAppendJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00294AA0	fileDuplicateAndAppendJob	inferred	file file requests and records in game/code_0028A0E0.c
-0x00294AD0	fileAppendJobFromEntry	inferred	file file requests and records in game/code_0028A0E0.c
+0x00294AD0	fileAppendJobFromCommandPath	inferred	Creates a payload from the borrowed command path and appends its address as a job in the destination queue.
 0x00294B18	fileJobDuplicateAfter	inferred	clones a FileJob (0xC0 bytes), marks it owned and inserts it after the source in the queue
 0x00294C30	fileQueueLinkJobToSectorLeader	inferred	Links job sector to reference, propagates secondary buffer and rechains followers if order differs. [names_reviewed7.tsv]
 0x00294DA0	fileQueueDetachSectorFollower	inferred	Clears follower flag and sector, rechaining former dependents when present. [names_reviewed7.tsv]

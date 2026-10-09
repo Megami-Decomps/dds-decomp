@@ -8152,7 +8152,6 @@ typedef struct EffResourceBankSlot {
 
 extern void effPollResourceBankSlot(char *, u32, void *);
 
-extern FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry);
 
 u32 effPollPartResource(void) {
     u8 record[0x110];
@@ -8165,7 +8164,7 @@ u32 effPollPartResource(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            FileJob *job = fileAppendJobFromEntry(effFileQueue, record);
+            FileJob *job = fileAppendJobFromCommandPath(effFileQueue, (const char *)record);
             u8 *asset = effFindAssetData(job);
             strcpy(job->name, *(char **)asset);
         }

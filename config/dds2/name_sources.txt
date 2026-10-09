@@ -4983,6 +4983,7 @@
 0x002D4AC8	fileGetQueueScale	inferred	Returns the current scale from the effect job queue. [names_reviewed15.tsv]
 0x002D4AD0	fileGetQueueColor	inferred	Returns the current color modulation from the effect job queue. [names_reviewed15.tsv]
 0x002D4AD8	fileQueueCopyRotationFromSource	inferred	Extracts rotation vector from source and stores it on destination queue. [names_reviewed7.tsv]
+0x002D4B90	fileAppendJobFromCommandPath	inferred	Creates a payload from the borrowed command path and appends its address as a job in the destination queue.
 0x002D4CF0	fileQueueLinkJobToSectorLeader	inferred	Links job sector to reference, propagates secondary buffer and rechains followers if order differs. [names_reviewed7.tsv]
 0x002D4E60	fileQueueDetachSectorFollower	inferred	Clears follower flag and sector, rechaining former dependents when present. [names_reviewed7.tsv]
 0x002D4F10	fileQueueRemoveAndDestroyJob	inferred	Removes job, recursively removes flagged children, rechains dependents then frees child and job. [names_reviewed7.tsv]
