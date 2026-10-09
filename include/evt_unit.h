@@ -215,6 +215,9 @@ typedef struct EvtUnit {
 #endif
 } EvtUnit;
 
+EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, struct MdlCtx *owner);
+s32 evtReleaseUnitTransitionWork(EvtUnit *work);
+
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
 
