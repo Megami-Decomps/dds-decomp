@@ -8852,9 +8852,9 @@ s32 effPollPrimaryFile(void) {
     s32 result = 0x400001;
 
     effUpdateResourceQueue(D_0042CF58, D_004386D0, &request);
-    if (request.completion.signedState == 2) {
+    if (request.completion.signedState == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (request.completion.signedState == 1) {
+    } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effQueuedFileHandle != 0) {
             func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithPrefix);
             result = 0x400002;
@@ -8875,9 +8875,9 @@ s32 effPollNamedFile(void) {
     s32 result = 0x400001;
 
     effUpdateResourceQueue(D_0042CF70, D_004386E0, &request);
-    if (request.completion.signedState == 2) {
+    if (request.completion.signedState == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (request.completion.signedState == 1) {
+    } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
             func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
@@ -8899,9 +8899,9 @@ s32 effPollAttachedFile(void) {
     s32 result = 0x400001;
 
     effUpdateResourceQueue(D_0042CF70, D_004386E8, &request);
-    if (request.completion.signedState == 2) {
+    if (request.completion.signedState == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (request.completion.signedState == 1) {
+    } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
             func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
@@ -9642,9 +9642,9 @@ s32 effPollPartResource(void) {
 
     effPollResourceBankSlot(D_0042CF58, 0x20, request);
     state = ((EffResourceBankSlot *)request)->state;
-    if (state == 2) {
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (state == 1) {
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             entry = fileAppendJobFromCommandPath(effFileQueue, (const char *)request);
             strcpy(entry->name, *(char **)effFindAssetData(entry));
@@ -9661,9 +9661,9 @@ u32 effPollNamedFileJob(void) {
 
     effPollResourceBankSlot(D_0042CF70, 0x10, record);
     state = ((EffResourceBankSlot *)record)->state;
-    if (state == 2) {
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (state == 1) {
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             fileQueueDestroy(effFileQueue);
         }
@@ -9866,7 +9866,7 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
         slot->type = btlFormatSelectedResourceName(effResourceBankDescriptor, slot->fullName);
         slot->count = btlGetResourcePathVariant(effResourceBankDescriptor);
         btlTrimResourceName(effResourceBankDescriptor, slot->name);
-        if (slot->state == 1) {
+        if (slot->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
             btlDestroyEntryList(effResourceBankEntries);
@@ -9898,7 +9898,7 @@ u32 effPollResourceQueue(void) {
     func_0020E380(effFileQueueNameRecord);
     btlFormatResourceNameWithoutPrefix(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002FCA40())->name);
     result = func_0020E7B0(effFileQueueNameRecord);
-    if ((u32)(result - 1) < 2) {
+    if ((u32)(result - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
         func_0020E368(effFileQueueNameRecord);
         effFileQueueNameRecord = 0;
         return 0;
@@ -9936,12 +9936,12 @@ void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *
     btlFormatResourceNameWithoutPrefix(effQueuedResourceNameRecord, record->name);
     state = func_0020E7B0(effQueuedResourceNameRecord);
     record->completion.state = state;
-    if (state == 1) {
+    if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (func_0020E858(effQueuedResourceNameRecord, result) != 0) {
             func_0020E368(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {
-            record->completion.state = 0;
+            record->completion.state = BTL_RESOURCE_SELECTION_PENDING;
         }
     }
 }
@@ -9986,7 +9986,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
         status->state = func_0020DFC8(effResourceBankDescriptor);
         status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status->fullName);
         status->count = btlGetResourcePathVariant(effResourceBankDescriptor);
-        if (status->state == 1) {
+        if (status->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
             btlDestroyEntryList(effResourceBankEntries);
@@ -10432,9 +10432,9 @@ s32 effPollFileQueueRecord(s32 mode) {
     s32 result = 0x600001;
 
     effPollResourceBank(mode, (EffBankStatus *)status);
-    if (((EffBankStatus *)status)->state == 2) {
+    if (((EffBankStatus *)status)->state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (((EffBankStatus *)status)->state == 1) {
+    } else if (((EffBankStatus *)status)->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (((EffBankStatus *)status)->type != 8) {
             entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)status)->count);
             if (effCurrentFileQueueEntry != entry) {
@@ -10467,9 +10467,9 @@ s32 effPollFileRecord(const char *resourceName, s32 mode) {
     s32 result = 0x600001;
 
     effPollResourceBankSlot(resourceName, mode, status);
-    if (((EffResourceBankSlot *)status)->state == 2) {
+    if (((EffResourceBankSlot *)status)->state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (((EffResourceBankSlot *)status)->state == 1) {
+    } else if (((EffResourceBankSlot *)status)->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
         if (((EffResourceBankSlot *)status)->type != 8) {
             fileJobCopyCommandIntoSecondaryData(effQueuedFileHandle,
@@ -10566,9 +10566,9 @@ u32 fileLoadEffectSlotA(void) {
     effPollResourceBankSlot(D_0042D128, 4, fileInfo);
     status = ((EffResourceBankSlot *)fileInfo)->state;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(3);
         fileJobSetPrimaryData(job, D_003F01D0.output, D_003F01D0.size,
                       D_003F01D0.transferMode);
@@ -10628,9 +10628,9 @@ u32 effQueueGeneratedFileJob(void) {
     effPollResourceBankSlot(D_0042D140, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         u32 headerBytes = 0x80;
         struct SdfMemBlock *oldAllocation;
         u32 queuedFile;
@@ -10687,9 +10687,9 @@ u32 effPollAndQueueCopiedFileResource(void) {
     effPollResourceBankSlot(D_0042D128, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x12);
         fileJobSetPrimaryData(job, D_003F9060.output, D_003F9060.size,
                       D_003F9060.transferMode);
@@ -10746,9 +10746,9 @@ u32 effLoadFileSlotF2(void) {
     effPollResourceBankSlot("/tool/effect/f2/", 0x80, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x14);
         fileJobSetPrimaryData(job, D_003FB948.output, D_003FB948.size,
                       D_003FB948.transferMode);
@@ -10789,9 +10789,9 @@ u32 effLoadMaterialFile(void) {
     effPollResourceBankSlot(D_0042D128, 2, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x16);
         fileJobSetPrimaryData(job, D_003FD988.output, D_003FD988.size,
                       D_003FD988.transferMode);
@@ -10834,9 +10834,9 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
     effPollResourceBankSlot(D_0042D128, 4, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
-    if (status == 2) {
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (status == 1) {
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
         job = fileCreateJob(0x19);
         coordinates = (f32 *)((u8 *)D_003FE040.output + 0x20);
         for (index = 0; index < 0xFF; index++) {
