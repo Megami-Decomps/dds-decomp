@@ -40,7 +40,6 @@ extern s32 effResourceBankDescriptor;
 extern s32 D_003BD098;
 
 
-extern s32 effTemporaryFileJob;
 
 extern u32 effScalyTextureHandle;
 

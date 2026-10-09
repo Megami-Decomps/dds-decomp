@@ -120,7 +120,7 @@ extern void *effQueuedFileObject;
 
 extern u8 D_003BD955;
 
-extern s32 effTemporaryFileJob;
+extern FileJobPayload *effTemporaryFileJob;
 
 extern FileQueue *effAuxiliaryFileQueue;
 
@@ -7469,7 +7469,7 @@ void effFileJobQueueRelease(u32 job) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+        fileJobDestroy(effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
     fileJobDestroy((FileJobPayload *)job);
@@ -7950,7 +7950,7 @@ u32 effReinitializeFileQueue(void) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+        fileJobDestroy(effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
     if (effFileQueue != 0) {
@@ -8375,7 +8375,7 @@ void effResetFileResources(void) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+        fileJobDestroy(effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
 }
@@ -9096,7 +9096,7 @@ u32 fileLoadEffectSlotA(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -9159,7 +9159,7 @@ u32 fileLoadEffectSlotHelp(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -9200,7 +9200,7 @@ u32 fileLoadEffectSlotB(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -9261,7 +9261,7 @@ u32 effLoadFileSlotF2(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -9302,7 +9302,7 @@ u32 effLoadMaterialFile(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            fileJobDestroy(effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
