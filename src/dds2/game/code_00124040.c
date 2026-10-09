@@ -1109,8 +1109,6 @@ extern void effMiscAxisAngleToQuaternionVU(f32);
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern u32 dds3GetObjectBaseResourceHandle(void *);
-
 extern void dds3SetObjectFlags(void *, u32);
 
 extern void fldResetCameraModelHandles(void);
@@ -1184,7 +1182,7 @@ void func_00126110(f32 *input) {
         effObjSetInnerFirstVec(player, (u128 *)input);
         effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)work);
         effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)unitScale);
-        fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)fldPlayerObject);
+        fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
         effObjSetInnerFloat(fldPlayerObject, 90.0f);
 
         if (fldAreaState.unk118 == 0) {
@@ -1210,7 +1208,7 @@ void func_00126110(f32 *input) {
             effObjSetInnerFirstVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
             effObjSetInnerSecondVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
             effObjSetInnerThirdVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
-            fldSecondarySceneModelHandle = dds3GetObjectBaseResourceHandle((EffWorldNode *)fldSecondarySceneObject);
+            fldSecondarySceneModelHandle = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSecondarySceneObject);
             effObjSetInnerFloat(fldSecondarySceneObject, 90.0f);
             mdlAddEntryFlagged((MdlCtx *)fldSecondarySceneModelHandle, 0, 0);
             sdfSetTextFloatPairOverride(((MdlCtx *)fldSecondarySceneModelHandle)->inner, 15.0f, 0.0f);
