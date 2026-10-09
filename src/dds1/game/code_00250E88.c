@@ -196,7 +196,62 @@ void mnuFreeTaskData(u32 unused, u32 taskData) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
+extern s32 prfReq54Evaluate(s32, ScrVmOperand *, u16);
+extern s32 mdlFlagTest(s32);
+extern void mdlFlagSet(s32);
+extern u32 mnuGetSelectedNodeValue(void);
+extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
+extern void *memcpy(void *, const void *, u32);
+extern const s32 D_003AF810[8];
+extern const u16 D_003AF830[8];
+
+s32 func_002515F0(MenuSceneWork *work) {
+    s32 pendingFlagBases[7];
+    u16 requirementIds[8];
+    MnuProfileProgress *selection;
+    s32 *flagBase;
+    s32 i;
+    u32 cap;
+    u32 value;
+    s32 pending = 0;
+
+    memcpy(pendingFlagBases, D_003AF810, 0x1C);
+    memcpy(requirementIds, D_003AF830, 0x10);
+    /* The native clear includes 32 reserved bytes after the eight flags. */
+    memset((u8 *)work + (u32)&((MenuSceneWork *)0)->pendingMantras, 0, 0x40);
+
+    selection = (MnuProfileProgress *)(u32)mnuGetSelectedNodeValue();
+    flagBase = &pendingFlagBases[selection->partyRecord->unitId];
+
+    for (i = 0; i < 8; i++) {
+        if (mdlFlagTest(*flagBase + i) == 0 &&
+            (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord,
+                              requirementIds[i]) != 0 ||
+             (i == 6 && mdlFlagTest(0x908) != 0))) {
+            cap = prfGetCapValue(requirementIds[i]);
+            value = ptyGetProfileRecordValue(selection->partyRecord, requirementIds[i]);
+            if (cap == value) {
+                mdlFlagSet(*flagBase + i);
+            } else {
+                work->pendingMantras[i] = 1;
+                mdlFlagSet(*flagBase + i);
+                if (pending == 0) {
+                    sdfGridGetCursorCoordinates(work->gridHandle,
+                                                &work->pendingGridColumn,
+                                                &work->pendingGridRow);
+                    work->pendingCursorCoordinates.x = work->cursorPosition.x;
+                    work->pendingCursorCoordinates.y = work->cursorPosition.y;
+                }
+                pending = 1;
+            }
+        }
+    }
+
+    return pending;
+}
+
 
 typedef struct DspUnitName {
     u8 encodedText[17];
