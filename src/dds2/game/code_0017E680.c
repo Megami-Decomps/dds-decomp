@@ -23,7 +23,7 @@ typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
 
-extern void *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
     u16 parameterCount;
@@ -56,7 +56,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     struct SdfMemBlock *allocation;
     EffResourceWork *work;
     EffResourceEntry *entries;
-    u32 asset;
+    SdfAsset *asset;
     u32 i;
 
     allocation = sdfAllocGeneralBlock(index * 20 + 0x74);
@@ -70,9 +70,9 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     work->scale[2] = 1.0f;
     work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work);
-    asset = (u32)sdfCreateAssetWithDrawEntries();
-    work->graphics6C = asset;
-    func_003332D0(asset, 1.0f);
+    asset = sdfCreateAssetWithDrawEntries();
+    work->drawAsset = asset;
+    func_003332D0((u32)asset, 1.0f);
     entries = work->entries;
     i = 0;
     if (index != 0) {
@@ -88,7 +88,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
 }
 
 void effReleaseAttachedResources(EffResourceWork *effect) {
-    sdfQueueAssetRelease(effect->graphics6C);
+    sdfQueueAssetRelease((s32)effect->drawAsset);
     effReleaseOptionalResource(effect);
     sdfReleaseResourceAllocation(effect->backingAllocation);
 }
@@ -104,7 +104,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
 
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket(packet, (void *)work->graphics6C, 0);
+    sdfConsAppendAssetPacket(packet, work->drawAsset, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];

@@ -555,9 +555,11 @@ typedef struct EffResourceWork {
     f32 (*normals)[4];
     u32 *colors;
     struct SdfMemBlock *streamAllocation;
-    u32 graphics6C;
+    SdfAsset *drawAsset;
     struct SdfMemBlock *backingAllocation;
 } EffResourceWork; /* 0x74 */
+typedef char EffResourceWork_drawAsset_offset_must_be_0x6C[
+    ((u32)&((EffResourceWork *)0)->drawAsset == 0x6C) ? 1 : -1];
 
 /* Position/color arrays precede this render pool; constructors clear the full allocation. */
 typedef struct EffRecordPool {
