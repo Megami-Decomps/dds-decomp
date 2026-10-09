@@ -134,7 +134,7 @@ struct MdlCtx {
         u32 word;
         struct {
             s16 id;
-            s16 arg;
+            s16 motionIndex; /* Entry index passed to sdfMotionInitialize. */
         } h;
     } current;
     MdlResourceItem *resourceItems;

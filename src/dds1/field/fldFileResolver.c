@@ -3559,7 +3559,7 @@ s32 func_0012FD00(void) {
 
     if (work->unk17C > 0) {
         model = fldPlayerModelContext;
-        node = model->current.h.arg;
+        node = model->current.h.motionIndex;
         if (node != 7) {
             kwlnFadeStartIn(8);
             func_0026A5F0(0x26);
@@ -3615,7 +3615,7 @@ s32 func_0012FE30(void) {
         }
 
         model = fldPlayerModelContext;
-        if (model->current.h.arg != 4) {
+        if (model->current.h.motionIndex != 4) {
             model->first->frameStep = 1.0f;
             mdlAddEntryPlain(model, 0, 4);
             kwlnPadStartMotor(0, 1, 30);
@@ -3652,7 +3652,7 @@ s32 fldUpdateCameraFrame(void) {
         func_0012FC20();
         fldUpdateCameraTarget();
         func_0012F578();
-        node = fldPlayerModelContext->current.h.arg;
+        node = fldPlayerModelContext->current.h.motionIndex;
         func_0012EEA0(node, node);
         if (fldAreaState.unk118 == 1) {
             fldUpdateCameraModelMotion(0, 0, 6.0f);
@@ -3725,7 +3725,7 @@ extern s32 fldGetLocationCoordinateValue(s32, s32);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
 void fldSetCameraNodeModeWithTen(void) {
-    s16 node = fldPlayerModelContext->current.h.arg;
+    s16 node = fldPlayerModelContext->current.h.motionIndex;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
@@ -3734,7 +3734,7 @@ void fldSetCameraNodeModeWithTen(void) {
 }
 
 void fldSetCameraNodeModeWithZero(void) {
-    s16 node = fldPlayerModelContext->current.h.arg;
+    s16 node = fldPlayerModelContext->current.h.motionIndex;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;

@@ -1976,7 +1976,7 @@ void mdlApplyViewerResourceMenuAction(void) {
             resource = mdlViewerState.resources[i];
             motion = resource->first;
             if (motion != NULL) {
-                entryId = resource->current.h.arg;
+                entryId = resource->current.h.motionIndex;
                 if (motion->loopEnabled == 0) {
                     sdfMotionInitializeAtZeroTime(motion, entryId, 0);
                 } else {
@@ -1988,7 +1988,7 @@ void mdlApplyViewerResourceMenuAction(void) {
     }
     mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
     mdlViewerState.unk1E = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
-    i = mdlViewerState.resources[0]->current.h.arg;
+    i = mdlViewerState.resources[0]->current.h.motionIndex;
     if (i < 0) {
         i = 0;
     }
