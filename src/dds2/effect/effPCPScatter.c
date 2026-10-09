@@ -43,7 +43,7 @@ extern void *effParamTableGetBlock(void *, s32);
 
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 extern f32 effMiscRandUnitFloat(void *state);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -463,14 +463,14 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
         segments = 1;
     }
     angleStep = EFF_SCATTER_RADIAL_TURN / segments;
-    particle->angle = angleStep * (index % segments) + angleStep * EFF_SCATTER_HALF_SEGMENT * effMiscRandUnitFloat(D_003AA868);
+    particle->angle = angleStep * (index % segments) + angleStep * EFF_SCATTER_HALF_SEGMENT * effMiscRandUnitFloat(effDefaultRandomState);
     jitter = work->params.radiusJitter;
-    particle->radius = work->params.startRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    particle->radius = work->params.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     particle->unk18 = 0.0f;
     jitter = work->params.targetRadiusJitter;
-    particle->unk04 = (work->params.endRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
+    particle->unk04 = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
     jitter = work->params.speedJitter;
-    particle->unk0C = work->params.unk3C * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    particle->unk0C = work->params.unk3C * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     particle->age = 0;
     particle->unk08 = work->params.unk44;
 }
@@ -720,7 +720,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand(D_003AA868) % delaySpread);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -793,15 +793,15 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
     f32 direction[4];
     f32 jitter;
 
-    sprite->angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    sprite->angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.startRadiusJitter;
-    sprite->radius = work->params.startRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    sprite->radius = work->params.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.endRadiusJitter;
-    sprite->radiusStep = (work->params.endRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - sprite->radius) / (f32)work->params.duration;
+    sprite->radiusStep = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - sprite->radius) / (f32)work->params.duration;
     sprite->angleStep = work->params.angleStep;
-    direction[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[1] = (effMiscRandUnitFloat(D_003AA868) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
-    direction[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
@@ -1053,7 +1053,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand(D_003AA868) % delaySpread);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -1136,12 +1136,12 @@ void effScatterInitRibbonParticle(PcpScatterRibbonWork *work, s32 index)
     particle->tiltHalfAngle = rightAngle;
     particle->tiltAngle = diagonalAngle;
     particle->tiltStep = tiltStep;
-    particle->unk1C = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
+    particle->unk1C = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
     particle->radius = EFF_SCATTER_INITIAL_RIBBON_RADIUS;
 
-    direction[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     direction[1] = 0.0f;
-    direction[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
+    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_SCATTER_RANDOM_MIDPOINT) * EFF_SCATTER_RANDOM_SPAN;
     VU0_NORMALIZE_PACKED_VECTOR(direction);
 
     particle->unk20 = direction[0];
@@ -1412,7 +1412,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1467,18 +1467,18 @@ void effScatterRingInit(PcpScatterInstance *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     riseStep = work->params.riseStep;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.targetRadiusJitter;
     rise = 0.0f;
-    ring->radiusStep = (work->params.targetRadius * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) - radius) / (f32)work->params.duration;
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->radiusStep = (work->params.targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - radius) / (f32)work->params.duration;
+    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
     ring->tiltAngle = rise;
     ring->angle = angle;
     ring->radius = radius;
@@ -1687,7 +1687,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1743,18 +1743,18 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     riseStep = work->params.riseStep;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.radiusStepJitter;
     rise = 0.0f;
-    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
     ring->tiltAngle = rise;
     ring->angle = angle;
     ring->radius = radius;
@@ -1896,7 +1896,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
                 effScatterRingUpdateScaled(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+                particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -1978,7 +1978,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -2033,16 +2033,16 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
+    angle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightOffsetJitter;
-    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    height = work->params.heightOffsetBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.radiusStepJitter;
-    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
-    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(D_003AA868);
+    ring->radiusStep = work->params.radiusStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    ring->orientationAngle = work->params.tiltScale * effMiscRandUnitFloat(effDefaultRandomState);
     ring->tiltAngle = 0;
     rise = work->params.riseRange / (f32)work->params.particleCount * (f32)index;
     radius = radius + work->params.radiusRamp * (f32)(work->params.particleCount - index);
@@ -2193,7 +2193,7 @@ void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
                 effScatterRingUpdateScaledLong(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+                particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -2325,7 +2325,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(D_003AA868) % delayModulus);
+        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -2374,17 +2374,17 @@ void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
 
     ring = &work->particles[index];
     count = work->scatterObject->vectorsPerParticle >> 1;
-    angle = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RADIAL_TURN;
+    angle = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RADIAL_TURN;
     jitter = work->params.angleStepJitter;
-    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
+    angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) / (f32)count;
     jitter = work->params.radiusJitter;
-    radius = work->params.radiusBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    radius = work->params.radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = work->params.heightJitter;
-    height = work->params.heightBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter));
+    height = work->params.heightBase * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     /* Euler samples use the retail constant's lower-rounded full turn. */
-    ring->rot[0] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
-    ring->rot[1] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
-    ring->rot[2] = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[0] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[1] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
+    ring->rot[2] = effMiscRandUnitFloat(effDefaultRandomState) * EFF_SCATTER_RIBBON_TURN;
     ring->angle = angle;
     ring->radius = radius;
     ring->height = height;

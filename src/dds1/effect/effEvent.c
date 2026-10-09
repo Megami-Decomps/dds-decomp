@@ -1443,7 +1443,7 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
 
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */
@@ -1455,43 +1455,43 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    particle->age = -(effMiscRand(D_0034DF38) % startDelaySpread);
-    particle->motionDelay = -(effMiscRand(D_0034DF38) % motionDelaySpread);
-    scaleFactor = effMiscRandUnitFloat(D_0034DF38) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
+    particle->age = -(effMiscRand(effDefaultRandomState) % startDelaySpread);
+    particle->motionDelay = -(effMiscRand(effDefaultRandomState) % motionDelaySpread);
+    scaleFactor = effMiscRandUnitFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
     particle->baseScale = work->head.baseScale * scaleFactor;
-    particle->scalePhaseX = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseY = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
-    particle->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    particle->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f);
-    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
-    particle->rotation = effMiscRandUnitFloat(D_0034DF38) * (EFF_EVENT_HALF_TURN * 2.0f);
-    if (effMiscRand(D_0034DF38) & 1) {
-        particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
+    particle->scalePhaseX = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseY = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    particle->scalePhaseStepX = work->head.scalePhaseStep * (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scalePhaseStepY = work->head.scalePhaseStep * (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f);
+    particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
+    particle->rotation = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
+    if (effMiscRand(effDefaultRandomState) & 1) {
+        particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
-        particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(D_0034DF38) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
+        particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
     }
     spawnRadius = work->head.spawnRadius;
-    direction[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[1] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
-    direction[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
-    particle->position[0] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[0];
-    particle->position[1] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[1];
-    particle->position[2] = spawnRadius * effMiscRandUnitFloat(D_0034DF38) * direction[2];
-    particle->motion[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->position[0] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[0];
+    particle->position[1] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[1];
+    particle->position[2] = spawnRadius * effMiscRandUnitFloat(effDefaultRandomState) * direction[2];
+    particle->motion[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     particle->motion[1] = 0;
-    particle->motion[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
+    particle->motion[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     VU0_LOAD_VF(vf10, particle->motion);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, particle->motion);
-    particle->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(D_0034DF38) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
+    particle->swayAmplitude = work->head.swayAmplitude * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.swayRandomness + (1.0f - work->head.swayRandomness));
     particle->swayPhase = 0;
-    particle->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
-    particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(D_0034DF38) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
+    particle->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.verticalSpeedRandomness + (1.0f - work->head.verticalSpeedRandomness));
+    particle->lateralSpeed = work->head.lateralSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * work->head.lateralSpeedRandomness + (1.0f - work->head.lateralSpeedRandomness));
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
@@ -1555,11 +1555,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
         delayModulus = work->head.spread;
         parameterTemplate = effParamWorkCreate(kind, params);
         record->param = parameterTemplate;
-        record->delay = -(effMiscRand(D_0034DF38) % delayModulus);
+        record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
             record->param = effParamWorkDuplicate(parameterTemplate);
-            record->delay = -(effMiscRand(D_0034DF38) % delayModulus);
+            record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
             record++;
         }
     }
