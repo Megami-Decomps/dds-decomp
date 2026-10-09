@@ -3449,7 +3449,48 @@ s32 func_001322D8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132408);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void fldPlayMenuSound(s32 soundId);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
+
+s32 func_00132408(void) {
+    FldAreaWork *work = &fldAreaState;
+    MdlCtx *model;
+
+    if (work->unk190 > 0) {
+        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+            fldPlayMenuSound(0x22);
+            kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
+            kwlnPadStartMotor(0, 1, 6);
+            kwlnPadStartMotor(1, 0x96, 6);
+            work->unk190 = 0;
+            fldSetSceneControlFlags(0x40);
+            return -1;
+        }
+
+        model = (MdlCtx *)fldCameraModelObject;
+        if (model->current.h.arg != 4) {
+            model->first->frameStep = 1.0f;
+            mdlAddEntryPlain(model, 0, 4);
+            fldPlaceAreaDamageEffect(fldAreaState.x, fldAreaState.y, fldAreaState.z);
+            fldPlayMenuSound(0x22);
+            kwlnPadStartMotor(0, 1, 15);
+            kwlnPadStartMotor(1, 0x64, 15);
+            model = (MdlCtx *)fldCameraModelObject;
+        }
+
+        if (model->first->state == 5) {
+            fldAreaState.unk190 = 0;
+            fldSetSceneControlFlags(0x40);
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_00132540);
 
