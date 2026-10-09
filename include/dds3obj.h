@@ -32,6 +32,9 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
 
 ObjBase *dds3CreateSlotResourceState(void *owner);
 ObjBase *dds3GetObjectOwnedHandle(EffWorldNode *object);
+void *dds3SetSlotByKind(EffWorldNode *object, EffWorldNode *slotData);
+void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex);
+void *dds3GetSlot(EffWorldNode *object, s32 slotIndex);
 void dds3SetOwnedWorldInnerValue(EffWorldNode *object, u32 value);
 EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
 EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
@@ -50,13 +53,6 @@ typedef struct {
     u32 unk8;
     u32 unkC;
 } ObjInner;
-
-/* Object slot discriminator (0x10); DDS1 basic/dds3ObjectBase.c. */
-typedef struct {
-    u8 pad[0xF];
-    u8 kind; /* Selects a slot in ObjBase. */
-} ObjData;
-
 
 /* Doubly linked world index node (0x10); DDS1/2 basic/dds3WorldBasic.c. */
 typedef struct WorldIndexNode {

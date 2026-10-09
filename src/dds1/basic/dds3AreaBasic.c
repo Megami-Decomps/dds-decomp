@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 
 typedef struct {
     u8 pad[0xC];
@@ -10,7 +11,6 @@ typedef struct {
     AreaSub *callbackRecord;
 } AreaObj;
 
-void dds3ExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 /* Exchange the area's slot, retaining the native selector pair (0, 5). */
 s32 dds3ExchangeAreaSlot(void *areaObject) {

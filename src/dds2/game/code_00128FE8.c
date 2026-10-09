@@ -726,7 +726,6 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
-extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
 extern void fldSetRecordValueById(s32, s32);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
@@ -799,7 +798,7 @@ void fldCreateResourceScriptObjects(void) {
             effObjSetActiveId(object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
-        dds3SetSlotByKind((ObjBase *)object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
+        dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
         func_00112168(object);
         binding = D_00438EC0;
         for (j = 0; j < D_00438EC4; j++, binding++) {
@@ -817,7 +816,7 @@ void fldCreateResourceScriptObjects(void) {
         /* Retail fetches the link descriptor even when the object is NULL. */
         linkedName = (FldResourceName *)resource->word14;
         if (object != NULL) {
-            dds3SetSlotByKind((ObjBase *)object, (ObjData *)dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
+            dds3SetSlotByKind(object, dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
             dds3RegisterObjectInHandlerIndex(object);
         }
     }
@@ -3011,7 +3010,7 @@ void fldUpdateCameraProximity(void) {
             return;
         }
     }
-    slot = dds3GetObjectOwnedHandle(fldPlayerObject)->resourceSlots[4];
+    slot = dds3GetObjectOwnedHandle((EffWorldNode *)fldPlayerObject)->resourceSlots[4];
     modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
     if (mdlFlagTest(0x31)) {
         range = 56.0f;
