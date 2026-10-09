@@ -19,6 +19,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_cross.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -660,19 +661,6 @@ void effPcpSetStaggerEffectColor(EffPCPStaggered *work, u32 val) {
     work->color = val;
 }
 
-typedef struct EffPCPCrossWork {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
-    u32 color;        /* 0x10 */
-    f32 scale;        /* 0x14 */
-    EffParamWork *base; /* 0x18 parameter work for the anchor model */
-    EffParamWork *handle[4][3]; /* 0x1C */
-    u8 pad4C[0x60];
-    u32 state[4][3];  /* 0xAC */
-} EffPCPCrossWork; /* 0xDC */
-
 extern void func_002DD708(f32 angle);
 
 /* Spawns cross arm (i, j): rotates the model by j sixths of a turn about the axis chosen by i. */
@@ -694,9 +682,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     VU0_STORE_MATRIX(mtx);
     effParamWorkCallback2(work->handle[i][j], mtx);
     if ((j + 1) & 1) {
-        work->state[i][j] = 0;
+        work->remainingDelay[i][j] = 0;
     } else {
-        work->state[i][j] = 5;
+        work->remainingDelay[i][j] = 5;
     }
 }
 
@@ -724,8 +712,6 @@ EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
     work->unk08 = 0;
     return work;
 }
-
-/* Four groups of three handles, starting 0x10 bytes into a block at +0xC. */
 
 /* Destroys the cross effect: releases the main handle and all 12 group handles. */
 void effCrossEffectRelease(EffPCPCrossWork *work) {
@@ -779,8 +765,8 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     mdlProcessContextNodesAndTransforms(anchor, D_00325828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            if (work->state[i][j] != 0) {
-                work->state[i][j]--;
+            if (work->remainingDelay[i][j] != 0) {
+                work->remainingDelay[i][j]--;
                 continue;
             }
             obj = effParamWorkGetData(work->handle[i][j]);
