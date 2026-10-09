@@ -193,7 +193,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
 
-extern void func_00208750(BtlIndexList *list, s32, s32);
+extern f32 func_00208750(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 
 extern void func_0021F3E8(s32);
 
