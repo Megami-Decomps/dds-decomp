@@ -6229,7 +6229,7 @@ extern void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index);
 extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
 extern void btlUpdateActorSlotStates(u8 *, s8);
-extern void func_001C3850(BtlUnit *unit, s32 unused, s8 phase);
+extern void btlSetActorSecondaryPresentation(BtlUnit *unit, s32 unused, s8 phase);
 extern DatEnemyRecord *datEnemyRecords;
 
 /* Draw selected actor names and advance the battle scene's actor panels. */
@@ -6299,7 +6299,7 @@ void func_001CC438(SceneAiWork *work) {
         }
         if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
             (unit->status.flags & 0x200) && panelTask != NULL) {
-            func_001C3850(unit, 0, 1);
+            btlSetActorSecondaryPresentation(unit, 0, 1);
         }
     }
 }
