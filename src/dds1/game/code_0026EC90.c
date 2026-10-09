@@ -70,10 +70,13 @@ void func_0026F118(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
 }
 
 typedef struct StaffImage {
-    u8 pad00[8];
+    s32 startFrame;
+    s32 movieIndex;
     s32 x;
     s32 y;
-    u8 pad10[0xC];
+    s32 width;
+    s32 height;
+    u32 imageIndex;
 } StaffImage;
 
 extern StaffImage D_0037AFC0[];
@@ -118,9 +121,103 @@ s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F5E8);
 
+extern s32 mnuCheckMovieDecoderStatus(void);
+extern void mnuStopMovieDrawTask(void);
+extern void mnuRequestIndexedMovieResource(s32 index);
+
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F918);
+void func_0026F918(void) {
+    s32 x = D_0037AFC0[D_003BC614].x;
+    s32 y = D_0037AFC0[D_003BC614].y;
+    s32 width = D_0037AFC0[D_003BC614].width;
+    s32 height = D_0037AFC0[D_003BC614].height;
+    s32 alpha = 128;
+    s32 i;
+
+    mnuMovieWork->unk10 = 0;
+    switch (D_003BC618) {
+    case 1:
+        if (mnuCheckMovieDecoderStatus() != 0) {
+            mnuMovieWork->fadeInTicks = 0;
+            D_003BC618 = 2;
+            mnuMovieWork->unk10 = 128;
+        } else {
+            if (mnuMovieDrawContext.soundNode.playbackFrameIndex < 32) {
+                alpha = mnuMovieDrawContext.soundNode.playbackFrameIndex * 4;
+                if (alpha > 128) {
+                    alpha = 128;
+                }
+            }
+            sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
+            mnuMovieWork->unk10 = alpha;
+        }
+        break;
+    case 2:
+        mnuMovieWork->unk10 = 128;
+        mnuMovieWork->fadeInTicks++;
+        if (mnuMovieWork->fadeInTicks >= 0) {
+            if (mnuMovieWork->fadeInTicks >= 128) {
+                mnuMovieWork->fadeOutTicks = 0;
+                D_003BC618 = 3;
+            } else {
+                sdfSetGridScaledDrawBounds(x, y, width, height, 0x80808080);
+                return;
+            }
+        }
+        break;
+    case 3:
+        mnuMovieWork->fadeOutTicks++;
+        if (mnuMovieWork->fadeOutTicks >= 260) {
+            mnuStopMovieDrawTask();
+            i = ++D_003BC614;
+            mnuMovieWork->unk10 = 0;
+            if (i == 15) {
+                D_003BC618 = 5;
+            } else {
+                D_003BC618 = 4;
+            }
+        } else {
+            alpha = 128.0f - mnuMovieWork->fadeOutTicks * 0.5f;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
+            mnuMovieWork->unk10 = alpha;
+        }
+        break;
+    case 4:
+        mnuMovieWork->unk10 = 0;
+        if (mnuMovieWork->scrollTicks < D_0037AFC0[D_003BC614].startFrame ||
+            mnuMovieWork->scrollTicks / 60 > (D_00379F70[255].offsetY + 224) / 60 - 4) {
+            break;
+        }
+        for (i = 14; i >= D_003BC614; i--) {
+            if (mnuMovieWork->scrollTicks >= D_0037AFC0[i].startFrame) {
+                if (mnuCheckMovieDecoderStatus() == 0 && D_003BC614 != 0) {
+                    return;
+                }
+                sdfSetGridScaledDrawBounds(D_0037AFC0[D_003BC614].x, D_0037AFC0[D_003BC614].y,
+                    D_0037AFC0[D_003BC614].width, D_0037AFC0[D_003BC614].height, 0);
+                if (D_003BC614 == 0) {
+                    mnuRequestIndexedMovieResource(D_0037AFC0[0].movieIndex);
+                    D_003BC614 = 0;
+                    mnuMovieWork->imageIndex = D_0037AFC0[0].imageIndex;
+                } else {
+                    mnuRequestIndexedMovieResource(D_0037AFC0[i].movieIndex);
+                    D_003BC614 = i;
+                    mnuMovieWork->imageIndex = D_0037AFC0[i].imageIndex;
+                }
+                D_003BC618 = 1;
+                return;
+            }
+        }
+        /* Waiting and finished states both leave the image transparent. */
+    case 5:
+        mnuMovieWork->unk10 = 0;
+        break;
+    }
+}
 
 s32 mnuStaffImageProc(void) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);

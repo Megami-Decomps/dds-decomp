@@ -176,7 +176,7 @@ void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue, s32 dra
     func_0024E260(x, y, layer, alpha, 0x11, drawContext);
     func_003014F0(valueText, D_003BC468, displayValue);
     itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
-                                  0, (u32)valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
+                                  0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
 }
 
 typedef struct MnuSpritePlacement {
@@ -478,7 +478,7 @@ typedef struct DspUnitSpriteLookup {
 extern DspUnitSpriteLookup D_003BC478[];
 extern DspUnitSpriteLookup D_003BC470[];
 extern char D_003BC450[];
-extern s32 frFontQueueFlaggedGlyphAndMeasure(s32, s32, s32, u32, u8, u32, s32, u32);
+extern s32 frFontQueueFlaggedGlyphAndMeasure(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Draw the unit-specific display sprite and its two-column numeric level. */
 void func_002561A0(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
@@ -489,7 +489,7 @@ void func_002561A0(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 cont
     func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
     func_003014F0(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, textColor,
-                                     4, (u32)text, 0, context);
+                                     4, text, 0, context);
 }
 
 /* Select the unit's display sprite; retain the complete signed-byte table copy. */
@@ -509,7 +509,7 @@ void func_002562E8(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 cont
     func_0024E260(x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
     func_003014F0(text, D_003BC450, entry->level);
     frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, tag,
-                                     4, (u32)text, 0, context);
+                                     4, text, 0, context);
 }
 
 extern f32 sdfSinPoly(f32);
