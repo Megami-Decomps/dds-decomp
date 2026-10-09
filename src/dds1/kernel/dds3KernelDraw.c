@@ -376,7 +376,7 @@ void kwlnDrawSetOverlayTransition(s32 duration, s32 alpha, s32 scale) {
 #define KWLN_DRAW_CLEAR_TEXTURE_TRANSITION 0xFFFF7FFF
 
 /* Stage rectangle-blur rotation, scale and blend control, in the original order. */
-void kwlnDrawSetD88FloatTriple(u32 blendControl, f32 rotation, f32 scale) {
+void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl) {
     kwlnRectangleBlurParameters.rotation = rotation;
     kwlnRectangleBlurParameters.scale = scale;
     kwlnRectangleBlurParameters.blendControl = blendControl;
@@ -449,7 +449,7 @@ void kwlnDrawEnableD88(s32 duration) {
 }
 
 /* Stage textured-blur source rotation, scale and blend control. */
-void kwlnDrawSetC70FloatTriple(u32 blendControl, f32 rotation, f32 scale) {
+void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl) {
     kwlnTexturedBlurParameters.source.rotation = rotation;
     kwlnTexturedBlurParameters.source.scale = scale;
     kwlnTexturedBlurParameters.source.blendControl = blendControl;
