@@ -10,22 +10,6 @@ typedef struct ItfMesWindowRec ItfMesWindowRec;
 
 
 
-/* Relocatable message blob: magic + fixup table + payload. */
-typedef struct ItfMesBin {
-    u8 unk0[8];     /* 0x0 */
-    u32 magic;      /* 0x8: "MSG0"/"MSG1" */
-    u8 unkC[4];     /* 0xC */
-    s32 fixupOff;   /* 0x10 */
-    s32 fixupSize;  /* 0x14 */
-    u8 unk18[4];    /* 0x18 */
-    u8 relocated;   /* 0x1C */
-    u8 unk1D[3];    /* 0x1D */
-    u8 data[1];     /* 0x20: relocated base */
-} ItfMesBin;
-
-
-
-
 /* State of the interactive message-layout inspector. */
 typedef struct ItfMesDebugState {
     s32 selectedItem;
@@ -72,7 +56,7 @@ ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex);
 
-void itfMesRelocate(ItfMesBin *bin);
+void itfMesRelocate(ItfMesRelocHeader *resource);
 
 void itfMesDestroyWindow(s32 window);
 
@@ -839,7 +823,7 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     s32 temporaryFontEntry;
 
     mes->sub = sub;
-    itfMesRelocate(sub);
+    itfMesRelocate((ItfMesRelocHeader *)sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
@@ -1124,20 +1108,20 @@ void itfMesDestroyWindow(s32 window) {
 
 /* Relocate packed payload words once, then set the resource's relocated marker. */
 /* Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c), recompiled unchanged */
-void itfMesRelocate(ItfMesBin *bin) {
-    if (bin->relocated == 0) {
-        sdfRelocatePackedResourceWords((int *)bin->data, (int)bin->data,
-                      (u8 *)bin + bin->fixupOff, bin->fixupSize);
-        bin->relocated = 1;
+void itfMesRelocate(ItfMesRelocHeader *resource) {
+    if (resource->relocated == 0) {
+        sdfRelocatePackedResourceWords((int *)resource->payload, (int)resource->payload,
+                      (u8 *)resource + resource->fixupTableOffset, resource->fixupTableBytes);
+        resource->relocated = 1;
     }
 }
 
 /* Recognize MSG0/MSG1 magic only; this is not complete format validation. */
-u32 itfMesIsMsgData(ItfMesBin *bin) {
+u32 itfMesIsMsgData(ItfMesRelocHeader *resource) {
     u32 isMessageResource;
 
     isMessageResource = 0;
-    if (bin->magic == ITF_MES_MAGIC_MSG0 || bin->magic == ITF_MES_MAGIC_MSG1) { /* "MSG0"/"MSG1" */
+    if (resource->magic == ITF_MES_MAGIC_MSG0 || resource->magic == ITF_MES_MAGIC_MSG1) { /* "MSG0"/"MSG1" */
         isMessageResource = 1;
     }
     return isMessageResource;
