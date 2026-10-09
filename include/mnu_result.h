@@ -70,7 +70,7 @@ typedef struct BrsProgressAnimation {
     u8 pad00[0x14];
     s8 state;
     u8 pad15[7];
-    u32 alpha;
+    s32 alpha;
     u8 pad20[0xC];
     s16 level;
     u8 pad2E[2];
@@ -79,9 +79,10 @@ typedef struct BrsProgressAnimation {
     s32 applied;
     s32 frames;
     s8 unk40;
-    u8 pad41[3];
+    s8 unk41;
+    u8 pad42[2];
     s32 iconFrame;
-    u32 iconOpacity;
+    s32 iconOpacity;
     s8 iconState;
     u8 pad4D[0x13];
     s8 progressInitialized;
@@ -101,7 +102,10 @@ typedef struct BrsProgressAnimation {
     u8 pad24[4];
     s32 frames; /* 0x28: progress ramp counter, clamped to 0..120. */
     s8 skipRamp; /* 0x2C: use the fixed fast step instead of the ramp. */
-    u8 pad2D[0xB];
+    s8 unk2D;
+    u8 pad2E[2];
+    s32 flashFrame;
+    s32 flashOpacity;
     s8 progressIconEnabled;
     u8 pad39[7];
     u32 progressIconOpacity;
@@ -254,6 +258,8 @@ typedef char BrsProgressAnimation_alpha_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->alpha == 0x1C) ? 1 : -1];
 typedef char BrsProgressAnimation_currentProgress_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->currentProgress == 0x30) ? 1 : -1];
+typedef char BrsProgressAnimation_unk41_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->unk41 == 0x41) ? 1 : -1];
 typedef char BrsProgressAnimation_iconFrame_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->iconFrame == 0x44) ? 1 : -1];
 typedef char BrsProgressAnimation_iconOpacity_offset_check[
@@ -282,6 +288,12 @@ typedef char BrsProgressAnimation_frames_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->frames == 0x28) ? 1 : -1];
 typedef char BrsProgressAnimation_skipRamp_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->skipRamp == 0x2C) ? 1 : -1];
+typedef char BrsProgressAnimation_unk2D_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->unk2D == 0x2D) ? 1 : -1];
+typedef char BrsProgressAnimation_flashFrame_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->flashFrame == 0x30) ? 1 : -1];
+typedef char BrsProgressAnimation_flashOpacity_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->flashOpacity == 0x34) ? 1 : -1];
 typedef char BrsProgressAnimation_progressInitialized_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->progressInitialized == 0x60) ? 1 : -1];
 typedef char BrsProgressAnimation_previousProgress_offset_check[

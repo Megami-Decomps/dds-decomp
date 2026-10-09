@@ -199,9 +199,30 @@ extern s32 evtStartSceneResourceTask();
 
 extern s32 D_004361BC;
 
-typedef struct FldTriggerShape {
+typedef struct FldTriggerSphere {
+    u32 kind;
+    f32 radius;
+} FldTriggerSphere;
+
+typedef struct FldTriggerPlane {
+    u32 kind;
+    f32 width;
+    f32 height;
+} FldTriggerPlane;
+
+typedef struct FldTriggerBox {
     u32 kind;
     f32 size[3];
+} FldTriggerBox;
+
+/* Serialized kind0/1/2 records occupy8/12/16 bytes. The action constructor
+ * embeds only the real8-byte sphere prefix, followed by its task descriptor;
+ * shape pointers inspect the member selected by kind, not a padded view. */
+typedef union FldTriggerShape {
+    u32 kind;
+    FldTriggerSphere sphere;
+    FldTriggerPlane plane;
+    FldTriggerBox box;
 } FldTriggerShape;
 
 typedef struct FldTaskInfo {
