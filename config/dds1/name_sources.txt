@@ -2375,8 +2375,10 @@
 0x00193BB8	frFontDetachFirstResourceNode	inferred	confidence=high; src/dds1/interface/fmGslCont.c:func_00193BB8; Removes the first nonsentinel resource node, reconnects both neighbors and decrements the list node count. [names_qp9.tsv]
 0x00193C08	frFontListInsert	inferred	doubly-linked insert after D_003D68C0 head, bumps count at +0x18
 0x00193C38	frFontSetEntryFlag	inferred	sets flag bytes at table entry +0x10 pointer for index & 0xFF
+0x00193C70	frFontReverseWordBytes	inferred	Native paired ten-instruction helper reverses all four byte positions of an unsigned word using shifts, masks and ORs.
 0x00193C98	frFontHighestSetBitIndex	inferred	Returns floor(log2(value)) for nonzero values and zero for zero, not bit length.
 0x00193CD8	frFontBuildGsSetupPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00193C08.c:111:func_00193CD8; Builds fixed GS register setup packet used by font drawing.; twin=0x0019B968, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
+0x00193FD0	frFontDrawCachedGlyphRelative	inferred	Native paired wrapper adds glyph-relative X/Y, reads unsigned cell width/half-height and cached UV rectangle, then submits through the font atlas with enable one.
 0x00194038	sdfUploadGsImageUnderSemaphore	inferred	Creates GS image upload, executes it under a semaphore and waits for GS sync. [names_reviewed21.tsv]
 0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/game/code_00193C08.c:func_001940B8; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
 0x00194190	frFontEnsureSlotLoaded	inferred	src/dds1/game/code_00193C08.c func_00194190: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. [names_reviewed24.tsv]
