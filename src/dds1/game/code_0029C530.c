@@ -7349,13 +7349,13 @@ EffParticleShared *func_002B4798(FileJobPayload *source) {
     return work;
 }
 
-void effReleaseParticleResources(u8 *work) {
-    BillObj *particle = ((EffParticleShared *)work)->billHandle;
+void effReleaseParticleResources(EffParticleShared *work) {
+    BillObj *particle = work->billHandle;
     if (particle != NULL) {
         billDispatchByKind(particle);
     }
-    if (((EffParticleShared *)work)->reference != NULL) {
-        effReleaseReferenceHolder(((EffParticleShared *)work)->reference);
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
     }
     sdfReleaseChipBlock(work);
 }
@@ -7387,8 +7387,8 @@ void effReplaceSharedResource(EffParticleShared *work, EffParticleShared *source
     work->reference = effReferenceObjectRetain(source->reference);
 }
 
-void effResetParticleStateWord(s32 work) {
-    ((EffParticleShared *)work)->state = 0;
+void effResetParticleStateWord(EffParticleShared *work) {
+    work->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B4BA0);
