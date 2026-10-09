@@ -8761,7 +8761,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source)
 
     if (source != 0) {
         void *sourceBuffer;
-        job = (FileJobPayload *)fileJobCreateFromCommandState(source);
+        job = fileJobCreateFromCommandState((const char *)source);
         sourceBuffer = fileResolvePrimaryBuffer(job);
         memcpy(descriptor->output, sourceBuffer, descriptor->size);
     } else {
