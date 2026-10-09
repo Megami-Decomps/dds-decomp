@@ -134,6 +134,21 @@ def main():
             d.emit(dict(scope="camera_probe_parity", target_bytes_equal=True,
                         target_relocations_equal=True, target_bytes=len(ordinary),
                         relocations=len(ordinary_relocs), source_snapshot_equal=True))
+            role_report, watch = Path(temp) / "roles.json", Path(temp) / "watch.json"
+            d.run("source_role_lineage", [sys.executable, "tools/ee_gcc_role_lineage.py",
+                  str(probe), "--roles", str(Path(__file__).with_name("roles.json")),
+                  "--json", str(role_report), "--watch", str(watch)])
+            report = json.loads(role_report.read_text())
+            d.emit(dict(scope="camera_source_roles", roles=[
+                dict(name=role["role"]["name"], seeds=len(role["seed_uids"]),
+                     first_transformation=role["first_observed_candidate_transformation"],
+                     transitions=[dict(before=row["before_stage"], after=row["after_stage"],
+                                       changes=row["change_count"],
+                                       surviving_order_changed=row["surviving_uid_order_changed"])
+                                  for row in role["transitions"]])
+                for role in report["roles"]],
+                watched_uids=[row["uid"] for row in report["cse_watch"]["uids"]],
+                omitted_watch_uids=report["cse_watch"]["omitted_count"]))
             directory = probe / "functions" / d.TARGET
             paths = sorted(p for p in directory.iterdir() if p.is_file()
                            and re.fullmatch(r"\d{2}\.[a-z0-9]+", p.name))

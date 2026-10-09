@@ -20,7 +20,9 @@ jobs:
           persist-credentials: false
 
       - name: Check diagnostic syntax
-        run: python3 experiments/kib-camera-interpreter/peer_probe.py --selftest
+        run: |
+          python3 experiments/kib-camera-interpreter/peer_probe.py --selftest
+          python3 tools/test_ee_gcc_role_lineage.py
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
@@ -44,8 +46,8 @@ jobs:
         if: steps.orig.outputs.available == 'true'
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q ninja-build cpp
-          python3 -m pip install -q -r requirements.txt
+          sudo apt-get install -y -q ninja-build cpp build-essential pkg-config libglib2.0-dev python3-venv gnupg
+          python3 -m pip install -q -r requirements.txt meson
           python3 tools/download_tools.py
           mkdir -p orig/dds1 orig/dds2
           cp .orig-src/orig/dds1/SLUS_209.74 orig/dds1/
@@ -67,3 +69,8 @@ jobs:
         if: steps.orig.outputs.available == 'true'
         timeout-minutes: 25
         run: python3 experiments/kib-camera-interpreter/trace.py
+
+      - name: Prepare official user-mode debugger
+        if: steps.orig.outputs.available == 'true'
+        timeout-minutes: 25
+        run: python3 experiments/kib-camera-interpreter/prepare_qemu.py
