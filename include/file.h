@@ -12,6 +12,7 @@
 struct FileNode;
 struct FileRequest;
 struct FileCbNode;
+struct SdfMemBlock;
 
 /* File-job buffer offsets are relative to the job unless allocation is retained. */
 typedef struct FileJobBufferSlot {
@@ -22,6 +23,16 @@ typedef struct FileJobBufferSlot {
     u16 unkE;
 } FileJobBufferSlot;
 
+/* Runtime payload buffers own a general-heap descriptor; queue image slots
+ * keep their separate opaque allocation word in FileJobBufferSlot. */
+typedef struct FileJobPayloadBufferSlot {
+    u32 offset;
+    u32 size;
+    struct SdfMemBlock *allocation;
+    u16 selector;
+    u16 unkE;
+} FileJobPayloadBufferSlot;
+
 /* Separately allocated payload and its serialized 0x2C header. Queue entries
  * refer to this object through their address-valued id field. */
 typedef struct FileJobPayload {
@@ -31,11 +42,11 @@ typedef struct FileJobPayload {
     void *data;
     u16 option;             /* selects primary payload interpretation */
     u16 unkE;
-    FileJobBufferSlot primary; /* selector at 0x1C describes the secondary payload */
+    FileJobPayloadBufferSlot primary; /* selector at 0x1C describes the secondary payload */
     struct {
         u32 offset;
         u32 size;
-        void *allocation;
+        struct SdfMemBlock *allocation;
     } secondary;            /* 0x20; no selector follows this descriptor */
 } FileJobPayload;
 
@@ -78,6 +89,8 @@ typedef struct FileJob {
 
 typedef char FileJobBufferSlot_size_must_be_0x10[
     (sizeof(FileJobBufferSlot) == 0x10) ? 1 : -1];
+typedef char FileJobPayloadBufferSlot_size_must_be_0x10[
+    (sizeof(FileJobPayloadBufferSlot) == 0x10) ? 1 : -1];
 typedef char FileJob_size_must_be_0xC0[
     (sizeof(FileJob) == 0xC0) ? 1 : -1];
 
