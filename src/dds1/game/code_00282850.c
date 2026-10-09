@@ -78,8 +78,6 @@ extern char D_003BC7A0[];
 #define EVT_STAGE_RESOURCE_TASK_KIND 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
-extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
-extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
 extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
 

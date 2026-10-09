@@ -2871,8 +2871,6 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern s32 fldTestSceneControlFlags(s32);
 
 void fldUpdateObjectActivation(void) {

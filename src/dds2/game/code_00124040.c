@@ -1113,7 +1113,6 @@ extern void dds3SetObjectFlags(void *, u32);
 
 extern void fldResetCameraModelHandles(void);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 extern void mdlFlagClear(s32);
 

@@ -43,7 +43,6 @@
 #include "eff_owner_records.h"
 #include "sdf.h"
 
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
 extern void func_00200930(f32 *, f32 *, s32);
 
@@ -7670,7 +7669,6 @@ MdlCtx **effAllocateModelObjectSlot(u32 owner) {
 }
 
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 MdlCtx **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source, u32 settings) {
     MdlCtx **work = effAllocateModelObjectSlot((u32)owner);

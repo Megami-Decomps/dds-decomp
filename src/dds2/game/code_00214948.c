@@ -1525,7 +1525,6 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
 
 extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 
 /* These two three-ID resource families retain the saved motion for selectors 16/17. */
@@ -4121,7 +4120,41 @@ s32 btlGetHealthyAllyActionStatus(ActionUnit *unit) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00220810);
+s32 func_00220810(BtlLinkedCommand *command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 actionCode = command->actionCode;
+    BtlUnit *unit;
+    f32 position[4];
+    f32 originalPosition;
+    f32 adjustedPosition;
+
+    if (actionCode < 0x105) {
+        if (actionCode >= 0x103) {
+            for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+                if (unit->flags & 1) {
+                    if (unit->flags & 0x400) {
+                        if (unit->partyRecord.unitId == 0x11B) {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (unit == NULL) {
+                return 0;
+            }
+            func_001E3108(unit, position);
+            originalPosition = position[2];
+            if (command->actionCode == 0x103) {
+                adjustedPosition = originalPosition + 400.0f;
+            } else {
+                adjustedPosition = originalPosition + 575.0f;
+            }
+            position[2] = adjustedPosition;
+            btlSetUnitPosition(unit, position);
+        }
+    }
+    return 0;
+}
 
 u32 func_00220918(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();

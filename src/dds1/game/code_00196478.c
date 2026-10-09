@@ -393,7 +393,67 @@ u32 func_00196BE0(void) {
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00196BE8);
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
+s32 func_00196ED0(s32 code, FrFontCtx *stream) {
+    s32 *position = &stream->encodedTextOffset;
+    u8 *bytes = stream->encodedText;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF413:
+        *position = payloadPosition + 4;
+        return 2;
+    case 0xF206:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF214:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF215:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF416:
+        *position = payloadPosition + 4;
+        break;
+    case 0xF10F:
+        break;
+    case 0xF110:
+        return 1;
+    case 0xF111:
+    case 0xF112:
+        break;
+    case 0xF104:
+        return 1;
+    case 0xF117:
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->encodedTextOffset += (payloadWords - 1) << 1;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 

@@ -66,7 +66,6 @@ void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 void mnuDeactivateModelNode(s32 nodeAddress);
 
 extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
-extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
 
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];

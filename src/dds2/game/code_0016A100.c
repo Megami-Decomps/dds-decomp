@@ -35,7 +35,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 extern MdlCtx *func_00232198(s32, s32);
 
