@@ -31,10 +31,9 @@
 typedef struct {
     s32 type;
     u8 pad04[4];
-    void *effect;
+    EffWork *effect;
 } EffMagatuhiCallback;
 
-extern void *effGetHandlerArg(void *arg);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 

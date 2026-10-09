@@ -15,13 +15,6 @@ extern void *memset(void *dst, s32 value, u32 size);
 /* Event-viewer entries are linked at +0x7C/+0x80 and keyed by id. */
 
 
-/* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
-typedef struct EvtGroupRec {
-    u8 pad00[8];
-    s32 group;               /* 0x08 */
-    s32 type;                /* 0x0C */
-    u8 pad10[0x10];
-} EvtGroupRec;
 
 
 
@@ -211,7 +204,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer) {
     }
     memset(entry, 0, 0x84);
     entry->type = id;
-    entry->entryHeader = -1;
+    entry->entryNameIndex = -1;
     entry->argument0C = -1;
     evtEventViewerInsertEntry(entry, viewer);
     return entry;
@@ -341,7 +334,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
 
     if (viewer->windowContext != NULL) {
         for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
-            btlRemoveCurrentGroupedEntity(((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].type);
+            btlRemoveCurrentGroupedEntity(viewer->windowContext->mainEntry3Data[i].group, viewer->windowContext->mainEntry3Data[i].type);
         }
     }
 }

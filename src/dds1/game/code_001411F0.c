@@ -3244,7 +3244,170 @@ s32 fldTitleMiniIsActive(void) {
     return kwlnTaskGetTaskByName(D_003A0828) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldTitleMini);
+/* Animate the unlock title's split caption, highlight and expanding fade. */
+s32 fldTitleMini(void) {
+    s32 alpha;
+    u32 color;
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+    s32 nextFrame;
+    u32 highlightRgb;
+
+    if (fldGetCampSceneControlMode() == 1) {
+        return 0;
+    }
+    fldSelectDisplayBuffer(0x53);
+    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
+    func_00129900(0);
+    switch (D_003BAFBC) {
+    case 0:
+        nextFrame = D_003BAFB8 + 1;
+        if (nextFrame > 3) {
+            D_003BAFBC = 1;
+            D_003BAFB8 = 0;
+        } else {
+            D_003BAFB8 = nextFrame;
+        }
+        break;
+    case 1:
+        if (D_003BAFB8 >= 8) {
+            alpha = (D_003BAFB8 - 8) * 16;
+            fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+                0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
+            fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+                0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
+        }
+        alpha = D_003BAFB8 * 128 / 10;
+        if (alpha > 128) {
+            alpha = 128;
+        }
+        color = (alpha << 24) | 0x808080;
+        x = 218 - D_003BAFB8 * 6;
+        fldSubmitSpriteRect(x < 128 ? 128 : x, 0x152, 0x80, 0x1C,
+            0, 0x24, 0x80, 0x1C, color, D_003BAFC4);
+        x = 166 + D_003BAFB8 * 6;
+        fldSubmitSpriteRect(x > 256 ? 256 : x, 0x152, 0x80, 0x1C,
+            0x80, 0x24, 0x80, 0x1C, color, D_003BAFC4);
+        if (D_003BAFB8 >= 10) {
+            alpha = (D_003BAFB8 - 10) * 25;
+            if (alpha > 128) {
+                alpha = 128;
+            }
+            func_00129900(1);
+            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+                (alpha << 24) | 0x808080, D_003BAFC4);
+        }
+        if (D_003BAFB8 >= 8) {
+            alpha = (D_003BAFB8 - 8) * 16;
+            func_00129900(0);
+            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+                (alpha << 24) | 0x808080, D_003BAFC4);
+        }
+        nextFrame = D_003BAFB8 + 1;
+        if (nextFrame > 15) {
+            D_003BAFB8 = 0;
+            D_003BAFBC++;
+        } else {
+            D_003BAFB8 = nextFrame;
+        }
+        break;
+    case 2:
+        alpha = 128;
+        fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+            0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
+        fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+            0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
+        alpha -= D_003BAFB8 * 8;
+        if (alpha > 0) {
+            func_00129900(1);
+            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+                (alpha << 24) | 0x808080, D_003BAFC4);
+        }
+        func_00129900(0);
+        fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+            0x80808080, D_003BAFC4);
+        func_00129900(0);
+        fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+            0x80808080, D_003BAFC4);
+        highlightRgb = 0x808080;
+        if (D_003BAFB8 < 4) {
+            alpha = D_003BAFB8 * 40 / 3;
+            func_00129900(1);
+            fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+                (alpha << 24) | highlightRgb, D_003BAFC4);
+        } else {
+            alpha = 56 - D_003BAFB8 * 4;
+            if (alpha > 0) {
+                func_00129900(1);
+                fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
+                    (alpha << 24) | highlightRgb, D_003BAFC4);
+            }
+        }
+        nextFrame = D_003BAFB8 + 1;
+        if (nextFrame > 30) {
+            D_003BAFB8 = 0;
+            D_003BAFBC++;
+        } else {
+            D_003BAFB8 = nextFrame;
+        }
+        break;
+    case 3:
+        alpha = 128;
+        if (D_003BAFB8 >= 5) {
+            alpha = 128 - (D_003BAFB8 - 5) * 12;
+        }
+        if (alpha > 0) {
+            fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+                0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
+            fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+                0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
+        }
+        if (D_003BAFB8 < 10) {
+            alpha = 128 - D_003BAFB8 * 16;
+            if (alpha > 0) {
+                func_00129900(0);
+                fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
+                    (alpha << 24) | 0x808080, D_003BAFC4);
+            }
+        }
+        alpha = 128;
+        if (D_003BAFB8 >= 5) {
+            alpha = 128 - (D_003BAFB8 - 5) * 16;
+        }
+        if (D_003BAFB8 < 10) {
+            x = 128;
+            width = 256;
+            y = 338;
+            height = 36;
+        } else {
+            width = (D_003BAFB8 - 10) * 128 / 15;
+            x = 128 - width / 2;
+            width = 256 + width;
+            height = (D_003BAFB8 - 10) * 32 / 15;
+            y = 338 + height / 2;
+            height = 36 - height;
+        }
+        if (alpha > 0) {
+            func_00129900(0);
+            fldSubmitSpriteRect(x, y, width, height, 0, 0, 0x100, 0x24,
+                (alpha << 24) | 0x808080, D_003BAFC4);
+        }
+        nextFrame = D_003BAFB8 + 1;
+        if (nextFrame > 30) {
+            D_003BAFB8 = 0;
+            D_003BAFBC++;
+        } else {
+            D_003BAFB8 = nextFrame;
+        }
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
+
 
 void fldReleaseTitleMiniTexture(void) {
     if (D_003BAFC4 != 0) {
@@ -3252,8 +3415,6 @@ void fldReleaseTitleMiniTexture(void) {
         D_003BAFC4 = 0;
     }
 }
-
-extern void fldTitleMini(void);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", fldTitleTaskName);
 

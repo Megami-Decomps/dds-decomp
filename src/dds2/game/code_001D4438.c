@@ -1406,12 +1406,12 @@ void btlMarkSceneTaskAfterReset(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags | 0x20;
 }
 
-extern void func_001E0CE0(s32, s32);
+extern void func_001E0CE0(ActionStateLink *, BattleIndexWork *);
 extern s32 btlAiCheckStatusRollEligibility();
 
-s32 btlCommandStateSelectB(s32 task) {
+s32 btlCommandStateSelectB(ActionStateLink *task) {
     if (sndHasActiveActor() == 0) {
-        func_001E0CE0(task, task + 0x20);
+        func_001E0CE0(task, &task->indexWork);
         if (btlAiCheckStatusRollEligibility(task) != 0) {
             btlDispatchStateHandler(task, 0xB);
         } else {

@@ -5,6 +5,7 @@
 #include "sdf.h"
 
 struct KwlnTask;
+struct EvtRuntime;
 
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
  * evtPolygonMovieAllocWork. Movie parsing, asynchronous resource loading,
@@ -31,26 +32,54 @@ typedef struct PolyMovieResourceSlot {
     PmdHeader *address;
 } PolyMovieResourceSlot;
 
+/* Fixed16-byte PMD relative-reference records, with unobserved tails opaque. */
+typedef struct EvtResourceReference {
+    s32 nameIndex, offset;
+    u32 kind;
+    u8 unknown0C[4];
+} EvtResourceReference;
+typedef struct EvtTextureReference {
+    s32 nameIndex, offset;
+    u8 unknown08[8];
+} EvtTextureReference;
+typedef char EvtResourceReference_size[(sizeof(EvtResourceReference) == 16) ? 1 : -1];
+typedef char EvtTextureReference_size[(sizeof(EvtTextureReference) == 16) ? 1 : -1];
+
+typedef char PmdNameRecord[32];
+
+/* PMD entry3 model resources, also read during viewer teardown. */
+typedef struct PmdModelResourceRecord {
+    s32 nameIndex;
+    u8 unknown04[4];
+    s32 group;
+    s32 type;
+    s32 offset;
+    s32 size;
+    s32 order;
+    u8 unknown1C[4];
+} PmdModelResourceRecord;
+typedef char PmdModelResourceRecord_size[(sizeof(PmdModelResourceRecord) == 32) ? 1 : -1];
+
 typedef struct PolyMovieWork {
     u32 flags;         /* 0x00 */
     PolyMovieResourceSlot mainResource; /* 0x04 */
     PmdHeader *data;   /* 0x10 */
     PmdEntry *entries; /* 0x14 */
-    u8 *mainEntry1Data;   /* 0x18 */
+    PmdNameRecord *mainEntry1Data;   /* 0x18 */
     u32 unk_1C;        /* 0x1C */
     u8 *mainEntry2Data;   /* 0x20 */
     u32 unk_24;        /* 0x24 */
     u8 *mainEntry10Data;  /* 0x28 */
     u8 *mainEntry11Data;  /* 0x2C */
     u8 *mainEntry12Data;  /* 0x30 */
-    u8 *mainEntry3Data;   /* 0x34 */
+    PmdModelResourceRecord *mainEntry3Data;   /* 0x34 */
     u32 unk_38;        /* 0x38 */
     u8 *mainEntry9Data;   /* 0x3C */
-    u8 *mainEntry7Data;   /* 0x40 */
+    EvtResourceReference *mainEntry7Data;   /* 0x40 */
     u32 unk_44;        /* 0x44 */
     u8 *mainEntry8Data;   /* 0x48 */
     u8 *mainEntry6Data;   /* 0x4C */
-    u8 *mainEntry22Data;  /* 0x50 */
+    EvtTextureReference *mainEntry22Data;  /* 0x50 */
     u32 unk_54;        /* 0x54 */
     u8 *mainEntry23Data;  /* 0x58 */
     PolyMovieResourceSlot secondaryResource; /* 0x5C */
@@ -111,10 +140,10 @@ void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
 
 #ifdef VERSION_DDS1
 PolyMovieWork *func_00234DA8(s32 eventId, s32 sceneId, s32 mode);
-void func_0023EF90(PolyMovieWork *work, void *viewer);
+s32 func_0023EF90(PolyMovieWork *work, struct EvtRuntime *viewer);
 #elif VERSION_DDS2
 PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode);
-void func_0025A280(PolyMovieWork *work, void *viewer);
+s32 func_0025A280(PolyMovieWork *work, struct EvtRuntime *viewer);
 #endif
 
 #endif

@@ -250,11 +250,11 @@ void mnuShopScrollList(EvtRuntime *scene, s32 delta) {
         return;
     }
     for (key = track->children; key != NULL; key = key->next) {
-        absoluteFrame = key->frame + track->metadataValue + delta;
-        if (absoluteFrame < track->metadataValue) {
+        absoluteFrame = key->frame + track->link.value + delta;
+        if (absoluteFrame < track->link.value) {
             key->frame = 0;
         } else if (scene->headerThird < absoluteFrame) {
-            key->frame = (u16)scene->headerThird - (u16)track->metadataValue - 1;
+            key->frame = (u16)scene->headerThird - (u16)track->link.value - 1;
         } else {
             key->frame = key->frame + delta;
         }
@@ -289,8 +289,8 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
     while (track != NULL) {
         for (key = track->children; key != NULL; key = key->next) {
             offset = key->frame;
-            base = track->metadataValue;
-            ubase = (u16)track->metadataValue;
+            base = track->link.value;
+            ubase = (u16)track->link.value;
             absoluteFrame = offset + base;
             if (absoluteFrame < threshold) {
                 continue;
@@ -350,7 +350,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     for (track = scene->groups; track != NULL; track = track->next) {
         key = track->children;
         while (key != NULL) {
-            if (key->frame + track->metadataValue < threshold) {
+            if (key->frame + track->link.value < threshold) {
                 key = key->next;
             } else {
                 func_00246950(scene, track, key);
@@ -592,7 +592,7 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeC
     if (track == 0) {
         return;
     }
-    base = track->metadataValue;
+    base = track->link.value;
     *out2 = track->children;
     while (*out2 != 0) {
         if (value < (*out2)->frame + base) {
@@ -631,9 +631,9 @@ typedef struct CampNameLookup {
 s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32 nameIndex) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
-        if (strcmp(scene->entryName[track->entryHeader],
+        if (strcmp(scene->entryName[track->entryNameIndex],
                    lookup->nameTable[nameIndex]) == 0) {
-            return track->entryHeader;
+            return track->entryNameIndex;
         }
         track = track->next;
     }
@@ -644,7 +644,7 @@ s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32
 void *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
-        if (strcmp(scene->entryName[track->entryHeader], name) == 0) {
+        if (strcmp(scene->entryName[track->entryNameIndex], name) == 0) {
             return track;
         }
         track = track->next;
@@ -683,12 +683,12 @@ void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue) {
                     scene->selectedEntry = 0;
                     return;
                 }
-                scene->selectedEntry = ((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE]))->entryValue;
+                scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[linkedEntryCode - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
                 return;
             }
         }
     } else {
-        scene->selectedEntry = ((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE]))->entryValue;
+        scene->selectedEntry = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(scene, scene->entryName[(s16)entryCodeBits - CAMP_ENTRY_NAME_CODE_BASE]))->texture;
     }
 }
 
@@ -2256,7 +2256,7 @@ extern s32 datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
 extern void func_00297320(s32);
-extern void func_00297970(s32);
+extern s32 func_00297970(MenuTerminalContext *);
 
 
 extern s32 D_003CE148[];
@@ -2594,7 +2594,7 @@ s32 func_00262330(KwlnTask *task) {
 s32 func_00262598(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2711,7 +2711,7 @@ s32 func_00262740(KwlnTask *task) {
 s32 func_002629A8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2831,7 +2831,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
 s32 func_00262DB8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2935,7 +2935,7 @@ s32 func_00262F78(KwlnTask *task) {
 s32 func_00263180(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3386,7 +3386,7 @@ s32 evtDispatchSceneReadyFollowup(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
     if (((MenuTerminalContext *)stateAddress)->sceneReady == 1) {
-        func_00297970(stateAddress);
+        func_00297970((MenuTerminalContext *)stateAddress);
     } else {
         func_00298648((MenuTerminalContext *)stateAddress);
     }
@@ -3593,7 +3593,7 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
 s32 func_00264AB8(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3649,7 +3649,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(KwlnTask *callbackContext) {
 s32 func_00264CE0(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3716,7 +3716,7 @@ s32 evtTriggerProgressGateThenOpenPopup(KwlnTask *callbackContext) {
 s32 func_00264F98(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     func_0025FD78((MenuTerminalContext *)stateAddress);
-    func_00297970(stateAddress);
+    func_00297970((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 

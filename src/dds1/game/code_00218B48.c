@@ -107,7 +107,10 @@ typedef struct MdlViewState {
     s32 packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
 typedef struct MdlPadState {
-    u8 pad00[4];
+    u8 pad00;
+    s8 confirm;
+    u8 pad02;
+    s8 cancel;
     s8 stepDownA;  /* 0x04 */
     s8 stepUpA;    /* 0x05 */
     s8 stepDownB;  /* 0x06 */
@@ -2774,16 +2777,43 @@ void mdlCleanupViewerTasksAndResources(void) {
     }
 }
 
-typedef struct MdlRotationContext {
-    u8 pad00[8];
+/* Light-editor state shared with the direction editor. */
+typedef struct MdlLightEditorState {
+    f32 (**lights)[4];
+    f32 *ambient;
     MdlPadState *pad;
-} MdlRotationContext;
+    u8 editing;
+    u8 blinkTick;
+    s16 selection;
+    SdfListHead *packetList;
+} MdlLightEditorState;
+
+typedef struct MdlOptionLabel {
+    u16 x;
+    u16 y;
+    s32 style;
+    const char *format;
+} MdlOptionLabel;
+
+extern MdlLightEditorState D_00367D30;
+extern MdlOptionLabel D_00367CE0[4];
+extern u16 D_00367D10[16];
+extern s8 D_00324520[16];
+extern SdfLightSources D_00324770;
+extern f32 kwlnDefaultColorVector[4];
+extern const char D_003BBCF8[]; /* ">" in .sdata */
+extern const char D_003BBD00[]; /* "%6.2f" in .sdata */
+extern SdfPoolNode D_00325708;
+extern void fldStepValueByPad(f32 *, u8 *, f32, f32, f32, f32);
+extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
+/* Direction-preview packet builder consumes the vector loaded in vf10. */
+extern void *func_0011D6B0(s32, s32, s32, s32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: rotate a viewer position about the camera axes selected by the pad. */
-void func_0021E450(MdlRotationContext *context, f32 *position)
+void func_0021E450(MdlLightEditorState *context, f32 *position)
 {
     if (context->pad->stepUpA != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
@@ -2821,7 +2851,137 @@ void func_0021E450(MdlRotationContext *context, f32 *position)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021E618);
+s32 func_0021E618(KwlnTask *task) {
+    MdlLightEditorState *state = (MdlLightEditorState *)kwlnTaskGetUserValue(task);
+    f32 (*light)[4];
+    MdlOptionLabel *label;
+    s32 changed;
+    s32 labelIndex;
+    s32 lightIndex;
+    s32 j;
+    s32 selected;
+    s32 y;
+    s32 directionStyle;
+    s32 directionY;
+    f32 *color;
+
+    if ((u32)state == 0) {
+        state = &D_00367D30;
+        state->pad = (MdlPadState *)D_00324520;
+    } else if ((u32)state == 1) {
+        state = &D_00367D30;
+        state->pad = (MdlPadState *)D_00324510;
+    }
+    if (state->pad == NULL) {
+        state->pad = (MdlPadState *)D_00324520;
+    }
+    if (state->lights == NULL) {
+        state->lights = D_00324770;
+    }
+    if (state->ambient == NULL) {
+        state->ambient = kwlnDefaultColorVector;
+    }
+    state->packetList = sdfCreateResetPacketList();
+    if (state->editing == 0) {
+        changed = 1;
+        if (state->pad->stepUpB & 0x80) {
+            if (state->selection >= 14) {
+                state->selection = 0;
+            } else {
+                state->selection++;
+            }
+        } else if (state->pad->stepUpB & 2) {
+            if (state->selection < 14) {
+                state->selection++;
+            }
+        } else if (state->pad->stepDownB & 0x80) {
+            if (state->selection > 0) {
+                state->selection--;
+            } else {
+                state->selection = 14;
+            }
+        } else if (state->pad->stepDownB & 2) {
+            if (state->selection > 0) {
+                state->selection--;
+            }
+        } else if (state->pad->confirm & 0x80) {
+            state->editing = 1;
+        } else {
+            changed = 0;
+        }
+        if (changed != 0) {
+            state->blinkTick = 0;
+        }
+    } else {
+        if (state->pad->confirm & 0x80) {
+            state->editing = 0;
+        } else if (state->pad->cancel & 0x80) {
+            state->editing = 0;
+        } else if (state->selection < 12) {
+            light = state->lights[state->selection >> 2];
+            if (light != NULL) {
+                if ((state->selection & 3) == 3) {
+                    func_0021E450(state, light[1]);
+                } else {
+                    fldStepValueByPad(&light[0][state->selection & 3], (u8 *)state->pad,
+                                      0.0f, 2.0f, 0.1f, 0.01f);
+                }
+            }
+        } else if (state->selection < 15) {
+            fldStepValueByPad(&state->ambient[state->selection - 12], (u8 *)state->pad,
+                              0.0f, 2.0f, 0.1f, 0.01f);
+        }
+    }
+    state->blinkTick++;
+    if (state->blinkTick == 30) {
+        state->blinkTick = 0;
+    }
+    sdfAppendPacket(state->packetList,
+                    func_0011D3E8(0x8650, 0x79A8, 0xFF007F, 0x8A0, 0xAB0,
+                                  0x60000000, 0x40806020));
+    label = D_00367CE0;
+    for (labelIndex = 0; labelIndex != 4; labelIndex++, label++) {
+        sdfAppendPacket(state->packetList,
+                        (u32)sdfCreateFormattedSifCommand(label->x, label->y,
+                                                         0xFF0080, label->style,
+                                                         label->format));
+    }
+    if (state->editing == 0 && state->blinkTick < 20) {
+        sdfAppendPacket(state->packetList,
+                        (u32)sdfCreateFormattedSifCommand(0x8680, D_00367D10[state->selection],
+                                                         0xFF0080, 0, D_003BBCF8));
+    }
+    selected = state->selection;
+    y = 0x7A20;
+    for (lightIndex = 0; lightIndex != 3; lightIndex++, selected -= 4, y += 0x300) {
+        light = state->lights[lightIndex];
+        if (light != NULL) {
+            VU0_LOAD_VF(vf10, light[1]);
+            directionY = y + 0x1B0;
+            directionStyle = 0;
+            if (state->editing == 1) {
+                directionStyle = selected == 3;
+            }
+            sdfAppendPacket(state->packetList,
+                            (u32)func_0011D6B0(0x88C0, directionY, 0xFF0080, directionStyle));
+            for (j = 0; j != 3; j++) {
+                sdfAppendPacket(state->packetList,
+                                (u32)sdfCreateFormattedSifCommand(0x8A40, y + 0x120 + j * 0x60, 0xFF0080,
+                                                                 0, D_003BBD00, light[1][j]));
+            }
+            color = light[0];
+        } else {
+            color = NULL;
+        }
+        fldDrawRgbEditor(state->packetList, 0x8740, y,
+                          state->editing == 1 ? selected : -1, color);
+    }
+    fldDrawRgbEditor(state->packetList, 0x8740, 0x8320,
+                      state->editing == 1 ? state->selection - 12 : -1, state->ambient);
+    D_00325708.append((SdfListHead *)&D_00325708, state->packetList);
+    return 0;
+}
+
 
 void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
@@ -2948,12 +3108,6 @@ typedef struct MdlOptionState {
     u8 pad34[4];
 } MdlOptionState;
 
-typedef struct MdlOptionLabel {
-    u16 x;
-    u16 y;
-    s32 style;
-    const char *format;
-} MdlOptionLabel;
 
 typedef char MdlOptionStateSize[sizeof(MdlOptionState) == 0x38 ? 1 : -1];
 extern MdlOptionState D_003D7B60;
@@ -2969,8 +3123,6 @@ extern const char D_003BBD60[];
 extern const char D_003BBD68[];
 extern const char D_003BBD70[];
 extern const char D_003BBD78[];
-extern SdfPoolNode D_00325708;
-extern void fldStepValueByPad(f32 *, u8 *, f32, f32, f32, f32);
 
 s32 func_0021F098(KwlnTask *task) {
     MdlOptionState *state = &D_003D7B60;

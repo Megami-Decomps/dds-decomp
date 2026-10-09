@@ -610,14 +610,14 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             work->mainEntry12Data = (u8 *)data + work->entries[i].offset;
             break;
         case 3:
-            work->mainEntry3Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry3Data = (PmdModelResourceRecord *)((u8 *)data + work->entries[i].offset);
             work->unk_38 = work->entries[i].value;
             break;
         case 9:
             work->mainEntry9Data = (u8 *)data + work->entries[i].offset;
             break;
         case 1:
-            work->mainEntry1Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry1Data = (PmdNameRecord *)((u8 *)data + work->entries[i].offset);
             work->unk_1C = work->entries[i].value;
             break;
         case 6:
@@ -629,14 +629,14 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *data, Pmd
             }
             break;
         case 7:
-            work->mainEntry7Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry7Data = (EvtResourceReference *)((u8 *)data + work->entries[i].offset);
             work->unk_44 = work->entries[i].value;
             break;
         case 8:
             work->mainEntry8Data = (u8 *)data + work->entries[i].offset;
             break;
         case 22:
-            work->mainEntry22Data = (u8 *)data + work->entries[i].offset;
+            work->mainEntry22Data = (EvtTextureReference *)((u8 *)data + work->entries[i].offset);
             work->unk_54 = work->entries[i].value;
             break;
         case 23:
