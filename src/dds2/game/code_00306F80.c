@@ -65,8 +65,8 @@ void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags,
     func_00306BF0(offsetX, offsetY, z, drawFlags, (u32)object, index, (s32)renderEntry, surfaceIndex);
 }
 
-/* Advance the indexed slot's timed source and carry its active state forward. */
-void func_00307018(EffectSlotSet *owner, s32 index) {
+/* Update the indexed slot's description countdown and carry its active state forward. */
+void itfUpdateGridSlotDescription(EffectSlotSet *owner, s32 index) {
     BdWork *base = &owner->workEntries[index];
     const u32 timedByteOffset = (index + base->slotOffset) * sizeof(BdWork);
     BdWork *timed = (BdWork *)(timedByteOffset + (u32)owner->workEntries);
@@ -74,10 +74,12 @@ void func_00307018(EffectSlotSet *owner, s32 index) {
     BdWork *next;
     u32 advance = 0;
 
-    if (timed->unk98 == 0) {
-        timed->unk98 = owner->descriptions[index + base->slotOffset].unk7E;
+    if (timed->remainingDescriptionUpdates == 0) {
+        timed->remainingDescriptionUpdates =
+            owner->descriptions[index + base->slotOffset].descriptionUpdateDelay;
         if ((u32)(index + timed->slotOffset + 1) < owner->count) {
-            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags & 0x20;
+            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags &
+                                  EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION;
             const u32 shouldAdvance = nextFlags > 0;
             advance = shouldAdvance;
         }
@@ -95,7 +97,7 @@ void func_00307018(EffectSlotSet *owner, s32 index) {
         next->states[0].source = previous->states[0].source;
         next->states[0].value = previous->states[0].value;
     } else {
-        timed->unk98--;
+        timed->remainingDescriptionUpdates--;
     }
 }
 
@@ -104,7 +106,7 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     s32 result;
 
     if (entry->states[0].delay == 0) {
-        func_00307018(object, key);
+        itfUpdateGridSlotDescription(object, key);
     }
     result = (s32)effUpdateTimedStates(object, (u32)key, entry);
     if (result == 0) {
