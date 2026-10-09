@@ -840,8 +840,8 @@ void func_00333A30(u8 *out, SdfSubParam *param) {
     transform->m[5] = 0.5f - m1 * (v0 + 0.5f) - m3 * (0.5f - v1);
 }
 
-void sdfCopyAssetPrimarySubParameter(s32 assetAddress, s32 entryAddress) {
-    func_00333A30(entryAddress + 0x68, ((SdfAsset *)assetAddress)->primarySubParam);
+void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, SdfAssetEntry *entry) {
+    func_00333A30((u8 *)&entry->transforms[0], asset->primarySubParam);
 }
 
 extern u16 D_0040B348[];
@@ -874,7 +874,7 @@ void sdfAssetCopyPairToTextParam(SdfTextParam *source, SdfTextParam *destination
  * entryIndex is unchecked and expected to be zero or one. */
 void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
-    void *drawEntry = asset->entries[entryIndex];
+    SdfAssetEntry *drawEntry = asset->entries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
     }
@@ -894,7 +894,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
  * Retain the other entry's captured bits; entryIndex remains unchecked. */
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
-    void *drawEntry = asset->entries[entryIndex];
+    SdfAssetEntry *drawEntry = asset->entries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
     } else if (sdfForcedAssetTextureMode != 0) {
