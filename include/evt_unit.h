@@ -18,6 +18,13 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
+/* Values observed in EvtUnit.transitionSourceKind; the field remains s16. */
+typedef enum EvtUnitTransitionSourceKind {
+    EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR = 0,
+    EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE = 1,
+    EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE = 2
+} EvtUnitTransitionSourceKind;
+
 /* Bits consumed by the event unit's motion, value and visual transitions. */
 enum EvtUnitFlags {
     EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
