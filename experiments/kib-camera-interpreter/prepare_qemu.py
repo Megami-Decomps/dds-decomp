@@ -55,7 +55,17 @@ def main():
         STAGE = "extract_verified_archive"
         with tarfile.open(archive) as source:
             try:
-                source.extractall(work, filter="data")
+                def user_mode_source(member, destination):
+                    # EDK2's macOS X11 header shortcut is unrelated to the
+                    # i386 Linux user-mode build. Omit this exact signed member;
+                    # every other member still passes Python's data filter.
+                    excluded = "qemu-" + VERSION + "/roms/edk2/EmulatorPkg/Unix/Host/X11IncludeHack"
+                    if member.name == excluded:
+                        if not member.issym() or member.linkname != "/opt/X11/include":
+                            raise RuntimeError("excluded_member_changed")
+                        return None
+                    return tarfile.data_filter(member, destination)
+                source.extractall(work, filter=user_mode_source)
             except tarfile.FilterError as exc:
                 # Only official, signature-verified archive member metadata.
                 member = getattr(exc, "tarinfo", None)

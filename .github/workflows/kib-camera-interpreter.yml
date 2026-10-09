@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -65,12 +65,20 @@ jobs:
         if: steps.orig.outputs.available == 'true'
         run: python3 experiments/kib-camera-interpreter/peer_probe.py
 
-      - name: Qualified compiler pass trace
+      - name: Prepare official user-mode debugger
+        id: debugger
         if: steps.orig.outputs.available == 'true'
         timeout-minutes: 25
-        run: python3 experiments/kib-camera-interpreter/trace.py
+        run: python3 experiments/kib-camera-interpreter/prepare_qemu.py
 
-      - name: Prepare official user-mode debugger
+      - name: Qualified compiler pass trace
         if: always() && steps.orig.outputs.available == 'true'
         timeout-minutes: 25
-        run: python3 experiments/kib-camera-interpreter/prepare_qemu.py
+        env:
+          DEBUGGER_READY: ${{ steps.debugger.outcome }}
+        run: |
+          if [ "$DEBUGGER_READY" = success ]; then
+            python3 experiments/kib-camera-interpreter/trace.py --qemu /tmp/dds-camera-qemu/qemu-i386
+          else
+            python3 experiments/kib-camera-interpreter/trace.py
+          fi
