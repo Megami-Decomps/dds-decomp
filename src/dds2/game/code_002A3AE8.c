@@ -3,6 +3,7 @@
 #include "fpu.h"
 #include "mnu.h"
 #include "mnu_list.h"
+#include "eff.h"
 
 extern s32 mnuGetSlidePathSegmentWeight(s32);
 extern s32 D_003E38A0[];
@@ -264,7 +265,57 @@ void mnuSlideBarSetStateSmall(u32 *state, u32 mode) {
     state[0] = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A3AE8", func_002A4208);
+/* Three-word small-bar control embedded in the movie-menu state. */
+typedef struct MovieMenuPulse {
+    s32 active;
+    s32 phase;
+    s32 alpha;
+} MovieMenuPulse;
+
+/* Resize and draw the pulsing bar, then advance its alpha and phase. */
+void func_002A4208(MovieMenuPulse *pulse, s32 drawContext) {
+    EffectSlotSet *sprites;
+    s32 index;
+    s32 amount;
+    s32 sourceWidth;
+    s32 sourceHeight;
+
+    if (pulse->active == 0 && pulse->alpha == 0) {
+        return;
+    }
+
+    sprites = (EffectSlotSet *)mnuSpriteGraphicHandle(0x15);
+    index = mnuSpriteDrawParam(0x15);
+    amount = pulse->phase;
+    if (amount > 0x100) {
+        amount = 0x200 - amount;
+    }
+
+    sourceWidth = sprites->workEntries[index].sourceWidth;
+    sourceHeight = sprites->workEntries[index].sourceHeight;
+    sprites->workEntries[index].geometry.bounds[2] = (sourceWidth << 4) + (amount << 3);
+    sprites->workEntries[index].geometry.bounds[3] = (sourceHeight << 3) + (amount << 2);
+
+    mnuDrawSprite(-((amount << 3) >> 4), 0, 0, pulse->alpha, 0, 0x15, drawContext);
+    mnuDrawSprite(0, 0, 0, pulse->alpha, 0, 0x14, drawContext);
+
+    if (pulse->active != 0) {
+        pulse->alpha += 8;
+    } else {
+        pulse->alpha -= 8;
+    }
+    if (pulse->alpha < 0) {
+        pulse->alpha = 0;
+    }
+    if (pulse->alpha > 0x80) {
+        pulse->alpha = 0x80;
+    }
+
+    pulse->phase += 4;
+    if (pulse->phase > 0x200) {
+        pulse->phase %= 0x200;
+    }
+}
 
 void mnuClearMovieMenuPickList(PickList *bar) {
     bar->count = 0;
