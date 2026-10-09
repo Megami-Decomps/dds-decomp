@@ -137,7 +137,7 @@ void frFontReleaseUnreferencedGlyphItem(FrFontGlyph *glyph) {
 
     if (cachedItem != NULL) {
         if (cachedItem->refs == 0) {
-            frFontWork.entries[glyph->u14.b[1]].slots[cachedItem->id] = 0;
+            frFontWork.entries[glyph->renderValueOrSetupOrShade.setupBytes.fontIndex].slots[cachedItem->id] = 0;
             frFontListInsert(cachedItem->list);
             frFontWork.cachedItemCount--;
         }
@@ -240,8 +240,8 @@ FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *desti
     destination->link20.linkedGlyph = glyph;
     destination->childCountOrCellDimensions.childCount++;
     destination->advance += glyph->advance;
-    destination->u10.half[0] = glyph->childCountOrCellDimensions.cellDimensions.cellWidth;
-    destination->u10.half[1] = glyph->childCountOrCellDimensions.cellDimensions.cellHeight;
+    destination->parentDimensionsOrRenderWord.parentDimensions.cellAdvance = glyph->childCountOrCellDimensions.cellDimensions.cellWidth;
+    destination->parentDimensionsOrRenderWord.parentDimensions.cellHeight = glyph->childCountOrCellDimensions.cellDimensions.cellHeight;
     return destination;
 }
 
@@ -332,7 +332,7 @@ extern u16 frFontGetSlotCellHeight(s32 index);
 /* Retain a cached table item, or create/upload a new one and cache it.
  * New records start with one reference; itemIndex is not bounds-checked. */
 FrFontRecord *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 itemIndex) {
-    FrFontEntry *entry = &frFontWork.entries[glyph->u14.b[1]];
+    FrFontEntry *entry = &frFontWork.entries[glyph->renderValueOrSetupOrShade.setupBytes.fontIndex];
     FrFontRecord *cachedItem = entry->slots[itemIndex];
     void *clonedResource;
 
@@ -340,8 +340,8 @@ FrFontRecord *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 itemIndex) 
         cachedItem->refs++;
         return cachedItem;
     }
-    clonedResource = frFontCloneEntryResource(glyph->u14.b[1], itemIndex);
-    cachedItem = frFontCreateAtlasItem(frFontGetSlotCellWidth(glyph->u14.b[1]), frFontGetSlotCellHeight(glyph->u14.b[1]), clonedResource, 1);
+    clonedResource = frFontCloneEntryResource(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex, itemIndex);
+    cachedItem = frFontCreateAtlasItem(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
     cachedItem->id = itemIndex;
     entry->slots[itemIndex] = cachedItem;
     frFontWork.cachedItemCount++;
@@ -351,30 +351,30 @@ FrFontRecord *frFontRetainOrCreateCachedItem(FrFontGlyph *glyph, s32 itemIndex) 
 /* Store the font/options, narrowed glyph code and high flag bits, then clear
  * positioning/links. Other glyph fields are deliberately not fully reset here. */
 void frFontSetupGlyph(FrFontGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption) {
-    glyph->u14.b[1] = fontIndex;
-    glyph->u14.b[0] = firstOption;
-    glyph->u14.b[2] = secondOption;
-    glyph->u0.h = glyphId;
-    glyph->u10.word = packedFlags & ~FR_FONT_BYTE_MASK;
-    glyph->u14.b[3] = frFontSharedGlyphFlags;
+    glyph->renderValueOrSetupOrShade.setupBytes.fontIndex = fontIndex;
+    glyph->renderValueOrSetupOrShade.setupBytes.firstOption = firstOption;
+    glyph->renderValueOrSetupOrShade.setupBytes.secondOption = secondOption;
+    glyph->glyphCodeOrContext.glyphCode = glyphId;
+    glyph->parentDimensionsOrRenderWord.renderWord = packedFlags & ~FR_FONT_BYTE_MASK;
+    glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags = frFontSharedGlyphFlags;
     glyph->x = 0;
     glyph->y = 0;
     glyph->advance = 0;
-    glyph->unk2 = 0;
+    glyph->drawCount = 0;
     glyph->link1C.firstChild = NULL;
     glyph->link20.linkedGlyph = NULL;
     glyph->previous = NULL;
     glyph->next = NULL;
 }
 
-/* Reset a standalone chain head: code byte 0x80, no children and zero counters. */
+/* Reset standalone chain-head state and context controls; leave drawCount intact. */
 void frFontInitGlyph(FrFontGlyph *glyph) {
-    glyph->u0.b.b0 = -0x80;
+    glyph->glyphCodeOrContext.byteRoles.encodedContextByte = -0x80;
     glyph->x = 0;
     glyph->y = 0;
-    glyph->u0.b.b1 = 0;
+    glyph->glyphCodeOrContext.byteRoles.spacing = 0;
     glyph->advance = 0;
-    glyph->u14.w = 0;
+    glyph->renderValueOrSetupOrShade.renderValue = 0;
     glyph->previous = NULL;
     glyph->next = NULL;
     glyph->chainHead = glyph;
@@ -400,10 +400,10 @@ FrFontGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOp
     frFontWork.itemCount++;
     frFontSetupGlyph(glyph, glyphId, fontIndex, firstOption, 0xA09DC300, secondOption);
 
-    if ((u16)glyph->u0.h < 0x80) {
-        glyphIndex = (u16)glyph->u0.h - 0x20;
+    if ((u16)glyph->glyphCodeOrContext.glyphCode < 0x80) {
+        glyphIndex = (u16)glyph->glyphCodeOrContext.glyphCode - 0x20;
     } else {
-        s32 adjusted = (u16)glyph->u0.h - 0x8080;
+        s32 adjusted = (u16)glyph->glyphCodeOrContext.glyphCode - 0x8080;
 
         glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
     }
@@ -413,7 +413,7 @@ FrFontGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOp
     }
     glyph->link1C.cachedItem = frFontRetainOrCreateCachedItem(glyph, glyphIndex);
     func_001949B0(glyph, glyphIndex);
-    if (glyph->u14.b[3] & 0x10) {
+    if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
         glyph->y = func_001949A8((s8)fontIndex, glyphIndex);
     } else {
         glyph->y = 0;
@@ -440,9 +440,9 @@ void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue) {
     s32 encodedValue = (inputValue & FR_FONT_BYTE_MASK) * 2;
 
     if (encodedValue >= FR_FONT_CONTEXT_BYTE_THRESHOLD) {
-        glyph->u0.b.b0 = FR_FONT_CONTEXT_BYTE_CAP;
+        glyph->glyphCodeOrContext.byteRoles.encodedContextByte = FR_FONT_CONTEXT_BYTE_CAP;
     } else {
-        glyph->u0.b.b0 = encodedValue;
+        glyph->glyphCodeOrContext.byteRoles.encodedContextByte = encodedValue;
     }
 }
 
@@ -454,7 +454,7 @@ void frFontEnableContextMode(FrFontGlyph *glyph) {
 
 /* Store the requested flag byte and refresh the cached child-chain advance. */
 void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag) {
-    glyph->u0.b.b1 = requestedFlag;
+    glyph->glyphCodeOrContext.byteRoles.spacing = requestedFlag;
     glyph->advance = frFontMeasureGlyphChain(glyph);
 }
 
@@ -464,8 +464,8 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cell
     FrFontGlyph *targetGlyph = glyph;
     FrFontGlyph *childGlyph;
 
-    targetGlyph->u10.half[0] = cellAdvance;
-    targetGlyph->u10.half[1] = cellHeight;
+    targetGlyph->parentDimensionsOrRenderWord.parentDimensions.cellAdvance = cellAdvance;
+    targetGlyph->parentDimensionsOrRenderWord.parentDimensions.cellHeight = cellHeight;
     for (; glyph != NULL; glyph = glyph->previous) {
         for (childGlyph = glyph->link1C.firstChild; childGlyph != NULL; childGlyph = childGlyph->next) {
             childGlyph->advance = cellAdvance;
@@ -484,7 +484,7 @@ void frFontSetContextPair(FrFontGlyph *glyph, u32 first, u32 second) {
 
 /* Store the glyph render value in sixteenths. */
 void frFontStoreShiftedContextValue(FrFontGlyph *glyph, u32 unshiftedValue) {
-    glyph->u14.w = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
+    glyph->renderValueOrSetupOrShade.renderValue = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
 }
 
 /* Assign the first option byte across all visited children; NULL is a no-op. */
@@ -493,7 +493,7 @@ void frFontSetChainFlag(FrFontGlyph *glyph, u8 flagValue) {
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (childGlyph = glyph->link1C.firstChild; childGlyph != NULL; childGlyph = childGlyph->next) {
-            childGlyph->u14.b[0] = flagValue;
+            childGlyph->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
     }
 }
@@ -503,7 +503,7 @@ void frFontSetChildColors(FrFontGlyph *parentNode, u32 colorWord) {
     for (; parentNode != NULL; parentNode = parentNode->previous) {
         FrFontGlyph *childNode;
         for (childNode = parentNode->link1C.firstChild; childNode != NULL; childNode = childNode->next) {
-            childNode->u10.word = colorWord;
+            childNode->parentDimensionsOrRenderWord.renderWord = colorWord;
         }
     }
 }
@@ -536,8 +536,8 @@ s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (childGlyph = glyph->link1C.firstChild; childGlyph != NULL; childGlyph = childGlyph->next) {
-            if (childGlyph->u14.b[2] == FR_FONT_FADE_OPTION) {
-                u32 glyphWord = childGlyph->u10.word;
+            if (childGlyph->renderValueOrSetupOrShade.setupBytes.secondOption == FR_FONT_FADE_OPTION) {
+                u32 glyphWord = childGlyph->parentDimensionsOrRenderWord.renderWord;
                 s32 fadeValue = glyphWord & FR_FONT_BYTE_MASK;
 
                 if (fadeValue != 0) {
@@ -546,7 +546,7 @@ s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
                         fadeValue = 0;
                     }
                     childGlyph->y += FR_FONT_FADE_Y_STEP;
-                    childGlyph->u10.word = (glyphWord & ~FR_FONT_BYTE_MASK) | fadeValue;
+                    childGlyph->parentDimensionsOrRenderWord.renderWord = (glyphWord & ~FR_FONT_BYTE_MASK) | fadeValue;
                     didChange = 1;
                 }
             }
@@ -571,16 +571,16 @@ s32 frFontAdvanceChildFadeAndGetJitter(FrFontGlyph *parent, FrFontGlyph *glyph, 
     if (previousGlyph == NULL) {
         previousParent = parent->previous;
         if (previousParent != NULL && previousParent->link20.linkedGlyph != NULL) {
-            previousFade = previousParent->link20.linkedGlyph->u10.byte[0];
-            previousOption = previousParent->link20.linkedGlyph->u14.b[2];
+            previousFade = previousParent->link20.linkedGlyph->parentDimensionsOrRenderWord.fadeByte.value;
+            previousOption = previousParent->link20.linkedGlyph->renderValueOrSetupOrShade.setupBytes.secondOption;
         }
     } else {
-        previousFade = previousGlyph->u10.byte[0];
+        previousFade = previousGlyph->parentDimensionsOrRenderWord.fadeByte.value;
         previousParent = parent->previous;
     }
 
-    fadeWord = &glyph->u10.word;
-    if (previousOption == 0 || previousOption == glyph->u14.b[2]) {
+    fadeWord = &glyph->parentDimensionsOrRenderWord.renderWord;
+    if (previousOption == 0 || previousOption == glyph->renderValueOrSetupOrShade.setupBytes.secondOption) {
         if (previousFade >= threshold) {
             canAdvanceFade = 1;
         }
@@ -611,7 +611,7 @@ s32 frFontAdvanceChildFadeAndGetJitter(FrFontGlyph *parent, FrFontGlyph *glyph, 
         }
     }
 
-    if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->link20.linkedGlyph->u10.byte[0] == FR_FONT_FADE_COMPLETE) {
+    if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->link20.linkedGlyph->parentDimensionsOrRenderWord.fadeByte.value == FR_FONT_FADE_COMPLETE) {
         if (parent->skipLipsStopWait == 0 && parent->remainingWaitFrames > 0) {
             if (parent->remainingWaitFrames == ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
                 if (mnuQueryTitleSoundBusy() != 0) {
@@ -631,7 +631,7 @@ s32 frFontAdvanceChildFadeAndGetJitter(FrFontGlyph *parent, FrFontGlyph *glyph, 
         u32 currentFadeWord;
 
         if ((s8)step >= 0) {
-            step = (step * FR_FONT_FADE_ADVANCE_SCALE) / (glyph->advance + parent->u0.b.b1);
+            step = (step * FR_FONT_FADE_ADVANCE_SCALE) / (glyph->advance + parent->glyphCodeOrContext.byteRoles.spacing);
         }
         currentFadeWord = *fadeWord;
         if ((u32)(FR_FONT_FADE_COMPLETE - (currentFadeWord & FR_FONT_BYTE_MASK)) >= step) {
@@ -643,10 +643,10 @@ s32 frFontAdvanceChildFadeAndGetJitter(FrFontGlyph *parent, FrFontGlyph *glyph, 
 
     {
         s8 currentFade = fadeWord[0];
-        u16 glyphValue = glyph->unk2;
+        u16 glyphValue = glyph->drawCount;
 
         if (currentFade >= 0) {
-            if (glyph->u14.b[2] == FR_FONT_JITTER_OPTION) {
+            if (glyph->renderValueOrSetupOrShade.setupBytes.secondOption == FR_FONT_JITTER_OPTION) {
                 glyphJitter = -((((glyphValue * 2) % FR_FONT_JITTER_PERIOD) - FR_FONT_JITTER_CENTER) << FR_FONT_POSITION_SHIFT);
             }
         }
@@ -681,38 +681,38 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
             do {
                 s32 x = glyph->x;
                 s32 y = glyph->y;
-                s8 spacing = glyph->u0.b.b1;
+                s8 spacing = glyph->glyphCodeOrContext.byteRoles.spacing;
 
                 child = glyph->link1C.firstChild;
                 if (child != NULL) {
                     atlas = &frFontWork.atlas;
                     do {
                         s32 xOffset = mode != 0 ? 0 :
-                            frFontAdvanceChildFadeAndGetJitter(glyph, child, FR_FONT_FADE_PREDECESSOR_THRESHOLD, (u8)glyph->u0.b.b0);
+                            frFontAdvanceChildFadeAndGetJitter(glyph, child, FR_FONT_FADE_PREDECESSOR_THRESHOLD, (u8)glyph->glyphCodeOrContext.byteRoles.encodedContextByte);
                         u32 glyphState;
                         if (child->link20.sourceItem == NULL) {
-                            if ((u16)child->u0.h < 0x80) {
+                            if ((u16)child->glyphCodeOrContext.glyphCode < 0x80) {
                                 enabled = 1;
                             }
                             func_00193D70(x + child->x + xOffset, y + child->y,
                                          child->childCountOrCellDimensions.cellDimensions.cellWidth,
                                          child->childCountOrCellDimensions.cellDimensions.cellHeight >> 1,
-                                         child->u14.b[0], child->u10.word,
-                                         glyph->u14.w, enabled,
+                                         child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
+                                         glyph->renderValueOrSetupOrShade.renderValue, enabled,
                                          &child->link1C.cachedItem->list->uv,
                                          atlas, flags);
                         } else {
                             func_00193D70(x + child->x + xOffset, y + child->y,
                                          child->childCountOrCellDimensions.cellDimensions.cellWidth,
                                          child->childCountOrCellDimensions.cellDimensions.cellHeight >> 1,
-                                         child->u14.b[0], child->u10.word,
-                                         glyph->u14.w, enabled,
+                                         child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
+                                         glyph->renderValueOrSetupOrShade.renderValue, enabled,
                                          &child->link20.sourceItem->list->uv,
                                          atlas, flags);
                         }
-                        glyphState = child->u10.byte[0];
+                        glyphState = child->parentDimensionsOrRenderWord.fadeByte.value;
                         if (glyphState != 0) {
-                            child->unk2++;
+                            child->drawCount++;
                         }
                         if (glyphState < FR_FONT_FADE_COMPLETE) {
                             ready = 0;
@@ -823,7 +823,7 @@ u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph) {
     s32 totalAdvance = 0;
 
     if (childGlyph != NULL) {
-        s8 childSpacing = parentGlyph->u0.b.b1;
+        s8 childSpacing = parentGlyph->glyphCodeOrContext.byteRoles.spacing;
 
         do {
             totalAdvance += childGlyph->advance;
@@ -844,7 +844,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
     for (parentGlyph = glyphChain->chainHead; parentGlyph != NULL; parentGlyph = parentGlyph->next) {
         childGlyph = parentGlyph->link1C.firstChild;
         if (childGlyph != NULL) {
-            s8 childSpacing = parentGlyph->u0.b.b1;
+            s8 childSpacing = parentGlyph->glyphCodeOrContext.byteRoles.spacing;
 
             do {
                 totalAdvance += childGlyph->advance;
@@ -1074,4 +1074,3 @@ INCLUDE_SDATA(const s32, "interface/frFont", frFontSharedRenderFlags);
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB180);
-

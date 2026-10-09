@@ -42,22 +42,46 @@ typedef struct UiSprite {
 /* Retained parent/child glyph record shared by font and interface code (0x44). */
 typedef struct FrFontGlyph {
     union {
-        s16 h;
-        struct { s8 b0; s8 b1; } b;
-    } u0;
-    u16 unk2;
+        u16 glyphCode;
+        struct {
+            u8 encodedContextByte;
+            s8 spacing;
+        } byteRoles;
+    } glyphCodeOrContext;
+    /* Child draw count: setup clears it; nonzero-fade draws increment it, and
+     * the fade helper also uses it to select the jitter phase. */
+    u16 drawCount;
     s32 x;
     s32 y;
     s32 advance;
+    /* Parent glyphs store dimensions; render words also carry a fade byte. */
     union {
-        u32 word;
-        u16 half[2];
-        u8 byte[4];
-    } u10;
+        struct {
+            u16 cellAdvance;
+            u16 cellHeight;
+        } parentDimensions;
+        u32 renderWord;
+        struct {
+            u8 value;
+            u8 opaque[3];
+        } fadeByte;
+    } parentDimensionsOrRenderWord;
+    /* Rendering, glyph setup, and message shade paths use distinct byte views. */
     union {
-        u32 w;
-        u8 b[4];
-    } u14;
+        u32 renderValue;
+        struct {
+            u8 firstOption;
+            u8 fontIndex;
+            u8 secondOption;
+            u8 sharedFlags;
+        } setupBytes;
+        struct {
+            u8 green;
+            u8 red;
+            u8 blue;
+            u8 opaque;
+        } shadeColor;
+    } renderValueOrSetupOrShade;
     /* Parent: child count. Font item: child cell dimensions. */
     union {
         u32 childCount;

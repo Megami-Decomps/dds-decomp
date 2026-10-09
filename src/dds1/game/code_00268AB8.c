@@ -598,11 +598,8 @@ void mnuStoreTaskResult(char *audioPath) {
 extern u32 D_003D9168[];
 
 
-extern s32 fileGetResourceHandle(u32);
 
-extern u32 fileGetLoadedDataAddress(u32);
 
-extern s32 fileGetResourceSize(u32);
 
 extern void filePollEntryCleanup(u32);
 
@@ -616,9 +613,9 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
     s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)D_003BD8D4);
 
     if (ready != 0) {
-        s32 resourceHandle = fileGetResourceHandle(D_003BD8D4);
-        u32 fileDataAddress = fileGetLoadedDataAddress(D_003BD8D4);
-        s32 fileBytes = fileGetResourceSize(D_003BD8D4);
+        s32 resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)D_003BD8D4);
+        u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)D_003BD8D4);
+        s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)D_003BD8D4);
         struct SdfMemBlock *allocation;
 
         filePollEntryCleanup(D_003BD8D4);
