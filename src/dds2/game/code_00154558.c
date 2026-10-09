@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_scene_record.h"
 #include "common.h"
 #include "dds3_path.h"
 extern void func_00140BC8(const char *name);
@@ -124,10 +125,6 @@ extern u32 fldCurrentBgmHandle;
 extern u32 fldArchiveLoadPending;
 
 extern u32 fldFixedArchiveLoadPhase;
-
-extern u32 fldSceneRecords;
-
-extern s32 fldSceneRecordResource;
 
 extern u32 fldSceneReady;
 
@@ -289,8 +286,6 @@ extern void fldSetSwayMode(s32);
 extern s32 fldSceneBgmArchiveTrack;
 
 extern s32 fldSceneBgmArchivePhase;
-
-extern s32 fldSceneRecordCount;
 
 extern s32 D_00436300;
 
