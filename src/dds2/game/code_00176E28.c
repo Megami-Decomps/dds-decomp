@@ -66,7 +66,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern s32 func_00167A10(EffPacketParams *);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void func_001781F8(EffRecordPool *pool);
-extern s32 effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
+extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
 
 
 
@@ -83,7 +83,7 @@ extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 extern u32 effMiscRand(void *state);
 
 extern u8 effDefaultRandomState[];
-extern s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
+extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_003B12B0[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -771,13 +771,13 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
 }
 
 /* Address the five-position record for one fan group. */
-s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 groupIndex) {
-    return (s32)(pool->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
+void *effGetExtendedGroupElement(EffRecordPool *pool, s32 groupIndex) {
+    return pool->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
 /* Address the five color words for one fan group. */
-s32 effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
-    return (s32)(pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
+u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 groupIndex) {
+    return (u32 *)(pool->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
 }
 
 /* Select the record pool's packet submission mode. */
