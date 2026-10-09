@@ -19,6 +19,62 @@ typedef struct PcpScatterParticle {
     f32 heightOffset;
 } PcpScatterParticle;
 
+/* The first ring variant retains its complete copied parameter head in the
+ * runtime owner. Its particle array follows the fixed 0x18C-byte owner. */
+typedef struct PcpScatterParamsA {
+    f32 origin[4];
+    f32 matrix[16];
+    u32 packetQueueIndex;
+    u8 loop;
+    u8 pad55[3];
+    s32 duration;
+    u32 particleCount;
+    u32 segmentsPerParticle;
+    u32 randomDelayRange;
+    s32 fadeIn;
+    s32 fadeRange;
+    f32 angleStepBase;
+    f32 angleStepJitter;
+    f32 riseStep;
+    f32 tiltScale;
+    f32 heightOffsetBase;
+    f32 heightOffsetJitter;
+    f32 initialRise;
+    f32 riseDecay;
+    u8 pad90[4];
+    f32 initialTiltSpeed;
+    f32 tiltDamping;
+    f32 radiusBase;
+    f32 radiusJitter;
+    f32 targetRadius;
+    f32 targetRadiusJitter;
+    s32 baseColor;
+    u32 uSpan; /* Horizontal UV extent. */
+    u32 vSpan; /* Vertical UV extent. */
+    u8 padB8[0x80];
+} PcpScatterParamsA;
+
+typedef struct PcpScatterInstanceA {
+    f32 matrix[16];
+    PcpScatterParamsA params;
+    PcpScatterParticle *particles;
+    f32 scale;
+    u32 color;
+    PcpScatterDraw *scatterObject;
+    SdfMemBlock *allocationHandle;
+} PcpScatterInstanceA;
+
+typedef char PcpScatterParamsA_size_must_be_0x138[
+    (sizeof(PcpScatterParamsA) == 0x138) ? 1 : -1];
+typedef char PcpScatterInstanceA_size_must_be_0x18C[
+    (sizeof(PcpScatterInstanceA) == 0x18C) ? 1 : -1];
+typedef char PcpScatterInstanceA_params_offset_must_be_0x40[
+    ((u32)&((PcpScatterInstanceA *)0)->params == 0x40) ? 1 : -1];
+typedef char PcpScatterInstanceA_particles_offset_must_be_0x178[
+    ((u32)&((PcpScatterInstanceA *)0)->particles == 0x178) ? 1 : -1];
+typedef char PcpScatterInstanceA_allocationHandle_offset_must_be_0x188[
+    ((u32)&((PcpScatterInstanceA *)0)->allocationHandle == 0x188) ? 1 : -1];
+
 /* B's copied parameter block and runtime owner. Its particle pointer follows
  * the copied parameters, and the variable particle array follows the owner. */
 typedef struct PcpScatterParamsB {
