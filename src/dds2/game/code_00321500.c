@@ -63,7 +63,39 @@ u32 mnuCreateReleaseCallbackNode(void) {
 }
 extern void mnuClearResourceList(MnuCallbackList *list);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321528);
+/* Rebuild the row's named states and attach its tagged parameter groups. */
+void func_00321528(u32 callbackList, MenuRegistryRecord *row) {
+    s32 groupIndex;
+    s32 recordIndex;
+    MenuShortRecordList *group;
+    MenuShortRecord *tag;
+    MenuStateRecord *state;
+
+    if (callbackList != 0) {
+        mnuClearResourceList((MnuCallbackList *)callbackList);
+        group = row->secondLists;
+        for (groupIndex = 0; groupIndex < row->secondCount; groupIndex++, group++) {
+            state = NULL;
+            tag = group->records;
+            for (recordIndex = 0; recordIndex < group->count; recordIndex++, tag++) {
+                if (tag->kind == 0x20) {
+                    state = mnuCreateNamedRecord(tag);
+                    func_00320CE0((MnuCallbackList *)callbackList, 0, (u32)state);
+                } else if (tag->kind == 0x10) {
+                    if (state != NULL) {
+                        memcpy(&state->pad12, tag, sizeof(*tag));
+                        state->flags.bits.valueGated = 1;
+                    }
+                } else if (tag->kind == 0x30) {
+                    if (state != NULL) {
+                        memcpy(&state->pad1A, tag, sizeof(*tag));
+                        state->flags.bits.hasRange = 1;
+                    }
+                }
+            }
+        }
+    }
+}
 
 void func_003216A8(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
