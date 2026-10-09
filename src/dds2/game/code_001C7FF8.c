@@ -220,7 +220,7 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C82D8);
 
 extern SceneKindTable *D_00438F4C;
 
-extern void func_001C8518();
+extern u16 *func_001C8518(s32, s16 *, u16, u16, u16);
 
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
@@ -265,7 +265,79 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
     return D_00438F4C->value[type];
 }
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8518);
+extern u16 D_003B6810[12];
+extern u16 D_003B55D0[0x260];
+
+u16 *func_001C8518(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
+    BattleSceneObject *object = (BattleSceneObject *)address;
+    s32 wanted;
+    BtlUnit *unit;
+    u16 *source;
+    u16 *out;
+    s32 gathered;
+    s32 count;
+    DatCommandSelector *selectors;
+    DatCommandRecord *records;
+    s32 i;
+
+    if (!(btlUnitStatusPair(object->owner->unit) & 0x1400) && !(object->owner->unit->partyRecord.flags & 0x10)) {
+        wanted = firstKind ? firstKind : 5;
+    } else {
+        wanted = firstKind;
+    }
+    btlGetRuntime();
+    unit = object->owner->unit;
+    out = D_003B6810;
+    memset(out, 0, 0x18);
+    selectors = datCommandSelectors;
+    records = datCommandRecords;
+    source = unit->partyRecord.effectData;
+    gathered = 0;
+    for (i = 0; i < 24; i++, source++) {
+        u16 id = *source;
+        s32 kind = selectors[id].kind;
+        if (kind != wanted && kind != secondKind && kind != thirdKind) {
+            continue;
+        }
+        if (wanted == 2 && id == 0xE0) {
+            continue;
+        }
+        if (!(records[id].unk_01 & 2)) {
+            continue;
+        }
+        if ((btlUnitStatusPair(object->owner->unit) & 0x1400) || (object->owner->unit->partyRecord.flags & 0x10)) {
+            if (selectors[id].kind == 5) {
+                continue;
+            }
+        } else if (selectors[id].kind != 5) {
+            continue;
+        }
+        if (id != 0) {
+            *out++ = id;
+            gathered++;
+        }
+    }
+    count = gathered;
+    out = D_003B55D0;
+    memcpy(out, D_003B6810, count * 2);
+    i = 0;
+    while (i < count) {
+        if (out[i] >= 0x220) {
+            s32 j;
+            for (j = i; j < count; j++) {
+                out[j] = out[j + 1];
+            }
+            count--;
+        } else {
+            i++;
+        }
+    }
+    if (wanted == 0 || wanted == 5) {
+        count++;
+    }
+    *outCount = count;
+    return out;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 

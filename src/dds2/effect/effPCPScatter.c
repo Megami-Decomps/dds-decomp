@@ -24,7 +24,6 @@
 #define EFF_SCATTER_RANDOM_MIDPOINT 0.5f
 #define EFF_SCATTER_RANDOM_SPAN 2.0f
 #define EFF_SCATTER_HALF_SEGMENT 0.5f
-#define EFF_SCATTER_DUPLICATE_WORK_KIND 6
 #define EFF_SCATTER_POOL_SLOTS_PER_GROUP 3
 #define EFF_SCATTER_POOL_RECORD_WORDS_PER_SLOT 8
 #define EFF_SCATTER_POOL_AUX_WORDS_PER_SLOT 2
@@ -709,7 +708,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
-        work->duplicatedHandles[0] = effParamWorkCreate(EFF_SCATTER_DUPLICATE_WORK_KIND, particleParams);
+        work->duplicatedHandles[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
         for (i = 1; i < count; i++) {
             work->duplicatedHandles[i] = effParamWorkDuplicate(work->duplicatedHandles[0]);
         }
@@ -1042,7 +1041,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
-        work->duplicatedHandles[0] = effParamWorkCreate(EFF_SCATTER_DUPLICATE_WORK_KIND, particleParams);
+        work->duplicatedHandles[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
         for (i = 1; i < count; i++) {
             work->duplicatedHandles[i] = effParamWorkDuplicate(work->duplicatedHandles[0]);
         }

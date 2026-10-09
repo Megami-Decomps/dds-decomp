@@ -6078,8 +6078,6 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
     return task;
 }
 
-extern void sdfFreeMemoryFromEitherHeap(s32);
-
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3CA0);
 
 void btlStartGunFinishLoad(s32 task) {
@@ -6089,7 +6087,7 @@ void btlStartGunFinishLoad(s32 task) {
         return;
     }
     if (*(s32 *)(actor + 0x30C) != 0) {
-        sdfFreeMemoryFromEitherHeap(*(s32 *)(actor + 0x30C));
+        sdfFreeMemoryFromEitherHeap((void *)(u32)(*(u32 *)(actor + 0x30C)));
         *(s32 *)(actor + 0x30C) = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
@@ -9788,11 +9786,11 @@ void btlReleaseWorkBuffers(void) {
     s32 context = btlGetRuntime();
     u32 pointer = *(u32 *)(context + 0x580);
     if (pointer != 0) {
-        sdfReleaseChipOrRetainedResource(pointer);
+        sdfReleaseChipOrRetainedResource((void *)pointer);
         *(u32 *)(context + 0x580) = 0;
     }
     if (*(u32 *)(context + 0x57C) != 0) {
-        sdfReleaseChipOrRetainedResource(*(u32 *)(context + 0x57C));
+        sdfReleaseChipOrRetainedResource((void *)(*(u32 *)(context + 0x57C)));
         *(u32 *)(context + 0x57C) = 0;
     }
 }

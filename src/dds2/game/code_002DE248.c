@@ -215,9 +215,12 @@ typedef struct EffModelResource {
     s32 kind;
     MdlCtx *model;
     u32 attributes;
-    void *childResource;
-    void *source;
+    struct EffSpanTable *childResource;
+    struct EffSpanConfig *source;
 } EffModelResource;
+
+typedef char EffModelResource_size_must_be_0x40[
+    (sizeof(EffModelResource) == 0x40) ? 1 : -1];
 
 typedef struct EffModelCreateRequest {
     u8 pad0[0x2C];
@@ -488,6 +491,23 @@ typedef struct EffClassOps {
     u32 payloadSize;           /* 0x14 */
 } EffClassOps;
 
+struct EffModelResource;
+struct EffSpanConfig;
+struct EffSpanTable;
+
+/* This table has a single populated kind with span-resource callbacks. */
+typedef struct EffModelResourceOps {
+    void (*initialize)(struct EffModelResource *); /* 0x00 */
+    struct EffSpanTable *(*createResource)(struct EffSpanConfig *, MdlCtx *); /* 0x04 */
+    void (*destroyResource)(struct EffSpanTable *); /* 0x08 */
+    void (*update)(struct EffModelResource *); /* 0x0C */
+    void (*draw)(struct EffModelResource *); /* 0x10 */
+    u32 payloadSize; /* 0x14 */
+} EffModelResourceOps;
+
+typedef char EffModelResourceOps_size_must_be_0x18[
+    (sizeof(EffModelResourceOps) == 0x18) ? 1 : -1];
+
 
 extern u8 *D_003E9CA8[];
 
@@ -532,7 +552,7 @@ extern EffResourceOps effModelBlockOperations[];
 extern EffResourceOps effRuntimeResourceOperations[];
 
 
-extern EffClassOps effModelResourceOperations[];
+extern EffModelResourceOps effModelResourceOperations[];
 
 extern char D_0045C1A0[];
 
@@ -6340,7 +6360,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     u32 size = effModelResourceOperations[kind].payloadSize;
     EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
 
-    effect->source = (u8 *)effect + headerSize;
+    effect->source = (EffSpanConfig *)((u8 *)effect + headerSize);
     effect->color = 0x80808080;
     effect->scale = 1.0f;
     effect->updateCount = 0;
@@ -6351,16 +6371,16 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     if (secondary != NULL) {
         effect->model = func_002DC1D0(secondary, param);
         effect->attributes = param;
-        effect->childResource = (void *)effModelResourceOperations[kind].createResource(effect->source, effect->model);
+        effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
     }
     return effect;
 }
 
-u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
-    return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+u32 effCreateModelResourceFromFile(FileJobPayload *work) {
+    void *first = fileResolvePrimaryBuffer(work);
+    void *second = fileResolveSecondaryBuffer(work);
+    return (u32)effCreateModelResourceWithInlineData(work->option, first, second, work->secondary.size);
 }
 
 void effDestroyModelResource(EffModelResource *effect) {
@@ -6378,7 +6398,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     effect->model = model;
     effInitModelVUState(model);
     effect->attributes = work->attributes;
-    effect->childResource = (void *)effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
+    effect->childResource = effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
     effModelResourceOperations[effect->kind].initialize(effect);
     return effect;
 }
@@ -8856,7 +8876,7 @@ s32 effPollPrimaryFile(void) {
         result = 0x400000;
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effQueuedFileHandle != 0) {
-            func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithPrefix);
+            func_0035C860(path, D_004386D8, D_0042CF58, request.nameWithExtension);
             result = 0x400002;
             fileWriteToPfs(effQueuedFileHandle, path);
         }
@@ -8880,7 +8900,7 @@ s32 effPollNamedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
+            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveImage(effFileQueue, path);
         }
@@ -8904,7 +8924,7 @@ s32 effPollAttachedFile(void) {
     } else if (request.completion.signedState == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (effFileQueue != 0) {
             strcpy(D_0045C1A0, request.name);
-            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
+            func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithExtension);
             result = 0x400002;
             fileQueueSaveVersionedImage(effFileQueue, path);
         }
@@ -9861,7 +9881,7 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
-        func_0020DAB8(effResourceBankDescriptor);
+        btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         slot->state = func_0020DFC8(effResourceBankDescriptor);
         slot->type = btlFormatSelectedResourceName(effResourceBankDescriptor, slot->fullName);
         slot->count = btlGetResourcePathVariant(effResourceBankDescriptor);
@@ -9887,17 +9907,17 @@ void effInitializeResourceQueue(void) {
         func_0020E368(effFileQueueNameRecord);
     }
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_004384E8);
-    btlSetResourceNameHeaderPairAlternate(effFileQueueNameRecord, 0xC2, 0xC8);
-    func_0020E850(effFileQueueNameRecord, 9);
+    btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
+    btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
     queueFile = fileQueueGetAt(effFileQueue, func_002FCA40());
     btlResourceRecordSetName(effFileQueueNameRecord, queueFile->name);
 }
 
 u32 effPollResourceQueue(void) {
     u32 result;
-    func_0020E380(effFileQueueNameRecord);
-    btlFormatResourceNameWithoutPrefix(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002FCA40())->name);
-    result = func_0020E7B0(effFileQueueNameRecord);
+    btlUpdateResourceNameEditor(effFileQueueNameRecord);
+    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002FCA40())->name);
+    result = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(result - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
         func_0020E368(effFileQueueNameRecord);
         effFileQueueNameRecord = 0;
@@ -9918,7 +9938,7 @@ void effQueueResource(const char *extension, const char *resourceName) {
     if (queue == 0) {
         queue = btlCreateResourceNameRecord(extension);
         effQueuedResourceNameRecord = queue;
-        btlSetResourceNameHeaderPairAlternate(queue, 0xC2, 0xC8);
+        btlSetResourceNamePosition(queue, 0xC2, 0xC8);
     }
     btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
 }
@@ -9928,13 +9948,13 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
 
     if (effQueuedResourceNameRecord == 0) {
         effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
-        btlSetResourceNameHeaderPairAlternate(effQueuedResourceNameRecord, 0xC2, 0xC8);
+        btlSetResourceNamePosition(effQueuedResourceNameRecord, 0xC2, 0xC8);
         return;
     }
-    func_0020E380(effQueuedResourceNameRecord);
-    btlFormatResourceNameWithPrefix(effQueuedResourceNameRecord, record->nameWithPrefix);
-    btlFormatResourceNameWithoutPrefix(effQueuedResourceNameRecord, record->name);
-    state = func_0020E7B0(effQueuedResourceNameRecord);
+    btlUpdateResourceNameEditor(effQueuedResourceNameRecord);
+    btlFormatResourceNameWithExtension(effQueuedResourceNameRecord, record->nameWithExtension);
+    btlFormatResourceNameWithoutExtension(effQueuedResourceNameRecord, record->name);
+    state = btlGetResourceNameSelectionStatus(effQueuedResourceNameRecord);
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {
@@ -9976,13 +9996,13 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
             count = func_00159BB0();
             for (i = 0; i < count; i++) {
                 func_0035C860(name, "GENERAL %d", i);
-                btlAppendEntry(effResourceBankEntries, name, 8, i, 0);
+                btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
             }
         }
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
-        func_0020DAB8(effResourceBankDescriptor);
+        btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         status->state = func_0020DFC8(effResourceBankDescriptor);
         status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status->fullName);
         status->count = btlGetResourcePathVariant(effResourceBankDescriptor);

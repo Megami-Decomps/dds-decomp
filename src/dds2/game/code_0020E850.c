@@ -66,19 +66,6 @@ extern void btlAppendCurrentUnitIdToCommandIndices(s32, s32);
 extern void btlSelectTargetsByMode();
 
 
-/* Resource-name record consumed by the overwrite prompt, not an effect task.
- * The adjacent name-record allocator reserves 0x38 bytes in both games. */
-typedef struct BtlResourceNameRecord {
-    s32 x;
-    s32 y;
-    u32 unk8;
-    s32 selection;
-    s32 nameLength;
-    u32 unk14;
-    s32 promptState;
-    char name[0x1C]; /* Suffix at 0x1C; editable name starts at 0x21. */
-} BtlResourceNameRecord;
-
 /* Linked-effect arguments share an owner and carry task-specific timing data.
  * The linked-number task allocates 0x34 bytes; the counter task uses 0x2C. */
 /* The ASM transfers two qwords, but the argument type retains natural alignment:
@@ -166,9 +153,9 @@ extern s32 btlAdvanceActorEffectLabelTask(void *args);
 extern s32 func_0020F5E0(BtlLinkedEffectArgs *args);
 
 
-/* Store the supplied name-record word without interpreting its bits. */
-void func_0020E850(BtlResourceNameRecord *record, u32 value) {
-    record->unk14 = value;
+/* Set the native editor's name-length limit. */
+void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength) {
+    record->maximumNameLength = maximumNameLength;
 }
 
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
@@ -1400,4 +1387,3 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", btlRandomState);
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
-

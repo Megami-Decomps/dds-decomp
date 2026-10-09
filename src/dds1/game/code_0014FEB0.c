@@ -9,12 +9,6 @@
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 
-typedef struct EffectHandler {
-    u32 (*handler)(u32);
-    u8 pad04[0x2C];
-} EffectHandler;
-
-extern EffectHandler D_0034DE40[];
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
@@ -34,7 +28,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
 
     copy->type = source->type;
     copy->arg = source->arg;
-    copy->instance = D_0034DE40[source->type].handler(argument);
+    copy->instance = effNodeTypeOperations[source->type].cloneInstanceWord(argument);
     return copy;
 }
 
