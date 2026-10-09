@@ -722,6 +722,7 @@ typedef char SdfFlagListWork_size_must_be_0x58[(sizeof(SdfFlagListWork) == 0x58)
 typedef char SdfFlagListWork_allocation_offset_must_be_0x54[
     ((unsigned long)&((SdfFlagListWork *)0)->allocation == 0x54) ? 1 : -1];
 
+SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *);
 void sdfResetFlagListEntries(SdfFlagListWork *);
 void sdfReleaseFlagListResource(SdfFlagListWork *);
 SdfFlagListWork *sdfInitializeFlagListFromResource(void *);
@@ -739,12 +740,10 @@ void itfSetPackedRgbAlpha(SdfFlagListWork *, u32);
 void itfCopyColorFields(SdfFlagListWork *, const SdfFlagListParams *);
 
 #ifdef VERSION_DDS1
-SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *);
 void func_002CEC40(SdfFlagListWork *);
 void func_002CF248(SdfFlagListWork *);
 void effUpdateSelectionEntryState(SdfFlagListWork *);
 #elif defined(VERSION_DDS2)
-SdfFlagListWork *func_00316528(const SdfFlagListParams *);
 void func_00316680(SdfFlagListWork *);
 void func_00316C88(SdfFlagListWork *);
 void func_002DEC08(SdfFlagListWork *);
