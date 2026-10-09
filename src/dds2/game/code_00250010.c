@@ -198,7 +198,7 @@ void evtAdvanceSkyTransition(void) {
     }
 }
 
-s32 evtUpdateSkyTask(void) {
+s32 evtUpdateSkyTask(KwlnTask *task) {
     evtAdvanceSkyTransition();
     func_00134A18();
     if (evtSkyOverlayEnabled != 0) {
@@ -208,7 +208,7 @@ s32 evtUpdateSkyTask(void) {
     return 0;
 }
 
-void evtResetSkyTaskFlags(void) {
+void evtResetSkyTaskFlags(KwlnTask *task) {
     evtSkyTransitionActive = 0;
     evtSkyOverlayEnabled = 0;
 }
