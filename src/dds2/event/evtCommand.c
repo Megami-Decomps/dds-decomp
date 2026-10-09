@@ -166,7 +166,7 @@ s32 func_00240D20(void) {
 }
 
 /* Apply four effect parameters after resolving every input object. */
-s32 func_00240DE0(void) {
+s32 evtCommandSetMagatuhiSourcePoints(void) {
     struct EffectObj *primary;
     struct EffectObj *point0;
     struct EffectObj *point1;

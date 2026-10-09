@@ -73,9 +73,9 @@ extern void func_00150F20(void);
 
 extern s32 func_00150F10(void);
 
-extern void func_00150A60(void);
+extern void fldUpdateDevilizeEventSequence(void);
 
-extern void func_00153410(void);
+extern void fldUpdateTargetGuideController(void);
 
 extern void func_00154F18(s32);
 
@@ -210,7 +210,7 @@ extern u32 D_00435F3C;
 
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 
-void func_001258B8(void);
+void fldLoadPlayerModel(void);
 
 extern u32 D_00389790[];
 
@@ -911,7 +911,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D60);
 
-void func_001258B8(void) {
+void fldLoadPlayerModel(void) {
     s32 model;
 
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x20) {
@@ -975,7 +975,7 @@ INCLUDE_ASM(const s32, "game/code_00124040", func_00125B10);
 void fldPrepareResourceBuffer(void) {
     void *source;
     void *buffer;
-    func_001258B8();
+    fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = (u32)sdfAllocGeneralBlock(D_00435F44);
     source = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldPlayerModelResource);
@@ -1131,7 +1131,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412EB0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412EC0);
 
-void func_00126110(f32 *input) {
+void fldSpawnPlayerUnits(f32 *input) {
     f32 work[4];
     EffWorldNode *player;
     s32 locationFlags;
@@ -1570,7 +1570,7 @@ extern u8 fldTestSceneLifecycleFlags(u32 mask);
 extern s16 D_00389898[];
 
 /* Complete a delayed camp handoff or advance the player scene transition. */
-s32 func_001273E8(void) {
+s32 fldUpdateCampMenuTransition(void) {
     FldAreaWork *scene;
     s32 control;
 
@@ -1755,7 +1755,7 @@ s32 func_001278D0(void) {
     mode = fldGetCampSceneControlMode();
     if (mode < 3) {
         if (mode > 0) {
-            func_001273E8();
+            fldUpdateCampMenuTransition();
             if (controller->stage == 4 && D_003898AC[0] != 0 && D_00389988[0x5C / 4] != 0) {
                 fldReportCampVolumeError();
             }
@@ -1865,7 +1865,7 @@ s32 func_001278D0(void) {
         if (fldAreaState.deferredExit == 1) fldStartDeferredFieldExit();
         break;
     case 4:
-        if (fldAreaState.unk13C != 0 && D_00389988[0x5C / 4] != 0) func_00153410();
+        if (fldAreaState.unk13C != 0 && D_00389988[0x5C / 4] != 0) fldUpdateTargetGuideController();
         D_004360E8 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
         if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
@@ -1878,11 +1878,11 @@ s32 func_001278D0(void) {
             func_00123B88(fldAreaState.floor, fldAreaState.unkC0,
                           fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_00389988[0] == 0) {
-            func_001273E8();
+            fldUpdateCampMenuTransition();
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_00389988[0] == 0) fldUpdateNextFloorTransition();
         }
-        if (func_00150F10() != 0) func_00150A60();
+        if (func_00150F10() != 0) fldUpdateDevilizeEventSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.targetGuideActive == 1) {
             func_00154F18(1);

@@ -51,7 +51,7 @@ INCLUDE_ASM(const s32, "game/code_00100000", func_001001D0);
 
 s32 func_001001D8(void) {
     evtResetDisplayProjectionAndVectorState();
-    func_001038D0();
+    kwlnResetPadInputAndMotorState();
     kwlnTaskCreate(D_00435BB8, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
     kwlnTaskCreate(D_00435BC0, 0x2710, 0, 0, func_00101D30, 0, 0);
     kwlnTaskCreate("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);

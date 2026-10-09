@@ -77,7 +77,7 @@ extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 
 /* Apply and restore a selected group's two-color and direction keyframe. */
-void func_001624D0(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
+void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
     BtlUnit *selected[16];
     f32 direction[4];
     u32 packedStart[4];

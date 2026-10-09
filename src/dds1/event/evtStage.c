@@ -133,7 +133,7 @@ void evtCreateEventScriptProcess(s32 eventId) {
 
 const char D_003AC038[0x28] = "kill field script -> [%s]\n";
 
-void func_00220178(void)
+void evtKillFieldScriptTasks(void)
 {
     s32 state;
     s32 taskIndex;

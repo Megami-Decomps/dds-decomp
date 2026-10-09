@@ -284,7 +284,7 @@ extern void func_001DC0E8(void);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern s32 func_001A3638(void);
+extern s32 btlMarkInactiveActorCandidates(void);
 
 s32 btlBothSidesActive(BtlUnit *unit);
 
@@ -1580,7 +1580,7 @@ extern s32 btlCountTasksByKind(u16 kind);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern s32 func_001A3638(void);
+extern s32 btlMarkInactiveActorCandidates(void);
 
 extern void fldUpdateSceneGroupTask(s32 task);
 
@@ -1593,7 +1593,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
     unit->status.flags = flags & ~1;
     if (flags & 0x200) {
         btlRepositionPartyAroundBattleCenter();
-        func_001A3638();
+        btlMarkInactiveActorCandidates();
     }
     if (btlCountTasksByKind(0x3C) != 0) {
         return;
@@ -1607,7 +1607,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
     if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(task + 0x18)) != 0) {
         if ((u32)unit->status.flags & 0x200) {
             func_001A1960(&unit->partyRecord, 8);
-            func_001A2258(unit);
+            btlRemovePartyActorAndShiftEntries(unit);
         }
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup((BtlTask *)task);
@@ -1749,13 +1749,13 @@ void func_001CF7A0(BtlTask *task) {
     }
 }
 
-extern s32 func_001A8640(BtlUnit *);
+extern s32 btlRollEscapeChance(BtlUnit *);
 
 void btlRecordLinkedActorOutcome(BtlTask *object) {
     s32 context = btlGetRuntime();
     BtlUnit *target = object->unit;
     *(s32 *)(context + 0x254) += 1;
-    if (func_001A8640(target)) {
+    if (btlRollEscapeChance(target)) {
         *(u32 *)(context + 0x1F4) |= 0x2000;
     } else {
         *(u32 *)(context + 0x1F4) |= 0x1000;

@@ -144,7 +144,7 @@ void *func_0011D3E8(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, 
     return packet;
 }
 
-void *func_0011D570(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+void *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);
 
     packet[0] = 4;
@@ -1127,7 +1127,7 @@ void func_00121B88(s32 room, s32 stage, f32 x, f32 z, f32 unused) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121DE0);
 
-s32 func_00121ED8(s32 floor, f32 x, f32 z) {
+s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z) {
     FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldAreaState.area, floor);
     s32 cellX;
     s32 row;

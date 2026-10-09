@@ -155,7 +155,7 @@ extern s32 func_0013FA98(s32 param0, s32 param1);
 
 extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
 
-extern void func_00140238(void);
+extern void fldStartSelectedActorTask(void);
 
 extern void fldStopCurrentBgm(void);
 
@@ -1534,7 +1534,7 @@ void func_00156C78(void) {
 }
 
 s32 func_00156C98(void) {
-    func_00140238();
+    fldStartSelectedActorTask();
     return 1;
 }
 
@@ -1756,10 +1756,10 @@ s32 fldCmdSetTargetGuideMode(void) {
     return 1;
 }
 
-extern void func_001536B8(s32);
+extern void fldSetTargetGuideMode(s32);
 
 s32 func_00157308(void) {
-    func_001536B8(scrReadIntParameter(0));
+    fldSetTargetGuideMode(scrReadIntParameter(0));
     return 1;
 }
 
