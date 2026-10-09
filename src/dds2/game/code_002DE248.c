@@ -220,7 +220,6 @@ extern void fileDispatchJobTypeCallback(void *, u32);
 
 extern void fileJobInvokePositionCallback(void *, void *);
 
-extern s32 func_002D5AA8(void *);
 
 typedef struct EffResourceBankSlot {
     u8 pad_00[0xC8];
@@ -9705,7 +9704,7 @@ u32 effPollNamedFileJob(void) {
             fileQueueDestroy((struct FileQueue *)effFileQueue);
         }
         strcpy((char *)D_0045C1A0, ((EffResourceBankSlot *)record)->name);
-        effFileQueue = func_002D5AA8(record);
+        effFileQueue = fileQueueCreateFromCommandState((const char *)record);
         D_0045C1F0 = *(EffectBlock128 *)effFileQueue;
         D_004386B0 = 0;
         D_003FFA84[0] = 0;

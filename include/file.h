@@ -144,6 +144,7 @@ typedef char FileQueue_first_offset_must_be_0x8C[
     ((u32)&((FileQueue *)0)->first == 0x8C) ? 1 : -1];
 
 FileQueue *fileQueueCreate(void);
+FileQueue *fileQueueCreateFromCommandState(const char *entry);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
 
 /* One of the four device-read slots at FileManWork + 0x20. */
