@@ -109,12 +109,20 @@ typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
 typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
     ((u32)&((SdfTexBuf *)0)->textureRegister == 0x28) ? 1 : -1];
 
-/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams.
- * Allocation mode is an unsigned classification: zero is a free range. */
+/* Known SdfTexResource allocation categories. Unknown u32 values are preserved. */
+enum SdfTexResourceAllocationMode {
+    SDF_TEX_RESOURCE_FREE = 0,
+    SDF_TEX_RESOURCE_FRAME = 1,
+    SDF_TEX_RESOURCE_TEXTURE = 2,
+    SDF_TEX_RESOURCE_CLUT = 3,
+    SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
+};
+
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
 typedef struct SdfTexResource {
     struct SdfTexResource *next; /* 0x00 */
     struct SdfTexResource *prev; /* 0x04 */
-    u32 allocationMode;         /* 0x08 */
+    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
     u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
     s16 width;                  /* 0x14 */

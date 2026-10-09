@@ -1079,7 +1079,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
                 textureHeight = (textureHeight + SDF_STREAM_NARROW_HEIGHT_MASK) & ~SDF_STREAM_NARROW_HEIGHT_MASK;
             }
         }
-        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, 2, 0);
+        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, SDF_TEX_RESOURCE_TEXTURE, 0);
         node->textureHead = texture;
         node->resourceWord = texture->word;
     }
