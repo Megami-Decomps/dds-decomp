@@ -118,7 +118,6 @@ extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packet);
 
 extern s32 func_0011E278();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);

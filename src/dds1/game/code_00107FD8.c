@@ -455,7 +455,6 @@ extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_002D4C80(const void *, void *, s32);
 
-extern void sdfAppendDmaTagToList(void *, void *);
 
 void func_00108E60(void) {
     void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
@@ -463,7 +462,7 @@ void func_00108E60(void) {
     sdfInitPacketList(list);
     framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
-    sdfAppendDmaTagToList(list, framePacket);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);
@@ -478,7 +477,7 @@ void func_00108F00(void) {
     sdfInitPacketList(list);
     framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
-    sdfAppendDmaTagToList(list, framePacket);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
         surface->append((SdfListHead *)surface, list);

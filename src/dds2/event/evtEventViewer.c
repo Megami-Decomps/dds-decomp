@@ -6,7 +6,6 @@
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
 extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 

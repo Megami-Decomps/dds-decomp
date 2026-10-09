@@ -45,7 +45,6 @@ void dds3RemoveWorldObjectNode(struct EffWorldNode *ptr);
 void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 void *dds3GetWorldObject(void);
-EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
 s32 strcmp(const char *a, const char *b);
 char *strcpy(char *dst, const char *src);
 

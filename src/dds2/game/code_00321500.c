@@ -603,15 +603,15 @@ void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
             if (record->parameters[1] == 0) {
                 entry->control.bits.repeatMode = 1;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             } else if (record->parameters[1] == 1) {
                 entry->control.bits.repeatMode = 2;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             } else if (record->parameters[1] == 2) {
                 entry->control.bits.repeatMode = 3;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             }
             break;
         }
@@ -635,7 +635,7 @@ s32 func_003233E8(s32 context) {
             f32 currentX;
             f32 currentY;
             s32 currentYInteger;
-            u8 alpha;
+            u8 movementEffectScale;
 
             memset(vector, 0, sizeof(vector));
             /* Save X across advancement, then reuse the scalar for step length. */
@@ -653,12 +653,12 @@ s32 func_003233E8(s32 context) {
             vector[1] = currentY - previousY;
             value = sdfVectorLength(vector);
             if (value * 10.0f >= 255.0f) {
-                alpha = 255;
+                movementEffectScale = 255;
             } else {
-                alpha = (u8)((u8)value * 10.0f);
+                movementEffectScale = (u8)((u8)value * 10.0f);
             }
-            /* The high byte stores the movement alpha. */
-            ((u8 *)&entry->unk38)[1] = alpha;
+            /* Store the clamped movement step scale in the second byte. */
+            entry->movementEffectScale = movementEffectScale;
 
             if (entry->x0 < -50.0f || (f32)parameters->width + 50.0f < entry->x0 ||
                 (f32)currentYInteger < -200.0f ||
@@ -707,7 +707,7 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
         if (!entry->flagsBits.halfRemainingCountReached) {
             if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
                 registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-                if (entry->remaining <= (registry->unk08 >> 1)) {
+                if (entry->remaining <= (registry->initialRemainingCount >> 1)) {
                     entry->flagsBits.halfRemainingCountReached = 1;
                 }
             }

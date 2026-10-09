@@ -518,7 +518,7 @@ typedef struct FileQueue {
     f32 transformValue; /* 0x74 */
     u8 pad78[8];
     s32 count;
-    u32 unk84;
+    u32 updateFrame;
     /* Disk reads at 295A90/2D5B38 use a relative job offset here;
      * runtime append at 293F60/2D3FC8 stores the tail pointer. */
     union {
@@ -4196,7 +4196,7 @@ void fileQueueInitTransform(void *queue)
 
 void fileJobResetAndInitTransform(FileJob *job) {
     memset(job, 0, 0x90);
-    job->scaleFlags = 1;
+    job->updateFlags = FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE;
     job->unk88[0] = 8;
     job->unk88[1] = 0;
     job->unk88[2] = 0;
@@ -4247,7 +4247,7 @@ FileQueue *fileQueueCreate(void) {
     FileQueue *queue = sdfAllocSizeClassBlock(0x90);
     memset(queue, 0, 0x90);
     queue->count = 0;
-    queue->unk84 = 0;
+    queue->updateFrame = 0;
     fileQueueInitTransform(queue);
     return queue;
 }
@@ -4355,12 +4355,12 @@ void fileQueueUpdate(FileQueue *queue)
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
     total = queue->scale * queue->transformValue;
-    limit = queue->unk84;
+    limit = queue->updateFrame;
     for (job = queue->first; job != NULL; job = job->next) {
-        if (limit < job->unk80) {
+        if (limit < job->startFrame) {
             continue;
         }
-        if (job->scaleFlags & 2) {
+        if (job->updateFlags & FILE_JOB_UPDATE_FLAG_SKIP_FRAME_UPDATE) {
             continue;
         }
         if (job->xformFlags & 0x18) {
@@ -4387,7 +4387,7 @@ void fileQueueUpdate(FileQueue *queue)
         }
         fileJobInvokeTypeCallback((FileJobPayload *)job->id);
     }
-    queue->unk84++;
+    queue->updateFrame++;
 }
 
 void fileQueueDestroy(FileQueue *queue) {
@@ -4505,7 +4505,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     total = scale * queue->transformValue;
     for (job = queue->first; job != NULL; job = job->next) {
         jobScale = job->scale;
-        if (job->scaleFlags & 1) {
+        if (job->updateFlags & FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE) {
             jobScale = jobScale * total;
         }
         fileJobInvokeScaleCallback((FileJobPayload *)job->id, jobScale);
@@ -4683,7 +4683,7 @@ void func_00295018(FileQueue *queue, s32 slot) {
         fd = func_0030E8F0(path, 0x602);
     }
     header = *queue;
-    header.unk84 = 0;
+    header.updateFrame = 0;
     size = sizeof(FileQueue);
     header.entryOffset = size;
     header.first = NULL;
@@ -4788,7 +4788,7 @@ void func_002954F0(FileQueue *queue, s32 slot) {
     func_0030F190(fd, &image, sizeof(image));
 
     header = *queue;
-    header.unk84 = 0;
+    header.updateFrame = 0;
     size = sizeof(FileQueue);
     header.entryOffset = size;
     header.first = NULL;

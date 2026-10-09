@@ -3,7 +3,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 
-struct NodeB;
+struct WorldIndexNode;
 
 extern u32 func_00128780(u32, u32, u32, u32, u32, u32);
 
@@ -276,12 +276,12 @@ EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 ki
     return NULL;
 }
 
-extern struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
+extern struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 extern void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 
-struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
+struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
     EvtWorldTable *data = object->data;
-    struct NodeB *indexObject;
+    struct WorldIndexNode *indexObject;
     EffWorldNode *node;
 
     if (data->slots[kind].count == 0) {

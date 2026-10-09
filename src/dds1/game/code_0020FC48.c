@@ -943,7 +943,43 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
     return 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002111A0);
+/* Counter eligibility for a command against the selected party members. */
+u16 func_002111A0(s32 commandId, u32 memberMask) {
+    u8 *entryList[5];
+    s32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        if (memberMask & (1 << i)) {
+            if (datGameState->party[i].flags & 1) {
+                entryList[count++] = (u8 *)&datGameState->party[i];
+            }
+        }
+    }
+    if ((datCommandRecords[commandId].attribute.bits & 0x400000FF) == 0x40000002 &&
+        (~datCommandRecords[commandId].restriction & 0x7FFF) == 0x4000 &&
+        btlListHasMarkedFlag(entryList, count) == 0) {
+        return 2;
+    }
+    switch (commandId) {
+    case 0xC4:
+        if (datGameState->world.fieldFlags & 1) {
+            return 4;
+        }
+        break;
+    case 0xC5:
+        if (datGameState->world.fieldFlags & 2) {
+            return 4;
+        }
+        break;
+    case 0xC6:
+        if (datGameState->world.fieldFlags & 4) {
+            return 4;
+        }
+        break;
+    }
+    return btlDetermineCommandCounterEligibility(entryList, count, 0, commandId);
+}
 
 
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
@@ -1275,7 +1311,6 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 extern u32 effGetWindTextureHandle(void);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(s32, void *);
 extern u32 btlMulColor(u32, u32);
 extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
 
@@ -1291,7 +1326,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList(list, tag);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
@@ -1326,7 +1361,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList(list, tag);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
 }
 
 extern f32 func_002F9F60(f32);
@@ -1491,9 +1526,7 @@ void btlReleaseRuntimeResource(void) {
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
 extern u8 D_00325860[];
 

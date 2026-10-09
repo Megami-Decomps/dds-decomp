@@ -15,6 +15,7 @@
 #include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "dds3obj.h"
 
 
 
@@ -2222,41 +2223,39 @@ s32 btlGetSubtaskActorMotionClass(void) {
 
 extern char D_0041A378[]; /* "md_01all_02" */
 
-extern u64 dds3GetWorldSecondaryObject(void);
-
-extern s32 dds3FindIndexedObjectChainNodeByName(u64, s32, char *);
+extern void *dds3GetWorldSecondaryObject(void);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 s32 func_002198D8(u8 *unit) {
-    s32 handle;
+    EffWorldNode *object;
     if (!(((BtlUnit *)unit)->flags & 0x400)) {
         return 1;
     }
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
         return 1;
     }
-    handle = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, D_0041A378);
-    if (handle == 0) {
+    object = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, (const u8 *)D_0041A378);
+    if (object == NULL) {
         return 1;
     }
-    dds3SetObjectPayloadWord8((EffWorldNode *)handle, 1);
+    dds3SetObjectPayloadWord8(object, 1);
     return 1;
 }
 
 s32 func_00219950(u8 *unit) {
-    s32 handle;
+    EffWorldNode *object;
     if (!(((BtlUnit *)unit)->flags & 0x400)) {
         return 1;
     }
     if (((BattleWork *)btlGetRuntime())->state22C == 5) {
         return 1;
     }
-    handle = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, D_0041A378);
-    if (handle == 0) {
+    object = dds3FindIndexedObjectChainNodeByName(dds3GetWorldSecondaryObject(), 6, (const u8 *)D_0041A378);
+    if (object == NULL) {
         return 1;
     }
-    dds3SetObjectPayloadWord8((EffWorldNode *)handle, 2);
+    dds3SetObjectPayloadWord8(object, 2);
     return 1;
 }
 
@@ -2758,7 +2757,23 @@ void func_0021A778(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlReturnUnitToGroup);
+void btlReturnUnitToGroup(ActionStateLink *task) {
+    BtlUnit *unit;
+
+    if (task->pendingFlags & 8) {
+        unit = task->unit;
+        if (unit->partyRecord.status & 0x4000) {
+            return;
+        }
+        unit->flags &= ~0x20;
+        unit->flags &= ~0x08000000;
+        unit->flags |= 1;
+        btlRefreshUnitMotionSelection(unit);
+        fldAppendTaskToGroup(task);
+        btlDispatchStateHandler(task, 2);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021A978);
 

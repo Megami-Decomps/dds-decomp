@@ -10,6 +10,7 @@
 #include "eff.h"
 #include "evt_world.h"
 #include "mnu_list.h"
+#include "dds3obj.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
@@ -325,7 +326,6 @@ INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
 typedef struct EffectObject EffectObject;
 
 extern void *dds3GetWorldSecondaryObject(void);
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 type, const u8 *name);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Fixed-width names identify the corresponding local-map model chain. */

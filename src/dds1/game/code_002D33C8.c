@@ -143,8 +143,6 @@ void sdfDestroyObjectList(SdfModel *owner);
 void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 s32 sdfAllocPacketAligned(s32 size);
-void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
-
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 
