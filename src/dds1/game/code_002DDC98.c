@@ -1150,7 +1150,7 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 extern vu8 sdfCurrentBufferIndex;
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
+void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset,
                               s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
