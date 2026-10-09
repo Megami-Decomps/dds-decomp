@@ -3,6 +3,26 @@
 #include "evt_viewer.h"
 #include "dds3obj.h"
 #include "evt_world.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "itf_mes_window.h"
+#include "sdf_resource.h"
+#include "kwln.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "pcp_vu0.h"
+#include "evt_unit.h"
+#include "eff_transform.h"
+#include "eff_blur.h"
+#include "eff_event_draw.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_object.h"
+#include "mdl.h"
+#include "evt_polygon_movie.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
@@ -560,5 +580,151 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
     node->payload = NULL;
 }
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
+extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
+extern void sdfSetViewFieldOfView(f32);
+extern s32 evtViewerHasUpdateFlag(s32);
+
+typedef struct CampDisplayDefaults CampDisplayDefaults;
+extern void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
+
+/* Interpolates parameter keys at the viewer's current frame, accounting for
+ * the track offset. DDS2 subtracts 35 from the second output word before applying it. */
+void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node, u16 *from, u16 *to) {
+    u8 out[0x20];
+    f32 ratio = 0.0f;
+
+    if (from != NULL) {
+        if (to != NULL) {
+            s32 start = *from;
+            f32 span = *to - start;
+            f32 elapsed = viewer->curFrame - (start + node->metadata.value);
+
+            if (span != 0.0f) {
+                ratio = elapsed / span;
+            }
+        }
+        func_0025E460((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
+        *(s32 *)(out + 4) -= 35;
+        mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
+    }
+}
+
+/* Applies kind-24 parameter tracks using bracketing keys, or the pending key
+ * when keyMode is 1. Traversal uses the shared timeline-key record. */
+void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
+    EvtRuntimeGroup *node = viewer->groups;
+    s32 position = viewer->curFrame;
+
+    while (node != NULL) {
+        if (node->type == 24) {
+            if (node->unk28 == 1) {
+                u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
+                evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
+            } else {
+                EvtRuntimeChild *glyph = node->children;
+                EvtRuntimeChild *from;
+
+                while (glyph != NULL && position >= glyph->frame + node->metadata.value) {
+                    glyph = glyph->next;
+                }
+                if (glyph != NULL) {
+                    from = glyph->prev;
+                } else {
+                    from = node->lastChild;
+                }
+                evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
+            }
+        }
+        node = node->next;
+    }
+}
+
+
+/* Native five-word draw-vector parameters; the timeline swaps x and y. */
+typedef struct EvtViewerDrawVector {
+    f32 x, y, z, w;
+    s32 mode;
+} EvtViewerDrawVector;
+extern EvtViewerDrawVector kwlnDrawVector;
+extern u128 *D_0037F770[];
+extern u128 kwlnDefaultColorVector[];
+extern f32 D_00438A48;
+extern f32 D_00438A4C;
+extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
+extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
+extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
+extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
+extern void *memcpy(void *destination, const void *source, u32 size);
+
+
+extern void effEnableTexturedBlur(void);
+extern void effDisableTexturedBlur(void);
+extern void effEnableTexturedSquare(void);
+extern void effDisableTexturedSquare(void);
+extern void effEnableFilterBlur(void);
+extern void effDisableFilterBlur(void);
+extern void effEnableStaggeredBlur(void);
+extern void effDisableStaggeredBlur(void);
+extern void effEnableFramebufferQuad(void);
+extern void effDisableFramebufferQuad(void);
+extern void effEnableColorRectangle(void);
+extern void effDisableColorRectangle(void);
+extern void func_0025EE00(EvtRuntime *);
+
+void func_002476B8(EvtRuntime *viewer) {
+    if (viewer->blurRectangleEnabled != 0) {
+        effDrawBlurRectangle(&effGetLoadDescA()->source);
+    }
+    if (viewer->texturedBlurEnabled != 0) {
+        effEnableTexturedBlur();
+    } else {
+        effDisableTexturedBlur();
+    }
+    if (viewer->texturedSquareEnabled != 0) {
+        effEnableTexturedSquare();
+    } else {
+        effDisableTexturedSquare();
+    }
+    if (viewer->filterBlurEnabled != 0) {
+        effEnableFilterBlur();
+    } else {
+        effDisableFilterBlur();
+    }
+    if (viewer->staggeredBlurEnabled != 0) {
+        effEnableStaggeredBlur();
+    } else {
+        effDisableStaggeredBlur();
+    }
+    if (viewer->framebufferQuadEnabled != 0) {
+        effEnableFramebufferQuad();
+    } else {
+        effDisableFramebufferQuad();
+    }
+    if (viewer->colorRectangleEnabled != 0) {
+        effEnableColorRectangle();
+    } else {
+        effDisableColorRectangle();
+    }
+    func_0025EE00(viewer);
+    evtViewerApplyParameterKeyTracks(viewer);
+}
+
+/* Select the active entry (or fallback) and sync world selection and camera. */
+void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
+    s32 unit;
+    s32 first = viewer->activeEntryIndex;
+
+    if (first != 0) {
+        unit = first;
+    } else {
+        unit = viewer->fallbackEntry;
+    }
+    if (unit != 0) {
+        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)unit);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)unit));
+    }
+}
+
+INCLUDE_ASM(const s32, "event/evtEventViewer", func_00247858);
 
