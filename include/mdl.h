@@ -59,9 +59,9 @@ typedef struct MdlResourceItem {
 
 typedef struct BattleGroupSlot {
     s32 flags;
-    s16 slot;
+    s16 motionSlotIndex;
     s16 motionIndex;
-    MotionTable *data;
+    MotionTable *motionTable;
     struct SdfMemBlock *resourceHandle;
 } BattleGroupSlot;
 
@@ -89,7 +89,7 @@ typedef struct MdlLoadPayload {
     DevRequest *resourceList;
     struct SdfItemListRef *itemList;
     struct SdfMemBlock *requestAllocation;
-    MotionTable *motionData;
+    MotionTable *motionTable;
     struct SdfMemBlock *motionResource;
     struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     s32 resourceHandle;
