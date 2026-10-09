@@ -25,6 +25,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff_queue.h"
+#include "btl_resource_name.h"
 #include "mdl.h"
 #include "sdf.h"
 #include "eff.h"
@@ -109,9 +110,8 @@ extern u32 D_003BD160;
 
 extern u32 D_003BD124;
 
-extern s32 effQueuedResourceNameRecord;
-
 extern struct BtlResourceEntryList *effResourceBankEntries;
+
 
 extern struct BtlResourceDescriptor *effResourceBankDescriptor;
 
@@ -314,21 +314,15 @@ extern u8 D_0038FA20[];
 
 extern u8 D_0038F938[];
 
+extern struct BtlResourceNameRecord *effQueuedResourceNameRecord;
+
 extern void effReleaseQueuedResourceName(void);
 
-extern void effQueueResource(void *, void *);
+extern const char D_003BD088[];
 
-extern u32 btlCreateResourceNameRecord();
+extern const char D_003BD090[];
 
-extern void btlSetResourceNameHeaderPairAlternate(u32, u32, u32);
-
-extern void btlResourceRecordSetName(u32, void *);
-
-extern u8 D_003BD088[];
-
-extern u8 D_003BD090[];
-
-extern u8 D_003DF8D0[];
+extern char D_003DF8D0[];
 
 extern u8 D_0038F2B8[];
 
@@ -7455,7 +7449,7 @@ extern char D_003BD080[];
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern u8 D_003BD078[];
+extern const char D_003BD078[];
 
 /* Payload option (+0x0C) selects the asset identifier at +0x08. */
 typedef struct EffAssetIdentifier {
@@ -7502,7 +7496,7 @@ u32 effPollNamedFile(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            strcpy((char *)D_003DF8D0, record.name);
+            strcpy(D_003DF8D0, record.name);
             func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithPrefix);
             fileQueueSaveImage(effFileQueue, path);
             result = 0x400002;
@@ -7528,7 +7522,7 @@ u32 effPollAttachedFile(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            strcpy((char *)D_003DF8D0, record.name);
+            strcpy(D_003DF8D0, record.name);
             func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithPrefix);
             fileQueueSaveVersionedImage(effFileQueue, path);
             result = 0x400002;
@@ -8170,7 +8164,7 @@ u32 effPollNamedFileJob(void) {
         if (effFileQueue != 0) {
             fileQueueDestroy(effFileQueue);
         }
-        strcpy((char *)D_003DF8D0, ((EffResourceBankSlot *)record)->name);
+        strcpy(D_003DF8D0, ((EffResourceBankSlot *)record)->name);
         effFileQueue = fileQueueCreateFromCommandState((const char *)record);
         D_003DF920 = *(EffectBlock128 *)effFileQueue;
         D_003BD058 = 0;
@@ -8397,11 +8391,10 @@ void effPollResourceBankSlot(char *path, u32 slot, void *record) {
     }
 }
 
-extern u32 effFileQueueNameRecord;
 
-extern u8 D_003BCF30[];
+extern struct BtlResourceNameRecord *effFileQueueNameRecord;
 
-extern void func_001FC7D0(u32, s32);
+extern const char D_003BCF30[];
 
 void effInitializeResourceQueue(void) {
     FileJob *record;
@@ -8415,12 +8408,6 @@ void effInitializeResourceQueue(void) {
     record = fileQueueGetAt(effFileQueue, func_002B5990());
     btlResourceRecordSetName(effFileQueueNameRecord, record->name);
 }
-
-extern void func_001FC300(u32);
-
-extern void btlFormatResourceNameWithoutPrefix(u32, void *);
-
-extern u32 func_001FC730(u32);
 
 u32 effPollResourceQueue(void) {
     u32 state;
@@ -8443,23 +8430,19 @@ void effReleaseQueuedResourceName(void) {
     }
 }
 
-void effQueueResource(void *unused, void *effect) {
+void effQueueResource(const char *extension, const char *resourceName) {
     if (effQueuedResourceNameRecord == 0) {
-        effQueuedResourceNameRecord = btlCreateResourceNameRecord();
+        effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
         btlSetResourceNameHeaderPairAlternate(effQueuedResourceNameRecord, 0xC2, 0xC8);
     }
-    btlResourceRecordSetName(effQueuedResourceNameRecord, effect);
+    btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
 }
 
-extern void btlFormatResourceNameWithPrefix(u32, void *);
-
-extern u32 func_001FC7D8(u32, u32 *);
-
-void effUpdateResourceQueue(u32 *result, void *queueData, EffQueueRecord *record) {
+void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *record) {
     u32 state;
 
     if (effQueuedResourceNameRecord == 0) {
-        effQueuedResourceNameRecord = btlCreateResourceNameRecord(queueData);
+        effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
         btlSetResourceNameHeaderPairAlternate(effQueuedResourceNameRecord, 0xC2, 0xC8);
         return;
     }
