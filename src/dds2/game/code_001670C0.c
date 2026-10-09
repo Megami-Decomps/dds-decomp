@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
@@ -9,7 +10,6 @@
 #include "eff.h"
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);

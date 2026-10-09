@@ -59,15 +59,13 @@ extern void btlDestroyGroupNode(BattleGroupNode *);
 extern s32 sdfRelocatePackedResourcePayload();
 
 
-struct FileWork;
-extern void filePollEntryCleanup(struct FileWork *);
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
-void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.requestHandle = fileGetResourceHandle((struct FileRequest *)resource);
-    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress((struct FileRequest *)resource));
+void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
+    request->payload.requestHandle = fileGetResourceHandle(resource);
+    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
@@ -79,9 +77,9 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
-void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)resource);
-    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress((struct FileRequest *)resource));
+void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
+    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
+    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
 }
@@ -399,7 +397,7 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_FIELD_MISSING;
@@ -408,7 +406,7 @@ s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-u16 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
+u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
@@ -418,7 +416,7 @@ u16 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;

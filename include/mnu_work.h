@@ -132,13 +132,13 @@ typedef union MenuRuntimeState {
 /* The two separately allocated runtime arrays use 0x24-byte records. */
 typedef struct MenuRuntimeRecord {
     MenuRuntimeState state;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
+    f32 baseX;
+    f32 baseY;
+    f32 rotatedOffsetX;
+    f32 rotatedOffsetY;
     f32 angle;
-    f32 unk18;
-    f32 unk1C;
+    f32 displacementX;
+    f32 displacementY;
     s16 speed;
     s16 remaining;
 } MenuRuntimeRecord;
@@ -175,13 +175,13 @@ typedef char MenuRuntimeLayoutAssert[(sizeof(MenuRuntimeRecord)==0x24 && sizeof(
     (unsigned long)&((MenuRuntimeState*)0)->flags==0 &&
     (unsigned long)&((MenuRuntimeState*)0)->kind==1 &&
     (unsigned long)&((MenuRuntimeState*)0)->directionDegrees==2 &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk04==4 &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk08==8 &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk0C==0x0C &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk10==0x10 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->baseX==4 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->baseY==8 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->rotatedOffsetX==0x0C &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->rotatedOffsetY==0x10 &&
     (unsigned long)&((MenuRuntimeRecord*)0)->angle==0x14 &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk18==0x18 &&
-    (unsigned long)&((MenuRuntimeRecord*)0)->unk1C==0x1C &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->displacementX==0x18 &&
+    (unsigned long)&((MenuRuntimeRecord*)0)->displacementY==0x1C &&
     (unsigned long)&((MenuRuntimeRecord*)0)->speed==0x20 &&
     (unsigned long)&((MenuRuntimeRecord*)0)->remaining==0x22)?1:-1];
 
@@ -217,12 +217,12 @@ typedef struct MenuRegistryParameters {
             s16 hitOffsetX;
         };
     };
-    s16 unk26;
+    s16 hitOffsetY;
     union {
         u8 pad28[2];
         u16 hitWidth;
     };
-    u16 unk2A;
+    u16 hitHeight;
     u8 pad2C[4];
 } MenuRegistryParameters;
 
@@ -254,8 +254,10 @@ typedef char MenuResourceLayoutsAssert[
      sizeof(((MenuRegistryParameters*)0)->hitOffsetX)==2 &&
      (unsigned long)&((MenuRegistryParameters*)0)->hitWidth==0x28 &&
      sizeof(((MenuRegistryParameters*)0)->hitWidth)==2 &&
-     (unsigned long)&((MenuRegistryParameters*)0)->unk26==0x26 &&
-     (unsigned long)&((MenuRegistryParameters*)0)->unk2A==0x2A &&
+     (unsigned long)&((MenuRegistryParameters*)0)->hitOffsetY==0x26 &&
+     sizeof(((MenuRegistryParameters*)0)->hitOffsetY)==2 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->hitHeight==0x2A &&
+     sizeof(((MenuRegistryParameters*)0)->hitHeight)==2 &&
      sizeof(MenuRegistry)==0x1C &&
      (unsigned long)&((MenuRegistry*)0)->parameterIndex==4 &&
      (unsigned long)&((MenuRegistry*)0)->table==0x0C &&

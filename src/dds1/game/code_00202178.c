@@ -2229,7 +2229,7 @@ void func_00207E68(void) {
     }
 }
 
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 s32 func_00207FF0(BtlUnit *unit, s32 animation) {
     BtlState *state;
@@ -2265,7 +2265,7 @@ s32 func_00207FF0(BtlUnit *unit, s32 animation) {
     }
     if (animation == 1) {
         s32 currentSpecies;
-        currentMotion = mdlGetNodeField2C(unit->ext->owner, 0);
+        currentMotion = mdlGetNodeMotionIndex(unit->ext->owner, 0);
         if (currentMotion == animation) {
             return -1;
         }
@@ -2831,7 +2831,7 @@ void btlStepFocusAngle(void) {
     if (unit == NULL) {
         return;
     }
-    mdlGetNodeField2C(player->ext->owner, 0);
+    mdlGetNodeMotionIndex(player->ext->owner, 0);
     if (slot[2] & 4) {
         if ((slot[1] & 0xFF000000) != 0x80000000) {
             slot[1] += 0x10000000;

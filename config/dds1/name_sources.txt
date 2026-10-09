@@ -2402,10 +2402,11 @@
 0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
 0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x00195360	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
+0x001953A8	frFontSetSpacingAndMeasureGlyphs	inferred	Stores the signed spacing byte at glyph+1 and refreshes the cached child-chain advance.
 0x001953D8	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
-0x00195450	frFontSetContextPair	inferred	Assigns the two supplied words to context fields. [names_reviewed6.tsv]
-0x00195460	frFontStoreShiftedContextValue	inferred	Shifts provided word right by four before storing it on font context. [names_reviewed6.tsv]
-0x00195470	frFontSetChainFlag	inferred	sets byte flag on every glyph in chain
+0x00195450	frFontSetGlyphPosition	inferred	Stores the supplied x and y words at glyph+4 and glyph+8.
+0x00195460	frFontStoreShiftedRenderValue	inferred	Stores the supplied word shifted right four in the glyph render-value view at +0x14.
+0x00195470	frFontSetChildChainFirstOption	inferred	Walks parent previous links and each child next chain, assigning the child first-option byte at +0x14.
 0x00195520	frFontAddSharedGlyphFlags	inferred	ORs flags into shared font flag byte [names_reviewed5.tsv]
 0x00195530	frFontClearFlagBits	inferred	interface/frFont: clears mask bits from the shared font flag byte D_003BB174 and returns the previous value; setter is func_00195520 [names_L10_LiteSweep.tsv]
 0x00195548	frFontSetSharedRenderFlags	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
@@ -3650,9 +3651,9 @@
 0x00217DE0	mdlAddEntryFlaggedEx	inferred	wraps func_00217CA8 with flag 1, passing float pair through
 0x00217DF8	mdlAddEntryPlainEx	inferred	wraps func_00217CA8 with flag 0, passing float pair through
 0x00217E10	mdlFindNodeById	inferred	walks node list for s16 id at +0x28
-0x00217E58	mdlGetNodeField2C	inferred	finds node by id, returns u16 at +0x2C or -1 when missing
-0x00217E88	mdlGetNodeField2E	inferred	finds node by id, returns u16 at +0x2E or 0 when missing
-0x00217EB0	mdlGetNodeInt1C	inferred	finds node by id, returns float at +0x1C converted to int, else 0
+0x00217E58	mdlGetNodeMotionIndex	inferred	Finds the named motion node; returns its unsigned motionIndex widened to s32, or -1 when absent.
+0x00217E88	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its frameCount, or zero when absent; preserves the existing title-specific result type.
+0x00217EB0	mdlGetNodeFrameAsInt	inferred	Finds the named motion node; numerically converts its currentFrame to s32, or returns zero when absent.
 0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
 0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
@@ -5667,9 +5668,11 @@
 0x002B0B40	effAllocateStripFromWorkAndRetainTexture	inferred	Allocates fresh strip work from supplied dimensions and increments the shared texture reference count. [names_reviewed18.tsv]
 0x002B1170	effLoadScalyTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B11A0	effGetScalyTextureHandle	inferred	Returns the handle populated when loading the scaly texture file. [names_reviewed5.tsv]
-0x002B11A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002B11A8	effSeedParticleSpanParameters	inferred	Seeds each span entry with randomized geometry factors and initializes its reference age to zero. [names_reviewed5.tsv]
 0x002B12D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count; native algorithm agrees with the verified DDS2 counterpart.
 0x002B14E8	effReleaseParticleList	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B1560	effUpdateParticleSpanGeometry	inferred	Model-operation update callback; updates point geometry using the parent model context, child span table at +0x38, and span configuration at +0x3C.
+0x002B1D68	effDrawParticleSpanPointsAndReferences	inferred	Model-operation draw callback; draws point groups and reference geometry from the child span table at +0x38 and configuration at +0x3C.
 0x002B2088	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002B20D0	effDestroyModelResource	inferred	Releases the kind-specific child resource, releases its model, then frees the effect object.
 0x002B2120	effCreateModelResource	inferred	Byte-identical dds2 twin 0x002F5520; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectModelResource behavior. [names_conflicts.tsv]

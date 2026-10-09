@@ -1976,10 +1976,11 @@
 0x0019CE10	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x0019D010	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x0019D038	frFontEnableContextMode	inferred	Sets the font context's mode at offset 0x40 and configures it with argument 0x80.
-0x0019D058	frFontSetFlagAndMeasureGlyphs	inferred	Sets a font context byte flag and caches frFontMeasureGlyphChain's result.
+0x0019D058	frFontSetSpacingAndMeasureGlyphs	inferred	Stores the signed spacing byte at glyph+1 and refreshes the cached child-chain advance.
 0x0019D088	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
-0x0019D100	frFontSetContextPair	inferred	Assigns the two supplied words to context fields. [names_reviewed6.tsv]
-0x0019D110	frFontStoreShiftedContextValue	inferred	Shifts provided word right by four before storing it on font context. [names_reviewed6.tsv]
+0x0019D100	frFontSetGlyphPosition	inferred	Stores the supplied x and y words at glyph+4 and glyph+8.
+0x0019D110	frFontStoreShiftedRenderValue	inferred	Stores the supplied word shifted right four in the glyph render-value view at +0x14.
+0x0019D120	frFontSetChildChainFirstOption	inferred	Walks parent previous links and each child next chain, assigning the child first-option byte at +0x14.
 0x0019D178	frFontSetChildColors	inferred	Walks each style node's children and writes the requested color to every child.
 0x0019D1D0	frFontAddSharedGlyphFlags	inferred	ORs flags into shared font flag byte [names_reviewed5.tsv]
 0x0019D1E0	frFontClearFlagBits	inferred	interface/frFont: clears mask bits from the shared font flag byte D_00436564 and returns the previous value; setter is func_0019D1D0 [names_L10_LiteSweep.tsv]
@@ -3311,6 +3312,9 @@
 0x00232390	mdlProcessContextNodesAndTransforms	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_00232390; Processes nonnull slot nodes, updates frame transforms, dispatches anchor records, and processes the development list under context flags. [names_qp9.tsv]
 0x002324C0	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_002324C0; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]
 0x002327C0	mdlFindOrCreateMotionRecordNode	inferred	Traverses nodes by search ID and creates a node if absent before recording its slot. [names_reviewed21.tsv]
+0x00232970	mdlGetNodeMotionIndex	inferred	Finds the named motion node; returns its unsigned motionIndex widened to s32, or -1 when absent.
+0x002329A0	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its frameCount, or zero when absent; preserves the existing title-specific result type.
+0x002329C8	mdlGetNodeFrameAsInt	inferred	Finds the named motion node; numerically converts its currentFrame to s32, or returns zero when absent.
 0x00232A30	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00232A58	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00232A88	mdlLoadPrimaryVectorVU	inferred	Loads the model inner vector at offset 0x50 into VU0 vf10.
@@ -5320,8 +5324,10 @@
 0x002F3D18	effRetainScalyTextureReference	inferred	High: lazily clones the handle loaded from /effect/scaly00.tmx, increments its owner count, and returns the shared clone. [names_qp9.tsv]
 0x002F3D58	effReleaseScalyTextureReference	inferred	High: decrements that owner count and releases and clears the shared scaly clone on its last reference; the argument is unused. [names_qp9.tsv]
 0x002F3F08	effReleaseScalyStripResources	inferred	Releases strip-specific texture state then queues its asset and frees its allocation. [names_reviewed5.tsv]
-0x002F45A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002F45A8	effSeedParticleSpanParameters	inferred	Seeds each span entry with randomized geometry factors and initializes its reference age to zero. [names_reviewed5.tsv]
 0x002F46D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count.
+0x002F4960	effUpdateParticleSpanGeometry	inferred	Model-operation update callback; updates point geometry using the parent model context, child span table at +0x38, and span configuration at +0x3C.
+0x002F5168	effDrawParticleSpanPointsAndReferences	inferred	Model-operation draw callback; draws point groups and reference geometry from the child span table at +0x38 and configuration at +0x3C.
 0x002F5358	effCreateModelResourceWithInlineData	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F5358; Allocates kind-sized inline source data, initializes model-effect defaults and optionally creates/updates a child model resource. [names_qp9.tsv]
 0x002F5488	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002F5520	effCreateModelResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectModelResource behavior.

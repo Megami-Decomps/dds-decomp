@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -1013,7 +1014,6 @@ typedef struct ItfFovPanelWork {
 extern ItfFovPanelWork D_003D73C0;
 extern s32 sdfCreateResetPacketList(void);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 func_0019FCC8(void) {

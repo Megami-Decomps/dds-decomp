@@ -66,7 +66,7 @@ extern void fileLoadCtxSlideUpdate(void);
 extern u8 D_003E8B98[];
 extern u8 D_003E8BB0[];
 extern u8 D_003E8BD0[];
-extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 flagValue);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 flagValue);
 extern void frFontSetChildColors(struct FrFontGlyph *glyph, u32 colorWord);
 typedef struct EffectSurfaceNode {
     u32 capacity;
@@ -409,7 +409,6 @@ extern s32 fileLoadMainBlobBegin(void);
 
 
 
-extern void filePollEntryCleanup(u32);
 
 extern s32 fileDrawMenuFrame(s32);
 
@@ -652,7 +651,7 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
-    frFontSetChainFlag((struct FrFontGlyph *)(u32)handle, 3);
+    frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
 }
@@ -661,8 +660,8 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
     D_0043900C = (u32)func_0019CE78((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
-    frFontSetContextPair((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);
+    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);
     frFontSetChildColors((struct FrFontGlyph *)(u32)D_0043900C, colors);
     frFontDrawGlyphChain(D_0043900C, 0, 0x56);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
@@ -2628,7 +2627,7 @@ s32 fileRunMenuState(KwlnTask *task) {
         D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)job);
         D_00439034 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
         D_00439038 = fileGetResourceSize((struct FileRequest *)(u32)job);
-        filePollEntryCleanup(job);
+        filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
     return 0;
 }
@@ -2897,7 +2896,7 @@ void fileReleaseMenuResources(void) {
         if (fileSaveIconRequest != 0) {
             fileWaitReady((struct FileRequest *)fileSaveIconRequest);
             D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
-            filePollEntryCleanup(fileSaveIconRequest);
+            filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
         sdfReleaseMemorySlot((s32 *)&D_00439030);

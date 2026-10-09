@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -582,7 +583,6 @@ struct EffGeneratedTextureDescriptor {
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);

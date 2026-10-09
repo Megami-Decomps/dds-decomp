@@ -129,8 +129,7 @@ extern void fldReleaseCameraModel(s32 arg0);
 extern void evtSetSolarOverlayFullyVisible(void);
 
 struct FileRequest;
-struct FileWork;
-struct FileCleanup;
+
 struct SdfMemBlock;
 extern s8 D_00324530[];
 extern s32 D_0032E4C0[];
@@ -145,7 +144,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern void *func_00115298(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
 extern void effObjSetFlags(void *, s32);
@@ -3292,7 +3290,7 @@ void func_0014CB08(void) {
         node = func_00115298((void *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
         effObjClearFlags(node, 1);
-        filePollEntryCleanup((struct FileCleanup *)D_003BAFE8);
+        filePollEntryCleanup((struct FileRequest *)(u32)D_003BAFE8);
         func_0012EA40(5, 0);
         effObjSetFlags(fldSparkControlState.object, 1);
         effObjReplaceActiveEventNode(fldSparkControlState.object, 0);

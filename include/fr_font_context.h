@@ -7,8 +7,8 @@ struct FrFontGlyph;
 
 void frFontSetContextEncodedByte(struct FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(struct FrFontGlyph *glyph);
-void frFontSetFlagAndMeasureGlyphs(struct FrFontGlyph *glyph, s32 requestedFlag);
-void frFontSetContextPair(struct FrFontGlyph *glyph, u32 first, u32 second);
-void frFontStoreShiftedContextValue(struct FrFontGlyph *glyph, u32 unshiftedValue);
+void frFontSetSpacingAndMeasureGlyphs(struct FrFontGlyph *glyph, s32 spacing);
+void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
+void frFontStoreShiftedRenderValue(struct FrFontGlyph *glyph, u32 unshiftedValue);
 
 #endif
