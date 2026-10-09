@@ -355,8 +355,10 @@ void func_0026C900(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-void evtCopyEntryStringToActiveWindow(s32 slotIndex, s32 sourceAddress) {
-    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceAddress);
+extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+
+void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
 }
 
 /* Return the gate byte independently of the singleton window's existence. */

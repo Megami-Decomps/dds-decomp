@@ -2166,7 +2166,7 @@ s32 evtBDispatchSync(KwlnTask *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
