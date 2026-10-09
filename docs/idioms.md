@@ -5251,3 +5251,17 @@ Both plane predicates use that owner rather than the `D_00444BC0` alias
 and its parallel padded type. This type closure does not match the
 controller's separate constant-lifetime and branch differences.
 
+
+## Disabled diagnostic drawers retain finite vector inputs
+
+DDS1 `001FB168` / `001FB178` / `001FB198` and DDS2
+`0020D1E8` / `0020D1F8` / `0020D218` are empty retail drawers, not
+zero-argument interfaces. Their camera-diagnostic callers deliberately
+form a vector pointer; a vector pointer, packed color, integer flag and
+float radius; or two vector pointers and a packed color, respectively.
+For example `002B800C` / `002FF264` pass the computed horizontal radius
+in `f12`, with the point/color/zero flag in `a0`/`a1`/`a2`.
+Retain those unused formals while leaving the genuine empty bodies alone.
+This finite caller-evidenced closure does not match the still-assembly
+diagnostic controllers or claim that the disabled drawers consume input.
+

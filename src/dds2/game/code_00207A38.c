@@ -2633,13 +2633,13 @@ void func_0020D1D8(void) {
 void func_0020D1E0(void) {
 }
 
-void func_0020D1E8(void) {
+void func_0020D1E8(f32 *position) {
 }
 
 void func_0020D1F0(void) {
 }
 
-void func_0020D1F8(void) {
+void func_0020D1F8(f32 *position, u32 color, s32 flags, f32 radius) {
 }
 
 void func_0020D200(void) {
@@ -2651,7 +2651,7 @@ void func_0020D208(void) {
 void func_0020D210(void) {
 }
 
-void func_0020D218(void) {
+void func_0020D218(f32 *from, f32 *to, u32 color) {
 }
 
 void func_0020D220(void) {
