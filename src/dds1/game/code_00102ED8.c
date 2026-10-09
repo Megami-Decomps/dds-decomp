@@ -872,20 +872,6 @@ typedef struct ConsMatrixPacket {
     u32 reservedB;
 } ConsMatrixPacket;
 
-typedef struct SdfSceneNode {
-    u8 pad00[4];
-    void (*handler)();
-    SdfGraphObj *view;
-    u8 pad0C[4];
-    SdfPacket header;
-    SdfGsDrawDefaultsRegisters drawDefaults;
-    SdfPacket contextOne[2];
-    SdfPacket contextTwo[2];
-    SdfGsCenteredBoundsRegisters centeredBounds;
-    SdfGsSceneBlendRegisters blendState;
-    u64 framePacketWords[4];
-    SdfTexBuf texturePackets[2];
-} SdfSceneNode;
 
 typedef struct KwlnFrameDrawBank {
     SdfListHead initialList;
@@ -902,7 +888,6 @@ typedef struct KwlnFrameDrawBank {
 } KwlnFrameDrawBank;
 
 typedef char KwlnFrameDrawBank_size_check[(sizeof(KwlnFrameDrawBank) == 0x1F40) ? 1 : -1];
-typedef char SdfSceneNode_size_check[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
 typedef char ConsMatrixPacket_size_check[(sizeof(ConsMatrixPacket) == 0xD0) ? 1 : -1];
 typedef char DmaPacketHeader_size_check[(sizeof(DmaPacketHeader) == 0x20) ? 1 : -1];
 
@@ -916,7 +901,6 @@ extern u8 D_00329790[0x40];
 extern SdfLightSources D_00324B10;
 extern f32 D_00324B20[4];
 extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
-extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
