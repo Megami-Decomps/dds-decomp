@@ -5875,6 +5875,7 @@
 0x00321308	mnuResetResourceProgressCounters	inferred	high confidence; src/dds2/game/code_00320FD0.c func_00321308: Clears both the cadence index and accumulated total while retaining limit and step. [names_reviewed25.tsv]
 0x00321318	mnuBindResourceRecordTable	inferred	confidence=high; matched-C; src/dds2/game/code_00320FD0.c:225:func_00321318; Stores the externally owned resource-record table pointer and its count; the neighboring indexed accessor uses twenty-eight-byte records.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00321328	mnuGetResourceRecordByIndex	inferred	Returns address at the externally stored resource table base plus 28 bytes per index; record fields remain unknown.
+0x003214C8	mnuSetRuntimeRecordInitializationCallback	inferred	stores the callback invoked immediately after a runtime record is allocated and initialized
 0x00321500	mnuCreateReleaseCallbackNode	inferred	Creates a callback node whose callback frees a nonzero supplied pointer.
 0x003218A0	mnuCreateNamedRecord	inferred	Allocates and clears a 0x22-byte record and copies an eight-byte identifier to offset 0xA.
 0x00321908	mnuFreeOptionalBlock	inferred	confidence=medium; matched-C; src/dds2/game/code_00321500.c:159:func_00321908; Releases the menu/resource heap block only when the pointer is nonzero; avoids asserting a specific record layout.; source=reviewed-prior-QP15 [names_qp15.tsv]
@@ -5902,7 +5903,11 @@
 0x00322F48	mnuAdvanceRegistryWorkEntry	inferred	readability/matching review (QP16)
 0x003236B0	mnuVisitActiveWorkAndEffectEntry	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:425:func_003236B0; Visits active menu work pool and separate active effect entry with callback.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
 0x003238A0	mnuVisitActiveRecords	inferred	Invokes func_00323748 on each flagged 0x48-byte record in the global record array.
+0x00323918	mnuSetWorkEntryStartCallback	inferred	stores the work-entry callback invoked when pendingStart is set
+0x00323920	mnuSetWorkEntryFinishOrDeactivateCallback	inferred	stores the work-entry callback invoked on finished and pendingDeactivate paths
 0x00323928	mnuSetActiveWorkVisitor	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:464:func_00323928; Stores active menu-work visitor callback.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00323930	mnuSetRuntimeWorkHitCallback	inferred	stores the callback invoked when work and runtime-record hit bounds overlap
+0x00323938	mnuSetRuntimeRecordPairCallback	inferred	stores the callback invoked for an overlapping runtime-record pair
 0x00323940	mnuAdvanceWorkEntry	inferred	Decrements remaining count and sets updated or finished status bit.
 0x00324238	mnuSetInputActionSnapshot	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:498:func_00324238; Copies twelve-byte input-action snapshot; retail caller builds zeroed block from pad-trigger bytes before menu work update, not resource progress parameters.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00324268	mnuGetActiveEffectWorkEntry	inferred	Returns the effect work entry installed by its initializer. [names_reviewed15.tsv]

@@ -217,8 +217,8 @@ INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);
 void func_003214C0(MenuRuntimeRecord *record) {
 }
 
-void func_003214C8(MenuRuntimeCallback value) {
-    D_0043899C = value;
+void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
+    D_0043899C = callback;
 }
 
 void func_003214D0(u32 unused, s32 resource) {
