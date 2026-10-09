@@ -1157,7 +1157,7 @@ SdfTexResource *sdfTexAllocHead(s32 type, s32 kind, s32 unused) {
     default:
         return head;
     }
-    head = sdfTexAllocHeadHigh(size, 3);
+    head = sdfTexAllocHeadHigh(size, SDF_TEX_RESOURCE_CLUT);
     head->width = 8;
     head->height = height;
     head->format = kind;

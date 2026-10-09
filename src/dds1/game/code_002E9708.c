@@ -656,7 +656,7 @@ void sdfDumpGsMemoryForward(void) {
     head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
-        if (node->allocationMode < 4) {
+        if (node->allocationMode < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00398A28[node->allocationMode];
         } else {
             sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
@@ -682,7 +682,7 @@ void sdfDumpGsMemoryBackward(void) {
     head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
-        if (node->allocationMode < 4) {
+        if (node->allocationMode < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00398A38[node->allocationMode];
         } else {
             sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
@@ -1068,7 +1068,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
                 textureHeight = (textureHeight + SDF_STREAM_NARROW_HEIGHT_MASK) & ~SDF_STREAM_NARROW_HEIGHT_MASK;
             }
         }
-        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, 2, 0);
+        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, SDF_TEX_RESOURCE_TEXTURE, 0);
         node->textureHead = texture;
         node->resourceWord = texture->word;
     }
