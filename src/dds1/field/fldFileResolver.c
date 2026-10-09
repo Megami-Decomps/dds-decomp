@@ -6,6 +6,7 @@
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
+#include "evt_action_object.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -198,7 +199,6 @@ typedef struct FldActionSpawn {
 } FldActionSpawn;
 extern void fldSpawnActionObjects(FldActionSpawn *, u32);
 extern void *dds3GetWorldSecondaryObject(void);
-extern s32 evtSpawnActionObj2(s32, s32);
 extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
@@ -691,10 +691,10 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 
     dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++) {
-        s32 handle = evtSpawnActionObj2(list->firstValue, list->secondValue);
+        struct EffWorldNode *node = evtSpawnActionObj2(list->firstValue, list->secondValue);
         list++;
         if (i == 0) {
-            fldAreaState.taskHandle = handle;
+            fldAreaState.taskHandle = (s32)node;
         }
     }
 }
