@@ -5239,3 +5239,15 @@ its step and input-table address. Likewise `0024C650` sets `a0=viewer`,
 three additional incoming scratch values. The timeline provider's
 pre-existing six-formal contract is separate debt, not changed here.
 
+
+## Room probes use their primary descriptor and geometry
+
+The DDS2 `0013DDC0` controller follows the existing task descriptor's
+shape pointer at `+0x0C`; its kind and dimensions belong to that serialized
+shape, not a second descriptor view. The three facing probes now read
+the same `FldTaskInfo.shape`. Room planes and limits are already members
+of the complete `0x140`-byte `FldRoomState` at `+0x90` and `+0xF0`.
+Both plane predicates use that owner rather than the `D_00444BC0` alias
+and its parallel padded type. This type closure does not match the
+controller's separate constant-lifetime and branch differences.
+

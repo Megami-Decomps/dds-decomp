@@ -200,9 +200,16 @@ extern s32 evtStartSceneResourceTask();
 
 extern s32 D_004361BC;
 
+typedef struct FldTriggerShape {
+    u32 kind;
+    f32 size[3];
+} FldTriggerShape;
+
 typedef struct FldTaskInfo {
     s32 unk0;
     s32 slot;
+    u32 unk08;
+    FldTriggerShape *shape;
 } FldTaskInfo;
 
 
@@ -210,13 +217,6 @@ typedef struct FldTaskInfo {
 
 extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 
-typedef struct FldRoomPlanes {
-    f32 plane[6][4];
-    f32 limit[6];
-    u8 pad78[0x140 - 0x78];
-} FldRoomPlanes;
-
-extern FldRoomPlanes D_00444BC0[];
 
 extern f32 fldDotVector(f32 *, f32 *);
 
@@ -703,10 +703,6 @@ s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
-typedef struct FldProbeKind {
-    u8 pad00[0xC];
-    u32 *kind; /* 0x0C */
-} FldProbeKind;
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
@@ -724,7 +720,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_0038BC50[i]->data)->kind;
+            kind = ((FldTaskInfo *)D_0038BC50[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 source = entry->data;
@@ -790,7 +786,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_0038BC50[i]->data)->kind;
+            kind = ((FldTaskInfo *)D_0038BC50[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 PCP_COPY_VECTOR(position, entry->data);
@@ -845,7 +841,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
     f32 angle;
     u32 kind;
 
-    kind = *((FldProbeKind *)D_0038BC50[index]->data)->kind;
+    kind = ((FldTaskInfo *)D_0038BC50[index]->data)->shape->kind;
     switch (kind) {
     case 0:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
@@ -911,7 +907,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 index) {
         planar[1] = direction[1];
     }
     for (i = 0; i < 4; i++) {
-        if (fldDotVector(probe, D_00444BC0[index].plane[i + 1]) - D_00444BC0[index].limit[i + 1] < 0.0f) {
+        if (fldDotVector(probe, fldRoomRecords[index].plane[i + 1]) - fldRoomRecords[index].limit[i + 1] < 0.0f) {
             return -1;
         }
     }
@@ -922,7 +918,7 @@ s32 fldRoomContainsPoint(f32 *direction, s32 index) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (fldDotVector(direction, D_00444BC0[index].plane[i]) - D_00444BC0[index].limit[i] > 0.0f) {
+        if (fldDotVector(direction, fldRoomRecords[index].plane[i]) - fldRoomRecords[index].limit[i] > 0.0f) {
             return 0;
         }
     }
