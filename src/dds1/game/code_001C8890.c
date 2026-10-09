@@ -11546,7 +11546,6 @@ typedef struct SoundHandleNode {
 } SoundHandleNode;
 
 struct FileQueue;
-extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
     SoundHandleNode *node = sdfAllocAndClearQuadwords(8);
@@ -11571,7 +11570,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 }
 
 void sndDestroyFileQueueWrapper(u32 arg0) {
-    fileQueueDestroy(*(u32 *)arg0);
+    fileQueueDestroy((struct FileQueue *)*(u32 *)arg0);
     sdfReleaseChipBlock((void *)arg0);
 }
 
