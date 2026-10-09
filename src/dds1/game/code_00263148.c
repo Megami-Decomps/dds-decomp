@@ -63,7 +63,7 @@ typedef struct DspUnitName {
 
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, u8 **);
 

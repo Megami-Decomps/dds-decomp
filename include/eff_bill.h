@@ -274,8 +274,15 @@ typedef struct EffBillQuadEntry {
 
 typedef struct EffBillPointConfig {
     EffBillTimedHeader timed;
+    /* Bolt/range updaters (DDS2 002EB058/002EC370) interpret the
+     * layer word as an unsigned division count for floating-point math. */
     s32 layers;
-    u8 pad40[0x1C];
+    s32 respawnDelay;
+    u8 pad44[8];
+    u32 periods;
+    f32 amplitude;
+    f32 speed;
+    f32 speedJitter;
     u8 drawFlag;
     u8 pad5D[0xB];
     f32 rangeFadeInEnd;
@@ -283,18 +290,23 @@ typedef struct EffBillPointConfig {
     u32 colorA;
     u32 colorB;
     u32 colorC;
-    u8 pad7C[8];
+    f32 halfWidth;
+    f32 edgeWidth;
     f32 unk84;
 } EffBillPointConfig;
 
 typedef struct EffBillRangeConfig {
     EffBillPointConfig point;
-    u8 pad88[4];
+    u8 tilted;
+    u8 pad89[3];
     f32 startBase;
     f32 startRand;
     f32 endBase;
     f32 endRand;
-    u8 pad9C[0x10];
+    f32 heightScale;
+    f32 angularBase;
+    f32 angularRand;
+    f32 angularAcceleration;
 } EffBillRangeConfig;
 
 /* DDS2 resource-op rows at 003E9DF4/003E9E10/003E9E2C copy
@@ -403,6 +415,71 @@ typedef struct EffBillFlameConfig {
     f32 gravity;
 } EffBillFlameConfig;
 
+/* Shared strip resource owner used by the flame updater and the existing
+ * quantized-row producers in both games. */
+typedef struct EffStripWork {
+    u32 count;          // 0x00
+    u32 type;           // 0x04
+    u32 color;          // 0x08
+    s32 rowStride;      // 0x0C
+    s32 repeat;         // 0x10
+    u8 flag;            // 0x14
+    u8 pad_15[3];
+    u32 *colors;        // 0x18
+    u8 *positions;      // 0x1C
+    u8 *uvsA;           // 0x20
+    u8 *uvsB;           // 0x24
+    u8 *extra;          // 0x28
+    SdfAsset *handle;   // 0x2C
+    struct SdfMemBlock *allocation; // 0x30
+} EffStripWork;
+
+/* The class operation table selects the interpretation of each 0x30-byte
+ * entry. Vortex (002ABDE0/002EF1C0), column (002ACA40/002EFE20) and flame
+ * (002AEC60/002F2050) share the timer/radius/spin prefix, but use the
+ * +0x10/+0x14 and +0x24..+0x2C words differently. Their allocators and
+ * reset callbacks use the same record stride and timer sentinel. */
+typedef struct EffBillEmitterEntry {
+    s32 timer;
+    u8 unk04[4];
+    f32 radius;
+    f32 radiusStep;
+    union {
+        struct {
+            f32 climb;
+            f32 climbStep;
+        } vortex;
+        struct {
+            f32 drag;
+            f32 positionY;
+        } column;
+        struct {
+            f32 drag;
+            f32 velocity;
+        } flame;
+    } vertical;
+    f32 spin;
+    f32 angle;
+    f32 width;
+    union {
+        struct {
+            f32 sweep;
+            f32 flare;
+            f32 height;
+        } vortex;
+        struct {
+            f32 length;
+            f32 flare;
+            f32 height;
+        } column;
+        struct {
+            f32 length;
+            f32 baseA;
+            f32 baseB;
+        } flame;
+    } geometry;
+} EffBillEmitterEntry;
+
 typedef struct EffBillRadialConfig {
     EffBillPointConfig point;
     f32 radius;
@@ -475,10 +552,15 @@ typedef union EffBillConfig {
 struct EffPointSet;
 typedef struct EffScaleRangeEntry {
     struct EffPointSet *set;
-    u8 pad04[0x10];
+    f32 position[3];
+    u8 pad10[4];
     s32 negativeSeed;
     u32 color;
-    u8 pad1C[0x14];
+    f32 yaw;
+    f32 pitch;
+    f32 angularRate;
+    f32 phase;
+    f32 height;
 } EffScaleRangeEntry;
 
 typedef char EffClassWorkSizeCheck[(sizeof(EffClassWork) == 0x40) ? 1 : -1];
@@ -516,5 +598,7 @@ typedef char EffBillConfigSizeCheck[(sizeof(EffBillConfig) == 0x10C) ? 1 : -1];
 typedef char EffScaleRangeEntrySizeCheck[(sizeof(EffScaleRangeEntry) == 0x30) ? 1 : -1];
 typedef char EffBillQuadEntrySizeCheck[(sizeof(EffBillQuadEntry) == 0x20) ? 1 : -1];
 typedef char EffBillQuadReverseOffsetCheck[((u32)&((EffBillQuadFrameConfig *)0)->reverse == 0x94) ? 1 : -1];
+typedef char EffBillEmitterEntrySizeCheck[(sizeof(EffBillEmitterEntry) == 0x30) ? 1 : -1];
+typedef char EffStripWorkSizeCheck[(sizeof(EffStripWork) == 0x34) ? 1 : -1];
 
 #endif

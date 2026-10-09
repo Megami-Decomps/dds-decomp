@@ -18,6 +18,8 @@ struct StaffMenuRuntime;
 #include "sdf.h"
 #include "itf.h"
 
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
@@ -438,8 +440,8 @@ u32 mnuEnterSelectedResourceLabel(KwlnTask *task) {
     context = kwlnTaskGetUserValue(task);
     resourceOwner = ((MenuContext *)context)->party;
     func_002C1B68(context + 0xaa50, 1);
-    evtCopyEntryStringToActiveWindow(0, D_00435E5C +
-                                    *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19);
+    evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C +
+                                    *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19));
     dspStartEntry(8);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xf);
@@ -510,7 +512,7 @@ u32 mnuEnterSlotLabel(KwlnTask *task) {
     s32 selectedEntry;
     func_002C1B68(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
-    evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
+    evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + selectedEntry * 0x19));
     dspStartEntry(0xd);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xf);
@@ -536,7 +538,7 @@ s32 mnuPartySlotConfirmClearUpdate(KwlnTask *callback) {
     if (evtGetCapturedWindowPanelValue() == 0) {
         selectedEntry = mnuGetPartyEntryCurrentId(slot);
         mnuClearPartySelectionValues(slot, selectedEntry);
-        evtCopyEntryStringToActiveWindow(0, D_00435E5C + selectedEntry * 0x19);
+        evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + selectedEntry * 0x19));
         dspStartEntry(0xE);
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         mnuRefreshPartyPanelBars(&((MenuContext *)context)->partyWindow);
