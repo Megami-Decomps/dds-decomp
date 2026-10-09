@@ -3,8 +3,6 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 
-struct WorldIndexNode;
-
 s32 dds3InvokeAreaCallback(void *arg);
 
 s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
@@ -112,37 +110,36 @@ EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name
 }
 
 
-struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
+WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 
 s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
-    u32 *p;
+    WorldIndexNode **indexNodes;
     u32 i;
 
-    object->data = sdfAllocSizeClassBlock(8);
-    p = (u32 *)object->data;
+    indexNodes = sdfAllocSizeClassBlock(8);
+    object->data = indexNodes;
     for (i = 0; i < 2; i++) {
-        *p = (u32)dds3AppendWorldIndexNode(0);
-        p++;
+        indexNodes[i] = dds3AppendWorldIndexNode(0);
     }
     return 1;
 }
 
 s32 dds3ExchangeAreaSlot(void *arg);
 
-void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
+void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 
 void dds3DestroyObjectPointerChains(EffWorldNode *object) {
-    u32 *p;
+    WorldIndexNode **indexNodes;
     u32 i;
 
-    p = (u32 *)object->data;
-    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[0], (s32 (*)(u32))dds3ExchangeAreaSlot);
-    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[1], (s32 (*)(u32))dds3ExchangeAreaSlot);
+    indexNodes = object->data;
+    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))dds3ExchangeAreaSlot);
+    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[1], (s32 (*)(u32))dds3ExchangeAreaSlot);
     for (i = 0; i < 2; i++) {
-        dds3DestroyWorldIndexNode((struct WorldIndexNode *)p[i]);
+        dds3DestroyWorldIndexNode(indexNodes[i]);
     }
-    sdfReleaseChipBlock(p);
+    sdfReleaseChipBlock(indexNodes);
 }
 
 u32 func_001112F8(void) {
@@ -150,6 +147,8 @@ u32 func_001112F8(void) {
 }
 
 s32 ddsDispatchFirstWorldIndexAreas(EffWorldNode *object) {
-    dds3VisitWorldObjectValues((WorldValueIndices *)(u32)*(u32 *)object->data, (s32 (*)(u32))dds3InvokeAreaCallback);
+    WorldIndexNode **indexNodes = object->data;
+
+    dds3VisitWorldObjectValues((WorldValueIndices *)indexNodes[0], (s32 (*)(u32))dds3InvokeAreaCallback);
     return 1;
 }
