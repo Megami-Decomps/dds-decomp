@@ -1175,9 +1175,9 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     recordBlock = (u32 *)sdfResourceRetainAddress(allocation);
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
-    pool->recordBase = (s32)recordBlock;
+    pool->recordBase = (u8 *)recordBlock;
     pool->unk10 = 1;
-    pool->auxRecordBase = (s32)(recordBlock + recordWords);
+    pool->auxRecordBase = (u8 *)(recordBlock + recordWords);
     pool->secondWordCount = auxWords;
     pool->allocation = allocation;
     pool->unk1C = 1.0f;
