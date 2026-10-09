@@ -41,7 +41,51 @@ u32 evtSelectGraphicSlotBySpriteType(MenuTerminalContext *object) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00294758);
+void func_00294758(MenuTerminalContext *object, s32 elapsedFrames) {
+    s32 frames = elapsedFrames;
+    s32 frameCount;
+    f32 alpha;
+    s32 scale;
+    u32 index;
+    MenuTerminalContext *resources;
+
+    if (frames < 0) {
+        frames = 0;
+    }
+    frameCount = frames;
+    if (frameCount < 0) {
+        frameCount = 0;
+    }
+    alpha = (f32)frameCount / 15.0f;
+    if (alpha > 1.0f) {
+        alpha = 1.0f;
+    }
+    scale = (s32)(alpha * 256.0f);
+
+    func_00306CD0(D_003D03F0[32][MENU_ICON_X] * 16,
+                  D_003D03F0[32][MENU_ICON_Y] * 8, 0, scale, 0,
+                  D_00438FC8->effectSlots[D_003D03F0[32][MENU_ICON_TEXTURE]],
+                  D_003D03F0[32][MENU_ICON_FRAME], 0x53);
+    func_0026BEC0(0, 0, 0, scale, &object->panelWork[0], 0x53);
+    func_0026BEC0(0, 0xCF8, 0, scale, &object->panelWork[1], 0x53);
+    func_00294680(object, scale, 0x53);
+
+    frameCount = frames - 5;
+    if (frameCount < 0) {
+        frameCount = 0;
+    }
+    alpha = (f32)frameCount / 15.0f;
+    if (alpha > 1.0f) {
+        alpha = 1.0f;
+    }
+    index = evtSelectGraphicSlotBySpriteType(object);
+    resources = D_00438FC8;
+    scale = (s32)(alpha * 256.0f);
+    func_00306CD0(D_003D03F0[index][MENU_ICON_X] * 16,
+                  D_003D03F0[index][MENU_ICON_Y] * 8, 0, scale, 0,
+                  resources->effectSlots[D_003D03F0[index][MENU_ICON_TEXTURE]],
+                  D_003D03F0[index][MENU_ICON_FRAME], 0x53);
+}
 
 void func_00294930(MenuTerminalContext *object, s32 elapsedFrames) {
     f32 elapsed = (f32)elapsedFrames - 0.0f;

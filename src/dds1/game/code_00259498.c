@@ -359,7 +359,83 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                                     0, currencyText, 0, context);
 }
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_0025B350);
+void func_0025B350(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
+    u32 prerequisiteFlags[4];
+    MnuMantraGridEntry *scene;
+    MnuProfileProgress *selection;
+    MnuMantraNodeState *states;
+    MantraPrerequisiteRecord *record;
+    s8 i;
+    u32 flags;
+    u32 color;
+
+    scene = (MnuMantraGridEntry *)(u32)cell->value;
+    if (scene == NULL) {
+        return;
+    }
+    x = (s32)((f32)x + (f32)D_0036B7F0[scene->sceneId][2] / 10.0f);
+    y = (s32)((f32)y + (f32)D_0036B7F0[scene->sceneId][3] / 10.0f);
+    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    states = (MnuMantraNodeState *)(u32)grid->userData;
+    sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    record = &D_0036AE80[scene->sceneId];
+    memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
+    if (record->unk00 == 0) {
+        for (i = 0; i < 4 && record->ids[i] != 0; i++) {
+            if (states[record->ids[i]].state != 0) {
+                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+            }
+        }
+        /* The prerequisite markers are no longer drawn; only their colours remain. */
+        for (i = 0; i < 4; i++) {
+            if (prerequisiteFlags[i] & 0x100) {
+                color = 0x50505080;
+                if (prerequisiteFlags[i] & 2) {
+                    color = 0x80808080;
+                }
+            }
+        }
+    }
+    switch (scene->value05) {
+    case 1:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10707020, surface);
+        break;
+    case 2:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x60401020, surface);
+        break;
+    case 3:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10601020, surface);
+        break;
+    case 4:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70701020, surface);
+        break;
+    case 5:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70107020, surface);
+        break;
+    case 6:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10107020, surface);
+        break;
+    case 7:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70707020, surface);
+        break;
+    }
+    flags = mnuGetMantraDisplayFlags(scene, selection);
+    if (flags & 1) {
+        uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0, 0x60501050, surface);
+    }
+    if (flags & 2) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x808020F0, (const u8 *)D_003BC488, surface);
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x808020F0, (const u8 *)D_003BC458, surface);
+    } else if (flags & 4) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x108080F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 8) {
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x108080F0, (const u8 *)D_003BC458, surface);
+    } else if (flags & 0x20) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC490, surface);
+    } else {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC498, surface);
+    }
+}
 
 void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
     if (allocation != 0) {
