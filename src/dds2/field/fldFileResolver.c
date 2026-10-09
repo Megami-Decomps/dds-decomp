@@ -4681,3 +4681,4 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0043615C);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436160);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436164);
+

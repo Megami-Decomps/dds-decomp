@@ -1334,8 +1334,8 @@ INCLUDE_ASM(const s32, "game/code_00202178", btlBindEffectUnitAndClearStateFlags
 
 /* Synchronize the bound actor pose and its offset effect vectors. */
 void func_00205730(BtlUnit *source) {
-    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
-    BtlUnit *unit = effect->actor;
+    BattleEffectState *effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
+    BtlUnit *unit = effect->header.actor;
     f32 position[4];
     f32 rotation[4] __attribute__((aligned(16)));
 
@@ -1346,8 +1346,8 @@ void func_00205730(BtlUnit *source) {
     unit->status.stateFlags &= ~0x80;
     unit->status.stateFlags &= ~0x100;
     btlSetUnitPosition(unit, unit->position);
-    btlSetUnitRotation(effect->actor, effect->actor->rotation);
-    unit = effect->actor;
+    btlSetUnitRotation(effect->header.actor, effect->header.actor->rotation);
+    unit = effect->header.actor;
 
     if (unit->status.flags & 2) {
         f32 translatedX;
@@ -1367,23 +1367,23 @@ void func_00205730(BtlUnit *source) {
         VU0_LOAD_VF(vf11, D_003A5D50);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        effObjSetInnerRotation(effect->actor->effectObject, (u128 *)rotation);
+        effObjSetInnerRotation(effect->header.actor->effectObject, (u128 *)rotation);
     }
 
-    effect->actor->status.stateFlags |= 0x180;
+    effect->header.actor->status.stateFlags |= 0x180;
 }
 
 extern void btlBeginEffectActorFadeOut(void);
 
 void btlBeginEffectActorFadeOut(void) {
-    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
-    BtlUnit *actor = effect->actor;
+    BattleEffectState *effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
+    BtlUnit *actor = effect->header.actor;
     if (actor != 0) {
         u32 state = actor->status.stateFlags;
         u32 flags = actor->status.flags | 0x100;
         state &= ~0x80;
         state &= ~0x100;
-        effect->actor = 0;
+        effect->header.actor = 0;
         actor->status.flags = flags;
         actor->status.stateFlags = state;
         btlRefreshUnitMotionSelection(actor);
@@ -1395,7 +1395,7 @@ void btlBeginEffectActorFadeOut(void) {
 
 void btlResetEffectState(void) {
     u8 *battle = (u8 *)btlGetRuntime();
-    BattleEffectState *data = ((BtlState *)battle)->effect;
+    BattleEffectState *data = (BattleEffectState *)((BtlState *)battle)->effect;
     data->active = 1;
     data->speed = 20.0f;
     data->flags = 0;
@@ -1403,7 +1403,7 @@ void btlResetEffectState(void) {
     data->value = 0;
     data->timer = 0;
     data->effect = 0;
-    data->owner = 0;
+    data->header.owner = 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
@@ -1422,7 +1422,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     default:
         return 0;
     }
-    effect = ((BtlState *)btlGetRuntime())->effect;
+    effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -1448,7 +1448,7 @@ void func_00205BD8(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *first = NULL;
     BtlUnit *second = NULL;
-    BattleEffectState *effect = state->effect;
+    BattleEffectState *effect = (BattleEffectState *)state->effect;
     BtlUnit *unit;
     f32 position[4];
 
@@ -1468,7 +1468,7 @@ void func_00205BD8(void) {
             }
         }
     }
-    if (effect->active == 1 || effect->owner == 0) {
+    if (effect->active == 1 || effect->header.owner == 0) {
         second->position[0] = 0.0f;
         btlSetUnitPosition(second, second->position);
         PCP_COPY_VECTOR(first->position, second->position);
@@ -1550,7 +1550,7 @@ s32 func_00205EF8(BtlUnit *unit, s32 code, s32 unused) {
     }
 
     battle = (BtlState *)btlGetRuntime();
-    effect = battle->effect;
+    effect = (BattleEffectState *)battle->effect;
     first = NULL;
     second = NULL;
     for (actor = battle->units; actor != NULL; actor = actor->next) {
@@ -1625,7 +1625,7 @@ s32 func_00205EF8(BtlUnit *unit, s32 code, s32 unused) {
 }
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
+    BattleEffectState *effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
     if (effect->active != 1) {
         return 0;
     }
@@ -1647,7 +1647,7 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     if (!(unit->status.flags & 0x400)) {
         return damageKind;
     }
-    if (((BtlState *)btlGetRuntime())->effect->active != 1) {
+    if (((BattleEffectState *)((BtlState *)btlGetRuntime())->effect)->active != 1) {
         return damageKind;
     }
     id = unit->partyRecord.unitId;
@@ -1728,9 +1728,9 @@ void func_00206450(void) {
     if ((battle->battleFlags & 0x80000) == 0) {
         return;
     }
-    effect = battle->effect;
-    if (effect->actor != 0) {
-        BtlUnit *selected = effect->actor;
+    effect = (BattleEffectState *)battle->effect;
+    if (effect->header.actor != 0) {
+        BtlUnit *selected = effect->header.actor;
         BtlUnit *actor;
         if ((selected->status.flags & 2) == 0) {
             return;
@@ -1740,7 +1740,7 @@ void func_00206450(void) {
         if (!(vector[1] > -125.0f)) {
             return;
         }
-        actor = effect->actor;
+        actor = effect->header.actor;
         limit = actor->species == 0x16 ? -62.5f : -125.0f;
         height = effect->height - effect->speed;
         speed = effect->speed / 1.11f;
@@ -1798,7 +1798,7 @@ void func_00206450(void) {
 INCLUDE_ASM(const s32, "game/code_00202178", func_00206608);
 
 s32 btlGetEffectTaskActorMatchCode(u8 *task) {
-    BattleEffectState *effect;
+    BtlEffectHeader *effect;
     if ((((BtlTask *)task)->flags & 8) == 0) {
         return -1;
     }
@@ -1824,8 +1824,8 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     if ((task->flags & 8) == 0) {
         return -1;
     }
-    effect = ((BtlState *)btlGetRuntime())->effect;
-    if (effect->owner != (u32)task->unit) {
+    effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
+    if (effect->header.owner != (u32)task->unit) {
         return -1;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -1988,7 +1988,7 @@ extern s32 fldGetSceneGroupEntry(s32);
 
 u64 func_002072F0(BtlTask *action) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BattleEffectState *effect = battle->effect;
+    BattleEffectState *effect = (BattleEffectState *)battle->effect;
     BtlUnit *unit;
     BtlRuntimeTask *task;
     u64 soundSequence;
@@ -2248,7 +2248,7 @@ s32 btlHasEffectActor(void) {
     if (effect == 0) {
         return absent;
     }
-    return (((BattleEffectState *)effect)->actor != 0);
+    return (((BtlEffectHeader *)effect)->actor != 0);
 }
 
 u32 btlGetEffectValue(void) {
@@ -2360,7 +2360,7 @@ void func_00207E68(void) {
     BtlUnit *selected = NULL;
     BtlUnit *head = state->units;
     BtlUnit *unit;
-    BattleEffectState *effect;
+    BtlEffectHeader *effect;
     BtlUnit *actor;
 
     for (unit = head; unit != NULL; unit = unit->next) {
@@ -2916,14 +2916,6 @@ extern char D_003A5D98[];
 
 extern struct EffRandState effSharedRandomState;
 
-/* Boss-selection view of battle->effect: +0x0C is a full-width lookup ID
- * here, unlike the timer/phase view in BattleEffectState. */
-typedef struct BtlBossEffectPayload {
-    s32 actor;
-    u32 color;
-    s32 options;
-    s32 selectedId;
-} BtlBossEffectPayload;
 
 void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
@@ -3131,7 +3123,7 @@ s32 btlSwapRandomBossSelection(void) {
     if (battle->mode != 1) {
         return -1;
     }
-    actor = (BtlUnit *)effect->actor;
+    actor = effect->header.actor;
     if (actor == NULL) {
         return -1;
     }
@@ -3225,7 +3217,7 @@ void func_00209528(void) {
     f32 *vector;
     u32 flags;
 
-    if (((BtlUnit *)effect->actor)->status.flags & 2) {
+    if (effect->header.actor->status.flags & 2) {
         unit = state->units;
         while (unit != NULL) {
             flags = unit->status.flags;
@@ -3233,11 +3225,11 @@ void func_00209528(void) {
                 if (flags & 0x400) {
                     if (flags & 2) {
                         if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
-                            btlInitializeEffectVectorsFromSourceRecords(unit, ((BtlUnit *)effect->actor)->resourceKind,
-                                                                        ((BtlUnit *)effect->actor)->species);
+                            btlInitializeEffectVectorsFromSourceRecords(unit, effect->header.actor->resourceKind,
+                                                                        effect->header.actor->species);
                         } else {
-                            btlInitializeEffectVectorsFromSourceRecords(unit, ((BtlUnit *)effect->actor)->resourceKind,
-                                                                        ((BtlUnit *)effect->actor)->species);
+                            btlInitializeEffectVectorsFromSourceRecords(unit, effect->header.actor->resourceKind,
+                                                                        effect->header.actor->species);
                             unit->height = 100.0f;
                             unit->unkB8 = 100.0f;
                             unit->reach = 25.0f;
@@ -3258,14 +3250,14 @@ void func_00209528(void) {
                     if (flags & 2) {
                         if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
                             vector = unit->position;
-                            actor = (BtlUnit *)effect->actor;
+                            actor = effect->header.actor;
                             PCP_COPY_VECTOR(actor->position, vector);
                             btlSetUnitPosition(actor, unit->currentPosition);
-                            actor = (BtlUnit *)effect->actor;
+                            actor = effect->header.actor;
                             vector = unit->rotation;
                             PCP_COPY_VECTOR(actor->rotation, vector);
                             btlSetUnitRotation(actor, unit->orientation);
-                            btlFlagUnitDefeatCandidate((BtlUnit *)effect->actor);
+                            btlFlagUnitDefeatCandidate(effect->header.actor);
                         }
                     }
                 }
@@ -3364,32 +3356,26 @@ s32 btlRemapSelectedBossCommand(u8 *unit, s32 command, u8 mode) {
 
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 
-typedef struct BtlEffectLink {
-    BtlUnit *actor;
-    u32 unk4;
-    u32 flags; /* 8 */
-    s32 code;  /* 0xC */
-} BtlEffectLink;
 
 void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
-    BtlEffectLink *effect;
+    BtlBossEffectPayload *effect;
     BtlUnit *target;
     BtlUnit *actor;
 
     if (unit->status.flags & 0x400) {
-        effect = (BtlEffectLink *)((BtlState *)btlGetRuntime())->effect;
-        target = effect->actor;
+        effect = (BtlBossEffectPayload *)((BtlState *)btlGetRuntime())->effect;
+        target = effect->header.actor;
         if (target != 0) {
             if (target->status.flags & 2) {
-                if (unit->lookupId == effect->code) {
+                if (unit->lookupId == effect->selectedId) {
                     if ((*(u16 *)(task + 0x26) & 0x800) == 0) {
-                        effect->flags |= 4;
+                        effect->options |= 4;
                         PCP_COPY_VECTOR(target->position, unit->position);
                         btlSetUnitPosition(target, unit->currentPosition);
-                        actor = effect->actor;
+                        actor = effect->header.actor;
                         PCP_COPY_VECTOR(actor->rotation, unit->rotation);
                         btlSetUnitRotation(actor, unit->orientation);
-                        btlFlagUnitDefeatCandidate(effect->actor);
+                        btlFlagUnitDefeatCandidate(effect->header.actor);
                     }
                 }
             }
@@ -3552,7 +3538,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
     BtlTask *candidates[16];
     BtlTask *task;
     BtlUnit *unit;
-    BattleEffectState *effectState;
+    BtlEffectHeader *effectState;
     DatPartyRecord *stats;
     u16 mode;
     s32 count;
@@ -3652,7 +3638,7 @@ s32 btlHasFirstSpecialEnemySpecies(void) {
 extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, s32);
 
 void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 action) {
-    BattleEffectState *effectState;
+    BtlEffectHeader *effectState;
     if ((unit->status.flags & 0x400) == 0) {
         return;
     }

@@ -106,7 +106,8 @@ typedef struct BattleActionState {
     BtlUnit *actor;
     f32 scale;
     s8 pending;
-    u8 pad09[7];
+    s8 alternateMotion; /* +9: 00221C48/00221CA4 select group 1 instead of 11. */
+    u8 pad0A[6];
 } BattleActionState;
 typedef char BattleActionExtent[(sizeof(BattleActionState) == 16) ? 1 : -1];
 typedef char BattleActionPendingOffset[((unsigned int)&((BattleActionState *)0)->pending == 8) ? 1 : -1];
@@ -319,7 +320,7 @@ typedef struct BtlState {
     u8 pad65C[0x10];
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
     u8 pad670[0x24];
-    BattleEffectState *effect; /* 0x694 */
+    BtlEffectHeader *effect; /* 0x694: mode-owned allocation begins with its generic header. */
     u8 pad698[0xC];
     BtlDebugMenuWork debug; /* 0x6A4 */
     s8 unk_E0C;
