@@ -3138,12 +3138,12 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     work->color = 0x80808080;
     work->mode = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->headHandle = effParamWorkCreate(3, blocks[0]);
-    work->handleA[0] = effParamWorkCreate(0, blocks[1]);
-    work->handleA[1] = effParamWorkCreate(0, blocks[2]);
-    work->handleA[2] = effParamWorkCreate(0, blocks[3]);
-    work->handleA[3] = effParamWorkCreate(0, blocks[4]);
-    work->handleA[4] = effParamWorkCreate(3, blocks[5]);
+    work->headHandle = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[0]);
+    work->handleA[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[1]);
+    work->handleA[1] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[2]);
+    work->handleA[2] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[3]);
+    work->handleA[3] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[4]);
+    work->handleA[4] = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[5]);
     model = effParamWorkGetData(work->headHandle);
     work->count = model->info->unk2E;
     for (i = 0; i < 3; i++) {
@@ -3151,7 +3151,7 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
             n = work->count * work->params.groupSize[i];
             work->alloc[i] = sdfAllocGeneralBlock(n * 4);
             work->list[i] = (EffParamWork **)sdfResourceRetainAddress(work->alloc[i]);
-            work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
+            work->list[i][0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
             }
@@ -3159,12 +3159,12 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
             work->alloc[i] = NULL;
         }
     }
-    work->handleB[0] = effParamWorkCreate(0, blocks[9]);
-    work->handleB[1] = effParamWorkCreate(0, blocks[10]);
-    work->handleB[2] = effParamWorkCreate(0, blocks[11]);
-    work->handleB[3] = effParamWorkCreate(0, blocks[12]);
-    work->handleB[4] = effParamWorkCreate(6, blocks[13]);
-    work->tailHandle = effParamWorkCreate(0, blocks[14]);
+    work->handleB[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[9]);
+    work->handleB[1] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[10]);
+    work->handleB[2] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[11]);
+    work->handleB[3] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[12]);
+    work->handleB[4] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, blocks[13]);
+    work->tailHandle = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[14]);
     return work;
 }
 
@@ -4729,9 +4729,9 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
                 EffParamWork *firstCreatedHandle;
 
                 if (index < 2) {
-                    *destinationHandles = effParamWorkCreate(0, (void *)*sourceResourceCursor);
+                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, (void *)*sourceResourceCursor);
                 } else {
-                    *destinationHandles = effParamWorkCreate(6, (void *)*sourceResourceCursor);
+                    *destinationHandles = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, (void *)*sourceResourceCursor);
                 }
                 firstCreatedHandle = *destinationHandles;
                 for (duplicateIndex = 1; duplicateIndex < entryCount; duplicateIndex++) {
@@ -5960,7 +5960,7 @@ EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *reso
     work->modelResource = 0;
     work->frame = 0;
     if (resourceParams != 0) {
-        work->modelResource = effParamWorkCreate(3, resourceParams);
+        work->modelResource = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, resourceParams);
     }
     if (ownerParams != 0) {
         work->owner = effEventCloneSoundMixer(ownerParams);
