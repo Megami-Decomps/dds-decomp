@@ -5,6 +5,9 @@
 
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
+    SDF_GS_PRIM = 0x00,
+    SDF_GS_RGBAQ = 0x01,
+    SDF_GS_XYZ2 = 0x05,
     SDF_GS_TEX0_1 = 0x06,
     SDF_GS_TEX0_2 = 0x07,
     SDF_GS_CLAMP_1 = 0x08,
@@ -28,6 +31,12 @@ enum {
     SDF_GS_FRAME_2 = 0x4D,
     SDF_GS_ZBUF_1 = 0x4E,
     SDF_GS_ZBUF_2 = 0x4F
+};
+
+/* Values written to the PRIM and TEST registers by the centered-bounds packet. */
+enum {
+    SDF_GS_PRIMITIVE_SPRITE = 0x06,
+    SDF_GS_CENTERED_VIEW_BOUNDS_TEST = 0x30003
 };
 
 /* Packed ALPHA operands: (A - B) * C / 128 + D. Cs/Cd denote
