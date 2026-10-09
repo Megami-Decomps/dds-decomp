@@ -666,42 +666,49 @@ void func_0029CF30(SdfFlagListWork *work, u32 value) {
     work->unk04 = value;
 }
 
-u32 effDuplicatePayloadHeader(const void *source) {
-    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(0x14);
-    *buffer = 0;
-    memcpy(buffer + 1, source, 16);
-    return (u32)buffer;
+typedef struct EffSelectionHeaderWork {
+    s32 frame;
+    s32 payload[4];
+} EffSelectionHeaderWork;
+
+typedef char EffSelectionHeaderWorkSizeCheck[(sizeof(EffSelectionHeaderWork) == 0x14) ? 1 : -1];
+
+EffSelectionHeaderWork *effDuplicatePayloadHeader(const void *source) {
+    EffSelectionHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffSelectionHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
 void effCreateSelectionHeaderFromFile(void *work) {
     void *resource;
 
-    resource = fileResolvePrimaryBuffer(work);
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicatePayloadHeader(resource);
 }
 
-void effReleaseSelectionHeaderAllocation(u32 allocation) {
+void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSelectionHeaderFromWork(s32 work) {
-    effDuplicatePayloadHeader((const void *)(work + 4));
+void effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
+    effDuplicatePayloadHeader(work->payload);
 }
 
-void effSelectionFrameReset(u32 *counter) {
-    *counter = 0;
+void effSelectionFrameReset(EffSelectionHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effSelectionFrameAdvance(s32 *counter) {
+void effSelectionFrameAdvance(EffSelectionHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        evtSelStateCreate(counter[1], (s16)counter[2], counter[3], counter[4]);
-        frame = *counter;
+        evtSelStateCreate(counter->payload[0], (s16)counter->payload[1], counter->payload[2], counter->payload[3]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 typedef struct EffFadeConfig {
