@@ -156,7 +156,7 @@ SdfListNode *mnuFindResourceNodeByHandle(MnuCallbackList *list, u32 handle) {
     return node;
 }
 
-void func_003211F0(void) {
+void func_003211F0(u32 unusedFirstWord, u32 unusedSecondWord) {
 }
 
 MenuProgressParameters *mnuGetResourceProgressParameters(void) {
@@ -221,9 +221,9 @@ void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback) {
     mnuRuntimeRecordInitializationCallback = callback;
 }
 
-void func_003214D0(u32 unused, s32 resource) {
-    if (resource != 0) {
-        mnuFreeOptionalBlock(resource);
+void func_003214D0(u32 unusedFirstWord, u32 resourceWord) {
+    if (resourceWord != 0) {
+        mnuFreeOptionalBlock(resourceWord);
         return;
     }
 }
