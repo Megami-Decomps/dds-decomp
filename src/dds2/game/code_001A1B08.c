@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "sdf_packet_list.h"
 #include "itf.h"
+#include "itf_mes_window.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 
@@ -99,7 +100,6 @@ extern PanelEntry itfWindowSlots[];
 
 extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
-extern void itfMesSetWindowPageAndRefresh(s32 window, s32 arg1, s32 arg2);
 extern u32 scrGetWindow(void);
 extern void scrSetIntegerReturnValue(s32);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
