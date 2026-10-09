@@ -573,7 +573,7 @@ void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void func_00333490(SdfAsset *param, u32 textureAddress) {
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, u32 textureAddress) {
     param->secondaryTexture = (SdfTex *)textureAddress;
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
@@ -678,7 +678,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        func_00333490(asset, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfSetAssetSecondaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
         sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
