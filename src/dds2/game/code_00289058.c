@@ -756,7 +756,88 @@ void mnuAdvanceMantraPanelTransitionTimer(MnuStatusResource *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028CD50);
+extern void mnuDrawMantraSprite(s32 x, s32 y, s32 depth, s32 fade, s32 sprite, s32 unused, s32 drawArg);
+
+/* Level bits of one flag entry: high nibble of the low byte. */
+typedef struct MantraFlagLevel {
+    u32 state : 4;
+    u32 level : 4;
+} MantraFlagLevel;
+
+/* Draws every visible node of the mantra map; the fade follows the panel transition. */
+void func_0028CD50(s32 offsetX, s32 offsetY, MnuStatusResource *object, s32 drawArg) {
+    MantraMenuWork *work = &object->menu;
+    MantraFlagResource *selected;
+    MantraFlagResource *profile;
+    MantraNodePos *node;
+    f32 ratio;
+    s32 fade = 0;
+    s32 count;
+    s32 id;
+    s32 x;
+    s32 y;
+    u16 high;
+    MantraFlagLevel *profileEntry;
+    u16 *selectedEntry;
+
+    ratio = (f32)(s16)work->panelTransitionTimer / 5.0f;
+    switch (work->panelTransitionMode) {
+    case 0:
+        return;
+    case 1:
+        fade = (s32)(ratio * 128.0f);
+        break;
+    case 2:
+        fade = (s32)((1.0f - ratio) * 128.0f);
+        break;
+    case 3:
+        fade = 0x80;
+        break;
+    }
+    node = mnuGetMantraNodePositionRecord(0);
+    selected = object->menu.slots[func_002890A8(object)];
+    profile = object->menu.slots[5];
+    count = 175;
+    do {
+        id = node->id;
+        if (id != 0) {
+            selectedEntry = selected->flags + id;
+            profileEntry = (MantraFlagLevel *)(profile->flags + id);
+            if ((*selectedEntry & 0xF) != 3) {
+                x = (s32)((((((f32)node->x / 10.0f) * 20.0f) - 180.0f) + 241.0f) - 10.0f + (f32)offsetX);
+                y = (s32)((((f32)node->y / 10.0f) * 20.0f) - 180.0f + 221.0f + (f32)offsetY);
+                switch (node->kind) {
+                case 1:
+                case 3:
+                case 4:
+                    if ((*selectedEntry >> 8) & 1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x105, 0, drawArg);
+                    } else if (profileEntry->level == 1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x106, 0, drawArg);
+                    } else {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x107, 0, drawArg);
+                    }
+                    break;
+                case 2:
+                    high = (*selectedEntry & 0xFF00) >> 8;
+                    if (high & 8) {
+                        if (node->selector.packed & 0x100) {
+                            mnuDrawMantraSprite(x, y, 0, fade, 0x108, 0, drawArg);
+                        } else {
+                            mnuDrawMantraSprite(x, y, 0, fade, 0x10A, 0, drawArg);
+                        }
+                    } else if (high & 1) {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x105, 0, drawArg);
+                    } else {
+                        mnuDrawMantraSprite(x, y, 0, fade, 0x109, 0, drawArg);
+                    }
+                    break;
+                }
+            }
+        }
+        node++;
+    } while (--count >= 0);
+}
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
 

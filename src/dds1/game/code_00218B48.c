@@ -1717,10 +1717,6 @@ u32 mdlRunViewerIndexedLabelTask(void) {
     return 0;
 }
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
-extern void mdlStorePrimaryVectorVU(MdlCtx *context);
-extern void mdlLoadRotationQuaternionVU(MdlCtx *context);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
 extern f32 D_00398380[4];
 extern f32 D_00398390[4];
 extern f32 D_003983A0[4];

@@ -370,7 +370,6 @@ extern u32 effFlashTextureHandles;
 
 extern u32 effModelUpdateControlFlags;
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
@@ -457,7 +456,6 @@ extern u32 D_004387B0;
 
 extern u32 D_00438774;
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 
 extern u32 effSharedTextureReferenceCount;
@@ -8081,9 +8079,6 @@ typedef struct EffModelCallbackConfig {
 } EffModelCallbackConfig;
 typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0x40 ? 1 : -1];
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 
 void func_002F8040(EffActiveResource *resource)
@@ -8257,9 +8252,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     effAdvanceClassResourceFrame(handle->material);
 }
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 /* The model helpers read vf10, following the SDK's VU0 macro-mode convention. */
 void effApplyModelTransform(u8 *work) {

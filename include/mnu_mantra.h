@@ -90,7 +90,7 @@ typedef struct MantraNodePos {
     union {
         MenuPanelSelector selector;
         struct {
-            u32 kind : 4;
+            s32 kind : 4;
             s32 modelFlagState : 4;
             u32 reserved : 8;
             s16 id;
