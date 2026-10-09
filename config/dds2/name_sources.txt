@@ -6226,9 +6226,14 @@
 0x003351C0	sdfMotionCaptureScaleVector	inferred	Copies the bound node's scale vector into motion work. [names_reviewed6.tsv]
 0x003351E0	sdfDispatchMotionHandler	inferred	Dispatches to a function-pointer table indexed by the low sixteen bits of the supplied selector.
 0x00335210	sdfMotionBindIndexedTrack	inferred	Stores the source and handler pair then selects a track from its index array. [names_reviewed6.tsv]
-0x003353B8	sdfCopyTrackStateToBinding	inferred	Copies the whole track word at offset 0x14 into the bound motion state's current word.
-0x00335518	sdfMotionReadBoundTrackInteger	inferred	Copies bound motion track integer into the command result field. [names_reviewed6.tsv]
-0x003357D8	sdfMotionCopyTrackValueToBinding	inferred	Copies a motion track current value into its binding. [names_reviewed12.tsv]
+0x003352C8	sdfMotionApplyPrimaryWordSecondKey	inferred	Interpolates the indexed track color and stores it in the target asset's second primary-state word; table D_0040B420 uses this as its sample callback.
+0x00335308	sdfMotionBlendPrimaryWordSecondKey	inferred	Blends the captured target word with the indexed color and stores the second primary-state word; paired with the second-word apply callback.
+0x00335428	sdfMotionApplyPrimaryWordFirstKey	inferred	Interpolates the indexed track color and stores the target asset's first primary-state word; table D_0040B438 uses this as its sample callback.
+0x00335468	sdfMotionBlendPrimaryWordFirstKey	inferred	Blends the captured target word with the indexed color and stores the first primary-state word; paired with the first-word apply callback.
+0x00335588	sdfMotionApplyPrimaryWordThirdKey	inferred	Interpolates the indexed track color and stores the target asset's third primary-state word; table D_0040B450 uses this as its sample callback.
+0x003355C8	sdfMotionBlendPrimaryWordThirdKey	inferred	Blends the captured target word with the indexed color and stores the third primary-state word; paired with the third-word apply callback.
+0x003356E8	sdfMotionApplyPrimaryWordFourthKey	inferred	Interpolates the indexed track color and stores the target asset's fourth primary-state word; table D_0040B468 uses this as its sample callback.
+0x00335728	sdfMotionBlendPrimaryWordFourthKey	inferred	Blends the captured target word with the indexed color and stores the fourth primary-state word; paired with the fourth-word apply callback.
 0x003357E8	sdfMotionCreateFloatBinding	inferred	Allocates indexed track work using the float-interpolation handler table. [names_reviewed6.tsv]
 0x00335848	sdfMotionApplyInterpolatedFloat	inferred	Interpolates two scalar float keys and applies the result to a node. [names_reviewed6.tsv]
 0x00335888	sdfMotionBlendInterpolatedFloat	inferred	Blends the interpolated float with a previous value using a second weight. [names_reviewed6.tsv]
@@ -6976,3 +6981,11 @@
 0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
 0x00157AC8	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.
 0x00316528	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.
+0x00335268	sdfMotionCreatePrimaryWordSecondBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word second, registering its apply/blend/capture callbacks.
+0x003353C8	sdfMotionCreatePrimaryWordFirstBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word first, registering its apply/blend/capture callbacks.
+0x00335528	sdfMotionCreatePrimaryWordThirdBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word third, registering its apply/blend/capture callbacks.
+0x00335688	sdfMotionCreatePrimaryWordFourthBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word fourth, registering its apply/blend/capture callbacks.
+0x003353B8	sdfMotionCapturePrimaryWordSecond	inferred	Captures the bound target word at offset 0x14 into the indexed binding.
+0x00335518	sdfMotionCapturePrimaryWordFirst	inferred	Captures the bound target word at offset 0x10 into the indexed binding.
+0x00335678	sdfMotionCapturePrimaryWordThird	inferred	Captures the bound target word at offset 0x20 into the indexed binding.
+0x003357D8	sdfMotionCapturePrimaryWordFourth	inferred	Captures the bound target word at offset 0x28 into the indexed binding.
