@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
@@ -29,7 +30,6 @@ extern void func_00101368(KwlnTask* task, s32 arg1);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 
-extern void* sdfAllocSizeClassBlock(s32 arg0);
 
 extern void sdfReleaseChipBlock(void* ptr);
 

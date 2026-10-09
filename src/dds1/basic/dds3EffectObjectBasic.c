@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
@@ -50,7 +51,6 @@ EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector
 EffectObj *effObjCreateMagatuhiForKind();
 extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
-extern void *sdfAllocSizeClassBlock(s32 size);
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
 extern void *func_0014FE28(void);

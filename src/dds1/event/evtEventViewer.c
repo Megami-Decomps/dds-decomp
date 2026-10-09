@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -41,7 +42,6 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void func_0022BF00(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
-void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 void *dds3GetWorldObject(void);
 s32 strcmp(const char *a, const char *b);

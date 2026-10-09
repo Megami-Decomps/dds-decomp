@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -59,7 +60,6 @@ extern s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 

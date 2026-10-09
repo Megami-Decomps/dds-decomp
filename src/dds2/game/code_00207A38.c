@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -162,7 +163,6 @@ extern s32 D_00438F80;
 
 extern void func_0035C860();
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 btlGetEffectActive(void);
 

@@ -12,6 +12,7 @@
 #include "kwln.h"
 #include "eff.h"
 #include "itf.h"
+#include "sdf_chip.h"
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -1406,7 +1407,6 @@ typedef struct SkillInfo {
     u16 codes[14];
 } SkillInfo;
 
-extern s32 sdfAllocSizeClassBlock(s32);
 extern void prfBuildRawSkillList(u32, SkillInfo *);
 
 s32 mnuBuildSkillCodeBitset(void) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
@@ -10,7 +11,6 @@
 
 
 
-void *sdfAllocSizeClassBlock(s32 size);
 void sdfReleaseChipBlock(void *memory);
 
 

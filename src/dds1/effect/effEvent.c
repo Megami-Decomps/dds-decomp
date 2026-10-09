@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -1089,7 +1090,6 @@ void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
 
 extern u8 D_003563F0[];
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern s32 D_003BB140;
 

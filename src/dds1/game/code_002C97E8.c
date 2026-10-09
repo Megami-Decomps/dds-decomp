@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
@@ -56,7 +57,6 @@ extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 float sdfQuatLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2] +

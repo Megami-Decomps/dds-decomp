@@ -165,7 +165,6 @@ extern struct EffExpandedList *func_0029C230(u32);
 extern u32 effFlashTextureHandles;
 
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 

@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
 #include "sdf.h"
@@ -439,7 +440,6 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
     effDrawBlurRectangle(&work->source);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {

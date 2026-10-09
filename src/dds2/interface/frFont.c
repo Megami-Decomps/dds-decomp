@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
@@ -30,7 +31,6 @@ extern u8 D_00436578[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct FrFontSegments {
     void *first;

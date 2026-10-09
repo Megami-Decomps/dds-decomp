@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
@@ -12,7 +13,6 @@ extern s8 ptyReadSignedRosterStatByte(s32);
 extern void scrSetIntegerReturnValue(s32);
 extern void func_0011A328(s32);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *p);
 
 
@@ -105,7 +105,6 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     return 0;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern EffWorldOps *D_003849D8[EFF_WORLD_KIND_COUNT];
 void effObjNodeDestroy(EffWorldNode *node);
 

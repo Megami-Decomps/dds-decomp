@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
@@ -178,7 +179,6 @@ extern void *memset(void *s, s32 c, u32 n);
 
 extern void *memcpy(void *dest, const void *src, u32 n);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern EffectConfig D_003AA884[];
 

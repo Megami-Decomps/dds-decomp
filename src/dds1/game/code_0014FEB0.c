@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -19,7 +20,6 @@ typedef struct EffectHandler {
 } EffectHandler;
 
 extern EffectHandler D_0034DE40[];
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);

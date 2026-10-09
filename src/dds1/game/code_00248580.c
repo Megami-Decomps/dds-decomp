@@ -5,6 +5,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
@@ -115,7 +116,6 @@ extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 
 extern s32 mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
-extern s32 sdfAllocSizeClassBlock(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
@@ -256,7 +256,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
  * The source is a party-vitals record; the context supplies the panel style. */
 s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
-    s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
+    s32 panel = (s32)sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
         *(s32 *)(workAddress + 0xe0));

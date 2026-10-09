@@ -115,7 +115,6 @@ typedef struct SdfMotionOutput {
     u32 capturedValue; /* 0x10: first word of the saved target state */
 } SdfMotionOutput;
 
-void *sdfAllocSizeClassBlock(s32 size);
 
 void sdfMotionBindIndexedTrack(SdfMotionOutput *output, Src360 *source, void *dispatch, s32 options);
 

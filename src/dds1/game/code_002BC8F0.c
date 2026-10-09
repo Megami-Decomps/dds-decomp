@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "itf_draw_grid.h"
@@ -158,7 +159,6 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 D_003BD064;
 
-extern void *sdfAllocSizeClassBlock(u32);
 
 extern void sdfReleaseChipBlock(void *);
 

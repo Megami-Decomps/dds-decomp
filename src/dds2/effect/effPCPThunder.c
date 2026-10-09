@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
@@ -1918,7 +1919,6 @@ struct EffThunderGroup {
     u32 color;
 };
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
 EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {

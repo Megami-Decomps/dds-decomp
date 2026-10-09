@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 
@@ -42,7 +43,6 @@ u32 sdfMemoryGetBlockAddress(SdfMemBlock *block) {
 }
 
 extern void (*D_004389CC)(s32);
-extern SdfMemBlock *sdfAllocSizeClassBlock(s32 size);
 
 /* Low-end first-fit with 128-byte rounding; returns an allocation handle.
  * At the end marker, call the optional out-of-memory hook and continue searching. */

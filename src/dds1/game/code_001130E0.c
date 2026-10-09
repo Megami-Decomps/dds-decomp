@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
@@ -41,7 +42,6 @@ extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *memory);
 extern void dds3SetObjectFlags(void *, s32);
 

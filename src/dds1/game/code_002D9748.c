@@ -119,7 +119,6 @@ extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
 extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
-void *sdfAllocSizeClassBlock(s32 size);
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "eff_transform.h"
@@ -94,7 +95,6 @@ typedef struct Dds3PathCurveTable {
     Dds3PathCurveEntry entries[1];
 } Dds3PathCurveTable;
 
-extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
 extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 

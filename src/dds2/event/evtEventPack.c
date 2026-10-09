@@ -190,7 +190,6 @@ void evtFreeMotionSeTaskParams(KwlnTask *task) {
 }
 
 extern void func_0035C860(char *, const char *, ...);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 /* Preserve the complete native format record, including its trailing zeros. */
 const char D_00424890[0x10] __attribute__((aligned(8))) = "mse_%d_%d";

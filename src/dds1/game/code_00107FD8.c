@@ -1574,7 +1574,6 @@ typedef struct BfFlw0Header {
     ScrSection sections[1];
 } BfFlw0Header;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 itfMesCreateWindow(void *data);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);

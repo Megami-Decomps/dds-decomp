@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
@@ -10,7 +11,6 @@
 extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
-void *sdfAllocSizeClassBlock(s32 size);
 void sdfReleaseChipBlock(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *arg);

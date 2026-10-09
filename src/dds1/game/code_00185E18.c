@@ -448,7 +448,6 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
     effDrawBlurRectangle(&work->source);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {

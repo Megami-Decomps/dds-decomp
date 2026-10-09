@@ -379,7 +379,6 @@ typedef struct MdlViewerHeader {
     s16 unk06;
 } MdlViewerHeader;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 strlen(const char *);
 extern char *strcpy(char *, const char *);
 extern MdlViewerHeader *D_00438F98;

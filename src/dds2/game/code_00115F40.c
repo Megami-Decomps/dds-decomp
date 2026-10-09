@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "dds3obj.h"
 #include "eff_event.h"
@@ -9,7 +10,6 @@
 #include "pcp_vu0.h"
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.

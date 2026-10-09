@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_object.h"
 #include "eff_dependency.h"
 #include "eff_event.h"
 
 extern ObjBase *dds3GetLightObjectResource(EffWorldNode *object);
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 effObjInnerCreate(EffWorldNode *object);
 
 /* Each object kind keeps its handle in a different structure. */

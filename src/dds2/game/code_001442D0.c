@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -261,7 +262,6 @@ extern s32 fldFindEffectByName(char *str);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern s32 fldFieldTaskUpdate(void);

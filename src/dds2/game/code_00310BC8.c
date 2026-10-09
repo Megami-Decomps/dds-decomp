@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
@@ -57,7 +58,6 @@ extern void func_0030F8D0(f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
 
