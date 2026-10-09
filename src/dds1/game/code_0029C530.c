@@ -6098,14 +6098,14 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     return table;
 }
 
-extern void effReleaseModelPointSetAsset(s32);
+extern void effReleaseModelPointSetAsset(EffPointSet *);
 
 void effReleaseParticleList(EffSpanTable *list) {
     u32 i;
     EffSpanRecord *entry = list->records;
 
     for (i = 0; i < list->count; i++, entry++) {
-        effReleaseModelPointSetAsset((s32)entry->pointSet);
+        effReleaseModelPointSetAsset(entry->pointSet);
         if (entry->references != 0) {
             effReleaseResourceRefs((u8 *)entry->references);
         }
@@ -6242,9 +6242,9 @@ EffPointSet *effCreatePointSet3(s32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effReleaseModelPointSetAsset(EffPointSet *set) {
+    sdfQueueAssetRelease(set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
