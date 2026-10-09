@@ -568,7 +568,7 @@ typedef struct SdfAssetEntry {
     u32 unk14;             /* 0x14 */
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
-    u32 unk20;             /* 0x20 */
+    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
     u32 mode;              /* 0x24 */
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */

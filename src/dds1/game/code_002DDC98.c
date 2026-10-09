@@ -601,7 +601,7 @@ void func_002E02D8(u32 workAddress) {
     }
     sdfBuildChunkedVuNodeTransfer(work, node->secondaryTextureState.sampling,
                                   node->secondaryTextureState.texture,
-                                  node->secondaryTextureState.clamp, node->unk20, 0);
+                                  node->secondaryTextureState.clamp, node->alphaState, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E03C0);
