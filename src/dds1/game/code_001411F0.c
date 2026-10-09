@@ -135,9 +135,9 @@ struct SdfMemBlock;
 extern s8 D_00324530[];
 extern s32 D_0032E4C0[];
 extern s32 D_0032E4E8[];
-extern s32 D_003BAFE8;
-extern s32 D_003BAFEC;
-extern s32 D_003BAFF0;
+extern struct FileRequest *D_003BAFE8;
+extern u32 D_003BAFEC;
+extern u32 D_003BAFF0;
 extern void func_0012EA40(u32, u32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -3718,13 +3718,168 @@ void fldFinishEventFieldState(void) {
     }
 }
 
+extern void func_0024DD78(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern void fldAddCameraModelEntry(s32);
+extern void func_0026A5F0(s32);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void func_0014B688(void);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern void evtSetSolarOverlayFullyTransparent(void);
+
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0918);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0928);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0978);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C648);
+void func_0014C648(void) {
+    f32 position[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    f32 rotation[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    s32 choice;
+    void *node;
+
+    switch (fldSparkControlState.dialogPhase) {
+    case 12:
+        func_0024DD78();
+        if (evtGetMessageWindowControlState() == 0) {
+            evtFinishMessageWindowAndNotify();
+            dspCloseChannel();
+            fldSparkControlState.dialogPhase = 11;
+            fldAreaState.transitionMode = 0;
+            evtSetSolarOverlayFullyVisible();
+        }
+        break;
+    case 1:
+        func_0024DD78();
+        if (evtGetMessageWindowControlState() == 0) {
+            choice = evtGetCapturedWindowPanelValue();
+            if (choice == 0) {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 5;
+                fldSparkControlState.unk2C = 0;
+            } else if (choice == 1) {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 11;
+                fldAreaState.transitionMode = 0;
+                evtSetSolarOverlayFullyVisible();
+            } else {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 4;
+                fldSparkControlState.unk2C = 0;
+                evtCreateMessageWindowIfMissing(D_0034D8F0);
+                dspStartEntry(3);
+                evtStoreValueAndCaptureWindowPanelValue(2);
+                evtSetMessageWindowOptionWhenOpen(0);
+            }
+        }
+        break;
+    case 4:
+        func_0024DD78();
+        if (evtGetMessageWindowControlState() == 0) {
+            evtFinishMessageWindowAndNotify();
+            dspCloseChannel();
+            fldSparkControlState.dialogPhase = 1;
+            fldSparkControlState.unk2C = 0;
+        }
+        break;
+    case 5:
+        dds3WorkClear();
+        fldReleaseCurrentBgm();
+        D_003BAFE8 = fileQueueDefaultCallbackRequest((const char *)D_003A0978);
+        fldSparkControlState.dialogPhase = 6;
+        fldSparkControlState.unk2C = 0;
+        break;
+    case 6:
+        if (fileIsRequestReadyInCurrentMode(D_003BAFE8) != 0) {
+            D_003BAFF0 = fileGetLoadedDataAddress(D_003BAFE8);
+            D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
+            position[0] = fldAreaState.x;
+            position[1] = fldAreaState.y;
+            position[2] = fldAreaState.z;
+            node = func_00115298((void *)D_003BAFF0, position, rotation);
+            fldSparkControlState.object = node;
+            effObjClearFlags(node, 1);
+            filePollEntryCleanup(D_003BAFE8);
+            fldAddCameraModelEntry(0xD);
+            D_0032E5C4[0] = 1;
+            fldResetArchiveLoadPhase();
+            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogPhase = 2;
+        }
+        break;
+    case 2:
+        if (fldSparkControlState.unk2C == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        fldSparkControlState.unk2C++;
+        if (fldStepArchiveLoad() != 0) {
+            func_0026A5F0(0x12);
+            fldSparkControlState.dialogPhase = 3;
+        }
+        break;
+    case 3:
+        if (fldSparkControlState.unk2C == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        fldSparkControlState.unk2C++;
+        if (mnuPollTitleStreamStateLocked() == 2) {
+            sndSetSequenceVolumePan(0x670010, 0x7F, 0x3F);
+            fldSparkControlState.dialogPhase = 8;
+        }
+        break;
+    case 8:
+        if (fldSparkControlState.unk2C == 46) {
+            kwlnFadeInStart(0xFF, 0xFF, 0xFF, 4);
+        }
+        if (fldSparkControlState.unk2C == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        if (++fldSparkControlState.unk2C > 50) {
+            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogPhase = 9;
+        }
+        break;
+    case 9:
+        func_0014B688();
+        fldLoadWeatherEffects();
+        func_001239C8();
+        func_0012EA40(0x66, 0);
+        fldSparkControlState.unk2C = 0;
+        fldSparkControlState.dialogPhase = 10;
+        evtSetSolarOverlayFullyTransparent();
+        kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
+        break;
+    case 10:
+        func_0014C210();
+        if (++fldSparkControlState.unk2C > 10) {
+            effObjClearFlags(fldSparkControlState.object, 1);
+            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAFEC);
+            fldSparkControlState.unk2C = 0;
+            fldSparkControlState.dialogPhase = 7;
+            mnuTitleStreamUpdateAndLogBgm();
+        }
+        break;
+    case 7:
+        func_0014C210();
+        fldSparkControlState.dialogPhase = 0;
+        fldSparkControlState.phase = 1;
+        fldPreparePlayerSceneCameraTarget();
+        break;
+    case 11:
+        fldSparkControlState.phase = 1;
+        fldSparkControlState.dialogPhase = 0;
+        fldPreparePlayerSceneCameraTarget();
+        break;
+    }
+}
 
 s32 func_0014CAF8(void) {
     return D_003D62C8[0];
@@ -3821,13 +3976,13 @@ void func_0014CB08(void) {
         fldSparkControlState.frame = 0;
         fldSparkControlState.phase = 6;
         mnuAdvanceTitleStateUnderSemaphore();
-        D_003BAFE8 = (s32)fileQueueDefaultCallbackRequest(D_003A0978);
+        D_003BAFE8 = fileQueueDefaultCallbackRequest(D_003A0978);
     } else if (phase == 6) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)D_003BAFE8) == 0) {
+        if (fileIsRequestReadyInCurrentMode(D_003BAFE8) == 0) {
             return;
         }
-        D_003BAFF0 = fileGetLoadedDataAddress((struct FileRequest *)D_003BAFE8);
-        D_003BAFEC = fileGetResourceHandle((struct FileRequest *)D_003BAFE8);
+        D_003BAFF0 = fileGetLoadedDataAddress(D_003BAFE8);
+        D_003BAFEC = fileGetResourceHandle(D_003BAFE8);
         area = &fldAreaState;
         firstVector[0] = area->x;
         firstVector[1] = area->y;
@@ -3835,7 +3990,7 @@ void func_0014CB08(void) {
         node = func_00115298((void *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
         effObjClearFlags(node, 1);
-        filePollEntryCleanup((struct FileRequest *)(u32)D_003BAFE8);
+        filePollEntryCleanup(D_003BAFE8);
         func_0012EA40(5, 0);
         effObjSetFlags(fldSparkControlState.object, 1);
         effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
@@ -3866,7 +4021,7 @@ void func_0014CB08(void) {
             node = fldSparkControlState.object;
             effObjClearFlags(node, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)D_003BAFEC);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAFEC);
         }
         if (fldSparkControlState.frame >= 11) {
             D_0032E5C4[0] = 0;
