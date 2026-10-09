@@ -11,6 +11,7 @@
 #include "sdf_texture_offset_list.h"
 #include "sdf_texture_file.h"
 #include "sdf_texture_queue.h"
+#include "sdf_stream_input_dma.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -995,11 +996,6 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
 }
 
 /* Each 16-byte DMA tag holds control/address bits and a zero reserved half. */
-typedef struct SdfStreamInputDmaTag {
-    u64 control;
-    u64 reserved;
-} SdfStreamInputDmaTag;
-
 void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
     s32 remaining = (bytes + 15) & ~15;
     SdfStreamInputDmaTag *tag;
