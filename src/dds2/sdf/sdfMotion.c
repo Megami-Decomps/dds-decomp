@@ -764,12 +764,12 @@ void sdfMotionReadBoundFloat(SdfMotionIndexedValueBinding *a0) {
     a0->capturedFloat = a0->target->unk1C;
 }
 
-void *sdfMotionCreateTextBlendBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateTextBlendBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B498, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B498, options);
+    return binding;
 }
 
 void sdfMotionApplyFiveFloatKeys(SdfMotionIndexedTextBinding *output, f32 t1) {
