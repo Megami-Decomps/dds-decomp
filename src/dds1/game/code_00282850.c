@@ -19,6 +19,7 @@
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "eff.h"
@@ -117,8 +118,6 @@ extern u8 fldIsFlagActive(void);
 extern u8 fldTestSecondarySceneFlag(void);
 extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
-extern s32 mdlRequestAsset(s32, s32, s32);
-
 extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 extern void func_002E7F20(f32, f32, f32);

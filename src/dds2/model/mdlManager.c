@@ -18,6 +18,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "mdl_resource_table.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
@@ -443,8 +444,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 }
 
 /* The nonblocking API returns 0/-1 status or a ready group address word. */
-extern s32 mdlRequestAsset(s32 group, s32 id, s32 blocking);
-
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);

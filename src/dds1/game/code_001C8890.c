@@ -25,6 +25,7 @@
 #include "dat_state.h"
 #include "evt_unit.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "sdf.h"
