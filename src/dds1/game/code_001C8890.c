@@ -11,6 +11,7 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "sdf_texture_offset_list.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
@@ -10219,7 +10220,8 @@ typedef struct BtlFieldLoadArgs {
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void func_00288788(s32);
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
+extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
+                                            const SdfTextureOffsetListHeader *, s32);
 
 extern char D_003A4B50[]; /* "%sf%03d_%03d.LB" */
 extern char D_003A4B60[]; /* "btl:field load[%s]\n" */
@@ -10270,7 +10272,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
             evtCreateWorldObjectFromResource(args->stage, args->variant,
                                              (s32)args->fieldF1, (s32)args->fieldF2,
-                                             (s32)args->fieldTB, 0);
+                                             (const SdfTextureOffsetListHeader *)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
                 sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);

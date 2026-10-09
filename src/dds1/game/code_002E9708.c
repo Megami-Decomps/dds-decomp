@@ -8,6 +8,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 #include "mdl_object_stream.h"
+#include "sdf_texture_offset_list.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -56,7 +57,6 @@ extern u32 D_003BD630;
 
 extern u32 D_003BD61C;
 
-extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 
@@ -783,24 +783,17 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
     return resource;
 }
 
-/* Serialized texture-resource count and offsets relative to the blob's base. */
-typedef struct SoundResourceList {
-    u8 pad00[0x10];
-    s32 count;
-    s32 relativeOffsets[1];
-} SoundResourceList;
-
-DevRequest *sndBuildResourceHandleListFromOffsets(const void *resource) {
-    const SoundResourceList *list = resource;
+DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
-    s32 count = list->count;
+    s32 count = resource->textureCount;
     DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
     const s32 *entry;
     if (count != i) {
-        entry = list->relativeOffsets;
+        entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((u8 *)resource + *entry));
+            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture(
+                (void *)((const u8 *)resource + *entry)));
             entry++;
         } while (i != count);
     }
@@ -813,7 +806,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
     u32 info[4];
 
     handle = sdfReadNamedResource(name, info, 0);
-    resource = sndBuildResourceHandleListFromOffsets((const void *)info[0]);
+    resource = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
     sdfReleaseResourceAllocation(handle);
     return resource;
 }

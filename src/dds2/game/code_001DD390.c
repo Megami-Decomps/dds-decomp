@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
 #include "btl_state.h"
@@ -9385,7 +9386,8 @@ u32 btlPollFieldArchiveLoad(args)
         }
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
             evtCreateWorldObjectFromResource(args->stage, args->variant,
-                                             args->fieldF1, args->fieldF2, args->fieldTB, 0);
+                                             args->fieldF1, args->fieldF2,
+                                             (const SdfTextureOffsetListHeader *)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTB != 0) {
                 sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
