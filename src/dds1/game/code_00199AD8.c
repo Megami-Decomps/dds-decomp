@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_packet_list.h"
 #include "itf.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
@@ -93,7 +94,6 @@ extern u8 D_003BB1C8[8];
 extern u8 D_003BB1D0[8];
 extern s32 sdfAllocPacketAligned(s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_00198990(PanelRect *rect, u32 *colors, u32 tail, s32 width, SdfListHead *command);
 extern u32 D_00357D68[];
 extern void itfSendTablePacket(SdfListHead *command, s32 index, s32 flag);

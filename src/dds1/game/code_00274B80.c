@@ -1093,8 +1093,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
 
     frFontAddSharedGlyphFlags(1);
     item = frFontAppendTextToGlyphChain((const char *)(u32)textId, 0, 0, 0, 0);
-    frFontSetContextPair(item, x, top);
-    frFontStoreShiftedContextValue(item, scale * 0x10);
+    frFontSetGlyphPosition(item, x, top);
+    frFontStoreShiftedRenderValue(item, scale * 0x10);
     frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
     frFontDrawGlyphChain(item, 1, param);
@@ -1238,7 +1238,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     func_003014F0(text, D_003BC700, value);
     glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
-    frFontSetChainFlag(glyph, chainFlag);
+    frFontSetChildChainFirstOption(glyph, chainFlag);
     frFontDrawGlyphChain(glyph, 1, texture);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {

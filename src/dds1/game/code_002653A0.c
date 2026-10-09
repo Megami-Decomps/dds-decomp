@@ -372,7 +372,7 @@ extern void frFontSetGlyphChainDimensions(struct FrFontGlyph *, s32, s32);
 
 void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
     frFontSetGlyphChainDimensions((struct FrFontGlyph *)(u32)fontContext, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs((struct FrFontGlyph *)(u32)fontContext,
+    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)fontContext,
         -4);
 }
 

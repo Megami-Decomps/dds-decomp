@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -441,7 +442,6 @@ extern SdfPoolNode *D_00355710[];
 extern SdfPoolNode D_00325248;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffTrackPolyDraw *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -110,7 +111,6 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 extern void sdfInitPacketList(void *);
 
-extern void sdfAppendPacket(void *, void *);
 
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
@@ -179,13 +179,13 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
         packet->header.unk8 = 0x11000000;
         sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, &packet->header);
+        sdfAppendPacket(&packet->list, (u32)&packet->header);
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
     ctx->unk1A0 = 0;
     ctx->unk1A8 = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, &ctx->unk1A0);
+    sdfAppendPacket(&ctx->syncList, (u32)&ctx->unk1A0);
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */

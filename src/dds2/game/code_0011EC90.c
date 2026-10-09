@@ -171,7 +171,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
     if (x == 0x800000) {
         x = (0x200 - glyph->advance) * 8;
     }
-    frFontSetContextPair(glyph, x, y);
+    frFontSetGlyphPosition(glyph, x, y);
     node = sdfAllocAndClearQuadwords(sizeof(*node));
     node->glyph = glyph;
     dds3RegisterOwnedIntrusiveNode(&node->owner, &dds3FontNodeVTable);
@@ -179,7 +179,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
 }
 
 void itfConfigureOwnedGlyphChainFlag(Dds3FontNode *node, u8 value) {
-    frFontSetChainFlag(node->glyph, value);
+    frFontSetChildChainFirstOption(node->glyph, value);
 }
 
 void frFontReleaseOwnerStorage(void *memory) {
