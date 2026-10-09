@@ -120,7 +120,7 @@ SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
 }
 
 /* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
-void sdfGetGeneralHeapStats(s32 *stats) {
+void sdfGetGeneralHeapStats(SdfGeneralHeapStats *stats) {
     SdfMemBlock *block = sdfGeneralHeap.head.next;
     s32 totalBytes = 0;
     s32 freeBytes = 0;
@@ -147,12 +147,12 @@ void sdfGetGeneralHeapStats(s32 *stats) {
             freeBlockCount++;
         }
     }
-    stats[SDF_HEAP_STAT_TOTAL_BYTES] = totalBytes;
-    stats[SDF_HEAP_STAT_FREE_BYTES] = freeBytes;
-    stats[SDF_HEAP_STAT_SMALLEST_FREE] = smallestFreeBytes;
-    stats[SDF_HEAP_STAT_LARGEST_FREE] = largestFreeBytes;
-    stats[SDF_HEAP_STAT_BLOCK_COUNT] = blockCount;
-    stats[SDF_HEAP_STAT_FREE_BLOCK_COUNT] = freeBlockCount;
+    stats->totalBytes = totalBytes;
+    stats->freeBytes = freeBytes;
+    stats->smallestFreeBytes = smallestFreeBytes;
+    stats->largestFreeBytes = largestFreeBytes;
+    stats->blockCount = blockCount;
+    stats->freeBlockCount = freeBlockCount;
 }
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */

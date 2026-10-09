@@ -53,7 +53,6 @@
 #define CAMP_SLOT_ROW_STRIDE 0x104
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
-#define CAMP_HEAP_STATS_WORD_COUNT 8
 
 
 extern void evtLoadResourcePair(const char *, u8 *);
@@ -715,11 +714,11 @@ void mnuCampLinkFontGlyph(EvtRuntime *scene) {
 
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
 void mnuCampCheckClockDivisor(void) {
-    s32 heapStats[CAMP_HEAP_STATS_WORD_COUNT];
+    SdfGeneralHeapStats heapStats;
     s32 quotient;
 
-    sdfGetGeneralHeapStats(heapStats);
-    quotient = 1 / heapStats[SDF_HEAP_STAT_TOTAL_BYTES];
+    sdfGetGeneralHeapStats(&heapStats);
+    quotient = 1 / heapStats.totalBytes;
 }
 
 void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
