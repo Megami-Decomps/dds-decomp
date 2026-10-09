@@ -203,7 +203,7 @@ void sdfPacCopyPendingBytes(PacState *state) {
 void sdfPacDecodePendingBytes(PacState *state) {
     s32 inputBytes = state->inputAvailable;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, inputBytes);
-    sdfPacAdvanceInput(state, inputBytes - state->decoder->remainingBytes);
+    sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
     }
@@ -256,7 +256,7 @@ void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet)
             break;
         case PAC_ENCODING_COMPRESSED: {
             PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
-            state->decoder = decoder;
+            state->decoder = (u8 *)decoder;
             sdfStoreWordAndSetState(decoder, state->outputCursor);
             state->onInput = sdfPacDecodePendingBytes;
             break;
@@ -342,7 +342,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     /* This handler offers pendingBytes, unlike the packet-level decoder. */
     s32 inputBytes = state->pendingBytes;
     s32 finished = func_002EEAE0(state->decoder, state->inputCursor, inputBytes);
-    sdfPacAdvanceInput(state, inputBytes - state->decoder->remainingBytes);
+    sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
     }
@@ -376,7 +376,37 @@ void sdfPacSkipResourceChunk(PacState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfPacDecode", func_002EE6F8);
+/* Point the resource buffer at one allocation packet: keep it in packet memory, or allocate a
+ * block and copy (raw) or decode (compressed) the payload into it. */
+void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer) {
+    state->resourceBuffer = buffer;
+    buffer->remainingBytes = packet->payloadSize - PAC_HEADER_BYTES;
+    if (state->flags & PAC_STATE_USE_PACKET_MEMORY) {
+        state->onInput = sdfPacSkipResourceChunk;
+        buffer->cursor = state->inputCursor - PAC_HEADER_BYTES;
+        return;
+    }
+    if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
+        buffer->resourceSlot = (s32)sdfAllocGeneralBlockHigh(packet->payloadSize);
+    } else {
+        buffer->resourceSlot = (s32)sdfAllocGeneralBlock(packet->payloadSize);
+    }
+    buffer->cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)buffer->resourceSlot);
+    memcpy(buffer->cursor, packet, PAC_HEADER_BYTES);
+    buffer->cursor += PAC_HEADER_BYTES;
+    switch (packet->flags) {
+    case PAC_ENCODING_RAW:
+        state->onInput = sdfPacCopyResourceChunk;
+        break;
+    case PAC_ENCODING_COMPRESSED: {
+        PacBuf *decoder = sdfAllocSizeClassBlock(0x20);
+        state->decoder = (u8 *)decoder;
+        sdfStoreWordAndSetState(decoder, buffer->cursor);
+        state->onInput = sdfPacDecodeResourceChunk;
+        break;
+    }
+    }
+}
 
 void sdfPacCompleteResourcePacket(PacState *state) {
     state->queueTail->resourceHandle = state->slot.resource->result;
