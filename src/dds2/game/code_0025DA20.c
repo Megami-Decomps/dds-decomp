@@ -93,8 +93,6 @@ extern u8 D_003CE658[];
 extern SdfTex *kwlnHeldTextureReference;
 
 
-extern void sdfCreateDescriptorPacket();
-
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 
 extern s32 strcmp(const char *a, const char *b);
@@ -878,7 +876,10 @@ void mnuShopSubmitDescriptor(u8 *scene) {
 
     if (((EvtRuntime *)scene)->pendingWork != 0) {
         drawPacket = (s32)(u32)sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket(drawPacket, (s32)kwlnHeldTextureReference->primaryResource, 0, 0, CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT, ((EvtRuntime *)scene)->pendingWork, 0);
+        sdfCreateDescriptorPacket((SdfListHead *)drawPacket,
+                                  kwlnHeldTextureReference->primaryResource, 0, 0,
+                                  CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
+                                  ((EvtRuntime *)scene)->pendingWork, 0);
         D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)drawPacket);
     }
 }

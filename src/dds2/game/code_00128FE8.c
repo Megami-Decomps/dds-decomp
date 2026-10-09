@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -274,10 +275,6 @@ extern void *memset(void *s, s32 c, u32 n);
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
-
-extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
-
-extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 
 /* Packed quad input: geometry fields precede the live packet origin and depth.
  * Preserve the unclassified words for the opaque renderer. */
@@ -2430,7 +2427,8 @@ void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
+        sdfCreateResourcePacket((SdfListHead *)packet, (SdfTexResource *)D_0040B2A0[0],
+                                0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }
@@ -2440,7 +2438,8 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
         u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
-        sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
+        sdfCreateDescriptorPacket((SdfListHead *)packet, (SdfTexResource *)D_0040B2A0[0],
+                                  0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
         descriptor->append((SdfListHead *)descriptor, (SdfListHead *)packet);
     }

@@ -1,5 +1,6 @@
 #include "sdf_resource.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "eff_resource_records.h"
 #include "itf.h"
 #include "fpu.h"
@@ -175,11 +176,10 @@ void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 index
     slot->index = index;
 }
 
-extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
-
 void itfCreateGridPacketWithDefaultFlags(u32 packetHandle, s32 width, s32 height, u8 *data,
                   SdfListHead *context) {
-    sdfCreateDescriptorPacket(context, (s32)packetHandle, 0, 0, width, height, (s32)data, 0);
+    sdfCreateDescriptorPacket(context, (SdfTexResource *)packetHandle,
+                              0, 0, width, height, (s32)data, 0);
 }
 
 /* The overlay packet is present only when this work flag is set. */
