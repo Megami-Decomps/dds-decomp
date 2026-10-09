@@ -1567,9 +1567,7 @@ extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
-extern SoundTask *sndCreateStationedSeTask(u32);
 
-extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
 void func_001CFD78(BtlTask *action) {
     BtlOperandEntry spec;
@@ -1605,7 +1603,7 @@ void func_001CFD78(BtlTask *action) {
                 btlStartTask(effectTask);
             }
             if ((unit->status.flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
-                btlStartTask(btlCreateActorModelBlendTask((u8 *)unit, 0, 11, 2, 1.0f));
+                btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
                 btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
             } else {
                 btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
@@ -1628,7 +1626,7 @@ void func_001CFD78(BtlTask *action) {
             btlStartTask(effectTask);
         }
         if ((unit->status.flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
-            btlStartTask(btlCreateActorModelBlendTask((u8 *)unit, 0, 11, 2, 1.0f));
+            btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
             btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
         } else {
             btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
@@ -1701,13 +1699,11 @@ void btlUnitTurnEndCommit(s32 task) {
 
 extern void btlAccumulateEnemyDefeatRewards(s32);
 
-extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
 extern u8 *func_001D9468(u8 *, u32);
 
-extern SoundTask *sndCreateStationedSeTask(u32);
 
 void btlStartActorDefeatTransition(s32 command) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
@@ -1715,7 +1711,7 @@ void btlStartActorDefeatTransition(s32 command) {
     BtlUnit *actor = commandTask->unit;
     DatPartyRecord *profile = &actor->partyRecord;
     SoundTask *soundTask;
-    SoundTask *object;
+    BtlRuntimeTask *object;
     s64 sequence;
     s32 entryFlags;
     s32 result;
@@ -1733,7 +1729,7 @@ void btlStartActorDefeatTransition(s32 command) {
     if (actor->status.flags & 0x200) {
         if (!(commandTask->flags & 0x100)) {
             if (!(actor->status.flags & 0x8000000) && actor->unkEC != 11) {
-                object = (SoundTask *)btlCreateActorModelBlendTask((u8 *)actor, 0, 11, 2, 1.0f);
+                object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
@@ -1743,7 +1739,7 @@ void btlStartActorDefeatTransition(s32 command) {
     } else if (actor->status.flags & 0x400) {
         btlAccumulateEnemyDefeatRewards((s32)actor);
         if (actor->status.flags & 0x8000000) {
-            object = (SoundTask *)btlCreateSelectedEffectUpdateTask((u8 *)actor);
+            object = (BtlRuntimeTask *)btlCreateSelectedEffectUpdateTask((u8 *)actor);
             object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             object->startCondition.value.handle = sequence;
             btlStartTask(object);
@@ -1765,7 +1761,7 @@ void btlStartActorDefeatTransition(s32 command) {
                 }
                 if (result != 0) {
                     if (actor->unkEC != 11) {
-                        object = (SoundTask *)btlCreateActorModelBlendTask((u8 *)actor, 0, 11, 2, 1.0f);
+                        object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
                         object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                         object->startCondition.value.handle = sequence;
                         btlStartTask(object);
@@ -1773,7 +1769,7 @@ void btlStartActorDefeatTransition(s32 command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (SoundTask *)func_001D9468((u8 *)actor, 0);
+                object = (BtlRuntimeTask *)func_001D9468((u8 *)actor, 0);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);

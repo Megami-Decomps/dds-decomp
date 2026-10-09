@@ -11,6 +11,7 @@ struct BtlUnit *btlCreateUnit(void);
 struct BtlRuntimeTask *btlCreateModelLoadPollTask(struct BtlUnit *unit, u32 index, u32 value, s8 mode);
 struct BtlRuntimeTask *btlCreateUnitBaseLightTask(struct BtlUnit *unit);
 struct BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(struct BtlUnit *unit, f32 *target, f32 scale);
+struct BtlRuntimeTask *btlCreateActorModelBlendTask(struct BtlUnit *unit, struct BtlUnit *target, s32 index, s32 value, f32 scale);
 #ifdef VERSION_DDS2
 struct BtlRuntimeTask *func_001E5FF8(struct BtlUnit *unit, s32 option);
 struct BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(struct BtlUnit *unit, f32 *target, s8 mode, f32 scale);

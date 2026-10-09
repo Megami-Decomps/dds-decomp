@@ -372,9 +372,9 @@ s32 kwlnStepTwoListCursors(s32 padSet, s32 secondaryCount, s32 primaryCount, s32
 }
 
 /* Append a cell rectangle; rowSpan also supplies the horizontal padding. */
-void kwlnDrawSpriteCell(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
+void kwlnDrawSpriteCell(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket((SdfListHead *)packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
+    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, 0xFEFFFF,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }

@@ -198,8 +198,7 @@ done:
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
 extern s32 func_001F12E8(u32, u32, u8 *, u16);
-struct SoundTask;
-extern struct SoundTask *sndCreateStationedSeTask(u32);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
                    u64 ownerId, u64 prerequisiteHandle, s32 condition) {
@@ -261,7 +260,7 @@ void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit 
     }
     btlStartTask(created);
 
-    sound = (BtlRuntimeTask *)sndCreateStationedSeTask(
+    sound = sndCreateStationedSeTask(
         (u32)(state->sequenceHandle + species - 0x130));
     sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT;
     sound->startCondition.value.handle = created->handle;

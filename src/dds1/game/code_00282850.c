@@ -2599,7 +2599,7 @@ extern SdfPoolNode D_00325708;
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 extern s32 sdfAllocPacketAligned(s32);
-extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
+extern void kwlnDrawSpriteCell(SdfListHead *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object

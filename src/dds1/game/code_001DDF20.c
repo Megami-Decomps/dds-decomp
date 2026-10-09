@@ -338,9 +338,7 @@ extern void sndFreeListNode(ActiveSoundNode *);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern SoundTask *sndCreateStationedSeTask(u32);
 
-extern SoundTask *sndCreateStationedSeTask(u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -6518,12 +6516,12 @@ s32 sndPlayStationedSe(u32 *sound) {
     return 1;
 }
 
-SoundTask *sndCreateStationedSeTask(u32 soundId) {
-    SoundTask *task = (SoundTask *)btlAllocTask(4);
+BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId) {
+    BtlRuntimeTask *task = btlAllocTask(4);
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x55;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->callback.playSound = sndPlayStationedSe;
+    task->callback = sndPlayStationedSe;
     *(u32 *)btlGetTaskArguments(task) = soundId;
     return task;
 }

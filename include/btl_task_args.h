@@ -27,4 +27,16 @@ typedef struct BtlSceneInsertArgs {
     u32 count;
 } BtlSceneInsertArgs;
 
+/* The model-blend task allocates and initializes this complete 0x1C-byte packet. */
+typedef struct BtlActorModelBlendArgs {
+    struct BtlUnit *unit;
+    struct BtlUnit *target;
+    s32 index;
+    s32 previousModelValue;
+    s32 value;
+    f32 scale;
+    u32 stage;
+} BtlActorModelBlendArgs;
+typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
+
 #endif /* BTL_TASK_ARGS_H */

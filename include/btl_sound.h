@@ -194,6 +194,7 @@ s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
+struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);

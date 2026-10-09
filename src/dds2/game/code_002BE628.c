@@ -222,7 +222,7 @@ extern char D_0042B610[];
 
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
+extern void kwlnDrawSpriteCell(SdfListHead *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);

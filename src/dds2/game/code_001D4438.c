@@ -14,6 +14,8 @@
 #include "sdf_resource.h"
 #include "mdl.h"
 
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
+
 
 extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -1813,7 +1815,6 @@ void func_001DACE0(ActionStateLink *task) {
 }
 
 extern BtlRuntimeTask *btlCreateControlObject(void);
-extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void func_001AA898(DatPartyRecord *record, s32 index);
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -2088,7 +2089,6 @@ extern s32 btlSumOtherTargetHitAmounts(u8 *);
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
-extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 
 void func_001DC540(void *data) {
     BtlOperandEntry spec;
@@ -2215,9 +2215,7 @@ void btlUnitTurnEndCommit(ActionStateLink *unit) {
 }
 
 extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
-extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
-extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartActorDefeatTransition(ActionStateLink *command) {
     BtlState *work = (BtlState *)btlGetRuntime();

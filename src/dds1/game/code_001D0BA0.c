@@ -393,11 +393,9 @@ extern void btlReleaseUnitResources(BtlUnit *);
 
 extern s32 btlCountTasksForOwner(s64);
 
-extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
 extern s32 btlCountTasksForOwner(s64);
 
-extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
@@ -4927,27 +4925,51 @@ void *btlCreateActorTransparencyTask(BtlUnit *actor) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001DA2E0);
+s32 func_001DA2E0(BtlActorModelBlendArgs *args) {
+    BtlUnit *unit;
+    BtlUnit *target;
 
-extern s32 func_001DA2E0(u32 *);
+    if (args->index < 0) {
+        return 1;
+    }
+    unit = args->unit;
+    target = args->target;
+    if (args->stage == 0) {
+        if (unit->status.flags & 2) {
+            args->previousModelValue = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+        } else {
+            args->previousModelValue = unit->unkEC;
+        }
+        unit->effectTimerA = 0;
+        unit->effectTimerB = 1;
+        btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
+    } else {
+        if (unit != target) {
+            btlWarpUnitToMotionReach(unit, target, args->previousModelValue);
+        }
+        return 1;
+    }
+    args->stage++;
+    return 0;
+}
 
-u8 *btlCreateActorModelBlendTask(u8 *actor, u32 target, u32 index, u32 value, f32 scale) {
-    u8 *task = btlAllocTask(0x1C);
-    u32 *arguments;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = func_001DA2E0;
-    *(u16 *)(task + 0x20) = 0x26;
-    *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s32 index, s32 value, f32 scale) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlActorModelBlendArgs));
+    BtlActorModelBlendArgs *arguments;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = func_001DA2E0;
+    task->taskId = 0x26;
+    task->ownerId = actor->identity;
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)actor;
-    arguments[1] = target;
-    arguments[2] = index;
-    arguments[4] = value;
-    *(f32 *)(arguments + 5) = scale;
-    arguments[3] = -1;
-    arguments[6] = 0;
+    arguments->unit = actor;
+    arguments->target = target;
+    arguments->index = index;
+    arguments->value = value;
+    arguments->scale = scale;
+    arguments->previousModelValue = -1;
+    arguments->stage = 0;
     return task;
 }
 
