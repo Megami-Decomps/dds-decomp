@@ -1223,9 +1223,9 @@ void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
     if (parent->children == NULL) {
         return;
     }
-    parent->children->flags &= ~1;
+    parent->children->flags &= ~SDF_DRAW_NODE_FLAG_SKIP_RENDER;
     if (clearFlag == 0) {
-        parent->children->flags |= 1;
+        parent->children->flags |= SDF_DRAW_NODE_FLAG_SKIP_RENDER;
     }
 
     first = parent->children;
@@ -1238,10 +1238,10 @@ void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
         return;
     }
     for (;;) {
-        flags = node->flags & ~1;
+        flags = node->flags & ~SDF_DRAW_NODE_FLAG_SKIP_RENDER;
         node->flags = flags;
         if (clearFlag == 0) {
-            node->flags = flags | 1;
+            node->flags = flags | SDF_DRAW_NODE_FLAG_SKIP_RENDER;
         }
         next = node->next;
         if (next == NULL) {

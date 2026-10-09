@@ -995,7 +995,7 @@ extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s3
 extern SdfGridCell *func_002CC0D0(SdfGrid *);
 extern void func_00253208(MenuSceneWork *, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
-extern void func_002512F0(s32, s32);
+extern void func_002512F0(MenuSceneWork *, s32);
 
 /* Construct the selection grid and callbacks, select its initial coordinates, then reset the cached scroll position. */
 void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
@@ -1018,5 +1018,5 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     }
     sceneWork->scrollX = 0;
     sceneWork->scrollY = 0;
-    func_002512F0((s32)sceneWork, 1);
+    func_002512F0(sceneWork, 1);
 }
