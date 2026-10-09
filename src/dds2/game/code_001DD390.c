@@ -684,7 +684,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
     work->indices = btlAllocateIndexList(13);
     allocation = sdfAllocGeneralBlock(0x48EC);
     work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(allocation);
-    work->allocationHandle = (u32)allocation;
+    work->allocationHandle = allocation;
     work->ownerId = 0;
     btlResetIndexWork(work);
 }
@@ -692,7 +692,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     if (object->allocationHandle != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(object->allocationHandle));
+        sdfReleaseResourceAllocation(object->allocationHandle);
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {

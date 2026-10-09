@@ -123,6 +123,8 @@ typedef struct BtlOperandGroup {
 /* Embedded command work at actor +0x20. DDS1 btlInitBattleIndexWork owns
  * thirteen retained groups at +0x60/+0x64 (0x68 bytes); DDS2 uses
  * +0x68/+0x6C (0x70 bytes). Neither record is the whole owning actor. */
+struct SdfMemBlock;
+
 typedef struct BattleIndexWork {
     s32 phase;
     s32 skillId;
@@ -166,7 +168,7 @@ typedef struct BattleIndexWork {
     u8 pad65[3];
 #endif
     BtlOperandGroup *groups;
-    u32 allocationHandle;
+    struct SdfMemBlock *allocationHandle;
 } BattleIndexWork;
 
 void btlInitBattleIndexWork(BattleIndexWork *work);
