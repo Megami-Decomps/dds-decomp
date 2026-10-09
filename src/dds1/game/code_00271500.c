@@ -107,7 +107,34 @@ s32 mnuStaffSlotsAllFilled(EffectList *resourceList, StaffSlots *slots) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00271500", func_002717D8);
+const char D_003B2080[] = "/camp/spr/";
+const char D_003B2090[] = "/camp/spr/n_pty/";
+const char D_003B20A8[] = "/camp/spr/n_con/";
+
+extern u32 D_0037C300[][2];
+extern u32 D_0037C310[][2];
+extern u32 D_0037C330[][2];
+extern u32 D_0037C378[][2];
+
+/* Queue the category, group, party and single staff resources after the base banks. */
+void func_002717D8(StaffMenuWork *menu) {
+    s32 resourceIndex;
+    s32 tableColumn;
+    EffectList *resourceList = (EffectList *)menu->resourceQueue;
+
+    mnuAppendCampSpriteRequests(resourceList, &menu->staffSlots);
+    tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
+    for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
+        effAppendListEntry(resourceList, (u32)D_003B2080, D_0037C300[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryPair[resourceIndex]);
+    }
+    for (resourceIndex = 0; resourceIndex < 4; resourceIndex++) {
+        effAppendListEntry(resourceList, (u32)D_003B2080, D_0037C310[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->categoryGroup[resourceIndex]);
+    }
+    for (resourceIndex = 0; resourceIndex < 9; resourceIndex++) {
+        effAppendListEntry(resourceList, (u32)D_003B2090, D_0037C330[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->partyModels[resourceIndex]);
+    }
+    effAppendListEntry(resourceList, (u32)D_003B20A8, D_0037C378[0][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&menu->singleResource);
+}
 
 s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
     s32 i;
