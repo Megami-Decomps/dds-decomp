@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
@@ -308,7 +309,25 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
-INCLUDE_ASM(const s32, "script/scrCommonCommand", func_0010E098);
+const char D_00412688[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
+extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+
+s32 func_0010E098(void) {
+    ScrVecW direction;
+
+    direction.x = bfWaitReadArgFloat(1);
+    direction.y = bfWaitReadArgFloat(2);
+    direction.z = bfWaitReadArgFloat(3);
+    direction.w = 0;
+    if (ffabsf(direction.x) <= 0.01f &&
+        ffabsf(direction.y) <= 0.01f &&
+        ffabsf(direction.z) <= 0.01f) {
+        evtPrintDeveloperConsoleMessage(D_00412688);
+        return 1;
+    }
+    kwlnSetLightDirectionTarget(scrReadIntParameter(0), 0, &direction);
+    return 1;
+}
 
 s32 scrCmdStorePositionVector(void)
 {
