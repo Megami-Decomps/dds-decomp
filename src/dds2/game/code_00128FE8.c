@@ -1055,7 +1055,7 @@ struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destinatio
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A270(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
@@ -1070,7 +1070,7 @@ struct SdfMemBlock *func_0012A270(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A2E8(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
@@ -1085,7 +1085,7 @@ struct SdfMemBlock *func_0012A2E8(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A360(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
