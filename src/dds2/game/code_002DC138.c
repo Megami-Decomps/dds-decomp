@@ -660,7 +660,6 @@ void effCopyResourceOwner(void *destination, void *source) {
     }
 }
 
-extern void fileQueueNotifyAllJobsComplete(u8 *);
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
@@ -672,7 +671,7 @@ void func_002DD3C0(void *work) {
         FileQueue **entries = owner->entries;
         if (count != 0) {
             do {
-                fileQueueNotifyAllJobsComplete((u8 *)*entries);
+                fileQueueNotifyAllJobsComplete(*entries);
                 entries++;
                 i++;
             } while (i < count);

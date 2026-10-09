@@ -390,7 +390,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 other;
     struct SdfMemBlock *data = sdfReadNamedResource((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
-    fileQueueNotifyAllJobsComplete(*owner);
+    fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
     sdfReleaseResourceAllocation(data);
     return *owner;
 }
