@@ -619,7 +619,7 @@ extern DrawColorRec D_003B44A0;
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void func_001A2AF0(UiSprite *panel, SdfListHead *command) {
+void itfDrawThreeBandPanelTexture(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
     DrawVertex *vertices = payload->vertices;

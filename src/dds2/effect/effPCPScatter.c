@@ -894,7 +894,7 @@ void effScatterInitRibbonParticle(PcpScatterRibbonWork *work, s32 index)
 }
 
 /* Advance ribbon particles and build each six-vertex strip in the shared pool. */
-void func_0017A340(PcpScatterRibbonWork *work) {
+void effScatterUpdateRibbonParticles(PcpScatterRibbonWork *work) {
     f32 next[4];
     f32 position[4];
     f32 duplicatePosition[4];

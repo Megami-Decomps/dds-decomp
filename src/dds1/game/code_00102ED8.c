@@ -81,7 +81,7 @@ extern void func_00104B88(void *data, s32 handle);
 
 extern void kwlnTextureAttachTask(SdfPoolNode *surface);
 
-extern void func_00105150(s32 arg0);
+extern void kwlnInitializeFrameDrawPackets(s32 arg0);
 
 extern void func_00105890(void);
 
@@ -411,7 +411,7 @@ extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 extern u8 D_003BD698[2];
 
-void func_001039E0(void) {
+void kwlnPadResetInputAndMotorState(void) {
     s32 port;
     s32 bank;
     s32 i;
@@ -507,7 +507,7 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
 }
 
 /* Tick both rumble countdowns; stop expired motors and refresh the active large motor. */
-void func_00104168(void) {
+void kwlnUpdatePadMotorDurations(void) {
     s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
     u8 *levels = kwlnPadMotorLevels;
     u8 *targets = D_003BD698;
@@ -904,7 +904,7 @@ extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
-void func_00105150(s32 bufferIndex) {
+void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfInitPacketList(&D_00325870[bufferIndex].initialList);
     sdfConsAppendProgramReferencePacket((s32)&D_00325870[bufferIndex].initialList,
                                         &D_00325870[bufferIndex].programReference);
@@ -947,8 +947,8 @@ void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     sdfCameraBuildProjection(&D_00324980.camera);
-    func_00105150(0);
-    func_00105150(1);
+    kwlnInitializeFrameDrawPackets(0);
+    kwlnInitializeFrameDrawPackets(1);
     func_00105890();
     D_003BA7FC = 0;
     evtEnsureDrawVectorState();

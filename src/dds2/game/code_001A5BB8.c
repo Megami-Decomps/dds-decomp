@@ -1188,7 +1188,7 @@ extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
 
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
-s32 func_001A8938(void) {
+s32 btlEditCameraFieldOfView(void) {
     SifCommand packet;
     s32 list;
     f32 radiansToDegrees = 57.2957795f;
@@ -2556,7 +2556,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
     return 0;
 }
 
-s32 func_001AC648(void) {
+s32 btlMarkInactiveActorCandidates(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *eligible[16];
     BtlUnit *unit;

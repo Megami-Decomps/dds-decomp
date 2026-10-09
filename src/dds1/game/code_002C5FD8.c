@@ -285,15 +285,15 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
     };
 
     evtSubmitPrimaryAlphaBlendMode(1);
-    func_00108FA0((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
+    kwlnDrawTexturedColorQuad((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
                   rects[1][4], rects[1][5], rects[1][6], rects[1][7], ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
-    func_00108FA0(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
+    kwlnDrawTexturedColorQuad(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
                   rects[2][7], ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   fldLocalMapTextureResource.texture);
-    func_00108FA0((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
+    kwlnDrawTexturedColorQuad((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
                   rects[3][4], rects[3][5], rects[3][6], rects[3][7], ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
@@ -402,7 +402,7 @@ void func_002C6EC8(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 
     height = scale * 205.0f;
     color = ((u8)grey | ((u32)alpha << 24)) |
             (((u8)grey << 16) | ((u8)grey << 8));
-    func_00108FA0((s32)left, (s32)top, (s32)width, (s32)height,
+    kwlnDrawTexturedColorQuad((s32)left, (s32)top, (s32)width, (s32)height,
                   0, 0, 0x100, 0xC0, color, color, color, color, texture);
 }
 
@@ -430,7 +430,7 @@ void fldReleaseMapRequestQueues(void) {
 /* Draw the auxiliary map texture centred on the requested position. */
 void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
+    kwlnDrawTexturedColorQuad((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
                   0, 0, 32, 32, colour, colour, colour, colour,
                   fldLocalMapAuxTextureResource.texture);
@@ -457,7 +457,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
     }
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
-    func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
+    kwlnDrawTexturedColorQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 16.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
@@ -484,7 +484,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
     fldProjectPointToGridCell(&gridX, &gridY, x, y, z);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
-    func_00108FA0((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
+    kwlnDrawTexturedColorQuad((s32)(gridX - scale * 16.0f), (s32)(gridY - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),

@@ -22,7 +22,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
 extern f32 sdfSinPoly(f32);
-extern u64 *func_001A0910(u32, u32, u32, u32, u32, u32, u32);
+extern u64 *itfCreateVerticalGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -51,7 +51,7 @@ extern s32 sdfAllocPacketAligned(s32 size);
 
 INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A04C0);
 
-u64 *func_001A0910(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
+u64 *itfCreateVerticalGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
 
     packet[0] = 7;
@@ -105,7 +105,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
     sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket(list, (u32)func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    sdfAppendPacket(list, (u32)itfCreateVerticalGradientQuadPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, (SdfListHead *)list);
 }
@@ -439,7 +439,7 @@ extern const char D_003A16D8[];
 extern const char D_003A16E8[];
 
 /* Snapshot battle rewards for the result screen. */
-u32 func_001A1530(BrsRewardSummary *rewards) {
+u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
     BtlState *runtime;
     u32 i;
 

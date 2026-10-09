@@ -182,7 +182,7 @@ extern void fldResetTaskSlots(void);
 
 extern void fldSetSceneLifecycleFlags(u32);
 
-extern void func_00220178(void);
+extern void evtKillFieldScriptTasks(void);
 
 extern char D_003BAAE0[];
 
@@ -995,7 +995,7 @@ extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 
 /* Install the two supplied homogeneous transform vectors and prepare field
  * model, scene commands and the borrowed action transform. */
-void func_00123FB8(u128 *transform) {
+void fldPreparePlayerAndCameraScene(u128 *transform) {
     FieldVec4 quaternion;
     FieldVec4 axis;
     FieldVec4 scale;
@@ -1352,7 +1352,7 @@ s32 fldAdvanceToNextScene(void) {
     fldSetSceneLifecycleFlags(1);
     fldSetSceneLifecycleFlags(2);
     fldResetPlayerSceneObjectState();
-    func_00220178();
+    evtKillFieldScriptTasks();
     return -1;
 }
 
@@ -1633,11 +1633,11 @@ extern void func_0013B1D8(EffWorldNode *);
 
 extern void func_001415F8(void);
 
-extern void func_0014C648(void);
+extern void fldUpdateSparkMessageSequence(void);
 
 extern s32 func_0014CAF8(void);
 
-extern void func_0014CB08(void);
+extern void fldUpdateSparkEncounterScene(void);
 
 extern void func_0014DAF0(s32);
 
@@ -1805,7 +1805,7 @@ s32 fldProcSequence(void) {
         }
         fldFinishDeferredExit();
         if (fldAreaState.transitionMode != 0) {
-            func_0014CB08();
+            fldUpdateSparkEncounterScene();
             func_00121B88(fldAreaState.floor, fldAreaState.unkC0,
                          fldAreaState.x, fldAreaState.z, 50.0f);
         } else if (D_0032E570[0] == 0) {
@@ -1813,7 +1813,7 @@ s32 fldProcSequence(void) {
             if (fldTestSceneControlFlags(0x20) == 0) break;
             if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
         }
-        if (func_0014CAF8() != 0) func_0014C648();
+        if (func_0014CAF8() != 0) fldUpdateSparkMessageSequence();
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldTestSceneControlFlags(0x40) != 0) {
             func_0014DAF0(1);

@@ -409,8 +409,8 @@ void func_00159F48(ParSystem *system, s32 index, const f32 *origin, u32 color, P
 
 extern void func_0015BCE8(ParSystem *system, s32 index);
 
-/* Triangle-cell variant of func_0015A118: three vertices per history segment. */
-void func_0015A118(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+/* Triangle-cell variant of parDrawHistoryRibbonTriangles: three vertices per history segment. */
+void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
     ParHistory *history = &source->records[index];
     ParCell *cell = &system->cells[index];
     u128 *vertex = cell->history;

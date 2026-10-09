@@ -314,7 +314,7 @@ void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 }
 
 /* Move a departing actor behind the remaining occupied party records. */
-void func_001A2258(BtlUnit *unit) {
+void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
     DatPartyRecord saved;
     DatGameState *scanState = datGameState;
     s32 originalIndex;
@@ -626,7 +626,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
     return 0;
 }
 
-s32 func_001A3638(void) {
+s32 btlMarkInactiveActorCandidates(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *eligible[16];
     BtlUnit *unit;
@@ -959,7 +959,7 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-f32 func_001A47F0(BtlTask *task) {
+f32 btlGetActorEffectScale(BtlTask *task) {
     BtlState *battle;
     BtlUnit *unit;
 
@@ -1415,7 +1415,7 @@ void func_001A5690(void) {
     }
 }
 
-void func_001A57A0(void) {
+void btlRestorePartySlotSnapshots(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 slot;
     BtlUnit *unit;

@@ -17,7 +17,7 @@ extern s32 func_0013CEB0(s32 param0, s32 param1);
 
 extern s32 fldGetActorSlotAttribute(s32 param0, s32 param1);
 
-extern void func_0013D650(void);
+extern void fldStartSelectedActorTask(void);
 
 extern s32 fldGetSelectedActorMotionId(void);
 
@@ -95,7 +95,7 @@ void func_0014F1A0(void) {
 }
 
 s32 func_0014F1C0(void) {
-    func_0013D650();
+    fldStartSelectedActorTask();
     return 1;
 }
 

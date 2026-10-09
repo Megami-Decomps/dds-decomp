@@ -552,7 +552,7 @@ extern SdfPoolNode D_003805A8;
 
 
 /* Queue the overlay's texture as a quad at its screen position. */
-void func_001956A8(EffTextureOverlay *overlay) {
+void effDrawResourceTexturePreview(EffTextureOverlay *overlay) {
     SdfListHead *list;
     s32 sprite;
     KwlnSpriteVertex *vertex;

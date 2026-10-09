@@ -1075,7 +1075,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
     }
 }
 
-extern f32 func_001A47F0(BtlTask *);
+extern f32 btlGetActorEffectScale(BtlTask *);
 
 void func_001E0100(BtlLinkedCommand *action, BtlCamState *pose) {
     BtlUnit *user;
@@ -1088,7 +1088,7 @@ void func_001E0100(BtlLinkedCommand *action, BtlCamState *pose) {
         user = action->task->unit;
         target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
         frames = func_001D6050(user, user->unkEC);
-        frames = (s32)((f32)frames / func_001A47F0(action->task));
+        frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
         if (action->state == frames && (target->status.flags & 0x200)) {
             idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
             eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
@@ -1468,7 +1468,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
     span = func_001D6050(user, user->unkEC);
-    span /= func_001A47F0(action->task);
+    span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
         ratio = 1.0f;
@@ -1573,7 +1573,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         return;
     }
     frames = func_001D6050(user, user->unkEC);
-    frames = (s32)((f32)frames / func_001A47F0(action->task));
+    frames = (s32)((f32)frames / btlGetActorEffectScale(action->task));
     if (action->state == frames && (target->status.flags & 0x200)) {
         idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
         eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
@@ -2101,7 +2101,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
     span = func_001D6050(user, user->unkEC);
-    span /= func_001A47F0(action->task);
+    span /= btlGetActorEffectScale(action->task);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
         ratio = 1.0f;

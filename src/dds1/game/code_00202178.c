@@ -806,7 +806,7 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
 
 extern s32 func_001D6050(BtlUnit *, s32);
 
-extern f32 func_001A47F0(BtlTask *);
+extern f32 btlGetActorEffectScale(BtlTask *);
 
 extern f32 func_002F9F60(f32);
 
@@ -836,7 +836,7 @@ void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     extent = user->reach * user->scale;
     span = func_001D6050(user, user->unkEC);
-    span /= func_001A47F0(command->task);
+    span /= btlGetActorEffectScale(command->task);
     ratio = (f32)command->state / span;
     if (ratio > 1.0f) {
         ratio = 1.0f;
@@ -2154,7 +2154,48 @@ s32 btlTryScheduleMarkedUnitTask(u8 *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00207718);
+extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern struct EffRandState effSharedRandomState;
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
+extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
+
+s32 func_00207718(BtlLinkedCommand *command) {
+    BtlTask *scene;
+
+    if (command->actionCode != 0x171) {
+        if (command->actionCode == 0x189) {
+            btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.25f, 2.0f, 0.0f, 1, 0);
+            command->motionParameter = 25.0f;
+            command->motionProgress = 0;
+            command->flags |= 0x841;
+            command->frontCamera.distance -= 300.0f;
+            command->backCamera.distance += 150.0f;
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+        } else {
+            return 0;
+        }
+    } else {
+        scene = (BtlTask *)fldGetSceneGroupEntry(0);
+        if (scene != NULL && (scene->flags & 8) && (scene->unit->status.flags & 0x200)) {
+            command->task = scene;
+            command->status = 9;
+            btlUpdateActionPoseForLinkedTarget(command);
+        } else {
+            btlClearAllUnitDefeatCandidatesTask();
+            btlFlagLinkedGroupDefeatCandidatesTask(command);
+            if (effMiscRand(&effSharedRandomState) & 1) {
+                btlSetEffectCameraKeys(command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
+                                       -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
+            } else {
+                btlSetEffectCameraKeys(command, 661.7f, -200.6f, -349.7f, -0.011f, 0.269f, -0.02f, 0.953f, 254.2f,
+                                       -445.6f, -431.6f, 0.152f, -0.129f, -0.036f, 0.97f, 40.0f, 30.0f);
+            }
+        }
+        command->flags |= 0x800;
+    }
+    return 1;
+}
 
 extern void btlInterpolateVectorStep();
 

@@ -204,9 +204,9 @@ INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C4A80);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern s32 func_001A3638(void);
+extern s32 btlMarkInactiveActorCandidates(void);
 
-extern void func_001A57A0(void);
+extern void btlRestorePartySlotSnapshots(void);
 
 extern void kwlnFadeBackgroundStartOut(s32);
 
@@ -244,9 +244,9 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
         if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
         }
-        func_001A3638();
+        btlMarkInactiveActorCandidates();
         if (*(u32 *)(scene + 0x1F8) & 0x80) {
-            func_001A57A0();
+            btlRestorePartySlotSnapshots();
             *(u32 *)(scene + 0x1F8) &= ~0x80;
         }
         if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {

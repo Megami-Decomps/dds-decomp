@@ -284,7 +284,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     scene->append(scene, (SdfListHead *)list);
 }
 
-extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void *fldCreateColoredLinePacket(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw a GS line between two projected points, using the fixed marker color. */
 void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
@@ -313,7 +313,7 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, (u32)(func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
+    sdfAppendPacket(list, (u32)(fldCreateColoredLinePacket((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)list);
 }
@@ -345,7 +345,7 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     pixel[1] = y0;
     pixel[2] = x1;
     pixel[3] = y1;
-    sdfAppendPacket(list, (u32)(func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
+    sdfAppendPacket(list, (u32)(fldCreateColoredLinePacket((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
     scene = &kwlnPositionedTextSurface;
     scene->append(scene, (SdfListHead *)list);
 }
@@ -368,7 +368,7 @@ extern void func_002DD608(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-void func_0018EB08(const f32 *center, u32 color, f32 radius) {
+void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));
     f32 vertices[40][4] __attribute__((aligned(16)));

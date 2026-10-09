@@ -162,6 +162,9 @@ typedef char MdlObjectAttachment_size_must_be_0x18[(sizeof(MdlObjectAttachment) 
 /* Model-context lifetime, per-frame update, and broadcast accessors. */
 void mdlDestroyContext(MdlCtx *ctx);
 void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces);
+MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id);
+u16 mdlGetContextResourceGroup(MdlCtx *ctx);
+u16 mdlGetContextResourceId(MdlCtx *ctx);
 u32 mdlGetBroadcastValue(MdlCtx *ctx);
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
 void mdlBroadcastMasked(MdlCtx *ctx, u32 value);

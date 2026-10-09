@@ -76,7 +76,7 @@ s32 func_001001D8(void) {
     func_003003F0(D_003BA738);
     evtResetDisplayProjectionAndVectorState();
     func_003003F0(D_003BA740);
-    func_001039E0();
+    kwlnPadResetInputAndMotorState();
     func_003003F0(D_003BA748);
     kwlnTaskCreate(D_003BA750, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
     func_003003F0(D_003BA758);
