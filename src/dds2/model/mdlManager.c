@@ -464,7 +464,85 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
 /* The nonblocking API returns 0/-1 status or a ready group address word. */
 extern s32 mdlRequestAsset(s32 group, s32 id, s32 blocking);
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
+extern u32 mdlGroupJobSemaphore;
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
+extern s32 btlGroupContainsId(s32, s32);
+extern void btlAddGroupId(s32, s32);
+extern BattleGroupNode *mdlWaitGroupThenFind(s32, s32);
+extern char *func_0035D5B0(const char *, s32);
+extern s32 func_0035CB10(const char *, const char *);
+extern const char D_00436FA8[];
+extern void sdfCreateSemaphoreFromOptions(void);
+extern void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *, MdlLoadRequest *);
+extern s32 mdlRequestLoadWithCallback(s32, s32, s32, s32, void (*)(u32), u32);
+
+/* Return a ready group address or queue its resources. Pending and new
+ * requests each perform their own optional blocking wait after unlocking. */
+s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
+    char pathBuffer[0x80];
+    BattleGroupNode *entity;
+    MdlResourceSelection *selection;
+    MdlResourcePath *path;
+    MdlLoadRequest *request;
+    const char *extension;
+    s32 packed;
+
+    WaitSema(mdlGroupJobSemaphore);
+    entity = btlFindGroupedEntity(group, id);
+    if (entity != NULL) {
+        SignalSema(mdlGroupJobSemaphore);
+        return (s32)entity;
+    }
+    if (btlGroupContainsId(group, id) != 0) {
+        SignalSema(mdlGroupJobSemaphore);
+        if (blocking != 0) {
+            return (s32)mdlWaitGroupThenFind(group, id);
+        }
+        return -1;
+    }
+    selection = &((MdlResourceSelection *)D_003C86B0[group].entries)[id];
+    path = &((MdlResourcePath *)D_003C6588[selection->pathTable].entries)[selection->pathIndex];
+    packed = 0;
+    extension = func_0035D5B0(path->path, '.');
+    if (extension != NULL) {
+        packed = func_0035CB10(extension, D_00436FA8) == 0;
+    }
+    btlAddGroupId(group, id);
+    SignalSema(mdlGroupJobSemaphore);
+    if (packed != 0) {
+        mdlBuildPrefixedString(pathBuffer, path->path);
+        mdlRequestLoadWithCallback(group, id, 0x101, (s32)pathBuffer,
+                                  (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
+    } else {
+        request = sdfAllocAndClearQuadwords(sizeof(MdlLoadRequest));
+        request->options = 0x101;
+        request->group = group;
+        request->id = id;
+        if (path->unk8 != NULL) {
+            request->deferred = 1;
+        }
+        if (path->unk0 != NULL) {
+            request->resourceListRequested = 1;
+            mdlBuildPrefixedString(pathBuffer, path->unk0);
+            fileCreateCallbackRequest(pathBuffer, 0,
+                                      (s32)mdlRecordLoadedSizeAndReleaseHandle, (s32)request);
+        }
+        request->itemsRequested = 1;
+        mdlBuildPrefixedString(pathBuffer, path->path);
+        fileCreateCallbackRequest(pathBuffer, 0, (s32)mdlFinishLoadCmd, (s32)request);
+        if (path->unk8 != NULL) {
+            mdlBuildPrefixedString(pathBuffer, path->unk8);
+            fileCreateCallbackRequest(pathBuffer, 0, (s32)mdlFinishLoadJob, (s32)request);
+        }
+    }
+    if (blocking != 0) {
+        return (s32)mdlWaitGroupThenFind(group, id);
+    }
+    return 0;
+}
+
 
 /* Blocking requests return the ready group through the SDK address-word API. */
 BattleGroupNode *func_00231DB0(u32 group, u32 id) {
