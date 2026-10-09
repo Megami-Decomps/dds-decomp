@@ -98,7 +98,7 @@ void evtDestroySecondaryWorldNode(void);
 s32 evtStageRelinkOwnedNodeResource(void *target, void *path);
 
 f32 bfWaitReadArgFloat(s32 idx);
-extern void func_002E7F20(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 void evtScaleSlotByClampedMultiplier(void *unit, f32 value);
@@ -798,9 +798,9 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     }
     degreesToRadians = 0.017453293f;
     pitch = bfWaitReadArgFloat(1) * degreesToRadians;
-    func_002E7F20(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(pitch, bfWaitReadArgFloat(2) * degreesToRadians, 0.0f);
     VU0_MOVE_VF(vf11, vf10);
-    func_002E7F20(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
     effObjSetInnerSecondVec(unit, quaternion);

@@ -6378,6 +6378,7 @@
 0x00340BA0	effMiscAxisAngleToQuaternionVU	inferred	Multiplies vf10 XYZ by sine of the half-angle and sets W to cosine of the half-angle.
 0x00340BF0	effMiscAxisAngleToQuaternionVf11	inferred	Uses half-angle trigonometric functions to scale vf11.xyz and set vf11.w, parallel to named vf10 implementation; high confidence.
 0x00340C40	effMiscQuaternionToMatrixVU	inferred	VU operations expand quaternion vf10 into vf28-vf31 rotation matrix; high confidence.
+0x00340DC8	sdfConvertEulerAnglesToQuaternionVU	inferred	Converts three Euler-angle inputs into a quaternion in VU registers.
 0x00341028	effMiscSlerpQuaternionVu	inferred	Spherically interpolates quaternion vectors in VU registers using the shortest arc. [names_reviewed12.tsv]
 0x00341120	effMiscQuaternionNlerpVU	inferred	Uses dot sign to select shorter arc, blends vf10/vf11 linearly and normalizes result; high confidence.
 0x003411A0	effMiscComputeQuaternionRotatedReferenceAngle	inferred	Rotates a reference vector through the quaternion basis and computes its planar angle. [names_reviewed11.tsv]

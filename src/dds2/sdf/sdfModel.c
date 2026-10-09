@@ -38,7 +38,7 @@ extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
 extern void effMiscQuaternionToMatrixVU(void);
-extern void func_00340DC8(f32 x, f32 y, f32 z);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
@@ -220,7 +220,7 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->sourceItem = item;
     node->nodeId = item->nodeId;
-    func_00340DC8(item->rotationX, item->rotationY, item->rotationZ);
+    sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
     VU0_STORE_VF(vf10, node->quaternion);
     PCP_COPY_VECTOR(node->translation, &item->translation);
     PCP_COPY_VECTOR(node->scale, &item->scale);

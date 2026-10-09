@@ -4916,7 +4916,7 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
-extern void func_00340DC8(f32 x, f32 y, f32 z);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
@@ -4944,7 +4944,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             continue;
         }
         data = effParamWorkGetData(work->handle[i]);
-        func_00340DC8(0.0f, work->rotationY[i], 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, work->rotationY[i], 0.0f);
         if (func_001695C8() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             VU0_LOAD_VF(vf11, D_00414610);
             effMiscQuatMultiplyVU();
