@@ -47,15 +47,15 @@
  */
 #define EE_MMI_RGBA_UNPACK(src, unit) __asm__ volatile ( \
     ".set noreorder\n" \
-    "lw $2, 0(%1)\n" \
+    "lw $2, 0(%0)\n" \
     "pextlb $2, $0, $2\n" \
     "pextlh $2, $0, $2\n" \
     "qmtc2.ni $2, vf10\n" \
     "vitof0.xyzw vf10, vf10\n" \
-    "qmtc2.ni %0, vf2\n" \
+    "qmtc2.ni %1, vf2\n" \
     "vmulx.xyzw vf10, vf10, vf2x\n" \
     ".set reorder" \
-    : : "r"(unit), "r"(src) : "$2", "memory")
+    : : "r"(src), "r"(unit) : "$2", "memory")
 
 /* Read-only variant of the same unpack, with the actual four-byte load as
  * an input instead of a global memory-write clobber. Event-unit transitions
