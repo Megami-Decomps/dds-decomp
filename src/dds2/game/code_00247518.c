@@ -26,7 +26,7 @@ extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 func_0035C860(char *buffer, const char *format, ...);
-extern s32 func_00259AE8(s32 mode, EvtRuntime *runtime);
+extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
@@ -1660,8 +1660,8 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EvtRuntime *viewer) {
             func_0035C860(viewer->eventName, D_00423050, D_004372B0, D_004372B2);
             mode = viewer->inputA;
             if (mode == 0) {
-                func_00259AE8(0, viewer);
-                func_00259AE8(1, viewer);
+                evtViewerSaveTrackFiles(0, viewer);
+                evtViewerSaveTrackFiles(1, viewer);
             } else if (mode == 1) {
                 evtReloadEventViewer(0, viewer);
             } else if (mode == 2) {
