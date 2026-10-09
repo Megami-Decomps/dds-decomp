@@ -84,15 +84,13 @@ typedef struct BrsProgressAnimation {
     s8 iconState;
     u8 pad39[3];
     s32 iconAngle;
-    u32 iconColor;
-    s32 iconX;
-    s32 iconY;
+    s32 iconColor;
+    s32 iconPosition[2]; /* x, y */
     s8 completionState;
     u8 pad4D[3];
-    u32 completionColor;
-    u32 auxiliaryColor;
-    s32 auxiliaryX;
-    s32 auxiliaryY;
+    s32 completionColor;
+    s32 auxiliaryColor;
+    s32 auxiliaryPosition[2]; /* x, y */
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;
@@ -278,6 +276,16 @@ typedef char BrsProgressAnimation_iconOpacity_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->iconOpacity == 0x34) ? 1 : -1];
 typedef char BrsProgressAnimation_iconState_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->iconState == 0x38) ? 1 : -1];
+typedef char BrsProgressAnimation_iconColor_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->iconColor == 0x40) ? 1 : -1];
+typedef char BrsProgressAnimation_iconPosition_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->iconPosition == 0x44) ? 1 : -1];
+typedef char BrsProgressAnimation_completionColor_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->completionColor == 0x50) ? 1 : -1];
+typedef char BrsProgressAnimation_auxiliaryColor_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->auxiliaryColor == 0x54) ? 1 : -1];
+typedef char BrsProgressAnimation_auxiliaryPosition_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->auxiliaryPosition == 0x58) ? 1 : -1];
 typedef char BrsProgressAnimation_progressInitialized_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->progressInitialized == 0x60) ? 1 : -1];
 typedef char BrsProgressAnimation_previousProgress_offset_check[
