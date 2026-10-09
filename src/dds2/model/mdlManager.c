@@ -4,9 +4,7 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 
-struct FileWork;
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
-extern void filePollEntryCleanup(struct FileWork *);
 
 extern u32 mdlGroupJobSemaphore;
 
@@ -122,14 +120,14 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadRequest *destination) {
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
     u32 handle;
     DevRequest *resourceList;
 
-    handle = fileGetLoadedDataAddress((struct FileRequest *)resource);
+    handle = fileGetLoadedDataAddress(resource);
     resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
     destination->payload.resourceList = resourceList;
-    handle = fileGetResourceHandle((struct FileRequest *)resource);
+    handle = fileGetResourceHandle(resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     filePollEntryCleanup(resource);
 }

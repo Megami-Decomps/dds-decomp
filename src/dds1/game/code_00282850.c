@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "sdf_packet_list.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -2525,7 +2526,6 @@ extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 

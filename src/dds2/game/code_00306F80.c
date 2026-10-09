@@ -1,4 +1,5 @@
 #include "sdf_resource.h"
+#include "sdf_packet_list.h"
 #include "eff_resource_records.h"
 #include "itf.h"
 #include "fpu.h"
@@ -37,7 +38,7 @@ typedef struct GridDrawWork {
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
-extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
+extern void func_00306BF0(s32, s32, s32, s32, EffectSlotSet *, s32, void *, s32);
 
 extern u32 kwlnGetDrawBufferIndex(void);
 
@@ -62,7 +63,7 @@ typedef struct GridAngleSlot {
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *object, u32 index, u32 surfaceIndex) {
     void *renderEntry = effGetSlotWorkOrOverride(object, index);
-    func_00306BF0(offsetX, offsetY, z, drawFlags, (u32)object, index, (s32)renderEntry, surfaceIndex);
+    func_00306BF0(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
 }
 
 /* Update the indexed slot's description countdown and carry its active state forward. */
@@ -212,7 +213,6 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 kind) {

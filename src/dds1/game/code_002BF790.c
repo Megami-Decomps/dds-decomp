@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "fpu.h"
 #include "eff.h"
 #include "eff_resource_slots.h"
@@ -40,7 +41,6 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitive, s32 r
 extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *object, s32 index, s32 surfaceIndex) {

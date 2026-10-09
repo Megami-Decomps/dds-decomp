@@ -234,7 +234,6 @@ extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
@@ -384,7 +383,6 @@ extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 extern void func_003365B8(f32);
 

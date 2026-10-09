@@ -1,4 +1,5 @@
 #include "ee_mmi.h"
+#include "sdf_packet_list.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
@@ -339,7 +340,6 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
 
-extern void sdfAppendPacket(SdfListHead *, u32);
 typedef struct SdfDrawPacket SdfDrawPacket;
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
@@ -584,7 +584,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket((SdfListHead *)command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }

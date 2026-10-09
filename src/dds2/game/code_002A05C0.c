@@ -583,7 +583,6 @@ void mnuStoreTaskResult(char *audioPath) {
 
 extern u32 D_00454D58[];
 
-extern void filePollEntryCleanup(u32);
 extern void func_003504A8(u32 *);
 
 /* Allocate in global status, but use the supplied state's copy destination
@@ -598,7 +597,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)D_00438FEC);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup(D_00438FEC);
+        filePollEntryCleanup((struct FileRequest *)(u32)D_00438FEC);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;

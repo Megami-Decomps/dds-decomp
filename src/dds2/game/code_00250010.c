@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 
@@ -40,7 +41,6 @@ extern void fldSelectDisplayBuffer(s32 id);
 
 extern void func_0012D3E0(void);
 
-extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 
 
 typedef struct {

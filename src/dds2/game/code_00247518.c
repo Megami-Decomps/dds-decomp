@@ -463,7 +463,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern u16 mdlGetNodeField2E(MdlCtx *ctx, s32 id);
+extern u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 id);
 extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern void sdfMotionSuspend(Motion *);
@@ -494,9 +494,9 @@ void func_002496B0(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
             }
             motion = mdlFindNodeById(model, channel);
             sdfMotionInitialize(motion, 0, 0, 0.0f, 0.0f);
-            if (mdlGetNodeField2E(model, channel) != 0) {
-                if ((s32)mdlGetNodeField2E(model, channel) - 1 < frame) {
-                    sampleFrame = (s32)mdlGetNodeField2E(model, channel) - 1;
+            if (mdlGetNodeFrameCount(model, channel) != 0) {
+                if ((s32)mdlGetNodeFrameCount(model, channel) - 1 < frame) {
+                    sampleFrame = (s32)mdlGetNodeFrameCount(model, channel) - 1;
                 } else {
                     sampleFrame = frame;
                 }
@@ -534,7 +534,7 @@ void func_002496B0(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
 
             if (loopEnabled == 0) {
                 s32 keyFrame = key->frame;
-                count = (s32)mdlGetNodeField2E(model, channel);
+                count = (s32)mdlGetNodeFrameCount(model, channel);
                 relativeFrame = frame - keyFrame + duration;
                 if (count - 1 < relativeFrame) {
                     mode = 1;
@@ -555,19 +555,19 @@ void func_002496B0(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                                 (f32)blendLead, (f32)key->p0C.sb[3]);
             if (mode == 1) {
                 if (loopEnabled == mode) {
-                    count = (s32)mdlGetNodeField2E(model, channel);
+                    count = (s32)mdlGetNodeFrameCount(model, channel);
                     if (count != 0) {
-                        count = (s32)mdlGetNodeField2E(model, channel);
+                        count = (s32)mdlGetNodeFrameCount(model, channel);
                         sampleFrame = ((s32)frame - key->frame + duration) % count;
                     } else {
                         sampleFrame = 0;
                     }
                 } else {
                     s32 capturedFrame = key->frame;
-                    count = (s32)mdlGetNodeField2E(model, channel);
+                    count = (s32)mdlGetNodeFrameCount(model, channel);
                     relativeFrame = frame - capturedFrame + duration;
                     if (count - 1 < relativeFrame) {
-                        count = (s32)mdlGetNodeField2E(model, channel);
+                        count = (s32)mdlGetNodeFrameCount(model, channel);
                         sampleFrame = count - 1;
                     } else {
                         sampleFrame = (s32)frame - key->frame + duration;
@@ -1940,7 +1940,6 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-extern s32 filePollEntryCleanup(void *file);
 
 void func_0024DBB8(PolyMovieWork *assets) {
 

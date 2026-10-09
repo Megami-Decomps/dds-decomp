@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 
@@ -45,7 +46,6 @@ extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void func_00132010(void);
 extern void fldSelectDisplayBuffer(s32 id);
 extern void func_0012AEB0(void);
-extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 sequence);

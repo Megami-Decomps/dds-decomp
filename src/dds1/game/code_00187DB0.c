@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "eff.h"
@@ -9,7 +10,6 @@ extern void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource,
 
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(struct SdfListHead *list, u32 packet);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern s32 billGetWorkTransformMatrix(s32 packet);
 extern SdfPoolNode D_003253C8;

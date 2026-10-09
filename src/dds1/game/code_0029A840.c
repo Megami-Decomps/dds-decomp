@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -201,7 +202,6 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00325788[13][4];
 extern u64 D_0037E5B0[];

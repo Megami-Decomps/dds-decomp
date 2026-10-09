@@ -393,7 +393,7 @@ void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
             }
         } else {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
-            frFontSetChainFlag(glyph, 4);
+            frFontSetChildChainFirstOption(glyph, 4);
             frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
@@ -1259,8 +1259,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     FrFontGlyph *handle;
     frFontAddSharedGlyphFlags(1);
     handle = frFontAppendTextToGlyphChain((const char *)(u32)model, 0, 0, 0, 0);
-    frFontSetContextPair(handle, x, top);
-    frFontStoreShiftedContextValue(handle, width << 4);
+    frFontSetGlyphPosition(handle, x, top);
+    frFontStoreShiftedRenderValue(handle, width << 4);
     frFontSetChildColors(handle, color);
     frFontClearFlagBits(1);
     frFontDrawGlyphChain(handle, 1, flags);
@@ -1394,7 +1394,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         }
         func_0035C860(text, D_00437BF8, value);
         glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
-        frFontSetChainFlag(glyph, chainFlag);
+        frFontSetChildChainFirstOption(glyph, chainFlag);
         frFontDrawGlyphChain(glyph, 1, texture);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     } else {

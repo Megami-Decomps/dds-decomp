@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
@@ -427,7 +428,6 @@ void fldFormatSecondsText(char *text, f32 value) {
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(void *, void *);
 extern u8 D_0032B0A0[];
 extern char *D_0032B0A8[];
 
@@ -451,10 +451,10 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         }
         color |= 0x80000000;
     }
-    sdfAppendPacket(packetList, func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
                      0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y,
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y,
                         0xFF0080, D_0032B0A0[i], D_0032B0A8[i]));
         style = selected == i ? 6 : 0;
         if (values == NULL) {
@@ -466,7 +466,7 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         } else {
             fldFormatSecondsText(text, values[i]);
         }
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x + 0x180,
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x + 0x180,
                         y, 0xFF0080, style, text));
         y += 0x60;
     }
@@ -486,7 +486,7 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     const char *label;
 
     color = (color & 0xFFFFFF) | 0x80000000;
-    sdfAppendPacket(packetList, func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
         switch (i) {
@@ -506,15 +506,15 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
             channel = (color >> 16) & 0xFF;
             break;
         }
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                         x, y, 0xFF0080, style, label));
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                         x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
                         D_003BAAF8, channel));
         if (showNormalized != 0) {
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                             x, y + 0x180, 0xFF0080, style, label));
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
                             D_003BAB00, channel * (1.0f / 255.0f)));
         }
