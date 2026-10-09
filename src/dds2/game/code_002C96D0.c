@@ -591,7 +591,7 @@ u32 fileMainBlobSize(void) {
 }
 
 void fileReloadSaveBuffer(void) {
-    s32 saved = datGameState->header.backingAllocation;
+    struct SdfMemBlock *saved = datGameState->header.backingAllocation;
     s32 size = FILE_MAIN_BLOB_SIZE;
     memcpy(datGameState, (void *)fileSaveReadBuffer, size);
     datGameState->header.backingAllocation = saved;
