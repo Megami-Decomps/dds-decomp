@@ -7903,7 +7903,7 @@ typedef struct EffCameraCreateRequest {
 extern void fileQueueInitTransform(void *);
 extern FileJob *fileAppendJob(FileQueue *, u32);
 extern s32 fileQueueCountLinkedJobs(FileQueue *);
-extern s32 effCurrentFileQueueEntry;
+extern FileJob *effCurrentFileQueueEntry;
 extern u32 D_003BD064;
 extern u32 D_0038F2F0[];
 
@@ -7913,7 +7913,7 @@ u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
 
     fileQueueInitTransform(D_003DF9A0);
     entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
-    effCurrentFileQueueEntry = (s32)entry;
+    effCurrentFileQueueEntry = entry;
     strcpy(entry->name, request->resource->name);
     entry->offset[0] = request->position[0];
     entry->offset[1] = request->position[1];
@@ -8937,12 +8937,12 @@ s32 effPollFileQueueRecord(s32 request) {
     } else if (kind == 1) {
         if (((EffBankStatus *)record)->type != 8) {
             FileJob *entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)record)->count);
-            if (effCurrentFileQueueEntry != (s32)entry) {
-                fileQueueDetachSectorFollower(effFileQueue, (FileJob *)effCurrentFileQueueEntry);
-                fileQueueLinkJobToSectorLeader(effFileQueue, (FileJob *)effCurrentFileQueueEntry, entry);
+            if (effCurrentFileQueueEntry != entry) {
+                fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
+                fileQueueLinkJobToSectorLeader(effFileQueue, effCurrentFileQueueEntry, entry);
             }
         } else {
-            fileQueueDetachSectorFollower(effFileQueue, (FileJob *)effCurrentFileQueueEntry);
+            fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
             fileJobSetSecondaryData((FileJobPayload *)effQueuedFileHandle, record + 0xD0, 4, 4);
         }
         result = 0x400002;
@@ -8993,7 +8993,7 @@ s32 effPollFileRecord(char *path, s32 slot) {
         result = 0x400000;
     } else if (kind == 1) {
         s32 type;
-        fileQueueDetachSectorFollower(effFileQueue, (FileJob *)effCurrentFileQueueEntry);
+        fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
         type = ((EffFileQueryInfo *)record)->resourceMask;
         if (type != 8) {
             fileJobCopyCommandIntoSecondaryData((FileJobPayload *)effQueuedFileHandle,
@@ -9086,7 +9086,7 @@ u32 fileLoadEffectSlotA(void) {
         fileJobCopyCommandIntoSecondaryData(job, (const char *)fileInfo,
                       effClassifyResourceMask(((EffFileQueryInfo *)fileInfo)->resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
-        effCurrentFileQueueEntry = (s32)entry;
+        effCurrentFileQueueEntry = entry;
         memcpy(D_003DF9A0, entry, 0x80);
         effQueuedFileHandle = entry->id;
         resource = (EffFileResourceRecord *)effFindAssetData(entry);
@@ -9141,7 +9141,7 @@ u32 fileLoadEffectSlotHelp(void) {
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, buffer, totalLength, 0);
         entry = fileAppendJob(effFileQueue, (u32)job);
-        effCurrentFileQueueEntry = (u32)entry;
+        effCurrentFileQueueEntry = entry;
         resource = (EffFileResourceRecord *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
         memcpy(D_003DF9A0, entry, 0x80);
@@ -9190,7 +9190,7 @@ u32 fileLoadEffectSlotB(void) {
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
-        effCurrentFileQueueEntry = (s32)entry;
+        effCurrentFileQueueEntry = entry;
         memcpy(D_003DF9A0, entry, 0x80);
         effQueuedFileHandle = entry->id;
         resource = (EffFileResourceRecord *)effFindAssetData(entry);
@@ -9251,7 +9251,7 @@ u32 effLoadFileSlotF2(void) {
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
-        effCurrentFileQueueEntry = (s32)entry;
+        effCurrentFileQueueEntry = entry;
         memcpy(D_003DF9A0, entry, 0x80);
         effQueuedFileHandle = entry->id;
         resource = (EffFileResourceRecord *)effFindAssetData(entry);
@@ -9292,7 +9292,7 @@ u32 effLoadMaterialFile(void) {
         fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
                       effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
-        effCurrentFileQueueEntry = (s32)entry;
+        effCurrentFileQueueEntry = entry;
         memcpy(D_003DF9A0, entry, 0x80);
         effQueuedFileHandle = entry->id;
         resource = (EffFileResourceRecord *)effFindAssetData(entry);
