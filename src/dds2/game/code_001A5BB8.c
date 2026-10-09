@@ -79,7 +79,6 @@ extern s32 D_00435DE4;
 
 extern s32 D_00435DF8;
 
-extern s32 datItemSkillRecords;
 
 extern s32 btlGetRuntime(void);
 
@@ -2538,13 +2537,13 @@ s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
 }
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
-    u16 item = *(u16 *)(datItemSkillRecords + index * 8 + 2);
+    u16 item = datItemSkillRecords[index].commandIndex;
     btlBossDebugPrintf(D_00415158, index, item);
     return item;
 }
 
 u16 btlGetActorBedAssetIdFromIndex(s32 arg0) {
-    return *(u16 *)(arg0 * 8 + datItemSkillRecords + 2);
+    return datItemSkillRecords[arg0].commandIndex;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415130);
