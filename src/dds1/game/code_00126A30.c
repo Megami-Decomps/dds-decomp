@@ -2060,7 +2060,6 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 
 /* Submit the field overlay's fixed register state and textured sprite payload. */
 void func_0012AEB0(void) {
@@ -2072,7 +2071,7 @@ void func_0012AEB0(void) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    sdfAppendDmaPrimary((s32)list,
+    sdfAppendDmaPrimary(list,
         (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
@@ -2128,7 +2127,7 @@ void func_0012B090(s32 mode) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    sdfAppendDmaPrimary((s32)list,
+    sdfAppendDmaPrimary(list,
         (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
@@ -2191,7 +2190,7 @@ void func_0012B2B0(s32 alpha) {
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
-    sdfAppendDmaPrimary((s32)list,
+    sdfAppendDmaPrimary(list,
         (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
@@ -2636,7 +2635,7 @@ void func_0012C428(s32 a1, s32 a2) {
     s32 quarter;
     SdfPoolNode *descriptor;
 
-    sdfAppendDmaPrimary((s32)list,
+    sdfAppendDmaPrimary(list,
         (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
