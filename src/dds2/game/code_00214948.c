@@ -107,7 +107,7 @@ extern void *btlCreateActionTask(void *, s32);
 
 extern s32 btlFindScriptResource(char *);
 
-extern u8 *btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
 
@@ -1521,7 +1521,7 @@ s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x5F || user->partyRecord.unitId == 0x101) {
-        table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -2055,7 +2055,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x108) {
-        table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -5012,7 +5012,61 @@ u32 btlGetSpecialActionGroupEntry(BtlUnit *unit, u32 group) {
     return D_003BF6C0[group][action];
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00221BC8);
+extern u8 D_003BF758[2][5];
+
+/* Forward special actor motion, retaining the linked actor's selected group and fresh model state. */
+void func_00221BC8(BtlUnit *unit, s32 selector, s32 firstParameter,
+                  s32 secondParameter, s32 mode, f32 frameStep) {
+    s32 group = selector;
+    BattleActionState *state;
+    u32 index;
+
+    if (!(unit->status.flags & 0x400)) {
+        evtPrepareUnitMotionState(unit->ext, selector, firstParameter, secondParameter, mode);
+        unit->ext->owner->first->frameStep = frameStep;
+    } else {
+        state = &((BtlState *)btlGetRuntime())->effect->action;
+        if (selector == 0xB) {
+            if (state->alternateMotion != 0) {
+                selector = 1;
+            }
+        }
+        group = btlGetSpecialActionGroupEntry(unit, selector);
+        evtPrepareUnitMotionState(unit->ext, group, firstParameter, secondParameter, mode);
+        unit->ext->owner->first->frameStep = frameStep;
+        if (selector == 0xB) {
+            if (unit->partyRecord.unitId == 0x121) {
+                state->alternateMotion = 1;
+            }
+            frameStep = ((BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+                unit->resourceKind, unit->resourceIndex))->motions[0].alphaFrameScale;
+            selector = btlGetSpecialActionGroupEntry(unit, 0);
+            evtUnitSetStoredParameter(unit->ext, selector);
+            evtSetTransitionMotionScale(unit->ext, frameStep);
+            evtStoreUnitMotionShortParameters(unit->ext, 0, 0);
+            unit->effectIndex = selector;
+            unit->effectParameter = 1;
+            unit->effectScale = frameStep;
+            if (state->actor != NULL) {
+                if (state->actor->status.flags & 2) {
+                    s32 linkedGroup;
+
+                    index = btlGetSpecialActionIndex(unit);
+                    linkedGroup = D_003BF758[1][index];
+                    evtPrepareUnitMotionState(state->actor->ext, linkedGroup, 0, 0, 0);
+                    state->actor->ext->owner->first->frameStep = 1.0f;
+                    evtUnitSetStoredParameter(state->actor->ext, D_003BF758[0][index]);
+                    evtSetTransitionMotionScale(state->actor->ext, 1.0f);
+                    evtStoreUnitMotionShortParameters(state->actor->ext, 0, 0);
+                }
+            }
+        }
+    }
+    if (secondParameter == 0) {
+        mdlAddEntryFlagged(unit->ext->owner, 0, group);
+        sdfMotionSampleAtFrame(unit->ext->owner->first, 0.0f);
+    }
+}
 
 void btlApplySpecialActionRenderGroup(BtlUnit *unit, u32 group, f32 opacity) {
     if ((unit->status.flags & 0x400) == 0) {
@@ -6499,7 +6553,7 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
     }
 }
 
-extern u8 *btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 s32 func_00226598(BtlLinkedCommand *command) {
     BtlUnit *unit = btlGetTargetUnitForLink(command);
@@ -6511,7 +6565,7 @@ s32 func_00226598(BtlLinkedCommand *command) {
         return 0;
     }
     if (unit->partyRecord.unitId == 0x113) {
-        table = btlGetSideIndexedActorStatusTable(
+        table = (u8 *)(u32)btlGetSideIndexedActorStatusTable(
             unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             s32 slot = command->link->indexWork.slot;
