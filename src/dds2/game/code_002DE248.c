@@ -11365,10 +11365,12 @@ void effInitializeAllSlotWork(EffectSlotSet *owner) {
 }
 
 /* Store the owner and slot index before invoking the work initializer. */
-void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, BdWork *entry) {
+void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, void *payload) {
+    /* Alternate records share these owner/index fields without a full work allocation. */
+    BdWork *entry = (BdWork *)payload;
     entry->owner = owner;
     entry->slotIndex = slotIndex;
-    effInitializeSlotWorkFromDescription(owner, slotIndex, entry);
+    effInitializeSlotWorkFromDescription(owner, slotIndex, payload);
 }
 
 /* Clear the complete normal slot, then restore owner/index and initialize it. */
@@ -11666,24 +11668,25 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
     return effect;
 }
 
-s32 effSetSlotOverrideWork(u8 *effect, u32 slot, u32 material) {
-    if (((EffectSlotSet *)effect)->workEntries[slot].alternate.bits == 0) {
-        effAttachSlotWorkOwner(effect, slot, (BdWork *)material);
+s32 effSetSlotOverrideWork(EffectSlotSet *owner, u32 slot, void *payload) {
+    if (owner->workEntries[slot].alternate.bits == 0) {
+        effAttachSlotWorkOwner(owner, slot, payload);
     }
-    ((EffectSlotSet *)effect)->workEntries[slot].alternate.bits = material;
+    owner->workEntries[slot].alternate.bits = (u32)payload;
     return 1;
 }
 
-u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
+u32 effSetMaterialSlots(EffectSlotSet *owner, s32 index, u32 materialFlags, void *payload) {
     u32 i;
     EffTimedState *states;
-    if (((EffectSlotSet *)work)->workEntries[index].alternate.asset == NULL) {
-        effAttachSlotWorkOwner((EffectSlotSet *)work, index, asset);
+    if (owner->workEntries[index].alternate.payload == NULL) {
+        effAttachSlotWorkOwner(owner, index, payload);
     }
-    ((EffectSlotSet *)work)->workEntries[index].alternate.asset = asset;
-    states = asset->states;
+    owner->workEntries[index].alternate.payload = payload;
+    /* Both timed states lie within the shared 0x6C-byte payload region. */
+    states = ((BdWork *)payload)->states;
     for (i = 0; i < 2; i++) {
-        states[i].materialFlags = value;
+        states[i].materialFlags = materialFlags;
     }
     return 1;
 }

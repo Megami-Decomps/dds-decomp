@@ -791,7 +791,7 @@ typedef struct BdWork {
     union {
         s32 address;
         u32 bits;
-        struct BdWork *asset;
+        void *payload; /* Alternate payloads may be only 0x6C bytes. */
     } alternate;        /* 0x9C */
 } BdWork;
 
