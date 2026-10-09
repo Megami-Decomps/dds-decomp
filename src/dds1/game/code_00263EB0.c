@@ -400,13 +400,13 @@ s32 itfRunPanelMode1(KwlnTask *request) {
 }
 
 
-extern void func_0024DC98(s32);
+extern void dspAdvanceMessageWindowControl(s32);
 
 s32 itfRunPanelMode2(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
-    func_0024DC98(0);
+    dspAdvanceMessageWindowControl(0);
     return menuRunPanel(panel, 2, request);
 }
 
@@ -495,7 +495,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 
 /* Draw each nonempty reward icon row with its name and formatted parameter. */
-void func_002650C8(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary,
+void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary,
                   u32 textStyle, BrsSkillPackageWork *work) {
     char formatted[32];
     u32 colors[4];

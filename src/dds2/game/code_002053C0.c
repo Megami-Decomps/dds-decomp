@@ -392,7 +392,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 
 /* Orient party actors and expand their formation when the marked count grows. */
-s32 func_002059F0(f32 *center) {
+s32 btlExpandPartyFormationAroundCenter(f32 *center) {
     BtlUnit *actors[16];
     f32 position[4];
     f32 direction[4];
@@ -582,7 +582,7 @@ s32 func_00205CC8(s32 filter) {
 s32 btlRepositionPartyAroundBattleCenter(void) {
     s128 v;
     PCP_COPY_VECTOR(&v, btlGetRuntime());
-    return func_002059F0((f32 *)&v);
+    return btlExpandPartyFormationAroundCenter((f32 *)&v);
 }
 
 s32 func_00206090(void) {

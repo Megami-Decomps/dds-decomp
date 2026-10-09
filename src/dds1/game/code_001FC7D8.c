@@ -21,7 +21,7 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void func_0011E280(f32, f32, f32, f32, s32);
-extern void func_001BCB88(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 btlGetRuntime();
 extern s8 btlHistoryCounter;
@@ -272,7 +272,7 @@ void func_001FCBA0(BtlUnit *unit) {
 
 extern void func_002BF438(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
-void func_001FCFB8(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
+void btlDrawCenteredUnsignedNumber(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     EffectSlotSet *set;
     BdWork *work;
@@ -459,7 +459,7 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
 extern f32 D_003603C8[12][2];
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
-s32 func_001FD5C8(BtlLinkedEffectArgs *args) {
+s32 btlUpdateLinkedNumberDisplay(BtlLinkedEffectArgs *args) {
     s32 screen[4] __attribute__((aligned(16)));
     s32 bounce[16];
     s32 value = args->payload.linked.value;
@@ -554,7 +554,7 @@ s32 func_001FD5C8(BtlLinkedEffectArgs *args) {
         if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
             screen[0] += (s32)(D_003603C8[args->payload.linked.offsetIndex][0] * 32.0f) << 4;
             screen[1] += ((s32)(D_003603C8[args->payload.linked.offsetIndex][1] * 32.0f) << 3) + 256;
-            func_001FCFB8(screen[0], screen[1] - rise, value, color, offsets);
+            btlDrawCenteredUnsignedNumber(screen[0], screen[1] - rise, value, color, offsets);
         }
     }
 
@@ -598,7 +598,7 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     }
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->identity;
-    task->callback = func_001FD5C8;
+    task->callback = btlUpdateLinkedNumberDisplay;
     task->onFinish = effDecrementFirstCountdown;
     args = btlGetTaskArguments(task);
     args->payload.linked.kind = kind;
@@ -1002,12 +1002,12 @@ typedef struct BtlWaitTask {
 s32 btlWaitEffectTask(BtlWaitTask *task) {
     if (task->ticks == 0) {
         btlCreateAnalysisPanelTask(task->value, 0);
-        func_001BCB88(0, 8);
+        btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->ticks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0) {
-                func_001BCB88(1, 8);
+                btlSetCommandPanelFadeMode(1, 8);
                 btlRequestAnalysisPanelClose();
                 return 1;
             }

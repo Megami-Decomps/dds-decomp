@@ -272,7 +272,7 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 extern s32 evtGetMirroredSolarPhase(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_00229540(SolarNoiseState *state) {
+void evtAdvanceSolarPhaseParticles(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();
     s32 spawnLimit = (s32)((f32)phase * 10.0f * 0.125f + 5.0f);
     SolarNoiseLayer *layer;
