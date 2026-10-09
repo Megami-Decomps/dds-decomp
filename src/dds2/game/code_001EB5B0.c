@@ -5865,9 +5865,9 @@ typedef struct SoundSlotTableEntry {
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
-u32 sndBuildMotSeResourceKey(u32 *sound, u32 slot) {
-    u32 id = ((SoundSlotOwner *)sound)->id;
-    u32 category = ((SoundSlotOwner *)sound)->category;
+u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
+    u32 id = sound->id;
+    u32 category = sound->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
     s32 scaledId = id * 0x20;
@@ -5907,7 +5907,7 @@ INCLUDE_RODATA(const s32, "game/code_001EB5B0", D_00419308);
 
 INCLUDE_RODATA(const s32, "game/code_001EB5B0", D_00419318);
 
-void sndLoadMotSeFiles(u32 *sound) {
+void sndLoadMotSeFiles(SoundSlotOwner *sound) {
     char filename[0x70];
     u32 slot = 0;
     s32 offset = 0x10;
@@ -5917,18 +5917,18 @@ void sndLoadMotSeFiles(u32 *sound) {
         if (id != 0) {
             if (slot != 0xB) {
                 func_0035C860(filename, D_004192D8, D_00436AE8, id >> 16);
-            } else if (sound[1] == 0) {
-                func_0035C860(filename, D_004192F8, D_00419308, sound[2]);
+            } else if (sound->category == 0) {
+                func_0035C860(filename, D_004192F8, D_00419308, sound->id);
             } else {
-                func_0035C860(filename, D_00419318, D_00419308, sound[2]);
+                func_0035C860(filename, D_00419318, D_00419308, sound->id);
             }
-            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
+            *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
         }
         slot++;
         offset += 4;
     } while (slot < 0x1D);
-    sound[0] |= 1;
+    sound->flags |= 1;
 }
 
 /* Find the newest registered owner with both keys equal; return null if absent. */
@@ -5966,7 +5966,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     }
     work->soundSlotOwners = owner;
     if (mdlFlagTest(0xC0F) == 0) {
-        sndLoadMotSeFiles((u32 *)owner);
+        sndLoadMotSeFiles(owner);
     }
     return owner;
 }
@@ -6079,7 +6079,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         return 1;
     }
     if (args->unk_08 != 0xB) {
-        key = sndBuildMotSeResourceKey((u32 *)owner, args->unk_08);
+        key = sndBuildMotSeResourceKey(owner, args->unk_08);
         if (owner->flags & 0x10) {
             sndSetStationedSeHighVolume(key);
             btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
