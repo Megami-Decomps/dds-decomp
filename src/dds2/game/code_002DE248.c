@@ -9923,7 +9923,7 @@ void effQueueResource(const char *extension, const char *resourceName) {
     btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
 }
 
-void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *record) {
+void effUpdateResourceQueue(const char *directoryPath, const char *extension, EffQueueRecord *record) {
     u32 state;
 
     if (effQueuedResourceNameRecord == 0) {
@@ -9937,7 +9937,7 @@ void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *
     state = func_0020E7B0(effQueuedResourceNameRecord);
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
-        if (func_0020E858(effQueuedResourceNameRecord, result) != 0) {
+        if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {
             func_0020E368(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {
