@@ -1,0 +1,64 @@
+name: Camera interpreter diagnostic
+
+on:
+  push:
+    branches:
+      - kib/camera-interpreter-diagnostic-20261009
+
+# Read-only token: the job runs repository build scripts.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Check diagnostic syntax
+        run: python3 -m py_compile experiments/kib-camera-interpreter/diagnose.py
+
+      # The retail executables are not in this repository. CI reads them from a
+      # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
+      # Pull requests from forks get no secrets and skip the build.
+      - name: Check for retail executables
+        id: orig
+        env:
+          KEY: ${{ secrets.ORIG_DEPLOY_KEY }}
+        run: echo "available=$([ -n "$KEY" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch retail executables
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/checkout@v5
+        with:
+          repository: Raikaru/dds-decomp-orig
+          ssh-key: ${{ secrets.ORIG_DEPLOY_KEY }}
+          path: .orig-src
+          persist-credentials: false
+
+      - name: Install dependencies
+        if: steps.orig.outputs.available == 'true'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ninja-build cpp
+          python3 -m pip install -q -r requirements.txt
+          python3 tools/download_tools.py
+          mkdir -p orig/dds1 orig/dds2
+          cp .orig-src/orig/dds1/SLUS_209.74 orig/dds1/
+          cp .orig-src/orig/dds2/SLUS_211.52 orig/dds2/
+          rm -rf .orig-src
+
+      - name: Require existing retail access
+        if: steps.orig.outputs.available != 'true'
+        run: |
+          echo '{"status":"diagnostic_failed","stage":"retail_unavailable"}'
+          exit 2
+
+      - name: Focused camera-interpreter diagnostic
+        if: steps.orig.outputs.available == 'true'
+        timeout-minutes: 25
+        run: python3 experiments/kib-camera-interpreter/diagnose.py
