@@ -110,6 +110,32 @@ kernel uses builtin `fabsf` and changes code under the helper. Check the whole
 unit and preserve the kernel exception. Do not introduce another asm spelling
 or replace an unrelated arithmetic expression just to constrain scheduling.
 
+## Scalar outputs and address reuse
+
+The linked-defeat cameras (`func_001E4180` in DDS1 and `func_001F1B00` in
+DDS2) combine the SDK `ffabsf` boundary with two independent `f32` extent
+outputs. The bounds providers accept independently nullable output pointers;
+the three VU vectors remain in a separate, genuinely 16-byte-aligned record.
+Both routines match with this source organization and complete 16-byte
+pointer-form COP2 memory operands.
+
+Grouping the scalar outputs into the vector record changes more than the
+stack layout. Their addresses become pseudo-register expressions before
+GCSE, and PRE retains the depth pointer across the two provider branches and
+a later query. Independent addressable floats instead enter RTL as
+`addressof` nodes. Their expansion assigns the stack addresses directly to
+the hard argument registers; the depth address is absent from the PRE
+expression table. The edge-vector address remains eligible and is reused,
+as retail requires. The dumps establish this representation difference;
+the exact internal hard-register eligibility predicate is not established.
+
+The SDK helper alone does not close the grouped-record version, and
+independent scalar outputs with builtin `fabsf` also remain unmatched. Check interacting
+source contracts before treating either negative as conclusive. Disabling
+GCSE also loses the required vector-address reuse and does not match. This
+case supports ordinary independent output locals, not invented storage,
+barriers, declaration-order search, or a global optimizer flag change.
+
 ## Code that changes with unrelated text (CONTEXT)
 
 ee-gcc 2.96's CSE hashes the addresses of symbol-name strings, so the rest of
