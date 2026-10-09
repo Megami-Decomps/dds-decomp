@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -121,7 +122,6 @@ extern u8 D_003AC600[];
 
 extern u32 sdfGetLodChunkValue(SdfModel *model);
 extern s32 scrGetWindow(void);
-extern void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 extern s32 scrReadStringParameter(s32 idx);
 extern void *effObjCreateKindFromResource(s32 arg0, s32 arg1);

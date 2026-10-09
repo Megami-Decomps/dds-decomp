@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "itf_mes_window.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
@@ -1154,7 +1155,6 @@ extern u8 D_003B4A28[];
 
 extern s32 scrCreateTaskForProcessId();
 
-extern void itfMesSetWindowCallbackAddress();
 
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
