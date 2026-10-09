@@ -3285,7 +3285,7 @@
 0x0022C948	btlIsModelPackEntryReady	inferred	Reports whether model request and optional file resource are ready. [names_reviewed8.tsv]
 0x0022CA60	btlLoadModelPack	inferred	unified with DDS1 twin (was btlStartModelPackLoad)
 0x0022CB68	btlReleaseFoundModelEntry	inferred	Releases the model entry found by the battle lookup. [names_reviewed8.tsv]
-0x0022CD30	btlReleaseEntryIfReady	inferred	unified with DDS1 twin (was btlPollModelEntryReady)
+0x0022CD30	btlIsModelEntryReady	inferred	Finds the model cache entry by kind/id and returns its readiness status; returns zero when absent.
 0x0022CF58	btlBuildOverlayQuadPacket	inferred	Builds a fixed-vertex overlay packet with supplied color. [names_reviewed8.tsv]
 0x0022CFB0	btlInitLightParams	inferred	Initializes four light parameter blocks D_0037FA50/FA90/FAD0/FB20 [names_M47_D2Game.tsv]
 0x0022DD18	btlInitFadeColors	inferred	Initializes runtime overlay color and initial alpha according to its state. [names_reviewed16.tsv]

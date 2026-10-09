@@ -1158,8 +1158,8 @@ s32 btlGetEntryState(s32 modelKind, s32 modelId) {
     return 0;
 }
 
-/* Despite its public name, this only queries readiness; it releases nothing. */
-s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
+/* Query readiness for the matching kind/id cache entry. */
+s32 btlIsModelEntryReady(s32 kind, s32 id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         return btlIsModelPackEntryReady(entry);
