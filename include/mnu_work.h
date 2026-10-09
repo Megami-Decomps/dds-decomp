@@ -87,7 +87,7 @@ typedef union MenuWorkFlags {
 typedef struct MenuWorkEntry {
     MenuWorkControl control;
     u32 tag;
-    s32 unk08;
+    s32 resourceRecordIndex;
     union {
         struct MnuModelNode *modelNode;
         struct ModelInstance *modelInstance;
@@ -146,7 +146,7 @@ typedef struct MenuRuntimeRecord {
 typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWorkFlags)==4 && sizeof(MenuWorkEntry)==0x48 &&
     (unsigned long)&((MenuWorkEntry*)0)->control==0 &&
     (unsigned long)&((MenuWorkEntry*)0)->tag==4 &&
-    (unsigned long)&((MenuWorkEntry*)0)->unk08==8 &&
+    (unsigned long)&((MenuWorkEntry*)0)->resourceRecordIndex==8 &&
     sizeof(((MenuWorkEntry*)0)->object)==4 &&
     (unsigned long)&((MenuWorkEntry*)0)->object==0x0C &&
     (unsigned long)&((MenuWorkEntry*)0)->x0==0x10 &&
@@ -267,7 +267,8 @@ typedef char MenuResourceLayoutsAssert[
 void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
 MenuResourceRecord *mnuGetResourceRecordByIndex(s32);
 MenuWorkEntry *mnuFindUnusedWorkEntry(void);
-void func_00322E18(MenuWorkEntry *, u32, s32, s32, s32, f32);
+/* Initializes/registers an existing work entry from its tagged registry. */
+void mnuInitializeRegistryWorkEntry(MenuWorkEntry *, u32, s32, s32, s32, f32);
 MenuWorkEntry *mnuCreateAnimatedEffect(u32, f32, f32, f32);
 
 MenuProgressParameters *mnuGetResourceProgressParameters(void);

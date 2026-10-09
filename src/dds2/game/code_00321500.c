@@ -575,14 +575,14 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((registry->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
-        MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
+        MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->resourceRecordIndex);
         return entry->y0 +
             (f32)((s32)*(u16 *)(progressState + 2) - resourceRecord->progress);
     }
     return entry->y0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
+INCLUDE_ASM(const s32, "game/code_00321500", mnuInitializeRegistryWorkEntry);
 
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
@@ -1417,7 +1417,7 @@ s32 func_00324B28(MenuWorkEntry *entry) {
 MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
     MenuWorkEntry *entry = mnuFindUnusedWorkEntry();
     if (entry != NULL) {
-        func_00322E18(entry, context, 0, (s32)x, (s32)y, progress);
+        mnuInitializeRegistryWorkEntry(entry, context, 0, (s32)x, (s32)y, progress);
         entry->flags |= 0x10;
     }
     return entry;
