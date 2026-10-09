@@ -3065,7 +3065,7 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
-void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
+EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x200);
     s32 auxAllocationHandle;
     s32 tailBytes = 0xB0;
@@ -3081,9 +3081,9 @@ void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     return clone;
 }
 
-void effFreeDiscAuxTemplate(u32 effect) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffTemplatePacketList *)effect)->auxiliaryAllocation));
-    effDestroyResources(effect);
+void effFreeDiscAuxTemplate(EffTemplatePacketList *effect) {
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->auxiliaryAllocation));
+    effDestroyResources((EffEmitterHead *)effect);
     sdfReleaseChipBlock(effect);
 }
 
