@@ -352,7 +352,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
 extern void func_00112518(void *, EffWorldNode *);
 extern void func_00120B88(EffWorldNode *);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
-extern void func_001200E8(s32, f32, f32, f32, f32);
+extern void func_001200E8(f32, f32, f32, f32, s32);
 extern u8 D_00380788[];
 
 s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
@@ -395,7 +395,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     if (sdfLoadMapRecordPositionVector(target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
         vec[1] = pickMode == 1 ? target->unkD4 : obj->inner->position[1];
-        func_001200E8(level, vec[0], vec[1], vec[2], obj->inner->radius);
+        func_001200E8(vec[0], vec[1], vec[2], obj->inner->radius, level);
     } else {
         if (effObjTestNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
             vec[0] = obj->inner->smoothedPosition[0];
@@ -409,7 +409,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         if (pickMode == 1) {
             vec[1] = target->unkD4;
         }
-        func_001200E8(level, vec[0], vec[1], vec[2], obj->inner->radius);
+        func_001200E8(vec[0], vec[1], vec[2], obj->inner->radius, level);
     }
     return 1;
 }
