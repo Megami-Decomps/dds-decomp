@@ -2715,9 +2715,9 @@ void btlUpdateSpecialActorFormation(void) {
     }
 }
 
-extern s32 mdlGetNodeField2C(MdlCtx *context, s32 searchId);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *context, s32 searchId);
 
-extern s32 mdlGetNodeInt1C(MdlCtx *context, s32 searchId);
+extern s32 mdlGetNodeFrameAsInt(MdlCtx *context, s32 searchId);
 
 extern char D_00436CE0[];
 
@@ -2738,8 +2738,8 @@ void func_0021A778(void) {
                     if (unitId >= 0x111) {
                         s32 nodeIndex = unitId == 0x111 ? 1 : 2;
 
-                        if (mdlGetNodeField2C(unit->ext->owner, nodeIndex) == 0x11) {
-                            if (unit->ext->slotC[nodeIndex] < mdlGetNodeInt1C(unit->ext->owner, nodeIndex)) {
+                        if (mdlGetNodeMotionIndex(unit->ext->owner, nodeIndex) == 0x11) {
+                            if (unit->ext->slotC[nodeIndex] < mdlGetNodeFrameAsInt(unit->ext->owner, nodeIndex)) {
                                 btlClearNamedChunkFlags(unit->partyRecord.unitId == 0x111 ? D_00436CE0 : D_00436CE8);
                                 unit->stateFlags &= ~0x80000;
                             }

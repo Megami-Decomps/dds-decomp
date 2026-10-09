@@ -44,7 +44,7 @@ void func_001D3FE8(BtlTask *, BattleIndexWork *);
 
 
 
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 
@@ -3946,7 +3946,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             break;
         case 3: case 4: case 5: case 6: case 7: case 8:
         case 12: case 19: case 20: case 21: case 22: case 23: case 24:
-            node = mdlGetNodeField2C(unit->ext->owner, 0);
+            node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
             switch (node) {
             case 0: case 2: case 9: case 10: case 11:
                 start = 0;
@@ -4152,7 +4152,7 @@ void btlUpdateUnitEffects(void) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xC4),
                                                   *(s32 *)(object + 0xC8));
             MdlCtx *model = ((BtlUnit *)object)->ext->owner;
-            s32 node = mdlGetNodeField2C(model, 0);
+            s32 node = mdlGetNodeMotionIndex(model, 0);
             if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
                 btlRefreshUnitMotionSelection(object);
@@ -5787,7 +5787,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         return 1;
     }
     if (task->tick == 0) {
-        node = mdlGetNodeField2C(task->unit->ext->owner, 0);
+        node = mdlGetNodeMotionIndex(task->unit->ext->owner, 0);
         if (node < 0x1D) {
             BtlActorStatusRecord *resource = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(task->unit->resourceKind,
                                                  task->unit->species);
@@ -6158,7 +6158,7 @@ void func_001DA468(void) {
             if (unit->updateFlags & 4) {
                 frame = (s32)btlGetUnitModelValue1C(unit);
                 index = unit->unkEC;
-                if (index == mdlGetNodeField2C(unit->ext->owner, 0)) {
+                if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
                         evtSetUnitAlphaTransition(unit->ext,
                             (s32)((f32)status->motions[index].alphaDuration /
@@ -6189,7 +6189,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
     for (; unit != 0; unit = unit->next) {
         if (unit->flags & 2) {
-            unit->unkEC = mdlGetNodeField2C(unit->ext->owner, 0);
+            unit->unkEC = mdlGetNodeMotionIndex(unit->ext->owner, 0);
             if (!(unit->flags & 0x40000)) {
                 if (unit->flags & 0x100000) {
                     color = mdlGetBroadcastValue(unit->ext->owner);
@@ -7122,7 +7122,7 @@ void btlApplyCombinedActorFlags(u8 *resource) {
 
 extern f32 D_00359EC0[];
 extern char D_003A3DD0[];
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
@@ -7141,7 +7141,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                     if (unit->flags & 0x200) {
                         if (unit->flags & 2) {
                             if (unit->ext != 0) {
-                                s32 node = mdlGetNodeField2C(unit->ext->owner, 0);
+                                s32 node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
                                 if (node == 0xD || node == 0x12) {
                                     current = btlGetUnitModelValue1C(unit);
                                     limit = (f32)btlGetUnitModelFrameCount(unit);
