@@ -549,12 +549,12 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionKeyFlagBinding *sdfMotionCreateKeyFlagBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionKeyFlagBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindDrawNode(r, a0, D_00398230, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_00398230, nodeIndex);
+    return binding;
 }
 
 void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
