@@ -59,15 +59,14 @@ extern void btlDestroyGroupNode(BattleGroupNode *);
 extern s32 sdfRelocatePackedResourcePayload();
 
 
-struct FileWork;
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
-void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.requestHandle = fileGetResourceHandle((struct FileRequest *)resource);
-    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup((struct FileRequest *)resource);
+void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
+    request->payload.requestHandle = fileGetResourceHandle(resource);
+    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(resource));
+    filePollEntryCleanup(resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
     }
@@ -78,10 +77,10 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
-void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)resource);
-    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup((struct FileRequest *)resource);
+void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
+    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
+    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
+    filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
 }
 
