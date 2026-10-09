@@ -276,7 +276,6 @@ void sdfServiceGraphicsBuffers(void) {
     }
 }
 
-extern void sdfGraphApplyModeDefaults(SdfGraphObj *, s32, s32);
 extern s32 sdfCreateThread(void *, void *, s32, s32);
 extern s32 _StartThread(s32, s32);
 extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
@@ -1172,4 +1171,3 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBusyBufferIndex);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfResourceListHead);
-

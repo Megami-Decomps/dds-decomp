@@ -15,8 +15,6 @@ extern u8 D_004389D8;
 
 extern u8 D_0043913C;
 
-void sdfGraphApplyModeDefaults(void *arg0, s32 arg1, s32 arg2);
-
 extern SdfGraphObj D_0040B290;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
@@ -125,4 +123,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_004389D9);
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfGsImageUploadSemaphore);
-
