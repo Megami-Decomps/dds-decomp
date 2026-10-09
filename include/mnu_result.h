@@ -115,15 +115,13 @@ typedef struct BrsProgressAnimation {
     s8 progressIconEnabled;
     u8 pad39[3];
     s32 progressIconAngle; /* 0x3C: signed 15-degree steps modulo 360. */
-    u32 progressIconOpacity;
-    s32 progressIconX;
-    s32 progressIconY;
+    s32 progressIconOpacity; /* Signed values are clamped to 0..128 by the animations. */
+    s32 progressIconPosition[2]; /* x, y */
     s8 iconState;
     u8 pad4D[3];
-    u32 iconOpacity;
-    u32 unk54;
-    s32 unk58; /* Initialized to 290; no reading role established. */
-    s32 unk5C; /* Initialized to 21; no reading role established. */
+    s32 iconOpacity;
+    s32 unk54;
+    s32 unk58[2]; /* Pair initialized by the result animations; no reading role established. */
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;

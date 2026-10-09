@@ -61,11 +61,144 @@ INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E820);
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029EE80);
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029F440);
+extern f32 sdfSinPoly(f32);
+
+void func_0029F440(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+    s32 y;
+    s32 bob;
+
+    switch (work->levelAnimation[index].progressIconEnabled) {
+    case 0:
+        work->levelAnimation[index].progressIconOpacity = 0;
+        work->levelAnimation[index].progressIconPosition[0] = 0xA6;
+        work->levelAnimation[index].progressIconPosition[1] = 0x22;
+        work->levelAnimation[index].progressIconAngle = 0xB4;
+        break;
+    case 1:
+        work->levelAnimation[index].progressIconAngle = (work->levelAnimation[index].progressIconAngle + 15) % 360;
+        work->levelAnimation[index].progressIconOpacity =
+            (u32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->levelAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+        work->levelAnimation[index].progressIconPosition[1] = 0x24 - bob;
+        work->levelAnimation[index].progressIconOpacity = (work->levelAnimation[index].progressIconOpacity > 0) ? ((work->levelAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->levelAnimation[index].progressIconOpacity) : 0;
+        y = work->levelAnimation[index].progressIconPosition[1];
+        work->levelAnimation[index].progressIconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
+        if (work->levelAnimation[index].progressIconOpacity >= 0x80) {
+            work->levelAnimation[index].progressIconEnabled += 2;
+            work->levelAnimation[index].progressIconAngle = 0x78;
+        }
+        break;
+    case 2:
+        work->levelAnimation[index].progressIconEnabled++;
+        work->levelAnimation[index].progressIconAngle = 0x78;
+        break;
+    default:
+        work->levelAnimation[index].progressIconOpacity -= 10;
+        work->levelAnimation[index].progressIconOpacity = (work->levelAnimation[index].progressIconOpacity > 0) ? ((work->levelAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->levelAnimation[index].progressIconOpacity) : 0;
+        y = work->levelAnimation[index].progressIconPosition[1] - 1;
+        work->levelAnimation[index].progressIconPosition[1] = y;
+        work->levelAnimation[index].progressIconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
+        if (work->levelAnimation[index].progressIconOpacity <= 0) {
+            work->levelAnimation[index].progressIconEnabled = 0;
+        }
+        break;
+    }
+    switch (work->levelAnimation[index].iconState) {
+    case 0:
+        work->levelAnimation[index].unk54 = 0;
+        work->levelAnimation[index].unk58[0] = 0x95;
+        work->levelAnimation[index].unk58[1] = 0x15;
+        break;
+    case 1:
+        work->levelAnimation[index].unk54 += 10;
+        work->levelAnimation[index].unk54 = (work->levelAnimation[index].unk54 > 0) ? ((work->levelAnimation[index].unk54 > 0x80) ? 0x80 : work->levelAnimation[index].unk54) : 0;
+        if (work->levelAnimation[index].unk54 >= 0x80) {
+            work->levelAnimation[index].iconState++;
+            work->levelAnimation[index].iconOpacity = 0;
+        }
+        break;
+    case 2:
+        work->levelAnimation[index].iconOpacity++;
+        work->levelAnimation[index].iconOpacity = (work->levelAnimation[index].iconOpacity > 0) ? ((work->levelAnimation[index].iconOpacity > 8) ? 8 : work->levelAnimation[index].iconOpacity) : 0;
+        if (work->levelAnimation[index].iconOpacity >= 8) {
+            work->levelAnimation[index].iconState++;
+        }
+        break;
+    default:
+        work->levelAnimation[index].unk54 -= 0x10;
+        work->levelAnimation[index].unk54 = (work->levelAnimation[index].unk54 > 0) ? ((work->levelAnimation[index].unk54 > 0x80) ? 0x80 : work->levelAnimation[index].unk54) : 0;
+        if (work->levelAnimation[index].unk54 <= 0) {
+            work->levelAnimation[index].iconState = 0;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029FA98);
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029FBE0);
+void func_0029FBE0(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+    s32 y;
+    s32 bob;
+
+    switch (work->profileAnimation[index].progressIconEnabled) {
+    case 0:
+        work->profileAnimation[index].progressIconOpacity = 0;
+        work->profileAnimation[index].progressIconPosition[0] = 0x12F;
+        work->profileAnimation[index].progressIconPosition[1] = 0x22;
+        work->profileAnimation[index].progressIconAngle = 0xB4;
+        break;
+    case 1:
+        work->profileAnimation[index].progressIconAngle = (work->profileAnimation[index].progressIconAngle + 15) % 360;
+        work->profileAnimation[index].progressIconOpacity =
+            (u32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].progressIconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+        work->profileAnimation[index].progressIconPosition[1] = 0x24 - bob;
+        work->profileAnimation[index].progressIconOpacity = (work->profileAnimation[index].progressIconOpacity > 0) ? ((work->profileAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[index].progressIconOpacity) : 0;
+        y = work->profileAnimation[index].progressIconPosition[1];
+        work->profileAnimation[index].progressIconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
+        if (work->profileAnimation[index].progressIconOpacity >= 0x80) {
+            work->profileAnimation[index].progressIconEnabled += 2;
+            work->profileAnimation[index].progressIconAngle = 0x78;
+        }
+        break;
+    case 2:
+        work->profileAnimation[index].progressIconEnabled++;
+        work->profileAnimation[index].progressIconAngle = 0x78;
+        break;
+    default:
+        work->profileAnimation[index].progressIconOpacity -= 10;
+        work->profileAnimation[index].progressIconOpacity = (work->profileAnimation[index].progressIconOpacity > 0) ? ((work->profileAnimation[index].progressIconOpacity > 0x80) ? 0x80 : work->profileAnimation[index].progressIconOpacity) : 0;
+        y = work->profileAnimation[index].progressIconPosition[1] - 1;
+        work->profileAnimation[index].progressIconPosition[1] = y;
+        work->profileAnimation[index].progressIconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
+        if (work->profileAnimation[index].progressIconOpacity <= 0) {
+            work->profileAnimation[index].progressIconEnabled = 0;
+        }
+        break;
+    }
+    switch (work->profileAnimation[index].iconState) {
+    case 0:
+        work->profileAnimation[index].unk54 = 0;
+        work->profileAnimation[index].unk58[0] = 0x122;
+        work->profileAnimation[index].unk58[1] = 0x15;
+        break;
+    case 1:
+        work->profileAnimation[index].unk54 = 0x80;
+        work->profileAnimation[index].iconState++;
+        work->profileAnimation[index].iconOpacity = 0;
+        break;
+    case 2:
+        work->profileAnimation[index].iconOpacity = 0xFF;
+        work->profileAnimation[index].iconState++;
+        break;
+    default:
+        work->profileAnimation[index].iconOpacity -= 8;
+        work->profileAnimation[index].iconOpacity = (work->profileAnimation[index].iconOpacity > 0)
+            ? ((work->profileAnimation[index].iconOpacity > 0xFF) ? 0xFF : work->profileAnimation[index].iconOpacity)
+            : 0;
+        break;
+    }
+}
 
 void func_002A0148(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *unused, s32 depth, s32 index) {
