@@ -17,8 +17,11 @@ typedef struct BattleEffect BattleEffect;
 struct EffBattleEntryList;
 struct EffParamWork;
 struct SdfMemBlock;
+struct FileRequest;
 struct BtlUnit;
 struct BtlRuntimeTask;
+struct SoundLoadNode;
+struct SoundFileNode;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
@@ -139,8 +142,49 @@ typedef struct SoundDataFileArgs {
 typedef char SoundDataFileArgs_size_must_be_4[
     (sizeof(SoundDataFileArgs) == 4) ? 1 : -1];
 
+/* Fixed header followed by the copied filename in sound MotSE load tasks. */
+typedef struct SoundFileTaskArgs {
+#ifdef VERSION_DDS1
+    struct SoundLoadNode *node; /* 0x00 */
+#else
+    struct SoundFileNode *node; /* 0x00 */
+#endif
+    struct FileRequest *request; /* 0x04: queued file request */
+    struct SdfMemBlock *resourceAllocation; /* 0x08: retained file allocation */
+#ifdef VERSION_DDS1
+    u32 blockIndex; /* 0x0C */
+#else
+    s32 frames; /* 0x0C */
+#endif
+    const char *filename; /* 0x10: points to inline bytes after this header */
+} SoundFileTaskArgs;
+
+typedef char SoundFileTaskArgs_size_must_be_0x14[
+    (sizeof(SoundFileTaskArgs) == 0x14) ? 1 : -1];
+typedef char SoundFileTaskArgs_node_offset_must_be_0[
+    ((u32)&((SoundFileTaskArgs *)0)->node == 0) ? 1 : -1];
+typedef char SoundFileTaskArgs_request_offset_must_be_4[
+    ((u32)&((SoundFileTaskArgs *)0)->request == 4) ? 1 : -1];
+typedef char SoundFileTaskArgs_allocation_offset_must_be_8[
+    ((u32)&((SoundFileTaskArgs *)0)->resourceAllocation == 8) ? 1 : -1];
+typedef char SoundFileTaskArgs_index_offset_must_be_C[
+#ifdef VERSION_DDS1
+    ((u32)&((SoundFileTaskArgs *)0)->blockIndex == 0x0C) ? 1 : -1];
+#else
+    ((u32)&((SoundFileTaskArgs *)0)->frames == 0x0C) ? 1 : -1];
+#endif
+typedef char SoundFileTaskArgs_filename_offset_must_be_10[
+    ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
+
 s32 sndLoadDataFile(const SoundDataFileArgs *data);
 struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
+void sndStartFileLoad(SoundFileTaskArgs *args);
+u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
+#ifdef VERSION_DDS1
+struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundLoadNode *node, u32 blockIndex, const char *filename);
+#else
+struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundFileNode *node, s32 frames, char *filename);
+#endif
 
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
