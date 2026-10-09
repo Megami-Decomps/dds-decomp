@@ -7319,3 +7319,4 @@
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x001FBF30	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x001FBF48	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
+0x002A93A0	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.

@@ -4349,17 +4349,17 @@ void effResetBillboardFrameDispatchCounters(s32 *work) {
 extern EffClassWork *effCreateClassResourceWork(u16, void *);
 extern void *memcpy(void *dst, const void *src, u32 size);
 
-u8 *func_002EB968(EffBillPointConfig *config) {
+EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config) {
     u32 count = config->timed.count;
-    u8 *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
-    u32 *entries = (u32 *)(allocation + 4);
+    EffClassWorkList *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
+    EffClassWork **entries = (EffClassWork **)(allocation + 1);
     EffBillPointConfig copy;
     u32 index;
     f32 step;
     f32 position;
     f32 offset;
 
-    *(u32 **)allocation = entries;
+    allocation->entries = entries;
     if ((u32)config->layers < 3) {
         config->layers = 3;
     }
@@ -4375,7 +4375,7 @@ u8 *func_002EB968(EffBillPointConfig *config) {
         EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
         u8 **resourceSlot = (u8 **)resourceWork->resource;
 
-        *entries++ = (u32)resourceWork;
+        *entries++ = resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
         offset = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
         position += step + step * offset * 0.25f;
