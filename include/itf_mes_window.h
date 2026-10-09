@@ -18,4 +18,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 void itfMesFinishWindowAndClearStatus(s32 window);
 
+struct SdfTex;
+struct SdfTex *itfMesGetGlobalWindowValue(void);
+
 #endif /* ITF_MES_WINDOW_H */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -31,8 +32,6 @@ extern MapResource fldLocalMapTextureResource;
 extern s32 fldLoadMapResource(const char *, MapResource *);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
-                         u32, u32, u32, u32, struct SdfTex *);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
