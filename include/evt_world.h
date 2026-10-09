@@ -69,8 +69,8 @@ typedef struct EvtWorldTable {
     EffWorldNode *cameraObject; /* 0x0C: retained camera world node */
     EffWorldNode *playerObject; /* 0x10 */
     u32 indexedHandle; /* 0x14 */
-    u32 unk18;
-    u32 unk1C;
+    u32 sceneResourceHandle; /* 0x18: retained allocation handle; released at teardown. */
+    u32 sceneResourceAddress; /* 0x1C: resolved base address used for scene script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } EvtWorldTable;
