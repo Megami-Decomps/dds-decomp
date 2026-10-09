@@ -7465,7 +7465,7 @@ u32 effPollPrimaryFile(void) {
     u32 state;
     u32 result = 0x400001;
 
-    effUpdateResourceQueue((u32 *)D_003B39C8, D_003BD078, &record);
+    effUpdateResourceQueue(D_003B39C8, D_003BD078, &record);
     state = record.completion.state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -7490,7 +7490,7 @@ u32 effPollNamedFile(void) {
     u32 state;
     u32 result = 0x400001;
 
-    effUpdateResourceQueue((u32 *)D_003B39E0, D_003BD088, &record);
+    effUpdateResourceQueue(D_003B39E0, D_003BD088, &record);
     state = record.completion.state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -7516,7 +7516,7 @@ u32 effPollAttachedFile(void) {
     u32 state;
     u32 result = 0x400001;
 
-    effUpdateResourceQueue((u32 *)D_003B39E0, D_003BD090, &record);
+    effUpdateResourceQueue(D_003B39E0, D_003BD090, &record);
     state = record.completion.state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -8438,7 +8438,7 @@ void effQueueResource(const char *extension, const char *resourceName) {
     btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
 }
 
-void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *record) {
+void effUpdateResourceQueue(const char *directoryPath, const char *extension, EffQueueRecord *record) {
     u32 state;
 
     if (effQueuedResourceNameRecord == 0) {
@@ -8452,7 +8452,7 @@ void effUpdateResourceQueue(u32 *result, const char *extension, EffQueueRecord *
     state = func_001FC730(effQueuedResourceNameRecord);
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
-        if (func_001FC7D8(effQueuedResourceNameRecord, result) != 0) {
+        if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {
             func_001FC2E8(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {

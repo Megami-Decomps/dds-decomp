@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_resource_name.h"
 #include "sdf_chip.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
@@ -93,7 +94,7 @@ extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 extern void func_003003F0(const char *fmt, ...);
 extern s8 D_00324510[];
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FC7D8);
+INCLUDE_ASM(const s32, "game/code_001FC7D8", btlPollResourceNameOverwrite);
 
 void func_001FC990(void) {
 }

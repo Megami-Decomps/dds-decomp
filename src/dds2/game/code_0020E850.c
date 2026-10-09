@@ -172,7 +172,7 @@ void func_0020E850(BtlResourceNameRecord *record, u32 value) {
 }
 
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020E858);
+INCLUDE_ASM(const s32, "game/code_0020E850", btlPollResourceNameOverwrite);
 
 
 void func_0020EA10(void) {

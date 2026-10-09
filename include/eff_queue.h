@@ -18,6 +18,6 @@ typedef struct EffQueueRecord {
 } EffQueueRecord;
 
 extern void effQueueResource(const char *extension, const char *resourceName);
-extern void effUpdateResourceQueue(u32 *, const char *extension, EffQueueRecord *);
+extern void effUpdateResourceQueue(const char *directoryPath, const char *extension, EffQueueRecord *);
 
 #endif /* EFF_QUEUE_H */
