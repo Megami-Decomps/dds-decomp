@@ -5491,6 +5491,7 @@
 0x002A34D8	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A3640	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002A3798	effCreateFileResourceInstance	inferred	eff resolves primary/secondary file buffers by type at work+0x1C (1 or 4) then creates the resource via func_002A36F8
+0x002A37F8	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002A3840	effCreateActiveResource	inferred	Byte-identical dds2 twin 0x002E58A8; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior. [names_conflicts.tsv]
 0x002A3910	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
 0x002A3958	effAdvanceActiveInstanceFrame	inferred	When effects are enabled, calls the active kind callback and advances its frame counter. [names_reviewed5.tsv]
@@ -5654,6 +5655,7 @@
 0x002B0598	effAllocateBlockWithModel	inferred	Byte-identical dds2 twin 0x002F3988; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior. [names_conflicts.tsv]
 0x002B0650	effCreateResourceInstanceC	inferred	eff twin of func_002ADF00 over table D_0037ED90 and allocateEffectBlockWithModel; one-argument createResource
 0x002B06E0	effResourceInstanceCreateFromFile	inferred	paired effect body: calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
+0x002B0710	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002B0758	effRecreateActiveByClass	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B07E8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
 0x002B0830	effAdvanceDispatchCounter	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -6868,6 +6870,7 @@
 0x0037EAD0	effClassWorkOperations	inferred	Matched paired operation table: effCreateClassWork and class-frame initialize/update/draw wrappers dispatch through this EffClassOps array; paired with DDS2 D_003E9B80.
 0x0037EC50	effClassResourceWorkOperations	inferred	Matched paired operation table: effCreateClassResourceWork and class-resource frame/reset wrappers dispatch through this EffClassOps array; paired with DDS2 D_003E9D00.
 0x0037ED08	effBlockResourceOperations	inferred	Matched paired operation table: block resource create/duplicate/reset/update/draw wrappers dispatch through this EffResourceOps array; paired with DDS2 D_003E9DD8.
+0x0037ED90	effModelBlockOperations	inferred	Kind-indexed model-block operation table; paired effect source reads payloadSize and dispatches create, clone, initialize, destroy, update, and draw callbacks. Native code uses 0x1C-byte kind strides and accesses create at +4, clone at +0xC, and initialize at +0. Paired with DDS2 0x003E9E60.
 0x0037EE38	effModelResourceOperations	inferred	confidence=high; src/dds1/game/code_0029C530.c:D_0037EE38; type=model-resource operation record[]; refs=effCreateModelResource,effResetModelResourceUpdateCount; Per-kind records provide payload sizes, child-resource creation and effect initialization/reset callbacks. [names_qp9.tsv]
 0x0038F898	effMappingState	inferred	confidence=high; src/dds1/game/code_0029C530.c:D_0038F898; type=EffectMapping; refs=effResetMappingFlags,effMapObjectWithTemporaryMappingTable; Stores active mapping table, table count and control flags; temporarily swaps tables during mapping. [names_qp9.tsv]
 0x003900A0	fldLocalMapFirstCameraVector	inferred	confidence=high; data D_003900A0; matched-C-users=3; src/dds1/game/code_002C3800.c:21:fldCreateLocalMapCamera; src/dds1/game/code_002C3868.c:123:sdfInitInnerVectors; src/dds1/game/code_002C3868.c:137:sdfLatchBaseVectorsForSelection; First vector passed into local-map camera construction and first-vector setter; data-twin=D_00400970, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/data.data.s:146315.; seed-placeholder=D_003900A0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
