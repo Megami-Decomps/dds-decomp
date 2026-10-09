@@ -114,7 +114,35 @@ struct SdfListHead *sdfCreateResetPacketList(void) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D3E8);
+/* Build the 0x80-byte bordered rectangle packet: the rectangle with its two color words, then its outline corners. */
+void *func_0011D3E8(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+    u64 *packet;
+    s32 right;
+    s32 bottom;
+    u64 depthHigh;
+
+    packet = (u64 *)sdfAllocPacketAligned(0x80);
+    packet[0] = 7;
+    right = x + width;
+    bottom = y + height;
+    depthHigh = (u64)(u32)depth << 32;
+    packet[1] = 0x5000000700000000ULL;
+    packet[2] = 0xB400000000008001ULL;
+    packet[3] = 0x55555105510ULL;
+    packet[4] = 0x146;
+    packet[5] = colorA | 0x3F80000000000000ULL;
+    packet[6] = (u32)(((u32)x & 0xFFFF) | ((u32)y << 16)) | depthHigh;
+    packet[7] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[8] = 0x142;
+    packet[9] = colorB | 0x3F80000000000000ULL;
+    packet[14] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[10] = packet[14];
+    packet[11] = (u32)(((u32)right & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[12] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[13] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[15] = 0;
+    return packet;
+}
 
 void *func_0011D570(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);

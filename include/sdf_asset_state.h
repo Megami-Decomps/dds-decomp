@@ -11,6 +11,8 @@ void sdfSetPrimaryStateWordSecond(struct SdfAsset *asset, u32 value);
 void sdfSetPrimaryStateWordThird(struct SdfAsset *asset, u32 value);
 void sdfSetPrimaryStateWordFourth(struct SdfAsset *asset, u32 bits);
 void sdfSetPrimaryStateFloat(struct SdfAsset *asset, f32 value);
+void sdfSetAssetSecondaryColor(struct SdfAsset *asset, u32 packedColor);
+void sdfSetAssetSecondaryMode(struct SdfAsset *asset, u32 packetMode);
 
 union SdfSubParam *sdfEnsurePrimaryTextSubParam(struct SdfAsset *asset);
 void sdfSetPrimaryTextScalars(struct SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e);

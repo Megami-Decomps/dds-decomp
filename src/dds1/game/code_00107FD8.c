@@ -3,6 +3,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "fr_font.h"

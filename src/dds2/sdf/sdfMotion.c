@@ -78,7 +78,6 @@ extern void *D_0040B3E0[];
 
 typedef SdfMotionTextParamSnapshot Blk;
 
-extern void func_00333460(SdfAsset *asset, u32 packedColor);
 
 void sdfInvokeMotionObjectCallback(VObj *object) {
     object->vtable->invoke();
@@ -617,22 +616,22 @@ void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
     binding->target = ((SdfAsset **)motion->owner->resources->buffer)[options];
 }
 
-void *func_00335268(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordSecondBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B420, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B420, options);
+    return binding;
 }
 
-void func_003352C8(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplyPrimaryWordSecondKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     sdfSetPrimaryStateWordSecond(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_00335308(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordSecondKey(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -643,26 +642,26 @@ void func_00335308(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     sdfSetPrimaryStateWordSecond(binding->target, color);
 }
 
-void sdfCopyTrackStateToBinding(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordSecond(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk14;
 }
 
-void *func_003353C8(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFirstBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B438, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B438, options);
+    return binding;
 }
 
-void func_00335428(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplyPrimaryWordFirstKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     sdfSetPrimaryStateWordFirst(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_00335468(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordFirstKey(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -673,26 +672,26 @@ void func_00335468(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     sdfSetPrimaryStateWordFirst(binding->target, color);
 }
 
-void sdfMotionReadBoundTrackInteger(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordFirst(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk10;
 }
 
-void *func_00335528(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B450, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B450, options);
+    return binding;
 }
 
-void func_00335588(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplyPrimaryWordThirdKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     sdfSetPrimaryStateWordThird(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_003355C8(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -703,26 +702,26 @@ void func_003355C8(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     sdfSetPrimaryStateWordThird(binding->target, color);
 }
 
-void func_00335678(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordThird(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk20;
 }
 
-void *func_00335688(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B468, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B468, options);
+    return binding;
 }
 
-void func_003356E8(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplyPrimaryWordFourthKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     sdfSetPrimaryStateWordFourth(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_00335728(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordFourthKey(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -733,16 +732,16 @@ void func_00335728(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     sdfSetPrimaryStateWordFourth(binding->target, color);
 }
 
-void sdfMotionCopyTrackValueToBinding(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk28;
 }
 
-void *sdfMotionCreateFloatBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B480, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B480, options);
+    return binding;
 }
 
 void sdfMotionApplyInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 t1) {
@@ -764,12 +763,12 @@ void sdfMotionReadBoundFloat(SdfMotionIndexedValueBinding *a0) {
     a0->capturedFloat = a0->target->unk1C;
 }
 
-void *sdfMotionCreateTextBlendBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateTextBlendBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B498, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B498, options);
+    return binding;
 }
 
 void sdfMotionApplyFiveFloatKeys(SdfMotionIndexedTextBinding *output, f32 t1) {
@@ -800,12 +799,12 @@ void sdfMotionCapturePrimaryTextParams(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-void *sdfMotionCreateSecondaryTextBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4B0, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4B0, options);
+    return binding;
 }
 
 void sdfMotionApplySecondaryTextKeys(SdfMotionIndexedTextBinding *output, f32 t1) {
@@ -836,22 +835,23 @@ void sdfMotionCaptureSecondaryTextParams(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-void *func_00335BE0(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreateSecondaryColorBinding(Motion *motion, s32 unused,
+                                                                    s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4C8, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4C8, options);
+    return binding;
 }
 
-void sdfMotionApplyInterpolatedKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplySecondaryColorKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
-    func_00333460(motion->target, sdfMotionInterpolateKeyColor(buffer));
+    sdfSetAssetSecondaryColor(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured output colour toward the keyed colour by weight. */
-void func_00335C80(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
+void sdfMotionBlendSecondaryColorKey(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -859,19 +859,19 @@ void func_00335C80(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
     sdfFindMotionKeyInterval(output, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, output->capturedWord, key, weight, 0.5f);
-    func_00333460(output->target, color);
+    sdfSetAssetSecondaryColor(output->target, color);
 }
 
-void sdfCopyMotionTargetValue(SdfMotionIndexedValueBinding *output) {
+void sdfMotionCaptureSecondaryColor(SdfMotionIndexedValueBinding *output) {
     output->capturedWord = output->target->secondaryColor;
 }
 
-void *sdfMotionCreateDirectTextKeyBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateDirectTextKeyBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4E0, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4E0, options);
+    return binding;
 }
 
 void sdfMotionApplySelectedTextKey(SdfMotionIndexedTextBinding *output, f32 t1) {
@@ -891,12 +891,13 @@ void sdfMotionApplySampleToTarget(SdfMotionIndexedTextBinding *output, f32 t1) {
 void func_00335E10(void) {
 }
 
-void *func_00335E18(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *motion, s32 unused,
+                                                                         s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4F8, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4F8, options);
+    return binding;
 }
 
 void sdfMotionApplySampledSecondaryTextValue(SdfMotionIndexedTextBinding *output, f32 t1) {

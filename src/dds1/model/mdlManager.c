@@ -24,6 +24,7 @@
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
 
@@ -433,7 +434,6 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern void *mdlRequestAsset(s32 group, s32 id, s32 blocking);
 extern char *func_00302240(const char *, s32);
 extern s32 func_003017A0(const char *, const char *);
 extern char D_003BBB68[];
@@ -441,7 +441,7 @@ extern void sdfCreateSemaphoreFromOptions(void);
 extern s32 mdlRequestLoadWithCallback(s32, s32, s32, s32, void (*)(u32), u32);
 
 /* Resolve or schedule a grouped model asset; -1 denotes an existing request. */
-void *mdlRequestAsset(s32 group, s32 id, s32 blocking) {
+s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     char requestPath[0x80];
     BattleGroupNode *entity;
     MdlResourceSelection *selection;
@@ -454,14 +454,14 @@ void *mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     entity = btlFindGroupedEntity(group, id);
     if (entity != NULL) {
         SignalSema(mdlGroupJobSemaphore);
-        return entity;
+        return (s32)entity;
     }
     if (btlGroupContainsId(group, id)) {
         SignalSema(mdlGroupJobSemaphore);
         if (blocking != 0) {
-            return mdlWaitGroupThenFind(group, id);
+            return (s32)mdlWaitGroupThenFind(group, id);
         }
-        return (void *)-1;
+        return -1;
     }
     selection = (MdlResourceSelection *)D_00367900[group].entries;
     selection += id;
@@ -499,9 +499,9 @@ void *mdlRequestAsset(s32 group, s32 id, s32 blocking) {
         }
     }
     if (blocking != 0) {
-        return mdlWaitGroupThenFind(group, id);
+        return (s32)mdlWaitGroupThenFind(group, id);
     }
-    return NULL;
+    return 0;
 }
 
 /* The blocking SDK request returns its group in a native status/address word. */

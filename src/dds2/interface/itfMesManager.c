@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_panel_api.h"
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
@@ -96,10 +97,6 @@ extern void func_0019DD48();
 extern s32 func_0019DBA8();
 
 extern UiSprite *func_001A1858(s32 kind, u32 payload);
-
-extern void itfSetPanelLayoutAndNotify();
-
-extern void itfPanelUpdateValuesAndNotify();
 
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
@@ -328,7 +325,7 @@ s32 itfMesScriptSetMessageRange(void) {
 }
 
 /* Return the loaded message-window texture resource, not a window index. */
-SdfTex *itfMesGetGlobalWindowValue(void) {
+SdfTex *itfMesGetWindowTexture(void) {
     return itfMesWork.windowTexture;
 }
 
@@ -810,7 +807,35 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A4A10);
+/* Set or append a window option; reserved and out-of-range IDs are rejected. */
+s32 func_001A4A10(s32 window, s32 id, s32 value) {
+    ItfMesBlk40 *optionBlock = &itfWindowSlots[window].mes->blk40;
+    ItfMesOption *option = NULL;
+    s32 index;
+
+    if ((u32)id >= 0x10) {
+        return 0;
+    }
+    if (id == 1 || id == 6 || id == 7) {
+        return 0;
+    }
+    for (index = 0; index < optionBlock->optionCount; index++) {
+        if (optionBlock->options[index].id == id) {
+            option = &optionBlock->options[index];
+            break;
+        }
+    }
+    if (option == NULL) {
+        if (optionBlock->optionCount >= 15) {
+            return 0;
+        }
+        option = &optionBlock->options[optionBlock->optionCount];
+        optionBlock->optionCount++;
+    }
+    option->id = id;
+    option->value = value;
+    return 1;
+}
 
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */

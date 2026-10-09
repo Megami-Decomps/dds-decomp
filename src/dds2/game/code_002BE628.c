@@ -21,6 +21,7 @@
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "eff.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -137,8 +138,6 @@ extern u8 D_003E7950[];
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
 
 extern s8 D_003E7928[];
-extern s32 mdlRequestAsset(s32, s32, s32);
-
 
 extern u16 D_003E7900[];
 

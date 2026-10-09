@@ -2528,6 +2528,7 @@
 0x0019B750	itfMesScriptSetMessageOption	inferred	passes one script value and zero to func_0019C968
 0x0019B7A0	itfMesScriptSetMessagePair	inferred	passes two script values to func_0019C968
 0x0019B808	itfMesScriptSetMessageRange	inferred	passes two script values to func_0019C9F0
+0x0019B870	itfMesGetWindowTexture	inferred	Returns the retained SdfTex pointer stored as the message window's texture; it does not return a scalar manager word.
 0x0019B880	itfMesSetFlags	inferred	ORs a bitmask into the shared itfMes flags word D_003BB1E8
 0x0019B890	itfMesClearFlags	inferred	AND-NOTs a bitmask out of the shared itfMes flags word D_003BB1E8
 0x0019B8A8	itfMesCreateWindow	inferred	acquires a pool node, allocates the 0x1E0-byte message state, installs the sub resource, resets the blk14/blk24/blk40/blkA4 blocks and bumps the window count at D_003D6EA0 [names_M71_ItfBlur.tsv]
@@ -6508,8 +6509,14 @@
 0x002DC2F0	sdfMotionCaptureQuaternion	inferred	Copies the bound node's quaternion into motion work. [names_reviewed6.tsv]
 0x002DC310	sdfMotionCaptureScaleVector	inferred	Copies the bound node's scale vector into motion work. [names_reviewed6.tsv]
 0x002DC360	sdfMotionBindIndexedTrack	inferred	Stores the source and handler pair then selects a track from its index array. [names_reviewed6.tsv]
-0x002DC668	sdfMotionReadBoundTrackInteger	inferred	Copies bound motion track integer into the command result field. [names_reviewed6.tsv]
-0x002DC928	sdfMotionCopyTrackValueToBinding	inferred	Copies a motion track current value into its binding. [names_reviewed12.tsv]
+0x002DC418	sdfMotionApplyPrimaryWordSecondKey	inferred	Interpolates the indexed track color and stores it in the target asset's second primary-state word; table D_00398270 uses this as its sample callback.
+0x002DC458	sdfMotionBlendPrimaryWordSecondKey	inferred	Blends the captured target word with the indexed color and stores the second primary-state word; paired with the second-word apply callback.
+0x002DC578	sdfMotionApplyPrimaryWordFirstKey	inferred	Interpolates the indexed track color and stores the target asset's first primary-state word; table D_00398288 uses this as its sample callback.
+0x002DC5B8	sdfMotionBlendPrimaryWordFirstKey	inferred	Blends the captured target word with the indexed color and stores the first primary-state word; paired with the first-word apply callback.
+0x002DC6D8	sdfMotionApplyPrimaryWordThirdKey	inferred	Interpolates the indexed track color and stores the target asset's third primary-state word; table D_003982A0 uses this as its sample callback.
+0x002DC718	sdfMotionBlendPrimaryWordThirdKey	inferred	Blends the captured target word with the indexed color and stores the third primary-state word; paired with the third-word apply callback.
+0x002DC838	sdfMotionApplyPrimaryWordFourthKey	inferred	Interpolates the indexed track color and stores the target asset's fourth primary-state word; table D_003982B8 uses this as its sample callback.
+0x002DC878	sdfMotionBlendPrimaryWordFourthKey	inferred	Blends the captured target word with the indexed color and stores the fourth primary-state word; paired with the fourth-word apply callback.
 0x002DC938	sdfMotionCreateFloatBinding	inferred	Allocates indexed track work using the float-interpolation handler table. [names_reviewed6.tsv]
 0x002DC998	sdfMotionApplyInterpolatedFloat	inferred	Interpolates two scalar float keys and applies the result to a node. [names_reviewed6.tsv]
 0x002DC9D8	sdfMotionBlendInterpolatedFloat	inferred	Blends the interpolated float with a previous value using a second weight. [names_reviewed6.tsv]
@@ -6522,10 +6529,14 @@
 0x002DCC18	sdfMotionApplySecondaryTextKeys	inferred	Interpolates five key values and applies them via the secondary-text updater. [names_reviewed6.tsv]
 0x002DCC68	sdfMotionBlendSecondaryTextKeys	inferred	Interpolates five keys, blends them with saved values, and updates secondary text. [names_reviewed6.tsv]
 0x002DCCE0	sdfMotionCaptureSecondaryTextParams	inferred	Copies the node's secondary text subparameter block into the command. [names_reviewed6.tsv]
-0x002DCD90	sdfMotionApplyInterpolatedKey	inferred	Samples motion keys at time and applies interpolated value to motion target. [names_reviewed6.tsv]
+0x002DCD30	sdfMotionCreateSecondaryColorBinding	inferred	Allocates a 0x14 indexed value binding for the secondary-color track, registered at D_00398248 row 4.
+0x002DCD90	sdfMotionApplySecondaryColorKey	inferred	Interpolates and applies the secondary-color key through the target asset setter; registered in D_00398318.
+0x002DCDD0	sdfMotionBlendSecondaryColorKey	inferred	Blends the captured secondary-color word with the interpolated key and applies it through the same setter.
+0x002DCE80	sdfMotionCaptureSecondaryColor	inferred	Captures target->secondaryColor as the base value used by the corresponding blend callback.
 0x002DCE90	sdfMotionCreateDirectTextKeyBinding	inferred	Allocates indexed track work preceding the direct text-key application handler. [names_reviewed6.tsv]
 0x002DCEF0	sdfMotionApplySelectedTextKey	inferred	Applies the selected key's first five-float block directly without interpolation. [names_reviewed6.tsv]
 0x002DCF28	sdfMotionApplySampleToTarget	inferred	Samples first key at provided time and applies that sample to target. [names_reviewed6.tsv]
+0x002DCF68	sdfMotionCreateSecondaryTextSampleBinding	inferred	Allocates a 0x24 indexed text binding for the direct secondary-text sample table D_00398348; registered sample callbacks copy the selected key into secondary text.
 0x002DCFC8	sdfMotionApplySampledSecondaryTextValue	inferred	Samples first key at time and applies it to secondary text subparameter. [names_reviewed6.tsv]
 0x002DD000	sdfMotionSampleTextScalarsAtTime	inferred	Samples a motion key at the specified time and copies text scalars. [names_reviewed10.tsv]
 0x002DD070	sdfSelectMotionPointerEntry	inferred	Uses 16-byte entry index to select a motion pointer from nested source table.
@@ -7305,7 +7316,7 @@
 0x003D68C0	frFontResourceList	inferred	high confidence; src/dds1/game/code_00193C08.c frFontListInsert(): FntNode *head = D_003D68C0.head; Sentinel-linked font resource list with a node count maintained on insertion. [names_reviewed26.tsv]
 0x003D6C80	frFontWork	inferred	high confidence; src/dds1/interface/frFont.c frFontFreeAllEntries(): if (D_003D6C80.entries[i].resource != NULL) { Font subsystem state containing resource entries and the glyph/resource slots released during shutdown. [names_reviewed26.tsv]
 0x003D6C84	frFontResourceRecords	inferred	confidence=high; src/dds1/interface/frFont.c:D_003D6C84; type=font-resource record[]; refs=frFontGetGlyphCellWidth,frFontGetGlyphCellHeight; Font-indexed resource records provide glyph cell width and height through their metrics pointers. [names_qp9.tsv]
-0x003D6EA0	itfMesWork	inferred	high confidence; src/dds1/interface/itfMesManager.c itfMesGetGlobalWindowValue(): return D_003D6EA0.windowTexture; Shared message-window state holding the window texture and allocation context used by panel construction. [names_reviewed26.tsv]
+0x003D6EA0	itfMesWork	inferred	high confidence; src/dds1/interface/itfMesManager.c itfMesGetWindowTexture(): return D_003D6EA0.windowTexture; Shared message-window state holding the window texture and allocation context used by panel construction. [names_reviewed26.tsv]
 0x003D6ECC	itfWindowSlots	inferred	high confidence; src/dds1/game/code_00199AD8.c itfPanelStartEntry(): rec = D_003D6ECC[window].ptr; Window-indexed registry containing panel records used by script-window commands. [names_reviewed26.tsv]
 0x003D7580	btlRuntimeState	inferred	confidence=high; matched_users=src/dds1/game/code_0020EA40.c:btlActivateRuntime, src/dds1/game/code_0020EA40.c:btlClearOverlayBuffers; Shared battle-runtime state governs activation, fade state, pending work and overlay options. [names_qp9.tsv]
 0x003D7A50	mdlViewerState	inferred	confidence=high; matched_users=src/dds1/game/code_00218B48.c:mdlAddPlainViewerEntryForSelectedNode, src/dds1/game/code_00218B48.c:mdlAddViewEntryFlagged; Shared model-viewer state owns resources, selected nodes, numeric ranges and viewer-task lifecycle. [names_qp9.tsv]
@@ -7341,3 +7352,13 @@
 0x002A9630	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
 0x0014FF28	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.
 0x002CEAE8	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.
+0x002DC3B8	sdfMotionCreatePrimaryWordSecondBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word second, registering its apply/blend/capture callbacks.
+0x002DC518	sdfMotionCreatePrimaryWordFirstBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word first, registering its apply/blend/capture callbacks.
+0x002DC678	sdfMotionCreatePrimaryWordThirdBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word third, registering its apply/blend/capture callbacks.
+0x002DC7D8	sdfMotionCreatePrimaryWordFourthBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word fourth, registering its apply/blend/capture callbacks.
+0x002DC508	sdfMotionCapturePrimaryWordSecond	inferred	Captures the bound target word at offset 0x14 into the indexed binding.
+0x002DC668	sdfMotionCapturePrimaryWordFirst	inferred	Captures the bound target word at offset 0x10 into the indexed binding.
+0x002DC7C8	sdfMotionCapturePrimaryWordThird	inferred	Captures the bound target word at offset 0x20 into the indexed binding.
+0x002DC928	sdfMotionCapturePrimaryWordFourth	inferred	Captures the bound target word at offset 0x28 into the indexed binding.
+0x002DA5B0	sdfSetAssetSecondaryColor	inferred	Stores the packed secondary color at SdfAsset +0x18 and marks secondary draw state dirty.
+0x002DA5C8	sdfSetAssetSecondaryMode	inferred	Stores the secondary packet and palette mode at SdfAsset +0x34 and marks secondary draw state dirty.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "eff_transform.h"
 #include "gs_packet.h"
@@ -109,7 +110,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
-extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, struct SdfTex *);
 
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
