@@ -699,14 +699,38 @@ s32 btlSelectTargetsWithoutActionMask(s32 task, s32 mask) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_002162C0);
-
-/* Out-values of btlBuildActorIndexListAndCount, kept together in one local
- * so their stack slots carry the struct member alias sets. */
+/* Out-values of btlBuildActorIndexListAndCount kept in their query record. */
 typedef struct BtlIndexQuery {
     u32 matching;
     u32 count;
 } BtlIndexQuery;
+
+/* Selects matching unit IDs, or preserves a preselected actor list. */
+s32 func_002162C0(s32 task, s32 mode) {
+    u16 picked[12];
+    BtlIndexQuery query;
+    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &query.matching, &query.count);
+    u16 i;
+
+    switch (query.matching) {
+    case 0:
+        memset(picked, 0, sizeof(picked));
+        for (i = 0; i < query.count; i++) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.unitId == mode) {
+                picked[i] = 1;
+            }
+        }
+        btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices,
+                                func_00215118(list, picked, query.count));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(((ActionStateLink *)task)->indexWork.indices, list);
+        break;
+    }
+    btlFreeIndexList(list);
+    return 1;
+}
 
 /* Combines three AI predicate target rows before choosing an index-list entry. */
 s32 func_002163C8(s32 actor) {

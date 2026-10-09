@@ -18,6 +18,17 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
 
+/* Values observed in EvtUnit.transitionSourceKind; the field remains s16. */
+typedef enum EvtUnitTransitionSourceKind {
+    EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR = 0,
+    EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE = 1,
+    EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE = 2
+} EvtUnitTransitionSourceKind;
+
+enum EvtUnitReferenceAngleCacheFlags {
+    EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID = 1
+};
+
 /* Bits consumed by the event unit's motion, value and visual transitions. */
 enum EvtUnitFlags {
     EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
@@ -143,8 +154,8 @@ typedef struct EvtUnit {
     u8 padD2;
     u8 unkD3;                     /* 0xD3: byte parameter written by timeline keys */
     f32 unkD4;                    /* 0xD4: float parameter written by timeline keys */
-    u32 unkD8Flags;                 /* 0xD8: tested and set at bit 0 */
-    f32 unkDC;                      /* 0xDC: stored angle/state value */
+    u32 referenceAngleCacheFlags;   /* 0xD8: bit 0 marks a valid cached angle. */
+    f32 cachedReferenceAngleDegrees; /* 0xDC: cached reference angle in degrees. */
     u8 slotFlags[12];              /* 0xE0 */
     u8 padEC[4];
 #ifdef VERSION_DDS1

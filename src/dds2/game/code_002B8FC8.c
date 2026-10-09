@@ -1791,14 +1791,14 @@ void mnuReleaseScrollPanelAnimations(menu)
     } while (i < 3);
 }
 
-MenuScrollPanel *mnuCreateScrollPanel(u32 owner) {
+MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner) {
     MenuScrollPanel *menu = (MenuScrollPanel *)sdfAllocSizeClassBlock(0x48);
     memset(menu, 0, 0x48);
     menu->firstSprite = 0;
     menu->secondSprite = 0;
-    itfGridStorePosition(&menu->positions[0], (EffectSlotSet *)owner, 0x40);
-    itfGridStorePosition(&menu->positions[1], (EffectSlotSet *)owner, 0x41);
-    itfGridStorePosition(&menu->positions[2], (EffectSlotSet *)owner, 0x44);
+    itfGridStorePosition(&menu->positions[0], owner, 0x40);
+    itfGridStorePosition(&menu->positions[1], owner, 0x41);
+    itfGridStorePosition(&menu->positions[2], owner, 0x44);
     itfGridStorePosition(&menu->active, 0, 0);
     itfGridStorePosition(&menu->pending, 0, 0);
     mnuInitScrollHandles(menu);

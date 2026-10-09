@@ -64,7 +64,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     }
     if (*popup == 0) {
         if (input & 1) {
-            MenuWindowContainer *skillPanel = (MenuWindowContainer *)context->images[0];
+            MenuWindowContainer *skillPanel = context->images[0];
             struct MenuListNode *entry = skillPanel->list->cursor;
 
             if ((entry->flags48 & 1) == 0) {
@@ -80,17 +80,17 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_0027C788((MenuWindowContainer *)context->images[0]);
+        func_0027C788(context->images[0]);
     }
     if (input & 0x10) {
-        mnuRetreatWindowListSelection((MenuWindowContainer *)context->images[0]);
+        mnuRetreatWindowListSelection(context->images[0]);
     }
     if (input & 0x20) {
-        mnuAdvanceWindowListSelection((MenuWindowContainer *)context->images[0]);
+        mnuAdvanceWindowListSelection(context->images[0]);
     }
-    mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)context->images[0]);
+    mnuClearWindowPanelTransitionFlag(context->images[0]);
     mnuPlayInputSound(0, input,
-                      &((MenuWindowContainer *)context->images[0])->list->stateFlags);
+                      &context->images[0]->list->stateFlags);
     return 0;
 }
 extern void func_00272778(KwlnTask *);
@@ -108,9 +108,9 @@ s32 func_002728F8(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_00272668(0, ((MenuWindowContainer *)context->images[0])->list->cursor->sortKeyPrimary, D_0037C3A8, context, 1, 0x53);
+    func_00272668(0, context->images[0]->list->cursor->sortKeyPrimary, D_0037C3A8, context, 1, 0x53);
     mnuDrawStaffCampSlotsAndCurrency(0, 0, 0, context->staffSlots.baseResources[5], context->staffSlots.baseResources[1], 0x53);
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (MenuWindowContainer *)context->images[0], 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, context->images[0], 0x53);
     mnuDrawStaffGridLabelsForKind(0, context->staffSlots.baseResources[6]);
     return menuRunPanel((void *)context, 1, (void *)task);
 }

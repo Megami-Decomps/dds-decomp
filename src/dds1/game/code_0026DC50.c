@@ -43,13 +43,13 @@ SpriteSpawnNode *func_0026DD30(MnuSpriteResourceGroup *group, SpriteSpawnNode *p
         node->y = parent->y + steps.offsets[direction * 2 + 1];
         node->generations = parent->generations - 1;
         node->direction = direction;
-        node->framesLeft = node->duration = group->owner - 5;
+        node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
         node->x = effMiscRandMod(NULL, 15) * 22 + 56;
         node->y = effMiscRandMod(NULL, 10) * 36 + 189;
-        node->generations = group->sprite;
+        node->generations = group->initialGenerations;
         node->direction = 0;
-        node->framesLeft = node->duration = group->owner;
+        node->framesLeft = node->duration = group->cueDuration;
     }
     return node;
 }

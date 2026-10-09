@@ -15,7 +15,7 @@ enum {
  * entry after releasing the selected resource. */
 typedef struct SdfTexReleaseEntry {
     struct SdfTexReleaseEntry *next; /* 0x00 */
-    s32 chipAddress;                 /* 0x04: used for chip-heap releases */
+    void *chipMemory;                 /* 0x04: used for chip-heap releases */
     struct SdfMemBlock *allocation;  /* 0x08: used for general-heap releases */
     u8 releaseMode;                  /* 0x0C */
     u8 reserved0D[0x93];             /* 0x0D */
@@ -24,7 +24,7 @@ typedef struct SdfTexReleaseEntry {
 typedef char SdfTexReleaseEntry_layout_must_match_native[
     (sizeof(SdfTexReleaseEntry) == 0xA0 &&
      (u32)&((SdfTexReleaseEntry *)0)->next == 0x00 &&
-     (u32)&((SdfTexReleaseEntry *)0)->chipAddress == 0x04 &&
+     (u32)&((SdfTexReleaseEntry *)0)->chipMemory == 0x04 &&
      (u32)&((SdfTexReleaseEntry *)0)->allocation == 0x08 &&
      (u32)&((SdfTexReleaseEntry *)0)->releaseMode == 0x0C)
         ? 1 : -1];

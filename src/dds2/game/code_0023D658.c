@@ -211,7 +211,7 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 
     work->motionSubmode = mode;
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
-    work->transitionSourceKind = 0;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(destination, vector);
     work->motionParameter = frames;
@@ -227,7 +227,7 @@ void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 object
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
         evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, callback, unusedLast);
-        work->transitionSourceKind = 1;
+        work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
     }
 }
@@ -287,7 +287,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         break;
     }
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
-    work->transitionSourceKind = 2;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3InterpolatePathVectorVU(path);
     VU0_STORE_VF($vf10, work->targetVector);
@@ -1058,7 +1058,7 @@ extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 
-u32 func_0023F938(void) {
+u32 evtOpTurnUnitRelativeToWorldNode(void) {
     EvtUnit *unit;
     EffWorldNode *actor;
     EffWorldNode *source;
@@ -1093,16 +1093,16 @@ u32 func_0023F938(void) {
     VU0_STORE_VF(vf10, actorPosition);
     PCP_COPY_VECTOR_F32(sourcePosition, sourceVector);
 
-    if ((unit->unkD8Flags & 1) == 0) {
+    if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
         effObjFetchInnerSecondVecNorm(actor);
         referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
-        unit->unkD8Flags |= 1;
-        unit->unkDC = -(referenceAngle * 57.29577637f);
+        unit->referenceAngleCacheFlags |= EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID;
+        unit->cachedReferenceAngleDegrees = -(referenceAngle * 57.29577637f);
     }
 
     targetAngle = sdfAtan2(actorPosition[0] - sourcePosition[0],
                            actorPosition[2] - sourcePosition[2]) * 57.32484055f;
-    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    angleDelta = evtGetShortestAngleDelta(unit->cachedReferenceAngleDegrees, targetAngle);
     if (angleDelta < -135.0f) {
         targetAngle -= angleDelta + 135.0f;
         angleDelta = -135.0f;
@@ -1120,7 +1120,7 @@ u32 func_0023F938(void) {
     if (frames >= 101) {
         frames = 100;
     }
-    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    angleDelta = evtGetShortestAngleDelta(unit->cachedReferenceAngleDegrees, targetAngle);
     if (angleDelta < 0.0f) {
         angleDelta = -angleDelta;
     }
@@ -1140,7 +1140,7 @@ u32 func_0023F938(void) {
     return 1;
 }
 
-u32 func_0023FBA8(void) {
+u32 evtOpRestoreUnitReferenceAngle(void) {
     EvtUnit *unit;
     EffWorldNode *actor;
     f32 rotation[4] __attribute__((aligned(16)));
@@ -1153,7 +1153,7 @@ u32 func_0023FBA8(void) {
         return 1;
     }
     unit->motionTicks = 0;
-    if ((unit->unkD8Flags & 1) == 0) {
+    if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
         return 1;
     }
     actor = dds3FindWorldObjectNodeByKey(
@@ -1163,14 +1163,14 @@ u32 func_0023FBA8(void) {
     }
     effObjFetchInnerSecondVecNorm(actor);
     referenceAngle = -(effMiscComputeQuaternionRotatedReferenceAngle() * 57.29577637f);
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->unkDC * 0.017453293f, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
     frames = scrReadIntParameter(1);
     if (frames >= 101) {
         frames = 100;
     }
-    angleDelta = evtGetShortestAngleDelta(referenceAngle, unit->unkDC);
+    angleDelta = evtGetShortestAngleDelta(referenceAngle, unit->cachedReferenceAngleDegrees);
     if (angleDelta < 0.0f) {
         angleDelta = -angleDelta;
     }

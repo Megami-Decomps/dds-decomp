@@ -630,7 +630,58 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
     evtSubmitGradientRectAtDepth(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
+void func_00109538(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+    s32 coords[3][2];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    SdfPoolNode *descriptor;
+
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    coords[0][0] = x0 * 16;
+    coords[0][1] = y0 * 8;
+    coords[1][0] = x1 * 16;
+    coords[1][1] = y1 * 8;
+    coords[2][0] = x2 * 16;
+    coords[2][1] = y2 * 8;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0; i < 3; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(coords[i][0] + 0x7000) |
+            ((u64)(coords[i][1] + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, (u32)packet);
+    descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
+    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+}
 
 
 
