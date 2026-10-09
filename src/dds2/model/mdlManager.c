@@ -583,7 +583,55 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
 
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231FD8);
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00232198);
+extern DevRequest *sdfResourceListClone(DevRequest *list);
+struct SdfItemListRef;
+extern SdfModel *sdfModelCreateWithItems(void *data, struct SdfItemListRef *itemList);
+extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
+
+/* Instantiate a model context from the group's resource list and item list, then
+ * start every populated slot's motion owner. */
+MdlCtx *func_00232198(u32 group, u32 id) {
+    BattleGroupNode *node = func_00231DB0(group, id);
+    MdlCtx *ctx = sdfAllocAndClearQuadwords(sizeof(MdlCtx));
+    MdlCtx *head;
+    SdfModel *inner;
+    f32 modelScale;
+    f32 scale[4];
+    s32 i;
+
+    ctx->sub = node;
+    head = node->modelContext;
+    ctx->next = head;
+    if (head != NULL) {
+        head->previous = ctx;
+    }
+    node->modelContext = ctx;
+    inner = sdfModelCreateWithItems(sdfResourceListClone(node->resourceList), node->itemList);
+    modelScale = node->unk_AC;
+    ctx->inner = inner;
+    scale[0] = modelScale;
+    scale[1] = modelScale;
+    scale[2] = modelScale;
+    scale[3] = 1.0f;
+    PCP_COPY_VECTOR(inner->scaleVector, scale);
+    ctx->unk34 = node->unk_B0;
+    ctx->current.h.id = -1;
+    ctx->current.h.arg = -1;
+    for (i = 0; i != 8; i++) {
+        if (node->slots[i].data != NULL && (node->slots[i].flags & 1)) {
+            motionOwnerCreateObjectForRecord(ctx, i);
+            if (i > 0) {
+                if (node->slots[i].motionIndex >= 0) {
+                    mdlAddEntryFlagged(ctx, i, node->slots[i].motionIndex);
+                }
+            }
+        }
+    }
+    ctx->resourceItems = NULL;
+    mdlApplyResourceEntries(ctx, -1, -1);
+    return ctx;
+}
+
 
 extern void mdlDestroyResourceItem(MdlResourceItem *);
 
