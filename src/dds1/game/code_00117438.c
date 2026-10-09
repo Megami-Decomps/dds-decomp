@@ -26,12 +26,6 @@ typedef struct EvtScaledValue {
 } EvtScaledValue;
 
 
-typedef struct SdfPackedValue {
-    u8 pad00[6];
-    u16 hp; /* 0x06 */
-    u8 pad08[6];
-    u16 flagsAndValue;
-} SdfPackedValue;
 
 /* Channel mask occupies the low 15 bits; the high status bit survives updates. */
 #define SDF_PACKED_STATUS_BIT 0x8000
@@ -40,21 +34,10 @@ typedef struct SdfPackedValue {
 /* The 0x20 flag selects base enemy vitals instead of the party script path. */
 #define SDF_UNIT_ENEMY 0x20
 
-/* Party-unit header used for HP/MP script dispatch. Full stride: 0x1A4. */
-typedef struct SdfPartyUnit {
-    u16 flags;          /* 0x00 */
-    u8 pad02[2];
-    u16 unitId;         /* 0x04 */
-    u16 hp;             /* 0x06 */
-    u16 maxHp;          /* 0x08 */
-    u8 pad0A[0x12];
-    u16 hpBonus;        /* 0x1C */
-    u16 mpBonus;        /* 0x1E */
-} SdfPartyUnit;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
+extern u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed);
 extern char sdfRuntimeTaskName[];
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
@@ -485,15 +468,14 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
 
 extern s32 datFlagToElementIndex(u32);
-struct DatUnitStatus;
-extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
-extern s32 datUnitHasSkill(SdfPackedValue *, s32);
+extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
+extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 extern s32 effMiscRandMod(s32, s32);
 extern void func_003003F0(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
+u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -519,8 +501,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
          datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!(datCommandRecords[index].unk30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
-            if (datGetEffectiveAffinity((struct DatUnitStatus *)packed, kind) & 0x170000) {
+        if (!(datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
+            if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
                 return 0;
             }
         }
@@ -544,19 +526,17 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     }
     flag = mask & 1;
     if (flag) {
-        SdfPartyUnit *actor = (SdfPartyUnit *)packed;
-
-        if (actor->hp * 100 / actor->maxHp >= 25) {
+        if (packed->hp * 100 / packed->maxHp >= 25) {
             mask &= 0xFFFE;
         } else if (!(*(u16 *)queryArg & 4)) {
             mask &= 0xFFFE;
-        } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
-                   ((datEnemyRecords[actor->unitId].flags & 0x440) != 0)) {
+        } else if ((packed->flags & SDF_UNIT_ENEMY) == 0 ||
+                   ((datEnemyRecords[packed->unitId].flags & 0x440) != 0)) {
             mask &= 0xFFFE;
         }
     }
     if (mask & 0x8000) {
-        if (packed->flagsAndValue & 0x1804) {
+        if (packed->status & 0x1804) {
             mask &= 0x7FFF;
         }
     }
@@ -572,7 +552,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     return hit ? mask : 0;
 }
 
-u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
+u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 result;
     u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
@@ -581,32 +561,31 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
-    if (!((item->flagsAndValue & SDF_PACKED_CHANNEL_MASK) < result)) {
+    if (!((item->status & SDF_PACKED_CHANNEL_MASK) < result)) {
         result = 0;
     }
     return result;
 }
 
-u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
+u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 result;
 
     if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
-    if ((result & (item->flagsAndValue & SDF_PACKED_CHANNEL_MASK)) == 0) {
+    if ((result & (item->status & SDF_PACKED_CHANNEL_MASK)) == 0) {
         result = 0;
     }
     return result;
 }
 
-extern s32 func_00118688(s32 channel, s32 queryArg, SdfPackedValue *item, u32 mode, u8 vital);
+extern s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
-extern s32 datAdjustCurrentHp(void *item, s32 delta);
-extern s32 datAdjustCurrentMp(void *item, s32 delta);
-void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value);
+/* These unused-result legacy mutator calls had no prototype in scope. */
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);
 
-s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
+s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;
     s32 mpDelta;
     u32 value;
@@ -650,19 +629,19 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
     return 1;
 }
 
-void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
-    item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
+void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
+    item->status = (item->status & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
 }
 
 extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value) {
     s32 channel;
 
-    if ((item->flagsAndValue & SDF_PACKED_CHANNEL_MASK) < value) {
-        item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
-        channel = item->flagsAndValue & SDF_PACKED_CHANNEL_MASK;
+    if ((item->status & SDF_PACKED_CHANNEL_MASK) < value) {
+        item->status = (item->status & SDF_PACKED_STATUS_BIT) | (value & SDF_PACKED_CHANNEL_MASK);
+        channel = item->status & SDF_PACKED_CHANNEL_MASK;
         switch (channel) {
         case 0x40:
         case 0x80:

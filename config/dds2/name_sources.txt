@@ -5157,7 +5157,7 @@
 0x002E5540	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E56A8	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002E5760	effCreateResourceInstanceA	inferred	twin of effCreateResourceInstanceB/C: allocate block, table[kind].init(source, extra) -> +0x30, table[kind].fn(block)
-0x002E5860	effDispatchDestroyOp	inferred	calls the destroy callback from the 28-byte op table D_003E9958[kind] then frees the object
+0x002E5860	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002E58A8	effCreateActiveResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior.
 0x002E5978	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
 0x002E59C0	effAdvanceActiveInstanceFrame	inferred	When effects are enabled, calls the active kind callback and advances its frame counter. [names_reviewed5.tsv]
@@ -5246,7 +5246,7 @@
 0x002EDCF0	effCreateClassResourceWork	inferred	Allocates kind-sized work, copies payload and initializes class-specific resource and callback. [names_reviewed5.tsv]
 0x002EDDE0	effCreateClassResourceFromFile	inferred	Resolves the primary file buffer and creates the requested class resource work. [names_reviewed5.tsv]
 0x002EDE10	effDestroyClassResourceWork	inferred	Calls the indexed class cleanup callback and frees the work. [names_reviewed5.tsv]
-0x002EDE58	effPayloadPointerGet	inferred	body reads payload [names_R_FuncNames7.tsv]
+0x002EDE58	effCloneClassResourceWork	inferred	Native clone callback returns a new full class-resource work allocation by tail-calling effCreateClassResourceWork with the source kind low 16 bits (+0x2C) and copied payload (+0x34).
 0x002EDEC0	effAdvanceClassResourceFrame	inferred	Calls the indexed class callback and advances frame only while effects are enabled. [names_reviewed5.tsv]
 0x002EDF20	effDrawClassResourceWork	inferred	Invokes the indexed class draw callback on work. [names_reviewed5.tsv]
 0x002EDF58	effUpdateAndDrawClassResource	inferred	Advances class callback unless paused and draws the class resource. [names_reviewed5.tsv]
@@ -5315,7 +5315,7 @@
 0x002F3750	effReleaseBillboardFrameAsset	inferred	Releases frame asset and frees frame state allocation. [names_reviewed7.tsv]
 0x002F3988	effAllocateBlockWithModel	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior.
 0x002F3AD0	effResourceInstanceCreateFromFile	inferred	body calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
-0x002F3B00	effDispatchCleanupOp	inferred	calls the cleanup callback from the 28-byte op table D_003E9E68[kind] then frees the object
+0x002F3B00	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002F3BD8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
 0x002F3C20	effAdvanceModelBlockFrame	inferred	Calls model block callback and increments frame while effect processing is enabled. [names_reviewed5.tsv]
 0x002F3C80	effDrawModelBlock	inferred	Invokes the model block kind's draw callback. [names_reviewed5.tsv]
@@ -6499,6 +6499,7 @@
 0x003E9B80	effClassWorkOperations	inferred	Matched paired operation table: effCreateClassWork and class-frame initialize/update/draw wrappers dispatch through this EffClassOps array; paired with DDS1 D_0037EAD0.
 0x003E9D00	effClassResourceWorkOperations	inferred	Matched paired operation table: effCreateClassResourceWork and class-resource frame/reset wrappers dispatch through this EffClassOps array; paired with DDS1 D_0037EC50.
 0x003E9DD8	effBlockResourceOperations	inferred	Matched paired operation table: block resource create/duplicate/reset/update/draw wrappers dispatch through this EffResourceOps array; paired with DDS1 D_0037ED08.
+0x003E9E60	effModelBlockOperations	inferred	Kind-indexed model-block operation table; paired effect source reads payloadSize and dispatches create, clone, initialize, destroy, update, and draw callbacks. Native code uses 0x1C-byte kind strides and accesses create at +4, clone at +0xC, and initialize at +0. Paired with DDS1 0x0037ED90.
 0x003E9F08	effModelResourceOperations	inferred	confidence=high; src/dds2/game/code_002DE248.c:D_003E9F08; type=model-resource operation record[]; refs=effCreateModelResource,effResetModelResourceUpdateCount; Per-kind records provide payload sizes, child-resource creation and effect initialization/reset callbacks. [names_qp9.tsv]
 0x003FF4B0	effBattleCameraSnapshotSelection	inferred	confidence=high; matched_users=src/dds2/game/code_002DE248.c:effLoadBattleCameraSnapshot, src/dds2/game/code_002DE248.c:effStoreBattleCameraSnapshot; Snapshot load/store switches its available camera selection table/count and clamps the selected entry. [names_qp9.tsv]
 0x00400018	effMappingState	inferred	confidence=high; src/dds2/game/code_002DE248.c:D_00400018; type=EffectMapping; refs=effResetMappingFlags,effMapObjectWithTemporaryMappingTable; Stores active mapping table, table count and control flags; temporarily swaps tables during mapping. [names_qp9.tsv]
