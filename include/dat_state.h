@@ -191,7 +191,7 @@ typedef struct DatGameState {
     u8 pad1299[3];
     s32 partyCount;                        /* 0x0129C */
     DatInventory inventory;               /* 0x012A0 */
-    s32 unk1360;
+    f32 unk1360;
     u16 unk1364; /* read with lhu by the battle test menu (func_00215FF8) */
     u8 pad1366[0xA];
     DatFieldMapBank maps[40];              /* 0x01370 */
@@ -212,8 +212,8 @@ typedef struct DatGameState {
     u8 pad1339[3];
     s32 partyCount;                        /* 0x0133C */
     DatInventory inventory;               /* 0x01340 */
-    s32 unk1440;
-    s16 unk1444;
+    f32 unk1440;
+    u16 unk1444;
     u8 pad1446[0xA];
     DatFieldMapBank maps[31];              /* 0x01450 */
     u64 areaFlags[10][64];                 /* 0x0FCD0 */

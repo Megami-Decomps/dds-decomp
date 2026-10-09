@@ -4,14 +4,18 @@
 #include "common.h"
 #include "sdf_list_node.h"
 
+/* Listener calls transport two generic 32-bit words; each callback interprets
+ * them according to the removal or destruction path. */
+typedef void (*MnuCallbackListListener)(u32 firstWord, u32 secondWord);
+
 /* Callback-bearing indexed-list owner allocated as 0x18 bytes. */
 typedef struct MnuCallbackList {
     u32 count;                    /* 0x00 */
     SdfListNode *head;            /* 0x04 */
     SdfListNode *tail;            /* 0x08 */
     u32 userData;                 /* 0x0C */
-    void (*onRemove)();           /* 0x10: invoked for each removed node */
-    void (*onDestroy)();          /* 0x14: invoked after clearing the list */
+    MnuCallbackListListener onRemove; /* 0x10: node index and value word */
+    MnuCallbackListListener onDestroy; /* 0x14: -1 and userData */
 } MnuCallbackList;
 
 typedef char MnuCallbackList_size_must_be_0x18[(sizeof(MnuCallbackList) == 0x18) ? 1 : -1];
@@ -22,9 +26,10 @@ typedef char MnuCallbackList_onRemove_offset_must_be_10[((u32)&((MnuCallbackList
 typedef char MnuCallbackList_onDestroy_offset_must_be_14[((u32)&((MnuCallbackList *)0)->onDestroy == 0x14) ? 1 : -1];
 
 MnuCallbackList *mnuCreateCallbackNode(u32 userData);
+MnuCallbackList *mnuCreateReleaseCallbackNode(void);
 void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *list);
-void dds3SetCallbackNodeFirstListener(MnuCallbackList *list, void (*callback)());
-void dds3SetCallbackNodeLastListener(MnuCallbackList *list, void (*callback)());
+void dds3SetCallbackNodeFirstListener(MnuCallbackList *list, MnuCallbackListListener callback);
+void dds3SetCallbackNodeLastListener(MnuCallbackList *list, MnuCallbackListListener callback);
 
 SdfListNode *dds3DetachIndexedListNodeAndRenumber(MnuCallbackList *list, SdfListNode *node);
 SdfListNode *dds3RemoveListNodeAndNotify(MnuCallbackList *list, SdfListNode *node);

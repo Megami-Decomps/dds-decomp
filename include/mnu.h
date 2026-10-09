@@ -19,10 +19,8 @@ void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
-#ifdef VERSION_DDS2
 void mnuSetPopupEntry(s32 *entrySlot, void *entry);
 void mnuSetPopupEntryFlagged(s32 *entrySlot, void *entry);
-#endif
 
 
 static inline s32 menuSetHandler(void *context, s32 mode, void *callback) {

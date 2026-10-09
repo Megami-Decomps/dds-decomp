@@ -210,8 +210,6 @@ typedef struct MenuSpriteArguments {
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
-extern void mnuSetPopupEntry();
-extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
 
 extern void mnuPlayInputSound(s32, u32, s32);
@@ -487,7 +485,7 @@ s32 mnuShopReleaseResources(KwlnTask *task) {
 
 void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
-    mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
+    mnuSetPopupEntryFlagged((s32 *)(u32)(menu + 0x54), (void *)D_0037CA58);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
         (struct EffectSlotSet *)(u32)((CampMenuContext *)menu)->displayVariant, 0, 1);
@@ -542,7 +540,7 @@ s32 func_00275920(s32 callback) {
                 mnuClearPartySelectionAndActivateSlots((s32)context);
                 func_00280048((s32)&context->partyWindow);
             } else {
-                mnuSetPopupEntryFlagged((s32)popup, D_0037CA58);
+                mnuSetPopupEntryFlagged(popup, D_0037CA58);
                 mnuActivatePanelAndConfigureGridResources(
                     (MenuScrollPanel *)(u32)context->display,
                     (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
@@ -839,7 +837,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
             *(s32 *)(menuWork + 0x24) = 1;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            mnuSetPopupEntryFlagged((s32)popupState, D_0037CA78);
+            mnuSetPopupEntryFlagged(popupState, D_0037CA78);
             mnuActivatePanelAndConfigureGridResources(
                 (MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
                 (struct EffectSlotSet *)(u32)((CampMenuContext *)context)->displayVariant, 0, 1);
@@ -1617,9 +1615,9 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
         mnuClearListFlags(0, &context->partyWindow);
         /* Both category paths select the same cancel entry in retail. */
         if (((MenuWindowContainer *)context->panel)->list->cursor->index == 0) {
-            mnuSetPopupEntryFlagged((s32)popup, D_0037CC20);
+            mnuSetPopupEntryFlagged(popup, D_0037CC20);
         } else {
-            mnuSetPopupEntryFlagged((s32)popup, D_0037CC20);
+            mnuSetPopupEntryFlagged(popup, D_0037CC20);
         }
         mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->display,
                                   (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
@@ -1753,13 +1751,13 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
         s32 sortKey = ((MenuInputInfo *)selectedNode)->target;
 
         if (!(((MenuInputInfo *)selectedNode)->flags & MNU_STAFF_NODE_UNAVAILABLE) && sortKey != 0) {
-            mnuSetPopupEntry(context + 0x54, D_0037CC74);
+            mnuSetPopupEntry((s32 *)(u32)(context + 0x54), D_0037CC74);
         } else {
             inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged(context + 0x54, D_0037CC3C);
+        mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), D_0037CC3C);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -1815,12 +1813,12 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         window = ptySkillMenuRebuildAfterMutation(0, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
         func_00280048((s32)&context->partyWindow);
-        mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
+        mnuSetPopupEntryFlagged(&context->popupState, D_0037CC90);
         ptySkillMenuRefreshEntries(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
+        mnuSetPopupEntryFlagged(&context->popupState, D_0037CC90);
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
@@ -1877,7 +1875,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     if (inputFlags & MNU_STAFF_REORDER_CANCEL_MASK) {
         inputFlags = MNU_STAFF_INPUT_CANCEL;
         if (mnuHasSelectedListNodeId(callback) == 0) {
-            mnuSetPopupEntryFlagged(context + 0x54, D_0037CC90);
+            mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), D_0037CC90);
         }
         mnuClearSelectedListNodeId(callback);
     }
