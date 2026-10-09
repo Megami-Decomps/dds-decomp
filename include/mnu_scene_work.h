@@ -63,7 +63,10 @@ typedef struct MenuSceneWork {
     u8 pad494[8];
     MenuSceneCoordinate coordinates[10]; /* 0x49C: copied grid-entry positions */
     s32 pendingMantras[8]; /* 0x4EC */
-    u8 pad50C[0x34];
+    u8 pad50C[0x24];
+    u32 pendingGridColumn; /* 0x530: cursor column before pending-entry display */
+    u32 pendingGridRow; /* 0x534: cursor row before pending-entry display */
+    MenuSceneCoordinate pendingCursorCoordinates; /* 0x538: saved signed cursor position */
     s32 scenePhase; /* 0x540: main menu-scene state-machine selector */
     s32 phaseFrame; /* 0x544: elapsed frame within the current phase */
     u32 entryMessageInProgress; /* 0x548: gates selected-entry drawing during DSP entry */
@@ -94,6 +97,11 @@ typedef char MenuSceneWorkLayoutAssert[
      (u32)&((MenuSceneWork *)0)->gridFeedback == 0x488 &&
      (u32)&((MenuSceneWork *)0)->gridFrame == 0x490 &&
      (u32)&((MenuSceneWork *)0)->coordinates == 0x49C &&
+     (u32)&((MenuSceneWork *)0)->pendingMantras == 0x4EC &&
+     sizeof(((MenuSceneWork *)0)->pendingMantras) == 0x20 &&
+     (u32)&((MenuSceneWork *)0)->pendingGridColumn == 0x530 &&
+     (u32)&((MenuSceneWork *)0)->pendingGridRow == 0x534 &&
+     (u32)&((MenuSceneWork *)0)->pendingCursorCoordinates == 0x538 &&
      (u32)&((MenuSceneWork *)0)->entryMessageInProgress == 0x548 &&
      (u32)&((MenuSceneWork *)0)->cursorInputMask == 0x54C &&
      (u32)&((MenuSceneWork *)0)->transitionBlendCounter == 0x550 &&
