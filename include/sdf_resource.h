@@ -6,20 +6,37 @@
 /* General-heap descriptors are distinct from the data addresses they own. */
 struct SdfMemBlock;
 
-enum {
-    SDF_HEAP_STAT_TOTAL_BYTES = 0,
-    SDF_HEAP_STAT_FREE_BYTES = 1,
-    SDF_HEAP_STAT_LARGEST_FREE = 2,
-    SDF_HEAP_STAT_SMALLEST_FREE = 3,
-    SDF_HEAP_STAT_BLOCK_COUNT = 4,
-    SDF_HEAP_STAT_FREE_BLOCK_COUNT = 5
-};
+/* Six signed words written by sdfGetGeneralHeapStats. */
+typedef struct SdfGeneralHeapStats {
+    s32 totalBytes;
+    s32 freeBytes;
+    s32 largestFreeBytes;
+    s32 smallestFreeBytes;
+    s32 blockCount;
+    s32 freeBlockCount;
+} SdfGeneralHeapStats;
+
+/* Five totals followed by the seven native chip size-class counters. */
+typedef struct SdfChipHeapStats {
+    u32 totalBytes;
+    u32 freeBytes;
+    u32 blockCount;
+    u32 emptyBlockCount;
+    u32 partialBlockCount;
+    u32 usedCells[7];
+} SdfChipHeapStats;
+
+typedef char SdfGeneralHeapStats_size_must_be_0x18[
+    (sizeof(SdfGeneralHeapStats) == 0x18) ? 1 : -1];
+typedef char SdfChipHeapStats_size_must_be_0x30[
+    (sizeof(SdfChipHeapStats) == 0x30) ? 1 : -1];
 
 struct SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes);
 struct SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes);
 struct SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes);
 struct SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
-void sdfGetGeneralHeapStats(s32 *stats);
+void sdfGetGeneralHeapStats(SdfGeneralHeapStats *stats);
+void sdfGetChipHeapStats(SdfChipHeapStats *stats);
 
 u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 s32 sdfMemoryGetBlockSize(struct SdfMemBlock *block);

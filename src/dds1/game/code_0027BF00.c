@@ -63,7 +63,7 @@ extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles 
 
 extern void mnuDrawPanelIconPairsAtFixedPositions(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
-extern void func_0027C140();
+extern void func_0027C140(s32, s32, s32, s32, s32, s32, u32, MenuList *, s32);
 
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 
@@ -190,11 +190,67 @@ void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, s32 entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027C140);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
+extern s32 func_003014F0(char *, const char *, ...);
+extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern const char D_003BC718[];
+
+/* Draw visible rows, preserving each row's glyph chain and callback state. */
+void func_0027C140(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
+                   s32 fadeScale, u32 unusedFlags, MenuList *list, s32 drawArg) {
+    char text[0x10];
+    MenuListNode *node = list->head;
+    s32 textX = x + xOffset;
+    s32 textY = y + yOffset;
+    s32 row = 0;
+
+    mnuDecreaseListNodeFadeCounters(list);
+    while (node != NULL && row < list->visibleCount) {
+        u32 color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
+        FrFontGlyph *glyph = NULL;
+        s32 chainFlag = 0;
+
+        color = mnuDispatchByFlag((s32)color, (s32)node);
+        color = uiBlendColors(color, color & 0xFFFFFF00, fadeScale);
+        if ((node == list->cursor && (list->stateFlags & 8) == 0) ||
+            (node->flags48 & 2) != 0) {
+            chainFlag = 4;
+        }
+
+        mnuDrawFourEntries(textX, textY, depth, list, node, drawArg);
+        if (node->value != NULL) {
+            glyph = itfCreateConvertedTextGlyph(textX, textY, depth, color,
+                                                (const u8 *)node->value, NULL);
+            frFontSetChildChainFirstOption(glyph, chainFlag);
+            if ((list->id & 1) != 0) {
+                func_003014F0(text, D_003BC718,
+                              (s32)node->sortKeyPrimary);
+                glyph = func_001978E8(x + 0x1180, textY + 0x20, depth,
+                                      color, text, glyph);
+                frFontSetChildChainFirstOption(glyph, chainFlag);
+            }
+        }
+        if (glyph != NULL) {
+            frFontDrawGlyphChain(glyph, 1, (u32)drawArg);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        }
+        if (list->drawCallback != NULL) {
+            list->drawCallback(x, y, depth, list, node, drawArg);
+        }
+
+        row++;
+        {
+            s32 rowStep = list->rowStep;
+            textY += rowStep;
+            y += rowStep;
+        }
+        node = node->next;
+    }
+}
 
 /* Invoke the native window renderer at full fade with its size/flag arguments zeroed. */
 void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
-    func_0027C140(x, y, depth, 0, 0, MNU_FULL_FADE, 0, menu, drawArg);
+    func_0027C140(x, y, depth, 0, 0, MNU_FULL_FADE, 0, (MenuList *)(u32)menu, drawArg);
 }
 
 

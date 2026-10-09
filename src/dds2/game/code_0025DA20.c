@@ -56,7 +56,6 @@
 #define CAMP_SLOT_LAST_ROW_INDEX 0x14
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
-#define CAMP_HEAP_STATS_WORD_COUNT 8
 
 extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 mnuPreparePopupAndDispatchSelection(KwlnTask *task);
@@ -834,11 +833,11 @@ void mnuCampLinkFontGlyph(EvtRuntime *scene) {
 
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
 void mnuCampCheckClockDivisor(void) {
-    s32 heapStats[CAMP_HEAP_STATS_WORD_COUNT];
+    SdfGeneralHeapStats heapStats;
     s32 quotient;
 
-    sdfGetGeneralHeapStats(heapStats);
-    quotient = 1 / heapStats[SDF_HEAP_STAT_TOTAL_BYTES];
+    sdfGetGeneralHeapStats(&heapStats);
+    quotient = 1 / heapStats.totalBytes;
 }
 
 void mnuEnterCampSceneMenuState(EvtRuntime *scene) {

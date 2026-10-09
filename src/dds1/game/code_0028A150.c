@@ -3959,41 +3959,41 @@ void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
 }
 
 void fileJobNotifyComplete(FileJobPayload *job) {
-    u16 idx = ((FileJobPayload *)job)->type;
+    u16 idx = job->type;
     void (*cb)(void *) = D_0037E14C[idx].cb10;
     if (cb != NULL) {
-        cb(((FileJobPayload *)job)->data);
+        cb(job->data);
     }
 }
 
 void fileJobInvokeTypeCallback(FileJobPayload *job) {
-    u16 idx = ((FileJobPayload *)job)->type;
-    void *data = ((FileJobPayload *)job)->data;
+    u16 idx = job->type;
+    void *data = job->data;
 
     D_0037E14C[idx].cb(data);
 }
 
 void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
-    u16 idx = ((FileJobPayload *)job)->type;
+    u16 idx = job->type;
     void (*cb)(void *, void *) = D_0037E14C[idx].cb14;
     if (cb != NULL) {
-        cb(((FileJobPayload *)job)->data, extra);
+        cb(job->data, extra);
     }
 }
 
 void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
-    u16 idx = ((FileJobPayload *)job)->type;
+    u16 idx = job->type;
     void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
-        cb(((FileJobPayload *)job)->data, extra);
+        cb(job->data, extra);
     }
 }
 
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale) {
-    u16 idx = ((FileJobPayload *)job)->type;
+    u16 idx = job->type;
     void (*cb)(void *, f32) = D_0037E14C[idx].cb1C;
     if (cb != NULL) {
-        cb(((FileJobPayload *)job)->data, scale);
+        cb(job->data, scale);
     }
 }
 
@@ -4396,7 +4396,7 @@ void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
     FileJob *job;
 
     for (job = queue->first; job != NULL; job = job->next) {
-        fileJobNotifyComplete((void *)job->id);
+        fileJobNotifyComplete((FileJobPayload *)job->id);
     }
 }
 

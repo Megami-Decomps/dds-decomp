@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "evt_world.h"
+#include "sdf_texture_offset_list.h"
 
 struct WorldIndexNode;
 
@@ -303,11 +304,11 @@ void dds3AttachResourceHandleToWorldObject(EffWorldNode *object, u32 resourceId)
 }
 
 void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 arg1, u32 arg2, u32 arg3,
-                                    u32 arg4, u32 arg5, u32 arg6) {
+                                    u32 arg4, const SdfTextureOffsetListHeader *textureOffsets, u32 arg6) {
     EvtWorldTable *data;
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = func_0012AC90(arg1, arg2, arg3, arg4, arg5, arg6);
+    handle = func_0012AC90(arg1, arg2, arg3, arg4, (u32)textureOffsets, arg6);
     data->indexedHandle = handle;
 }

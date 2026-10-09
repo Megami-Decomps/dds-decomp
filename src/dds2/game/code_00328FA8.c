@@ -71,17 +71,8 @@ void func_00328FA8(u32 heapSize) {
     sdfInitializeSynchronizedRequest(&sdfChipReleaseRequest, sdfReleaseChipBlock);
 }
 
-typedef struct SdfChipStats {
-    u32 totalBytes; /* 0x00 */
-    u32 freeBytes; /* 0x04 */
-    u32 blockCount; /* 0x08 */
-    u32 emptyBlocks; /* 0x0C: blocks without a size class */
-    u32 partialBlocks; /* 0x10: blocks with free cells */
-    u32 usedCells[SDF_CHIP_CLASS_COUNT]; /* 0x14: used cells per size class */
-} SdfChipStats;
-
 /* Fill `stats` with the chip heap's block totals and per-size-class usage. */
-void sdfGetChipHeapStats(SdfChipStats *stats) {
+void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
     SdfChipPage *block;
     s32 blocksRemaining;
     s32 classIndex;
@@ -116,8 +107,8 @@ void sdfGetChipHeapStats(SdfChipStats *stats) {
         block++;
     } while (--blocksRemaining != 0);
     stats->freeBytes = freeBytes;
-    stats->emptyBlocks = emptyBlocks;
-    stats->partialBlocks = partialBlocks;
+    stats->emptyBlockCount = emptyBlocks;
+    stats->partialBlockCount = partialBlocks;
 }
 
 extern void *func_0035A828(u32 size);

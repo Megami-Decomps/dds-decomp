@@ -3,8 +3,8 @@
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "sdf_texture_offset_list.h"
 
-extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 
 extern u32 mdlGroupJobSemaphore;
 
@@ -125,7 +125,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
     DevRequest *resourceList;
 
     handle = fileGetLoadedDataAddress(resource);
-    resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
+    resourceList = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)handle);
     destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle(resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
