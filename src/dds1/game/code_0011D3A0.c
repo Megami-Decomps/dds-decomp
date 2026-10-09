@@ -533,7 +533,7 @@ extern void fldSelectDisplayBuffer(s32);
 extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
-void func_0011E280(s32 fade, f32 x, f32 y, f32 z, f32 radius) {
+void func_0011E280(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     s32 color;
     s32 angle;
     s32 prev;

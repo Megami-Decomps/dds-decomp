@@ -15,7 +15,7 @@ struct SdfModel;
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
 extern s32 sdfLoadMapRecordPositionVector(struct SdfModel *, s32);
-extern void func_0011E280(s32, f32, f32, f32, f32);
+extern void func_0011E280(f32, f32, f32, f32, s32);
 extern void func_001BCB88(s8, s32);
 
 extern s32 btlGetRuntime();
