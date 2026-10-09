@@ -5530,18 +5530,18 @@ extern float effMiscRandUnitFloat(void *);
 typedef struct EffAnimationState {
     f32 *positions;       // 0x00
     u32 textureHandle;    // 0x04
-    u32 record;           // 0x08
+    FileSlotTable *record; // 0x08
     struct SdfMemBlock *allocation;       // 0x0C
 } EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
     EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
-    u8 *payload = (u8 *)state->record;
+    FileSlotTable *record = state->record;
     float *positions = state->positions;
-    u32 count = ((FileSlotTable *)payload)->count;
+    u32 count = record->count;
     u32 i = 0;
 
-    fileClearRecordReferences((s32)payload);
+    fileClearRecordReferences(record);
     for (; i < count; i++) {
         positions[0] = effMiscRandUnitFloat(effSharedRandomState);
         positions[1] = effMiscRandUnitFloat(effSharedRandomState);
@@ -5570,12 +5570,12 @@ EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
 
 EffAnimationState *effActivateAnimationState(s32 work) {
     EffAnimationState *owner = (EffAnimationState *)((EffClassWork *)work)->resource;
-    s32 resource = owner->record;
-    EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
+    FileSlotTable *resource = owner->record;
+    EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, resource->count);
 
     resource = owner->record;
-    state->record = (u32)fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
-                               ((FileSlotTable *)resource)->data1);
+    state->record = fileAllocateGridRecordSlots(resource->type, resource->count,
+                               resource->data1);
     return state;
 }
 
@@ -5586,17 +5586,17 @@ void effReleaseAnimationFrameResources(u8 *work) {
 
     effReleaseScalyTextureReference(state->textureHandle);
     if (state->record != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)state->record);
+        fileReleaseGridRecordHandle(state->record);
     }
     sdfReleaseResourceAllocation(state->allocation);
 }
 
 void effSynchronizeFileTransform(u8 *work) {
     EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
-    u32 handle = state->record;
+    FileSlotTable *record = state->record;
 
-    if (handle != 0) {
-        mnuRecordSetVector(handle, work);
+    if (record != 0) {
+        mnuRecordSetVector(record, work);
         fileSetRecordSecondVector(state->record, work + 0x10);
         dds3DispatchIndexedCallback((u16 *)state->record, ((EffClassWork *)work)->scale);
         fileAcquireRecord(state->record);
@@ -5612,7 +5612,7 @@ EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    state->record = (u32)fileAllocateGridRecordSlots(1, count, mapping);
+    state->record = fileAllocateGridRecordSlots(1, count, mapping);
     return state;
 }
 
@@ -5621,7 +5621,7 @@ EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    state->record = (u32)fileAllocateGridRecordSlots(3, count, mapping);
+    state->record = fileAllocateGridRecordSlots(3, count, mapping);
     return state;
 }
 
