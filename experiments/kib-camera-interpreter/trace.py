@@ -139,6 +139,10 @@ def live_cse_observation(temp, watch_path, ordinary_identity, qemu):
         # Preparation checks the selected QEMU interface; it never builds QEMU.
         case_builder.make_case(d.ROOT, d.UNIT, case_dir, qemu, watch_path)
         case = observer.load_case(case_dir / "case.json")
+        d.emit(dict(scope="camera_unix_capability", qualified=True,
+                    transport=case.transport["kind"], child_confined=True,
+                    socket_owned=True, peer_verified=True,
+                    no_owned_internet_socket=True, guest_continued=False))
         control = json.loads((case_dir / "native-control.json").read_text())
         d.require(control["cwd"] == str(case.cwd) and control["environment"] == case.env
                   and control["compiler_command"] == case.command[1:]

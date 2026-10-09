@@ -83,9 +83,9 @@ def main():
         run(["ninja", "-j2", "qemu-i386"], cwd=build)
         binary = build / "qemu-i386"
         help_text = run([str(binary), "--help"])
-        # Keep the upstream observer's conservative transport gate.
-        if not re.search(r"-g\s+endpoint\b", help_text):
-            raise RuntimeError("unix_debugger_capability_missing")
+        # Help text is informational: the case builder separately qualifies
+        # an owned Unix-only endpoint before any live compiler observation.
+        endpoint_advertised = bool(re.search(r"-g\s+endpoint\b", help_text))
         PREFIX.mkdir(exist_ok=False)
         shutil.copy2(binary, PREFIX / "qemu-i386")
         for name in ("COPYING", "COPYING.LIB"):
@@ -93,9 +93,10 @@ def main():
                 shutil.copy2(source / name, PREFIX / name)
         (PREFIX / "SOURCE.txt").write_text(
             "Official QEMU " + VERSION + "\nhttps://download.qemu.org/" + archive.name + "\n")
-        print(json.dumps(dict(status="qemu_prepared", version=VERSION,
+        print(json.dumps(dict(status="qemu_built", version=VERSION,
                               official_signature_verified=True,
-                              unix_endpoint_advertised=True)))
+                              unix_endpoint_advertised=endpoint_advertised,
+                              unix_capability_qualified=False)))
 if __name__ == "__main__":
     try:
         main()

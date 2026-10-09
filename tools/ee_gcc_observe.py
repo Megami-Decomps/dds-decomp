@@ -21,6 +21,7 @@ import time
 
 from _ee_gcc_observer import GatedGlobalTracer, OperandTracer
 from ee_gcc_qemu_loopback import SOURCE_SHA256, PATCHED_SHA256
+import ee_gcc_unix_capability as unix_capability
 
 COMPILER_SHA256 = 'd11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1'
 ALLOWED_COMMAND = re.compile(r'(?:qSupported|\?|g|c|s|m[0-9a-f]+,[0-9a-f]+|[Zz]0,[0-9a-f]+,1)')
@@ -244,10 +245,15 @@ class Case:
         self.transport = data.get('transport', {'kind': 'unix'})
         if self.transport == {'kind': 'unix'}:
             self.observed_qemu = self.qemu
+        elif isinstance(self.transport, dict) and self.transport.get('kind') == 'unix-verified':
+            exact_keys(self.transport, {'kind', 'receipt'})
+            self.observed_qemu = self.qemu
+            self.unix_receipt = self.path(self.transport['receipt'])
+            unix_capability.validate_receipt(self.unix_receipt, self.command, self.inputs)
         else:
             exact_keys(self.transport, {'kind', 'qemu'})
             if self.transport['kind'] != 'loopback-copy':
-                raise ValueError('Only unix or pinned loopback-copy transport is allowed')
+                raise ValueError('Only unix, unix-verified or pinned loopback-copy transport is allowed')
             self.observed_qemu = self.path(self.transport['qemu'])
             if self.inputs.get(self.qemu) != SOURCE_SHA256:
                 raise ValueError('Loopback transport requires the pinned original QEMU')
@@ -362,9 +368,10 @@ def compare_artifacts(baseline, observed):
 
 
 def run_command(case, command, stem):
+    kwargs = unix_capability.confined_child_kwargs() if case.transport['kind'] == 'unix-verified' else {}
     with case.logs[stem + '_stdout'].open('wb') as stdout, case.logs[stem + '_stderr'].open('wb') as stderr:
         result = subprocess.run(command, cwd=case.cwd, env=case.env,
-                                stdout=stdout, stderr=stderr, timeout=case.timeout)
+                                stdout=stdout, stderr=stderr, timeout=case.timeout, **kwargs)
     if result.returncode:
         raise RuntimeError(f'{stem} failed with status {result.returncode}; see configured stderr')
 
@@ -408,7 +415,11 @@ def loopback_listener(port, tables, owner_inodes=None):
 
 @contextlib.contextmanager
 def debugger_endpoint(case):
-    if case.transport['kind'] == 'unix':
+    if case.transport['kind'] == 'unix-verified':
+        unix_capability.validate_receipt(case.unix_receipt, case.command, case.inputs)
+        with unix_capability.private_endpoint() as endpoint:
+            yield endpoint, socket.AF_UNIX, endpoint
+    elif case.transport['kind'] == 'unix':
         help_result = subprocess.run([str(case.qemu), '--help'], env=case.env,
                                      capture_output=True, text=True, timeout=10)
         if help_result.returncode or not unix_supported(help_result.stdout):
@@ -436,15 +447,21 @@ def observe(case, output, mode):
         command = [str(case.observed_qemu), '-g', endpoint, *case.command[1:]]
         (output / 'observed-command.json').write_text(json.dumps(command, indent=2) + '\n')
         with case.logs['cc1_stdout'].open('wb') as stdout, case.logs['cc1_stderr'].open('wb') as stderr:
-            process = subprocess.Popen(command, cwd=case.cwd, env=case.env, stdout=stdout, stderr=stderr)
+            verified_unix = case.transport['kind'] == 'unix-verified'
+            kwargs = unix_capability.confined_child_kwargs() if verified_unix else {}
+            process = subprocess.Popen(command, cwd=case.cwd, env=case.env, stdout=stdout, stderr=stderr, **kwargs)
             tracer = None
+            connection = None
             try:
                 deadline = time.monotonic() + min(10, case.timeout)
                 while True:
                     if process.poll() is not None:
                         raise RuntimeError('QEMU exited before debugger connection; see configured stderr')
                     if family == socket.AF_UNIX:
-                        ready = Path(address).exists()
+                        if verified_unix:
+                            ready = unix_capability.owned_listener(process.pid, address) is not None
+                        else:
+                            ready = Path(address).exists()
                         if ready and not stat.S_ISSOCK(Path(address).stat().st_mode):
                             raise ValueError('Debugger endpoint is not a Unix socket')
                     else:
@@ -465,12 +482,19 @@ def observe(case, output, mode):
                     if time.monotonic() >= deadline:
                         raise TimeoutError('Local debugger listener did not appear')
                     time.sleep(0.05)
-                with socket.socket(family, socket.SOCK_STREAM) as connection:
-                    connection.settimeout(10)
-                    connection.connect(address)
-                    tracer = tracer_class(RSP(connection, deadline=time.monotonic() + case.timeout),
-                                          output / 'events.jsonl', case.function)
-                    tracer.run()
+                connection = socket.socket(family, socket.SOCK_STREAM)
+                connection.settimeout(10)
+                connection.connect(address)
+                if verified_unix:
+                    unix_capability.verify_peer(connection, process.pid)
+                    (output / 'unix-transport.json').write_text(json.dumps({
+                        'method': unix_capability.METHOD,
+                        'child_confined': True, 'socket_owned': True,
+                        'peer_verified': True, 'no_owned_internet_socket': True,
+                        'fresh_checks_before_guest_continuation': True}, indent=2) + '\n')
+                tracer = tracer_class(RSP(connection, deadline=time.monotonic() + case.timeout),
+                                      output / 'events.jsonl', case.function)
+                tracer.run()
                 if process.wait(timeout=30):
                     raise RuntimeError('Observed compiler exited unsuccessfully')
                 (output / 'hook-checks.json').write_text(json.dumps({
@@ -480,9 +504,13 @@ def observe(case, output, mode):
             finally:
                 if tracer is not None and not tracer.f.closed:
                     tracer.f.close()
-                if process.poll() is None:
-                    process.kill()
-                    process.wait()
+                try:
+                    if process.poll() is None:
+                        process.kill()
+                    process.wait(timeout=5)
+                finally:
+                    if connection is not None:
+                        connection.close()
 
 
 def run(case, output, mode):
@@ -503,7 +531,8 @@ def run(case, output, mode):
     (output / 'case.json').write_text(json.dumps(case.data, indent=2) + '\n')
     (output / 'tool-hashes.json').write_text(json.dumps({p.name: sha(p) for p in
         (Path(__file__), Path(__file__).with_name('_ee_gcc_observer.py'),
-         Path(__file__).with_name('ee_gcc_qemu_loopback.py'))}, indent=2) + '\n')
+         Path(__file__).with_name('ee_gcc_qemu_loopback.py'),
+         Path(__file__).with_name('ee_gcc_unix_capability.py'))}, indent=2) + '\n')
     copy_inventory(initial, output / 'preexisting')
     # Preserve preexisting outputs before clearing them; stale files cannot fake equality.
     try:

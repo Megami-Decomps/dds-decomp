@@ -611,7 +611,34 @@ def inspect(repo):
          and reuse.status_reads[0] == {"offset": 0, "bytes": 8},
          "first_peer_status_width_changed")
 
+
+    class ReferenceStatusWidthVM(VM):
+        def read(self, address, width):
+            if address == REFERENCE + 0x110:
+                self.observed_reference_status_width = width
+                raise StatusObserved()
+            return super().read(address, width)
+
+    reference_widths = []
+    for entry_kind in (17, 18, 27):
+        vm = ReferenceStatusWidthVM(words, read_native, calls,
+                                    runtime_site, clear_site, cursor, gp)
+        vm.put(SCRIPT, 4, val(entry_kind, "kind"))
+        try:
+            vm.run()
+        except StatusObserved:
+            need(vm.runtime_count == 0 and not vm.clears,
+                 "reference_status_after_unexpected_callback")
+            reference_widths.append({
+                "entry_kind": entry_kind,
+                "first_reference_status_load_bytes":
+                    vm.observed_reference_status_width,
+            })
+        else:
+            raise Blocked("reference_status_load_not_reached")
+
     return {
+        "native_reference_status_widths": reference_widths,
         "opcode37_status_reads_before_first_clear": reuse.status_reads,
         "status": "bounded_native_semantics_observed",
         "native_status_widths": widths,

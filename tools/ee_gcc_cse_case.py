@@ -17,6 +17,7 @@ import subprocess
 import sys
 
 import ee_gcc_observe as observer
+import ee_gcc_unix_capability as unix_capability
 from ee_gcc_cse_role_tracer import validate_watch
 from ee_gcc_role_lineage import COMPILER, digest
 
@@ -130,10 +131,11 @@ def make_case(repo, source, work, qemu, watch_path):
     env = {"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C", "TZ": "UTC",
            "HOME": str(work / "home"), "TMPDIR": str(work / "tmp"),
            "DDS_VERSION": "dds2", "DDS_AS_UNIT": UNIT}
-    help_result = subprocess.run([str(qemu), "--help"], env=env, capture_output=True,
-                                 text=True, timeout=10)
-    if help_result.returncode or not observer.unix_supported(help_result.stdout):
-        raise ValueError("selected QEMU does not advertise the required -g endpoint interface")
+    work.mkdir(parents=True)
+    (work / "home").mkdir()
+    (work / "tmp").mkdir()
+    capability_receipt = unix_capability.qualify(
+        qemu, loader, compiler, repo, env, work / "unix-capability", observer.RSP)
     inputs = {}
     def add(path):
         path = path.resolve()
@@ -141,7 +143,7 @@ def make_case(repo, source, work, qemu, watch_path):
             raise ValueError("input closure contains a missing/non-file path")
         inputs[str(path)] = digest(path.read_bytes())
     for path in (source, compiler, assembler, qemu, loader, libc, wrapper, cflags,
-                 watch_path, Path(sys.executable), Path(__file__)):
+                 watch_path, capability_receipt, Path(sys.executable), Path(__file__)):
         add(path)
     # Supersets avoid guessing which include branches/macros the old compiler
     # opens. Keep generated assembly private; its hashes are local receipts only.
@@ -155,7 +157,8 @@ def make_case(repo, source, work, qemu, watch_path):
     # These exact modules execute in the observer process.
     for name in ("ee_gcc_cse_role_tracer.py", "ee_gcc_role_lineage.py",
                  "ee_gcc_delay_slots.py", "ee_gcc_probe.py", "ee_gcc_observe.py",
-                 "_ee_gcc_observer.py", "ee_gcc_qemu_loopback.py"):
+                 "_ee_gcc_observer.py", "ee_gcc_qemu_loopback.py",
+                 "ee_gcc_unix_capability.py"):
         add(Path(__file__).with_name(name))
     native_modules = set()
     for module in list(sys.modules.values()):
@@ -178,7 +181,8 @@ def make_case(repo, source, work, qemu, watch_path):
             for name in ("cc1_stdout", "cc1_stderr", "as_stdout", "as_stderr")}
     case = {"schema": 1, "cwd": str(repo), "environment": env,
             "compiler": str(compiler), "assembler": str(assembler), "qemu": str(qemu),
-            "transport": {"kind": "unix"}, "timeout_seconds": 1800,
+            "transport": {"kind": "unix-verified", "receipt": str(capability_receipt)},
+            "timeout_seconds": 1800,
             "function": watch["function"], "command": command,
             "assembler_command": assembler_command, "inputs": inputs, "logs": logs,
             "artifacts": [
@@ -186,11 +190,9 @@ def make_case(repo, source, work, qemu, watch_path):
                 {"path": str(work / "candidate.o"), "archive": "candidate.o"},
                 {"root": str(work), "pattern": "rtl.[0-9][0-9].*", "archive_dir": "rtl"},
             ] + [{"path": path, "archive": name + ".log"} for name, path in logs.items()]}
-    # Validate the complete schema before creating outputs.
+    # Validate before creating compiler inputs/outputs; the private capability
+    # receipt already exists and is frozen with the selected executable closure.
     observer.Case(case, work)
-    work.mkdir(parents=True)
-    (work / "home").mkdir()
-    (work / "tmp").mkdir()
     fixed_source.parent.mkdir(parents=True, exist_ok=True)
     fixed_assembly.parent.mkdir(parents=True, exist_ok=True)
     fixed_source.write_bytes(source_bytes)
@@ -202,13 +204,13 @@ def make_case(repo, source, work, qemu, watch_path):
     (work / "native-control.json").write_text(json.dumps(control, indent=2, sort_keys=True) + "\n")
     (work / "preparation.json").write_text(json.dumps({
         "schema": 1, "compiler_sha256": COMPILER, "source_sha256": digest(source_bytes),
-        "qemu_sha256": inputs[str(qemu)], "qemu_help_sha256": digest(help_result.stdout.encode()),
-        "transport": "unix", "input_count": len(inputs), "compiled": False,
+        "qemu_sha256": inputs[str(qemu)], "unix_capability_qualified": True,
+        "transport": "unix-verified", "input_count": len(inputs), "compiled": False,
         "canonical_source_length": len(SOURCE_REL),
         "canonical_assembly_length": len(ASSEMBLY_REL),
         "closure": "all include/src/build-eeasm files, declared tools, loaded Python modules and resolved host ELF dependencies",
         "limitations": ["A directory supersets receipt is not a syscall-level proof that no undeclared file was opened.",
-                        "This builder does not establish ordinary/native/QEMU parity or debugger availability."]
+                        "This builder does not establish ordinary/native/QEMU compiler-output parity."]
     }, indent=2, sort_keys=True) + "\n")
     observer.load_case(work / "case.json").verify()
     return len(inputs)
@@ -221,9 +223,9 @@ def main():
     args = parser.parse_args()
     try:
         count = make_case(args.repo, args.source, args.work, args.qemu, args.watch)
-    except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         parser.exit(2, str(error) + "\n")
-    print(json.dumps({"prepared": True, "compiled": False, "transport": "unix", "inputs": count}))
+    print(json.dumps({"prepared": True, "compiled": False, "transport": "unix-verified", "inputs": count}))
 
 
 if __name__ == "__main__":
