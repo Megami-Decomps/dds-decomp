@@ -567,7 +567,33 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     return entry->currentY;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", mnuInitializeRegistryWorkEntry);
+extern void func_00321528(u32, MenuRegistryRecord *);
+extern void func_003232A0(MenuWorkEntry *, MenuShortRecordList *);
+
+void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
+                                    s32 resourceRecordIndex, s32 x, s32 y,
+                                    f32 progress) {
+    MenuRegistry *registry;
+    MenuRegistryTable *table;
+    MenuRegistryRecord *record;
+
+    memset(entry, 0, sizeof(*entry));
+    entry->flags |= MNU_WORK_ACTIVE;
+    entry->resourceRecordIndex = resourceRecordIndex;
+    tag |= MNU_WORK_TAG_REGISTRY_TABLE;
+    entry->tag = tag;
+    entry->currentX = entry->segmentStartX = (f32)x;
+    entry->currentY = entry->segmentStartY = (f32)y;
+    entry->currentAngleRadians = entry->segmentStartAngleRadians = progress;
+
+    registry = mnuGetMenuRecordRegistryEntry(tag);
+    table = registry->table;
+    entry->remaining = registry->initialRemainingCount;
+    record = table->recordBase;
+    func_003232A0(entry, record->lists);
+    entry->callback = mnuCreateReleaseCallbackNode();
+    func_00321528(entry->callback, record);
+}
 
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
