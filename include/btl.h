@@ -31,18 +31,15 @@ struct EvtUnit;
 struct SoundResourceLink;
 struct EffWorldNode;
 
-/* BtlUnit's status pair at +0x110. Retail touches it two ways: 32-bit flags/stateFlags
- * accesses that type-based aliasing sees as plain words (dds1 func_001C9098 hoists a
- * link->unit load above its `flags |=` store), and 64-bit mask tests read through this
- * union, which GCC treats as alias set 0 (btlAccumulateEnemyDefeatRewards keeps the ld
- * after the s32 experienceEarned store; a plain u64 read is hoisted above it). */
-typedef union BtlUnitFlagPair {
-    u64 bits;
-    struct {
-        s32 flags;
-        u32 stateFlags;
-    } words;
-} BtlUnitFlagPair;
+/* The actor owns both status words as one complete, naturally aligned record.
+ * Scalar accesses retain their ordinary word alias behavior. Packed observations
+ * copy the whole record's representation, without casting a scalar member. */
+typedef struct BtlUnitStatus {
+    s32 flags;
+    u32 stateFlags;
+} BtlUnitStatus;
+
+extern void *memcpy(void *, const void *, unsigned int);
 
 /* Six-byte status-entry record; each game's battle unit contains seven. */
 typedef struct BtlUnitEntrySlot {
@@ -121,8 +118,7 @@ typedef struct BtlUnit {
     s32 effectArgB; /* 0x100 */
     f32 effectValue; /* 0x104 */
     u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
-    s32 flags; /* 0x110: arithmetic-shift accessors use the signed low word. */
-    u32 stateFlags; /* 0x114 */
+    BtlUnitStatus status; /* 0x110: complete low/high status record. */
     u32 gunResourceFlags; /* 0x118 */
     u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
     u8 pad11D[3];
@@ -206,8 +202,7 @@ typedef struct BtlUnit {
     s32 effectParameter; /* 0x100 */
     f32 effectScale; /* 0x104 */
     u64 owner;      /* 0x108: compared against the battle command's unit ID */
-    s32 flags; /* 0x110: same signed status word as DDS1. */
-    u32 stateFlags; /* 0x114 */
+    BtlUnitStatus status; /* 0x110: complete low/high status record. */
     s32 gunResourceFlags;
     u8 lookupId;
     u8 pad11D[3];
@@ -244,9 +239,20 @@ typedef char BtlUnitMirrorOffsetCheck[((u32)&((BtlUnit *)0)->mirror == 0x348) ? 
 typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 
+/* Both titles keep the primary owner's existing eight-byte alignment. */
+typedef char BtlUnitStatusSizeCheck[(sizeof(BtlUnitStatus) == 8) ? 1 : -1];
+typedef char BtlUnitStatusAlignmentCheck[(__alignof__(BtlUnitStatus) == 4) ? 1 : -1];
+typedef char BtlUnitAlignmentCheck[(__alignof__(BtlUnit) == 8) ? 1 : -1];
+typedef char BtlUnitStatusOffsetCheck[((u32)&((BtlUnit *)0)->status == 0x110) ? 1 : -1];
+typedef char BtlUnitStatusFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.flags == 0x110) ? 1 : -1];
+typedef char BtlUnitStateFlagsOffsetCheck[((u32)&((BtlUnit *)0)->status.stateFlags == 0x114) ? 1 : -1];
+typedef char BtlUnitGunResourceFlagsOffsetCheck[((u32)&((BtlUnit *)0)->gunResourceFlags == 0x118) ? 1 : -1];
+
 /* Whole status pair (flags low, stateFlags high) for the 64-bit mask tests. */
 static inline u64 btlUnitStatusPair(BtlUnit *unit) {
-    return ((BtlUnitFlagPair *)&unit->flags)->bits;
+    u64 bits;
+    memcpy(&bits, &unit->status, sizeof(unit->status));
+    return bits;
 }
 
 /* Returns the signed projection length in f0; the projected point is in vf10. */

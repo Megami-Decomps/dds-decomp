@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl.h"
 #include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -16,6 +17,7 @@
 #include "eff_param.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
+#include "eff_pcp_group_set.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -3171,10 +3173,6 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 }
 
 
-typedef struct EffPCPAimBattle {
-    u8 pad00[0x110];
-    u32 flags;             /* 0x110 */
-} EffPCPAimBattle;
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 func_001695C8(void);
@@ -3203,7 +3201,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         return;
     }
     if (func_001695C8() && work->frame == 0) {
-        func_00208000(((EffPCPAimBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x600, NULL, NULL);
+        func_00208000(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
         btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF(vf10, muzzle);
@@ -4778,51 +4776,6 @@ void effPcpCopyLinkedBeamMatrix(EffPCPBeamLargeWork *work, void *src) {
     VU0_STORE_MATRIX(work->node->localMatrix);
 }
 
-/* Block-set parameter head (0x164 bytes, copied whole into each new work). */
-typedef struct EffPCPGroupHead {
-    f32 origin[4];
-    u8 pad10[0x40];
-    u8 unk50;            /* 0x50 */
-    u8 pad51[3];
-    s32 framesPerEntry;   /* 0x54: interpolation duration */
-    u32 count;           /* 0x58: handles per group */
-    s32 delaySpread;      /* 0x5C: random initial delay */
-    s32 fadeIn;           /* 0x60 */
-    s32 fadeOut;          /* 0x64 */
-    f32 startPosition;    /* 0x68: interpolated position at frame zero */
-    f32 endPosition;      /* 0x6C: interpolated position at final frame */
-    f32 startJitter;      /* 0x70: fractional random variation */
-    f32 endJitter;        /* 0x74: fractional random variation */
-    f32 unk78;           /* 0x78 */
-    f32 unk7C;           /* 0x7C */
-    f32 unk80;           /* 0x80 */
-    f32 unk84;           /* 0x84 */
-    f32 unk88;           /* 0x88 */
-    u8 activeGroups[4];  /* 0x8C */
-    EffThunderFragmentParams spawnParams; /* 0x90 */
-    u8 padE4[0x80];
-} EffPCPGroupHead;
-
-typedef struct EffPCPGroupEntry {
-    EffThunderFragmentWork *handle; /* 0x00 */
-    s32 frame;            /* 0x04: negative until the start delay expires */
-    f32 position;         /* 0x08: initial interpolated position */
-    f32 positionStep;     /* 0x0C: change per frame */
-    f32 angle;            /* 0x10: evenly spaced angle in radians */
-    f32 unk14;           /* 0x14 */
-} EffPCPGroupEntry;
-
-typedef struct EffPCPGroupSet {
-    EffPCPGroupHead head;
-    EffPCPGroupEntry *entries;  /* 0x164 */
-    f32 scale;            /* 0x168: multiplies start/end positions */
-    f32 unk16C;
-    u32 color;           /* 0x170 */
-    EffParamWork **duplicates; /* 0x174: four groups of parameter work */
-    struct SdfMemBlock *duplicateHandle;
-    struct SdfMemBlock *workHandle;
-} EffPCPGroupSet;
-
 EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
     u32 entryCount = header->count;
     struct SdfMemBlock *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
@@ -5061,10 +5014,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
     }
 }
 
-typedef struct EffPCPPulseBattle {
-    u8 pad00[0x110];
-    u32 flags;              /* 0x110 */
-} EffPCPPulseBattle;
 
 /* Unit quaternion for a half turn around Y; consumed by a quadword VU load. */
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
@@ -5097,7 +5046,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         }
         data = effParamWorkGetData(work->handle[i]);
         func_00340DC8(0.0f, work->rotationY[i], 0.0f);
-        if (func_001695C8() && (((EffPCPPulseBattle *)effBTLFieldColorGetVariantSelector())->flags & 0x400)) {
+        if (func_001695C8() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             VU0_LOAD_VF(vf11, D_00414610);
             effMiscQuatMultiplyVU();
         }

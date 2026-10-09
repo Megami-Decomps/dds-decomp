@@ -71,6 +71,15 @@ typedef struct SdfMotionIndexedTextBinding {
     SdfMotionTextCapture capture;
 } SdfMotionIndexedTextBinding;
 
+/* Shared 0x10-byte draw-target prefix; vector and key-flag tails differ. */
+typedef struct SdfMotionDrawTargetBinding {
+    SdfMotionKeyBinding keys;
+    SdfDrawNode *node;
+} SdfMotionDrawTargetBinding;
+
+void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
+                          void *dispatch, s32 nodeIndex);
+
 typedef struct SdfMotionDrawBinding {
     SdfMotionKeyBinding keys;
     SdfDrawNode *node;
@@ -99,6 +108,8 @@ typedef char SdfMotionTextParamSnapshot_size[
     (sizeof(SdfMotionTextParamSnapshot) == 0x14) ? 1 : -1];
 typedef char SdfMotionIndexedTextBinding_size[
     (sizeof(SdfMotionIndexedTextBinding) == 0x24) ? 1 : -1];
+typedef char SdfMotionDrawTargetBinding_size[
+    (sizeof(SdfMotionDrawTargetBinding) == 0x10) ? 1 : -1];
 typedef char SdfMotionDrawBinding_size[(sizeof(SdfMotionDrawBinding) == 0x20) ? 1 : -1];
 typedef char SdfMotionKeyFlagBinding_size[(sizeof(SdfMotionKeyFlagBinding) == 0x14) ? 1 : -1];
 
@@ -114,6 +125,8 @@ typedef char SdfMotionIndexedValueBinding_capture_at_10[
     ((u32)&((SdfMotionIndexedValueBinding *)0)->capturedWord == 0x10) ? 1 : -1];
 typedef char SdfMotionIndexedTextBinding_capture_at_10[
     ((u32)&((SdfMotionIndexedTextBinding *)0)->capture == 0x10) ? 1 : -1];
+typedef char SdfMotionDrawTargetBinding_node_at_0C[
+    ((u32)&((SdfMotionDrawTargetBinding *)0)->node == 0x0C) ? 1 : -1];
 typedef char SdfMotionDrawBinding_node_at_0C[
     ((u32)&((SdfMotionDrawBinding *)0)->node == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyFlagBinding_node_at_0C[

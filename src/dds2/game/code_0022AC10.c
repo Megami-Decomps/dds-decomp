@@ -119,7 +119,9 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u32 func_001AC360(u64, BtlIndexList *, u64);
 
-extern s32 btlMatchActorEntryCode(void *, s32);
+extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
+extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
+extern s16 btlGetActorEntryCode(BtlUnit *, s32);
 
 extern s8 D_00453068[];
 
@@ -210,7 +212,8 @@ extern void btlStartSkillEventTask(u32);
 
 extern s32 btlReleaseScriptResource(void);
 
-extern s32 btlFindModelEntry();
+struct BattleModelEntry;
+extern struct BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
 struct BattleScriptTaskData;
 
@@ -382,7 +385,7 @@ void func_0022AC10(void) {
         if ((battle->scriptFlags & 2) != 0 &&
             (battle->commandRestrictFlags & 0x800) == 0) {
             BtlUnit *unit = battle->eventUnit;
-            if ((unit->flags & 2) != 0) {
+            if ((unit->status.flags & 2) != 0) {
                 frame = (s32)btlGetUnitModelValue1C(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
@@ -392,8 +395,8 @@ void func_0022AC10(void) {
                     ext->motionState = 0;
                     mdlAddEntryPlain(model, 0, unit->unkEC);
                     sdfMotionSampleAtFrame(model->first, 26.0f);
-                    unit->flags &= 0x7FFFFFFF;
-                    unit->flags &= ~0x40000000;
+                    unit->status.flags &= 0x7FFFFFFF;
+                    unit->status.flags &= ~0x40000000;
                     btlBossDebugPrintf("btl:eve mot over [%d]\n", frame);
                 }
             }
@@ -593,7 +596,7 @@ s32 btlCommandSelectEventAction(void) {
     if (selectedUnit == 0) {
         return 1;
     }
-    if ((selectedUnit->flags & 2) == 0) {
+    if ((selectedUnit->status.flags & 2) == 0) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
@@ -655,7 +658,7 @@ s32 btlCommandPlayUnitMotion(void) {
     if (unit == 0) {
         return 1;
     }
-    if ((unit->flags & 2) == 0) {
+    if ((unit->status.flags & 2) == 0) {
         return 1;
     }
     if (index >= 0) {
@@ -794,7 +797,7 @@ u32 func_0022BA08(BattleScriptTaskData *record) {
     void *resource;
 
     if (record->frames == 0) {
-        if (!(record->object->flags & 2)) {
+        if (!(record->object->status.flags & 2)) {
             return 1;
         }
         resource = evtFindTaskResourceEntryByKey(battle->eventTaskId, record->group);
@@ -866,7 +869,7 @@ void *btlCreateActionTask(void *object, s32 group) {
 s32 btlHasRestrictedUnit(void) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
-        u32 unitFlags = unitCursor->flags;
+        u32 unitFlags = unitCursor->status.flags;
         if (unitFlags & 0x200) {
             if (unitFlags & 0xe0) {
                 return 1;
@@ -969,7 +972,7 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
     u32 codeIndex;
-    void *actorEntry;
+    BtlUnit *actorEntry;
     s32 requirementBits;
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
@@ -1310,15 +1313,12 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     return requestReady;
 }
 
-/* Return the matching cache entry's legacy 32-bit address, or zero. */
-s32 btlFindModelEntry(modelKind, modelId)
-s32 modelKind;
-s32 modelId;
-{
+/* Return the matching cache entry, or null. */
+BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId) {
     BattleModelEntry *cacheCursor = *(BattleModelEntry **)((u8 *)btlGetRuntime() + 0x264);
     while (cacheCursor != 0) {
         if (cacheCursor->kind == modelKind && cacheCursor->id == modelId) {
-            return (s32)cacheCursor;
+            return cacheCursor;
         }
         cacheCursor = cacheCursor->next;
     }
@@ -1335,7 +1335,7 @@ void func_0022CA48(void) {
 /* Reuse a cached kind/id pair or request its model pack and first reference. */
 void btlLoadModelPack(s32 modelKind, s32 modelId) {
     char resourcePath[128];
-    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
+    BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
 
     if (cacheEntry == 0) {
         cacheEntry = btlCreateModelEntry();
@@ -1359,11 +1359,11 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
 
 /* Drop one reference from the matching kind/id cache entry, if it exists. */
 void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
-    s32 entryAddress;
+    BattleModelEntry *cacheEntry;
 
-    entryAddress = btlFindModelEntry(modelKind, modelId);
-    if (entryAddress != 0) {
-        btlReleaseModelEntry((BattleModelEntry *)entryAddress);
+    cacheEntry = btlFindModelEntry(modelKind, modelId);
+    if (cacheEntry != 0) {
+        btlReleaseModelEntry(cacheEntry);
         return;
     }
 }
@@ -1372,26 +1372,26 @@ INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CBA0);
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {
-    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
+    BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
     if (cacheEntry != 0) {
         return cacheEntry->state;
     }
     return 0;
 }
 
-/* Despite its public name, this only queries readiness; it releases nothing. */
-s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
-    s32 entry = btlFindModelEntry(kind, id);
+/* Query readiness for the matching kind/id cache entry. */
+s32 btlIsModelEntryReady(s32 kind, s32 id) {
+    BattleModelEntry *entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return btlIsModelPackEntryReady((BattleModelEntry *)entry);
+        return btlIsModelPackEntryReady(entry);
     }
-    return entry;
+    return 0;
 }
 
 extern void func_0022CBA0(s32, s32);
 
 s32 func_0022CD60(s32 kind, s32 id) {
-    s32 entry;
+    BattleModelEntry *entry;
 
     if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
         sndFindListNodeForChannel(kind, id) != 0) {
@@ -1399,8 +1399,8 @@ s32 func_0022CD60(s32 kind, s32 id) {
     }
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        if (btlIsModelPackEntryReady((BattleModelEntry *)entry) != 0) {
-            if (((BattleModelEntry *)entry)->state == 0) {
+        if (btlIsModelPackEntryReady(entry) != 0) {
+            if (entry->state == 0) {
                 func_0022CBA0(kind, id);
             }
             return 1;
@@ -1850,7 +1850,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
     s32 value;
     s32 label;
 
-    if ((unit->flags & 1) != 0) {
+    if ((unit->status.flags & 1) != 0) {
         evtSetDrawSurfaceIndex(0x53);
         evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
@@ -1861,8 +1861,8 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
         evtSubmitDefaultDepthGradientRect(x, y + 320, 240, 2, color[0], color[1], color[2], color[3]);
         btlBossDebugPrintfN(x, y, 0, D_00436EE8);
-        if ((unit->flags & 0x200) != 0) {
-            if ((unit->flags & 0x1000) != 0) {
+        if ((unit->status.flags & 0x200) != 0) {
+            if ((unit->status.flags & 0x1000) != 0) {
                 row = ((BtlAffinityRow *)D_00435DD8)[unit->partyRecord.unitId];
             } else {
                 row = ((BtlAffinityRow *)D_00435DDC)[unit->partyRecord.unitId];
@@ -2085,7 +2085,7 @@ void func_002303D0(void) {
     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
     buffer = sdfAllocateBlockBySizeThreshold(10000);
     cursor = buffer;
-    if (unit->flags & 0x200) {
+    if (unit->status.flags & 0x200) {
         cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[0]);
     } else {
         cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[1]);

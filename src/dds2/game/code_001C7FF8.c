@@ -134,7 +134,7 @@ extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 extern u32 func_001C82D8(s32, s8);
 
-extern u32 btlCountFlaggedSceneActors(void);
+extern s32 btlCountFlaggedSceneActors(void);
 
 extern s32 func_001AC750(s32, void *);
 
@@ -636,7 +636,7 @@ s32 func_001CA8D8(void) {
 
     if (actor != 0) {
         do {
-            if ((actor->flags & requiredFlags) == requiredFlags) {
+            if ((actor->status.flags & requiredFlags) == requiredFlags) {
                 for (i = 0; i < 8; i++) {
                     if ((u16)(actor->partyRecord.effectData[i] - 0xE0) < 0x20) {
                         return actor->partyRecord.effectData[i];
@@ -772,7 +772,7 @@ void func_001CAB60(ActionStateLink *task) {
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
         func_001BD6E8(object);
-        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+        if ((task->unit->status.flags & 0x200) && !(scene->flags & 0x1000000)) {
             switch (fldSelectSceneMode(task)) {
             case 1:
                 btlBossDebugPrintf("-----------------First Battle!!-------------------\n");

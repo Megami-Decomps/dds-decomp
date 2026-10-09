@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
+#include "fpu.h"
 
 extern u32 dds3WorldCounter;
 
@@ -41,7 +42,21 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FBD0);
+/* vu0 routine: whether the distance between the two points at +0x40 is inside the second object's radius at +0xC4 */
+s32 func_0010FBD0(u8 *left, u8 *right) {
+    f32 length;
+    f32 rightLimit;
+
+    VU0_LOAD_VF(vf10, left + 0x40);
+    VU0_LOAD_VF(vf11, right + 0x40);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(length);
+    rightLimit = *(f32 *)(right + 0xC4);
+    if (ffabsf(length) - rightLimit < 0.0f) {
+        return 1;
+    }
+    return 0;
+}
 
 
 
