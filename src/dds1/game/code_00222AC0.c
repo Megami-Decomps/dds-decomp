@@ -266,7 +266,7 @@ void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].vec[12], &D_003D7BD8[i].vec[13]);
+        mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].auxX, &D_003D7BD8[i].auxY);
         D_003D7BD8[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         D_003D7BD8[i].id = 0;
     }
@@ -295,7 +295,12 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", evtSetSlotVector);
+void evtSetSlotVector(s32 slotIndex, f32 x, f32 y) {
+    if (slotIndex < 7) {
+        D_003D7BD8[slotIndex].auxX = x;
+        D_003D7BD8[slotIndex].auxY = y;
+    }
+}
 
 /* Copy the second vector of the slot bound to `id` (else the first state-2 slot). */
 s32 func_00223718(s32 id, f32 *out) {
@@ -377,15 +382,15 @@ s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
 
     for (i = 0; i < 7; i++) {
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
-            *outX = D_003D7BD8[i].vec[12];
-            *outY = D_003D7BD8[i].vec[13];
+            *outX = D_003D7BD8[i].auxX;
+            *outY = D_003D7BD8[i].auxY;
             return 1;
         }
     }
     for (i = 0; i < 7; i++) {
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
-            *outX = D_003D7BD8[i].vec[12];
-            *outY = D_003D7BD8[i].vec[13];
+            *outX = D_003D7BD8[i].auxX;
+            *outY = D_003D7BD8[i].auxY;
             return 1;
         }
     }
