@@ -248,7 +248,7 @@ typedef struct EffModelResource {
     s32 kind;
     MdlCtx *model;
     u32 attributes;
-    u32 childResource;
+    void *childResource;
     void *source;
 } EffModelResource;
 
@@ -6274,7 +6274,7 @@ typedef struct EffSpanConfig {
 
 void effSeedParticleSpanParameters(u8 *work) {
     u32 index = 0;
-    EffSpanTable *table = (EffSpanTable *)((EffModelResource *)work)->childResource;
+    EffSpanTable *table = ((EffModelResource *)work)->childResource;
     EffSpanConfig *config = ((EffModelResource *)work)->source;
     u32 total = table->total;
     u32 per = config->perSpan;
@@ -6410,7 +6410,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     if (secondary != NULL) {
         effect->model = func_002DC1D0(secondary, param);
         effect->attributes = param;
-        effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
+        effect->childResource = (void *)effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
     }
     return effect;
@@ -6437,7 +6437,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     effect->model = model;
     effInitModelVUState(model);
     effect->attributes = work->attributes;
-    effect->childResource = effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
+    effect->childResource = (void *)effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
     effModelResourceOperations[effect->kind].initialize(effect);
     return effect;
 }
