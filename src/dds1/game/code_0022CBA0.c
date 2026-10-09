@@ -67,7 +67,7 @@ extern u8 D_003BBE88[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void func_0022E5A0(s32 arg0, void *arg1);
-void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
@@ -1136,8 +1136,7 @@ s32 evtViewFindPrevGlyph(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, s32 viewerAddr) {
-    EvtRuntime *viewer = (EvtRuntime *)viewerAddr;
+void evtViewerPushCommandHistory(s32 mode, s32 first, s32 second, EvtRuntime *viewer) {
     s32 count = viewer->historyCount + 1;
 
     viewer->actionMode = mode;
@@ -1268,13 +1267,13 @@ s32 func_00230478(s32 arg0, s32 arg1, EvtRuntime *viewer) {
     case 2:
         viewer->charCol = 0;
         viewer->charRow = 0;
-        evtViewerPushCommandHistory(9, 0xE4, 0x3C, (s32)viewer);
+        evtViewerPushCommandHistory(9, 0xE4, 0x3C, viewer);
         break;
     case 5:
         viewer->value = viewer->headerThird - 1;
         viewer->valueMin = viewer->frameRange.word;
         viewer->valueMax = 10000;
-        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, viewer);
         break;
     case 3:
     case 4:
@@ -1282,7 +1281,7 @@ s32 func_00230478(s32 arg0, s32 arg1, EvtRuntime *viewer) {
         viewer->itemCount = 2;
         viewer->title = "FRAME SET.OK? ";
         viewer->itemNames = D_00368410;
-        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, viewer);
         break;
     case 6:
         viewer->commandStart = 1;
@@ -1298,27 +1297,27 @@ s32 func_00230478(s32 arg0, s32 arg1, EvtRuntime *viewer) {
         viewer->itemCount = 2;
         viewer->title = "START FRAME SELECT";
         viewer->itemNames = D_00368430;
-        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, viewer);
         break;
     case 8:
         viewer->value = 0;
         viewer->valueMin = -5000;
         viewer->valueMax = 5000;
-        evtViewerPushCommandHistory(7, 0xB4, 0x78, (s32)viewer);
+        evtViewerPushCommandHistory(7, 0xB4, 0x78, viewer);
         break;
     case 9:
         viewer->cursor = mnuCampGetPrimaryOption(viewer);
         viewer->itemCount = 2;
         viewer->title = "SET BISTAMODE";
         viewer->itemNames = D_00368418;
-        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, viewer);
         break;
     case 10:
         viewer->cursor = mnuCampGetSecondaryOption(viewer);
         viewer->itemCount = 3;
         viewer->title = "SET SKIPMODE";
         viewer->itemNames = D_00368420;
-        evtViewerPushCommandHistory(2, 0xE4, 0x3C, (s32)viewer);
+        evtViewerPushCommandHistory(2, 0xE4, 0x3C, viewer);
         break;
     }
     return 0;
@@ -1327,8 +1326,8 @@ s32 func_00230478(s32 arg0, s32 arg1, EvtRuntime *viewer) {
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_00230660);
 
-u32 func_00230A38(u32 unused0, u32 unused1, u32 viewerAddr) {
-    evtViewerPushCommandHistory(5, 0x90, 0x48, viewerAddr);
+u32 func_00230A38(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
     return 0;
 }
 
@@ -1562,7 +1561,7 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime
     if (evtEventViewerGetPendingNode(viewer) != 0) {
         viewer->groupFirst = 0;
         viewer->groupCursor = 0;
-        evtViewerPushCommandHistory(0xa, 0x9c, 0x54, (s32)viewer);
+        evtViewerPushCommandHistory(0xa, 0x9c, 0x54, viewer);
         return 0;
     }
 }
@@ -1663,7 +1662,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->actionMode = 0;
             viewer->historyCount = 0;
             viewer->commandResetId = 0;
-            evtViewerPushCommandHistory(1, 0x24, 0x18, (s32)viewer);
+            evtViewerPushCommandHistory(1, 0x24, 0x18, viewer);
             return (s32)evtViewerPickNextHandler;
         }
         func_0022FA60(viewer);
