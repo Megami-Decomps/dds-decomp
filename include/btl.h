@@ -7,14 +7,19 @@
 #include "dat_state.h"
 #endif
 
-/* Mode-dependent first word; actor/flags/timing view is 0x18 bytes in both games. */
-typedef struct BattleEffectState {
+/* Generic first word shared by actor-effect and boss-selection allocations. */
+typedef struct BtlEffectHeader {
     union {
         u32 owner;
         struct BtlUnit *actor;
         u8 statIndex;
         u16 formCount; /* DDS1 HARI1 reads and advances only this halfword. */
     };
+} BtlEffectHeader;
+
+/* DDS1 mode 0x108 owns the complete 0x18-byte timing/vertical-motion record. */
+typedef struct BattleEffectState {
+    BtlEffectHeader header;
     u32 flags, value;        /* +0x04/+0x08 */
     u16 timer;               /* +0x0C */
     u8 active, phase;        /* +0x0E/+0x0F */
@@ -24,6 +29,18 @@ typedef struct BattleEffectState {
     };
     f32 speed;               /* +0x14 */
 } BattleEffectState;
+
+/* DDS1 mode 0x10B allocates a distinct 0x10-byte boss-selection record. */
+typedef struct BtlBossEffectPayload {
+    BtlEffectHeader header;
+    u32 color;
+    s32 options;
+    s32 selectedId;
+} BtlBossEffectPayload;
+
+typedef char BtlEffectHeaderSizeCheck[(sizeof(BtlEffectHeader) == 4) ? 1 : -1];
+typedef char BattleEffectStateSizeCheck[(sizeof(BattleEffectState) == 0x18) ? 1 : -1];
+typedef char BtlBossEffectPayloadSizeCheck[(sizeof(BtlBossEffectPayload) == 0x10) ? 1 : -1];
 
 typedef struct BtlUnit BtlUnit;
 

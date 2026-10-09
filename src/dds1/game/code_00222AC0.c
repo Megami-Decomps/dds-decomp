@@ -588,7 +588,7 @@ u32 evtOpModelLodChg(void) {
     return 1;
 }
 
-u32 evtSetWorldUnitFirstVector(void) {
+u32 evtSetWorldUnitPosition(void) {
     f32 v[4];
     void *ctx;
     s32 id;
@@ -637,7 +637,7 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     return 1;
 }
 
-u32 evtSetWorldUnitThirdVector(void) {
+u32 evtSetWorldUnitScale(void) {
     f32 v[4];
     void *ctx;
     s32 id;
@@ -1574,3 +1574,4 @@ u32 evtOpCopyModelTransformFromSource(void) {
 INCLUDE_SDATA(const s32, "game/code_00222AC0", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "game/code_00222AC0", D_003BBDB0);
+

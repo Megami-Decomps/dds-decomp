@@ -145,3 +145,4 @@ ObjBase *dds3CreateSlotResourceState(void *owner) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00111838", dds3SlotRingCursor);
+

@@ -1122,37 +1122,40 @@ void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel, u32 unu
 }
 
 void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
-    s32 *source = &menu->active[0].effect;
-    s32 *dest = &menu->pending[0].sprite;
+    s32 *activeEffect = &menu->active[0].effect;
+    MenuSpriteRef *pendingSlot = &menu->pending[0];
     s32 remaining = 1;
     do {
-        u32 previous = *dest;
-        u32 next = source[4];
-        dest[-4] = previous;
-        *source = next;
-        *dest = 0;
-        source += 2;
-        dest += 2;
+        struct EffectSlotSet *pendingSprite = pendingSlot->sprite;
+        /* The corresponding pending effect is four words after activeEffect. */
+        u32 pendingEffect = activeEffect[4];
+        pendingSlot[-2].sprite = pendingSprite;
+        *activeEffect = pendingEffect;
+        pendingSlot->sprite = NULL;
+        activeEffect += 2;
+        pendingSlot++;
     } while (--remaining >= 0);
     if (menu->active[0].sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
-        effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)menu->active[0].sprite,
+        itfSetGridEntryQuantizedAndRefresh(menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
+        effConfigureWithDefaultSetting(menu->active[0].sprite,
                                           menu->active[0].effect,
                                           menu->handles[2],
                                           0, 10, 2);
     }
 }
 
-void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32 y, s32 color) {
+void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
+                                               struct EffectSlotSet *sprite,
+                                               s32 y, s32 color) {
     mnuActivatePendingPanelResource(menu);
-    menu->pending[0].sprite = x;
+    menu->pending[0].sprite = sprite;
     menu->pending[0].effect = y;
-    menu->pending[1].sprite = x;
+    menu->pending[1].sprite = sprite;
     menu->pending[1].effect = color;
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, y, 0, 0, -0x400, 0);
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, color, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
+    itfSetGridEntryQuantizedAndRefresh(sprite, y, 0, 0, -0x400, 0);
+    effConfigureIndexedSlotResource(sprite, y, menu->handles[0], 0, 3);
+    itfSetGridEntryQuantizedAndRefresh(sprite, color, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(sprite, color,
                                    menu->handles[1], 0, 10, 0);
 }
 

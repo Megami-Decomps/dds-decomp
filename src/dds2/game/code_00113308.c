@@ -887,3 +887,4 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
+

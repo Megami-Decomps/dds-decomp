@@ -2,15 +2,6 @@
 _start = 0x00100008; // type:func
 // Pad port table in .sdata (pad init reads it as its own 4-byte object)
 // "FREE CAMERA" follows func_00287258's last vector constant in .rodata; its own item (D_003BC7B8 points at it)
-effObjSetInnerPosition = 0x0010F6E0; // type:func
-effObjSetInnerRotation = 0x0010F710; // type:func
-effObjSetInnerScale = 0x0010F740; // type:func
-effObjFetchInnerPosition = 0x0010F770; // type:func
-effObjFetchInnerRotationNormalized = 0x0010F788; // type:func
-effObjFetchInnerScale = 0x0010F7A8; // type:func
-effObjAddInnerPosition = 0x0010F7C0; // type:func
-effObjMultiplyInnerRotation = 0x0010F7F8; // type:func
-effObjMultiplyInnerScale = 0x0010F848; // type:func
 D_003B2560 = 0x003B2560; // type:asciz
 // Two s8 globals open game/code_002C5FD8's .sdata at 0x3BD280 (code_002C3868 reads the first);
 // splitting the unit at 0x3BD281 linked D_003BD281 one byte low
@@ -3924,9 +3915,7 @@ evtCommandAddEffectUnitToWorld = 0x00226D98; // type:func
 evtCommandAddFlaggedEffectUnitToWorld = 0x00226E10; // type:func
 evtCommandCreateWorldEffectObject = 0x00226FC0; // type:func
 evtCommandDestroyEffectUnitById = 0x00227050; // type:func
-evtCommandSetEffectUnitFirstVector = 0x00227090; // type:func
 evtCommandSetEffectUnitEulerRotation = 0x00227138; // type:func
-evtCommandSetEffectUnitSecondVector = 0x00227210; // type:func
 evtCommandEnableSolarAdvance = 0x00227708; // type:func
 evtCommandDisableSolarAdvance = 0x00227728; // type:func
 evtCommandReadMirroredSolarPhase = 0x00227748; // type:func
@@ -7350,6 +7339,21 @@ sdfGraphResetDeviceForCurrentMode = 0x002D1020; // type:func
 sdfGraphWakeDisplayThread = 0x002D1080; // type:func
 mdlGetSelectedRecord = 0x0021CF00; // type:func
 
+// Inner-transform helpers and script transform setters (inferred names).
+effObjSetInnerPosition = 0x0010F6E0; // type:func
+effObjSetInnerRotation = 0x0010F710; // type:func
+effObjSetInnerScale = 0x0010F740; // type:func
+effObjFetchInnerPosition = 0x0010F770; // type:func
+effObjFetchInnerRotationNormalized = 0x0010F788; // type:func
+effObjFetchInnerScale = 0x0010F7A8; // type:func
+effObjAddInnerPosition = 0x0010F7C0; // type:func
+effObjMultiplyInnerRotation = 0x0010F7F8; // type:func
+effObjMultiplyInnerScale = 0x0010F848; // type:func
+evtSetWorldUnitPosition = 0x00223FB0; // type:func  // dds2 0x0023EBE8
+evtSetWorldUnitScale = 0x00224130; // type:func  // dds2 0x0023ED68
+evtCommandSetEffectUnitPosition = 0x00227090; // type:func
+evtCommandSetEffectUnitQuaternionRotation = 0x00227210; // type:func
+
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -7795,8 +7799,6 @@ mdlApplyViewerResourceMenuAction = 0x0021C310; // type:func  // dds2 0x00236E80
 mdlDrawViewerTexturePreview = 0x0021C6E8; // type:func  // dds2 0x00237258
 evtUnitStepScaledValue = 0x00220748; // type:func  // dds2 0x0023B2B8
 evtUnitGetNestedValue = 0x002220D8; // type:func  // dds2 0x0023CC48
-evtSetWorldUnitFirstVector = 0x00223FB0; // type:func  // dds2 0x0023EBE8
-evtSetWorldUnitThirdVector = 0x00224130; // type:func  // dds2 0x0023ED68
 evtCommandSetUnitValue = 0x00224A80; // type:func  // dds2 0x0023F6E0
 evtViewerSyncWorldGroups = 0x0022EE90; // type:func  // dds2 0x00249A98
 evtViewerCountFlaggedUpdates = 0x0022F2A8; // type:func  // dds2 0x00249EB0
