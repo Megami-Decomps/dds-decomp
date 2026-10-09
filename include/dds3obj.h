@@ -12,7 +12,7 @@ struct Motion;
 
 typedef struct ObjBase {
     u32 flags;
-    u32 worldIndexNode;
+    struct WorldIndexNode *worldIndexNode;
     u32 resourceState;
     u32 resourceHandle;
     void *slots[8];
@@ -87,6 +87,7 @@ typedef char WorldIndexNodeLayoutAssert[
 
 WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 void dds3DestroyWorldIndexNode(WorldIndexNode *node);
+WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object);
 u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 u16 dds3GetWorldValueCount(WorldValueIndices *object);
 s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
