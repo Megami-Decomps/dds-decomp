@@ -151,7 +151,7 @@ typedef struct BrsSkillPackageWork {
     struct SdfMemBlock *allocation;
     u32 overlayFlags;
     BrsResultTransition transition;
-    s32 fadeTarget;
+    struct EffectList *resourceList;
     BrsRewardSummary rewards;
 #ifdef VERSION_DDS1
     u8 pad88[8];
