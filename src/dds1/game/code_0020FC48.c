@@ -1311,7 +1311,6 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 extern u32 effGetWindTextureHandle(void);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(s32, void *);
 extern u32 btlMulColor(u32, u32);
 extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
 
@@ -1327,7 +1326,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList(list, tag);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
     registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
@@ -1362,7 +1361,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     }
     tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
-    sdfAppendDmaTagToList(list, tag);
+    sdfAppendDmaTagToList((SdfListHead *)list, (u32)tag);
 }
 
 extern f32 func_002F9F60(f32);

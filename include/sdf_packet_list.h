@@ -15,6 +15,7 @@ void sdfAppendPacketRange(struct SdfListHead *list, u32 packetAddress,
                           u32 rangeTailAddress);
 void sdfAppendReferencePacket(struct SdfListHead *list, u32 packetAddress);
 void sdfAppendCallPacket(struct SdfListHead *list, u32 packetAddress);
+void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packetAddress);
 void sdfAppendDmaPrimary(struct SdfListHead *list, u32 source,
                          struct SdfDmaNode *node);
 

@@ -258,7 +258,6 @@ extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_0032DB30(s32, u32, s32);
 
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 extern void func_0032DB78(s32, u32, s32);
 
