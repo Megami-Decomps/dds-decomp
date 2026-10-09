@@ -200,7 +200,7 @@ extern s32 fldSceneSoundBase;
 extern void ddsReleaseUnitObject(EffWorldNode *node);
 
 typedef struct {
-    s32 unk0;
+    EffWorldNode *objectHandle;
     s32 unk4;
     u8 pad8[0xC];
 } FldEnt14; /* 0x14 bytes */
@@ -3452,23 +3452,93 @@ void *fldFindFieldEntryByKeyPair(s32 key0, s32 key1) {
     return NULL;
 }
 
+typedef struct FldSparkController {
+    void *object;              /* 0x00 */
+    void *entry;               /* 0x04 */
+    s32 phase;                 /* 0x08 */
+    s32 countdown;             /* 0x0C */
+    s32 terminated;            /* 0x10 */
+    s32 mode;                  /* 0x14 */
+    s32 modeCountdown;         /* 0x18 */
+    s32 pendingMode;           /* 0x1C */
+    s32 frame;                 /* 0x20 */
+    s32 pulse;                 /* 0x24 */
+    s32 dialogPhase;           /* 0x28 */
+    s32 unk2C;                 /* 0x2C */
+    s32 entryCount;            /* 0x30 */
+    s32 unk34;                 /* 0x34 */
+    s32 unk38;                 /* 0x38 */
+    s32 cursor;                /* 0x3C */
+} FldSparkController;
+
+extern FldSparkController fldSparkControlState;
+
+typedef struct FldSparkEntryInfo {
+    u8 pad00[0xE];
+    s16 modelId;
+} FldSparkEntryInfo;
+
+extern u32 dds3AdvanceWorldCounter(void);
+extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
+extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
+extern void func_00111E30(EffWorldNode *node, s32 kind, s32 resource);
+extern void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector);
+extern void func_00147DB0(void *unit);
+
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08E8);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A08F8);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014B688);
+const char D_003A0908[] = "HUNT_MDL_UNIT";
+
+extern FldVec4 D_003A08E8;
+extern FldVec4 D_003A08F8;
+
+void func_0014B688(void) {
+    FldVec4 position = D_003A08E8;
+    FldVec4 rotation;
+    MdlCtx *resource;
+    s32 i;
+
+    memset(&rotation, 0, sizeof(rotation));
+    {
+        FldVec4 scale = D_003A08F8;
+
+        for (i = 0; i < 17; i++) {
+            fldSparkObjectEntries[i].objectHandle = NULL;
+            fldSparkObjectEntries[i].unk4 = -1;
+            *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
+        }
+        for (i = 0; i < 17; i++) {
+            fldSparkObjectEntries[i].objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
+            dds3SetWorldNodeValue(fldSparkObjectEntries[i].objectHandle, (u32)D_003A0908);
+            if (i == 16) {
+                func_00111E30(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);
+            } else {
+                func_00111E30(fldSparkObjectEntries[i].objectHandle, 1, 0x146);
+            }
+            effObjSetInnerThirdVec(fldSparkObjectEntries[i].objectHandle, (u128 *)&scale);
+            resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldSparkObjectEntries[i].objectHandle);
+            resource->first->frameStep = 1.0f;
+            mdlAddEntryFlagged(resource, 0, 0);
+            resource->flags |= 1;
+            dds3SetObjectFlags(fldSparkObjectEntries[i].objectHandle, 0x400);
+            func_00147DB0(evtUnitGetNestedValue(fldSparkObjectEntries[i].objectHandle));
+        }
+    }
+}
 
 void fldClearObjectEntryHandles(void) {
     FldEnt14 *entry = fldSparkObjectEntries;
     s32 i = 0x10;
 
     do {
-        s32 temp = entry->unk0;
+        EffWorldNode *objectHandle = entry->objectHandle;
 
         i--;
-        if (temp != 0) {
-            ddsReleaseUnitObject((EffWorldNode *)temp);
-            entry->unk0 = 0;
+        if (objectHandle != NULL) {
+            ddsReleaseUnitObject(objectHandle);
+            entry->objectHandle = NULL;
         }
         entry++;
     } while (i >= 0);
@@ -3528,26 +3598,6 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
 }
 
 /* Complete 0x40-byte field spark controller, including the weather timer. */
-typedef struct FldSparkController {
-    void *object;              /* 0x00 */
-    void *entry;               /* 0x04 */
-    s32 phase;                 /* 0x08 */
-    s32 countdown;             /* 0x0C */
-    s32 terminated;            /* 0x10 */
-    s32 mode;                  /* 0x14 */
-    s32 modeCountdown;         /* 0x18 */
-    s32 pendingMode;           /* 0x1C */
-    s32 frame;                 /* 0x20 */
-    s32 pulse;                 /* 0x24 */
-    s32 dialogPhase;           /* 0x28 */
-    s32 unk2C;                 /* 0x2C */
-    s32 entryCount;            /* 0x30 */
-    s32 unk34;                 /* 0x34 */
-    s32 unk38;                 /* 0x38 */
-    s32 cursor;                /* 0x3C */
-} FldSparkController;
-
-extern FldSparkController fldSparkControlState;
 extern s32 D_003D62DC[];
 struct EffWorldNode;
 extern void effObjSetInnerFirstVec(struct EffWorldNode *, u128 *);
@@ -3578,9 +3628,9 @@ s32 func_0014BA50(s32 index, s32 reserved) {
     D_003D62DC[0] = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
         PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
-        effObjSetInnerFirstVec((struct EffWorldNode *)fldSparkObjectEntries[slot].unk0, (u128 *)fldSparkSlots[index].pos);
-        effObjSetInnerSecondVec((struct EffWorldNode *)fldSparkObjectEntries[slot].unk0, (u128 *)fldSparkSlots[index].vel);
-        flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSparkObjectEntries[slot].unk0);
+        effObjSetInnerFirstVec(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
+        effObjSetInnerSecondVec(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
+        flags = (s32 *)dds3GetObjectBaseResourceHandle(fldSparkObjectEntries[slot].objectHandle);
         *flags &= ~1;
         fldSparkSlots[index].objectSlot = slot;
         fldSparkObjectEntries[slot].unk4 = index;
@@ -3597,7 +3647,7 @@ extern FldVec4 D_003A0918;
 
 void fldFreeSparkSlot(s32 index) {
     FldVec4 vec;
-    s32 obj;
+    EffWorldNode *obj;
     s32 *flags;
     s16 slot;
 
@@ -3605,9 +3655,9 @@ void fldFreeSparkSlot(s32 index) {
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.v[0] = fldSparkSlots[index].pos[0];
         vec.v[2] = fldSparkSlots[index].pos[2];
-        effObjSetInnerFirstVec((struct EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0, (u128 *)&vec);
-        obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].unk0;
-        flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)obj);
+        effObjSetInnerFirstVec(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
+        obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
+        flags = (s32 *)dds3GetObjectBaseResourceHandle(obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
