@@ -2263,7 +2263,36 @@ void func_001AAC50(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB160);
+void func_001AB160(BtlUnit *unit) {
+    DatPartyRecord saved;
+    DatGameState *scanState = datGameState;
+    s32 originalIndex;
+    s32 index;
+
+    originalIndex = unit->unk2E4;
+    memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
+    index = originalIndex;
+    if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
+        do {
+            memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
+            if (datGameState->party[index + 1].flags & 2) {
+                btlFindActiveActorByKind(index + 1)->unk2E4 = index;
+            }
+            index++;
+            if (index >= 4) {
+                break;
+            }
+            scanState = datGameState;
+        } while ((u16)(scanState->party[index + 1].flags & 1));
+    }
+
+    memcpy(&datGameState->party[index], &saved, sizeof(saved));
+    unit->partyRecord.flags &= ~2;
+    datGameState->party[index].flags &= ~2;
+    unit->unk2E4 = 6;
+    func_001AABD8();
+    btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
+}
 
 extern const char D_00415130[];
 
