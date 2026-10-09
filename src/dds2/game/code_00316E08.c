@@ -8,6 +8,8 @@
 #include "itf.h"
 #include "mnu_shooting.h"
 #include "kwln_task_lifecycle.h"
+#include "file_pac.h"
+#include "file_request_api.h"
 
 
 
@@ -205,11 +207,332 @@ s32 evtCallShooting(void) {
     return 1;
 }
 
+/* The writable loader table has 13 complete 0x2C-byte descriptors. */
+typedef struct MnuPackageDescriptor {
+    char name[0x24];
+    s8 kind;
+    u8 pad25[3];
+    s32 value;
+} MnuPackageDescriptor;
+
+typedef char MnuPackageDescriptor_size_is_0x2C[
+    (sizeof(MnuPackageDescriptor) == 0x2C) ? 1 : -1];
+
+extern MnuPackageDescriptor D_0040A970[13];
+extern char D_00438920[];
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4D0);
 
 INCLUDE_RODATA(const s32, "game/code_00316E08", D_0042D4E0);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00317058);
+const char D_0042D500[] __attribute__((aligned(8))) = "fileload ...OK!!\n";
+const char D_0042D518[] __attribute__((aligned(8))) = "SMG already Read[%s]\n";
+const char D_0042D530[] __attribute__((aligned(8))) = "pac load check ok ...\n";
+const char D_0042D548[] __attribute__((aligned(8))) = "FileSize %d\n";
+const char D_0042D558[] __attribute__((aligned(8))) = "ObjectList Create ... %s \n";
+const char D_0042D578[] __attribute__((aligned(8))) = "... OK!! \n";
+const char D_0042D588[] __attribute__((aligned(8))) = "PlayerObjectList Create ... %s \n";
+const char D_0042D5B0[] __attribute__((aligned(8))) = "MapObjectList Create ... %s \n";
+const char D_0042D5D0[] __attribute__((aligned(8))) = "DrawbjectList Create ... %s \n";
+const char D_0042D5F0[] __attribute__((aligned(8))) = "load SPR File %s \n";
+const char D_0042D608[] __attribute__((aligned(8))) = "load SE %s \n";
+const char D_0042D618[] __attribute__((aligned(8))) = "DrawbjectList Create ...    [%s:%d] \n";
+const char D_0042D640[] __attribute__((aligned(8))) = "PlayerObjectList Create ... [%s:%d] \n";
+const char D_0042D668[] __attribute__((aligned(8))) = "ObjectList Create ...       [%s:%d] \n";
+const char D_0042D690[] __attribute__((aligned(8))) = "MapObjectList Create ...    [%s:%d] \n";
+const char D_0042D6B8[] __attribute__((aligned(8))) = "%s ... OK!! \n";
+const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \n";
+
+/* The native wrapper tail-forwards the request through its legacy ABI. */
+extern void func_002C7CE8();
+extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
+extern void fileQueueNotifyAllJobsComplete(u8 *queue);
+extern s32 sndFindPackedTrackLoadStatus(s32 sound);
+extern void sndEnsureMidiBankResident(s32 sound);
+extern void effRequestResourceByMode(const char *prefix, const char *name,
+                                     s32 mode, u32 *outInstance);
+extern void func_0035B6E0(const char *format, ...);
+extern MnuSectionObjectList *func_00317988(void *data);
+void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
+
+/* Advance the shooting package loader; only the completed state returns one. */
+s32 func_00317058(u8 *workBytes) {
+    MnuShootingWork *work = (MnuShootingWork *)workBytes;
+    void *data = NULL;
+
+    switch (work->unk68) {
+    case 0:
+        work->unk6C = 0;
+        work->unk68 = 2;
+        break;
+
+    case 1:
+        work->unk68 = 0;
+        work->state = 1;
+        evtPrintDeveloperConsoleMessage(D_0042D500);
+        return 1;
+
+    case 2:
+        switch (D_0040A970[work->unk6C].kind) {
+        case 0:
+            if (work->round == D_0040A970[work->unk6C].value) {
+                work->packageRequest = fileQueueDefaultCallbackRequest(
+                    D_0040A970[work->unk6C].name);
+            } else {
+                work->unk6C++;
+                if (work->unk6C < 13) {
+                    work->unk68 = 2;
+                } else {
+                    work->unk68 = 1;
+                }
+                return 0;
+            }
+            break;
+        case 1:
+            if (work->resourceSlots[D_0040A970[work->unk6C].value] == 0) {
+                effRequestResourceByMode(D_00438920,
+                    D_0040A970[work->unk6C].name, 0,
+                    &work->resourceSlots[D_0040A970[work->unk6C].value]);
+            } else {
+                work->unk68 = 4;
+            }
+            break;
+        case 2: {
+            s32 status = sndFindPackedTrackLoadStatus(
+                D_0040A970[work->unk6C].value);
+            if (status == 0) {
+                sndEnsureMidiBankResident(D_0040A970[work->unk6C].value);
+            } else {
+                work->unk68 = 4;
+                evtPrintDeveloperConsoleMessage(D_0042D518,
+                    D_0040A970[work->unk6C].name);
+            }
+            break;
+        }
+        case 5:
+            if (work->queueCopies[0] == NULL) {
+                work->packageDataRequest = fileQueuePlainDispatchRequest(
+                    D_0040A970[work->unk6C].name);
+            } else {
+                work->unk6C++;
+                if (work->unk6C < 13) {
+                    work->unk68 = 2;
+                } else {
+                    work->unk68 = 1;
+                }
+                return 0;
+            }
+            break;
+        case 3:
+        case 4:
+            if (work->round == D_0040A970[work->unk6C].value) {
+                work->packageDataRequest = fileQueuePlainDispatchRequest(
+                    D_0040A970[work->unk6C].name);
+            } else {
+                work->unk6C++;
+                if (work->unk6C < 13) {
+                    work->unk68 = 2;
+                } else {
+                    work->unk68 = 1;
+                }
+                return 0;
+            }
+            break;
+        }
+        work->unk68 = 3;
+        break;
+
+    case 3:
+        switch (D_0040A970[work->unk6C].kind) {
+        case 0:
+            if (fileIsRequestReadyInCurrentMode(work->packageRequest) != 0) {
+                work->unk68 = 4;
+            }
+            break;
+        case 1:
+            if (work->resourceSlots[D_0040A970[work->unk6C].value] != 0) {
+                work->unk68 = 4;
+            }
+            break;
+        case 2:
+            if (sndFindPackedTrackLoadStatus(D_0040A970[work->unk6C].value) == 1) {
+                work->unk68 = 4;
+            }
+            break;
+        case 3:
+        case 4:
+        case 5:
+            if (fileRequestIsReady(work->packageDataRequest) != 0) {
+                evtPrintDeveloperConsoleMessage(D_0042D530);
+                work->unk68 = 4;
+            }
+            break;
+        }
+        break;
+
+    case 4: {
+        struct FileRequest *request = work->packageRequest;
+
+        if (request != NULL) {
+            data = (void *)(u32)fileGetLoadedDataAddress(request);
+            request = work->packageRequest;
+            evtPrintDeveloperConsoleMessage(D_0042D548,
+                                            fileGetResourceSize(request));
+        }
+
+        switch (D_0040A970[work->unk6C].kind) {
+        case 0:
+            switch (work->unk6C) {
+            case 6:
+            case 10:
+            case 14:
+                evtPrintDeveloperConsoleMessage(D_0042D558, D_0040A970[work->unk6C].name);
+                work->objects = func_00317988(data);
+                func_0035B6E0(D_0042D578);
+                break;
+            case 7:
+            case 11:
+            case 15:
+                func_0035B6E0(D_0042D588, D_0040A970[work->unk6C].name);
+                work->playerObjects = func_00317988(data);
+                func_0035B6E0(D_0042D578);
+                break;
+            case 8:
+            case 12:
+            case 16:
+                func_0035B6E0(D_0042D5B0, D_0040A970[work->unk6C].name);
+                work->mapObjects = func_00317988(data);
+                func_0035B6E0(D_0042D578);
+                break;
+            case 9:
+            case 13:
+            case 17:
+                func_0035B6E0(D_0042D5D0, D_0040A970[work->unk6C].name);
+                work->drawObjects = func_00317988(data);
+                func_0035B6E0(D_0042D578);
+                break;
+            default:
+                break;
+            }
+            break;
+
+        case 1:
+            func_0035B6E0(D_0042D5F0, D_0040A970[work->unk6C].name);
+            break;
+
+        case 2:
+            func_0035B6E0(D_0042D608, D_0040A970[work->unk6C].name);
+            break;
+
+        case 5: {
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
+            PacWork *entry = pacRequest->packet.queueHead;
+            if (entry != NULL) {
+                struct FileQueue **queueSlot = work->queueCopies;
+
+                do {
+                    if (entry->packet[0] == 1) {
+                        struct FileQueue *clone =
+                            fileCloneQueueEntries((struct FileQueue *)entry->dataCursor);
+                        *queueSlot++ = clone;
+                        fileQueueNotifyAllJobsComplete((u8 *)clone);
+                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                    }
+                    entry = entry->next;
+                } while (entry != NULL);
+            }
+            func_002C7CE8(work->packageDataRequest);
+            work->packageDataRequest = NULL;
+            break;
+        }
+
+        case 4: {
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
+            PacWork *entry = pacRequest->packet.queueHead;
+            s32 entryIndex = 0;
+
+            while (entry != NULL) {
+                if (entry->packet[0] == 1) {
+                    switch (entryIndex) {
+                    case 0:
+                        evtPrintDeveloperConsoleMessage(D_0042D618, D_0040A970[work->unk6C].name, 0);
+                        work->drawObjects = func_00317988(entry->dataCursor);
+                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        break;
+                    case 1:
+                        evtPrintDeveloperConsoleMessage(D_0042D640, D_0040A970[work->unk6C].name, 1);
+                        work->playerObjects = func_00317988(entry->dataCursor);
+                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        break;
+                    case 2:
+                        evtPrintDeveloperConsoleMessage(D_0042D668, D_0040A970[work->unk6C].name, 2);
+                        work->objects = func_00317988(entry->dataCursor);
+                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        break;
+                    case 3:
+                        evtPrintDeveloperConsoleMessage(D_0042D690, D_0040A970[work->unk6C].name, 3);
+                        work->mapObjects = func_00317988(entry->dataCursor);
+                        sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                        evtPrintDeveloperConsoleMessage(D_0042D578);
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                entry = entry->next;
+                entryIndex++;
+            }
+            func_002C7CE8(work->packageDataRequest);
+            work->packageDataRequest = NULL;
+            break;
+        }
+
+        case 3: {
+            struct FilePacRequest *pacRequest =
+                (struct FilePacRequest *)work->packageDataRequest;
+            PacWork *entry = pacRequest->packet.queueHead;
+
+            while (entry != NULL) {
+                if (entry->packet[0] == 1) {
+                    mdlLoadViewerPackageFromWork((MnuPackageEntry *)entry);
+                    sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
+                }
+                entry = entry->next;
+            }
+            func_002C7CE8(work->packageDataRequest);
+            work->packageDataRequest = NULL;
+            break;
+        }
+
+        default:
+            break;
+        }
+
+        evtPrintDeveloperConsoleMessage(D_0042D6B8, D_0040A970[work->unk6C].name);
+
+        if (D_0040A970[work->unk6C].kind == 0) {
+            sdfReleaseResourceAllocation(
+                (struct SdfMemBlock *)(u32)fileGetResourceHandle(work->packageRequest));
+            filePollEntryCleanup(work->packageRequest);
+            evtPrintDeveloperConsoleMessage(D_0042D6C8);
+        }
+
+        work->unk6C++;
+        if (work->unk6C < 13) {
+            work->unk68 = 2;
+        } else {
+            work->unk68 = 1;
+        }
+        break;
+    }
+    }
+    return 0;
+}
+
 
 /* Forward the stored package-request words without interpreting their roles. */
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry) {
@@ -596,4 +919,3 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438948);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043894C);
-

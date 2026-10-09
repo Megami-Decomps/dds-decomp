@@ -8,6 +8,7 @@ struct SdfMemBlock;
 struct MnuSectionObjectList;
 struct MdlCtx;
 struct FileQueue;
+struct FileRequest;
 struct WideSlotPool;
 struct CompactSlotPool;
 
@@ -150,11 +151,11 @@ typedef struct MnuShootingWork {
             u32 remainingSlots[5];
         } fadeResources;
     };
-    u8 pad4C[0xC];
+    struct FileQueue *queueCopies[3]; /* 0x4C: copied queue views retained from the request */
     s32 state;
     s32 (*initialize)(u8 *work);
     s32 (*update)(u8 *work);
-    u8 pad64[4];
+    struct FileRequest *packageRequest; /* 0x64 */
     u32 unk68;
     u32 unk6C;
     u32 unk70Bit0 : 1;
@@ -187,11 +188,17 @@ typedef struct MnuShootingWork {
     FadeNumber frame;
     s32 choiceIndex;                /* 0x1D4 */
     u16 unk1D8;
-    u8 pad1DA[6];
+    u8 pad1DA[2];
+    struct FileRequest *packageDataRequest; /* 0x1DC */
 } MnuShootingWork;
 
 typedef char MnuShootingWork_size_must_be_0x1E0[
     (sizeof(MnuShootingWork) == 0x1E0) ? 1 : -1];
+
+typedef char ShootingPackageOffsetsAssert[
+    ((unsigned long)&((MnuShootingWork *)0)->queueCopies == 0x4C &&
+     (unsigned long)&((MnuShootingWork *)0)->packageRequest == 0x64 &&
+     (unsigned long)&((MnuShootingWork *)0)->packageDataRequest == 0x1DC) ? 1 : -1];
 
 typedef char ShootingPoolOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&
