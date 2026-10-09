@@ -410,8 +410,8 @@ s32 func_00318C00(MnuShootingWork *work) {
     while (index < list->capacity) {
         u32 stateWord = record->state.word;
         if ((stateWord & 1) != 0) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
 
             switch (kind) {
@@ -460,8 +460,8 @@ s32 func_00318C00(MnuShootingWork *work) {
     while (index < list->capacity) {
         u32 stateWord = record->state.word;
         if ((stateWord & 1) != 0) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
 
             switch (kind) {
