@@ -1,10 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
-
-typedef struct WorldSlotObject {
-    u8 pad00[0x18];
-    u32 *slots;
-} WorldSlotObject;
+#include "dds3_path.h"
 
 
 extern EffWorldNode *dds3AppendWorldObjectNode();
@@ -110,11 +106,13 @@ s32 dds3AllocateClearedObjectWork(EffWorldNode *obj) {
     return 1;
 }
 
-void dds3ReleaseWorldSlotResource(WorldSlotObject *object) {
-    u32 *resource;
+extern void dds3ReleaseObjectResource(EffWorldNode *object);
 
-    resource = object->slots;
-    dds3ReleaseObjectResource();
-    dds3ExchangeSlot(*resource, 0, 1);
+void dds3ReleaseWorldSlotResource(EffWorldNode *object) {
+    Dds3SlotResource *resource;
+
+    resource = object->data;
+    dds3ReleaseObjectResource(object);
+    dds3ExchangeSlot(resource->target, 0, 1);
     sdfReleaseChipBlock(resource);
 }
