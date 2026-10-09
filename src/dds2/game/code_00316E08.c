@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -244,7 +245,6 @@ const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
 extern void func_002C7CE8();
-extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
 extern void fileQueueNotifyAllJobsComplete(u8 *queue);
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);
@@ -868,7 +868,7 @@ void func_00319F48(void) {
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);
-    func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+    func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
     D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
                                                position[0], position[1], position[2], 0.5f);
@@ -886,7 +886,7 @@ void mnuUpdateTimedEffectPosition(void) {
         x = origin->x;
         y = origin->y;
         value = mnuEvaluateTimedValue(&D_0040ABF8);
-        func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+        func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
         fileQueueSetPosition(D_00438930->queue, position);
     }
 }

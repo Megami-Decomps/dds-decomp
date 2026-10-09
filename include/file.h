@@ -10,6 +10,7 @@
 #define FILE_IO_MAX_CHUNK_BYTES 0x8000
 
 struct FileNode;
+struct FileQueue;
 struct FileRequest;
 struct FileCbNode;
 struct SdfMemBlock;
@@ -65,6 +66,10 @@ void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 o
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
 void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandPath, u16 option);
 void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *commandPath, u16 selector);
+
+struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
+struct FileQueue *fileQueueClone(struct FileQueue *source);
+void fileQueueDestroy(struct FileQueue *queue);
 
 /* Queue flags describe payload sharing and secondary-buffer links. */
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1

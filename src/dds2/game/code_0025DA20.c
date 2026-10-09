@@ -2116,7 +2116,55 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
     return scene->window->list->count;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261B98);
+extern u32 D_003CD0D0[][16];
+
+s32 func_00261B98(MenuTerminalContext *scene) {
+    CampWindowParams *params;
+    void *block;
+    u32 value;
+    s32 price;
+    s32 i;
+
+    if (scene->window != NULL) {
+        if (scene->window->list->context != NULL) {
+            sdfReleaseChipBlock(scene->window->list->context);
+            scene->window->list->context = NULL;
+        }
+        mnuDestroyWindowContainer(scene->window);
+    }
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x16);
+    for (i = 0; i < 0x100; i++) {
+        scene->unkC7 = 1;
+        if (mnuIsBulletItemId(i) != 0 || func_002C54B0(i) != 0) {
+            continue;
+        }
+        if (datGameState->inventory.counts[i] != 0) {
+            if ((datItemSkillRecords[i].flags & 3) != 0) {
+                params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
+                value = datItemSkillRecords[i].price;
+                value >>= 1;
+                params->value = value;
+                price = func_002613C8(0, value);
+                params->id = i;
+                params->value = price;
+                params->price = price;
+            } else if (func_002C5498(i) != 0) {
+                params = &mnuAppendWindowListNode(scene->window, D_00435E5C + i * 0x19)->camp;
+                value = D_003CD0D0[i - 0x60][evtGetSolarPhase()];
+                params->value = value;
+                price = func_002613C8(0, value);
+                params->id = i;
+                params->value = price;
+                params->price = price;
+            }
+        }
+    }
+    scene->window->list->drawCallback = func_002958B0;
+    block = sdfAllocSizeClassBlock(0x14);
+    memset(block, 0, 0x14);
+    scene->window->list->context = block;
+    return scene->window->list->count;
+}
 
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
     s32 handle;
