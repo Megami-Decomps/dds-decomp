@@ -377,7 +377,6 @@ extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void func_003332E8(u32, u32);
 extern s32 func_00167A10(EffPacketParams *);
 

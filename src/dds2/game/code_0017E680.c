@@ -44,7 +44,6 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_00167A10(EffResourceRenderState *);
 extern f32 D_003B1540[][4];

@@ -52,7 +52,6 @@ extern s32 func_003101B8(s32 directory);
 extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
-extern void sdfInitPacketList(s32 arg0);
 extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);
 

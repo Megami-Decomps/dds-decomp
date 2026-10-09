@@ -159,7 +159,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(SdfListHead *);
 
 
 extern u32 sdfConsFinalizePacketHeader(u32, s32);

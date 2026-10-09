@@ -9,7 +9,6 @@
 extern void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsCoordinates);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(void *);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern s32 billGetWorkTransformMatrix(s32 packet);
 extern SdfPoolNode D_003253C8;
