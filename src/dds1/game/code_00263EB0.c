@@ -448,7 +448,7 @@ void mnuDrawTitleFadeSprites(BrsSkillPackageWork *work) {
     };
     s32 i;
 
-    if (work->teardownHandle) {
+    if (work->teardownResource != NULL) {
         for (i = 0; i < 8; i++) {
             u32 color = work->opacity | 0x80808000;
 
@@ -457,7 +457,7 @@ void mnuDrawTitleFadeSprites(BrsSkillPackageWork *work) {
             colors[2] = color;
             colors[3] = color;
             func_002BF438(positions[i][0] << 4, positions[i][1] << 3, 0,
-                         colors, 0, (EffectSlotSet *)work->teardownHandle, positions[i][2], 0x53);
+                         colors, 0, work->teardownResource, positions[i][2], 0x53);
         }
     }
 }
@@ -517,7 +517,7 @@ void func_002650C8(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary
 
             iconGlyph = itfCreateConvertedTextGlyph(x + 0x300, y, depth, color, name, NULL);
             func_002BF438(x + 0xB20, y + 0x28, 0, colors, 0,
-                          (EffectSlotSet *)work->teardownHandle, 0x1C, 0x53);
+                          work->teardownResource, 0x1C, 0x53);
             func_003014F0(formatted, D_003BC560, parameter);
             valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);

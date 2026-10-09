@@ -74,7 +74,7 @@ void func_002A0148(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
     memcpy(color, D_004285E0, sizeof(color));
 
-    if (work->teardownHandle != 0) {
+    if (work->teardownResource != NULL) {
         if (work->profileAnimation[index].iconState >= 2) {
             packed = work->profileAnimation[index].iconOpacity | 0x80808000;
             color[0] = packed;
@@ -82,9 +82,9 @@ void func_002A0148(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
             color[2] = packed;
             color[3] = packed;
             func_00306C28(x + 0x1180, y + 0x130, z, color, 0,
-                         (struct EffectSlotSet *)work->teardownHandle, 0x16, depth);
+                         work->teardownResource, 0x16, depth);
             func_00306C28(x + 0x17E0, y + 0x130, z, color, 0,
-                         (struct EffectSlotSet *)work->teardownHandle, 0x17, depth);
+                         work->teardownResource, 0x17, depth);
         }
     }
 }

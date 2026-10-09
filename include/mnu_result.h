@@ -190,7 +190,7 @@ typedef struct BrsSkillPackageWork {
     struct {
         s8 opacityReady;
         u8 padD3D[7];
-        s32 teardownHandle;
+        struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase;
         s8 unkD4D;
@@ -208,7 +208,7 @@ typedef struct BrsSkillPackageWork {
     struct {
         s8 opacityReady;
         u8 padAEA9[7];
-        s32 teardownHandle;
+        struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
         s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */

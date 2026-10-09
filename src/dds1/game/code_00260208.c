@@ -569,7 +569,7 @@ s8 brsTaskHasPendingRows(void) {
 }
 
 s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
-    if (context->teardownHandle != 0) {
+    if (context->teardownResource != NULL) {
         brsUpdateBlocked = 0;
     }
     return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
@@ -850,9 +850,9 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
-    work->teardownHandle = 0;
+    work->teardownResource = NULL;
     effRequestResourceByMode(D_003AFA88, D_003AFAA8, 0,
-                             (s32)&work->teardownHandle);
+                             (u32 *)&work->teardownResource);
     return work;
 }
 
@@ -861,8 +861,8 @@ extern void dspCloseChannel(void);
 void brsStaffTaskDestroy(KwlnTask *arg0) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(arg0);
 
-    if (context->teardownHandle != 0) {
-        effDestroyResourceSlotSet(context->teardownHandle);
+    if (context->teardownResource != NULL) {
+        effDestroyResourceSlotSet(context->teardownResource);
     }
     mnuDrainPanelTransitions(&context->transition.data, arg0);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
