@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
 #include "sdf.h"
@@ -24,7 +25,6 @@ extern void effSetResourceBlendColor(s32 handle, u32 color);
 extern u32 func_0016F018(u32 address);
 
 void effFreePairedResources(PairedEffectResources *pair) {
-    extern void sdfReleaseChipBlock(void *work);
 
     effThunderGroupRelease(pair->resource[1]);
     effThunderGroupRelease(pair->resource[0]);
@@ -439,7 +439,6 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
     effDrawBlurRectangle(&work->source);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {

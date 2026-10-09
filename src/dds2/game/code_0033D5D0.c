@@ -98,7 +98,6 @@ extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern u32 strlen(const char *s);
 extern f32 sdfNormalizedAsinSamples[];

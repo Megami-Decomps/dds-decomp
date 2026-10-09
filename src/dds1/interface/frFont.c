@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
@@ -310,7 +311,6 @@ typedef struct FrFontSegments {
     void *third;
 } FrFontSegments;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
 extern void func_00198088(void *dst, s32 option, void *block, FrFontSegments *segments);
 

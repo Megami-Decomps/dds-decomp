@@ -1,10 +1,9 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3Admin.h"
 #include "kwln.h"
 
 extern char dds3AdminTaskName[];
-extern void sdfReleaseChipBlock(void *);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memcpy(void *, void *, s32);
 
 /* Return the named administration task's user state; the task must exist. */

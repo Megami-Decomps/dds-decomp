@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_chip.h"
 
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
 #include "kwln_task_lifecycle.h"
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 extern KwlnTask* kwlnActiveTaskHead;
@@ -52,7 +52,6 @@ extern void kwlnTaskRunScheduledUpdates(void);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 
-extern void sdfReleaseChipBlock(void* ptr);
 
 
 void kwlnTaskActivate(KwlnTask* task)

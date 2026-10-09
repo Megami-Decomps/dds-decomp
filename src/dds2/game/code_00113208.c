@@ -16,7 +16,6 @@ extern void effObjInnerVecBackup(ObjectTransform *node);
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 
-extern void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex);
 
 extern s32 dds3RegisterObjectInHandlerIndex(void *object);
 

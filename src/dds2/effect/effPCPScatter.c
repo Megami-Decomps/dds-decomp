@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -59,7 +60,6 @@ extern s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
@@ -1290,7 +1290,6 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Release the texture and owner only when the decremented reference count equals zero. */
 void effPcpScatterResRelease(PcpScatterRes *res) {

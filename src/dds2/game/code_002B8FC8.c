@@ -82,7 +82,6 @@ typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
 
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 mdlFlagTest(s32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);

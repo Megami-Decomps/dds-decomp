@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
@@ -770,8 +771,6 @@ EvtUnit *evtUnitGetNestedValue(EffWorldNode *obj) {
     return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
-extern void sdfReleaseChipBlock(void *block);
 extern const s32 D_003AC060[];
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {

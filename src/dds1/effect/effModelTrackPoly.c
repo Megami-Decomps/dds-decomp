@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -27,7 +28,7 @@ typedef struct EffTrackPolyDraw {
     u16 flags;
     u8 pad06[2];
     u32 color;      /* 0x08 */
-    void *unk0C;
+    const u32 *indices;
     u128 *points;   /* 0x10: the same vertex records owned by track data */
     u8 pad14[0xC];
     u32 *colors;   /* 0x20: gradient color for each input vertex */
@@ -74,13 +75,14 @@ void effTrackPolyDrawWork(EffTrackPolyWork *work) {
     effTrackPolyDrawStrips(work->data);
 }
 
-/* Per-frame update: while the model's value lies inside [unk0C, unk10] the endpoints are resampled every sampleInterval updates and the strips drawn; above the range the strips fade out, below it the track restarts. */
+/* Sample endpoints between startFrame and endFrame (inclusive), fade after
+ * endFrame, and reset history before startFrame. */
 void effTrackPolyUpdate(EffTrackPolyWork *work) {
     MdlCtx *model = work->params.model;
     f32 value = model->first->currentFrame;
 
-    if (work->params.unk0C <= value) {
-        if (value <= work->params.unk10) {
+    if (work->params.startFrame <= value) {
+        if (value <= work->params.endFrame) {
             if (work->updateCount % work->params.sampleInterval == 0) {
                 effSampleTrackPolyEndpoints(work);
             }
@@ -209,7 +211,7 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_ADD(vf10, vf10, vf12);
 }
 extern EffTrackPolyDraw D_003D6640;
-extern u8 D_003556D0[];
+extern const u32 D_003556D0[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
 extern void func_002DA420(struct SdfTextParam *asset, f32 scale);
@@ -235,7 +237,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     func_002DA420((struct SdfTextParam *)data->nodeHandle, 1.0f);
     memset(&D_003D6640, 0, sizeof(D_003D6640));
     D_003D6640.flags = 0x4000;
-    D_003D6640.unk0C = D_003556D0;
+    D_003D6640.indices = D_003556D0;
     return data;
 }
 

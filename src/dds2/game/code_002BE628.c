@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font.h"
 #include "sdf_dev_state.h"
 #include "dat_command.h"
@@ -132,7 +133,6 @@ extern u8 D_003E7940[];
 
 extern u8 D_003E7950[];
 
-extern s32 sdfAllocSizeClassBlock(u32);
 
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
 
@@ -162,7 +162,6 @@ extern char D_00437CB0[];
 
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 
-extern void sdfReleaseChipBlock(void *);
 
 struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *state);

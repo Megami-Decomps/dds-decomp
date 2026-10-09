@@ -96,7 +96,6 @@ extern s32 sdfPacketBufferEnd;
 
 extern SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag);
 
-extern u32 sdfAllocSizeClassBlock(u32);
 
 
 typedef struct SdfDescriptorSource {

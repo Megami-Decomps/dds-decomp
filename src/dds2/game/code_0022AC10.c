@@ -296,7 +296,6 @@ extern u8 *btlFindUnitByModeFlagged(s32);
 
 extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 extern char D_00436CF8[];

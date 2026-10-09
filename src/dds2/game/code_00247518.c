@@ -514,7 +514,6 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-extern s32 dds3GetSlot(s32 owner, s32 kind);
 extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
 
 
@@ -540,7 +539,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                     do {
                         node = viewer->groups;
                         while (node != NULL) {
-                            if (node->handle != 0 && object == dds3GetSlot(node->handle, 1)) {
+                            if (node->handle != 0 && (void *)object == dds3GetSlot((EffWorldNode *)node->handle, 1)) {
                                 if (node->type == 2) {
                                     time = 0;
                                     if (node->childCount != 0) {

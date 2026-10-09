@@ -540,7 +540,6 @@ typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model =
 
 extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern void *func_002DCCE8(void *);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 

@@ -67,7 +67,6 @@ SdfTex *sdfTexAcquireResourceTexture(void *resource);
 
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 
-void *sdfAllocSizeClassBlock(s32 size);
 
 void func_003475A0(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 

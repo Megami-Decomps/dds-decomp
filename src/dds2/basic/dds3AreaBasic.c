@@ -1,6 +1,6 @@
 #include "common.h"
+#include "dds3obj.h"
 
-void dds3ExchangeSlot(void *arg0, s32 arg1, s32 arg2);
 
 typedef struct {
     u8 pad[0xC];

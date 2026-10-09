@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
 
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 s32 func_00111388(u32 kind) {

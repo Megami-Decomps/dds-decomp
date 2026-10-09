@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 
@@ -18,7 +19,6 @@ extern s32 dds3SlotRingCursor;
 
 extern s32 dds3UpdateMoverTransform(EffWorldNode *object);
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 

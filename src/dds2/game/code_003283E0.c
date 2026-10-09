@@ -21,7 +21,6 @@ extern s32 RemoveSbusIntcHandler(s32);
 
 extern void (*sdfTickCallback)(void);
 
-extern void *sdfAllocSizeClassBlock();
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
@@ -30,7 +29,6 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
     return sdfAllocSizeClassBlock(size);
 }
 
-extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
 void sdfFreeMemoryFromEitherHeap(void *data) {

@@ -66,7 +66,6 @@ extern u8 D_003BD2F0;
 extern u8 *D_003BD2F4;
 extern void (*D_003BD2F8)(void *);
 
-void *sdfAllocSizeClassBlock(s32 size);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);

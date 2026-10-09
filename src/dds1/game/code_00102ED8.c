@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -138,7 +139,6 @@ typedef struct KwlnDebugWork {
 extern char dds3AdminTaskName[];
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminReleaseTaskWork(KwlnTask *task);
-extern void *sdfAllocSizeClassBlock(s32);
 
 void kwlnDebugTaskCreate(void) {
     KwlnDebugWork *work;

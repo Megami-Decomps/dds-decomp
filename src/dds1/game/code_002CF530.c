@@ -2,14 +2,12 @@
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 
-extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
 extern void (*sdfTickCallback)(void);
 
 
 
-extern void *sdfAllocSizeClassBlock();
 
 typedef struct SdfHandlerNode {
     struct SdfHandlerNode *next;

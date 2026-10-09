@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font_context.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -14,7 +15,6 @@ extern s8 D_0037F510[];
 
 
 
-extern void sdfReleaseChipBlock();
 
 
 
@@ -58,7 +58,6 @@ extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 extern u64 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
 

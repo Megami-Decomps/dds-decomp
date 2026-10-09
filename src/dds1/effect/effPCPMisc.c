@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
@@ -7,6 +8,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
 #include "eff_param.h"
@@ -161,7 +163,6 @@ typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0
 
 
 
-extern void sdfReleaseChipBlock(void *ptr);
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
@@ -188,7 +189,6 @@ typedef struct EffPCPSharedTrail {
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Constructor and aimed update share the 0x78-byte angular-sweep work.
    The update uses unsigned frame bounds; the initial sweep interval is
@@ -213,9 +213,7 @@ typedef struct EffPCPSpanWork {
 } EffPCPSpanWork;
 
 extern EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams);
-extern struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
 extern void effDestroyNode(struct EffNode *node);
-extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
@@ -2881,7 +2879,7 @@ EffPCPSpanWork *effPcpCloneWithOptionalHandle(EffPCPSpanWork *work) {
 
     child = effPcpSpanCreate(&work->params, NULL);
     if (work->optionalHandle != NULL) {
-        child->optionalHandle = (struct EffNode *)effCloneSourceWithTypeHandler((u32)work->optionalHandle);
+        child->optionalHandle = effCloneSourceWithTypeHandler(work->optionalHandle);
     }
     return child;
 }
@@ -2998,8 +2996,6 @@ typedef struct EffPCPTripleWork {
 typedef char EffPCPTripleParamsSizeCheck[sizeof(EffPCPTripleParams) == 0x50 ? 1 : -1];
 typedef char EffPCPTripleWorkSizeCheck[sizeof(EffPCPTripleWork) == 0xAC ? 1 : -1];
 
-extern u32 effCloneSourceWithTypeHandler(u32 handle);
-
 EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors) {
     EffPCPTripleWork *work;
     struct EffNode **handle;
@@ -3012,8 +3008,8 @@ EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDe
     handle = work->handles;
     for (i = 0; i < 7; i++) {
         handle[0] = effCreateNodeFromDescriptor(descriptors[i]);
-        handle[7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
-        handle[14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
+        handle[7] = effCloneSourceWithTypeHandler(handle[0]);
+        handle[14] = effCloneSourceWithTypeHandler(handle[0]);
         handle++;
     }
     return work;
@@ -3049,9 +3045,9 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     sourceHandleCursor = (src->handles + 14);
     destinationHandleCursor = (work->handles + 14);
     for (slotIndex = 0; slotIndex < 7; slotIndex++) {
-        destinationHandleCursor[-14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-14]);
-        destinationHandleCursor[-7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-7]);
-        destinationHandleCursor[0] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[0]);
+        destinationHandleCursor[-14] = effCloneSourceWithTypeHandler(sourceHandleCursor[-14]);
+        destinationHandleCursor[-7] = effCloneSourceWithTypeHandler(sourceHandleCursor[-7]);
+        destinationHandleCursor[0] = effCloneSourceWithTypeHandler(sourceHandleCursor[0]);
         sourceHandleCursor++;
         destinationHandleCursor++;
     }

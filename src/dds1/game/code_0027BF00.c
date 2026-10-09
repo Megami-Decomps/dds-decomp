@@ -91,7 +91,6 @@ extern void func_0027FCA0(MenuPageWindow *, s32, s32);
 
 extern MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32);
 
-extern s32 sdfAllocSizeClassBlock(u32);
 
 extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
 

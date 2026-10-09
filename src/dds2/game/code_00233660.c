@@ -18,6 +18,8 @@
 #include "sdf_chunk.h"
 #include "sdf_pac_state.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
+#include "eff_node.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
@@ -42,7 +44,6 @@ extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
 
 
 
-s32 effCreateNodeFromDescriptor(s32);
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -379,7 +380,6 @@ typedef struct MdlViewerHeader {
     s16 unk06;
 } MdlViewerHeader;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 strlen(const char *);
 extern char *strcpy(char *, const char *);
 extern MdlViewerHeader *D_00438F98;
@@ -733,12 +733,12 @@ void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
 }
 
 /* Append a newly created effect to the next part-list slot. */
-void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
+void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
-    partEntry->object = effCreateNodeFromDescriptor(descriptorIndex);
+    partEntry->object = (s32)effCreateNodeFromDescriptor(descriptor);
     partList->usedCount += 1;
 }
 
@@ -817,7 +817,7 @@ void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
 }
 
 void mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    effCloneSourceWithTypeHandler((u32)entry->object);
+    effCloneSourceWithTypeHandler((EffNode *)(u32)entry->object);
     entry->state = entry->state + 1;
 }
 
@@ -898,8 +898,8 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 su
     effectParams.model = owner;
     effectParams.idA = effectRecord->effectId;
     effectParams.idB = effectRecord->param0C;
-    effectParams.unk0C = effectRecord->scaleX;
-    effectParams.unk10 = effectRecord->scaleY;
+    effectParams.startFrame = effectRecord->scaleX;
+    effectParams.endFrame = effectRecord->scaleY;
     effectParams.sampleInterval = effectRecord->value14;
     effectParams.historyLength = effectRecord->value16;
     effectParams.unk1C = 3;
@@ -3299,7 +3299,6 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-extern void *dds3SetSlotByKind(s32 obj, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(void *obj);
 
@@ -3319,7 +3318,7 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
     mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle((s32)obj), 0, 0);
-    dds3SetSlotByKind((s32)obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3SetSlotByKind(obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3RegisterObjectInHandlerIndex(obj);
     func_001129C8(obj, 0);
     dds3SetObjectFlags((u32)obj, 0x400);

@@ -217,7 +217,6 @@ typedef struct FuncTab {
     void (*w10)(void *a0, f32 t1, f32 t2);
 } FuncTab;
 
-void *sdfAllocSizeClassBlock(s32 size);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 void func_002DA3C0(void *a0, s32 a1);
 void func_002DA3D8(void *a0, s32 a1);

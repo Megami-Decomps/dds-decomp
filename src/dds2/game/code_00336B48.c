@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -137,7 +138,6 @@ typedef struct ConsNode {
 
 extern ConsNode *D_00438AB0;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 

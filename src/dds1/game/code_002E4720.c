@@ -106,7 +106,6 @@ extern void EIntr(void);
 extern void sceCdPowerOff(void *arg0);
 extern s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void func_002D0750(struct SdfMemBlock *allocation, s32 size);
 extern u32 strlen(const char *s);
 extern void func_002F4190(u32 arg0);

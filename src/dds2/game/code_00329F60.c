@@ -71,7 +71,6 @@ extern SdfTexResource *sdfTextureBlockListHead;
 
 extern SdfTexResource *sdfTextureListHead;
 
-void *sdfAllocSizeClassBlock(s32 size);
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
 extern s32 func_0036DE70(void);
 

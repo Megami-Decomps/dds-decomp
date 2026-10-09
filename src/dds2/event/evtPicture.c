@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -10,7 +11,6 @@ typedef struct {
 } Picture;
 
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-extern void sdfReleaseChipBlock(void *);
 
 extern u8 D_003C9498[];
 extern u8 D_003C94A8[];

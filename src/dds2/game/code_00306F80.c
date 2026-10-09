@@ -9,6 +9,7 @@
 #include "mnu.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "sdf_chip.h"
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 

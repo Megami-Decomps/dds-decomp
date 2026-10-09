@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
@@ -102,7 +103,6 @@ extern ParDispatch parKindConstructorEntries[];
 extern void (*D_0034E2F0[])();
 
 void effDestroyResources(void *arg);
-void sdfReleaseChipBlock(void *arg);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */

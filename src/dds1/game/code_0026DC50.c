@@ -1,7 +1,7 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "mnu_sprite_resource.h"
 
-extern void sdfReleaseChipBlock(void *);
 
 extern void mnuRequestIndexedMovieResource(s32);
 
@@ -22,7 +22,6 @@ void func_0026DD10(void) {
 
 extern char D_003AFEC8[];
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern u32 effMiscRandMod(void *, u32);
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */

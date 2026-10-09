@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "itf_draw_grid.h"
@@ -31,11 +32,7 @@ extern u32 D_003BD160;
 
 extern u32 D_003BD124;
 
-extern s32 effQueuedResourceNameRecord;
 
-extern s32 effResourceBankEntries;
-
-extern s32 effResourceBankDescriptor;
 
 extern s32 D_003BD098;
 
@@ -158,9 +155,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 D_003BD064;
 
-extern void *sdfAllocSizeClassBlock(u32);
 
-extern void sdfReleaseChipBlock(void *);
 
 extern char D_003BD198[];
 
@@ -383,7 +378,7 @@ u32 effDispatchRecordBuckets(u32 refresh, EffectOwnerRecord *list, s32 drawOptio
 /* Release bucket records before the owner list; preserve the existing short-arity K&R call. */
 u32 effDestroyOwnerRecordList(u32 list) {
     effReleaseRecordBuckets();
-    sdfReleaseChipBlock(list);
+    sdfReleaseChipBlock((void *)list);
     return 1;
 }
 
