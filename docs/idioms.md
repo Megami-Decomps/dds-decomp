@@ -1144,6 +1144,26 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_NORMALIZE_VF10()` | `vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w; vmaddz.w vf2; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q` |
 | `VU0_CROSS_XYZ(dst, a, b)` / `VU0_DOT_XYZ(out, a, b)` | `vopmula.xyz ACC,a,b; vopmsub.xyz dst,b,a` / `vmul.xyz vf2,a,b; vaddy.x; vaddz.x; qmfc2.ni $2,vf2; mtc1 $2,out` (`$2` clobbered) |
 
+### Float inputs through GPR constraints
+
+The EE compiler accepts an `f32` value as an inline-asm `"r"` input and
+transfers its bits to a GPR; it does not convert the float to an integer.
+`VU0_SCALE_VF` uses this convention. When a native primitive takes float bits
+in a GPR, pass the actual float value through that constraint rather than
+introducing a separate C integer temporary with an `mfc1` output block.
+
+The distinction closed DDS2 `func_0032C278`, the 400-byte texture palette
+blender. Explicit transfer outputs created GPR quantities whose expanded
+local-allocation intervals occupied `$3` and `$4`, moving the subsequent CLUT
+branch operand to `$5`. Direct float inputs remained float pseudos through
+local allocation; reload inserted the native `mfc1` pair, and the branch
+reused `$3`. The setup instructions can look identical while later allocation
+differs. Compare the local-allocation and reload dumps, including the intervals
+actually passed to register selection, before attributing a mismatch to a
+register-choice tie. Keep operands and memory effects accurate; register
+pinning, extra barriers and operand-order searches do not establish the source
+contract.
+
 Soft-float libcalls: the `nop` retail leaves in the delay slot of `jal` calls to the double compare helper (`func_002FC6C8`, `func_00292CE0`) comes from assembling with `as -g`; see "Assembler version and `-g`".
 
 Uses: the colour-modulate function (`func_00151568` and copies in
