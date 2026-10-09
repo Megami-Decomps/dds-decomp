@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
@@ -18,7 +19,6 @@ extern void dds3WorkInit(void *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void func_00117A80(void);
-extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
 
 

@@ -12,7 +12,6 @@ typedef struct {
 
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
 extern u32 dds3AdvanceWorldCounter(void);
 

@@ -23,7 +23,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern EffWorldNode *dds3GetWorldSecondaryObject(void);
-extern void dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *node);
 extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);

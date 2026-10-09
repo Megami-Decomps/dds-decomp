@@ -66,7 +66,6 @@ extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void func_0022E5A0(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 void *dds3GetWorldObject(void);
-EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *object);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 void sdfSetViewFieldOfView(f32 arg0);
 void mnuStopMovieDrawTask(void);

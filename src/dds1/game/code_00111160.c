@@ -22,7 +22,6 @@ s32 func_00111160(u32 kind) {
 }
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(2);

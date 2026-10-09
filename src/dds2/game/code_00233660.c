@@ -3232,7 +3232,6 @@ extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *obj);
 
 s32 mdlSpawnViewerWorldObject(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};

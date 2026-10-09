@@ -34,7 +34,6 @@ void evtDestroySecondaryWorldNode(void) {
 }
 
 
-extern void dds3RemoveWorldObjectNode(struct EffWorldNode *node);
 
 /* Detach every unit node from the secondary object's per-kind list. */
 void evtDrainSecondaryWorldNodes(void) {

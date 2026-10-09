@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_light.h"
 #include "eff_object.h"
 #include "pcp_vu0.h"
@@ -10,9 +11,7 @@ extern u8 kwlnDefaultColorVector[];
 struct EvtUnit;
 extern void evtSetUnitValueTransition(struct EvtUnit *unit, EffWorldNode *target, s32 duration);
 extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void dds3EnsureSlotData();
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "evt_task.h"
@@ -59,10 +60,8 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
-extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void effObjDispatchReadyState(void *arg0);
-extern void dds3RemoveWorldObjectNode(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 extern void dds3FreePathObject(s32);

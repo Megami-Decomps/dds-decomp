@@ -37,7 +37,6 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 
 extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern s32 mdlFlagTest(s32);
 extern int strcmp(const char *, const char *);
