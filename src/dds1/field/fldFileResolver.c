@@ -351,7 +351,7 @@ extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 
                                                       f32 *targetPositionOut);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern u32 fldAreaLoadRequest;
+extern struct FileRequest *fldAreaLoadRequest;
 extern u8 D_003BACE0[];
 extern u8 D_003BACE8[];
 extern s32 fldEncounterRuntimeState;
@@ -372,7 +372,7 @@ extern u8 D_003BA734;
 extern ScrData *scrFindNamedProcessNode(char *name);
 extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 extern u32 fldAreaCachedResource;
-extern u32 fldAreaPackedArchive;
+extern struct FileRequest *fldAreaPackedArchive;
 extern u8 D_003BAC90[];
 extern void func_00288788(u32 arg0);
 extern s32 D_0032E4C8[];
@@ -996,7 +996,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_003014F0(path, D_0039FE38, directory, area, floor);
-        fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
+        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
     }
@@ -1037,34 +1037,23 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_003BA734 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_003014F0(path, D_0039FE38, directory, area, room);
-    fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
+    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
 }
 
-typedef struct FldAreaResourceNode {
-    struct FldAreaResourceNode *next; /* 0x00 */
-    u32 pad04;
-    u32 resourceHandle; /* 0x08 */
-} FldAreaResourceNode;
-
-typedef struct FldAreaResource {
-    u8 pad00[0x60];
-    FldAreaResourceNode *nodes; /* 0x60 */
-} FldAreaResource;
-
 void fldFreeDisplayObjects(void) {
     if (fldAreaLoadRequest != 0) {
-        FldAreaResourceNode *node = ((FldAreaResource *)fldAreaLoadRequest)->nodes;
+        PacWork *work = ((FilePacRequest *)fldAreaLoadRequest)->packet.queueHead;
 
-        if (node != NULL) {
+        if (work != NULL) {
             do {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->resourceHandle);
-                node = node->next;
-            } while (node != NULL);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
+                work = work->next;
+            } while (work != NULL);
         }
-        func_00288788(fldAreaLoadRequest);
-        fldAreaLoadRequest = 0;
+        func_00288788((u32)fldAreaLoadRequest);
+        fldAreaLoadRequest = NULL;
     }
     fldPendingArea = 0;
     fldPendingFloor = 0;
@@ -1078,7 +1067,7 @@ u32 fldPollAreaResourceLoad(void) {
 
     if (sceneState != 0) {
         if (sceneState == 1) {
-            if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+            if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
                 fldAreaState.resourceFlag = 0;
                 D_003BA734 = 0;
             }
@@ -1093,7 +1082,7 @@ u32 fldGetResourceReadyFlag(void) {
 
 u8 fldIsAreaResourceReady(void) {
     if (fldAreaLoadRequest != 0) {
-        if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+        if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
             return 1;
         }
     }
@@ -1104,7 +1093,7 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (fldAreaState.resourceArea != area || fldAreaState.resourceFloor != room) {
         return 0;
     }
-    if (fldAreaLoadRequest != 0 && fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
+    if (fldAreaLoadRequest != 0 && fileRequestIsReady(fldAreaLoadRequest) != 0) {
         return 1;
     }
     return fldAreaState.resourceFlag != 0;
@@ -1245,8 +1234,8 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
-        fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
-        func_00288C50((struct FileRequest *)fldAreaPackedArchive);
+        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
+        func_00288C50(fldAreaPackedArchive);
         request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
@@ -1295,7 +1284,7 @@ void fldReleaseAreaResourceCache(void) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
         fldAreaCachedResource = 0;
     }
-    resourceHandle = fldAreaPackedArchive;
+    resourceHandle = (u32)fldAreaPackedArchive;
     if (resourceHandle != 0) {
         func_00288788(resourceHandle);
         fldAreaPackedArchive = 0;
@@ -1314,7 +1303,7 @@ extern FldTransferChunk *D_003BAC20;
 extern u32 D_003BAC24;
 extern FldTransferChunk *D_003BAC28;
 extern u32 D_003BAC2C;
-extern FldAreaResource *D_003BAC38;
+extern struct FileRequest *D_003BAC38;
 extern s32 D_003BAC4C;
 extern u32 fldCachedRoomResourceAllocation;
 extern u32 fldCachedRoomF1ResourceAllocation;
@@ -1323,7 +1312,7 @@ extern u32 fldCachedRoomKF2ResourceAllocation;
 
 void fldReleaseFieldResources(void) {
     s32 i;
-    FldAreaResourceNode *node;
+    PacWork *work;
 
     fldReleaseBackgroundBuffer();
     fldPlayPendingSounds();
@@ -1404,19 +1393,19 @@ void fldReleaseFieldResources(void) {
         fldAreaState.cachedArea = fldAreaState.area;
     }
     if (D_003BAC38 != 0) {
-        node = D_003BAC38->nodes;
+        work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
         i = 0;
-        if (node != 0) {
+        if (work != 0) {
             do {
                 if (i > 0) {
-                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->resourceHandle);
+                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
                 }
-                node = node->next;
+                work = work->next;
                 i++;
-            } while (node != 0);
+            } while (work != 0);
         }
         func_00288788((u32)D_003BAC38);
-        D_003BAC38 = 0;
+        D_003BAC38 = NULL;
     }
 }
 
