@@ -42,4 +42,15 @@ typedef char SdfGsDrawDefaultsRegisters_texa_at_0x30[
 
 void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet);
 
+/* TEST/ALPHA A+D state for the two independent GS drawing contexts. */
+typedef struct SdfGsSceneBlendRegisters {
+    SdfGsBlendRegisters contextOne;
+    SdfGsBlendRegisters contextTwo;
+} SdfGsSceneBlendRegisters;
+
+typedef char SdfGsSceneBlendRegisters_size_must_be_0x40[
+    (sizeof(SdfGsSceneBlendRegisters) == 0x40) ? 1 : -1];
+typedef char SdfGsSceneBlendRegisters_contextTwo_at_0x20[
+    ((u32)&((SdfGsSceneBlendRegisters *)0)->contextTwo == 0x20) ? 1 : -1];
+
 #endif
