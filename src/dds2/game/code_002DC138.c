@@ -81,12 +81,6 @@ extern u64 D_003E9640[];
 extern u32 effSharedTextureReferenceCount;
 extern SdfTex *D_00437E40;
 
-extern MdlCtx *func_00232198(s32 group, s32 id);
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 
 
@@ -112,7 +106,7 @@ MdlCtx *func_002DC1D0(void *kind, u32 flags) {
         D_00437E2C++;
     }
     mdlLoadViewerPackage(6, D_00437E2C, 0x101, kind, flags);
-    result = func_00232198(6, D_00437E2C);
+    result = mdlCreateContextFromResourceKey(6, D_00437E2C);
     effInitModelVUState(result);
     D_00437E2C++;
     return result;
@@ -131,7 +125,7 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 
     group = mdlGetContextResourceGroup(sourceModel);
     id = mdlGetContextResourceId(sourceModel);
-    model = func_00232198(group, id);
+    model = mdlCreateContextFromResourceKey(group, id);
     effInitModelVUState(model);
     return model;
 }
@@ -183,7 +177,7 @@ void effRecreateModelFromSource(EffModelOwner *owner, EffModelOwner *source) {
     }
     group = mdlGetContextResourceGroup(source->model);
     id = mdlGetContextResourceId(source->model);
-    model = func_00232198(group, id);
+    model = mdlCreateContextFromResourceKey(group, id);
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALAR_OP_CLOBBER(owner->scale, "vmulx.xyzw vf10, vf10, vf2x");
@@ -627,7 +621,7 @@ void effCopyResourceOwner(void *destination, void *source) {
     if (dst->model != 0) {
         effDestroyModelContext(dst->model);
     }
-    dst->model = func_00232198(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
+    dst->model = mdlCreateContextFromResourceKey(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
     effInitModelVUState(dst->model);
     if (dst->model->first != NULL) {
         if (dst->base.plainEntry != 0) {

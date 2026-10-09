@@ -3578,11 +3578,6 @@ void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *fx, s32 kind, s32 inde
     fx->zOffset = base->f14;
     fx->unk58 = base->f14;
 }
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
 s32 btlHasMatchingModel(s32 effect, s32 model) {
     s32 context = btlGetRuntime();
     BtlUnit *node = ((BtlState *)context)->units;
