@@ -5395,3 +5395,19 @@ Use the same explicit word-to-pointer boundary as the adjacent
 implicit integer argument. All three callers in `game/code_001C7FF8`
 retain their retail instructions. This contract correction does not
 claim that the still-ASM command-list renderer has matched.
+
+## PCP block sets retain full vector and parameter owners
+
+The paired `0017DCF8`/`00185950` updaters copy the quadword at work `+50`
+to `+40`, then store the model's returned position at `+50`. These are
+`currentPosition` and `previousPosition`, not an opaque 0x20-byte pad.
+Their shared 0x50-byte parameter record starts at work `+60`: position
+at `+0`, signed fade durations at `+10/+14`, float scale at `+18`,
+three group sizes at `+1C`, float group scales/random scales at `+28/+34`,
+scatter factors at `+40`, and the signed tail-start frame at `+4C`.
+Complete those fields in each game's existing primary owner; do not add
+a second float view beside word arrays. Constructor/clone whole-record
+copies, the 0x10C work allocation, and existing `u32` frame/count fields
+at work `+B0/+B4` remain unchanged. The updater bodies are still ASM;
+their native modes 1/2 omit local matrix initialization, so a future C
+body must not invent an identity-matrix fallback.
