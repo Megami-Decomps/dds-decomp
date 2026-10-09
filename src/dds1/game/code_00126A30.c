@@ -3320,7 +3320,43 @@ s32 func_0012FD00(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
+extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
+extern void fldSetSceneControlFlags(u32 mask);
+
+s32 func_0012FE30(void) {
+    FldAreaWork *work = &fldAreaState;
+    MdlCtx *model;
+
+    if (work->unk184 > 0) {
+        if (work->unk11C == 0 && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+            kwlnFadeOutStart(0x80, 0x20, 0x20, 6);
+            kwlnPadStartMotor(0, 1, 6);
+            kwlnPadStartMotor(1, 0x96, 6);
+            work->unk184 = 0;
+            fldSetSceneControlFlags(0x40);
+            return -1;
+        }
+
+        model = (MdlCtx *)fldCameraModelObject;
+        if (model->current.h.arg != 4) {
+            model->first->frameStep = 1.0f;
+            mdlAddEntryPlain(model, 0, 4);
+            kwlnPadStartMotor(0, 1, 30);
+            kwlnPadStartMotor(1, 0x96, 30);
+            model = (MdlCtx *)fldCameraModelObject;
+        }
+
+        if (model->first->state == 5) {
+            fldAreaState.unk184 = 0;
+            fldSetSceneControlFlags(0x40);
+        } else {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FF48);
 
