@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "sdf_asset_state.h"
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
@@ -2651,7 +2652,6 @@ void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfQueueAssetRelease(s32 assetAddress);
 
-extern void func_003332D0(void *, f32);
 
 extern EffPacketParams D_004582B0;
 
@@ -2718,7 +2718,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->flag = 0;
     set->shared = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(&D_004582B0, 0, 0x2C);
     D_004582B0.primitive = 0x4000;
     return set;
@@ -3513,7 +3513,7 @@ u8 *effCreatePointSet4(u32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_004582E0, 0, 0x2C);
     D_004582E0[0].primitive = 0x4000;
     return (u8 *)set;
@@ -4079,7 +4079,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->tail = data;
     node->field_24 = 0;
     node->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(node->handle, 1.0f);
+    sdfSetPrimaryStateFloat(node->handle, 1.0f);
     memset(&D_00458310, 0, sizeof(EffPacketParams));
     D_00458310.primitive = 0x4000;
     D_00458310.parameters = (u32 *)D_003E9C40;
@@ -4226,7 +4226,7 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->billHandle = NULL;
     work->reference = NULL;
     work->assetHandle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(work->assetHandle, 1.0f);
+    sdfSetPrimaryStateFloat(work->assetHandle, 1.0f);
     memset(&D_00458370, 0, sizeof(EffPacketParams));
     D_00458370.primitive = 0x4000;
     D_00458370.parameters = D_003E9CC0;
@@ -4886,7 +4886,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_004583A0, 0, 0x2C);
     D_004583A0[0].primitive = 0x4000;
     return set;
@@ -5693,7 +5693,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
         ((u32 *)p)[i] = 0x80808080;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(work->handle, 1.0f);
+    sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_004583D0, 0, sizeof(EffPacketParams));
     D_004583D0.primitive = 0x4000;
     return (u8 *)work;
@@ -6243,7 +6243,7 @@ u32 repeat;
         ((u32 *)p)[i] = 0x80808080;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(work->handle, 1.0f);
+    sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_00458400, 0, sizeof(EffPacketParams));
     D_00458400.primitive = 0x4000;
     return (u8 *)work;
@@ -6561,7 +6561,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_003332D0(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_00458430, 0, 0x2C);
     D_00458430[0].primitive = 0x4000;
     return set;
@@ -8048,7 +8048,6 @@ void effUpdateSelectedActorAlpha(EffActiveResource *work) {
 
 extern u8 D_003E9FF0[];
 
-extern void func_003332D0(void *, f32);
 
 typedef struct EffMotionResource {
     BillObj *billboard; /* 0x00 */
@@ -8063,7 +8062,7 @@ EffMotionResource *effCreateMotionResource(EffMotionResourceConfig *unusedConfig
 
     work->billboard = NULL;
     work->asset = sdfCreateAssetWithDrawEntries();
-    func_003332D0(work->asset, 1.0f);
+    sdfSetPrimaryStateFloat(work->asset, 1.0f);
     memset(&D_004584C0, 0, sizeof(EffPacketParams));
     D_004584C0.primitive = 0x4000;
     D_004584C0.parameters = (u32 *)D_003E9FF0;

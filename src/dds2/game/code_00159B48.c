@@ -10,7 +10,6 @@
 #include "ee_mmi.h"
 
 extern void *sdfCreateAssetWithDrawEntries();
-extern void func_003332D0(void *, f32);
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
@@ -489,7 +488,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 
     instance->billboard = billCreateIndexed(1, entryIndex);
     instance->renderState = sdfCreateAssetWithDrawEntries();
-    func_003332D0(instance->renderState, 1.0f);
+    sdfSetPrimaryStateFloat(instance->renderState, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
@@ -500,7 +499,7 @@ u8 *billCloneUnitObject(EffInstance *source) {
 
     instance->billboard = billCloneObjectRetainingSharedData(source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
-    func_003332D0(instance->renderState, 1.0f);
+    sdfSetPrimaryStateFloat(instance->renderState, 1.0f);
     sdfSetPrimaryStateWordSecond(instance->renderState, 0x80808080);
     sdfSetPrimaryStateWordFirst(instance->renderState, 0x80808080);
     sdfSetPrimaryStateWordThird(instance->renderState, 0x80808080);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -214,7 +215,6 @@ extern EffTrackPolyDraw D_003D6640;
 extern const u32 D_003556D0[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
-extern void func_002DA420(struct SdfTextParam *asset, f32 scale);
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
@@ -234,7 +234,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     data->resourceHandle = handle;
     data->colors = (u32 *)cursor;
     data->nodeHandle = sdfCreateAssetWithDrawEntries();
-    func_002DA420((struct SdfTextParam *)data->nodeHandle, 1.0f);
+    sdfSetPrimaryStateFloat((struct SdfAsset *)data->nodeHandle, 1.0f);
     memset(&D_003D6640, 0, sizeof(D_003D6640));
     D_003D6640.flags = 0x4000;
     D_003D6640.indices = D_003556D0;

@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -40,7 +41,6 @@ typedef struct {
 
 extern EffResourceRenderState D_003D65E0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(u32 resource, f32 scale);
 extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
@@ -72,7 +72,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->drawAsset = sdfCreateAssetWithDrawEntries();
-    func_002DA420((u32)work->drawAsset, 1.0f);
+    sdfSetPrimaryStateFloat(work->drawAsset, 1.0f);
     entry = work->entries;
     for (i = 0; i < count; i++, entry++) {
         entry->value = 0x80808080;

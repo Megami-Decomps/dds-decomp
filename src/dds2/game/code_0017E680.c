@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -24,7 +25,6 @@ typedef struct EffBillboardParams {
 } EffBillboardParams;
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
     u16 parameterCount;
     u16 vertexCount;
@@ -72,7 +72,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     EE_MMI_UNIT_MATRIX(work);
     asset = sdfCreateAssetWithDrawEntries();
     work->drawAsset = asset;
-    func_003332D0((u32)asset, 1.0f);
+    sdfSetPrimaryStateFloat(asset, 1.0f);
     entries = work->entries;
     i = 0;
     if (index != 0) {

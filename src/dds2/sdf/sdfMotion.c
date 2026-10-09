@@ -747,20 +747,16 @@ void *sdfMotionCreateFloatBinding(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-extern void func_003332D0(s32, f32);
-
 void sdfMotionApplyInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 t1) {
     SdfMotionKeyInterval sample;
     sdfFindMotionKeyInterval(motion, &sample, t1);
-    func_003332D0((s32)motion->target, sdfInterpolateMotionKeys(&sample));
+    sdfSetPrimaryStateFloat(motion->target, sdfInterpolateMotionKeys(&sample));
 }
-
-extern void func_003332D0(s32, f32);
 
 void sdfMotionBlendInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 unused, f32 scale) {
     SdfMotionKeyInterval sample;
     sdfFindMotionKeyInterval(motion, &sample, unused);
-    func_003332D0((s32)motion->target,
+    sdfSetPrimaryStateFloat(motion->target,
                   motion->capturedFloat + sdfInterpolateMotionKeys(&sample) * scale -
                       motion->capturedFloat * scale);
 }

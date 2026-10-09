@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -372,7 +373,6 @@ void func_0016F7B0(EffRingWork *work)
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void *memset(void *dst, s32 value, u32 size);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(u32 asset, f32 value);
 
 /* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
 EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
@@ -401,7 +401,7 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_002DA420((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
     D_003D6550->primitive = 0x4000;
     return pool;
@@ -509,7 +509,6 @@ void func_0016FF48(EffRecordPool *work, f32 scale) {
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(u32 asset, f32 value);
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */
@@ -538,7 +537,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_002DA420((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
     D_003D6550->primitive = 0x4000;
     return pool;
@@ -626,7 +625,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     pool->scale = 1.0f;
     pool->color = EFF_NEUTRAL_COLOR;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_002DA420((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
     D_003D6550->primitive = 0x4000;
     return pool;
