@@ -226,7 +226,7 @@ EffBossWork *effBossCreate(EffBossParams *src, void *param1) {
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
-    work->paramWork = effParamWorkCreate(3, param1);
+    work->paramWork = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, param1);
     effBossInitializeModelGroups(work);
     return work;
 }
@@ -288,8 +288,8 @@ EffPCPBossWork *effBossBeamCreate(void *vector, void *paramA, void *paramB) {
     memcpy(work->parameterVector, vector, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
-    work->modelResource = effParamWorkCreate(3, paramA);
-    work->auxiliaryResource = effParamWorkCreate(6, paramB);
+    work->modelResource = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, paramA);
+    work->auxiliaryResource = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, paramB);
     return work;
 }
 

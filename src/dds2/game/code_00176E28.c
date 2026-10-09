@@ -895,7 +895,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
         handles = (EffParamWork **)sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;
         work->duplicatedHandles = handles;
-        work->duplicatedHandles[0] = effParamWorkCreate(6, particleParams);
+        work->duplicatedHandles[0] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, particleParams);
         for (i = 1; i < count; i++) {
             work->duplicatedHandles[i] = effParamWorkDuplicate(work->duplicatedHandles[0]);
         }

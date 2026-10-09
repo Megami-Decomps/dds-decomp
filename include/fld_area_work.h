@@ -61,7 +61,8 @@ typedef struct FldAreaWork {
     u8 padB0[0xC];
     s32 flagNumber;
     s32 unkC0;
-    u8 padC4[8];
+    s32 unkC4;                  /* -1 means no primary label selection. */
+    s32 unkC8;                  /* -1 means no alternate label selection. */
     s32 overlayMode;
     s32 overlayCounter;
     s32 unkD4;

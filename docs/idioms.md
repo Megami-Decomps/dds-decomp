@@ -5280,6 +5280,14 @@ The complete constructor candidate remains private and non-matching;
 its separate `0x30`-byte transform and two primary `FldFileResource`
 descriptors are not replaced with partial descriptor views.
 
+DDS1's slot reset and three facing probes share the same complete
+sixteen-byte `FldTaskInfo` descriptor as DDS2; its shape pointer is at
+`+0C`. Keep the slot and tagged-shape accesses on that primary descriptor,
+not separate padded prefix views. The named scene-task provider takes a
+world-node pointer and a task-name string and returns a signed task ID.
+Its two existing DDS1 field callers retain their exact bytes after that
+declaration is corrected; the room/task controller remains assembly.
+
 ## Result EXP flash counters retain signed scalar storage
 
 `00266E28` and `0029E820` increment the level-up flash frame through
