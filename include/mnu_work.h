@@ -127,7 +127,8 @@ typedef struct MenuWorkEntry {
     s16 repeatCount;
     u16 repeatTargetRecordIndex; /* 0x34: destination record selected after a type-0x12 repeat */
     s16 remaining;
-    u16 unk38;
+    u8 unk38;
+    u8 movementEffectScale;
     u16 elapsed;
     u32 callback; /* Callback-list node address, not a direct function pointer. */
     /* Retail 0x00323960 ORs the whole word with MNU_WORK_FINISHED (4).
@@ -198,6 +199,7 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->repeatTargetRecordIndex==0x34 &&
     (unsigned long)&((MenuWorkEntry*)0)->remaining==0x36 &&
     (unsigned long)&((MenuWorkEntry*)0)->unk38==0x38 &&
+    (unsigned long)&((MenuWorkEntry*)0)->movementEffectScale==0x39 &&
     (unsigned long)&((MenuWorkEntry*)0)->elapsed==0x3A &&
     (unsigned long)&((MenuWorkEntry*)0)->callback==0x3C &&
     (unsigned long)&((MenuWorkEntry*)0)->flags==0x40 &&
