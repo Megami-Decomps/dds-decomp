@@ -233,10 +233,11 @@ typedef struct MantraDrawItem {
 s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item);
 
 typedef struct MantraDrawPool {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     MantraDrawItem *items;
     s32 count;
 } MantraDrawPool;
+typedef char MantraDrawPool_size_must_be_0x0C[(sizeof(MantraDrawPool) == 0x0C) ? 1 : -1];
 
 
 typedef struct MantraCountState {
@@ -271,8 +272,9 @@ typedef struct MantraPulseFade {
 
 typedef struct MantraEffectResource {
     u8 pad00[0x6C];
-    u32 handle;
+    struct EffectSlotSet *resourceSlots;
 } MantraEffectResource;
+typedef char MantraEffectResource_size_must_be_0x70[(sizeof(MantraEffectResource) == 0x70) ? 1 : -1];
 
 typedef struct MantraFadeState {
     /* 0x00 */ u16 state;
@@ -947,11 +949,11 @@ void func_0026FAC8(void) {
 /* Allocate one header followed by fixed-size draw items; return the pool base. */
 MantraDrawPool *mnuCreateMantraDrawPool(u32 itemCount) {
     u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock((s32)poolBytes);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock((s32)poolBytes);
     MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(
-        (struct SdfMemBlock *)allocationHandle);
+        allocation);
     memset(pool, 0, poolBytes);
-    pool->handle = allocationHandle;
+    pool->allocation = allocation;
     pool->count = itemCount;
     pool->items = (MantraDrawItem *)((u8 *)pool + MNU_MANTRA_DRAW_POOL_HEADER_BYTES);
     evtPrintDeveloperConsoleMessage("mtrDrawProcessCreate!! num[%d]\n", itemCount);
@@ -967,7 +969,7 @@ void mnuDestroyMantraDrawPool(MantraDrawPool *pool) {
             mnuMantraSetupSlot((u32)item);
         }
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(pool->handle));
+    sdfReleaseResourceAllocation(pool->allocation);
 }
 
 void mnuMantraSetupSlot(u32 item) {
@@ -4885,16 +4887,17 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
 u32 mnuRequestEffectResource(u32 context, u32 config) {
     MantraEffectResource *resource = (MantraEffectResource *)sdfAllocSizeClassBlock(sizeof(MantraEffectResource));
     memset(resource, 0, sizeof(MantraEffectResource));
-    effRequestResourceByMode((const char *)context, (const char *)config, 0, &resource->handle);
+    effRequestResourceByMode((const char *)context, (const char *)config, 0,
+                             (u32 *)&resource->resourceSlots);
     return (u32)resource;
 }
 
 u8 mnuHasEffectResourceHandle(MantraEffectResource *resource) {
-    return resource->handle != 0;
+    return resource->resourceSlots != 0;
 }
 
 void mnuReleaseEffectResource(MantraEffectResource *resource) {
-    effDestroyResourceSlotSet(resource->handle);
+    effDestroyResourceSlotSet(resource->resourceSlots);
     sdfReleaseChipBlock(resource);
 }
 
