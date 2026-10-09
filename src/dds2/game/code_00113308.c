@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
@@ -510,7 +511,6 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
     return data->resourceState;
 }
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData();
 
@@ -538,7 +538,6 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     return obj;
 }
 
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 void func_00113FD0(EffWorldNode *node) {
     dds3RemoveWorldObjectNode(node);

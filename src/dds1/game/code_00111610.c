@@ -12,7 +12,6 @@ typedef struct {
 extern Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *);
 extern void dds3FreePathObject(Dds3PathCurveWork *);
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 extern u32 dds3AdvanceWorldCounter(void);
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;

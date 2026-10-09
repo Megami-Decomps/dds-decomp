@@ -88,7 +88,6 @@ void evtDestroySecondaryWorldNode(void);
 
 extern u32 kwlnDrawControlFlags;
 
-void dds3RemoveWorldObjectNode(void *unit);
 
 void dds3RefreshStoredVec3(EffWorldNode *object);
 

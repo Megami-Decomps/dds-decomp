@@ -120,7 +120,6 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
 
 extern void dds3ClearSceneObjectState(EffWorldNode *object);
 extern void evtReleaseSceneResource(EffWorldNode *object);
-void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 /* Destroy every node of every list, then release the data block and scene state. */
 void dds3DestroyWorldObjectData(EffWorldNode *object) {

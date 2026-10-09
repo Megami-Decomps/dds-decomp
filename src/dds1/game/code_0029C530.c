@@ -4,6 +4,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_packet_append.h"
 #include "sdf_dev_state.h"
 #include "bill_object_api.h"
@@ -6777,7 +6778,6 @@ typedef struct EffCopiedPayloadWork {
 } EffCopiedPayloadWork;
 
 extern void dds3FreePathObject(Dds3PathCurveWork *path);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     Dds3PathCurveWork **objects = work->payload->targets;

@@ -1,11 +1,11 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_light.h"
 #include "eff_event.h"
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void effObjSetInnerFirstVec();
 

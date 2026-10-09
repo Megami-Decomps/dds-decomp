@@ -1905,7 +1905,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 /* Native actor-model setup providers used by func_001E1BB8. */
 extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 extern void *dds3GetWorldObject(void);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 extern void btlMarkTaskReady(SoundResourceLink *resource);
 extern void btlResetUnitModelProgress(BtlUnit *unit);
