@@ -4965,6 +4965,7 @@
 0x002D38E8	fileJobCopyCommandIntoPrimaryData	inferred	Reads command state into temporary allocation then copies bytes into primary job slot. [names_reviewed7.tsv]
 0x002D39C8	fileJobSetSecondaryData	inferred	DDS1 0x00293960 twin
 0x002D3A68	fileJobCopyCommandIntoSecondaryData	inferred	Reads command state into temporary allocation then copies bytes into secondary job slot. [names_reviewed7.tsv]
+0x002D3B48	fileJobWriteSerializedPayload	inferred	Writes the 0x2C payload header with relative buffer offsets, then primary data, alignment padding and secondary data.
 0x002D3DF8	fileJobCreateFromCommandState	inferred	DDS1 0x00293D90 twin
 0x002D3E98	fileJobSerializedSize	inferred	DDS1 0x00293E30 twin
 0x002D3F08	fileQueueInitTransform	inferred	DDS1 twin func_00293EA0 [names_M68_VuRest.tsv]

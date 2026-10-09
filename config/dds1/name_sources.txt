@@ -5296,6 +5296,7 @@
 0x00293880	fileJobCopyCommandIntoPrimaryData	inferred	Reads command state into temporary allocation then copies bytes into primary job slot. [names_reviewed7.tsv]
 0x00293960	fileJobSetSecondaryData	inferred	Same for the secondary buffer; stores the selector in slot 0
 0x00293A00	fileJobCopyCommandIntoSecondaryData	inferred	Reads command state into temporary allocation then copies bytes into secondary job slot. [names_reviewed7.tsv]
+0x00293AE0	fileJobWriteSerializedPayload	inferred	Writes the 0x2C payload header with relative buffer offsets, then primary data, alignment padding and secondary data.
 0x00293C50	fileWriteToPfs	inferred	Formats a pfs0: path, opens it (0x602), writes, closes and syncs pfs:.
 0x00293D08	fileDuplicateJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00293D90	fileJobCreateFromCommandState	inferred	Builds a job from an sdf command state: allocate, retain address, duplicate job, free handle

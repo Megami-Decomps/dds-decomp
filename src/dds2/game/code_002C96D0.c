@@ -556,7 +556,6 @@ extern char *sdfDevGetPathBuffer(void);
 
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 
-extern void func_002D3B48(s32 fd, FileJobPayload *payload);
 
 extern s32 func_00369DF8(s32 fd);
 
@@ -4567,7 +4566,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D3B48);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileJobWriteSerializedPayload);
 
 void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
@@ -4580,7 +4579,7 @@ void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
         func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
-    func_002D3B48(fd, job);
+    fileJobWriteSerializedPayload(fd, job);
     func_00369DF8(fd);
     func_0036BCD0(D_00437E20, 0);
 }
@@ -5212,14 +5211,14 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
         }
         if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
-            func_002D3B48(fd, (FileJobPayload *)job->id);
+            fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
             payload.secondary.offset = 0;
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
-            func_002D3B48(fd, &payload);
+            fileJobWriteSerializedPayload(fd, &payload);
         }
         blocks = size >> 4;
         if ((size & 0xF) != 0) {
@@ -5317,14 +5316,14 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
         }
         if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
-            func_002D3B48(fd, (FileJobPayload *)job->id);
+            fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
             payload.secondary.offset = 0;
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
-            func_002D3B48(fd, &payload);
+            fileJobWriteSerializedPayload(fd, &payload);
         }
         blocks = size >> 4;
         if ((size & 0xF) != 0) {
