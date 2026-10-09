@@ -346,7 +346,66 @@ void parClearSlotFlag(ParTable *table, s32 slotIndex) {
     table->slots[slotIndex].pointCount = 0;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00161B38);
+extern f32 D_00451F30[];
+extern f32 D_00451F40[];
+extern void effBillSetEntryValue(ParSystem *system, s32 index, u32 color);
+
+/* Rebuild one slot's two-vertex strip cells from its point history: each cell is
+   the offset point +/- the cross product of the segment direction with the view axis,
+   scaled by the strip width. */
+void func_00161B38(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+    ParHistory *history = &source->records[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertex = cell->history;
+    u32 count = history->count;
+    f32 point[4];
+    f32 localOrigin[4];
+
+    if (count >= 2) {
+        s32 segments;
+        s32 i;
+        s32 lastIndex;
+        s32 ring;
+
+        PCP_COPY_VECTOR(localOrigin, origin);
+        segments = count - 1;
+        cell->vertexCount = segments * 2;
+        ring = history->nextIndex;
+        lastIndex = source->capacity - 1;
+        ring = ring == 0 ? lastIndex : ring - 1;
+        point[0] = localOrigin[0] + history->points[ring][0];
+        point[1] = localOrigin[1] + history->points[ring][1];
+        point[2] = localOrigin[2] + history->points[ring][2];
+        point[3] = 0;
+        for (i = 0; i < segments; i++) {
+            VU0_LOAD_VF(vf10, point);
+            ring = ring == 0 ? lastIndex : ring - 1;
+            point[0] = localOrigin[0] + history->points[ring][0];
+            point[1] = localOrigin[1] + history->points[ring][1];
+            point[2] = localOrigin[2] + history->points[ring][2];
+            VU0_LOAD_VF(vf12, point);
+            VU0_MOVE_VF(vf11, vf12);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LOAD_VF(vf11, D_00451F30);
+            VU0_CROSS_XYZ(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, D_00451F40);
+            VU0_MUL(vf10, vf10, vf11);
+            VU0_MOVE_VF(vf2, vf10);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_MOVE_VF(vf12, vf2);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_ADD(vf10, vf10, vf12);
+            VU0_STORE_VF_UNCLOBBERED(vf10, vertex);
+            VU0_MOVE_VF(vf10, vf12);
+            VU0_SUB(vf11, vf11, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf11, vertex + 1);
+            vertex += 2;
+        }
+        parFadeAlphaCell(system, index);
+    }
+    effBillSetEntryValue(system, index, color);
+}
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00161D08);
 
