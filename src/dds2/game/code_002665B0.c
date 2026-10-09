@@ -253,7 +253,29 @@ void func_002665E8(MenuSlotState *scene) {
     scene->alternateBatch = effCreateResourceSlotSet(scene->resourceBank[0], 7, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
+extern void mnuReleaseMantraSpriteSlots(void);
+
+/* Release the terminal's loaded resource banks, camp animation and mantra sprite slots. */
+func_00266808(MenuSlotState *scene) {
+    s32 i;
+
+    if (scene->reducedMode == 0) {
+        for (i = 0; i < 4; i++) {
+            effDestroyResourceSlotSet(scene->resourceBank[i]);
+        }
+        func_002665B0(&scene->campEffect);
+    } else {
+        for (i = 0; i < 2; i++) {
+            effDestroyResourceSlotSet(scene->resourceBank[i]);
+        }
+    }
+    effDestroyResourceSlotSet(scene->alternateBatch);
+    if (scene->reduced < 2) {
+        if (scene->reduced >= 0) {
+            mnuReleaseMantraSpriteSlots();
+        }
+    }
+}
 
 /* Release four resources in full mode, only the first two in reduced mode. */
 void mnuReleaseResourceGroup(s32 address) {
@@ -966,7 +988,6 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     return obj;
 }
 
-extern void func_00266808(u32 *work);
 extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
 extern s32 mnuCheckResourceTask(void);
@@ -981,7 +1002,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
-        func_00266808((u32 *)work);
+        func_00266808(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
