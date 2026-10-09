@@ -222,7 +222,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer)
     }
     memset(entry, 0, 0x84);
     entry->type = id;
-    entry->entryHeader.word = -1;
+    entry->entryHeader = -1;
     entry->argument0C = -1;
     evtEventViewerInsertEntry(entry, viewer);
     return entry;

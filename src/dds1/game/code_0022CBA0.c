@@ -270,7 +270,7 @@ void func_0022E098(s32 time, EvtRuntime *viewer) {
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
                                 if (selectedTime < key->frame + node->metadataValue) {
-                                    selectedValue = node->transitionValue;
+                                    selectedValue = (s32)node->info;
                                     selectedTime = key->frame + node->metadataValue;
                                     selected = key;
                                 }
@@ -306,6 +306,7 @@ void func_0022E098(s32 time, EvtRuntime *viewer) {
 
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
 extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
+struct PolyMovieObject;
 extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
@@ -411,8 +412,8 @@ void func_0022E288(EvtRuntimeGroup *track, s32 time) {
             break;
         }
     }
-    evtPolygonMovieSetObjectMode(track->movie, objectMode, 0, 0);
-    evtPolygonMovieSetObjectMode(track->movie, unitMode, setFlags, clearFlags);
+    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, objectMode, 0, 0);
+    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022E5A0);
@@ -438,7 +439,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                     do {
                         node = viewer->groups;
                         while (node != NULL) {
-                            if (node->handle != 0 && (void *)object == dds3GetSlot((EffWorldNode *)node->handle, 1)) {
+                            if (node->info != NULL && (void *)object == dds3GetSlot(node->info, 1)) {
                                 if (node->type == 2) {
                                     time = 0;
                                     if (node->childCount != 0) {
@@ -578,7 +579,7 @@ void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
                 node = viewer->groups;
                 found = NULL;
                 while (node != NULL) {
-                    if (node->handle == object) {
+                    if ((s32)node->info == object) {
                         found = node;
                         break;
                     }
@@ -983,7 +984,7 @@ void func_0022FB30(s32 mode, u32 frame, EvtRuntime *viewer) {
         track = viewer->groups;
         found = NULL;
         while (track != NULL) {
-            if (track->handle == (u32)object) {
+            if (track->info == object) {
                 found = track;
                 break;
             }
