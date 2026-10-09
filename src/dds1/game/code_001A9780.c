@@ -5071,7 +5071,7 @@ void func_001C0DF8(SceneAiWork *work) {
         }
         if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
             (unit->status.flags & 0x200) && panelTask != NULL) {
-            func_001B8650(unit, 0, 1);
+            btlSetActorSecondaryPresentation(unit, 0, 1);
         }
     }
 }

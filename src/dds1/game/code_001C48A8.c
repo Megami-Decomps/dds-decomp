@@ -816,7 +816,7 @@ void func_001C5F80(BtlState *scene) {
 
     func_001A5690();
     if (scene->eventReady != 5) {
-        func_001BCB88(0, 8);
+        btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
         func_001ACC20();
         btlDestroyTaskC();
