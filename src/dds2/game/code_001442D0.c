@@ -1097,7 +1097,7 @@ void func_00145698(void) {
 
     fldFormatAreaDirectory(directory, fldAreaState.area, 1);
     func_0035C860(path, (const char *)D_00413700, directory, fldAreaState.area);
-    fldSceneRecordResource = (s32)(u32)sdfReadNamedResource(path, &resourceHandle, 0);
+    fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
     header = func_00129D60(transferStart);
@@ -1105,7 +1105,7 @@ void func_00145698(void) {
     fldSceneRecordCount = ((SceneHeader *)header)->count;
 }
 
-void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId) {
+void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
     /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
@@ -1115,7 +1115,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId) {
     if (D_00389780[0] < 0xC8) {
         u8 *transferStart = chunk + 8;
 
-        fldSceneRecordResource = resourceId;
+        fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
             s32 header = func_00129D60((s32)(u32)transferStart);
@@ -1137,7 +1137,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (fldSceneRecordResource != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldSceneRecordResource);
+        sdfQueueGeneralAllocationRelease(fldSceneRecordResource);
     }
     fldSceneRecordResource = 0;
     fldSceneRecords = 0;
