@@ -15,6 +15,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
@@ -91,8 +92,6 @@ extern SdfPendingNode *sdfPendingQueueHead;
 extern s8 sdfPendingQueueRotationActive;
 extern s32 sdfPendingQueueSlots[2];
 
-extern SdfResource *sdfResourceListHead;
-
 
 extern SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag);
 
@@ -138,15 +137,15 @@ extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
 
-/* Search the linked resource registry by its numeric resource identifier. */
-SdfResource *sdfFindResourceById(s32 id) {
-    SdfResource *resource = sdfResourceListHead;
+/* Find a texture by resource key, walking from the newest node to older ones. */
+SdfTex *sdfFindTextureByResourceKey(s32 resourceKey) {
+    SdfTex *texture = sdfResourceListHead;
 
-    while (resource != NULL) {
-        if (resource->id == id) {
-            return resource;
+    while (texture != NULL) {
+        if (texture->resourceKey == resourceKey) {
+            return texture;
         }
-        resource = resource->next;
+        texture = texture->prev;
     }
     return NULL;
 }

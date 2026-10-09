@@ -10,6 +10,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "mdl_resource_entries.h"
@@ -885,8 +886,6 @@ typedef struct MdlEntryRec {
     u16 index;  /* 0x12 */
 } MdlEntryRec;
 
-extern SdfResource *sdfFindResourceById(s32 id);
-
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
@@ -894,7 +893,7 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subty
     if (partSlot != 0) {
         MdlObj *object = (MdlObj *)partSlot->object;
         if (object->inUse == 0) {
-            SdfTex *texture = (SdfTex *)sdfFindResourceById(entryRecord->dataId);
+            SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->dataId);
             if (texture != 0) {
                 MdlResourceItem *resourceItem;
                 u8 *attributes;
