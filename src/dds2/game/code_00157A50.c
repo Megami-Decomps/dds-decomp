@@ -22,7 +22,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
 
 extern void func_0035B6E0(const char *format, ...);
 
-void func_00157AC8(EffNodeDescriptor *descriptor) {
+void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
 
     if (descriptor->version == 1.0f) {
