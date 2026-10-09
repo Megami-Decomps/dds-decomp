@@ -42,7 +42,6 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 
 extern s32 evtStageTestUpdateCamera(void);
 extern s32 evtGetMessageWindowControlState(void);
-extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
 
@@ -236,7 +235,6 @@ u32 func_00264608(void) {
 
 extern s32 evtStageTestUpdateCamera(void);
 extern s32 evtGetMessageWindowControlState(void);
-extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */

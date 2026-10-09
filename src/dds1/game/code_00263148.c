@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "mnu_result.h"
 
+#include "mnu.h"
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
@@ -118,7 +119,6 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
 extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void mnuSetPopupEntryFlagged(s32 *, void *);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
 extern void func_002E8E50(void);
@@ -269,7 +269,6 @@ extern s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *);
 extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
-extern void mnuSetPopupEntry(s32 *, void *);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void func_002E96D8(u32);
 extern char D_0036D424[];
