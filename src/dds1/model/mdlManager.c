@@ -1,3 +1,241 @@
+#include "pcp_vu0.h"
+#include "common.h"
+#include "sdf_texture_draw_packet.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_chip.h"
+#include "snd_slot.h"
+#include "sdf_resource.h"
+#include "eff_ref_obj.h"
+#include "file_pac.h"
+#include "dat_state.h"
+#include "btl_state.h"
+#include "btl_sound.h"
+#include "evt_unit.h"
+#include "evt_event_pack.h"
+#include "evt_task.h"
+#include "btl_task_args.h"
+#include "btl_command.h"
+#include "btl_model_record.h"
+#include "sdf.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
+#include "ee_mmi.h"
+#include "mdl.h"
+#include "dat_command.h"
+#include "file_request_api.h"
+
+#define BTL_GROUP_COUNT 8
+
+#define BTL_GROUP_RESOURCE_SLOT_COUNT 8
+
+#define BTL_GROUP_OWNS_RESOURCES_FLAG 1
+
+/* Each group also has an independent, singly-linked list of IDs. */
+typedef struct BattleGroupIdEntry {
+    struct BattleGroupIdEntry *next;
+    s32 id;
+} BattleGroupIdEntry;
+
+extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
+
+void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
+
+extern s32 sdfCreateSemaphore(s32, s32, s32);
+
+extern u32 mdlGroupJobSemaphore;
+
+extern BattleGroupNode *btlGroupNodeHeads[];
+
+extern BattleGroupIdEntry *btlGroupIdHeads[];
+
+/* Create the model-job semaphore and clear both lists for all eight groups. */
+void btlInitializeCommandSemaphoreSlots(void) {
+    s32 i;
+
+    mdlGroupJobSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
+    for (i = 0; i != 8; i++) {
+        btlGroupNodeHeads[i] = 0;
+        btlGroupIdHeads[i] = 0;
+    }
+}
+
+/* Return the first node of this type in group, or NULL. */
+BattleGroupNode *btlFindGroupedEntity(s32 group, s32 type) {
+    BattleGroupNode *entry = btlGroupNodeHeads[group];
+    while (entry != 0) {
+        if (entry->type == type) {
+            break;
+        }
+        entry = entry->next;
+    }
+    return entry;
+}
+
+/* Return whether this group's separate ID list contains id. */
+s32 btlGroupContainsId(s32 groupIndex, s32 wantedId) {
+    BattleGroupIdEntry *idCursor = btlGroupIdHeads[groupIndex];
+    while (idCursor != 0) {
+        if (idCursor->id == wantedId) {
+            return 1;
+        }
+        idCursor = idCursor->next;
+    }
+    return 0;
+}
+
+/* Prepend id to this group's ID list; duplicate IDs are allowed. */
+void btlAddGroupId(s32 groupIndex, s32 newId) {
+    BattleGroupIdEntry *idEntry = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
+    BattleGroupIdEntry **groupHead = &btlGroupIdHeads[groupIndex];
+    idEntry->id = newId;
+    idEntry->next = *groupHead;
+    *groupHead = idEntry;
+}
+
+/* Remove the first matching ID using its incoming link, including the head. */
+void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
+    BattleGroupIdEntry **idLink;
+    BattleGroupIdEntry *idCursor;
+
+    idLink = &btlGroupIdHeads[groupIndex];
+    idCursor = *idLink;
+    if (idCursor == 0) {
+        return;
+    }
+    do {
+        if (idCursor->id == wantedId) {
+            *idLink = idCursor->next;
+            sdfReleaseChipBlock(idCursor);
+            break;
+        } else {
+            idLink = &idCursor->next;
+            idCursor = idCursor->next;
+        }
+    } while (idCursor != 0);
+}
+
+/* Replace the group/type node; only flags bit 0 selects resource ownership. */
+void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, s32 requestHandle) {
+    BattleGroupNode *groupNode;
+    BattleGroupNode *previousHead;
+    s32 slotIndex;
+    btlRemoveCurrentGroupedEntity(groupIndex, entityType);
+    groupNode = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
+    previousHead = btlGroupNodeHeads[groupIndex];
+    if (previousHead != NULL) {
+        previousHead->prev = groupNode;
+    }
+    btlGroupNodeHeads[groupIndex] = groupNode;
+    groupNode->next = previousHead;
+    groupNode->group = groupIndex;
+    groupNode->type = entityType;
+    groupNode->resourceList = resourceList;
+    groupNode->itemList = itemList;
+    groupNode->requestHandle = requestHandle;
+    groupNode->prev = NULL;
+    groupNode->modelContext = NULL;
+    for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
+        groupNode->slots[slotIndex].flags = 0;
+        groupNode->slots[slotIndex].data = NULL;
+        groupNode->slots[slotIndex].resourceHandle = 0;
+    }
+    groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
+    groupNode->resourceHandle = 0;
+    groupNode->partInfo = NULL;
+    groupNode->partList = NULL;
+    groupNode->unk_AC = 1.0f;
+    groupNode->unk_B0 = 100.0f;
+}
+
+extern void mdlDestroyContext(MdlCtx *);
+
+extern void mdlDestroyPartList(DevRequest *);
+
+extern void sdfResourceListRelease(DevRequest *, s32);
+
+/* Capture ownership before clearing it for callbacks; keep the context-release
+ * loop and resource-release order intact. NULL is allowed. */
+void btlDestroyGroupNode(BattleGroupNode *groupNode) {
+    BattleGroupNode *previousNode;
+    BattleGroupNode *nextNode;
+    u8 ownsResources;
+    s32 slotIndex;
+    if (groupNode == NULL) {
+        return;
+    }
+    previousNode = groupNode->prev;
+    nextNode = groupNode->next;
+    if (previousNode == NULL) {
+        btlGroupNodeHeads[groupNode->group] = nextNode;
+    } else {
+        previousNode->next = nextNode;
+    }
+    if (nextNode != NULL) {
+        nextNode->prev = previousNode;
+    }
+    ownsResources = groupNode->ownsResources;
+    groupNode->ownsResources = 0;
+    if (groupNode->modelContext != NULL) {
+        do {
+            mdlDestroyContext(groupNode->modelContext);
+        } while (groupNode->modelContext != NULL);
+    }
+    if (ownsResources != 0) {
+        sdfResourceListRelease(groupNode->resourceList, 1);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
+        for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
+            if (groupNode->slots[slotIndex].resourceHandle != 0) {
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
+            }
+        }
+    }
+    mdlDestroyPartList(groupNode->partList);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->resourceHandle));
+    sdfReleaseChipBlock(groupNode);
+}
+
+/* Forward the group/type pair explicitly, then destroy its node if present. */
+void btlRemoveCurrentGroupedEntity(s32 groupIndex, s32 entityType) {
+    BattleGroupNode *groupNode;
+
+    groupNode = btlFindGroupedEntity(groupIndex, entityType);
+    btlDestroyGroupNode(groupNode);
+}
+
+/* Destroy every group node, saving the next link before each unlink/free. */
+void btlReleaseAllEntities(void) {
+    u32 groupIndex = 0;
+    BattleGroupNode **groupHead = btlGroupNodeHeads;
+    do {
+        BattleGroupNode *groupNode = *groupHead;
+        while (groupNode != 0) {
+            BattleGroupNode *nextNode = groupNode->next;
+            btlDestroyGroupNode(groupNode);
+            groupNode = nextNode;
+        }
+        groupIndex++;
+        groupHead++;
+    } while (groupIndex < BTL_GROUP_COUNT);
+}
+
+extern Motion *func_002DB230(SdfModel *, MotionTable *);
+
+/* Create and attach the motion for the selected resource record. */
+Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
+    MotionTable *resource = owner->sub->slots[index].data;
+    s16 slot = owner->sub->slots[index].slot;
+    Motion *object = func_002DB230(owner->inner, resource);
+
+    object->searchId = index;
+    owner->slots[slot] = object;
+    object->slotIndex = slot;
+    if (slot == 0) {
+        owner->first = object;
+    }
+    return object;
+}
+
 #include "ee_mmi.h"
 #include "common.h"
 #include "sdf_chip.h"
