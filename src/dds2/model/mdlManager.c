@@ -457,7 +457,7 @@ extern s32 func_0035CB10(const char *, const char *);
 extern const char D_00436FA8[];
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *, MdlLoadRequest *);
-extern s32 mdlRequestLoadWithCallback(s32, s32, s32, s32, void (*)(u32), u32);
+extern s32 mdlRequestLoadWithCallback(s32, s32, s32, const char *, void (*)(u32), u32);
 
 /* Return a ready group address or queue its resources. Pending and new
  * requests each perform their own optional blocking wait after unlocking. */
@@ -494,7 +494,7 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     SignalSema(mdlGroupJobSemaphore);
     if (packed != 0) {
         mdlBuildPrefixedString(pathBuffer, path->path);
-        mdlRequestLoadWithCallback(group, id, 0x101, (s32)pathBuffer,
+        mdlRequestLoadWithCallback(group, id, 0x101, pathBuffer,
                                   (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(MdlLoadRequest));
@@ -1163,7 +1163,7 @@ typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
     u32 arg;           /* 0x4 */
-    void *owner;       /* 0x8: request slot from fileCreatePacLoadWork */
+    FilePacRequest *owner; /* 0x8: retained file request */
     void (*done)(u32); /* 0xC */
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
@@ -1174,12 +1174,6 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 }
 
 
-/* Request slot handed back by fileCreatePacLoadWork; its +0x60 word feeds the load apply. */
-typedef struct MdlLoadSlot {
-    u8 pad00[0x60];
-    PacWork *handle; /* 0x60 */
-} MdlLoadSlot;
-
 extern u32 mdlGroupJobSemaphore;
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
@@ -1187,9 +1181,9 @@ extern void btlRemoveGroupId(s32, s32);
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
-void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *completionJob) {
+void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
     completionJob->owner = requestOwner;
-    func_00233280(requestOwner->handle, completionJob->group, completionJob->id, completionJob->arg);
+    func_00233280(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
     WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(completionJob->group, completionJob->id);
     SignalSema(mdlGroupJobSemaphore);
@@ -1202,28 +1196,28 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
 
 
 
-extern void mdlCompleteGroupedJobAndNotify();
+extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
 
 #define MDL_DONE_JOB_BYTES 0x14
 
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
  * here; otherwise the completion callback path owns cleanup. Always return zero.
- * Preserve the provider's existing signature and caller casts/conversions. */
-s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
+ * Preserve the generic callback and user-data word parameters. */
+s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    struct FileRequest *requestSlot;
+    FilePacRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = fileCreatePacLoadWork((const char *)requestHandle, 0, 0,
-                                      (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
+    requestSlot = (FilePacRequest *)fileCreatePacLoadWork(requestPath, 0, 0,
+                                                         (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_002C81D0(requestSlot);
+        func_002C81D0((struct FileRequest *)requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;
