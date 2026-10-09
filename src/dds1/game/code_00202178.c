@@ -3220,7 +3220,65 @@ s32 btlCheckSelectedBossUnitFlag(void) {
     return (((BtlUnit *)unit)->status.flags & 0x20) ? 1 : -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00209528);
+/* Re-seed every selected boss-flagged unit's effect vectors, then copy the
+ * selected unit's transform onto the effect's actor and flag it. */
+void func_00209528(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlBossEffectPayload *effect = (BtlBossEffectPayload *)state->effect;
+    BtlUnit *unit;
+    BtlUnit *actor;
+    f32 *vector;
+    u32 flags;
+
+    if (((BtlUnit *)effect->actor)->status.flags & 2) {
+        unit = state->units;
+        while (unit != NULL) {
+            flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (flags & 2) {
+                        if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
+                            btlInitializeEffectVectorsFromSourceRecords(unit, ((BtlUnit *)effect->actor)->resourceKind,
+                                                                        ((BtlUnit *)effect->actor)->species);
+                        } else {
+                            btlInitializeEffectVectorsFromSourceRecords(unit, ((BtlUnit *)effect->actor)->resourceKind,
+                                                                        ((BtlUnit *)effect->actor)->species);
+                            unit->height = 100.0f;
+                            unit->unkB8 = 100.0f;
+                            unit->reach = 25.0f;
+                            unit->unkBC = 25.0f;
+                            unit->bodyOffsetZ += 150.0f;
+                        }
+                    }
+                }
+            }
+            unit = unit->next;
+        }
+        func_001F53F0();
+        unit = state->units;
+        while (unit != NULL) {
+            flags = unit->status.flags;
+            if (flags & 1) {
+                if (flags & 0x400) {
+                    if (flags & 2) {
+                        if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
+                            vector = unit->position;
+                            actor = (BtlUnit *)effect->actor;
+                            PCP_COPY_VECTOR(actor->position, vector);
+                            btlSetUnitPosition(actor, unit->currentPosition);
+                            actor = (BtlUnit *)effect->actor;
+                            vector = unit->rotation;
+                            PCP_COPY_VECTOR(actor->rotation, vector);
+                            btlSetUnitRotation(actor, unit->orientation);
+                            btlFlagUnitDefeatCandidate((BtlUnit *)effect->actor);
+                        }
+                    }
+                }
+            }
+            unit = unit->next;
+        }
+    }
+}
 
 extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
 
