@@ -2265,7 +2265,36 @@ void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
     mnuRefreshWindowSlots(menu, MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuRefreshPartyPanelBars);
+extern void func_002C1D10(MenuPageBar *bar);
+
+void mnuRefreshPartyPanelBars(MenuPageWindow *page) {
+    PartyPanel *party;
+    s32 hp;
+    s32 maxHp;
+    s32 mp;
+    s32 maxMp;
+    s32 row;
+
+    party = page->records;
+    row = 0;
+    if (party->unk0 + party->unk4 <= 0) {
+        return;
+    }
+
+    do {
+        hp = page->records->slots[row].hp;
+        maxHp = page->records->slots[row].maxHp;
+        page->slots[row].hp.quantizedSpan = (hp * 100) / maxHp;
+        func_002C1D10(&page->slots[row].hp);
+
+        mp = page->records->slots[row].mp;
+        maxMp = page->records->slots[row].maxMp;
+        page->slots[row].mp.quantizedSpan = (mp * 100) / maxMp;
+        func_002C1D10(&page->slots[row].mp);
+        party = page->records;
+        row++;
+    } while (row < party->unk0 + party->unk4);
+}
 
 extern char D_00437C30[];
 
