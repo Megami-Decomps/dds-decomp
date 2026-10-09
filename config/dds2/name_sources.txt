@@ -3479,6 +3479,7 @@
 0x0023EBE8	evtSetWorldUnitFirstVector	inferred	Loads three script float operands into a vector and calls effObjSetInnerFirstVec on the selected world unit.
 0x0023EC80	evtOpSetWorldUnitRotationFromAngles	inferred	Converts supplied degree angles into the unit quaternion vector. [names_reviewed8.tsv]
 0x0023ED68	evtSetWorldUnitThirdVector	inferred	Loads three script float operands with homogeneous w=1 and calls effObjSetInnerThirdVec on the selected world unit.
+0x0023EE08	evtOpDeprecatedModelMotion	inferred	Registered MODEL_MOTION script handler; resolves a unit, prepares motion state with mode 0, and logs that the command will be prohibited.
 0x0023EFF8	evtInvokeStoredWindowMotion	inferred	Invokes the motion slot stored for the current window callback. [names_reviewed8.tsv]
 0x0023F010	evtLipsExecFunction	inferred	DDS1 twin 0x002243D8 [names_M52_EvtEff.tsv]
 0x0023F168	evtLipsStopFunction	inferred	DDS1 twin 0x00224530 [names_M52_EvtEff.tsv]

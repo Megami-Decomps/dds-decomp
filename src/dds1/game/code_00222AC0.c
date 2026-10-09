@@ -663,7 +663,7 @@ u32 evtSetWorldUnitThirdVector(void) {
     return 1;
 }
 
-u32 func_002241D0(void) {
+u32 evtOpDeprecatedModelMotion(void) {
     EvtUnit *unit;
 
     unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
