@@ -13,6 +13,7 @@
 #include "eff.h"
 #include "itf.h"
 #include "itf_panel_draw.h"
+#include "itf_panel_api.h"
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "sdf.h"
@@ -223,11 +224,6 @@ extern s32 func_0019DBA8(s32 row, FrFontGlyph *glyph);
 
 extern UiSprite *func_001A1858(s32, u32);
 
-extern void itfSetPanelLayoutAndNotify();
-
-extern void itfPanelUpdateValuesAndNotify();
-
-extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 

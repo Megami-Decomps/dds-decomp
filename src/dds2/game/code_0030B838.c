@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -184,7 +185,6 @@ extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
-extern void func_00108EC0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
 
 
 
@@ -771,7 +771,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  fldLocalMapTextureResource.image);
+                  (struct SdfTex *)(u32)(fldLocalMapTextureResource.image));
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 

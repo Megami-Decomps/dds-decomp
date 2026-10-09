@@ -28,6 +28,7 @@
 #include "eff_transform.h"
 #include "eff_object.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "file_request_api.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"

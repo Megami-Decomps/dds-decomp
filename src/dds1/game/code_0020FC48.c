@@ -23,6 +23,7 @@
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
 
@@ -1071,8 +1072,6 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
         func_003014F0(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
     }
 }
-
-extern s32 mdlRequestAsset(s32, s32, s32);
 
 /* Nonzero cache state bypasses requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */

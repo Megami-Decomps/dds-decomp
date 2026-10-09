@@ -9,6 +9,7 @@
 #include "sdf_sif_command.h"
 #include "sdf_projection.h"
 #include "itf_panel_draw.h"
+#include "itf_panel_api.h"
 
 
 
@@ -25,10 +26,6 @@ extern void func_0019E4F8(ItfMesState *);
 extern s32 func_00195ED8();
 
 extern UiSprite *func_00199828(s32, u32);
-
-extern void itfSetPanelLayoutAndNotify();
-
-extern void itfPanelUpdateValuesAndNotify();
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct SndPad {
@@ -68,7 +65,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern UiOwnerRef *D_00357D88[];
 
-extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
 
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
 

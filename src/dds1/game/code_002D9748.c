@@ -458,7 +458,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     }
     itemCount = list->usedCount;
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        SdfAsset *asset = (SdfAsset *)((u32 *)list->buffer)[itemIndex];
+        SdfAsset *asset = ((SdfAsset **)list->buffer)[itemIndex];
 
         if ((u8)asset->secondaryColor != 0) {
             func_002D33C8((u32)asset, arg, value);
@@ -480,7 +480,7 @@ void sdfResourceListReleaseAssets(DevRequest *list) {
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < list->usedCount; itemIndex++) {
-        sdfAssetRelease((SdfAsset *)((u32 *)list->buffer)[itemIndex]);
+        sdfAssetRelease(((SdfAsset **)list->buffer)[itemIndex]);
     }
     sdfDestroyDevRequest(list);
 }
@@ -504,7 +504,7 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
     if (list->usedCount >= (s16)list->capacity) {
         sdfGrowResourceListStorage(list);
     }
-    ((u32 *)list->buffer)[list->usedCount] = (u32)asset;
+    ((SdfAsset **)list->buffer)[list->usedCount] = asset;
     list->usedCount++;
 }
 
@@ -588,13 +588,13 @@ void sdfCopyPrimaryTextScalars(SdfAsset *param, const f32 *sourceScalars) {
 }
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
-void func_002DA5B0(SdfAsset *param, u32 packedColor) {
+void sdfSetAssetSecondaryColor(SdfAsset *param, u32 packedColor) {
     param->secondaryColor = packedColor;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
 /* Store the mode used by the secondary packet's mode and palette lookup. */
-void func_002DA5C8(SdfAsset *param, u32 packetMode) {
+void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
     param->secondaryMode = packetMode;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
@@ -700,14 +700,14 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_COLOR_PRESENT) {
-        func_002DA5B0(asset, *(u32 *)parameterCursor);
+        sdfSetAssetSecondaryColor(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
         func_002DA5E0(param, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
-        func_002DA5C8(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
+        sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
         sdfSetSecondaryTextScalars(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);

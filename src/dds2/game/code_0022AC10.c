@@ -18,6 +18,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_asset_request.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "evt_task.h"
@@ -263,8 +264,6 @@ typedef struct BattleListEntry {
     u16 secondaryLimit;
     u16 flags;
 } BattleListEntry;
-
-extern s32 mdlRequestAsset(s32, s32, s32);
 
 extern u64 btlStartTask(void *);
 
