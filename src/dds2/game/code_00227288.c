@@ -281,7 +281,7 @@ s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
 
 
 /* Lower the linked actor, or return eligible actors to ground level. */
-void func_00227820(void) {
+void btlUpdateLinkedActorGroundHeight(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleEffectPayload *effect;
     f32 vector[4] __attribute__((aligned(16)));
@@ -517,7 +517,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     return 1;
 }
 
-void func_002286D8(ActionStateLink *action) {
+void btlQueueLinkedActorModelStateTasks(ActionStateLink *action) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleEffectPayload *effect = battle->effect;
     BtlUnit *unit;

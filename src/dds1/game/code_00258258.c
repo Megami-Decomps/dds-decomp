@@ -56,7 +56,7 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern void func_00258258(s32, s32, s32, s32, s32, u32, s32, MnuMantraGridEntry *, MnuMantraNodeState *, s32);
 
-void func_00258620(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
+void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
     u32 prerequisiteFlags[4];
     MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;

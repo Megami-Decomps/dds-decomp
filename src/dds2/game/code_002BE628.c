@@ -2054,7 +2054,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
     if (mnuGetAbilityTargetCategory(ability) == 1) {
         mask = mnuGetMatchingPartyEntryMask(entry);
 
-        if (func_0022C600(ability, mask) != 0) {
+        if (btlCheckSelectedPartyCommandEligibility(ability, mask) != 0) {
             return 0;
         }
         func_002C5128(ability, target, entry);
@@ -2068,7 +2068,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
-                if (func_0022C600(ability, mask) == 0) {
+                if (btlCheckSelectedPartyCommandEligibility(ability, mask) == 0) {
                     func_002C5128(ability, target, entry);
                     applied = 1;
                 }

@@ -3134,7 +3134,7 @@
 0x00219848	btlGetSubtaskActorMotionClass	inferred	maps subtask actor mode (0x10A/0x132/0x135 -> 0x63, 0x133/0x136 -> 0x62, else 0x64) [names_reviewed2.tsv]
 0x002199C8	btlTriggerLinkedActionMotionAlternate	inferred	sibling of btlTriggerLinkedActionMotion, calls func_00217378 instead of func_00217470 [names_reviewed2.tsv]
 0x00219A70	btlTriggerLinkedActionMotion	inferred	When action owner has flags 0x400 and code 0x136 with bound actor state 0x1200, applies an effect vector, raises motion coordinate 150, and refreshes actor effect state.
-0x00219B48	btlStartLinkedActionMotionPrimary	inferred	actionCode 0x17E branch of func_00219BD0 sibling [names_M86_BattleAct.tsv]
+0x00219B48	btlStartLinkedActionMotionPrimary	inferred	actionCode 0x17E branch of btlSetupHariActionCameraPair sibling [names_M86_BattleAct.tsv]
 0x00219CC8	btlAdvanceTimedActionState	inferred	For action 0x10C, increments its frame counter when accepted; after frame 18 calls func_001E9890 and invokes func_001EC868 with a zero float.
 0x00219D40	btlRemapCommandKind	inferred	sibling of func_00218630 style kind remap in the battle-select state [names_M86_BattleAct.tsv]
 0x00219E38	btlGetSpecialEnemyActionStatus	inferred	L13
@@ -3290,7 +3290,7 @@
 0x0022B6E8	btlCommandSetSequenceVolumePan	inferred	Uses a script-provided sequence index to set volume and pan on a live sequence.
 0x0022B8E0	btlCmdGetIndexedBattleStateValue	inferred	Returns a bounded indexed battle state value through the script integer result. [names_reviewed16.tsv]
 0x0022B928	btlCommandCountModelFlags	inferred	Counts one hundred descending model flags and publishes the count to the script VM.
-0x0022BAA8	btlCreateScriptResourceTask	inferred	Creates a battle task with callback func_0022BA08 and initializes its object/group resource-work fields.
+0x0022BAA8	btlCreateScriptResourceTask	inferred	Creates a battle task with callback btlRunSceneActorEventTask and initializes its object/group resource-work fields.
 0x0022BB28	btlUpdateScriptResourceTask	inferred	On the first update, requests the group's script resource and binds the target object; on later updates waits for release and advances its frame counter.
 0x0022BDC0	btlIndexListMatchesEntryCodes	inferred	unified with DDS1 twin (was btlListCountsMatchMask)
 0x0022BEB0	btlIndexListNoExpiredEntryCodes	inferred	unified with DDS1 twin (was btlListCheckExpiredEntryCodes)
@@ -7094,3 +7094,38 @@
 0x001AC648	btlMarkInactiveActorCandidates	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00240DE0	evtCommandSetMagatuhiSourcePoints	inferred	Inferred from the current C implementation in event/evtCommand.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0032A230	sdfRunGraphicsTransferWorker	inferred	Inferred from the current C implementation in game/code_00329F60.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023ACE8	evtKillFieldScriptTasks	inferred	Inferred from the current C implementation in event/evtStage.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C3850	btlSetActorSecondaryPresentation	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C3BB0	btlClearFinishedActorSlotChannels	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C4520	btlUpdateActorPanelHighlights	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001CE838	btlDrawSceneSlotFades	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B3BE0	btlSelectPreemptiveOutcome	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B52D8	btlTestSideCountCommandEligibility	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C1A68	btlUpdateActorPanelPresentation	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C5868	btlAdvanceActorSlotEchoAnimation	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001CF0B0	btlDrawSceneSlotFadeTiles	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002059F0	btlExpandPartyFormationAroundCenter	inferred	Inferred from the current C implementation in game/code_002053C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0022BA08	btlRunSceneActorEventTask	inferred	Inferred from the current C implementation in game/code_0022AC10.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002162C0	btlFilterTargetListByUnitId	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002163C8	btlSelectTargetsByAiPredicateKinds	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00218520	btlPrepareUnitMotionWithSavedOverride	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00219BD0	btlSetupHariActionCameraPair	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0021A778	btlUpdateSpecialActorChunkFade	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0021B368	btlResetSpecialActionActorPresentation	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00220450	btlToggleMarkedTaskActionState	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00220810	btlOffsetSpecialEnemyForCommand	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00221158	btlQueryLinkedGroupResponse	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00221BC8	btlPrepareLinkedSpecialActionMotion	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00222F18	btlSelectActionTransitionCamera	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002242F8	btlSelectLinkedActionCameraPose	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00226AB0	btlRestoreLinkedEffectUnitPose	inferred	Inferred from the current C implementation in game/code_00214948.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00227820	btlUpdateLinkedActorGroundHeight	inferred	Inferred from the current C implementation in game/code_00227288.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002286D8	btlQueueLinkedActorModelStateTasks	inferred	Inferred from the current C implementation in game/code_00227288.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0022C600	btlCheckSelectedPartyCommandEligibility	inferred	Inferred from the current C implementation in game/code_0022AC10.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00243568	evtAdvanceSolarClockAndExpireControls	inferred	Inferred from the current C implementation in game/code_00242CB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002665E8	mnuLoadTerminalSceneResourceBanks	inferred	Inferred from the current C implementation in game/code_002665B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00267238	mnuDrawEligibleTerminalSlotEntry	inferred	Inferred from the current C implementation in game/code_002665B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00269478	mnuConfigureTerminalModeEffects	inferred	Inferred from the current C implementation in game/code_002665B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0026CE90	mtrLoadMantraNodePositions	inferred	Inferred from the current C implementation in game/code_0026CD50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0026D168	mnuUpdateMantraRecordFlags	inferred	Inferred from the current C implementation in game/code_0026CD50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0026D590	evtTestMantraNodePartyRequirements	inferred	Inferred from the current C implementation in game/code_0026CD50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

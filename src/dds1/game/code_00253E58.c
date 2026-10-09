@@ -7,7 +7,7 @@
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 extern TaskWork *mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
-extern s32 func_00255E08();
+extern s32 mnuDrawMantraSparkScene();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
 extern void func_0025D2F8(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
@@ -49,7 +49,7 @@ s32 mnuDrawMantraCostTransition(void) {
     nodePrev = sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     nodeNext = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     scene = (MenuSceneWork *)(u32)nodeNext;
-    func_00255E08(nodePrev, 0x80, 0x52);
+    mnuDrawMantraSparkScene(nodePrev, 0x80, 0x52);
     level = *(s32 *)(nodePrev + 0x1C);
     switch (level) {
     case 0:
@@ -107,7 +107,7 @@ s32 mnuDrawMantraCostTransition(void) {
 }
 
 void mnuDrawDisplaySpriteAndPanelMarks(s32 p0, s32 a1, s32 a2) {
-    func_00255E08();
+    mnuDrawMantraSparkScene();
     func_0024E260(0, 0, 0, a1, 0x5A, a2);
     itfDspDrawMarksA(a1, a2);
 }

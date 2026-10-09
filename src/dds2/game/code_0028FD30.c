@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -363,7 +364,7 @@ MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
     return object->menu.defaultSelector;
 }
 
-extern void func_0026D168(void *, s32, s32);
+extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
 extern void func_0026D988(void *);
 
@@ -380,7 +381,7 @@ s32 func_00290A78(MnuStatusResource *object) {
         while (node != 0) {
             source = node->unk70;
             if (*slot != 0) {
-                func_0026D168(*slot, source, 0);
+                mnuUpdateMantraRecordFlags(*slot, source, 0);
             } else {
                 *slot = evtAllocateMantraSelectionWork(source, 0);
             }
@@ -404,7 +405,7 @@ s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     index = func_002890A8((MnuStatusResource *)object);
     source = object->list->cursor->unk70;
     if (object->menu.slots[index] != 0) {
-        func_0026D168(object->menu.slots[index], source, 0);
+        mnuUpdateMantraRecordFlags(object->menu.slots[index], source, 0);
     } else {
         object->menu.slots[index] = evtAllocateMantraSelectionWork(source, 0);
     }
@@ -646,8 +647,6 @@ void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
-
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 
 void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
     MantraMenuWork *state = &object->menu;
@@ -950,7 +949,6 @@ void func_00292998(MnuStatusResource *object) {
     record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
 }
 
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconAtPosition(s32, s32, struct MantraDrawPool *pool);
 extern void func_00278EA8(struct MantraDrawPool *pool);

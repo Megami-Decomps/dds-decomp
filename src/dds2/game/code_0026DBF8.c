@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
 #include "file_request_api.h"
+#include "mnu_mantra_position_api.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
@@ -92,7 +93,6 @@ typedef struct MantraMenu {
     MantraMenuWork work;
 } MantraMenu;
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern DatPartyRecord *mnuGetSelectedNodeValue(u8 *);
 extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);

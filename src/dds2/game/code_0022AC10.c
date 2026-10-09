@@ -206,7 +206,7 @@ extern u32 btlAllocTask(u32);
 
 struct BattleScriptTaskData;
 
-extern u32 func_0022BA08(struct BattleScriptTaskData *);
+extern u32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
 
 extern void btlStartSkillEventTask(u32);
 
@@ -792,7 +792,7 @@ u32 func_0022B9D0(void) {
     return 1;
 }
 
-u32 func_0022BA08(BattleScriptTaskData *record) {
+u32 btlRunSceneActorEventTask(BattleScriptTaskData *record) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *resource;
 
@@ -822,7 +822,7 @@ u32 btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
     BattleScriptTaskData *data;
     task->enabled = 1;
     task->taskId = 0x68;
-    task->callback.processScript = func_0022BA08;
+    task->callback.processScript = btlRunSceneActorEventTask;
     task->status = 0;
     data = btlGetTaskArguments(task);
     data->object = object;
@@ -1182,7 +1182,7 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 }
 
 /* Counter eligibility for a command against the selected party members. */
-u16 func_0022C600(s32 commandId, u32 memberMask) {
+u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
     u8 *entryList[5];
     s32 count = 0;
     s32 i;
