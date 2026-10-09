@@ -660,7 +660,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 typedef struct SdfImageUploadPrefix {
     struct SdfImageUploadPrefix *next;
-    s32 chipAddress;
+    void *chipMemory;
     SdfMemBlock *allocation;
     u8 releaseMode;
     u8 pad0D[3];
@@ -703,7 +703,7 @@ void func_0032AC30(SdfImageUploadRequest *request) {
     allocation = sdfAllocSizeClassBlock(allocationBlocks * 0x30 + 0x80);
     releaseEntry = (SdfImageUploadPrefix *)allocation;
     releaseEntry->next = NULL;
-    releaseEntry->chipAddress = (s32)request->pixels;
+    releaseEntry->chipMemory = request->pixels;
     releaseEntry->allocation = request->allocation;
     releaseEntry->releaseMode = request->allocationMode;
 
@@ -795,7 +795,7 @@ void sdfTexQueueResourceRelease(s32 address) {
     if (address != 0) {
         entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
-            entry->chipAddress = address;
+            entry->chipMemory = (void *)address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {
             entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
@@ -871,7 +871,7 @@ void func_0032B018(void) {
             sdfReleaseResourceAllocation(entry->allocation);
             break;
         case SDF_TEX_RELEASE_CHIP_ADDRESS:
-            sdfReleaseChipBlock((void *)entry->chipAddress);
+            sdfReleaseChipBlock(entry->chipMemory);
             break;
         }
         sdfReleaseChipBlock(entry);
