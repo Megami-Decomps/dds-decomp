@@ -38,7 +38,7 @@ typedef struct MdlObjectAttachment {
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next;
     u16 type; /* MdlResourceKind value, with native halfword storage. */
-    s16 subtype;
+    s16 motionSlotIndex; /* Owning Motion.slotIndex; -1 tags context-wide entries. */
     union {
         struct {
             /* Type 2 stores a track; other part kinds store their created instance. */
