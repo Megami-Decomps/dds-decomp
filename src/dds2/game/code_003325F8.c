@@ -463,7 +463,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     }
     itemCount = list->usedCount;
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        SdfAsset *asset = (SdfAsset *)((u32 *)list->buffer)[itemIndex];
+        SdfAsset *asset = ((SdfAsset **)list->buffer)[itemIndex];
 
         if ((u8)asset->secondaryColor != 0) {
             func_0032C278((u32)asset, arg, value);
@@ -485,7 +485,7 @@ void sdfResourceListReleaseAssets(DevRequest *list) {
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < list->usedCount; itemIndex++) {
-        sdfAssetRelease((SdfAsset *)((u32 *)list->buffer)[itemIndex]);
+        sdfAssetRelease(((SdfAsset **)list->buffer)[itemIndex]);
     }
     sdfDestroyDevRequest(list);
 }
@@ -509,7 +509,7 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
     if (list->usedCount >= (s16)list->capacity) {
         sdfGrowResourceListStorage(list);
     }
-    ((u32 *)list->buffer)[list->usedCount] = (u32)asset;
+    ((SdfAsset **)list->buffer)[list->usedCount] = asset;
     list->usedCount++;
 }
 
