@@ -14,6 +14,7 @@
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "mdl_resource_entries.h"
+#include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
 
 #include "pcp_vu0.h"
@@ -784,40 +785,24 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
     }
 }
 
-typedef struct MdlEffectRec {
-    u8 pad00[8];
-    s32 effectId;    /* 0x08 */
-    s32 param0C;     /* 0x0C */
-    u16 scaleX;      /* 0x10 */
-    u16 scaleY;      /* 0x12 */
-    u16 value14;     /* 0x14 */
-    u8 value16;      /* 0x16 */
-    u8 value17;      /* 0x17 */
-    s32 value18;     /* 0x18 */
-    s32 value1C;     /* 0x1C */
-    s32 value20;     /* 0x20 */
-    s32 value24;     /* 0x24 */
-} MdlEffectRec;
-
-
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 subtype) {
+void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 subtype) {
     EffTrackPolyParams effectParams;
     MdlResourceItem *resourceItem;
 
     effectParams.model = owner;
-    effectParams.idA = effectRecord->effectId;
-    effectParams.idB = effectRecord->param0C;
-    effectParams.startFrame = effectRecord->scaleX;
-    effectParams.endFrame = effectRecord->scaleY;
-    effectParams.sampleInterval = effectRecord->value14;
-    effectParams.historyLength = effectRecord->value16;
+    effectParams.idA = record->startPositionId;
+    effectParams.idB = record->endPositionId;
+    effectParams.startFrame = record->startFrame;
+    effectParams.endFrame = record->endFrame;
+    effectParams.sampleInterval = record->sampleInterval;
+    effectParams.historyLength = record->historyLength;
     effectParams.unk1C = 3;
-    effectParams.kind = effectRecord->value17;
-    effectParams.gradientColors[0] = effectRecord->value18;
-    effectParams.gradientColors[1] = effectRecord->value1C;
-    effectParams.gradientColors[2] = effectRecord->value20;
-    effectParams.gradientColors[3] = effectRecord->value24;
+    effectParams.kind = record->drawKind;
+    effectParams.gradientColors[0] = record->gradientColors[0];
+    effectParams.gradientColors[1] = record->gradientColors[1];
+    effectParams.gradientColors[2] = record->gradientColors[2];
+    effectParams.gradientColors[3] = record->gradientColors[3];
     resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, subtype);
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
@@ -891,7 +876,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-        mdlCreateViewerEffectPart(owner, (MdlEffectRec *)record, subtype);
+        mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, subtype);
         return;
     case MDL_VIEWER_RECORD_KIND_STREAM:
         mdlLoadViewerStreamRecord(owner, record);
