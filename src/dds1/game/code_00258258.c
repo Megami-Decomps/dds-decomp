@@ -44,7 +44,97 @@ u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *
     return flags;
 }
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258620);
+extern char D_003BC458[];
+extern char D_003BC488[];
+extern char D_003BC490[];
+extern char D_003BC498[];
+extern TaskWork *mnuSceneResourceContext;
+extern void *memset(void *, s32, u32);
+extern u32 mnuGetSelectedNodeValue(void);
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
+extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
+extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern void func_00258258(s32, s32, s32, s32, s32, u32, s32, MnuMantraGridEntry *, MnuMantraNodeState *, s32);
+
+void func_00258620(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
+    u32 prerequisiteFlags[4];
+    MnuMantraGridEntry *scene;
+    MnuProfileProgress *selection;
+    MnuMantraNodeState *states;
+    MantraNeighborRecord *record;
+    s32 cellWidth;
+    s32 cellHeight;
+    s8 i;
+    u32 flags;
+    u32 color;
+
+    scene = (MnuMantraGridEntry *)(u32)cell->value;
+    if (scene == NULL) {
+        return;
+    }
+    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
+    states = (MnuMantraNodeState *)(u32)grid->userData;
+    sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    record = &D_0036AE80[scene->sceneId];
+    memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
+    if (record->kind == 0) {
+        cellWidth = grid->cellWidth;
+        cellHeight = grid->cellHeight;
+        for (i = 0; i < 4 && record->neighbors[i] != 0; i++) {
+            if (states[record->neighbors[i]].state != 0) {
+                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (prerequisiteFlags[i] & 0x100) {
+                color = 0x50505080;
+                if (prerequisiteFlags[i] & 2) {
+                    color = 0x80808080;
+                }
+                func_00258258(x, y, z, cellWidth, cellHeight, color, i, scene, states, surface);
+            }
+        }
+    }
+    switch (scene->value05) {
+    case 1:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10707020, surface);
+        break;
+    case 2:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x60401020, surface);
+        break;
+    case 3:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10601020, surface);
+        break;
+    case 4:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70701020, surface);
+        break;
+    case 5:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70107020, surface);
+        break;
+    case 6:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10107020, surface);
+        break;
+    case 7:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70707020, surface);
+        break;
+    }
+    flags = mnuGetMantraDisplayFlags(scene, selection);
+    if (flags & 1) {
+        uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0, 0x60501050, surface);
+    }
+    if (flags & 2) {
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x808020F0, (const u8 *)D_003BC458, surface);
+        frFontMeasureAndQueueGlyph(x, y, z, 0x808020F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 4) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x108080F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 8) {
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x404040F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 0x20) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC490, surface);
+    } else {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC498, surface);
+    }
+}
 
 void func_0024E728(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
