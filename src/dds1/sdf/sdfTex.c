@@ -186,7 +186,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;
     texture->resourceKey = header->resourceKey;
-    texture->battleTextureSlot = header->unk20;
+    texture->battleTextureSlot = header->battleTextureSlot;
     pixels = (u8 *)header + (header->flags & 0xF0) + sizeof(*header);
     if (sdfTexGetPaletteCount(texture) != 0) {
         sdfTexAllocatePaletteData(texture);

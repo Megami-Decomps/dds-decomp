@@ -269,10 +269,10 @@ void effUploadModelTextures(EffModelOwner *owner) {
         u8 format;
 
         switch (tex->battleTextureSlot) {
-        case 1:
+        case SDF_TEXTURE_BATTLE_SLOT_ONE:
             header = battle->slot1;
             break;
-        case 2:
+        case SDF_TEXTURE_BATTLE_SLOT_TWO:
             header = battle->slot2;
             break;
         default:
