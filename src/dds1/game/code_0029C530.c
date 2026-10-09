@@ -4804,11 +4804,11 @@ u8 *effAssetPointerSet(u8 *work) {
 }
 
 void effReleaseRingFadeTable(s32 work) {
-    s32 state;
+    EffFrameState *state;
 
-    state = (s32)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((u32)state->asset);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
@@ -4974,11 +4974,11 @@ u8 *effCloneBillFadeTable(u8 *work) {
 }
 
 void effReleaseBillFadeTable(s32 work) {
-    s32 state;
+    EffFrameState *state;
 
-    state = (s32)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((u32)state->asset);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ACA40);
@@ -5143,11 +5143,11 @@ u8 *effCloneBillboardFrameAsset(u8 *work) {
 }
 
 void effReleaseCompactRingFadeTable(s32 work) {
-    s32 state;
+    EffFrameState *state;
 
-    state = (s32)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((u32)state->asset);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AD6B8);
@@ -5472,11 +5472,11 @@ u32 *effPrepareOwnedTextureAnimation(u8 *work) {
 }
 
 void effReleaseTextureAnimationWork(s32 work) {
-    s32 state;
+    EffFrameState *state;
 
-    state = (s32)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effReleaseScalyStripResources((u32)state->asset);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AEC60);
@@ -5669,11 +5669,11 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *work) {
 }
 
 void effReleaseBillboardFrameAsset(s32 work) {
-    s32 state;
+    EffFrameState *state;
 
-    state = (s32)((EffClassWork *)work)->resource;
-    effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effReleaseScalyStripResources((u32)state->asset);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 
