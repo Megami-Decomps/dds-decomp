@@ -18,7 +18,7 @@ struct MenuListNode {
     s32 index;
     const void *value; /* 0x04: DDS1 245A40 and DDS2 2B0FA0 pass caption/table-entry pointers. */
     struct {
-        u32 sprite;
+        struct EffectSlotSet *sprite;
         u32 effect;
     } sprites[8];       /* 0x08: four normal and four selected-row sprites */
     u32 flags48;        /* 0x48 */
@@ -49,6 +49,9 @@ struct MenuListNode {
         struct DatPartyRecord *partyRecord;
     };
 };
+typedef char MenuListNode_sprite_word_must_be_4[
+    (sizeof(((struct MenuListNode *)0)->sprites[0].sprite) == 4) ? 1 : -1];
+typedef char MenuListNode_size_must_be_0x74[(sizeof(struct MenuListNode) == 0x74) ? 1 : -1];
 struct MenuList {
     u32 stateFlags;     /* 0x00: cursor and selection-control bits */
     u32 flags;
