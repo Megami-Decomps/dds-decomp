@@ -155,7 +155,17 @@ INCLUDE_RODATA(const s32, "effect/effBattle", D_004144C0);
 
 INCLUDE_ASM(const s32, "effect/effBattle", func_00168978);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00169168);
+void func_00169168(BattleEffect *effect, f32 scale) {
+    s32 i;
+    s32 count;
+
+    if (scale != 1.0f) {
+        count = effect->list->count;
+        for (i = 0; i < count; i++) {
+            effParamWorkCallback1(effect->parameterWorks[i], scale);
+        }
+    }
+}
 
 typedef union EffBattleParameterValue {
     u32 sourceOffset;
