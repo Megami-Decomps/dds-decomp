@@ -145,8 +145,8 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         sdfSubmitGsTestOneRegisterPacket(0x5101BL, buffer);
     }
     if (!(flags & 1)) {
-        x += description->xOffset * 16;
-        y += description->yOffset * 8;
+        x += description->bounds[0] * 16;
+        y += description->bounds[1] * 8;
     }
     if (flags & 0x10) {
         x -= draw->geometry.bounds[0];
