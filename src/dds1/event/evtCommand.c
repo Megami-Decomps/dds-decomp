@@ -777,7 +777,7 @@ s32 evtCommandSetEffectUnitFirstVector(void) {
     vec[0] = bfWaitReadArgFloat(1);
     vec[1] = bfWaitReadArgFloat(2);
     vec[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerFirstVec(unit, (u128 *)vec);
+    effObjSetInnerPosition(unit, (u128 *)vec);
     return 1;
 }
 
@@ -803,7 +803,7 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF(vf10, quaternion);
-    effObjSetInnerSecondVec(unit, (u128 *)quaternion);
+    effObjSetInnerRotation(unit, (u128 *)quaternion);
     return 1;
 }
 
@@ -823,7 +823,7 @@ s32 evtCommandSetEffectUnitSecondVector(void) {
     vec[1] = bfWaitReadArgFloat(2);
     vec[2] = bfWaitReadArgFloat(3);
     vec[3] = bfWaitReadArgFloat(4);
-    effObjSetInnerSecondVec(unit, (u128 *)vec);
+    effObjSetInnerRotation(unit, (u128 *)vec);
     return 1;
 }
 

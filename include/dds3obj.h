@@ -48,15 +48,15 @@ EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *player);
 
 /* Inner transform vector helpers; fetch results are returned in VU vf10. */
-void effObjSetInnerFirstVec(EffWorldNode *object, u128 *vector);
-void effObjSetInnerSecondVec(EffWorldNode *object, u128 *vector);
-void effObjSetInnerThirdVec(EffWorldNode *object, u128 *vector);
-void effObjFetchInnerFirstVec(EffWorldNode *object);
-void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
-void effObjFetchInnerThirdVec(EffWorldNode *object);
-void effObjAddInnerFirstVec(EffWorldNode *object, u128 *vector);
-void effObjQuatMulInnerSecondVec(EffWorldNode *object, u128 *vector);
-void effObjMulInnerThirdVec(EffWorldNode *object, u128 *vector);
+void effObjSetInnerPosition(EffWorldNode *object, u128 *vector);
+void effObjSetInnerRotation(EffWorldNode *object, u128 *vector);
+void effObjSetInnerScale(EffWorldNode *object, u128 *vector);
+void effObjFetchInnerPosition(EffWorldNode *object);
+void effObjFetchInnerRotationNormalized(EffWorldNode *object);
+void effObjFetchInnerScale(EffWorldNode *object);
+void effObjAddInnerPosition(EffWorldNode *object, u128 *vector);
+void effObjMultiplyInnerRotation(EffWorldNode *object, u128 *vector);
+void effObjMultiplyInnerScale(EffWorldNode *object, u128 *vector);
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */
 typedef struct {

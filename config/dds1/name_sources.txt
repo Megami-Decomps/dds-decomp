@@ -368,15 +368,15 @@
 0x0010F688	effObjInnerVecBackup	inferred	three 128-bit copies +0x60->+0xA0, +0x50->+0x90, +0x40->+0x80 via explicit-$2 copy macro
 0x0010F6C0	effObjSetInnerFloat	inferred	stores f32 arg to inner +0xC4
 0x0010F6D0	effObjGetInnerFloat	inferred	loads f32 from inner +0xC4
-0x0010F6E0	effObjSetInnerFirstVec	inferred	sets bit0/clears bit1 of inner flags, 128-bit copy of arg to inner +0x40
-0x0010F710	effObjSetInnerSecondVec	inferred	sets bit0/clears bit1 of inner flags, 128-bit copy of arg to inner +0x50
-0x0010F740	effObjSetInnerThirdVec	inferred	sets bit0/clears bit1 of inner flags, 128-bit copy of arg to inner +0x60
-0x0010F770	effObjFetchInnerFirstVec	inferred	lqc2 inner +0x40 to vf10 then vmove.w vf10,vf0
-0x0010F788	effObjFetchInnerSecondVecNorm	inferred	lqc2 inner +0x50 to vf10 then tail-calls effMiscNormalizeVU
-0x0010F7A8	effObjFetchInnerThirdVec	inferred	lqc2 inner +0x60 to vf10
-0x0010F7C0	effObjAddInnerFirstVec	inferred	flags update, lqc2 inner +0x40 and arg, vadd.xyzw, recomputed-address sqc2
-0x0010F7F8	effObjQuatMulInnerSecondVec	inferred	flags update, lqc2 pair, effMiscQuatMultiplyVU, recomputed-address sqc2; parked: allocator keeps src in saved reg instead of inner, no honest fix found
-0x0010F848	effObjMulInnerThirdVec	inferred	flags update, lqc2 inner +0x60 and arg, vmul.xyzw, recomputed-address sqc2
+0x0010F6E0	effObjSetInnerPosition	inferred	Copy a16-byte position vector; set update-pending and clear matrix-cache-valid.
+0x0010F710	effObjSetInnerRotation	inferred	Copy a16-byte rotation vector with the same transform flags.
+0x0010F740	effObjSetInnerScale	inferred	Copy a16-byte scale vector with the same transform flags.
+0x0010F770	effObjFetchInnerPosition	inferred	Load position to VUvf10 and force W=1; no C/GPR return.
+0x0010F788	effObjFetchInnerRotationNormalized	inferred	Load rotation to VUvf10 and normalize all four components; no C/GPR return.
+0x0010F7A8	effObjFetchInnerScale	inferred	Load raw scale to VUvf10; no C/GPR return.
+0x0010F7C0	effObjAddInnerPosition	inferred	Add all four position-vector components and invalidate cached transform.
+0x0010F7F8	effObjMultiplyInnerRotation	inferred	Quaternion-multiply the current rotation by the supplied vector and invalidate cached transform.
+0x0010F848	effObjMultiplyInnerScale	inferred	Componentwise scale multiplication and transform invalidation.
 0x0010F880	dds3BuildVuTransformFromComponents	inferred	Builds a VU transform from quaternion, scale and translation vectors. [names_reviewed10.tsv]
 0x0010F8D8	dds3LoadOrBuildObjectMatrix	inferred	Loads a cached object matrix or builds it and sets its valid flag. [names_reviewed8.tsv]
 0x0010F948	dds3TestObjectSphereOverlap	inferred	src/dds1/game/code_0010F8D8.c func_0010F948: Computes position-vector distance and compares with sum of stored object radii. [names_reviewed24.tsv]

@@ -115,8 +115,8 @@ extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
                                         const char *text);
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
-    effObjSetInnerSecondVec((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
     ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
 }
 
