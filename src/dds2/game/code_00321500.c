@@ -177,12 +177,66 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
-
 extern MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *);
 extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 extern f64 cos(f64);
 extern f64 sin(f64);
+
+MenuRuntimeRecord *func_00321A30(MenuStateRecord *state, MenuRuntimeList *runtimeList,
+                                  s32 x, s32 y, f32 angle) {
+    s32 offsetX = 0;
+    s32 offsetY;
+    s32 effect;
+    MenuRuntimeRecord *record;
+    u32 flags;
+    u8 kind;
+    f32 baseX;
+    f32 baseY;
+
+    if (state->flags.bits.hasRange) {
+        offsetX = state->offsetX;
+        offsetY = state->offsetY;
+    } else {
+        offsetY = 0;
+    }
+
+    effect = state->effect;
+    if (effect > 0) {
+        mnuCreateAnimatedEffect((u32)(effect - 1), (f32)(x + offsetX),
+                                (f32)(y + offsetY), angle);
+        state->value++;
+        return NULL;
+    }
+
+    record = mnuAcquireRuntimeRecordSlot(runtimeList);
+    if (record == NULL) {
+        return NULL;
+    }
+
+    kind = state->tag.flags;
+    baseX = (f32)x;
+    baseY = (f32)y;
+    record->displacementX = 0.0f;
+    record->state.kind = kind;
+    record->displacementY = 0.0f;
+    record->state.directionDegrees = state->tag.group;
+    record->baseX = baseX;
+    record->baseY = baseY;
+    record->rotatedOffsetX = offsetX * cos(angle + 1.5707963f) +
+                    offsetY * sin(angle + 1.5707963f);
+    record->rotatedOffsetY = offsetY * cos(angle + 1.5707963f) -
+                    offsetX * sin(angle + 1.5707963f);
+    record->angle = angle;
+    record->speed = state->tag.index;
+    flags = record->state.word & ~0x1Eu;
+    record->remaining = state->unk18;
+    record->state.word = flags |
+                         (state->flags.bits.direction << 1);
+    state->value++;
+    mnuRuntimeRecordInitializationCallback(record);
+    return record;
+}
+
 
 MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
                            s32 offsetX, s32 offsetY, s32 direction,
