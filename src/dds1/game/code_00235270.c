@@ -20,6 +20,7 @@
 #include "evt_polygon_movie.h"
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_texture_file.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern s32 func_00237428();
@@ -4135,7 +4136,6 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 }
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void effSetCh72Id(u32);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
@@ -4148,7 +4148,7 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(old);
             data->effect72 = 0;
         }
-        texture = sdfTexAcquireResourceTexture(address);
+        texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(address));
         effSetCh72Id((u32)texture);
         data->effect72 = texture;
     }

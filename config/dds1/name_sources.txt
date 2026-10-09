@@ -6236,9 +6236,12 @@
 0x002D0B50	sdfGetGeneralHeapStats	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:128:func_002D0B50; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
 0x002D0BF8	sdfFindGeneralBlockContaining	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:130:func_002D0BF8; Returns the used general-heap block containing the supplied address in its half-open range, or NULL when the end marker is reached.; source=names_pending_main.tsv:131 [names_qp11.tsv]
 0x002D0C68	sdfSendNamedResourceRequest	inferred	Allocates a request containing name length, name and payload for transfer. [names_reviewed21.tsv]
+0x002D0E30	sdfGraphApplyModeDefaults	inferred	Selects the display-mode row, initializes its dimensions and formats, and optionally clears the buffer pointers.
 0x002D0EC0	sdfGraphReleaseBuffers	inferred	Releases and clears three graph buffer pointers.
 0x002D0F08	sdfGraphRecreateBuffers	inferred	Releases existing graph buffers and allocates three using dimensions and modes from the graph.
 0x002D0F90	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x00329E40, input-family pairing. [names_qp10.tsv]
+0x002D1020	sdfGraphResetDeviceForCurrentMode	inferred	Resets the GS using interlace settings from the current display mode and marks graph state for reset.
+0x002D1080	sdfGraphWakeDisplayThread	inferred	Wakes the graph worker for channel 1, enables interrupts, and returns zero.
 0x002D10B0	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
 0x002D10C8	sdfCaptureDeferredGsImage	inferred	U0
 0x002D1318	sdfSwapBufferSlots	inferred	replaces buffer index in the two slot bytes with its complement
@@ -6470,7 +6473,7 @@
 0x002DA830	sdfParseAssetParameterFlags	inferred	Decodes flag-selected packed fields and advances the data cursor. [names_reviewed8.tsv]
 0x002DAA00	sdfAssetRelease	inferred	Releases four owned allocations and then the asset itself
 0x002DAA68	sdfQueueAssetRelease	inferred	Enqueues a non-null asset in the queue whose registered completion callback is sdfAssetRelease.
-0x002DAAA0	sdfInitNodeHeaderFromWords	inferred	Writes a 16-byte SdfNode header with type 0xA and payload from the third word at the selected source offset, returning the following payload address.
+0x002DAAA0	sdfInitAssetDrawEntryReferenceNode	inferred	Selects the asset drawEntries[frame] pointer, writes a 16-byte reference header with its physical address, and returns the following packet payload.
 0x002DAAE0	sdfAssetCopyTextureState	inferred	Copies resource and texture state into a selected asset entry
 0x002DAB80	sdfBuildSubParameterTransform	inferred	Builds the 24-byte scalar-block transform from its five float parameters, or writes the identity transform when the block is absent.
 0x002DAC68	sdfCopyAssetPrimarySubParameter	inferred	Copies the asset primary subparameter into its draw entry. [names_reviewed8.tsv]
@@ -6490,6 +6493,7 @@
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
 0x002DB538	sdfMotionSampleAtFrame	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:370:func_002DB538; Sets the current motion frame/state and calls each object blend callback with a lead-in-clamped weight until the blend interval ends; calls sample callbacks afterward.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002DB660	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap.
+0x002DB7A8	sdfMotionReleaseBindingStorage	inferred	Releases storage for a motion-owned binding through its common callback slot.
 0x002DB7C0	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x002DB7C8	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS2 0x00334678.
 0x002DB900	sdfMotionBlendVectorKeys	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:443:func_002DB900; Interpolates the two bracketing vec3 key pointers by their stored key weight, leaving the vector result in vf10.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -7373,3 +7377,7 @@
 0x002ECF70	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
 0x002D86E0	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
 0x002D7F40	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
+0x0016BAC0	effFlashAccumulatingSetParticleColors	inferred	Writes packed colors for paired particle quad records using the supplied color multiplier.
+0x0016BBB0	effFlashAccumulatingBuildParticleQuads	inferred	Builds paired outer and inner particle quads and advances radius by radialStep.
+0x0016C698	effFlashOrbitArcUpdate	inferred	Advances shape and particle lifetimes, updates orbit-arc geometry and colors, and submits the record pool.
+0x0016DBA0	effFlashRadialStripSetParticleColors	inferred	Writes packed colors for paired radial-strip quad records using the supplied color multiplier.

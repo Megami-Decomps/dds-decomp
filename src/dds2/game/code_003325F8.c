@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_model_scalars.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -726,12 +727,10 @@ void sdfQueueAssetRelease(s32 assetAddress) {
     }
 }
 
-/* Initialize the node header from the selected source words and return its payload. */
-void *sdfInitNodeHeaderFromWords(u32 *words, SdfNode *node, s32 wordIndex) {
-    u32 *headerWords = words + wordIndex;
-
+/* Reference the selected buffered asset draw entry and return the packet payload. */
+void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfNode *node, s32 frame) {
     node->unk3 = 0x30;
-    node->unk4 = headerWords[2] & SDF_NODE_SOURCE_WORD_MASK;
+    node->unk4 = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
     node->unk0 = 0xA;
     node->unk8 = 0;
     node->unkC = 0;
@@ -957,8 +956,8 @@ void sdfCopyAssetListParameterState(DevRequest *destination, DevRequest *source)
 
 extern s32 (*D_0040B358[])(u32, u32);
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-s32 sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
-    D_0040B358[commandWord >> 16](context, commandWord);
+void *sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
+    return (void *)D_0040B358[commandWord >> 16](context, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_003325F8", sdfLiveAssetCount);

@@ -262,7 +262,7 @@ typedef struct MdlDoneJob {
     u16 group;         /* 0x0 */
     u16 id;            /* 0x2 */
     u32 arg;           /* 0x4 */
-    void *owner;       /* 0x8: request slot from fileAllocateDispatchRequest */
+    FilePacRequest *owner; /* 0x8: retained file request */
     void (*done)(u32); /* 0xC */
     u32 doneArg;       /* 0x10 */
 } MdlDoneJob;
@@ -439,7 +439,7 @@ extern char *func_00302240(const char *, s32);
 extern s32 func_003017A0(const char *, const char *);
 extern char D_003BBB68[];
 extern void sdfCreateSemaphoreFromOptions(void);
-extern s32 mdlRequestLoadWithCallback(s32, s32, s32, s32, void (*)(u32), u32);
+extern s32 mdlRequestLoadWithCallback(s32, s32, s32, const char *, void (*)(u32), u32);
 
 /* Resolve or schedule a grouped model asset; -1 denotes an existing request. */
 s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
@@ -476,7 +476,7 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
     SignalSema(mdlGroupJobSemaphore);
     if (packedBundle != 0) {
         mdlBuildPrefixedString(requestPath, paths->path);
-        mdlRequestLoadWithCallback(group, id, 0x101, (s32)requestPath,
+        mdlRequestLoadWithCallback(group, id, 0x101, requestPath,
                                   (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(*request));
@@ -1138,18 +1138,12 @@ void mdlDestroyLoadRequestOwner(MdlDoneJob *ownerBlock) {
 }
 
 
-/* Request slot handed back by fileAllocateDispatchRequest; its +0x60 word feeds the load apply. */
-typedef struct MdlLoadSlot {
-    u8 pad00[0x60];
-    PacWork *handle; /* 0x60 */
-} MdlLoadSlot;
-
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
-void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *completionJob) {
+void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
     completionJob->owner = requestOwner;
-    func_00218768(requestOwner->handle, completionJob->group, completionJob->id, completionJob->arg);
+    func_00218768(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
     WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(completionJob->group, completionJob->id);
     SignalSema(mdlGroupJobSemaphore);
@@ -1159,28 +1153,28 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void mdlCompleteGroupedJobAndNotify();
+extern void mdlCompleteGroupedJobAndNotify(FilePacRequest *, MdlDoneJob *);
 
 #define MDL_DONE_JOB_BYTES 0x14
 
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
  * here; otherwise the completion callback path owns cleanup. Always return zero.
- * Preserve the provider's word-valued completion and user-data parameters. */
-s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
+ * Preserve the generic callback and user-data word parameters. */
+s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    struct FileRequest *requestSlot;
+    FilePacRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = fileAllocateDispatchRequest((const char *)requestHandle, 0, 0,
-                                              (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
+    requestSlot = (FilePacRequest *)fileAllocateDispatchRequest(requestPath, 0, 0,
+                                                                (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_00288C50(requestSlot);
+        func_00288C50((struct FileRequest *)requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

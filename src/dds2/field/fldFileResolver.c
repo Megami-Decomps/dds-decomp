@@ -4,6 +4,8 @@
 #include "fld_resource_resolver.h"
 #include "fld.h"
 #include "dds3obj.h"
+#include "sdf_texture_file.h"
+#include "evt_action_object.h"
 
 
 extern FldFileResource *D_00438EC0;
@@ -254,8 +256,6 @@ extern u32 D_00438EC8;
 extern u8 D_0038A700[];
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern f32 D_004360B0;
@@ -755,8 +755,6 @@ void func_00128FE8(u32 batchAddress, u32 batchCount, s32 appended) {
     }
 }
 
-extern s32 evtSpawnActionObj2(u32, u32);
-
 extern void *dds3GetWorldSecondaryObject(void);
 
 typedef struct FldActionSpawn {
@@ -776,13 +774,13 @@ typedef struct FldSceneRequest {
 
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
-    s32 handle;
+    struct EffWorldNode *node;
 
     dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, list++) {
-        handle = evtSpawnActionObj2(list->firstValue, list->secondValue);
+        node = evtSpawnActionObj2(list->firstValue, list->secondValue);
         if (i == 0) {
-            fldAreaState.taskHandle = handle;
+            fldAreaState.taskHandle = (s32)node;
         }
     }
 }
@@ -1558,7 +1556,7 @@ void fldInitDisplayObjects(void) {
         D_0043607C = (u32)object;
         object->unk1C = 1.0f;
         D_00438EC8 = (u32)sdfCreateAssetWithDrawEntries();
-        fldMarkerTexture = sdfTexAcquireResourceTexture(D_0038A700);
+        fldMarkerTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_0038A700));
     }
 }
 
@@ -4002,7 +4000,7 @@ void fldLoadSkyResource(s32 area) {
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
             fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
-            fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+            fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
 }
@@ -4029,7 +4027,7 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
         fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
-        fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+        fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
     }
 }
 

@@ -59,4 +59,10 @@ typedef char SdfTextureFileHeader_unk20_offset_must_be_0x20[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(unk20) == 0x20) ? 1 : -1];
 #undef SDF_TEXTURE_FILE_HEADER_OFFSET
 
+struct SdfTex;
+
+/* Acquire a texture from a serialized texture-file header. */
+struct SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header);
+struct SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header);
+
 #endif /* SDF_TEXTURE_FILE_H */

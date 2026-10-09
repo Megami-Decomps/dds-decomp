@@ -502,7 +502,30 @@ void mnuSynchronizeMantraModelFlags(s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291038);
+extern void func_00314298(DatPartyRecord *, const s32 *);
+extern s32 ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount);
+
+/* Apply one stat, or all five base stats, to each occupied party slot. */
+void func_00291038(s32 statIndex, s32 amount) {
+    s32 index;
+
+    for (index = 0; index < 5; index++) {
+        if ((u16)(datGameState->party[index].flags & 1) != 0) {
+            DatPartyRecord *entry = &datGameState->party[index];
+
+            if (statIndex == DAT_BASE_STAT_COUNT) {
+                s32 stat;
+
+                for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
+                    ptyAddClampedEntryValue(entry, stat, amount);
+                }
+            } else {
+                ptyAddClampedEntryValue(entry, statIndex, amount);
+            }
+            func_00314298(entry, NULL);
+        }
+    }
+}
 
 extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);

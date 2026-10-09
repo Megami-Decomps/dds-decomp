@@ -25,6 +25,8 @@
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
+
+extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct SdfTex;
 struct MenuListNode;
@@ -3038,17 +3040,6 @@ s32 fileTestSavedSlotFlags(u32 kind) {
     return fileTestSlotFlagsBit(kind, (s32 *)&datGameState->world.slotFlags);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2920);
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2940);
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2960);
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2980);
-
-INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B29A0);
-
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00290FE0);
 
 /* Each configuration node owns this separately allocated four-byte payload. */
 typedef struct FileConfigCountdown {
@@ -3087,6 +3078,67 @@ typedef struct FileConfigTask {
     u32 pending;    /* 0x34: zero when no load can start */
     u32 effect;     /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
+
+extern struct MenuList *mnuCreateListState(s32, s32, s32);
+extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
+extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
+extern void mnuResetTitleStreamLocked(void);
+extern void func_0026A5F0(s32);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
+extern void func_002918F8();
+extern char D_003BC8E0[];
+
+/* Allocate the save/config task, its five-row list and its effect resource slots. */
+s32 func_00290FE0(s32 mode) {
+    char *names[4] = {
+        "/camp/spr/n_con/n_con01.spr",
+        "/camp/spr/n_con/n_con02.spr",
+        "/camp/spr/n_con/n_con03.spr",
+        "/camp/spr/n_con/n_con04.spr",
+    };
+    struct SdfMemBlock *block;
+    FileConfigTask *task;
+    struct MenuList *list;
+    FileConfigListNode *node;
+    s32 i;
+
+    block = sdfAllocGeneralBlock(0x3C);
+    task = (FileConfigTask *)sdfResourceRetainAddress(block);
+    memset(task, 0, 0x3C);
+    task->memory = block;
+    task->state = mode;
+    task->ticks = 0;
+    task->result = 0;
+    list = mnuCreateListState(0, 5, 0x23);
+    task->frame = (u32)list;
+    list->drawCallback = func_002918F8;
+    for (i = 0; i < 5; i++) {
+        node = (FileConfigListNode *)mnuListAppendNode((struct MenuList *)task->frame, NULL);
+        node->resource = sdfAllocSizeClassBlock(4);
+        memset(node->resource, 0, 4);
+    }
+    switch (mode) {
+    case 1:
+        task->effect = (u32)mnuRequestEffectResource(D_003BC8E0, "/facility/spr/mantra/mantr_bg.spr");
+        while (mnuHasEffectResourceHandle((MenuResourceWork *)task->effect)) {
+        }
+        for (i = 0; i < 4; i++) {
+            effRequestResourceByMode(D_003BC8E0, names[i], 0, &task->slots[i]);
+        }
+        mnuResetTitleStreamLocked();
+        func_0026A5F0(0x14);
+        mnuTitleStreamUpdateAndLogBgm();
+        kwlnFadeOutStart(0, 0, 0, 0xF);
+        break;
+    default:
+        for (i = 0; i < 4; i++) {
+            effRequestResourceByMode(D_003BC8E0, names[i], 0, &task->slots[i]);
+        }
+        break;
+    }
+    return (s32)task;
+}
 
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);

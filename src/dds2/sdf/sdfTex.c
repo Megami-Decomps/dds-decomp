@@ -221,13 +221,13 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
 }
 
 /* Build the texture and its packet with variant zero. */
-SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress) {
-    return sdfTexCreateFromFileHeader(resourceAddress, 0);
+SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header) {
+    return sdfTexCreateFromFileHeader(header, 0);
 }
 
 /* Build the texture and its packet with variant one. */
-SdfTex *sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
-    return sdfTexCreateFromFileHeader(resourceAddress, 1);
+SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header) {
+    return sdfTexCreateFromFileHeader(header, 1);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */
