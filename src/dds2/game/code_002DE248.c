@@ -4121,14 +4121,14 @@ void effSubmitIndexedRenderPacket(u32 index) {
     effCurrentRenderPacket = NULL;
 }
 
-extern EffQuadWork *func_002EA120(FileJobPayload *job);
+extern EffQuadWork *effCreateQuadWork(FileJobPayload *job);
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
 
 extern EffPacketParams D_00458370;
 extern u32 D_003E9CC0[];
 extern u32 D_003E9CD0[];
 
-EffQuadWork *func_002EA120(FileJobPayload *job) {
+EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     EffQuadWork *work = sdfAllocSizeClassBlock(sizeof(EffQuadWork));
     void *buffer;
 
@@ -4191,7 +4191,7 @@ void effReleaseRenderResources(EffQuadWork *work) {
 }
 
 EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
-    EffQuadWork *effect = func_002EA120(NULL);
+    EffQuadWork *effect = effCreateQuadWork(NULL);
     memcpy(&effect->source, &source->source, sizeof(effect->source));
     effDuplicateRenderResourceOwner(effect, source);
     return effect;
