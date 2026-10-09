@@ -21,6 +21,8 @@ void sdfAppendDmaPrimary(struct SdfListHead *list, u32 source,
                          struct SdfDmaNode *node);
 void sdfAppendDmaSecondary(struct SdfListHead *list, u32 source,
                            struct SdfDmaNode *node);
+void sdfConnectPacketLists(struct SdfListHead *previous, struct SdfListHead *incoming);
+
 void sdfAppendPacketList(struct SdfPoolNode *pool, struct SdfListHead *item);
 void sdfPrependPacketList(struct SdfPoolNode *pool, struct SdfListHead *item);
 s32 sdfPrependIfMode1(struct SdfPoolNode *pool, s32 mode, struct SdfListHead *item);
