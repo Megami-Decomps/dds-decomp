@@ -6487,3 +6487,50 @@ those are the two explicit word boundaries, not alternate CPU views.
 Local declarations must agree with those actual provider contracts in
 both games, even when an older wrong pointer return happened to match.
 
+
+## Event viewer software lists and claim-held import debt
+
+The menu frame, available row/header callbacks and their reset-list
+locals use the existing `SdfListHead *` owner through formatting and
+surface append. The header and row callback typedefs stay unprototyped:
+their existing call convention genuinely supplies different arities.
+`kwlnDrawSpriteCell` now exposes the same CPU list owner in both provider
+definitions; its generated packet still occupies append's physical
+second argument.
+
+Existing viewer sprite-import declarations/casts and four claimed
+functions are deliberately unchanged, not evidence of a word-based CPU
+API. Finish the script-test import at `0022AB90` after its claim releases
+or 2026-10-10 21:47Z; finish the camera-editor pair `0023CA60`/`00257910`
+and the viewer sprite imports after release or 2026-10-11 04:22Z.
+The DDS2 row callback `00251ED0` similarly waits until release or
+2026-10-12 05:19Z. No new compatibility casts or adapters are introduced.
+
+
+## Model-blend tasks share one complete argument packet
+
+DDS1 `001DA3A8` and DDS2 `001E7378` allocate the same `0x1C`-byte
+`BtlActorModelBlendArgs`. The callbacks' initial `BLTZ` proves the signed
+index; unit and target are the real `BtlUnit *` owners. Their completion
+result follows the scheduler's `s32` callback contract. Fresh full-unit
+checks make both 200-byte callbacks exact without a TU or flag change;
+the older one-word annulment parks are not a reason to add call hints.
+
+The blend and stationed-SE factories return the common `0x70`-byte
+`BtlRuntimeTask` header. Stationed SE adds only a four-byte argument word,
+and its callers use scheduler fields, not a derived sound owner. Preserve
+the defeat transition's genuine reused task local with that primary type;
+do not cast a blend allocation through the old `SoundTask` view.
+Clients needing only the opaque factory retain truthful local declarations
+rather than importing unrelated sound-resource layouts and contracts.
+
+
+## Single-register GS writers retain the packet header
+
+The paired framebuffer flag, TEST, ALPHA, PABE and texture-register writers
+retain `SdfDrawPacket *` from allocation through header initialization.
+Their existing `u64 *` descriptor cursor owns the actual two-word GS
+payload, not another packet view. Preserve the scalar SDK offset helper
+and physical append conversions; the register values, branches and store
+order are independent of the CPU header's pointer representation.
+

@@ -4285,19 +4285,8 @@ BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *unit) {
     return task;
 }
 
-typedef struct BtlActorModelBlendArgs {
-    BtlUnit *unit;
-    BtlUnit *target;
-    s32 index;
-    s32 previousModelValue;
-    s32 value;
-    f32 scale;
-    u32 stage;
-} BtlActorModelBlendArgs;
 
-typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
-
-u32 func_001E72B0(BtlActorModelBlendArgs *args) {
+s32 func_001E72B0(BtlActorModelBlendArgs *args) {
     BtlUnit *unit;
     BtlUnit *target;
 
@@ -4325,7 +4314,7 @@ u32 func_001E72B0(BtlActorModelBlendArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 index, u32 value, f32 scale) {
+BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, BtlUnit *target, s32 index, s32 value, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(BtlActorModelBlendArgs));
     BtlActorModelBlendArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -4336,7 +4325,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 inde
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->unit = unit;
-    args->target = (BtlUnit *)target;
+    args->target = target;
     args->index = index;
     args->value = value;
     args->scale = scale;

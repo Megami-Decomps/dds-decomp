@@ -2088,15 +2088,15 @@ s32 btlSpawnLinkedActionEffect(u8 *task) {
  */
 void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHandle, s32 delayBase) {
     BtlUnit *unit;
-    u8 *task;
+    BtlRuntimeTask *task;
     if (record->pendingFlags & 8) {
         unit = record->unit;
         if (unit->status.flags & 0x400) {
             if (unit->partyRecord.unitId == 0x108) {
-                task = (u8 *)sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
-                ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
-                ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
-                ((BtlRuntimeTask *)task)->startDelay = delayBase + 0x28;
+                task = sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
+                task->startCondition.value.handle = prerequisiteHandle;
+                task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                task->startDelay = delayBase + 0x28;
                 btlStartTask(task);
             }
         }
