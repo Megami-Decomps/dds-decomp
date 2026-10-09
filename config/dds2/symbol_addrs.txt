@@ -6483,6 +6483,7 @@ effClassResourceWorkOperations = 0x003E9D00;
 effBlockResourceOperations = 0x003E9DD8;
 effModelBlockOperations = 0x003E9E60;
 effModelResourceOperations = 0x003E9F08;
+effRuntimeResourceOperations = 0x003EA018;
 effBattleCameraSnapshotSelection = 0x003FF4B0;
 effMappingState = 0x00400018;
 fldLocalMapFirstCameraVector = 0x00400970;
