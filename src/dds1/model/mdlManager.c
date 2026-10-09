@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "mdl_resource_table.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
@@ -275,22 +276,6 @@ extern u8 D_003BBB60[];
 extern void sdfDestroyMotion(Motion *arg);
 extern char *strcat(char *dst, const char *src);
 
-typedef struct MdlResourceSelection {
-    u16 pathTable;
-    u16 pathIndex;
-    u32 unk4;
-} MdlResourceSelection;
-
-typedef struct MdlResourcePath {
-    char *resourceListPath;
-    char *path;
-    char *motionPath;
-} MdlResourcePath;
-
-typedef struct MdlResourceTable {
-    void *entries;
-    s32 count;
-} MdlResourceTable;
 
 extern MdlResourceTable D_00367900[];
 extern MdlResourceTable D_00365858[];
@@ -1076,8 +1061,8 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 value, f32 scalar) {
 void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
     MdlResourcePath *pathEntry;
-    char *path;
-    char *basename;
+    const char *path;
+    const char *basename;
     s32 pathLength;
     s32 startIndex;
     s32 endIndex;

@@ -552,7 +552,7 @@ typedef struct BtlState {
     s32 (*unk6FC)(BtlUnit *, s32, s32);
     void (*unitReturnHook)(struct ActionStateLink *); /* 0x700: custom return-to-group handling */
     f32 (*hitChanceScale)(BtlUnit *, BtlUnit *, s32); /* 0x704: 001B1B20 multiplies the callback result in f0. */
-    u8 pad708[4];
+    f32 (*commandAmountScaleHook)(BtlUnit *, BtlUnit *, u32, s32); /* 0x708: HP/MP command amount multiplier. */
     s32 (*selectSingleTargetOverride)(struct ActionStateLink *); /* 0x70C: 0021552C calls the single-target override. */
     s32 (*unk710)(BtlUnit *, s32);
     void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */

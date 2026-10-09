@@ -39,7 +39,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern void func_00243AD8(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
 
-extern u32 D_00437210[];
+extern char D_00437210[];
 
 
 /* The definition uses legacy K&R parameters. */
@@ -75,12 +75,12 @@ typedef struct SolarLayerTimer {
 f32 effMiscRandUnitFloat(s32 seed);
 u32 effMiscRand(s32 seed);
 
-void evtLoadSolarNoiseSprite(u32 *sprite) {
-    *sprite = (u32)effLoadIndexedResource((const char *)D_00437210, "solarnoise.spr", 0);
+void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
+    *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
 }
 
-void evtReleaseSolarNoiseSprite(u32 *sprite) {
-    effDestroyResourceSlotSet((struct EffectSlotSet *)*sprite);
+void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {
+    effDestroyResourceSlotSet(*sprite);
 }
 
 void evtInitializeSolarOverlay(s32 object) {

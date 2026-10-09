@@ -958,11 +958,11 @@ s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *record) {
     return mdlFlagTest(0x820) != 0;
 }
 
+/* Roll the defeat chance for a petrified actor and the command's attack kind. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157A0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004157C8);
 
-/* Roll the defeat chance for a petrified actor and the command's attack kind. */
 s32 func_001B4600(BtlUnit *unit, s32 command) {
     s32 kind;
     s32 chance;

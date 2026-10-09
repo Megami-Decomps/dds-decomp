@@ -31,12 +31,15 @@ typedef struct SdfBattleParameters {
     SdfBattleMoneyRewardBand moneyRewardBands[10]; /* 0x924 */
     f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
 #ifdef VERSION_DDS2
-    u8 padA6C[0x74];
+    u8 padA6C[0x2C];
+    f32 solarScale[2][9]; /* 0xA98: row 0 for source flag 0x200, row 1 otherwise. */
     f32 partyEntryScaleA[7]; /* 0xAE0 */
     f32 enemyEntryScaleA[7]; /* 0xAFC */
     f32 partyEntryScaleB[7]; /* 0xB18 */
     f32 enemyEntryScaleB[7]; /* 0xB34 */
-    u8 padB50[0x1C];
+    u8 padB50[0x14];
+    f32 unkB64; /* 0xB64: command factor gated by model flag 0x80E and source/target flags. */
+    u8 padB68[4];
     f32 specialAffinityScale; /* 0xB6C */
     f32 criticalScale; /* 0xB70: special-mode multiplier for the critical roll. */
     u8 padB74[8];
@@ -46,7 +49,9 @@ typedef struct SdfBattleParameters {
     f32 unkB88; /* 0xB88: target-conditioned factor, DDS2 001B1B8C. */
     u8 unkB8C; /* 0xB8C: source-conditioned minimum chance, DDS2 001B1E90. */
     u8 unkB8D; /* 0xB8D: target-conditioned minimum chance, DDS2 001B1EBC. */
-    u8 padB8E[0xA];
+    u8 padB8E[2];
+    f32 unkB90; /* 0xB90: command factor for a source with record flag 0x10 and unit flag 0x200. */
+    f32 unkB94; /* 0xB94: corresponding target-conditioned command factor. */
     s8 criticalPartyAttackerBias; /* 0xB98: signed critical chance adjustments. */
     s8 criticalPartyDefenderBias; /* 0xB99 */
     u8 padB9A[0xA];

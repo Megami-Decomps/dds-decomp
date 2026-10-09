@@ -10,6 +10,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_resource_table.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -219,21 +220,10 @@ extern s8 D_00324510[64];
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
 
-/* Three independently allocated resources; their individual roles are unresolved. */
-typedef struct MdlSlotEntry {
-    s32 firstHandle;
-    s32 secondHandle;
-    s32 thirdHandle;
-} MdlSlotEntry;
 
-typedef struct MdlSlotTable {
-    MdlSlotEntry *entries;
-    s32 count;
-} MdlSlotTable;
+extern MdlResourceTable D_00365858[];
 
-extern MdlSlotTable D_00365858[];
-
-extern MdlSlotTable D_00367900[];
+extern MdlResourceTable D_00367900[];
 
 extern s32 D_003BBB6C;
 
@@ -263,9 +253,9 @@ void func_00218BE8(s32 resource) {
     sdfReleaseChipBlock((void *)resource);
 }
 
-/* Release all three handles in each viewer-table entry, then clear its tables and backing allocations. */
+/* Release the three copied filename paths, then their tables and backing allocations. */
 void mdlReleaseViewerSlotResources(void) {
-    MdlSlotEntry *slotEntry;
+    MdlResourcePath *slotEntry;
     s32 entryCount;
     s32 entryIndex;
 
@@ -275,9 +265,9 @@ void mdlReleaseViewerSlotResources(void) {
         entryIndex = 0;
         do {
             entryIndex++;
-            sdfReleaseChipBlock((void *)slotEntry->secondHandle);
-            sdfReleaseChipBlock((void *)slotEntry->firstHandle);
-            sdfReleaseChipBlock((void *)slotEntry->thirdHandle);
+            sdfReleaseChipBlock((void *)slotEntry->path);
+            sdfReleaseChipBlock((void *)slotEntry->resourceListPath);
+            sdfReleaseChipBlock((void *)slotEntry->motionPath);
             slotEntry++;
         } while (entryIndex < entryCount);
     }
@@ -289,44 +279,37 @@ void mdlReleaseViewerSlotResources(void) {
     sdfReleaseMemorySlot(&D_003BBB70);
 }
 
-/* Three-entry name table plus a small header, built from the first slot-table entry. */
-typedef struct MdlViewerHeader {
-    s16 kind;
-    s16 unk02;
-    s16 unk04;
-    s16 unk06;
-} MdlViewerHeader;
 
 extern u32 strlen(const char *);
 extern char *strcpy(char *, const char *);
-extern MdlViewerHeader *D_003BD880;
-extern char **D_003BD884;
+extern MdlResourceSelection *D_003BD880;
+extern MdlResourcePath *D_003BD884;
 
-/* Copy the three source strings into the viewer table, preserving the first/second handle ordering. */
+/* Copy the model, resource-list and motion filenames into the viewer's path table. */
 void mdlInitializeViewerResourceTable(void) {
     s32 sourceIndex;
-    char *sourceText;
+    const char *sourceText;
     char *copiedText;
 
     mdlReleaseViewerSlotResources();
     D_003BBB6C = (u32)sdfAllocGeneralBlock(MDL_VIEWER_HEADER_BYTES);
-    D_003BD880 = (MdlViewerHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB6C));
-    D_003BD880->kind = 5;
-    D_003BD880->unk02 = 0;
-    D_003BD880->unk04 = 0x1000;
-    D_003BD880->unk06 = 0x3E8;
+    D_003BD880 = (MdlResourceSelection *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB6C));
+    D_003BD880->pathTable = 5;
+    D_003BD880->pathIndex = 0;
+    D_003BD880->unk4 = 0x1000;
+    D_003BD880->unk6 = 0x3E8;
     D_003BBB70 = (u32)sdfAllocGeneralBlock(MDL_VIEWER_NAME_TABLE_BYTES);
-    D_003BD884 = (char **)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB70));
+    D_003BD884 = (MdlResourcePath *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB70));
     for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
         switch (sourceIndex) {
         case 0:
-            sourceText = (char *)D_00365858[0].entries->secondHandle;
+            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->path;
             break;
         case 1:
-            sourceText = (char *)D_00365858[0].entries->firstHandle;
+            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->resourceListPath;
             break;
         default:
-            sourceText = (char *)D_00365858[0].entries->thirdHandle;
+            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->motionPath;
             break;
         }
         if (sourceText != NULL) {
@@ -334,20 +317,20 @@ void mdlInitializeViewerResourceTable(void) {
             strcpy(copiedText, sourceText);
             switch (sourceIndex) {
             case 0:
-                D_003BD884[1] = copiedText;
+                D_003BD884->path = copiedText;
                 break;
             case 1:
-                D_003BD884[0] = copiedText;
+                D_003BD884->resourceListPath = copiedText;
                 break;
             case 2:
-                D_003BD884[2] = copiedText;
+                D_003BD884->motionPath = copiedText;
                 break;
             }
         }
     }
-    D_00367900[MDL_VIEWER_TABLE_SLOT].entries = (MdlSlotEntry *)D_003BD880;
+    D_00367900[MDL_VIEWER_TABLE_SLOT].entries = D_003BD880;
     D_00367900[MDL_VIEWER_TABLE_SLOT].count = 1;
-    D_00365858[MDL_VIEWER_TABLE_SLOT].entries = (MdlSlotEntry *)D_003BD884;
+    D_00365858[MDL_VIEWER_TABLE_SLOT].entries = D_003BD884;
     D_00365858[MDL_VIEWER_TABLE_SLOT].count = 1;
 }
 
