@@ -34,7 +34,7 @@ extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 
-extern void func_00331590(SdfDrawNode *node, SdfItem *item);
+extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00340DC8(f32 x, f32 y, f32 z);
@@ -229,7 +229,7 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->boundsAddress = item->boundsAddress;
 }
 
-void func_00331590(SdfDrawNode *node, SdfItem *item) {
+void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
     u32 *cursor;
@@ -305,7 +305,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 
     if (count != i) {
         do {
-            func_00331590(((SdfDrawNode **)model->list->buffer)[i], item);
+            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[i], item);
             item++;
             i++;
         } while (i != count);

@@ -7365,3 +7365,4 @@
 0x002DA5B0	sdfSetAssetSecondaryColor	inferred	Stores the packed secondary color at SdfAsset +0x18 and marks secondary draw state dirty.
 0x002DA5C8	sdfSetAssetSecondaryMode	inferred	Stores the secondary packet and palette mode at SdfAsset +0x34 and marks secondary draw state dirty.
 0x002ECF70	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
+0x002D86E0	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
