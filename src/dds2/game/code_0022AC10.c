@@ -1203,7 +1203,43 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
     return 3;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022C600);
+/* Counter eligibility for a command against the selected party members. */
+u16 func_0022C600(s32 commandId, u32 memberMask) {
+    u8 *entryList[5];
+    s32 count = 0;
+    s32 i;
+
+    for (i = 0; i < 5; i++) {
+        if (memberMask & (1 << i)) {
+            if (datGameState->party[i].flags & 1) {
+                entryList[count++] = (u8 *)&datGameState->party[i];
+            }
+        }
+    }
+    if ((datCommandRecords[commandId].attribute.bits & 0x400000FF) == 0x40000002 &&
+        (~datCommandRecords[commandId].restriction & 0x7FFF) == 0x4000 &&
+        btlListHasMarkedFlag(entryList, count) == 0) {
+        return 2;
+    }
+    switch (commandId) {
+    case 0xC4:
+        if (datGameState->world.fieldFlags & 1) {
+            return 4;
+        }
+        break;
+    case 0xC5:
+        if (datGameState->world.fieldFlags & 2) {
+            return 4;
+        }
+        break;
+    case 0xC6:
+        if (datGameState->world.fieldFlags & 4) {
+            return 4;
+        }
+        break;
+    }
+    return btlDetermineCommandCounterEligibility(entryList, count, 0, commandId);
+}
 
 
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
