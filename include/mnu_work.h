@@ -137,9 +137,9 @@ typedef struct MenuWorkEntry {
         struct MnuModelNode *modelNode;
         struct ModelInstance *modelInstance;
     } object;
-    f32 x0, y0, scale0;
+    f32 currentX, currentY, currentAngleRadians;
     u8 pad1C[4];
-    f32 x1, y1, scale1;
+    f32 segmentStartX, segmentStartY, segmentStartAngleRadians;
     s16 recordIndex;
     s16 shortListIndex;
     s16 frameCounter; /* 0x30: frames shown of the current short record (func_003230A0) */
@@ -203,14 +203,14 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->resourceRecordIndex==8 &&
     sizeof(((MenuWorkEntry*)0)->object)==4 &&
     (unsigned long)&((MenuWorkEntry*)0)->object==0x0C &&
-    (unsigned long)&((MenuWorkEntry*)0)->x0==0x10 &&
-    (unsigned long)&((MenuWorkEntry*)0)->y0==0x14 &&
-    (unsigned long)&((MenuWorkEntry*)0)->scale0==0x18 &&
+    (unsigned long)&((MenuWorkEntry*)0)->currentX==0x10 &&
+    (unsigned long)&((MenuWorkEntry*)0)->currentY==0x14 &&
+    (unsigned long)&((MenuWorkEntry*)0)->currentAngleRadians==0x18 &&
     (unsigned long)&((MenuWorkEntry*)0)->pad1C==0x1C &&
     sizeof(((MenuWorkEntry*)0)->pad1C)==4 &&
-    (unsigned long)&((MenuWorkEntry*)0)->x1==0x20 &&
-    (unsigned long)&((MenuWorkEntry*)0)->y1==0x24 &&
-    (unsigned long)&((MenuWorkEntry*)0)->scale1==0x28 &&
+    (unsigned long)&((MenuWorkEntry*)0)->segmentStartX==0x20 &&
+    (unsigned long)&((MenuWorkEntry*)0)->segmentStartY==0x24 &&
+    (unsigned long)&((MenuWorkEntry*)0)->segmentStartAngleRadians==0x28 &&
     (unsigned long)&((MenuWorkEntry*)0)->recordIndex==0x2C &&
     (unsigned long)&((MenuWorkEntry*)0)->shortListIndex==0x2E &&
     (unsigned long)&((MenuWorkEntry*)0)->frameCounter==0x30 &&
