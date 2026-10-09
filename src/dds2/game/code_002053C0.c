@@ -291,11 +291,11 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         unit = args->unit;
-        if (unit->flags & 0x200) {
+        if (unit->status.flags & 0x200) {
             id = unit->partyRecord.unitId;
             if (unit->partyRecord.flags & 0x10) {
                 id += 0x20;
-            } else if (unit->flags & 0x1000) {
+            } else if (unit->status.flags & 0x1000) {
                 id += 0x10;
             }
             func_0035C860(path, D_004192F8, D_00419308, id);
@@ -411,7 +411,7 @@ s32 func_002059F0(f32 *center) {
 
     battle = (BtlState *)btlGetRuntime();
     for (unit = battle->units; unit != 0; unit = unit->nextActor) {
-        s32 flags = unit->flags;
+        s32 flags = unit->status.flags;
         if (flags & 0x200) {
             actors[count++] = unit;
             if ((flags & 1) || battle->unk268 == 3) {
@@ -423,9 +423,9 @@ s32 func_002059F0(f32 *center) {
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
-        if (!(unit->flags & 0x80000)) {
+        if (!(unit->status.flags & 0x80000)) {
             PCP_COPY_VECTOR(unit->rotation, D_003BE070);
-        } else if (unit->flags & 0xE0) {
+        } else if (unit->status.flags & 0xE0) {
             PCP_COPY_VECTOR(unit->rotation, D_003BE070);
         } else {
             btlUnitGetMuzzlePosVU(unit);
@@ -448,7 +448,7 @@ s32 func_002059F0(f32 *center) {
     radius = 400.0f;
     for (i = count - 1; i >= 0; i--) {
         unit = actors[i];
-        if (unit->flags & 1) {
+        if (unit->status.flags & 1) {
             position[0] = center[0] - sdfSinPoly(angle) * radius;
             position[1] = center[1];
             position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
@@ -499,7 +499,7 @@ s32 func_00205CC8(s32 filter) {
 
     battle = (BtlState *)btlGetRuntime();
     for (unit = battle->units; unit != 0; unit = unit->nextActor) {
-        s32 flags = unit->flags;
+        s32 flags = unit->status.flags;
         if ((flags & filter) && (flags & 1)) {
             f32 halfWidth = unit->unkBC * unit->scale;
             actors[count++] = unit;
@@ -594,9 +594,9 @@ s32 func_00206090(void) {
 void btlMoveOtherUnitsAway(ActionStateLink *link) {
     f32 pos[4];
     BtlUnit *other = ((BtlState *)btlGetRuntime())->units;
-    u32 mask = link->unit->flags & 0x600;
+    u32 mask = link->unit->status.flags & 0x600;
     for (; other != NULL; other = other->nextActor) {
-        if ((other->flags & 1) && (other->flags & mask) && other != link->unit) {
+        if ((other->status.flags & 1) && (other->status.flags & mask) && other != link->unit) {
             btlClearUnitDefeatCandidate(other);
             if ((btlUnitStatusPair(other) & 0x102) == 0x102) {
                 func_001E3108(other, pos);
@@ -669,7 +669,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
         target = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
         btlFlagAllUnitsDefeatCandidate();
-        btlClearMatchingUnitDefeatCandidates(target->flags & 0x600);
+        btlClearMatchingUnitDefeatCandidates(target->status.flags & 0x600);
         btlFlagUnitDefeatCandidate(target);
         slot[0] = 0;
         slot[1] = 0;
@@ -726,7 +726,7 @@ void func_00206570(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
     u32 i;
     BtlState *work = (BtlState *)btlGetRuntime();
     btlClearAllUnitDefeatCandidates();
-    btlFlagMatchingUnitsDefeatCandidate(link->unit->flags & 0x600);
+    btlFlagMatchingUnitsDefeatCandidate(link->unit->status.flags & 0x600);
     slot[0] = 0;
     slot[1] = 0;
     slot[2] = 0;
@@ -736,7 +736,7 @@ void func_00206570(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
         slot[second->lookupId] = second;
     } else {
         for (unit = work->units; unit != NULL; unit = unit->nextActor) {
-            u32 flags = unit->flags;
+            u32 flags = unit->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
                     slot[unit->lookupId] = unit;
@@ -803,20 +803,20 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     BtlUnit *target;
     s128 vec[3];
     u32 count;
-    if (link->unit->flags & 0x1000) {
+    if (link->unit->status.flags & 0x1000) {
         back = link->unit;
     } else {
         front = link->unit;
     }
     if (a != 0) {
-        if (a->flags & 0x1000) {
+        if (a->status.flags & 0x1000) {
             back = a;
         } else {
             front = a;
         }
     }
     if (b != 0) {
-        if (b->flags & 0x1000) {
+        if (b->status.flags & 0x1000) {
             back = b;
         } else {
             front = b;
@@ -829,7 +829,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     } else {
         btlUnitGetMuzzlePosVU(front);
         VU0_STORE_VF(vf10, &vec[0]);
-        func_00208000(target->flags & 0x600, 0, 0);
+        func_00208000(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
         if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
@@ -856,7 +856,7 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
         target = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
         btlFlagAllUnitsDefeatCandidate();
-        btlClearMatchingUnitDefeatCandidates(target->flags & 0x600);
+        btlClearMatchingUnitDefeatCandidates(target->status.flags & 0x600);
         btlFlagUnitDefeatCandidate(target);
         slot[0] = NULL;
         slot[1] = NULL;
@@ -950,7 +950,7 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
         slot[1] = linked;
     }
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != NULL; unit = unit->nextActor) {
-        u32 flags = unit->flags;
+        u32 flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
                 if (unit != slot[0] && unit != slot[1]) {
@@ -1026,7 +1026,7 @@ void func_00207438(ActionStateLink *link, BtlUnit *firstActor, BtlUnit *secondAc
         BtlUnit **firstEntry = first;
         BtlUnit **secondEntry = second;
         do {
-            u32 flags = unit->flags;
+            u32 flags = unit->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
                     *firstEntry++ = unit;
@@ -1148,7 +1148,7 @@ s32 func_002077C0(u32 *rawArgs) {
     if (args->first == NULL && args->second == NULL) {
         return 1;
     }
-    if (args->actor->unit->flags & 0x400) {
+    if (args->actor->unit->status.flags & 0x400) {
         category = D_00435E34[args->commandId - 0x1AB].kind;
         switch (category) {
         case 7:

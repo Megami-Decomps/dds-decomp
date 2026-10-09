@@ -119,7 +119,9 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u32 func_001AC360(u64, BtlIndexList *, u64);
 
-extern s32 btlMatchActorEntryCode(void *, s32);
+extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
+extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
+extern s16 btlGetActorEntryCode(BtlUnit *, s32);
 
 extern s8 D_00453068[];
 
@@ -382,7 +384,7 @@ void func_0022AC10(void) {
         if ((battle->scriptFlags & 2) != 0 &&
             (battle->commandRestrictFlags & 0x800) == 0) {
             BtlUnit *unit = battle->eventUnit;
-            if ((unit->flags & 2) != 0) {
+            if ((unit->status.flags & 2) != 0) {
                 frame = (s32)btlGetUnitModelValue1C(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
@@ -392,8 +394,8 @@ void func_0022AC10(void) {
                     ext->motionState = 0;
                     mdlAddEntryPlain(model, 0, unit->unkEC);
                     sdfMotionSampleAtFrame(model->first, 26.0f);
-                    unit->flags &= 0x7FFFFFFF;
-                    unit->flags &= ~0x40000000;
+                    unit->status.flags &= 0x7FFFFFFF;
+                    unit->status.flags &= ~0x40000000;
                     btlBossDebugPrintf("btl:eve mot over [%d]\n", frame);
                 }
             }
@@ -593,7 +595,7 @@ s32 btlCommandSelectEventAction(void) {
     if (selectedUnit == 0) {
         return 1;
     }
-    if ((selectedUnit->flags & 2) == 0) {
+    if ((selectedUnit->status.flags & 2) == 0) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
@@ -655,7 +657,7 @@ s32 btlCommandPlayUnitMotion(void) {
     if (unit == 0) {
         return 1;
     }
-    if ((unit->flags & 2) == 0) {
+    if ((unit->status.flags & 2) == 0) {
         return 1;
     }
     if (index >= 0) {
@@ -794,7 +796,7 @@ u32 func_0022BA08(BattleScriptTaskData *record) {
     void *resource;
 
     if (record->frames == 0) {
-        if (!(record->object->flags & 2)) {
+        if (!(record->object->status.flags & 2)) {
             return 1;
         }
         resource = evtFindTaskResourceEntryByKey(battle->eventTaskId, record->group);
@@ -866,7 +868,7 @@ void *btlCreateActionTask(void *object, s32 group) {
 s32 btlHasRestrictedUnit(void) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
-        u32 unitFlags = unitCursor->flags;
+        u32 unitFlags = unitCursor->status.flags;
         if (unitFlags & 0x200) {
             if (unitFlags & 0xe0) {
                 return 1;
@@ -969,7 +971,7 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
     u32 codeIndex;
-    void *actorEntry;
+    BtlUnit *actorEntry;
     s32 requirementBits;
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
@@ -1850,7 +1852,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
     s32 value;
     s32 label;
 
-    if ((unit->flags & 1) != 0) {
+    if ((unit->status.flags & 1) != 0) {
         evtSetDrawSurfaceIndex(0x53);
         evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
         evtSubmitPrimaryAlphaBlendMode(1);
@@ -1861,8 +1863,8 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
         color[3] = color[2] = color[1] = color[0] = 0x80A0A0A0;
         evtSubmitDefaultDepthGradientRect(x, y + 320, 240, 2, color[0], color[1], color[2], color[3]);
         btlBossDebugPrintfN(x, y, 0, D_00436EE8);
-        if ((unit->flags & 0x200) != 0) {
-            if ((unit->flags & 0x1000) != 0) {
+        if ((unit->status.flags & 0x200) != 0) {
+            if ((unit->status.flags & 0x1000) != 0) {
                 row = ((BtlAffinityRow *)D_00435DD8)[unit->partyRecord.unitId];
             } else {
                 row = ((BtlAffinityRow *)D_00435DDC)[unit->partyRecord.unitId];
@@ -2085,7 +2087,7 @@ void func_002303D0(void) {
     record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
     buffer = sdfAllocateBlockBySizeThreshold(10000);
     cursor = buffer;
-    if (unit->flags & 0x200) {
+    if (unit->status.flags & 0x200) {
         cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[0]);
     } else {
         cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[1]);

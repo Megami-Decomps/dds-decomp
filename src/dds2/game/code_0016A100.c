@@ -127,10 +127,10 @@ void func_0016A100(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame)
         count = 1;
         break;
     case 1:
-        mask = ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->flags & 0xE00;
+        mask = ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->status.flags & 0xE00;
         break;
     case 2:
-        mask = ((BtlUnit *)effBTLFieldColorGetVariantSelector())->flags & 0xE00;
+        mask = ((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0xE00;
         break;
     case 3:
         mask = 0xE00;
@@ -138,8 +138,8 @@ void func_0016A100(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame)
     }
     if (count == 0) {
         for (current = battle->units; current != NULL; current = current->nextActor) {
-            u32 flags = current->flags;
-            if ((flags & 2) && (current->stateFlags & 0x10) &&
+            u32 flags = current->status.flags;
+            if ((flags & 2) && (current->status.stateFlags & 0x10) &&
                 current->ext != NULL && (flags & mask)) {
                 selected[count++] = current;
             }
@@ -190,10 +190,10 @@ void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *comma
     u32 endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
     u32 restoreFrame;
 
-    if ((unit->flags & 0xE0) != 0) {
+    if ((unit->status.flags & 0xE0) != 0) {
         return;
     }
-    if ((unit->flags & 2) == 0) {
+    if ((unit->status.flags & 2) == 0) {
         return;
     }
     if (startFrame >= endFrame) {

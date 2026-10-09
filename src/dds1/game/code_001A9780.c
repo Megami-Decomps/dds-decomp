@@ -303,10 +303,10 @@ const char D_003A1D50[] = "btl:surprise=%d%%[level=%d,ratio=%.2f]\n";
 void btlClearUnitStatusMask(void) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     for (; actor != NULL; actor = actor->next) {
-        u32 flags = actor->flags;
+        u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
-                actor->flags = flags & ~0x1000;
+                actor->status.flags = flags & ~0x1000;
                 actor->partyRecord.flags &= ~0x1000;
             }
         }
@@ -352,7 +352,7 @@ s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *actor) {
     u8 *battle = (u8 *)btlGetRuntime();
     s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))(battle + 0x65C);
     if (predicate != 0 && predicate(actor) == 0) return 0;
-    if (actor->stateFlags & 0x2000) return 0;
+    if (actor->status.stateFlags & 0x2000) return 0;
     if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 0;
     if (btlCheckSpecialAbility(&actor->partyRecord, 0x231)) return 1;
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
@@ -360,7 +360,7 @@ s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *actor) {
 }
 
 s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
-    if ((object->flags & 0x400) == 0) {
+    if ((object->status.flags & 0x400) == 0) {
         return 0;
     }
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
@@ -438,12 +438,12 @@ u32 func_001AA848(void) {
     return 0xffffffff;
 }
 
-void btlRestoreUnitMinimumValueAndClearStatus(s32 object, s32 status) {
+void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *object, s32 status) {
     *(u16 *)(status + 0x26) &= ~3;
-    *(u32 *)(object + 0x110) &= ~0x20;
-    *(u16 *)(object + 0x12E) &= ~0x4080;
-    if (*(u16 *)(object + 0x126) == 0) {
-        *(u16 *)(object + 0x126) = 1;
+    object->status.flags = (u32)object->status.flags & (~0x20);
+    *(u16 *)((u8 *)object + 0x12E) &= ~0x4080;
+    if (*(u16 *)((u8 *)object + 0x126) == 0) {
+        *(u16 *)((u8 *)object + 0x126) = 1;
     }
 }
 
@@ -480,9 +480,9 @@ s32 func_001AA8B0(BtlTask *action) {
             } else {
                 target = btlGetIndexListEntry(action->indexWork.indices, i);
             }
-            if ((target->flags & 0x200) != 0) {
+            if ((target->status.flags & 0x200) != 0) {
                 targetSideA++;
-            } else if ((target->flags & 0x400) != 0) {
+            } else if ((target->status.flags & 0x400) != 0) {
                 targetSideB++;
             }
         }
@@ -491,7 +491,7 @@ s32 func_001AA8B0(BtlTask *action) {
     activeSideA = 0;
     activeSideB = 0;
     for (unit = battle->units; unit != NULL; unit = unit->next) {
-        s32 flags = unit->flags;
+        s32 flags = unit->status.flags;
         if ((flags & 1) == 0) {
             continue;
         }
@@ -563,14 +563,14 @@ s32 btlHasHighPriorityState(void) {
 }
 
 s32 btlCountFlaggedSceneActors(void) {
-    u8 *actor = *(u8 **)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = *(BtlUnit **)(btlGetRuntime() + 0x228);
     s32 count = 0;
     while (actor != 0) {
-        if ((*(u64 *)(actor + 0x110) & 0x321) == 0x301 &&
-            (*(u16 *)(actor + 0x12E) & 0x800) == 0) {
+        if ((btlUnitStatusPair(actor) & 0x321) == 0x301 &&
+            (*(u16 *)((u8 *)actor + 0x12E) & 0x800) == 0) {
             count++;
         }
-        actor = *(u8 **)(actor + 0x344);
+        actor = *(BtlUnit **)((u8 *)actor + 0x344);
     }
     return count;
 }
@@ -1052,7 +1052,7 @@ void btlClearTaskActorSlots(void) {
         BtlUnit *actor = node->unit;
         if (actor != 0) {
             if (context->variant == 1) {
-                if (actor->flags & 0x200) {
+                if (actor->status.flags & 0x200) {
                     u32 *entries;
                     i = 0;
                     entries = &node->actions[0];
@@ -1060,7 +1060,7 @@ void btlClearTaskActorSlots(void) {
                         *entries++ = 0;
                     }
                 }
-            } else if (actor->flags & 0x400) {
+            } else if (actor->status.flags & 0x400) {
                 u32 *entries;
                 i = 7;
                 entries = &node->actions[7];
@@ -1217,7 +1217,7 @@ void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     BattleActorPanelWork *work;
     u32 index;
 
-    if (unit->flags & 0x200) {
+    if (unit->status.flags & 0x200) {
         index = unit->lookupId;
         task = kwlnTaskGetTaskByName(D_003BB3B0);
         if (task != NULL) {
@@ -1709,7 +1709,7 @@ void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
 void func_001ADCE8(BtlUnit *unit, s8 style, s8 phase, s32 unused, BattlePanelColors *colors) {
     BtlState *state = (BtlState *)btlGetRuntime();
 
-    if ((unit->flags & 0x20) || (unit->partyRecord.status & 0x4000)) {
+    if ((unit->status.flags & 0x20) || (unit->partyRecord.status & 0x4000)) {
         colors->values[0] = 0x80282222;
         colors->values[1] = 0x802C242A;
         colors->values[2] = 0x802C242A;
@@ -2046,7 +2046,7 @@ void btlReleaseMessageWindowTask(KwlnTask *task) {
 u32 btlGetVitalTextColor(BtlUnit *object, s32 current, s32 total, s8 mode) {
     u32 color;
 
-    if (mode == 1 && (object->flags & 0x20) != 0) {
+    if (mode == 1 && (object->status.flags & 0x20) != 0) {
         color = 0x4F4E3E40;
     } else if ((object->partyRecord.status & 0x4800) != 0) {
         color = 0x4F4E3E40;
@@ -3565,7 +3565,7 @@ void func_001BB118(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     for (i = 0; i < 4; i++) {
         colors.values[i] = (colors.values[i] & 0xFFFFFF00) | pulse->alpha;
     }
-    if (!(unit->flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
+    if (!(unit->status.flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
         func_002BF438((x + xOffset + pulse->progress) << 4,
                      (y + yOffset + pulse->yOffset) << 3, 0, colors.values,
                      0, btlResourceBlock->resA, sprite, 0x53);
@@ -3801,7 +3801,7 @@ extern const s8 D_003BB470[];
 
 /* Resolve the command class through the owning actor's status-selected table. */
 s32 func_001BD0D0(BattleSceneObject *object, s8 mode) {
-    s32 flags = object->owner->unit->flags;
+    s32 flags = object->owner->unit->status.flags;
     s8 normal[6];
     s8 alternate[6];
     s8 restricted[6];
@@ -4237,7 +4237,7 @@ void func_001BF4C0(BtlTask *task) {
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
         func_001B2AC8(object);
-        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+        if ((task->unit->status.flags & 0x200) && !(scene->flags & 0x1000000)) {
             if (mdlFlagTest(0x81B) == 0) {
                 mdlFlagSet(0x81B);
                 btlTrackedTaskHandles->status.bytes.blocked = 1;
@@ -4396,7 +4396,7 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
         case 0x10E:
             count = btlGetIndexListCount(owner);
             for (i = 0; i < count; i++) {
-                if (((BtlUnit *)btlGetIndexListEntry(state->listA, i))->flags & 0x200) {
+                if (((BtlUnit *)btlGetIndexListEntry(state->listA, i))->status.flags & 0x200) {
                     break;
                 }
             }
@@ -4481,7 +4481,7 @@ nextActor:
         goto selectTarget;
     }
     actor = (BtlUnit *)btlGetIndexListEntry(work->listA, i++);
-    if (!(actor->flags & 0x200)) {
+    if (!(actor->status.flags & 0x200)) {
         goto nextActor;
     }
     return work;
