@@ -46,7 +46,15 @@ void func_0026D270(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0026D270", func_0026D480);
+/* Draw a list row's sprite pair: the base sprite, then the highlight on the cursor node. */
+func_0026D480(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
+    s32 index = node->index;
+
+    mnuDrawSprite(0, 0, 0, 0x80, 0, index + 0x10, priority);
+    if (list->cursor == node) {
+        mnuDrawSprite(0, 0, 0, 0x80, 0, index + 0x13, priority);
+    }
+}
 
 s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
