@@ -2153,7 +2153,7 @@ fact explains it.
 
 A real-body visibility control makes the TU mechanism concrete for DDS2
 `fldDestroySceneTasksAndBuffers` (`0x001CFCA8`, 592 bytes,
-`game/code_001C7FF8`). The normal twin-port candidate has just
+now `game/code_001B2AF8`). The normal twin-port candidate has just
 `beql` versus retail `beq` at `+0x1B8` (147/148 words; `51 match, 1 differ`).
 Putting the actual existing `btlDestroyTaskD` body before that caller in a
 private diagnostic TU yields `53 match, 0 differ`, including the provider
@@ -2161,10 +2161,11 @@ and all surrounding C. After normalizing block addresses and label
 ordinals, `28.mach` differs only by `REG_EH_REGION 0` on call UID 443.
 Both `29.dbr` files donate the same global-panel load, UID 449, into jump
 UID 435: taken-only for the opaque provider, always for the visible one.
-The final assembly differs only in that branch mnemonic. This is a causal
-control, **not a landed match**: the original DDS2 TU boundary has not been
-authenticated. The Nocturne prototype catalog has no matching row, and
-the US catalog's weak call-graph correspondence is not TU evidence.
+The final assembly differs only in that branch mnemonic. The TU was then
+authenticated: the short string literals `"%3d"` and `"%s"` are each
+emitted once and used on both sides of the former `code_001C35F0` and
+`code_001C7FF8` splits, so both belong to `code_001B2AF8`'s file. With the
+units rejoined, the function matches as written.
 
 Check API contracts before treating a park as one-word-close. For DDS2
 `func_0024D430`, combining the genuine glyph-increment eligibility in the
@@ -5475,7 +5476,7 @@ DDS2's command-list text helpers receive a 32-bit handle from
 `interface/frFont.c` forwards that pointer and mode to the chain renderer.
 Use the same explicit word-to-pointer boundary as the adjacent
 `frFontQueueGlyphForCurrentDrawBuffer` call, rather than relying on an
-implicit integer argument. All three callers in `game/code_001C7FF8`
+implicit integer argument. All three callers (now in `game/code_001B2AF8`)
 retain their retail instructions. This contract correction does not
 claim that the still-ASM command-list renderer has matched.
 
