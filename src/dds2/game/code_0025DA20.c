@@ -1025,7 +1025,31 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
+extern void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY);
+
+s32 func_0025F708(s32 target, const s32 *x, const s32 *y) {
+    s32 currentX;
+    s32 resultY;
+    s32 nextX;
+    f32 parameter = 0.5f;
+    f32 step = 0.25f;
+
+    func_0025F640(parameter, x, y, &currentX, &resultY);
+    for (;;) {
+        if (currentX == target || step < 0.0009999999310821295f) {
+            return resultY;
+        }
+        if (currentX < target) {
+            parameter += step;
+        }
+        if (target < currentX) {
+            parameter -= step;
+        }
+        step *= 0.5f;
+        func_0025F640(parameter, x, y, &nextX, &resultY);
+        currentX = nextX;
+    }
+}
 
 
 void mnuInitializeShopStatusBatches(MenuTerminalContext *scene) {
