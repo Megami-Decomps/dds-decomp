@@ -2593,7 +2593,7 @@ void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, 
 typedef struct BtlResourceDescriptor {
     s32 word00;             /* 0x00 */
     s32 word04;             /* 0x04 */
-    u32 word08;             /* 0x08 */
+    u32 selectionStatus;    /* 0x08: pending, accepted, or canceled */
     s32 entryCount;         /* 0x0C */
     u32 word10;             /* 0x10 */
     u32 selectedIndex;      /* 0x14 */
@@ -2618,7 +2618,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
 
     descriptor->word00 = 8;
     descriptor->word04 = 8;
-    descriptor->word08 = 0;
+    descriptor->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
     descriptor->entryCount = list->count;
     descriptor->word10 = 0;
     descriptor->selectedIndex = 0;
@@ -2660,9 +2660,9 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
         descriptor->repeatDelay--;
     } else if (descriptor->firstVisibleEntry == NULL) {
         if (D_0039862B[0] < 0) {
-            descriptor->word08 = 2;
+            descriptor->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
         }
-    } else if (descriptor->word08 == 0) {
+    } else if (descriptor->selectionStatus == BTL_RESOURCE_SELECTION_PENDING) {
         BtlResourceEntry *navigationEntry;
         BtlResourceEntry *selectedEntry;
         s32 navigationStep;
@@ -2729,9 +2729,9 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
                 }
             }
         } else if ((s8)sdfPadButtonStates[3] < 0) {
-            descriptor->word08 = 2;
+            descriptor->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
         } else if ((s8)sdfPadButtonStates[1] < 0) {
-            descriptor->word08 = 1;
+            descriptor->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
         } else {
             BtlResourceEntry *cachedEntry = descriptor->cachedEntry;
             selectedEntry = descriptor->selectedEntry;
@@ -2812,7 +2812,7 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
 
     surface = &kwlnDrawSurfaces[descriptor->word24];
     surface->append((SdfListHead *)surface, packetList);
-    return descriptor->word08;
+    return descriptor->selectionStatus;
 }
 
 /* Release an owned texture handle and the descriptor, but not its entry list. */
@@ -2828,7 +2828,7 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
 typedef struct BtlResourceNameRecord {
     s32 word00;     /* 0x00: initialized to 8 */
     s32 word04;     /* 0x04: initialized to 8 */
-    u32 word08;     /* 0x08 */
+    u32 selectionStatus; /* 0x08: pending, accepted, or canceled */
     s32 word0C;     /* 0x0C */
     s32 nameLength; /* 0x10: length of text written at 0x21 */
     u32 word14;     /* 0x14: initialized to 9 */
@@ -2922,7 +2922,7 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
     record->word14 = 9;
     record->word00 = 8;
     record->word04 = 8;
-    record->word08 = 0;
+    record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
     record->nameLength = 0;
     record->word0C = 0;
     record->word18 = 0;
@@ -2942,7 +2942,7 @@ void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record,
 }
 
 u32 func_001FC730(struct BtlResourceNameRecord *record) {
-    return record->word08;
+    return record->selectionStatus;
 }
 
 /* Copy the resource name at +0x21 and store its length. */

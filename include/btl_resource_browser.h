@@ -2,6 +2,7 @@
 #define BTL_RESOURCE_BROWSER_H
 
 #include "common.h"
+#include "btl_resource_selection.h"
 
 struct BtlResourceEntryList;
 struct BtlResourceDescriptor;

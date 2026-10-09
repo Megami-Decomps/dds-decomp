@@ -2,6 +2,7 @@
 #define BTL_RESOURCE_NAME_H
 
 #include "common.h"
+#include "btl_resource_selection.h"
 
 struct BtlResourceNameRecord;
 
