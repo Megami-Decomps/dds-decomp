@@ -679,7 +679,7 @@ s32 func_002007A8(BtlUnit *unit, s32 conditionIndex, s8 inverse) {
     return 0;
 }
 
-extern s32 btlTestSelectedItemCategoryMask(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern const s32 btlRequiredActionCategories[10];
 

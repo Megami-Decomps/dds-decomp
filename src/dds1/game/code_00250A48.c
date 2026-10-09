@@ -5,8 +5,8 @@
 typedef s16 MnuVariantSpritePlacement[6];
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s8 D_00324510[64];
-extern s32 func_002CBE18(SdfGrid *grid);
-extern s32 func_002CBF60(SdfGrid *grid);
+extern SdfGridCell *func_002CBE18(SdfGrid *grid);
+extern SdfGridCell *func_002CBF60(SdfGrid *grid);
 extern s32 func_00252F88(SdfGrid *grid);
 extern s32 func_00253018(SdfGrid *grid);
 extern void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan);
@@ -65,11 +65,11 @@ void func_00250B60(MenuSceneWork *work) {
     direction = work->cursorInputMask;
     if (work->cursorMoving == 0) {
         if ((D_00324510[0x26] & 2) && (direction & 0x80)) {
-            if (func_002CBE18(work->gridHandle) != 0) {
+            if (func_002CBE18(work->gridHandle) != NULL) {
                 feedback = 1;
             }
         } else if ((D_00324510[0x27] & 2) && (direction & 0x40)) {
-            if (func_002CBF60(work->gridHandle) != 0) {
+            if (func_002CBF60(work->gridHandle) != NULL) {
                 feedback = 1;
             }
         } else if ((D_00324510[0x24] & 2) && (direction & 0x20)) {

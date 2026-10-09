@@ -12,6 +12,7 @@
 #include "sdf_primitive.h"
 #include "dds3obj.h"
 #include "fld.h"
+#include "fld_waypoint.h"
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
@@ -1128,15 +1129,17 @@ u8 fldHasAreaResourceNameChanged(void) {
 
 extern void fldCopyInfoTable(FldInfTable *);
 
-extern void fldSetNpcPalette(u32);
+struct FldNpcPalette;
+extern void fldSetNpcPalette(struct FldNpcPalette *source);
 
-extern void fldUploadSkyBuffer();
+struct FldSkyBuffer;
+extern void fldUploadSkyBuffer(struct FldSkyBuffer *source);
 
-extern void fldCopyActorWaypointTable(u32);
+extern void fldCopyActorWaypointTable(FldWaypointBlock *source);
 
 
 
-extern void fldSetSceneRecordChunk(u32, u32);
+extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId);
 
 extern void fldCacheMapLabelLengths();
 
@@ -1159,17 +1162,17 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
-                fldSetNpcPalette((u32)work->dataCursor);
+                fldSetNpcPalette((struct FldNpcPalette *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
-                fldUploadSkyBuffer(work->dataCursor);
+                fldUploadSkyBuffer((struct FldSkyBuffer *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
-                fldCopyActorWaypointTable((u32)work->dataCursor);
+                fldCopyActorWaypointTable((FldWaypointBlock *)work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
@@ -1183,8 +1186,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk((s32)(u32)work->dataCursor,
-                                       work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
                 break;
             }
         }
