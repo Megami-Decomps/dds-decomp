@@ -5,9 +5,8 @@
 #include "pcp_vu0.h"
 
 extern void *dds3GetSlot(void *obj, s32 index);
-struct ObjectWithResource;
 struct EvtScaledValue;
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *slot);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *slot);
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
 extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
