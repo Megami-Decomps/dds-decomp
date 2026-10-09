@@ -121,8 +121,6 @@ extern Entry24B D_00393220[];
 
 extern Entry24W D_00393234[];
 
-extern void ptySetProfileFlag1(DatPartyRecord *, u16);
-
 typedef struct Dds1ProfileParamRecord {
     u32 flags;
     u8 value04;
@@ -172,8 +170,46 @@ void ptyClearProfileRecords(void) {
     memset(datGameState->profileRecords, 0, sizeof(datGameState->profileRecords));
 }
 
-extern void ptySelectProfileStage(DatPartyRecord *);
-INCLUDE_ASM(const s32, "game/code_002CC750", ptySelectProfileStage);
+s8 scrSelectOperandIndex(DatPartyRecord *unit, s32 profileId);
+extern void ptySetProfileFlag1(DatPartyRecord *, u16);
+u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
+
+/* Pick the highest preset stage whose required profiles all sit at their cap, then apply that stage's script. */
+void ptySelectProfileStage(DatPartyRecord *unit) {
+    u16 unitId = unit->unitId;
+    s32 best = 0;
+    s32 stage;
+    s32 satisfied;
+    s32 i;
+    u16 scriptId;
+    u16 initialValue;
+
+    for (stage = 1; stage < 4; stage++) {
+        if (D_00393A80[unitId].scriptChoices[stage].scriptId != 0) {
+            satisfied = 1;
+            for (i = 0; i < 4; i++) {
+                u16 entry = D_00393A80[unitId].scriptChoices[stage].requiredProfiles[i];
+                s32 profileId = entry & SCR_FLAG_ID_MASK;
+
+                if (entry != 0) {
+                    if (ptyGetProfileRecord(unit, profileId)->value != prfGetCapValue(profileId)) {
+                        satisfied = 0;
+                    }
+                }
+            }
+            if (satisfied) {
+                best = stage;
+            }
+        }
+    }
+    scriptId = D_00393A80[unitId].scriptChoices[best].scriptId;
+    initialValue = D_00393A80[unitId].scriptChoices[best].initialValue;
+    if (scriptId != 0) {
+        scrSelectOperandIndex(unit, scriptId);
+        ptySetProfileFlag1(unit, scriptId);
+        ptyAddProfilePoints(unit, initialValue);
+    }
+}
 
 extern void ptyApplyProfilePreset(s32, DatPartyRecord *);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
