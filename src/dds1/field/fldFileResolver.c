@@ -4096,7 +4096,101 @@ typedef struct {
     u8 padA4[0x30];
     f32 unitColorB[3];
 } FldLightSet; /* 0xE0 bytes */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00132FD0);
+extern void kwlnSetDrawColorTarget(s32, f32 *);
+extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
+extern void kwlnSetBackgroundColorTarget(s32, f32 *);
+extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
+extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern void fldSetSwayMode(u32);
+extern u32 D_003BADA8;
+extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
+                          f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
+
+/* Start fading to the sky light set at index. A zero scene command also applies the set to the
+ * display state and player lighting using the (clamped) transition duration. */
+void func_00132FD0(u32 index, s32 mode) {
+    FldAreaWork *state = &fldAreaState;
+    FldLightSet *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+
+    if (state->area < 200) {
+        if (D_003BAD58 == 0 && state->area < 40) {
+            mode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (mode != 0) {
+            duration = defaultDuration;
+        }
+        if (mode >= 2) {
+            duration = mode;
+        }
+        D_003BAD98 = index;
+        D_003BADC8 = index;
+        D_003BADA8 = 0;
+        if (state->sceneCommand == 0) {
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            area = light->type;
+            D_0032E570[13] = area;
+            D_0032E570[14] = light->unk4;
+            value = light->fadeValue;
+            D_0032E570[15] = value;
+            D_0032E570[16] = light->swayMode;
+            fldSetFadeTarget(area, value, duration);
+            fldSetSwayMode(D_0032E570[16]);
+            vec[0] = light->fixedVectorX * 0.00390625f;
+            vec[1] = light->fixedVectorY * 0.00390625f;
+            vec[2] = light->fixedVectorZ * 0.00390625f;
+            vec[3] = 0;
+            kwlnSetDrawColorTarget(duration, vec);
+            evtSetDrawVectorTarget(duration, light->unk1C, light->unk24, light->unk20, light->unk28);
+            dir[0] = light->lightDirectionAX;
+            dir[1] = light->lightDirectionAY;
+            dir[2] = light->lightDirectionAZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 0, dir);
+            vec[0] = light->lightVectorAX;
+            vec[1] = light->lightVectorAY;
+            vec[2] = light->lightVectorAZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 0, vec);
+            dir[0] = light->lightDirectionBX;
+            dir[1] = light->lightDirectionBY;
+            dir[2] = light->lightDirectionBZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 1, dir);
+            vec[0] = light->lightVectorBX;
+            vec[1] = light->lightVectorBY;
+            vec[2] = light->lightVectorBZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 1, vec);
+            dir[0] = light->lightDirectionCX;
+            dir[1] = light->lightDirectionCY;
+            dir[2] = light->lightDirectionCZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 2, dir);
+            vec[0] = light->lightVectorCX;
+            vec[1] = light->lightVectorCY;
+            vec[2] = light->lightVectorCZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 2, vec);
+            vec[0] = light->finalVectorX;
+            vec[1] = light->finalVectorY;
+            vec[2] = light->finalVectorZ;
+            vec[3] = 1.0f;
+            kwlnSetBackgroundColorTarget(duration, vec);
+            func_00132E38(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                          light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                          light->unitLightDirection[0], light->unitLightDirection[1],
+                          light->unitLightDirection[2]);
+        }
+    }
+}
 
 extern s32 D_0032E3C0[];
 extern s16 D_0032E4D8[];
