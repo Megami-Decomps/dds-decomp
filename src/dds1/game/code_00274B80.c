@@ -1408,18 +1408,18 @@ void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
     }
 }
 
-u32 ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
+MenuWindowContainer *ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(contextArg))->menu;
     s32 selected = ((MenuWindowContainer *)menu->selectedList)->list->cursor->index;
-    s32 state;
+    MenuWindowContainer *window;
 
     mnuDestroySelectedPartyWindow(contextArg);
     ptySkillMenuBuildEquippedSlots(actor, contextArg);
     mnuSeekListNode(selected, ((MenuWindowContainer *)menu->selectedList)->list);
-    state = menu->selectedList;
-    *(s32 *)(state + 0x44) = 0x200;
-    *(s32 *)(state + 0x48) = 0x100;
-    return state;
+    window = (MenuWindowContainer *)menu->selectedList;
+    *(s32 *)((u8 *)window + 0x44) = 0x200;
+    *(s32 *)((u8 *)window + 0x48) = 0x100;
+    return window;
 }
 
 void func_00277DD0(u32 context) {
@@ -1812,7 +1812,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
             }
         }
-        window = (MenuWindowContainer *)ptySkillMenuRebuildAfterMutation(0, callback);
+        window = ptySkillMenuRebuildAfterMutation(0, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
         func_00280048((s32)&context->partyWindow);
         mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
@@ -1869,7 +1869,7 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
         } else if (selectedSlot != menuWork->selectionId) {
             mnuSwapPartySkillSlots(partyEntry, menuWork->selectionId, selectedSlot);
             mnuClearSelectedListNodeId(callback);
-            window = (MenuWindowContainer *)ptySkillMenuRebuildAfterMutation(0, callback);
+            window = ptySkillMenuRebuildAfterMutation(0, callback);
         } else {
             inputFlags = MNU_STAFF_INPUT_REJECTED;
         }
