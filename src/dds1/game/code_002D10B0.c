@@ -7,6 +7,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
 
@@ -44,7 +45,6 @@ extern s8 sdfBufferSlotIndices[2];
 /* Busy-buffer index is published by the slot setters and polled below;
  * volatile prevents the wait loop from reusing an earlier read. */
 extern volatile s8 sdfBusyBufferIndex;
-extern SdfTex *sdfResourceListHead;
 extern SdfPendingRequest sdfTextureUpdateQueue;
 extern SdfTextureQueue sdfTextureQueueWork;
 extern u8 D_003BD2F0;
