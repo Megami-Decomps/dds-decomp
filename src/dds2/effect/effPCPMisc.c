@@ -92,18 +92,25 @@ extern void effPcpCopyBlockMatrix(void *dst, void *src);
 extern void effPcpCopyVector60(void *dst, void *src);
 /* The 0x50-byte parameter block copied by all block-set clones. */
 typedef struct EffPCPBlockSetParams {
-    u32 unk00[7];
+    f32 position[4];
+    s32 fadeInFrames;
+    s32 fadeOutFrames;
+    f32 scale;
     s32 groupSize[3];
-    u32 unk28[10];
+    f32 groupScale[3];
+    f32 groupRandomScale[3];
+    f32 groupScatter[3];
+    s32 tailStartFrame;
 } EffPCPBlockSetParams;
 
 /* One 0x10C record for construction, cloning, setters and teardown.
    A non-NULL source borrows its resources; NULL owns the listed handles. */
 typedef struct EffPCPBlockSetWork {
     f32 matrix[16];
-    u8 pad40[0x20];
+    f32 previousPosition[4];
+    f32 currentPosition[4];
     EffPCPBlockSetParams params;
-    u32 unkB0;
+    u32 frame;
     u32 count;
     u32 color;
     u32 mode;
@@ -3399,7 +3406,7 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     work = sdfAllocSizeClassBlock(0x10C);
     memset(work, 0, 0x10C);
     work->params = *(EffPCPBlockSetParams *)first;
-    work->unkB0 = 0;
+    work->frame = 0;
     work->color = 0x80808080;
     work->mode = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
@@ -3498,7 +3505,7 @@ EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *src) {
     work = sdfAllocSizeClassBlock(0x10C);
     memset(work, 0, 0x10C);
     work->params = src->params;
-    work->unkB0 = 0;
+    work->frame = 0;
     work->color = 0x80808080;
     work->mode = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
@@ -3539,7 +3546,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185950);
 
 void effPcpCopyVector60(void *work, void *src) {
-    PCP_COPY_VECTOR(((EffPCPBlockSetWork *)work)->params.unk00, src);
+    PCP_COPY_VECTOR(((EffPCPBlockSetWork *)work)->params.position, src);
 }
 
 void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 value) {
@@ -3566,7 +3573,7 @@ EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *src) {
     work->params = src->params;
     work->color = 0x80808080;
     work->mode = 1;
-    work->unkB0 = 0;
+    work->frame = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
     return work;
@@ -3587,7 +3594,7 @@ EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *src) {
     work->params = src->params;
     work->color = 0x80808080;
     work->mode = 2;
-    work->unkB0 = 0;
+    work->frame = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
     return work;
@@ -3666,7 +3673,7 @@ EffPCPRotateWork *effPcpRotateClone(EffPCPRotateWork *src) {
         memcpy(&work->blockSets[i]->params, &src->blockSets[i]->params,
                sizeof(work->blockSets[i]->params));
         sub = work->blockSets[i];
-        sub->unkB0 = 0;
+        sub->frame = 0;
         sub->color = 0x80808080;
         sub->mode = 0;
         EE_MMI_UNIT_MATRIX(sub->matrix);
