@@ -8128,7 +8128,7 @@ u32 effPollPartResource(void) {
     u32 state;
     u32 result = 0x400001;
 
-    effPollResourceBankSlot(D_003B39C8, 0x20, record);
+    effPollResourceBankSlot(D_003B39C8, BTL_RESOURCE_SCAN_EP, record);
     state = ((EffResourceBankSlot *)record)->state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -8156,7 +8156,7 @@ u32 effPollNamedFileJob(void) {
     u32 state;
     u32 result = 0x400001;
 
-    effPollResourceBankSlot(D_003B39E0, 0x10, record);
+    effPollResourceBankSlot(D_003B39E0, BTL_RESOURCE_SCAN_EPL, record);
     state = ((EffResourceBankSlot *)record)->state;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -8369,11 +8369,11 @@ typedef struct EffBankSelection {
     s32 variant;     // 0x104
 } EffBankSelection;
 
-void effPollResourceBankSlot(char *path, u32 slot, void *record) {
+void effPollResourceBankSlot(char *path, u32 flags, void *record) {
     EffBankSelection *selection = record;
 
     if (effResourceBankEntries == 0) {
-        effResourceBankEntries = btlScanDirectory(path, slot);
+        effResourceBankEntries = btlScanDirectory(path, flags);
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
         return;
@@ -8484,7 +8484,7 @@ void effPollResourceBank(s32 flags, void *out) {
 
     if (effResourceBankEntries == 0) {
         effResourceBankEntries = btlScanDirectory(0, flags);
-        if (flags & 8) {
+        if (flags & BTL_RESOURCE_SCAN_GENERAL) {
             u32 i = 0;
             u32 count = func_00151FC0();
             if (count != 0) {
@@ -8908,15 +8908,15 @@ s32 effPollFileQueueRecord(s32 request) {
 }
 
 void func_002BB838(void) {
-    effPollFileQueueRecord(0x4b);
+    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
 void func_002BB850(void) {
-    effPollFileQueueRecord(0x4b);
+    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
 void func_002BB868(void) {
-    effPollFileQueueRecord(0xb);
+    effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
 }
 
 extern u16 effClassifyResourceMask(s32);
@@ -8939,12 +8939,12 @@ typedef struct EffFileResourceRecord {
 } EffFileResourceRecord;
 
 
-s32 effPollFileRecord(char *path, s32 slot) {
+s32 effPollFileRecord(char *path, s32 flags) {
     u8 record[0x110];
     s32 kind;
     s32 result = 0x600001;
 
-    effPollResourceBankSlot(path, slot, record);
+    effPollResourceBankSlot(path, flags, record);
     kind = ((EffFileQueryInfo *)record)->status;
     if (kind == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -8964,35 +8964,35 @@ s32 effPollFileRecord(char *path, s32 slot) {
 }
 
 s32 func_002BB930(void) {
-    return effPollFileRecord(D_003B3B88, 0x43);
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
 s32 func_002BB950(void) {
-    return effPollFileRecord(D_003B3B88, 0x43);
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
 s32 func_002BB970(void) {
-    return effPollFileRecord(D_003B39C8, 0x20);
+    return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
 }
 
 s32 func_002BB990(void) {
-    return effPollFileRecord(D_003B39E0, 0x10);
+    return effPollFileRecord(D_003B39E0, BTL_RESOURCE_SCAN_EPL);
 }
 
 s32 func_002BB9B0(void) {
-    return effPollFileRecord(D_003B39C8, 0x20);
+    return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
 }
 
 s32 func_002BB9D0(void) {
-    return effPollFileRecord(D_003B3B88, 1);
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
 s32 func_002BB9F0(void) {
-    return effPollFileRecord(D_003B3B88, 1);
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
 s32 func_002BBA10(void) {
-    return effPollFileRecord(D_003B3B88, 1);
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
 u32 effFileJobSecondaryDataSet(void) {
@@ -9002,7 +9002,7 @@ u32 effFileJobSecondaryDataSet(void) {
 }
 
 s32 func_002BBA68(void) {
-    return effPollFileRecord(D_003B3BA0, 4);
+    return effPollFileRecord(D_003B3BA0, BTL_RESOURCE_SCAN_PB);
 }
 
 typedef struct EffectFileHeader {
@@ -9031,7 +9031,7 @@ u32 fileLoadEffectSlotA(void) {
     s32 status;
     u32 result;
 
-    effPollResourceBankSlot(D_003B3B88, 4, fileInfo);
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, fileInfo);
     status = ((EffFileQueryInfo *)fileInfo)->status;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
@@ -9078,7 +9078,7 @@ u32 fileLoadEffectSlotHelp(void) {
     u32 dataLength;
     struct SdfMemBlock *allocation;
 
-    effPollResourceBankSlot(D_003B3BA0, 4, &fileInfo);
+    effPollResourceBankSlot(D_003B3BA0, BTL_RESOURCE_SCAN_PB, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
@@ -9135,7 +9135,7 @@ u32 fileLoadEffectSlotB(void) {
     s32 status;
     u32 result;
 
-    effPollResourceBankSlot(D_003B3B88, 4, &fileInfo);
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
@@ -9196,7 +9196,7 @@ u32 effLoadFileSlotF2(void) {
     s32 status;
     u32 result;
 
-    effPollResourceBankSlot("/tool/effect/f2/", 0x80, &fileInfo);
+    effPollResourceBankSlot("/tool/effect/f2/", BTL_RESOURCE_SCAN_F2, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
@@ -9237,7 +9237,7 @@ u32 effLoadMaterialFile(void) {
     s32 status;
     u32 result;
 
-    effPollResourceBankSlot(D_003B3B88, 2, &fileInfo);
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_P2A, &fileInfo);
     status = fileInfo.status;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
