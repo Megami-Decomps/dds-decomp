@@ -1056,7 +1056,35 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
+void func_002C1E48(s32 x, s32 y, s32 depth, u32 fade, MenuPageBar *bar, u32 flags) {
+    u32 alpha = (fade << 8) >> 8;
+
+    switch (bar->activeEffect) {
+    case 0:
+        func_00306CD0(x, y, depth, alpha, 0, bar->textures[3], 0, flags);
+        if (bar->holdEffectUpdate == 0) {
+            itfGridLookupValueOrDefault(bar->textures[3], 0);
+            if (bar->textures[3]->workEntries->states[0].source == NULL) {
+                effInitializeSlotWork(bar->textures[3], 0);
+                effConfigureIndexedSlotResource(bar->textures[4], 0, bar->effects[1], 0, 0);
+                bar->activeEffect = 1;
+            }
+        }
+        break;
+    case 1:
+        func_00306CD0(x, y, depth, alpha, 0, bar->textures[4], 0, flags);
+        if (bar->holdEffectUpdate == 0) {
+            itfGridLookupValueOrDefault(bar->textures[4], 0);
+            if (bar->textures[4]->workEntries->states[0].source == NULL) {
+                effInitializeSlotWork(bar->textures[4], 0);
+                effConfigureIndexedSlotResource(bar->textures[3], 0, bar->effects[0], 0, 0);
+                bar->activeEffect = 0;
+            }
+        }
+        break;
+    }
+    bar->holdEffectUpdate = 0;
+}
 
 void mnuCreatePairedEffects(MenuPageBar *pair) {
     struct EffMappedResource *effectHandle;

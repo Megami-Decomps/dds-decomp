@@ -249,7 +249,52 @@ void func_0029C860(BrsSkillPackageWork *work) {
 void func_0029C878(void *work) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029C880);
+extern u32 D_004379C0[];
+extern s32 itfCreateConvertedTextGlyph();
+extern s32 func_0019F6C8();
+extern s32 func_0035C860();
+
+/* Draw the three reward icon rows: name, label shadow, value text and its shadow. */
+void func_0029C880(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 surface, BrsSkillPackageWork *work) {
+    char name[32];
+    u32 valueColor[4];
+    u32 labelColor[4];
+    MenuIconRef *icon = res->icons;
+    u16 id;
+    u8 param;
+    s32 glyph;
+    u32 packed;
+    u32 i;
+
+    valueColor[0] = alpha;
+    valueColor[1] = alpha;
+    valueColor[2] = alpha;
+    valueColor[3] = alpha;
+    labelColor[0] = (alpha & 0xFF) | 0x80808000;
+    labelColor[1] = (alpha & 0xFF) | 0x80808000;
+    labelColor[2] = (alpha & 0xFF) | 0x80808000;
+    labelColor[3] = (alpha & 0xFF) | 0x80808000;
+    for (i = 0; i < 3; i++) {
+        id = icon->id;
+        param = icon->param;
+        icon++;
+        if (id != 0) {
+            packed = (alpha & 0xFF) | 0x96FF9B00;
+            glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+            func_00306C28(x + 0x720, y + 0x20, 0, labelColor, 0, (struct EffectSlotSet *)work->teardownHandle, 0x20, 0x53);
+            func_0035C860(name, D_004379C0, param);
+            packed = (alpha & 0xFF) | 0xA09DC300;
+            glyph = func_0019F6C8(x + 0x900, y, z, packed, name, 0);
+            frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)glyph, 3);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
+            func_00306C28(x + 0x6E0, y + 0x88, 0, valueColor, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
+            y += 0xB8;
+        }
+    }
+}
 
 extern u32 D_004379C8[];
 
