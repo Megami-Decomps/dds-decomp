@@ -342,7 +342,52 @@ s32 dspCaptureWindowSecondPanelValue(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026C7F8);
+extern s8 itfPanelGetStatus(s32 index);
+extern s32 func_001A4A10(s32 window, s32 first, s32 second);
+extern void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
+extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
+
+/* Advance the singleton window through its active, gated and cleanup phases. */
+void func_0026C7F8(s32 notify, s32 refresh) {
+    s32 handle = dspWindowHandle;
+
+    if (handle < 0) {
+        return;
+    }
+    switch (dspWindowControlState) {
+    case 0:
+        return;
+    case DSP_WINDOW_CONTROL_ACTIVE:
+        if (itfPanelGetStatus(handle) < 0) {
+            dspWindowControlState = DSP_WINDOW_CONTROL_GATED;
+        }
+        return;
+    case DSP_WINDOW_CONTROL_GATED:
+        if (D_00437888 >= 0) {
+            if (refresh != 0) {
+                func_001A4A10(handle, 3, 1);
+                handle = dspWindowHandle;
+            }
+            itfMesCountClearBits(handle, evtMessageWindowOption);
+            itfMesBuildOptionList(dspWindowHandle, D_00437888);
+            D_00437888 = -1;
+        }
+        if (dspWindowStateGate != 0) {
+            return;
+        }
+        if (dspCaptureWindowSecondPanelValue() != 0) {
+            return;
+        }
+        dspWindowControlState = 3;
+        return;
+    case 3:
+        evtCleanupMessageWindow(notify);
+        return;
+    default:
+        return;
+    }
+}
+
 
 /* Pass the supplied value to mode one of the existing message-window worker. */
 void func_0026C8E8(u32 value) {
@@ -355,8 +400,10 @@ void func_0026C900(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-void evtCopyEntryStringToActiveWindow(s32 slotIndex, s32 sourceAddress) {
-    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceAddress);
+extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+
+void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
 }
 
 /* Return the gate byte independently of the singleton window's existence. */

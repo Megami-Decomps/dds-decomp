@@ -337,7 +337,7 @@ extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 dspStartEntry(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -415,14 +415,14 @@ s32 func_00287C20(void) {
         break;
 
     case 2:
-        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
-            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+            1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(
-            2, (s32)D_00435E50[selectedEntryId].encodedText);
+            2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
         func_0035C860(text, "%d", sourceAmount);
-        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
         dspStartEntry(0);
         evtStoreValueAndCaptureWindowPanelValue(8);
@@ -430,14 +430,14 @@ s32 func_00287C20(void) {
         break;
 
     case 3:
-        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
-            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+            1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(
-            2, (s32)D_00435E50[selectedEntryId].encodedText);
+            2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
         func_0035C860(text, "%d", sourceAmount);
-        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        evtCopyEntryStringToActiveWindow(3, text);
         evtSetMessageWindowOptionWhenOpen(0);
         dspStartEntry(1);
         evtStoreValueAndCaptureWindowPanelValue(8);
@@ -460,14 +460,14 @@ s32 func_00287C20(void) {
 
     case 6:
         sourceEntryId = (u16)selectedEntryId;
-        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[selectedRecord->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
-            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+            1, D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
         evtCopyEntryStringToActiveWindow(
-            2, (s32)D_00435E50[selectedEntryId].encodedText);
+            2, D_00435E50[selectedEntryId].encodedText);
         sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
         func_0035C860(text, "%d", sourceAmount);
-        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        evtCopyEntryStringToActiveWindow(3, text);
         dspStartEntry(2);
         equip->state = 12;
         if ((((u32)selectedPanelFlags >> 8) & 2) == 0) {
