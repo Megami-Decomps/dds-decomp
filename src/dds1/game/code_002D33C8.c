@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
 #include "sdf_gs_blend.h"
@@ -712,14 +713,14 @@ void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node) 
 }
 
 /* Encode the packed A+D payload count and its DMA/VIF transfer length. */
-void sdfInitializeDmaReferenceTag(SdfPacket *packet, s32 payloadQwords) {
+void sdfInitializeDmaReferenceTag(SdfGsPacketHeader *header, s32 payloadQwords) {
     s64 dmaQwords;
 
     dmaQwords = payloadQwords + 1;
-    packet->unk8 = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
-    packet->unk10 = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
-    packet->unk0 = dmaQwords;
-    packet->unk18 = SDF_GIF_REGISTER_AD;
+    header->vifCommands = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
+    header->gifTag = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
+    header->dmaTag = dmaQwords;
+    header->gifRegisters = SDF_GIF_REGISTER_AD;
 }
 
 /* Emit a GIF header, a REF tag with masked count/address, and the trailing NEXT tag. */
@@ -806,12 +807,12 @@ extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
 void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
                            s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
-    sdfInitializeDmaReferenceTag(packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
+    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
     sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
 typedef struct SdfSceneDrawPacket {
-    SdfPacket header;    /* 0x00 */
+    SdfGsPacketHeader header; /* 0x00 */
     u64 draw[8];         /* 0x20 */
     SdfPacket contextOne[2]; /* 0x60 */
     SdfPacket contextTwo[2]; /* 0xA0 */
@@ -857,7 +858,7 @@ typedef struct SdfSceneNode {
     SdfPacketPatchLink link; /* Native next/callback prefix at 0/4. */
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
-    SdfPacket header;  /* 0x10 */
+    SdfGsPacketHeader header; /* 0x10 */
     u64 draw[8];       /* 0x30 */
     SdfPacket contextOne[2]; /* 0x70 */
     SdfPacket contextTwo[2]; /* 0xB0 */
@@ -931,7 +932,7 @@ void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfPrepareFrameDepthPacket);
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
-    sdfInitializeDmaReferenceTag(packet->packets, 2);
+    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet->packets, 2);
     packet->mode = mode;
     packet->source = source;
     packet->frameMask = frameMask;

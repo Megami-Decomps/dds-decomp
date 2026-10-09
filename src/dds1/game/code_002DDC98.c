@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
@@ -810,7 +811,7 @@ s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contex
 
 /* Exclude the two header quadwords from the reference payload count. */
 u32 sdfConsFinalizePacketHeader(u32 packetAddress, s32 packetBytes) {
-    sdfInitializeDmaReferenceTag(packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
     return packetAddress;
 }
 
