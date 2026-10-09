@@ -4511,7 +4511,7 @@ void effSeedBillScaleRange(u8 *work) {
     EffBillRangeConfig *config = ((EffClassWork *)work)->payload;
     EffScaleRange *range = (EffScaleRange *)((EffClassWork *)work)->resource;
     s32 steps = config->point.timed.time.duration;
-    u8 *entry = range->entries;
+    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
     f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
@@ -4529,8 +4529,8 @@ void effSeedBillScaleRange(u8 *work) {
     if (count != 0) {
         do {
             index++;
-            ((EffScaleRangeEntry *)entry)->negativeSeed = -1 - (effMiscRand(effSharedRandomState) & 7);
-            entry += 0x30;
+            entry->negativeSeed = -1 - (effMiscRand(effSharedRandomState) & 7);
+            entry++;
         } while (index < count);
     }
 }
@@ -5002,17 +5002,17 @@ void effResetBillTable(u8 *p) {
     u8 *b = ((EffClassWork *)p)->payload;
     u32 n = ((EffBillEmitterCommon *)b)->header.timed.count;
     u32 *counts = (u32 *)((EffRibbonWork *)((EffFrameState *)a)->asset)->colors;
-    u8 *rec = *(u8 **)a;
+    EffBillEmitterEntry *rec = (EffBillEmitterEntry *)((EffFrameState *)a)->entries;
     u32 i;
     for (i = 0; i < n; i++) {
         *counts++ = 0;
-        *(s32 *)rec = -1;
-        rec += 0x30;
+        rec->timer = -1;
+        rec++;
     }
 }
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5170,17 +5170,17 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
     u8 *b = ((EffClassWork *)p)->payload;
     u32 n = ((EffBillEmitterCommon *)b)->header.timed.count;
     u32 *counts = (u32 *)((EffRibbonWork *)((EffFrameState *)a)->asset)->colors;
-    u8 *rec = *(u8 **)a;
+    EffBillEmitterEntry *rec = (EffBillEmitterEntry *)((EffFrameState *)a)->entries;
     u32 i;
     for (i = 0; i < n; i++) {
         *counts++ = 0;
-        *(s32 *)rec = -1;
-        rec += 0x30;
+        rec->timer = -1;
+        rec++;
     }
 }
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5683,18 +5683,18 @@ void effResetAnimationFrameEntries(u8 *p) {
     u8 *a = (u8 *)((EffClassWork *)p)->resource;
     u8 *b = ((EffClassWork *)p)->payload;
     u32 n = ((EffBillFlameConfig *)b)->header.timed.count;
-    u32 *counts = ((EffFrameAsset *)((EffFrameState *)a)->asset)->animationFrames;
-    u8 *rec = *(u8 **)a;
+    u32 *counts = ((EffStripWork *)((EffFrameState *)a)->asset)->colors;
+    EffBillEmitterEntry *rec = (EffBillEmitterEntry *)((EffFrameState *)a)->entries;
     u32 i;
     for (i = 0; i < n; i++) {
         *counts++ = 0;
-        *(s32 *)rec = -1;
-        rec += 0x30;
+        rec->timer = -1;
+        rec++;
     }
 }
 
 u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5967,22 +5967,6 @@ void effReleaseBillboardFrameAsset(s32 work) {
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
 }
 
-typedef struct EffStripWork {
-    u32 count;          // 0x00
-    u32 type;           // 0x04
-    u32 color;          // 0x08
-    s32 rowStride;      // 0x0C
-    s32 repeat;         // 0x10
-    u8 flag;            // 0x14
-    u8 pad_15[3];
-    u32 *colors;        // 0x18
-    u8 *positions;      // 0x1C
-    u8 *uvsA;           // 0x20
-    u8 *uvsB;           // 0x24
-    u8 *extra;          // 0x28
-    SdfAsset *handle;     // 0x2C
-    struct SdfMemBlock *allocation; // 0x30
-} EffStripWork;
 
 void effOffsetNodeRowsVU(u8 *work) {
     s32 *list = (s32 *)((EffClassWork *)work)->resource;
