@@ -7349,3 +7349,4 @@
 0x002A9630	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
 0x0014FF28	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.
 0x002CEAE8	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.
+0x002DC3B8	sdfMotionCreatePrimaryWordSecondBinding	inferred	Allocates a 0x14-byte indexed value binding to the asset primary state word second, registering its apply/blend/capture callbacks.
