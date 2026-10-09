@@ -216,7 +216,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
         (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
         resourceAddress, arg7, arg8);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
         (u32)packet + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
@@ -692,15 +692,15 @@ void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
     list->unkC = 0;
 }
 
-void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node) {
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, SdfPacketPatchLink *node) {
     if (list->last == 0) {
-        list->first = (SdfPacketPatchLink *)node;
+        list->first = node;
     }
     else {
-        *(u32 *)list->last = (SdfPacketPatchLink *)node;
+        list->last->next = node;
     }
-    list->last = (SdfPacketPatchLink *)node;
-    *node = 0;
+    list->last = node;
+    node->next = NULL;
 }
 
 void sdfClearPacketChain(SdfPacketChain *chain) {
@@ -900,7 +900,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
-void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, u32 *linkedNode) {
+void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *linkedList, SdfPacketPatchLink *linkedNode) {
     sdfAppendLinkedPacketNode(linkedList, linkedNode);
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
@@ -1255,7 +1255,7 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
         destination->format, destinationX, destinationY, D_003980E0.buffers[0]->word,
         D_003980E0.width, D_003980E0.bufferFormat, sourceX, sourceY, transferWidth,
         transferHeight, 2);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendLinkedPacketNode(linkedList, &packet->link);
     sdfAppendPacket(drawList, (s32)drawPacket);
 }
 
