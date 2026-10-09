@@ -50,7 +50,7 @@ enum MenuPanelKind {
 typedef struct MenuList MenuList;
 
 
-extern void func_0027CA90();
+extern void func_0027CA90(s32, s32, s32, MenuWindowContainer *, s32);
 
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
@@ -297,33 +297,36 @@ void mnuDestroyWindowContainer(MenuWindowContainer *window) {
     sdfReleaseChipBlock(window);
 }
 
-void mnuSetWindowOverlaySprite(MenuWindowContainer *window, u32 sprite) {
-    window->overlaySprite = sprite;
+void mnuSetWindowOverlaySprite(MenuWindowContainer *window, EffectSlotSet *resources) {
+    window->overlayResources = resources;
 }
 
 void mnuSetWindowFadeScale(MenuWindowContainer *window, u32 fadeScale) {
     window->fadeScale = fadeScale;
 }
 
-void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window, s32 x, s32 y, u32 sprite,
-                   u32 effect, u32 color) {
-    window->x = x;
-    window->y = y;
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, y, -0x70, -0x68, -0x70, -0x68);
-    window->sprite = sprite;
-    window->effect = effect;
-    if (sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, 0x60, -0xd0, 0, 0);
+void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window,
+                   EffectSlotSet *frameResources, s32 frameSlot,
+                   EffectSlotSet *spriteResources, u32 spriteSlot, u32 overlaySlot) {
+    window->frameResources = frameResources;
+    window->frameSlot = frameSlot;
+    itfSetGridEntryQuantizedAndRefresh(frameResources, frameSlot, -0x70, -0x68, -0x70, -0x68);
+    window->spriteResources = spriteResources;
+    window->spriteSlot = spriteSlot;
+    if (spriteResources != 0) {
+        itfSetGridEntryQuantizedAndRefresh(spriteResources, spriteSlot, 0x60, -0xd0, 0, 0);
     }
-    window->overlaySprite = sprite;
-    window->overlayColor = color;
-    if (sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, color, 0x60, -0xd0, 0, 0);
+    window->overlayResources = spriteResources;
+    window->overlaySlot = overlaySlot;
+    if (spriteResources != 0) {
+        itfSetGridEntryQuantizedAndRefresh(spriteResources, overlaySlot, 0x60, -0xd0, 0, 0);
     }
 }
 
-void mnuForwardDupArg(MenuWindowContainer *panel, s32 x, s32 y, s32 sprite, s32 effect) {
-    mnuConfigureWindowSpriteAndGrid(panel, x, y, sprite, effect, effect);
+void mnuForwardDupArg(MenuWindowContainer *window, EffectSlotSet *frameResources,
+                     s32 frameSlot, EffectSlotSet *spriteResources, s32 spriteSlot) {
+    mnuConfigureWindowSpriteAndGrid(window, frameResources, frameSlot, spriteResources,
+                                    spriteSlot, spriteSlot);
 }
 
 void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, s32 x, s32 y, s32 option) {
@@ -463,7 +466,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     struct MenuWindowSpriteGroup *textures;
 
     menu->list->scale = fadeScale;
-    func_0027CA90();
+    func_0027CA90(x, y, depth, menu, drawArg);
     func_0027CA78(x, y, depth, menu, drawArg);
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);

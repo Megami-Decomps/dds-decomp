@@ -87,7 +87,7 @@ extern u32 D_003BD8D4;
 
 extern u32 D_003BC5BC;
 
-extern u32 D_003BC5C8;
+extern s32 D_003BC5C8;
 
 extern u8 D_003D9178[];
 
@@ -738,7 +738,6 @@ void mnuAdvanceTitleStateUnderSemaphore(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-extern u32 D_003BC5C8;
 
 /* Save the pre-transition load-state read before marking the commit complete. */
 void mnuCommitTitleStreamReadyState(void) {

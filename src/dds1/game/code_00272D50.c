@@ -15,7 +15,6 @@ extern s32 mnuUseStaffItem(s32, s32);
 extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void func_00272D50(StaffDisplayContext *);
-extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
 
 
 typedef struct {
@@ -120,7 +119,8 @@ void func_00272D50(StaffDisplayContext *context) {
     itemId = 1;
     minimumQuantity = 1;
     resources->windows[0] = window;
-    mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xD);
+    mnuForwardDupArg(window, (struct EffectSlotSet *)context->unk74, 0,
+                     (struct EffectSlotSet *)context->unkD8, 0xD);
     mnuAttachWindowTextureState(resources->windows[0], -0xE0, 0x370, 0, context->unkDC);
     mnuConfigureWindowSpriteSlots(resources->windows[0]->textures,
                                   (struct EffMappedResource *)context->spriteResource);
@@ -143,7 +143,8 @@ void func_00272D50(StaffDisplayContext *context) {
     } while (itemId < 0xC0);
 
     resources->windows[1] = window;
-    mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xE);
+    mnuForwardDupArg(window, (struct EffectSlotSet *)context->unk74, 0,
+                     (struct EffectSlotSet *)context->unkD8, 0xE);
     mnuAttachWindowTextureState(resources->windows[1], -0xE0, 0x370, 0, context->unkDC);
     mnuConfigureWindowSpriteSlots(resources->windows[1]->textures,
                                   (struct EffMappedResource *)context->spriteResource);
@@ -197,7 +198,8 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
         textOffset += 25;
     } while (itemId < 0xC0);
     resources->windows[2] = window;
-    mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 15);
+    mnuForwardDupArg(window, (struct EffectSlotSet *)context->unk74, 0,
+                     (struct EffectSlotSet *)context->unkD8, 15);
     mnuAttachWindowTextureState(resources->windows[2], -0xE0, 0x370, 0, context->unkDC);
     mnuConfigureWindowSpriteSlots(resources->windows[2]->textures,
                                   (struct EffMappedResource *)context->spriteResource);
@@ -229,7 +231,7 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     resources->allocation = handle;
     func_00273390((u32)context);
     func_00272D50(context);
-    mnuForwardDupArg(context->activeWindow, context->unk74, 0, 0, 0);
+    mnuForwardDupArg(context->activeWindow, (struct EffectSlotSet *)context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)context->unk138, context->unkD8, 0, 1);
     mnuSeekListNode(0, context->activeWindow->list);
