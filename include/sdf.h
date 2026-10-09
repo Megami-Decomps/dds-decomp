@@ -482,7 +482,8 @@ typedef char SdfSubParam_size_must_be_0x18[
 
 /* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
 typedef struct SdfAsset {
-    u8 pad00[6];
+    u32 unk00; /* Word from the serialized asset-parameter header. */
+    u16 unk04; /* Halfword from the serialized asset-parameter header. */
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
     struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
@@ -504,6 +505,10 @@ typedef struct SdfAsset {
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(SdfAsset) == 0x48) ? 1 : -1];
+typedef char SdfAsset_unk04_at_4[
+    ((u32)&((SdfAsset *)0)->unk04 == 4) ? 1 : -1];
+typedef char SdfAsset_dirtyFlags_at_6[
+    ((u32)&((SdfAsset *)0)->dirtyFlags == 6) ? 1 : -1];
 typedef char SdfAsset_drawEntries_offset_must_be_0x08[
     ((u32)&((SdfAsset *)0)->drawEntries == 0x08) ? 1 : -1];
 typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[

@@ -126,8 +126,8 @@ extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_0015FE20(ScatterRenderState *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
-struct SdfTextParam;
-extern void func_002DA438(struct SdfTextParam *, u32);
+struct SdfAsset;
+extern void func_002DA438(struct SdfAsset *, u32);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
 void effScatterDrawObject(PcpScatterDraw *object) {
@@ -151,7 +151,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     sdfComposeVuMatrixFromRegisters();
     sdfConsAppendVuPacket(packet, 0);
     if (object->sharedResource != NULL) {
-        func_002DA438((struct SdfTextParam *)object->asset,
+        func_002DA438((struct SdfAsset *)object->asset,
                       (u32)object->sharedResource->textureHandle);
     }
     sdfConsAppendAssetPacket(packet, (void *)object->asset, 0);

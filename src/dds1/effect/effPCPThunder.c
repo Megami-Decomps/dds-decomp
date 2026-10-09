@@ -2905,7 +2905,6 @@ typedef struct EffThunderDrawParams {
 extern EffThunderDrawParams D_003D64F0;
 extern EffThunderDrawParams D_003D6520;
 
-struct SdfTextParam;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern const f32 D_00354860[8][4];
 extern const u32 D_003547D0[28];
