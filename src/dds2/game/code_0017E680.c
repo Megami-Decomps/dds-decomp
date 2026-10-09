@@ -88,7 +88,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
 }
 
 void effReleaseAttachedResources(EffResourceWork *effect) {
-    sdfQueueAssetRelease((s32)effect->drawAsset);
+    sdfQueueAssetRelease(effect->drawAsset);
     effReleaseOptionalResource(effect);
     sdfReleaseResourceAllocation(effect->backingAllocation);
 }

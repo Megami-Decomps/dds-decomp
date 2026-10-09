@@ -2649,7 +2649,6 @@ void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
 }
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void sdfQueueAssetRelease(s32 assetAddress);
 
 
 extern EffPacketParams D_004582B0;
@@ -2833,7 +2832,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
             effReleaseSharedReference(work->shared);
         }
     }
-    sdfQueueAssetRelease((s32)work->handle);
+    sdfQueueAssetRelease(work->handle);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
@@ -3708,7 +3707,7 @@ u8 *effCreatePointSet4(u32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -4333,7 +4332,7 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease((s32)((EffSurfaceGridNode *)work)->handle);
+    sdfQueueAssetRelease(((EffSurfaceGridNode *)work)->handle);
     sdfReleaseResourceAllocation(((EffSurfaceGridNode *)work)->allocation);
 }
 
@@ -4458,7 +4457,7 @@ void effReleaseRenderResources(EffQuadWork *work) {
         effReleaseReferenceHolder(work->reference);
     }
     if (work->assetHandle != 0) {
-        sdfQueueAssetRelease((s32)work->assetHandle);
+        sdfQueueAssetRelease(work->assetHandle);
     }
     sdfReleaseChipBlock(work);
 }
@@ -5139,7 +5138,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(EffPointSet *set) {
-    sdfQueueAssetRelease((s32)set->handle);
+    sdfQueueAssetRelease(set->handle);
     sdfReleaseResourceAllocation(set->allocation);
 }
 
@@ -5973,7 +5972,7 @@ void effSharedAssetReferenceRelease(s32 work) {
     else {
         effReleaseSharedReference(((EffRibbonWork *)work)->resource);
     }
-    sdfQueueAssetRelease((s32)((EffRibbonWork *)work)->handle);
+    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
     sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
 }
 
@@ -6505,7 +6504,7 @@ u64 effCreateTexturedStripWithSharedTexture(void) {
 
 void effReleaseScalyStripResources(u8 *work) {
     effReleaseScalyTextureReference(effSharedScalyStripResource);
-    sdfQueueAssetRelease((s32)((EffStripWork *)work)->handle);
+    sdfQueueAssetRelease(((EffStripWork *)work)->handle);
     sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
 }
 
@@ -6814,7 +6813,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(EffPointSet *set) {
-    sdfQueueAssetRelease((s32)set->handle);
+    sdfQueueAssetRelease(set->handle);
     sdfReleaseResourceAllocation(set->allocation);
 }
 
@@ -8188,7 +8187,7 @@ void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
 
     resource = work->asset;
     if (resource != NULL) {
-        sdfQueueAssetRelease((s32)resource);
+        sdfQueueAssetRelease(resource);
     }
     sdfReleaseChipBlock(work);
 }
@@ -8343,7 +8342,7 @@ void effDestroyBillboardAndOwnedAssetWork(EffMotionResource *work) {
         billDispatchByKind(work->billboard);
     }
     if (work->asset != NULL) {
-        sdfQueueAssetRelease((s32)work->asset);
+        sdfQueueAssetRelease(work->asset);
     }
     sdfReleaseChipBlock(work);
 }

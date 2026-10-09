@@ -34,7 +34,6 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-extern void sdfQueueAssetRelease(s32 assetAddress);
 extern void *effParamTableGetBlock(void *table, s32 index);
 
 
@@ -415,7 +414,7 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -550,7 +549,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
 
 /* Release the asset and backing allocation; the header points into that block. */
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -638,7 +637,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
 
 /* Queue the asset before releasing the allocation containing this header. */
 void effReleaseRecordGroupResources(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 

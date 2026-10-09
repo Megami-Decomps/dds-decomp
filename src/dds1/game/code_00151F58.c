@@ -497,7 +497,7 @@ u8 *billCloneUnitObject(u8 *source) {
 }
 
 void effDestroy(u32 instance) {
-    sdfQueueAssetRelease((u32)((EffUnitObject *)instance)->resource);
+    sdfQueueAssetRelease((SdfAsset *)((EffUnitObject *)instance)->resource);
     billDispatchByKind(((EffUnitObject *)instance)->billboard);
     sdfReleaseChipBlock(instance);
 }

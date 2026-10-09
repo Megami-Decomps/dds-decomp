@@ -4259,7 +4259,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
 }
 
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
-    sdfQueueAssetRelease((s32)work->assetHandle);
+    sdfQueueAssetRelease(work->assetHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
     sdfReleaseChipBlock(work);
 }

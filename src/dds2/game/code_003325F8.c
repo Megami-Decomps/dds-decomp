@@ -721,8 +721,8 @@ void sdfAssetRelease(SdfAsset *asset) {
 }
 
 /* Queue the non-null asset address for deferred release. */
-void sdfQueueAssetRelease(s32 assetAddress) {
-    s32 queuedAddress = assetAddress;
+void sdfQueueAssetRelease(SdfAsset *asset) {
+    s32 queuedAddress = (s32)asset;
 
     if (queuedAddress != 0) {
         sdfPendingQueuePush(&sdfAssetReleaseQueue, queuedAddress);

@@ -184,7 +184,6 @@ extern void effReleaseSurfaceGridBuffers(s32);
 extern s32 func_00151FC0(void);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 
 extern EffPacketParams D_003DC9E0;

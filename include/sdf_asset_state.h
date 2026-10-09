@@ -6,6 +6,9 @@
 struct SdfAsset;
 union SdfSubParam;
 
+/* Queue an asset owner for the deferred SdfAsset release callback. */
+void sdfQueueAssetRelease(struct SdfAsset *asset);
+
 /* Refresh one of the two draw entries and retain the other entry's dirty bits. */
 void sdfAssetApplyEntryChanges(struct SdfAsset *asset, s32 entryIndex);
 

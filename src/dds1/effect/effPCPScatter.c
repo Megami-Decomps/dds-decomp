@@ -50,7 +50,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 
-extern void sdfQueueAssetRelease(u32 res);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
@@ -1094,7 +1093,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
     if (work->sharedResource != NULL) {
         effPcpScatterResRelease(work->sharedResource);
     }
-    sdfQueueAssetRelease((u32)work->drawAsset);
+    sdfQueueAssetRelease(work->drawAsset);
     sdfReleaseResourceAllocation(work->allocation);
 }
 

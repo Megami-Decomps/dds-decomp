@@ -108,7 +108,6 @@ typedef struct EffTrackPolyList {
     SdfMemBlock *handle;               /* 0x08 */
 } EffTrackPolyList;
 
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
@@ -241,7 +240,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
 }
 
 void effTrackPolyFreeData(EffTrackPolyData *data) {
-    sdfQueueAssetRelease(data->nodeHandle);
+    sdfQueueAssetRelease((SdfAsset *)data->nodeHandle);
     sdfReleaseResourceAllocation(data->resourceHandle);
 }
 
