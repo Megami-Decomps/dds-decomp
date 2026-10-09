@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
@@ -307,7 +308,6 @@ extern f32 btlGetUnitModelValue1C(BtlUnit *);
 
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern void btlClearRuntimeFlag2000(void);
 

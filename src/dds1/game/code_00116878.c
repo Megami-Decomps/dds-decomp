@@ -8,8 +8,6 @@
 
 
 
-extern Motion *func_002DB230(SdfModel *, MotionTable *);
-
 /* Script object work area (0x18). */
 typedef struct ObjWork {
     EffWorldNode *unk0;   /* 0x00: fallback model resource */
@@ -68,7 +66,7 @@ Motion *evtAttachScriptToObject(EffWorldNode *object, SdfModel *owner) {
     }
     work = object->data;
     if (work->unk8 != NULL) {
-        motion = func_002DB230(owner, work->unk8);
+        motion = sdfCreateMotion(owner, work->unk8);
         sdfMotionInitializeAtZeroTime(motion, 0, 1);
     }
     return motion;

@@ -220,13 +220,11 @@ void btlReleaseAllEntities(void) {
     } while (groupIndex < BTL_GROUP_COUNT);
 }
 
-extern Motion *func_003340E0(SdfModel *, MotionTable *);
-
 /* Create and attach the motion for the selected resource record. */
 Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
     MotionTable *resource = owner->sub->slots[index].data;
     s16 slot = owner->sub->slots[index].slot;
-    Motion *object = func_003340E0(owner->inner, resource);
+    Motion *object = sdfCreateMotion(owner->inner, resource);
 
     object->searchId = index;
     owner->slots[slot] = object;
@@ -252,7 +250,6 @@ extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
 
 
-extern void sdfDestroyMotion(Motion *arg);
 
 extern s32 btlGroupContainsId(s32 group, s32 id);
 
@@ -399,7 +396,6 @@ extern Motion *mdlFindNodeById(MdlCtx *, s32);
 extern MdlResourceTable D_003C86B0[];
 extern MdlResourceTable D_003C6588[];
 
-extern void sdfDestroyMotion(Motion *);
 
 /* 8-byte prefix copied from D_003BBB60 by mdlBuildPrefixedString. */
 typedef struct Hdr8 {
@@ -757,7 +753,6 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 }
 
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
-extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 

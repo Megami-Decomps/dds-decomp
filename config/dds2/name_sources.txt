@@ -6185,6 +6185,7 @@
 0x00334078	sdfDispatchAssetCommandWord	inferred	Dispatches through the table selected by the high command halfword. [names_reviewed8.tsv]
 0x003340A8	sdfInvokeMotionObjectCallback	inferred	Invokes the callback in the first pointer of a motion object's callback table.
 0x003340D0	sdfSetMotionPointerPair	inferred	Stores the two supplied pointers into the pair in reverse argument order.
+0x003340E0	sdfCreateMotion	inferred	Allocates and links the 0x34-byte Motion owner returned to paired model and object callers.
 0x003341B8	sdfDestroyMotion	inferred	DDS1 twin func_002DB308 [names_M68_VuRest.tsv]
 0x00334280	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS1 0x002DB3D0.
 0x003343C8	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
