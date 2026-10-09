@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "par_cell_api.h"
@@ -10,7 +11,6 @@
 #include "eff_scatter_draw.h"
 #include "eff_pcp_scatter_rings.h"
 
-extern void sdfQueueAssetRelease(struct SdfAsset *asset);
 
 /* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
  * instance, not to the drawable used by the resource helpers below. */
@@ -79,7 +79,6 @@ extern s32 func_0015FE20(ScatterRenderState *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 struct SdfAsset;
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
 void effScatterDrawObject(PcpScatterDraw *object) {
@@ -104,7 +103,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     sdfConsAppendVuPacket(packet, 0);
     if (object->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset,
-                      (u32)object->sharedResource->textureHandle);
+                      object->sharedResource->textureHandle);
     }
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
@@ -134,7 +133,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
         }
     }
     surface = D_00354BF0[object->packetQueueIndex];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Give this object its own reference to a newly created scatter resource. */

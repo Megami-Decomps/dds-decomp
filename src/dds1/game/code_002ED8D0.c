@@ -158,12 +158,12 @@ void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
     }
 }
 
-/* Preserve the drained flag and unresolved byte-1A release predicate. */
+/* Decoder completion requires drained input and no completed output buffers pending. */
 s32 sdfPacCheckDecoderStatus(MovObj *job) {
     if (job->soundNode.drained == 0) {
         return 0;
     }
-    return job->soundNode.unk1A == 0;
+    return job->soundNode.completedBufferCount == 0;
 }
 
 /* Start the packet counter at -1 and select a custom or built-in packet callback. */

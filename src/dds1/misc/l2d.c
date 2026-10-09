@@ -17,7 +17,7 @@ void l2dDrawColoredRect(void *owner)
     sdfAppendClosedRectanglePacket(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);
-    D_003255A8.append((SdfListHead *)&D_003255A8, list);
+    D_003255A8.append(&D_003255A8, list);
 }
 
 extern Dds3IntrusiveNodeCallbacks D_003BAAD8;

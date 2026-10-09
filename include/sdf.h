@@ -181,7 +181,7 @@ typedef struct SdfStreamFrameNode {
     u8 playbackCadenceRemainder;
     u8 bufferIndex;
     u8 transferPacketIndex;
-    u8 unk1A;
+    u8 completedBufferCount; /* Completed output buffers waiting for playback submission. */
     u8 pad1B;
     s32 bufferSize;
     void *frameBuffers[2];
@@ -217,6 +217,8 @@ typedef char SdfStreamFrameNode_playbackPhase_offset_must_be_0x10[
     ((u32)&((SdfStreamFrameNode *)0)->playbackPhase == 0x10) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputDmaStartPending_offset_must_be_0x12[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaStartPending == 0x12) ? 1 : -1];
+typedef char SdfStreamFrameNode_completedBufferCount_offset_must_be_0x1A[
+    ((u32)&((SdfStreamFrameNode *)0)->completedBufferCount == 0x1A) ? 1 : -1];
 typedef char SdfStreamFrameNode_playbackCadenceRemainder_offset_must_be_0x17[
     ((u32)&((SdfStreamFrameNode *)0)->playbackCadenceRemainder == 0x17) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputFeedDmaInFlight_offset_must_be_0x64[
@@ -357,7 +359,7 @@ typedef struct SdfTex {
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfListHead {
-    u32 unk0;
+    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
     u32 first;
     u32 last;
     u32 unkC;
@@ -367,19 +369,30 @@ typedef struct SdfListHead {
     u32 unk1C;
 } SdfListHead;
 
+typedef char SdfListHead_link_layout[
+    (sizeof(SdfListHead) == 0x20 &&
+     (u32)&((SdfListHead *)0)->nextList == 0 &&
+     (u32)&((SdfListHead *)0)->first == 4 &&
+     (u32)&((SdfListHead *)0)->last == 8) ? 1 : -1];
+
 /* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next; /* 0x00 */
-    u32 first;               /* 0x04 */
-    u32 last;                /* 0x08 */
+    SdfListHead *first;       /* 0x04 */
+    SdfListHead *last;        /* 0x08 */
     u32 unkC;
-    void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
-    s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
+    void (*append)(struct SdfPoolNode *, SdfListHead *);      /* 0x10 */
+    s32 (*prepend)(struct SdfPoolNode *, s32, SdfListHead *); /* 0x14 */
     u32 unk18;
     u32 unk1C;
 } SdfPoolNode;
 
 typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -1];
+typedef char SdfPoolNode_owner_layout[
+    ((u32)&((SdfPoolNode *)0)->first == 4 &&
+     (u32)&((SdfPoolNode *)0)->last == 8 &&
+     (u32)&((SdfPoolNode *)0)->append == 0x10 &&
+     (u32)&((SdfPoolNode *)0)->prepend == 0x14) ? 1 : -1];
 
 /* Callback-list hooks also accept the shared task-entry no-op. */
 typedef void (*SdfListCallback)();

@@ -565,7 +565,44 @@ void func_00342E58(u32 kind, u8 *dst) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343188);
+extern char D_00438BE0[];
+extern char D_00438BE8[];
+extern char D_00438BF0[];
+extern char D_00438BF8[];
+extern char D_00438C00[];
+extern char D_00438C08[];
+extern char D_00438C10[];
+
+void func_00343188(const u8 *data, s32 size) {
+    s32 column = 0;
+    s32 i;
+
+    while (size > 0) {
+        if (column == 0) {
+            sdfPrintFormattedDevMessage(D_00438BE0, data);
+            column = (u32)data & 0xF;
+            for (i = column; i > 0; i--) {
+                sdfPrintFormattedDevMessage(D_00438BE8);
+            }
+        } else if (column == 8) {
+            sdfPrintFormattedDevMessage(D_00438BF0);
+        } else {
+            sdfPrintFormattedDevMessage(D_00438BF8);
+        }
+        sdfPrintFormattedDevMessage(D_00438C00, *data++);
+        column++;
+        if (column == 0x10) {
+            column = 0;
+            sdfPrintFormattedDevMessage(D_00438C08);
+        }
+        size--;
+    }
+    if (column == 0) {
+        sdfPrintFormattedDevMessage(D_00438C08);
+    } else {
+        sdfPrintFormattedDevMessage(D_00438C10);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E590);
 
@@ -1253,7 +1290,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
 
     node = sdfStreamNodeListHead;
     while (node != 0) {
-        if (node->unk1A + node->unk13 < 2 &&
+        if (node->completedBufferCount + node->unk13 < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
             sdfStartStreamNodeIpuTransfer(node);
@@ -1289,7 +1326,7 @@ void sdfIpuDmaCompletionWorker(void) {
         if (work->playbackPhase == SDF_STREAM_PLAYBACK_INITIAL) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
-        work->unk1A++;
+        work->completedBufferCount++;
         D_00439204 = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
@@ -1362,10 +1399,10 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
 void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     s32 interruptsEnabled = func_0036DE70();
-    s32 pendingBuffers = node->unk1A;
+    s32 pendingBuffers = node->completedBufferCount;
     s32 remainingBuffers = pendingBuffers - 1;
     if (pendingBuffers > 0) {
-        node->unk1A = remainingBuffers;
+        node->completedBufferCount = remainingBuffers;
         node->transferPacketIndex ^= 1;
         node->unk13++;
     }
@@ -1384,7 +1421,7 @@ extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
 s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     u32 *selectedBuffer;
-    if (node->unk1A == 0) {
+    if (node->completedBufferCount == 0) {
         return 0;
     }
     selectedBuffer = (u32 *)(node->transferPacketIndex * 4 + (s32)node + 0x28);

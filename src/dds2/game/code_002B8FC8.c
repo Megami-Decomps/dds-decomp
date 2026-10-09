@@ -808,9 +808,9 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
     do {
         s32 selected = node == list->cursor;
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
-        u32 sprite = node->sprites[index].sprite;
+        struct EffectSlotSet *sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
@@ -978,10 +978,11 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
     panel->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
 
-void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth) {
+void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second,
+                               u32 third, EffectSlotSet *spriteResource) {
     MenuListDefaults defaults = D_0042AF00;
     menu->resource =
-        mnuCreateWindowSpriteResources(first, second, third, (EffectSlotSet *)fourth,
+        mnuCreateWindowSpriteResources(first, second, third, spriteResource,
                                        defaults.indices, 3);
 }
 

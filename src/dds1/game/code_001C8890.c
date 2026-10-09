@@ -4620,7 +4620,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = 0x72801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -4639,7 +4639,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = 0x51801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     func_002D9748(overlay, model->inner);
     if (unit->status.flags & 2) {
@@ -4659,7 +4659,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[4] = D_00359CF0[i];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     mdlSetAllResourceFrames(model, frame);
     for (item = model->resourceItems; item != NULL; item = item->next) {
@@ -4747,7 +4747,7 @@ void func_001D6FB0(BtlUnit *unit) {
     packet = (u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket((SdfListHead *)packet, D_003980E0.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
-    D_00359D20[0]->append((SdfListHead *)D_00359D20[0], (SdfListHead *)packet);
+    D_00359D20[0]->append(D_00359D20[0], (SdfListHead *)packet);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -4764,7 +4764,7 @@ void func_001D6FB0(BtlUnit *unit) {
     packet = (u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket((SdfListHead *)packet, D_003980E0.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
-    D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
+    D_00359D30[0]->append(D_00359D30[0], (SdfListHead *)packet);
     func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
 
@@ -4790,9 +4790,87 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
     return 1;
 }
 
+extern u8 D_0037E110[];
+extern void effMiscQuaternionToMatrixVU(void);
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BA8);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001D7258);
+const char D_003A3BB8[16] = "btl:warp[%p]\n";
+
+void func_001D7258(BtlUnit *unit, BtlUnit *target, s32 index) {
+    f32 bodyPos[4] __attribute__((aligned(16)));
+    f32 muzzlePos[4] __attribute__((aligned(16)));
+    f32 world[4] __attribute__((aligned(16)));
+    BtlEffectResource *table;
+    f32 reach;
+    f32 margin;
+    f32 distance;
+    f32 scale;
+
+    if (index < 0) {
+        return;
+    }
+    if ((unit->status.stateFlags & 0x8000) != 0) {
+        return;
+    }
+    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+    if (table->nodes[index].triggerKind != 2) {
+        return;
+    }
+    scale = unit->scale;
+    reach = table->nodes[index].reachOffset;
+    reach *= scale;
+    margin = unit->reach;
+    margin *= scale;
+    if (reach <= scale * 100.0f || reach <= margin) {
+        return;
+    }
+    reach -= margin;
+    btlUnitGetBodyPosVU((u8 *)unit);
+    VU0_STORE_VF(vf10, bodyPos);
+    if (target != NULL) {
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, muzzlePos);
+        muzzlePos[1] = bodyPos[1];
+        VU0_LOAD_VF(vf10, muzzlePos);
+        VU0_LOAD_VF(vf11, bodyPos);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+    } else {
+        VU0_LOAD_VF(vf10, unit->orientation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_0037E110);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, bodyPos);
+    }
+    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, world);
+    VU0_LOAD_VF(vf10, unit->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
+    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_LOAD_VF(vf11, world);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, world);
+    if ((unit->status.flags & 2) != 0) {
+        world[1] = 0;
+        if (sdfLoadMapRecordPositionVector(unit->ext->owner->inner, 0) == 0) {
+            effObjFetchInnerPosition(unit->effectObject);
+        }
+        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        VU0_LOAD_VF(vf11, world);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        if (distance < 2.0f * (unit->unkBC * unit->scale)) {
+            effObjSetInnerPosition(unit->effectObject, (u128 *)world);
+            unit->status.stateFlags |= 0x8000;
+            btlBossDebugPrintf(D_003A3BB8, unit);
+        }
+    }
+}
 
 void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     u32 flags = (u32)unit->status.flags;

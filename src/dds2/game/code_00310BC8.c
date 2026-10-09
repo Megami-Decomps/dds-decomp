@@ -480,7 +480,7 @@ void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
     }
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 /* Return a callback-list header with its allocation descriptor and teardown userData. */

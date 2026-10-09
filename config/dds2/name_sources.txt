@@ -3365,7 +3365,7 @@
 0x00233E40	mdlFindViewerRecord	inferred	Traverses resource record relative links until the requested ID or count exhaustion.
 0x00233EC0	mdlGetFirstRecord	inferred	Returns the table's first record unless its first word is the 0xffff sentinel.
 0x00233ED8	mdlGetNextRecord	inferred	Follows the current record's relative next offset unless the next record is a sentinel.
-0x00233F48	mdlRecordMatchesId	inferred	Compares the first record word against a requested identifier.
+0x00233F48	mdlRecordHasKind	inferred	Checks whether a viewer record carries the requested record kind; all current callers test the track-poly kind.
 0x00234448	mdlEditMarkParametersWithPad	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00234448; Navigates a viewer mark-parameter cursor and edits mark indices, timing, blending, and color channels from pad input. [names_qp9.tsv]
 0x00234668	mdlAddBillboardPart	inferred	Adds a kind-zero model part backed by billCreateIndexed.
 0x00234720	mdlAppendObjectPart	inferred	Allocates object handler node, appends object part and increments list count. [names_reviewed7.tsv]
@@ -3403,6 +3403,7 @@
 0x00237440	mdlUpdateViewerNodeCursorTask	inferred	Viewer task processes loaded node cursor before drawing its overlay as in DDS1. [names_reviewed18.tsv]
 0x00237490	mdlUpdateViewerSettingsInput	inferred	confidence=high; src/dds2/game/code_00233660.c:func_00237490; Handles viewer option navigation, debug-graph toggles, background-color editing, numeric settings, and camera reset input. [names_qp9.tsv]
 0x002379E0	mdlRunViewerSettingsTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1677:func_002379E0; Updates settings input, draws associated viewer settings UI and returns zero.; twin=0x0021CE70, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00237A70	mdlGetSelectedRecord	inferred	Returns the record at the viewer's selected index across the shared and active-entry lists.
 0x00237B30	mdlUpdateViewerMarkEditorInput	inferred	U1
 0x002380D8	mdlRunViewerEffectEditorTask	inferred	confidence=high; matched-C; src/dds2/game/code_00233660.c:1697:func_002380D8; Runs effect-list input/editor and renderer; retail callee displays NO EFFECT fallback and selected effect parameters.; twin=0x0021D568, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00238100	mdlRequestViewerExitOnce	inferred	Sets viewer exit guard and releases viewer state only on first call. [names_reviewed7.tsv]

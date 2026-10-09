@@ -626,7 +626,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
         x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
         0xFEFFD0, NULL);
-    D_003805A8.append((SdfListHead *)&D_003805A8, list);
+    D_003805A8.append(&D_003805A8, list);
     return 1;
 }
 

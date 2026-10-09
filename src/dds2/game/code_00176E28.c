@@ -34,7 +34,6 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-extern void sdfQueueAssetRelease(s32 assetAddress);
 extern void *effParamTableGetBlock(void *table, s32 index);
 
 
@@ -415,7 +414,7 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -462,7 +461,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         sdfAppendPacket(list, func_00167A10(D_00451FF0));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_003B1308[work->drawMode]->append((SdfListHead *)D_003B1308[work->drawMode], list);
+        D_003B1308[work->drawMode]->append(D_003B1308[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
@@ -474,7 +473,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         packet[3] = 0xE;
         packet[5] = 0x42;
         sdfAppendPacket(stateList, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, stateList);
+        D_00380248.append(&D_00380248, stateList);
         packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -483,7 +482,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, list);
+        D_00380248.append(&D_00380248, list);
     }
 }
 
@@ -550,7 +549,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
 
 /* Release the asset and backing allocation; the header points into that block. */
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -592,7 +591,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
         sdfAppendPacket(packet, func_00167A10(D_00451FF0));
     }
     surface = D_003B1318[pool->drawMode];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Address three quadword positions for one triangle. */
@@ -638,7 +637,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
 
 /* Queue the asset before releasing the allocation containing this header. */
 void effReleaseRecordGroupResources(EffRecordPool *pool) {
-    sdfQueueAssetRelease((s32)pool->resource);
+    sdfQueueAssetRelease(pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -680,7 +679,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
         sdfAppendPacket(packet, func_00167A10(D_00451FF0));
     }
     surface = D_003B1378[pool->drawMode];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Address four quadword positions for one quad. */
@@ -746,7 +745,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         sdfAppendPacket(list, func_00167A10(D_00451FF0));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_003B1388[work->drawMode]->append((SdfListHead *)D_003B1388[work->drawMode], list);
+        D_003B1388[work->drawMode]->append(D_003B1388[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
@@ -758,7 +757,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         packet[3] = 0xE;
         packet[5] = 0x42;
         sdfAppendPacket(stateList, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, stateList);
+        D_00380248.append(&D_00380248, stateList);
         packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -767,7 +766,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        D_00380248.append((SdfListHead *)&D_00380248, list);
+        D_00380248.append(&D_00380248, list);
     }
 }
 

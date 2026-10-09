@@ -327,7 +327,7 @@ void func_0029AE88(EffModelOwner *owner) {
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
         surface = D_00325788[1][index];
-        surface->append((SdfListHead *)surface, list);
+        surface->append(surface, list);
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
@@ -348,7 +348,7 @@ void func_0029AE88(EffModelOwner *owner) {
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
         surface = D_00325788[1][index];
-        surface->append((SdfListHead *)surface, list);
+        surface->append(surface, list);
     }
 }
 
