@@ -116,7 +116,7 @@ extern void func_0020E380(u32);
 
 typedef struct EffectAssetLink {
     u8 *asset;
-    u32 object;
+    void *object;
     u8 pad_08[0x14];
 } EffectAssetLink;
 
@@ -8973,7 +8973,7 @@ u8 *effFindAssetData(FileJob *entry) {
     return NULL;
 }
 
-u32 effFindAssetObject(FileJob *entry) {
+void *effFindAssetObject(FileJob *entry) {
     FileJobPayload *requested = (FileJobPayload *)entry->id;
     u16 type = requested->type;
     u16 option = requested->option;
@@ -8993,7 +8993,7 @@ u32 effFindAssetObject(FileJob *entry) {
             }
         }
     }
-    return 0;
+    return NULL;
 }
 
 u32 func_002FCA40(void) {
@@ -10606,7 +10606,7 @@ u32 fileLoadEffectSlotA(void) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob((u8 *)resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10684,7 +10684,7 @@ u32 effQueueGeneratedFileJob(void) {
         resource->transferMode = 1;
         memcpy(D_00459E30, D_003F0DA8, 0x74);
         D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10727,7 +10727,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10786,7 +10786,7 @@ u32 effLoadFileSlotF2(void) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10829,7 +10829,7 @@ u32 effLoadMaterialFile(void) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10878,7 +10878,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        effQueuedFileObject = (s32)effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
