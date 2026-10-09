@@ -980,7 +980,6 @@ extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
 
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
-extern void mdlAddEntryFlagged(struct MdlCtx *, s32, s32);
 
 extern void fldResetCameraModelHandles(void);
 

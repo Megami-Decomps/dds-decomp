@@ -169,7 +169,7 @@ typedef struct SdfStreamFrameNode {
     u8 unk13;
     u8 audioMode;
     u8 loopMode;
-    u8 playbackMode;
+    u8 playbackCadenceStep;
     u8 playbackCadenceRemainder;
     u8 bufferIndex;
     u8 transferPacketIndex;
@@ -185,7 +185,7 @@ typedef struct SdfStreamFrameNode {
     u16 height;
     u32 cycleLength;
     u32 tickCount;
-    s32 unk48; /* Movie progress reader; no producer has been located. */
+    s32 playbackFrameIndex;
     void *inputDmaChain;
     u8 headerReady;
     u8 done;
@@ -456,6 +456,23 @@ typedef struct SdfNode {
     u32 unkC;
 } SdfNode;
 
+/* Optional packed or five-float state block owned by an SdfAsset. */
+typedef union SdfSubParam {
+    struct {
+        u64 unk0;
+        u64 unk8;
+        u32 unk10;
+        u32 unk14;
+    } packed;
+    struct {
+        f32 values[5];
+        u32 unk14;
+    } scalar;
+} SdfSubParam;
+
+typedef char SdfSubParam_size_must_be_0x18[
+    (sizeof(SdfSubParam) == 0x18) ? 1 : -1];
+
 /* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
 typedef struct SdfAsset {
     u8 pad00[6];
@@ -464,7 +481,7 @@ typedef struct SdfAsset {
     void *entries[2];
     u32 unk10;
     u32 unk14;
-    u32 unk18;
+    u32 secondaryColor; /* 0x18 */
     f32 unk1C;
     u32 unk20;
     u32 unk24;
@@ -472,16 +489,24 @@ typedef struct SdfAsset {
     SdfTex *texture;
     SdfTex *secondaryTexture; /* 0x30 */
     u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
-    void *third;
-    void *fourth;
-    f32 unk40;
-    f32 unk44;
+    SdfSubParam *primarySubParam; /* 0x38 */
+    SdfSubParam *secondarySubParam; /* 0x3C */
+    f32 scalarPairFirst; /* 0x40 */
+    f32 scalarPairSecond; /* 0x44 */
 } SdfAsset;
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(SdfAsset) == 0x48) ? 1 : -1];
 typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
     ((u32)&((SdfAsset *)0)->dirtyFlags == 0x06) ? 1 : -1];
+typedef char SdfAsset_primarySubParam_offset_must_be_0x38[
+    ((u32)&((SdfAsset *)0)->primarySubParam == 0x38) ? 1 : -1];
+typedef char SdfAsset_secondarySubParam_offset_must_be_0x3C[
+    ((u32)&((SdfAsset *)0)->secondarySubParam == 0x3C) ? 1 : -1];
+typedef char SdfAsset_scalarPairFirst_offset_must_be_0x40[
+    ((u32)&((SdfAsset *)0)->scalarPairFirst == 0x40) ? 1 : -1];
+typedef char SdfAsset_scalarPairSecond_offset_must_be_0x44[
+    ((u32)&((SdfAsset *)0)->scalarPairSecond == 0x44) ? 1 : -1];
 
 /* Draw entries store six transform floats and expose the same bytes as three qwords. */
 typedef union SdfDrawTransform {

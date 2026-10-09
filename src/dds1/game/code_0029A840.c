@@ -86,8 +86,6 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern u16 mdlGetContextResourceGroup(MdlCtx *);
 extern u16 mdlGetContextResourceId(MdlCtx *);
 

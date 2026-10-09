@@ -274,7 +274,6 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
-extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
 
 extern u8 *btlFindUnitByModeClear(s32);
 
@@ -306,7 +305,6 @@ extern s32 abs(s32);
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *);
 
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
 
 extern void btlClearRuntimeFlag2000(void);
@@ -665,7 +663,7 @@ s32 btlCommandPlayUnitMotion(void) {
         if (index < 0x1D) {
             btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
         } else {
-            mdlAddEntryPlainEx((s32)unit->ext->owner, 0, index, 0.0f, 0.0f);
+            mdlAddEntryPlainEx(unit->ext->owner, 0, index, 0.0f, 0.0f);
         }
     }
     return 1;

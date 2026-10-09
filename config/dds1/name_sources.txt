@@ -6466,9 +6466,10 @@
 0x002DAA68	sdfQueueAssetRelease	inferred	Enqueues a non-null asset in the queue whose registered completion callback is sdfAssetRelease.
 0x002DAAA0	sdfInitNodeHeaderFromWords	inferred	Writes a 16-byte SdfNode header with type 0xA and payload from the third word at the selected source offset, returning the following payload address.
 0x002DAAE0	sdfAssetCopyTextureState	inferred	Copies resource and texture state into a selected asset entry
+0x002DAB80	sdfBuildSubParameterTransform	inferred	Builds the 24-byte scalar-block transform from its five float parameters, or writes the identity transform when the block is absent.
 0x002DAC68	sdfCopyAssetPrimarySubParameter	inferred	Copies the asset primary subparameter into its draw entry. [names_reviewed8.tsv]
 0x002DAC88	sdfApplyAssetSecondaryEntry	inferred	Copies secondary color, mode, texture and subparameter into the draw entry. [names_reviewed8.tsv]
-0x002DAD18	sdfAssetCopyPairToTextParam	inferred	Copies two adjacent asset values to text parameters at +0x28 and +0x2C; twin DDS2 00333BC8.
+0x002DAD18	sdfCopyAssetScalarPairToDrawEntry	inferred	Copies the asset scalar pair at +0x40/+0x44 into its draw entry scalar slots at +0x28/+0x2C.
 0x002DAD30	sdfAssetApplyEntryChanges	inferred	Applies flag-selected changes to one of two asset entries
 0x002DAE00	sdfApplyAssetEntryChangesWithForcedTexture	inferred	Updates flagged asset entry fields and forces texture state when requested. [names_reviewed8.tsv]
 0x002DAEE8	sdfAssetListParse	inferred	Allocates a list and parses successive serialized asset entries

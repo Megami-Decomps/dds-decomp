@@ -2684,7 +2684,7 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
 }
 
 /* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
-s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
+void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfAllocSizeClassBlock(0x150);
     s32 tailBytes = 0;
 
@@ -2694,10 +2694,10 @@ s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     clone->packetCount = 1;
     clone->packetTag = 0;
     func_00153740((s32)clone);
-    return (s32)clone;
+    return clone;
 }
 
-void effFreeSingleParticleTemplate(u32 effect) {
+void effFreeSingleParticleTemplate(void *effect) {
     effDestroyResources();
     sdfReleaseChipBlock(effect);
 }
@@ -3084,25 +3084,25 @@ void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
 }
 
 /* Clone the disc prefix/tail plus a separate 16-byte-per-packet auxiliary allocation. */
-s32 effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
-    s32 clone = (s32)sdfAllocSizeClassBlock(0x200);
+EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
+    EffTemplatePacketList *clone = sdfAllocSizeClassBlock(0x200);
+    s32 auxAllocationHandle;
     s32 tailBytes = 0xB0;
 
-    memset((void *)clone, 0, 0x200);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    ((EffTemplatePacketList *)clone)->auxiliaryAllocation =
-        (u32)sdfAllocGeneralBlock(((EffTemplatePacketList *)clone)->packetCount << 4);
-    ((EffTemplatePacketList *)clone)->auxiliaryData =
-        (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)clone)->auxiliaryAllocation));
-    func_00153740(clone);
+    memset(clone, 0, 0x200);
+    memcpy(clone, source, source->templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
+    auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->packetCount << 4);
+    clone->auxiliaryAllocation = auxAllocationHandle;
+    clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
+    func_00153740((s32)clone);
     effResetDiscAuxPacketAges(clone);
     return clone;
 }
 
-void effFreeDiscAuxTemplate(u32 effect) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffTemplatePacketList *)effect)->auxiliaryAllocation));
-    effDestroyResources(effect);
+void effFreeDiscAuxTemplate(EffTemplatePacketList *effect) {
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->auxiliaryAllocation));
+    effDestroyResources((s32)effect);
     sdfReleaseChipBlock(effect);
 }
 

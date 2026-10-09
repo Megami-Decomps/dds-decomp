@@ -8,7 +8,7 @@ typedef struct SoundFormat {
     u8 hasAudio;
     u8 stereo;
     u8 loopMode;
-    u8 playbackMode;
+    u8 playbackCadenceStep;
 } SoundFormat;
 typedef SoundFormat SdfStreamParams;
 

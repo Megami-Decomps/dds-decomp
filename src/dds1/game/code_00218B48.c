@@ -1171,7 +1171,6 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
 
 extern MdlCtx *func_00217680(s16, s16);
 
-extern void mdlAddEntryFlagged(void *, s32, s32);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlCtx *resource = func_00217680(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
@@ -1311,12 +1310,6 @@ void mdlDrawViewerModelAndMotionSummary(void) {
     }
     sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(formatted));
 }
-
-extern s32 mdlHasNode(s32 resource, s32 id);
-
-extern void mdlAddEntryFlaggedEx(s32 resource, s32 id, s32, f32, f32);
-
-extern void mdlAddEntryPlainEx(s32 resource, s32 id, s32, f32, f32);
 
 void mdlAddViewEntryFlagged(void) {
     f32 low;
