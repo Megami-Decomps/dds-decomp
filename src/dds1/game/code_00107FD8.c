@@ -1442,16 +1442,6 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
 
 INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010B1B0);
 
-typedef struct SdfChipStats {
-    u32 totalBytes;
-    u32 freeBytes;
-    u32 blockCount;
-    u32 emptyBlocks;
-    u32 partialBlocks;
-    u32 usedCells[7];
-} SdfChipStats;
-
-extern void sdfGetChipHeapStats(SdfChipStats *);
 extern void func_0010B1B0(void *, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
 extern char D_003BA980[];
@@ -1460,18 +1450,18 @@ extern char D_003BA988[];
 /* Format general/chip free-memory statistics into the supplied draw surface.
    Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
 void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
-    s32 generalHeapStats[6];
-    SdfChipStats chipHeapStats;
+    SdfGeneralHeapStats generalHeapStats;
+    SdfChipHeapStats chipHeapStats;
     char statusText[100];
     void *packetList;
 
-    sdfGetGeneralHeapStats(generalHeapStats);
-    D_003BA97C = generalHeapStats[SDF_HEAP_STAT_TOTAL_BYTES];
+    sdfGetGeneralHeapStats(&generalHeapStats);
+    D_003BA97C = generalHeapStats.totalBytes;
     sdfGetChipHeapStats(&chipHeapStats);
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     func_0010B1B0(packetList, 0x86C0, 0x79C0);
-    func_003014F0(statusText, D_003BA980, generalHeapStats[SDF_HEAP_STAT_FREE_BYTES]);
+    func_003014F0(statusText, D_003BA980, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
     func_003014F0(statusText, D_003BA988, chipHeapStats.freeBytes);
@@ -1496,7 +1486,7 @@ extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
 s32 func_0010B590(KwlnTask *task) {
-    s32 heapStats[6];
+    SdfGeneralHeapStats heapStats;
     s32 heapRatio;
     SdfListHead *list;
     void *packet;
@@ -1504,9 +1494,9 @@ s32 func_0010B590(KwlnTask *task) {
     s32 textCount;
     s32 gsCount;
 
-    sdfGetGeneralHeapStats(heapStats);
+    sdfGetGeneralHeapStats(&heapStats);
     /* The unused heap ratio retains the native zero-divisor check. */
-    heapRatio = heapStats[SDF_HEAP_STAT_FREE_BYTES] / heapStats[SDF_HEAP_STAT_TOTAL_BYTES];
+    heapRatio = heapStats.freeBytes / heapStats.totalBytes;
     list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     packet = (void *)sdfAllocPacketAligned(0x40);

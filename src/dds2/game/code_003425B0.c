@@ -702,36 +702,26 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpHeader);
 INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpRowFormat);
 
 void sndPrintMemoryInfo(void) {
-    s32 info[6];
-    sdfGetGeneralHeapStats(info);
+    SdfGeneralHeapStats info;
+    sdfGetGeneralHeapStats(&info);
     sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
-                    info[SDF_HEAP_STAT_TOTAL_BYTES], info[SDF_HEAP_STAT_FREE_BYTES],
-                    info[SDF_HEAP_STAT_LARGEST_FREE], info[SDF_HEAP_STAT_SMALLEST_FREE],
-                    info[SDF_HEAP_STAT_BLOCK_COUNT], info[SDF_HEAP_STAT_FREE_BLOCK_COUNT]);
+                    info.totalBytes, info.freeBytes,
+                    info.largestFreeBytes, info.smallestFreeBytes,
+                    info.blockCount, info.freeBlockCount);
 }
 
-typedef struct SdfChipStats {
-    u32 totalBytes;
-    u32 freeBytes;
-    u32 blockCount;
-    u32 emptyBlocks;
-    u32 partialBlocks;
-    u32 usedCells[7];
-} SdfChipStats;
-
-extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_00438C08[];
 
 /* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
 void sdfPrintChipHeapInfo(void) {
-    SdfChipStats stats;
+    SdfChipHeapStats stats;
     u32 limit = 16;
     s32 i = 0;
     u32 first;
     u32 *used;
 
     sdfGetChipHeapStats(&stats);
-    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlocks, stats.partialBlocks);
+    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlockCount, stats.partialBlockCount);
     sdfPrintFormattedDevMessage("\n several size alloc count...\n");
     first = 0;
     used = stats.usedCells;
