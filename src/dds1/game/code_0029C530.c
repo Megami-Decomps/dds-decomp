@@ -7913,7 +7913,6 @@ typedef struct EffCameraCreateRequest {
     f32 position[3];
 } EffCameraCreateRequest;
 
-typedef struct FileQueue FileQueue;
 extern void fileQueueInitTransform(void *);
 extern FileJob *fileAppendJob(FileQueue *, u32);
 extern s32 fileQueueCountLinkedJobs(FileQueue *);
@@ -7958,7 +7957,6 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6778);
 
 extern u32 D_0038EA6C[];
 
-extern s32 fileQueueCreate(void);
 
 u32 effReinitializeFileQueue(void) {
     if (effTemporaryFileJob != 0) {
@@ -7983,7 +7981,6 @@ u32 effReinitializeFileQueue(void) {
 
 extern u32 D_0038EB3C[];
 
-extern void *fileQueueGetAt(s32, s32);
 
 extern void fileQueueRemoveAndDestroyJob(s32, void *);
 

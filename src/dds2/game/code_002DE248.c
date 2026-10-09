@@ -41,7 +41,6 @@
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
 extern void func_00200930(f32 *, f32 *, s32);
-typedef struct FileQueue FileQueue;
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -9427,7 +9426,6 @@ u32 effReinitializeFileQueue(void) {
 
 extern u32 D_003FFA78[];
 
-extern u8 *fileQueueGetAt(u32, u32);
 
 extern u32 D_003FF22C[11];
 
