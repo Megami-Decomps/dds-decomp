@@ -33,7 +33,6 @@ typedef struct {
 extern Entry270 *D_003BAA20;
 
 extern void *dds3GetWorldObject(void);
-extern void effObjSetInnerThirdVec(void *object, void *vector);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
@@ -74,7 +73,6 @@ extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
-extern void effObjSetInnerSecondVec(void *, void *);
 
 extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
@@ -90,7 +88,7 @@ extern u8 D_003AC480[];
 
 extern void *memset(void *dst, s32 c, u32 n);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
-extern void effObjSetInnerFirstVec(void *object, void *vector);
+
 extern f32 bfWaitReadArgFloat(s32 idx);
 
 /* World object views used by the model-parameter opcodes. */
@@ -609,7 +607,7 @@ u32 evtSetWorldUnitFirstVector(void) {
     v[0] = bfWaitReadArgFloat(1);
     v[1] = bfWaitReadArgFloat(2);
     v[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerFirstVec(unit, v);
+    effObjSetInnerFirstVec(unit, (u128 *)v);
     return 1;
 }
 
@@ -638,7 +636,7 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerSecondVec(unit, v);
+    effObjSetInnerSecondVec(unit, (u128 *)v);
     return 1;
 }
 
@@ -659,7 +657,7 @@ u32 evtSetWorldUnitThirdVector(void) {
     v[0] = bfWaitReadArgFloat(1);
     v[1] = bfWaitReadArgFloat(2);
     v[2] = bfWaitReadArgFloat(3);
-    effObjSetInnerThirdVec(unit, v);
+    effObjSetInnerThirdVec(unit, (u128 *)v);
     return 1;
 }
 
@@ -1007,8 +1005,7 @@ f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *object);
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 
@@ -1543,7 +1540,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerSecondVec(obj, v);
+        effObjSetInnerSecondVec(obj, (u128 *)v);
     }
     return 1;
 }
@@ -1580,4 +1577,3 @@ u32 evtOpCopyModelTransformFromSource(void) {
 INCLUDE_SDATA(const s32, "game/code_00222AC0", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "game/code_00222AC0", D_003BBDB0);
-

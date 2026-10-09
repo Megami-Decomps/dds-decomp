@@ -8,8 +8,7 @@
 extern s32 effObjInnerCreate(EffWorldNode *object);
 extern void dds3EnsureSlotData();
 
-extern void effObjSetInnerFirstVec();
-extern void effObjSetInnerSecondVec();
+
 extern void effObjInnerVecBackup();
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */

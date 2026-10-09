@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "mdl_motion_api.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
@@ -94,10 +95,6 @@ extern u8 *btlCreateStiffenDamageShakeTask(u8 *, f32);
 extern void btlSetUnitPosition(BtlUnit *, void *);
 
 extern void btlSetUnitRotation(BtlUnit *, void *);
-
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 
 extern void effMiscQuatMultiplyVU(void);
 
@@ -1719,8 +1716,6 @@ s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit) {
     }
     return unit->displaySpecies;
 }
-
-extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
 
 void func_00206450(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();

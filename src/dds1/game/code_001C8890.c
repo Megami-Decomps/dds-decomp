@@ -4344,8 +4344,6 @@ u32 btlIsUnitModelStateFive(BtlUnit *object) {
     return object->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 void btlSetUnitPosition(BtlUnit *object, void *position) {
     f32 world[4] __attribute__((aligned(16)));
     s32 context;
@@ -4489,8 +4487,6 @@ extern u8 D_003A3B70[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
 void btlSetUnitRotation(BtlUnit *object, void *rotation) {
     u8 vector[16];
     if ((object->status.stateFlags & 0x100) != 0) {
@@ -4539,11 +4535,6 @@ extern void mdlReleaseInnerResourceHandle(MdlCtx *, s32, f32);
 void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xffffff) | 0x80000000, scalar);
 }
-
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
-
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
@@ -5998,14 +5989,14 @@ u32 func_001D9C28(BtlPositionEffectArgs *task) {
         if (task->amount <= 0.01f) {
             func_001D6300((u8 *)task->unit, position);
             position[2] += task->unit->zOffset;
-            effObjSetInnerFirstVec(task->unit->effectObject, position);
+            effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     func_001D6300((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->zOffset;
-    effObjSetInnerFirstVec(task->unit->effectObject, position);
+    effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
 }
@@ -15012,4 +15003,3 @@ INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB6B0);
-

@@ -20,12 +20,11 @@ extern u8 kwlnDefaultColorVector[];
 extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
 extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
-extern void effObjSetInnerFirstVec(void *obj, void *vec);
-extern void effObjSetInnerSecondVec(void *obj, void *vec);
+
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
-extern void effObjAddInnerFirstVec(void *obj, void *vec);
+
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 func_00222498(EvtUnit *unit, f32 *dir, f32 scale);
 extern f32 evtGetValueScaleFactor(s32 path);
@@ -949,7 +948,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     scale = unit->motionParameter * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, v);
-    effObjAddInnerFirstVec(obj, v);
+    effObjAddInnerFirstVec(obj, (u128 *)v);
     return 1;
 }
 
@@ -1006,14 +1005,14 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
     dds3InterpolatePathVectorVU(unit->pathHandle);
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerFirstVec(unit->effObj, v);
+    effObjSetInnerFirstVec(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PreparePathVectorPair(unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerSecondVec(unit->effObj, v);
+        effObjSetInnerSecondVec(unit->effObj, (u128 *)v);
     }
     return 1;
 }

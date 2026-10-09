@@ -1,5 +1,6 @@
 #include "kwln_sprite.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_unit.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -142,7 +143,6 @@ extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 extern void effMiscQuaternionToMatrixVU(void);
-extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
 
 extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
