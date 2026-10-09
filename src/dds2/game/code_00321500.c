@@ -452,14 +452,9 @@ MenuRegistryRecord *mnuResolveTaggedRegistryRecord(MenuWorkEntry *work) {
     return &registryTable->recordBase[work->recordIndex];
 }
 
-typedef struct MenuByteRecordList {
-    s32 count;         /* 0x00 */
-    u8 *records;       /* 0x04 */
-} MenuByteRecordList;
-
-u8 *mnuFindMarkedShortListRecord(MenuByteRecordList *list) {
+MenuShortRecord *mnuFindMarkedShortListRecord(MenuShortRecordList *list) {
     s32 recordIndex;
-    u8 *record;
+    MenuShortRecord *record;
 
     if (list != NULL) {
         record = list->records;
@@ -467,11 +462,11 @@ u8 *mnuFindMarkedShortListRecord(MenuByteRecordList *list) {
             return NULL;
         }
         for (recordIndex = 0; recordIndex < list->count; recordIndex++) {
-            if ((*record & MENU_REPEAT_DIRECTIVE_KIND_MASK) ==
+            if ((record->kind & MENU_REPEAT_DIRECTIVE_KIND_MASK) ==
                 MENU_REPEAT_DIRECTIVE_KIND_TAG) {
                 return record;
             }
-            record += 8;
+            record++;
         }
     }
     return NULL;
@@ -579,11 +574,11 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 
-void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
+void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
     MenuShortRecord *record;
 
     entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_NONE;
-    record = (MenuShortRecord *)mnuFindMarkedShortListRecord(list);
+    record = mnuFindMarkedShortListRecord(list);
     if (record != NULL) {
         switch (record->kind) {
         case MENU_REPEAT_DIRECTIVE_KIND_REPEAT:
