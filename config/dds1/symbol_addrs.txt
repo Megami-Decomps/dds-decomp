@@ -6863,6 +6863,7 @@ effActiveInstanceOperations = 0x0037E8A0;
 effClassWorkOperations = 0x0037EAD0;
 effClassResourceWorkOperations = 0x0037EC50;
 effBlockResourceOperations = 0x0037ED08;
+effModelBlockOperations = 0x0037ED90;
 effModelResourceOperations = 0x0037EE38;
 effMappingState = 0x0038F898;
 fldLocalMapFirstCameraVector = 0x003900A0;

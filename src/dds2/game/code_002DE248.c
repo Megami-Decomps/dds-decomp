@@ -569,7 +569,7 @@ extern EffClassOps effClassWorkOperations[];
 extern EffResourceOps effBlockResourceOperations[];
 
 
-extern EffResourceOps D_003E9E60[];
+extern EffResourceOps effModelBlockOperations[];
 
 extern EffResourceOps D_003EA018[];
 
@@ -6034,7 +6034,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
 
 EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
-    u32 size = D_003E9E60[kind].payloadSize;
+    u32 size = effModelBlockOperations[kind].payloadSize;
     EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
@@ -6049,8 +6049,8 @@ EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
 
 EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     EffClassWork *work = effAllocateBlockWithModel(kind, source);
-    work->resource = (u32)D_003E9E60[kind].createResource(source);
-    D_003E9E60[kind].initialize(work);
+    work->resource = (u32)effModelBlockOperations[kind].createResource(source);
+    effModelBlockOperations[kind].initialize(work);
     return work;
 }
 
@@ -6062,34 +6062,34 @@ void effResourceInstanceCreateFromFile(s32 work) {
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    D_003E9E60[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource();
     sdfReleaseChipBlock(work);
 }
 
 EffClassWork *effRecreateActiveByClass(EffClassWork *obj) {
     EffClassWork *work = effAllocateBlockWithModel((u16)obj->kind, obj->payload);
-    void *resource = D_003E9E60[obj->kind].cloneResource(obj);
+    void *resource = effModelBlockOperations[obj->kind].cloneResource(obj);
     s32 kind = obj->kind;
 
     work->resource = (u32)resource;
-    D_003E9E60[kind].initialize(work);
+    effModelBlockOperations[kind].initialize(work);
     return work;
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    D_003E9E60[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize();
     work->frame = 0;
 }
 
 void effAdvanceModelBlockFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9E60[work->kind].update();
+        effModelBlockOperations[work->kind].update();
         work->frame++;
     }
 }
 
 void effDrawModelBlock(EffClassWork *work) {
-    D_003E9E60[work->kind].draw((void *)work);
+    effModelBlockOperations[work->kind].draw((void *)work);
 }
 
 void effUpdateAndDrawModelBlock(EffClassWork *work) {

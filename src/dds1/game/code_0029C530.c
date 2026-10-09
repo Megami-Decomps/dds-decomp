@@ -313,7 +313,7 @@ extern EffClassOps effClassResourceWorkOperations[];
 
 extern EffResourceOps effBlockResourceOperations[];
 
-extern EffResourceOps D_0037ED90[];
+extern EffResourceOps effModelBlockOperations[];
 
 extern EffResourceOps D_0037EEE0[];
 
@@ -5746,7 +5746,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
 
 EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
-    u32 size = D_0037ED90[kind].payloadSize;
+    u32 size = effModelBlockOperations[kind].payloadSize;
     EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
     effect->payload = (u8 *)effect + headerSize;
     effect->color = 0x80808080;
@@ -5763,8 +5763,8 @@ extern EffClassWork *effAllocateBlockWithModel(u16, void *);
 
 EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     EffClassWork *effect = effAllocateBlockWithModel(kind, source);
-    effect->resource = D_0037ED90[kind].createResource(source);
-    D_0037ED90[kind].initialize(effect);
+    effect->resource = effModelBlockOperations[kind].createResource(source);
+    effModelBlockOperations[kind].initialize(effect);
     return effect;
 }
 
@@ -5776,31 +5776,31 @@ void effResourceInstanceCreateFromFile(s32 request) {
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    D_0037ED90[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource();
     sdfReleaseChipBlock(work);
 }
 
 EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
     EffClassWork *effect = effAllocateBlockWithModel(work->kind, work->payload);
-    u32 resource = D_0037ED90[work->kind].cloneResource(work);
+    u32 resource = effModelBlockOperations[work->kind].cloneResource(work);
     s32 kind = work->kind;
     effect->resource = resource;
-    D_0037ED90[kind].initialize(effect);
+    effModelBlockOperations[kind].initialize(effect);
     return effect;
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    D_0037ED90[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize();
     work->frame = 0;
 }
 
 void effAdvanceDispatchCounter(EffClassWork *work) {
-    D_0037ED90[work->kind].update(work);
+    effModelBlockOperations[work->kind].update(work);
     work->frame++;
 }
 
 void effDrawModelBlock(EffClassWork *work) {
-    D_0037ED90[work->kind].draw(work);
+    effModelBlockOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawModelBlock(EffClassWork *work) {
