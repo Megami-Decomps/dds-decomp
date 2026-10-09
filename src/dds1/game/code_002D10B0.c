@@ -25,11 +25,7 @@ enum {
 #define SDF_MIN_FILTER_SHIFT 6
 #define SDF_UPLOAD_CHIP_MAX_BYTES 0x400
 
-enum {
-    SDF_UPLOAD_BORROWED = 0,
-    SDF_UPLOAD_GENERAL_HEAP = 1,
-    SDF_UPLOAD_CHIP_HEAP = 2
-};
+
 
 
 
