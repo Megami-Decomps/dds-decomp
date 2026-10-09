@@ -6184,7 +6184,7 @@
 0x00334510	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap; paired with DDS1 0x002DB660.
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
-0x00334670	sdfSetMotionOutputValue	inferred	Writes the supplied word into the motion output at offset 0x08.
+0x00334670	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x00334678	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS1 0x002DB7C8.
 0x00334788	sdfInterpolateMotionKeys	inferred	Interpolates two float key values according to the supplied weight.
 0x003347B0	sdfMotionBlendVectorKeys	inferred	confidence=high; matched-C; src/dds2/sdf/sdfMotion.c:367:func_003347B0; Interpolates the two bracketing vec3 key pointers by their stored key weight, leaving the vector result in vf10.; source=fresh-R_Names31-today [names_qp11.tsv]
