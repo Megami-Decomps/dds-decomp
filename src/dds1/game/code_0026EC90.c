@@ -220,8 +220,8 @@ void func_0026F918(void) {
 }
 
 s32 mnuStaffImageProc(void) {
-    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
-    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
+    mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, (s32)mnuMovieWork->spriteSet, 0x10, 0, 0x27);
+    mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, (s32)mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
     func_0026F230(0x53);
     func_0026F918();
     return 0;
@@ -242,7 +242,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieWork->spriteSet);
+    effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
