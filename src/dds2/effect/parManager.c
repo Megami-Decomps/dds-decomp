@@ -132,7 +132,7 @@ typedef struct {
 
 extern s32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 extern u8 effEmitterDelayRandomState[];
 
 /* Initialize one 64-byte particle record and its kind-specific state. Negative
@@ -151,16 +151,16 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
     initialRadius = effect->initialRadius;
     jitterFactor = effect->initialRadiusJitter;
-    direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    direction[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-    direction[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+    direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, direction);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, direction);
     /* Each component gets a separate jitter sample, not one shared radius draw. */
-    packet->radialOffset[0] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
-    packet->radialOffset[1] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
-    packet->radialOffset[2] = initialRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
+    packet->radialOffset[0] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[0];
+    packet->radialOffset[1] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[1];
+    packet->radialOffset[2] = initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) * direction[2];
     VU0_LOAD_VF(vf10, packet->radialOffset);
     VU0_LENGTH_VF10(initialRadiusLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -171,9 +171,9 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     packet->position[1] = packet->radialOffset[1] + effect->head.origin[1];
     packet->position[2] = packet->radialOffset[2] + effect->head.origin[2];
     if (effect->axisMode == PAR_BURST_RANDOM_AXIS) {
-        direction[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-        direction[1] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-        direction[2] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
+        direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, direction);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
@@ -186,15 +186,15 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
         packet->rotationAxis[2] = 0;
     }
     jitterFactor = effect->targetRadiusJitter;
-    packet->radiusStep = (effect->targetRadius * (effMiscRandUnitFloat(D_003AA868) * jitterFactor +
+    packet->radiusStep = (effect->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor +
                                     (1.0f - jitterFactor)) - initialRadiusLength) /
                    effect->head.lifetimeFrames;
     jitterFactor = effect->head.billboardScaleJitter;
-    packet->billboardScale = effect->head.billboardScale * (effMiscRandUnitFloat(D_003AA868) * jitterFactor +
+    packet->billboardScale = effect->head.billboardScale * (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor +
                                          (1.0f - jitterFactor));
     jitterFactor = effect->head.initialPhaseJitter;
     if (jitterFactor != 0) {
-        packet->initialPhaseRadians = (effMiscRandUnitFloat(D_003AA868) * jitterFactor + (1.0f - jitterFactor)) *
+        packet->initialPhaseRadians = (effMiscRandUnitFloat(effDefaultRandomState) * jitterFactor + (1.0f - jitterFactor)) *
                        (3.14159265f * 2.0f);
     } else {
         packet->initialPhaseRadians = 0;

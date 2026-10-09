@@ -1785,12 +1785,12 @@ extern void effManagerUpdateAndDispatch(void);
 
 extern void effManagerInitializeSubsystems(void);
 
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 
 extern char D_004363F8[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock(D_003AA868);
+    effMiscSeedRandomFromClock(effDefaultRandomState);
     effLoadCommonTexturesAndResetRenderFlags();
     effInitializeBillResourceOwners();
     parSysReset();

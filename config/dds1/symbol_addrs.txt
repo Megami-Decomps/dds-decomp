@@ -6815,6 +6815,7 @@ sceGsExecStoreImage = 0x002F0C00; // type:func
 sceSdRemoteInit = 0x002F5850; // type:func
 litodp = 0x00315A28; // type:func
 effSharedRandomState = 0x00324550;
+effDefaultRandomState = 0x0034DF38;
 sdfSceneProjectionParameters = 0x003245E0;
 sdfProjectionMatrix = 0x00324610;
 sdfViewEyeVector = 0x00324680;

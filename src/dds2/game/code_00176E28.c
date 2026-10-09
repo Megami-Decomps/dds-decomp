@@ -81,7 +81,7 @@ extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
 extern u32 effMiscRand(void *state);
 
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 extern s32 effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_003B12B0[];
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
@@ -124,7 +124,7 @@ EffRingWork *source;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].age = -(effMiscRand(D_003AA868) % spread);
+        ring->vertices[i].age = -(effMiscRand(effDefaultRandomState) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -341,7 +341,7 @@ void func_00177408(EffRingWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand(D_003AA868) % randomRange);
+                part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashWriteRingColorSlots(work, index, color);
@@ -909,7 +909,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     }
     segments = work->params.radialSegments;
     for (i = 0; i < count; i++, particle++) {
-        particle->age = ageOffset - effMiscRand(D_003AA868) % delaySpread;
+        particle->age = ageOffset - effMiscRand(effDefaultRandomState) % delaySpread;
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }
