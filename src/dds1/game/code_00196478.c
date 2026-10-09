@@ -331,8 +331,8 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
-            frFontSetFlagAndMeasureGlyphs(stream->glyphChain, D_003BB160);
-            frFontStoreShiftedContextValue(stream->glyphChain, stream->z);
+            frFontSetSpacingAndMeasureGlyphs(stream->glyphChain, D_003BB160);
+            frFontStoreShiftedRenderValue(stream->glyphChain, stream->z);
         }
         bytes = stream->encodedText;
     }
@@ -447,11 +447,11 @@ FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32
     frFontAddSharedGlyphFlags(0x10);
     frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetSpacingAndMeasureGlyphs(glyph, measureFlag);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
-    frFontSetChainFlag(glyph, 5);
+    frFontSetChildChainFirstOption(glyph, 5);
     return glyph;
 }
 
@@ -506,10 +506,10 @@ void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
 
     glyph = frFontAppendTextToGlyphChain(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
-    frFontSetFlagAndMeasureGlyphs(glyph, -4);
+    frFontSetSpacingAndMeasureGlyphs(glyph, -4);
     frFontLinkGlyph(parent, glyph, 0);
 }
 
@@ -543,9 +543,9 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
                 glyphData[2] = 0;
             }
             glyph = frFontAppendTextToGlyphChain(glyphData, glyphMode, 0, 0, 0);
-            frFontStoreShiftedContextValue(glyph, depth << 4);
+            frFontStoreShiftedRenderValue(glyph, depth << 4);
             frFontSetChildColors(glyph, colors);
-            frFontSetFlagAndMeasureGlyphs(glyph, 3);
+            frFontSetSpacingAndMeasureGlyphs(glyph, 3);
             chain = frFontLinkGlyphAfterPrevious(chain, glyph);
             if (position == 0) {
                 glyph->x = x;
@@ -572,7 +572,7 @@ FrFontGlyph *parent;
 {
     FrFontGlyph *handle = itfAppendTextGlyphChain(x, y, depth, colors, text, 1, 0, parent);
 
-    frFontSetFlagAndMeasureGlyphs(handle, 3);
+    frFontSetSpacingAndMeasureGlyphs(handle, 3);
     return handle;
 }
 
@@ -613,8 +613,8 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
     glyph = frFontAppendTextToGlyphChain(buffer, 1, 0, 0, 0);
     frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return frFontLinkGlyph(parent, glyph, 0);
 }
@@ -625,10 +625,10 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 2, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs(glyph, -1);
+    frFontSetSpacingAndMeasureGlyphs(glyph, -1);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -640,8 +640,8 @@ FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 3, 0, 0, glyph);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -652,10 +652,10 @@ FrFontGlyph *func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 3, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs(glyph, -2);
+    frFontSetSpacingAndMeasureGlyphs(glyph, -2);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     return glyph;
 }
@@ -667,9 +667,9 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 
     glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs(glyph, 3);
-    frFontSetContextPair(glyph, x, y);
-    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetSpacingAndMeasureGlyphs(glyph, 3);
+    frFontSetGlyphPosition(glyph, x, y);
+    frFontStoreShiftedRenderValue(glyph, depth << 4);
     frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }

@@ -452,9 +452,9 @@ void frFontEnableContextMode(FrFontGlyph *glyph) {
     frFontSetContextEncodedByte(glyph, FR_FONT_CONTEXT_ENABLE_VALUE);
 }
 
-/* Store the requested flag byte and refresh the cached child-chain advance. */
-void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag) {
-    glyph->glyphCodeOrContext.byteRoles.spacing = requestedFlag;
+/* Store the signed spacing byte and refresh the cached child-chain advance. */
+void frFontSetSpacingAndMeasureGlyphs(FrFontGlyph *glyph, s32 spacing) {
+    glyph->glyphCodeOrContext.byteRoles.spacing = spacing;
     glyph->advance = frFontMeasureGlyphChain(glyph);
 }
 
@@ -477,23 +477,23 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cell
 }
 
 /* Store the glyph position without scaling. */
-void frFontSetContextPair(FrFontGlyph *glyph, u32 first, u32 second) {
-    glyph->x = first;
-    glyph->y = second;
+void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y) {
+    glyph->x = x;
+    glyph->y = y;
 }
 
 /* Store the glyph render value in sixteenths. */
-void frFontStoreShiftedContextValue(FrFontGlyph *glyph, u32 unshiftedValue) {
+void frFontStoreShiftedRenderValue(FrFontGlyph *glyph, u32 unshiftedValue) {
     glyph->renderValueOrSetupOrShade.renderValue = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
 }
 
 /* Assign the first option byte across all visited children; NULL is a no-op. */
-void frFontSetChainFlag(FrFontGlyph *glyph, u8 flagValue) {
+void frFontSetChildChainFirstOption(FrFontGlyph *glyph, u8 firstOption) {
     FrFontGlyph *childGlyph;
 
     for (; glyph != NULL; glyph = glyph->previous) {
         for (childGlyph = glyph->link1C.firstChild; childGlyph != NULL; childGlyph = childGlyph->next) {
-            childGlyph->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
+            childGlyph->renderValueOrSetupOrShade.setupBytes.firstOption = firstOption;
         }
     }
 }
@@ -1045,7 +1045,7 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
         pending = ctx->pendingPosition;
     }
     if (pending != 0) {
-        frFontSetContextPair(ctx->glyphChain, ctx->x, ctx->y);
+        frFontSetGlyphPosition(ctx->glyphChain, ctx->x, ctx->y);
         ctx->pendingPosition = 0;
     }
 }

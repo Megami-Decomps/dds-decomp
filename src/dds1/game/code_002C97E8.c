@@ -342,8 +342,8 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     FrFontGlyph *handle = func_001951C8(name, 0, type, 0, 0);
     s32 result = 0;
     frFontSetChildColors(handle, second);
-    frFontSetContextPair(handle, x << 4, y << 3);
-    frFontStoreShiftedContextValue(handle, first);
+    frFontSetGlyphPosition(handle, x << 4, y << 3);
+    frFontStoreShiftedRenderValue(handle, first);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
@@ -356,7 +356,7 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
@@ -373,7 +373,7 @@ s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *
     FrFontGlyph *handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
@@ -390,7 +390,7 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
     FrFontGlyph *handle = func_001978E8(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
@@ -404,7 +404,7 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
 s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, FrFontTextBank *name, u32 extra, s32 flag, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
-    frFontSetChainFlag(handle, opacity);
+    frFontSetChildChainFirstOption(handle, opacity);
     frFontSetChildColors(handle, second);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);

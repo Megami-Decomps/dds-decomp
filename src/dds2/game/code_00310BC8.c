@@ -360,10 +360,10 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
     FrFontGlyph *handle = func_0019CE78(glyphSource, 0, type, 0, 0);
     u32 result = 0;
     frFontSetChildColors(handle, colors);
-    frFontSetContextPair(handle, x << 4, y << 3);
-    frFontStoreShiftedContextValue(handle, depth);
+    frFontSetGlyphPosition(handle, x << 4, y << 3);
+    frFontStoreShiftedRenderValue(handle, depth);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
@@ -376,9 +376,9 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
 u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 flag, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
@@ -391,9 +391,9 @@ u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
 u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     FrFontGlyph *handle = func_0019F798(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
@@ -406,9 +406,9 @@ u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
 u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     FrFontGlyph *handle = func_0019F5E8(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
@@ -421,10 +421,10 @@ u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
 u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u8 opacity, u16 textId, FrFontTextBank *bank, s32 layoutFlags, s32 flag, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, depth, textId, bank, layoutFlags);
     u32 result = 0;
-    frFontSetChainFlag(handle, opacity);
+    frFontSetChildChainFirstOption(handle, opacity);
     frFontSetChildColors(handle, colors);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
