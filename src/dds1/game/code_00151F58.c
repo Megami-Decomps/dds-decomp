@@ -11,6 +11,7 @@
 
 extern void *sdfCreateAssetWithDrawEntries();
 #include "eff.h"
+#include "eff_track_poly_list.h"
 #include "par_table.h"
 #include "par_kind_api.h"
 #include "fpu.h"
@@ -884,7 +885,7 @@ void effDestroyResources(effect)
         parReleaseCellSystem(owner->sub.secondaryDraw.system);
         break;
     case 4:
-        effTrackPolyDestroyModelWorkList((s32)owner->sub.secondaryDraw.modelList);
+        effTrackPolyDestroyModelWorkList(owner->sub.secondaryDraw.modelList);
         break;
     }
     billDispatchByKind(owner->billboard);
