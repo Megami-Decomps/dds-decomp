@@ -5,12 +5,6 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-typedef struct {
-    EffWorldNode *target;
-    Dds3PathCurveWork *path;
-    s32 (*update)(ObjectTransform *, EffWorldNode *);
-} MoverWork;
-
 extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
 extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
 extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
@@ -37,7 +31,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
     f32 pathVector[4];
     WorldTransformParams transformParams;
     ObjectTransform relativeTransform;
-    MoverWork *work = object->data;
+    Dds3SlotResource *work = object->data;
     EffWorldNode *target = work->target;
     ObjectTransform *inner = target->inner;
     s32 (*updateCallback)(ObjectTransform *, EffWorldNode *);

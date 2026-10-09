@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "dds3_path.h"
 extern const char *fldGetTaskRecordValue(u32 task);
 extern void func_0013DF60(const char *name);
 #include "sdf.h"
@@ -103,7 +104,7 @@ extern s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
-extern void dds3InvokeSlot1Handler(s32 arg0, s32 arg1);
+extern s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -331,7 +332,7 @@ s32 fldCmdReleaseCurrentObject(void) {
     if (object == 0) {
         return 1;
     }
-    dds3InvokeSlot1Handler((u32)object, 0);
+    dds3InvokeSlot1Handler(object, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     return 1;
