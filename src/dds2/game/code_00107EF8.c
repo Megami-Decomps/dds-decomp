@@ -563,8 +563,8 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109028);
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
     s32 *pos;
@@ -595,11 +595,11 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     coords[5] = (y + h) * 8;
     coords[6] = x * 16;
     coords[7] = (y + h) * 8;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -621,9 +621,9 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 /* Submit the four-corner gradient rectangle with the native default depth.

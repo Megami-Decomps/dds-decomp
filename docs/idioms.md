@@ -6534,3 +6534,31 @@ payload, not another packet view. Preserve the scalar SDK offset helper
 and physical append conversions; the register values, branches and store
 order are independent of the CPU header's pointer representation.
 
+
+The paired colored triangle, rectangle-strip and gradient-line writers
+use the same primary header lifetime. Their existing named vertex
+structures describe only the payload after the SDK's `0x20` header;
+keep those real cursors and their packed GS fields. Header typing does
+not justify merging vertex formats or changing coordinate packing,
+color unpacking, or store order.
+
+
+Field GS primitive writers also keep two distinct primary allocations:
+`SdfListHead *command` for the CPU list, and `SdfDrawPacket *packet` for
+the initialized draw header. Their existing `u64 *` payload cursor and
+coordinate/color work arrays remain unchanged. Do not apply this header
+type to SDK routines that only transport address words through the
+scalar finalize interface; that is a different, genuine word contract.
+
+
+The counted RGBA/XYZ2 strip pair (`002CAAC8`/`00311F20`) also retains
+the primary `SdfDrawPacket *` independently of its real `u64 *` vertex
+cursor. Header typing leaves count, first-color selection and coordinate
+packing unchanged; it is not a reason to rewrite the loop or input APIs.
+
+
+`evtSubmitGradientRectAtDepth` in both games keeps its command-list and
+draw-header allocations under those same two primary pointer types.
+Its four real color-channel captures, coordinate array and color-selection
+loop remain the original consumed work, independent of list encoding.
+
