@@ -485,7 +485,6 @@ void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *
     }
 }
 
-extern void evtViewerDispatchFlagMode();
 extern void func_00249088();
 extern void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
 
@@ -535,7 +534,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (D_0037F510.apply != 0) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
-            evtViewerDispatchFlagMode(ctx, step, &D_0037F510);
+            evtViewerDispatchFlagMode(ctx);
             func_00249088(ctx->curFrame, ctx);
         }
     }
@@ -4427,7 +4426,6 @@ extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
 extern s32 evtPreloadBgm(s32);
 extern s32 evtIsBgmLoaded(s32);
-extern void evtViewerDispatchFlagMode(EvtRuntime *);
 extern void func_00249088(s32, void *);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32, s32, s32);
@@ -5129,10 +5127,7 @@ extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
 extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
 extern s32 sdfPathExists(char *path);
-extern void evtEventViewerShutdown(EvtRuntime *runtime);
 extern void evtDestroySecondaryWorldNode(void);
-extern void evtEventViewerReleaseGroups(EvtRuntime *runtime);
-extern void evtEventViewerReset(EvtRuntime *runtime);
 
 s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     char path0[0x80];
