@@ -1266,7 +1266,24 @@ void mdlRotateViewList(void) {
     mdlViewerState.resources[resourceIndex] = firstResource;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
+extern const char *D_003C8780[];
+extern char D_00437060[];
+
+void func_00235568(void) {
+    SifCommand packet;
+    s32 phase;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7948, 0xFF0080, 0xBA0, 0x90, 0);
+    sdfPktInit(&packet, 0x7180, 0x7960, 0xFF0080, 0);
+    sdfAppendPacket(mdlViewerState.packetList, (u32)(sdfFormatSifPacket(&packet, D_00437060)));
+    phase = mdlViewerState.taskPhase;
+    if (phase == 0) {
+        phase = mdlViewerState.unk0B - 1;
+    } else {
+        phase = phase - 1;
+    }
+    sdfAppendPacket(mdlViewerState.packetList, (u32)(sdfFormatSifPacket(&packet, D_003C8780[phase])));
+}
 
 
 extern const char *D_003C8780[];
@@ -3454,3 +3471,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
+
