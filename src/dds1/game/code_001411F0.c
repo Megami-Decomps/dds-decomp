@@ -145,8 +145,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern u32 fileGetLoadedDataAddress(struct FileWork *);
-extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern void *func_00115298(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
@@ -3285,8 +3283,8 @@ void func_0014CB08(void) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)D_003BAFE8) == 0) {
             return;
         }
-        D_003BAFF0 = fileGetLoadedDataAddress((struct FileWork *)D_003BAFE8);
-        D_003BAFEC = fileGetResourceHandle((struct FileWork *)D_003BAFE8);
+        D_003BAFF0 = fileGetLoadedDataAddress((struct FileRequest *)D_003BAFE8);
+        D_003BAFEC = fileGetResourceHandle((struct FileRequest *)D_003BAFE8);
         area = &fldAreaState;
         firstVector[0] = area->x;
         firstVector[1] = area->y;
