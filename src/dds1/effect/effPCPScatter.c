@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -1130,7 +1131,6 @@ void func_00172C60(void)
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(void *obj, f32 value);
 typedef struct EffPacketParams {
     s16 parameterCount;
     s16 vertexCount;
@@ -1184,7 +1184,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->color = EFF_SCATTER_NEUTRAL_COLOR;
     pool->sharedResource = 0;
     pool->drawAsset = sdfCreateAssetWithDrawEntries();
-    func_002DA420(pool->drawAsset, 1.0f);
+    sdfSetPrimaryStateFloat(pool->drawAsset, 1.0f);
     memset(D_003D6580, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
     D_003D6580->primitive = 0x4000;
     return pool;

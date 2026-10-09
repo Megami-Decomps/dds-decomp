@@ -6453,6 +6453,7 @@
 0x002DA3D8	sdfSetPrimaryStateWordSecond	inferred	Stores the second primary-state u32 at SdfAsset+0x14 and marks the primary state dirty.
 0x002DA3F0	sdfSetPrimaryStateWordThird	inferred	Stores the third primary-state u32 at SdfAsset+0x20 and marks the primary state dirty.
 0x002DA408	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at SdfAsset+0x28 and marks the primary state dirty.
+0x002DA420	sdfSetPrimaryStateFloat	inferred	Stores the primary-state float at SdfAsset+0x1C and marks the primary state dirty.
 0x002DA450	sdfSubParamCreate	inferred	allocates and inits 0x18 sub-param block with defaults
 0x002DA4C8	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA548	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]

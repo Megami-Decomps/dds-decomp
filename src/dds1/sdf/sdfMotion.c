@@ -57,7 +57,6 @@ typedef struct FuncTab {
 } FuncTab;
 
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
-void func_002DA420(void *a0, f32 a1);
 Blk *sdfEnsurePrimaryTextSubParam(void *a0);
 void sdfCopyPrimaryTextScalars(void *a0, void *a1);
 void func_002DA5B0(void *a0, s32 a1);
@@ -759,14 +758,14 @@ void sdfMotionApplyInterpolatedFloat(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
-    func_002DA420(a0->target, sdfInterpolateMotionKeys(&b));
+    sdfSetPrimaryStateFloat(a0->target, sdfInterpolateMotionKeys(&b));
 }
 
 void sdfMotionBlendInterpolatedFloat(SdfMotionIndexedValueBinding *a0, f32 t1, f32 t2) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t1);
-    func_002DA420(a0->target, (a0->capturedFloat + sdfInterpolateMotionKeys(&b) * t2) - (a0->capturedFloat * t2));
+    sdfSetPrimaryStateFloat(a0->target, (a0->capturedFloat + sdfInterpolateMotionKeys(&b) * t2) - (a0->capturedFloat * t2));
 }
 
 /* Capture the bound float as the base value for a later blend. */

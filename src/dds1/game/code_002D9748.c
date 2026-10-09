@@ -546,9 +546,9 @@ void sdfSetPrimaryStateWordFourth(SdfAsset *asset, u32 bits) {
 }
 
 /* Store the primary-state float and dirty both draw entries. */
-void func_002DA420(SdfTextParam *param, f32 value) {
-    param->unk1C = value;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
+    asset->unk1C = value;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
@@ -735,7 +735,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {
-        func_002DA420(param, *(f32 *)parameterCursor);
+        sdfSetPrimaryStateFloat(asset, *(f32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SCALAR_PAIR_PRESENT) {

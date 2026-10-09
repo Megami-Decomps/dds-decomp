@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -377,7 +378,6 @@ void func_00177408(EffRingWork *work)
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_003332D0(u32 asset, f32 value);
 
 /* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
 EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
@@ -406,7 +406,7 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_003332D0((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
     D_00451FF0->primitive = 0x4000;
     return pool;
@@ -513,7 +513,6 @@ void func_00177BA0(u8 *work, f32 scale) {
 
 extern void *memset(void *dst, s32 value, u32 size);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_003332D0(u32 asset, f32 value);
 
 /* Allocate three positions and three colors per triangle, then the header.
  * The complete block and shared packet-parameter record are cleared. */
@@ -542,7 +541,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_003332D0((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
     D_00451FF0->primitive = 0x4000;
     return pool;
@@ -630,7 +629,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     pool->scale = 1.0f;
     pool->color = EFF_NEUTRAL_COLOR;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_003332D0((u32)pool->resource, 1.0f);
+    sdfSetPrimaryStateFloat(pool->resource, 1.0f);
     memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
     D_00451FF0->primitive = 0x4000;
     return pool;

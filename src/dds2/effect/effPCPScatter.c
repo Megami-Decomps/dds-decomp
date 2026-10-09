@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -381,7 +382,6 @@ extern s32 func_00167A10(EffPacketParams *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
-extern void func_003332D0(u32 res, f32 scale);
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
 extern PcpScatterRadialWork *effScatterCreateRadialWork(
@@ -1192,7 +1192,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->color = EFF_SCATTER_NEUTRAL_COLOR;
     pool->sharedResource = 0;
     pool->drawAsset = sdfCreateAssetWithDrawEntries();
-    func_003332D0((u32)pool->drawAsset, 1.0f);
+    sdfSetPrimaryStateFloat(pool->drawAsset, 1.0f);
     memset(D_00452020, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
     D_00452020->primitive = 0x4000;
     return pool;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -4353,7 +4354,6 @@ typedef struct EffPCPBeamDrawParams {
 extern EffPCPBeamDrawParams D_004520B0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
-extern void func_003332D0(struct SdfTextParam *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
@@ -4371,7 +4371,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfCreateAssetWithDrawEntries();
-    func_003332D0((struct SdfTextParam *)node->assetHandle, 1.0f);
+    sdfSetPrimaryStateFloat((struct SdfAsset *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_004520B0, 0, sizeof(D_004520B0));

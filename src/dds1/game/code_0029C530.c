@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "sdf_asset_state.h"
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
@@ -182,7 +183,6 @@ extern s32 func_00151FC0(void);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfQueueAssetRelease(SdfAsset *asset);
 
-extern void func_002DA420(void *, f32);
 
 extern EffPacketParams D_003DC9E0;
 
@@ -2614,7 +2614,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->flag = 0;
     set->shared = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(&D_003DC9E0, 0, 0x2C);
     D_003DC9E0.primitive = 0x4000;
     return set;
@@ -3363,7 +3363,7 @@ u8 *effCreatePointSet4(u32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_003DCA10, 0, 0x2C);
     D_003DCA10[0].primitive = 0x4000;
     return (u8 *)set;
@@ -3853,7 +3853,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->tail = data;
     node->field_14 = 0;
     node->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(node->handle, 1.0f);
+    sdfSetPrimaryStateFloat(node->handle, 1.0f);
     memset(&D_003DCA40, 0, sizeof(EffPacketParams));
     D_003DCA40.primitive = 0x4000;
     D_003DCA40.parameters = (u32 *)D_0037EB90;
@@ -4001,7 +4001,7 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->billHandle = NULL;
     work->reference = NULL;
     work->assetHandle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(work->assetHandle, 1.0f);
+    sdfSetPrimaryStateFloat(work->assetHandle, 1.0f);
     memset(&D_003DCAA0, 0, sizeof(EffPacketParams));
     D_003DCAA0.primitive = 0x4000;
     D_003DCAA0.parameters = D_0037EC10;
@@ -4573,7 +4573,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_003DCAD0, 0, 0x2C);
     D_003DCAD0[0].primitive = 0x4000;
     return set;
@@ -5398,7 +5398,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
         ((u32 *)p)[i] = 0x80808080;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(work->handle, 1.0f);
+    sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
     return (u8 *)work;
@@ -5965,7 +5965,7 @@ u32 repeat;
         ((u32 *)p)[i] = 0x80808080;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(work->handle, 1.0f);
+    sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_003DCB30, 0, sizeof(EffPacketParams));
     D_003DCB30.primitive = 0x4000;
     return (u8 *)work;
@@ -6309,7 +6309,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->tail = data;
     set->flag = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
-    func_002DA420(set->handle, 1.0f);
+    sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_003DCB60, 0, 0x2C);
     D_003DCB60[0].primitive = 0x4000;
     return set;
