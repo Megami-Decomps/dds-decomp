@@ -109,12 +109,20 @@ typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
 typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
     ((u32)&((SdfTexBuf *)0)->textureRegister == 0x28) ? 1 : -1];
 
-/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams.
- * Allocation mode is an unsigned classification: zero is a free range. */
+/* Known SdfTexResource allocation categories. Unknown u32 values are preserved. */
+enum SdfTexResourceAllocationMode {
+    SDF_TEX_RESOURCE_FREE = 0,
+    SDF_TEX_RESOURCE_FRAME = 1,
+    SDF_TEX_RESOURCE_TEXTURE = 2,
+    SDF_TEX_RESOURCE_CLUT = 3,
+    SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
+};
+
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
 typedef struct SdfTexResource {
     struct SdfTexResource *next; /* 0x00 */
     struct SdfTexResource *prev; /* 0x04 */
-    u32 allocationMode;         /* 0x08 */
+    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
     u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
     s16 width;                  /* 0x14 */
@@ -345,13 +353,7 @@ typedef struct SdfTex {
 } SdfTex;
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct SdfSemaObj {
-    s32 semaphoreId;
-    void *unk4;
-    void *releaseTail;
-    void *unkC;
-    s32 packetTail;
-} SdfSemaObj;
+
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfListHead {
@@ -555,21 +557,21 @@ typedef struct SdfAssetEntry {
     u32 pad00;             /* 0x00 */
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
-    u32 unk0C;             /* 0x0C */
+    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
     u32 unk10;             /* 0x10 */
     u32 unk14;             /* 0x14 */
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
-    u32 unk20;             /* 0x20 */
-    u32 mode;              /* 0x24 */
+    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
+    u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */
     u8 pad30[8];           /* 0x30 */
     SdfGsTextureStateValues primaryTextureState; /* 0x38 */
     SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
     SdfDrawTransform transforms[2]; /* 0x68 */
-    u32 unk98;             /* 0x98 */
-    u32 unk9C;             /* 0x9C */
+    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
+    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
 } SdfAssetEntry;
 
 typedef char SdfAssetEntry_size_must_be_0xA0[
@@ -580,6 +582,10 @@ typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
     ((u32)&((SdfAssetEntry *)0)->secondaryTextureState == 0x50) ? 1 : -1];
 typedef char SdfAssetEntry_transforms_offset_must_be_0x68[
     ((u32)&((SdfAssetEntry *)0)->transforms == 0x68) ? 1 : -1];
+typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
+    ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
+typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
+    ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
 
 /* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
 typedef struct SdfThreadNode {

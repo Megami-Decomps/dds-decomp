@@ -782,7 +782,6 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
 }
 
 extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *);
-extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void func_002B2C88(s32, s32, s32, s32);
 
 void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
@@ -794,8 +793,8 @@ void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
     index = host->partyWindow.lists[0]->cursor->index;
     mnuSetWindowResource(index, window, (EffectSlotSet *)host->staffSlots.baseResources[0],
                          host->staffSlots.pairResources[0], host->staffSlots.pairResources[1], 0, 0);
-    mnuAttachPartyIconBundle(index, window, (u32)host->staffSlots.pairResources[0]);
-    host->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)host->staffSlots.baseResources[1],
+    mnuAttachPartyIconBundle(index, window, host->staffSlots.pairResources[0]);
+    host->panelGroup = mnuCreatePanelGroup(host->staffSlots.baseResources[1],
                                           host->staffSlots.pairResources[0], 0);
     host->effectResource = mnuAllocateSimpleSprite((EffectSlotSet *)host->staffSlots.baseResources[1],
                                                   host->staffSlots.pairResources[1],

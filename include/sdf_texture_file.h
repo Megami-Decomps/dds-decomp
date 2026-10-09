@@ -3,10 +3,15 @@
 
 #include "common.h"
 
+/* Values used by the battle-model texture uploader; other values use its default path. */
+#define SDF_TEXTURE_BATTLE_SLOT_ONE 1
+#define SDF_TEXTURE_BATTLE_SLOT_TWO 2
+#define SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK 0xF0
+
 /* Serialized texture-resource header; payload begins after this 0x40-byte prefix. */
 typedef struct SdfTextureFileHeader {
     u8 unk00;
-    u8 flags;          /* 0x01: high nibble contributes to the variable payload offset. */
+    u8 payloadOffsetFlags; /* 0x01: high nibble adds payload offset bytes; low bits stay opaque. */
     u8 pad02[2];       /* 0x02 */
     u32 byteCount;     /* 0x04 */
     u32 magic;         /* 0x08 */
@@ -21,7 +26,7 @@ typedef struct SdfTextureFileHeader {
     u8 unk1A;          /* 0x1A */
     u8 clampMode;      /* 0x1B */
     s32 resourceKey;   /* 0x1C */
-    s32 unk20;         /* 0x20 */
+    s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
     u8 pad24[0x1C];    /* 0x24 */
 } SdfTextureFileHeader;
 
@@ -29,8 +34,8 @@ typedef char SdfTextureFileHeader_size_must_be_0x40[
     (sizeof(SdfTextureFileHeader) == 0x40) ? 1 : -1];
 #define SDF_TEXTURE_FILE_HEADER_OFFSET(field) \
     ((u32)&(((SdfTextureFileHeader *)0)->field))
-typedef char SdfTextureFileHeader_flags_offset_must_be_0x01[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(flags) == 0x01) ? 1 : -1];
+typedef char SdfTextureFileHeader_payloadOffsetFlags_offset_must_be_0x01[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(payloadOffsetFlags) == 0x01) ? 1 : -1];
 typedef char SdfTextureFileHeader_byte_count_offset_must_be_0x04[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(byteCount) == 0x04) ? 1 : -1];
 typedef char SdfTextureFileHeader_magic_offset_must_be_0x08[
@@ -55,8 +60,8 @@ typedef char SdfTextureFileHeader_clamp_mode_offset_must_be_0x1B[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(clampMode) == 0x1B) ? 1 : -1];
 typedef char SdfTextureFileHeader_resource_key_offset_must_be_0x1C[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(resourceKey) == 0x1C) ? 1 : -1];
-typedef char SdfTextureFileHeader_unk20_offset_must_be_0x20[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(unk20) == 0x20) ? 1 : -1];
+typedef char SdfTextureFileHeader_battleTextureSlot_offset_must_be_0x20[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(battleTextureSlot) == 0x20) ? 1 : -1];
 #undef SDF_TEXTURE_FILE_HEADER_OFFSET
 
 struct SdfTex;

@@ -677,7 +677,7 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
     index = work->partyWindow.lists[0]->cursor->index;
     mnuSetWindowResource(index, window, (s32)work->staffSlots.pairResources[0], (s32)work->staffSlots.pairResources[1]);
     mnuAttachPartyIconBundle(index, window, (u32)work->staffSlots.pairResources[0]);
-    work->panelGroup = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
+    work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->effectResource = mnuAllocateSimpleSprite(
         work->staffSlots.baseResources[5],
         work->staffSlots.baseResources[2],

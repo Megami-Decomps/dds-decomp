@@ -999,7 +999,131 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002053C0", func_00206EA8);
+extern s128 D_003BE0B0;
+extern s128 D_003BE0C0;
+
+void func_00206EA8(ActionStateLink *link, BtlUnit *other) {
+    BtlUnit *slots[2];
+    f32 position[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 center[4] __attribute__((aligned(16)));
+    f32 muzzle[4] __attribute__((aligned(16)));
+    f32 firstPosition[4] __attribute__((aligned(16)));
+    f32 secondPosition[4] __attribute__((aligned(16)));
+    BtlState *state;
+    BtlUnit *unit;
+    BtlUnit *linked;
+    s32 special;
+    f32 reach;
+    f32 radius;
+    u32 i;
+
+    state = (BtlState *)btlGetRuntime();
+    linked = link->unit;
+    if (linked->lookupId < other->lookupId) {
+        slots[0] = linked;
+        slots[1] = other;
+    } else {
+        slots[0] = other;
+        slots[1] = linked;
+    }
+    special = 0;
+    if ((state->commandRestrictFlags & 0x400000) && btlGetBossSceneStateWhenActive() == 0) {
+        unit = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
+        switch (unit->partyRecord.unitId) {
+        case 0x111:
+            special = 1;
+            center[0] = -407.0f;
+            center[1] = 0.0f;
+            center[2] = -206.0f;
+            firstPosition[0] = -557.0f;
+            firstPosition[1] = 0.0f;
+            firstPosition[2] = -300.0f;
+            secondPosition[0] = -250.0f;
+            secondPosition[1] = 0.0f;
+            secondPosition[2] = -300.0f;
+            break;
+        case 0x112:
+            special = 1;
+            center[0] = 407.0f;
+            center[1] = 0.0f;
+            center[2] = -206.0f;
+            secondPosition[0] = 557.0f;
+            secondPosition[1] = 0.0f;
+            secondPosition[2] = -300.0f;
+            firstPosition[0] = 250.0f;
+            firstPosition[1] = 0.0f;
+            firstPosition[2] = -300.0f;
+            break;
+        }
+    }
+    if (!special) {
+        if (btlGetIndexListCount(link->indexWork.indices) == 1) {
+            unit = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
+            btlUnitGetMuzzlePosVU(unit);
+            reach = unit->reach * unit->scale;
+        } else {
+            func_00208750(link->indexWork.indices, 0, 0);
+            reach = 0.0f;
+        }
+        VU0_STORE_VF(vf10, muzzle);
+        VU0_SCALAR_OP_CLOBBER(0.0f, "vaddx.y vf10, vf0, vf2x");
+        VU0_LOAD_VF(vf11, &D_003BE0B0);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, center);
+        center[2] -= reach;
+    }
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x200) {
+                if (unit != slots[0] && unit != slots[1]) {
+                    btlClearUnitDefeatCandidate(unit);
+                    btlSetUnitPosition(unit, center);
+                    if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
+                        PCP_COPY_VECTOR(position, center);
+                        position[1] += 1000000.0f;
+                        effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        if (special) {
+            if (i == 0) {
+                position[0] = firstPosition[0];
+                position[1] = firstPosition[1];
+                position[2] = firstPosition[2];
+            } else {
+                position[0] = secondPosition[0];
+                position[1] = secondPosition[1];
+                position[2] = secondPosition[2];
+            }
+        } else {
+            radius = slots[i]->unkBC * slots[i]->scale;
+            radius += 100.0f;
+            if (i == 0) {
+                func_00336538(1.0471975f);
+            } else {
+                func_00336538(-1.0471975f);
+            }
+            VU0_LOAD_VF(vf10, &D_003BE0C0);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+            VU0_LOAD_VF(vf11, center);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+        }
+        btlSetUnitPosition(slots[i], position);
+        if (btlAimHorizontalDirectionVU(position, muzzle) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            btlSetUnitRotation(slots[i], (s128 *)rotation);
+        }
+    }
+}
+
+
 
 INCLUDE_ASM(const s32, "game/code_002053C0", func_00207268);
 

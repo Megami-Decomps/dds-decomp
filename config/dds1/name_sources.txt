@@ -7385,3 +7385,4 @@
 0x0016BBB0	effFlashAccumulatingBuildParticleQuads	inferred	Builds paired outer and inner particle quads and advances radius by radialStep.
 0x0016C698	effFlashOrbitArcUpdate	inferred	Advances shape and particle lifetimes, updates orbit-arc geometry and colors, and submits the record pool.
 0x0016DBA0	effFlashRadialStripSetParticleColors	inferred	Writes packed colors for paired radial-strip quad records using the supplied color multiplier.
+0x002193E8	mdlGetRecordPartIndex	inferred	returns the u16 MdlRecord part index at +0x0e, used for part-list selection

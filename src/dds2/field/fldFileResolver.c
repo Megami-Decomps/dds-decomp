@@ -2289,7 +2289,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList((SdfListHead *)command);
     sdfConsAppendClearPacket((SdfListHead *)command, 0);
-    sdfConsAppendAssetPacket((SdfListHead *)command, (void *)D_0043607C, 0);
+    sdfConsAppendAssetPacket((SdfListHead *)command, (SdfAsset *)D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.stripWordCount = 1;

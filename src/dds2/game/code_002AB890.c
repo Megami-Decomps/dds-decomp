@@ -2,6 +2,7 @@
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -35,7 +36,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 extern char (*D_00435E5C)[25];
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
 extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C54B0(s32);
@@ -63,7 +63,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xD, 7);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xD, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AB8C0;
 
@@ -116,7 +116,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = mnuDrawCampGridResourceSlot;
 
@@ -163,7 +163,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AB890;
     do {
@@ -210,7 +210,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AC050;
     node = mnuAppendWindowListNode(window, D_00437BC8);
@@ -343,7 +343,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = mnuDrawOwnedCatalogListNode;
     node = mnuAppendWindowListNode(window, D_00437BC8);

@@ -42,8 +42,8 @@ void mnuRefreshWindowSlots(MenuPageWindow *page, s32 preserveResourceHandles);
 
 /* Native staff components: page 0x284, party 0xA928 and fade 0xB10C. */
 void mnuInitializeWindowFadeState(MenuFadeFields *fade);
-/* Generic task/resource addresses are recovered as window and fade owners inside. */
-void mnuBeginWindowFadeTransition(void *windowAddress, void *work);
+void mnuBeginWindowFadeTransition(MenuWindowContainer *window,
+                                  MenuFadeFields *fade);
 void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth,
                                      MenuFadeFields *fade, s32 option);
 void mnuClearActionFlags(s32 kind, MenuPageWindow *page);

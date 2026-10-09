@@ -199,7 +199,6 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
-extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 
 
@@ -442,7 +441,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -961,9 +959,9 @@ void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlot
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
-void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth) {
+void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, EffectSlotSet *spriteResource, u32 third, u32 fourth) {
     menu->field1C = first;
-    menu->sprite20 = second;
+    menu->spriteResource = spriteResource;
     menu->param24 = third;
     menu->param28 = fourth;
 }
@@ -1125,16 +1123,16 @@ void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContaine
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
     s32 i;
-    s32 sprite = window->sprite20;
+    EffectSlotSet *sprite = window->spriteResource;
     s32 state = window->fadeScale;
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
-            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, (EffectSlotSet *)(u32)sprite, window->param28, option);
+            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
             func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
-                          (EffectSlotSet *)(u32)window->sprite20, window->param24, option);
+                          window->spriteResource, window->param24, option);
         }
     }
 }
@@ -1706,7 +1704,7 @@ void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
 }
 
 /* Snapshot the outgoing window and its resources before starting the next fade. */
-void mnuBeginWindowFadeTransition(void *windowAddress, void *work) {
+void mnuBeginWindowFadeTransition(MenuWindowContainer *windowAddress, MenuFadeFields *work) {
     MenuWindowContainer *window = windowAddress;
     MenuFadeFields *menu = work;
     if (menu->currentWindow != NULL) {
@@ -2081,13 +2079,13 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-MenuIconBundle *mnuCreateIconBundle(u32 resource) {
+MenuIconBundle *mnuCreateIconBundle(EffectSlotSet *resource) {
     MenuIconLayout layout = D_0042AFD8;
     MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
     u32 i;
     memset(set, 0, 0x20);
     for (i = 0; i < 3; i++) {
-        EffectSlotSet *sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, layout.entry[i].id, 1);
+        EffectSlotSet *sprite = effCreateResourceSlotSet(resource, layout.entry[i].id, 1);
         set->sprite[i] = sprite;
         itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
@@ -2125,7 +2123,7 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource) {
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, EffectSlotSet *resource) {
     MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_packets.h"
+#include "sdf_asset_state.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -268,7 +269,6 @@ extern SdfTex *D_00438A80;
 
 extern vu8 sdfCurrentBufferIndex;
 
-extern void sdfAssetApplyEntryChanges(void *, s32);
 
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
@@ -681,8 +681,8 @@ void func_00339188(u32 workAddress) {
                   (u8 *)work->asset + 0x80);
     sdfVuBlendNodeXY(work->blend);
     asset = work->asset;
-    mode = asset->mode;
-    paramC = asset->unk0C;
+    mode = asset->secondaryMode;
+    paramC = asset->secondaryColor;
     param8 = asset->unk08;
     switch (mode) {
         case 0:
@@ -703,7 +703,7 @@ void func_00339188(u32 workAddress) {
     }
     sdfBuildChunkedVuNodeTransfer(work, asset->secondaryTextureState.sampling,
                                   asset->secondaryTextureState.texture,
-                                  asset->secondaryTextureState.clamp, asset->unk20, 0);
+                                  asset->secondaryTextureState.clamp, asset->alphaState, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00339270);
@@ -1177,7 +1177,7 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 }
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
+void sdfConsAppendAssetPacket(SdfListHead *packetList, SdfAsset *asset,
                               s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {

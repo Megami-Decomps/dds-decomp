@@ -340,7 +340,8 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                          ((StaffImageContext *)context)->windowParam);
     mnuAttachPartyIconBundle(index, &((StaffImageContext *)context)->pageWindow,
                              ((StaffImageContext *)context)->spriteScene);
-    ((StaffImageContext *)context)->panelHandle = mnuCreatePanelGroup(((StaffImageContext *)context)->spriteScene);
+    ((StaffImageContext *)context)->panelHandle =
+        mnuCreatePanelGroup((struct EffectSlotSet *)(u32)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->spriteHandle =
         mnuCreateSpriteState((struct EffectSlotSet *)((StaffImageContext *)context)->spriteArg0,
                              (struct EffectSlotSet *)((StaffImageContext *)context)->spriteArg1,

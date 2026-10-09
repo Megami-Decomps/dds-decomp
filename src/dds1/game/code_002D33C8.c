@@ -75,7 +75,7 @@ extern s32 D_003BD340;
 extern s8 D_003BDA05;
 extern u8 sdfCurrentBufferIndex;
 
-extern void *sdfPendingQueueHead;
+extern SdfPendingNode *sdfPendingQueueHead;
 extern s8 sdfPendingQueueRotationActive;
 extern s32 sdfPendingQueueSlots[2];
 
@@ -113,7 +113,7 @@ extern SdfDescriptorSource *sdfPacketResourceEntries[];
 
 void sdfTexRelease(SdfTex *texture);
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
-void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
@@ -165,7 +165,7 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *s
     packet->header[11] = 0x5000000500000000ULL;
     packet->header[12] = 0x1000000000000004ULL;
     packet->header[13] = 0xE;
-    sdfWriteImageTransferRegisters(packet->transfer, 0, 0, 0, 0, 0,
+    sdfWriteImageTransferRegisters(&packet->transfer, 0, 0, 0, 0, 0,
         source->word, source->width, source->format,
         sourceX, sourceY, width, height, 1);
     quadwordCount = (sdfFormatBitsPerPixelB(source->format) * width * height) >> 7;
@@ -196,8 +196,8 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
 }
 
 void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIndex) {
-    packet->resourcePacket.transfer[0].unk0 =
-        (packet->resourcePacket.transfer[0].unk0 & ~0x3FFF) |
+    packet->resourcePacket.transfer.bitbltbuf.value =
+        (packet->resourcePacket.transfer.bitbltbuf.value & ~0x3FFF) |
         (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
 }
 
@@ -230,7 +230,7 @@ void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfTexResource 
     packet->header[1] = 0x5000000611000000;
     packet->header[2] = 0x1000000000000004;
     packet->header[3] = 0xE;
-    sdfWriteImageTransferRegisters(packet->transfer, source->word, source->width,
+    sdfWriteImageTransferRegisters(&packet->transfer, source->word, source->width,
                   source->format, destinationX, destinationY, 0, 0, 0, 0, 0,
                   transferWidth, transferHeight, 0);
 
@@ -304,18 +304,14 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry) {
     }
 }
 
-typedef struct SdfQueueNode {
-    struct SdfQueueNode *next;
-    struct SdfQueueNode *link;
-} SdfQueueNode;
-
-SdfQueueNode *sdfDetachQueue(void) {
-    SdfQueueNode *head = sdfPendingQueueHead;
-    SdfQueueNode *node;
+/* Detach the pending chain and clear each callback owner's pending node. */
+SdfPendingNode *sdfDetachQueue(void) {
+    SdfPendingNode *head = sdfPendingQueueHead;
+    SdfPendingNode *node;
 
     sdfPendingQueueHead = NULL;
     for (node = head; node != NULL; node = node->next) {
-        node->link->link = NULL;
+        node->owner->pending = NULL;
     }
     return head;
 }
@@ -1171,35 +1167,35 @@ void sdfInitializeTextureFlushPacket(SdfPacket *packet) {
 }
 
 /* Emit the four A+D registers controlling an image transfer. */
-void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
-    packet[0].unk0 = (destinationFormat << 56) |
+    packet->bitbltbuf.value = (destinationFormat << 56) |
         ((u64)(destinationBufferWidth >> 6) << 48) |
         ((u64)(destinationBufferAddress >> 6) << 32) |
         (sourceFormat << 24) | ((sourceBufferWidth >> 6) << 16) |
         (sourceBufferAddress >> 6);
-    packet[0].unk8 = 0x50;
-    packet[0].unk10 = (destinationY << 48) | (destinationX << 32) |
+    packet->bitbltbuf.registerId = SDF_GS_BITBLTBUF;
+    packet->trxpos.value = (destinationY << 48) | (destinationX << 32) |
         (sourceY << 16) | sourceX;
-    packet[0].unk18 = 0x51;
-    packet[1].unk0 = transferWidth | ((u64)transferHeight << 32);
-    packet[1].unk8 = 0x52;
-    packet[1].unk10 = transferDirection;
-    packet[1].unk18 = 0x53;
+    packet->trxpos.registerId = SDF_GS_TRXPOS;
+    packet->trxreg.value = transferWidth | ((u64)transferHeight << 32);
+    packet->trxreg.registerId = SDF_GS_TRXREG;
+    packet->trxdir.value = transferDirection;
+    packet->trxdir.registerId = SDF_GS_TRXDIR;
 }
 
 /* Wrap BITBLTBUF, TRXPOS, TRXREG and TRXDIR image-transfer settings in a DMA/GIF header. */
-void sdfInitializeExtendedDrawPacket(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfInitializeExtendedDrawPacket(SdfImageTransferPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                                     s64 destinationFormat, s64 destinationX, s64 destinationY,
                                     u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                                     s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
-    packet->unk0 = 5;
-    packet->unk8 = (((u64)0x50000005 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8004);
-    packet->unk18 = 0xE;
-    sdfWriteImageTransferRegisters(packet + 1, destinationBufferAddress, destinationBufferWidth,
+    packet->header.dmaTag = 5;
+    packet->header.vifCommands = (((u64)0x50000005 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8004);
+    packet->header.gifRegisters = 0xE;
+    sdfWriteImageTransferRegisters(&packet->transfer, destinationBufferAddress, destinationBufferWidth,
                   destinationFormat, destinationX, destinationY, sourceBufferAddress, sourceBufferWidth,
                   sourceFormat, sourceX, sourceY, transferWidth, transferHeight, transferDirection);
 }
@@ -1216,15 +1212,15 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
         allocator = sdfAllocPacketAligned;
     }
     packetAddress = allocator(0x60);
-    sdfInitializeExtendedDrawPacket((SdfPacket *)packetAddress, destinationBufferAddress, destinationBufferWidth,
+    sdfInitializeExtendedDrawPacket((SdfImageTransferPacket *)packetAddress, destinationBufferAddress, destinationBufferWidth,
                                     destinationFormat, destinationX, destinationY, sourceBufferAddress, sourceBufferWidth,
                                     sourceFormat, sourceX, sourceY, transferWidth, transferHeight, transferDirection);
     sdfAppendPacket(packetList, packetAddress);
 }
 
 void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
-    packet->transfer[0].unk0 =
-        (packet->transfer[0].unk0 & ~0x3FFF) |
+    packet->draw.transfer.bitbltbuf.value =
+        (packet->draw.transfer.bitbltbuf.value & ~0x3FFF) |
         (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
@@ -1236,7 +1232,7 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
     SdfGraphCopyPacket *packet;
-    SdfPacket *drawPacket;
+    SdfImageTransferPacket *drawPacket;
 
     if (allocPacket == NULL) {
         allocPacket = sdfAllocPacketAligned;
@@ -1244,7 +1240,7 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
     packet = (SdfGraphCopyPacket *)allocPacket(0x70);
     packet->resourceIndexXor = resourceIndexXor;
     packet->link.patch = sdfPatchPacketResourceReference;
-    drawPacket = &packet->drawHeader;
+    drawPacket = &packet->draw;
 
     sdfInitializeExtendedDrawPacket(
         drawPacket, destination->word, destination->width,

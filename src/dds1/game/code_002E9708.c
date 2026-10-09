@@ -10,6 +10,7 @@
 #include "mdl_object_stream.h"
 #include "sdf_texture_offset_list.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_queue.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -127,7 +128,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
@@ -656,7 +656,7 @@ void sdfDumpGsMemoryForward(void) {
     head = sdfGetTextureListHead();
     node = head;
     while (node != 0) {
-        if (node->allocationMode < 4) {
+        if (node->allocationMode < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00398A28[node->allocationMode];
         } else {
             sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
@@ -682,7 +682,7 @@ void sdfDumpGsMemoryBackward(void) {
     head = sdfGetTextureBlockListHead();
     node = head;
     while (node != 0) {
-        if (node->allocationMode < 4) {
+        if (node->allocationMode < SDF_TEX_RESOURCE_KNOWN_MODE_COUNT) {
             name = D_00398A38[node->allocationMode];
         } else {
             sdfPrintFormattedDevMessage(buf, sdfGsMemoryTypeFormat, node->allocationMode);
@@ -1068,7 +1068,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
                 textureHeight = (textureHeight + SDF_STREAM_NARROW_HEIGHT_MASK) & ~SDF_STREAM_NARROW_HEIGHT_MASK;
             }
         }
-        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, 2, 0);
+        texture = sdfTexAllocateHeadForDimensions(textureWidth, textureHeight, pixelFormat, SDF_TEX_RESOURCE_TEXTURE, 0);
         node->textureHead = texture;
         node->resourceWord = texture->word;
     }
@@ -1378,7 +1378,7 @@ s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     if (*selectedBuffer == 0) {
         sdfBuildStreamFrameTransferPackets(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (SdfTextureDmaTail *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(node);
     return 1;
 }

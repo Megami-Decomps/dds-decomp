@@ -146,8 +146,8 @@ typedef struct MenuPanelItem MenuPanelItem;
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
-extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32);
-extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
+extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
@@ -403,9 +403,9 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
     itfGridStorePosition(&panel->secondSlot, resource, index);
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
-    panel->resourceHandle = mnuCreatePanelSpriteHandles(
-        2, (EffectSlotSet *)(u32)resource, (EffMappedResource *)(u32)target);
+void mnuInitializePanelResource(MenuPanelState *panel, EffectSlotSet *resource,
+                                EffMappedResource *target) {
+    panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
 void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
@@ -430,7 +430,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
 
 /* Create the five panel items owned by this group and clear its selection. */
-MenuPanelGroup *mnuCreatePanelGroup(s32 parent) {
+MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
     MenuPanelGroup *group = sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -453,7 +453,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
 }
 
 /* Configure all five panel items against the same grid object. */
-void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
+void mnuUpdateFiveListEntries(MenuPanelGroup *group, EffectSlotSet *gridObject) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         mnuInitializePanelItemGridSlots(group->children[panelIndex], gridObject, panelIndex);
@@ -864,7 +864,7 @@ MenuPanelItem *mnuCreatePanelItem(void) {
     return panelItem;
 }
 
-void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, EffectSlotSet *gridObject, s32 panelIndex) {
     s32 entryIndices[5] = {0, 2, 1, 3, 4};
 
     itfGridStorePosition(&item->groupGridSlots[0], gridObject, 3);
@@ -884,7 +884,8 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 gridObject, s32 p
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelItemGridSlots(MenuPanelItem *item, EffectSlotSet *gridObject,
+                                     s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
     itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
