@@ -29,11 +29,11 @@ typedef char SdfLinkedPacketList_last_at_8[
 typedef char SdfPacketChain_size_must_be_8[sizeof(SdfPacketChain) == 8 ? 1 : -1];
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
-void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
+void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, SdfPacketPatchLink *node);
 void sdfClearPacketChain(SdfPacketChain *chain);
 void sdfAppendPacketChainNode(SdfPacketChain *chain, SdfLinkedPacketList *node);
 void sdfAppendLinkedPacketPayload(struct SdfListHead *dmaList,
                                   SdfLinkedPacketList *linkedList,
-                                  u32 *linkedNode);
+                                  SdfPacketPatchLink *linkedNode);
 
 #endif
