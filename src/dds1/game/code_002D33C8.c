@@ -129,7 +129,6 @@ void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 desti
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 void sdfDestroyObjectList(SdfModel *owner);
-void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 s32 sdfAllocPacketAligned(s32 size);
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
@@ -944,7 +943,7 @@ void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfPrepareFrameDepthPacket);
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
-    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet->packets, 2);
+    sdfInitializeDmaReferenceTag(&packet->packetHeader, 2);
     packet->mode = mode;
     packet->source = source;
     packet->frameMask = frameMask;
