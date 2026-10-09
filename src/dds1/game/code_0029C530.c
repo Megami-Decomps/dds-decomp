@@ -7306,8 +7306,13 @@ typedef struct EffParticleShared {
     BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
     struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
+typedef char EffParticleSharedSizeCheck[(sizeof(EffParticleShared) == 0xAC) ? 1 : -1];
+typedef char EffParticleSharedBillboardOffsetCheck[
+    ((u32)&((EffParticleShared *)0)->billHandle == 0xA4) ? 1 : -1];
+typedef char EffParticleSharedReferenceOffsetCheck[
+    ((u32)&((EffParticleShared *)0)->reference == 0xA8) ? 1 : -1];
 
-u8 *func_002B4798(FileJobPayload *source) {
+EffParticleShared *func_002B4798(FileJobPayload *source) {
     EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
     void *buffer;
 
@@ -7316,7 +7321,7 @@ u8 *func_002B4798(FileJobPayload *source) {
     work->billHandle = NULL;
     work->reference = NULL;
     if (source == NULL) {
-        return (u8 *)work;
+        return work;
     }
     work->option = source->option;
     buffer = fileResolvePrimaryBuffer(source);
@@ -7341,7 +7346,7 @@ u8 *func_002B4798(FileJobPayload *source) {
             billMarkKindOneFlag(work->billHandle);
         }
     }
-    return (u8 *)work;
+    return work;
 }
 
 void effReleaseParticleResources(u8 *work) {
@@ -7355,10 +7360,10 @@ void effReleaseParticleResources(u8 *work) {
     sdfReleaseChipBlock(work);
 }
 
-u8 *effCloneParticleSharedResource(u8 *source) {
-    u8 *effect = func_002B4798(NULL);
-    memcpy(effect + 0xC, source + 0xC, 0x98);
-    effReplaceSharedResource(effect, source);
+EffParticleShared *effCloneParticleSharedResource(EffParticleShared *source) {
+    EffParticleShared *effect = func_002B4798(NULL);
+    memcpy(effect->pad0C, source->pad0C, sizeof(effect->pad0C));
+    effReplaceSharedResource((u8 *)effect, (u8 *)source);
     return effect;
 }
 
