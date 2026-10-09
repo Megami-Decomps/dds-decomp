@@ -449,12 +449,12 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
 }
 
-void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_0040B398, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B398, nodeIndex);
+    return binding;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334B70);
