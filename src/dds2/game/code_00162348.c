@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -168,7 +169,6 @@ extern void effTrackPolyResetIndexedWork(s32);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
-extern void func_003332D0(s32, f32);
 
 void func_00162348(ParObj *work, u32 value) {
     work->valueF0 = value;
@@ -632,7 +632,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         parCellInit(system, i);
     }
     system->asset = sdfCreateAssetWithDrawEntries();
-    func_003332D0((s32)system->asset, 1.0f);
+    sdfSetPrimaryStateFloat(system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
@@ -645,7 +645,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 }
 
 void parReleaseCellSystem(ParSystem *system) {
-    sdfQueueAssetRelease((s32)system->asset);
+    sdfQueueAssetRelease(system->asset);
     sdfReleaseResourceAllocation(system->allocation);
 }
 
@@ -1697,12 +1697,12 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->allocation = allocation;
     block->positions = (u128 *)base;
     block->asset = sdfCreateAssetWithDrawEntries();
-    func_003332D0((s32)block->asset, 1.0f);
+    sdfSetPrimaryStateFloat(block->asset, 1.0f);
     return block;
 }
 
 void parReleaseDrawBlock(ParBlock *block) {
-    sdfQueueAssetRelease((s32)block->asset);
+    sdfQueueAssetRelease(block->asset);
     sdfReleaseResourceAllocation(block->allocation);
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -18,7 +19,6 @@ void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
 void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
-void sdfDestroyMotion(void *arg);
 void func_00111258(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 

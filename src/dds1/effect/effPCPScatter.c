@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -81,8 +82,8 @@ extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
-extern s32 effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
-extern s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
+extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
+extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
 
 extern void effPcpScatterReleasePoolResources(PcpScatterPool *work);
@@ -1129,8 +1130,7 @@ void func_00172C60(void)
 }
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern void *sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(void *obj, f32 value);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 typedef struct EffPacketParams {
     s16 parameterCount;
     s16 vertexCount;
@@ -1175,16 +1175,16 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     recordBlock = (u32 *)sdfResourceRetainAddress(allocation);
     memset(recordBlock, 0, allocationBytes);
     pool = (PcpScatterPool *)(recordBlock + (recordWords + auxWords));
-    pool->recordBase = (s32)recordBlock;
+    pool->recordBase = (u8 *)recordBlock;
     pool->unk10 = 1;
-    pool->auxRecordBase = (s32)(recordBlock + recordWords);
+    pool->auxRecordBase = (u8 *)(recordBlock + recordWords);
     pool->secondWordCount = auxWords;
     pool->allocation = allocation;
     pool->unk1C = 1.0f;
     pool->color = EFF_SCATTER_NEUTRAL_COLOR;
     pool->sharedResource = 0;
-    pool->drawAsset = (u32)sdfCreateAssetWithDrawEntries();
-    func_002DA420((void *)pool->drawAsset, 1.0f);
+    pool->drawAsset = sdfCreateAssetWithDrawEntries();
+    sdfSetPrimaryStateFloat(pool->drawAsset, 1.0f);
     memset(D_003D6580, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
     D_003D6580->primitive = 0x4000;
     return pool;
@@ -1196,7 +1196,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
     if (work->sharedResource != NULL) {
         effPcpScatterResRelease(work->sharedResource);
     }
-    sdfQueueAssetRelease(work->drawAsset);
+    sdfQueueAssetRelease((u32)work->drawAsset);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
@@ -1215,12 +1215,12 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        func_002DA438(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        func_002DA438((u32)pool->drawAsset, (u32)pool->sharedResource->textureHandle);
         D_003D6580->texcoords = D_00354AC0;
     } else {
         D_003D6580->texcoords = NULL;
     }
-    sdfConsAppendAssetPacket(packet, (void *)pool->drawAsset, 0);
+    sdfConsAppendAssetPacket(packet, pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
     D_003D6580->colors = (u32 *)pool->auxRecordBase;
     D_003D6580->positions = (u128 *)pool->recordBase;
@@ -1439,8 +1439,8 @@ void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work)
  * Pair-count and duration divisors are unchecked; keep XYZ-only vertex setup. */
 void effScatterRingInit(PcpScatterInstance *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
-    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = effGetScatterNarrowBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 angle;
     f32 angleStep;
@@ -1512,7 +1512,7 @@ void effScatterRingInit(PcpScatterInstance *work, s32 index)
  * Keep the narrow-block lookup even though its returned pointer is unused. */
 void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 radius;
     f32 rise;
@@ -1714,8 +1714,8 @@ void effScatterReleaseInstanceResources(PcpScatterInstanceB *work)
  * Preserve RNG order and unchecked pair-count division rather than folding samples. */
 void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
-    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = effGetScatterNarrowBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 angle;
     f32 angleStep;
@@ -1787,7 +1787,7 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
  * The native unused narrow-block lookup remains part of this sequence. */
 void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 radius;
     f32 rise;
@@ -2004,8 +2004,8 @@ void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work)
  * The UV extents retain this variant's native member order and unsigned conversions. */
 void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
-    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
+    f32 *uv = effGetScatterNarrowBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 angle;
     f32 angleStep;
@@ -2076,7 +2076,7 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
  * Keep the otherwise unused narrow-block lookup and XYZ-only vertex construction. */
 void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterParticle *ring;
     f32 radius;
     f32 rise;
@@ -2347,7 +2347,7 @@ void effReleaseScatterWorkResources(PcpScatterPlainInstance *work)
 
 /* Seed a flat-ring particle and its paired UVs with independent samples. */
 void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
-    f32 *uv = (f32 *)effGetScatterNarrowBlock(work->scatterObject, index);
+    f32 *uv = effGetScatterNarrowBlock(work->scatterObject, index);
     PcpScatterPlainParticle *ring;
     f32 angle;
     f32 angleStep;
@@ -2397,7 +2397,7 @@ void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
  * Preserve the narrow-block lookup and the native XYZ-only setup. */
 void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
 {
-    f32 *vertex = (f32 *)effGetScatterWideBlock(work->scatterObject, index);
+    f32 *vertex = effGetScatterWideBlock(work->scatterObject, index);
     PcpScatterPlainParticle *ring;
     f32 angle;
     f32 radius;

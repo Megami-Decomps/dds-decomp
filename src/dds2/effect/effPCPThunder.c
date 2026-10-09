@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -2912,7 +2913,6 @@ extern EffThunderDrawParams D_00451FC0;
 
 struct SdfTextParam;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void func_003332D0(struct SdfTextParam *, f32);
 extern const f32 D_003B1190[8][4];
 extern const u32 D_003B1100[28];
 extern const u32 D_003B1170[8];
@@ -2947,7 +2947,7 @@ EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivis
     memcpy(history->endPoints, D_003B1190, sizeof(D_003B1190));
     asset = sdfCreateAssetWithDrawEntries();
     history->resourceHandle = asset;
-    func_003332D0((struct SdfTextParam *)asset, 1.0f);
+    sdfSetPrimaryStateFloat(asset, 1.0f);
     memset(&D_00451F90, 0, 0x2C);
     D_00451F90.flags = 0x4000;
     D_00451F90.primitiveIndices = D_003B1100;

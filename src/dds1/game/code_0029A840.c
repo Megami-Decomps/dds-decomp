@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
@@ -74,8 +75,6 @@ extern u8 btlIsRuntimeAllocated(void);
 extern s32 btlIsCurrentActorFullyMarked(void);
 
 extern EffModelOwner *effCreateModelOwner();
-
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern u32 effSharedTextureReferenceCount;
 extern SdfTex *D_003BC958;

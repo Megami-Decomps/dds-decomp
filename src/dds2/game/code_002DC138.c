@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
@@ -20,8 +21,6 @@ typedef struct EffModelOwner {
     SdfLightingPacketStorage *ownedBuffer;
     u32 flags;
 } EffModelOwner;
-
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 
 extern u32 effModelUpdateControlFlags;
@@ -655,8 +654,6 @@ void effCopyResourceOwner(void *destination, void *source) {
     }
 }
 
-
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 void func_002DD3C0(void *work) {
     EffResourceOwner *owner = work;

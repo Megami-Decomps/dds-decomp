@@ -5748,6 +5748,7 @@
 0x002B4770	effCopyActiveResourceSecondaryVector	inferred	Copies a vector into the second vector slot of active resource work. [names_reviewed8.tsv]
 0x002B4788	effSetActiveResourceColor	inferred	Writes the provided color to active resource's color field. [names_reviewed8.tsv]
 0x002B4790	effSetActiveResourceScale	inferred	Stores the runtime resource owner scale float at offset 0x20; registered alongside its vector and color setters.
+0x002B4798	effCreateParticleSharedResourceFromFile	inferred	File-operation factory allocates the complete shared particle resource, copies the primary payload, and resolves its retained billboard or reference resource.
 0x002B4998	effReleaseParticleResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B49E8	effCloneParticleSharedResource	inferred	Allocates particle effect, copies source payload and replaces shared billboard or reference. [names_reviewed5.tsv]
 0x002B4B08	effReplaceSharedResource	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -6448,6 +6449,11 @@
 0x002DA2F8	sdfReleaseQueuedResource	inferred	Releases a resource immediately or through the registered disposal queue
 0x002DA340	sdfGrowResourceListStorage	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:436:func_002DA340; Expands the backing buffered request used by a resource list; the append path calls it when count reaches capacity.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002DA358	sdfAppendAssetToResourceList	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:440:func_002DA358; Ensures capacity, stores the asset at the current count, and increments the resource-list count.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x002DA3C0	sdfSetPrimaryStateWordFirst	inferred	Stores the first primary-state u32 at SdfAsset+0x10 and marks the primary state dirty.
+0x002DA3D8	sdfSetPrimaryStateWordSecond	inferred	Stores the second primary-state u32 at SdfAsset+0x14 and marks the primary state dirty.
+0x002DA3F0	sdfSetPrimaryStateWordThird	inferred	Stores the third primary-state u32 at SdfAsset+0x20 and marks the primary state dirty.
+0x002DA408	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at SdfAsset+0x28 and marks the primary state dirty.
+0x002DA420	sdfSetPrimaryStateFloat	inferred	Stores the primary-state float at SdfAsset+0x1C and marks the primary state dirty.
 0x002DA450	sdfSubParamCreate	inferred	allocates and inits 0x18 sub-param block with defaults
 0x002DA4C8	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA548	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]
@@ -6471,6 +6477,7 @@
 0x002DB048	sdfCopyAssetParameterState	inferred	Copies asset state and any populated text subparameters. [names_reviewed8.tsv]
 0x002DB158	sdfCopyAssetListParameterState	inferred	Copies matching asset states across resource lists. [names_reviewed8.tsv]
 0x002DB1C8	sdfDispatchAssetCommandWord	inferred	Dispatches through the table selected by the high command halfword. [names_reviewed8.tsv]
+0x002DB230	sdfCreateMotion	inferred	Allocates and links the 0x34-byte Motion owner returned to paired model and object callers.
 0x002DB308	sdfDestroyMotion	inferred	unlinks the motion from its owner's list, invokes each request callback, destroys the dev request and frees the node [names_M68_VuRest.tsv]
 0x002DB3D0	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS2 0x00334280.
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "file.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
@@ -49,7 +50,6 @@ extern void mnuUpdateTimedEffectPosition(void);
 typedef struct SoundSlot SoundSlot;
 extern SoundSlot *dds3ClaimSoundSlot(u32, u32);
 extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern s32 D_00438934;
 void func_00319F48(void);
 

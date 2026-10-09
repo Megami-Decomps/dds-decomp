@@ -555,9 +555,11 @@ typedef struct EffResourceWork {
     f32 (*normals)[4];
     u32 *colors;
     struct SdfMemBlock *streamAllocation;
-    u32 graphics6C;
+    SdfAsset *drawAsset;
     struct SdfMemBlock *backingAllocation;
 } EffResourceWork; /* 0x74 */
+typedef char EffResourceWork_drawAsset_offset_must_be_0x6C[
+    ((u32)&((EffResourceWork *)0)->drawAsset == 0x6C) ? 1 : -1];
 
 /* Position/color arrays precede this render pool; constructors clear the full allocation. */
 typedef struct EffRecordPool {
@@ -568,8 +570,8 @@ typedef struct EffRecordPool {
     u32 color;
     s32 vertexCount; /* Positions/color words, not group count. */
     f32 scale;
-    s32 recordBase;
-    s32 auxRecordBase;
+    u8 *recordBase;
+    u8 *auxRecordBase;
     SdfAsset *resource;
     SdfMemBlock *buffer;
 } EffRecordPool; /* 0x70 */
@@ -579,6 +581,10 @@ typedef char EffRecordPool_resource_offset_must_be_0x68[
     ((u32)&((EffRecordPool *)0)->resource == 0x68) ? 1 : -1];
 typedef char EffRecordPool_buffer_offset_must_be_0x6C[
     ((u32)&((EffRecordPool *)0)->buffer == 0x6C) ? 1 : -1];
+typedef char EffRecordPool_recordBase_offset_must_be_0x60[
+    ((u32)&((EffRecordPool *)0)->recordBase == 0x60) ? 1 : -1];
+typedef char EffRecordPool_auxRecordBase_offset_must_be_0x64[
+    ((u32)&((EffRecordPool *)0)->auxRecordBase == 0x64) ? 1 : -1];
 
 typedef struct EffRingParticle {
     u32 color;
@@ -670,12 +676,21 @@ typedef struct PcpScatterPool {
     u32 color;
     s32 secondWordCount;
     f32 unk1C;
-    s32 recordBase;
-    s32 auxRecordBase;
-    u32 drawAsset;
+    u8 *recordBase;
+    u8 *auxRecordBase;
+    SdfAsset *drawAsset;
     SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
+typedef char PcpScatterPool_size_must_be_0x34[(sizeof(PcpScatterPool) == 0x34) ? 1 : -1];
+typedef char PcpScatterPool_recordBase_offset_must_be_0x20[
+    ((u32)&((PcpScatterPool *)0)->recordBase == 0x20) ? 1 : -1];
+typedef char PcpScatterPool_auxRecordBase_offset_must_be_0x24[
+    ((u32)&((PcpScatterPool *)0)->auxRecordBase == 0x24) ? 1 : -1];
+typedef char PcpScatterPool_drawAsset_offset_must_be_0x28[
+    ((u32)&((PcpScatterPool *)0)->drawAsset == 0x28) ? 1 : -1];
+typedef char PcpScatterPool_allocation_offset_must_be_0x2C[
+    ((u32)&((PcpScatterPool *)0)->allocation == 0x2C) ? 1 : -1];
 
 
 

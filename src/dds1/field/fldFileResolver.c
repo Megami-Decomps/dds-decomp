@@ -1947,7 +1947,46 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldSubmitGsGradientTriangle);
+void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2) {
+    s32 coords[6];
+    s32 command;
+    s32 packet;
+    u64 *dst;
+    s32 i;
+    SdfPoolNode *descriptor;
+
+    coords[0] = x0 * 16;
+    coords[1] = y0 * 16;
+    coords[2] = x1 * 16;
+    coords[3] = y1 * 16;
+    coords[4] = x2 * 16;
+    coords[5] = y2 * 16;
+    command = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList((SdfListHead *)command);
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    for (i = 0; i < 3; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(coords[i * 2] + 0x7000) |
+            ((u64)(coords[i * 2 + 1] + 0x7900) << 32);
+        dst += 2;
+    }
+    sdfAppendPacket((SdfListHead *)command, packet);
+    descriptor = &kwlnDrawSurfaces[fldDisplayRow];
+    descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
+}
 
 void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
     s32 coords[8];
@@ -4321,7 +4360,13 @@ void func_00133640(s32 index, s32 mode) {
 }
 /*END func_00133640*/
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldSetDisplayState);
+void fldSetDisplayState(u32 state) {
+    D_003BAD98 = state;
+    D_003BADC8 = 0;
+    D_0032E570[12] = 0;
+    D_0032E570[11] = state;
+    D_003BADD8 = 0;
+}
 
 void fldInitializeDisplayPointerTable(void) {
     u32 *displayPointers = D_00330738;

@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
@@ -158,7 +159,6 @@ extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
 
 extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
 
-extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
 
 extern void btlRefreshUnitEffects(void);
 

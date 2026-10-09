@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -436,7 +437,7 @@ typedef struct EffPCPTwinWork {
 extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
-extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
+extern void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 
 typedef struct EffPCPCrossWork {
     u32 unk00;
@@ -638,7 +639,7 @@ typedef struct EffPCPSprayWork {
 } EffPCPSprayWork; /* 0x98 */
 
 
-extern void mdlStorePrimaryVectorVU(void *obj);
+extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
@@ -4353,7 +4354,6 @@ typedef struct EffPCPBeamDrawParams {
 extern EffPCPBeamDrawParams D_004520B0;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
-extern void func_003332D0(struct SdfTextParam *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
@@ -4371,7 +4371,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfCreateAssetWithDrawEntries();
-    func_003332D0((struct SdfTextParam *)node->assetHandle, 1.0f);
+    sdfSetPrimaryStateFloat((struct SdfAsset *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_004520B0, 0, sizeof(D_004520B0));
@@ -5119,8 +5119,8 @@ typedef struct EffPCPPulseBattle {
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void func_00340DC8(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
-extern void mdlStoreTertiaryVectorVU(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
