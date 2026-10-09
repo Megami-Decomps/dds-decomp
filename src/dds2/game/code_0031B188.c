@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "mnu_work.h"
 #include "file.h"
+#include "eff_update_flags.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "mnu_shooting.h"
@@ -525,12 +526,12 @@ void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
 }
 
 void mnuPauseEffectQueueFrameAdvance(void) {
-    fileSetRenderFlag(2);
+    fileSetRenderFlag(EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE);
 }
 
 
 u32 mnuResumeEffectQueueFrameAdvance(void) {
-    return fileClearRenderFlag(2);
+    return fileClearRenderFlag(EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE);
 }
 
 
