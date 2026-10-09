@@ -201,17 +201,9 @@ extern u32 effBTLFieldColorGetFinalSelector(void);
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 
-extern void fileJobInvokeRotationCallback(void *, void *);
-
-extern void fileJobInvokeScaleCallback(void *, f32);
-
 extern u8 D_0045C270[];
 
 extern void effComputeBattleCameraPositionVU(u8 *);
-
-extern void fileDispatchJobTypeCallback(void *, u32);
-
-extern void fileJobInvokePositionCallback(void *, void *);
 
 
 typedef struct EffResourceBankSlot {
@@ -8836,7 +8828,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source)
 void effInvokeFileJobWithBattleCamera(u32 work) {
     if (effAuxiliaryFileQueue == 0) {
         effApplyBattleCameraToObject();
-        fileJobInvokeTypeCallback(work);
+        fileJobInvokeTypeCallback((FileJobPayload *)work);
         return;
     }
 }

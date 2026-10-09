@@ -4452,50 +4452,50 @@ void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
     }
 }
 
-void fileJobNotifyComplete(void *work) {
-    u16 id = ((FileJobPayload *)work)->type;
+void fileJobNotifyComplete(FileJobPayload *job) {
+    u16 id = job->type;
 
     if (fileJobTypeOperations[id].reset != NULL) {
-        fileJobTypeOperations[id].reset(((FileJobPayload *)work)->data);
+        fileJobTypeOperations[id].reset(job->data);
     }
 }
 
-void fileJobInvokeTypeCallback(FileJobPayload *work) {
-    u16 idx = work->type;
-    void *data = work->data;
+void fileJobInvokeTypeCallback(FileJobPayload *job) {
+    u16 idx = job->type;
+    void *data = job->data;
 
     D_003E916C[idx].cb(data);
 }
 
-void fileJobInvokePositionCallback(void *work, void *extra) {
-    u16 id = ((FileJobPayload *)work)->type;
+void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
+    u16 id = job->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(((FileJobPayload *)work)->data, extra);
+        D_003E9180[id].func(job->data, extra);
     }
 }
 
-void fileJobInvokeRotationCallback(void *work, void *extra) {
-    u16 id = ((FileJobPayload *)work)->type;
+void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
+    u16 id = job->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(((FileJobPayload *)work)->data, extra);
+        D_003E9184[id].func(job->data, extra);
     }
 }
 
-void fileJobInvokeScaleCallback(void *work, f32 scale) {
-    u16 id = ((FileJobPayload *)work)->type;
+void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale) {
+    u16 id = job->type;
 
     if (D_003E9188[id].func != NULL) {
-        D_003E9188[id].func(((FileJobPayload *)work)->data, scale);
+        D_003E9188[id].func(job->data, scale);
     }
 }
 
-void fileDispatchJobTypeCallback(void *work, u32 color) {
-    u16 id = ((FileJobPayload *)work)->type;
+void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
+    u16 id = job->type;
 
     if (D_003E918C[id].func != NULL) {
-        D_003E918C[id].func(((FileJobPayload *)work)->data, color);
+        D_003E918C[id].func(job->data, color);
     }
 }
 
@@ -4888,7 +4888,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
 void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
     FileJob *job = queue->first;
     while (job != NULL) {
-        fileJobNotifyComplete(job->id);
+        fileJobNotifyComplete((FileJobPayload *)job->id);
         job = job->next;
     }
     queue->updateFrame = 0;
