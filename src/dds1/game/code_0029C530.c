@@ -4693,12 +4693,12 @@ void effResetBillTable(u8 *work) {
 typedef struct EffectNodeHeader {
     u8 *entries;
     u32 unk_04;
-    u8 *allocation;
+    struct SdfMemBlock *allocation;
 } EffectNodeHeader;
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
     struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -4876,7 +4876,7 @@ void effResetBillboardFrameInstanceCounters(u8 *work) {
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
     struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -5044,7 +5044,7 @@ void effResetParticleBillFrameCounters(u8 *work) {
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
     struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress(base);
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -5396,9 +5396,9 @@ void effResetAnimationFrameEntries(u8 *work) {
 u32 *effAllocateAnimationBuffer(EffBillFlameConfig *work) {
     u32 age;
     u32 *buffer;
-    void *allocation = sdfAllocGeneralBlock(work->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(work->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
 
-    buffer = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    buffer = (u32 *)sdfResourceRetainAddress(allocation);
     age = work->header.segments;
 
     buffer[0] = (u32)(buffer + 3);
@@ -5630,8 +5630,8 @@ void effResetSlotAnimationRecord(s32 work) {
 }
 
 u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
-    void *allocation = sdfAllocGeneralBlock(0xC);
-    u32 *buffer = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0xC);
+    u32 *buffer = (u32 *)sdfResourceRetainAddress(allocation);
     u32 count = work->samples.quantizedSamples;
 
     buffer[2] = (u32)allocation;
