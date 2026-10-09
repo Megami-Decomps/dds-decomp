@@ -898,12 +898,13 @@ void sdfMotionApplySampleToTarget(SdfMotionIndexedTextBinding *a0, f32 t) {
 void func_002DCF60(void) {
 }
 
-void *func_002DCF68(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *motion, s32 unused,
+                                                                       s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(r, a0, D_00398348, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_00398348, options);
+    return binding;
 }
 
 void sdfMotionApplySampledSecondaryTextValue(SdfMotionIndexedTextBinding *a0, f32 t) {

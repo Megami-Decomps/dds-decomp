@@ -6536,6 +6536,7 @@
 0x002DCE90	sdfMotionCreateDirectTextKeyBinding	inferred	Allocates indexed track work preceding the direct text-key application handler. [names_reviewed6.tsv]
 0x002DCEF0	sdfMotionApplySelectedTextKey	inferred	Applies the selected key's first five-float block directly without interpolation. [names_reviewed6.tsv]
 0x002DCF28	sdfMotionApplySampleToTarget	inferred	Samples first key at provided time and applies that sample to target. [names_reviewed6.tsv]
+0x002DCF68	sdfMotionCreateSecondaryTextSampleBinding	inferred	Allocates a 0x24 indexed text binding for the direct secondary-text sample table D_00398348; registered sample callbacks copy the selected key into secondary text.
 0x002DCFC8	sdfMotionApplySampledSecondaryTextValue	inferred	Samples first key at time and applies it to secondary text subparameter. [names_reviewed6.tsv]
 0x002DD000	sdfMotionSampleTextScalarsAtTime	inferred	Samples a motion key at the specified time and copies text scalars. [names_reviewed10.tsv]
 0x002DD070	sdfSelectMotionPointerEntry	inferred	Uses 16-byte entry index to select a motion pointer from nested source table.
