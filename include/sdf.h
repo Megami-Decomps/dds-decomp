@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf_list_node.h"
+#include "sdf_gs_packet.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
@@ -163,6 +164,10 @@ typedef enum SdfStreamAudioMode {
 } SdfStreamAudioMode;
 
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+struct SdfStreamInputDmaTag;
+struct MovObj;
+struct SoundFormat;
+
 typedef struct SdfStreamFrameNode {
     struct SdfStreamFrameNode *streamPrev;
     struct SdfStreamFrameNode *streamNext;
@@ -194,15 +199,15 @@ typedef struct SdfStreamFrameNode {
     u32 cycleLength;
     u32 tickCount;
     s32 playbackFrameIndex;
-    void *inputDmaChain;
+    struct SdfStreamInputDmaTag *inputDmaChain;
     u8 headerReady;
     u8 done;
     u8 filledSlots;
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
-    u32 source;
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext; /* Owner context passed to the read callback. */
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
@@ -241,10 +246,16 @@ typedef char SdfStreamFrameNode_inputDmaChain_offset_must_be_0x4C[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaChain == 0x4C) ? 1 : -1];
 typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
     ((u32)&((SdfStreamFrameNode *)0)->scratchBuffer == 0x54) ? 1 : -1];
+typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
+    ((u32)&((SdfStreamFrameNode *)0)->readContext == 0x60) ? 1 : -1];
 
-typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
 
 void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *, u8 *, s32);
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 void sdfAdvanceStreamPlayback(s32 cadence);
 
 typedef struct SdfMovieDescriptor {
@@ -467,17 +478,34 @@ typedef struct SdfResEntry {
     u32 baseAddress; /* Shifted right six bits when patching a GS texture base. */
 } SdfResEntry;
 
-/* Two-slot packet builder and source/mode state (0x60); DDS1/2 game/code_002D33C8/0032C278.c. */
+/* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
 typedef struct SdfPacketBuilder {
     u8 pad00[4];
     void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
     u8 pad08[8];
-    SdfPacket packets[2];
+    SdfGsPacketHeader packetHeader;
+    SdfGsRegisterWrite frame;
+    SdfGsRegisterWrite zbuf;
     SdfGraphObj *source;
     u32 frameMask;
     s32 region;
     s32 mode;
 } SdfPacketBuilder;
+
+typedef char SdfPacketBuilder_size_must_be_0x60[
+    (sizeof(SdfPacketBuilder) == 0x60) ? 1 : -1];
+typedef char SdfPacketBuilder_header_at_0x10[
+    ((u32)&((SdfPacketBuilder *)0)->packetHeader == 0x10) ? 1 : -1];
+typedef char SdfPacketBuilder_frame_at_0x30[
+    ((u32)&((SdfPacketBuilder *)0)->frame == 0x30) ? 1 : -1];
+typedef char SdfPacketBuilder_zbuf_at_0x40[
+    ((u32)&((SdfPacketBuilder *)0)->zbuf == 0x40) ? 1 : -1];
+typedef char SdfPacketBuilder_source_at_0x50[
+    ((u32)&((SdfPacketBuilder *)0)->source == 0x50) ? 1 : -1];
+
+void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
+void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source,
+    u32 frameMask, s32 region, s32 mode);
 
 /* Linked named resource (0x24); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResource {

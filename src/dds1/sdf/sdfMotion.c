@@ -177,7 +177,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     for (i = 0; i < motion->request->usedCount; i++) {
         object = ((void **)motion->request->buffer)[i];
         object->dispatch->bindKeyTrack(object, (SdfMotionKeyTrack *)bindingData);
-        bindingData += *(u32 *)bindingData;
+        bindingData += ((SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
     }
 }
 /* Select a motion with no lead-in and no blend duration. */

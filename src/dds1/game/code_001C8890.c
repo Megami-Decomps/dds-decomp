@@ -410,7 +410,7 @@ extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
 extern void btlCreateRainEffect(u32, u32);
 
-extern void btlRepositionPartyAroundBattleCenter(void);
+extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern s32 func_001A3638(void);
 
@@ -1724,7 +1724,7 @@ u64 btlCommandTaskReturnStart(u8 *task) {
 
 extern s32 btlCountTasksByKind(u16 kind);
 
-extern void btlRepositionPartyAroundBattleCenter(void);
+extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern s32 func_001A3638(void);
 
@@ -14662,11 +14662,11 @@ s32 func_001F5028(s32 filter) {
 
 extern s32 func_001F4D50(f32 *);
 
-void btlRepositionPartyAroundBattleCenter(void) {
+s32 btlRepositionPartyAroundBattleCenter(void) {
     f32 vector[4];
     u8 *context = (u8 *)btlGetRuntime();
     PCP_COPY_VECTOR(vector, context);
-    func_001F4D50(vector);
+    return func_001F4D50(vector);
 }
 
 s64 func_001F53F0(void) {

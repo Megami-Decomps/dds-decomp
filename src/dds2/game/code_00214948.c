@@ -5278,7 +5278,105 @@ u32 btlOffsetSpecialActionValue(BtlUnit *unit, u32 base) {
     return base;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00222450);
+/* Each species has three position/quaternion camera presets. */
+typedef struct BtlBossCameraPreset {
+    f32 x, y, z;
+    f32 qx, qy, qz, qw;
+} BtlBossCameraPreset;
+
+extern BtlBossCameraPreset D_003BF768[5][3];
+
+s32 func_00222450(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *target;
+    BtlUnit *candidate;
+    s32 speciesPreset;
+    u32 cameraPreset;
+    u32 flags;
+
+    if (command->link == NULL) {
+        return 1;
+    }
+    target = btlGetTargetUnitForLink(command);
+    if (target == NULL) {
+        return 1;
+    }
+    if (target->status.flags & 0x400) {
+        return 1;
+    }
+
+    if (battle->unk268 == 3) {
+        cameraPreset = target->lookupId;
+    } else {
+        cameraPreset = target->lookupId == 0 ? 0 : 2;
+    }
+    if ((u32)cameraPreset >= 3) {
+        return 1;
+    }
+
+    speciesPreset = -1;
+    candidate = battle->units;
+    if (candidate == NULL) {
+        return 1;
+    }
+    for (;;) {
+        flags = candidate->status.flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (candidate->partyRecord.unitId) {
+                case 0x11D: speciesPreset = 0; break;
+                case 0x11E: speciesPreset = 1; break;
+                case 0x11F: speciesPreset = 2; break;
+                case 0x120: speciesPreset = 3; break;
+                case 0x121: speciesPreset = 4; break;
+                }
+            }
+        }
+        /* A matching tail entry still exits without setting the camera. */
+        candidate = candidate->nextActor;
+        if (candidate == NULL) {
+            goto done;
+        }
+        if (speciesPreset != -1) {
+            break;
+        }
+    }
+
+    btlFlagAllUnitDefeatCandidatesTask();
+    btlInitMotionTransformFromComponents(camera,
+        D_003BF768[speciesPreset][cameraPreset].x,
+        D_003BF768[speciesPreset][cameraPreset].y,
+        D_003BF768[speciesPreset][cameraPreset].z,
+        D_003BF768[speciesPreset][cameraPreset].qx,
+        D_003BF768[speciesPreset][cameraPreset].qy,
+        D_003BF768[speciesPreset][cameraPreset].qz,
+        D_003BF768[speciesPreset][cameraPreset].qw, 40.0f);
+
+    if (rotate == 1 && battle->unk268 == 3) {
+        switch (cameraPreset) {
+        case 0:
+            func_003364B8(-0.13089969f);
+            func_00336818(0.13089969f);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        case 1:
+            func_003364B8(-0.13089969f);
+            break;
+        case 2: {
+            f32 angle = -0.13089969f;
+            func_003364B8(angle);
+            func_00336818(angle);
+            sdfComposeVuMatrixFromRegisters();
+            break;
+        }
+        }
+        VU0_LOAD_VF(vf10, camera->direction);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, camera->direction);
+    }
+done:
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapA);
 

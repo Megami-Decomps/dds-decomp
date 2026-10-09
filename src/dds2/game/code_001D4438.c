@@ -123,7 +123,7 @@ extern SceneSlotFadeWork *D_00438F54;
 
 
 extern s32 func_00206090();
-extern void btlRepositionPartyAroundBattleCenter();
+extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 func_001AC648();
 extern void func_001AEEA8();
 extern void kwlnFadeBackgroundStartOut();
