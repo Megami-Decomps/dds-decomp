@@ -6,6 +6,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
 #include "sdf_packet_append.h"
 #include "sdf_dev_state.h"
@@ -204,7 +205,6 @@ extern void effBlurStepScaleSlotsAndDraw(void *);
 extern s32 effRequestResourceByMode(u32, u32, u32, void **);
 
 
-extern void func_00288788(void *);
 
 
 

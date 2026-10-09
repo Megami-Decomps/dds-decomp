@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
@@ -374,7 +375,6 @@ extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 extern u32 fldAreaCachedResource;
 extern struct FileRequest *fldAreaPackedArchive;
 extern u8 D_003BAC90[];
-extern void func_00288788(u32 arg0);
 extern s32 D_0032E4C8[];
 extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
@@ -1052,7 +1052,7 @@ void fldFreeDisplayObjects(void) {
                 work = work->next;
             } while (work != NULL);
         }
-        func_00288788((u32)fldAreaLoadRequest);
+        func_00288788(fldAreaLoadRequest);
         fldAreaLoadRequest = NULL;
     }
     fldPendingArea = 0;
@@ -1286,7 +1286,7 @@ void fldReleaseAreaResourceCache(void) {
     }
     resourceHandle = (u32)fldAreaPackedArchive;
     if (resourceHandle != 0) {
-        func_00288788(resourceHandle);
+        func_00288788((void *)resourceHandle);
         fldAreaPackedArchive = 0;
     }
     D_003C9200[0] = D_003BAC90[0];
@@ -1404,7 +1404,7 @@ void fldReleaseFieldResources(void) {
                 i++;
             } while (work != 0);
         }
-        func_00288788((u32)D_003BAC38);
+        func_00288788(D_003BAC38);
         D_003BAC38 = NULL;
     }
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "file.h"
 #include "eff_resource_slots.h"
@@ -242,7 +243,6 @@ const char D_0042D6B8[] __attribute__((aligned(8))) = "%s ... OK!! \n";
 const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \n";
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
-extern void func_002C7CE8();
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
@@ -11779,7 +11780,6 @@ typedef struct BtlFieldLoadArgs {
 } BtlFieldLoadArgs;
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern void func_00288788(s32);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
                                             const SdfTextureOffsetListHeader *, s32);
 
@@ -11826,7 +11826,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                 node = node->next;
                 i++;
             }
-            func_00288788((s32)request);
+            func_00288788(request);
             args->request = NULL;
         }
         if (args->fieldF1 != NULL && args->fieldF2 != NULL && args->fieldTB != NULL) {
@@ -13024,7 +13024,6 @@ SoundTask *sndCreateSetStateTask(void) {
     return task;
 }
 
-extern void func_00288788(s32 archive);
 
 extern char D_003A5008[];
 extern char D_003A5020[];
@@ -13056,7 +13055,7 @@ void sndLoadSysEffLb(void) {
         D_0035F748[i].resource = 0;
         D_0035F748[i].unk_08 = 0;
     }
-    func_00288788(archive);
+    func_00288788((void *)archive);
 }
 /* Register available SYSEFF handles; unavailable slots are left untouched. */
 void btlRefreshSoundEntries(void) {

@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
 #include "sdf_motion.h"
 #include "mdl.h"
@@ -2599,7 +2600,6 @@ void fldUpdateMenuResourceEffects(void) {
 }
 
 
-extern void func_00288788(void *);
 
 
 extern s32 D_003BD7EC, D_003BD7F0, D_003BAF68, D_003BAF6C, D_003BAF50, D_003BAF54;

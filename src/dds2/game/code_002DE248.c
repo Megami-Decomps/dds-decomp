@@ -7,6 +7,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "dds3obj.h"
 #include "sdf_texture_draw_packet.h"
@@ -11245,7 +11246,6 @@ typedef struct EffRequest {
 
 
 
-extern void func_002C7CE8(void *);
 
 
 
