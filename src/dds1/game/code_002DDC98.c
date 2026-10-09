@@ -1159,7 +1159,7 @@ void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitNodeHeaderFromWords(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitAssetDrawEntryReferenceNode(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
