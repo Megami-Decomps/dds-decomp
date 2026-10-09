@@ -7124,12 +7124,6 @@ SoundTask *sndCreateEarringTask(void) {
     return task;
 }
 
-typedef struct BattleVoiceLoad {
-    u32 request;
-    s32 state;
-    s32 index;
-} BattleVoiceLoad;
-
 extern BattleVoiceEntry D_00377650[];
 
 extern char D_003A5328[];
@@ -7138,26 +7132,26 @@ extern char D_003A5340[];
 
 extern char D_003A5358[];
 
-s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
+s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    s32 resource;
+    struct SdfMemBlock *resource;
     u32 data;
     u32 size;
 
     if (args->state == 0) {
-        func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
-        args->request = (u32)fileQueueDefaultCallbackRequest(path);
+        func_003014F0(path, D_003A5328, D_00377650[args->entryIndex].fileName);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
-    } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->request) != 0) {
+    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle((struct FileRequest *)args->request);
-        data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->request);
-        filePollEntryCleanup((struct FileRequest *)(u32)args->request);
-        func_0026ABA8(data, size, D_00377650[args->index].volume);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
+        resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+        data = sdfResourceRetainAddress(resource);
+        size = (s32)fileGetResourceSize(args->request);
+        filePollEntryCleanup(args->request);
+        func_0026ABA8(data, size, D_00377650[args->entryIndex].volume);
+        sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf(D_003A5358);
         return 1;
     }
@@ -7167,7 +7161,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
 
 void *sndCreateAtracEffectLoadTask(u32 owner) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    Atrac3LoadTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x58;
@@ -7175,9 +7169,9 @@ void *sndCreateAtracEffectLoadTask(u32 owner) {
     *(void **)(task + 0x4C) = sndPollAtrac3SELoadTask;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = 0;
-    arguments[1] = 0;
-    arguments[2] = owner;
+    arguments->request = 0;
+    arguments->state = 0;
+    arguments->entryIndex = owner;
     return task;
 }
 

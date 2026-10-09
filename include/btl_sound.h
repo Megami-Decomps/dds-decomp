@@ -130,6 +130,20 @@ typedef char BtlDeadLoadArgs_request_offset_must_be_4[
 typedef char BtlDeadLoadArgs_resourceAllocation_offset_must_be_8[
     ((u32)&((BtlDeadLoadArgs *)0)->resourceAllocation == 8) ? 1 : -1];
 
+/* Fixed task payload for asynchronous ATRAC3 sample effects. */
+typedef struct Atrac3LoadTaskArgs {
+    struct FileRequest *request; /* 0x00 */
+    s32 state; /* 0x04 */
+    s32 entryIndex; /* 0x08 */
+} Atrac3LoadTaskArgs;
+
+typedef char Atrac3LoadTaskArgs_size_must_be_0x0C[
+    (sizeof(Atrac3LoadTaskArgs) == 0x0C) ? 1 : -1];
+typedef char Atrac3LoadTaskArgs_state_offset_must_be_4[
+    ((u32)&((Atrac3LoadTaskArgs *)0)->state == 4) ? 1 : -1];
+typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
+    ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
+
 struct ActiveSoundNode;
 struct SoundResourceLink;
 struct SoundLink;
