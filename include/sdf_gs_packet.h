@@ -30,7 +30,11 @@ enum {
     SDF_GS_FRAME_1 = 0x4C,
     SDF_GS_FRAME_2 = 0x4D,
     SDF_GS_ZBUF_1 = 0x4E,
-    SDF_GS_ZBUF_2 = 0x4F
+    SDF_GS_ZBUF_2 = 0x4F,
+    SDF_GS_BITBLTBUF = 0x50,
+    SDF_GS_TRXPOS = 0x51,
+    SDF_GS_TRXREG = 0x52,
+    SDF_GS_TRXDIR = 0x53
 };
 
 /* Values written to the PRIM and TEST registers by the centered-bounds packet. */

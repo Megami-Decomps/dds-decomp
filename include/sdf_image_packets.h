@@ -3,11 +3,26 @@
 
 #include "sdf.h"
 #include "sdf_packet_patch.h"
+#include "sdf_gs_packet.h"
+
+/* The four A+D writes controlling a GS image transfer. */
+typedef struct SdfImageTransferRegisters {
+    SdfGsRegisterWrite bitbltbuf;
+    SdfGsRegisterWrite trxpos;
+    SdfGsRegisterWrite trxreg;
+    SdfGsRegisterWrite trxdir;
+} SdfImageTransferRegisters;
+
+typedef char SdfImageTransferRegisters_layout[
+    (sizeof(SdfImageTransferRegisters) == 0x40 &&
+     (u32)&((SdfImageTransferRegisters *)0)->trxpos == 0x10 &&
+     (u32)&((SdfImageTransferRegisters *)0)->trxreg == 0x20 &&
+     (u32)&((SdfImageTransferRegisters *)0)->trxdir == 0x30) ? 1 : -1];
 
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct SdfResourcePacket {
     u64 header[14];
-    SdfPacket transfer[2];
+    SdfImageTransferRegisters transfer;
     s32 quadwordCount;
     u32 unkB4;
     u32 unkB8;
@@ -27,7 +42,7 @@ typedef char SdfResourcePacket_tail_offset_must_be_0xC0[
 /* Host-to-local image transfer packet followed by its flush terminal tag (0xB0). */
 typedef struct SdfDescriptorPacket {
     u64 header[4];
-    SdfPacket transfer[2];
+    SdfImageTransferRegisters transfer;
     u64 imageReferenceTag;
     u64 imageReferencePad;
     u64 imageGifTag0;
@@ -55,7 +70,7 @@ typedef struct SdfGraphCopyPacket {
     u32 resourceIndexXor; /* Selects the source resource for the queued buffer. */
     u32 unk0C;
     SdfPacket drawHeader;
-    SdfPacket transfer[2];
+    SdfImageTransferRegisters transfer;
 } SdfGraphCopyPacket;
 
 typedef char SdfGraphCopyPacket_resourceIndexXor_at_8[
