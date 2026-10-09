@@ -370,7 +370,42 @@ void func_0016F7B0(EffRingWork *work)
 }
 
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
-INCLUDE_ASM(const s32, "game/code_0016F1D0", effRecordPoolCreateFiveVertexGroups);
+extern void *memset(void *dst, s32 value, u32 size);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void func_002DA420(u32 asset, f32 value);
+
+/* Allocate five 16-byte positions and five color words per group, then the 0x70-byte header. */
+EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
+    EffRecordPool *pool;
+    SdfMemBlock *handle;
+    u8 *block;
+    s32 vertexCount;
+    s32 recordBytes;
+    s32 size;
+    s32 quads;
+
+    vertexCount = count * 5;
+    recordBytes = vertexCount * 5 * 4;
+    quads = recordBytes >> 4;
+    recordBytes = ((recordBytes & 0xF) != 0 ? quads + 1 : quads) << 4;
+    size = recordBytes + EFF_POOL_HEADER_BYTES;
+    handle = sdfAllocGeneralBlock(size);
+    block = (u8 *)sdfResourceRetainAddress(handle);
+    memset(block, 0, size);
+    pool = (EffRecordPool *)(block + recordBytes);
+    pool->recordBase = (s32)block;
+    pool->auxRecordBase = (s32)(block + vertexCount * 16);
+    pool->color = EFF_NEUTRAL_COLOR;
+    pool->drawMode = 2;
+    pool->vertexCount = vertexCount;
+    pool->buffer = handle;
+    pool->scale = 1.0f;
+    pool->resource = sdfCreateAssetWithDrawEntries();
+    func_002DA420((u32)pool->resource, 1.0f);
+    memset(D_003D6550, 0, EFF_PACKET_PARAMS_BYTES);
+    D_003D6550->primitive = 0x4000;
+    return pool;
+}
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *group) {
