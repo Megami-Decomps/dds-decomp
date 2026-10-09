@@ -8866,7 +8866,6 @@ extern char D_004386D8[];
 extern s32 func_0035C860(char *, char *, ...);
 
 
-extern void func_002D55B0(u32, char *);
 
 
 
@@ -8930,7 +8929,7 @@ s32 effPollAttachedFile(void) {
             strcpy((char *)D_0045C1A0, request.name);
             func_0035C860(path, D_004386D8, D_0042CF70, request.nameWithPrefix);
             result = 0x400002;
-            func_002D55B0((u32)effFileQueue, path);
+            fileQueueSaveVersionedImage(effFileQueue, path);
         }
     }
     return result;

@@ -4732,7 +4732,7 @@ extern char D_0037E528[];
 
 /* Save a queue image: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
-void func_002954F0(FileQueue *queue, s32 slot) {
+void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     char path[0xD0];
     FileJobPayload payload;
     FileQueue header;
@@ -4745,10 +4745,10 @@ void func_002954F0(FileQueue *queue, s32 slot) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BC928, slot);
+        func_003014F0(path, D_003BC928, filePath);
         fd = func_0030E8F0(path, 0x602, 0x1B6);
     } else {
-        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
         fd = func_0030E8F0(path, 0x602);
     }
     image.version = 5;
