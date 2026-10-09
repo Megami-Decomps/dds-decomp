@@ -683,7 +683,6 @@ extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(u8 *node, f32 value);
 extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
 struct SdfPoolNode;
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void func_0031B080(MnuShootingWork *work);

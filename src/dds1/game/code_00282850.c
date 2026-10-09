@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
 #include "sdf_dev_state.h"
@@ -99,7 +100,6 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 
 extern void evtStageTestCreateModelEffect(s32);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void mnuApplyModelCamera(MdlCtx *);
 extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
@@ -2451,7 +2451,7 @@ void evtStageTestAdvanceMotionQueue(void) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
-        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
+        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == SDF_MOTION_STATE_TERMINAL || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
             if (motionIndex < mdlGetNodeRefHalf(model, 0)) {

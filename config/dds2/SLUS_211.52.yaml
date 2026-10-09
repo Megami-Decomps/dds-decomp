@@ -83,6 +83,8 @@ segments:
       - [0x11FE8, c, game/code_00110FE8]
       - [0x12330, c, basic/dds3AreaBasic]  # Nocturne __FILE__
       - [0x12388, c, game/code_00111388]
+      - [0x12480, c, game/code_00111480]
+      - [0x12668, c, game/code_00111668]
       - [0x126A0, c, basic/dds3MoverBasic]  # Nocturne __FILE__
       - [0x12838, c, game/code_00111838]
       - [0x12A68, c, basic/dds3ObjectBase]  # Nocturne __FILE__

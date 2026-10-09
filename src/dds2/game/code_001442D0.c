@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
@@ -3210,14 +3211,14 @@ void func_0014D0E8(void) {
                 }
             } else {
                 resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-                if (resource->first->state == 5) {
+                if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
             resource = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-            if (resource->first->state == 5) {
+            if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
                 fldObjectSlots[i].unk8 = 2;

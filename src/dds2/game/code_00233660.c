@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
@@ -1392,7 +1393,6 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
 
 extern u32 func_00232F08(void);
 extern u32 mdlGetTableWord(s32 tableIndex);
-extern void mdlDestroyContext(MdlCtx *resource);
 extern void func_00233938(void);
 extern void mdlFreeViewResources(void);
 extern u8 sdfPfsDebugMode;
@@ -1998,8 +1998,6 @@ u32 func_00236E58(void) {
 
 extern u16 mdlGetContextResourceGroup(MdlCtx *resource);
 extern u16 mdlGetContextResourceId(MdlCtx *resource);
-extern void mdlDestroyContext(MdlCtx *resource);
-extern void sdfMotionInitializeAtZeroTime(void *, s32, s32);
 
 void mdlApplyViewerResourceMenuAction(void) {
     s32 i;

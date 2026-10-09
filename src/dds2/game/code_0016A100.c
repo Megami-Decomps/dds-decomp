@@ -28,7 +28,6 @@ extern u8 D_003B0190[];
 
 extern u8 D_003B01A0[];
 
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
@@ -37,7 +36,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
-extern void mdlDestroyContext(MdlCtx *);
 
 extern MdlCtx *func_00232198(s32, s32);
 
@@ -61,7 +59,6 @@ typedef struct EffBattleUnitRgbCommand {
 
 extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

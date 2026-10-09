@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -636,7 +637,6 @@ typedef struct EffPCPSprayWork {
     EffParamWork *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void mdlStorePrimaryVectorVU(void *obj);
 
@@ -644,7 +644,6 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
 extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlBroadcastMasked(void *obj, u32 mask);
 
 
 
@@ -5124,7 +5123,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 extern void mdlStoreTertiaryVectorVU(void *work);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
-extern s32 sdfMotionUpdate(void *motion);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
 void effPcpUpdateStaggeredPulseModels(EffPCPPulseWork *work) {

@@ -1,6 +1,8 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_motion.h"
+#include "mdl.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_dev_state.h"
@@ -2869,29 +2871,19 @@ void fldReleaseObjectSlots(void) {
     }
 }
 
-typedef struct FldModelDescriptor {
-    u8 pad00[0x30];
-    u8 kind;
-} FldModelDescriptor;
-
-typedef struct FldModelResource {
-    u8 pad00[0x1C];
-    FldModelDescriptor *descriptor;
-} FldModelResource;
-
-extern void mdlAddEntryPlain(FldModelResource *, s32, s32);
-extern void mdlAddEntryFlagged(FldModelResource *, s32, s32);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern s32 fldTestSceneControlFlags(s32);
 
 void fldUpdateObjectActivation(void) {
     s32 i;
-    FldModelResource *resource;
+    MdlCtx *resource;
 
     for (i = 0; i < fldObjectSlotCount; i++) {
         switch (fldObjectSlots[i].unk8) {
         case 0:
             if (fldObjectSlots[i].activationRequested == 1) {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryPlain(resource, 0, 1);
                 fldObjectSlots[i].unk8 = fldObjectSlots[i].activationRequested;
                 switch (fldObjectSlots[i].effectVariant) {
@@ -2914,15 +2906,15 @@ void fldUpdateObjectActivation(void) {
                     break;
                 }
             } else {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-                if (resource->descriptor->kind == 5) {
+                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                     mdlAddEntryPlain(resource, 0, 0);
                 }
             }
             break;
         case 1:
-            resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
-            if (resource->descriptor->kind == 5) {
+            resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+            if (resource->first->state == SDF_MOTION_STATE_TERMINAL) {
                 mdlAddEntryFlagged(resource, 0, 2);
                 fldObjectSlots[i].activationRequested = 2;
                 fldObjectSlots[i].unk8 = 2;
@@ -2930,7 +2922,7 @@ void fldUpdateObjectActivation(void) {
             break;
         case 2:
             if (fldTestSceneControlFlags(0x40)) {
-                resource = (FldModelResource *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
+                resource = (MdlCtx *)(u32)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldObjectSlots[i].unk0);
                 mdlAddEntryFlagged(resource, 0, 3);
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].unk8 = 3;
