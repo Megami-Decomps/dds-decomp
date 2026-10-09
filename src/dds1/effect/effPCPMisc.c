@@ -301,7 +301,7 @@ extern void func_002DD968(f32 angle);
 extern void func_002DD8E8(f32 angle);
 extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
 
-extern void mdlStorePrimaryVectorVU(void *obj);
+extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
 extern u32 func_001619E8(void);
@@ -5002,8 +5002,8 @@ typedef struct EffPCPPulseBattle {
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
 extern void func_002E7F20(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
-extern void mdlStoreTertiaryVectorVU(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_002D9238(void *table, void *model);
 
