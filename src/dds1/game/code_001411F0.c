@@ -160,7 +160,7 @@ extern s32 D_0032E4C4[];
 
 extern u8 D_0034D8F0[];
 
-extern void evtCreateMessageWindowIfMissing(void *arg0);
+extern s32 evtCreateMessageWindowIfMissing(s32 unused);
 
 extern void dspStartEntry(s32 arg0);
 
@@ -3768,7 +3768,7 @@ void func_0014C648(void) {
                 dspCloseChannel();
                 fldSparkControlState.dialogPhase = 4;
                 fldSparkControlState.unk2C = 0;
-                evtCreateMessageWindowIfMissing(D_0034D8F0);
+                evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
                 dspStartEntry(3);
                 evtStoreValueAndCaptureWindowPanelValue(2);
                 evtSetMessageWindowOptionWhenOpen(0);
@@ -3946,7 +3946,7 @@ void func_0014CB08(void) {
             func_0012EA40(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
-            evtCreateMessageWindowIfMissing(D_0034D8F0);
+            evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
             dspStartEntry(4);
             fldResetPlayerSceneObjectState();
             fldClearObjectEntryHandles();
@@ -4049,7 +4049,7 @@ void fldResetEventSceneState(void) {
 }
 
 void fldStartDeferredFieldExit(void) {
-    evtCreateMessageWindowIfMissing(D_0034D8F0);
+    evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
     dspStartEntry(5);
     fldResetPlayerSceneObjectState();
     D_0032E4C4[0] = 2;

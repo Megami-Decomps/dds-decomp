@@ -1753,7 +1753,13 @@ s32 func_0024D148(s32 unused0, s32 unused1, EvtRuntime *viewer) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00247518", evtViewerPickNextHandler);
+/* Hand control back to the frame update whether or not the task still owns a viewer. */
+s32 evtViewerPickNextHandler(KwlnTask *task) {
+    if (kwlnTaskGetUserValue(task) != 0) {
+        return (s32)evtViewerUpdateFrame;
+    }
+    return (s32)evtViewerUpdateFrame;
+}
 
 extern s16 D_004372B4;
 extern s8 D_0037F510[];

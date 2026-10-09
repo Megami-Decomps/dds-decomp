@@ -660,7 +660,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
         entryWords = sdfAllocSizeClassBlock(SDF_ASSET_DRAW_ENTRY_BYTES);
-        asset->entries[entryIndex] = entryWords;
+        asset->drawEntries[entryIndex] = (SdfAssetEntry *)entryWords;
         entryWords[0] = 0x6E05C000;
         entryWords[0x18 / 4] = 0x6005C005;
         entryWords[0x30 / 4] = 0;
@@ -743,8 +743,8 @@ void sdfAssetRelease(SdfAsset *asset) {
         return;
     }
     sdfLiveAssetCount--;
-    sdfReleaseChipBlock(asset->entries[0]);
-    sdfReleaseChipBlock(asset->entries[1]);
+    sdfReleaseChipBlock(asset->drawEntries[0]);
+    sdfReleaseChipBlock(asset->drawEntries[1]);
     sdfReleaseChipBlock(asset->primarySubParam);
     sdfReleaseChipBlock(asset->secondarySubParam);
     sdfReleaseChipBlock(asset);
@@ -872,7 +872,7 @@ void sdfCopyAssetScalarPairToDrawEntry(SdfAsset *source, SdfAssetEntry *destinat
  * entryIndex is unchecked and expected to be zero or one. */
 void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
-    SdfAssetEntry *drawEntry = asset->entries[entryIndex];
+    SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
     }
@@ -892,7 +892,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
  * Retain the other entry's captured bits; entryIndex remains unchecked. */
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
-    SdfAssetEntry *drawEntry = asset->entries[entryIndex];
+    SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
     } else if (sdfForcedAssetTextureMode != 0) {

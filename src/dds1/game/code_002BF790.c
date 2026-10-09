@@ -8,6 +8,9 @@
 #include "itf_grid_text.h"
 #include "itf_draw_grid.h"
 #include "sdf.h"
+#include "sdf_draw.h"
+#include "sdf_projection.h"
+#include "pcp_vu0.h"
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
@@ -502,7 +505,62 @@ void itfGridUnpackColorChannels(u64 *channels, u32 color) {
     channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0628);
+typedef struct DmaPacketHeader {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 reservedWord;
+    u32 command;
+    u8 pad10[0x10];
+} DmaPacketHeader;
+
+typedef struct ConsMatrixPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 reservedWord;
+    u32 command;
+    u8 matrixA[0x40];
+    u8 matrixB[0x40];
+    u8 vecC[0x10];
+    u8 vecD[0x10];
+    u8 vecE[0x10];
+    u32 stmodCommand;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+} ConsMatrixPacket;
+
+extern SdfListHead D_003DFAB0[2];
+extern DmaPacketHeader D_003DFAF0[2];
+extern SdfListHead D_003DFB30[2];
+extern SdfLightingPacketStorage D_003DFB70[2];
+extern ConsMatrixPacket D_003DFD30[2];
+extern SdfLightSources D_00324770;
+extern f32 kwlnDefaultColorVector[4];
+extern u8 sdfViewMatrix[0x40];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
+
+/* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
+void func_002C0628(void) {
+    s32 i;
+
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    for (i = 0; i < 2; i++) {
+        sdfInitPacketList(&D_003DFAB0[i]);
+        sdfConsAppendProgramReferencePacket((s32)&D_003DFAB0[i], &D_003DFAF0[i]);
+        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)&D_003DFD30[i], &sdfSceneProjectionParameters, sdfViewMatrix);
+        sdfAppendPacket(&D_003DFAB0[i], (u32)&D_003DFD30[i]);
+        sdfInitPacketList(&D_003DFB30[i]);
+        sdfBuildLightingPacket(&D_003DFB70[i], D_00324770, kwlnDefaultColorVector);
+        sdfAppendPacket(&D_003DFB30[i], (u32)&D_003DFB70[i]);
+    }
+}
 
 void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
@@ -675,7 +733,45 @@ void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 colo
     uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
+typedef struct GridPackedStripVertex {
+    u64 channels[2];
+    u64 xy;
+    u64 depth;
+} GridPackedStripVertex;
+
+void func_002C0DF8(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
+    u32 left = x + 0x7000;
+    u32 top = y + 0x7900;
+    u64 topWord = (u64)top << 32;
+    s32 packet;
+    GridPackedStripVertex *vertices;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    u64 right, bottom;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
+    vertices = (GridPackedStripVertex *)sdfConsMeasurePacketWithHeader(packet);
+    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
+    vertices[0].xy = (u64)left | topWord;
+    vertices[0].depth = z;
+    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    right = (u32)(left + width);
+    vertices[1].xy = right | topWord;
+    vertices[1].depth = z;
+    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
+    bottom = (u64)(top + height) << 32;
+    vertices[2].xy = (u64)left | bottom;
+    vertices[2].depth = z;
+    itfGridUnpackColorChannels(vertices[3].channels, colors[3]);
+    vertices[3].xy = right | bottom;
+    vertices[3].depth = z;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
     func_002C0DF8(x, y, z, width, height, vertexColors, 0, surfaceIndex);

@@ -14,11 +14,14 @@ extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 typedef struct EffBillResourceInit {
-    s32 resource;
-    s16 kind;
+    const char *resourcePath;
+    s16 billboardKind;
     s16 pad06;
     f32 scale;
 } EffBillResourceInit;
+
+typedef char EffBillResourceInit_size_must_be_0x0C[
+    (sizeof(EffBillResourceInit) == 0x0C) ? 1 : -1];
 
 extern EffBillResourceInit effBillResourceInitTable[];
 
@@ -35,7 +38,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
 extern s32 func_003003F0(const char *format, ...);
 
 /* Normalize legacy payloads before the effect manager constructs their nodes. */
-void func_0014FF28(EffNodeDescriptor *descriptor) {
+void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
 
     if (descriptor->version == 1.0f) {
@@ -81,8 +84,8 @@ void effInitializeBillResourceOwners(void) {
     D_003BD7F4 = 0;
     i = 0;
     do {
-        billboard = billCreateFromResource(effBillResourceInitTable[i].kind,
-                                           (const char *)(u32)effBillResourceInitTable[i].resource);
+        billboard = billCreateFromResource(effBillResourceInitTable[i].billboardKind,
+                                           effBillResourceInitTable[i].resourcePath);
         payload = billboard->child;
         effBillResourceOwners[i] = billboard;
         payload->halfWidth *= effBillResourceInitTable[i].scale;

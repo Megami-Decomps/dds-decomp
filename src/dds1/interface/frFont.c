@@ -946,7 +946,40 @@ void frFontSetContextCursorSpacing(u32 spacing) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_00195E60);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195ED8);
+s32 func_00195ED8(s32 requestedLine, FrFontGlyph *glyph) {
+    FrFontGlyph *node;
+    s32 bottom;
+    s32 currentY;
+    u32 width = 0;
+    s32 line = 0;
+
+    if (glyph == NULL) {
+        return 0;
+    }
+    glyph = glyph->chainHead;
+    if (glyph != NULL) {
+        do {
+            width = 0;
+            node = glyph;
+            currentY = glyph->y;
+            /* Same null-tolerant band walk as the position query below. */
+            if (glyph != NULL) {
+                bottom = currentY + FR_FONT_POSITION_BAND_HEIGHT;
+                if (currentY < bottom) {
+                    do {
+                        width += frFontMeasureGlyphChain(node);
+                        node = node->next;
+                    } while (node != NULL && node->y < bottom);
+                }
+            }
+            if (line++ == requestedLine) {
+                break;
+            }
+            glyph = glyph->next;
+        } while (glyph != NULL);
+    }
+    return (s32)(width << FR_FONT_POSITION_SHIFT);
+}
 
 typedef struct FrFontPosition {
     s32 x;

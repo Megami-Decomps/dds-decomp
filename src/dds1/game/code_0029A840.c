@@ -743,7 +743,46 @@ s32 effCountExpandedEntries(EffExpandedList *list) {
     return total;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C230);
+/* Serialized expanded list: 0x10-byte header, the entry table, then each entry's payload. */
+typedef struct EffExpandedSource {
+    u8 unk00[4];
+    u32 count;
+    u8 unk08[8];
+    EffExpandedEntry entries[1];
+} EffExpandedSource;
+
+/* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
+struct EffExpandedList *func_0029C230(u32 sourceAddress) {
+    EffExpandedSource *source = (EffExpandedSource *)sourceAddress;
+    u32 count = source->count;
+    EffExpandedEntry *sourceEntry = source->entries;
+    u32 i = 0;
+    struct SdfMemBlock *allocation;
+    EffExpandedList *list;
+    u8 *payload;
+
+    allocation = sdfAllocGeneralBlock(count * (sizeof(EffExpandedEntry) + sizeof(RefObj *)) + sizeof(EffExpandedList));
+    list = (EffExpandedList *)sdfResourceRetainAddress(allocation);
+    list->entries = (EffExpandedEntry *)(list + 1);
+    list->handles = (RefObj **)(list->entries + count);
+    list->unk20 = -1;
+    list->allocation = allocation;
+    list->refCount = 0;
+    memcpy(list, source, 0x10);
+    payload = (u8 *)(sourceEntry + count);
+    if (count != 0) {
+        do {
+            list->entries[i] = *sourceEntry;
+            list->handles[i] = effCreateSharedTextureReference((SdfTextureFileHeader *)payload);
+            payload += sourceEntry->payloadSize;
+            sourceEntry++;
+            i++;
+        } while (i < count);
+    }
+    list->totalEntryCount = effCountExpandedEntries(list);
+    list->refCount++;
+    return list;
+}
 
 void effReleaseReferenceHolder(EffExpandedList *holder) {
     u32 i;
