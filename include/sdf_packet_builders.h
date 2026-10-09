@@ -4,6 +4,16 @@
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 
+void sdfCreateResourcePacket(
+    SdfListHead *list, SdfTexResource *source, s32 sourceX, s32 sourceY,
+    s32 width, s32 height, s32 arg6, s32 arg7, s32 arg8,
+    s32 (*allocatePacket)(s32));
+
+void sdfCreateDescriptorPacket(
+    SdfListHead *list, SdfTexResource *source, s32 destinationX,
+    s32 destinationY, s32 width, s32 height, s32 sourceAddress,
+    s32 (*allocatePacket)(s32));
+
 /* resourceAddress is copied as a packet metadata word, not dereferenced. */
 void sdfCreatePatchableResourcePacket(
     SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
