@@ -155,9 +155,12 @@ typedef struct EffDrawableAsset {
 
 typedef struct EffDrawableAssetWork {
     u32 unk00;
-    s32 asset;
+    SdfAsset *asset;
     u32 state;
 } EffDrawableAssetWork;
+
+typedef char EffDrawableAssetWorkSizeCheck[(sizeof(EffDrawableAssetWork) == 0xC) ? 1 : -1];
+typedef char EffDrawableAssetWorkAssetOffsetCheck[((u32)&((EffDrawableAssetWork *)0)->asset == 4) ? 1 : -1];
 
 typedef struct EffMotionResourceConfig {
     u8 pad00[0x4C];
@@ -7843,7 +7846,7 @@ EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
     EffDrawableAsset *position;
     work->state = 0;
     position = (EffDrawableAsset *)sdfCreateAssetWithDrawEntries();
-    work->asset = (s32)position;
+    work->asset = (SdfAsset *)position;
     position->opacity = 1.0f;
     return work;
 }
@@ -7856,14 +7859,14 @@ EffDrawableAssetWork *effCloneDrawableAssetWork(EffActiveResource *owner) {
     return effCreateDrawableAssetWithDefaultOpacity(owner->payload);
 }
 
-void effReleaseQueuedDrawableAssetWork(u32 work) {
-    s32 resource;
+void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
+    SdfAsset *resource;
 
-    resource = ((EffDrawableAssetWork *)work)->asset;
-    if (resource != 0) {
-        sdfQueueAssetRelease(resource);
+    resource = work->asset;
+    if (resource != NULL) {
+        sdfQueueAssetRelease((s32)resource);
     }
-    sdfReleaseChipBlock((void *)work);
+    sdfReleaseChipBlock(work);
 }
 
 void func_002F8640(void) {
