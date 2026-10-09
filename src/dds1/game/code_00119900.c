@@ -40,7 +40,7 @@ enum {
 };
 
 extern u8 D_0032AF70[];
-extern s32 func_0011B158(s32, s32, u8);
+extern s32 func_0011B158(DatPartyRecord *, s32, u8);
 
 
 extern s32 datRosterDetails;
@@ -649,7 +649,62 @@ u32 func_0011B150(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", func_0011B158);
+typedef struct DatSkillList {
+    s16 skills[16];
+} DatSkillList;
+
+extern DatSkillList *D_003BAA58;
+
+/* Test whether a party record satisfies one participant requirement of an affinity. */
+s32 func_0011B158(DatPartyRecord *unit, s32 affinity, u8 slot) {
+    DatAffinityRecord *record;
+    s32 requirement;
+    s32 value;
+    u32 i;
+
+    if (unit == NULL) {
+        return 0;
+    }
+    record = &datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND];
+    if (record->flags & 2) {
+        return 0;
+    }
+    requirement = record->requirements[slot];
+    if (requirement == -1) {
+        return 0;
+    }
+    switch (requirement & 0xF0000000) {
+    case 0:
+        if (requirement == 0 || datUnitHasSkill(unit, requirement) != 0) {
+            return 1;
+        }
+        break;
+    case 0x10000000:
+        value = requirement & 0x0FFFFFFF;
+        for (i = 0; i < 24; i++) {
+            if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == value) {
+                return 1;
+            }
+        }
+        break;
+    case 0x20000000:
+        value = requirement & 0x0FFFFFFF;
+        if (value == 0 || value == (1 << unit->unitId)) {
+            return 1;
+        }
+        break;
+    case 0x40000000:
+        for (i = 0; i < 16; i++) {
+            s16 skill = D_003BAA58[requirement].skills[i];
+
+            if (skill >= 0 && datUnitHasSkill(unit, skill)) {
+                return 1;
+            }
+        }
+        break;
+    }
+    return 0;
+}
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
 s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {

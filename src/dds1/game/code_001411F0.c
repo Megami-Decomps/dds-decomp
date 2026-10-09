@@ -917,7 +917,35 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001426E0);
+typedef struct FldSlot {
+    u32 unk_0;
+    u32 unk_4;
+    u32 unk_8;
+} FldSlot;
+
+extern SdfTex *D_003D40A0[4];
+extern SdfModel *D_00348F30[];
+extern FldSlot D_003D40B0[];
+
+void func_001426E0(void) {
+    s32 i;
+
+    fldAreaState.unkC4 = -1;
+    fldAreaState.unkC8 = -1;
+    fldSceneRecordResource = 0;
+    fldSceneRecords = 0;
+    fldSceneRecordCount = 0;
+    D_003D40A0[0] = 0;
+    D_003D40A0[1] = 0;
+    D_003D40A0[2] = 0;
+    D_003D40A0[3] = 0;
+    for (i = 0; i < 64; i++) {
+        D_00348F30[i] = 0;
+        D_003D40B0[i].unk_0 = 0;
+        D_003D40B0[i].unk_4 = 0;
+        D_003D40B0[i].unk_8 = 0;
+    }
+}
 
 
 extern SdfPoolNode *D_00325838[];
@@ -1812,12 +1840,6 @@ void fldReleaseTitleSlots(void) {
 
 extern SdfModel *D_00348F30[];
 
-typedef struct FldSlot {
-    u32 unk_0;
-    u32 unk_4;
-    u32 unk_8;
-} FldSlot;
-
 extern FldSlot D_003D40B0[];
 
 extern void sdfReleaseDevSlot(SdfModel *, s32, s32);
@@ -1942,8 +1964,8 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_003D40B0)[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].block);
-    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].block);
+    D_003D40A0[0] = sdfTexAcquireResourceTexture((void *)cam->mapResources[0].resourceAddress);
+    D_003D40A0[1] = sdfTexAcquireResourceTexture((void *)cam->mapResources[1].resourceAddress);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->unkC0;
@@ -2678,23 +2700,23 @@ void fldParseMixLb(void) {
             break;
         case 10:
             value = node->value;
-            fldAreaState.mapResources[0].unk0 = value;
-            fldAreaState.mapResources[0].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[0].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[0].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 11:
             value = node->value;
-            fldAreaState.mapResources[1].unk0 = value;
-            fldAreaState.mapResources[1].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[1].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[1].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 12:
             value = node->value;
-            fldAreaState.mapResources[2].unk0 = value;
-            fldAreaState.mapResources[2].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[2].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[2].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         case 13:
             value = node->value;
-            fldAreaState.mapResources[3].unk0 = value;
-            fldAreaState.mapResources[3].block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
+            fldAreaState.mapResources[3].allocation = (struct SdfMemBlock *)(u32)value;
+            fldAreaState.mapResources[3].resourceAddress = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)value);
             break;
         }
     }

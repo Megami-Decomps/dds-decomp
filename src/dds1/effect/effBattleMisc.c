@@ -76,7 +76,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
     u32 sub = param->size;
 
     if (effFieldColorFlags & 1) {
-        if (unit->flags & 0x400) {
+        if (unit->status.flags & 0x400) {
             if (kind == 5) {
                 kind = 0;
             }
@@ -88,7 +88,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
         length = (f32)param->unk04;
     }
     halfHeight = unit->height * unit->scale * 0.5f;
-    if (unit->stateFlags & 0x8000) {
+    if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
         btlUnitGetMuzzlePosVU(unit);
@@ -221,14 +221,14 @@ void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *v
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
-    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, value);
 }
 
 void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
-    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, value);
 }
 
 
@@ -277,7 +277,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
     } else {
         dir[0] = 0;
         dir[1] = 0;
-        dir[2] = (unit->flags & 0x200) ? 1.0f : -1.0f;
+        dir[2] = (unit->status.flags & 0x200) ? 1.0f : -1.0f;
         func_002DD688(D_003528A8[sub]);
         VU0_LOAD_VF(vf10, dir);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -303,11 +303,11 @@ f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {
         break;
     case 1:
         other = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
-        result = func_001F6970(other->flags & 0x600, 0, 0);
+        result = func_001F6970(other->status.flags & 0x600, 0, 0);
         break;
     case 2:
         other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
-        result = func_001F6970(other->flags & 0x600, 0, 0);
+        result = func_001F6970(other->status.flags & 0x600, 0, 0);
         break;
     case 3:
         result = func_001F6970(0x600, 0, 0);
@@ -329,7 +329,7 @@ void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *param, f32 *ou
     f32 origin[4];
 
     effBattleMiscQueryPosition(unit, param, (u128 *)origin);
-    if (unit->stateFlags & 0x8000) {
+    if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
         btlUnitGetMuzzlePosVU(unit);

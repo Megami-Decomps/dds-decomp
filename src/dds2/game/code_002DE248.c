@@ -42,7 +42,7 @@
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
-
+#include "fpu.h"
 
 extern void func_00200930(f32 *, f32 *, s32);
 
@@ -3089,7 +3089,104 @@ void effReleaseRingResourceHandle(u32 handle) {
     sdfReleaseChipBlock((void *)handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E64F0);
+/* Class 1 ring parameters have a distinct 0x6C-byte copied layout. */
+typedef struct EffExpandingRingParams {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
+    u32 segments;
+    u8 flag;
+    u8 pad3D[3];
+    f32 baseRadius;
+    u32 colors[3];
+    f32 widths[3];
+    u32 unk5C;
+    f32 speed;
+    f32 acceleration;
+    u8 reverseTime;
+    u8 pad69[3];
+} EffExpandingRingParams;
+
+typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C) ? 1 : -1];
+
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+void func_002E64F0(EffClassWork *work) {
+    EffExpandingRingParams *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if (config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, bands[0]);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_STORE_VF(vf10, bands[1]);
+    VU0_STORE_VF(vf11, bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, direction);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_STORE_VF(vf10, out[0]);
+        VU0_LOAD_VF(vf10, bands[0]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[1]);
+        VU0_LOAD_VF(vf10, bands[1]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[2]);
+        VU0_LOAD_VF(vf10, bands[2]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3373,7 +3470,98 @@ void effReleaseRingHandle(EffRingResource *handle) {
     sdfReleaseChipBlock(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E6F48);
+/* Class 0 ring parameters: the 0x68-byte layout without the extra word. */
+typedef struct EffExpandingRingParams0 {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
+    u32 segments;
+    u8 flag;
+    u8 pad3D[3];
+    f32 baseRadius;
+    u32 colors[3];
+    f32 widths[3];
+    f32 speed;
+    f32 acceleration;
+    u8 reverseTime;
+    u8 pad65[3];
+} EffExpandingRingParams0;
+
+typedef char EffExpandingRingParams0_size[(sizeof(EffExpandingRingParams0) == 0x68) ? 1 : -1];
+
+void func_002E6F48(EffClassWork *work) {
+    EffExpandingRingParams0 *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if (config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, bands[0]);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_STORE_VF(vf10, bands[1]);
+    VU0_STORE_VF(vf11, bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[2] = sdfSinPoly(angle);
+        VU0_STORE_VF(vf0, out[0]);
+        VU0_LOAD_VF(vf11, direction);
+        VU0_LOAD_VF(vf10, bands[0]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[1]);
+        VU0_LOAD_VF(vf10, bands[1]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[2]);
+        VU0_LOAD_VF(vf10, bands[2]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
 
 void billDrawCellBlendB(EffClassWork *work) {
     EffRadialRingParams *config = work->payload;
@@ -6764,37 +6952,37 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
 
     switch (kind) {
     case 1:
-        if ((((BtlUnit *)actor)->flags & 2) && ((BtlUnit *)actor)->ext != 0) {
+        if ((((BtlUnit *)actor)->status.flags & 2) && ((BtlUnit *)actor)->ext != 0) {
             out[0] = (BtlUnit *)actor;
             count = 1;
         }
         break;
     case 4:
-        mask = ((BtlUnit *)other)->flags & 0x600;
+        mask = ((BtlUnit *)other)->status.flags & 0x600;
         break;
     case 3:
-        mask = ((BtlUnit *)actor)->flags & 0x600;
+        mask = ((BtlUnit *)actor)->status.flags & 0x600;
         break;
     case 5:
         mask = 0x600;
         break;
     case 6:
         other = (u8 *)effBTLFieldColorGetOverrideSelector();
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+        if ((((BtlUnit *)other)->status.flags & 2) && ((BtlUnit *)other)->ext != 0) {
             out[0] = (BtlUnit *)other;
             count = 1;
         }
         break;
     case 7:
         other = (u8 *)effBTLFieldColorGetFinalSelector();
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+        if ((((BtlUnit *)other)->status.flags & 2) && ((BtlUnit *)other)->ext != 0) {
             out[0] = (BtlUnit *)other;
             count = 1;
         }
         break;
     case 0:
     case 2:
-        if ((((BtlUnit *)other)->flags & 2) && ((BtlUnit *)other)->ext != 0) {
+        if ((((BtlUnit *)other)->status.flags & 2) && ((BtlUnit *)other)->ext != 0) {
             out[0] = (BtlUnit *)other;
             count = 1;
         }
@@ -6804,7 +6992,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
         u8 *link;
 
         for (link = (u8 *)((BtlState *)state)->units; link != NULL; link = (u8 *)((BtlUnit *)link)->nextActor) {
-            u32 flags = ((BtlUnit *)link)->flags;
+            u32 flags = ((BtlUnit *)link)->status.flags;
 
             if (flags & 1) {
                 if (flags & 2) {
@@ -6834,7 +7022,7 @@ void func_002F5EF0(u32 unusedResource) {
     }
     unit = state->units;
     while (unit != NULL) {
-        if (unit->flags & 2) {
+        if (unit->status.flags & 2) {
             EvtUnit *effect = unit->ext;
 
             if (effect != NULL) {
@@ -6968,7 +7156,7 @@ void func_002F6000(EffActiveResource *work) {
     }
     if (frame == 0) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
                 evtSetUnitStatusFlags(effect);
                 if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
@@ -6976,7 +7164,7 @@ void func_002F6000(EffActiveResource *work) {
                 }
                 if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
                     if (request.kind == 3) {
-                        if (actors[index]->stateFlags & 0x8000) {
+                        if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
                             btlUnitGetMuzzlePosVU(actors[index]);
@@ -6988,7 +7176,7 @@ void func_002F6000(EffActiveResource *work) {
                         effBattleMiscDirectionTo(actors[index], &request, direction);
                         VU0_LOAD_VF(vf10, direction);
                     } else {
-                        if (actors[index]->stateFlags & 0x8000) {
+                        if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
                             btlUnitGetMuzzlePosVU(actors[index]);
@@ -7004,7 +7192,7 @@ void func_002F6000(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->colorFadeOut) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 u32 firstColor;
                 u32 secondColor;
                 effect = actors[index]->ext;
@@ -7025,7 +7213,7 @@ void func_002F6000(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->directionFadeOut) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
                 VU0_LOAD_VF(vf10, actors[index]->lightDirection);
                 evtSetUnitNormalizedDirection(effect, config->directionFadeOut);
@@ -7046,7 +7234,7 @@ void effSyncLinkedActorChildParameter(void) {
     }
     entry = ((BtlState *)owner)->units;
     while (entry != NULL) {
-        if (entry->flags & 2) {
+        if (entry->status.flags & 2) {
             EvtUnit *child = entry->ext;
             if (child != 0) {
                 child->color60 = entry->baseColor;
@@ -7083,11 +7271,11 @@ void func_002F64D8(EffActiveResource *work) {
 
     if (frame == 0) {
         for (i = 0; i < count; i++) {
-            if (actors[i]->flags & 2) {
-                if (actors[i]->flags & 0xE0) {
+            if (actors[i]->status.flags & 2) {
+                if (actors[i]->status.flags & 0xE0) {
                     s32 handled;
 
-                    if (actors[i]->flags & 0x200) {
+                    if (actors[i]->status.flags & 0x200) {
                         continue;
                     }
                     handled = 0;
@@ -7115,11 +7303,11 @@ void func_002F64D8(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->fadeOut) {
         for (i = 0; i < count; i++) {
-            if (actors[i]->flags & 2) {
-                if (actors[i]->flags & 0xE0) {
+            if (actors[i]->status.flags & 2) {
+                if (actors[i]->status.flags & 0xE0) {
                     s32 handled;
 
-                    if (actors[i]->flags & 0x200) {
+                    if (actors[i]->status.flags & 0x200) {
                         continue;
                     }
                     handled = 0;
@@ -7274,7 +7462,7 @@ typedef struct EffAnimInfo {
 
 
 
-extern void btlApplyScaledUnitEffectParameter(BtlUnit *, u16, s32, f32);
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 extern void btlStartMoveOtherUnitsTask();
 
@@ -7287,8 +7475,8 @@ void effApplySelectedActorEffects(EffActiveResource *owner) {
         info = owner->payload;
         count = effCollectModelEffectActors(actor, info->actorSelection);
         for (i = 0; i < count; i++) {
-            if (actor[i]->flags & 2) {
-                if (!(actor[i]->flags & 0x20) && !(actor[i]->effectLink.flags & 0x10)) {
+            if (actor[i]->status.flags & 2) {
+                if (!(actor[i]->status.flags & 0x20) && !(actor[i]->effectLink.flags & 0x10)) {
                     if (actor[i]->effectLink.flags & 0x40) {
                         switch (info->id) {
                         case 0:
@@ -7780,7 +7968,7 @@ void func_002F8040(EffActiveResource *resource)
         VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
         effObjSetInnerFirstVec(unit->effectObject, (u128 *)matrix[3]);
         effObjSetInnerSecondVec(unit->effectObject, &quaternion);
-        unit->stateFlags |= 0x200000;
+        unit->status.stateFlags |= 0x200000;
     }
 }
 
@@ -7966,7 +8154,7 @@ void effSyncFadeColorToTargets(void) {
         BtlUnit *node = ((BtlState *)owner)->units;
 
         while (node != 0) {
-            if (node->flags & 2) {
+            if (node->status.flags & 2) {
                 EvtUnit *target = node->ext;
 
                 if (target != 0) {
@@ -8021,7 +8209,7 @@ void effUpdateSelectedActorAlpha(EffActiveResource *work) {
         }
         alpha = 0x80 - (u32)((f32)(0x80 - (color >> 24)) * blend);
         for (i = 0; i < count; i++) {
-            if (actors[i]->flags & 2) {
+            if (actors[i]->status.flags & 2) {
                 actors[i]->overlayColor = (actors[i]->overlayColor & 0xFFFFFF) | (alpha << 24);
             }
         }
@@ -8029,14 +8217,14 @@ void effUpdateSelectedActorAlpha(EffActiveResource *work) {
     if (config->transition) {
         if (frame == 0) {
             for (i = 0; i < count; i++) {
-                if (actors[i]->flags & 2) {
+                if (actors[i]->status.flags & 2) {
                     evtSetUnitAlphaTransition(actors[i]->ext, config->fadeIn, color);
                 }
             }
         }
         if (config->duration != 0 && frame == config->duration - config->fadeOut) {
             for (i = 0; i < count; i++) {
-                if (actors[i]->flags & 2) {
+                if (actors[i]->status.flags & 2) {
                     evtSetUnitAlphaTransition(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
                 }
             }

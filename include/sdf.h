@@ -238,14 +238,20 @@ typedef struct SdfMovieDescriptor {
     u16 unk08;
     u16 unk0A;
     s32 source;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
+    u8 hasAudio;
+    u8 stereo;
+    u8 playbackCadenceStep;
     u8 pad13;
 } SdfMovieDescriptor;
 
 typedef char SdfMovieDescriptor_size_must_be_0x14[
     (sizeof(SdfMovieDescriptor) == 0x14) ? 1 : -1];
+typedef char SdfMovieDescriptor_hasAudio_offset_must_be_0x10[
+    ((u32)&((SdfMovieDescriptor *)0)->hasAudio == 0x10) ? 1 : -1];
+typedef char SdfMovieDescriptor_stereo_offset_must_be_0x11[
+    ((u32)&((SdfMovieDescriptor *)0)->stereo == 0x11) ? 1 : -1];
+typedef char SdfMovieDescriptor_playbackCadenceStep_offset_must_be_0x12[
+    ((u32)&((SdfMovieDescriptor *)0)->playbackCadenceStep == 0x12) ? 1 : -1];
 
 /* The +0x1C movie work pointer selects one of two separately allocated records.
  * isPac at +3 chooses the active arm; the variant payload types live in
@@ -285,6 +291,7 @@ typedef char MovObj_stream_offset_must_be_0x1C[
     ((u32)&((MovObj *)0)->stream == 0x1C) ? 1 : -1];
 
 void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
+void sdfCancelAndReleaseMovieStreamWork(MovObj *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {

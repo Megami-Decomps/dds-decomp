@@ -1,7 +1,14 @@
-# DDS2 camera interpreter continuation
+# DDS2 camera interpreter matching
 
-Target: func_001FA480, 5256 native bytes. Credit Basalt Finch and team for the complete reconstruction, Obsidian Heron for adopted-source review, and PiM for corrected contracts and control-flow recovery.
+Active target: `func_001FA480`, native5256B. Current work follows grounded source contracts and source-linked compiler instrumentation.
 
-This experiment restores the complete historical-store-selector packet on the current source context using ten unique exact source hunks. It preserves all unrelated unit text and restores the unit after checking. The prior packet recorded 5248 candidate bytes and 600 positional differing words. PiM's later reported 570-word source has not yet been supplied; no equivalence to that unpublished state is claimed.
+- `current-body.c` and `candidate.patch`: current primary-owner candidate, including the two native-proven8-byte peer-status reads.
+- `historical-candidate.patch`: preserved historical5248B/600-difference baseline.
+- `STATUS-OWNER.md`: exact source correction and evidence.
+- `diagnose.py`: complete owning-unit comparison, older-function preservation and source restoration. A nonmatch intentionally exits1.
+- `peer_probe.py`: bounded private-native semantics using synthetic inputs, aggregate output only.
+- `trace.py`, `roles.json`, and additive compiler tools: parity-gated source-role and CSE instrumentation under development.
 
-The body remains nonmatching. The independent normal Build job sees unchanged canonical source and is not candidate qualification. The focused job captures all raw tool output and emits only match/issue counts and object sizes. No original bytes or raw compiler dumps are published.
+Diagnostic branches do not replace canonical game source. Ordinary Build on these branches tests unchanged canonical code. Only the focused diagnostic temporarily installs the complete candidate. No full-retail or runtime qualification is claimed for a nonmatch.
+
+Credit Basalt, Obsidian and PiM for the reconstruction and prior compiler work; KiB / redthing1's dot continues matching.

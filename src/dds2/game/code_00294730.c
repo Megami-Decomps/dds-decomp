@@ -299,8 +299,6 @@ void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00296298);
-
 struct FrFontGlyph;
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -308,6 +306,39 @@ extern u32 func_0019F798(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
+
+/* Draw the selected row's icons and quantity at full opacity. */
+void func_00296298(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
+    char text[16];
+    struct MenuList *list = scene->window->list;
+    struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
+    s32 row;
+    s32 firstIndex;
+    s32 textOffset;
+    struct FrFontGlyph *glyph;
+
+    if (list->count != 0) {
+        firstIndex = list->head->index;
+        row = list->cursor->index - firstIndex;
+        func_00306CD0(0x600, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x20, option);
+        func_00306CD0(0xD10, (152 + row * 22) << 3, 0, 0x80, 0, texture, 0x21, option);
+        func_00306CD0((D_003D03F0[29][MENU_ICON_X] + 8) << 4,
+                      (D_003D03F0[29][MENU_ICON_Y] + row * 22) << 3,
+                      0, 0x100, 0, texture,
+                      D_003D03F0[29][MENU_ICON_FRAME], option);
+        if (scene->multiplier / 10 != 0) {
+            textOffset = 0;
+        } else {
+            textOffset = 0x70;
+        }
+        func_0035C860(text, D_00437978, scene->multiplier);
+        glyph = (struct FrFontGlyph *)func_0019F798(
+            0xD30 + textOffset, (135 + row * 22) << 3, depth, 0xA09DC380, text, 0);
+        frFontSetChildChainFirstOption(glyph, 4);
+        frFontDrawGlyphChain(glyph, 1, option);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    }
+}
 
 /* Fade the selected row's icons and quantity while preserving its row snapshot. */
 void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,

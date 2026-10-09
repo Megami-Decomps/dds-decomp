@@ -96,7 +96,7 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     u16 *listedMode;
     u32 i;
 
-    if ((unit->flags & 0x400) == 0) {
+    if ((unit->status.flags & 0x400) == 0) {
         return action;
     }
     battle = (BtlState *)btlGetRuntime();
@@ -127,7 +127,7 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     u16 *listedMode;
     u32 i;
 
-    if ((unit->flags & 0x400) == 0) {
+    if ((unit->status.flags & 0x400) == 0) {
         return 0;
     }
     battle = (BtlState *)btlGetRuntime();

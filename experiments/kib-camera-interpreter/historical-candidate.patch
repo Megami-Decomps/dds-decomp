@@ -298,7 +298,7 @@
 +        case 17:
 +            if (instruction->startFrame <= (f32)CURSOR->frame &&
 +                (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-+                if (action->link->unit->status.flags & 0x200) {
++                if (action->link->unit->flags & 0x200) {
 +                    btlFlagMatchingUnitsDefeatCandidate(0x200);
 +                } else {
 +                    btlFlagMatchingUnitsDefeatCandidate(0x400);
@@ -309,7 +309,7 @@
 +        case 18:
 +            if (instruction->startFrame <= (f32)CURSOR->frame &&
 +                (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
-+                if (action->link->unit->status.flags & 0x200) {
++                if (action->link->unit->flags & 0x200) {
 +                    btlFlagMatchingUnitsDefeatCandidate(0x400);
 +                } else {
 +                    btlFlagMatchingUnitsDefeatCandidate(0x200);
@@ -353,7 +353,7 @@
 +                unit = ((BtlState *)btlGetRuntime())->units;
 +                if (action->link->unit->lookupId == 1) {
 +                    while (unit != NULL) {
-+                        if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
++                        if ((unit->flags & 0x201) == 0x201 &&
 +                            unit->lookupId != action->link->unit->lookupId) {
 +                            if (instruction->kind == 37) {
 +                                lower = unit->lookupId;
@@ -363,7 +363,7 @@
 +                                upper = unit->lookupId;
 +                            }
 +                            if (lower < upper &&
-+                                ((unit->status.flags & 0x20) != 0 ||
++                                ((unit->flags & 0x20) != 0 ||
 +                                 (unit->partyRecord.status & 0x7FFF) != 0)) {
 +                                btlClearUnitDefeatCandidate(unit);
 +                            }
@@ -382,7 +382,7 @@
 +                (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
 +                unit = ((BtlState *)btlGetRuntime())->units;
 +                while (unit != NULL) {
-+                    if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
++                    if ((unit->flags & 0x201) == 0x201 &&
 +                        unit->lookupId != action->link->unit->lookupId) {
 +                        switch ((u32)instruction->kind) {
 +                        case 34:
@@ -526,7 +526,7 @@
 +                    actor = action->linkedB;
 +                    break;
 +                }
-+                if (actor->status.flags & 0x80000) {
++                if (actor->flags & 0x80000) {
 +                    btlUnitGetPosVU(actor, 0);
 +                    VU0_STORE_VF_UNCLOBBERED(vf10, actorPosition);
 +                    btlCopyUnitRotationQuaternion(actor, quaternion);
@@ -555,7 +555,7 @@
 +                        break;
 +                    case 30:
 +                        target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-+                        if (target->status.flags & 0x400) {
++                        if (target->flags & 0x400) {
 +                            func_00208000(0x400, NULL, NULL);
 +                        } else {
 +                            func_00208000(0x200, NULL, NULL);

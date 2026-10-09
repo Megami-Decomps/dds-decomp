@@ -57,7 +57,7 @@ extern void func_00216D10();
 
 extern void btlAppendSelfAfterTargetScan();
 
-extern void btlSelectTargetsExcludingActorUnit();
+extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 
@@ -179,10 +179,10 @@ void func_0020EA18(BtlUnit *unit) {
     BtlActorStatusRecord *status;
     MdlCtx *model;
 
-    if (!(unit->flags & 8)) {
+    if (!(unit->status.flags & 8)) {
         return;
     }
-    if (!(unit->flags & 2)) {
+    if (!(unit->status.flags & 2)) {
         return;
     }
     if (unit->unkCC != 0) {
@@ -269,7 +269,7 @@ void func_0020EC20(BtlUnit *unit) {
     s32 y;
 
     if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
-        if (unit->stateFlags & 0x80) {
+        if (unit->status.stateFlags & 0x80) {
             return;
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
@@ -278,7 +278,7 @@ void func_0020EC20(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
         baseline[1] = -btlUnitGetTopY(unit);
     }
-    if (unit->stateFlags & 0x80) {
+    if (unit->status.stateFlags & 0x80) {
         VU0_LOAD_VF(vf10, baseline);
         return;
     }
@@ -292,7 +292,7 @@ void func_0020EC20(BtlUnit *unit) {
             visible = btlProjectForwardPositionToPackedScreen(screen);
             x = screen[0] >> 4;
             y = screen[1] >> 3;
-            if (visible == 1 && !(unit->stateFlags & 0x400000) &&
+            if (visible == 1 && !(unit->status.stateFlags & 0x400000) &&
                 x >= 12 && x < 501 && y >= 48 && y < 324) {
                 btlBossDebugPrintf("btl:hpmp clip 1shot\n");
                 VU0_LOAD_VF(vf10, candidate);
@@ -520,15 +520,15 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
     }
     effect = effOffsetIfOwnerFlagClear(link->unit, effect);
     if (adjustSide) {
-        s32 ownerSide = link->unit->flags & 0x600;
+        s32 ownerSide = link->unit->status.flags & 0x600;
         s32 targetSides = 0;
 
         count = btlGetIndexListCount(link->indexWork.indices);
         for (i = 0; i < count; i++) {
-            targetSides |= ((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, i))->flags & 0x600;
+            targetSides |= ((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, i))->status.flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
-            effect = (link->unit->flags & 0x200) ? effect + 1 : effect - 1;
+            effect = (link->unit->status.flags & 0x200) ? effect + 1 : effect - 1;
         }
     }
     return effect;
@@ -536,7 +536,7 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
 
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
 s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
-    return base + (((owner->flags >> 9) ^ 1U) & 1);
+    return base + (((owner->status.flags >> 9) ^ 1U) & 1);
 }
 
 /* Number display: initializes both anchor vectors, then adds the offset before projection. */
@@ -570,7 +570,7 @@ s32 func_0020F5E0(BtlLinkedEffectArgs *args) {
         switch (args->payload.linked.kind) {
         case 0:
             if (value <= 0) {
-                if ((args->unit->flags & 0x400) &&
+                if ((args->unit->status.flags & 0x400) &&
                     btlWouldUiValueFallBelowQuarter(args->unit, 0)) {
                     args->payload.linked.color = 0x805050B0;
                 } else {
@@ -725,7 +725,7 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
             if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->partyRecord.flags & 0x10) == 0) {
                 func_001B8580((s32)btlGetIndexedUiResource(owner));
             } else if (battleState->commandRestrictFlags & 0x400) {
-                if (owner->flags & 0x400) {
+                if (owner->status.flags & 0x400) {
                     func_001B8580(D_003BEB60[0]);
                 } else {
                     func_001B8580(D_003BEB58[0]);
@@ -803,7 +803,7 @@ s32 btlPollCategoryLabelTask(void *arguments) {
             func_001B8580((s32)D_003BEB28);
             break;
         case 5: {
-            u32 flags = owner->flags;
+            u32 flags = owner->status.flags;
             if (flags & 0x200) {
                 if (!(flags & 0x1000)) {
                     func_001B8580(D_003BEB38[0]);
@@ -1316,7 +1316,7 @@ void btlCmdWithArgE(s32 context) {
     func_00216888(context, 0);
 }
 
-extern void btlSelectTargetsPassingCheck(s32, s32);
+extern s32 btlSelectTargetsPassingCheck(s32, s32);
 
 void btlCmdSimpleB(s32 context, s32 value) {
     btlSelectTargetsPassingCheck(context, value);
@@ -1352,8 +1352,8 @@ void btlCmdSimpleH(void) {
     btlAppendSelfAfterTargetScan();
 }
 
-void btlCmdSimpleI(void) {
-    btlSelectTargetsExcludingActorUnit();
+void btlCmdSimpleI(s32 context, s32 unused) {
+    btlSelectTargetsExcludingActorUnit(context);
 }
 
 void btlCmdWithArgF(s32 context) {

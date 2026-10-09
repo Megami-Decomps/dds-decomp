@@ -35,14 +35,14 @@ extern void btlSelectLowestHealthRateTarget(s32, s32);
 extern void btlSelectLowestHealthElementBlockTarget();
 extern void btlSelectLowestRankTarget(s32, s32);
 extern void func_00203BA8(s32, s32);
-extern void btlSelectTargetsPassingCheck();
+extern s32 btlSelectTargetsPassingCheck(s32, s32);
 extern void btlSelectTargetsByActionMask();
 extern void btlSelectTargetsWithoutActionMask();
 extern void btlSelectTargetsByMode();
 extern void func_00204008();
 extern void func_00204028();
 extern void btlAppendSelfAfterTargetScan();
-extern void btlSelectTargetsExcludingActorUnit();
+extern s32 btlSelectTargetsExcludingActorUnit(s32);
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
 
@@ -97,8 +97,8 @@ void func_001FC998(BtlUnit *unit) {
     BtlActorStatusRecord *status;
     s32 alpha;
 
-    if ((unit->flags & 8) != 0) {
-        if ((unit->flags & 2) == 0) {
+    if ((unit->status.flags & 8) != 0) {
+        if ((unit->status.flags & 2) == 0) {
             return;
         }
         if (unit->unkCC != 0) {
@@ -185,7 +185,7 @@ void func_001FCBA0(BtlUnit *unit) {
     s32 y;
 
     if (btlSetActorEffectParameter((u8 *)unit, 2) != 0) {
-        if (unit->stateFlags & 0x80) {
+        if (unit->status.stateFlags & 0x80) {
             return;
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
@@ -194,7 +194,7 @@ void func_001FCBA0(BtlUnit *unit) {
         VU0_STORE_VF_UNCLOBBERED(vf10, baseline);
         baseline[1] = -btlUnitGetTopY(unit);
     }
-    if (unit->stateFlags & 0x80) {
+    if (unit->status.stateFlags & 0x80) {
         VU0_LOAD_VF(vf10, baseline);
         return;
     }
@@ -432,15 +432,15 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
     }
     effect = effOffsetIfOwnerFlagClear(task->unit, effect);
     if (adjustSide) {
-        s32 ownerSide = task->unit->flags & 0x600;
+        s32 ownerSide = task->unit->status.flags & 0x600;
         s32 targetSides = 0;
 
         count = btlGetIndexListCount(task->indexWork.indices);
         for (i = 0; i < count; i++) {
-            targetSides |= ((BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, i))->flags & 0x600;
+            targetSides |= ((BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, i))->status.flags & 0x600;
         }
         if (ownerSide != targetSides && targetSides != 0) {
-            effect = (task->unit->flags & 0x200) ? effect + 1 : effect - 1;
+            effect = (task->unit->status.flags & 0x200) ? effect + 1 : effect - 1;
         }
     }
     return effect;
@@ -450,7 +450,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
 /* Adds one to the base unless bit 9 of the owner's flags is set. */
 
 s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
-    return base + (((owner->flags >> 9) ^ 1U) & 1);
+    return base + (((owner->status.flags >> 9) ^ 1U) & 1);
 }
 
 /* Number display: initialize its saved anchor, then project it with the
@@ -485,7 +485,7 @@ s32 func_001FD5C8(BtlLinkedEffectArgs *args) {
         switch (args->payload.linked.kind) {
         case 0:
             if (value <= 0) {
-                if ((args->unit->flags & 0x400) &&
+                if ((args->unit->status.flags & 0x400) &&
                     btlWouldUiValueFallBelowQuarter(args->unit, 0)) {
                     args->payload.linked.color = 0x805050B0;
                 } else {
@@ -542,7 +542,7 @@ s32 func_001FD5C8(BtlLinkedEffectArgs *args) {
     }
 
     rise += 128;
-    if (args->unit->flags & 4) {
+    if (args->unit->status.flags & 4) {
         if ((btlUnitStatusPair(args->unit) & 0x21) == 1) {
             btlUnitGetMuzzlePosVU(args->unit);
         } else {
@@ -659,7 +659,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
         if (resourceIndex == 0) {
             if ((btlUnitStatusPair(owner) & 0x1400) != 0) {
                 if (battleState->commandRestrictFlags & 0x400) {
-                    if (owner->flags & 0x400) {
+                    if (owner->status.flags & 0x400) {
                         func_001AD970(D_00360460[0]);
                     } else {
                         func_001AD970(D_00360458[0]);
@@ -753,7 +753,7 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
             func_001AD970((s32)D_00360428);
             break;
         case 5:
-            if (owner->flags & 0x1000) {
+            if (owner->status.flags & 0x1000) {
                 func_001AD970(D_00360448[0]);
             } else {
                 func_001AD970(D_00360438[0]);
@@ -1206,8 +1206,8 @@ void btlCmdWithArgE(s32 context) {
     func_00203BA8(context, 0);
 }
 
-void btlCmdSimpleB(void) {
-    btlSelectTargetsPassingCheck();
+void btlCmdSimpleB(s32 context, s32 value) {
+    btlSelectTargetsPassingCheck(context, value);
 }
 
 void btlCmdSimpleC(void) {
@@ -1234,8 +1234,8 @@ void btlCmdSimpleH(void) {
     btlAppendSelfAfterTargetScan();
 }
 
-void btlCmdSimpleI(void) {
-    btlSelectTargetsExcludingActorUnit();
+void btlCmdSimpleI(s32 context, s32 unused) {
+    btlSelectTargetsExcludingActorUnit(context);
 }
 
 void btlCmdWithArgF(s32 context) {

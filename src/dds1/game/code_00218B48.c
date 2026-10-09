@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "file_request_api.h"
@@ -178,7 +179,6 @@ s32 mdlUpdateViewerCursor(s16 *, s32);
 
 
 
-extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 void mdlUpdateViewerSelectedModelFromPad(void);
 

@@ -178,7 +178,7 @@ extern s8 D_0032453B[];
 extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
 
 
-extern void func_0010AC98(void);
+extern s32 func_0010AC98(struct KwlnTask *);
 
 extern void *D_003BD764;
 
@@ -1352,7 +1352,43 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_0010AC98);
+extern u16 D_003BA970;
+extern u16 D_003BA972;
+extern char D_003BA978[];
+extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+s32 func_0010AC98(struct KwlnTask *task) {
+    SdfGeneralHeapStats heapStats;
+    SdfListHead *list;
+    void *packet;
+    s32 freePercent;
+    s32 originX = 0x7100;
+    s32 currentColumn;
+    s32 peakColumn;
+
+    sdfGetGeneralHeapStats(&heapStats);
+    freePercent = heapStats.freeBytes * 100 / heapStats.totalBytes;
+    list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    sdfInitPacketList(list);
+    packet = (void *)sdfAllocPacketAligned(0x40);
+    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
+    sdfAppendPacket(list, (u32)packet);
+    sdfAppendPacket(list, (u32)func_0011D3E8(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x85C0, 0xFFFF80, 0, D_003BA978, freePercent));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8080, 0x85C0, 0xFFFF80, 6, D_003BA978, D_003BA970));
+    currentColumn = (s32)((f32)freePercent / 100.0f * 200.0f) + 0x2A;
+    sdfCreatePacketA(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
+    peakColumn = (s32)((f32)D_003BA970 / 100.0f * 200.0f) + 0x2B;
+    sdfCreatePacketA(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    if (D_003BA972 >= 0x47 || D_003BA970 < freePercent) {
+        D_003BA970 = freePercent;
+        D_003BA972 = 0;
+    } else {
+        D_003BA972 = D_003BA972 + 1;
+    }
+    return 0;
+}
 
 void func_0010AEE8(void) {
 }
@@ -1696,6 +1732,8 @@ ScrData *bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA970);
+
+INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA972);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", D_003BA978);
 

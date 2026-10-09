@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
@@ -818,8 +819,7 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 }
 
 #define MDL_NODE_FIELD_MISSING (-1)
-#define MDL_NODE_BYTE_CHECK_MISSING 2
-#define MDL_NODE_BYTE_CHECK_MATCH 5
+#define MDL_NODE_MOTION_STATUS_MISSING 2
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
@@ -850,14 +850,13 @@ s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
     return (s32)matchedNode->currentFrame;
 }
 
-/* Three outcomes: 2 for a missing node, otherwise 1/0 for byte equal/not equal
- * to 5. The meaning of that byte value is not established here. */
-s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 searchId) {
+/* Report whether a node is terminal, using 2 to distinguish a missing node. */
+s32 mdlGetNodeMotionTerminalStatus(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
-        return MDL_NODE_BYTE_CHECK_MISSING;
+        return MDL_NODE_MOTION_STATUS_MISSING;
     }
-    return matchedNode->state == MDL_NODE_BYTE_CHECK_MATCH;
+    return matchedNode->state == SDF_MOTION_STATE_TERMINAL;
 }
 
 /* Read the stored float, defaulting to zero when the searched node is absent. */
