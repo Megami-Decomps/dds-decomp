@@ -30,6 +30,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_update_flags.h"
 #include "eff_resource_list.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -791,7 +792,7 @@ void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
 }
 
 void func_002DEC08(SdfFlagListWork *work) {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         func_00316680(work);
         return;
     }
@@ -1328,7 +1329,7 @@ void effKindWorkFrameReset(EffKindWork *work) {
 
 void effKindWorkFrameUpdate(EffKindWork *work) {
     D_003E9810[work->kind].update();
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
 }
@@ -1428,7 +1429,7 @@ void effAlternateKindWorkFrameReset(EffKindWork *work) {
 
 void effAlternateKindWorkFrameUpdate(EffKindWork *work) {
     D_003E98A0[work->kind].update();
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
 }
@@ -2541,7 +2542,7 @@ void effResetActiveInstanceFrame(EffClassWork *work) {
 void effAdvanceActiveInstanceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9950[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -3385,7 +3386,7 @@ void effInitializeClassFrame(EffClassWork *work) {
 void effAdvanceClassFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9B80[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -3931,7 +3932,7 @@ void effClearSurfaceNodeRecordReferences(s32 node) {
 }
 
 void effAcquireSurfaceRecord(s32 node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (((EffectSlotNode54 *)node)->record != 0) {
@@ -4765,7 +4766,7 @@ void effResetDispatchCounter(u8 *work) {
 void effAdvanceClassResourceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9D00[work[0x2C / 4]].update(work);
         work[0x28 / 4]++;
     }
@@ -4954,7 +4955,7 @@ void effClearStripRecordReferences(EffectStripNode *node) {
 }
 
 void effAcquireStripRecord(EffectStripNode *node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (node->active != 0) {
@@ -5560,7 +5561,7 @@ void effResetBlockResourceFrame(u8 *work) {
 void effAdvanceBlockResourceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9DD8[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -6110,7 +6111,7 @@ void effResetModelBlockFrame(u8 *work) {
 void effAdvanceModelBlockFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9E60[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -6459,7 +6460,7 @@ void effResetModelResourceUpdateCount(EffModelResource *effect) {
 }
 
 void effDispatchModelResourceUpdate(EffModelResource *effect) {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         effModelResourceOperations[effect->kind].update(effect);
         effect->updateCount++;
     }
@@ -8059,7 +8060,8 @@ void effClearCallbackFrame(u32 *obj) {
 }
 
 void effAdvanceCallbackFrame(u8 *work) {
-    if (btlIsRuntimeAllocated() != 0 && (effModelUpdateControlFlags & 2) == 0) {
+    if (btlIsRuntimeAllocated() != 0 &&
+        (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
         EffResourceOps *entry = &D_003EA018[kind];
         void (*callback)(void *) = entry->update;
@@ -8475,7 +8477,7 @@ void effClearSurfaceRecordReferences(s32 node) {
 }
 
 void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (((EffectSlotNode80 *)node)->record != 0) {
