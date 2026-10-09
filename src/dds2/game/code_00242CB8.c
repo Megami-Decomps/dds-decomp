@@ -56,7 +56,24 @@ KwlnTask *evtCreateTask(s32, const char *);
 s32 evtPreloadBgm(s32 id);
 s32 evtIsBgmLoaded(s32 id);
 
-INCLUDE_ASM(const s32, "game/code_00242CB8", func_00242CB8);
+extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
+extern s32 evtCheckWorldObjectResourceScale(void *object);
+
+s32 func_00242CB8(void) {
+    s32 status = evtCheckWorldObjectResourceScale(
+        evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0)));
+
+    switch (status) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    case -1:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 u32 evtCreateTextureEntryChildTask(void) {
     ScrData *work;
