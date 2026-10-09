@@ -5,7 +5,14 @@
 
 s32 func_00111388(u32 kind);
 
-INCLUDE_ASM(const s32, "game/code_00111480", func_00111480);
+extern s32 dds3RemoveMatchingWorldValueEntries(WorldValueIndices *indexNode, EffWorldNode *targetNode, s32 processAllMatches);
+
+/* Remove every entry for the node from the owner's world slot selected by the node's kind. */
+void func_00111480(EffWorldNode *object, EffWorldNode *node) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(object, func_00111388(((u8 *)node)[0xF]));
+
+    dds3RemoveMatchingWorldValueEntries((WorldValueIndices *)slot, node, 0);
+}
 
 /* Select one of the kind-2 owner's two world index nodes. */
 WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index) {
