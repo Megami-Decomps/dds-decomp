@@ -58,7 +58,12 @@ jobs:
           echo '{"status":"diagnostic_failed","stage":"retail_unavailable"}'
           exit 2
 
-      - name: Focused camera-interpreter diagnostic
+      - name: Bounded native selector semantics
+        continue-on-error: true
+        if: steps.orig.outputs.available == 'true'
+        run: python3 experiments/kib-camera-interpreter/peer_probe.py
+
+      - name: Qualified compiler pass trace
         if: steps.orig.outputs.available == 'true'
         timeout-minutes: 25
-        run: python3 experiments/kib-camera-interpreter/peer_probe.py
+        run: python3 experiments/kib-camera-interpreter/trace.py
