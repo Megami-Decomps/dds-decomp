@@ -15,7 +15,20 @@ extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029DF18);
+extern u32 uiBlendColors(u32, u32, u32);
+
+/* Fade a result row's background in; the row is ready once it is fully opaque. */
+void func_0029DF18(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *unused, s32 context, s32 index) {
+    s32 fade = 0x100 - work->fadeProgress;
+
+    if (work->fadeAnimation[index].backgroundState == 0) {
+        work->fadeAnimation[index].backgroundOpacity = uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
+        if (work->fadeAnimation[index].backgroundOpacity >= 0x80) {
+            work->fadeAnimation[index].backgroundState = 1;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428560);
 
