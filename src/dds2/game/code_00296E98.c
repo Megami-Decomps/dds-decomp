@@ -854,17 +854,17 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardSummary *rewards;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     BrsProgressRow *party;
     BrsRewardBatch *rewardState;
     BrsRewardBatch *primary;
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfResourceRetainAddress(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
-    work->handle = handle;
+    work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
     work->fadeTarget = (s32)mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
@@ -906,7 +906,7 @@ void brsStaffTaskDestroy(KwlnTask *taskArg) {
     }
     effDestroyEffectList((struct EffectList *)(u32)context->fadeTarget);
     dspCloseChannel();
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
+    sdfReleaseResourceAllocation(context->allocation);
     brsTaskState = 2;
 }
 

@@ -820,17 +820,17 @@ extern char D_003AFAA8[];
 
 BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsRewardSummary *rewards;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     BrsProgressRow *party;
     BrsRewardBatch *rewardState;
     BrsRewardBatch *primary;
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfResourceRetainAddress(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
-    work->handle = handle;
+    work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
     work->fadeTarget = (s32)mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_0036C858);
@@ -869,7 +869,7 @@ void brsStaffTaskDestroy(KwlnTask *arg0) {
     }
     effDestroyEffectList((struct EffectList *)(u32)context->fadeTarget);
     dspCloseChannel();
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
+    sdfReleaseResourceAllocation(context->allocation);
     brsTaskState = 2;
 }
 
