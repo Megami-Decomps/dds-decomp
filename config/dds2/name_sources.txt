@@ -6974,3 +6974,4 @@
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x0020DFC8	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
 0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
+0x00157AC8	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.

@@ -35,7 +35,7 @@ EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
 extern s32 func_003003F0(const char *format, ...);
 
 /* Normalize legacy payloads before the effect manager constructs their nodes. */
-void func_0014FF28(EffNodeDescriptor *descriptor) {
+void effConvertLegacyNodeDescriptor(EffNodeDescriptor *descriptor) {
     u8 *payload = descriptor->payload;
 
     if (descriptor->version == 1.0f) {
