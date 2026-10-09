@@ -34,7 +34,7 @@ extern SdkFileStream *func_00359A98(const char *name, const char *mode);
 extern u32 func_00359B18(void *data, u32 size, u32 count, SdkFileStream *stream);
 extern u32 func_0035A648(const void *data, u32 size, u32 count, SdkFileStream *stream);
 extern s32 func_003594A8(SdkFileStream *stream);
-extern void func_003211F0(void);
+extern void func_003211F0(u32, u32);
 
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
 
@@ -814,7 +814,8 @@ void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *node) {
 }
 
 
-void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode, void (*callback)()) {
+void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode,
+                                    MnuCallbackListListener callback) {
     if (callback != 0) {
         callbackNode->onDestroy = callback;
     }
@@ -824,7 +825,8 @@ INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320CE0);
 
 INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320D80);
 
-void dds3SetCallbackNodeFirstListener(MnuCallbackList *callbackNode, void (*callback)()) {
+void dds3SetCallbackNodeFirstListener(MnuCallbackList *callbackNode,
+                                      MnuCallbackListListener callback) {
     if (callback != 0) {
         callbackNode->onRemove = callback;
     }

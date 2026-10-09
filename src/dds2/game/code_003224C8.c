@@ -47,7 +47,6 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
@@ -59,7 +58,7 @@ extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
 /* Exported timed-state/runtime-list providers from the preceding unit. */
 extern MenuRuntimeList *func_00321EC8(void);
 extern MenuRuntimeList *func_00321ED8(void);
-extern void func_00321688(u32, u32, u32, u32, f32);
+extern void func_00321688(MnuCallbackList *, MenuRuntimeList *, u32, u32, f32);
 extern void func_00321798(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, s32, f32);
 extern void mnuDeactivateListRecord(MenuRuntimeList *, MenuRuntimeRecord *);
 extern void func_00322418(void);
@@ -206,9 +205,8 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     return entry->currentY;
 }
 
-extern void func_00321528(u32, MenuRegistryRecord *);
+extern void func_00321528(MnuCallbackList *, MenuRegistryRecord *);
 extern void func_003232A0(MenuWorkEntry *, MenuShortRecordList *);
-extern u32 mnuCreateReleaseCallbackNode(void);
 
 void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
                                     s32 resourceRecordIndex, s32 x, s32 y,
@@ -238,14 +236,13 @@ void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
     if (entry->callback != 0) {
-        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)entry->callback);
+        dds3DestroyCallbackNodeAfterLastNotification(entry->callback);
         entry->callback = 0;
     }
 }
 
 extern void func_003226D8(MenuWorkEntry *, MenuShortRecordList *, MenuShortRecord *);
 extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, MenuShortRecord *);
-extern void func_00321528(u32, MenuRegistryRecord *);
 
 /* Tick the packed countdown and dispatch the row's fixed-kind record. */
 s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
@@ -463,7 +460,7 @@ s32 func_003233E8(s32 context) {
             }
 
             if (context == 0) {
-                func_00321688(entry->callback, (u32)runtimeList,
+                func_00321688(entry->callback, runtimeList,
                               (s32)entry->currentX, currentYInteger,
                               entry->currentAngleRadians);
             }
@@ -828,7 +825,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
         return 0;
     }
 
-    oldList = (MnuCallbackList *)entry->callback;
+    oldList = entry->callback;
     if (oldList != NULL) {
         for (node = oldList->head; node != NULL; node = node->next) {
             record = (MenuStateRecord *)node->value;
@@ -858,7 +855,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
         record->offsetX = -20;
         record->offsetY = -20;
     }
-    func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+    func_00320CE0(entry->callback, 0, (u32)record);
 
     currentMode = entry->flagsBits.mode;
     if (currentMode < 5) {
@@ -873,7 +870,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 1:
@@ -886,7 +883,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x40;
             tag.group = -90;
@@ -897,7 +894,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 2:
@@ -910,7 +907,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetX = 0;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 2;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -921,7 +918,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -932,7 +929,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 3:
@@ -945,7 +942,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x40;
             tag.group = -90;
@@ -956,7 +953,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.direction = 4;
             record->flags.bits.hasRange = 1;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -967,7 +964,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 3;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
 
             tag.flags = 0x45;
             tag.group = -90;
@@ -978,7 +975,7 @@ s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
             record->offsetY = 5;
             record->flags.bits.hasRange = 1;
             record->flags.bits.direction = 4;
-            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            func_00320CE0(entry->callback, 0, (u32)record);
             entry->flagsBits.mode++;
             break;
         case 4:
@@ -1053,7 +1050,7 @@ s32 func_00324840(void) {
         }
     }
 
-    func_00321798((MnuCallbackList *)work->callback,
+    func_00321798(work->callback,
                   func_00321ED8(), kindMask,
                   (s32)work->currentX, (s32)work->currentY, kindMask,
                   work->currentAngleRadians);
@@ -1092,7 +1089,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
     initialTag.index = 0;
     memset(context, 0, 0x48);
     context->callback = mnuCreateReleaseCallbackNode();
-    func_00320CE0((MnuCallbackList *)context->callback, 0,
+    func_00320CE0(context->callback, 0,
                    (u32)mnuCreateNamedRecord(&initialTag));
 }
 
