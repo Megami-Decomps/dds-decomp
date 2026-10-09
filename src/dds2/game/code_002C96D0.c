@@ -4681,7 +4681,7 @@ void fileQueueInitTransform(void *queue)
 
 void fileJobResetAndInitTransform(FileJob *job) {
     memset(job, 0, 0x90);
-    job->scaleFlags = 1;
+    job->updateFlags = FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE;
     job->unk88[0] = 8;
     job->unk88[1] = 0;
     job->unk88[2] = 0;
@@ -4848,7 +4848,7 @@ void fileQueueUpdate(FileQueue *queue)
         if (limit < job->startFrame) {
             continue;
         }
-        if (job->scaleFlags & 2) {
+        if (job->updateFlags & FILE_JOB_UPDATE_FLAG_SKIP_FRAME_UPDATE) {
             continue;
         }
         if (job->xformFlags & 0x18) {
@@ -4995,7 +4995,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     total = scale * queue->transformValue;
     for (job = queue->first; job != NULL; job = job->next) {
         jobScale = job->scale;
-        if (job->scaleFlags & 1) {
+        if (job->updateFlags & FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE) {
             jobScale = jobScale * total;
         }
         fileJobInvokeScaleCallback((FileJobPayload *)job->id, jobScale);
