@@ -3076,7 +3076,7 @@ typedef struct FileConfigTask {
     f32 choiceFade;
     f32 labelFade;
     u32 pending;    /* 0x34: zero when no load can start */
-    u32 effect;     /* 0x38: effect resource requested for the save scene */
+    MenuResourceWork *effect; /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
@@ -3120,8 +3120,8 @@ s32 func_00290FE0(s32 mode) {
     }
     switch (mode) {
     case 1:
-        task->effect = (u32)mnuRequestEffectResource(D_003BC8E0, "/facility/spr/mantra/mantr_bg.spr");
-        while (mnuHasEffectResourceHandle((MenuResourceWork *)task->effect)) {
+        task->effect = mnuRequestEffectResource(D_003BC8E0, "/facility/spr/mantra/mantr_bg.spr");
+        while (mnuHasEffectResourceHandle(task->effect)) {
         }
         for (i = 0; i < 4; i++) {
             effRequestResourceByMode(D_003BC8E0, names[i], 0, (u32 *)&task->slots[i]);
@@ -3152,7 +3152,7 @@ void fileConfigTaskDestroy(void) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
-            mnuReleaseEffectResource((MenuResourceWork *)((FileConfigTask *)fileConfigTaskWork)->effect);
+            mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
