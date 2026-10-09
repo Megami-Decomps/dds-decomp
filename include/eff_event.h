@@ -18,6 +18,8 @@ typedef struct EffEventWork EffEventWork;
 /* The event constructor copies a serialized, caller-specific 0x30-byte
  * parameter record. Its retained work owner is opaque to external users. */
 EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
+/* Copy a caller-built 0x30-byte record into the event's initialization prefix. */
+void effEventCopyFileRecordHeader(EffEventWork *destination, const void *source);
 void effEventReleaseNode(EffEventWork *work);
 void effEventSetScale(EffEventWork *work, f32 scale);
 void effEventUpdateEffectParameters(EffEventWork *work);
