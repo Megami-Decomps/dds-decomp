@@ -850,10 +850,10 @@ void evtDrawSelectedEntryLabel(s32 list, EvtRuntimeGroup *selected, s32 x,
     x += 0x6C0;
     kwlnDrawSpriteCell((u32)list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
-    if (selected->entryHeader.word >= 0) {
+    if (selected->entryHeader >= 0) {
         sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
             x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088,
-            runtime->entryName[selected->entryHeader.word]));
+            runtime->entryName[selected->entryHeader]));
     }
 }
 
@@ -2235,7 +2235,7 @@ void evtViewerDrawGroupRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 0x18) {
             if (n == index) {
-                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader.word]));
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader]));
                 return;
             }
             n++;
@@ -3534,7 +3534,7 @@ void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
             s32 i;
             u16 value;
 
-            value = child->value04;
+            value = (u16)child->interpolationMode;
             record.groupType = group->type;
             record.start = child->frame;
             record.span = child->duration;
@@ -3580,7 +3580,7 @@ void evtWriteGroupHeader(s32 output, EvtRuntime *runtime) {
     for (group = runtime->groups; group != NULL; group = group->next) {
         if (group->type == 2) {
             s32 header[4];
-            header[0] = group->entryHeader.word;
+            header[0] = group->entryHeader;
             header[1] = 0;
             header[2] = 0;
             header[3] = 0;
@@ -3703,7 +3703,7 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         u8 header[8];
         header[0] = *(u8 *)group;
         header[1] = group->metadataFlag;
-        *(u16 *)&header[2] = group->entryHeader.shortValue;
+        *(u16 *)&header[2] = (u16)group->entryHeader;
         *(u16 *)&header[4] = group->metadataValue;
         header[6] = group->metadataByte1;
         header[7] = group->metadataByte2;
@@ -3909,8 +3909,8 @@ void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *
     } else {
         for (i = 0; i < src->count; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader.word], src->names + link->index * 32) == 0) {
-                    link->index = group->entryHeader.word;
+                if (strcmp(runtime->entryName[group->entryHeader], src->names + link->index * 32) == 0) {
+                    link->index = group->entryHeader;
                     return;
                 }
             }
