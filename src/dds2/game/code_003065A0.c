@@ -37,7 +37,7 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
     }
 }
 
-extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, u32, u32, u32,
+extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, const u32 *, const u32 *, u32,
                                       f32, u32, u32, u32, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
@@ -65,7 +65,7 @@ void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
                                        edgeColorBytes, 0);
         itfDrawRotatedTexturedRect(position[0], position[1], depth,
                                    dimensions[0], dimensions[1],
-                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
                                    texture, buffer);
         textureCoordinates[3] = savedTextureCoordinates[3];
@@ -81,7 +81,7 @@ void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
                                        edgeColorBytes, 1);
         itfDrawRotatedTexturedRect(position[0], position[1], depth,
                                    dimensions[0], dimensions[1],
-                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
                                    texture, buffer);
         textureCoordinates[1] = savedTextureCoordinates[1];
@@ -97,7 +97,7 @@ void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
                                        edgeColorBytes, 2);
         itfDrawRotatedTexturedRect(position[0], position[1], depth,
                                    dimensions[0], dimensions[1],
-                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
                                    texture, buffer);
         textureCoordinates[2] = savedTextureCoordinates[2];
@@ -113,7 +113,7 @@ void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
                                        edgeColorBytes, 3);
         itfDrawRotatedTexturedRect(position[0], position[1], depth,
                                    dimensions[0], dimensions[1],
-                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   textureCoordinates, cornerColors,
                                    kind, 0.0f, mode, flip,
                                    texture, buffer);
         textureCoordinates[0] = savedTextureCoordinates[0];

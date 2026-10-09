@@ -315,7 +315,7 @@ extern EffResourceOps effBlockResourceOperations[];
 
 extern EffResourceOps effModelBlockOperations[];
 
-extern EffResourceOps D_0037EEE0[];
+extern EffResourceOps effRuntimeResourceOperations[];
 
 extern EffClassOps effModelResourceOperations[];
 
@@ -525,42 +525,49 @@ void effReleaseSharedReference(RefObj *obj);
 
 RefObj *effRetainSharedReference(RefObj *obj);
 
-u32 effDuplicateSmallHeader(const void *source) {
-    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(12);
-    *buffer = 0;
-    memcpy(buffer + 1, source, 8);
-    return (u32)buffer;
+typedef struct EffFadeHeaderWork {
+    s32 frame;
+    s32 payload[2];
+} EffFadeHeaderWork;
+
+typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 : -1];
+
+EffFadeHeaderWork *effDuplicateSmallHeader(const void *source) {
+    EffFadeHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffFadeHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
-void effCreateSmallHeaderFromFile(void *work) {
+EffFadeHeaderWork *effCreateSmallHeaderFromFile(void *work) {
     void *resource;
 
-    resource = fileResolvePrimaryBuffer(work);
-    effDuplicateSmallHeader(resource);
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
+    return effDuplicateSmallHeader(resource);
 }
 
-void effReleaseFadeHeaderAllocation(u32 allocation) {
+void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSmallHeaderFromWork(s32 work) {
-    effDuplicateSmallHeader((const void *)(work + 4));
+EffFadeHeaderWork *effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
+    return effDuplicateSmallHeader(work->payload);
 }
 
-void effFadeFrameReset(u32 *counter) {
-    *counter = 0;
+void effFadeFrameReset(EffFadeHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effFadeFrameAdvance(s32 *counter) {
+void effFadeFrameAdvance(EffFadeHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        kwlnFadeSetupFrames(counter[1], counter[2]);
-        frame = *counter;
+        kwlnFadeSetupFrames(counter->payload[0], counter->payload[1]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 EffFadeVectorWork *effCreateFadeVectorWork(source)
@@ -659,42 +666,49 @@ void func_0029CF30(SdfFlagListWork *work, u32 value) {
     work->unk04 = value;
 }
 
-u32 effDuplicatePayloadHeader(const void *source) {
-    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(0x14);
-    *buffer = 0;
-    memcpy(buffer + 1, source, 16);
-    return (u32)buffer;
+typedef struct EffSelectionHeaderWork {
+    s32 frame;
+    s32 payload[4];
+} EffSelectionHeaderWork;
+
+typedef char EffSelectionHeaderWorkSizeCheck[(sizeof(EffSelectionHeaderWork) == 0x14) ? 1 : -1];
+
+EffSelectionHeaderWork *effDuplicatePayloadHeader(const void *source) {
+    EffSelectionHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffSelectionHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
-void effCreateSelectionHeaderFromFile(void *work) {
+EffSelectionHeaderWork *effCreateSelectionHeaderFromFile(void *work) {
     void *resource;
 
-    resource = fileResolvePrimaryBuffer(work);
-    effDuplicatePayloadHeader(resource);
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
+    return effDuplicatePayloadHeader(resource);
 }
 
-void effReleaseSelectionHeaderAllocation(u32 allocation) {
+void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSelectionHeaderFromWork(s32 work) {
-    effDuplicatePayloadHeader((const void *)(work + 4));
+EffSelectionHeaderWork *effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
+    return effDuplicatePayloadHeader(work->payload);
 }
 
-void effSelectionFrameReset(u32 *counter) {
-    *counter = 0;
+void effSelectionFrameReset(EffSelectionHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effSelectionFrameAdvance(s32 *counter) {
+void effSelectionFrameAdvance(EffSelectionHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        evtSelStateCreate(counter[1], (s16)counter[2], counter[3], counter[4]);
-        frame = *counter;
+        evtSelStateCreate(counter->payload[0], (s16)counter->payload[1], counter->payload[2], counter->payload[3]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 typedef struct EffFadeConfig {
@@ -7093,7 +7107,7 @@ void effApplyKeyframeAngle(u8 *work) {
 
 u8 *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
-    u32 size = D_0037EEE0[kind].payloadSize;
+    u32 size = effRuntimeResourceOperations[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffActiveResource *)effect)->payload = effect + headerSize;
     ((EffActiveResource *)effect)->color = 0x80808080;
@@ -7110,11 +7124,11 @@ u32 effCreateResourceInstance(u16 kind, void *source, void *secondary, u32 param
     u8 *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
-        if (D_0037EEE0[kind].createResource != NULL) {
-            ((EffActiveResource *)effect)->resource = D_0037EEE0[kind].createResource(source, secondary, param);
+        if (effRuntimeResourceOperations[kind].createResource != NULL) {
+            ((EffActiveResource *)effect)->resource = effRuntimeResourceOperations[kind].createResource(source, secondary, param);
         }
-        if (D_0037EEE0[kind].initialize != NULL) {
-            D_0037EEE0[kind].initialize(effect);
+        if (effRuntimeResourceOperations[kind].initialize != NULL) {
+            effRuntimeResourceOperations[kind].initialize(effect);
         }
     }
     return (u32)effect;
@@ -7128,7 +7142,7 @@ u32 effCreateActiveResourceFromFile(u8 *work) {
 
 void effDestroyResourceInstance(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = D_0037EEE0[((EffActiveResource *)work)->kind.signedIndex].destroyResource;
+        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].destroyResource;
         if (callback != NULL) {
             callback((void *)((EffActiveResource *)work)->resource);
         }
@@ -7140,17 +7154,17 @@ u8 *effDuplicateActiveResource(u8 *source) {
     u8 *effect;
     u32 kind = ((EffActiveResource *)source)->kind.index;
 
-    if (D_0037EEE0[kind].cloneResource == NULL) {
+    if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
         effect = (u8 *)effCreateResourceInstance(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload, 0, 0);
     } else {
         u32 resource;
         u32 activeKind;
         effect = effAllocateResourcePayload(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload);
-        resource = D_0037EEE0[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
+        resource = effRuntimeResourceOperations[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
         activeKind = ((EffActiveResource *)source)->kind.index;
         ((EffActiveResource *)effect)->resource = resource;
-        if (D_0037EEE0[activeKind].initialize != NULL) {
-            D_0037EEE0[activeKind].initialize(effect);
+        if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
+            effRuntimeResourceOperations[activeKind].initialize(effect);
         }
     }
     return effect;
@@ -7158,7 +7172,7 @@ u8 *effDuplicateActiveResource(u8 *source) {
 
 void effClearCallbackFrame(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = D_0037EEE0[((EffActiveResource *)work)->kind.signedIndex].initialize;
+        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].initialize;
         if (callback != NULL) {
             callback(work);
         }
@@ -7168,7 +7182,7 @@ void effClearCallbackFrame(u8 *work) {
 
 void effDispatchIndexedCallback(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = D_0037EEE0[((EffActiveResource *)work)->kind.signedIndex].update;
+        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].update;
         if (callback != NULL) {
             callback(work);
         }
@@ -7178,7 +7192,7 @@ void effDispatchIndexedCallback(u8 *work) {
 
 void effDispatchEnabledCallback(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = D_0037EEE0[((EffActiveResource *)work)->kind.signedIndex].draw;
+        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].draw;
         if (callback != NULL) {
             callback(work);
         }
