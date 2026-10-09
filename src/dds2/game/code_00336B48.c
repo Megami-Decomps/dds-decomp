@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -271,7 +272,6 @@ extern vu8 sdfCurrentBufferIndex;
 
 extern void sdfAssetApplyEntryChanges(void *, s32);
 
-extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void sdfVuMultiplyPrimaryByScratch(void) {
@@ -1187,7 +1187,7 @@ void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitNodeHeaderFromWords(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }

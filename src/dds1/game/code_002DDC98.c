@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -1148,7 +1149,6 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfAssetApplyEntryChanges(void *, s32);
-extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
 void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
@@ -1159,7 +1159,7 @@ void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitNodeHeaderFromWords(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }

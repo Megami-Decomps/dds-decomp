@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
-extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
 typedef struct {
@@ -96,7 +96,7 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
 
 /* Select an asset packet from the root model's parsed resource table. */
 void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(((u32 **)model->resources->buffer)[index], packet, frame);
+    return sdfInitNodeHeaderFromWords(((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */
