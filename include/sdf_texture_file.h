@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+/* Values used by the battle-model texture uploader; other values use its default path. */
+#define SDF_TEXTURE_BATTLE_SLOT_ONE 1
+#define SDF_TEXTURE_BATTLE_SLOT_TWO 2
+
 /* Serialized texture-resource header; payload begins after this 0x40-byte prefix. */
 typedef struct SdfTextureFileHeader {
     u8 unk00;
@@ -21,7 +25,7 @@ typedef struct SdfTextureFileHeader {
     u8 unk1A;          /* 0x1A */
     u8 clampMode;      /* 0x1B */
     s32 resourceKey;   /* 0x1C */
-    s32 unk20;         /* 0x20 */
+    s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
     u8 pad24[0x1C];    /* 0x24 */
 } SdfTextureFileHeader;
 
@@ -55,8 +59,8 @@ typedef char SdfTextureFileHeader_clamp_mode_offset_must_be_0x1B[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(clampMode) == 0x1B) ? 1 : -1];
 typedef char SdfTextureFileHeader_resource_key_offset_must_be_0x1C[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(resourceKey) == 0x1C) ? 1 : -1];
-typedef char SdfTextureFileHeader_unk20_offset_must_be_0x20[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(unk20) == 0x20) ? 1 : -1];
+typedef char SdfTextureFileHeader_battleTextureSlot_offset_must_be_0x20[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(battleTextureSlot) == 0x20) ? 1 : -1];
 #undef SDF_TEXTURE_FILE_HEADER_OFFSET
 
 struct SdfTex;
