@@ -293,7 +293,6 @@ void fldUnloadPlayerModel(void);
 
 extern void dds3ClearObjectFlags(u32, s32);
 
-extern EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 
 extern void func_00112058(u32, s32, s32);
 
@@ -1286,7 +1285,6 @@ extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 
 extern void effObjSetInnerFloat(u32, f32);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
 void fldCreateSecondaryWorldCamera(void) {

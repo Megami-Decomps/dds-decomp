@@ -86,7 +86,6 @@ extern s32 fldSecondaryEffectPositionPending;
 
 extern void *dds3GetWorldObject(void);
 
-extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
 
 extern char D_003BB000[]; /* "BARIA" */
 
@@ -437,7 +436,6 @@ s32 fldCmdSetLookAtHeading(void) {
 
 extern u32 fldGetPlayerSceneState(void);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
 

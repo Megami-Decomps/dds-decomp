@@ -86,7 +86,6 @@ extern u32 D_00436088;
 
 extern void *dds3GetWorldObject(void);
 
-extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 
 extern s64 fldGetPlayerSceneState(void);
 

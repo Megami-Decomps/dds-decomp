@@ -21,7 +21,6 @@ void dds3DestroyCameraData(EffWorldNode *camera) {
     sdfReleaseChipBlock(data);
 }
 
-EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 void *dds3GetWorldSecondaryObject(void);
 u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 void effObjClearNodeFlags(ObjectTransform *node, u32 flags);

@@ -122,7 +122,6 @@ void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
 u32 fldGetPlayerSceneState(void);
 
-EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 
 extern void func_00101A80(KwlnTask *parent, KwlnTask *child);

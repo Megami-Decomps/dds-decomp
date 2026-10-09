@@ -3173,7 +3173,6 @@ extern void dds3EnsureSlotData();
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *object);
 
 extern void func_001127A0(s32 object, s32 arg);
 

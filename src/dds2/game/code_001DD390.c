@@ -5238,8 +5238,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9130);
 extern f32 D_003B6D70[4], D_003B6D80[4];
 extern f32 D_003B6D50[4], D_003B6D60[4];
 extern u32 D_00436A98;
-extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);

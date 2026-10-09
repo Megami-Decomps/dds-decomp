@@ -62,7 +62,6 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 
 extern void *dds3GetWorldObject(void);
 
-extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
