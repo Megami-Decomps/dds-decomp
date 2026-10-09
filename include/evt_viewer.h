@@ -100,7 +100,7 @@ typedef struct EvtRuntime {
     s32 previousGlyphPosition;
     s32 entryTotal;
     char entryName[256][32];
-    s32 activeEntryIndex;
+    EffWorldNode *activeEntryIndex;
     u8 pad2028[4];
     s32 fallbackEntry;
     s32 entryCount;
