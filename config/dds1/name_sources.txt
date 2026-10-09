@@ -5485,6 +5485,7 @@
 0x0029F8A0	billUpdateCellDrawColorAndTransform	inferred	Blends cell draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x0029FA80	billCreateParticleNode	inferred	DDS2 twin func_002E1AE8: 0x2C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x0029FB18	billReleaseParticleNode	inferred	Particle node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
+0x0029FB48	billAdvanceParticleInstances	inferred	Kind-3 active update advances particle instances from EffBillParticleConfig and the parent frame/resource state.
 0x002A0260	billUpdateParticleDrawColorAndTransform	inferred	Blends particle draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A03C8	effClearAnimatedFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A0440	billAllocateAnimatedTransformEntries	inferred	Allocates and retains the entry buffer used by both animated-transform creation and cloning. [names_reviewed5.tsv]

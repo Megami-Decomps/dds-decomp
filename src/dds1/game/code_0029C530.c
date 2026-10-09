@@ -1714,7 +1714,7 @@ void billReleaseParticleNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029FB48);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceParticleInstances);
 
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
