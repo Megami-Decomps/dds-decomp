@@ -18,7 +18,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
 
     func_0029AA48(panel);
     func_0029AC20(panel, 0);
-    return func_002C4038(&panel->transition, &panel->transition.state, 1, (void *)request);
+    return menuSetHandler(panel, 1, request);
 }
 
 s32 itfRunPanelMode2(KwlnTask *request) {
@@ -26,7 +26,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0026C8E8(0);
-    return func_002C4038(&panel->transition, &panel->transition.state, 2, (void *)request);
+    return menuSetHandler(panel, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029C120);
