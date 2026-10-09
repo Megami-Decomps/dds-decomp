@@ -724,7 +724,38 @@ void func_00291A20(MnuStatusResource *object, s32 selector, u16 id, s32 panelX) 
     } while (--recordIndex >= 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291C68);
+void func_00291C68(MnuStatusResource *object, s32 selector, u16 id) {
+    MantraNodePos *position;
+    MantraNodePos **neighbor;
+    MenuPanelPositionRecord *record;
+    MantraPanelAnimation *animation;
+    s32 i;
+    s32 k;
+
+    position = mnuGetMantraPanelPositionRecord((s16)id);
+    animation = mnuFindPanelSlotById(object->menu.resource, id, 6);
+    mnuQueuePanelAnimationTransition(animation, 1, 0);
+    i = 0;
+    while (i < 3) {
+        record = func_00291400(i++, id);
+        record->stateFlags |= 0x800;
+    }
+    for (k = 0; k < 3; k++) {
+        record = func_00291400(k, id);
+        record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 2);
+        neighbor = position->neighbors;
+        for (i = 5; i >= 0; i--, neighbor++) {
+            if (*neighbor != NULL) {
+                if ((func_00291400(k, (*neighbor)->id)->flags & 1) != 0) {
+                    record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
+                }
+            }
+        }
+    }
+    func_00278FA8(object->menu.selectionController);
+    func_00279148(object->menu.selectionController);
+    mnuStorePanelEntry(0x20007, 20);
+}
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
 
 void itfClearSelectionFlags(MnuStatusResource *object) {
