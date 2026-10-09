@@ -5005,11 +5005,11 @@ u32 fileGetQueueColor(FileQueue *queue) {
     return queue->color;
 }
 
-void fileQueueCopyRotationFromSource(void *dst, void *src) {
+void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     s128 vec;
-    sdfVuMatrixToQuaternion(src);
+    sdfVuMatrixToQuaternion(matrix);
     VU0_STORE_VF(vf10, &vec);
-    fileQueueSetRotation(dst, &vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
 }
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);

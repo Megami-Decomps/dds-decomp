@@ -4495,11 +4495,11 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileQueueSetColor);
 
-void fileQueueCopyRotationFromSource(void *dst, void *src) {
+void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     s128 vec;
-    sdfVuMatrixToQuaternion(src);
+    sdfVuMatrixToQuaternion(matrix);
     VU0_STORE_VF(vf10, &vec);
-    fileQueueSetRotation(dst, &vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
 }
 
 FileJob *fileAppendJob(FileQueue *queue, u32 id) {
