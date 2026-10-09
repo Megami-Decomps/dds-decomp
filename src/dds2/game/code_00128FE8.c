@@ -1040,61 +1040,61 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     return fldAreaState.resourceFlag != 0;
 }
 
-void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            void *buffer = sdfAllocGeneralBlock(fldCachedRoomResourceSize);
-            void *data = (void *)sdfResourceRetainAddress(buffer);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(fldCachedRoomResourceSize);
+            void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
-            return buffer;
+            return allocation;
         }
     }
     return NULL;
 }
 
-void *func_0012A270(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *func_0012A270(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            void *buffer = sdfAllocGeneralBlock(D_00436004);
-            void *data = (void *)sdfResourceRetainAddress(buffer);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_00436004);
+            void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
             memcpy(data, (void *)D_00435FF4, D_00436004);
-            return buffer;
+            return allocation;
         }
     }
     return NULL;
 }
 
-void *func_0012A2E8(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *func_0012A2E8(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            void *buffer = sdfAllocGeneralBlock(D_00436008);
-            void *data = (void *)sdfResourceRetainAddress(buffer);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_00436008);
+            void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
             memcpy(data, (void *)D_00435FF8, D_00436008);
-            return buffer;
+            return allocation;
         }
     }
     return NULL;
 }
 
-void *func_0012A360(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *func_0012A360(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
         if (state->resourceFloor == room) {
-            void *buffer = sdfAllocGeneralBlock(D_0043600C);
-            void *data = (void *)sdfResourceRetainAddress(buffer);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_0043600C);
+            void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
             memcpy(data, (void *)D_00435FFC, D_0043600C);
-            return buffer;
+            return allocation;
         }
     }
     return NULL;
