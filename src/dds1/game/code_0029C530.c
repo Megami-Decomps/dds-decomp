@@ -4114,20 +4114,20 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     return table;
 }
 
-void effFreeIndexedEntries(u8 *work) {
+void effFreeIndexedEntries(EffClassWork *work) {
     u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *pool = (u8 *)((EffClassWork *)work)->resource;
-    u8 *entry = *(u8 **)pool;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetTable *table = (EffPointSetTable *)work->resource;
+    EffPointSetRow *entry = table->rows;
 
     if (count != 0) {
         do {
-            effReleasePointSetAsset((EffPointSet *)*(u32 *)entry);
-            entry += 0x10;
+            effReleasePointSetAsset(entry->set);
+            entry++;
             index++;
         } while (index < count);
     }
-    sdfReleaseChipBlock(pool);
+    sdfReleaseChipBlock(table);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A8A90);
@@ -4382,20 +4382,20 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     return table;
 }
 
-void effReleaseBillPointEntries(u8 *work) {
-    u8 *config = ((EffClassWork *)work)->payload;
-    u8 *state = (u8 *)((EffClassWork *)work)->resource;
-    u32 count = ((EffBillTimedHeader *)config)->count;
+void effReleaseBillPointEntries(EffClassWork *work) {
+    EffBillTimedHeader *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    u32 count = config->count;
     u32 index = 0;
-    u8 *entry = *(u8 **)state;
+    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
 
     if (count != 0) {
         do {
-            effReleasePointSetAsset(((EffScaleRangeEntry *)entry)->set);
-            entry += 0x30;
+            effReleasePointSetAsset(entry->set);
+            entry++;
         } while (++index < count);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffScaleRange *)state)->allocation));
+    sdfReleaseResourceAllocation(range->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9DA8);
