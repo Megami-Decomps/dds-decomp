@@ -8250,7 +8250,7 @@ typedef struct EffectSlotNode80 {
     void *deviceSlot;       // 0x64
     u32 resourceEntries;    // 0x68
     struct SdfMemBlock *entryAllocation;    // 0x6C: queue-clone array descriptor
-    u32 record;             // 0x70
+    FileSlotTable *record;  // 0x70: primary slot-table owner
     u8 *positions;          // 0x74
     struct SdfMemBlock *positionAllocation; // 0x78: particle-position array descriptor
     u16 active;
@@ -8304,7 +8304,7 @@ EffectSlotNode80 *effAllocateActiveEffectSlotNode(u32 count) {
     node->opacity = 1.0f;
     node->model = 0;
     node->deviceSlot = 0;
-    node->record = 0;
+    node->record = NULL;
     node->resourceEntries = 0;
     node->entryAllocation = 0;
     node->active = 1;
@@ -8359,14 +8359,14 @@ void effDestroyOwnedResources(s32 *work) {
         sdfReleaseDevSlot(((EffectSlotNode80 *)work)->deviceSlot, 1, 1);
     }
     if (((EffectSlotNode80 *)work)->entryAllocation != 0) {
-        u32 count = ((s32 *)((EffectSlotNode80 *)work)->record)[2];
+        u32 count = ((EffectSlotNode80 *)work)->record->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(((s32 *)((EffectSlotNode80 *)work)->resourceEntries)[i]);
         }
         sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->entryAllocation);
     }
-    if (((EffectSlotNode80 *)work)->record != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)((EffectSlotNode80 *)work)->record);
+    if (((EffectSlotNode80 *)work)->record != NULL) {
+        fileReleaseGridRecordHandle(((EffectSlotNode80 *)work)->record);
     }
     if (((EffectSlotNode80 *)work)->positionAllocation != 0) {
         sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->positionAllocation);
@@ -8377,11 +8377,11 @@ void effDestroyOwnedResources(s32 *work) {
 extern s32 *func_002FA5B8(s32 *);
 
 s32 *effCloneOwnedState(u8 *owner) {
-    s32 *source = (s32 *)((FileSlotTable *)((EffectSlotNode80 *)owner)->record)->data1;
+    s32 *source = (s32 *)((EffectSlotNode80 *)owner)->record->data1;
     s32 *work = func_002FA5B8(source);
     memcpy(&((EffectSlotNode80 *)work)->randomDirection,
         &((EffectSlotNode80 *)owner)->randomDirection, 0x50);
-    effRebuildResourceEntries((u8 *)work, ((FileSlotTable *)((EffectSlotNode80 *)owner)->record)->type, source);
+    effRebuildResourceEntries((u8 *)work, ((EffectSlotNode80 *)owner)->record->type, source);
     func_002FA978(work, owner);
     return work;
 }
@@ -8408,7 +8408,7 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
         kind = src->resourceKind;
         break;
     case 6:
-        count = ((FileSlotTable *)src->record)->count;
+        count = src->record->count;
         if (count == 0) {
             return;
         }
@@ -8436,20 +8436,20 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
 
 
 void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
-    s32 previous = ((EffectSlotNode80 *)work)->record;
+    FileSlotTable *previous = ((EffectSlotNode80 *)work)->record;
     struct SdfMemBlock *allocation;
     u32 count;
     u32 i;
     u8 *entries;
-    if (previous != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)previous);
+    if (previous != NULL) {
+        fileReleaseGridRecordHandle(previous);
     }
-    ((EffectSlotNode80 *)work)->record = (u32)fileAllocateGridRecordSlots(kind, *(s32 *)work, config);
+    ((EffectSlotNode80 *)work)->record = fileAllocateGridRecordSlots(kind, *(s32 *)work, config);
     allocation = ((EffectSlotNode80 *)work)->positionAllocation;
     if (allocation != 0) {
         sdfReleaseResourceAllocation(allocation);
     }
-    count = ((FileSlotTable *)((EffectSlotNode80 *)work)->record)->count;
+    count = ((EffectSlotNode80 *)work)->record->count;
     ((EffectSlotNode80 *)work)->positionAllocation = sdfAllocGeneralBlock(count * 0x18);
     ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress(((EffectSlotNode80 *)work)->positionAllocation);
     entries = ((EffectSlotNode80 *)work)->positions;
@@ -8478,9 +8478,9 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, void *s
     work->deviceSlot = deviceSlot;
 }
 
-/* Rebuilds the surface job queue of one record bucket and clones the first job. */
+/* Rebuilds one cloned surface job queue for each slot-table entry. */
 void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) {
-    u32 count = ((EffRecordBucket *)obj->record)->count;
+    u32 count = obj->record->count;
     u32 i;
     s32 size;
 
@@ -8504,7 +8504,7 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) 
 }
 
 void effClearSurfaceRecordReferences(s32 node) {
-    if (((EffectSlotNode80 *)node)->record != 0) {
+    if (((EffectSlotNode80 *)node)->record != NULL) {
         fileClearRecordReferences(((EffectSlotNode80 *)node)->record);
         return;
     }
@@ -8514,7 +8514,7 @@ void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
     if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
-    if (((EffectSlotNode80 *)node)->record != 0) {
+    if (((EffectSlotNode80 *)node)->record != NULL) {
         fileAcquireRecord(((EffectSlotNode80 *)node)->record);
     }
 }
@@ -8527,11 +8527,11 @@ void func_002FB400(u32 node) {
 }
 
 void func_002FB428(s32 node) {
-    mnuRecordSetVector(((EffectSlotNode80 *)node)->record);
+    mnuRecordSetVector((u8 *)((EffectSlotNode80 *)node)->record);
 }
 
 void func_002FB440(s32 node) {
-    fileSetRecordSecondVector(((EffectSlotNode80 *)node)->record);
+    fileSetRecordSecondVector((u8 *)((EffectSlotNode80 *)node)->record);
 }
 
 /* Set the active effect slot's packed color. */
