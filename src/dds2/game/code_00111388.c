@@ -53,15 +53,15 @@ WorldValueIndices *dds3GetWorldSlotValue(u8 *object, s32 index) {
     return (WorldValueIndices *)(u32)(*(s32 *)(*(u8 **)(object + 0x18) + (index << 2)));
 }
 
-extern NodeB *dds3AppendWorldIndexNode(s32 initialCount);
-extern void dds3DestroyWorldIndexNode(NodeB *node);
+extern WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
+extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 extern void *dds3GetWorldSecondaryObject(void);
-extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-NodeB *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
+WorldIndexNode *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
     WorldValueIndices *slot = dds3GetWorldSlotValue((u8 *)object, index);
-    NodeB *result;
+    WorldIndexNode *result;
     u32 word;
 
     if (dds3GetWorldValueCount(slot) == 0) {
@@ -84,7 +84,7 @@ NodeB *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
 }
 
 EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void) {
-    NodeB *indexObject;
+    WorldIndexNode *indexObject;
     EffWorldNode *node;
 
     indexObject = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 2);
