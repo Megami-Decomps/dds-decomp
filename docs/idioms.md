@@ -6304,3 +6304,20 @@ only its eventual DMA submission converts it to a `u32` packet-address
 word. The allocator's address-word ABI, source offsets, tag encoding,
 and packet submission order remain unchanged.
 
+## Viewer dispatch shares its resource providers
+
+DDS1 `func_0022CED0` needs the preceding `evtEventViewer.c` resource
+providers visible. Moving only `evtEventViewerFreeBuffer` before it does not
+fix the branch: both the release and constructor calls need their genuine
+same-TU `REG_EH_REGION 0` notes. Controlled probes keep pass-28 branch UID
+276, target and epilogue donor UID 1658 identical; reorg alone changes the
+donor from taken-only to unconditional (`bnel` to retail `bne` at +0x124).
+
+Independent ownership evidence is the adjacent Nocturne-mapped release
+at `0022CB68` and the preceding voice-conflict diagnostic `D_003ACFE8`,
+whose consumer is this dispatcher. DDS2 mirrors that ownership with
+`D_004224A8`. The recovered DDS1 leading region ends at `0022D420`;
+the following jump table starts at `003AD0C0`. No flags or attributes change.
+
+Writing the source fields in pending/message/frame order emits the native
+loads and pending/frame/message stores without artificial temporaries.
