@@ -6315,8 +6315,8 @@
 0x002D3288	sdfTexAcquireResourceTexture	inferred	confidence=high; matched-C; src/dds1/sdf/sdfTex.c:133:func_002D3288; Finds cached resource texture and increments reference or builds texture/upload state; default upload-mode flag.; twin=0x0032C138, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002D32A0	sdfTexAcquireAlternateResourceTexture	inferred	confidence=high; matched-C; src/dds1/sdf/sdfTex.c:161:func_002D32A0; Processes the resource texture using packet variant one, complementary to sdfTexAcquireResourceTexture.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002D32B8	sdfTexBuildIntensityMap	inferred	Fam_Mid3
-0x002D3558	sdfFindResourceById	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D3598	sdfRegisterTextureReleaseRequestHandler	inferred	Binds texture release callback to the synchronized request slot rather than merely echoing initialization. [names_reviewed12.tsv]
+0x002D3558	sdfFindTextureByResourceKey	inferred	Searches the active SdfTex registry by resourceKey (+0x20), follows prev (+4), and returns the matched texture; paired with 0x0032C408.
 0x002D35B8	sdfBuildResourceTransferPacket	inferred	U2
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D38B8	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:121:func_002D38B8; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]

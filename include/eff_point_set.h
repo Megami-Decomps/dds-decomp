@@ -19,13 +19,20 @@ typedef struct EffPointSet {
     struct SdfMemBlock *allocation; // 0x1C
 } EffPointSet;
 
+typedef struct EffRingResource {
+    EffPointSet *pointSet;
+} EffRingResource;
+
 typedef char EffPointSetSizeCheck[sizeof(EffPointSet) == 0x20 ? 1 : -1];
 typedef char EffPointSetHandleOffsetCheck[
     ((u32)&((EffPointSet *)0)->handle == 0x18) ? 1 : -1];
 typedef char EffPointSetAllocationOffsetCheck[
     ((u32)&((EffPointSet *)0)->allocation == 0x1C) ? 1 : -1];
+typedef char EffRingResourceSizeCheck[
+    (sizeof(EffRingResource) == 0x04) ? 1 : -1];
 
 EffPointSet *effCreatePointSet5(s32 count);
+EffPointSet *effCreatePointSet4(u32 count);
 void effReleasePointSetAsset(EffPointSet *set);
 
 #endif

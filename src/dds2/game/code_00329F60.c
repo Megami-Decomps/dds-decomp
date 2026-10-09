@@ -9,6 +9,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
 
@@ -46,7 +47,6 @@ extern u8 *D_004389E4;
 
 extern void (*D_004389E8)(void *);
 
-extern SdfTex *sdfResourceListHead;
 
 extern SdfPendingRequest sdfTextureUpdateQueue;
 
