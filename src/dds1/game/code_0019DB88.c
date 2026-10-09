@@ -1009,7 +1009,6 @@ typedef struct ItfFovPanelWork {
 } ItfFovPanelWork;
 
 extern ItfFovPanelWork D_003D73C0;
-extern s32 sdfCreateResetPacketList(void);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
@@ -1018,7 +1017,7 @@ s32 func_0019FCC8(void) {
     s32 list;
     f32 radiansToDegrees = 57.2957795f;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket((SdfListHead *)list,
                     func_0011D3E8(0x8500, 0x79C0, 0xFEFFFF,
                                   0xA80, 0x120, 0x60000000, 0x40806020));
@@ -1141,7 +1140,7 @@ s32 func_0019FF60(void) {
     s16 previous;
     s32 highlight;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket((SdfListHead *)list,
         func_0011D3E8(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
