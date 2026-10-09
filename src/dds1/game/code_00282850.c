@@ -1127,7 +1127,7 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_00285670);
 /* Compare the popup state's current entry address, not an entry payload value. */
 
 u8 mnuIsPopupEntryValue(s32 stateAddress, s32 entryAddress) {
-    return ((MenuPopupState *)stateAddress)->entryAddress == entryAddress;
+    return ((MenuPopupState *)stateAddress)->entryAddress == (MenuPopupEntry *)(u32)entryAddress;
 }
 
 /* Bind the entry address and retain only the entry's low sixteen flag bits. */
@@ -1158,9 +1158,9 @@ void mnuAttachAndMarkMenuEntry(s32 entrySlotAddress, s32 entryAddress) {
 }
 
 /* Bind the current popup entry only when its saved address is nonzero. */
-void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
-    if (((MenuPopupState *)stateAddress)->entryAddress != 0) {
-        mnuSetPopupEntryFlagged((s32 *)(u32)entrySlotAddress, (void *)(u32)((MenuPopupState *)stateAddress)->entryAddress);
+void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
+    if (state->entryAddress != NULL) {
+        mnuSetPopupEntryFlagged(entrySlot, state->entryAddress);
         return;
     }
 }
