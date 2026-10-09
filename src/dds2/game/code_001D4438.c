@@ -874,7 +874,50 @@ extern void btlFlagUnitDefeatCandidate();
 extern void btlRefreshUnitMotionSelection();
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
-INCLUDE_ASM(const s32, "game/code_001D4438", btlReleaseIdleUnitSoundAndAdvanceTask);
+extern u64 btlStartTask(void *);
+
+void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
+    BtlState *runtime;
+    BtlUnit *unit;
+    SoundResourceNode *resource;
+    u32 flags;
+    u32 masked;
+    void (*callback)(ActionStateLink *);
+
+    runtime = (BtlState *)btlGetRuntime();
+    unit = task->unit;
+    resource = unit->node318;
+    task->pendingFlags &= ~0x100;
+    if (resource != 0) {
+        if (sndIsResourceNodeReferencedOrActive(resource) == 0) {
+            sndFreeResourceNode(unit->node318);
+            unit->node318 = 0;
+        }
+    }
+    flags = unit->flags;
+    if (flags & 0x400) {
+        callback = runtime->unitReturnHook;
+        if (callback != 0) {
+            callback(task);
+        }
+    } else {
+        if (unit->partyRecord.status & 0x4000) {
+            return;
+        }
+        if (unit->resourceIndex == 0x1F) {
+            func_001AA850(&unit->partyRecord, 0x1000);
+            flags = unit->flags;
+        }
+        masked = flags & ~0x20;
+        masked &= ~0x08000000;
+        unit->flags = masked;
+        btlFlagUnitDefeatCandidate(unit);
+        btlRefreshUnitMotionSelection(unit);
+        btlStartTask(btlAllocateIndexedUnitEffectTask((u8 *)unit, 0xE, 0, 1.0f));
+        fldAppendTaskToGroup(task);
+        btlDispatchStateHandler(task, 2);
+    }
+}
 
 void func_001D4A30(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = (((ActionStateLink *)task)->pendingFlags | 0x10) & ~0x200;
@@ -944,7 +987,6 @@ void func_001D4C98(void) {
 }
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
-extern u64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
