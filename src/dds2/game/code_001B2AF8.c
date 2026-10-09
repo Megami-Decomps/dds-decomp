@@ -463,7 +463,44 @@ u32 btlIsActorHighStateFlagClear(BtlUnit *actor) {
     return (((s32)actor->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B3200);
+s32 func_001B3200(BtlUnit *requester) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 limit;
+    u32 active;
+    u32 spawnLimit;
+    BtlUnit *unit;
+
+    if (datBattleSceneRecords[battle->battleMode].maxActiveEnemies >= 6) {
+        return 0;
+    }
+    limit = 5;
+    if (datBattleSceneRecords[battle->battleMode].maxActiveEnemies != 0) {
+        limit = datBattleSceneRecords[battle->battleMode].maxActiveEnemies;
+    }
+    if (battle->enemyLimitOverride != 0) {
+        limit = battle->enemyLimitOverride(requester, &datBattleSceneRecords[battle->battleMode], limit);
+    }
+    active = 0;
+    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+        s32 flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                active++;
+            }
+        }
+    }
+    if (active >= limit) {
+        return 0;
+    }
+    if (datBattleSceneRecords[battle->battleMode].maxEnemySpawns != 0) {
+        spawnLimit = datBattleSceneRecords[battle->battleMode].maxEnemySpawns;
+        if (battle->unk27E >= spawnLimit) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 
 s32 func_001B32F8(s32 object, s32 *choices) {
     s32 count = 0;
