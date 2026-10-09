@@ -1978,7 +1978,7 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0FA0);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceEmitterInstances);
 
 void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;

@@ -5496,6 +5496,7 @@
 0x002A0BE0	billUpdateAlternatingDrawColorAndTransform	inferred	Blends alternating-node draw colors and stores a quaternion-derived scaled transform matrix. [names_reviewed21.tsv]
 0x002A0DC0	billAllocEmitterNode	inferred	DDS2 twin func_002E2E28 [names_M84_AllocNode.tsv]
 0x002A0F70	billReleaseEmitterNode	inferred	Following emitter-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002A0FA0	billAdvanceEmitterInstances	inferred	Advances active emitter instances for one frame.
 0x002A1588	billUpdateEmitterDrawColorAndTransform	inferred	Blends emitter draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A16F0	effClearStripFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A1768	billAllocStripNode	inferred	DDS2 twin func_002E37D0 [names_M84_AllocNode.tsv]
