@@ -1323,21 +1323,19 @@ void sdfQueueFlatTriangle(SdfListHead *list, s32 color, s32 primitive, s32 x0, s
 }
 
 /* Pack four GS XYZ vertices with a common depth. */
-void sdfBuildPacket104x4(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x6400000000008001ULL;
-    packet[1] = 0x555510;
-    packet[2] = (u32)(primitive | 0x104);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[7] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0x6400000000008001ULL;
+    packet->gifRegisterList = 0x555510;
+    packet->primitive = (u32)(primitive | 0x104);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->xyz2[2] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->xyz2[3] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
@@ -1348,7 +1346,7 @@ void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y
     buffer = alloc(0x50);
     *(u64 *)buffer = 0x20000004ULL;
     *(u64 *)(buffer + 8) = 0x5000000410000000ULL;
-    sdfBuildPacket104x4(buffer + 0x10, color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
+    sdfBuildPacket104x4((SdfGsFlatQuadPayload *)(buffer + 0x10), color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
     sdfAppendPacket(list, buffer);
 }
 

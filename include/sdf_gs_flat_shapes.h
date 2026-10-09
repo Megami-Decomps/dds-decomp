@@ -41,6 +41,28 @@ void sdfBuildTriPacket104(SdfGsFlatTrianglePayload *dst, s32 color,
     s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
     s32 depth);
 
+/* GIF stream for four flat-color vertices: PRIM, RGBAQ and four XYZ2 values. */
+typedef struct SdfGsFlatQuadPayload {
+    u64 gifTag;
+    u64 gifRegisterList;
+    u64 primitive;
+    u64 rgbaq;
+    u64 xyz2[4];
+} SdfGsFlatQuadPayload;
+
+typedef char SdfGsFlatQuadPayload_size_must_be_0x40[
+    (sizeof(SdfGsFlatQuadPayload) == 0x40) ? 1 : -1];
+typedef char SdfGsFlatQuadPayload_primitive_at_0x10[
+    ((u32)&((SdfGsFlatQuadPayload *)0)->primitive == 0x10) ? 1 : -1];
+typedef char SdfGsFlatQuadPayload_rgbaq_at_0x18[
+    ((u32)&((SdfGsFlatQuadPayload *)0)->rgbaq == 0x18) ? 1 : -1];
+typedef char SdfGsFlatQuadPayload_xyz2_at_0x20[
+    ((u32)&((SdfGsFlatQuadPayload *)0)->xyz2 == 0x20) ? 1 : -1];
+
+void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color,
+    s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
+    s32 x3, s32 y3, s32 depth);
+
 /* GIF stream for a closed rectangle: its first XYZ2 value is repeated last. */
 typedef struct SdfGsClosedRectanglePayload {
     u64 gifTag;
