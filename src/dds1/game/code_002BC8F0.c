@@ -39,7 +39,6 @@ extern s32 effResourceBankDescriptor;
 
 extern s32 D_003BD098;
 
-extern s32 effQueuedFileObject;
 
 extern s32 effTemporaryFileJob;
 
