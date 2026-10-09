@@ -2538,12 +2538,10 @@ void effResetActiveInstanceFrame(EffClassWork *work) {
     work->frame = 0;
 }
 
-void effAdvanceActiveInstanceFrame(work)
-s32 *work;
-{
+void effAdvanceActiveInstanceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9950[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9950[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -2552,7 +2550,7 @@ void effDispatchActiveInstanceDraw(s32 work) {
 }
 
 void effUpdateAndDrawActiveInstance(u32 work) {
-    effAdvanceActiveInstanceFrame();
+    effAdvanceActiveInstanceFrame((EffClassWork *)work);
     effDispatchActiveInstanceDraw(work);
 }
 
@@ -3138,7 +3136,7 @@ typedef struct EffClassRowOutput {
     u8 *rows;
 } EffClassRowOutput;
 
-extern void effAdvanceClassFrame();
+extern void effAdvanceClassFrame(EffClassWork *);
 
 void func_002E6B68(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3382,12 +3380,10 @@ void effInitializeClassFrame(EffClassWork *work) {
     work->frame = 0;
 }
 
-void effAdvanceClassFrame(work)
-s32 *work;
-{
+void effAdvanceClassFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9B80[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9B80[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -3396,7 +3392,7 @@ void effRunClassPostFrame(s32 work) {
 }
 
 void effUpdateClassFrame(u32 work) {
-    effAdvanceClassFrame();
+    effAdvanceClassFrame((EffClassWork *)work);
     effRunClassPostFrame(work);
 }
 
@@ -4367,14 +4363,14 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB058);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB728);
 
-extern void effResetDispatchCounter(u8 *);
+extern void effResetDispatchCounter(EffClassWork *);
 
 void effResetBillboardFrameDispatchCounters(s32 *work) {
     u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++) {
-        effResetDispatchCounter((u8 *)*entry++);
+        effResetDispatchCounter((EffClassWork *)*entry++);
     }
 }
 
@@ -4429,7 +4425,7 @@ void effReleaseBillFrameEntries(u8 *work) {
     sdfReleaseChipBlock(header);
 }
 
-extern void effAdvanceClassResourceFrame();
+extern void effAdvanceClassResourceFrame(EffClassWork *);
 
 void effReleaseTrackEntriesA(u8 *work) {
     u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
@@ -4437,7 +4433,7 @@ void effReleaseTrackEntriesA(u8 *work) {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effAdvanceClassResourceFrame(*entry++);
+        effAdvanceClassResourceFrame((EffClassWork *)*entry++);
     }
 }
 
@@ -4756,18 +4752,16 @@ u32 effPayloadPointerGet(s32 work) {
     return effCreateClassResourceWork(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
 }
 
-void effResetDispatchCounter(u8 *work) {
-    D_003E9D00[((EffClassWork *)work)->kind].initialize(work);
-    ((EffClassWork *)work)->frame = 0;
+void effResetDispatchCounter(EffClassWork *work) {
+    D_003E9D00[work->kind].initialize(work);
+    work->frame = 0;
 }
 
 
-void effAdvanceClassResourceFrame(work)
-s32 *work;
-{
+void effAdvanceClassResourceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9D00[work[0x2C / 4]].update(work);
-        work[0x28 / 4]++;
+        D_003E9D00[work->kind].update(work);
+        work->frame++;
     }
 }
 
@@ -4776,7 +4770,7 @@ void effDrawClassResourceWork(s32 work) {
 }
 
 void effUpdateAndDrawClassResource(u32 work) {
-    effAdvanceClassResourceFrame();
+    effAdvanceClassResourceFrame((EffClassWork *)work);
     effDrawClassResourceWork(work);
 }
 
@@ -5552,17 +5546,15 @@ u8 *effDuplicateActiveResourceB(u8 *obj) {
     return work;
 }
 
-void effResetBlockResourceFrame(u8 *work) {
-    D_003E9DD8[((EffClassWork *)work)->kind].initialize();
-    ((EffClassWork *)work)->frame = 0;
+void effResetBlockResourceFrame(EffClassWork *work) {
+    D_003E9DD8[work->kind].initialize();
+    work->frame = 0;
 }
 
-void effAdvanceBlockResourceFrame(work)
-s32 *work;
-{
+void effAdvanceBlockResourceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9DD8[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9DD8[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -5571,7 +5563,7 @@ void effDrawBlockResourceWork(s32 work) {
 }
 
 void effUpdateAndDrawBlockResource(u32 work) {
-    effAdvanceBlockResourceFrame();
+    effAdvanceBlockResourceFrame((EffClassWork *)work);
     effDrawBlockResourceWork(work);
 }
 
@@ -7527,7 +7519,7 @@ void func_002F7AC8(u8 *work) {
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle[0], (s128 *)look);
-    effAdvanceClassResourceFrame(handle[0]);
+    effAdvanceClassResourceFrame((EffClassWork *)handle[0]);
 }
 
 void effDrawActiveClassResource(s32 owner) {
@@ -7774,7 +7766,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle->material, (s128 *)look);
-    effAdvanceClassResourceFrame(handle->material);
+    effAdvanceClassResourceFrame((EffClassWork *)handle->material);
 }
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
