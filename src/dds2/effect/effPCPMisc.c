@@ -4765,7 +4765,7 @@ void effPcpGroupSetCreateFromTable(void *args) {
     effPcpGroupSetCreate(work, resources);
 }
 
-EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
+EffPCPGroupSet *effPcpGroupSetCloneWithDuplicates(EffPCPGroupSet *work) {
     EffPCPGroupSet *groupSet = effPcpGroupSetCreate(&work->head, 0);
     u32 groupIndex;
     u32 groupByteOffset;
@@ -4801,7 +4801,7 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
     return groupSet;
 }
 
-void effBlockSetRelease(EffPCPGroupSet *work) {
+void effPcpGroupSetRelease(EffPCPGroupSet *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;

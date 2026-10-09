@@ -1702,7 +1702,8 @@
 0x00188E30	effPcpCopyLinkedBeamMatrix	inferred	Copies VU0 matrix to linked nested beam work; twin 0x001811D8. [names_R_FuncNames5.tsv]
 0x00188E60	effPcpGroupSetCreate	inferred	DDS1 twin 0x00181208 [names_M97_PcpMisc.tsv]
 0x001890E8	effPcpGroupSetCreateFromTable	inferred	DDS1 twin 0x00181490 [names_M97_PcpMisc.tsv]
-0x00189190	effBlockSetCloneWithDuplicates	inferred	DDS1 func_00181538 twin; copies block, duplicates enabled groups [names_R_FuncNames.tsv]
+0x00189190	effPcpGroupSetCloneWithDuplicates	inferred	DDS1 twin 0x00181538; clones the group-set work and duplicates the enabled resource handles.
+0x001892A8	effPcpGroupSetRelease	inferred	DDS1 twin 0x00181650; releases entry events, the per-block handle list, and both retained resources.
 0x00189360	effPcpGroupSetInitEntry	inferred	DDS1 twin 0x00181708 [names_M97_PcpMisc.tsv]
 0x001898B8	effPcpCopyGroupSetVector	inferred	src/dds2/effect/effPCPMisc.c:func_001898B8; Copies one vector through VU0 for the group-set effect callback. Registration: asm/dds2/data/data.data.s:63936: table record 0x003B0B60, vector slot. [names_qp9.tsv]
 0x001898C8	effPcpSetGroupScale	inferred	Sets group scale shared by particle group work. [names_reviewed6.tsv]
