@@ -943,7 +943,93 @@ s32 ptyGetAverageLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", ptyAddUnit);
+extern void ptyAccumulateStatGains(s32 *, s32, DatPartyRecord *);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
+extern void evtCopyRosterTableValue(DatPartyRecord *);
+extern s32 D_0032ACA8[128];
+
+/* Restore or initialise the first free roster slot and publish its model flags. */
+s32 ptyAddUnit(s32 rosterIndex) {
+    s32 gains[DAT_BASE_STAT_COUNT];
+    DatPartyRecord *entry;
+    s32 slotIndex;
+    s32 remaining;
+    s8 *stat;
+    s32 *gain;
+    s32 *modelFlags;
+
+    if (dds3FindEntryIndex(rosterIndex) >= 0) {
+        return -1;
+    }
+    for (slotIndex = 0; slotIndex < 5; slotIndex++) {
+        entry = &datGameState->party[slotIndex];
+        if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) == 0) {
+            break;
+        }
+    }
+    if (slotIndex == 5) {
+        return -2;
+    }
+
+    memset(entry, 0, sizeof(*entry));
+    if ((datGameState->templates[rosterIndex].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
+        datGameState->templates[rosterIndex].level != 0) {
+        s32 averageLevel = ptyGetAverageLevel();
+        memcpy(entry, &datGameState->templates[rosterIndex], sizeof(*entry));
+        memset(&datGameState->templates[rosterIndex], 0, sizeof(*entry));
+        if (entry->level < averageLevel) {
+            ptyAccumulateStatGains(gains, averageLevel - entry->level, entry);
+            remaining = DAT_BASE_STAT_COUNT - 1;
+            stat = entry->baseStats;
+            gain = gains;
+            do {
+                *stat = (u8)*stat + (u8)*gain;
+                stat++;
+                gain++;
+                remaining--;
+            } while (remaining >= 0);
+            entry->level = averageLevel;
+            entry->totalExp = ptyComputeTotalExp(entry, 0);
+            ptyRecomputeMaxHpMp(entry);
+        }
+        ptyRebuildProfileSkills(1, entry);
+        entry->hp = entry->maxHp;
+        entry->mp = entry->maxMp;
+        entry->status = 0;
+    } else {
+        s32 maximumLevel = dds3EntryMax();
+        memcpy(entry, &D_003BAA04[rosterIndex], sizeof(*entry));
+        if (entry->level < maximumLevel) {
+            ptyAccumulateStatGains(gains, maximumLevel - entry->level, entry);
+            remaining = DAT_BASE_STAT_COUNT - 1;
+            stat = entry->baseStats;
+            gain = gains;
+            do {
+                *stat = (u8)*stat + (u8)*gain;
+                stat++;
+                gain++;
+                remaining--;
+            } while (remaining >= 0);
+            entry->level = maximumLevel;
+        }
+        entry->totalExp = ptyComputeTotalExp(entry, 0);
+        ptyRebuildProfileSkills(0, entry);
+        evtCopyRosterTableValue(entry);
+    }
+
+    entry->flags &= ~DAT_PARTY_FLAG_FRONTLINE;
+    modelFlags = &D_0032ACA8[rosterIndex * 4];
+    for (remaining = 0; remaining < 4U; remaining++) {
+        s32 modelFlag = *modelFlags++;
+        if (modelFlag != 0) {
+            mdlFlagSet(modelFlag);
+        }
+    }
+    return slotIndex;
+}
+
 
 extern s32 D_0032ACA8[128];
 extern void mdlFlagClear(s32);
