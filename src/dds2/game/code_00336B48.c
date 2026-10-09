@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -11,6 +12,7 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_texture_file.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 #define SDF_PAD_REPLY_BUFFER_BYTES 0x20
@@ -68,8 +70,6 @@ extern u32 D_00438A64;
 extern u32 D_00438A68;
 
 extern u32 D_00439194;
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 extern u8 D_00476250[];
@@ -256,7 +256,6 @@ extern u8 D_0040B730[];
 extern void func_0033AC10(void);
 extern void sdfInitializeObjectListRequest(void);
 extern void sdfRegisterResourceQueueCallbacks(void);
-extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern u8 D_00372C00[];
 extern u8 D_00376C40[];
 extern s32 D_0037F1B8[];
@@ -271,7 +270,6 @@ extern vu8 sdfCurrentBufferIndex;
 
 extern void sdfAssetApplyEntryChanges(void *, s32);
 
-extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void sdfVuMultiplyPrimaryByScratch(void) {
@@ -1128,11 +1126,11 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
     D_0037F1B8[0] = textureWord;
     D_00438A78 = textureWord;
     D_0037F1B8[1] = textureWord >> 32;
-    D_00438A6C = sdfTexAcquireAlternateResourceTexture(D_00372C00);
+    D_00438A6C = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_00372C00);
     textureWord = sdfTexGetPrimaryTextureState(D_00438A6C);
     D_0037F270[0] = textureWord;
     D_0037F270[1] = textureWord >> 32;
-    D_00438A80 = sdfTexAcquireAlternateResourceTexture(D_00376C40);
+    D_00438A80 = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_00376C40);
     textureWord = sdfTexGetPrimaryTextureState(D_00438A80);
     D_0037F1F4[0] = textureWord;
     D_0037F1F4[1] = textureWord >> 32;
@@ -1187,7 +1185,7 @@ void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitAssetDrawEntryReferenceNode(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
@@ -1880,7 +1878,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_00438AB4 == 0) {
         D_00438AB4 = 1;
-        D_00439194 = (u32)sdfTexAcquireResourceTexture(D_00370B80);
+        D_00439194 = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00370B80));
     }
 }
 

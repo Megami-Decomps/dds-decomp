@@ -14,8 +14,7 @@
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
+#include "sdf_texture_file.h"
 
 
 extern u32 D_003BD11C;
@@ -570,7 +569,7 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == (s32)slotIndex) {
                     if (set->textureReferences[slotIndex] == 0) {
-                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
+                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceData));
                     }
                 } else {
                     set->textureReferences[slotIndex] = 0;

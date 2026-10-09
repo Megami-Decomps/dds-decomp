@@ -6148,7 +6148,7 @@
 0x00330A00	sdfResizeBufferedSlotRequest	inferred	confidence=high; matched-C; src/dds2/game/code_0032C278.c:1594:func_00330A00; Resizes the buffered request addressed by the first word of the slot handle.; source=revalidated-unapplied-names_R_Names31.tsv:45 [names_qp12_apply.tsv]
 0x00330A88	sdfAppendBufferedRouteNode	inferred	Grows buffered request if needed and links a route node into its entries. [names_reviewed8.tsv]
 0x00330CE8	sdfModelWriteFixedPacket	inferred	Appends a packet with zero high half and a fixed 0x60000000 command.
-0x00330D00	sdfModelWriteIndexedAssetPacket	inferred	Selects the indexed asset in the nested chunk table and passes it with packet/frame parameters to func_00333950, which writes a 16-byte packet.
+0x00330D00	sdfModelWriteIndexedAssetPacket	inferred	Selects the indexed asset in the nested chunk table and passes it with packet/frame parameters to sdfInitAssetDrawEntryReferenceNode, which writes its 16-byte reference header.
 0x00331238	sdfDrawNodePrependCommandNode	inferred	Allocates a command node and prepends it to the selected draw-node command list.
 0x003312A8	sdfDrawNodeBuildCommandList	inferred	Dispatches serialized command-list entries into packet and object-reference commands for a draw node.
 0x003314B0	sdfDrawNodeBuildMatrix	inferred	twin [names_M67_Named.tsv]
@@ -7011,3 +7011,4 @@
 0x00345E18	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
 0x00331590	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
 0x00330DF0	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
+0x00333950	sdfInitAssetDrawEntryReferenceNode	inferred	Selects the asset drawEntries[frame] pointer, writes a 16-byte reference header with its physical address, and returns the following packet payload.

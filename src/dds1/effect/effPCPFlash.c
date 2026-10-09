@@ -751,7 +751,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     work->parts = (PcpFlashAccumulatingParticle *)(work + 1);
     work->allocationHandle = handle;
     work->tintColor = 0x80808080;
-    work->unk54 = 0;
+    work->updateCount = 0;
     work->renderScale = 1.0f;
     if (work->randomRange == 0) {
         work->randomRange = 1;
@@ -765,7 +765,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
-        work->parts[i].accumulator = angle;
+        work->parts[i].orbitAngle = angle;
         angle += step;
     }
     return work;
@@ -844,18 +844,18 @@ void func_0016BBB0(PcpFlashAccumulatingWork *work, s32 index)
     f32 height;
     f32 *mirror;
 
-    center = part->unk14;
+    center = part->radius;
     VEC3_SPLAT(middle, center);
-    outerEdge = center + part->unk08;
+    outerEdge = center + part->radialHalfThickness;
     VEC3_SPLAT(outer, outerEdge);
-    innerEdge = center - part->unk08;
+    innerEdge = center - part->radialHalfThickness;
     VEC3_SPLAT(inner, innerEdge);
-    part->unk14 = part->unk14 + work->radialStep;
-    span = part->unk0C;
+    part->radius = part->radius + work->radialStep;
+    span = part->span;
     VEC3_SPLAT(size, span);
-    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->accumulator);
+    unit[0] = sdfEvaluateCosineViaSinePhaseShift(part->orbitAngle);
     unit[1] = 0;
-    sinv = sdfSinPoly(part->accumulator);
+    sinv = sdfSinPoly(part->orbitAngle);
     unit[2] = sinv;
     offset[0] = unit[0] * work->orbitRadius;
     offset[1] = 0;
@@ -915,7 +915,7 @@ void effFlashAccumulatingParticleAdvance(PcpFlashAccumulatingWork *work, s32 ind
     PcpFlashAccumulatingParticle *part;
 
     part = &work->parts[index];
-    part->accumulator += work->increment;
+    part->orbitAngle += work->increment;
 }
 
 extern void func_0016BAC0(PcpFlashAccumulatingWork *, s32, u32);
@@ -952,11 +952,11 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
             func_0016BAC0(work, index, 0);
             part->color = 0x80808080;
             factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
-            part->unk08 = work->unk3C * factor;
+            part->radialHalfThickness = work->radialHalfThicknessBase * factor;
             factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.7f + 0.3f;
-            part->unk0C = work->unk30 * factor;
+            part->span = work->spanBase * factor;
             part->unk10 = work->unk34 * factor;
-            part->unk14 = 0;
+            part->radius = 0;
         } else if (age >= lifetime) {
             if (restart != 0) {
                 part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
@@ -980,7 +980,7 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
     }
     handle = work->resourceHandle;
     handle->origin[0] = work->origin[0];
-    work->unk54 = work->unk54 + 1;
+    work->updateCount = work->updateCount + 1;
     handle->origin[1] = work->origin[1];
     handle->origin[2] = work->origin[2];
     handle->scale = work->renderScale;
@@ -1007,10 +1007,10 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     ring->parts = block->parts;
     ring->allocationHandle = handle;
     ring->tintColor = 0x80808080;
-    ring->orbitRadius = ring->unk38;
-    ring->upSpan = ring->unk30;
-    ring->acrossSpan = ring->unk34;
-    ring->unk5C = 0;
+    ring->orbitRadius = ring->orbitRadiusStart;
+    ring->upSpan = ring->upSpanStart;
+    ring->acrossSpan = ring->acrossSpanStart;
+    ring->shapeProgressFrame = 0;
     ring->renderScale = 1.0f;
     if (ring->randomRange == 0) {
         ring->randomRange = 1;
@@ -1184,13 +1184,13 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
     restart = work->restartRandomly;
     randomRange = work->randomRange;
     tintColor = work->tintColor;
-    heightDelta = work->unk4C - work->unk48;
+    heightDelta = work->heightEnd - work->heightStart;
     progress = 1.0f;
     if (lifetime > 0) {
-        progress = (f32)work->unk5C / (f32)lifetime;
+        progress = (f32)work->shapeProgressFrame / (f32)lifetime;
     }
-    start = work->unk38;
-    radiusEnd = work->unk3C;
+    start = work->orbitRadiusStart;
+    radiusEnd = work->orbitRadiusEnd;
     delta = radiusEnd - start;
     work->orbitRadius = start + delta * progress;
     if (start > 0.0f) {
@@ -1198,12 +1198,12 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
     } else {
         factor = radiusEnd;
     }
-    upStart = work->unk30;
-    acrossStart = work->unk34;
+    upStart = work->upSpanStart;
+    acrossStart = work->acrossSpanStart;
     upEnd = upStart * factor;
     acrossEnd = acrossStart * factor;
-    start = work->unk40;
-    normalEnd = work->unk44;
+    start = work->normalSpanStart;
+    normalEnd = work->normalSpanEnd;
     delta = upEnd - upStart;
     work->upSpan = upStart + delta * progress;
     delta = acrossEnd - acrossStart;
@@ -1216,7 +1216,7 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
         s32 color;
 
         if (age == 0) {
-            part->stepSpeed = work->unk48;
+            part->stepSpeed = work->heightStart;
             effFlashArcQuad(work, index);
             effFlashOrbitArcSetParticleColors(work, index, 0);
             part->color = 0x80808080;
@@ -1228,7 +1228,7 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
             effFlashOrbitArcSetParticleColors(work, index, color);
         } else if (age > 0) {
             progress = (f32)age / (f32)lifetime;
-            part->stepSpeed = heightDelta * progress + work->unk48;
+            part->stepSpeed = heightDelta * progress + work->heightStart;
             effFlashOrbitArcAdvanceAngle(work, index);
             effFlashArcQuad(work, index);
             if (part->age < fadeIn && fadeIn != 0) {
@@ -1243,10 +1243,10 @@ void func_0016C698(PcpFlashOrbitArcWork *work)
         }
         part->age = part->age + 1;
     }
-    if (work->unk5C == lifetime) {
-        work->unk5C = 0;
+    if (work->shapeProgressFrame == lifetime) {
+        work->shapeProgressFrame = 0;
     } else {
-        work->unk5C++;
+        work->shapeProgressFrame++;
     }
     handle = work->resourceHandle;
     handle->origin[0] = work->origin[0];
@@ -1790,10 +1790,10 @@ void effFlashSpawnStripParticle(PcpFlashRadialStripWork *work, s32 index, void *
 
     part->angle = effMiscRandUnitFloat(effDefaultRandomState) * 6.2831853f;
     factor = effMiscRandUnitFloat(effDefaultRandomState) * 0.3f + 0.7f;
-    part->thickness = work->maxScale * factor;
-    factor = work->unk34;
-    part->span = work->unk30 * (effMiscRandUnitFloat(effDefaultRandomState) * factor + (1.0f - factor));
-    part->angularStep = work->unk3C * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    part->thickness = work->maxThickness * factor;
+    factor = work->spanVariation;
+    part->span = work->spanBase * (effMiscRandUnitFloat(effDefaultRandomState) * factor + (1.0f - factor));
+    part->angularStep = work->angularStepRange * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
 }
 
 /* vu0 routine: two quads of corner offsets for a flash particle (a strip and its mirror), turned around the view axis by the particle's angle */
@@ -1885,7 +1885,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
     s32 index;
     s32 count;
     s32 lifetime;
-    f32 maxScale;
+    f32 maxThickness;
     s32 fadeIn;
     s32 fadeOut;
     f32 startA;
@@ -1904,7 +1904,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
     count = work->particleCount;
     part = work->parts;
     lifetime = work->lifetime;
-    maxScale = work->maxScale;
+    maxThickness = work->maxThickness;
     fadeIn = work->fadeInTime;
     fadeOut = work->fadeOutTime;
     startA = work->initialRadius;
@@ -1923,7 +1923,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
                 effFlashSpawnStripParticle(work, index, &axis);
                 effFlashRotatedStripPair(work, index, &axis);
                 func_0016DBA0(work, index, 0);
-                part->thickness = maxScale;
+                part->thickness = maxThickness;
                 part->radius = startA;
                 part->radialSpeed = startB;
                 part->color = 0x80808080;

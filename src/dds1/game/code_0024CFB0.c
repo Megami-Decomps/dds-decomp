@@ -8,6 +8,7 @@
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
 #include "dds3obj.h"
+#include "sdf_texture_file.h"
 
 struct SdfTex;
 
@@ -61,9 +62,6 @@ typedef struct {
 } ActiveList;
 
 extern EvtActiveFlagTable evtActiveEntryFlags;
-
-
-extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 
 extern u32 effMiscRand(void *);
@@ -742,7 +740,7 @@ s32 evtOpReadDisplayValue(void) {
 u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 info[2];
     u32 allocation = (u32)sdfReadNamedResource((const char *)(u32)path, info, &info[1]);
-    u32 texture = (u32)sdfTexAcquireResourceTexture((void *)info[0]);
+    u32 texture = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
 
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return texture;
