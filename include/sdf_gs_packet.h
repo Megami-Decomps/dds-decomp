@@ -19,6 +19,7 @@ enum {
     SDF_GS_XYOFFSET_2 = 0x19,
     SDF_GS_PRMODECONT = 0x1A,
     SDF_GS_TEXA = 0x3B,
+    SDF_GS_TEXFLUSH = 0x3F,
     SDF_GS_SCISSOR_1 = 0x40,
     SDF_GS_SCISSOR_2 = 0x41,
     SDF_GS_ALPHA_1 = 0x42,
@@ -80,6 +81,12 @@ typedef struct SdfGsBlendPacket {
     SdfGsBlendRegisters registers;
 } SdfGsBlendPacket;
 
+/* A single A+D write follows the texture-flush DMA/VIF/GIF header. */
+typedef struct SdfGsTextureFlushPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite textureFlush;
+} SdfGsTextureFlushPacket;
+
 typedef struct SdfGsTexturePacket {
     SdfGsPacketHeader header;
     SdfGsRegisterWrite sampling;
@@ -109,5 +116,10 @@ typedef char SdfGsTexturePacket_texture_at_0x30[
     ((u32)&((SdfGsTexturePacket *)0)->texture == 0x30) ? 1 : -1];
 typedef char SdfGsTexturePacket_clamp_at_0x40[
     ((u32)&((SdfGsTexturePacket *)0)->clamp == 0x40) ? 1 : -1];
+
+typedef char SdfGsTextureFlushPacket_size_must_be_0x30[
+    (sizeof(SdfGsTextureFlushPacket) == 0x30) ? 1 : -1];
+typedef char SdfGsTextureFlushPacket_payload_at_0x20[
+    ((u32)&((SdfGsTextureFlushPacket *)0)->textureFlush == 0x20) ? 1 : -1];
 
 #endif /* SDF_GS_PACKET_H */
