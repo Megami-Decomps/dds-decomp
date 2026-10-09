@@ -5065,23 +5065,19 @@ void effFillRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
     }
 }
 
-extern u32 effCreateRibbonWithSharedResource(u32, u32, u32);
-
 u8 *effCreateRingFadeTable(EffBillVortexConfig *config, u32 resource) {
     u8 *node = effAllocateRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillRingFadeGradient(node, &config->common);
     return node;
 }
-
-extern u32 effCloneRibbonWithSharedResource(u32);
 
 u8 *effAssetPointerSet(u8 *work) {
     EffBillVortexConfig *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateRingFadeEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5090,7 +5086,7 @@ void effReleaseRingFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5242,7 +5238,7 @@ void effFillBillFadeGradient(u8 *node, EffBillEmitterCommon *config) {
 u8 *effCreateBillFadeTable(EffBillColumnConfig *config, u32 resource) {
     u8 *node = effAllocateBillFadeFrameEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillBillFadeGradient(node, &config->common);
     return node;
 }
@@ -5251,7 +5247,7 @@ u8 *effCloneBillFadeTable(u8 *work) {
     EffBillColumnConfig *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateBillFadeFrameEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillBillFadeGradient(node, &config->common);
     return node;
 }
@@ -5260,7 +5256,7 @@ void effReleaseBillFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5410,7 +5406,7 @@ void effFillCompactRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
 u8 *effCreateCompactRingFadeTable(EffBillSpiralConfig *config, u32 resource) {
     u8 *node = effAllocateCompactRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillCompactRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5420,7 +5416,7 @@ u8 *effCloneBillboardFrameAsset(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateCompactRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillCompactRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5429,7 +5425,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5568,7 +5564,7 @@ void effSetBlockResourceMatrixComponent(EffClassWork *work, float value) {
 
 extern EffPacketParams D_003DCB00;
 
-u8 *effCreateRibbonWork(u32 count, u32 repeat) {
+EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
@@ -5598,17 +5594,15 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
-    return (u8 *)work;
+    return work;
 }
 
-extern u8 *effCreateRibbonWork(u32, u32);
-
-u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
-    u8 *node = effCreateRibbonWork(count, repeat);
+EffRibbonWork *effCreateRibbonWithSharedResource(u32 count, u32 repeat, struct SdfTextureFileHeader *resource) {
+    EffRibbonWork *node = effCreateRibbonWork(count, repeat);
 
     if (resource == 0) {
         s32 references = effSharedRibbonReferenceCount;
-        ((EffRibbonWork *)node)->resource = NULL;
+        node->resource = NULL;
         if (references == 0) {
             D_003BC990 = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effWindTextureHandle, 0x300);
             references = effSharedRibbonReferenceCount;
@@ -5616,13 +5610,13 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)resource);
+        node->resource = effCreateSharedTextureReference(resource);
     }
-    return (u32)node;
+    return node;
 }
 
-void effSharedAssetReferenceRelease(s32 work) {
-    if (((EffRibbonWork *)work)->resource == NULL) {
+void effSharedAssetReferenceRelease(EffRibbonWork *work) {
+    if (work->resource == NULL) {
         effSharedRibbonReferenceCount = effSharedRibbonReferenceCount - 1;
         if (effSharedRibbonReferenceCount == 0) {
             effReleaseSharedReference((RefObj *)D_003BC990);
@@ -5630,23 +5624,23 @@ void effSharedAssetReferenceRelease(s32 work) {
         }
     }
     else {
-        effReleaseSharedReference(((EffRibbonWork *)work)->resource);
+        effReleaseSharedReference(work->resource);
     }
-    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
-    sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
+    sdfQueueAssetRelease(work->handle);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
-u32 effCloneRibbonWithSharedResource(u32 work) {
-    u8 *node = effCreateRibbonWork(((EffRibbonWork *)work)->count, ((EffRibbonWork *)work)->repeat);
-    RefObj *texture = ((EffRibbonWork *)work)->resource;
+EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
+    EffRibbonWork *node = effCreateRibbonWork(source->count, source->repeat);
+    RefObj *texture = source->resource;
 
     if (texture != NULL) {
-        ((EffRibbonWork *)node)->resource = effRetainSharedReference(texture);
+        node->resource = effRetainSharedReference(texture);
     } else {
         effSharedRibbonReferenceCount++;
-        ((EffRibbonWork *)node)->resource = NULL;
+        node->resource = NULL;
     }
-    return (u32)node;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AE498);
