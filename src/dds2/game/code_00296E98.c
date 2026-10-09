@@ -515,7 +515,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, work->unitHandle);
+    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],

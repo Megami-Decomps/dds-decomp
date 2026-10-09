@@ -147,7 +147,7 @@ extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
 extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, s32);
-extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
@@ -453,7 +453,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
 }
 
 /* Configure all five panel items against the same grid object. */
-void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
+void mnuUpdateFiveListEntries(MenuPanelGroup *group, EffectSlotSet *gridObject) {
     s32 panelIndex;
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
         mnuInitializePanelItemGridSlots(group->children[panelIndex], gridObject, panelIndex);
@@ -884,7 +884,8 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 gridObject, s32 p
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelItemGridSlots(MenuPanelItem *item, EffectSlotSet *gridObject,
+                                     s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
     itfGridStorePosition(&item->gridSlots[0], gridObject, 7);

@@ -137,7 +137,7 @@ extern u8 D_003E7940[];
 extern u8 D_003E7950[];
 
 
-extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, s32, s32);
+extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 
 extern s8 D_003E7928[];
 
@@ -799,7 +799,7 @@ void mnuDestroyPanelGroup(MenuPanelGroup *group) {
 }
 
 /* Configure all five panel items against the same grid object. */
-void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject) {
+void mnuUpdateFiveListEntries(MenuPanelGroup *group, EffectSlotSet *gridObject) {
     s32 panelIndex;
 
     for (panelIndex = 0; panelIndex < MNU_PANEL_ITEM_COUNT; panelIndex++) {
@@ -1250,18 +1250,19 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, EffectSlotSet *primar
 
 /* Bind five grid object/index references and initialize their quantized bounds.
  * The x/y members in this path hold object addresses and entry indices, not coordinates. */
-void mnuInitializePanelItemGridSlots(MenuPanelItem *item, s32 gridObject, s32 panelIndex) {
+void mnuInitializePanelItemGridSlots(MenuPanelItem *item, EffectSlotSet *gridObject,
+                                     s32 panelIndex) {
     s32 entryIndices[5] = {0, 4, 1, 2, 3};
 
-    itfGridStorePosition(&item->gridSlots[0], (EffectSlotSet *)gridObject, 7);
+    itfGridStorePosition(&item->gridSlots[0], gridObject, 7);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[0].set, item->gridSlots[0].index, -0x50, -0x50, 0, 0);
-    itfGridStorePosition(&item->gridSlots[1], (EffectSlotSet *)gridObject, 5);
+    itfGridStorePosition(&item->gridSlots[1], gridObject, 5);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[1].set, item->gridSlots[1].index, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->gridSlots[2], (EffectSlotSet *)gridObject, 6);
+    itfGridStorePosition(&item->gridSlots[2], gridObject, 6);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[2].set, item->gridSlots[2].index, 0x390, -8, 0, 0);
-    itfGridStorePosition(&item->gridSlots[3], (EffectSlotSet *)gridObject, 9);
+    itfGridStorePosition(&item->gridSlots[3], gridObject, 9);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[3].set, item->gridSlots[3].index, 0x5D0, 0, 0, 0);
-    itfGridStorePosition(&item->gridSlots[4], (EffectSlotSet *)gridObject, entryIndices[panelIndex]);
+    itfGridStorePosition(&item->gridSlots[4], gridObject, entryIndices[panelIndex]);
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[4].set, item->gridSlots[4].index, 0x130, -0x30, 0, 0);
 }
 

@@ -334,7 +334,8 @@ extern MenuPanelGroup *mnuCreatePanelGroup(struct EffectSlotSet *owner,
 extern MenuPanelGroup *mnuCreatePanelGroup(s32 parent);
 #endif
 extern void mnuDestroyPanelGroup(MenuPanelGroup *group);
-extern void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject);
+extern void mnuUpdateFiveListEntries(MenuPanelGroup *group,
+                                    struct EffectSlotSet *gridObject);
 extern void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection);
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *group);
 extern u32 mnuGetPanelGroupSelection(MenuPanelGroup *group);
