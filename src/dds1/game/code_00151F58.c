@@ -2684,7 +2684,7 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
 }
 
 /* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
-s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
+void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfAllocSizeClassBlock(0x150);
     s32 tailBytes = 0;
 
@@ -2694,10 +2694,10 @@ s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     clone->packetCount = 1;
     clone->packetTag = 0;
     func_00153740((s32)clone);
-    return (s32)clone;
+    return clone;
 }
 
-void effFreeSingleParticleTemplate(u32 effect) {
+void effFreeSingleParticleTemplate(void *effect) {
     effDestroyResources();
     sdfReleaseChipBlock(effect);
 }
