@@ -59,7 +59,7 @@ extern char D_003A6018[];
 
 extern void btlChooseRandomPresetCameraKeys();
 
-extern void func_0020B190(BtlLinkedCommand *, BtlUnit *);
+extern void btlSetLinkedCameraForCommandMode(BtlLinkedCommand *, BtlUnit *);
 
 /* 0x20-byte action metadata entries referenced by a unit's action index. */
 typedef struct BtlActionTableRow {
@@ -94,7 +94,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         if (btlGetIndexListCount(command->task->indexWork.indices) == 1) {
             void *target = btlGetIndexListEntry(command->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190(command, target);
+            btlSetLinkedCameraForCommandMode(command, target);
             command->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
@@ -201,7 +201,7 @@ extern s32 func_001F12E8(u32, u32, u8 *, u16);
 struct SoundTask;
 extern struct SoundTask *sndCreateStationedSeTask(u32);
 
-void func_0020D2E0(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
+void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
                    u64 ownerId, u64 prerequisiteHandle, s32 condition) {
     BtlRuntimeTask *created;
     BtlRuntimeTask *sound;
@@ -592,7 +592,7 @@ extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
-s32 func_0020DE70(BtlLinkedCommand *command) {
+s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command) {
     BtlTask *task;
     BtlUnit *target;
     f32 position[4] __attribute__((aligned(16)));
@@ -638,8 +638,8 @@ s32 func_0020DE70(BtlLinkedCommand *command) {
 
 extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
-extern s32 func_0020DE70(BtlLinkedCommand *);
-extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *);
+extern void btlConfigureBattleCameraAction(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Pose helpers use the existing command and camera owners. */
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -657,7 +657,7 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
             return 0;
         }
         if (btlHasLinkedEffectNodeTrigger(command) != 0) {
-            func_0020DE70(command);
+            btlFrameMarkedTargetDefeatCamera(command);
             command->flags |= 0x800;
             return 1;
         }
@@ -669,7 +669,7 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
                 return 1;
             }
         }
-        func_001DF410(command, &command->frontCamera, &command->backCamera);
+        btlConfigureBattleCameraAction(command, &command->frontCamera, &command->backCamera);
         return 1;
     }
     btlPrepareRandomizedActionCameraPose(command,

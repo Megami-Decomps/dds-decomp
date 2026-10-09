@@ -3628,7 +3628,7 @@ void func_002918F8(s32 x, s32 y, s32 depth, FileConfigList *list,
 }
 
 
-extern void func_0025C0D8(void *resource, s32 alpha, s32 drawArg);
+extern void mnuDrawMantraPulseAndSparks(void *resource, s32 alpha, s32 drawArg);
 
 void func_00292720(void *unused) {
     s16 sprites[5][4] = {
@@ -3655,7 +3655,7 @@ void func_00292720(void *unused) {
                  ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
-        func_0025C0D8((void *)((FileConfigTask *)fileConfigTaskWork)->effect, 0x80, 0x52);
+        mnuDrawMantraPulseAndSparks((void *)((FileConfigTask *)fileConfigTaskWork)->effect, 0x80, 0x52);
     }
     entry++;
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,

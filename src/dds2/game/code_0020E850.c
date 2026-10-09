@@ -1335,10 +1335,10 @@ void btlCmdSimpleD(s32 context, s32 value) {
     btlSelectTargetsWithoutActionMask(context, value);
 }
 
-extern s32 func_002162C0(s32, s32);
+extern s32 btlFilterTargetListByUnitId(s32, s32);
 
 void btlCmdSimpleE(s32 context, s32 value) {
-    func_002162C0(context, value);
+    btlFilterTargetListByUnitId(context, value);
 }
 
 void btlCmdSimpleG(void) {

@@ -124,7 +124,7 @@ extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 extern struct MenuList *mnuCreateListState();
 
 
-extern void func_002491B8(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern void mnuDrawThresholdNodeWithSelectedAccents(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
 extern u8 D_003BC3F8[];
 
@@ -430,7 +430,7 @@ u8 func_00249198(void) {
 extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Draw selected-row accents in eighth-pixel units, then the indexed panel. */
-void func_002491B8(s32 x, s32 y, s32 arg2, struct MenuList *list,
+void mnuDrawThresholdNodeWithSelectedAccents(s32 x, s32 y, s32 arg2, struct MenuList *list,
                    struct MenuListNode *entry, s32 drawContext) {
     s32 value = list->scale;
     MenuTerminalWork *owner = (MenuTerminalWork *)list->context;
@@ -465,7 +465,7 @@ struct MenuList *mnuBuildThresholdNodeList(s32 *items, s32 count, s32 excluded, 
     struct MenuList *list = mnuCreateListState(0, count, 0x15, callback);
     s32 entryIndex;
     list->context = (void *)callback;
-    list->drawCallback = func_002491B8;
+    list->drawCallback = mnuDrawThresholdNodeWithSelectedAccents;
     list->scale = 0;
     for (entryIndex = 0; entryIndex < count; entryIndex++) {
         if (entryIndex != excluded) {
@@ -728,7 +728,7 @@ extern s32 kwlnFadeIsActive(void);
 extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
-s32 func_00249A60(s8 closing) {
+s32 mnuAdvanceTerminalTransition(s8 closing) {
     MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue((KwlnTask *)D_003BC3E4);
 
     if (closing == 1) {
@@ -1063,7 +1063,7 @@ void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
     option->status = retainedStatus;
 }
 
-extern s32 func_0025C0D8(void *, s32, s32);
+extern s32 mnuDrawMantraPulseAndSparks(void *, s32, s32);
 
 s32 func_0024A2D8(s32 state) {
     MenuTerminalWork *work = (MenuTerminalWork *)state;
@@ -1076,7 +1076,7 @@ s32 func_0024A2D8(s32 state) {
             if (result != 0) {
                 result = mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle);
                 if (result != 0) {
-                    result = func_0025C0D8((void *)work->effectHandle, 0x80, 0x53);
+                    result = mnuDrawMantraPulseAndSparks((void *)work->effectHandle, 0x80, 0x53);
                 }
             }
         }
@@ -1310,7 +1310,7 @@ void func_0024A728(u32 mode, s32 context) {
 extern const s32 D_003AF6B0[6][2];
 
 /* Draw the terminal's frame layers and the selected resource's progress. */
-void func_0024A930(MenuTerminalWork *work) {
+void mnuDrawTerminalSlotGauge(MenuTerminalWork *work) {
     s32 positions[6][2];
     s32 index;
     u32 scale;
@@ -1363,7 +1363,7 @@ s32 func_0024AB28(MenuSelectorContext *context) {
 }
 
 /* Update the old and selected terminal-effect slots from the chosen mode. */
-void func_0024AB70(u32 mode, s32 context) {
+void mnuAnimateTerminalSelection(u32 mode, s32 context) {
     MenuTerminalWork *work = (MenuTerminalWork *)context;
     s32 effect = 0;
     s32 style = 0;
@@ -1522,7 +1522,7 @@ void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
 extern const MenuGridPositions D_003AF700;
 
 /* Slide the threshold list out while closing, or in after its grid entry completes. */
-void func_0024B168(s32 close, MenuTerminalWork *work) {
+void mnuSlideTerminalThresholdList(s32 close, MenuTerminalWork *work) {
     MenuGridPositions positions = D_003AF700;
     s32 offset = 0;
     s32 direction = 0;
@@ -1736,7 +1736,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
         return 0;
     }
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, request);
 }
@@ -1758,12 +1758,12 @@ s32 evtBClearAndReset(KwlnTask *task) {
     return 1;
 }
 
-extern void func_0024AB70(u32, s32);
+extern void mnuAnimateTerminalSelection(u32, s32);
 
 u32 evtBeginSelectionExitFade(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
-    func_0024AB70(1, context);
+    mnuAnimateTerminalSelection(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     mnuTerminalSelectSlot(0, -2, context);
     mnuSetWorldObjectAndMenuEnabled(1);
@@ -1831,7 +1831,7 @@ u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
         func_0024A728(3, context);
         evtRememberDispatchCallback((s32)mnuDrawOwnerProgressAndFade, context);
         func_0024AE18(3, context);
-        func_0024AB70(4, context);
+        mnuAnimateTerminalSelection(4, context);
         mnuTerminalSelectSlot(3, 1, context);
     }
     ((EvtBContext *)context)->transitionPending = 0;
@@ -1848,7 +1848,7 @@ u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
         func_0024A728(3, context);
         evtRememberDispatchCallback((s32)func_0024ACD8, context);
         func_0024AE18(4, context);
-        func_0024AB70(3, context);
+        mnuAnimateTerminalSelection(3, context);
         mnuTerminalSelectSlot(3, 0, context);
         evtFinishMessageWindowAndNotify();
     }
@@ -1896,7 +1896,7 @@ s32 func_0024BC18(KwlnTask *item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -1908,7 +1908,7 @@ s32 evtBSetupDispatchSyncC(KwlnTask *request) {
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-extern void func_0024B168(s32, MenuTerminalWork *);
+extern void mnuSlideTerminalThresholdList(s32, MenuTerminalWork *);
 
 u32 evtEnterThresholdSelectionList(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
@@ -1917,8 +1917,8 @@ u32 evtEnterThresholdSelectionList(KwlnTask *task) {
     mnuSelectFirstListNode(((EvtBContext *)context)->thresholdList);
     mnuTerminalSelectSlot(3, 2, context);
     mnuApplyGridPanelHostSetting(3, context);
-    func_0024AB70(4, context);
-    evtRememberDispatchCallback((s32)func_0024B168, context);
+    mnuAnimateTerminalSelection(4, context);
+    evtRememberDispatchCallback((s32)mnuSlideTerminalThresholdList, context);
     return 1;
 }
 
@@ -1929,7 +1929,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
 
     mnuTerminalSelectSlot(3, 0, context);
     mnuApplyGridPanelHostSetting(4, context);
-    func_0024AB70(3, context);
+    mnuAnimateTerminalSelection(3, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     mnuHighlightProgressNodeByMode(context);
     return 1;
@@ -1938,7 +1938,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
 /* Process recovery input only while popup dispatch is idle. A successful
  * purchase restores the selected party member, releases its panel and charges
  * the stored cost; unavailable entries replace confirmation with error sound. */
-s32 func_0024BDB8(KwlnTask *request) {
+s32 mnuHandleTerminalRecoverySelection(KwlnTask *request) {
     MenuTerminalWork *host = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &host->popupState;
@@ -2011,7 +2011,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     if (*(s32 *)(state + 0x7C) == 0) {
         mnuDrawTerminalAmountText(1, state);
@@ -2061,7 +2061,7 @@ s32 func_0024C1B8(KwlnTask *item) {
     if (evtGetMessageWindowControlState() == 0 && ((EvtBContext *)state)->exitPending == 0) {
         func_0024A728(2, state);
         mnuTerminalSelectSlot(2, -1, (MenuTerminalWork *)state);
-        func_0024AB70(2, state);
+        mnuAnimateTerminalSelection(2, state);
         ((EvtBContext *)state)->exitPending = 1;
     }
     func_0024A2D8(state);
@@ -2073,7 +2073,7 @@ s32 func_0024C1B8(KwlnTask *item) {
         func_0024A340(0, state);
     }
     mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -2092,7 +2092,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
     mnuReleaseStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(2, context);
     mnuTerminalSelectSlot(2, -1, context);
-    func_0024AB70(2, context);
+    mnuAnimateTerminalSelection(2, context);
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->exitPending = 1;
     *(s32 *)(context + 0x98) = 0;
@@ -2108,7 +2108,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuResolveStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(1, context);
     mnuTerminalSelectSlot(1, 0, (MenuTerminalWork *)context);
-    func_0024AB70(1, context);
+    mnuAnimateTerminalSelection(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     ((EvtBContext *)context)->exitPending = 0;
     evtCreateMessageWindowIfMissing(((MenuTerminalWork *)context)->messageResources[1]);
@@ -2119,7 +2119,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
 }
 
 /* Sequence resource teardown, reload and fade before returning to the terminal menu. */
-s32 func_0024C3F8(KwlnTask *request) {
+s32 evtPollTerminalResourceTransition(KwlnTask *request) {
     MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
     s32 result = menuRunPanel(work, 0, (void *)request);
 
@@ -2132,11 +2132,11 @@ s32 func_0024C3F8(KwlnTask *request) {
     if (work->resourcePhase == 0) {
         if (fldClassifyRemainingFrames(work) == 0) {
             mnuReleaseBothVisualResourceTextures(work);
-            func_00249A60(0);
+            mnuAdvanceTerminalTransition(0);
             work->resourcePhase = 1;
         }
     } else if (work->resourcePhase == 1) {
-        if (func_00249A60(0) != 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
+        if (mnuAdvanceTerminalTransition(0) != 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
             mnuCreateResourceTask();
             kwlnFadeOutStart(0, 0, 0, 0);
             work->resourcePhase = 2;
@@ -2148,10 +2148,10 @@ s32 func_0024C3F8(KwlnTask *request) {
                 return 0;
             }
             mnuReleaseVisualResources(work);
-            func_00249A60(1);
+            mnuAdvanceTerminalTransition(1);
             work->resourcePhase = 3;
         } else if (work->resourcePhase == 3) {
-            if (func_00249A60(1) != 0) {
+            if (mnuAdvanceTerminalTransition(1) != 0) {
                 mnuTerminalSelectResourceBank(work);
                 work->resourcePhase = 0;
                 mnuSetPopupEntryFlagged(&work->popupState, D_0036ACF8);
@@ -2175,7 +2175,7 @@ s32 evtBPollSelectionChainPanel(KwlnTask *item) {
             func_0024A340(0, state);
         }
         mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
-        func_0024A930((MenuTerminalWork *)state);
+        mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
         mnuDrawTerminalSelectedSlots(state);
     }
     return menuRunPanel((void *)state, 1, (void *)item);
@@ -2250,7 +2250,7 @@ s32 func_0024C7E8(KwlnTask *item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -2300,7 +2300,7 @@ s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *item) {
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
-    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);
 }
@@ -2322,7 +2322,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
         func_0024AE18(2, context);
     } else {
         mnuTerminalSelectSlot(2, -1, context);
-        func_0024AB70(2, context);
+        mnuAnimateTerminalSelection(2, context);
     }
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->exitPending = 1;
@@ -2339,7 +2339,7 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
     mnuTerminalBuildMenus(context);
     func_0024A728(1, context);
     mnuTerminalSelectSlot(1, 0, context);
-    func_0024AB70(1, context);
+    mnuAnimateTerminalSelection(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
     ((EvtBContext *)context)->dispatchMode = 0;
     ((EvtBContext *)context)->exitPending = 0;
@@ -2401,7 +2401,7 @@ s32 evtBDispatchSyncD2(KwlnTask *item) {
     }
     mnuDispatchTransitionHostCallbacks(state);
     if (((EvtBContext *)state)->dispatchMode != 3) {
-        func_0024A930((MenuTerminalWork *)state);
+        mnuDrawTerminalSlotGauge((MenuTerminalWork *)state);
     }
     mnuDrawTerminalSelectedSlots(state);
     return menuRunPanel((void *)state, 1, (void *)item);

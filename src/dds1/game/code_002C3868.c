@@ -53,7 +53,7 @@ typedef struct SdfCounterChannel {
 } SdfCounterChannel;
 
 struct SdfCounterRuntime;
-typedef void (*SdfCounterDrawFn)();
+typedef void (*SdfCounterDrawFn)(s32, s32, s32, struct SdfCounterRuntime *, SdfCounterChannel *, s32);
 
 typedef struct SdfCounterRuntime {
     u8 pad00[0xC];
@@ -299,7 +299,7 @@ extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
-extern void func_002C4C88();
+extern void func_002C4C88(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
 extern u8 D_00390220[];
 
 s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
@@ -527,7 +527,7 @@ void func_002C4A58(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
 INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4C88);
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
-void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
+void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel, s32 drawContext) {
     f32 fade = (f32)rt->timer->value / 10.0f;
     s32 base = 0;
     s32 width;

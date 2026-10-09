@@ -359,7 +359,7 @@ extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 
-void func_00255B78(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
+void mnuDrawMantraSparkBackdrop(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
     s32 i;
     DspParticle *particle;
 
@@ -408,7 +408,7 @@ void func_00255D00(MenuSceneMetadata *scene, s32 alpha, s32 drawArg) {
     }
 }
 
-void func_00255E08(MenuSceneMetadata *scene, s32 alpha, s32 context) {
+void mnuDrawMantraSparkScene(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     DspParticleState *sparkles;
     f32 factor;
 
@@ -420,7 +420,7 @@ void func_00255E08(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     func_0024E260(0, 0, 0, (f32)alpha * factor, 0x2B, context);
     sparkles = &scene->sparkles;
     mnuTickMantraSparkParticles(sparkles);
-    func_00255B78(sparkles, (s32)D_0036C698[1], context);
+    mnuDrawMantraSparkBackdrop(sparkles, (s32)D_0036C698[1], context);
 }
 
 void itfDspDrawMarksA(s32 scale, s32 context) {

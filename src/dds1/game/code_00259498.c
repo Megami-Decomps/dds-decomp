@@ -232,7 +232,7 @@ void func_0025AD68(s32 frame, s32 size, s32 param) {
     func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
-void func_0025AE80(MenuSceneWork *display, s32 inputScale, s32 param) {
+void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 param) {
     s8 enabled[4] __attribute__((aligned(4)));
     const u32 clearWord = 0;
     MantraPulseAnimationWork *pulse = &display->pulse;

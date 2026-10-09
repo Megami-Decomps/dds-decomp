@@ -2807,7 +2807,7 @@
 0x001C4100	btlFadeStaleSceneSlots	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C4418	fldSceneCleanupTask	inferred	task callback: calls func_001C4278 unless scene waits on D_003BB3D8
 0x001C4470	fldResetSceneStatus	inferred	Sets battle scene work sceneStatus to zero. [names_reviewed5.tsv]
-0x001C4490	fldBeginSceneTransition	inferred	func_001BCB88(1,8) and sets scene flag 0x200
+0x001C4490	fldBeginSceneTransition	inferred	btlSetCommandPanelFadeMode(1,8) and sets scene flag 0x200
 0x001C44D0	fldClearSceneTransition	inferred	Clears the transition mode by passing zero to scene transition setter. [names_reviewed5.tsv]
 0x001C4658	fldDestroySceneTasksAndBuffers	inferred	U2
 0x001C48B8	fldBattleSceneEnterInit	inferred	Established DDS2 counterpart and source-level behavior agree (0.72 match). [names_reviewed19.tsv]
@@ -7451,3 +7451,68 @@
 0x00220178	evtKillFieldScriptTasks	inferred	Inferred from the current C implementation in event/evtStage.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00226180	evtCommandSetMagatuhiSourcePoints	inferred	Inferred from the current C implementation in event/evtCommand.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002D1380	sdfRunGraphicsTransferWorker	inferred	Inferred from the current C implementation in game/code_002D10B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0015E760	polyCreateArcRingNode	inferred	Inferred from the current C implementation in effect/polyManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0015ED90	polyCreateRotatingBand	inferred	Inferred from the current C implementation in effect/polyManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B8650	btlSetActorSecondaryPresentation	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B89B0	btlClearFinishedActorSlotChannels	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001A9D38	btlRollStoneDeathChance	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B9318	btlUpdateActorPanelHighlights	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C32B0	btlDrawSceneSlotFades	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001AD758	btlCreatePhaseChangePanelTask	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001AE250	btlDrawPanelIconGroup	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B6850	btlUpdateActivePanelEntryFades	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B8838	btlRetireActorSlotPresentationChannels	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001BA198	btlWriteTriangleHighlightPulse	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001BA660	btlUpdateActorPanelSecondaryPulse	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001BCB88	btlSetCommandPanelFadeMode	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001BF4C0	btlOpenBattleCommandPanel	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C13E8	btlCreateAiWork	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C3B28	btlDrawSceneSlotGlyphGrid	inferred	Inferred from the current C implementation in game/code_001A9780.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C7028	btlFinishScenePartyRecovery	inferred	Inferred from the current C implementation in game/code_001C48A8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F4D50	btlExpandPartyFormationAroundCenter	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001C9960	btlInitializeActorCommandState	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001CF7A0	btlReloadLinkedUnitAndQueueEffects	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001D3FE8	btlPrepareSavedCommandTargets	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001DC0E8	btlInitializeWorldCamera	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001DF410	btlConfigureBattleCameraAction	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001E0DA0	btlSetupCameraAimDualUnit	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001E3920	btlBuildShoulderActionCamera	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001E6BB0	btlBuildPresetCameraPose	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001EB1B0	btlConstrainCameraEndpointHeight	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001ECCA8	btlApplyScriptCameraTrack	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001EEAE0	btlInitializeCameraCursorForActorMode	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F06E0	btlRestoreSceneTransformLighting	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F1470	sndUpdateActorEffectTask	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F2218	btlFormatActionEventFilename	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F5028	btlArrangeFormationSlots	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001FCFB8	btlDrawCenteredUnsignedNumber	inferred	Inferred from the current C implementation in game/code_001FC7D8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001FD5C8	btlUpdateLinkedNumberDisplay	inferred	Inferred from the current C implementation in game/code_001FC7D8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002036E8	btlSelectEnemyAiConditionalTargets	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002072F0	btlScheduleActionAndSoundSequence	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020A560	btlSelectMissingHariSummon	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020B190	btlSetLinkedCameraForCommandMode	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020B640	btlUpdateSpecialTargetCamera	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020BE30	btlSelectSpecialDefeatCameraPose	inferred	Inferred from the current C implementation in game/code_00202178.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020D2E0	btlStartPairedActorCommandEffect	inferred	Inferred from the current C implementation in game/code_0020CB38.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0020DE70	btlFrameMarkedTargetDefeatCamera	inferred	Inferred from the current C implementation in game/code_0020CB38.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00210670	btlRunSceneActorEventTask	inferred	Inferred from the current C implementation in game/code_0020FC48.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002118D8	btlEnsureModelAndSoundReady	inferred	Inferred from the current C implementation in game/code_0020FC48.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00215A50	btlDrawActorStatusUvDiagnostics	inferred	Inferred from the current C implementation in game/code_0020FC48.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00229540	evtAdvanceSolarPhaseParticles	inferred	Inferred from the current C implementation in game/code_00228B38.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002491B8	mnuDrawThresholdNodeWithSelectedAccents	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00249A60	mnuAdvanceTerminalTransition	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024A930	mnuDrawTerminalSlotGauge	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024AB70	mnuAnimateTerminalSelection	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024B168	mnuSlideTerminalThresholdList	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024BDB8	mnuHandleTerminalRecoverySelection	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024C3F8	evtPollTerminalResourceTransition	inferred	Inferred from the current C implementation in game/code_00248580.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024DC98	dspAdvanceMessageWindowControl	inferred	Inferred from the current C implementation in game/code_0024CFB0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0024EF68	mnuDrawScaledFixedSpritePlacement	inferred	Inferred from the current C implementation in game/code_0024E1C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002515F0	mnuScheduleUnlockedMantraMessages	inferred	Inferred from the current C implementation in game/code_00250E88.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00255B78	mnuDrawMantraSparkBackdrop	inferred	Inferred from the current C implementation in game/code_00254B30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00255E08	mnuDrawMantraSparkScene	inferred	Inferred from the current C implementation in game/code_00254B30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00258620	mnuDrawMantraGraphCell	inferred	Inferred from the current C implementation in game/code_00258258.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0025AE80	mnuDrawMantraNavigationPulses	inferred	Inferred from the current C implementation in game/code_00259498.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0025C0D8	mnuDrawMantraPulseAndSparks	inferred	Inferred from the current C implementation in game/code_0025BC38.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002650C8	brsDrawRewardEntryRows	inferred	Inferred from the current C implementation in game/code_00263EB0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00266250	brsDrawActiveUnitProgressRows	inferred	Inferred from the current C implementation in game/code_002653A0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

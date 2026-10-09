@@ -601,7 +601,7 @@ extern s32 func_0019C9F0(s32 window, s32 first, s32 second);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
-void func_0024DC98(s32 notify) {
+void dspAdvanceMessageWindowControl(s32 notify) {
     s32 handle = dspWindowHandle;
     if (handle < 0) {
         return;
@@ -639,7 +639,7 @@ void func_0024DC98(s32 notify) {
 
 /* Request mode one from the existing message-window worker. */
 void func_0024DD78(void) {
-    func_0024DC98(1);
+    dspAdvanceMessageWindowControl(1);
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
