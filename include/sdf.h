@@ -478,6 +478,15 @@ typedef union SdfSubParam {
         f32 values[5];
         u32 unk14;
     } scalar;
+    /* Named view of scalar.values; the last word remains opaque. */
+    struct {
+        f32 centerOffsetX;
+        f32 centerOffsetY;
+        f32 basisScaleX;
+        f32 basisScaleY;
+        f32 rotationInput;
+        u32 unk14;
+    } transformInputs;
 } SdfSubParam;
 
 typedef char SdfSubParam_size_must_be_0x18[
