@@ -389,15 +389,15 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                               EffectSlotSet *resource, u32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
     itfGridStorePosition(&panel->firstSlot, resource, index);
 }
 
-void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelSecondGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                                EffectSlotSet *resource, u32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
     itfGridStorePosition(&panel->secondSlot, resource, index);
@@ -408,15 +408,15 @@ void mnuInitializePanelResource(MenuPanelState *panel, EffectSlotSet *resource,
     panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
-void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                               EffectSlotSet *resource, u32 index) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
     itfGridStorePosition(&panel->thirdSlot, resource, index);
 }
 
-void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index, u32 additionalValue) {
+void mnuSetPanelFourthGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                                EffectSlotSet *resource, u32 index, u32 additionalValue) {
     panel->fourthValueA = valueA;
     panel->fourthValueB = valueB;
     itfGridStorePosition(&panel->fourthSlot, resource, index);
