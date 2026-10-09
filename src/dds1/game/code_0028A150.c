@@ -496,8 +496,6 @@ extern LoadObj *fileLoadObjectCreate(void *owner);
 extern void fileCloneEffectSurfaceResources(LoadObj *result, LoadObj *owner);
 
 
-extern FileJobPayload *fileCreateJob(u16 type);
-
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
 
 extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
