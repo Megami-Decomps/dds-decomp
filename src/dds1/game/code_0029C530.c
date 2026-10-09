@@ -205,6 +205,7 @@ extern void func_002DA420(void *, f32);
 extern EffPacketParams D_003DC9E0;
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
+extern void effReleaseResourceRefs(EffTrackSet *);
 
 extern void func_001FBA38(s32);
 
@@ -2563,8 +2564,7 @@ EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 shar
 
 
 /* Release the track set's retained reference, draw asset, and allocation. */
-void effReleaseResourceRefs(u8 *work) {
-    EffTrackSet *refs = (EffTrackSet *)work;
+void effReleaseResourceRefs(EffTrackSet *refs) {
     if (refs->columns != 0) {
         RefObj *ref = refs->shared;
         if (ref == NULL) {
@@ -2797,7 +2797,7 @@ typedef struct EffClassDrawState {
         f32 *scales;
     };
     EffClassWork *effect;
-    u32 references;
+    EffTrackSet *trackSet;
     struct SdfMemBlock *allocation;
 } EffClassDrawState;
 
@@ -2895,7 +2895,7 @@ void effResetClassFrameAndFlags(s32 work) {
     EffClassWork *effect;
 
     effect = ((EffClassDrawState *)((EffClassWork *)work)->resource)->effect;
-    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->references)->frame = 0;
+    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->trackSet)->frame = 0;
     effInitializeClassFrame(effect);
 }
 
@@ -2938,7 +2938,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     state->effect = effCreateClassWork(1, source->classConfig);
     tracks = effCreateTrackSetWithSharedReferences(count, 2, 0);
     first = source->ring.firstColor;
-    state->references = (u32)tracks;
+    state->trackSet = tracks;
     colors = (u32 *)tracks->tail;
     second = source->ring.middleColor;
     for (i = 0; i < count; i++) {
@@ -2953,7 +2953,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 }
 
 void effReleaseClassDrawResources(s32 work) {
-    effReleaseResourceRefs(((EffClassDrawState *)work)->references);
+    effReleaseResourceRefs(((EffClassDrawState *)work)->trackSet);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
     sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
@@ -4563,7 +4563,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->color = 0x80808080;
     node->opacity = 1.0f;
     node->active = 0;
-    node->transform = (u32)effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
+    node->trackSet = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
     node->resource = effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
@@ -4593,8 +4593,8 @@ void effReleaseModelResources(EffectStripNode *work) {
     if (work->resource != NULL) {
         billDispatchByKind(work->resource);
     }
-    if (work->transform != 0) {
-        effReleaseResourceRefs((u8 *)work->transform);
+    if (work->trackSet != NULL) {
+        effReleaseResourceRefs(work->trackSet);
     }
     if (work->active != 0) {
         fileReleaseGridRecordHandle(work->active);
@@ -5938,7 +5938,8 @@ typedef struct EffSpanEntry {
 } EffSpanEntry;
 
 typedef struct EffModelResource {
-    u8 transform[0x20];
+    f32 position[4];
+    f32 orientation[4]; /* Quaternion. */
     f32 scale;
     u32 color;
     s32 updateCount;
@@ -6107,7 +6108,7 @@ void effReleaseParticleList(EffSpanTable *list) {
     for (i = 0; i < list->count; i++, entry++) {
         effReleaseModelPointSetAsset(entry->pointSet);
         if (entry->references != 0) {
-            effReleaseResourceRefs((u8 *)entry->references);
+            effReleaseResourceRefs(entry->references);
         }
     }
     sdfReleaseResourceAllocation(list->allocation);
@@ -6128,8 +6129,8 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     effect->scale = 1.0f;
     effect->updateCount = 0;
     effect->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->position);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->orientation);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState(secondary, param);
@@ -6197,20 +6198,20 @@ void effStepModelResourceCallbacks(EffModelResource *effect) {
     effDispatchModelResourceCallback(effect);
 }
 
-void effSetModelResourcePrimaryTransformVector(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
+    PCP_COPY_VECTOR(effect->position, position);
 }
 
-void effSetModelResourceSecondaryTransformVector(void *work, void *src) {
-    PCP_COPY_VECTOR(&((EffModelResource *)work)->transform[0x10], src);
+void effSetModelResourceSecondaryTransformVector(EffModelResource *effect, const f32 *orientation) {
+    PCP_COPY_VECTOR(effect->orientation, orientation);
 }
 
-void effSetModelResourceColor(s32 work, u32 color) {
-    ((EffModelResource *)work)->color = color;
+void effSetModelResourceColor(EffModelResource *effect, u32 color) {
+    effect->color = color;
 }
 
-void effSetModelResourceScale(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
+    effect->scale = scale;
 }
 
 extern EffPacketParams D_003DCB60[];
