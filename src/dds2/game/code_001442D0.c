@@ -1139,7 +1139,7 @@ void func_00145698(void) {
     fldSceneRecordCount = ((SceneHeader *)header)->count;
 }
 
-void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
+void fldSetSceneRecordChunk(u8 *chunk, s32 resourceId) {
     /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
@@ -1147,14 +1147,12 @@ void fldSetSceneRecordChunk(s32 chunk, s32 resourceId) {
         s32 count; /* 0x08: number of scene rows */
     } SceneHeader;
     if (D_00389780[0] < 0xC8) {
-        s32 source = chunk;
-        s32 resource = resourceId;
-        s32 transferStart = source + 8;
+        u8 *transferStart = chunk + 8;
 
-        fldSceneRecordResource = resource;
-        fldRelocatePackedTransferChunk(chunk, transferStart);
+        fldSceneRecordResource = resourceId;
+        fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
-            s32 header = func_00129D60(transferStart);
+            s32 header = func_00129D60((s32)(u32)transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
             s32 count = ((SceneHeader *)header)->count;
 
