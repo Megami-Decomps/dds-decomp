@@ -973,7 +973,7 @@ void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
+void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->dmaTag = ((u64)((source + 0x1E0) & 0xfffffff) << 32) | 0x30000004;
     node->nextTag = 0;
