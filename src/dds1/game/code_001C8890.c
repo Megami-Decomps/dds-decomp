@@ -1790,7 +1790,104 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
     btlStartTask(value);
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CF7A0);
+extern void func_001A2608(BtlUnit *, u8);
+extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
+extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 *, f32);
+extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
+extern u8 *func_001D9038(u8 *, u32);
+extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
+extern void btlResetUnitLinks(BtlUnit *);
+extern void btlReleaseUnitResources(BtlUnit *);
+
+void func_001CF7A0(BtlTask *task) {
+    BtlUnit *unit = task->indexWork.linkedUnit;
+    DatPartyRecord *record;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *spawned;
+    BtlRuntimeTask *delayed;
+    u32 species;
+    u32 flags;
+    u32 unitId;
+    f32 rate;
+
+    if (!(unit->flags & 0x40)) {
+        return;
+    }
+    if (fldReleaseIdleSceneActorResources(unit) == 0) {
+        return;
+    }
+    unit->flags &= ~0xC0;
+    record = &unit->partyRecord;
+    func_001A1960(record, 8);
+    if (unit->flags & 0x200) {
+        btlSyncPlayerWork(unit);
+    }
+    btlReleaseUnitResources(unit);
+    btlResetUnitLinks(unit);
+    func_001A2608(unit, (u8)task->indexWork.unk18);
+    flags = unit->flags;
+    unit->flags = flags | 0x301;
+    if (record->flags & 0x1000) {
+        unit->flags = flags | 0x1301;
+    }
+    if (record->flags & 0x4000) {
+        unit->stateFlags |= 0x2000;
+    }
+    if (unit->partyRecord.status & 0x4000) {
+        unit->flags |= 0x20;
+    }
+    unitId = unit->partyRecord.unitId;
+    unit->modelVariant = unitId;
+    unit->displaySpecies = unitId + 0x10;
+    unit->modelId = 0;
+    unit->unkDC = 0;
+    species = (unit->flags & 0x1000) ? unit->displaySpecies : unitId;
+    ((BtlTask *)btlFindUnitByActor((s32)unit))->flags |= 0x100;
+    unit->baseColor = 0x80808080;
+    unit->overlayColor = 0x80808080;
+    if (!(unit->partyRecord.status & 0x1000)) {
+        load = btlCreateModelLoadPollTask(unit, 0, species, 0);
+    } else {
+        load = btlCreateModelLoadPollTask(unit, 0, 0x1F, 0);
+    }
+    rate = 1.0f;
+    load->ownerId = task->unit->identity;
+    btlStartTask(load);
+    spawned = (BtlRuntimeTask *)btlCreateGunLoadPollTask((u8 *)unit);
+    spawned->ownerId = task->unit->identity;
+    btlStartTask(spawned);
+    spawned = btlCreateUnitPositionLerpTowardTargetTask(unit, unit->currentPosition, rate);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = load->handle;
+    btlStartTask(spawned);
+    if (!(unit->flags & 0xE0)) {
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->orientation, rate);
+    } else {
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->rotation, rate);
+    }
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = load->handle;
+    btlStartTask(spawned);
+    delayed = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 0x12);
+    delayed->ownerId = task->unit->identity;
+    delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    delayed->startDelay = 2;
+    delayed->startCondition.value.handle = load->handle;
+    btlStartTask(delayed);
+    spawned = btlCreateUnitBaseLightTask(unit);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = delayed->handle;
+    btlStartTask(spawned);
+    spawned = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)task, 0x64, 1);
+    spawned->ownerId = task->unit->identity;
+    btlStartTask(spawned);
+    if ((task->unit->partyRecord.status & 0x480) && task->indexWork.linkedUnit != task->unit) {
+        btlDispatchStateHandler(task, 0x18);
+    } else {
+        btlDispatchStateHandler(task, 0x1A);
+    }
+}
 
 extern s32 func_001A8640(BtlUnit *);
 
@@ -9441,7 +9538,38 @@ u32 btlCountUnitsByFlags(u32 mask) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEAE0);
+void func_001EEAE0(BtlLinkedCommand *action, BtlCamState *state) {
+    memset(&D_0035F100, 0, sizeof(D_0035F100));
+    switch (action->task->unit->partyRecord.unitId) {
+    case 1:
+        func_001E6BB0(action, state, 2, 2);
+        CURSOR->unk_0C = 2;
+        func_001E6668(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 4:
+        func_001E6BB0(action, state, 2, 0);
+        CURSOR->unk_0C = 0;
+        func_001E6668(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 3:
+    case 5:
+    case 6:
+        func_001E6BB0(action, state, 2, 2);
+        CURSOR->unk_0C = 1;
+        func_001E6668(action, state, 2, 1);
+        CURSOR->unk_00 = 1;
+        break;
+    case 2:
+        return;
+    default:
+        if (btlHasSingleLinkedResource(action) != 0) {
+            func_001E1288(action, (BtlCamState *)action, 1);
+        }
+        break;
+    }
+}
 
 extern const BtlCameraTimedInstruction *D_0035DAE0[];
 
