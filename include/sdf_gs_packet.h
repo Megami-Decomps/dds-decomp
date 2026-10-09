@@ -9,13 +9,25 @@ enum {
     SDF_GS_TEX0_2 = 0x07,
     SDF_GS_CLAMP_1 = 0x08,
     SDF_GS_CLAMP_2 = 0x09,
+    SDF_GIF_REGISTER_AD = 0x0E,
     SDF_GS_TEX1_1 = 0x14,
     SDF_GS_TEX1_2 = 0x15,
+    SDF_GS_XYOFFSET_1 = 0x18,
+    SDF_GS_XYOFFSET_2 = 0x19,
+    SDF_GS_PRMODECONT = 0x1A,
+    SDF_GS_TEXA = 0x3B,
+    SDF_GS_SCISSOR_1 = 0x40,
+    SDF_GS_SCISSOR_2 = 0x41,
     SDF_GS_ALPHA_1 = 0x42,
     SDF_GS_ALPHA_2 = 0x43,
+    SDF_GS_DTHE = 0x45,
+    SDF_GS_COLCLAMP = 0x46,
     SDF_GS_TEST_1 = 0x47,
     SDF_GS_TEST_2 = 0x48,
-    SDF_GIF_REGISTER_AD = 0x0E
+    SDF_GS_FRAME_1 = 0x4C,
+    SDF_GS_FRAME_2 = 0x4D,
+    SDF_GS_ZBUF_1 = 0x4E,
+    SDF_GS_ZBUF_2 = 0x4F
 };
 
 /* Packed ALPHA operands: (A - B) * C / 128 + D. Cs/Cd denote
