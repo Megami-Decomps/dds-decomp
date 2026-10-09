@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "par_cell_api.h"
@@ -10,7 +11,6 @@
 #include "eff_scatter_draw.h"
 #include "eff_pcp_scatter_rings.h"
 
-extern void sdfQueueAssetRelease(struct SdfAsset *asset);
 
 /* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
  * instance, not to the drawable used by the resource helpers below. */

@@ -1097,7 +1097,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
     if (pool->sharedResource != NULL) {
         effPcpScatterResRelease(pool->sharedResource);
     }
-    sdfQueueAssetRelease((s32)pool->drawAsset);
+    sdfQueueAssetRelease(pool->drawAsset);
     sdfReleaseResourceAllocation(pool->allocation);
 }
 

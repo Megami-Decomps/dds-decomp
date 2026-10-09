@@ -34,7 +34,6 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 extern void *effParamTableGetBlock(void *table, s32 index);
 

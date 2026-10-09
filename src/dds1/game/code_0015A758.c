@@ -15,7 +15,6 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 typedef struct ParListNode ParListNode;
 

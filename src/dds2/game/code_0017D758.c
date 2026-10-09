@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -45,7 +46,7 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
     if (object->sharedResource != 0) {
         effPcpScatterResRelease(object->sharedResource);
     }
-    sdfQueueAssetRelease((s32)object->asset);
+    sdfQueueAssetRelease(object->asset);
     sdfReleaseResourceAllocation(object->allocation);
     sdfReleaseChipBlock(object);
 }
@@ -73,9 +74,9 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_00167A10(ScatterRenderState *);
 struct SdfAsset;
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *, s32);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *, s32);
+extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern u32 effGetScatterEntry(PcpScatterDraw *, s32);
 
 void effScatterDrawObject(PcpScatterDraw *object) {

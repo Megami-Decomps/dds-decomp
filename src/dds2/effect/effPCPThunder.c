@@ -2959,7 +2959,7 @@ EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivis
 }
 
 void effReleaseEffectResources(EffFragmentResources *work) {
-    sdfQueueAssetRelease((s32)work->resourceHandle);
+    sdfQueueAssetRelease(work->resourceHandle);
     sdfReleaseResourceAllocation(work->allocation);
 }
 

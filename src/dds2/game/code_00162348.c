@@ -548,7 +548,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->flags = 1;
-    sdfQueueAssetRelease((s32)record->asset);
+    sdfQueueAssetRelease(record->asset);
     sdfReleaseResourceAllocation(record->allocation);
 }
 
