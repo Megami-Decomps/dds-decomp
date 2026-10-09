@@ -88,10 +88,16 @@ s32 evtIsFadeDispatchIdle(void) {
     return evtGetMessageWindowControlState() == 0;
 }
 
+/* Install a dispatch state table and point the popup at the shared shop entry. */
+#define MNU_INSTALL_STATE_TABLE(ctx, table, entry) \
+    do { \
+        (ctx)->stateTable = (s32)(table); \
+        mnuSetPopupEntry((s32)&(ctx)->dispatchState, (s32)(entry)); \
+    } while (0)
+
 void evtInstallStateTable(ShopScene *state) {
     if (state->menuMode == 2) {
-        state->stateTable = (s32)D_0036AA68;
-        mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AA68 + 0xC4);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AA68, D_0036AA68 + 0xC4);
     }
 }
 
@@ -145,8 +151,7 @@ s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
 
 void evtInstallStateTableB(ShopScene *state) {
     if (state->menuMode == 1) {
-        state->stateTable = (s32)D_0036AA84;
-        mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AA84 + 0xA8);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AA84, D_0036AA84 + 0xA8);
     }
 }
 
@@ -196,8 +201,7 @@ s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
 
 void evtInstallStateTableC(ShopScene *state) {
     if (state->menuMode == 1) {
-        state->stateTable = (s32)D_0036AAA0;
-        mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AAA0 + 0x8C);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AAA0, D_0036AAA0 + 0x8C);
     }
 }
 
@@ -246,8 +250,7 @@ s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
 
 void evtInstallStateTableD(ShopScene *state) {
     if (state->menuMode == 2) {
-        state->stateTable = (s32)D_0036AABC;
-        mnuSetPopupEntry((s32)&state->dispatchState, (s32)D_0036AABC + 0x70);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AABC, D_0036AABC + 0x70);
     }
 }
 
@@ -701,7 +704,7 @@ s32 func_00247A78(KwlnTask *callbackContext) {
         }
         break;
     }
-    return func_00285670(&state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
+    return menuRunPanel(state, EVT_DISPATCH_OPERATION_PRIMARY, callbackContext);
 }
 
 s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
