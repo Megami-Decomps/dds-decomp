@@ -52,19 +52,6 @@
 #define SDF_PARAM_TEXTURE_INDEX_MASK 0xFFFF
 #define SDF_PARAM_PACKET_MODE_SHIFT 16
 
-typedef union SdfSubParam {
-    struct {
-        u64 unk0;
-        u64 unk8;
-        u32 unk10;
-        u32 unk14;
-    } packed;
-    struct {
-        f32 values[5];
-        u32 unk14;
-    } scalar;
-} SdfSubParam;
-
 typedef struct SdfTextParam {
     u32 unk00;
     u16 unk04;
@@ -73,7 +60,7 @@ typedef struct SdfTextParam {
     u32 unk10; /* 0x10 */
     u32 unk14; /* 0x14 */
     union {
-        u32 packedColor;
+        u32 secondaryColor;
         struct {
             u8 unk18;
             u8 overrideFlags; /* bit 0x2 selects scalar overrides */
@@ -473,7 +460,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
         SdfAsset *asset = (SdfAsset *)((u32 *)list->buffer)[itemIndex];
 
-        if ((u8)asset->unk18 != 0) {
+        if ((u8)asset->secondaryColor != 0) {
             func_002D33C8((u32)asset, arg, value);
         }
     }
@@ -602,7 +589,7 @@ void sdfCopyPrimaryTextScalars(SdfTextParam *param, const f32 *sourceScalars) {
 
 /* Write the full packed secondary-color word and dirty both draw entries. */
 void func_002DA5B0(SdfTextParam *param, u32 packedColor) {
-    param->packedColor = packedColor;
+    param->secondaryColor = packedColor;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
@@ -676,11 +663,11 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
         entryWords[0x98 / 4] = 0x400000C;
         entryWords[0x9C / 4] = 0x14000000;
     }
-    asset->unk40 = 0;
-    asset->unk44 = 0;
+    asset->scalarPairFirst = 0;
+    asset->scalarPairSecond = 0;
     asset->unk10 = 0x80808080;
     asset->unk14 = 0x80808080;
-    asset->unk18 = 0x80808080;
+    asset->secondaryColor = 0x80808080;
     return asset;
 }
 
@@ -753,8 +740,8 @@ void sdfAssetRelease(SdfAsset *asset) {
     sdfLiveAssetCount--;
     sdfReleaseChipBlock(asset->entries[0]);
     sdfReleaseChipBlock(asset->entries[1]);
-    sdfReleaseChipBlock(asset->third);
-    sdfReleaseChipBlock(asset->fourth);
+    sdfReleaseChipBlock(asset->primarySubParam);
+    sdfReleaseChipBlock(asset->secondarySubParam);
     sdfReleaseChipBlock(asset);
 }
 
@@ -846,7 +833,7 @@ void func_002DAB80(u8 *out, SdfSubParam *param) {
 }
 
 void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, u8 *entry) {
-    func_002DAB80(entry + 0x68, asset->third);
+    func_002DAB80(entry + 0x68, asset->primarySubParam);
 }
 
 /* Copy color, unchecked mode/palette state and optional GS texture words,
@@ -856,7 +843,7 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
-    drawEntry->unk0C = asset->unk18;
+    drawEntry->unk0C = asset->secondaryColor;
     packetMode = asset->secondaryMode;
     drawEntry->mode = packetMode;
     drawEntry->unk20 = D_00398198[packetMode];
@@ -865,13 +852,13 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
         drawEntry->secondaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);
         drawEntry->secondaryTextureState.clamp = sdfTexGetPrimaryClampState(texture);
     }
-    func_002DAB80(entryBytes + 0x80, asset->fourth);
+    func_002DAB80(entryBytes + 0x80, asset->secondarySubParam);
 }
 
 /* Copy the source pair into the destination entry's two scalar slots. */
 void sdfAssetCopyPairToTextParam(SdfAsset *source, SdfTextParam *destination) {
-    destination->unk28 = source->unk40;
-    destination->unk2C = source->unk44;
+    destination->unk28 = source->scalarPairFirst;
+    destination->unk2C = source->scalarPairSecond;
 }
 
 /* Apply the selected entry's groups and retain the other entry's captured bits.
@@ -963,21 +950,21 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     destination->unk10 = source->unk10;
     destination->unk14 = source->unk14;
     destination->unk1C = source->unk1C;
-    destination->unk18 = source->unk18;
+    destination->secondaryColor = source->secondaryColor;
     *(u16 *)&destination->pad00[4] = *(u16 *)&source->pad00[4];
     destination->texture = source->texture;
     destination->unk20 = source->unk20;
     destination->unk28 = source->unk28;
-    subParameters = source->third;
+    subParameters = source->primarySubParam;
     if (subParameters != NULL) {
         sdfEnsurePrimaryTextSubParam((SdfTextParam *)destination)->scalar = subParameters->scalar;
     }
-    subParameters = source->fourth;
+    subParameters = source->secondarySubParam;
     if (subParameters != NULL) {
         sdfEnsureSecondaryTextSubParam((SdfTextParam *)destination)->scalar = subParameters->scalar;
     }
-    destination->unk40 = source->unk40;
-    destination->unk44 = source->unk44;
+    destination->scalarPairFirst = source->scalarPairFirst;
+    destination->scalarPairSecond = source->scalarPairSecond;
 }
 
 /* Copy paired items using the destination count; source must contain at least that many items. */
