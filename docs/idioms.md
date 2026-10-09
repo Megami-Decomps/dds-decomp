@@ -5370,3 +5370,28 @@ source for both words. In `001447A0`/`001415F8`, the two 500-unit checks
 really take the square root of the Y delta squared; do not rewrite them
 as full-distance or X-only checks based on that decoder output.
 
+## Field label tables retain coordinate headers before encoded text
+
+DDS2's `FLDALL.TBL` loader reads `0x3C00` and `0x4400` bytes for
+512 records of 30 and 34 bytes. The matched `001237B0`/`00123808`
+lookups read signed coordinate halfwords at `+0/+2`; encoded label text
+starts at `+4` and occupies 26/30 bytes. Share those complete records
+between the loader/lookups and label-length cache, rather than inventing
+stride-sized string objects based at the interior `+4` addresses.
+The banner's primary/alternate selection indices are signed words at
+`FldAreaWork +C4/+C8`; the initializer and both retail banner consumers
+use `-1` as the no-selection sentinel. These owner completions do not
+claim that the remaining banner controller has matched.
+
+
+## Battle text handles cross the real glyph draw boundary
+
+DDS2's command-list text helpers receive a 32-bit handle from
+`itfCreateConvertedTextGlyph`, then pass its glyph pointer to
+`frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8)`. The provider in
+`interface/frFont.c` forwards that pointer and mode to the chain renderer.
+Use the same explicit word-to-pointer boundary as the adjacent
+`frFontQueueGlyphForCurrentDrawBuffer` call, rather than relying on an
+implicit integer argument. All three callers in `game/code_001C7FF8`
+retain their retail instructions. This contract correction does not
+claim that the still-ASM command-list renderer has matched.

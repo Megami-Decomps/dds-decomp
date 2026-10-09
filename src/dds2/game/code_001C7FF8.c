@@ -24,6 +24,7 @@ extern s32 btlGetRuntime(void);
 
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, TaskUpdate, TaskDestroy, s32);
 
@@ -193,7 +194,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
@@ -202,7 +203,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     s32 handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
@@ -435,7 +436,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     }
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
