@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
 
 typedef struct SdfMat4 {
@@ -106,31 +107,6 @@ void *func_00324F50(u32 *owner, u32 resource) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", mnuRemoveLinkedResourceByHandle);
-
-typedef struct DdsCountedPayload {
-    u32 count;
-    void *data;
-} DdsCountedPayload;
-
-typedef struct DdsNestedGroup {
-    u32 unk_00;
-    u16 firstCount;
-    u16 secondCount;
-    DdsCountedPayload *first;
-    DdsCountedPayload *second;
-} DdsNestedGroup;
-
-/* The packed nested format is 0x14 bytes, unlike the separate 0x18 SdfResourceRecord. */
-typedef struct DdsNestedHeader {
-    u32 unk_00;
-    u32 unk_04;
-    u32 unk_08;
-    u16 unk_0C;
-    u16 groupCount;
-    DdsNestedGroup *groups;
-} DdsNestedHeader;
-
-extern s32 dds3MeasureMenuRecord(DdsNestedGroup *);
 
 DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list) {
     SdfListNode *node;

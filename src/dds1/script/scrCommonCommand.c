@@ -9,11 +9,11 @@ s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, 
 f32 bfWaitReadArgFloat(s32 idx);
 s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
 s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
-void kwlnDrawSetC70FloatTriple(u32 blendControl, f32 rotation, f32 scale);
+void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnSetLightColorTarget(s32 arg0, s32 arg1, void *arg2);
 s32 kwlnSetBackgroundColorTarget(s32 arg0, void *arg1);
 s32 kwlnSetLightDirectionTarget(s32 arg0, s32 arg1, void *arg2);
-void kwlnDrawSetD88FloatTriple(u32 blendControl, f32 rotation, f32 scale);
+void kwlnDrawSetD88FloatTriple(f32 rotation, f32 scale, u32 blendControl);
 s32 kwlnDrawSetDc8Second(s32 arg0);
 s32 kwlnDrawSetE08Fifth(s32 arg0);
 s32 kwlnFadeOutStart(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -360,8 +360,29 @@ s32 scrCommandSetDrawOffsetTransition(void)
     return 1;
 }
 
-extern s32 scrCmdSetDrawFloatPairByMode(void);
-INCLUDE_ASM(const s32, "script/scrCommonCommand", scrCmdSetDrawFloatPairByMode);
+s32 scrCmdSetDrawFloatPairByMode(void) {
+    u32 blendControl;
+    f32 rotation;
+    f32 scale;
+
+    switch (scrReadIntParameter(2)) {
+    case 1:
+        blendControl = 0x48;
+        break;
+    case 2:
+        blendControl = 0x42;
+        break;
+    case 0:
+    default:
+        blendControl = 0x44;
+        break;
+    }
+    rotation = bfWaitReadArgFloat(0);
+    scale = bfWaitReadArgFloat(1);
+    kwlnDrawSetC70FloatTriple(rotation, scale, blendControl);
+    return 1;
+}
+
 
 s32 scrCmdSetPackedDrawComponentBytes(void)
 {
@@ -562,8 +583,36 @@ s32 scrCmdBeginStaggeredBlurDeactivation(void)
     return 1;
 }
 
-extern s32 scrCmdConfigureRectangleBlur(void);
-INCLUDE_ASM(const s32, "script/scrCommonCommand", scrCmdConfigureRectangleBlur);
+s32 scrCmdConfigureRectangleBlur(void)
+{
+    s32 blendControl;
+    s32 mode;
+    f32 rotation;
+    f32 scale;
+
+    mode = scrReadIntParameter(2);
+    switch (mode) {
+    case 0:
+        blendControl = 0x44;
+        break;
+    case 1:
+        blendControl = 0x48;
+        break;
+    case 2:
+        blendControl = 0x42;
+        break;
+    default:
+        evtPrintDeveloperConsoleMessage("error: BLUR2_PARA blend\n");
+        blendControl = 0x44;
+        break;
+    }
+
+    rotation = bfWaitReadArgFloat(0);
+    scale = bfWaitReadArgFloat(1);
+    kwlnDrawSetD88FloatTriple(rotation, scale, blendControl);
+    return 1;
+}
+
 
 s32 scrCmdSetRectangleBlurPackedColor(void)
 {

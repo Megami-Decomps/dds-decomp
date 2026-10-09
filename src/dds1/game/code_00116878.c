@@ -1,9 +1,9 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_model.h"
 #include "eff_transform.h"
 #include "sdf_draw.h"
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
 
 extern Motion *func_002DB230(SdfModel *, MotionTable *);

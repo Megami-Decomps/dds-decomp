@@ -1,6 +1,7 @@
 #include "common.h"
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
+#include "dds_nested_resource.h"
 
 #define MNU_WORK_ACTIVE   1
 
@@ -46,16 +47,8 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-typedef struct MenuLengthData {
-    u8 pad0[4];
-    u16 firstCount;
-    u16 secondCount;
-    s32 *firstRecords;
-    s32 *secondRecords;
-} MenuLengthData;
-
 void func_003214D0(u32, s32);
-s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
+s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
@@ -347,21 +340,21 @@ void func_00322418(void) {
 
 
 /* Include the 0x10-byte header and both variable-length record blocks. */
-s32 dds3MeasureMenuRecord(MenuLengthData *data) {
-    s32 byteSize = dds3MeasureRecordBlock(data->firstRecords, data->firstCount) + 0x10;
-    return byteSize + dds3MeasureRecordBlock(data->secondRecords, data->secondCount);
+s32 dds3MeasureMenuRecord(DdsNestedGroup *group) {
+    s32 byteSize = dds3MeasureRecordBlock(group->first, group->firstCount) + 0x10;
+    return byteSize + dds3MeasureRecordBlock(group->second, group->secondCount);
 }
 
 /* Each entry has an eight-byte header followed by its eight-byte subentries. */
-s32 dds3MeasureRecordBlock(s32 *records, s32 count) {
+s32 dds3MeasureRecordBlock(DdsCountedPayload *records, s32 count) {
     s32 subentryCount;
     s32 byteSize;
 
     byteSize = count << 3;
     if (0 < count) {
         do {
-            subentryCount = *records;
-            records = records + 2;
+            subentryCount = records->count;
+            records++;
             count = count - 1;
             byteSize = byteSize + subentryCount * 8;
         } while (count != 0);

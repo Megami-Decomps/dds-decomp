@@ -24,7 +24,6 @@ void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
 void func_00111258(void *slot, void *owner);
-void dds3RemoveWorldObjectNode(void *node);
 void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 void sdfReleaseChipBlock(void *block);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);

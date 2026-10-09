@@ -9,7 +9,6 @@ typedef struct {
 
 extern void effObjFreeInner(EffWorldNode *node);
 extern void dds3DestroyObjectBase(ObjBase *base);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern void sdfReleaseChipBlock(void *block);
 
 /* Release the camera's inner node, base handle, and owned data block. */
@@ -22,7 +21,6 @@ void dds3DestroyCameraData(EffWorldNode *camera) {
     sdfReleaseChipBlock(data);
 }
 
-EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
 void *dds3GetWorldSecondaryObject(void);
 u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
@@ -95,7 +93,6 @@ ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
     return ((CameraData *)camera->data)->handle;
 }
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData(void *object);
 extern void effObjSetInnerFirstVec(EffWorldNode *obj, u128 *vec);

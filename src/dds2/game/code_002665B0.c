@@ -2241,7 +2241,29 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_0026A998);
+s32 func_0026A998(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
+    EventDispatchState *dispatchState = (EventDispatchState *)state;
+
+    if (evtGetMessageWindowControlState() == 0 && dispatchState->exitState == 0) {
+        func_00268CC0(2, state);
+        mnuTerminalSelectSlot(2, -1, (MenuSlotState *)state);
+        func_002690A8(2, state);
+        dispatchState->exitState = 1;
+    }
+    mnuDrawTerminalBackdrop(state);
+    if (dispatchState->savedMenuMode == 0) {
+        mnuDrawAndStepTerminalPanelFade(1, (MenuSlotState *)state);
+    } else if (func_00268C08((MenuSlotState *)state) == 0) {
+        mnuDrawAndStepTerminalPanelFade(1, (MenuSlotState *)state);
+    } else {
+        mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
+    }
+    mnuDispatchTransitionHostCallbacks(state);
+    func_00268EC8(state);
+    mnuDrawTerminalSelectedSlots(state);
+    return menuSetHandler(dispatchState, 1, (void *)request);
+}
 
 s32 evtBSetupDispatchSyncE(KwlnTask *request) {
     EventDispatchState *state = (EventDispatchState *)kwlnTaskGetUserValue(request);

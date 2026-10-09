@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "eff_transform.h"
@@ -144,7 +145,6 @@ extern void *func_00115298(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
 extern void effObjSetFlags(void *, s32);
 extern void effObjReplaceActiveEventNode(void *, u32);
-extern void dds3RemoveWorldObjectNode(void *);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];

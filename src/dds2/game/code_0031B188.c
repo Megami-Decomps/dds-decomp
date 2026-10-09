@@ -22,23 +22,6 @@ typedef struct SoundSlotPool {
 
 
 
-typedef struct FileQueue {
-    f32 offset[4];
-    f32 axis[4];
-    u8 unk20[0x20];
-    f32 position[4];
-    f32 quat[4];
-    f32 scale;
-    u32 color;
-    u32 transformWord;
-    u8 pad6C[8];
-    f32 transformValue;
-    u8 pad78[8];
-    s32 count;
-    u32 updateFrame;
-    FileJob *last;
-    FileJob *first;
-} FileQueue;
 
 
 

@@ -25,7 +25,6 @@ extern s32 func_0035C860(char *buffer, const char *format, ...);
 extern s32 func_00259AE8(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
 

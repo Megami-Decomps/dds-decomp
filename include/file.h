@@ -62,6 +62,8 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateFromCommandState(const char *entry);
 FileJobPayload *fileCreateJob(u16 type);
 void fileJobDestroy(FileJobPayload *job);
+void fileWriteToPfs(FileJobPayload *job, const char *filePath);
+void fileJobWriteSerializedPayload(s32 fd, FileJobPayload *job);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
 void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandPath, u16 option);
@@ -113,6 +115,46 @@ typedef char FileJobPayloadBufferSlot_size_must_be_0x10[
     (sizeof(FileJobPayloadBufferSlot) == 0x10) ? 1 : -1];
 typedef char FileJob_size_must_be_0xC0[
     (sizeof(FileJob) == 0xC0) ? 1 : -1];
+
+/* Runtime queue owner; serialized images retain the same 0x90-byte header. */
+typedef struct FileQueue {
+    f32 offset[4];
+    f32 axis[4];
+    u8 unk20[0x20];
+    f32 position[4];  /* 0x40 */
+    f32 quat[4];      /* 0x50 */
+    f32 scale;        /* 0x60 */
+    u32 color;        /* 0x64: modulation colour */
+    u32 transformFlags; /* 0x68: bits 0x60 select the rotation branch */
+    u8 pad6C[8];
+    f32 scaleMultiplier; /* 0x74: multiplies queue scale during updates */
+    u8 pad78[8];
+    s32 count;        /* 0x80 */
+    u32 updateFrame;  /* 0x84 */
+    union {
+        FileJob *last;   /* runtime linked-list tail */
+        u32 entryOffset; /* relative first-entry offset in serialized images */
+    };               /* 0x88 */
+    FileJob *first;   /* 0x8C: runtime traversal start */
+} FileQueue;
+
+typedef char FileQueue_size_must_be_0x90[
+    (sizeof(FileQueue) == 0x90) ? 1 : -1];
+typedef char FileQueue_scaleMultiplier_offset_must_be_0x74[
+    ((u32)&((FileQueue *)0)->scaleMultiplier == 0x74) ? 1 : -1];
+typedef char FileQueue_first_offset_must_be_0x8C[
+    ((u32)&((FileQueue *)0)->first == 0x8C) ? 1 : -1];
+
+FileQueue *fileQueueCreate(void);
+FileQueue *fileQueueCreateFromCommandState(const char *entry);
+void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
+void fileQueueSaveImage(FileQueue *queue, const char *filePath);
+FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
+FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
+void fileJobCopyHeader(FileJob *destination, FileJob *source);
+void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);
+void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job);
+void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *leader);
 
 /* One of the four device-read slots at FileManWork + 0x20. */
 typedef struct FileManSlot {

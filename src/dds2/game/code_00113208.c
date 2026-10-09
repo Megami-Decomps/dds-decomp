@@ -1,10 +1,10 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_object.h"
 
 
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData(void *object);
 

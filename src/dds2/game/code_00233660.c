@@ -2323,7 +2323,37 @@ s32 mdlCountActiveRecords(void) {
     return firstListCount + activeListCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00237A70);
+/* Record at the cursor index, counting list -1 first and then the active entry's list. */
+MdlRecord *func_00237A70(void) {
+    MdlCtx *resource = mdlViewerState.resources[0];
+    MdlRecord *firstList = mdlFindViewerRecord(resource, -1);
+    MdlRecord *secondList = mdlFindViewerRecord(resource, mdlViewerState.activeEntryId);
+    s32 index = mdlViewerState.unk42;
+    MdlRecord *record;
+
+    if (firstList != NULL) {
+        record = mdlGetFirstRecord((s32)firstList);
+        while (record != NULL) {
+            if (index == 0) {
+                return record;
+            }
+            index--;
+            record = mdlGetNextRecord(record);
+        }
+    }
+    if (secondList == NULL) {
+        return NULL;
+    }
+    record = mdlGetFirstRecord((s32)secondList);
+    while (record != NULL) {
+        if (index == 0) {
+            return record;
+        }
+        index--;
+        record = mdlGetNextRecord(record);
+    }
+    return NULL;
+}
 
 extern MdlRecord *func_00237A70(void);
 
@@ -3232,7 +3262,6 @@ extern s32 dds3CreateCameraObject(s32 world, f32 *pos, f32 *rot);
 
 extern void dds3EnsureSlotData(s32 obj);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *obj);
 
 s32 mdlSpawnViewerWorldObject(void) {
     f32 pos[4] = {0.0f, -100.0f, -600.0f, 0.0f};

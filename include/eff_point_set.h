@@ -25,4 +25,6 @@ typedef char EffPointSetHandleOffsetCheck[
 typedef char EffPointSetAllocationOffsetCheck[
     ((u32)&((EffPointSet *)0)->allocation == 0x1C) ? 1 : -1];
 
+EffPointSet *effCreatePointSet5(s32 count);
+
 #endif
