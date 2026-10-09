@@ -5187,3 +5187,55 @@ primary owner without an address-named scalar alias or another view.
 The support-height routines themselves remain assembly: selector
 lifetimes, control scheduling and triangle-call setup are not matched.
 
+
+## Scene count scratch is a complete shared pointer owner
+
+`001B2AC8` / `001BD6E8` both allocate and clear `0x38` bytes for
+`SceneKindTable`. Its unsigned pulse phase, signed halfword alpha,
+cached entry/cursor/relative row and eight count words occupy `+0`,
+`+4`, `+8/+C/+10` and `+14..+30`; `+34..+37` remain opaque.
+The canonical owner replaces both partial `0x34`-byte DDS2 copies.
+The retained globals are pointers in both games, and the DDS1 count
+provider indexes the same typed `value[]` rather than a parallel raw
+offset view. The shared-header cutover does not match the still-assembly
+selection controller or close the separate legacy scene-context API.
+
+
+## Field vector fetches retain their real node contract
+
+`effObjFetchInnerFirstVec` takes an `EffWorldNode *` and leaves the
+position in `vf10`; it has no C return value. The field controller
+converts its retained address word once at that provider boundary.
+The vertical-step callback at `001321F8` returns zero on both exits,
+so its local forward declaration is `s32(void)`, not `void(void)`.
+It remains assembly: no redundant Z self-copy or one-off coordinate
+inline is introduced to imitate its still-unmatched join stores.
+
+
+## Hit-result overrides retain both real actor arguments
+
+DDS1 `0020ED90` installs `btlClassifyLinkedSkillRequest` at
+`BtlState +0x59C`. The hit classifier at `001A7548` explicitly supplies
+source, target and command index and returns a nonzero override result;
+the provider legitimately ignores the source but retains its real
+`BtlUnit *` formal. Its target is a pointer, not an address-word API.
+The shared primary member uses the already established DDS2
+`hitResultOverride` name (DDS2 `+0x5D0`); neighboring offsets and both
+extents are unchanged. Restoring this hook and the existing provider
+types does not certify either still-assembly hit classifier.
+
+
+## Viewer mode providers retain the real runtime pointer
+
+`0022FB30` / `0024A738` consume `EvtRuntime *` directly; their mode
+dispatchers already have that same allocation. Pointer formals replace
+the address-word inputs and the local cast aliases, with no change to
+the playback or movie-track work. Every real caller supplies the pointer.
+
+Keep deliberate extra-argument calls through the existing unprototyped
+declarations: for example DDS2 `evtViewerFrameChangeUpdate` also supplies
+its step and input-table address. Likewise `0024C650` sets `a0=viewer`,
+`a1=value` and `a2=curFrame` for `mnuFxWorldScrollDelta`; do not invent its
+three additional incoming scratch values. The timeline provider's
+pre-existing six-formal contract is separate debt, not changed here.
+

@@ -254,7 +254,8 @@ typedef struct BtlState {
     struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
     u8 pad590[4];
     void (*bossCleanup)(void); /* 0x594 */
-    u8 pad598[8];
+    u8 pad598[4];
+    s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x59C: source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
     u8 pad5A4[8];
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
@@ -325,6 +326,7 @@ typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotO
 typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
 typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
 typedef char BtlTimingRateOffset[((unsigned int)&((BtlState *)0)->timingRate == 0x490) ? 1 : -1];
+typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResultOverride == 0x59C) ? 1 : -1];
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
 typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
 typedef char BtlPostTargetHookOffset[((unsigned int)&((BtlState *)0)->postTargetHook == 0x64C) ? 1 : -1];
