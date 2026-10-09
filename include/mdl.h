@@ -167,6 +167,8 @@ u16 mdlGetContextResourceGroup(MdlCtx *ctx);
 u16 mdlGetContextResourceId(MdlCtx *ctx);
 u32 mdlGetBroadcastValue(MdlCtx *ctx);
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
+void mdlSetResourceFrame(MdlCtx *ctx, MdlResourceItem *item, s32 frame);
+void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *item, f32 amount);
 void mdlBroadcastMasked(MdlCtx *ctx, u32 value);
 
 /* Motion-record selection and lookup. */

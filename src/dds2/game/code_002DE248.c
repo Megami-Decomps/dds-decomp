@@ -8986,8 +8986,6 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
 }
 
 
-extern void mdlSetResourceAmount(MdlCtx *, MdlResourceItem *, f32);
-
 typedef struct EffectBlob {
     u32 unk00;
     f32 scale;

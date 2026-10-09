@@ -1002,8 +1002,6 @@ void mdlBroadcastValue(MdlCtx *ctx, u32 value) {
     mdlSetAllResourceFrames(ctx, value);
 }
 
-extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
-
 /* Forward the floating amount to each resource without changing color. */
 void mdlSetAmountOnAllContextResources(MdlCtx *ctx, f32 amount) {
     MdlResourceItem *resourceNode;
