@@ -111,7 +111,6 @@ segments:
       - [0x20208, c, game/code_0011F208]
       - [0x25040, c, game/code_00124040]
       - [0x29750, c, field/fldFileResolver]  # Nocturne __FILE__
-      - [0x29FE8, c, game/code_00128FE8]
       - [0x370B8, c, game/code_001360B8]
       - [0x37EF8, c, game/code_00136EF8]
       - [0x451C8, c, field/fldPanel]  # Nocturne __FILE__
@@ -335,7 +334,6 @@ segments:
       - [0x313B30, .rodata, game/code_0011F208]
       - [0x313CF0, .rodata, game/code_00124040]
       - [0x313FF0, .rodata, field/fldFileResolver]
-      - [0x314050, .rodata, game/code_00128FE8]
       - [0x3143A0, .rodata, game/code_00136EF8]
       - [0x3146B0, .rodata, field/fldPanel]
       - [0x3146C0, .rodata, game/code_001442D0]
@@ -455,7 +453,7 @@ segments:
       - [0x333EE4, .lit4, game/code_00116440]
       - [0x333EEC, .lit4, game/code_0011F208]
       - [0x333F3C, .lit4, game/code_00124040]
-      - [0x333F7C, .lit4, game/code_00128FE8]
+      - [0x333F7C, .lit4, field/fldFileResolver]
       - [0x334010, .lit4, game/code_00136EF8]
       - [0x334068, .lit4, game/code_001442D0]
       - [0x334180, .lit4, game/code_00154558]
@@ -559,7 +557,7 @@ segments:
       - [0x336EA8, .sdata, game/code_0011EC90]
       - [0x336EB0, .sdata, misc/l2d]
       - [0x336EB8, .sdata, game/code_0011F208]
-      - [0x336FA0, .sdata, game/code_00128FE8]
+      - [0x336FA0, .sdata, field/fldFileResolver]
       - [0x337168, .sdata, game/code_001360B8]
       - [0x337174, .sdata, game/code_00136EF8]
       - [0x337204, .sdata, field/fldPanel]
