@@ -590,9 +590,9 @@ SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag) {
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
     dmaHeader |= packedAddress;
-    referenceNode->unk0 = dmaHeader;
-    referenceNode->unk10 = 0;
-    referenceNode->unk8 = sourceTag->vifCommands;
+    referenceNode->dmaTag = dmaHeader;
+    referenceNode->nextTag = 0;
+    referenceNode->vifCommands = sourceTag->vifCommands;
     return referenceNode;
 }
 
@@ -922,16 +922,16 @@ void func_002D4CC8(s32 source, u32 packet, s32 variant) {
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
 void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
-    node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->unk0 = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
-    node->unk10 = 0;
+    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    node->dmaTag = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
+    node->nextTag = 0;
     sdfAppendReferencePacket(list, (u32)node);
 }
 
