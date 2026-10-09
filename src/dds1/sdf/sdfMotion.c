@@ -872,12 +872,12 @@ void sdfCopyMotionTargetValue(SdfMotionIndexedValueBinding *a0) {
     a0->capturedWord = a0->target->secondaryColor;
 }
 
-void *sdfMotionCreateDirectTextKeyBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionIndexedTextBinding *sdfMotionCreateDirectTextKeyBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(r, a0, D_00398330, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_00398330, options);
+    return binding;
 }
 
 void sdfMotionApplySelectedTextKey(SdfMotionIndexedTextBinding *a0, f32 t) {
