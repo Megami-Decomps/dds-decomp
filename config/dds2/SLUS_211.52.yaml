@@ -106,7 +106,6 @@ segments:
       - [0x18170, c, basic/dds3PathBasic]  # Nocturne __FILE__
       - [0x186A0, c, game/code_001176A0]
       - [0x1A7A8, c, newdata/datCalc]  # Nocturne __FILE__
-      - [0x1B118, c, game/code_0011A118]
       - [0x1FC60, c, game/code_0011EC60]  # mirrors dds1 game/code_0011CE88 (tools/shared_funcs.py)
       - [0x1FC90, c, game/code_0011EC90]
       - [0x200F8, c, misc/l2d]  # Nocturne __FILE__
@@ -555,7 +554,6 @@ segments:
       - [0x336DA0, .sdata, game/code_00113308]
       - [0x336DB0, .sdata, game/code_001176A0]
       - [0x336DD8, .sdata, newdata/datCalc]
-      - [0x336E04, .sdata, game/code_0011A118]
       - [0x336EA8, .sdata, game/code_0011EC90]
       - [0x336EB0, .sdata, misc/l2d]
       - [0x336EB8, .sdata, game/code_0011F208]
