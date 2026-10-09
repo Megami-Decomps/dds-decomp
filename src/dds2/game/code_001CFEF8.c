@@ -7,6 +7,7 @@
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
+#include "sdf.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -53,7 +54,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001C7DB8(s32, s32);
+extern void func_001C7DB8(s8, s32);
 
 extern void func_00230960(s32);
 
@@ -819,7 +820,245 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D18D8);
+extern void func_001AED98(void);
+extern void btlSetTaskPhase5(void);
+extern s32 func_001B7830(void);
+extern s32 btlDestroyTaskC(void);
+extern s32 btlDestroyTaskD(void);
+extern s32 btlChooseAvailableUnit(void);
+extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
+extern BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
+extern s32 btlGetSlotRateKind(u8 *, s32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
+extern void btlAdvanceTitleState(void);
+extern BtlRuntimeTask *sndCreateCustomTask(s32, s32);
+extern void btlSyncPlayerWork(BtlUnit *);
+extern s32 func_001B39E8(u32);
+extern s32 btlCountAvailableParticipants(void);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+extern void brsTaskStart(void);
+
+/* Prepare the outcome tasks, then settle battle money and participant EP. */
+void func_001D18D8(BtlState *scene) {
+    BtlRuntimeTask *task;
+    ActionStateLink *actor;
+    BtlUnit *unit;
+    f32 moneyRatio;
+    f32 epRatio;
+    s32 averageLevel;
+    s32 defeatedLevel;
+    s32 threshold;
+    s32 levelLimit;
+    u32 band;
+    u32 turn;
+    u32 participants;
+    u32 i;
+
+    func_001AED98();
+    if (scene->eventReady != 5) {
+        func_001C7DB8(0, 8);
+        btlSetTaskPhase5();
+        func_001B7830();
+        btlDestroyTaskC();
+        btlDestroyTaskD();
+    }
+    if (scene->eventReady == 1) {
+        if (datBattleSceneRecords[scene->battleMode].flags & 0x4000) {
+            scene->eventReady = 6;
+        }
+    }
+    scene->sceneState = 30;
+    scene->endFlags &= ~7;
+    scene->endDelay = 0;
+    switch (scene->eventReady) {
+    case 1: {
+        BtlRuntimeTask *sound;
+        if (scene->scriptState != 0xF000003) {
+            ActionStateLink *current = scene->currentTask;
+            if (current != NULL && (current->pendingFlags & 8)) {
+                if (current->unit->status.flags & 0x200) {
+                    actor = current;
+                    if (current->unit->status.flags & 0xE0) {
+                        actor = (ActionStateLink *)btlChooseAvailableUnit();
+                    }
+                    unit = actor->unit;
+                    sound = btlCreateHookedUnitSoundTask(unit, 0xF);
+                    sound->startDelay = 25;
+                    btlStartTask(sound);
+                    task = sndCreateClearBattleFlagTask();
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                    task->startCondition.value.handle = sound->handle;
+                    btlStartTask(task);
+                    task = btlCreateCommandSoundUpdateTask();
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                    task->startCondition.value.handle = sound->handle;
+                    btlStartTask(task);
+                    task = btlCreateSecondaryCommandSoundTask();
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                    task->startCondition.value.handle = sound->handle;
+                    btlStartTask(task);
+                    task = btlCreateCommandSoundTask((s32)actor, 0xC);
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                    task->startCondition.value.handle = sound->handle;
+                    btlStartTask(task);
+                    task = btlAllocateIndexedUnitEffectTask(unit, 0xF, btlGetSlotRateKind((u8 *)unit, 0xF), 1.0f);
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+                    task->startCondition.value.handle = sound->handle;
+                    btlStartTask(task);
+                    scene->sceneState = 120;
+                }
+            }
+        }
+        break;
+    }
+    case 2:
+    case 3:
+    case 7: {
+        BtlRuntimeTask *clear;
+        btlAdvanceTitleState();
+        clear = sndCreateClearBattleFlagTask();
+        clear->startDelay = 24;
+        btlStartTask(clear);
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+        task->startCondition.value.handle = clear->handle;
+        btlStartTask(task);
+        task = btlCreateSecondaryCommandSoundTask();
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+        task->startCondition.value.handle = clear->handle;
+        btlStartTask(task);
+        if (scene->eventReady == 2) {
+            task = btlCreateCommandSoundTask(0, 0xD);
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+            task->startCondition.value.handle = clear->handle;
+            btlStartTask(task);
+            scene->sceneState = 280;
+        } else {
+            task = btlCreateCommandSoundTask(0, 3);
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+            task->startCondition.value.handle = clear->handle;
+            btlStartTask(task);
+            scene->sceneState = 90;
+        }
+        task = sndCreateCustomTask(-1, 24);
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+        task->startCondition.value.handle = clear->handle;
+        task->startDelay = scene->sceneState - 48;
+        btlStartTask(task);
+        break;
+    }
+    case 4:
+        btlAdvanceTitleState();
+        task = sndCreateCustomTask(-1, 20);
+        task->startDelay = 30;
+        btlStartTask(task);
+        scene->sceneState = 50;
+        break;
+    case 6:
+        if (scene->scriptState != 0xF000003) {
+            btlStartTask(sndCreateClearBattleFlagTask());
+            btlStartTask(btlCreateCommandSoundUpdateTask());
+            btlStartTask(btlCreateSecondaryCommandSoundTask());
+            btlStartTask(btlCreateCommandSoundTask(0, 3));
+            task = sndCreateCustomTask(0, 30);
+            if (scene->commandRestrictFlags & 0x80000) {
+                task->startDelay = 12;
+                scene->sceneState = 42;
+            } else {
+                task->startDelay = 80;
+                scene->sceneState = 110;
+            }
+            btlStartTask(task);
+        }
+        break;
+    }
+    if (scene->eventReady != 5) {
+        for (unit = scene->units; unit != NULL; unit = unit->nextActor) {
+            u32 flags = unit->status.flags;
+            if (!(flags & 1)) {
+                continue;
+            }
+            if (!(flags & 0x200)) {
+                continue;
+            }
+            btlSyncPlayerWork(unit);
+        }
+    }
+
+    moneyRatio = 1.0f;
+    averageLevel = func_001B39E8(4);
+    defeatedLevel = averageLevel;
+    if (scene->unk290 != 0) {
+        defeatedLevel = (u16)(scene->unk292 / scene->unk290);
+    }
+    band = 0;
+    for (levelLimit = 10; levelLimit < 100 && averageLevel >= levelLimit; levelLimit += 10) {
+        band++;
+    }
+    threshold = datBattleParameters->moneyRewardBands[band].levelThreshold;
+    if (averageLevel - defeatedLevel > threshold) {
+        moneyRatio *= datBattleParameters->moneyRewardBands[band].moneyScale;
+        btlBossDebugPrintf("btl:money[level=%.3f(%d,%d-%d>%d)]\n", moneyRatio, band, averageLevel, defeatedLevel, threshold);
+    }
+    if (!(scene->commandRestrictFlags & 0x1000)) {
+        f32 turnRatio;
+        turn = scene->turnCount;
+        if (turn >= 16) {
+            turn = 15;
+        }
+        turnRatio = datBattleParameters->moneyTurnScales[turn];
+        moneyRatio *= turnRatio;
+        btlBossDebugPrintf("btl:money[turn=%.3f(%d)]\n", turnRatio, turn);
+    }
+    btlBossDebugPrintf("btl:money ratio = %.3f\n", moneyRatio);
+    scene->moneyEarned = (s32)((f32)(u32)scene->moneyEarned * moneyRatio);
+    participants = btlCountAvailableParticipants();
+    if (participants != 0) {
+        btlBossDebugPrintf("btl:ep=%d[number=%d]\n", scene->epEarned, participants);
+        scene->epEarned = (s32)((f32)(u32)scene->epEarned / participants);
+    }
+    for (i = 0; i < 5; i++) {
+        if ((u16)(datGameState->party[i].flags & 1) && (datGameState->party[i].flags & 2)) {
+            epRatio = 1.0f;
+            if ((datGameState->party[i].status & 0x7FFF) != 0x4000 && datGameState->party[i].hp != 0) {
+                moneyRatio = 1.0f;
+                if (btlCheckSpecialAbility(&datGameState->party[i], 0x242) != 0) {
+                    moneyRatio = datAbilityParameters[0x242 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                } else if (btlCheckSpecialAbility(&datGameState->party[i], 0x241) != 0) {
+                    moneyRatio = datAbilityParameters[0x241 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                }
+                if (epRatio < moneyRatio) {
+                    epRatio = moneyRatio;
+                }
+            }
+            if (epRatio != 1.0f) {
+                datGameState->party[i].huntExp = (s32)((f32)(u32)datGameState->party[i].huntExp * epRatio);
+                datGameState->party[i].huntExp = (u32)((f32)(u32)datGameState->party[i].huntExp + (f32)(u32)scene->epEarned * (epRatio - 1.0f));
+                btlBossDebugPrintf("btl:auto ep=%d[ratio=%.2f][%X]\n", datGameState->party[i].huntExp, epRatio, datGameState->party[i].unitId);
+            }
+        }
+    }
+    epRatio = 1.0f;
+    for (i = 0; i < 5; i++) {
+        if ((u16)(datGameState->party[i].flags & 1) && (datGameState->party[i].flags & 2)) {
+            if (btlDoesEnabledStatusMatchCurrentId(&datGameState->party[i], 0xDD) != 0) {
+                epRatio = 1.25f;
+            }
+        }
+    }
+    scene->moneyEarned = (s32)((f32)(u32)scene->moneyEarned * epRatio);
+    btlBossDebugPrintf("btl:auto money=%d[ratio=%.2f]\n", scene->moneyEarned, epRatio);
+    scene->unk2F8 += scene->epEarned;
+    btlBossDebugPrintf("btl:epTotal = %d\n", scene->unk2F8);
+    scene->epEarned = 0;
+    scene->moneyTotal += scene->moneyEarned;
+    btlBossDebugPrintf("btl:moneyTotal = %d\n", scene->moneyTotal);
+    scene->moneyEarned = 0;
+    if (scene->eventReady == 1) {
+        brsTaskStart();
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D22D8);
 
