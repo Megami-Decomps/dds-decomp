@@ -2674,7 +2674,50 @@ void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A95C8);
+extern void func_0011CE38();
+const char D_003A1CA8[] = "btl:preemptive=%d%%[ratio=%.2f]\n";
+
+s32 func_001A95C8(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    s32 chance;
+    f32 ratio;
+    u32 i;
+
+    if (state->battleFlags & 0x4000) {
+        if (state->requestMode == 2 || state->requestMode == 4) {
+            if (datBattleSceneRecords[state->battleMode].flags & 2) {
+                return 2;
+            }
+        }
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 4) {
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 2) {
+        return 2;
+    }
+    ratio = 1.0f;
+    chance = evtRunContext(0x16, 0, 0, 0, 0);
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (datGameState->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&datGameState->party[i], 0x22E)) {
+                    ratio *= datAbilityParameters[0x22E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                }
+            }
+        }
+    }
+    chance = (s32)((f32)chance * ratio);
+    if (chance < 60) {
+        chance = 60;
+    } else if (chance > 80) {
+        chance = 80;
+    }
+    btlBossDebugPrintf(D_003A1CA8, chance, ratio);
+    func_0011CE38(chance);
+    return btlRollAiBucket() < chance ? 1 : 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9780);
 
