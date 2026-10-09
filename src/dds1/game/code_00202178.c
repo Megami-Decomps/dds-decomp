@@ -880,7 +880,7 @@ extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
-void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
+void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, f32 sideScale, f32 backLift, f32 frontLift, s8 mirror, s8 swapRoles) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
