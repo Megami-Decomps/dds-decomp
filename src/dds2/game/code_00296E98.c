@@ -50,8 +50,6 @@ extern s8 brsTaskState;
 extern void sndEnsureMidiBankResident(s32);
 
 
-extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
-
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuRequestEffectResources(MenuEffectResources *);
@@ -762,7 +760,7 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
-    mnuAppendCampSpriteRequests((s32)work->resourceList, &work->staffSlots);
+    mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
     effRequestResourceByMode(D_00428358, D_00428368, 0,
                              (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
@@ -772,7 +770,6 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 movAreTitleEffectsReady(s32, StaffSlots *);
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -784,7 +781,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady((s32)ctx->resourceList, &ctx->staffSlots) == 0) {
+    if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002C6CE8() == 1) {
