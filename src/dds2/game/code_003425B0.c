@@ -1290,7 +1290,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
 
     node = sdfStreamNodeListHead;
     while (node != 0) {
-        if (node->completedBufferCount + node->unk13 < 2 &&
+        if (node->completedBufferCount + node->pendingPlaybackSubmissions < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
             sdfStartStreamNodeIpuTransfer(node);
@@ -1404,7 +1404,7 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     if (pendingBuffers > 0) {
         node->completedBufferCount = remainingBuffers;
         node->transferPacketIndex ^= 1;
-        node->unk13++;
+        node->pendingPlaybackSubmissions++;
     }
     node->playbackFrameIndex++;
     if (node->playbackFrameIndex == node->cycleLength && node->loopMode != 0) {
@@ -1446,8 +1446,8 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     }
     node = sdfSoundNodeHead;
     while (node != NULL) {
-        if (node->unk13 != 0) {
-            node->unk13--;
+        if (node->pendingPlaybackSubmissions != 0) {
+            node->pendingPlaybackSubmissions--;
         }
         elapsed = node->playbackCadenceRemainder;
         /* The playback provider views the same 0x8C stream allocation. */

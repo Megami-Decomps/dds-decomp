@@ -174,7 +174,7 @@ typedef struct SdfStreamFrameNode {
     u8 playbackPhase;
     u8 unk11;
     u8 inputDmaStartPending;
-    u8 unk13;
+    u8 pendingPlaybackSubmissions; /* Queued output submissions not yet retired by a playback update. */
     u8 audioMode;
     u8 loopMode;
     u8 playbackCadenceStep;
@@ -217,6 +217,8 @@ typedef char SdfStreamFrameNode_playbackPhase_offset_must_be_0x10[
     ((u32)&((SdfStreamFrameNode *)0)->playbackPhase == 0x10) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputDmaStartPending_offset_must_be_0x12[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaStartPending == 0x12) ? 1 : -1];
+typedef char SdfStreamFrameNode_pendingPlaybackSubmissions_offset_must_be_0x13[
+    ((u32)&((SdfStreamFrameNode *)0)->pendingPlaybackSubmissions == 0x13) ? 1 : -1];
 typedef char SdfStreamFrameNode_completedBufferCount_offset_must_be_0x1A[
     ((u32)&((SdfStreamFrameNode *)0)->completedBufferCount == 0x1A) ? 1 : -1];
 typedef char SdfStreamFrameNode_playbackCadenceRemainder_offset_must_be_0x17[
