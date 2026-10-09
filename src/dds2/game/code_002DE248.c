@@ -8002,10 +8002,10 @@ void effCreateActiveResourceFromFile(FileJobPayload *source) {
                   source->primary.selector, secondary, source->secondary.size);
 }
 
-void effDestroyResourceInstance(u32 *obj) {
+void effDestroyResourceInstance(EffActiveResource *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource != NULL) {
-            effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource(obj[0x30 / 4]);
+        if (effRuntimeResourceOperations[obj->kind.index].destroyResource != NULL) {
+            effRuntimeResourceOperations[obj->kind.index].destroyResource(obj->resource);
         }
     }
     sdfReleaseChipBlock(obj);

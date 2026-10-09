@@ -7140,11 +7140,11 @@ u32 effCreateActiveResourceFromFile(u8 *work) {
     return effCreateResourceInstance(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
-void effDestroyResourceInstance(u8 *work) {
+void effDestroyResourceInstance(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].destroyResource;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].destroyResource;
         if (callback != NULL) {
-            callback((void *)((EffActiveResource *)work)->resource);
+            callback((void *)work->resource);
         }
     }
     sdfReleaseChipBlock(work);
