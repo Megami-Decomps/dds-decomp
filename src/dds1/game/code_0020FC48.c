@@ -26,51 +26,64 @@
 #include "file_request_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
+
 #define BTL_LIST_FLAG_MASK 0x7FFF
+
 #define BTL_LIST_MARKED_FLAG 0x4000
+
 #define BTL_ENTRY_CODE_COUNT 5
+
 #define BTL_EXPIRED_POSITIVE_ENTRY_RULE 0x800
+
 #define BTL_EXPIRED_NEGATIVE_ENTRY_RULE 0x1000
+
 #define BTL_COUNTER_ELIGIBILITY_UNSET (-1)
+
 #define BTL_COUNTER_ELIGIBILITY_MET 3
+
 #define BTL_COUNTER_ELIGIBILITY_NOT_MET 0
+
 #define BTL_BLOCK_EMPTY_OR_ALL_FLAGGED 9
 
 #define MNU_LIST_INPUT_FLAG 2
+
 #define MNU_LIST_ROW_HEIGHT 0x18
+
 #define MNU_LIST_FRAME_INSET 4
+
 #define MNU_LIST_FIXED_ROW_HEIGHT 0xC0
+
 #define MNU_LIST_LABEL_OFFSET 0x2C
+
 #define MNU_LIST_SELECTED_COLOR 0x89FEFF80
+
 #define MNU_LIST_NORMAL_COLOR 0xA09DC380
+
 #define MNU_LIST_TEXT_DEPTH 0xFF0000
+
 #define MNU_LIST_SELECTED_TEXT_FLAG 4
 
-#define BTL_GROUP_COUNT 8
-#define BTL_GROUP_RESOURCE_SLOT_COUNT 8
-#define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
 #define BTL_EVENT_TASK_NONE (-1)
+
 #define BTL_EVENT_ACTION_NONE (-1)
+
 #define BTL_EVENT_SCENE_MODE_LIMIT 0x400
+
 #define BTL_EVENT_SOUND_RESOURCE_COUNT 15
+
 #define BTL_EVENT_SOUND_KEY_FIRST 0x32
+
 #define BTL_EVENT_SOUND_SLOT_FIRST 0xB
+
 #define BTL_EVENT_DATA_LIFETIME_FLAG 2
+
 #define BTL_EVENT_SEQUENCE_BASE 0x1E60000
+
 #define BTL_EVENT_SEQUENCE_ID_BIAS 0x384
+
 #define BTL_EVENT_SEQUENCE_VOLUME 0x7F
+
 #define BTL_EVENT_SEQUENCE_PAN 0x3F
-
-/* Each group also has an independent, singly-linked list of IDs. */
-typedef struct BattleGroupIdEntry {
-    struct BattleGroupIdEntry *next;
-    s32 id;
-} BattleGroupIdEntry;
-
-
-extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
-void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 
 extern s8 D_003BBB0D; /* func_00215FF8 tests it with lb */
 
@@ -83,8 +96,6 @@ extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 extern u32 func_001A3360(void *, BtlIndexList *, s32);
-
-
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -117,21 +128,11 @@ typedef struct BattleRuntimeState {
 
 extern BattleRuntimeState btlRuntimeState;
 
-extern s32 sdfCreateSemaphore(s32, s32, s32);
-
-extern u32 mdlGroupJobSemaphore;
-
-extern BattleGroupNode *btlGroupNodeHeads[];
-
-extern BattleGroupIdEntry *btlGroupIdHeads[];
-
 extern s32 func_003014F0(char *, const char *, ...);
 
 extern s32 btlGetRuntime(void);
 
-
 extern s32 btlMatchActorEntryCode(void *, s32);
-
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
@@ -139,33 +140,40 @@ extern s32 btlLowestSetPairIndex(u32);
 
 extern u64 btlStartTask(void *);
 
-
 extern void kwlnTextureClearReferenceFlag(void);
 
 extern void kwlnTextureReleaseHeldReference(void);
 
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
-extern char D_003A66C0[];
-
-extern char D_003A66D8[];
-
-extern char D_003A66F0[];
-
 extern s32 abs(s32);
+
 struct SoundTask;
+
 extern struct SoundTask *sndCreateReleaseTask(u32 *sound);
+
 extern struct BtlRuntimeTask *func_001F0920(u32 value);
+
 extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
+
 extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
+
 extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
+
 extern void btlRefreshUnitEffects(void);
+
 extern void btlClearRuntimeFlag2000(void);
+
 extern void btlResetActiveUnitList(void);
+
 extern void btlUpdateUnitActors(void);
+
 extern void mdlSetListedObjectFlag(void);
+
 extern void effResetSlots(void);
+
 extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
+
 extern void func_00160D88(BattleEffect *effect);
 
 void func_0020FC48(void) {
@@ -268,9 +276,13 @@ void func_0020FC48(void) {
 }
 
 extern char D_003A6738[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
+
 extern char D_003A6758[]; /* "btl:event[%s]\n" */
+
 extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
+
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
+
 extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
 /* Reset event state and request the scene's script/task resources.
@@ -361,10 +373,10 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_003A67D0);
 }
 
-
 extern void btlCreateIndexedSoundResourceNode(s32, void *);
 
 extern char D_003A67E8[];
+
 extern char D_003A6810[];
 
 /* Populate sound slots 11..25 from event keys 50..64; skip missing bindings. */
@@ -559,7 +571,6 @@ typedef struct BattleTaskData {
 } BattleTaskData;
 
 extern BattleTask *btlAllocTask(s32);
-
 
 extern s32 func_00210670(void *);
 
@@ -980,7 +991,6 @@ u16 func_002111A0(s32 commandId, u32 memberMask) {
     return btlDetermineCommandCounterEligibility(entryList, count, 0, commandId);
 }
 
-
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
 typedef struct BattleModelEntry {
     s32 kind;
@@ -993,7 +1003,6 @@ typedef struct BattleModelEntry {
     struct BattleModelEntry *prev;
     struct BattleModelEntry *next;
 } BattleModelEntry;
-
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
@@ -1018,8 +1027,6 @@ BattleModelEntry *btlCreateModelEntry(void) {
 extern char D_003A68F8[];
 
 extern void func_00288788(void *);
-
-
 
 /* Only the final reference releases resources and unlinks the cache entry. */
 void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {
@@ -1067,7 +1074,6 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
 }
 
 extern s32 mdlRequestAsset(s32, s32, s32);
-
 
 /* Nonzero cache state bypasses requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
@@ -1221,6 +1227,7 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 }
 
 extern SdfTex *kwlnHeldTextureReference;
+
 void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
@@ -1255,7 +1262,9 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
 }
 
 extern u8 kwlnFrameDrawPacketRecords[];
+
 extern s32 sdfAllocPacketAligned(s32);
+
 extern s32 kwlnGetDrawBufferIndex(void);
 
 void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
@@ -1303,9 +1312,13 @@ void btlBuildOverlayQuadPacket(SdfListHead *list, s32 primitive, s32 color, s32 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
 extern u32 effGetWindTextureHandle(void);
+
 extern void func_002D4C80(const void *, void *, s32);
+
 extern void func_002D4CC8(const void *, void *, s32);
+
 extern u32 btlMulColor(u32, u32);
+
 extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
 
 /* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
@@ -1362,7 +1375,6 @@ extern f32 func_002F9F60(f32);
 
 extern f32 func_002FA060(f32);
 
-
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
     s32 x;
@@ -1389,6 +1401,7 @@ void btlReleaseOwnedData(void) {
 }
 
 extern f32 D_00360F30[];
+
 void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
@@ -1452,7 +1465,6 @@ void btlInitFadeColors(void) {
 
 extern SdfPoolNode D_00325708;
 
-
 extern void func_00212998(u32, u32, u32, u32, u32, s32);
 
 s32 btlUpdateFadeIn(void) {
@@ -1512,11 +1524,7 @@ void btlReleaseRuntimeResource(void) {
     kwlnTextureReleaseHeldReference();
 }
 
-
-
 extern s32 sdfAllocPacketAligned(s32);
-
-
 
 extern u8 D_00325860[];
 
@@ -1557,13 +1565,21 @@ void btlInitializeOverlayGraphics(void) {
 }
 
 extern void func_00132010(void);
+
 extern void kwlnFadeBackgroundStartOut(s32);
+
 extern u32 kwlnDrawControlFlags;
+
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
+
 extern s32 func_00213370(void);
+
 void btlResetRuntimeState(void);
+
 extern char D_003A69C0[];
+
 extern char D_003A69D8[];
+
 extern char D_003A69F0[];
 
 s32 func_00213808(void) {
@@ -1714,15 +1730,25 @@ void btlMarkRuntimeUpdatePending(void) {
 }
 
 extern s32 *D_003BAA08;
+
 extern s32 *D_003BAA0C;
+
 extern s32 *D_003BAA2C;
+
 extern char D_003BBA98[];
+
 extern char D_003BBAA0[];
+
 extern s32 func_001A2F50(BtlUnit *, s32);
+
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+
 extern void evtSetDrawSurfaceIndex(s32);
+
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
+
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
 
 typedef struct BtlAffinityRow {
@@ -1908,6 +1934,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
 }
 
 extern void frFontDrawGlyphChain(void *, s32, s32);
+
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = func_00197748(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
@@ -1950,7 +1977,6 @@ s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *sele
     func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
 }
-
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
@@ -2029,27 +2055,49 @@ void btlInitDrawTables(void) {
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00214868);
 
 extern BtlUnit *D_003BB940;
+
 extern BtlActorStatusRecord D_003D77C0;
+
 extern const char *D_00361388[12];
+
 extern char D_003BBAB8[];
+
 extern char D_003BBAC0[];
+
 extern char D_003BBAC8[];
+
 extern char D_003BBAD0[];
+
 extern char D_003BBAD8[];
+
 extern char D_003BBAE0[];
+
 extern char D_003BBAE8[];
+
 extern char D_003BBAF0[];
+
 extern char D_003BBAF8[];
+
 extern char D_003BBB00[];
+
 extern char D_003BBB08[];
+
 extern u8 sdfPfsDebugMode;
+
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+
 extern void *sdfAllocateBlockBySizeThreshold(s32);
+
 extern void sdfFreeMemoryFromEitherHeap(void *);
+
 extern char *sdfDevGetPathBuffer(void);
+
 extern s32 func_0030E8F0(const char *, s32, ...);
+
 extern s32 func_0030F190(s32, const void *, s32);
+
 extern s32 func_0030EB78(s32);
+
 extern s32 func_00310A68(const char *, s32);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
@@ -2127,7 +2175,6 @@ void func_00215A50(void) {
     sdfFreeMemoryFromEitherHeap(buffer);
 }
 
-
 void func_00215FE0(void) {
     D_003BBB0D = 0;
     dds3WorkClear();
@@ -2190,12 +2237,19 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00215FF8);
 
 extern u8 D_003BBB0E;
+
 extern u8 D_003BBB10;
+
 extern u8 D_003BBB58;
+
 extern DatPartyRecord D_00361DA0[5];
+
 extern s32 D_003625D8[5][24];
+
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
+
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
+
 extern void mdlFlagSet(u32);
 
 void btlApplyPartySetupOverride(void) {
@@ -2255,198 +2309,6 @@ void btlApplyPartySetupOverride(void) {
         datGameState->world.slotFlags |= 0xC;
         D_003BBB58 = 0;
     }
-}
-
-/* Create the model-job semaphore and clear both lists for all eight groups. */
-void btlInitializeCommandSemaphoreSlots(void) {
-    s32 i;
-
-    mdlGroupJobSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
-    for (i = 0; i != 8; i++) {
-        btlGroupNodeHeads[i] = 0;
-        btlGroupIdHeads[i] = 0;
-    }
-}
-
-/* Return the first node of this type in group, or NULL. */
-BattleGroupNode *btlFindGroupedEntity(s32 group, s32 type) {
-    BattleGroupNode *entry = btlGroupNodeHeads[group];
-    while (entry != 0) {
-        if (entry->type == type) {
-            break;
-        }
-        entry = entry->next;
-    }
-    return entry;
-}
-
-/* Return whether this group's separate ID list contains id. */
-s32 btlGroupContainsId(s32 groupIndex, s32 wantedId) {
-    BattleGroupIdEntry *idCursor = btlGroupIdHeads[groupIndex];
-    while (idCursor != 0) {
-        if (idCursor->id == wantedId) {
-            return 1;
-        }
-        idCursor = idCursor->next;
-    }
-    return 0;
-}
-
-
-
-/* Prepend id to this group's ID list; duplicate IDs are allowed. */
-void btlAddGroupId(s32 groupIndex, s32 newId) {
-    BattleGroupIdEntry *idEntry = sdfAllocSizeClassBlock(sizeof(BattleGroupIdEntry));
-    BattleGroupIdEntry **groupHead = &btlGroupIdHeads[groupIndex];
-    idEntry->id = newId;
-    idEntry->next = *groupHead;
-    *groupHead = idEntry;
-}
-
-/* Remove the first matching ID using its incoming link, including the head. */
-void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
-    BattleGroupIdEntry **idLink;
-    BattleGroupIdEntry *idCursor;
-
-    idLink = &btlGroupIdHeads[groupIndex];
-    idCursor = *idLink;
-    if (idCursor == 0) {
-        return;
-    }
-    do {
-        if (idCursor->id == wantedId) {
-            *idLink = idCursor->next;
-            sdfReleaseChipBlock(idCursor);
-            break;
-        } else {
-            idLink = &idCursor->next;
-            idCursor = idCursor->next;
-        }
-    } while (idCursor != 0);
-}
-
-
-/* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, s32 requestHandle) {
-    BattleGroupNode *groupNode;
-    BattleGroupNode *previousHead;
-    s32 slotIndex;
-    btlRemoveCurrentGroupedEntity(groupIndex, entityType);
-    groupNode = sdfAllocSizeClassBlock(sizeof(BattleGroupNode));
-    previousHead = btlGroupNodeHeads[groupIndex];
-    if (previousHead != NULL) {
-        previousHead->prev = groupNode;
-    }
-    btlGroupNodeHeads[groupIndex] = groupNode;
-    groupNode->next = previousHead;
-    groupNode->group = groupIndex;
-    groupNode->type = entityType;
-    groupNode->resourceList = resourceList;
-    groupNode->itemList = itemList;
-    groupNode->requestHandle = requestHandle;
-    groupNode->prev = NULL;
-    groupNode->modelContext = NULL;
-    for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
-        groupNode->slots[slotIndex].flags = 0;
-        groupNode->slots[slotIndex].data = NULL;
-        groupNode->slots[slotIndex].resourceHandle = 0;
-    }
-    groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
-    groupNode->resourceHandle = 0;
-    groupNode->partInfo = NULL;
-    groupNode->partList = NULL;
-    groupNode->unk_AC = 1.0f;
-    groupNode->unk_B0 = 100.0f;
-}
-
-extern void mdlDestroyContext(MdlCtx *);
-
-extern void mdlDestroyPartList(DevRequest *);
-
-
-extern void sdfResourceListRelease(DevRequest *, s32);
-
-/* Capture ownership before clearing it for callbacks; keep the context-release
- * loop and resource-release order intact. NULL is allowed. */
-void btlDestroyGroupNode(BattleGroupNode *groupNode) {
-    BattleGroupNode *previousNode;
-    BattleGroupNode *nextNode;
-    u8 ownsResources;
-    s32 slotIndex;
-    if (groupNode == NULL) {
-        return;
-    }
-    previousNode = groupNode->prev;
-    nextNode = groupNode->next;
-    if (previousNode == NULL) {
-        btlGroupNodeHeads[groupNode->group] = nextNode;
-    } else {
-        previousNode->next = nextNode;
-    }
-    if (nextNode != NULL) {
-        nextNode->prev = previousNode;
-    }
-    ownsResources = groupNode->ownsResources;
-    groupNode->ownsResources = 0;
-    if (groupNode->modelContext != NULL) {
-        do {
-            mdlDestroyContext(groupNode->modelContext);
-        } while (groupNode->modelContext != NULL);
-    }
-    if (ownsResources != 0) {
-        sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
-        for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
-            if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
-            }
-        }
-    }
-    mdlDestroyPartList(groupNode->partList);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->resourceHandle));
-    sdfReleaseChipBlock(groupNode);
-}
-
-/* Forward the group/type pair explicitly, then destroy its node if present. */
-void btlRemoveCurrentGroupedEntity(s32 groupIndex, s32 entityType) {
-    BattleGroupNode *groupNode;
-
-    groupNode = btlFindGroupedEntity(groupIndex, entityType);
-    btlDestroyGroupNode(groupNode);
-}
-
-/* Destroy every group node, saving the next link before each unlink/free. */
-void btlReleaseAllEntities(void) {
-    u32 groupIndex = 0;
-    BattleGroupNode **groupHead = btlGroupNodeHeads;
-    do {
-        BattleGroupNode *groupNode = *groupHead;
-        while (groupNode != 0) {
-            BattleGroupNode *nextNode = groupNode->next;
-            btlDestroyGroupNode(groupNode);
-            groupNode = nextNode;
-        }
-        groupIndex++;
-        groupHead++;
-    } while (groupIndex < BTL_GROUP_COUNT);
-}
-
-
-extern Motion *func_002DB230(SdfModel *, MotionTable *);
-
-/* Create and attach the motion for the selected resource record. */
-Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
-    MotionTable *resource = owner->sub->slots[index].data;
-    s16 slot = owner->sub->slots[index].slot;
-    Motion *object = func_002DB230(owner->inner, resource);
-
-    object->searchId = index;
-    owner->slots[slot] = object;
-    object->slotIndex = slot;
-    if (slot == 0) {
-        owner->first = object;
-    }
-    return object;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72F0);
