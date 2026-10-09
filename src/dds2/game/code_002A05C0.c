@@ -71,7 +71,9 @@ typedef struct MovieMenuState {
     s32 state;
     s32 cursor;
     s32 mode;
-    u8 pad1C[0x14];
+    u8 pad1C[0x10];
+    s8 movieOpened;      /* 0x2C */
+    u8 pad2D[3];
     u32 bar[2];           /* 0x30 */
     u32 barB[2];          /* 0x38 */
     u32 barSmall[3];      /* 0x40 */
@@ -1111,7 +1113,415 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
     return done;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A30C0);
+/* Actual cross-unit contracts used by the title-menu callback. */
+typedef struct MovieMenuPulse {
+    s32 active;
+    s32 phase;
+    s32 alpha;
+} MovieMenuPulse;
+
+typedef struct SlideBarPair {
+    u8 active[2];
+    u8 pad[2];
+    s32 pos[2];
+} SlideBarPair;
+
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern s32 kwlnFadeIsActive(void);
+extern void kwlnFadeClear(void);
+extern s32 mnuIsAnyMenuInputPressed(void);
+extern u8 mnuHasSpriteHandle(void);
+extern void mnuStartMovieMenuSfx16(s32);
+extern void mnuStartMovieMenuSfx17(u32);
+extern void mnuStartMovieMenuSfx18(u32);
+extern u8 func_002A8028(void);
+extern s32 mnuCheckMovieDecoderStatus(void);
+extern void mnuClearGlobalMenuStateFields(void);
+extern s32 mnuPollMovieMenuInputAndTimeout(void);
+extern void mnuUpdateTitlePageByMode(void);
+extern void mnuTitleResetSequenceTimers(void);
+extern void mnuDrawTitleSceneForPhase(void);
+extern u32 func_002A3C78(void);
+extern s32 func_002A5C58(void);
+extern void func_002A5890(void);
+extern void func_002A5F80(void);
+extern void func_00342580(u32);
+extern void sdfSoundSetChannelCount(u32);
+extern void sndStartTrackExtended(s32);
+extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+extern void mnuRestartRuntimeAfterViewer(s32);
+extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
+extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);
+extern void func_002A5040(SlideBarTimed *, SlideBar *, s32);
+extern void func_002A4208(MovieMenuPulse *, s32);
+extern void mnuAdvancePairedSlideBars(SlideBarPair *, s32);
+extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
+extern void mnuAdvanceSlideBar(PickList *, s32);
+extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
+
+s32 func_002A30C0(KwlnTask *task) {
+    s32 volume;
+    s32 menuAction;
+    s32 selectedItem;
+
+    switch (mnuMovieMenuState->state) {
+    case 0:
+        mnuMovieMenuState->cursor = 0;
+        mnuMovieMenuState->state = 2;
+        sndEnsureMidiBankResident(0x310000);
+        break;
+    case 1:
+    case 22:
+    case 27:
+    case 29:
+    case 35:
+        break;
+    case 2:
+        mnuMovieMenuState->cursor = 0;
+        D_00435BB0 = 0;
+        if (mnuMovieMenuState->mode != 0) {
+            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+            mnuMovieMenuState->state = 3;
+            if (mnuMovieMenuState->mode == 3) {
+                if (fileLoadStateChanged() == 0) {
+                    fileCacheSlotFlagsFromState();
+                } else {
+                    fileRestoreSlotFlagsToState();
+                }
+            }
+        } else {
+            kwlnFadeOutStart(0, 0, 0, 0x14);
+            mnuMovieMenuState->state = 5;
+        }
+        mnuMovieMenuState->mode = 0;
+        break;
+    case 3:
+        if (mnuIsTitleMovieDrawActive() == 0) {
+            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        } else if (func_002A8028() != 0) {
+            mnuMovieMenuState->state = 4;
+            mnuMovieMenuState->cursor = 0;
+        }
+        break;
+    case 4:
+        if (mnuHasSpriteHandle() != 0) {
+            mnuMovieMenuState->state = 31;
+            kwlnFadeOutStart(0, 0, 0, 0x14);
+            if (mnuMovieMenuState->mode >= 0) {
+                if (mnuMovieMenuState->mode < 2) {
+                    sndStartTrackExtended(0x310000);
+                }
+            }
+        }
+        break;
+    case 5:
+        kwlnFadeOutStart(0, 0, 0, 0x14);
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuMovieMenuState->state++;
+        break;
+    case 6:
+        mnuStartMovieMenuSfx16(0x80);
+        if (kwlnFadeIsActive() == 0) {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 7:
+        mnuStartMovieMenuSfx16(0x80);
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            mnuMovieMenuState->cursor = 0x4B;
+        }
+        if (mnuMovieMenuState->cursor < 0x4B) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 8:
+        volume = 0x80 - mnuMovieMenuState->cursor * 8;
+        if (volume > 0) {
+            mnuStartMovieMenuSfx16(volume);
+        }
+        if (mnuMovieMenuState->cursor < 0x16) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 9:
+        volume = mnuMovieMenuState->cursor * 6;
+        if (volume >= 0x81) {
+            volume = 0x80;
+        }
+        if (volume > 0) {
+            mnuStartMovieMenuSfx17(volume);
+        }
+        if (mnuMovieMenuState->cursor < 0x14) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 10:
+        mnuStartMovieMenuSfx17(0x80);
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            mnuMovieMenuState->cursor = 0x4B;
+        }
+        if (mnuMovieMenuState->cursor < 0x4B) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 11:
+        volume = 0x80 - mnuMovieMenuState->cursor * 8;
+        if (volume > 0) {
+            mnuStartMovieMenuSfx17(volume);
+        }
+        if (mnuMovieMenuState->cursor < 0x16) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 12:
+        volume = mnuMovieMenuState->cursor * 6;
+        if (volume >= 0x81) {
+            volume = 0x80;
+        }
+        if (volume > 0) {
+            mnuStartMovieMenuSfx18(volume);
+        }
+        if (mnuMovieMenuState->cursor < 0x14) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 13:
+        mnuStartMovieMenuSfx18(0x80);
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            mnuMovieMenuState->cursor = 0x4B;
+        }
+        if (mnuMovieMenuState->cursor < 0x4B) {
+            mnuMovieMenuState->cursor++;
+        } else {
+            kwlnFadeInStart(0, 0, 0, 0x16);
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 14:
+        if (mnuMovieMenuState->cursor < 0x16) {
+            mnuStartMovieMenuSfx18(0x80);
+            mnuMovieMenuState->cursor++;
+        } else {
+            kwlnFadeOutStart(0, 0, 0, 0x1E);
+            mnuMovieMenuState->state = 15;
+            mnuMovieMenuState->cursor = 0;
+        }
+        break;
+    case 15: {
+        MovieMenuState *menu;
+        mnuArmTitleMovieDrawAndResetFrame(0x5C, 0);
+        menu = mnuMovieMenuState;
+        menu->movieOpened = 0;
+        menu->state = 16;
+        break;
+    }
+    case 16:
+        if (func_002A8028() != 0) {
+            mnuMovieMenuState->state = 17;
+        }
+        break;
+    case 17:
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            mnuMovieMenuState->state = 18;
+            mnuMovieMenuState->cursor = 0;
+            kwlnFadeInStart(0, 0, 0, 0x16);
+            sdfSoundSetChannelCount(0x2D);
+            mnuMovieMenuState->movieOpened = 1;
+        }
+        if (mnuCheckMovieDecoderStatus() != 0) {
+            mnuMovieMenuState->state = 18;
+            mnuMovieMenuState->cursor = 0x2D;
+        }
+        break;
+    case 18:
+        if (mnuMovieMenuState->cursor >= 0x2D) {
+            mnuStopTitleMovieDraw();
+            mnuMovieMenuState->state = 19;
+            mnuMovieMenuState->cursor = 0;
+        } else {
+            mnuMovieMenuState->cursor++;
+        }
+        break;
+    case 19:
+        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        if (mnuMovieMenuState->movieOpened != 0) {
+            mnuMovieMenuState->state = 23;
+        } else {
+            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+            func_002A5F80();
+            mnuMovieMenuState->state = 20;
+        }
+        break;
+    case 20:
+        if (func_002A8028() != 0) {
+            mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+            mnuMovieMenuState->state = 21;
+            mnuMovieMenuState->cursor = 0;
+        }
+        break;
+    case 21:
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        if (mnuIsAnyMenuInputPressed() != 0) {
+            mnuMovieMenuState->state = 23;
+            mnuMovieMenuState->cursor = 0;
+            mnuStopTitleMovieDraw();
+        }
+        if (mnuCheckMovieDecoderStatus() != 0) {
+            mnuMovieMenuState->state = 23;
+            mnuMovieMenuState->cursor = 0;
+            mnuStopTitleMovieDraw();
+        }
+        break;
+    case 23:
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuMovieMenuState->state = 24;
+        break;
+    case 24:
+        if (mnuHasSpriteHandle() != 0) {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state++;
+        }
+        break;
+    case 25:
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        mnuMovieMenuState->cursor = 0;
+        mnuMovieMenuState->state++;
+        func_002A5890();
+        break;
+    case 26:
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        menuAction = mnuPollMovieMenuInputAndTimeout();
+        if (menuAction != -1) {
+            if (menuAction != 1) {
+                mnuUpdateTitlePageByMode();
+            } else {
+                mnuSelectMenuListCursorByAdvance(0);
+                mnuUpdateTitlePageByMode();
+                mnuMovieMenuState->state = 31;
+                mnuMovieMenuState->cursor = 0;
+                mnuTitleResetSequenceTimers();
+            }
+        } else {
+            mnuUpdateTitlePageByMode();
+            mnuMovieMenuState->state = 28;
+            mnuMovieMenuState->cursor = 0;
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            func_00342580(0x310000);
+        }
+        break;
+    case 28:
+        if (mnuMovieMenuState->cursor < 0x78) {
+            mnuUpdateTitlePageByMode();
+            mnuMovieMenuState->cursor++;
+        } else {
+            mnuMovieMenuState->cursor = 0;
+            mnuMovieMenuState->state = 5;
+            mnuStopTitleMovieDraw();
+            func_003458E8(0);
+        }
+        break;
+    case 30:
+        if (kwlnFadeIsActive() == 0) {
+            mnuMovieMenuState->state = 31;
+            mnuMovieMenuState->cursor = 0;
+            mnuTitleResetSequenceTimers();
+        }
+        break;
+    case 31:
+        mnuHandleTitleMenuEvent(mnuMovieMenuState->state);
+        menuAction = func_002A5C58();
+        switch (menuAction) {
+        case 1:
+            mnuDrawTitleSceneForPhase();
+            mnuMovieMenuState->state = 32;
+            mnuMovieMenuState->cursor = 0;
+            kwlnFadeInStart(0, 0, 0, 0xF);
+            break;
+        case 2:
+            mnuDrawTitleSceneForPhase();
+            mnuMovieMenuState->state = 33;
+            mnuMovieMenuState->cursor = 0;
+            mnuClearGlobalMenuStateFields();
+            mnuMovieMenuState->state = 26;
+            mnuMovieMenuState->cursor = 0;
+            break;
+        default:
+            mnuDrawTitleSceneForPhase();
+            break;
+        }
+        break;
+    case 32:
+        if (mnuMovieMenuState->cursor < 0xF) {
+            mnuMovieMenuState->cursor++;
+        } else if (mnuHandleTitleMenuEvent(mnuMovieMenuState->state) == 0) {
+            selectedItem = func_002A3C78();
+            switch (selectedItem) {
+            case 1:
+                kwlnFadeOutStart(0, 0, 0, 0x14);
+                mnuMovieMenuState->state = 34;
+                mnuMovieMenuState->cursor = 0;
+                break;
+            case 0:
+                mnuMovieMenuState->mode = 1;
+                dds3AdminSubmitModeRequest(3, 0, 0, 0);
+                mnuMovieMenuState->state = 35;
+                break;
+            case 2:
+                func_00342580(0x310000);
+                mnuMovieMenuState->mode = selectedItem;
+                mnuMovieMenuState->cursor = 0;
+                kwlnFadeOutStart(0, 0, 0, 0xA);
+                dds3AdminSubmitModeRequest(0xD, 0, 0, 0);
+                mnuMovieMenuState->state = 35;
+                break;
+            }
+        }
+        break;
+    case 33:
+        mnuClearGlobalMenuStateFields();
+        mnuMovieMenuState->state = 26;
+        mnuMovieMenuState->cursor = 0;
+        break;
+    case 34:
+        kwlnFadeClear();
+        mnuRestartRuntimeAfterViewer(0);
+        dds3AdminSubmitModeRequest(0x1E, 0, 0, 0);
+        mnuMovieMenuState->state = 35;
+        mnuMovieMenuState->mode = 3;
+        mnuMovieMenuState->cursor = 0;
+        break;
+    }
+
+    mnuAdvanceTimedSlideBar(&mnuMovieMenuState->timedA, 0x52);
+    mnuAdvanceMultiSpriteSlideBar((SlideBar *)&mnuMovieMenuState->timedB, 0x52);
+    func_002A5040(&mnuMovieMenuState->timedA, (SlideBar *)&mnuMovieMenuState->timedB, 0x52);
+    func_002A4208((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
+    mnuAdvancePairedSlideBars((SlideBarPair *)mnuMovieMenuState->movie, 0x52);
+    mnuAdvanceSlideBarValue((SlideBar *)mnuMovieMenuState->barB, 0x52);
+    mnuAdvanceSlideBar(&mnuMovieMenuState->paired, 0x53);
+    mnuDrawAndAdvanceMovieMenuBar((SlideBar *)mnuMovieMenuState->bar, 0x53);
+    return 0;
+}
 
 u32 func_002A3A50(s32 mode) {
     mnuCreateTitleMenuTask(mode);
