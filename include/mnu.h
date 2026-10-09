@@ -685,7 +685,7 @@ typedef struct MenuTerminalWindowState {
     u16 unk0C;
     u16 unk0E;
     u16 unk10;
-    u16 selectedSlot;
+    s16 selectedSlot;
 } MenuTerminalWindowState;
 
 typedef char MenuTerminalWindowState_size_must_be_0x14[(sizeof(MenuTerminalWindowState) == 0x14) ? 1 : -1];

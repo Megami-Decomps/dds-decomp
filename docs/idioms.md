@@ -5497,3 +5497,12 @@ argument is passed in `f12`; declaring that fifth formal as an integer
 loses the native ABI. The routines update the canonical sprite bounds
 and write the signed half-size adjustments to the two outputs.
 
+## Battle entry providers use the canonical unit
+
+DDS2's entry-code getter, setter, expiry query, match query and multiplier
+take `BtlUnit *`, as their DDS1 counterparts already do. The seven signed
+six-byte records are `BtlUnit.entrySlots` at `+0x2E6`, and the multiplier
+reads the same unit's flags at `+0x110`. These providers are not methods of
+the old local `UiObject` view. The provider unit and the existing entry-query
+users in both games remain text- and data-exact after the parameter cutover.
+
