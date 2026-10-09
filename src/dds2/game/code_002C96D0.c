@@ -4555,18 +4555,18 @@ void fileJobSetPrimaryData(job, src, size, option)
 void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 commandId, u16 option) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
+    struct SdfMemBlock *allocation;
+    void *buffer;
 
     command = sdfDevCreateCommandState((const char *)commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetPrimaryData(job, (void *)address, size, option);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        fileJobSetPrimaryData(job, buffer, size, option);
+        sdfReleaseResourceAllocation(allocation);
         return;
     }
 }
@@ -4590,18 +4590,18 @@ void fileJobSetSecondaryData(job, src, size, selector)
 void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 commandId, u16 selector) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
+    struct SdfMemBlock *allocation;
+    void *buffer;
 
     command = sdfDevCreateCommandState((const char *)commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetSecondaryData(job, (void *)address, size, selector);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        fileJobSetSecondaryData(job, buffer, size, selector);
+        sdfReleaseResourceAllocation(allocation);
         return;
     }
 }
