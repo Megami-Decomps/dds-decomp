@@ -1,3 +1,4 @@
+#include "sdf_scene_packet.h"
 #include "sdf_gs_gouraud_textured.h"
 #include "sdf_gs_scene_state.h"
 #include "sdf_gs_textured_shapes.h"
@@ -879,14 +880,6 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32
     sdfBuildFrameDepthScissorPacket((SdfGsContextRegisters *)(packet + 1), frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
-typedef struct SdfSceneDrawPacket {
-    SdfGsPacketHeader header; /* 0x00 */
-    SdfGsDrawDefaultsRegisters drawDefaults;         /* 0x20 */
-    SdfGsContextRegisters contextOne; /* 0x60 */
-    SdfGsContextRegisters contextTwo; /* 0xA0 */
-    SdfGsCenteredBoundsRegisters centeredBounds;      /* 0xE0 */
-    SdfGsSceneBlendRegisters blendState;         /* 0x130 */
-} SdfSceneDrawPacket;
 
 extern u8 D_00438A22;
 
