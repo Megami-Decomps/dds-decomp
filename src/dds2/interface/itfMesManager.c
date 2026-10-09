@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_panel_api.h"
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
@@ -96,10 +97,6 @@ extern void func_0019DD48();
 extern s32 func_0019DBA8();
 
 extern UiSprite *func_001A1858(s32 kind, u32 payload);
-
-extern void itfSetPanelLayoutAndNotify();
-
-extern void itfPanelUpdateValuesAndNotify();
 
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
