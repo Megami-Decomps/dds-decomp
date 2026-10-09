@@ -3665,7 +3665,38 @@ void btlChooseRandomPresetCameraKeys(unit)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_0020B190);
+void func_0020B190(BtlLinkedCommand *command, BtlUnit *target) {
+    switch (target->partyRecord.unitId) {
+    case 0x11B:
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera,
+            &command->backCamera, 0.8f, -0.5f, 0.0f, 0, 1);
+        command->frontCamera.distance += 700.0f;
+        break;
+    case 0x13D:
+    case 0x13E:
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera,
+            &command->backCamera, 1.0f, -1.0f, 1.75f, 0, 1);
+        command->frontCamera.distance += 900.0f;
+        break;
+    case 0x13F:
+    case 0x140:
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera,
+            &command->backCamera, 1.0f, -0.5f, 1.0f, 0, 1);
+        command->frontCamera.distance += 600.0f;
+        break;
+    case 0x141:
+    case 0x142:
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera,
+            &command->backCamera, 1.0f, -0.5f, 0.0f, 0, 1);
+        command->frontCamera.distance += 500.0f;
+        break;
+    }
+    command->backCamera.distance = command->frontCamera.distance + 100.0f;
+    command->motionParameter = 30.0f;
+    command->flags |= 0x41;
+    btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+    btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+}
 
 
 extern void func_002DD608(f32);
@@ -3808,7 +3839,7 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
             if ((((BtlUnit *)other)->flags & 0x400) == 0) {
                 return 0;
             }
-            func_0020B190(unit, other);
+            func_0020B190((BtlLinkedCommand *)unit, (BtlUnit *)other);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             btlSetLinkedDefeatCameraPresetA(unit, unit, 0);
@@ -3936,7 +3967,7 @@ extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern void func_0020B190(u8 *, void *);
+extern void func_0020B190(BtlLinkedCommand *, BtlUnit *);
 extern char D_003A6338[];
 extern char D_003A6358[];
 
@@ -3968,7 +3999,7 @@ s32 func_0020BE30(BtlLinkedCommand *command, s32 any200, s32 any400) {
             if (!(target->flags & 0x400)) {
                 return 0;
             }
-            func_0020B190((u8 *)command, target);
+            func_0020B190(command, target);
             return 1;
         }
         if (count >= 2 && selector == 0 && mode == 1) {
@@ -4155,7 +4186,7 @@ s32 func_0020BE30(BtlLinkedCommand *command, s32 any200, s32 any400) {
     }
 }
 
-extern void func_0020B190(u8 *, void *);
+extern void func_0020B190(BtlLinkedCommand *, BtlUnit *);
 
 /* Group-camera policy takes precedence over target-camera policy.
  * Return 1 after selecting keys, or 0 when neither camera policy is requested. */
@@ -4177,7 +4208,7 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
         if (btlGetIndexListCount(((BtlEventEntry *)unit)->task->indexWork.indices) == 1) {
             void *other = btlGetIndexListEntry(((BtlEventEntry *)unit)->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190(unit, other);
+            func_0020B190((BtlLinkedCommand *)unit, (BtlUnit *)other);
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
             btlChooseRandomPresetCameraKeys(unit);
