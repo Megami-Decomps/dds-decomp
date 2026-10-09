@@ -499,40 +499,13 @@ extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 extern FileJob *fileJobCreate(void);
 
 
-typedef struct FileQueue {
-    f32 offset[4];
-    f32 axis[4];
-    u8 unk20[0x20];
-    f32 position[4];
-    f32 quat[4];
-    f32 scale;        /* 0x60 */
-    u32 color;         /* 0x64: modulation colour */
-    /* 0x68: bitmask; bits 0x60 select the rotation branch. Left as unk68 because
-     * renaming it alone changes codegen in fileJobNotifyPair. The DDS2 twin
-     * calls this transformWord. */
-    u32 unk68;
-    u8 pad6C[8];
-    f32 transformValue; /* 0x74 */
-    u8 pad78[8];
-    s32 count;
-    u32 updateFrame;
-    /* Disk reads at 295A90/2D5B38 use a relative job offset here;
-     * runtime append at 293F60/2D3FC8 stores the tail pointer. */
-    union {
-        FileJob *last;
-        u32 entryOffset;
-    };              /* 0x88 */
-    FileJob *first;  /* 0x8C: traversal start */
-} FileQueue;
 extern void fileQueueSetPosition(FileQueue *queue, void *vec);
 extern void fileQueueSetRotation(FileQueue *queue, void *rot);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_00294938(FileQueue *queue, u32 color);
-extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
 
 extern FileJob *fileQueueFindById(FileQueue *, u32);
-extern FileJob *fileQueueGetAt(FileQueue *, s32);
 extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);
 
 
@@ -4095,7 +4068,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00293AE0);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileJobWriteSerializedPayload);
 
 extern u8 sdfPfsDebugMode;
 extern char D_003BC928[];
@@ -4103,22 +4076,21 @@ extern char D_003BC930[];
 extern char D_003BC938[];
 extern char *sdfDevGetPathBuffer(void);
 extern s32 func_0030E8F0(const char *path, s32 flags, ...);
-extern void func_00293AE0(s32 fd, FileJobPayload *job);
 extern s32 func_0030EB78(s32 fd);
 extern s32 func_00310A68(const char *path, s32 mode);
 
-void fileWriteToPfs(FileJobPayload *job, s32 slot) {
+void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
     s32 fd;
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BC928, slot);
+        func_003014F0(path, D_003BC928, filePath);
         fd = func_0030E8F0(path, 0x602, 0x1B6);
     } else {
-        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
         fd = func_0030E8F0(path, 0x602);
     }
-    func_00293AE0(fd, job);
+    fileJobWriteSerializedPayload(fd, job);
     func_0030EB78(fd);
     func_00310A68(D_003BC938, 0);
 }
@@ -4186,9 +4158,9 @@ void fileQueueInitTransform(void *queue)
     view->position[1] = -5.0f;
     VU0_STORE_VF_UNCLOBBERED(vf0, view->quat);
     view->scale = 1.0f;
-    view->transformValue = 1.0f;
+    view->scaleMultiplier = 1.0f;
     view->color = 0x80808080;
-    view->unk68 = 0x80;
+    view->transformFlags = 0x80;
 }
 
 void fileJobResetAndInitTransform(FileJob *job) {
@@ -4268,8 +4240,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
 
     PCP_COPY_VECTOR(queue->offset, source->offset);
     PCP_COPY_VECTOR(queue->axis, source->offset);
-    queue->transformValue = source->transformValue;
-    queue->unk68 = source->unk68;
+    queue->scaleMultiplier = source->scaleMultiplier;
+    queue->transformFlags = source->transformFlags;
     if (source->first != NULL) {
         for (entry = source->first; entry != NULL; entry = entry->next) {
             job = fileJobCreate();
@@ -4345,13 +4317,13 @@ void fileQueueUpdate(FileQueue *queue)
     s32 limit;
     f32 total;
 
-    if (queue->unk68 & 0x60) {
+    if (queue->transformFlags & 0x60) {
         PCP_COPY_VECTOR(savedQuat, queue->quat);
         camAimRotation(queue, aimQuat);
         fileQueueSetRotation(queue, aimQuat);
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
-    total = queue->scale * queue->transformValue;
+    total = queue->scale * queue->scaleMultiplier;
     limit = queue->updateFrame;
     for (job = queue->first; job != NULL; job = job->next) {
         if (limit < job->startFrame) {
@@ -4408,8 +4380,8 @@ FileQueue *fileQueueClone(FileQueue *source) {
 
     PCP_COPY_VECTOR(queue, source);
     PCP_COPY_VECTOR(queue->axis, source->axis);
-    queue->transformValue = source->transformValue;
-    queue->unk68 = source->unk68;
+    queue->scaleMultiplier = source->scaleMultiplier;
+    queue->transformFlags = source->transformFlags;
     for (src = source->first; src != NULL; src = src->next) {
         FileJob *job = fileJobCreate();
         job->id = (u32)fileJobCreateChild((FileJobPayload *)src->id);
@@ -4449,7 +4421,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
     VU0_LOAD_VF(vf10, queue->quat);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_MATRIX(rot);
-    scale = queue->scale * queue->transformValue;
+    scale = queue->scale * queue->scaleMultiplier;
     for (job = queue->first; job != NULL; job = job->next) {
         VU0_LOAD_VF(vf10, base);
         if (job->xformFlags & 4) {
@@ -4499,7 +4471,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     f32 jobScale;
 
     queue->scale = scale;
-    total = scale * queue->transformValue;
+    total = scale * queue->scaleMultiplier;
     for (job = queue->first; job != NULL; job = job->next) {
         jobScale = job->scale;
         if (job->updateFlags & FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE) {
@@ -4561,7 +4533,6 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
 extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
-extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref);
 
 /* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
 static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *owner, FileJob *leader) {
@@ -4661,7 +4632,7 @@ extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
 /* Export a queue: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
-void func_00295018(FileQueue *queue, s32 slot) {
+void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     char path[0xD0];
     FileJobPayload payload;
     FileQueue header;
@@ -4673,10 +4644,10 @@ void func_00295018(FileQueue *queue, s32 slot) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BC928, slot);
+        func_003014F0(path, D_003BC928, filePath);
         fd = func_0030E8F0(path, 0x602, 0x1B6);
     } else {
-        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
         fd = func_0030E8F0(path, 0x602);
     }
     header = *queue;
@@ -4724,14 +4695,14 @@ void func_00295018(FileQueue *queue, s32 slot) {
         }
         if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
-            func_00293AE0(fd, (FileJobPayload *)job->id);
+            fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
             payload.secondary.offset = 0;
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
-            func_00293AE0(fd, &payload);
+            fileJobWriteSerializedPayload(fd, &payload);
         }
         blocks = size >> 4;
         if ((size & 0xF) != 0) {
@@ -4760,7 +4731,7 @@ extern char D_0037E528[];
 
 /* Save a queue image: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
-void func_002954F0(FileQueue *queue, s32 slot) {
+void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     char path[0xD0];
     FileJobPayload payload;
     FileQueue header;
@@ -4773,10 +4744,10 @@ void func_002954F0(FileQueue *queue, s32 slot) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BC928, slot);
+        func_003014F0(path, D_003BC928, filePath);
         fd = func_0030E8F0(path, 0x602, 0x1B6);
     } else {
-        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
         fd = func_0030E8F0(path, 0x602);
     }
     image.version = 5;
@@ -4829,14 +4800,14 @@ void func_002954F0(FileQueue *queue, s32 slot) {
         }
         if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
-            func_00293AE0(fd, (FileJobPayload *)job->id);
+            fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
             payload.secondary.offset = 0;
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
-            func_00293AE0(fd, &payload);
+            fileJobWriteSerializedPayload(fd, &payload);
         }
         blocks = size >> 4;
         if ((size & 0xF) != 0) {
@@ -4853,7 +4824,7 @@ void func_002954F0(FileQueue *queue, s32 slot) {
     func_00310A68(D_003BC938, 0);
 }
 
-FileQueue *func_002959E8(s32 entry) {
+FileQueue *fileQueueCreateFromCommandState(const char *entry) {
     DevState *command = sdfDevCreateCommandState(entry);
     s32 size;
     struct SdfMemBlock *allocation;
@@ -4874,8 +4845,8 @@ FileQueue *func_002959E8(s32 entry) {
     queue = fileQueueCreate();
     PCP_COPY_VECTOR(queue->offset, image->offset);
     PCP_COPY_VECTOR(queue->axis, image->offset);
-    queue->transformValue = image->transformValue;
-    queue->unk68 = image->unk68;
+    queue->scaleMultiplier = image->scaleMultiplier;
+    queue->transformFlags = image->transformFlags;
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
          i < image->count; i++, src++) {
         if ((src->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {

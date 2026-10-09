@@ -295,7 +295,6 @@ extern void *dds3GetWorldObject(void);
 
 extern u32 fldGetPlayerSceneState(void);
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *, f32 *, f32 *);
 

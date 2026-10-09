@@ -119,7 +119,6 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
 
 extern void dds3ClearSceneObjectState(EffWorldNode *object);
 extern void evtReleaseSceneResource(EffWorldNode *object);
-void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
 /* Destroy every node of every list, then release the data block and scene state. */
 void dds3DestroyWorldObjectData(EffWorldNode *object) {
@@ -226,7 +225,6 @@ void dds3RemoveWorldObjectNode(EffWorldNode *node) {
     }
 }
 
-EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *object);
 
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *object, EffWorldNode *value) {
     EvtWorldTable *data;
@@ -242,7 +240,6 @@ EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *object) {
     return ((EvtWorldTable *)object->data)->cameraObject;
 }
 
-EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
 
 EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value) {
     EvtWorldTable *data;

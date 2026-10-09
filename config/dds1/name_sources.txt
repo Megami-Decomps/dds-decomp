@@ -5296,6 +5296,7 @@
 0x00293880	fileJobCopyCommandIntoPrimaryData	inferred	Reads command state into temporary allocation then copies bytes into primary job slot. [names_reviewed7.tsv]
 0x00293960	fileJobSetSecondaryData	inferred	Same for the secondary buffer; stores the selector in slot 0
 0x00293A00	fileJobCopyCommandIntoSecondaryData	inferred	Reads command state into temporary allocation then copies bytes into secondary job slot. [names_reviewed7.tsv]
+0x00293AE0	fileJobWriteSerializedPayload	inferred	Writes the 0x2C payload header with relative buffer offsets, then primary data, alignment padding and secondary data.
 0x00293C50	fileWriteToPfs	inferred	Formats a pfs0: path, opens it (0x602), writes, closes and syncs pfs:.
 0x00293D08	fileDuplicateJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00293D90	fileJobCreateFromCommandState	inferred	Builds a job from an sdf command state: allocate, retain address, duplicate job, free handle
@@ -5325,6 +5326,9 @@
 0x00294DA0	fileQueueDetachSectorFollower	inferred	Clears follower flag and sector, rechaining former dependents when present. [names_reviewed7.tsv]
 0x00294E50	fileQueueRemoveAndDestroyJob	inferred	Removes job, recursively removes flagged children, rechains dependents then frees child and job. [names_reviewed7.tsv]
 0x00294F50	fileJobCopyHeader	inferred	copies the first 0x90 bytes of a FileJob
+0x00295018	fileQueueSaveImage	inferred	Saves the queue header, relocated job records and aligned owned payloads to a borrowed path.
+0x002954F0	fileQueueSaveVersionedImage	inferred	Writes a 16-byte versioned preamble followed by the serialized queue image to a borrowed path.
+0x002959E8	fileQueueCreateFromCommandState	inferred	Creates a runtime queue from a command-loaded serialized image, duplicates its jobs and releases the temporary image.
 0x00295B70	fileQueueFindById	inferred	traverses job links matching id field
 0x00295BB0	fileQueueFindFlaggedById	inferred	traverses matching id only when flags bit zero is set
 0x00295BF8	fileQueueFindBySector	inferred	traverses matching sector with flags low bits equal two
@@ -6354,7 +6358,7 @@
 0x002D5EB0	sdfAppendTexturedLinePacket	inferred	Allocates and appends packet containing UV and XYZ for two vertices. [names_reviewed8.tsv]
 0x002D5FD8	sdfBuildTriPacket104	inferred	Byte-identical dds2 twin 0x0032EE88; GIF packet with 0x104 flag and three vertex pairs [names_conflicts.tsv]
 0x002D6080	sdfQueueFlatTriangle	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1101:func_002D6080; Allocates a DMA/VIF packet containing three same-color XY vertices and appends it to the list.; source=revalidated-unapplied-names_R_Names31.tsv:34 [names_qp12_apply.tsv]
-0x002D6258	sdfBuildPacketE	inferred	0x50-byte packet builder around func_002D6188
+0x002D6258	sdfQueueFlatQuad	inferred	Allocates a DMA/VIF packet for four same-color XYZ vertices and appends it to the supplied list; paired native callers confirm this queue role.
 0x002D6450	sdfBuildPacketF	inferred	0x60-byte packet builder around func_002D6380
 0x002D6578	sdfWriteGouraudQuadPacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1176:func_002D6578; Writes PRIM IIP/TRISTRIP with four independent RGBAQ and XYZ vertices.; source=revalidated-unapplied-names_R_Names31.tsv:35 [names_qp12_apply.tsv]
 0x002D6690	sdfQueueGouraudQuad	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:1193:func_002D6690; Allocates the DMA/VIF envelope for a four-color quad and appends the completed packet.; source=revalidated-unapplied-names_R_Names31.tsv:36 [names_qp12_apply.tsv]

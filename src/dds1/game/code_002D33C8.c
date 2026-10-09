@@ -1338,7 +1338,7 @@ void sdfBuildPacket104x4(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, 
 
 extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void sdfBuildPacketE(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
+void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {

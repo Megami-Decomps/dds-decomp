@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf.h"
 
 extern s32 fldLocalMapCameraObject;
@@ -16,7 +17,6 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32, f32);
 
-extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *, struct EffWorldNode *);
 
 extern s32 dds3CreateCameraObject(s32, SdfQuad *, SdfQuad *);
 

@@ -72,7 +72,6 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
-extern EffectObj *dds3AppendWorldObjectNode(s32 kind);
 
 extern void dds3EnsureSlotData(void *obj);
 
@@ -101,7 +100,6 @@ void effObjReleaseObjectData(EffectObj *obj) {
 extern s32 billGetKindOneParameter(struct EffNode *bill);
 extern s32 effInvokeNodeConditionOrAcceptDefault(struct EffNode *node);
 extern void effEventCopyFileRecordHeader(void *destination, const void *source);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
@@ -293,7 +291,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     EffectObj *obj;
     EffectDependencyState *data;
 
-    obj = dds3AppendWorldObjectNode(7);
+    obj = (EffectObj *)dds3AppendWorldObjectNode(7);
     if (obj == NULL) {
         return NULL;
     }

@@ -2056,7 +2056,28 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
 
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024C1B8);
+s32 func_0024C1B8(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
+
+    if (evtGetMessageWindowControlState() == 0 && ((EvtBContext *)state)->exitPending == 0) {
+        func_0024A728(2, state);
+        mnuTerminalSelectSlot(2, -1, (MenuTerminalWork *)state);
+        func_0024AB70(2, state);
+        ((EvtBContext *)state)->exitPending = 1;
+    }
+    func_0024A2D8(state);
+    if (((EvtBContext *)state)->selectionStep == 0) {
+        func_0024A340(1, state);
+    } else if (func_0024A6E8((MenuTerminalWork *)state) == 0) {
+        func_0024A340(1, state);
+    } else {
+        func_0024A340(0, state);
+    }
+    mnuDispatchTransitionHostCallbacks((TransitionHost *)state);
+    func_0024A930((MenuTerminalWork *)state);
+    mnuDrawTerminalSelectedSlots(state);
+    return menuRunPanel((void *)state, 1, (void *)item);
+}
 
 s32 evtBSetupDispatchSyncE(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);

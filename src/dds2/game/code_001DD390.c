@@ -1905,7 +1905,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 /* Native actor-model setup providers used by func_001E1BB8. */
 extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 extern void *dds3GetWorldObject(void);
-extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 extern void btlMarkTaskReady(SoundResourceLink *resource);
 extern void btlResetUnitModelProgress(BtlUnit *unit);
@@ -5239,8 +5238,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9130);
 extern f32 D_003B6D70[4], D_003B6D80[4];
 extern f32 D_003B6D50[4], D_003B6D60[4];
 extern u32 D_00436A98;
-extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
 extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);

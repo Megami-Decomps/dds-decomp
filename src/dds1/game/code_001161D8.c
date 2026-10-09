@@ -1,10 +1,10 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_light.h"
 #include "eff_event.h"
 
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
-extern EffWorldNode *dds3AppendWorldObjectNode();
 extern void dds3EnsureSlotData();
 
 extern void effObjSetInnerFirstVec();

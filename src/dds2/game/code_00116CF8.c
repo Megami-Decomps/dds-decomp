@@ -22,7 +22,6 @@ typedef struct ActionSub {
     s32 unk10;
 } ActionSub;
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0xB);

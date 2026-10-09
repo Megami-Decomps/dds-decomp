@@ -3,7 +3,6 @@
 #include "dds3_path.h"
 
 
-extern EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 

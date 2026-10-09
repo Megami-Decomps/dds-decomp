@@ -88,7 +88,6 @@ void evtDestroySecondaryWorldNode(void);
 
 extern u32 kwlnDrawControlFlags;
 
-void dds3RemoveWorldObjectNode(void *unit);
 
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
@@ -103,7 +102,6 @@ void effObjSetFlags(void *unit, s32 flag);
 
 u32 fldGetPlayerSceneState(void);
 
-EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 f32 bfWaitReadArgFloat(s32 idx);
 extern void func_00340DC8(f32, f32, f32);

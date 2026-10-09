@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "mnu_title_effect.h"
@@ -55,7 +56,6 @@ extern void effObjSetInnerFloat(s32 object, f32 value);
 
 extern s32 dds3GetWorldSecondaryObject(void);
 
-extern struct EffWorldNode *dds3SetWorldCameraObject(struct EffWorldNode *, struct EffWorldNode *);
 
 extern u8 D_003DC1C0[];
 

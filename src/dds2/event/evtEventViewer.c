@@ -44,7 +44,6 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void func_00246878(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
-void dds3RemoveWorldObjectNode(struct EffWorldNode *ptr);
 
 void func_002467A0(void) {
     func_00246108();
