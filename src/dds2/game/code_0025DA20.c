@@ -848,8 +848,6 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 
 extern SdfPoolNode D_00380708;
 extern u8 D_00380860[];
-extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
-extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
 
 void func_0025EFD8(EvtRuntime *scene) {
     s32 surface;

@@ -869,10 +869,8 @@ extern u8 D_00384790[];
 extern SdfLightSources D_0037FB10;
 extern f32 D_0037FB20[4];
 extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
-extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
 extern void sdfBuildCenteredViewBoundsPacket(u64 *, s32, s32, s32, s32);
-extern void sdfAppendLinkedPacketPayload(SdfListHead *, SdfLinkedPacketList *, u32 *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
