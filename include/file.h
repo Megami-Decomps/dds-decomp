@@ -58,6 +58,8 @@ void *fileResolveSecondaryBuffer(FileJobPayload *job);
 FileJobPayload *fileJobCreateFromJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateChild(FileJobPayload *request);
 void fileJobDestroy(FileJobPayload *job);
+void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
+void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
 
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
