@@ -7529,7 +7529,7 @@ u32 effPollNamedFile(void) {
         if (effFileQueue != 0) {
             strcpy((char *)D_003DF8D0, record.name);
             func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithPrefix);
-            func_00295018(effFileQueue, path);
+            fileQueueSaveImage(effFileQueue, path);
             result = 0x400002;
         }
     }

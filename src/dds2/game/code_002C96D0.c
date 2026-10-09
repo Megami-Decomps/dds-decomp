@@ -5149,7 +5149,7 @@ extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
 /* Export a queue: the queue header, one relocated record per job, then each
  * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
-void func_002D50D8(FileQueue *queue, s32 slot) {
+void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
     char path[0xD0];
     FileJobPayload payload;
     FileQueue header;
@@ -5161,10 +5161,10 @@ void func_002D50D8(FileQueue *queue, s32 slot) {
     FileJob *job;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, slot);
+        func_0035C860(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slot);
+        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
     header = *queue;
