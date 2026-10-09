@@ -5,68 +5,61 @@
 #include "sdf_model.h"
 #include "eff_transform.h"
 #include "sdf_draw.h"
+#include "evt_script_model.h"
 
 
 
-/* Script object work area (0x18). */
-typedef struct ObjWork {
-    EffWorldNode *unk0;   /* 0x00: fallback model resource */
-    void *unk4;   /* 0x04: item list for the model */
-    MotionTable *unk8;   /* 0x08: script table */
-    void *unkC;   /* 0x0C: loaded script resource, null when unloaded */
-    u8 pad10[8];
-} ObjWork;
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
 EffWorldNode *evtCreateScriptObject(s32 a, void *b, MotionTable *c, EffWorldNode *d, const char *e) {
     EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
-    ObjWork *work = object->data;
+    EvtScriptModelWork *work = object->data;
 
-    work->unk8 = c;
+    work->motionTable = c;
     object->key = a;
     object->value = (u32)e;
-    work->unk0 = d;
-    work->unk4 = b;
-    work->unkC = NULL;
+    work->fallbackModelObject = d;
+    work->itemList = b;
+    work->loadedModelResource = NULL;
     return object;
 }
 
 /* Create a script object with its loaded resource already supplied. */
 EffWorldNode *evtCreateScriptObjectWithResource(s32 a, void *b, MotionTable *c, void *d, const char *e) {
     EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
-    ObjWork *work = object->data;
+    EvtScriptModelWork *work = object->data;
 
     object->key = a;
-    work->unkC = d;
-    work->unk4 = b;
-    work->unk8 = c;
+    work->loadedModelResource = d;
+    work->itemList = b;
+    work->motionTable = c;
     object->value = (u32)e;
     return object;
 }
 
 
 SdfModel *evtCreateModelFromObject(EffWorldNode *obj) {
-    ObjWork *work = obj->data;
+    EvtScriptModelWork *work = obj->data;
     SdfModel *model;
 
-    if (work->unkC != NULL) {
-        model = sdfModelCreateWithItems(work->unkC, work->unk4);
+    if (work->loadedModelResource != NULL) {
+        model = sdfModelCreateWithItems(work->loadedModelResource, work->itemList);
     } else {
-        model = sdfModelCreateWithItems(work->unk0->data, work->unk4);
+        model = sdfModelCreateWithItems(work->fallbackModelObject->data, work->itemList);
     }
     return model;
 }
 
 Motion *evtAttachScriptToObject(EffWorldNode *object, SdfModel *owner) {
     Motion *motion = NULL;
-    ObjWork *work;
+    EvtScriptModelWork *work;
 
     if (owner == NULL) {
         return NULL;
     }
     work = object->data;
-    if (work->unk8 != NULL) {
-        motion = sdfCreateMotion(owner, work->unk8);
+    if (work->motionTable != NULL) {
+        motion = sdfCreateMotion(owner, work->motionTable);
         sdfMotionInitializeAtZeroTime(motion, 0, 1);
     }
     return motion;
