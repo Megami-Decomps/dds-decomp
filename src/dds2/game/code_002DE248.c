@@ -8250,10 +8250,10 @@ typedef struct EffectSlotNode80 {
     MdlCtx *model;           // 0x60
     void *deviceSlot;       // 0x64
     u32 resourceEntries;    // 0x68
-    u32 entryAllocation;    // 0x6C
+    struct SdfMemBlock *entryAllocation;    // 0x6C: queue-clone array descriptor
     u32 record;             // 0x70
     u8 *positions;          // 0x74
-    u32 positionAllocation; // 0x78
+    struct SdfMemBlock *positionAllocation; // 0x78: particle-position array descriptor
     u16 active;
 } EffectSlotNode80;
 
@@ -8364,13 +8364,13 @@ void effDestroyOwnedResources(s32 *work) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(((s32 *)((EffectSlotNode80 *)work)->resourceEntries)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffectSlotNode80 *)work)->entryAllocation));
+        sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->entryAllocation);
     }
     if (((EffectSlotNode80 *)work)->record != 0) {
         fileReleaseGridRecordHandle(((EffectSlotNode80 *)work)->record);
     }
     if (((EffectSlotNode80 *)work)->positionAllocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffectSlotNode80 *)work)->positionAllocation));
+        sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->positionAllocation);
     }
     sdfReleaseChipBlock(work);
 }
@@ -8417,15 +8417,15 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(((s32 *)dst->resourceEntries)[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->entryAllocation));
+            sdfReleaseResourceAllocation(dst->entryAllocation);
             dst->resourceEntries = 0;
             dst->entryAllocation = 0;
         }
         if (count * 4 == 0) {
             return;
         }
-        dst->entryAllocation = (u32)sdfAllocGeneralBlock(count * 4);
-        dst->resourceEntries = sdfResourceRetainAddress((struct SdfMemBlock *)(dst->entryAllocation));
+        dst->entryAllocation = sdfAllocGeneralBlock(count * 4);
+        dst->resourceEntries = sdfResourceRetainAddress(dst->entryAllocation);
         for (i = 0; i < count; i++) {
             ((void **)dst->resourceEntries)[i] = fileQueueClone(((void **)src->resourceEntries)[0]);
         }
@@ -8439,7 +8439,7 @@ extern s32 fileAllocateGridRecordSlots(u16, s32, s32);
 
 void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     s32 previous = ((EffectSlotNode80 *)work)->record;
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u32 count;
     u32 i;
     u8 *entries;
@@ -8449,11 +8449,11 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     ((EffectSlotNode80 *)work)->record = fileAllocateGridRecordSlots(kind, *(s32 *)work, (s32)config);
     allocation = ((EffectSlotNode80 *)work)->positionAllocation;
     if (allocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+        sdfReleaseResourceAllocation(allocation);
     }
     count = ((FileSlotTable *)((EffectSlotNode80 *)work)->record)->count;
-    ((EffectSlotNode80 *)work)->positionAllocation = (u32)sdfAllocGeneralBlock(count * 0x18);
-    ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffectSlotNode80 *)work)->positionAllocation));
+    ((EffectSlotNode80 *)work)->positionAllocation = sdfAllocGeneralBlock(count * 0x18);
+    ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress(((EffectSlotNode80 *)work)->positionAllocation);
     entries = ((EffectSlotNode80 *)work)->positions;
     for (i = 0; i < count; i++, entries += 0x18) {
         effInitializeParticleDirection(work, (float *)entries);
@@ -8490,14 +8490,14 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) 
         for (i = 0; i < count; i++) {
             fileQueueDestroy((s32)(u32)((void **)obj->resourceEntries)[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->entryAllocation));
+        sdfReleaseResourceAllocation(obj->entryAllocation);
         obj->resourceEntries = 0;
         obj->entryAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        obj->entryAllocation = (u32)sdfAllocGeneralBlock(size);
-        obj->resourceEntries = sdfResourceRetainAddress((struct SdfMemBlock *)(obj->entryAllocation));
+        obj->entryAllocation = sdfAllocGeneralBlock(size);
+        obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
         ((void **)obj->resourceEntries)[0] = fileCloneQueueEntries(secondary);
         for (i = 1; i < count; i++) {
             ((void **)obj->resourceEntries)[i] = fileQueueClone(((void **)obj->resourceEntries)[0]);
