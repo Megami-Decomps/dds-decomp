@@ -1,0 +1,3 @@
+# Retained terminal-renderer source replay
+
+A source-only nonmatching experiment for DDS2 func_00297320. Reuses Spark's complete reconstruction and Slate's preserved handoff without source changes against e2566fe9b5c1b9d8cff1c5181697ba6ecd2a5ebb. Historical result: 1384 candidate bytes, 1396 native executable bytes plus alignment, 60 different words, 41 older C functions exact. Only a complete owning-unit replay is intended; no full-image or runtime proof is claimed by this diagnostic. Candidate installation is temporary and restored. Raw diagnostic output remains captured. The existing build workflow is unchanged; the added diagnostic workflow is restricted to its dedicated branch.
