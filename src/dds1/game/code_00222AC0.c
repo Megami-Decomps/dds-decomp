@@ -59,7 +59,6 @@ extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
 
 
-extern void *dds3FindWorldObjectNodeByKey(void *world, s32 objectId, s32 kind);
 extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void effObjDispatchReadyState(void *arg0);

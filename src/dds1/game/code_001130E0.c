@@ -36,7 +36,6 @@ enum {
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
