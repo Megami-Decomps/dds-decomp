@@ -47,7 +47,7 @@ extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
 extern BtlUnit *btlFindActorForOwner(s64);
 
-void func_001D3FE8(BtlTask *, BattleIndexWork *);
+void btlPrepareSavedCommandTargets(BtlTask *, BattleIndexWork *);
 
 extern s32 btlIsUnitInActiveList(void *unit);
 
@@ -280,7 +280,7 @@ extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
-extern void func_001DC0E8(void);
+extern void btlInitializeWorldCamera(void);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
@@ -838,7 +838,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
 void func_001C9628(u32 arg0) {
     btlGetRuntime();
     *(u32 *)((s32)arg0 + 8) = *(u32 *)((s32)arg0 + 8) & 0xfffffffb;
-    func_001BF4C0(arg0);
+    btlOpenBattleCommandPanel(arg0);
 }
 
 extern s32 fldGetSceneObjectState(void);
@@ -937,7 +937,7 @@ extern void fldMarkActiveSceneScriptState(void);
 
 extern s32 btlSetTaskPhase2(void);
 
-void func_001C9960(BtlTask *task) {
+void btlInitializeActorCommandState(BtlTask *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 state;
     BtlIndexList *selected;
@@ -1070,7 +1070,7 @@ void btlMarkSceneTaskAfterReset(BtlTask *task) {
 
 s32 btlCommandStateSelectB(s32 arg0) {
     if (sndHasActiveActor() == 0) {
-        func_001D3FE8((BtlTask *)arg0, &((BtlTask *)arg0)->indexWork);
+        btlPrepareSavedCommandTargets((BtlTask *)arg0, &((BtlTask *)arg0)->indexWork);
         if (btlAiCheckStatusRollEligibility(arg0) != 0) {
             btlDispatchStateHandler(arg0, 0xB);
         } else {
@@ -1660,7 +1660,7 @@ extern void btlResetUnitLinks(BtlUnit *);
 
 extern void btlReleaseUnitResources(BtlUnit *);
 
-void func_001CF7A0(BtlTask *task) {
+void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     BtlUnit *unit = task->indexWork.linkedUnit;
     DatPartyRecord *record;
     BtlRuntimeTask *load;
@@ -3049,7 +3049,7 @@ void btlUpdateAutoMusic(void) {
     }
 }
 
-void func_001D3FE8(BtlTask *task, BattleIndexWork *work) {
+void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
     BtlIndexList *list;
@@ -3755,7 +3755,7 @@ void btlRequestModelAssetByMode(u32 arg0, u32 arg1, u32 arg2) {
 
     temp_v0 = mdlFlagTest(0xc0f);
     if (temp_v0 != 0) {
-        func_002118D8(arg1, arg2);
+        btlEnsureModelAndSoundReady(arg1, arg2);
         return;
     }
     mdlRequestAsset(arg1, arg2, 0);
@@ -3773,7 +3773,7 @@ void btlReleaseModelAssetByMode(u32 arg0, u32 arg1, u32 arg2) {
 
 s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
     if (mdlFlagTest(0xC0F) != 0) {
-        if (func_002118D8(effect, model, 0) != 0) {
+        if (btlEnsureModelAndSoundReady(effect, model, 0) != 0) {
             return 1;
         }
     } else {
@@ -6895,7 +6895,7 @@ extern void dds3EnsureSlotData(void *);
 extern void func_001127A0(EffWorldNode *, s32);
 
 /* vu0 routine: add the battle origin to the default camera position. */
-void func_001DC0E8(void) {
+void btlInitializeWorldCamera(void) {
     f32 position[4];
     EffWorldNode *camera;
     CameraData *data;
@@ -7649,7 +7649,7 @@ extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
 
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001EEAE0(BtlLinkedCommand *, BtlCamState *);
+extern void btlInitializeCameraCursorForActorMode(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001E2FF8(BtlLinkedCommand *);
 
@@ -7674,7 +7674,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             }
         } else {
             action->stepKind = 11;
-            func_001EEAE0(action, &action->camera);
+            btlInitializeCameraCursorForActorMode(action, &action->camera);
         }
     } else {
         if (btlMatchLinkedActorFlags((s32)action)) {

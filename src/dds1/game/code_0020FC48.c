@@ -574,9 +574,9 @@ typedef struct BattleTaskData {
 
 extern BattleTask *btlAllocTask(s32);
 
-extern s32 func_00210670(void *);
+extern s32 btlRunSceneActorEventTask(void *);
 
-s32 func_00210670(void *args) {
+s32 btlRunSceneActorEventTask(void *args) {
     BattleTaskData *data = args;
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *resource;
@@ -610,7 +610,7 @@ void *btlCreateActionTask(void *battler, s32 action) {
 
     task->enabled = 1;
     task->taskId = 0x62;
-    task->callback.run = func_00210670;
+    task->callback.run = btlRunSceneActorEventTask;
     task->status = 0;
     data = btlGetTaskArguments(task);
     data->battler = battler;
@@ -1169,7 +1169,7 @@ s32 btlIsModelEntryReady(s32 kind, s32 id) {
 
 extern void func_00211740(s32, s32);
 
-s32 func_002118D8(s32 kind, s32 id) {
+s32 btlEnsureModelAndSoundReady(s32 kind, s32 id) {
     BattleModelEntry *entry;
 
     if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
@@ -2093,7 +2093,7 @@ extern s32 func_0030EB78(s32);
 extern s32 func_00310A68(const char *, s32);
 
 /* Write the selected model header and its bank's motion rows to table.txt. */
-void func_00215A50(void) {
+void btlDrawActorStatusUvDiagnostics(void) {
     BtlUnit *unit = D_003BB940;
     BtlActorStatusRecord *record;
     BtlActorMotionSlot *motion;

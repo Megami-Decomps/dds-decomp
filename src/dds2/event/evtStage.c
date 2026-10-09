@@ -136,7 +136,7 @@ void evtCreateEventScriptProcess(s32 eventId) {
 
 const char D_004215A8[0x28] = "kill field script -> [%s]\n";
 
-void func_0023ACE8(void) {
+void evtKillFieldScriptTasks(void) {
     s32 state;
     s32 taskIndex;
     KwlnTask *task;

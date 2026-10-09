@@ -364,7 +364,7 @@ MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
     return object->menu.defaultSelector;
 }
 
-extern void func_0026D168(void *, s32, s32);
+extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
 extern void func_0026D988(void *);
 
@@ -381,7 +381,7 @@ s32 func_00290A78(MnuStatusResource *object) {
         while (node != 0) {
             source = node->unk70;
             if (*slot != 0) {
-                func_0026D168(*slot, source, 0);
+                mnuUpdateMantraRecordFlags(*slot, source, 0);
             } else {
                 *slot = evtAllocateMantraSelectionWork(source, 0);
             }
@@ -405,7 +405,7 @@ s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     index = func_002890A8((MnuStatusResource *)object);
     source = object->list->cursor->unk70;
     if (object->menu.slots[index] != 0) {
-        func_0026D168(object->menu.slots[index], source, 0);
+        mnuUpdateMantraRecordFlags(object->menu.slots[index], source, 0);
     } else {
         object->menu.slots[index] = evtAllocateMantraSelectionWork(source, 0);
     }

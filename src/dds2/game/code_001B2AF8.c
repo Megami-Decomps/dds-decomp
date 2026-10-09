@@ -808,7 +808,7 @@ extern void func_0011EBE8();
 
 extern const char D_004156F8[];
 
-s32 func_001B3BE0(void) {
+s32 btlSelectPreemptiveOutcome(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 chance;
     f32 ratio;
@@ -1157,7 +1157,7 @@ void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *object, BtlOperandEntry *
     }
 }
 
-s32 func_001B52D8(ActionStateLink *action) {
+s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlOperandGroup *group;
     BtlUnit *unit;
@@ -3767,7 +3767,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416780);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416798);
 
-void func_001C1A68(BtlState *battle, BattleActorPanelWork *work) {
+void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *work) {
     BattleActorPanelPositions positions = D_00416798;
     BtlUnit *actor;
     KwlnTask *task;
@@ -4181,7 +4181,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     }
 }
 
-void func_001C3850(BtlUnit *actor, s32 unused, s8 mode) {
+void btlSetActorSecondaryPresentation(BtlUnit *actor, s32 unused, s8 mode) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
     s32 eligibleBefore = 0;
@@ -4280,7 +4280,7 @@ void func_001C3A38(BattleActorPanelWork *work, s8 mode) {
     } while (--remaining >= 0);
 }
 
-void func_001C3BB0(BattleActorPanelWork *work, s8 mode) {
+void btlClearFinishedActorSlotChannels(BattleActorPanelWork *work, s8 mode) {
     s32 slot;
     s32 remaining;
 
@@ -4417,7 +4417,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416858);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416870);
 
-void func_001C4520(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
+void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
     s32 i;
 
     switch (reserve == 0 ? work->activeEntries[slot].presentation.presentationState :
@@ -4584,7 +4584,7 @@ void func_001C53A0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C5610);
 
-void func_001C5868(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlAdvanceActorSlotEchoAnimation(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->activeEntries[slot].presentation.transitionState) {
@@ -6229,7 +6229,7 @@ extern void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index);
 extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
 extern void btlUpdateActorSlotStates(u8 *, s8);
-extern void func_001C3850(BtlUnit *unit, s32 unused, s8 phase);
+extern void btlSetActorSecondaryPresentation(BtlUnit *unit, s32 unused, s8 phase);
 extern DatEnemyRecord *datEnemyRecords;
 
 /* Draw selected actor names and advance the battle scene's actor panels. */
@@ -6299,7 +6299,7 @@ void func_001CC438(SceneAiWork *work) {
         }
         if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
             (unit->status.flags & 0x200) && panelTask != NULL) {
-            func_001C3850(unit, 0, 1);
+            btlSetActorSecondaryPresentation(unit, 0, 1);
         }
     }
 }
@@ -6662,7 +6662,7 @@ INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_00436898);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004368A0);
 
-void func_001CE838(void) {
+void btlDrawSceneSlotFades(void) {
     u32 overlays[2] = {0x0000FF00, 0xFF000000};
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 bank;
@@ -6834,7 +6834,7 @@ extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 extern const s32 D_00416FA0[10][3];
 
 
-void func_001CF0B0(void) {
+void btlDrawSceneSlotFadeTiles(void) {
     u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 rows[10][3] = {

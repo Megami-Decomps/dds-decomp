@@ -404,7 +404,7 @@ extern s32 mdlFlagTest(s32);
 extern void mdlFlagClear(s32);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
-void func_00243568(f32 delta) {
+void evtAdvanceSolarClockAndExpireControls(f32 delta) {
     if (datGameState->world.flags & 1) {
         datGameState->world.phaseTimer += delta;
         if (datGameState->world.phaseTimer > 4500.0f) {

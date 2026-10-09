@@ -47,7 +47,7 @@ extern void func_00315A50(void);
 void mnuLoadMantraNodePositionTable(u32 resourceId);
 
 /* Load the mantra node-position table synchronously and release the request. */
-void func_0026CE90(void) {
+void mtrLoadMantraNodePositions(void) {
     s32 request;
 
     evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
@@ -132,7 +132,7 @@ struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
                                     ((index << 0x10) >> 0xb));
 }
 
-extern void func_0026D168(void *, s32, s32);
+extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 
 typedef struct EvtMantraWork {
     struct SdfMemBlock *allocation;
@@ -152,7 +152,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     work->capacity = 0xB0;
     work->entries = work->data;
     if (initialValue != 0) {
-        func_0026D168(work, initialValue, mode);
+        mnuUpdateMantraRecordFlags(work, initialValue, mode);
     }
     return work;
 }
@@ -183,12 +183,12 @@ extern s32 func_00315FA0(u32, DatPartyRecord *, u16);
 
 extern s32 func_0028F128(u16, s8);
 
-extern s32 func_0026D590(u16, s32);
+extern s32 evtTestMantraNodePartyRequirements(u16, s32);
 
 extern const char D_00425098[];
 
 /* Populate mantra selection flags from rank, profile state and node rules. */
-void func_0026D168(void *selection, s32 unitAddress, s32 mode) {
+void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
     EvtMantraWork *work = selection;
     DatPartyRecord *unit = (DatPartyRecord *)unitAddress;
     s32 rank;
@@ -238,7 +238,7 @@ void func_0026D168(void *selection, s32 unitAddress, s32 mode) {
                 } else if (func_00315FA0(0, unit, node->id) != 0 || rankMet) {
                     switch ((s32)(node->packedHeader << 28) >> 28) {
                     case 2:
-                        if (func_0026D590(node->id, mode)) {
+                        if (evtTestMantraNodePartyRequirements(node->id, mode)) {
                             *entry |= 0x800;
                         }
                         if (func_00315C68(1, 2, unit, node->id, 0)) {
@@ -307,7 +307,7 @@ s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {
 }
 
 /* Like func_0026D7E8, but a mode of 1 rejects the node and the profile caps alone decide. */
-s32 func_0026D590(u16 entry, s32 mode) {
+s32 evtTestMantraNodePartyRequirements(u16 entry, s32 mode) {
     EvtMantraNodePositionRecord *record;
     s8 satisfiedNeighbors;
     s32 partyIndex;

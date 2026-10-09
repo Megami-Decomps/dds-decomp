@@ -98,7 +98,7 @@ typedef struct BattleController {
 
 extern s32 btlGetEffectActive(void);
 
-extern void func_001BCB88(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
@@ -316,7 +316,7 @@ void btlClearUnitStatusMask(void) {
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 func_001A9D38(BtlUnit *actor, s32 index) {
+s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
     DatPartyRecord *record;
     s32 chance;
     f32 ratio;
@@ -1106,7 +1106,7 @@ void btlReleaseResourceBlock(void) {
 
 extern void btlClearTaskActorSlots(void);
 
-extern s32 func_001AD758(s32);
+extern s32 btlCreatePhaseChangePanelTask(s32);
 
 s32 btlResetSceneSlotFades(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -1147,7 +1147,7 @@ s32 btlResetSceneSlotFades(void) {
     }
     btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
-    return func_001AD758(kind);
+    return btlCreatePhaseChangePanelTask(kind);
 }
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
@@ -1699,7 +1699,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern void func_00101A80(KwlnTask *, KwlnTask *);
 
 /* Create the phase-gated PSECHG panel with one of two initial point sets. */
-s32 func_001AD758(s32 variant) {
+s32 btlCreatePhaseChangePanelTask(s32 variant) {
     BtlPsechgPositions firstPoints = D_003A2270;
     BtlPsechgPositions secondPoints = D_003A2298;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -2017,7 +2017,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2318);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A23D8);
 
-void func_001AE250(s32 section, s32 delta) {
+void btlDrawPanelIconGroup(s32 section, s32 delta) {
     /* Rows contain pixel X, pixel Y and sprite slot; section 3 is the sixteen-row grid. */
     u32 colors[4];
     s32 primary[2][3];
@@ -3097,7 +3097,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2C10);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2C28);
 
-void func_001B6850(BtlState *battle, BattleActorPanelWork *work) {
+void btlUpdateActivePanelEntryFades(BtlState *battle, BattleActorPanelWork *work) {
     BattleActorPanelPositions positions = D_003A2C28;
     BtlUnit *actor;
     KwlnTask *task;
@@ -3405,7 +3405,7 @@ void btlReleaseTrackedTaskResource(void) {
     btlSetTrackedTaskHandle(8, 0);
 }
 
-extern void func_001B8838(BattleActorPanelWork *, s8);
+extern void btlRetireActorSlotPresentationChannels(BattleActorPanelWork *, s8);
 
 extern void btlUpdateActorSlotStates(u8 *, s8);
 
@@ -3432,7 +3432,7 @@ void func_001B83D8(BtlTask *task, s8 mode, s8 value) {
         panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
         if (panelTask != NULL) {
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
-            func_001B8838(panel, mode);
+            btlRetireActorSlotPresentationChannels(panel, mode);
             btlUpdateActorSlotStates((u8 *)panel, 0);
             panel->activeEntries[slot].presentation.presentationState = 2;
             panel->activeEntries[slot].presentation.presentationValue = value;
@@ -3473,7 +3473,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
-                func_001B8838((BattleActorPanelWork *)entry, mode);
+                btlRetireActorSlotPresentationChannels((BattleActorPanelWork *)entry, mode);
             }
             offset = slot * 0x290 + 0x10;
             slotEntry = (BtlSlotRow *)(entry + offset);
@@ -3483,7 +3483,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
     }
 }
 
-void func_001B8650(BtlUnit *object, s32 unused, s8 value) {
+void btlSetActorSecondaryPresentation(BtlUnit *object, s32 unused, s8 value) {
     s32 count = 0;
     u8 slot = 0;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -3543,7 +3543,7 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
     }
 }
 
-void func_001B8838(BattleActorPanelWork *work, s8 mode) {
+void btlRetireActorSlotPresentationChannels(BattleActorPanelWork *work, s8 mode) {
     s32 slot;
     s32 remaining;
 
@@ -3577,7 +3577,7 @@ void func_001B8838(BattleActorPanelWork *work, s8 mode) {
     } while (--remaining >= 0);
 }
 
-void func_001B89B0(BattleActorPanelWork *work, s8 mode) {
+void btlClearFinishedActorSlotChannels(BattleActorPanelWork *work, s8 mode) {
     s32 slot;
     s32 remaining;
 
@@ -3716,7 +3716,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2CE8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2D00);
 
-void func_001B9318(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
+void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
     s32 i;
 
     switch (reserve == 0 ? work->activeEntries[slot].presentation.presentationState :
@@ -3846,7 +3846,7 @@ void func_001B9E98(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2D28);
 
-void func_001BA198(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->activeEntries[slot].presentation.transitionState) {
@@ -3883,7 +3883,7 @@ void func_001BA198(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BA408);
 
-void func_001BA660(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlUpdateActorPanelSecondaryPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->activeEntries[slot].presentation.transitionState) {
@@ -4279,7 +4279,7 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
     return -128;
 }
 
-void func_001BCB88(s8 mode, s32 duration) {
+void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
     KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     KwlnTask *panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
     KwlnTask *registeredTask = kwlnTaskGetTaskByName(D_003BB3C0);
@@ -4863,7 +4863,7 @@ s32 fldGetSceneObjectState(void) {
     return fldGetSceneObjectTaskUserData()->state;
 }
 
-void func_001BF4C0(BtlTask *task) {
+void btlOpenBattleCommandPanel(BtlTask *task) {
     BattleController *scene;
     BattleSceneObject *object;
     u32 handle;
@@ -4894,7 +4894,7 @@ void func_001BF4C0(BtlTask *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
                 dspStartEntry(2);
-                func_001BCB88(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
             } else if (btlGetTaskState6() != 0) {
                 scene->flags &= ~0x100000;
                 handle = (u32)kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
@@ -4904,7 +4904,7 @@ void func_001BF4C0(BtlTask *task) {
                 btlSetTrackedTaskHandle(0xC, handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00358828);
-                func_001BCB88(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
             } else {
                 scene->flags |= 0x100000;
             }
@@ -5071,7 +5071,7 @@ void func_001C0DF8(SceneAiWork *work) {
         }
         if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
             (unit->status.flags & 0x200) && panelTask != NULL) {
-            func_001B8650(unit, 0, 1);
+            btlSetActorSecondaryPresentation(unit, 0, 1);
         }
     }
 }
@@ -5146,7 +5146,7 @@ extern u32 func_001A3360(void *source, BtlIndexList *list, s32);
 
 extern s32 func_001C0650(s32, SceneAiWork *);
 
-SceneAiWork *func_001C13E8(BtlTask *source) {
+SceneAiWork *btlCreateAiWork(BtlTask *source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
@@ -5251,7 +5251,7 @@ BtlIndexList *fldGetSceneScriptValue(void) {
 
 extern s32 fldStepSceneStateMachine(KwlnTask *);
 
-extern SceneAiWork *func_001C13E8(BtlTask *);
+extern SceneAiWork *btlCreateAiWork(BtlTask *);
 
 void fldCreateSceneSpriteTask(s32 arg0) {
     BattleController *scene;
@@ -5271,7 +5271,7 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     }
     scene = (BattleController *)btlGetRuntime();
     task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
-                          (u32)func_001C13E8((BtlTask *)arg0));
+                          (u32)btlCreateAiWork((BtlTask *)arg0));
     func_00101A80(scene->taskParent, (KwlnTask *)task);
     scene->spriteObject = task;
 }
@@ -5533,7 +5533,7 @@ INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB470);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB478);
 
-void func_001C32B0(void) {
+void btlDrawSceneSlotFades(void) {
     u32 overlays[2] = {0x0000FF00, 0xFF000000};
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 bank;
@@ -5702,7 +5702,7 @@ void func_001C32B0(void) {
 
 extern const s32 D_003A32F0[10][3];
 
-void func_001C3B28(void) {
+void btlDrawSceneSlotGlyphGrid(void) {
     u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
     s32 rows[10][3] = {
@@ -5874,13 +5874,13 @@ void fldResetSceneStatus(KwlnTask *task) {
 
 void fldBeginSceneTransition(void) {
     BattleController *scene = (BattleController *)btlGetRuntime();
-    func_001BCB88(1, 8);
+    btlSetCommandPanelFadeMode(1, 8);
     scene->flags |= 0x200;
 }
 
 void fldClearSceneTransition(void) {
     btlGetRuntime();
-    func_001BCB88(0, 8);
+    btlSetCommandPanelFadeMode(0, 8);
 }
 
 void func_001C44F8(void) {

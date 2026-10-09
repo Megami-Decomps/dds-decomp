@@ -329,7 +329,7 @@ extern void fldResetTaskSlots(void);
 
 extern void fldSetSceneLifecycleFlags(u32);
 
-extern void func_0023ACE8(void);
+extern void evtKillFieldScriptTasks(void);
 
 extern void func_00150800(void);
 
@@ -1508,7 +1508,7 @@ s32 fldAdvanceToNextScene(void) {
     fldSetSceneLifecycleFlags(1);
     fldSetSceneLifecycleFlags(2);
     fldResetPlayerSceneObjectState();
-    func_0023ACE8();
+    evtKillFieldScriptTasks();
     return -1;
 }
 
