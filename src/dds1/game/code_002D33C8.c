@@ -1338,16 +1338,16 @@ void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color, s32 primitive,
 
 
 void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsFlatQuadPacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x50);
-    *(u64 *)buffer = 0x20000004ULL;
-    *(u64 *)(buffer + 8) = 0x5000000410000000ULL;
-    sdfBuildPacket104x4((SdfGsFlatQuadPayload *)(buffer + 0x10), color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsFlatQuadPacket *)alloc(0x50);
+    packet->dmaTag = 0x20000004ULL;
+    packet->vifCommands = 0x5000000410000000ULL;
+    sdfBuildPacket104x4(&packet->drawing, color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
+    sdfAppendPacket(list, (s32)packet);
 }
 
 /* Emit three GS vertices, each with its own packed color and shared depth. */

@@ -1362,14 +1362,14 @@ void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color, s32 primitive,
 
 void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsFlatQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x50);
-    packet->unk0 = 0x20000004;
-    packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildPacket104x4((SdfGsFlatQuadPayload *)&packet->unk10, color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
+    packet = (SdfGsFlatQuadPacket *)alloc(0x50);
+    packet->dmaTag = 0x20000004;
+    packet->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    sdfBuildPacket104x4(&packet->drawing, color, primitive, x0, y0, x1, y1, x2, y2, x3, y3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
