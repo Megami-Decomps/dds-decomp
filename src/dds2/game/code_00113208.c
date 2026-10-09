@@ -8,10 +8,6 @@
 
 extern void dds3EnsureSlotData(void *object);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
-
-extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
-
 extern void effObjInnerVecBackup(ObjectTransform *node);
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);

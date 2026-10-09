@@ -71,10 +71,6 @@ extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 extern void dds3EnsureSlotData(void *obj);
 
-extern void effObjSetInnerFirstVec(void *obj, void *vec);
-
-extern void effObjSetInnerSecondVec(void *obj, void *vec);
-
 extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
 extern void effMagatuhiSetControlPointParams(void *, const void *);

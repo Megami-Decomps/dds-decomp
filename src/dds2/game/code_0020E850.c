@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "btl_resource_name.h"
 #include "sdf_chip.h"
 #include "btl_task_state.h"
@@ -167,7 +168,7 @@ void func_0020EA10(void) {
 
 
 extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
-extern void effObjFetchInnerFirstVec(EffWorldNode *node);
+
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void func_001200E8(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 

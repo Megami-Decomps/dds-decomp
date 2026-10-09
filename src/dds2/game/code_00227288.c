@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
@@ -278,8 +279,6 @@ s32 btlGetCanonicalCombatantKind(BtlUnit *unit) {
     return unit->combatantKind;
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 
 /* Lower the linked actor, or return eligible actors to ground level. */
 void func_00227820(void) {

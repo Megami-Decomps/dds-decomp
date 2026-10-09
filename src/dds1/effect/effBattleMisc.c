@@ -17,7 +17,7 @@ extern void (*D_003528D8[])();
 extern void *dds3GetWorldObject(void);
 struct EffWorldNode;
 extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
-extern void effObjFetchInnerFirstVec(void *object);
+
 extern f32 D_00352890[];
 extern f32 D_003528A8[];
 extern void func_002DD688(f32 angle);

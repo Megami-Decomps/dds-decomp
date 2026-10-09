@@ -32,9 +32,7 @@ extern void *dds3GetWorldObject(void);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
+
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);

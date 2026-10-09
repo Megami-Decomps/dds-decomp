@@ -79,8 +79,7 @@ f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
+
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32, f32);
 
@@ -246,9 +245,7 @@ extern u8 dds3TestObjectFlags(void *, s32);
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
 extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_00222ED8(EffLocalNode *, EffWorldNode *);
-extern void effObjMulInnerThirdVec(EffWorldNode *, u128 *);
-extern void effObjQuatMulInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjAddInnerFirstVec(EffWorldNode *, u128 *);
+
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern f32 sdfSinPoly(f32);
 extern void mdlStoreTertiaryVectorVU(void *);
@@ -501,8 +498,7 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
 }
 
 extern void dds3EnsureSlotData();
-extern void effObjSetInnerFirstVec();
-extern void effObjSetInnerSecondVec();
+
 EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     f32 zero[4];
     EffWorldNode *obj;
@@ -513,7 +509,7 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     obj->key = (u32)a;
     dds3EnsureSlotData(obj);
     effObjSetInnerSecondVec(obj, second);
-    effObjSetInnerFirstVec(obj, zero);
+    effObjSetInnerFirstVec(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
     ((EffectTransformData *)obj->data)->offset[0] = vec[0];
     ((EffectTransformData *)obj->data)->offset[1] = vec[1];
@@ -861,4 +857,3 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", effObjOpacityPassEnabled);
-

@@ -11,12 +11,9 @@ extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
 extern void dds3InterpolatePathOutput(Dds3PathCurveWork *, WorldTransformParams *);
 extern void dds3LoadWorldTransformParams(EffWorldNode *, WorldTransformParams *);
 extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *);
-extern void effObjSetInnerFirstVec(EffWorldNode *, void *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, void *);
+
 extern void effObjInnerVecInit(ObjectTransform *);
-extern void effObjMulInnerThirdVec(EffWorldNode *, void *);
-extern void effObjQuatMulInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjAddInnerFirstVec(EffWorldNode *, void *);
+
 
 #define DDS3_MOVER_POSITION_COPY_KIND 6
 #define DDS3_MOVER_CAMERA_KIND 4
@@ -42,7 +39,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
         if (work->path->flags & DDS3_PATH_POSITION_CHANNEL) {
             dds3InterpolatePathVectorVU(work->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerFirstVec(target, pathVector);
+            effObjSetInnerFirstVec(target, (u128 *)pathVector);
             if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_POSITION_COPY_KIND) {
                 PCP_COPY_VECTOR(&((EffectTransformData *)target->data)->position, pathVector);
             }
@@ -50,7 +47,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
         if (work->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
             dds3PreparePathVectorPair(work->path);
             VU0_STORE_VF(vf10, pathVector);
-            effObjSetInnerSecondVec(target, pathVector);
+            effObjSetInnerSecondVec(target, (u128 *)pathVector);
         }
         if (work->path->flags & DDS3_PATH_SCALAR_CHANNEL) {
             if (((u8 *)&target->kindTag)[3] == DDS3_MOVER_CAMERA_KIND) {
@@ -75,12 +72,11 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
         if (updateCallback != NULL) {
             effObjInnerVecInit(&relativeTransform);
             if (updateCallback(&relativeTransform, target) == 1) {
-                effObjMulInnerThirdVec(target, relativeTransform.scale);
+                effObjMulInnerThirdVec(target, (u128 *)relativeTransform.scale);
                 effObjQuatMulInnerSecondVec(target, (u128 *)&relativeTransform.rotation);
-                effObjAddInnerFirstVec(target, relativeTransform.position);
+                effObjAddInnerFirstVec(target, (u128 *)relativeTransform.position);
             }
         }
     }
     return 1;
 }
-

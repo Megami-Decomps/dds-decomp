@@ -2497,8 +2497,6 @@ void fldReleaseTextureSlots(void) {
 
 extern u32 fldPlayerObject;
 
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
-
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
 extern void func_002DD688(f32 angle);
@@ -3600,8 +3598,7 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
 /* Complete 0x40-byte field spark controller, including the weather timer. */
 extern s32 D_003D62DC[];
 struct EffWorldNode;
-extern void effObjSetInnerFirstVec(struct EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(struct EffWorldNode *, u128 *);
+
 
 s32 func_0014BA50(s32 index, s32 reserved) {
     s32 slot;
@@ -3638,8 +3635,6 @@ s32 func_0014BA50(s32 index, s32 reserved) {
     }
     return 0;
 }
-
-extern void effObjSetInnerFirstVec();
 
 extern void dds3ClearObjectFlags();
 

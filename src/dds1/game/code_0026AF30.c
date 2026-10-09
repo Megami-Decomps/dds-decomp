@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "eff_transform.h"
 
 extern f32 D_003DC1C0[4];
@@ -14,10 +15,6 @@ extern void fldReleaseCameraColorEffect(void);
 extern void func_002CF430(void);
 
 extern void evtDestroySecondaryWorldNode(void);
-
-extern void effObjSetInnerFirstVec(void *, void *);
-
-extern void effObjSetInnerSecondVec(void *, void *);
 
 extern s32 evtCreateWorldObjectForKey(s32, s32);
 
@@ -36,8 +33,8 @@ extern void func_002CF420(void);
 extern void fldApplyLightSetIndex(s32);
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerFirstVec(mnuTitleCameraObject, D_003DC1C0);
-    effObjSetInnerSecondVec(mnuTitleCameraObject, D_003DC1D0);
+    effObjSetInnerFirstVec(mnuTitleCameraObject, (u128 *)D_003DC1C0);
+    effObjSetInnerSecondVec(mnuTitleCameraObject, (u128 *)D_003DC1D0);
     return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 

@@ -13,8 +13,7 @@ extern void effObjFreeInner(EffWorldNode *node);
 extern void dds3DestroyObjectBase(ObjBase *base);
 
 extern void dds3EnsureSlotData(void *object);
-extern void effObjSetInnerFirstVec(EffWorldNode *obj, u128 *vec);
-extern void effObjSetInnerSecondVec(EffWorldNode *obj, u128 *vec);
+
 extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
 extern CameraVector D_0039F6F8;
