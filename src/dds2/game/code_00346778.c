@@ -34,12 +34,8 @@ extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_0035D5B0(const char *text, s32 delimiter);
 extern s32 func_0035CB10(const char *text, const char *suffix);
-extern void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format,
-                                                SdfStreamRead read, u32 source, s32 resource);
 extern s32 sdfMovieHandleLinearDeviceEvent(void *, s32, s32, s32, s32);
 extern s32 sdfMovieHandlePacDeviceEvent(void *, s32, s32, s32, s32);
-extern s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *, u32, s32, void *, s32);
-extern s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *, u32, s32, void *, s32);
 extern s32 D_00438D08;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];
@@ -88,7 +84,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         owner->deviceState = sdfDevCreateCallbackState(name,
                                                         (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
-                                            sdfMovieLinearStreamReadCallback, (u32)owner, descriptor->source);
+                                            sdfMovieLinearStreamReadCallback, owner, descriptor->source);
         return;
     }
 
@@ -112,7 +108,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
     sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
-                                        sdfMoviePacStreamReadCallback, (u32)owner, descriptor->source);
+                                        sdfMoviePacStreamReadCallback, owner, descriptor->source);
 }
 
 extern s32 sdfDevQueueActiveOperation(DevState *);
