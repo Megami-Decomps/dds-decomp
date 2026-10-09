@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "sdf.h"
+#include "sdf_thread.h"
 
 #define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
 #define SDF_THREAD_COMPLETION_EVENT 2
@@ -11,11 +12,11 @@
 
 s32 sdfThreadWakeTick __attribute__((section(".sdata"), aligned(8))) = 0;
 
-extern u64 sdfFindThreadNode(u64);
+extern void func_003289C8(SdfThreadNode *node);
 
 /* The negative lookup selector selects the calling thread's tracked entry. */
 void sdfUnlinkAndDeleteCurrentThread(void) {
-    u64 threadNode;
+    SdfThreadNode *threadNode;
 
     threadNode = sdfFindThreadNode(SDF_CURRENT_THREAD_SELECTOR);
     func_003289C8(threadNode);
