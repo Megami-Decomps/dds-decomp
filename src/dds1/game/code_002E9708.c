@@ -9,6 +9,7 @@
 #include "sdf_dev_state.h"
 #include "mdl_object_stream.h"
 #include "sdf_texture_offset_list.h"
+#include "sdf_texture_file.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -56,8 +57,6 @@ extern s32 D_003BD62C;
 extern u32 D_003BD630;
 
 extern u32 D_003BD61C;
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 
 extern u32 sdfSoundCommandStatus;
@@ -767,7 +766,7 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
     u32 info[4];
 
     handle = sdfReadNamedResource(name, info, 0);
-    resource = sdfTexAcquireResourceTexture((void *)info[0]);
+    resource = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
     sdfReleaseResourceAllocation(handle);
     return resource;
 }
@@ -781,8 +780,8 @@ DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHead
         entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture(
-                (void *)((const u8 *)resource + *entry)));
+            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(
+                (void *)((const u8 *)resource + *entry))));
             entry++;
         } while (i != count);
     }

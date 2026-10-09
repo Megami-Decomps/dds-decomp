@@ -6,6 +6,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_texture_file.h"
 
 typedef struct SdfTex SdfTex;
 
@@ -498,8 +499,6 @@ s32 evtOpReadDisplayValue(void) {
     return 1;
 }
 
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
-
 /* Acquire the loaded data's texture reference, then release its temporary resource.
  * DDS2 passes the size-output address as an integer, unlike DDS1's pointer slot. */
 s32 evtLoadTextureFromResourcePath(u32 path) {
@@ -508,7 +507,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
     s32 texture;
 
     allocation = sdfReadNamedResource((const char *)(u32)path, &info[0], (u32 *)&info[1]);
-    texture = (s32)sdfTexAcquireResourceTexture((void *)info[0]);
+    texture = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(info[0]));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return texture;
 }

@@ -22,6 +22,7 @@
 #include "dds3obj.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
+#include "sdf_texture_file.h"
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
@@ -2271,10 +2272,6 @@ void fldEnterSceneCamera(void) {
     D_0037F980.camera.offsetY = 2118.0f;
 }
 
-
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
-
 /* Loads the scene's models into the resource slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
@@ -2296,10 +2293,10 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_0044F818)[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_0044F7F0[5] = sdfTexAcquireResourceTexture((void *)cam->mapResources[3].resourceAddress);
-    D_0044F7F0[7] = sdfTexAcquireResourceTexture((void *)cam->mapResources[5].resourceAddress);
-    D_0044F7F0[8] = sdfTexAcquireResourceTexture((void *)cam->mapResources[6].resourceAddress);
-    D_0044F7F0[9] = sdfTexAcquireResourceTexture((void *)cam->mapResources[7].resourceAddress);
+    D_0044F7F0[5] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[3].resourceAddress));
+    D_0044F7F0[7] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[5].resourceAddress));
+    D_0044F7F0[8] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[6].resourceAddress));
+    D_0044F7F0[9] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(cam->mapResources[7].resourceAddress));
     D_00436268 = 0;
     D_00436248 = cam->floor;
     D_0043624C = cam->unkC0;
@@ -3064,10 +3061,10 @@ void fldInitializeMenuResources(void) {
             fldAreaDamageEffect = 0;
         }
         fldAreaDamageEffectPlaced = 0;
-        fldAreaState.fieldTextures[0].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[0].resourceAddress);
-        fldAreaState.fieldTextures[1].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[1].resourceAddress);
-        fldAreaState.fieldTextures[2].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[2].resourceAddress);
-        fldAreaState.fieldTextures[3].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[3].resourceAddress);
+        fldAreaState.fieldTextures[0].texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldAreaState.fieldTextures[0].resourceAddress));
+        fldAreaState.fieldTextures[1].texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldAreaState.fieldTextures[1].resourceAddress));
+        fldAreaState.fieldTextures[2].texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldAreaState.fieldTextures[2].resourceAddress));
+        fldAreaState.fieldTextures[3].texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldAreaState.fieldTextures[3].resourceAddress));
     }
 }
 
@@ -3661,12 +3658,12 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
         func_0035C860(path, "/fld/f/pnl/df%03d.tmx", field);
     }
     handle = sdfReadNamedResource(path, &resourceAddress, 0);
-    D_00436368 = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    D_00436368 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (field == 0xC) {
         func_0035C860(path, "/fld/f/pnl/df_b.tmx");
         handle = sdfReadNamedResource(path, &resourceAddress, 0);
-        D_0043636C = sdfTexAcquireResourceTexture((void *)resourceAddress);
+        D_0043636C = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     }
     if (fldTitleIsActive() == 0) {
@@ -3822,7 +3819,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_00436374 = 0;
     func_0035C860(path, "/fld/f/pnl/ds_%03d.tmx", id);
     handle = sdfReadNamedResource(path, &data, 0);
-    D_0043637C = sdfTexAcquireResourceTexture((void *)data);
+    D_0043637C = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_00413C80, 0x2B0A, 0, 1, func_0014EDB8, fldReleaseTitleMiniTexture, 0);
@@ -3841,13 +3838,13 @@ void fldLoadWeatherEffects(void) {
     s32 handle;
 
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt1.tmx", &data, 0);
-    D_004363AC = sdfTexAcquireResourceTexture((void *)data);
+    D_004363AC = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt2.tmx", &data, 0);
-    D_004363B0 = sdfTexAcquireResourceTexture((void *)data);
+    D_004363B0 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt3.tmx", &data, 0);
-    D_004363B4 = sdfTexAcquireResourceTexture((void *)data);
+    D_004363B4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     D_00436380 = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     fldDamEffectNode = func_001579C8(D_00436384);

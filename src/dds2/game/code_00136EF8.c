@@ -16,6 +16,7 @@ extern FldInfTable D_0038E2D0;
 #include "evt_world.h"
 #include "scr.h"
 #include "sdf.h"
+#include "sdf_texture_file.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
@@ -152,8 +153,6 @@ extern u8 D_00391F84[];
 extern s32 D_004361FC;
 
 extern s32 fldRainTextureResource;
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
 
 extern char D_00413350[];
@@ -322,7 +321,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00136EF8);
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
-    fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
+    fldRainTextureReference = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);

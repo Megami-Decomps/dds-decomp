@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
 #include "fld_map_resource.h"
+#include "sdf_texture_file.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
@@ -13,9 +14,6 @@ extern s32 D_004390A4;
 extern u32 D_0045C7A0[];
 
 extern u32 D_0045C7B0[];
-
-
-extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 
 
@@ -299,7 +297,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     struct SdfMemBlock *allocation = sdfReadNamedResource(name, &record->resourceAddress, 0);
     u32 resourceAddress = record->resourceAddress;
     record->allocation = allocation;
-    record->texture = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    record->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     if (record->allocation != 0) {
         sdfQueueGeneralAllocationRelease(record->allocation);
         record->allocation = 0;

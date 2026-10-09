@@ -43,6 +43,7 @@
 #include "eff_owner_records.h"
 #include "sdf.h"
 #include "fpu.h"
+#include "sdf_texture_file.h"
 
 extern void func_00200930(f32 *, f32 *, s32);
 
@@ -1533,8 +1534,6 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
     object->scale = scale;
 }
 
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
-
 
 typedef struct EffKindAssetHolder {
     s32 kind;
@@ -1548,7 +1547,7 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
     object[1] = 1;
     switch (kind) {
     case 1:
-        object[2] = (s32)sdfTexAcquireResourceTexture(source);
+        object[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(source));
         break;
     case 4:
         object[2] = (s32)effGetBillResourceTexture(*source);
@@ -11732,7 +11731,7 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == slotIndex) {
                     if (set->textureReferences[slotIndex] == 0) {
-                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
+                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceData));
                     }
                 } else {
                     set->textureReferences[slotIndex] = 0;
