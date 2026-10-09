@@ -490,7 +490,7 @@ extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
 extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
-extern void func_0013BAB8(FldFileResource *, EffWorldNode *);
+extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);
 extern void func_0014C9B0(u32, f32 *, f32, f32, f32);
