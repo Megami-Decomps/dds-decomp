@@ -2712,7 +2712,14 @@ void fldGetVisibleSceneBounds(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", fldCheckSceneReady);
+void fldCheckSceneReady(void) {
+    if (D_00389780[0] >= 200) {
+        return;
+    }
+    if (fldSceneReady == 1) {
+        func_0014A258();
+    }
+}
 
 void func_0014B050(void) {
     if (fldSceneReady == 1) {
