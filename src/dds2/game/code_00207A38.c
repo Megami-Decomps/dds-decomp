@@ -3130,7 +3130,8 @@ typedef struct BtlResourceNameRecord {
     s32 nameLength; /* 0x10: length of text written at 0x21 */
     u32 word14;     /* 0x14: initialized to 9 */
     s32 word18;     /* 0x18 */
-    char name[0x1C]; /* 0x1C */
+    char extension[5];       /* 0x1C: four-character extension plus terminator */
+    char resourceName[0x17]; /* 0x21: remaining bytes in the 0x38-byte allocation */
 } BtlResourceNameRecord;
 
 void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
@@ -3205,7 +3206,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
 
-/* Allocate the native name record and copy the initial text at byte 0x1C. */
+/* Allocate the native name record and initialize its header and extension. */
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
     struct BtlResourceNameRecord *record;
 
@@ -3217,7 +3218,7 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
     record->nameLength = 0;
     record->word0C = 0;
     record->word18 = 0;
-    strcpy((char *)record + 0x1c, extension);
+    strcpy(record->extension, extension);
     return record;
 }
 
@@ -3236,18 +3237,18 @@ u32 func_0020E7B0(struct BtlResourceNameRecord *record) {
     return record->word08;
 }
 
-/* Copy text at native byte 0x21 and record its length, unlike the constructor's 0x1C copy. */
+/* Copy the resource name at +0x21 and store its length. */
 void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *name) {
-    strcpy((char *)record + 0x21, name);
+    strcpy(record->resourceName, name);
     record->nameLength = strlen(name);
 }
 
 void btlFormatResourceNameWithPrefix(struct BtlResourceNameRecord *record, char *output) {
-    func_0035C860(output, D_00436C50, (char *)record + 0x21, (char *)record + 0x1c);
+    func_0035C860(output, D_00436C50, record->resourceName, record->extension);
 }
 
 void btlFormatResourceNameWithoutPrefix(struct BtlResourceNameRecord *record, char *output) {
-    func_0035C860(output, D_00436C58, (char *)record + 0x21);
+    func_0035C860(output, D_00436C58, record->resourceName);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00207A38", D_00436AF0);
