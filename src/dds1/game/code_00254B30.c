@@ -8,6 +8,8 @@
 #include "mnu_scene_work.h"
 #include "mnu_scene_list.h"
 
+struct EffectSlotSet;
+
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
 #define MNU_DISPLAY_ALPHA_MASK 0xFF
@@ -185,17 +187,17 @@ typedef struct MnuSpritePlacement {
 } MnuSpritePlacement;
 
 extern MnuSpritePlacement D_0036B510[];
-extern s32 D_0036C698[];
+extern struct EffectSlotSet *D_0036C698[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
                               u16 unusedSceneId, s32 unusedContext) {
-    s32 resource = D_0036C698[D_0036B510[41].resourceIndex];
+    struct EffectSlotSet *resource = D_0036C698[D_0036B510[41].resourceIndex];
 
     func_002BF4E0((x + D_0036B510[41].x) << 4,
                   (y + D_0036B510[41].y) << 3, z,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
-                  resource,
+                  (s32)resource,
                   D_0036B510[41].spriteIndex, 0x53);
 }
 
@@ -418,7 +420,7 @@ void func_00255E08(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     func_0024E260(0, 0, 0, (f32)alpha * factor, 0x2B, context);
     sparkles = &scene->sparkles;
     mnuTickMantraSparkParticles(sparkles);
-    func_00255B78(sparkles, D_0036C698[1], context);
+    func_00255B78(sparkles, (s32)D_0036C698[1], context);
 }
 
 void itfDspDrawMarksA(s32 scale, s32 context) {
