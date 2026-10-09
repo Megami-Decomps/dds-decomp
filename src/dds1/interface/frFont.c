@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_image_upload.h"
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "itf.h"
@@ -257,18 +258,7 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontRecord *source, FrFontGlyph *destinat
     return frFontLinkGlyphAfterPrevious(destination, referenceChain);
 }
 
-typedef struct SdfImageUploadRequest {
-    void *pixels;
-    s32 allocation;
-    u8 allocationMode;
-    u8 format;
-    u16 bufferWidth;
-    u32 destination;
-    u16 x;
-    u16 y;
-    u16 width;
-    u16 height;
-} SdfImageUploadRequest;
+
 
 extern FntNode *frFontDetachFirstResourceNode(void);
 extern void func_002D1D80(SdfImageUploadRequest *);
