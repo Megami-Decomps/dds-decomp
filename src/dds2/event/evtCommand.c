@@ -120,8 +120,6 @@ extern char D_00421F08[];
 
 
 
-/* Same room-name and inner-status offsets as the DDS1 event unit. */
-
 extern char D_00421F68[];
 
 void evtSetWorldSlotStatusFlag(void *unit);

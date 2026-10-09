@@ -85,7 +85,6 @@ extern void evtEnsureDrawVectorState(void);
 
 extern void sdfGraphSetDisplayMode(s32 arg0);
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern s32 effMiscRandMod(s32, s32);
