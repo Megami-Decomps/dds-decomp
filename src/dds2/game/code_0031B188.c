@@ -54,7 +54,7 @@ extern u32 *dds3SoundSlotPool;
 extern u32 fileClearRenderFlag(u32 mask);
 
 
-extern void func_00328160(f32 *out);
+extern void func_00328160(f32 *out, f32 x, f32 y, f32 z);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
@@ -689,11 +689,11 @@ void mnuTranslateNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
     mdlStorePrimaryVectorVU(modelNode->model);
 }
 
-/* Cache the source quaternion and use it to rebuild the model's rotation basis. */
-void mnuRefreshNodeSecondaryVector(u8 *node) {
+/* Build a quaternion from the incoming Euler angles and refresh the model basis. */
+void mnuRefreshNodeSecondaryVector(u8 *node, f32 xAngle, f32 yAngle, f32 zAngle) {
     f32 quaternion[4];
 
-    func_00328160(quaternion);
+    func_00328160(quaternion, xAngle, yAngle, zAngle);
     ((MnuModelNode *)node)->rotationQuaternion[0] = quaternion[0];
     ((MnuModelNode *)node)->rotationQuaternion[1] = quaternion[1];
     ((MnuModelNode *)node)->rotationQuaternion[2] = quaternion[2];

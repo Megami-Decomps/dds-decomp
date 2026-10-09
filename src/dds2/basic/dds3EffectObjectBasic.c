@@ -428,10 +428,10 @@ EffectObj *effObjCreateResourceKindZero(const char *path, u64 firstVectorAddress
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
    The object-base state word remains a separate native value of two. */
-EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
+EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     void *bill;
     void *firstVector;
-    s32 secondVectorAddress;
+    void *secondVector;
 {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
@@ -440,7 +440,7 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
     EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -465,11 +465,11 @@ EffectObj *effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress)
 }
 
 /* Create the descriptor-sourced node and return its bound world object. */
-EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = effCreateNodeFromDescriptor(descriptor);
-    return effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress);
+    return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
 /* Load and bind the named resource, returning the created object. */
@@ -477,7 +477,7 @@ void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVecto
     struct EffNode *bill;
 
     bill = effLoadResourceNode(resourceName);
-    return effObjCreateWithBoundBill(bill, firstVector, (s32)(u32)secondVector);
+    return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
 /* The world-bill entry uses the same state-one/node-instance initialization as binding. */
