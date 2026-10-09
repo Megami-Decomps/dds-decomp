@@ -250,6 +250,8 @@ struct BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex);
 struct BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex);
 #endif
 
+struct BtlRuntimeTask *sndCreateEarringPlaybackTask(struct BtlUnit *unit);
+
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
 

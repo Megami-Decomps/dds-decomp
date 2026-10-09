@@ -329,19 +329,19 @@ void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
 
-BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
-    BtlRuntimeTask *task = btlAllocTask(12);
+BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlDeadLoadArgs));
     BtlDeadLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
-    task->ownerId = owner->owner;
+    task->ownerId = unit->owner;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndDeadAtracPlaybackTask;
     task->onFinish = sndFinishEarringPlaybackTask;
     args = btlGetTaskArguments(task);
-    args->unit = owner;
+    args->unit = unit;
     args->request = 0;
     args->resourceAllocation = 0;
     return task;

@@ -7242,20 +7242,20 @@ void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *args) {
     --*(u16 *)(state + 0x260);
 }
 
-void *sndCreateEarringPlaybackTask(u8 *owner) {
-    u8 *task = btlAllocTask(12);
+BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlDeadLoadArgs));
     BtlDeadLoadArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x59;
-    *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(void **)(task + 0x48) = sndStartDeadAtracLoad;
-    *(void **)(task + 0x4C) = sndUpdateEarringDeadPlayback;
-    *(void **)(task + 0x50) = sndFinishEarringPlaybackTask;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->taskId = 0x59;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->ownerId = unit->identity;
+    task->onStart = sndStartDeadAtracLoad;
+    task->callback = sndUpdateEarringDeadPlayback;
+    task->onFinish = sndFinishEarringPlaybackTask;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = unit;
     arguments->request = 0;
     arguments->resourceAllocation = 0;
     return task;
