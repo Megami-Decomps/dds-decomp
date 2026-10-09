@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_scene_fade.h"
 #include "eff_ref_obj.h"
@@ -946,9 +947,6 @@ extern BtnUv D_0035FA98[];
 extern BtnUv D_0035FAA0[];
 struct RefObj;
 extern SdfTex *func_0029C048(void *, struct RefObj *);
-extern void sdfQueueGouraudTexturedQuad(s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-    s32, s32, s32, s32, s32, s32 (*)(s32));
 extern s32 sdfAllocPacketAligned(s32);
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
@@ -985,7 +983,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
         sdfConsCreateDrawPacket(packet, texture, 0);
         xFixed = x * 0x10;
         yFixed = y * 8;
-        sdfQueueGouraudTexturedQuad((s32)packet, 0x40,
+        sdfQueueGouraudTexturedQuad(packet, 0x40,
                       xFixed + 0x7000, yFixed + 0x7900, uv->u * 0x10, uv->v * 0x10, topLeftColor,
                       xFixed + 0x7200, yFixed + 0x7900, uv->u * 0x10 + 0x200, uv->v * 0x10, topRightColor,
                       xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,

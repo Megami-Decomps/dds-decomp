@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -5895,13 +5896,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 
 extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfQueueGouraudTexturedQuad(
-    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
-    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
-    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
-    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
-    s32 depth, s32 (*allocate)(s32));
-
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
@@ -5920,7 +5914,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
     vBottom = vFixed + height * 0x10;
-    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+    sdfQueueGouraudTexturedQuad(list, 0x40,
         x0 * 0x10 + 0x7000, y0 * 8 + 0x7900, uFixed, vFixed, colors[0],
         x1 * 0x10 + 0x7000, y1 * 8 + 0x7900, uRight, vFixed, colors[1],
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
