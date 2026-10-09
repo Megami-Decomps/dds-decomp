@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -100,10 +101,6 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
-extern void sdfBuildPrimaryTestBlendPacket(void *);
-extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
-extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 /* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
  * Each blend builder fills the 0x40-byte packet area after the list head. */
 typedef struct SdfDrawPacketGroup {
@@ -126,10 +123,10 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].header);
-    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].header);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].header);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
+    sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)&ctx->groups[0].header);
+    sdfBuildPrimaryTestBlendPacket((SdfGsBlendPacket *)&ctx->groups[1].header);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[2].header);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[3].header);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
         packet->header.firstVifCode = 0x11000000;

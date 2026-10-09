@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
@@ -156,7 +157,6 @@ typedef struct EvtGsCommand {
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 
