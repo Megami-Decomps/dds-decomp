@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_image_upload.h"
 #include "ee_mmi.h"
 
 extern s32 iWakeupThread(s32 threadId);
@@ -32,18 +33,7 @@ enum {
     SDF_UPLOAD_CHIP_HEAP = 2
 };
 
-typedef struct SdfImageUploadRequest {
-    void *pixels;
-    SdfMemBlock *allocation;
-    u8 allocationMode;
-    u8 format;
-    u16 bufferWidth;
-    u32 destination;
-    u16 x;
-    u16 y;
-    u16 width;
-    u16 height;
-} SdfImageUploadRequest;
+
 
 extern void func_0032AC30(SdfImageUploadRequest *);
 
