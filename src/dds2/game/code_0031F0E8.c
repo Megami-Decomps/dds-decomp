@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
 
 typedef struct DdsSpriteFileHeader {
@@ -104,28 +105,6 @@ typedef struct DdsSpriteExtendedRecord {
     u8 inlineData[8];
     void *data;
 } DdsSpriteExtendedRecord;
-
-typedef struct DdsCountedPayload {
-    u32 count;
-    void *data;
-} DdsCountedPayload;
-
-typedef struct DdsNestedGroup {
-    u32 unk_00;
-    u16 firstCount;
-    u16 secondCount;
-    DdsCountedPayload *first;
-    DdsCountedPayload *second;
-} DdsNestedGroup;
-
-typedef struct DdsNestedHeader {
-    u32 unk_00;
-    u32 unk_04;
-    u32 unk_08;
-    u16 unk_0C;
-    u16 groupCount;
-    DdsNestedGroup *groups;
-} DdsNestedHeader;
 
 typedef struct DdsNestedRecord {
     u32 unk_00;
