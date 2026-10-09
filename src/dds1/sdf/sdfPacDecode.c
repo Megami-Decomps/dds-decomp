@@ -68,7 +68,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 sdfPacFeedInput(PacState *state, void *input, s32 available) {
+s32 sdfPacFeedInput(PacState *state, u8 *input, s32 available) {
     s32 consumeBytes;
 
     state->inputCursor = input;
@@ -474,4 +474,3 @@ void sdfPacSkipAllocationEntryBytes(PacState *state) {
     }
     sdfPacResetOutputToAllocationEntry(state);
 }
-

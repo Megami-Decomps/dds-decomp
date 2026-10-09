@@ -245,7 +245,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
     if (flags & 2) {
         sdfPacUsePacketPayloadMemory(&request);
     }
-    sdfPacFeedInput((PacState *)&request, requestFirst, requestSecond);
+    sdfPacFeedInput((PacState *)&request, (u8 *)requestFirst, requestSecond);
     func_00218768(request.handle, first, second, flags);
     sdfPacReleasePacketQueueNodes(&request);
 }
@@ -3425,4 +3425,3 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
-

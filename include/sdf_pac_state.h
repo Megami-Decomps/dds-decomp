@@ -44,6 +44,6 @@ typedef char PacState_queueTail_must_be_at_0x34[
     ((u32)&((PacState *)0)->queueTail == 0x34) ? 1 : -1];
 
 void sdfPacInitializeDispatchPacket(PacState *state, void *callbackAddress);
-s32 sdfPacFeedInput(PacState *state, void *input, s32 available);
+s32 sdfPacFeedInput(PacState *state, u8 *input, s32 available);
 
 #endif /* SDF_PAC_STATE_H */
