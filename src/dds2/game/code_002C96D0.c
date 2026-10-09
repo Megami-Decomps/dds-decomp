@@ -105,8 +105,6 @@ struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-extern void *fileDuplicateJob(void *);
-
 struct SdfMemBlock;
 
 
@@ -445,8 +443,6 @@ extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceI
 extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job);
 extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
-
-extern FileJobPayload *fileCreateJob(u16 type);
 
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
 extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
@@ -4614,8 +4610,7 @@ void fileWriteToPfs(s32 data, s32 slotIndex) {
     func_0036BCD0(D_00437E20, 0);
 }
 
-void *fileDuplicateJob(void *source) {
-    FileJobPayload *request = source;
+FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
     FileJobPayload *job = fileCreateJob(request->type);
 
     if (request->primary.size != 0) {
@@ -4629,24 +4624,22 @@ void *fileDuplicateJob(void *source) {
 
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
-void *fileJobCreateFromCommandState(entry)
-    s32 entry;
-{
+FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
-    void *job;
+    struct SdfMemBlock *allocation;
+    void *buffer;
+    FileJobPayload *job;
 
-    command = sdfDevCreateCommandState((const char *)entry);
+    command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        job = fileDuplicateJob((void *)address);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        job = fileDuplicateJob((FileJobPayload *)buffer);
+        sdfReleaseResourceAllocation(allocation);
         return job;
     }
 }
@@ -5057,8 +5050,8 @@ FileJob *fileAppendJob(FileQueue *queue, u32 id) {
     return job;
 }
 
-FileJob *fileDuplicateAndAppendJob(FileQueue *queue, void *source) {
-    void *job = fileDuplicateJob(source);
+FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
+    FileJobPayload *job = fileDuplicateJob(source);
     return fileAppendJob(queue, (u32)job);
 }
 
@@ -5400,7 +5393,7 @@ FileQueue *func_002D5AA8(s32 entry) {
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
          i < image->count; i++, src++) {
         if ((src->flags & 1) == 0) {
-            copy = fileDuplicateAndAppendJob(queue, (u8 *)image + src->id);
+            copy = fileDuplicateAndAppendJob(queue, (FileJobPayload *)((u8 *)image + src->id));
         } else {
             copy = fileJobDuplicateAfter(queue, fileQueueGetAt(queue, src->id));
         }
