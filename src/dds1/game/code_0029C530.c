@@ -8412,7 +8412,7 @@ void effInitializeResourceQueue(void) {
 u32 effPollResourceQueue(void) {
     u32 state;
 
-    func_001FC300(effFileQueueNameRecord);
+    btlUpdateResourceNameEditor(effFileQueueNameRecord);
     btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002B5990())->name);
     state = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(state - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
@@ -8446,7 +8446,7 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
         btlSetResourceNamePosition(effQueuedResourceNameRecord, 0xC2, 0xC8);
         return;
     }
-    func_001FC300(effQueuedResourceNameRecord);
+    btlUpdateResourceNameEditor(effQueuedResourceNameRecord);
     btlFormatResourceNameWithExtension(effQueuedResourceNameRecord, record->nameWithExtension);
     btlFormatResourceNameWithoutExtension(effQueuedResourceNameRecord, record->name);
     state = btlGetResourceNameSelectionStatus(effQueuedResourceNameRecord);

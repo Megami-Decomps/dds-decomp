@@ -36,12 +36,12 @@ u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record,
 u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record);
 void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength);
 
+void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record);
+
 #ifdef VERSION_DDS1
 void func_001FC2E8(void *allocation);
-void func_001FC300(struct BtlResourceNameRecord *record);
 #else
 void func_0020E368(void *allocation);
-void func_0020E380(struct BtlResourceNameRecord *record);
 #endif
 
 #endif /* BTL_RESOURCE_NAME_H */
