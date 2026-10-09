@@ -6947,3 +6947,4 @@
 0x0020E858	btlPollResourceNameOverwrite	inferred	Formats the target path from directory, editable name and extension; returns permission after a file-existence check and optional overwrite prompt.
 0x0020E7B0	btlGetResourceNameSelectionStatus	inferred	Returns the current name-entry selection result without modifying the record.
 0x0020E850	btlSetResourceNameLengthLimit	inferred	Sets the maximum name length tested by the native character editor before appending.
+0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.

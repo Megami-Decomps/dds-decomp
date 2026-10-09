@@ -3214,7 +3214,7 @@ void func_0020E368(void *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E380);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlUpdateResourceNameEditor);
 
 void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y) {
     record->x = x;
