@@ -453,16 +453,6 @@ typedef struct SdfResource {
     s32 id;
 } SdfResource;
 
-/* Graphics packet header (0x10); DDS1/2 game/code_002D9748/003325F8.c. */
-typedef struct SdfNode {
-    u16 unk0;
-    u8 unk2;
-    u8 unk3;
-    u32 unk4;
-    u32 unk8;
-    u32 unkC;
-} SdfNode;
-
 /* Optional packed or five-float state block owned by an SdfAsset. */
 typedef union SdfSubParam {
     struct {

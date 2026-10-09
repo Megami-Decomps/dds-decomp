@@ -248,7 +248,7 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
         allocatePacket = sdfAllocPacketAligned;
     }
     packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
-    packet->node.unk4 = (u32)sdfPatchPacketResourceField;
+    packet->link.patch = sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket(&packet->resourcePacket,
         (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
         resourceAddress, arg7, arg8);
@@ -1269,7 +1269,7 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
 void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
     packet->transfer[0].unk0 =
         (packet->transfer[0].unk0 & ~0x3FFF) |
-        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->node.unk8]->baseAddress >> 6);
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
 }
 
 extern SdfGraphObj D_0040B290;
@@ -1286,8 +1286,8 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
         allocPacket = sdfAllocPacketAligned;
     }
     packet = (SdfGraphCopyPacket *)allocPacket(0x70);
-    packet->node.unk8 = resourceIndexXor;
-    packet->node.unk4 = (u32)sdfPatchPacketResourceReference;
+    packet->resourceIndexXor = resourceIndexXor;
+    packet->link.patch = sdfPatchPacketResourceReference;
     drawPacket = &packet->drawHeader;
 
     sdfInitializeExtendedDrawPacket(
