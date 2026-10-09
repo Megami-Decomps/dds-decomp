@@ -860,6 +860,10 @@ void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer);
 struct SdfMemBlock;
 struct MnuSpriteResourceGroup;
 
+void mnuDrawIconAlphaSprite(s32 x, s32 y, s32 z, s32 alpha,
+                            struct EffectSlotSet *sprite, s32 mode,
+                            s32 flag, s32 param);
+
 typedef struct MnuStaffMovieWork {
     struct SdfMemBlock *allocation; /* 0x00: retained general-heap descriptor */
     struct EffectSlotSet *spriteSet; /* 0x04: loaded roll-sprite slot-set owner */
