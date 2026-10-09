@@ -416,7 +416,60 @@ void func_0027CA78(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
     func_0027C7B8();
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CA90);
+void func_0027CA90(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
+    s32 fadeScale = window->fadeScale;
+    s32 weight = fadeScale;
+    s32 firstFade;
+    s32 secondFade;
+    EffectSlotSet *frame;
+    s32 slot;
+    EffectSlotSet *sprite;
+
+    if (fadeScale > 0x100) {
+        weight = 0x200 - fadeScale;
+    }
+    firstFade = window->firstDecorationFade * weight / 256;
+    secondFade = window->secondDecorationFade * weight / 256;
+    frame = window->frameResources;
+    if (frame != NULL) {
+        slot = window->frameSlot;
+        func_002BF4E0(x, y, depth, fadeScale, 0, frame, slot, drawArg);
+        if (window->flags & 4) {
+            window->firstDecorationFade = 0;
+            if (window->secondDecorationFade > 0) {
+                window->secondDecorationFade -= 0x20;
+            }
+            if (window->secondDecorationFade < 0) {
+                window->secondDecorationFade = 0;
+            }
+        } else {
+            if (window->firstDecorationFade < 0x200) {
+                window->firstDecorationFade += 0x20;
+            }
+            if (window->firstDecorationFade > 0x200) {
+                window->firstDecorationFade = 0x200;
+            }
+            if (window->secondDecorationFade < 0x100) {
+                window->secondDecorationFade += 0x20;
+            }
+            if (window->secondDecorationFade > 0x100) {
+                window->secondDecorationFade = 0x100;
+            }
+        }
+        func_002BF4E0(x - 0x10, y - 0x30, depth, firstFade, 0, frame, slot + 2, drawArg);
+        func_002BF4E0(x - 0x10, y - 0x30, depth, secondFade, 0, frame, slot + 1, drawArg);
+    }
+    sprite = window->spriteResources;
+    if (sprite != NULL) {
+        if (window->flags & 4) {
+            sprite = window->overlayResources;
+            slot = window->overlaySlot;
+        } else {
+            slot = window->spriteSlot;
+        }
+        func_002BF4E0(x, y, depth, fadeScale, 0, sprite, slot, drawArg);
+    }
+}
 
 /* Draw at the selected row before advancing the panel's transition value.
  * DDS1 also normalizes the transition range before drawing; DDS2 does not. */
