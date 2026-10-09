@@ -1454,12 +1454,12 @@ void btlCommandStartSoundTasks(u8 *task) {
     }
 }
 
-extern void func_001DDB60(ActionStateLink *, s32);
+extern void func_001DDB60(ActionStateLink *, BattleIndexWork *);
 
 void btlCommandPrintAndFetchOwner(ActionStateLink *task) {
     s32 command;
     btlBossDebugPrintf("btl:command=%d\n", task->indexWork.phase);
-    func_001DDB60(task, (s32)&task->indexWork);
+    func_001DDB60(task, &task->indexWork);
     command = task->indexWork.phase;
     if (command > 0) {
         if (command >= 4) {
