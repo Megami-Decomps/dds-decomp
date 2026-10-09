@@ -172,8 +172,7 @@ segments:
       - [0x128288, c, game/code_00227288]
       - [0x12B8A8, c, game/code_0022A8A8]
       - [0x12BC10, c, game/code_0022AC10]
-      - [0x132690, c, model/mdlManager]  # Nocturne __FILE__
-      - [0x132A80, c, game/code_00231A80]
+      - [0x1321C0, c, model/mdlManager]  # Nocturne __FILE__
       - [0x134660, c, game/code_00233660]
       - [0x13B9A8, c, event/evtStage]  # Nocturne __FILE__
       - [0x13BF20, c, game/code_0023AF20]
@@ -494,7 +493,7 @@ segments:
       - [0x334A2C, .lit4, game/code_00214948]
       - [0x336218, .lit4, game/code_00227288]
       - [0x336334, .lit4, game/code_0022AC10]
-      - [0x336368, .lit4, game/code_00231A80]
+      - [0x336368, .lit4, model/mdlManager]
       - [0x33636C, .lit4, game/code_00233660]
       - [0x3363C4, .lit4, event/evtStage]
       - [0x3363D0, .lit4, event/evtUnitManager]
@@ -584,7 +583,7 @@ segments:
       - [0x337C78, .sdata, game/code_0020E850]
       - [0x337CC0, .sdata, game/code_00214948]
       - [0x337CF8, .sdata, game/code_00227288]
-      - [0x337FA0, .sdata, game/code_00231A80]  # `/model/` (func_00231B50)
+      - [0x337FA0, .sdata, model/mdlManager]  # `/model/` (func_00231B50)
       - [0x337FAC, .sdata, game/code_00233660]
       - [0x3381EC, .sdata, game/code_0023D658]
       - [0x3381F8, .sdata, game/code_00242CB8]
