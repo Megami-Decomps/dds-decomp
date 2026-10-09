@@ -9,6 +9,7 @@
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_param.h"
+#include "eff_pcp_scatter_radial.h"
 #include "eff_scatter_draw.h"
 #include "sdf_texture_file.h"
 
@@ -181,63 +182,8 @@ extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
 
 
 
-typedef struct PcpScatterRadialWork PcpScatterRadialWork;
 typedef struct PcpScatterSpinWork PcpScatterSpinWork;
 typedef struct PcpScatterRibbonWork PcpScatterRibbonWork;
-
-typedef struct {
-    f32 origin[4];
-    f32 width;
-    f32 height;
-    u32 poolMode;
-    u8 respawn;
-    u8 pad1D[3];
-    u32 particleCount;
-    u32 radialSegments;
-    s32 delaySpread;
-    u32 fadeIn;
-    u32 fadeOut;
-    s32 duration;
-    s32 fadeDuration;
-    f32 unk3C;
-    f32 heightDamping;
-    f32 unk44;
-    f32 angleDamping;
-    f32 startRadius;
-    f32 endRadius;
-    f32 radiusJitter;
-    f32 targetRadiusJitter;
-    f32 speedJitter;
-    u8 pulseEnabled;
-    u8 pad61[3];
-    f32 pulseAngle;
-    u8 duplicateParticles;
-    u8 pad69[3];
-    s32 duplicateStartAge;
-    u32 particlesPerGroup;
-} PcpScatterRadialParams;
-
-typedef struct {
-    s32 age;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 radius;
-    f32 angle;
-    f32 unk18;
-} PcpScatterRadialParticle;
-
-struct PcpScatterRadialWork {
-    PcpScatterRadialParams params;
-    PcpScatterRadialParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
-    u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
-};
 
 typedef struct {
     f32 origin[4];
@@ -462,13 +408,13 @@ void effPcpScatterInitRadialParticle(PcpScatterRadialWork *work, u32 index) {
     particle->angle = angleStep * (index % segments) + angleStep * EFF_SCATTER_HALF_SEGMENT * effMiscRandUnitFloat(effDefaultRandomState);
     jitter = work->params.radiusJitter;
     particle->radius = work->params.startRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
-    particle->unk18 = 0.0f;
+    particle->height = 0.0f;
     jitter = work->params.targetRadiusJitter;
-    particle->unk04 = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
+    particle->radiusStep = (work->params.endRadius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - particle->radius) / work->params.duration;
     jitter = work->params.speedJitter;
-    particle->unk0C = work->params.unk3C * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    particle->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     particle->age = 0;
-    particle->unk08 = work->params.unk44;
+    particle->angleStep = work->params.initialAngleStep;
 }
 
 extern u128 *effPcpScatterGetRecordAddress(PcpScatterPool *, s32);
@@ -553,9 +499,9 @@ void func_00178B80(PcpScatterRadialWork *work) {
             color = effBlendColor(baseColor & 0xFFFFFF, baseColor, factor);
             angle = particle->angle;
             radius = particle->radius;
-            height = particle->unk18;
-            angleStep = particle->unk08;
-            heightStep = particle->unk0C;
+            height = particle->height;
+            angleStep = particle->angleStep;
+            heightStep = particle->heightStep;
             if (!moving && pulse) {
                 if (age == duration) {
                     angle += pulseAngle;
@@ -609,11 +555,11 @@ void func_00178B80(PcpScatterRadialWork *work) {
                 PCP_COPY_VECTOR(position, next);
             }
             if (moving) {
-                particle->radius += particle->unk04;
+                particle->radius += particle->radiusStep;
                 particle->angle += angleStep;
-                particle->unk18 += heightStep;
-                particle->unk08 = angleStep * angleDamping;
-                particle->unk0C = heightStep * heightDamping;
+                particle->height += heightStep;
+                particle->angleStep = angleStep * angleDamping;
+                particle->heightStep = heightStep * heightDamping;
             }
         } else {
             colors[0] = 0;
@@ -654,9 +600,9 @@ void effScatterSetRadialColor(PcpScatterRadialWork *work, u32 color) {
     work->color = color;
 }
 
-/* Rescale both radius inputs and the still-opaque motion input in place; calls compound. */
+/* Rescale the initial height step and radius endpoints in place; calls compound. */
 void effScatterScaleRadialInputs(float scale, PcpScatterRadialWork *work) {
-    work->params.unk3C *= scale;
+    work->params.initialHeightStep *= scale;
     work->params.startRadius *= scale;
     work->params.endRadius *= scale;
 }
