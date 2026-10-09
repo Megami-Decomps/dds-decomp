@@ -7,7 +7,6 @@
 #include "sdf_pac_work.h"
 
 struct FileNode;
-struct PacBuf;
 struct PacAlloc;
 
 /* 0x70-byte file request: PAC state at 0x30, readiness gate at 0x68. */
