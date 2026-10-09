@@ -58,7 +58,7 @@ extern char D_003A6018[];
 
 extern void btlChooseRandomPresetCameraKeys();
 
-extern void func_0020B190(u8 *, void *);
+extern void func_0020B190(BtlLinkedCommand *, BtlUnit *);
 
 /* 0x20-byte action metadata entries referenced by a unit's action index. */
 typedef struct BtlActionTableRow {
@@ -93,7 +93,7 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
         if (btlGetIndexListCount(command->task->indexWork.indices) == 1) {
             void *target = btlGetIndexListEntry(command->task->indexWork.indices, 0);
             btlFlagAllUnitDefeatCandidatesTask();
-            func_0020B190((u8 *)command, target);
+            func_0020B190(command, target);
             command->state = 0;
         } else {
             btlFlagAllUnitDefeatCandidatesTask();
