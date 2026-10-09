@@ -199,7 +199,6 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern char D_003BB450[];
 
-extern s32 datItemSkillRecords;
 
 extern s32 D_003BAA14;
 
@@ -658,13 +657,13 @@ s32 btlSelectSideIndexedActorParameterTable(s32 arg0, s32 arg1) {
 extern char D_003A1788[];
 
 s32 btlGetLoggedIndexedCommandItem(s32 index) {
-    u16 item = *(u16 *)(datItemSkillRecords + index * 8 + 2);
+    u16 item = datItemSkillRecords[index].commandIndex;
     btlBossDebugPrintf(D_003A1788, index, item);
     return item;
 }
 
 s32 btlGetActorBedAssetIdFromIndex(s32 arg0) {
-    return *(u16 *)(arg0 * 8 + datItemSkillRecords + 2);
+    return datItemSkillRecords[arg0].commandIndex;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
@@ -6124,11 +6123,11 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
     s32 total = 0;
     if ((datBattleSceneRecords[index].flags & 0x800) == 0) {
         u8 *selected = datGameState->inventory.counts;
-        u8 *flags = (u8 *)datItemSkillRecords;
+        DatItemSkillRecord *items = datItemSkillRecords;
         u8 *out = D_00358FE0;
         s32 i;
-        for (i = 0; i < 0xC0; i++, flags += 8, selected++) {
-            if (*selected != 0 && (*flags & 2)) {
+        for (i = 0; i < 0xC0; i++, items++, selected++) {
+            if (*selected != 0 && (items->flags & 2)) {
                 out[0] = i;
                 out[1] = *selected;
                 out += 2;

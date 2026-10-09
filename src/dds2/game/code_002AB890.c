@@ -1,3 +1,4 @@
+#include "dat_command.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -42,7 +43,6 @@ extern s32 func_002C5498(s32);
 extern s32 mtrMantraFindIndex(s32);
 extern s32 evtCheckValueThreshold(s32 itemId, s32 minimum);
 extern void mnuDrawCampGridResourceSlot(s32, u32, u32, s32, u32, u32);
-extern u8 *datItemSkillRecords;
 
 typedef struct MenuCatalogItem {
     u16 itemId;
@@ -68,7 +68,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     window->list->drawCallback = func_002AB8C0;
 
     for (itemId = 1; itemId < 0x100; itemId++) {
-        if (datGameState->inventory.counts[itemId] != 0 && (datItemSkillRecords[itemId * 8] & 3) != 0 &&
+        if (datGameState->inventory.counts[itemId] != 0 && (datItemSkillRecords[itemId].flags & 3) != 0 &&
             mnuIsBulletItemId(itemId) == 0 && func_002C54B0(itemId) == 0 &&
             func_002C5498(itemId) == 0 && mtrMantraFindIndex(itemId) == 0) {
             u32 quantity;
@@ -77,7 +77,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
             quantity = datGameState->inventory.counts[itemId];
             node->sortKeySecondary = itemId;
             node->sortKeyPrimary = quantity;
-            if ((datItemSkillRecords[itemId * 8] & 1) == 0 || func_002C5498(itemId) != 0) {
+            if ((datItemSkillRecords[itemId].flags & 1) == 0 || func_002C5498(itemId) != 0) {
                 node->flags48 |= 1;
             }
         }
@@ -121,7 +121,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     window->list->drawCallback = mnuDrawCampGridResourceSlot;
 
     for (itemId = 1; itemId < 0x100; itemId++) {
-        if (evtCheckValueThreshold(itemId, 1) != 0 && (datItemSkillRecords[itemId * 8] & 4) != 0) {
+        if (evtCheckValueThreshold(itemId, 1) != 0 && (datItemSkillRecords[itemId].flags & 4) != 0) {
             node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
             node->sortKeyPrimary = 1;
             node->sortKeySecondary = itemId;
