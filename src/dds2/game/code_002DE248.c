@@ -5817,7 +5817,7 @@ typedef struct EffAnimationState {
     f32 *positions;       // 0x00
     u32 textureHandle;    // 0x04
     u32 record;           // 0x08
-    u32 allocation;       // 0x0C
+    struct SdfMemBlock *allocation;       // 0x0C
 } EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
@@ -5840,8 +5840,8 @@ u32 effClampSlotCount(u8 *p) {
 }
 
 u32 *effCreateAnimationState(u32 unused, u32 count) {
-    u32 allocation = (u32)sdfAllocGeneralBlock(count * 8 + 0x10);
-    u32 *state = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
+    u32 *state = (u32 *)sdfResourceRetainAddress(allocation);
 
     ((EffAnimationState *)state)->allocation = allocation;
     ((EffAnimationState *)state)->positions = (f32 *)(state + 4);
@@ -5872,7 +5872,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
     if (((EffAnimationState *)state)->record != 0) {
         fileReleaseGridRecordHandle(((EffAnimationState *)state)->record);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffAnimationState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffAnimationState *)state)->allocation);
 }
 
 void effSynchronizeFileTransform(u8 *work) {
