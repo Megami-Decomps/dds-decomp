@@ -33,6 +33,7 @@
 #include "eff.h"
 #include "eff_resource_list.h"
 #include "file_request_api.h"
+#include "sdf_texture_file.h"
 
 
 typedef struct EffPacketParams {
@@ -522,8 +523,6 @@ typedef struct EffKindSource {
 extern EffKindDesc D_0037E770[];
 
 extern EffKindDesc D_0037E7E8[];
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 
 /* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
@@ -1253,7 +1252,7 @@ EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
+                effect->target = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
                 effect->target = (u32)effGetBillResourceTexture(secondary[0]);
@@ -1347,7 +1346,7 @@ EffKindWork *effCreateKindWorkFromFileB(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
+                effect->target = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
                 effect->target = (u32)effGetBillResourceTexture(secondary[0]);

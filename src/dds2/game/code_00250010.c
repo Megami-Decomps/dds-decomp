@@ -20,6 +20,7 @@
 #include "evt_polygon_movie.h"
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_texture_file.h"
 
 extern u32 evtSkyOverlayEnabled;
 
@@ -4226,7 +4227,6 @@ void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
 
 extern void effSetCh72Id(u32);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
@@ -4237,7 +4237,7 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
             sdfTexReleaseReferenceViaHandler(data->effect72);
             data->effect72 = 0;
         }
-        texture = sdfTexAcquireResourceTexture(address);
+        texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(address));
         effSetCh72Id((u32)texture);
         data->effect72 = texture;
     }

@@ -18,6 +18,7 @@
 #include "dat_command.h"
 #include "sce_io.h"
 #include "fpu.h"
+#include "sdf_texture_file.h"
 
 extern s32 func_003101B8(s32 directory);
 extern s32 func_00310320(s32 directory, SceDirent *entry);
@@ -2891,8 +2892,6 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
     sdfReleaseResourceAllocation(allocation);
 }
 
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
-
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
     SdfTex *texture = descriptor->texture;
@@ -2900,7 +2899,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }
-    descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
+    descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
 extern void *sdfConsAllocateColumnPacket(s32 loopCount);

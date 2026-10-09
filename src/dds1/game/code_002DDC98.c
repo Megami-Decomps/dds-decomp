@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -11,6 +12,7 @@
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_texture_file.h"
 
 #define SDF_PAD_ENTRY_COUNT 2
 #define SDF_PAD_REPLY_BUFFER_BYTES 0x20
@@ -120,8 +122,6 @@ extern u128 *D_003EB860[][3];
 extern SdfTex *D_003BD37C;
 extern SdfTex *D_003BD380;
 extern SdfTex *D_003BD390;
-extern SdfTex *sdfTexAcquireResourceTexture(void *);
-extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 extern s32 sdfAllocPacketAligned(s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
@@ -1093,11 +1093,11 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
     D_003BD388 = textureWord;
     D_003241D8[0] = textureWord;
     D_003241D8[1] = textureWord >> 32;
-    D_003BD37C = sdfTexAcquireAlternateResourceTexture(D_00317C20);
+    D_003BD37C = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_00317C20);
     textureWord = sdfTexGetPrimaryTextureState(D_003BD37C);
     D_00324290[0] = textureWord;
     D_00324290[1] = textureWord >> 32;
-    D_003BD390 = sdfTexAcquireAlternateResourceTexture(D_0031BC60);
+    D_003BD390 = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)D_0031BC60);
     textureWord = sdfTexGetPrimaryTextureState(D_003BD390);
     D_00324214[0] = textureWord;
     D_00324214[1] = textureWord >> 32;
@@ -1148,7 +1148,6 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfAssetApplyEntryChanges(void *, s32);
-extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
 void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
@@ -1159,7 +1158,7 @@ void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
     }
     sdfAssetApplyEntryChanges(asset, (s8)sdfCurrentBufferIndex);
     referencePacket = (u64 *)allocatePacket(0x20);
-    sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
+    sdfInitAssetDrawEntryReferenceNode(asset, (SdfNode *)referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
@@ -1860,7 +1859,7 @@ void sdfPadInit(void) {
 void sdfDevConsInit(void) {
     if (D_003BD3C4 == 0) {
         D_003BD3C4 = 1;
-        D_003BDA34 = sdfTexAcquireResourceTexture(D_00315BA0);
+        D_003BDA34 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_00315BA0));
     }
 }
 

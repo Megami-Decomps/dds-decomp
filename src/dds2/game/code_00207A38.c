@@ -20,6 +20,7 @@
 #include "dat_command.h"
 #include "sce_io.h"
 #include "fpu.h"
+#include "sdf_texture_file.h"
 
 extern s32 func_0036B420(s32 directory);
 extern s32 func_0036B588(s32 directory, SceDirent *entry);
@@ -246,8 +247,6 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern char *D_003BEA80[];
 
@@ -3193,7 +3192,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }
-    descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
+    descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);

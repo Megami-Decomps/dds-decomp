@@ -10,6 +10,7 @@
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_scatter_draw.h"
+#include "sdf_texture_file.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
@@ -57,11 +58,6 @@ extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 
 
 /* Ownership handles refer to SDF allocation nodes, not their retained payloads. */
-
-
-
-
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 
@@ -1282,7 +1278,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = sdfAllocSizeClassBlock(EFF_SCATTER_RES_BYTES);
-    res->textureHandle = sdfTexAcquireResourceTexture((void *)resId);
+    res->textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resId));
     res->refCount = 1;
     return res;
 }

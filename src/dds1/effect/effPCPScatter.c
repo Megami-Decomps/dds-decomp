@@ -10,6 +10,7 @@
 #include "eff_param.h"
 #include "eff_scatter_draw.h"
 #include "fpu.h"
+#include "sdf_texture_file.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
@@ -47,7 +48,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 
 
 extern void sdfQueueAssetRelease(u32 res);
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
@@ -1428,7 +1428,7 @@ PcpScatterRes *effPcpScatterResCreate(u32 resId)
     PcpScatterRes *res;
 
     res = sdfAllocSizeClassBlock(EFF_SCATTER_RES_BYTES);
-    res->textureHandle = sdfTexAcquireResourceTexture((void *)resId);
+    res->textureHandle = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resId));
     res->refCount = 1;
     return res;
 }
