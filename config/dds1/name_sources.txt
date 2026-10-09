@@ -581,7 +581,7 @@
 0x00116D38	dds3CreatePathCurveWork	inferred	readability/matching review (QP16)
 0x00116F08	dds3FreePathObject	inferred	Frees the path's associated buffer handle and then frees the path object allocation.
 0x00116F38	dds3InterpolatePathVectorVU	inferred	U0
-0x00117050	dds3PreparePathVectorPair	inferred	When path flag bit one is set, selects adjacent 16-byte vector entries at the current path time and loads VU vf10/vf11 for interpolation.
+0x00117050	dds3InterpolatePathQuaternionVU	inferred	Samples adjacent quaternion keys at path time and nlerps them into VU vf10; copies VU vf0 into vf10 when rotation is absent.
 0x001170D8	dds3InterpolatePathOutput	inferred	confidence=high; src/dds1/basic/dds3PathBasic.c:func_001170D8; Locates the path segment/fraction for the current time and linearly interpolates three vector groups; clears the output when the path flag is disabled. [names_qp9.tsv]
 0x00117438	sdfSampleActiveLinearCurve	inferred	src/dds1/game/code_00117438.c func_00117438: Samples adjacent curve values using located time fraction; returns zero when inactive. [names_reviewed24.tsv]
 0x001174C0	sdfStepWrappingFloatCounter	inferred	src/dds1/game/code_00117438.c func_001174C0: Steps up or down by one, supports freeze and wrapping flags and reports nonwrapping exhaustion. [names_reviewed24.tsv]
