@@ -1,3 +1,4 @@
+#include "sdf_gs_context.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
@@ -768,7 +769,7 @@ void sdfBuildDmaReferenceChain(u64 *packet, u32 sourceAddress, s32 qwordCount) {
 
 /* Emit FRAME/ZBUF/XYOFFSET/SCISSOR A+D pairs for the selected GS context.
  * Register IDs are separate from their values; fieldOffset adds a half-pixel Y step. */
-void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
+void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
                   s32 fieldOffset, s32 gsContext) {
     s64 frameRegisterId;
@@ -789,19 +790,19 @@ void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 wi
         offsetRegisterId = SDF_GS_XYOFFSET_2;
         scissorRegisterId = SDF_GS_SCISSOR_2;
     }
-    packet[1].unk18 = scissorRegisterId;
+    packet->scissor.registerId = scissorRegisterId;
     yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
     xOffset = (SDF_GS_CENTER_BIAS - width) << 3;
-    packet[0].unk0 = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
+    packet->frame.value = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
     if (fieldOffset != 0) {
         yOffset += SDF_GS_FIELD_OFFSET_STEP;
     }
-    packet[0].unk8 = frameRegisterId;
-    packet[0].unk10 = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
-    packet[0].unk18 = depthRegisterId;
-    packet[1].unk8 = offsetRegisterId;
-    packet[1].unk10 = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
-    packet[1].unk0 = xOffset | ((s64)yOffset << 32);
+    packet->frame.registerId = frameRegisterId;
+    packet->zbuf.value = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
+    packet->zbuf.registerId = depthRegisterId;
+    packet->xyoffset.registerId = offsetRegisterId;
+    packet->scissor.value = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
+    packet->xyoffset.value = xOffset | ((s64)yOffset << 32);
 }
 
 /* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
@@ -833,20 +834,19 @@ void sdfInitDrawPacket(u64 *packet) {
     packet[7] = SDF_GS_TEXA;
 }
 
-extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
 void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
                            s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
     sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
-    sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
+    sdfBuildFrameDepthScissorPacket((SdfGsContextRegisters *)(packet + 1), frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
 typedef struct SdfSceneDrawPacket {
     SdfGsPacketHeader header; /* 0x00 */
     u64 draw[8];         /* 0x20 */
-    SdfPacket contextOne[2]; /* 0x60 */
-    SdfPacket contextTwo[2]; /* 0xA0 */
+    SdfGsContextRegisters contextOne; /* 0x60 */
+    SdfGsContextRegisters contextTwo; /* 0xA0 */
     u64 limits[10];      /* 0xE0 */
     u64 regs[8];         /* 0x130 */
 } SdfSceneDrawPacket;
@@ -869,8 +869,8 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     frameFormat = view->bufferFormat;
     height = view->height;
     depthFormat = view->auxiliaryFormat;
-    sdfBuildFrameDepthScissorPacket(packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
-    sdfBuildFrameDepthScissorPacket(packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
+    sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
+    sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
     sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->regs[0] = SDF_GS_SCENE_TEST;
     packet->regs[1] = SDF_GS_TEST_1;
@@ -891,8 +891,8 @@ typedef struct SdfSceneNode {
     u8 padC[4];
     SdfGsPacketHeader header; /* 0x10 */
     u64 draw[8];       /* 0x30 */
-    SdfPacket contextOne[2]; /* 0x70 */
-    SdfPacket contextTwo[2]; /* 0xB0 */
+    SdfGsContextRegisters contextOne; /* 0x70 */
+    SdfGsContextRegisters contextTwo; /* 0xB0 */
     u64 limits[10];    /* 0xF0 */
     u64 regs[8];       /* 0x140 */
     u64 framePacketWords[4]; /* 0x180 */
