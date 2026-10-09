@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "sdf_gs_context.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
@@ -146,7 +147,6 @@ void sdfDestroyObjectList(SdfModel *owner);
 
 
 
-extern void sdfDestroyDevRequest(DevRequest *request);
 extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 extern void sdfDevBufferedRequestGrow(DevRequest *request);
 
