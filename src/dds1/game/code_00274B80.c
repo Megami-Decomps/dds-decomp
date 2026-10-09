@@ -194,7 +194,6 @@ typedef struct MenuInputNode {
     MenuInputFlags *flags; /* 0x14 */
 } MenuInputNode;
 
-extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
 
 
 
@@ -261,7 +260,8 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
 
     window = mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
-    mnuForwardDupArg(window, context->option, 0, context->panelResource, 0x20);
+    mnuForwardDupArg(window, (struct EffectSlotSet *)context->option, 0,
+                     (struct EffectSlotSet *)context->panelResource, 0x20);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x30, 0x530, -0x90, 0xA10);
     window->list->context = context;
     window->list->drawCallback = func_00274BC0;
@@ -1352,7 +1352,8 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
 
     window = mnuCreateWindowContainer(0, 0x160, 0x10, skillCount, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
-    mnuForwardDupArg(window, context->option, 0, context->unkE4, 0x14);
+    mnuForwardDupArg(window, (struct EffectSlotSet *)context->option, 0,
+                     (struct EffectSlotSet *)context->unkE4, 0x14);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout,
                             0x130, 0x630, -0x90, 0xC20);
     mnuInitializeWindowEntryPlacement(0, window, context->option, 0x14, placement);
@@ -1534,7 +1535,8 @@ s32 mnuCampMenuInit(KwlnTask *task) {
     memset(menu, 0, 0x38);
     *menu = handle;
     func_00277DD0(context);
-    mnuForwardDupArg((MenuWindowContainer *)work->panelList, work->option, 0, 0, 0);
+    mnuForwardDupArg((MenuWindowContainer *)work->panelList,
+                     (struct EffectSlotSet *)work->option, 0, 0, 0);
     switch (((MenuWindowContainer *)work->panel)->list->cursor->index) {
     case 0:
         mnuActivatePanelAndConfigureGridResources(

@@ -64,7 +64,7 @@ void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         0, menu->staffSlots.baseResources[3], menu->secondaryImage);
     menu->images[0] = mnuCreateFilteredStaffEntryWindow(D_0037B950, 8, 0x300, menu, D_0037C388);
-    mnuForwardDupArg(menu->images[0], (s32)menu->staffSlots.baseResources[5], 0, 0, 0);
+    mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = mnuCreateFilteredStaffEntryWindow(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowFadeScale(menu->images[1], 0x100);
     menu->images[2] = mnuCreateFilteredStaffEntryWindow(D_0037B980, 2, 0x200, menu, 0);

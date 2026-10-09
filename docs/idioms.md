@@ -2258,6 +2258,17 @@ native DDS2 helper without a second `MenuWindowSet`/`MenuSlotWindow` view.
 That earlier shared-header closure was 58 actual CPP consumers, all clean in
 serial `check_unit` runs (2200 matching functions, zero differences).
 
+DDS1's general `MenuWindowContainer` keeps frame, base-sprite and overlay
+`EffectSlotSet *` owners at `+0x2C/+0x34/+0x3C`, with their slot indices at
+`+0x30/+0x38/+0x40`. The grid setter dereferences these resource sets; they
+are not XY coordinates or color words. The signed decoration fades at
+`+0x44/+0x48` are distinct from the window-wide `fadeScale` at `+0x88`.
+Keep the native pre-update alpha snapshots and per-layer clamp behavior.
+The forwarding API now takes the real resource pointers; unresolved outer
+saved words cross that boundary once rather than creating another window
+view. `entryX` at `+0x1C` remains a signed word: its staff resource, camp
+option and zero producers do not establish one universal pointer type.
+
 
 ## Profile panels retain sprite-slot pairs
 
@@ -5753,4 +5764,9 @@ DDS1 `code_00268AB8` gates `65 match, 0 differ` and DDS2 `code_002A05C0`
 gates `71 match, 0 differ` in the private proof. The condensed status snapshot
 still transfers just frame count, frame index and repeat frame. This owner
 closure does not claim a match for either assembly-retained stream updater.
+
+The title-audio tick limit (`D_003BC5C8` / `D_00437A38`) is an `s32`:
+retail uses signed `slt` against the incremented tick, and its C setters
+store `6` or the signed load state. Keep one declaration per owning unit;
+the unused declarations left in DDS1 `code_0026BD58` are retired.
 

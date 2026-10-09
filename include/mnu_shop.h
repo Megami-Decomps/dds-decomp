@@ -122,17 +122,28 @@ typedef struct MenuWindowContainer {
     s32 entryY;
     s32 alternateEntryY;
     s32 entryOption;
-    s32 x;
-    s32 y;
-    u32 sprite;
-    u32 effect;
-    u32 overlaySprite;
-    u32 overlayColor;
-    u8 pad44[8];
+    struct EffectSlotSet *frameResources;
+    s32 frameSlot;
+    struct EffectSlotSet *spriteResources;
+    u32 spriteSlot;
+    struct EffectSlotSet *overlayResources;
+    u32 overlaySlot;
+    s32 firstDecorationFade;
+    s32 secondDecorationFade;
     MenuPanelHandles panel;
     struct MenuWindowSpriteGroup *textures;
     s32 fadeScale; /* 0x88: window/list opacity scale; full fade is 0x100 */
 } MenuWindowContainer;
+
+void mnuSetWindowOverlaySprite(MenuWindowContainer *window,
+                                struct EffectSlotSet *resources);
+void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window,
+                                     struct EffectSlotSet *frameResources, s32 frameSlot,
+                                     struct EffectSlotSet *spriteResources, u32 spriteSlot,
+                                     u32 overlaySlot);
+void mnuForwardDupArg(MenuWindowContainer *window,
+                      struct EffectSlotSet *frameResources, s32 frameSlot,
+                      struct EffectSlotSet *spriteResources, s32 spriteSlot);
 
 /* 2443F8 allocates 0x10 bytes. The operation-row renderer 25E820 reads
  * countdown/mode; 245C98's initialization stores the pending selection. */

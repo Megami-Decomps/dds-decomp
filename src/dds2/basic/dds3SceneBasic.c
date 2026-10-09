@@ -81,8 +81,7 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
     worldData->unk1C = 0;
 }
 
-/* Starts the named script task on the scene object's resource; stays asm:
-   retail's beqz/b merge of the two exit paths has no plain-C shape. */
+/* Starts the named script task on the scene object's resource. */
 s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
     void *resource = (void *)worldData->unk1C;
