@@ -709,7 +709,7 @@ void sdfChainReferenceNodes(SdfListHead *list) {
 }
 
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
-s32 sdfFlushPoolNodes(SdfPoolNode *node) {
+SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *tail = NULL;
     s32 head = 0;
 
@@ -729,7 +729,7 @@ s32 sdfFlushPoolNodes(SdfPoolNode *node) {
         ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
         ((SdfDmaTag *)tail->last)->address = 0;
     }
-    return head;
+    return (SdfListHead *)(u32)head;
 }
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {
