@@ -248,7 +248,7 @@ typedef struct BtlResourceDescriptor {
     BtlResourceEntry *firstVisibleEntry; /* 0x30 */
     BtlResourceEntry *selectedEntry; /* 0x34 */
     BtlResourceEntry *cachedEntry; // 0x38: last entry whose preview was updated
-    s32 handle;             // 0x3C
+    SdfTex *texture;        // 0x3C: owned or borrowed preview texture
     s32 ownsHandle;         // 0x40
     BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;
@@ -260,7 +260,7 @@ extern u8 D_00436C58[];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 
-void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
+void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
@@ -2926,7 +2926,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     descriptor->firstVisibleEntry = list->head;
     descriptor->selectedEntry = list->head;
     descriptor->cachedEntry = NULL;
-    descriptor->handle = 0;
+    descriptor->texture = 0;
     descriptor->entryList = list;
     return descriptor;
 }
@@ -2937,7 +2937,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
 extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
-void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, s32);
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 extern void func_0020E1E0(BtlResourceDescriptor *);
 
 /* Update list selection and submit the visible browser rows to its surface. */
@@ -3037,9 +3037,9 @@ s32 func_0020DAB8(BtlResourceDescriptor *descriptor) {
                     if (selectedEntry->id == 0) {
                         char resourceName[0x70];
                         btlFormatSelectedResourceName(descriptor, resourceName);
-                        btlLoadAndReplaceResourceHandle(descriptor, (s32)resourceName);
+                        btlLoadAndReplaceResourceHandle(descriptor, resourceName);
                     } else {
-                        btlReplaceResourceHandle(descriptor, selectedEntry->id);
+                        btlReplaceResourceHandle(descriptor, (void *)(u32)selectedEntry->id);
                     }
                     selectedEntry = descriptor->selectedEntry;
                     descriptor->previewActive = descriptor->ownsHandle = 1;
@@ -3047,7 +3047,7 @@ s32 func_0020DAB8(BtlResourceDescriptor *descriptor) {
                 case 8: {
                     SdfTex *texture = effGetBillResourceTexture(selectedEntry->value);
                     descriptor->ownsHandle = category;
-                    descriptor->handle = (s32)texture;
+                    descriptor->texture = texture;
                     descriptor->previewActive = 1;
                     selectedEntry = descriptor->selectedEntry;
                     break;
@@ -3112,9 +3112,9 @@ s32 func_0020DAB8(BtlResourceDescriptor *descriptor) {
 
 /* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
-    s32 textureHandle = descriptor->handle;
-    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
+    SdfTex *texture = descriptor->texture;
+    if (texture != NULL && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(texture);
     }
     sdfReleaseChipBlock(descriptor);
 }
@@ -3176,27 +3176,27 @@ u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
 
 /* Replace an owned old texture, acquire the named resource's texture,
  * then release the temporary allocation returned by the resource reader. */
-void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 nameAddress) {
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const char *resourceName) {
     u32 loadedResource;
-    s32 textureHandle = descriptor->handle;
-    s32 allocationHandle;
-    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
-        descriptor->handle = 0;
+    SdfTex *texture = descriptor->texture;
+    struct SdfMemBlock *allocation;
+    if (texture != NULL && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(texture);
+        descriptor->texture = 0;
     }
-    allocationHandle = sdfReadNamedResource((const char *)(u32)nameAddress, &loadedResource, 0);
-    btlReplaceResourceHandle(descriptor, loadedResource);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
+    allocation = sdfReadNamedResource(resourceName, &loadedResource, 0);
+    btlReplaceResourceHandle(descriptor, (void *)loadedResource);
+    sdfReleaseResourceAllocation(allocation);
 }
 
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
-void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 textureResource) {
-    s32 textureHandle = descriptor->handle;
-    if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
-        descriptor->handle = 0;
+void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
+    SdfTex *texture = descriptor->texture;
+    if (texture != NULL && descriptor->ownsHandle == 1) {
+        sdfTexReleaseReferenceViaHandler(texture);
+        descriptor->texture = 0;
     }
-    descriptor->handle = (s32)sdfTexAcquireResourceTexture((void *)textureResource);
+    descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
