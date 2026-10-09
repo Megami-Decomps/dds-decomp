@@ -27,7 +27,7 @@ typedef struct StaffMenuWork {
     struct EffMappedResource *primaryImage;
     MenuPanelHandles *resourceList;
     struct EffMappedResource *secondaryImage;
-    u32 images[3];
+    MenuWindowContainer *images[3];
     struct EffMappedResource *extraImages[2];
     MenuScrollPanel *scrollPanel;
     u8 background[0x6B0];
