@@ -360,7 +360,31 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 #include "itf.h"
 
 
-INCLUDE_ASM(const s32, "game/code_00263EB0", func_002649B0);
+extern char D_0036D408[];
+
+/* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
+s32 func_002649B0(KwlnTask *request) {
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    s32 result;
+
+    evtStageTestUpdateCamera();
+    result = menuRunPanel(panel, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (panel->transition.state == 0) {
+        if (evtGetMessageWindowControlState() == 0) {
+            if (panel->rewardMode != 0) {
+                func_002647D0(panel);
+                kwlnItemUpdateDisplay(panel);
+                panel->rewardMode = 0;
+            } else {
+                mnuSetPopupEntryFlagged(&panel->transition.state, D_0036D408);
+            }
+        }
+    }
+    return 0;
+}
 
 
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
