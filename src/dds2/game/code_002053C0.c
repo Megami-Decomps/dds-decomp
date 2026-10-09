@@ -144,7 +144,7 @@ extern s32 D_00436AA0;
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
-extern void func_00208750(BtlIndexList *, s32, s32);
+extern f32 func_00208750(BtlIndexList *, f32 *, f32 *);
 
 extern s16 D_00436AB0[];
 
