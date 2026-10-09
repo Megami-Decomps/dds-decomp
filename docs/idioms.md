@@ -4916,14 +4916,14 @@ word; generic slot APIs and the float-counter SDK word boundary are unchanged.
 
 ## Packed command queries borrow the complete party record
 
-DDS2 `001176A0` uses `DatPartyRecord` for its HP-bracket and packed-status
-query/apply/raise helpers. HP/max-HP at `+6/+8`, MP/max-MP at `+A/+C`
+DDS1 `00117438` and DDS2 `001176A0` use `DatPartyRecord` for packed-status
+query/apply/raise helpers and DDS2's HP-bracket helper. HP/max-HP at `+6/+8`, MP/max-MP at `+A/+C`
 and status at `+E` belong to one record, not separate short party views.
 The affinity and skill providers already accept that same owner.
 
-The HP/MP mutators in `datCalc.c` really return `void`, but this caller TU
-keeps them unprototyped rather than publishing false `s32` declarations.
-Native `sdfApplyCommandResults` reloads HP into `v1` and branches on it at
+The HP/MP mutators in `datCalc.c` really return `void`, but these caller TUs
+keep them unprototyped rather than publishing false `s32` declarations.
+Native DDS2 `sdfApplyCommandResults` reloads HP into `v1` and branches on it at
 `+E0/+E4`; exposing the void prototype changes those two register operands.
 The inferred original implicit-int call boundary preserves the observed
 caller without inventing a provider result; neither call consumes a result.
@@ -4956,3 +4956,27 @@ retain their old TU-local imports. The former still has two pointer-to-word
 text arguments. These two excluded consumers are explicit follow-up debt,
 not a completed all-caller migration.
 
+## Scene input feedback is a void dispatcher
+
+DDS1 `00250B60` samples the low byte of the word-sized `cursorInputMask`
+into a signed direction local and reads `cursorMoving` with `lb`.
+The primary scene-work flag is therefore `s8`; its existing cursor-position
+producer still stores the real 0/1 movement result.
+
+The only retail caller (`00251A38`) ignores this dispatcher's result, and
+the sound provider `sndSetSequenceVolumePan` returns `void`. The four
+feedback cases use ordinary terminal sound returns for cases 1–3 and
+the final case's implicit function exit. This preserves the native three
+tail jumps and final call/epilogue without inventing an unused integer
+return value. DDS2 `0028B318` is a different navigation updater, not its twin.
+
+
+## Local-map loader retains opaque file requests
+
+`LmapLoadState.file` is the request passed to the loaded-address, size,
+resource-handle, readiness and cleanup APIs. Its archive request comes
+from `fileQueuePlainDispatchRequest`, whose matched provider also returns
+`struct FileRequest *`. Both fields therefore retain that canonical
+opaque owner, rather than `void *` or an invented `FilePacRequest` view.
+This does not expose the provider's private PAC layout; the sixteen-byte
+load record and its offset `+0x78` inside the `0x88`-byte task stay unchanged.
