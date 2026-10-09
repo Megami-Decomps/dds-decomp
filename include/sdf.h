@@ -478,7 +478,7 @@ typedef struct SdfAsset {
     u8 pad00[6];
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
-    void *entries[2];
+    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
     u32 unk10;
     u32 unk14;
     u32 secondaryColor; /* 0x18 */
@@ -497,6 +497,8 @@ typedef struct SdfAsset {
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(SdfAsset) == 0x48) ? 1 : -1];
+typedef char SdfAsset_drawEntries_offset_must_be_0x08[
+    ((u32)&((SdfAsset *)0)->drawEntries == 0x08) ? 1 : -1];
 typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
     ((u32)&((SdfAsset *)0)->dirtyFlags == 0x06) ? 1 : -1];
 typedef char SdfAsset_primarySubParam_offset_must_be_0x38[
