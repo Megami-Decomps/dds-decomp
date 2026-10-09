@@ -570,8 +570,8 @@ typedef struct EffRecordPool {
     u32 color;
     s32 vertexCount; /* Positions/color words, not group count. */
     f32 scale;
-    s32 recordBase;
-    s32 auxRecordBase;
+    u8 *recordBase;
+    u8 *auxRecordBase;
     SdfAsset *resource;
     SdfMemBlock *buffer;
 } EffRecordPool; /* 0x70 */
@@ -581,6 +581,10 @@ typedef char EffRecordPool_resource_offset_must_be_0x68[
     ((u32)&((EffRecordPool *)0)->resource == 0x68) ? 1 : -1];
 typedef char EffRecordPool_buffer_offset_must_be_0x6C[
     ((u32)&((EffRecordPool *)0)->buffer == 0x6C) ? 1 : -1];
+typedef char EffRecordPool_recordBase_offset_must_be_0x60[
+    ((u32)&((EffRecordPool *)0)->recordBase == 0x60) ? 1 : -1];
+typedef char EffRecordPool_auxRecordBase_offset_must_be_0x64[
+    ((u32)&((EffRecordPool *)0)->auxRecordBase == 0x64) ? 1 : -1];
 
 typedef struct EffRingParticle {
     u32 color;
