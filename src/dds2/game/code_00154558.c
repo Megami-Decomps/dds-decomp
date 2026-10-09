@@ -1816,3 +1816,4 @@ INCLUDE_SDATA(const s32, "game/code_00154558", fldRoomNameSentinel);
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F8);
+

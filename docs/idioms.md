@@ -5055,3 +5055,79 @@ pointer transport. The legacy first input of `btlSelectedEntryHitsElement`
 remains an explicitly deferred address-word contract; its formal types
 and body are preserved until the existing preserve-types scope releases.
 
+## Model afterimage slots own models and signed countdowns
+
+The paired afterimage updaters (`002174C0` / `00231FD8`) allocate `0xC`
+bytes per `MdlDevSlot`: next at `+0`, the actual `SdfModel *` at `+4`,
+and a signed word countdown at `+8`. The destructor releases that model
+before the slot allocation. Keep the complete owner in `mdl.h`, not an
+eight-byte prefix or another private slot view.
+
+`SdfModel.unk94` is one four-byte value with genuinely different uses.
+DDS1 `0021755C` and DDS2 `00232074` store the float `1000.0f`;
+DDS1 renderer `002D9530` loads its unchanged word and `002D953C`
+forwards those bits into a VIF packet at `+0x2C`. The Nocturne debug
+renderer independently reads the same member as a float at `002B07D4`
+and as a packet word at `002B089C` / `002B08A8`. Use the primary
+owner's documented `scalar` / `word` union, preserving its `0x9C` extent.
+These type completions do not match the still-assembly afterimage body:
+its unobserved local packed-color store needs genuine source/API evidence,
+not a padded temporary or fabricated memory-output packing primitive.
+
+
+## DDS2 scene-slot flags and the retained fade-count argument
+
+`ActorSlotOrder` keeps the DDS2 slot-mask/mode flags at `+2`, separate
+from the signed state bytes at `+4`. The controller `001CF800` uses
+`LHU`/`SH` there, setting mode bit `0x1000` and the individual slot bits;
+the DDS1 layout is unchanged. Its stale-slot call at `001CF840` deliberately
+loads the signed last fade index from `sp+0` into `a0` at `001CF844`, after
+the count provider wrote that output. `btlFadeStaleSceneSlots` retains this
+unused formal even though its retail body does not read it. These contracts
+do not claim that the controller body matches.
+
+
+## PM paired-file exporters return a real status
+
+The DDS1 `0023E7F8` and DDS2 `00259AE8` providers return an explicit
+`s32`: zero when either file open fails, one after the completed PM2/PM3
+write, close, and device-sync sequence. Their real inputs are a signed
+mode and the canonical `EvtRuntime *`. The viewer's mode-selection
+client deliberately discards the result, but its declaration must still
+describe that status API rather than `void` or an unprototyped call.
+The upstream exporter bodies are unchanged by this contract correction.
+
+
+## Battle input snapshots retain the complete kernel extent
+
+DDS1's local `SndPad` owner in `code_001A1960` covers all `0x40` bytes,
+not just the known button fields through `+27`. The kernel initializer
+`001039E0` clears two banks of two ports with sixteen input bytes each;
+the cursor provider indexes that same 64-byte snapshot by 16-byte set.
+An unknown tail completes the existing owner without moving or changing
+any named field. This type completion does not match the still-assembly
+selection controller `001C08B8`.
+
+
+## Field scatter effects retain their actual work pointer
+
+DDS2 `code_00124040` stores `effBlurCreateScatterWork`'s returned
+`EffBlurScatterWork *` in `D_00435F74` and later passes it to
+`effBlurReleaseFirstResource`. The retained global is a work pointer,
+not an arithmetic handle; the two pointer-to-integer stores and the
+integer-to-pointer destruction cast are unnecessary. The serialized
+small-data slot remains four bytes. This owner closure does not claim
+the still-assembly `fldProcDraw` callback as matching.
+
+
+## Scene target cursors use a word and two coordinate halves
+
+The DDS1 selector `001C0650` compares `SceneAiWork`'s cursor at `+18`
+with a word load (`001C0724`, `001C0760`) and moves its two halves with
+`SH` at `+18/+1A`. The primary owner embeds those genuine word/half uses
+in one union. Existing consumers retain unsigned halfword storage;
+the selector's signed logical coordinates account for its `LH` indexing
+and signed 16-bit wrap checks. The constructor's row `2`, column `1`
+pair produces the packed sentinel `0x00010002`. This owner completion
+does not match the still-assembly selector body.
+

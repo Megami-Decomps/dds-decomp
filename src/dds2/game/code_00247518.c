@@ -22,7 +22,7 @@ extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 func_0035C860(char *buffer, const char *format, ...);
-extern void func_00259AE8();
+extern s32 func_00259AE8(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer();
 extern void *dds3GetWorldObject(void);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
@@ -2060,3 +2060,4 @@ INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
+

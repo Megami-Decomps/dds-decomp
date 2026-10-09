@@ -2055,3 +2055,4 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361F8);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_004361FC);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldFieldTaskHandle);
+
