@@ -1424,7 +1424,8 @@ void func_0011CE38(void) {
 void func_0011CE40(void) {
 }
 
-void func_0011CE48(void) {
+/* The surprise-probability diagnostic hook receives the final chance. */
+void func_0011CE48(s32 chance) {
 }
 
 s32 evtPushRequestedRosterPresence(void) {
