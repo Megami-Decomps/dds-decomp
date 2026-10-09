@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "fr_font.h"
@@ -160,7 +161,6 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
 
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 

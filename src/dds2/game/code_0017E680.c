@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -45,7 +46,6 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(EffResourceRenderState *);
 extern f32 D_003B1540[][4];
 extern u32 D_003B1600[];

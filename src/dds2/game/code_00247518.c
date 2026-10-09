@@ -1940,7 +1940,6 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-extern s32 filePollEntryCleanup(void *file);
 
 void func_0024DBB8(PolyMovieWork *assets) {
 

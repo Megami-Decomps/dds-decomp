@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
@@ -131,7 +132,6 @@ struct SdfListHead;
 extern void sdfInitPacketList(struct SdfListHead *);
 
 
-extern void sdfAppendPacket(struct SdfListHead *, u32);
 
 
 
