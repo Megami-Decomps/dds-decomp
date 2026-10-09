@@ -73,7 +73,9 @@ typedef enum EvtUnitVectorSlotState {
 typedef struct EvtUnitVectorSlot {
     s32 state;                    /* 0x00: EvtUnitVectorSlotState. */
     s32 id;                       /* 0x04: unit bound to a state-3 slot. */
-    f32 vec[14];                  /* 0x08: vec4 at 0x08/0x18/0x28, then 0x38/0x3C. */
+    f32 vec[12];                  /* 0x08: vec4 at 0x08/0x18/0x28. */
+    f32 auxX;                     /* 0x38: auxiliary coordinates (scalar fields: */
+    f32 auxY;                     /* 0x3C: writers split the address at 0x30). */
 } EvtUnitVectorSlot;
 
 typedef char EvtUnitVectorSlotSizeCheck[sizeof(EvtUnitVectorSlot) == 0x40 ? 1 : -1];
