@@ -1387,3 +1387,4 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", btlRandomState);
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
+
