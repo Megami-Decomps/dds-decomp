@@ -462,12 +462,12 @@ INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBCC0);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBD80);
 
-void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_00398200, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_00398200, nodeIndex);
+    return binding;
 }
 
 /* vu0 routine: interpolate the sampled scale keys into the draw node. */
