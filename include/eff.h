@@ -554,9 +554,9 @@ typedef struct EffResourceWork {
     f32 (*positions)[4];
     f32 (*normals)[4];
     u32 *colors;
-    u32 resource68;
+    struct SdfMemBlock *streamAllocation;
     u32 graphics6C;
-    u32 resource70;
+    struct SdfMemBlock *backingAllocation;
 } EffResourceWork; /* 0x74 */
 
 /* Position/color arrays precede this render pool; constructors clear the full allocation. */
