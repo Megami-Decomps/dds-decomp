@@ -3388,7 +3388,7 @@ typedef struct EffectSurfaceNode {
     FileJobPayload **jobs;          // 0x38
     struct SdfMemBlock *jobAllocation;      // 0x3C
     struct EffExpandedList *resourceHolder; // 0x40, released separately from the grid record
-    u32 record;         // 0x44: fileAllocateGridRecordSlots result
+    FileSlotTable *record; // 0x44: retained grid record table
     u16 count;          // 0x48: initialized to 1; remaining role unknown
 } EffectSurfaceNode;
 
@@ -3468,7 +3468,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         billDispatchByKind(node->resource);
     }
     if (node->jobAllocation != 0) {
-        count = ((FileSlotTable *)node->record)->count;
+        count = node->record->count;
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
@@ -3484,7 +3484,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         effReleaseReferenceHolder(node->resourceHolder);
     }
     if (node->record != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)node->record);
+        fileReleaseGridRecordHandle(node->record);
     }
     sdfReleaseChipBlock(node);
 }
@@ -3492,20 +3492,20 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
 extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
 
 EffectSurfaceNode *effRecreateSurfaceNodeFromWork(u8 *work) {
-    FileKeyBlock *params = (FileKeyBlock *)((FileSlotTable *)((EffectSurfaceNode *)work)->record)->data1;
+    FileKeyBlock *params = (FileKeyBlock *)((EffectSurfaceNode *)work)->record->data1;
     EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
-    effRebuildSurfaceHandles(node, ((FileSlotTable *)((EffectSurfaceNode *)work)->record)->type, &((EffectSurfaceNode *)work)->params);
-    effReplaceResourceRef(node, ((FileSlotTable *)((EffectSurfaceNode *)work)->record)->type, params);
+    effRebuildSurfaceHandles(node, ((EffectSurfaceNode *)work)->record->type, &((EffectSurfaceNode *)work)->params);
+    effReplaceResourceRef(node, ((EffectSurfaceNode *)work)->record->type, params);
     return node;
 }
 
 extern void func_002A5DE0(EffectSurfaceNode *, u8 *);
 
 EffectSurfaceNode *effCreateSurfaceGridWithConfiguration(u8 *work) {
-    FileKeyBlock *params = (FileKeyBlock *)((FileSlotTable *)((EffectSurfaceNode *)work)->record)->data1;
+    FileKeyBlock *params = (FileKeyBlock *)((EffectSurfaceNode *)work)->record->data1;
     EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
-    effRebuildSurfaceHandles(node, ((FileSlotTable *)((EffectSurfaceNode *)work)->record)->type, &((EffectSurfaceNode *)work)->params);
-    effReplaceResourceRef(node, ((FileSlotTable *)((EffectSurfaceNode *)work)->record)->type, params);
+    effRebuildSurfaceHandles(node, ((EffectSurfaceNode *)work)->record->type, &((EffectSurfaceNode *)work)->params);
+    effReplaceResourceRef(node, ((EffectSurfaceNode *)work)->record->type, params);
     func_002A5DE0(node, work);
     return node;
 }
@@ -3524,12 +3524,12 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
         dst->resource = billCloneObjectRetainingSharedData(src->resource);
         billMarkKindOneFlag(dst->resource);
         if (dst->record != 0) {
-            FileSlotTable *record = (FileSlotTable *)dst->record;
+            FileSlotTable *record = dst->record;
             billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5: {
-        u32 count = ((FileSlotTable *)src->record)->count;
+        u32 count = src->record->count;
         s32 size;
         u32 i;
 
@@ -3592,10 +3592,10 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
 
 
 void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource) {
-    if (node->record != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)node->record);
+    if (node->record != NULL) {
+        fileReleaseGridRecordHandle(node->record);
     }
-    node->record = (u32)fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
+    node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
 }
 
 
@@ -3607,7 +3607,7 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
     resource = effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3620,7 +3620,7 @@ void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) 
     resource = billCreateIndexed(0, resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3633,12 +3633,12 @@ void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) 
     node->resource = resource;
     billMarkKindOneFlag(resource);
     if (node->record != 0) {
-        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
-    u32 count = ((FileSlotTable *)node->record)->count;
+    u32 count = node->record->count;
     u32 i;
     u32 size;
 
