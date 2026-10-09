@@ -4818,8 +4818,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     return queue;
 }
 
-void func_002D4380(u32 unused, u32 job) {
-    fileCloneQueueEntries((FileQueue *)job);
+FileQueue *func_002D4380(u32 unused, FileQueue *source) {
+    return fileCloneQueueEntries(source);
 }
 
 extern void camFollowOffsetVec();
