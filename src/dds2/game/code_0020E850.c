@@ -7,6 +7,10 @@
 #include "btl_action.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "eff_transform.h"
+#include "btl_model_record.h"
 #include "pcp_vu0.h"
 #include "dat_command.h"
 #include "eff.h"
@@ -174,7 +178,65 @@ void func_0020EA10(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EA18);
+extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
+extern void effObjFetchInnerFirstVec(EffWorldNode *node);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
+extern void func_001200E8(f32 x, f32 y, f32 z, f32 radius, s32 fade);
+
+void func_0020EA18(BtlUnit *unit) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 actorPosition[4] __attribute__((aligned(16)));
+    f32 radius;
+    s32 alpha;
+    BtlActorStatusRecord *status;
+    MdlCtx *model;
+
+    if (!(unit->flags & 8)) {
+        return;
+    }
+    if (!(unit->flags & 2)) {
+        return;
+    }
+    if (unit->unkCC != 0) {
+        return;
+    }
+
+    model = unit->ext->owner;
+    alpha = ((u8 *)&unit->overlayColor)[3];
+    if (alpha == 0) {
+        return;
+    }
+
+    status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->resourceIndex);
+    switch (status->shadowKind) {
+    case 0:
+        return;
+    case 1:
+        radius = 50.0f;
+        break;
+    case 2:
+        radius = 100.0f;
+        break;
+    case 3:
+        radius = 200.0f;
+        break;
+    case 4:
+        radius = 300.0f;
+        break;
+    default:
+        radius = 0.0f;
+        break;
+    }
+
+    effObjFetchInnerFirstVec((EffWorldNode *)unit->effectObject);
+    VU0_STORE_VF(vf10, actorPosition);
+    if (sdfLoadMapRecordPositionVector(model->inner, 0) == 0) {
+        VU0_LOAD_VF(vf10, actorPosition);
+    }
+    VU0_STORE_VF(vf10, position);
+    func_001200E8(position[0], actorPosition[1], position[2], radius, alpha);
+}
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
