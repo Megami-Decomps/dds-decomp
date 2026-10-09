@@ -29,6 +29,24 @@ typedef struct BattleSceneObject {
 #endif
 } BattleSceneObject;
 
+/* Both scene scratch constructors allocate and clear 0x38 bytes. */
+typedef struct SceneKindTable {
+    u32 phase;
+    s16 alpha;
+    u8 pad06[2];
+    s32 entry;
+    s32 cursor;
+    s32 row;
+    u32 value[8];
+    u8 pad34[4];
+} SceneKindTable;
+
+typedef char SceneKindTable_size_must_be_0x38[(sizeof(SceneKindTable) == 0x38) ? 1 : -1];
+typedef char SceneKindTable_alpha_offset_check[
+    ((u32)&((SceneKindTable *)0)->alpha == 0x04) ? 1 : -1];
+typedef char SceneKindTable_value_offset_check[
+    ((u32)&((SceneKindTable *)0)->value == 0x14) ? 1 : -1];
+
 #ifdef VERSION_DDS1
 void fldInitializeSceneObject(BattleSceneObject *object, struct BtlTask *owner);
 #else

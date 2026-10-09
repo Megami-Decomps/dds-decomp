@@ -56,7 +56,7 @@ typedef struct FldAreaWork {
     u8 pad98[8];
     s32 unkA0;
     s32 unkA4;
-    u8 padA8[4];
+    s32 overrideSupportRecordIndex; /* -1 selects the default support record. */
     s32 unkAC;
     u8 padB0[0xC];
     s32 flagNumber;

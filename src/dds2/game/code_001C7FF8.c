@@ -217,10 +217,6 @@ s32 btlIsSceneActorCountWithinLimit(s32 unused, u32 limit) {
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C82D8);
 
-typedef struct SceneKindTable {
-    u8 pad00[0x14];
-    u32 value[8];
-} SceneKindTable;
 
 extern SceneKindTable *D_00438F4C;
 
