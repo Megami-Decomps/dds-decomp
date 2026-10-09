@@ -237,13 +237,17 @@ typedef struct BtlResourceDescriptor {
     s32 word04;             // 0x04
     u32 word08;             // 0x08
     s32 entryCount;         // 0x0C
-    u32 word10[5];          // 0x10
+    u32 word10;             // 0x10
+    u32 selectedIndex;      // 0x14
+    u32 visibleIndex;       // 0x18
+    u32 previewActive;      // 0x1C
+    u32 repeatDelay;        // 0x20
     u32 word24;             // 0x24
     u32 word28;             // 0x28
     u32 word2C;             // 0x2C
     BtlResourceEntry *firstVisibleEntry; /* 0x30 */
     BtlResourceEntry *selectedEntry; /* 0x34 */
-    u32 word38;             // 0x38
+    BtlResourceEntry *cachedEntry; // 0x38: last entry whose preview was updated
     s32 handle;             // 0x3C
     s32 ownsHandle;         // 0x40
     BtlResourceEntryList *entryList; /* 0x44 */
@@ -2911,23 +2915,200 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     descriptor->word04 = 8;
     descriptor->word08 = 0;
     descriptor->entryCount = list->count;
-    descriptor->word10[0] = 0;
-    descriptor->word10[1] = 0;
-    descriptor->word10[2] = 0;
-    descriptor->word10[3] = 0;
-    descriptor->word10[4] = 0;
+    descriptor->word10 = 0;
+    descriptor->selectedIndex = 0;
+    descriptor->visibleIndex = 0;
+    descriptor->previewActive = 0;
+    descriptor->repeatDelay = 0;
     descriptor->word24 = 0x60;
     descriptor->word28 = 0x80806020;
     descriptor->word2C = 0x60000000;
     descriptor->firstVisibleEntry = list->head;
     descriptor->selectedEntry = list->head;
-    descriptor->word38 = 0;
+    descriptor->cachedEntry = NULL;
     descriptor->handle = 0;
     descriptor->entryList = list;
     return descriptor;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
+extern u8 sdfPadButtonStates[0x20];
+extern s8 D_0040B7DB[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
+extern SdfTex *effGetBillResourceTexture(s32);
+s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, s32);
+extern void func_0020E1E0(BtlResourceDescriptor *);
+
+/* Update list selection and submit the visible browser rows to its surface. */
+s32 func_0020DAB8(BtlResourceDescriptor *descriptor) {
+    BtlResourceEntry *visibleEntry;
+    SdfListHead *packetList;
+    SdfPoolNode *surface;
+    s32 drawnRows;
+    s32 topRow;
+    s32 contentRow;
+    s32 packedY;
+
+    if (descriptor->repeatDelay != 0) {
+        descriptor->repeatDelay--;
+    } else if (descriptor->firstVisibleEntry == NULL) {
+        if (D_0040B7DB[0] < 0) {
+            descriptor->word08 = 2;
+        }
+    } else if (descriptor->word08 == 0) {
+        BtlResourceEntry *navigationEntry;
+        BtlResourceEntry *selectedEntry;
+        s32 navigationStep;
+        if ((sdfPadButtonStates[6] & 2) != 0) {
+            if (descriptor->selectedEntry->prev != NULL) {
+                descriptor->selectedEntry = descriptor->selectedEntry->prev;
+                descriptor->selectedIndex--;
+                if (descriptor->visibleIndex != 0) {
+                    descriptor->visibleIndex--;
+                }
+                if (descriptor->selectedEntry == descriptor->firstVisibleEntry) {
+                    if (descriptor->selectedEntry->prev != NULL) {
+                        descriptor->firstVisibleEntry = descriptor->selectedEntry->prev;
+                        descriptor->visibleIndex = 1;
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+            if (descriptor->selectedEntry->next != NULL) {
+                descriptor->selectedEntry = descriptor->selectedEntry->next;
+                descriptor->selectedIndex++;
+                descriptor->visibleIndex++;
+                if (descriptor->visibleIndex == 0x11) {
+                    if (descriptor->firstVisibleEntry->next != NULL) {
+                        descriptor->firstVisibleEntry = descriptor->firstVisibleEntry->next;
+                        descriptor->visibleIndex = 0x10;
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[9] & 2) != 0) {
+            selectedEntry = descriptor->selectedEntry;
+            for (navigationStep = 0; navigationStep < 0x12; navigationStep++) {
+                navigationEntry = selectedEntry->prev;
+                if (navigationEntry != NULL) {
+                    descriptor->selectedEntry = navigationEntry;
+                    descriptor->selectedIndex--;
+                    if (descriptor->visibleIndex != 0) {
+                        descriptor->visibleIndex--;
+                    }
+                    selectedEntry = descriptor->selectedEntry;
+                    if (selectedEntry == descriptor->firstVisibleEntry) {
+                        BtlResourceEntry *previous = selectedEntry->prev;
+                        if (previous != NULL) {
+                            descriptor->firstVisibleEntry = previous;
+                            descriptor->visibleIndex = 1;
+                        }
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[11] & 2) != 0) {
+            for (navigationStep = 0; navigationStep < 0x12; navigationStep++) {
+                navigationEntry = descriptor->selectedEntry->next;
+                if (navigationEntry != NULL) {
+                    descriptor->selectedEntry = navigationEntry;
+                    descriptor->selectedIndex++;
+                    descriptor->visibleIndex++;
+                    if (descriptor->visibleIndex == 0x11) {
+                        BtlResourceEntry *next = descriptor->firstVisibleEntry->next;
+                        if (next != NULL) {
+                            descriptor->firstVisibleEntry = next;
+                            descriptor->visibleIndex = 0x10;
+                        }
+                    }
+                }
+            }
+        } else if ((s8)sdfPadButtonStates[3] < 0) {
+            descriptor->word08 = 2;
+        } else if ((s8)sdfPadButtonStates[1] < 0) {
+            descriptor->word08 = 1;
+        } else {
+            BtlResourceEntry *cachedEntry = descriptor->cachedEntry;
+            selectedEntry = descriptor->selectedEntry;
+            if (cachedEntry != selectedEntry) {
+                s32 category;
+                category = selectedEntry->category;
+                switch (category) {
+                case 1:
+                    if (selectedEntry->id == 0) {
+                        char resourceName[0x70];
+                        btlFormatSelectedResourceName(descriptor, resourceName);
+                        btlLoadAndReplaceResourceHandle(descriptor, (s32)resourceName);
+                    } else {
+                        btlReplaceResourceHandle(descriptor, selectedEntry->id);
+                    }
+                    selectedEntry = descriptor->selectedEntry;
+                    descriptor->previewActive = descriptor->ownsHandle = 1;
+                    break;
+                case 8: {
+                    SdfTex *texture = effGetBillResourceTexture(selectedEntry->value);
+                    descriptor->ownsHandle = category;
+                    descriptor->handle = (s32)texture;
+                    descriptor->previewActive = 1;
+                    selectedEntry = descriptor->selectedEntry;
+                    break;
+                }
+                case 2:
+                default:
+                    descriptor->previewActive = 0;
+                    break;
+                }
+                descriptor->cachedEntry = selectedEntry;
+            }
+            if (descriptor->previewActive != 0) {
+                func_0020E1E0(descriptor);
+            }
+        }
+    }
+
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011F250(
+        (descriptor->word00 << 4) + 0x7000,
+        (descriptor->word04 << 3) + 0x7900,
+        0xFEFFFF, 0xCC0, 0x740, descriptor->word2C, descriptor->word28));
+
+    if (descriptor->previewActive != 0) {
+        sdfAppendPacket(packetList, (u32)func_0011F250(
+            (descriptor->word00 << 4) + 0x7000,
+            (descriptor->word04 << 3) + 0x8050,
+            0xFEFFFF, 0x800, 0x400, 0, descriptor->word28));
+    }
+
+    drawnRows = 0;
+    topRow = descriptor->word04;
+    contentRow = topRow + 2;
+    if (descriptor->entryList->pathPrefix != NULL) {
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            (descriptor->word00 << 4) + 0x7020,
+            (contentRow << 3) + 0x7900, 0xFF0000, 5,
+            descriptor->entryList->pathPrefix));
+        contentRow = topRow + 0xE;
+    }
+    packedY = (contentRow << 3) + 0x7900;
+    visibleEntry = descriptor->firstVisibleEntry;
+    while (visibleEntry != NULL) {
+        s32 selectionFlags = visibleEntry == descriptor->selectedEntry ? 4 : 0;
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            (descriptor->word00 << 4) + 0x7020,
+            packedY, 0xFF0000, selectionFlags, visibleEntry->name));
+        drawnRows++;
+        packedY += 0x60;
+        if (drawnRows >= 0x12) {
+            break;
+        }
+        visibleEntry = visibleEntry->next;
+    }
+
+    surface = &kwlnDrawSurfaces[descriptor->word24];
+    surface->append((SdfListHead *)surface, packetList);
+    return descriptor->word08;
+}
+
 
 /* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
