@@ -2970,6 +2970,7 @@
 0x0020DA28	btlCreateResourceDescriptor	inferred	allocates the 0x48 BtlResourceDescriptor consumed by btlDestroyResourceDescriptor [names_M36_SmallSweep5.tsv]
 0x0020DAB8	btlUpdateAndDrawResourceBrowser	inferred	Handles browser navigation, updates the selected entry preview and submits the visible browser rows; returns the selection status.
 0x0020DFB0	btlSetResourceNameHeaderPair	inferred	Stores two argument words in resource-name record header at offsets 0 and 4. [names_R_FuncNames6.tsv]
+0x0020E1E0	btlDrawResourcePreview	inferred	Paired native function builds and submits the resource preview panel from the descriptor texture.
 0x0020E300	btlCreateResourceNameRecord	inferred	Allocates and initializes 0x38-byte battle resource-name record then copies its name. [names_R_FuncNames6.tsv]
 0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
 0x0020E7A0	btlSetResourceNamePosition	inferred	Sets the name-editor and overwrite-prompt origin at record offsets zero and four.

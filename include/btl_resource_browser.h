@@ -46,6 +46,7 @@ s32 btlFormatSelectedResourceName(struct BtlResourceDescriptor *descriptor,
 s32 btlTrimResourceName(struct BtlResourceDescriptor *descriptor,
                         char *output);
 u32 btlGetResourcePathVariant(struct BtlResourceDescriptor *descriptor);
+void btlDrawResourcePreview(struct BtlResourceDescriptor *descriptor);
 
 /* These two word-prefix helpers are shared with another 0x38-byte record. */
 void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord);
