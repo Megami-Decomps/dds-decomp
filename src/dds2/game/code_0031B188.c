@@ -47,8 +47,6 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern u32 *dds3SoundSlotPool;
 extern u32 fileClearRenderFlag(u32 mask);
@@ -56,7 +54,6 @@ extern u32 fileClearRenderFlag(u32 mask);
 
 extern void func_00328160(f32 *out, f32 x, f32 y, f32 z);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 
 void mnuClearNodeBroadcastFlag(u8 *node);
