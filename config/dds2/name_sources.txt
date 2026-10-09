@@ -5476,6 +5476,7 @@
 0x00304AB8	effReleaseSlotWorkAllocation	inferred	Releases 0xa0-byte-per-slot work allocation kept at owner offset 0x14. [names_R_FuncNames4.tsv]
 0x00304AD8	effGetSlotWorkOrOverride	inferred	Finds indexed slot work at 0x18 with 0xa0 stride, returns override pointer at +0x9c if present. [names_R_FuncNames4.tsv]
 0x00304AF8	effInitializeSlotPhase	inferred	Sets phase to zero for flag 1, otherwise fixed-point 0x10000. [names_R_FuncNames4.tsv]
+0x00304B18	effInitializeSlotWorkFromDescription	inferred	Initializes one live slot work entry from its paired serialized description.
 0x00304CE0	effInitializeSlotWork	inferred	Calls slot work initializer for entry at indexed 0xa0 stride. [names_R_FuncNames4.tsv]
 0x00304D08	effInitializeAllSlotWork	inferred	Initializes each allocated slot work entry in owner. [names_R_FuncNames4.tsv]
 0x00304D60	effAttachSlotWorkOwner	inferred	Stores parent owner and slot index in work then initializes work. [names_R_FuncNames4.tsv]
@@ -5504,6 +5505,7 @@
 0x00306500	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
 0x003065A0	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
 0x00306F80	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
+0x00307018	itfUpdateGridSlotDescription	inferred	Decrements the current entry's update-call delay or advances its continued description sequence; paired DDS1/DDS2 native wrappers agree.
 0x003071D0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
 0x00307270	itfGridSetQuantizedBounds	inferred	Stores x and width shifted by four and y and height shifted by three, then copies all four quantized coordinates into its draw entry.
 0x003072E8	itfGridSetBounds	inferred	Writes the grid widget's x, y, width, and height fields.
