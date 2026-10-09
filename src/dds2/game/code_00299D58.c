@@ -43,7 +43,7 @@ extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_00299B98(BrsSkillPackageWork *, s32);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
 extern void func_00341CF8(void);
 extern s32 btlHasPendingRuntimeActivity(void);

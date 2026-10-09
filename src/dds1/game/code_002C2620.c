@@ -85,7 +85,7 @@ extern void fldDisplayLocalMapCounterMessage(void);
 extern s32 func_002C3DB0(void);
 extern s32 evtGetCapturedWindowPanelValue(void);
 /* The retail caller passes color bytes as promoted ints; the callee narrows them. */
-extern void kwlnFadeInStart();
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);
