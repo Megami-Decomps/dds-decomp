@@ -59,7 +59,7 @@ typedef struct BattleGroupSlot {
     s32 flags;
     s16 slot;
     s16 motionIndex;
-    void *data;
+    MotionTable *data;
     struct SdfMemBlock *resourceHandle;
 } BattleGroupSlot;
 
@@ -87,7 +87,7 @@ typedef struct MdlLoadPayload {
     DevRequest *resourceList;
     void *itemList;
     struct SdfMemBlock *requestAllocation;
-    void *motionData;
+    MotionTable *motionData;
     struct SdfMemBlock *motionResource;
     void *partInfo;
     s32 resourceHandle;
