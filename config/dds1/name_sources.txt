@@ -6508,6 +6508,8 @@
 0x002DC2F0	sdfMotionCaptureQuaternion	inferred	Copies the bound node's quaternion into motion work. [names_reviewed6.tsv]
 0x002DC310	sdfMotionCaptureScaleVector	inferred	Copies the bound node's scale vector into motion work. [names_reviewed6.tsv]
 0x002DC360	sdfMotionBindIndexedTrack	inferred	Stores the source and handler pair then selects a track from its index array. [names_reviewed6.tsv]
+0x002DC418	sdfMotionApplyPrimaryWordSecondKey	inferred	Interpolates the indexed track color and stores it in the target asset's second primary-state word; table D_00398270 uses this as its sample callback.
+0x002DC458	sdfMotionBlendPrimaryWordSecondKey	inferred	Blends the captured target word with the indexed color and stores the second primary-state word; paired with the second-word apply callback.
 0x002DC668	sdfMotionReadBoundTrackInteger	inferred	Copies bound motion track integer into the command result field. [names_reviewed6.tsv]
 0x002DC928	sdfMotionCopyTrackValueToBinding	inferred	Copies a motion track current value into its binding. [names_reviewed12.tsv]
 0x002DC938	sdfMotionCreateFloatBinding	inferred	Allocates indexed track work using the float-interpolation handler table. [names_reviewed6.tsv]
