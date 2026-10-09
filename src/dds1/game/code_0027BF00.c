@@ -1144,16 +1144,18 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
     }
 }
 
-void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32 y, s32 color) {
+void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
+                                               struct EffectSlotSet *sprite,
+                                               s32 y, s32 color) {
     mnuActivatePendingPanelResource(menu);
-    menu->pending[0].sprite = (struct EffectSlotSet *)(u32)x;
+    menu->pending[0].sprite = sprite;
     menu->pending[0].effect = y;
-    menu->pending[1].sprite = (struct EffectSlotSet *)(u32)x;
+    menu->pending[1].sprite = sprite;
     menu->pending[1].effect = color;
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, y, 0, 0, -0x400, 0);
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, color, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
+    itfSetGridEntryQuantizedAndRefresh(sprite, y, 0, 0, -0x400, 0);
+    effConfigureIndexedSlotResource(sprite, y, menu->handles[0], 0, 3);
+    itfSetGridEntryQuantizedAndRefresh(sprite, color, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(sprite, color,
                                    menu->handles[1], 0, 10, 0);
 }
 

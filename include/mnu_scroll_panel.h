@@ -62,7 +62,8 @@ void mnuDestroyScrollPanel(MenuScrollPanel *panel);
 void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel,
                                                   u32 unused0, u32 unused1,
                                                   u32 selection);
-void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x,
+void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
+                                               struct EffectSlotSet *sprite,
                                                s32 y, s32 color);
 #endif
 
