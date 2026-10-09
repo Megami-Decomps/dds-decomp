@@ -285,7 +285,82 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003224C8", func_003230A0);
+s32 func_003230A0(MenuWorkEntry *entry, MenuRegistryTable *table,
+                  MenuRegistryRecord *row, MenuShortRecord *record) {
+    s32 action = 0;
+
+    entry->frameCounter++;
+    if (entry->frameCounter > record->parameters[0]) {
+        entry->frameCounter = 0;
+        entry->shortListIndex++;
+        entry->segmentStartX = entry->currentX;
+        entry->segmentStartY = entry->currentY;
+        entry->segmentStartAngleRadians = entry->currentAngleRadians;
+        if (entry->shortListIndex >= row->firstCount) {
+            if (entry->control.bits.loopMode == MENU_REPEAT_LOOP_MODE_RESTART_OR_ADVANCE) {
+                switch (entry->control.bits.repeatMode) {
+                case MENU_REPEAT_POLICY_DECREMENT_COUNT:
+                    if (entry->repeatCount > 0) {
+                        entry->shortListIndex = 0;
+                        entry->repeatCount--;
+                    } else {
+                        action = 1;
+                    }
+                    break;
+                case MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING:
+                    if (entry->remaining > entry->repeatCount) {
+                        entry->shortListIndex = 0;
+                    } else {
+                        action = 1;
+                    }
+                    break;
+                case MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT:
+                    if (entry->remaining < entry->repeatCount) {
+                        entry->shortListIndex = 0;
+                    } else {
+                        action = 1;
+                    }
+                    break;
+                }
+            } else if (entry->control.bits.loopMode == MENU_REPEAT_LOOP_MODE_TARGET_CAPABLE) {
+                switch (entry->control.bits.repeatMode) {
+                case MENU_REPEAT_POLICY_DECREMENT_COUNT:
+                    if (entry->repeatCount > 0) {
+                        entry->shortListIndex = 0;
+                        entry->repeatCount--;
+                    } else {
+                        action = 2;
+                    }
+                    break;
+                case MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING:
+                    action = entry->remaining > entry->repeatCount ? 2 : 1;
+                    break;
+                case MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT:
+                    action = entry->remaining < entry->repeatCount ? 2 : 1;
+                    break;
+                }
+            } else {
+                action = 1;
+            }
+            if (action != 0) {
+                entry->shortListIndex = 0;
+                entry->elapsed = 0;
+                if (action == 1) {
+                    entry->recordIndex++;
+                } else if (action == 2) {
+                    entry->recordIndex = entry->repeatTargetRecordIndex;
+                }
+                if (table->recordCount <= entry->recordIndex) {
+                    return 2;
+                }
+                row = &table->recordBase[entry->recordIndex];
+                func_003232A0(entry, row->lists);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 void func_003232A0(MenuWorkEntry *entry, MenuShortRecordList *list) {
     MenuShortRecord *record;
