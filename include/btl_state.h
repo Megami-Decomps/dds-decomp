@@ -254,17 +254,17 @@ typedef struct BtlState {
     s32 cleanupTask; /* 0x2B0: fldCreateSceneCleanupTask stores its task handle. */
     BtlItemDrop itemDrops[3]; /* 0x2B4: battle defeat item aggregation in code_001A1960 */
     s32 moneyEarned;
-    u8 pad2C4[4];
+    s32 moneyTotal; /* 0x2C4: accumulated battle money. */
     s32 experienceEarned; /* 0x2C8: defeat experience accumulator */
     s32 epEarned; /* 0x2CC: distinct defeat EP accumulator */
-    u8 pad2D0[4];
+    s32 unk2D0; /* 0x2D0: accumulated battle EP. */
     BtlSceneSlot slots[8]; /* 0x2D4: fldClearSceneSlotsAndGroups resets all eight. */
     BtlTask *groupPrimary[20]; /* 0x2EC: scene-group lists in code_001C48A8 */
     BtlTask *groupSecondary[45]; /* 0x33C */
     BtlTask *groupTertiary[15]; /* 0x3F0 */
     u8 pad42C[0x20];
     BtlSceneFadingRecord fading[8]; /* 0x44C: fldInitSceneFadeRecords initializes these. */
-    u8 pad48C[4];
+    BtlTask *currentTask; /* 0x48C: retained current command actor. */
     s8 timingRate; /* 0x490: initialized to 30; scales battle motion and countdowns. */
     u8 pad491[3];
     f32 modelFrameScale; /* 0x494 */

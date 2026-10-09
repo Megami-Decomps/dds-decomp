@@ -165,7 +165,6 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern s32 datActionAnimationRecords;
 
@@ -5767,19 +5766,19 @@ BtlRuntimeTask *sndCreateFileLoadTask(s32 value, s32 option, char *name) {
     return task;
 }
 
-s32 sndLoadDataFile(s32 *data) {
+s32 sndLoadDataFile(const SoundDataFileArgs *data) {
     char filename[0x70];
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode(data[0], (s32)filename);
+    sndFormatResourceNameFromUnitMode(data->unit, filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
 
 BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
-    BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundDataFileArgs));
+    SoundDataFileArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = sndLoadDataFile;
@@ -5787,7 +5786,7 @@ BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    args->unit = unit;
     return task;
 }
 
@@ -5805,12 +5804,12 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
     return (flags & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 source, s32 output) {
+void sndFormatResourceNameFromIndex(s32 source, char *output) {
     func_0035C860(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
 }
 
-void sndFormatResourceNameFromUnitMode(s32 unit, s32 output) {
-    func_0035C860(output, D_004192E8, ((BtlUnit *)unit)->partyRecord.unitId);
+void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
+    func_0035C860(output, D_004192E8, unit->partyRecord.unitId);
 }
 
 s32 sndResolveResourceId(s32 category, s32 id) {
