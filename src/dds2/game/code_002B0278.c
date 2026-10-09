@@ -1139,8 +1139,8 @@ s32 mnuCreatePanels(KwlnTask *callback) {
                          (EffectSlotSet *)menuContext->displayResource,
                          (EffectSlotSet *)menuContext->alternateResource, 0, 0);
     mnuAttachPartyIconBundle(index, window, (EffectSlotSet *)menuContext->displayResource);
-    menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
-                                                   menuContext->displayResource, 0);
+    menuContext->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)menuContext->resourceHandle,
+                                                   (EffectSlotSet *)menuContext->displayResource, 0);
     menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
                                                     (struct EffectSlotSet *)menuContext->displayResource,
                                                     (struct EffectSlotSet *)menuContext->displayHandle);
