@@ -5831,3 +5831,44 @@ clear 16 bytes, matching the existing `BattleActionState`. Its alternate
 motion byte at `+9` is signed: `00221C48` uses `LB`, and `00221CA4` uses
 `SB`. This is a field of that owner, not a view of the DDS1 timing word.
 
+
+## Mantra flag lookups copy their owned constant tables explicitly
+
+DDS2 `func_0028F128` copies four ID/flag tables (14, 4, 8, 8 halfword
+pairs) and nine signed party offsets into automatic arrays before its
+first-hit scans. Declare the actual source tables at `004272F8`,
+`00427330`, `00427340`, `00427360`, and `00427380`, then copy each with
+`memcpy`; keep their existing `INCLUDE_RODATA` ownership. Synthesized
+literal-array initializers instead allow gcc to reorder the table copies
+and introduce new literal data. The explicit-copy form matches all 150
+native words and preserves all seven surrounding C functions (8/0 unit).
+
+## Scene-pair result checks carry actors, not integer addresses
+
+`btlCheckScenePairResult` passes its own actor and both descriptor actors to
+`func_001ABDE8`, whose four actor inputs are actual `BtlUnit *` owners.
+The result-6 validation calls `func_001ABA40`, which reads that actor's
+party record. Keep the wrapper's formal, both `SceneCheckArgs` members,
+and every query declaration pointer-typed, including the fourth nullable
+actor in the linked-command caller. The unused second local descriptor
+definition and query declarations in `code_001D4438` are not another view.
+
+
+## Battle overlay visibility and packet-list owners
+
+DDS1 `btlInitVisibilityGrid` allocates exactly `gridWidth * gridHeight`
+bytes; `00212998` reads each visibility value with `LBU`. Keep the
+source-local runtime owner as `u8 *`, including its initializer and
+release local, rather than an opaque allocation with a signed-byte view.
+The overlay providers and their fade caller carry actual `SdfListHead *`
+values through to the existing SDK list APIs. The textured-cell provider
+forwards that same owner to `effAppendTexturedTrianglePacket`.
+
+This does not turn SDK address-word interfaces into pointer returns:
+`sdfAllocPacketAligned` still returns its native `s32` address word, and
+`sdfAppendPacket` still takes a `u32` packet address. Convert only at those
+documented word boundaries. Native `SD` operations justify the existing
+four-`u64` `SdfPacket`; no alternate packet owner is needed. Credit
+Purist6c's complete prior overlay reconstruction for the owner-gap lead;
+the `00212998` body remains unlanded until an honest full match.
+

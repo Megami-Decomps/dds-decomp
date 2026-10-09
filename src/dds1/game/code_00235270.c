@@ -946,6 +946,44 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
 
+extern char D_003BC160[]; /* "%4d" */
+extern char D_003BC168[]; /* " ---" */
+extern char D_003BC170[]; /* "..." */
+extern char D_003BC178[]; /* "  x" */
+extern char D_003BC180[]; /* "ON " */
+extern char D_003BC188[]; /* "OFF" */
+extern char D_003BC190[]; /* "NORMAL" */
+extern char D_003BC198[]; /* "ADD" */
+extern char D_003BC1A0[]; /* "SUB" */
+extern char D_003BC1A8[]; /* " -- " */
+extern char D_003BC1B0[]; /* "1STOP" */
+extern char D_003BC1B8[]; /* "DOWN" */
+extern char D_003BC1C0[]; /* "UP" */
+extern char D_003BC1C8[]; /* " IN " */
+extern char D_003BC1D0[]; /* " OUT " */
+extern char D_003BC1D8[]; /* "%.1f" */
+extern char D_003BC1E0[]; /* "%d" */
+extern char D_003BC1E8[]; /* "%-.11s" */
+extern char D_003BC1F0[]; /* "N" */
+extern char D_003BC1F8[]; /* "B%d" */
+extern char D_003BC200[]; /* " X" */
+extern char D_003BC208[]; /* " -" */
+extern char D_003BC210[]; /* "LEV %d" */
+extern char D_003BC218[]; /* "DEF " */
+extern char D_003BC220[]; /* "%3d " */
+extern char D_003BC228[]; /* " x" */
+extern char D_003BC230[]; /* "CUR" */
+extern char D_003BC238[]; /* "DEF" */
+extern s8 D_00368750[];
+extern char *D_003688E8[];
+extern char *D_003688F8[];
+extern char *D_00368918[];
+extern char *D_00368938[];
+extern char *D_00368940[];
+extern char *D_00368948[];
+
+/* Format each enabled column of a timeline key. Some columns reuse the
+ * preceding scalar selection; the selected group kind is fixed for this row. */
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE530);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE540);
@@ -958,7 +996,320 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE570);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE580);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_002375D8);
+void func_002375D8(s32 list, s32 x, s32 y, s32 color,
+                   EvtRuntimeChild *node, EvtRuntime *ctx) {
+    char name[32];
+    s32 type;
+    s32 column;
+    s32 value;
+    s32 style;
+    s32 unavailable;
+    s32 bank;
+
+    type = ctx->frameGroup->type;
+    value = 0;
+    for (column = 0; column < D_00368768[type].columns; column++) {
+        style = color;
+        if (ctx->frameColumn != column) {
+            style = 0;
+        }
+        switch (D_00368768[type].columnTypes[column]) {
+        case 0:
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->frame + ctx->frameGroup->metadata.value));
+            break;
+        case 9:
+            switch (type) {
+            case 18: value = node->p08.sh[0]; break;
+            case 3: value = node->p08.sh[1]; break;
+            case 20: value = node->p08.sh[1]; break;
+            case 21: value = node->p08.sh[1]; break;
+            case 26: value = node->p08.sh[1]; break;
+            }
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            break;
+        case 15:
+            switch (type) {
+            case 3:
+            case 20:
+            case 21:
+            case 26: value = node->duration; break;
+            }
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            break;
+        case 1:
+            if (type != 10) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
+            } else if (ctx->frameGroup->metadata.extra1 != 3) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC168));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->duration));
+            }
+            break;
+        case 13:
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC170));
+            break;
+        case 14:
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "%.1f %.2f", node->p08.f, node->p0C.f));
+            break;
+        case 2:
+            if (type == 7) {
+                value = node->p08.sh[0];
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            }
+            break;
+        case 3:
+            switch (type) {
+            case 8: value = node->p08.sh[0]; break;
+            case 12: value = node->p08.sh[1]; break;
+            case 31: value = node->p08.sh[1]; break;
+            }
+            if (type == 31 && node->p08.sh[0] == 0) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC178));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            }
+            break;
+        case 4:
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, node->p08.sh[1]));
+            break;
+        case 5:
+            switch (type) {
+            case 10: value = node->serializedValue; break;
+            case 11: value = node->p08.sh[0]; break;
+            case 13: value = node->p08.sh[0]; break;
+            case 14: value = node->p08.sh[0]; break;
+            case 15: value = node->p08.sh[0]; break;
+            case 16: value = node->p08.sh[0]; break;
+            case 17: value = node->p08.sh[0]; break;
+            case 23: value = node->p08.sh[0]; break;
+            case 27: value = node->p08.sh[0]; break;
+            case 24: value = node->p08.sb[0]; break;
+            case 8: value = node->p0C.sh[0]; break;
+            case 25: value = node->p0C.sh[0]; break;
+            }
+            if (value) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+            }
+            break;
+        case 12:
+            switch (type) {
+            case 12:
+                switch (node->p08.sh[0]) {
+                case 0: sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC190)); break;
+                case 1: sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC198)); break;
+                case 2: sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1A0)); break;
+                }
+                break;
+            case 6:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_003688E8[node->p08.sh[0]]));
+                break;
+            case 19:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_003688F8[node->p08.sh[0]]));
+                break;
+            case 1:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368918[node->p08.sb[0]]));
+                break;
+            case 28:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368938[node->p08.sh[0]]));
+                break;
+            case 10:
+                if (node->p14.sh[0] == 0) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1A8));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1B0));
+                }
+                break;
+            case 30:
+                if (node->p08.sh[1] == 0) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1B8));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1C0));
+                }
+                break;
+            case 31:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, D_00368948[node->p08.sh[0]]));
+                break;
+            case 32:
+                if (node->p08.sh[0] == 0) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1C8));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1D0));
+                }
+                break;
+            }
+            break;
+        case 11:
+            switch (type) {
+            case 9: value = node->p08.sh[1]; break;
+            case 22: value = node->p08.sh[0]; break;
+            case 25: value = node->p08.sh[0]; break;
+            }
+            if (value) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+            }
+            break;
+        case 16:
+            switch (type) {
+            case 3: value = node->p0C.sb[0]; break;
+            case 20:
+            case 21: value = node->p08.sb[1]; break;
+            case 26: value = node->p0C.sb[0]; break;
+            }
+            if (value) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC180));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC188));
+            }
+            break;
+        case 6:
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1D8, node->p08.f * 57.29577637f));
+            break;
+        case 8:
+            switch (type) {
+            case 3: value = node->p0C.sb[1]; break;
+            case 26: value = node->p0C.sb[1]; break;
+            case 12: value = node->p0C.i; break;
+            case 18: value = node->p0C.sb[0]; break;
+            case 19: value = node->p08.sh[1]; break;
+            case 28: value = node->p08.sh[1]; break;
+            case 4: value = node->p08.sh[0]; break;
+            case 5: value = node->p08.sh[0]; break;
+            case 29: value = node->p08.sh[0]; break;
+            case 30: value = node->p08.sh[0]; break;
+            }
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E0, value));
+            break;
+        case 21:
+            value = 0;
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E0, value));
+            break;
+        case 7:
+            if (type == 5) {
+                value = node->p08.sh[1];
+            }
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC160, value));
+            break;
+        case 10:
+            switch (type) {
+            case 3: value = node->p0C.sh[1]; break;
+            case 26: value = node->p0C.sh[1]; break;
+            case 9: value = node->p08.sh[0]; break;
+            case 18: value = node->p08.sh[1]; break;
+            }
+            if (value < 0) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "-----------"));
+            } else {
+                memcpy(name, ctx->entryName[value], sizeof(name));
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E8, name));
+            }
+            break;
+        case 17:
+            value = node->p08.sh[0];
+            bank = (value >> 12) & 15;
+            if (bank == 0) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1F0));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1F8, bank - 1));
+            }
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x240, y, 0xFEFFFF, style, D_003BC1E0, value & 0xFFF));
+            break;
+        case 18:
+            unavailable = 0;
+            switch (type) {
+            case 4:
+                value = node->p08.sh[1];
+                if (node->p08.h[0] >> 12) unavailable = 1;
+                break;
+            case 2: value = node->p0C.sh[0]; break;
+            case 1:
+                if (node->p08.sb[0] >= 6) {
+                    unavailable = 1;
+                } else if (node->p08.sb[0] < 0) {
+                    unavailable = 1;
+                } else {
+                    value = node->p10.sh[0];
+                }
+                break;
+            case 12: value = node->p14.sh[0]; break;
+            case 16: value = node->p14.sh[0]; break;
+            case 17: value = node->p14.sh[0]; break;
+            }
+            if (unavailable) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC200));
+            } else if (((value >> 12) & 15) == 0) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC208));
+            } else {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "B%d = %d", ((value >> 12) & 15) - 1, value & 0xFFF));
+            }
+            break;
+        case 19:
+            switch (node->p08.sb[0]) {
+            case 5:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "%d-%d %s H%d", node->p0C.sb[0], node->p0C.sb[1], D_00368940[node->p0C.sb[2]], node->p0C.sb[3]));
+                break;
+            case 6:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC210, node->p0C.sb[0]));
+                break;
+            case 7:
+                value = node->p0C.sh[0];
+                if (value < 0) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "-----------"));
+                } else {
+                    memcpy(name, ctx->entryName[value], sizeof(name));
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC1E8, name));
+                }
+                break;
+            case 3:
+                if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC218));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
+                }
+                if (node->p0C.b[0] < 2) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "    DEF "));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "    %.1f", node->p14.f));
+                }
+                break;
+            case 4:
+                if (node->p0C.sb[0] == 0 || node->p0C.sb[0] == 2) {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC218));
+                } else {
+                    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC220, node->p0C.b[1]));
+                }
+                break;
+            default:
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC228));
+                break;
+            }
+            break;
+        case 20:
+            value = 0;
+            switch (type) {
+            case 14:
+            case 15:
+            case 17:
+            case 23: value = node->p10.sh[0]; break;
+            }
+            if (value == 0) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC230));
+            } else if (value == 1) {
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC238));
+            } else {
+                value -= 2;
+                memcpy(name, ctx->entryName[value], sizeof(name));
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, name));
+            }
+            break;
+        }
+        x += D_00368750[D_00368768[type].columnTypes[column]] * 0xC0;
+    }
+}
+
 
 extern void func_002375D8(s32 list, s32 x, s32 y, s32 color, EvtRuntimeChild *node, EvtRuntime *ctx);
 

@@ -90,7 +90,6 @@ void effObjReleaseObjectData(EffectObj *obj) {
 }
 
 extern s32 billGetKindOneParameter(struct EffNode *bill);
-extern void effEventCopyFileRecordHeader(void *destination, const void *source);
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
 extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
@@ -221,7 +220,7 @@ s32 func_001145C0(EffectObj *obj) {
                 if (record != NULL) {
                     PCP_COPY_VECTOR(record, position);
                     PCP_COPY_VECTOR(record + 0x10, rotation);
-                    effEventCopyFileRecordHeader(eventNode, record);
+                    effEventCopyFileRecordHeader((EffEventWork *)eventNode, record);
                 }
             }
         }

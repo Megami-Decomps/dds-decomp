@@ -1093,7 +1093,7 @@ void effEventReleaseNode(EffEventWork *work) {
 }
 
 /* Copy the packed 0x30-byte record while retaining its native packed layout. */
-void effEventCopyFileRecordHeader(void *destination, const void *source) {
+void effEventCopyFileRecordHeader(EffEventWork *destination, const void *source) {
     *(FileRecordHeader *)destination = *(const FileRecordHeader *)source;
 }
 
@@ -1176,13 +1176,13 @@ void effEventLightSetPosition(EffEventLight *work, f32 *position) {
     work->init.position[1] = position[1] - work->init.height * 0.5f;
     work->init.position[2] = position[2];
     work->init.position[3] = 0;
-    effEventCopyFileRecordHeader((FileRecordHeader *)work->owner, (FileRecordHeader *)&work->init);
+    effEventCopyFileRecordHeader(work->owner, &work->init);
 }
 
 /* Copy the holder's updated packed tint to its event record. */
 void effEventBindEffect(EffEventLight *work, u32 color) {
     work->init.color = color;
-    effEventCopyFileRecordHeader((FileRecordHeader *)work->owner, (FileRecordHeader *)&work->init);
+    effEventCopyFileRecordHeader(work->owner, &work->init);
 }
 
 
