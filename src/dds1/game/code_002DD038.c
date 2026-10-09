@@ -9,7 +9,6 @@ extern s32 (*D_003982D0[])(void *a0, s32 a1);
 extern s32 (*D_00398360[])(void *a0, s32 a1);
 extern u8 D_00398368[];
 
-
 void func_002DD038(void) {
 }
 
@@ -17,20 +16,19 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
     return D_00398360[(u16)command](object, command);
 }
 
-
-
-/* Select a 16-byte entry from the source object's motion pointer table. */
-void sdfSelectMotionPointerEntry(s32 destination, s32 source, u32 unused, s32 entryIndex) {
-    sdfSetMotionPointerPair();
-    ((SdfMotionSlotPairBinding *)destination)->current = (SdfSlotEntry *)(*(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10);
+/* Bind the selected pair of model slot indices and weights. */
+void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+                                 Motion *motion, void *dispatch, s32 entryIndex) {
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
+                            motion, dispatch);
+    destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
+SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
+                                                           s32 unused, s32 entryIndex) {
+    SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-
-s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = (s32)sdfAllocSizeClassBlock(0x20);
-
-    sdfSelectMotionPointerEntry(entry, source, D_00398368, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, D_00398368, entryIndex);
     return entry;
 }
 

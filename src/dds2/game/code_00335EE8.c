@@ -13,8 +13,6 @@ extern u8 D_0040B518[];
 
 
 
-
-
 void func_00335EE8(void) {
 }
 
@@ -22,16 +20,19 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
     return D_0040B510[(u16)command](object, command);
 }
 
-/* Select a 16-byte entry from the source object's motion pointer table. */
-void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 entryIndex) {
-    sdfSetMotionPointerPair();
-    ((SdfMotionSlotPairBinding *)destination)->current = (SdfSlotEntry *)(*(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10);
+/* Bind the selected pair of model slot indices and weights. */
+void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+                                 Motion *motion, void *dispatch, s32 entryIndex) {
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
+                            motion, dispatch);
+    destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
-s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = (s32)sdfAllocSizeClassBlock(0x20);
+SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
+                                                           s32 unused, s32 entryIndex) {
+    SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, D_0040B518, entryIndex);
     return entry;
 }
 

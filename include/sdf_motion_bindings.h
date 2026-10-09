@@ -10,6 +10,9 @@ typedef struct SdfMotionBindingHead {
     void *source;
 } SdfMotionBindingHead;
 
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source,
+                             void *dispatch);
+
 typedef struct SdfMotionKeyInterval {
     f32 *firstKey;
     f32 *secondKey;
