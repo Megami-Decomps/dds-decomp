@@ -2324,7 +2324,7 @@ typedef struct EffClassWorkList {
     EffClassWork **entries;
 } EffClassWorkList;
 
-u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
+EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effActiveInstanceOperations[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
@@ -2336,7 +2336,7 @@ u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     VU0_STORE_VF($vf0, effect);
     VU0_STORE_VF($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    return effect;
+    return (EffClassWork *)effect;
 }
 
 
@@ -2381,9 +2381,9 @@ typedef struct EffRingResource {
 typedef char EffRadialRingParams_size_must_be_0x68[(sizeof(EffRadialRingParams) == 0x68) ? 1 : -1];
 typedef char EffRingResource_size_must_be_0x04[(sizeof(EffRingResource) == 0x04) ? 1 : -1];
 
-u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
-    u8 *effect = effAllocateActiveInstanceWork(kind, source);
-    ((EffClassWork *)effect)->resource = effActiveInstanceOperations[kind].createResource(source, option);
+EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
+    EffClassWork *effect = effAllocateActiveInstanceWork(kind, source);
+    effect->resource = effActiveInstanceOperations[kind].createResource(source, option);
     effActiveInstanceOperations[kind].initialize(effect);
     return effect;
 }
@@ -2399,7 +2399,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 void effDispatchDestroyOp(EffClassWork *work) {
@@ -2407,8 +2407,8 @@ void effDispatchDestroyOp(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-u8 *effCreateActiveResource(EffClassWork *work) {
-    u8 *effect;
+EffClassWork *effCreateActiveResource(EffClassWork *work) {
+    EffClassWork *effect;
     if (effActiveInstanceOperations[work->kind].cloneResource == NULL) {
         effect = effCreateResourceInstanceA(work->kind, work->payload, 0);
     } else {
@@ -2418,7 +2418,7 @@ u8 *effCreateActiveResource(EffClassWork *work) {
         clonedResource = effActiveInstanceOperations[work->kind].cloneResource(work);
         /* Capture the clone's class before publishing its resource. */
         kind = work->kind;
-        ((EffClassWork *)effect)->resource = clonedResource;
+        effect->resource = clonedResource;
         effActiveInstanceOperations[kind].initialize(effect);
     }
     return effect;

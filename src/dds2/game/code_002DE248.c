@@ -650,7 +650,7 @@ extern u128 kwlnDefaultColorVector[];
 
 extern s8 D_00437E94;
 
-extern u8 *effAllocateActiveInstanceWork(u16, void *);
+extern EffClassWork *effAllocateActiveInstanceWork(u16, void *);
 
 
 extern u8 *effAllocateBlockWithModel(u16, void *);
@@ -2465,7 +2465,7 @@ typedef struct EffClassWorkList {
     EffClassWork **entries;
 } EffClassWorkList;
 
-u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
+EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effActiveInstanceOperations[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
@@ -2477,19 +2477,14 @@ u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     VU0_STORE_VF(vf0, effect);
     VU0_STORE_VF(vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    return effect;
+    return (EffClassWork *)effect;
 }
 
-typedef struct EffInstance {
-    u8 pad_00[0x30];
-    void *resourceHandle;
-} EffInstance;
-
-u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
-    EffInstance *work = (EffInstance *)effAllocateActiveInstanceWork(kind, source);
-    work->resourceHandle = effActiveInstanceOperations[kind].createResource(source, extra);
+EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
+    EffClassWork *work = effAllocateActiveInstanceWork(kind, source);
+    work->resource = (u32)effActiveInstanceOperations[kind].createResource(source, extra);
     effActiveInstanceOperations[kind].initialize(work);
-    return (u8 *)work;
+    return work;
 }
 
 u8 *effCreateFileResourceInstance(u8 *work) {
@@ -2503,7 +2498,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 
@@ -2513,24 +2508,22 @@ void effDispatchDestroyOp(u32 *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-typedef struct EffActiveInstance {
-    u8 pad_00[0x2C];
-    s32 kind;
-    void *resource;
-    void *source;
-} EffActiveInstance;
-
-u8 *effCreateActiveResource(EffActiveInstance *obj) {
-    EffActiveInstance *work;
+EffClassWork *effCreateActiveResource(EffClassWork *obj) {
+    EffClassWork *work;
 
     if (effActiveInstanceOperations[obj->kind].cloneResource == NULL) {
-        work = (EffActiveInstance *)effCreateResourceInstanceA((u16)obj->kind, obj->source, 0);
+        work = effCreateResourceInstanceA((u16)obj->kind, obj->payload, 0);
     } else {
-        work = (EffActiveInstance *)effAllocateActiveInstanceWork((u16)obj->kind, obj->source);
-        work->resource = effActiveInstanceOperations[obj->kind].cloneResource(obj);
-        effActiveInstanceOperations[obj->kind].initialize(work);
+        void *resource;
+        s32 kind;
+
+        work = effAllocateActiveInstanceWork((u16)obj->kind, obj->payload);
+        resource = effActiveInstanceOperations[obj->kind].cloneResource(obj);
+        kind = obj->kind;
+        work->resource = (u32)resource;
+        effActiveInstanceOperations[kind].initialize(work);
     }
-    return (u8 *)work;
+    return work;
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
