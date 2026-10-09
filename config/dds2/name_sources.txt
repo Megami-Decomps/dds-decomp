@@ -5890,6 +5890,8 @@
 0x00322480	dds3MeasureRecordBlock	inferred	Computes eight bytes per record plus eight bytes per record's first-word count.
 0x003224E0	mnuBindMenuRecordRegistry	inferred	Stores base pointer and count of the first menu-record registry; no tag semantics established. [names_reviewed18.tsv]
 0x003224F0	mnuGetMenuRecordRegistryEntry	inferred	Indexes the first menu-record registry with a narrowed 16-bit index. [names_reviewed18.tsv]
+0x00322510	mnuBindMovementRecordTable	inferred	Stores the supplied MenuMovementRecord18 base and setup count; getters use a low-16-bit index and 0x18-byte stride.
+0x00322520	mnuGetMovementRecordByIndex	inferred	Narrows the supplied tag to its low 16 bits and returns the corresponding 0x18-byte movement record without checking the stored count.
 0x00322540	mnuBindMenuRegistryParameters	inferred	binds the externally supplied 0x30-byte menu parameter table and stores its supplied count
 0x00322550	mnuGetMenuRegistryParametersByIndex	inferred	masks the index to its low byte and returns table base plus index times 0x30 without checking the stored count
 0x00322570	mnuFindFirstFixedKindShortRecord	inferred	Scans a short-record list and returns the first record with the constant kind, else NULL. [names_reviewed17.tsv]
@@ -6835,7 +6837,13 @@
 0x004390C4	mnuResourceRecordCount	inferred	Count of the bound MenuResourceRecord table used as the resource iteration bound.
 0x004390C8	mnuWorkEntryPool	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuRegisterWorkEntryPool; Base pointer registered with count; reset clears count * 72 bytes. [names_qp9.tsv]
 0x004390CC	mnuWorkEntryPoolCount	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuRegisterWorkEntryPool; Registered number of 72-byte work entries. [names_qp9.tsv]
+0x004390D0	mnuMenuRecordRegistryBase	inferred	Base pointer set by mnuBindMenuRecordRegistry and indexed by low 16 bits as 0x1C-byte MenuRegistry rows.
+0x004390D4	mnuMenuRecordRegistrySetupCount	inferred	Count word supplied to mnuBindMenuRecordRegistry; retained but not checked by the getter.
 0x004390D8	mnuActiveEffectEntry	inferred	confidence=high; src/dds2/game/code_00321500.c:mnuInitializeActiveEffectWorkEntry; Stores the initialized MenuWorkEntry selected as the active effect entry. [names_qp9.tsv]
+0x004390DC	mnuMovementRecordTableBase	inferred	Base pointer set by mnuBindMovementRecordTable and indexed by low 16 bits as 0x18-byte MenuMovementRecord18 rows.
+0x004390E0	mnuMovementRecordTableSetupCount	inferred	Count word supplied to mnuBindMovementRecordTable; retained but not checked by the getter.
+0x004390E4	mnuMenuRegistryParametersBase	inferred	Base pointer set by mnuBindMenuRegistryParameters and indexed by low 8 bits as 0x30-byte MenuRegistryParameters rows.
+0x004390E8	mnuMenuRegistryParametersSetupCount	inferred	The binder stores its supplied count in the first u32 of this existing 8-byte symbol; the trailing word is unknown, and the getter does not check this count.
 0x004390F8	sdfTrackedThreadSemaphore	inferred	high confidence; src/dds2/game/code_00328778.c sdfStartTrackedThread(): WaitSema(D_004390F8); Instruction-aligned data counterpart of DDS1 D_003BD998 in the matched sdfStartTrackedThread() twin. Semaphore taken while linking tracked thread nodes and while waking the tracked list. [names_reviewed26.tsv]
 0x004390FC	sdfTrackedThreadHead	inferred	high confidence; src/dds2/game/code_00328778.c sdfStartTrackedThread(): node->next = D_004390FC; Instruction-aligned data counterpart of DDS1 D_003BD99C in the matched sdfStartTrackedThread() twin. Head of the tracked thread-node list updated before starting a newly created thread. [names_reviewed26.tsv]
 0x00439100	sdfThreadWakeWorkerId	inferred	confidence=high; data D_00439100; matched-C-users=2; src/dds2/game/code_00328AC8.c:18:sdfWakeThreadOnCompletionEvent; src/dds2/game/code_00328AC8.c:65:sdfStartQueuedThreadWakeWorker; Created queued-waiter worker thread ID is stored here and woken on completion events; data-twin=D_003BD9A0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/sbss.sbss.s:1139.; seed-placeholder=D_00439100; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
