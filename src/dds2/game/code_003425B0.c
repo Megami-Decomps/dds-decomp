@@ -565,7 +565,44 @@ void func_00342E58(u32 kind, u8 *dst) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00343188);
+extern char D_00438BE0[];
+extern char D_00438BE8[];
+extern char D_00438BF0[];
+extern char D_00438BF8[];
+extern char D_00438C00[];
+extern char D_00438C08[];
+extern char D_00438C10[];
+
+void func_00343188(const u8 *data, s32 size) {
+    s32 column = 0;
+    s32 i;
+
+    while (size > 0) {
+        if (column == 0) {
+            sdfPrintFormattedDevMessage(D_00438BE0, data);
+            column = (u32)data & 0xF;
+            for (i = column; i > 0; i--) {
+                sdfPrintFormattedDevMessage(D_00438BE8);
+            }
+        } else if (column == 8) {
+            sdfPrintFormattedDevMessage(D_00438BF0);
+        } else {
+            sdfPrintFormattedDevMessage(D_00438BF8);
+        }
+        sdfPrintFormattedDevMessage(D_00438C00, *data++);
+        column++;
+        if (column == 0x10) {
+            column = 0;
+            sdfPrintFormattedDevMessage(D_00438C08);
+        }
+        size--;
+    }
+    if (column == 0) {
+        sdfPrintFormattedDevMessage(D_00438C08);
+    } else {
+        sdfPrintFormattedDevMessage(D_00438C10);
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E590);
 
