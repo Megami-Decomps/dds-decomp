@@ -146,6 +146,7 @@ typedef char FileQueue_first_offset_must_be_0x8C[
 
 FileQueue *fileQueueCreate(void);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
+void fileQueueSaveImage(FileQueue *queue, const char *filePath);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
 void fileJobCopyHeader(FileJob *destination, FileJob *source);
