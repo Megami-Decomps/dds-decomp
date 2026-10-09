@@ -1157,7 +1157,30 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145818);
+void func_00145818(void) {
+    s32 i;
+
+    fldAreaState.unkC4 = -1;
+    fldAreaState.unkC8 = -1;
+    fldSceneRecordResource = 0;
+    fldSceneRecords = 0;
+    fldSceneRecordCount = 0;
+    D_0044F7F0[0] = 0;
+    D_0044F7F0[1] = 0;
+    D_0044F7F0[2] = 0;
+    D_0044F7F0[3] = 0;
+    D_0044F7F0[4] = 0;
+    D_0044F7F0[5] = 0;
+    D_0044F7F0[6] = 0;
+    D_0044F7F0[7] = 0;
+    D_0044F7F0[8] = 0;
+    for (i = 0; i < 96; i++) {
+        D_003A5470[i] = 0;
+        D_0044F818[i].unk0 = 0;
+        D_0044F818[i].unk4 = 0;
+        D_0044F818[i].unk8 = 0;
+    }
+}
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];

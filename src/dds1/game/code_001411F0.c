@@ -917,7 +917,35 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001426E0);
+typedef struct FldSlot {
+    u32 unk_0;
+    u32 unk_4;
+    u32 unk_8;
+} FldSlot;
+
+extern SdfTex *D_003D40A0[4];
+extern SdfModel *D_00348F30[];
+extern FldSlot D_003D40B0[];
+
+void func_001426E0(void) {
+    s32 i;
+
+    fldAreaState.unkC4 = -1;
+    fldAreaState.unkC8 = -1;
+    fldSceneRecordResource = 0;
+    fldSceneRecords = 0;
+    fldSceneRecordCount = 0;
+    D_003D40A0[0] = 0;
+    D_003D40A0[1] = 0;
+    D_003D40A0[2] = 0;
+    D_003D40A0[3] = 0;
+    for (i = 0; i < 64; i++) {
+        D_00348F30[i] = 0;
+        D_003D40B0[i].unk_0 = 0;
+        D_003D40B0[i].unk_4 = 0;
+        D_003D40B0[i].unk_8 = 0;
+    }
+}
 
 
 extern SdfPoolNode *D_00325838[];
@@ -1811,12 +1839,6 @@ void fldReleaseTitleSlots(void) {
 }
 
 extern SdfModel *D_00348F30[];
-
-typedef struct FldSlot {
-    u32 unk_0;
-    u32 unk_4;
-    u32 unk_8;
-} FldSlot;
 
 extern FldSlot D_003D40B0[];
 
