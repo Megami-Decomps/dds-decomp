@@ -6473,7 +6473,7 @@
 0x002DA830	sdfParseAssetParameterFlags	inferred	Decodes flag-selected packed fields and advances the data cursor. [names_reviewed8.tsv]
 0x002DAA00	sdfAssetRelease	inferred	Releases four owned allocations and then the asset itself
 0x002DAA68	sdfQueueAssetRelease	inferred	Enqueues a non-null asset in the queue whose registered completion callback is sdfAssetRelease.
-0x002DAAA0	sdfInitNodeHeaderFromWords	inferred	Writes a 16-byte SdfNode header with type 0xA and payload from the third word at the selected source offset, returning the following payload address.
+0x002DAAA0	sdfInitAssetDrawEntryReferenceNode	inferred	Selects the asset drawEntries[frame] pointer, writes a 16-byte reference header with its physical address, and returns the following packet payload.
 0x002DAAE0	sdfAssetCopyTextureState	inferred	Copies resource and texture state into a selected asset entry
 0x002DAB80	sdfBuildSubParameterTransform	inferred	Builds the 24-byte scalar-block transform from its five float parameters, or writes the identity transform when the block is absent.
 0x002DAC68	sdfCopyAssetPrimarySubParameter	inferred	Copies the asset primary subparameter into its draw entry. [names_reviewed8.tsv]

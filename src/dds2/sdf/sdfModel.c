@@ -96,7 +96,7 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
 
 /* Select an asset packet from the root model's parsed resource table. */
 void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
+    return sdfInitAssetDrawEntryReferenceNode(((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */

@@ -723,7 +723,7 @@ void sdfQueueAssetRelease(SdfAsset *asset) {
 }
 
 /* Reference the selected buffered asset draw entry and return the packet payload. */
-void *sdfInitNodeHeaderFromWords(SdfAsset *asset, SdfNode *node, s32 frame) {
+void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfNode *node, s32 frame) {
     node->unk3 = 0x30;
     node->unk4 = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
     node->unk0 = 0xA;
