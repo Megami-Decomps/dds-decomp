@@ -6411,6 +6411,7 @@
 0x002D7DF0	sdfModelWriteAddressPacket	inferred	Writes a 16-byte packet containing a model address indexed in 128-byte steps.
 0x002D7E38	sdfModelWriteFixedPacket	inferred	Appends a packet with zero high half and a fixed 0x60000000 command.
 0x002D7E80	sdfCommandListMeasure	inferred	sums packet sizes over a command list (types 1..8), adds the type-3 count to *arg1, stores the 16-byte-item size in *arg2; parked near-miss, not applied [names_M70_VuNamed.tsv]
+0x002D8388	sdfDrawNodePrependCommandNode	inferred	Allocates a command node and prepends it to the selected draw-node command list.
 0x002D8600	sdfDrawNodeBuildMatrix	inferred	quaternion to matrix into vectors[2..4] [names_M67_Named.tsv]
 0x002D8650	sdfDrawNodeSetFromItem	inferred	copies item fields and rebuilds matrix [names_M67_Named.tsv]
 0x002D8800	sdfModelResetAndInitNodes	inferred	Frees node lists, resets root workspace and sets up two slots.
