@@ -1,3 +1,4 @@
+#include "fld_label_rows.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
@@ -1028,9 +1029,7 @@ u32 fldGetCurrentBgmHandle(void) {
     return fldCurrentBgmHandle;
 }
 
-typedef struct FldName30 { char s[0x1E]; } FldName30;
 
-typedef struct FldName34 { char s[0x22]; } FldName34;
 
 typedef struct FldName28 { char s[0x1C]; } FldName28;
 
@@ -1044,9 +1043,7 @@ extern s16 D_0044FCF0[];
 
 extern s16 D_00438ED8;
 
-extern FldName30 D_0039A5AC[];
 
-extern FldName34 D_0039E1AC[];
 
 extern FldName28 D_003A25AC[];
 
@@ -1064,10 +1061,10 @@ void fldCacheMapLabelLengths(s32 world) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_0044FC98[i] = strlen(D_0039A5AC[func_001237B0(world, i)].s);
+        D_0044FC98[i] = strlen((const char *)D_0039A5A8[func_001237B0(world, i)].name);
     }
     for (i = 0; i < 24; i++) {
-        D_0044FD48[i] = strlen(D_0039E1AC[func_00123808(world, i)].s);
+        D_0044FD48[i] = strlen((const char *)D_0039E1A8[func_00123808(world, i)].name);
     }
     for (i = 0; i < 41; i++) {
         D_0044FCF0[i] = strlen(D_003A25AC[fldFindMapCoordinateIndex(world, i)].s);

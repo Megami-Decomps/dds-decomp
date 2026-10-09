@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "fld_label_rows.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "dds3_path.h"
@@ -56,9 +57,7 @@ extern FieldStageCoordinate D_00389170[];
 
 extern u32 fldGetSceneReadyFlag(void);
 
-extern u8 D_0039E1A8[];
 
-extern u8 D_0039A5A8[];
 
 extern u8 D_003A25A8[];
 
@@ -952,7 +951,7 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 s32 func_001237B0(s32 x, s32 y) {
     s32 index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
-        if (x == *(s16 *)(D_0039A5A8 + index * 0x1E) && y == *(s16 *)(D_0039A5A8 + index * 0x1E + 2)) {
+        if (x == D_0039A5A8[index].x && y == D_0039A5A8[index].y) {
             return index;
         }
     }
@@ -963,7 +962,7 @@ s32 func_001237B0(s32 x, s32 y) {
 s32 func_00123808(s32 x, s32 y) {
     s32 index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
-        if (x == *(s16 *)(D_0039E1A8 + index * 0x22) && y == *(s16 *)(D_0039E1A8 + index * 0x22 + 2)) {
+        if (x == D_0039E1A8[index].x && y == D_0039E1A8[index].y) {
             return index;
         }
     }
