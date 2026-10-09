@@ -8748,7 +8748,7 @@ typedef struct EffFileJobRequest {
     u8 padA[2];
     void *output;
     u32 size;
-    u32 allocationHandle;
+    struct SdfMemBlock *allocation;
     u16 resourceMode;
     u8 pad1A[2];
     u32 relatedResource;
@@ -10596,7 +10596,7 @@ u32 effQueueGeneratedFileJob(void) {
     DevState *command;
     u32 totalLength;
     u32 dataLength;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 
     effPollResourceBankSlot(D_0042D140, 4, &fileInfo);
     status = fileInfo.status;
@@ -10605,14 +10605,14 @@ u32 effQueueGeneratedFileJob(void) {
         result = 0x400000;
     } else if (status == 1) {
         u32 headerBytes = 0x80;
-        u32 oldAllocation;
+        struct SdfMemBlock *oldAllocation;
         u32 queuedFile;
         job = fileCreateJob(6);
         command = sdfDevCreateCommandState(&fileInfo);
         dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
-        allocation = (u32)sdfAllocGeneralBlock(totalLength);
-        buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+        allocation = sdfAllocGeneralBlock(totalLength);
+        buffer = (u8 *)sdfResourceRetainAddress(allocation);
         memset(buffer, 0, headerBytes);
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
         sdfDevWaitThenReleaseCommandState(command);
@@ -10623,12 +10623,12 @@ u32 effQueueGeneratedFileJob(void) {
         strcpy(entry->name, resource->name);
         memcpy(D_0045C270, entry, 0x80);
         queuedFile = entry->id;
-        oldAllocation = resource->allocationHandle;
+        oldAllocation = resource->allocation;
         effQueuedFileHandle = queuedFile;
         if (oldAllocation != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(oldAllocation));
+            sdfReleaseResourceAllocation(oldAllocation);
         }
-        resource->allocationHandle = allocation;
+        resource->allocation = allocation;
         resource->output = buffer;
         resource->size = dataLength + headerBytes;
         resource->transferMode = 1;

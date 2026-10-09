@@ -9002,7 +9002,7 @@ typedef struct EffFileResourceRecord {
     u8 padA[2];
     u8 *buffer;
     u32 size;
-    u32 allocationHandle;
+    struct SdfMemBlock *allocation;
 } EffFileResourceRecord;
 
 
@@ -9143,7 +9143,7 @@ u32 fileLoadEffectSlotHelp(void) {
     DevState *command;
     u32 totalLength;
     u32 dataLength;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 
     effPollResourceBankSlot(D_003B3BA0, 4, &fileInfo);
     status = fileInfo.status;
@@ -9152,14 +9152,14 @@ u32 fileLoadEffectSlotHelp(void) {
         result = 0x400000;
     } else if (status == 1) {
         u32 headerBytes = 0x40;
-        u32 oldAllocation;
+        struct SdfMemBlock *oldAllocation;
         u32 queuedFile;
         job = fileCreateJob(6);
         command = sdfDevCreateCommandState(&fileInfo);
         dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
-        allocation = (u32)sdfAllocGeneralBlock(totalLength);
-        buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+        allocation = sdfAllocGeneralBlock(totalLength);
+        buffer = (u8 *)sdfResourceRetainAddress(allocation);
         memset(buffer, 0, headerBytes);
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
         sdfDevWaitThenReleaseCommandState(command);
@@ -9170,12 +9170,12 @@ u32 fileLoadEffectSlotHelp(void) {
         strcpy(entry->name, resource->name);
         memcpy(D_003DF9A0, entry, 0x80);
         queuedFile = entry->id;
-        oldAllocation = resource->allocationHandle;
+        oldAllocation = resource->allocation;
         effQueuedFileHandle = queuedFile;
         if (oldAllocation != 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(oldAllocation));
+            sdfReleaseResourceAllocation(oldAllocation);
         }
-        resource->allocationHandle = allocation;
+        resource->allocation = allocation;
         resource->buffer = buffer;
         resource->size = dataLength + headerBytes;
         resource->mode = 0;
