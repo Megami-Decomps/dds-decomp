@@ -169,7 +169,7 @@ typedef struct SdfStreamFrameNode {
     u8 unk13;
     u8 audioMode;
     u8 loopMode;
-    u8 playbackMode;
+    u8 playbackCadenceStep;
     u8 playbackCadenceRemainder;
     u8 bufferIndex;
     u8 transferPacketIndex;
@@ -185,7 +185,7 @@ typedef struct SdfStreamFrameNode {
     u16 height;
     u32 cycleLength;
     u32 tickCount;
-    s32 unk48; /* Movie progress reader; no producer has been located. */
+    s32 playbackFrameIndex;
     void *inputDmaChain;
     u8 headerReady;
     u8 done;

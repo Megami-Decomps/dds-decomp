@@ -972,7 +972,7 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
         node->audioMode = SDF_STREAM_AUDIO_STEREO;
     }
     node->loopMode = format->loopMode;
-    node->playbackMode = format->playbackMode;
+    node->playbackCadenceStep = format->playbackCadenceStep;
 }
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
@@ -1286,7 +1286,7 @@ s32 sdfCompleteIpuInputFeedDma(void) {
     SdfStreamFrameNode *stream = D_003BDAA8;
 
     if (stream != NULL) {
-        D_003BDA94 = stream->unk48;
+        D_003BDA94 = stream->playbackFrameIndex;
         D_003BDAA8 = NULL;
         if (stream->unk11 != 0 && stream->active == 1) {
             if (stream->inputFeedDmaInFlight != 0) {
@@ -1333,9 +1333,9 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
         node->transferPacketIndex ^= 1;
         node->unk13++;
     }
-    node->unk48++;
-    if (node->unk48 == node->cycleLength && node->loopMode != 0) {
-        node->unk48 = 0;
+    node->playbackFrameIndex++;
+    if (node->playbackFrameIndex == node->cycleLength && node->loopMode != 0) {
+        node->playbackFrameIndex = 0;
     }
     if (interruptsEnabled != 0) {
         EIntr();
@@ -1379,11 +1379,11 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
         case SDF_STREAM_PLAYBACK_FIRST_COMPLETION:
             sdfSubmitBufferedPlayback(node);
             node->playbackPhase = SDF_STREAM_PLAYBACK_CADENCED;
-            node->playbackCadenceRemainder = node->playbackMode;
+            node->playbackCadenceRemainder = node->playbackCadenceStep;
             break;
         case SDF_STREAM_PLAYBACK_CADENCED:
             if (D_003BD614 != 1) {
-                elapsed += node->playbackMode;
+                elapsed += node->playbackCadenceStep;
                 if (elapsed >= cadence) {
                     if (sdfSubmitBufferedPlayback(node) != 0) {
                         elapsed -= cadence;
