@@ -52,7 +52,7 @@ typedef struct SdfChannel {
 typedef char SdfChannel_size_must_be_0xA4[(sizeof(SdfChannel) == 0xA4) ? 1 : -1];
 
 extern SdfChannel D_00385A90[8];
-extern void func_00118798(SdfChannel *channel);
+extern void sdfReloadChannelSegments(SdfChannel *channel);
 extern void func_0035B6E0(const char *fmt, ...);
 const char D_00412AB0[16] = "sys:[%s]\n";
 
@@ -367,7 +367,7 @@ u8 scrIsCurrentWorkTask(u32 expected) {
 }
 
 /* Load the channel file and copy its size-prefixed segments into table slots. */
-void func_00118798(SdfChannel *table) {
+void sdfReloadChannelSegments(SdfChannel *table) {
     DevState *command;
     struct SdfMemBlock *block;
     s32 size;
@@ -416,7 +416,7 @@ void sdfResetChannels(void) {
 
     sdfFirePendingCallback();
     for (i = 0; i < 8; i++) {
-        func_00118798(&D_00385A90[i]);
+        sdfReloadChannelSegments(&D_00385A90[i]);
     }
     func_00118680();
 }

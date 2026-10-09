@@ -434,7 +434,7 @@ void dds3StartCrossfade(s32 frames) {
 }
 
 /* Capture the first frame, then draw the held texture with a decreasing alpha. */
-void func_001602F8(void) {
+void billSubmitTexturedQuadColumns(void) {
     SdfListHead *list;
     SdfDmaNode *reference;
     u64 *texturePacket;

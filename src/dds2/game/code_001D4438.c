@@ -124,7 +124,7 @@ extern SceneSlotFadeWork *D_00438F54;
 
 extern s32 func_00206090();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
-extern s32 func_001AC648();
+extern s32 btlMarkInactiveActorCandidates();
 extern void func_001AEEA8();
 extern void kwlnFadeBackgroundStartOut();
 extern void kwlnDrawSetOverlayTransition();
@@ -2045,7 +2045,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     unit->status.flags = flags & ~1;
     if (flags & 0x200) {
         btlRepositionPartyAroundBattleCenter();
-        func_001AC648();
+        btlMarkInactiveActorCandidates();
     }
     if (btlCountTasksByKind(0x3F) != 0) {
         return;

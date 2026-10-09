@@ -106,7 +106,7 @@ extern s32 func_00206090();
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern s32 func_001AC648();
+extern s32 btlMarkInactiveActorCandidates();
 
 extern void func_001AEEA8();
 
@@ -259,7 +259,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
         if (!(scene->battleFlags & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
         }
-        func_001AC648();
+        btlMarkInactiveActorCandidates();
         if (scene->commandRestrictFlags & 0x80) {
             func_001AEEA8();
             scene->commandRestrictFlags &= ~0x80;

@@ -129,7 +129,7 @@ extern u8 D_00325860[];
 extern u8 D_00325870[];
 extern void sdfWaitAndSelectBuffer(void);
 extern void func_002D4240(SdfPoolNode *, s32);
-extern void func_00105150(s32);
+extern void kwlnInitializeFrameDrawPackets(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
 #define KWLN_FRAME_BUFFER_BYTES 0x1F40
@@ -172,7 +172,7 @@ s32 kwlnPrepareFrameDrawPackets(void) {
     sdfWaitAndSelectBuffer();
     func_002D4240(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
     sdfClearPacketChain((SdfPacketChain *)D_00325860);
-    func_00105150(bufferIndex);
+    kwlnInitializeFrameDrawPackets(bufferIndex);
     packetGroups = D_003258B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
     for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
         sdfInitializeDrawPacketGroups(packetGroups);

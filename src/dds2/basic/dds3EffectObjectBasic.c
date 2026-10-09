@@ -97,7 +97,7 @@ typedef struct EffOwnerVectors {
 
 /* Refresh the world position and orientation from the owner link (or the object's own
    inner transform), then forward them to the bound node according to the state. */
-s32 func_00114828(EffectObj *obj) {
+s32 effObjUpdateOwnedVectorsAndState(EffectObj *obj) {
     f32 matrix[16];
     f32 position[4];
     f32 rotation[4] = {0, 0, 0, 1.0f};
@@ -679,7 +679,7 @@ EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
     return obj;
 }
 
-EffectObj *func_00115AA8(s32 kind, struct EffNodeDescriptor *descriptor) {
+EffectObj *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor) {
     return effObjCreateMagatuhiForKind(kind, descriptor);
 }
 

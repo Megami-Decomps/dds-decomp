@@ -172,7 +172,7 @@ void *func_0011F250(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, 
     return packet;
 }
 
-void *func_0011F3D8(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+void *fldCreateColoredLinePacket(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);
 
     packet[0] = 4;

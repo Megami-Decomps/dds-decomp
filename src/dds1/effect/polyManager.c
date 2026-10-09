@@ -355,7 +355,7 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
 }
 
 /* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
-PolyBand *func_0015DFA8(PolyRingHead *templateHead) {
+PolyBand *polyCreateExpandingRingBands(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     PolyBand *band = (PolyBand *)sdfResourceRetainAddress(allocation);
@@ -796,7 +796,7 @@ void func_0015EC08(PolyArc *obj) {
     parPrependCellNode(obj->strip);
 }
 
-/* Rotating-band counterpart of func_0015DFA8: twenty-byte records follow the header. */
+/* Rotating-band counterpart of polyCreateExpandingRingBands: twenty-byte records follow the header. */
 PolyRotatingBand *func_0015ED90(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);

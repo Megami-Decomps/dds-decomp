@@ -639,7 +639,7 @@ void func_002C57F0(void) {
         value = 0.0f;
     }
     value *= fade;
-    func_00108FA0(displacement + 11, 122, 17, 14, 204, 339, 17, 14,
+    kwlnDrawTexturedColorQuad(displacement + 11, 122, 17, 14, 204, 339, 17, 14,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
@@ -657,7 +657,7 @@ void func_002C57F0(void) {
         value = 0.0f;
     }
     value *= fade;
-    func_00108FA0(displacement + 11, 257, 17, 14, 224, 339, 17, 14,
+    kwlnDrawTexturedColorQuad(displacement + 11, 257, 17, 14, 224, 339, 17, 14,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
@@ -724,7 +724,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(1);
     shrink = (1.0f - grow) * 8.5f;
-    func_00108FA0((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
+    kwlnDrawTexturedColorQuad((s32)(shrink + 13.0f), (s32)((f32)(x - offset + timer->y + 7) + shrink), (s32)(grow * 17.0f), (s32)(grow * 17.0f),
                   0xB6, 0x151, 0x11, 0x11,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,

@@ -169,7 +169,7 @@ void itfPanelSetFourColumnVertices(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s3
 extern s32 D_00357AE0[4];
 
 /* Emit the frame grid and three table-offset rows above and below it. */
-void func_00199B80(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfBuildPanelBorderVertexGrid(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -212,7 +212,7 @@ void func_00199B80(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     }
 }
 
-void func_00199CF0(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void itfPanelSetInsetFrameVertices(PanelPt *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -599,7 +599,7 @@ extern DrawColorRec D_00357AA8;
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void func_0019AAC0(UiSprite *panel, SdfListHead *command) {
+void itfDrawStretchTexturePanelBands(UiSprite *panel, SdfListHead *command) {
     DrawVertex rect[2];
     UiSpriteBandPayload *payload = (UiSpriteBandPayload *)panel->payload;
     DrawVertex *vertices = payload->vertices;
@@ -766,7 +766,7 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     return 1;
 }
 
-s32 func_0019AFD8(void) {
+s32 itfStepHeldPanelMessages(void) {
     s32 frame;
     s32 latest = -1;
     s32 i;
