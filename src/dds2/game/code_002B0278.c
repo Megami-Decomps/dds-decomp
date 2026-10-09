@@ -3836,7 +3836,6 @@ void mnuInitScrollLists(MenuPageWindow *menu, s32 *counts);
 
 void mnuDestroyWindowOwnedLists();
 
-void mnuRebuildScrollLists(u32 context, u32 counts);
 
 void mnuClearPageSelection(MenuPageWindow *menu);
 

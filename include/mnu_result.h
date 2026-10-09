@@ -107,7 +107,8 @@ typedef struct BrsProgressAnimation {
     s32 flashFrame;
     s32 flashOpacity;
     s8 progressIconEnabled;
-    u8 pad39[7];
+    u8 pad39[3];
+    s32 progressIconAngle; /* 0x3C: signed 15-degree steps modulo 360. */
     u32 progressIconOpacity;
     s32 progressIconX;
     s32 progressIconY;
@@ -115,7 +116,8 @@ typedef struct BrsProgressAnimation {
     u8 pad4D[3];
     u32 iconOpacity;
     u32 unk54;
-    u8 pad58[8];
+    s32 iconX; /* 0x58 */
+    s32 iconY; /* 0x5C */
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;

@@ -284,7 +284,7 @@ typedef struct DatEnemyRecord {
     u8 overrideAction;    /* 0x44: action selected before the ordinary slots. */
     u8 overrideChance;    /* 0x45: bucket threshold for the override action. */
     s8 unk46;            /* Signed indexed-value accessor. */
-    u8 pad47;
+    u8 tickCount;         /* 0x47: enemy action tick count; zero is read as one. */
     u8 unk48;            /* Enemy display-byte accessor. */
     u8 pad49[3];
 } DatEnemyRecord;

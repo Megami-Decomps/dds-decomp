@@ -5685,3 +5685,13 @@ Both 100-byte providers and 44-byte forwarders remain exact under the
 existing unit flags. This source-only contract repair does not claim an
 option-confirm body match.
 
+## Enemy tick byte and unit-local roster stat view
+
+`DatEnemyRecord` byte `0x47` is the tick count read by the DDS2 battle
+action-frame path (`func_001D5FB0`, `code_001D4438`); zero is read as one.
+The header names it `tickCount`. `datRosterDetails` entries (stride `0x14`)
+carry the count at `0x11` and the amount at `0x12`. The sibling
+`EventRosterStat` layouts disagree (`0x0E/0x0F` in `code_001A5BB8.c`, `pad08`
+in `code_0011A118.c`), so `code_001D4438` keeps a unit-local `DatRosterDetail`
+view until a shared record is reconciled. This note claims no body match.
+
