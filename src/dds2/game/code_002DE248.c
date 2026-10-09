@@ -8079,7 +8079,7 @@ void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
     work->color = color;
 }
 
-void func_002F99E0(EffActiveResource *work, f32 value) {
+void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
     work->scale = value;
 }
 
