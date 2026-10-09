@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "common.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -103,7 +104,6 @@ Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     return motion;
 }
 
-void sdfDestroyDevRequest(void *a0);
 
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */

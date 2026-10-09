@@ -3802,7 +3802,7 @@ extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void func_002218C8(void);
 
-extern s32 func_00222450();
+extern s32 func_00222450(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern s32 btlSetLinkedDefeatCameraPresetB();
 
@@ -5625,7 +5625,7 @@ s32 func_00223DD8(BtlLinkedCommand *unit) {
         unit->state = 0;
     } else if (flags & 0x8000) {
         btlFlagAllUnitDefeatCandidatesTask();
-        func_00222450(unit, unit, 0);
+        func_00222450(unit, &unit->camera, 0);
     } else if (flags & 0x8) {
         if (btlGetIndexListCount(unit->link->indexWork.indices) == 1) {
             btlFlagAllUnitDefeatCandidatesTask();

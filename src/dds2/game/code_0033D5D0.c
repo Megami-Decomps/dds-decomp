@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -1860,7 +1861,6 @@ void sdfDestroyDevRequest(DevRequest *request) {
 }
 
 extern void func_00329600(struct SdfMemBlock *allocation, s32 size);
-void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
 /* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
 void sdfDevBufferedRequestGrow(DevRequest *request) {
