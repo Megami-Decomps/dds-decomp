@@ -338,7 +338,7 @@ void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
     mdlReleaseOwnerSlotResources(entity, index);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, struct SdfMemBlock *resourceHandle) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, MotionTable *data, struct SdfMemBlock *resourceHandle) {
     BattleGroupNode *owner = btlFindGroupedEntity(group, id);
     BattleGroupSlot *slot;
 
