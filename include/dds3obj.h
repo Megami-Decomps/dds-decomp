@@ -33,6 +33,7 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
 ObjBase *dds3CreateSlotResourceState(void *owner);
 ObjBase *dds3GetObjectOwnedHandle();
 EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
+EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */

@@ -1,12 +1,12 @@
 #include "common.h"
 #include "fld_resource_resolver.h"
 #include "fld.h"
+#include "dds3obj.h"
 
 
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern void *dds3GetWorldSecondaryObject(void);
-extern void *dds3FindIndexedObjectChainNodeByName(void *world, s32 index, const char *name);
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
@@ -34,7 +34,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
 
 void *fldResolveWorldObjectByResourceId(u32 id) {
     u32 i = 0;
-    void *world = dds3GetWorldSecondaryObject();
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
 
     for (; i < D_00438EC4; i++, resource++) {
@@ -44,7 +44,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
                 u32 j = 0;
 
                 for (; j < resource->names->count; j++, entry++) {
-                    void *object = dds3FindIndexedObjectChainNodeByName(world, 6, entry->name);
+                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)entry->name);
                     if (object != NULL) {
                         return object;
                     }
@@ -64,7 +64,7 @@ void *fldResolveWorldObjectByResourceId(u32 id) {
 
 void *fldResolveWorldObjectByResourceEntryName(const char *name) {
     u32 i = 0;
-    void *world = dds3GetWorldSecondaryObject();
+    EffWorldNode *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_00438EC0;
 
     for (; i < D_00438EC4; i++, resource++) {
@@ -74,7 +74,7 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
             for (; j < resource->names->count; j++, entry++) {
                 if (strcmp(name, entry->name) == 0) {
-                    void *object = dds3FindIndexedObjectChainNodeByName(world, 11, resource->name);
+                    EffWorldNode *object = dds3FindIndexedObjectChainNodeByName(world, 11, (const u8 *)resource->name);
                     if (object != NULL) {
                         return object;
                     }

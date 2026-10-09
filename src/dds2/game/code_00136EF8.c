@@ -37,7 +37,6 @@ static inline f32 fldNormalizeProbeVector(void) {
 
 
 extern void *dds3GetWorldObject(void);
-extern u32 *dds3FindIndexedObjectChainNodeByName();
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 extern s32 mdlFlagTest(s32);
@@ -1455,7 +1454,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
 void func_00140A58(const char *name) {
     FldActorEntry *entry;
     char *entryName;
-    u32 *camera;
+    EffWorldNode *camera;
     s32 i;
 
     if (name == NULL) {
@@ -1477,7 +1476,7 @@ void func_00140A58(const char *name) {
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
                     camera = dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(), 4, entry->linkName);
-                    dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)camera);
+                    dds3SetWorldCameraObject(dds3GetWorldObject(), camera);
                     fldHideSceneModelsAndResetCamera();
                     return;
                 }
