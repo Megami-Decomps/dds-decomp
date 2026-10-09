@@ -55,7 +55,6 @@ extern char D_003C8C80[];
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
-extern void dds3SetWorldObjectValue(EffWorldNode *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);

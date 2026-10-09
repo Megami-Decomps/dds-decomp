@@ -92,7 +92,7 @@ void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 si
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
-s32 sdfPacFeedInput(PacState *state, void *input, s32 available) {
+s32 sdfPacFeedInput(PacState *state, u8 *input, s32 available) {
     s32 consumeBytes;
 
     state->inputCursor = input;

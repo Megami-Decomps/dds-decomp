@@ -2,6 +2,7 @@
 #define SDF_IMAGE_PACKETS_H
 
 #include "sdf.h"
+#include "sdf_packet_patch.h"
 
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct SdfResourcePacket {
@@ -50,10 +51,15 @@ typedef char SdfDescriptorPacket_flush_tag_offset_must_be_0x80[
 
 /* Metadata node plus the extended local-to-local image-copy payload (0x70). */
 typedef struct SdfGraphCopyPacket {
-    SdfNode node;
+    SdfPacketPatchLink link;
+    u32 resourceIndexXor; /* Selects the source resource for the queued buffer. */
+    u32 unk0C;
     SdfPacket drawHeader;
     SdfPacket transfer[2];
 } SdfGraphCopyPacket;
+
+typedef char SdfGraphCopyPacket_resourceIndexXor_at_8[
+    ((u32)&((SdfGraphCopyPacket *)0)->resourceIndexXor == 8) ? 1 : -1];
 
 typedef char SdfGraphCopyPacket_size_must_be_0x70[
     (sizeof(SdfGraphCopyPacket) == 0x70) ? 1 : -1];
@@ -64,7 +70,9 @@ typedef char SdfGraphCopyPacket_transfer_offset_must_be_0x30[
 
 /* Metadata node followed by the resource-transfer payload (0x100). */
 typedef struct SdfPatchableResourcePacket {
-    SdfNode node;
+    SdfPacketPatchLink link;
+    u32 unk08;
+    u32 unk0C;
     SdfResourcePacket resourcePacket;
 } SdfPatchableResourcePacket;
 

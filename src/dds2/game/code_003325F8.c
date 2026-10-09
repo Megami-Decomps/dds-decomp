@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
 #include "sdf_model_scalars.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -107,7 +108,7 @@ extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
  * Each blend builder fills the 0x40-byte packet area after the list head. */
 typedef struct SdfDrawPacketGroup {
     SdfListHead list;
-    SdfNode header;
+    SdfDmaTagHeader header;
     u8 pad30[0x30];
 } SdfDrawPacketGroup;
 
@@ -131,7 +132,7 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
-        packet->header.unk8 = 0x11000000;
+        packet->header.firstVifCode = 0x11000000;
         sdfInitPacketList(&packet->list);
         sdfAppendPacket(&packet->list, (u32)&packet->header);
         packet++;
@@ -728,13 +729,13 @@ void sdfQueueAssetRelease(s32 assetAddress) {
 }
 
 /* Reference the selected buffered asset draw entry and return the packet payload. */
-void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfNode *node, s32 frame) {
-    node->unk3 = 0x30;
-    node->unk4 = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
-    node->unk0 = 0xA;
-    node->unk8 = 0;
-    node->unkC = 0;
-    return (void *)((u8 *)node + SDF_NODE_HEADER_BYTES);
+void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, s32 frame) {
+    tag->control = 0x30;
+    tag->address = (u32)asset->drawEntries[frame] & SDF_NODE_SOURCE_WORD_MASK;
+    tag->quadwordCount = 0xA;
+    tag->firstVifCode = 0;
+    tag->secondVifCode = 0;
+    return (void *)((u8 *)tag + SDF_NODE_HEADER_BYTES);
 }
 
 /* Copy primary words and optional GS texture state; only mode one zeros its state word. */

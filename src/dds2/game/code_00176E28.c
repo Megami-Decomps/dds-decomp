@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_param.h"
+#include "eff_pcp_scatter_radial.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -796,60 +797,6 @@ void effSetRecordPoolScale(EffRecordPool *work, f32 scale) {
 }
 
 
-typedef struct {
-    f32 origin[4];
-    f32 width;
-    f32 height;
-    u32 poolMode;
-    u8 respawn;
-    u8 pad1D[3];
-    u32 particleCount;
-    u32 radialSegments;
-    s32 delaySpread;
-    u32 fadeIn;
-    u32 fadeOut;
-    s32 duration;
-    u8 pad38[4];
-    f32 unk3C;
-    u32 unk40;
-    f32 unk44;
-    u32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 radiusJitter;
-    f32 targetRadiusJitter;
-    f32 speedJitter;
-    u8 pad60[8];
-    u8 duplicateParticles;
-    u8 pad69[3];
-    s32 duplicateStartAge;
-    u32 particlesPerGroup;
-} PcpScatterRadialParams;
-
-typedef struct {
-    s32 age;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 radius;
-    f32 angle;
-    f32 unk18;
-} PcpScatterRadialParticle;
-
-typedef struct PcpScatterRadialWork PcpScatterRadialWork;
-
-struct PcpScatterRadialWork {
-    PcpScatterRadialParams params;
-    PcpScatterRadialParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterPool *childWork;
-    SdfMemBlock *ownedResource;
-    u32 duplicatedCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
-};
-
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
 PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParams)
@@ -872,7 +819,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     work->particles = (PcpScatterRadialParticle *)(work + 1);
     work->params = *params;
     work->color = 0x80808080;
-    work->ownedResource = handle;
+    work->allocation = handle;
     work->scale = 1.0f;
     work->duplicatedHandles = NULL;
     work->duplicateAllocation = NULL;
@@ -885,11 +832,11 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
         if (work->params.particlesPerGroup == 0) {
             work->params.particlesPerGroup = 1;
         }
-        work->duplicatedCount = work->params.particleCount / work->params.particlesPerGroup;
+        work->duplicateGroupCount = work->params.particleCount / work->params.particlesPerGroup;
         if (work->params.particleCount % work->params.particlesPerGroup != 0) {
-            work->duplicatedCount++;
+            work->duplicateGroupCount++;
         }
-        count = work->duplicatedCount;
+        count = work->duplicateGroupCount;
         handle = sdfAllocGeneralBlock(count * sizeof(u32));
         handles = (EffParamWork **)sdfResourceRetainAddress(handle);
         work->duplicateAllocation = handle;

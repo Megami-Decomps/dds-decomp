@@ -63,7 +63,7 @@ typedef struct EvtWorldSlot {
 } EvtWorldSlot;
 
 typedef struct EvtWorldTable {
-    s32 unk00;
+    s32 areaRoomKey; /* 0x00: packed area in the high halfword and room in the low halfword; -1 before assignment. */
     struct SdfMemBlock *resource; /* 0x04: descriptor owning the slot array */
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
     EffWorldNode *cameraObject; /* 0x0C: retained camera world node */
@@ -78,5 +78,7 @@ typedef struct EvtWorldTable {
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
 void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
+void dds3SetWorldObjectValue(EffWorldNode *object, u32 value);
+s32 dds3GetWorldObjectValue(EffWorldNode *object);
 
 #endif /* EVT_WORLD_H */

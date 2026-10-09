@@ -887,7 +887,7 @@ void func_00105070(s32 bufferIndex) {
     }
     sdfAppendLinkedPacketPayload(&D_00380870[bufferIndex].sceneList,
                                  &D_00380870[bufferIndex].linkedList,
-                                 (u32 *)&D_00380870[bufferIndex].scene);
+                                 (SdfPacketPatchLink *)&D_00380870[bufferIndex].scene);
     sdfConsBuildMatrixPacket(&D_00380870[bufferIndex].sceneMatrix,
                              &sdfSceneProjectionParameters, sdfViewMatrix);
     sdfAppendPacket(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].sceneMatrix);
