@@ -2317,7 +2317,7 @@ void billReleaseTrailNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4320);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceTrailInstances);
 
 void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
