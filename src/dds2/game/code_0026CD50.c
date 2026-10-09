@@ -37,7 +37,27 @@ typedef struct EvtMantraNodePositionRecord {
 
 INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026CD50);
 
-INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026CE90);
+extern s32 fileQueueDefaultCallbackRequest(const char *path);
+extern s32 fileIsRequestReadyInCurrentMode(s32 request);
+extern u32 fileGetLoadedDataAddress(s32 request);
+extern s32 fileGetResourceHandle(s32 request);
+extern void filePollEntryCleanup(s32 request);
+extern void func_00315A50(void);
+void mnuLoadMantraNodePositionTable(u32 resourceId);
+
+/* Load the mantra node-position table synchronously and release the request. */
+void func_0026CE90(void) {
+    s32 request;
+
+    evtPrintDeveloperConsoleMessage("Mantra Table Load [/facility/data/mtrMantraBlockData.tbl]\n");
+    request = fileQueueDefaultCallbackRequest("/facility/data/mtrMantraBlockData.tbl");
+    while (!fileIsRequestReadyInCurrentMode(request)) {
+    }
+    mnuLoadMantraNodePositionTable(fileGetLoadedDataAddress(request));
+    func_00315A50();
+    sdfReleaseResourceAllocation(fileGetResourceHandle(request));
+    filePollEntryCleanup(request);
+}
 
 /* Replace the node-position resource, releasing an existing table first. */
 void mnuLoadMantraNodePositionTable(u32 resourceId) {
@@ -135,7 +155,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     return work;
 }
 
-s32 evtReleaseMantraSelectionWork(EvtMantraWork *work) {
+void evtReleaseMantraSelectionWork(EvtMantraWork *work) {
     if (work != NULL) {
         sdfReleaseResourceAllocation(work->allocation);
     }
