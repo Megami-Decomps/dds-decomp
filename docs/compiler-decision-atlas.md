@@ -9,7 +9,9 @@ difference does not prove that a late pass caused it.
 `ee_gcc_why.py` explains what changed between two compiler probes. It does not
 compare a candidate's RTL directly with retail RTL, so its result establishes
 causality for the source experiment, not by itself the origin of a retail
-mismatch.
+mismatch. The [investigation method](matching-investigation.md) develops this
+into a complete workflow for discovering an undocumented rule, with source
+contracts, discriminating controls and transfer checks.
 
 | Decision family | Evidence to require | Truthful lever to test | Stop rule |
 | --- | --- | --- | --- |
