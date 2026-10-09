@@ -263,11 +263,11 @@ extern SdfMemBlock *D_00438E98;
 extern SdfMemBlock *D_00438E9C;
 extern SdfMemBlock *D_00438EA0;
 extern SdfMemBlock *D_00438EA4;
-extern s32 D_00438EA8;
+extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
 extern void func_0011D130(void);
-extern s32 mtrMantraEventBitPush(void);
+extern SdfMemBlock *mtrMantraEventBitPush(void);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
  * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */
@@ -319,7 +319,7 @@ void sdfSaveResetSnapshot(void) {
 }
 
 extern void mnuMarkEntryBlocked(s32);
-extern void mtrMantraEventBitPop(s32);
+extern void mtrMantraEventBitPop(SdfMemBlock *);
 extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
 extern void func_0011D0D8(void);
