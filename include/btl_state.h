@@ -311,7 +311,10 @@ typedef struct BtlState {
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
-    u8 pad634[0x14];
+    u8 pad634[8];
+    s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, u32); /* 0x63C */
+    s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x640 */
+    u8 pad644[4];
     void (*preActionHook)(BtlTask *, s32, u64, u64, u64); /* 0x648 */
     void (*postTargetHook)(BtlTask *, s32, BtlUnit *, u64, u64, s32); /* 0x64C */
     u8 pad650[4];
@@ -319,7 +322,9 @@ typedef struct BtlState {
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[0x10];
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
-    u8 pad670[0x24];
+    u8 pad670[0xC];
+    s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
+    u8 pad680[0x14];
     BtlEffectHeader *effect; /* 0x694: mode-owned allocation begins with its generic header. */
     u8 pad698[0xC];
     BtlDebugMenuWork debug; /* 0x6A4 */
