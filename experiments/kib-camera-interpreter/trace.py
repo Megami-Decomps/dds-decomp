@@ -28,12 +28,50 @@ def target_identity(obj):
     return code[start:start + size], rels
 
 
+
+HEADER = re.compile(
+    r"\((note|barrier|code_label|call_insn|jump_insn|insn)"
+    r"(?:/[A-Za-z]+)*(?::[^\s()]+)?\s+(\d+)\s+(\d+)\s+(\d+)")
+
+def inventories(text):
+    groups, current = [], []
+    for form in top_level_forms(text):
+        match = HEADER.match(form)
+        if not match:
+            continue
+        uid, previous, following = (int(match[i]) for i in (2, 3, 4))
+        if previous == 0:
+            if current:
+                groups.append(current)
+            current = []
+        current.append((uid, previous, following, form))
+        if following == 0:
+            groups.append(current)
+            current = []
+    if current:
+        groups.append(current)
+    valid = []
+    for group in groups:
+        if not group or group[0][1] != 0 or group[-1][2] != 0:
+            continue
+        if len({row[0] for row in group}) != len(group):
+            continue
+        if any(group[i][2] != group[i+1][0] or group[i+1][1] != group[i][0]
+               for i in range(len(group)-1)):
+            continue
+        valid.append(group)
+    return groups, valid
+
 def summarize_dump(path):
     text = path.read_text()
     d.require(re.findall(r"(?m)^;; Function (\S+)", text) == [d.TARGET],
               "trace_function_scope")
+    groups, valid = inventories(text)
+    if not valid:
+        return dict(pass_name=path.name, executable_inventory=False,
+                    raw_inventory_groups=len(groups), valid_inventory_groups=0)
     nodes = []
-    for form in top_level_forms(text):
+    for _, _, _, form in valid[-1]:
         m = NODE_HEADER.match(form)
         if m:
             nodes.append((m[1], int(m[3]), form))
@@ -41,7 +79,9 @@ def summarize_dump(path):
              for i, (kind, uid, form) in enumerate(nodes)
              if kind == "call_insn" and SYMBOL_REF.search(form)]
     getters = [(i, uid) for i, uid, name in calls if name == "btlGetRuntime"]
-    result = dict(pass_name=path.name, nodes=len(nodes),
+    result = dict(pass_name=path.name, executable_inventory=True,
+                  raw_inventory_groups=len(groups), valid_inventory_groups=len(valid),
+                  nodes=len(nodes),
                   node_kinds=dict(Counter(kind for kind, _, _ in nodes)),
                   runtime_calls=len(getters))
     if len(getters) != 2:
@@ -95,7 +135,8 @@ def main():
                         target_relocations_equal=True, target_bytes=len(ordinary),
                         relocations=len(ordinary_relocs), source_snapshot_equal=True))
             directory = probe / "functions" / d.TARGET
-            paths = sorted(p for p in directory.iterdir() if p.is_file())
+            paths = sorted(p for p in directory.iterdir() if p.is_file()
+                           and re.fullmatch(r"\d{2}\.[a-z0-9]+", p.name))
             d.require(bool(paths), "probe_dumps_missing")
             for path in paths:
                 d.emit(dict(scope="camera_pass_lineage", **summarize_dump(path)))
