@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "sdf_gs_context.h"
+#include "sdf_gs_gouraud_shapes.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
@@ -1374,34 +1375,32 @@ void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y
 }
 
 /* Emit three GS vertices, each with its own packed color and shared depth. */
-void sdfBuildPacket10C(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildPacket10C(SdfGsGouraudTrianglePayload *packet, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x8400000000008001ULL;
-    packet[1] = 0xFFFFFFFFF5151510ULL;
-    packet[2] = (u32)(primitive | 0x10C);
-    packet[3] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[7] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0x8400000000008001ULL;
+    packet->gifRegisters = 0xFFFFFFFFF5151510ULL;
+    packet->primitive = (u32)(primitive | 0x10C);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfBuildPacketF(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsGouraudTrianglePacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x60);
-    *(u64 *)buffer = 0x20000005ULL;
-    *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    sdfBuildPacket10C(buffer + 0x10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsGouraudTrianglePacket *)alloc(0x60);
+    packet->dmaTag = 0x20000005ULL;
+    packet->vifCommands = 0x5000000510000000ULL;
+    sdfBuildPacket10C(&packet->drawing, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, depth);
+    sdfAppendPacket(list, (s32)packet);
 }
 
 /* Four vertices each carry their own color, with a common Z value. */
