@@ -269,6 +269,20 @@ typedef struct EffResourceOps {
     u32 payloadSize;           /* 0x18 */
 } EffResourceOps;
 
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
+
+
 /* Native class operations: callbacks followed by the copied payload size.
  * Callback arity varies between creation and frame-notification paths. */
 typedef struct EffClassOps {
@@ -293,6 +307,20 @@ typedef struct EffClassResourceOps {
 typedef char EffClassResourceOps_size_must_be_0x18[
     (sizeof(EffClassResourceOps) == 0x18) ? 1 : -1];
 
+/* Block-resource callbacks receive the owning class work, not the payload. */
+typedef struct EffBlockOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04: preserve the existing generic result ABI */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C: preserve the existing generic result ABI */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffBlockOps;
+
+typedef char EffBlockOps_size_must_be_0x1C[
+    (sizeof(EffBlockOps) == 0x1C) ? 1 : -1];
+
 struct EffModelResource;
 struct EffSpanConfig;
 struct EffSpanTable;
@@ -310,15 +338,15 @@ typedef struct EffModelResourceOps {
 typedef char EffModelResourceOps_size_must_be_0x18[
     (sizeof(EffModelResourceOps) == 0x18) ? 1 : -1];
 
-extern EffResourceOps effActiveInstanceOperations[];
+extern EffActiveInstanceOps effActiveInstanceOperations[];
 
 extern EffClassOps effClassWorkOperations[];
 
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
-extern EffResourceOps effBlockResourceOperations[];
+extern EffBlockOps effBlockResourceOperations[];
 
-extern EffResourceOps effModelBlockOperations[];
+extern EffBlockOps effModelBlockOperations[];
 
 extern EffResourceOps effRuntimeResourceOperations[];
 
@@ -1494,7 +1522,7 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029E898);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
 
 extern u8 D_0037E0E0[];
 
@@ -1686,7 +1714,7 @@ void billReleaseParticleNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029FB48);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceParticleInstances);
 
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -1824,7 +1852,7 @@ void billReleaseAlternatingTransformNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0638);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceAnimatedFrameTransforms);
 
 void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -2437,7 +2465,7 @@ EffClassWork *effCreateActiveResource(EffClassWork *work) {
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].initialize();
+    effActiveInstanceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
@@ -5235,7 +5263,7 @@ EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
 }
 
 void effDestroyBlockResourceWork(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].destroyResource();
+    effBlockResourceOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5249,7 +5277,7 @@ EffClassWork *effDuplicateActiveResourceB(EffClassWork *work) {
 }
 
 void effResetBlockResourceFrame(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].initialize();
+    effBlockResourceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
@@ -5780,7 +5808,7 @@ EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    effModelBlockOperations[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5794,7 +5822,7 @@ EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    effModelBlockOperations[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 

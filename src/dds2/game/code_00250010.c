@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -1246,7 +1247,6 @@ extern char D_00423F70[];
 extern char D_00423428[];
 extern char D_004233F0[];
 extern char D_00423400[];
-extern s32 itfMesGetWindowEntryItems(s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423EC0);
 
