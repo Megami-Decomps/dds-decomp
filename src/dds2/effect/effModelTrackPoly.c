@@ -73,13 +73,14 @@ void effTrackPolyDrawWork(EffTrackPolyWork *work) {
     effTrackPolyDrawStrips(work->data);
 }
 
-/* Per-frame update: while the model's value lies inside [unk0C, unk10] the endpoints are resampled every sampleInterval updates and the strips drawn; above the range the strips fade out, below it the track restarts. */
+/* Sample endpoints between startFrame and endFrame (inclusive), fade after
+ * endFrame, and reset history before startFrame. */
 void effTrackPolyUpdate(EffTrackPolyWork *work) {
     MdlCtx *model = work->params.model;
     f32 value = model->first->currentFrame;
 
-    if (work->params.unk0C <= value) {
-        if (value <= work->params.unk10) {
+    if (work->params.startFrame <= value) {
+        if (value <= work->params.endFrame) {
             if (work->updateCount % work->params.sampleInterval == 0) {
                 effSampleTrackPolyEndpoints(work);
             }

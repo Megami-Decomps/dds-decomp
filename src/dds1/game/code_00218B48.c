@@ -820,8 +820,8 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 su
     effectParams.model = owner;
     effectParams.idA = effectRecord->effectId;
     effectParams.idB = effectRecord->param0C;
-    effectParams.unk0C = effectRecord->scaleX;
-    effectParams.unk10 = effectRecord->scaleY;
+    effectParams.startFrame = effectRecord->scaleX;
+    effectParams.endFrame = effectRecord->scaleY;
     effectParams.sampleInterval = effectRecord->value14;
     effectParams.historyLength = effectRecord->value16;
     effectParams.unk1C = 3;
