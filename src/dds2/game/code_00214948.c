@@ -6801,7 +6801,18 @@ void btlClearSpecialEnemyEntryFlags(void) {
 /* Park this unit in the battle effect slot and drop the 0x100 and 0x8 flags. */
 extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlBindEffectUnitAndClearStateFlags);
+void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
+    BattleActionContext *ctx = (BattleActionContext *)btlGetRuntime();
+    s32 flags = unit->status.flags;
+    BattleLinkedEffectState *linked;
+
+    flags &= ~0x100;
+    flags &= ~8;
+    linked = &ctx->effect->linked;
+    linked->actor = unit;
+    unit->status.flags = flags;
+    unit->partyRecord.status &= 0x4000;
+}
 
 extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_0041B4D0[];
