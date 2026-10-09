@@ -83,6 +83,9 @@ extern s32 D_003BDA88;
 extern s32 WakeupThread(s32 thread);
 extern s32 func_002E8640(void);
 extern void *memcpy(void *, const void *, u32);
+extern void FlushCache(s32);
+extern s32 sceSifSetDma(void *, s32);
+extern s32 sceSifDmaStat(s32);
 
 u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
@@ -134,7 +137,41 @@ u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E87A8", func_002E8938);
+/* Descriptor consumed by sceSifSetDma: EE source, IOP destination, byte size, attributes. */
+typedef struct SifDmaTransfer {
+    u32 source;
+    s32 destination;
+    s32 size;
+    s32 attributes;
+} SifDmaTransfer;
+
+extern SifDmaTransfer D_003FD080;
+
+void func_002E8938(s32 destination, void *source, s32 size) {
+    s32 dmaId;
+    s32 delay;
+
+    D_003FD080.source = (u32)source;
+    D_003FD080.destination = destination;
+    D_003FD080.size = size;
+    D_003FD080.attributes = 0;
+    FlushCache(0);
+    goto submit;
+retry:
+    /* Busy-wait before retrying a full SIF DMA queue. */
+    delay = 0x186A0;
+    while (delay != 0) {
+        delay -= 0x271;
+        __asm__ volatile ("nop");
+    }
+submit:
+    dmaId = sceSifSetDma(&D_003FD080, 1);
+    if (dmaId == 0) {
+        goto retry;
+    }
+    while (sceSifDmaStat(dmaId) >= 0) {
+    }
+}
 
 
 extern u8 sdfPfsDebugMode;
