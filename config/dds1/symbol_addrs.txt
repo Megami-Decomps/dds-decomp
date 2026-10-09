@@ -3698,7 +3698,7 @@ mdlFindViewerRecord = 0x002192D0; // type:func
 mdlGetFirstRecord = 0x00219350; // type:func
 mdlGetNextRecord = 0x00219368; // type:func
 mdlCountRecords = 0x00219388; // type:func
-mdlRecordMatchesId = 0x002193D8; // type:func
+mdlRecordHasKind = 0x002193D8; // type:func
 mdlGetRecordPartIndex = 0x002193E8; // type:func
 mdlDrawMarkParamsPanel = 0x00219590; // type:func
 mdlEditMarkParametersWithPad = 0x002198D8; // type:func
@@ -7348,6 +7348,8 @@ sdfIpuStreamThreadStack = 0x003FEB00;
 sdfGraphApplyModeDefaults = 0x002D0E30; // type:func
 sdfGraphResetDeviceForCurrentMode = 0x002D1020; // type:func
 sdfGraphWakeDisplayThread = 0x002D1080; // type:func
+mdlGetSelectedRecord = 0x0021CF00; // type:func
+
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -9185,7 +9187,6 @@ func_0021C2E0 = 0x0021C2E0; // type:func
 func_0021C2E8 = 0x0021C2E8; // type:func
 func_0021C518 = 0x0021C518; // type:func
 func_0021CB80 = 0x0021CB80; // type:func
-func_0021CF00 = 0x0021CF00; // type:func
 func_0021D198 = 0x0021D198; // type:func
 func_0021E068 = 0x0021E068; // type:func
 func_0021E1C8 = 0x0021E1C8; // type:func

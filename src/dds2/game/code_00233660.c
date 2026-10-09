@@ -62,6 +62,14 @@ extern void func_00103388(s32, s32, s32, s32);
 #define MDL_MAP_POSITION_TAG 0x534F504D
 
 
+typedef enum MdlViewerRecordKind {
+    MDL_VIEWER_RECORD_KIND_BILLBOARD_PART = 1,
+    MDL_VIEWER_RECORD_KIND_EFFECT_PART = 2,
+    MDL_VIEWER_RECORD_KIND_TRACK_POLY = 3,
+    MDL_VIEWER_RECORD_KIND_STREAM = 4,
+    MDL_VIEWER_RECORD_KIND_OBJECT_PART = 5
+} MdlViewerRecordKind;
+
 /* Viewer-wide state for the model viewer task (DDS2 game/code_00233660 and
  * DDS1 game/code_00218B48 share this layout field for field). Fields that are
  * only written by a defaults initialiser and never read in either game are
@@ -102,7 +110,7 @@ typedef struct MdlViewState {
     s16 unk3C;
     s16 unk3E;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
-    s16 unk42;
+    s16 selectedRecordIndex; /* 0x42: index across the shared and active-entry record lists */
     s16 effectListScroll; /* 0x44: first record displayed by the effect list */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
     s16 unk48;
@@ -546,8 +554,8 @@ s32 mdlCountRecords(MdlRecord *listHeader) {
     return recordCount;
 }
 
-s32 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
-    return record->kind == wantedId;
+s32 mdlRecordHasKind(MdlRecord *record, s32 kind) {
+    return record->kind == kind;
 }
 
 u16 mdlGetRecordPartIndex(MdlRecord *record) {
@@ -575,11 +583,12 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
 void func_00233F68(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
-    if (record->kind >= 1 && record->kind <= 5) {
+    if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
+        record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
         switch (record->kind) {
-        case 1:
-        case 2: {
-            char *label = record->kind == 1 ? D_00436FC0 : D_00436FC8;
+        case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
+        case MDL_VIEWER_RECORD_KIND_EFFECT_PART: {
+            char *label = record->kind == MDL_VIEWER_RECORD_KIND_BILLBOARD_PART ? D_00436FC0 : D_00436FC8;
 
             if (record->parameter.part.count == 1) {
                 sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
@@ -593,17 +602,17 @@ void func_00233F68(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textSty
                                                                 record->parameter.part.partIndex));
             return;
         }
-        case 3:
+        case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
             sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_00421010, record->payload.word,
                                                                 record->parameter.word));
             return;
-        case 4:
+        case MDL_VIEWER_RECORD_KIND_STREAM:
             sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_00421020, record->payload.stream.selectorA,
                                                                 record->payload.stream.selectorB));
             return;
-        case 5:
+        case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
             sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y, depth, textStyle,
                                                                 D_00421030, record->payload.word));
             return;
@@ -954,19 +963,19 @@ extern s32 mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 opt
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
 void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
     switch (record->kind) {
-    case 1:
+    case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
         return;
-    case 2:
+    case MDL_VIEWER_RECORD_KIND_EFFECT_PART:
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
         return;
-    case 3:
+    case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
         mdlCreateViewerEffectPart(owner, (MdlEffectRec *)record, subtype);
         return;
-    case 4:
+    case MDL_VIEWER_RECORD_KIND_STREAM:
         mdlLoadViewerStreamRecord(owner, record);
         return;
-    case 5:
+    case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
         mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, subtype);
         break;
     }
@@ -2296,11 +2305,11 @@ s32 mdlCountActiveRecords(void) {
 }
 
 /* Record at the cursor index, counting list -1 first and then the active entry's list. */
-MdlRecord *func_00237A70(void) {
+MdlRecord *mdlGetSelectedRecord(void) {
     MdlCtx *resource = mdlViewerState.resources[0];
     MdlRecord *firstList = mdlFindViewerRecord(resource, -1);
     MdlRecord *secondList = mdlFindViewerRecord(resource, mdlViewerState.activeEntryId);
-    s32 index = mdlViewerState.unk42;
+    s32 index = mdlViewerState.selectedRecordIndex;
     MdlRecord *record;
 
     if (firstList != NULL) {
@@ -2327,7 +2336,7 @@ MdlRecord *func_00237A70(void) {
     return NULL;
 }
 
-extern MdlRecord *func_00237A70(void);
+extern MdlRecord *mdlGetSelectedRecord(void);
 
 void mdlUpdateViewerMarkEditorInput(void) {
     MdlViewState *state = &mdlViewerState;
@@ -2338,34 +2347,34 @@ void mdlUpdateViewerMarkEditorInput(void) {
     case 0:
         count = mdlCountActiveRecords();
         if (D_0037F510[0x27] < 0) {
-            state->unk42++;
-            if (state->unk42 >= count) {
-                state->unk42 = 0;
+            state->selectedRecordIndex++;
+            if (state->selectedRecordIndex >= count) {
+                state->selectedRecordIndex = 0;
             }
         } else if (((u8)D_0037F510[0x27] & MDL_PAD_REPEAT_FLAG) != 0) {
-            if (state->unk42 < count - 1) {
-                state->unk42++;
+            if (state->selectedRecordIndex < count - 1) {
+                state->selectedRecordIndex++;
             }
         } else if (D_0037F510[0x26] < 0) {
-            if (state->unk42 == 0) {
-                state->unk42 = count - 1;
+            if (state->selectedRecordIndex == 0) {
+                state->selectedRecordIndex = count - 1;
             } else {
-                state->unk42--;
+                state->selectedRecordIndex--;
             }
         } else if (((u8)D_0037F510[0x26] & MDL_PAD_REPEAT_FLAG) != 0) {
-            if (state->unk42 > 0) {
-                state->unk42--;
+            if (state->selectedRecordIndex > 0) {
+                state->selectedRecordIndex--;
             }
         } else if (D_0037F510[0x21] < 0) {
-            record = func_00237A70();
-            if (record != NULL && mdlRecordMatchesId(record, 3)) {
+            record = mdlGetSelectedRecord();
+            if (record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
                 state->editorMode = 1;
             }
         }
         break;
     case 1:
-        record = func_00237A70();
-        if (D_0037F510[0x23] >= 0 && record != NULL && mdlRecordMatchesId(record, 3)) {
+        record = mdlGetSelectedRecord();
+        if (D_0037F510[0x23] >= 0 && record != NULL && mdlRecordHasKind(record, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
             if (D_0037F510[0x21] < 0) {
                 mdlAddPlainViewerEntryForSelectedNode();
             } else {
@@ -2430,10 +2439,10 @@ void func_00237D08(void) {
             record = mdlGetFirstRecord(secondList);
         }
 
-        selected = mdlViewerState.unk42;
+        selected = mdlViewerState.selectedRecordIndex;
         if (selected >= totalCount) {
             selected = totalCount - 1;
-            mdlViewerState.unk42 = selected;
+            mdlViewerState.selectedRecordIndex = selected;
         }
         if (selected < scroll) {
             scroll = selected;
@@ -2506,9 +2515,9 @@ void func_00237D08(void) {
     }
 
     if (mdlViewerState.editorMode == 1) {
-        MdlRecord *markRecord = func_00237A70();
+        MdlRecord *markRecord = mdlGetSelectedRecord();
 
-        if (markRecord != NULL && mdlRecordMatchesId(markRecord, 3)) {
+        if (markRecord != NULL && mdlRecordHasKind(markRecord, MDL_VIEWER_RECORD_KIND_TRACK_POLY)) {
             mdlAppendViewerRectToDrawList(0x8590, 0x7A08, 0xFF007F, 0x960, 0xA50, 0);
             mdlDrawMarkParamsPanel(packetList, 0x85C0, 0x7A20, 0xFF0080,
                                    (EffMarkParams *)markRecord,
