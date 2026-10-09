@@ -27,12 +27,11 @@
 #include "sdf.h"
 #include "file.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 struct FileWork;
-struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
-extern u32 fileGetResourceHandle(struct FileWork *work);
-extern s32 filePollEntryCleanup(struct FileCleanup *entry);
+
+
 
 extern s32 func_003014F0(char *dst, const char *format, ...);
 
@@ -45,7 +44,7 @@ void func_001D3FE8(BtlTask *, BattleIndexWork *);
 
 
 
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 
@@ -3947,7 +3946,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
             break;
         case 3: case 4: case 5: case 6: case 7: case 8:
         case 12: case 19: case 20: case 21: case 22: case 23: case 24:
-            node = mdlGetNodeField2C(unit->ext->owner, 0);
+            node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
             switch (node) {
             case 0: case 2: case 9: case 10: case 11:
                 start = 0;
@@ -4153,7 +4152,7 @@ void btlUpdateUnitEffects(void) {
             u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xC4),
                                                   *(s32 *)(object + 0xC8));
             MdlCtx *model = ((BtlUnit *)object)->ext->owner;
-            s32 node = mdlGetNodeField2C(model, 0);
+            s32 node = mdlGetNodeMotionIndex(model, 0);
             if (*(s16 *)(resource + node * 20 + 0x30) == 1 &&
                 btlIsActorModeAcceptedByBattleHook(object) == 0) {
                 btlRefreshUnitMotionSelection(object);
@@ -4513,12 +4512,11 @@ extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u64 *);
 extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];
 extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
 void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode **surfaces, u32 frame) {
@@ -4542,13 +4540,13 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = 0x72801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
     model->inner->unk1A = 0x2000;
-    mdlProcessContextNodesAndTransforms(model, (s32)surfaces);
+    mdlProcessContextNodesAndTransforms(model, surfaces);
     model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->unk1A = savedFlags;
     for (i = 0; i != 4; i++) {
@@ -4561,7 +4559,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = 0x51801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     func_002D9748(overlay, model->inner);
@@ -4581,7 +4579,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = D_00359CF0[i];
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     mdlSetAllResourceFrames(model, frame);
@@ -4611,8 +4609,8 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
 
 extern void sdfReleaseDevSlot(s32, s32, s32);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
-extern s32 D_00325788[];
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325788[13][4];
 extern SdfPoolNode *D_00359D10[];
 
 void btlUpdateUnitTransparency(BtlUnit *unit) {
@@ -4636,7 +4634,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlBroadcastMasked(info, color);
-                    mdlProcessContextNodesAndTransforms(info, (s32)D_00325788);
+                    mdlProcessContextNodesAndTransforms(info, D_00325788[0]);
                     dds3ClearObjectFlags(unit->effectObject, 1);
                     btlBossDebugPrintf(D_003A3AD0, unit);
                 }
@@ -5789,7 +5787,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         return 1;
     }
     if (task->tick == 0) {
-        node = mdlGetNodeField2C(task->unit->ext->owner, 0);
+        node = mdlGetNodeMotionIndex(task->unit->ext->owner, 0);
         if (node < 0x1D) {
             BtlActorStatusRecord *resource = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(task->unit->resourceKind,
                                                  task->unit->species);
@@ -5987,8 +5985,6 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
 
 extern void sdfFreeMemoryFromEitherHeap(s32);
 
-extern s32 fileQueueAlternateCallbackRequest(char *);
-
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3CA0);
 
 void btlStartGunFinishLoad(s32 task) {
@@ -6002,7 +5998,7 @@ void btlStartGunFinishLoad(s32 task) {
         *(s32 *)(actor + 0x30C) = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
-        s32 handle = fileQueueAlternateCallbackRequest(filename);
+        s32 handle = (s32)fileQueueAlternateCallbackRequest(filename);
         *(s32 *)(task + 4) = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -6025,8 +6021,8 @@ u32 btlPollGunLoad(u32 *arg) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
-    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->handle)));
-    filePollEntryCleanup((struct FileCleanup *)args->handle);
+    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->handle)));
+    filePollEntryCleanup((struct FileRequest *)(u32)args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
@@ -6162,7 +6158,7 @@ void func_001DA468(void) {
             if (unit->updateFlags & 4) {
                 frame = (s32)btlGetUnitModelValue1C(unit);
                 index = unit->unkEC;
-                if (index == mdlGetNodeField2C(unit->ext->owner, 0)) {
+                if (index == mdlGetNodeMotionIndex(unit->ext->owner, 0)) {
                     if (frame >= status->motions[index].alphaStartFrame) {
                         evtSetUnitAlphaTransition(unit->ext,
                             (s32)((f32)status->motions[index].alphaDuration /
@@ -6193,7 +6189,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
     for (; unit != 0; unit = unit->next) {
         if (unit->flags & 2) {
-            unit->unkEC = mdlGetNodeField2C(unit->ext->owner, 0);
+            unit->unkEC = mdlGetNodeMotionIndex(unit->ext->owner, 0);
             if (!(unit->flags & 0x40000)) {
                 if (unit->flags & 0x100000) {
                     color = mdlGetBroadcastValue(unit->ext->owner);
@@ -7126,7 +7122,7 @@ void btlApplyCombinedActorFlags(u8 *resource) {
 
 extern f32 D_00359EC0[];
 extern char D_003A3DD0[];
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
@@ -7145,7 +7141,7 @@ void btlResetCameraMotion(BtlLinkedCommand *action) {
                     if (unit->flags & 0x200) {
                         if (unit->flags & 2) {
                             if (unit->ext != 0) {
-                                s32 node = mdlGetNodeField2C(unit->ext->owner, 0);
+                                s32 node = mdlGetNodeMotionIndex(unit->ext->owner, 0);
                                 if (node == 0xD || node == 0x12) {
                                     current = btlGetUnitModelValue1C(unit);
                                     limit = (f32)btlGetUnitModelFrameCount(unit);
@@ -7741,7 +7737,7 @@ void btlAdvanceTargetCursorUnlessHookHandles(BtlLinkedCommand *actor) {
     }
 }
 
-extern void func_001E3E58(BtlLinkedCommand *, u8 *, BtlUnit *, s32);
+extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 
 void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
@@ -7756,11 +7752,11 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     }
     if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
         btlCopyMotionTransform(&action->frontCamera, &action->camera);
-        func_001E3E58(action, (u8 *)&action->backCamera, action->task->unit, 0);
+        func_001E3E58(action, &action->backCamera, action->task->unit, 0);
         action->motionParameter = 7.0f;
         action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
     } else {
-        func_001E3E58(action, (u8 *)action, action->task->unit, 0);
+        func_001E3E58(action, &action->camera, action->task->unit, 0);
     }
 }
 void func_001DE5F0(void) {
@@ -7782,7 +7778,7 @@ void func_001DE960(BtlLinkedCommand *action) {
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     if (action->task->unit->flags & 0x200) {
-        func_001E3E58(action, action, target, 0);
+        func_001E3E58(action, &action->camera, target, 0);
         return;
     }
     if (btlHasActorCategoryFlag100(action) != 0) {
@@ -7857,9 +7853,10 @@ void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
     btlAdvanceCommandCursor(action, &action->camera);
 }
 
-void func_001DEE18(u32 arg0) {
-    func_001E4AC0(arg0, (s32)&((BtlLinkedCommand *)arg0)->frontCamera,
-                 (s32)&((BtlLinkedCommand *)arg0)->backCamera);
+extern void func_001E4AC0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+void func_001DEE18(BtlLinkedCommand *action) {
+    func_001E4AC0(action, &action->frontCamera, &action->backCamera);
 }
 
 void func_001DEE38(void) {
@@ -10098,8 +10095,6 @@ typedef struct BtlFieldLoadArgs {
 } BtlFieldLoadArgs;
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern s32 fileQueuePlainDispatchRequest(const char *);
-extern u32 fileRequestIsReady(u32);
 extern void func_00288788(s32);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 
@@ -10124,7 +10119,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady((u32)args->request)) {
+        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
             BtlFieldArchiveRequest *request = args->request;
             node = request->resources;
             i = 0;
@@ -10209,17 +10204,17 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         func_003014F0(path, D_003A4B98, stage, stage, variant);
         result = 0;
-        args->frontHandle = fileQueueDefaultCallbackRequest(path);
+        args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BB8, path);
         func_003014F0(path, D_003A4BC8, stage, stage, variant);
-        args->sideHandle = fileQueueDefaultCallbackRequest(path);
+        args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
                 work->primaryBuffer =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->frontHandle)));
-                filePollEntryCleanup((struct FileCleanup *)args->frontHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->frontHandle)));
+                filePollEntryCleanup((struct FileRequest *)(u32)args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
@@ -10229,8 +10224,8 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
                 work->secondaryBuffer =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->sideHandle)));
-                filePollEntryCleanup((struct FileCleanup *)args->sideHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->sideHandle)));
+                filePollEntryCleanup((struct FileRequest *)(u32)args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {
@@ -10788,11 +10783,11 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
         return 0;
     }
     btlBossDebugPrintf(D_003A4C88, args->name);
-    resource = fileGetResourceHandle((struct FileWork *)args->loadHandle);
+    resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
     effect->resourceHandle =
         sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
-    filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
+    filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -11344,10 +11339,6 @@ SoundTask *sndCreateSetStateTask(void) {
     return task;
 }
 
-extern s32 fileQueuePlainDispatchRequest(const char *path);
-
-extern void func_00288C50(s32 archive);
-
 extern void func_00288788(s32 archive);
 
 extern char D_003A5008[];
@@ -11355,11 +11346,11 @@ extern char D_003A5020[];
 /* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
 void sndLoadSysEffLb(void) {
     const char *path = D_003A5008;
-    s32 archive = fileQueuePlainDispatchRequest(path);
+    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
     s32 node;
     u32 i;
 
-    func_00288C50(archive);
+    func_00288C50((struct FileRequest *)archive);
     btlBossDebugPrintf(D_003A5020, path);
     node = *(s32 *)(archive + 0x60);
     i = 0;
@@ -11740,8 +11731,8 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
             s32 size;
             s32 data;
             btlBossDebugPrintf(D_003A50F0, request->name);
-            request->resourceHandle = fileGetResourceHandle((struct FileWork *)request->handle);
-            size = fileGetResourceSize(request->handle);
+            request->resourceHandle = fileGetResourceHandle((struct FileRequest *)request->handle);
+            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)request->handle);
             data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_002E9450(data, size);
@@ -11754,7 +11745,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
-        filePollEntryCleanup((struct FileCleanup *)request->handle);
+        filePollEntryCleanup((struct FileRequest *)(u32)request->handle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
@@ -11953,7 +11944,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_003014F0(filename, D_003A5198, D_003A5188, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
+            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
         }
         slot++;
@@ -12018,7 +12009,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
         u32 *requests = (u32 *)node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
-                filePollEntryCleanup((struct FileCleanup *)*requests);
+                filePollEntryCleanup((struct FileRequest *)(u32)*requests);
             }
             if (*resources != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resources));
@@ -12222,10 +12213,10 @@ void func_001F44C0(void) {
                     if (fileIsRequestReadyInCurrentMode(
                             (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
                         u32 resource = fileGetResourceHandle(
-                            (struct FileWork *)(u32)owner->work.fileRequests[slot]);
+                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]);
 
-                        struct FileCleanup *completedRequest =
-                            (struct FileCleanup *)(u32)owner->work.fileRequests[slot];
+                        struct FileRequest *completedRequest =
+                            (struct FileRequest *)(u32)owner->work.fileRequests[slot];
 
                         owner->work.resourceHandles[slot] = resource;
                         filePollEntryCleanup(completedRequest);
@@ -12355,16 +12346,16 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
 
     if (args->state == 0) {
         func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = (u32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
     } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle((struct FileWork *)args->request);
+        resource = fileGetResourceHandle((struct FileRequest *)args->request);
         data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = fileGetResourceSize(args->request);
-        filePollEntryCleanup((struct FileCleanup *)args->request);
+        size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->request);
+        filePollEntryCleanup((struct FileRequest *)(u32)args->request);
         func_0026ABA8(data, size, D_00377650[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf(D_003A5358);
@@ -12418,7 +12409,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_003014F0(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
         }
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = (u32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5370, path);
     }
     ++*(u16 *)(work + 0x260);
@@ -12440,11 +12431,11 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
     }
     if (args[2] == 0) {
         if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args[1]) != 0) {
-            resource = fileGetResourceHandle((struct FileWork *)args[1]);
+            resource = fileGetResourceHandle((struct FileRequest *)args[1]);
             args[2] = resource;
             data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-            size = fileGetResourceSize(args[1]);
-            filePollEntryCleanup((struct FileCleanup *)args[1]);
+            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args[1]);
+            filePollEntryCleanup((struct FileRequest *)(u32)args[1]);
             func_0026ABA8(data, size, 2);
             mnuPrintTitleDebugBanner();
             func_003003F0(D_003A5390);

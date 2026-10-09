@@ -5,10 +5,9 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 
-extern void *dds3SpawnSlotRingObj3(void *arg);
+extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 extern void *dds3GetSlot(void *arg0, s32 index);
-struct ObjectWithResource;
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
 
 s32 dds3SelectSlotForObjectKind(u8 arg);
@@ -16,9 +15,10 @@ void *dds3GetExtData(void *obj);
 void *dds3SetSlotByKind(void *arg0, ObjData *arg1);
 void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 void dds3EnsureWorldNodeInSlot(void *arg0, void *arg1);
-void dds3SetSlotValue(void *arg0, void *arg1);
-void dds3SetSlotKey(void *arg0, void *arg1);
-void dds3ReplaceObjectResource(void *arg0);
+void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
+void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
+void dds3ReplaceObjectResource(EffWorldNode *object);
+void dds3ReleaseObjectResource(EffWorldNode *object);
 void mdlDestroyContext(MdlCtx *model);
 void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
@@ -338,8 +338,9 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void func_00108E60(void);
 extern void func_00108F00(void);
 extern void evtSubmitGradientRectAtDepth();
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *context, s32 updateArg);
-extern s32 D_00325818[4];
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325818[4];
 
 
 void func_00112100(void *object) {
@@ -364,7 +365,7 @@ void func_00112100(void *object) {
     context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
     inner->flags |= 0x20;
-    mdlProcessContextNodesAndTransforms(context, (s32)D_00325818);
+    mdlProcessContextNodesAndTransforms(context, D_00325818);
     inner->flags &= ~0x20;
     dds3SetObjectFlags(object, 0x10000);
 
@@ -394,21 +395,21 @@ void dds3EnsureSlotData(void *object) {
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001127A0);
 
-s32 dds3InvokeSlot1Handler(void *obj, void *context) {
+s32 dds3InvokeSlot1Handler(void *obj, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3GetSlot(obj, 1);
     if (handler == NULL) {
         return 0;
     }
-    dds3SetSlotValue(handler, context);
+    dds3SetSlotValue(handler, update);
     return 1;
 }
 
 /* Store the source object on the data-slot handler, then replace the supplied
  * object's curve work. The replacement call uses object, not handler;
  * unlike the conditional dispatcher, this path does not check for NULL. */
-void dds3RunSlot1Handlers(void *object, void *sourceObject) {
+void dds3RunSlot1Handlers(void *object, EffWorldNode *sourceObject) {
     void *handler;
 
     handler = dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT);

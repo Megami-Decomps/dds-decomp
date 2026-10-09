@@ -37,4 +37,20 @@ typedef char Dds3PathKeyframes_size_must_be_0x0C[
 typedef char Dds3PathCurveWork_size_must_be_0x24[
     (sizeof(Dds3PathCurveWork) == 0x24) ? 1 : -1];
 
+struct EffWorldNode;
+struct ObjectTransform;
+
+typedef s32 (*Dds3MoverUpdate)(struct ObjectTransform *, struct EffWorldNode *);
+
+/* Kind 3 allocates 0x10 bytes in dds3AllocateClearedObjectWork. */
+typedef struct Dds3SlotResource {
+    struct EffWorldNode *target; /* 0x00: object whose transform is updated. */
+    Dds3PathCurveWork *path; /* 0x04: retained curve work. */
+    Dds3MoverUpdate update; /* 0x08: used when no curve work is retained. */
+    struct EffWorldNode *sourceObject; /* 0x0C: kind-16 curve source. */
+} Dds3SlotResource;
+
+typedef char Dds3SlotResource_size_must_be_0x10[
+    (sizeof(Dds3SlotResource) == 0x10) ? 1 : -1];
+
 #endif

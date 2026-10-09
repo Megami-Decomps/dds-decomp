@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -127,21 +128,13 @@ extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags();
 
-extern s32 frFontAppendGlyphFromData();
-
-extern void frFontSetContextPair();
-
-extern void frFontStoreShiftedContextValue();
-
-extern void frFontSetChildColors();
-
 extern void frFontClearFlagBits();
 
 extern char D_003E7588[];
 
-extern char D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 
-extern void evtStageTestUpdate();
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
 extern char D_003E7790[];
 
@@ -192,7 +185,6 @@ extern s32 D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind();
 
-extern u8 effHasFirstTextureHandle(s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 
@@ -202,7 +194,6 @@ extern char D_003E69B0[];
 
 extern void mnuCreateStaffImageSprite();
 
-extern void mnuDrawStaffGridLabelsForKind();
 
 
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
@@ -314,7 +305,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
-extern void func_0019D550(s32, s32, s32);
+extern void frFontDrawGlyphChain(s32, s32, s32);
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
@@ -430,12 +421,6 @@ void func_002B27F0(u32 context);
 
 void mnuReleaseMenuWindowHandles(s32 context);
 
-/* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(s32 menuWork);
-
-/* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(s32 menuWork);
-
 u32 mnuCreateSelectState(u32 unused, s32 flag);
 
 s32 mnuStaffCloseSelectionState(void);
@@ -458,7 +443,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
@@ -891,16 +875,16 @@ void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
-    menu->decorations[2].sprite = layout;
+void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, struct EffectSlotSet *sprite) {
+    menu->decorations[2].sprite = sprite;
 }
 
 void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
     menu->fadeScale = fadeScale;
 }
 
-void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
-                                    u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
+void mnuSetWindowContainerLayout(MenuWindowContainer *menu, struct EffectSlotSet *layout2C, u32 layout30, struct EffectSlotSet *layout34,
+                                    u32 layout48, u32 layout38, struct EffectSlotSet *layout3C, u32 layout40,
                                     u32 layout4C) {
     menu->decorations[0].sprite = layout2C;
     menu->decorationX[2] = layout4C;
@@ -913,7 +897,7 @@ void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 la
     menu->decorationX[0] = 0;
 }
 
-void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second) {
+void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlotSet *first, u32 second) {
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
@@ -1106,13 +1090,13 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
     u32 state = window->fadeScale;
 
     for (i = 0; i < 3; i++) {
-        u32 sprite = window->decorations[i].sprite;
+        struct EffectSlotSet *sprite = window->decorations[i].sprite;
         u32 parameter = window->decorations[i].parameter;
         u32 offset = window->decorationX[i];
 
-        if (sprite != 0) {
+        if (sprite != NULL) {
             func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
-                         1, (EffectSlotSet *)sprite, parameter, option);
+                         1, sprite, parameter, option);
         }
     }
 }
@@ -1240,7 +1224,6 @@ MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
     return panel;
 }
 
-extern void effInitializeSlotWork(s32, s32);
 
 
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */
@@ -1251,7 +1234,7 @@ void mnuClearEntryFlags(MenuIconState *group) {
             EffectSlotSet *obj = group->sprite[spriteIndex];
             u32 *flags = &obj->workEntries->states[0].flags;
             *flags &= ~1;
-            effInitializeSlotWork((s32)obj, 0);
+            effInitializeSlotWork(obj, 0);
         }
     }
 }
@@ -1796,25 +1779,13 @@ u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);
 
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
                                   EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    ) {
-    u32 handle;
-
-    handle = (u32)effCreateResourceSlotSet(model, firstValue, 1);
-    slot->handles[0] = handle;
-    handle = (u32)effCreateResourceSlotSet(model, secondValue, 1);
-    slot->handles[1] = handle;
+                                  u32 secondValue, s32 thirdValue) {
+    slot->panelResourceHandles[0] = effCreateResourceSlotSet(model, firstValue, 1);
+    slot->panelResourceHandles[1] = effCreateResourceSlotSet(model, secondValue, 1);
     if (-1 < thirdValue) {
-        handle = (u32)effCreateResourceSlotSet(model, thirdValue, 1);
-        slot->handles[2] = handle;
+        slot->panelResourceHandles[2] = effCreateResourceSlotSet(model, thirdValue, 1);
     }
 }
 
@@ -2000,11 +1971,16 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     }
 }
 
-void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          EffectSlotSet *mainResource,
+                          EffectSlotSet *itemResource,
+                          EffectSlotSet *iconResource,
+                          EffectSlotSet *cursorResource,
+                          EffectSlotSet *alternateResource) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = mnuCreatePageSpriteSet(
-        0, (EffectSlotSet *)a2, (EffectSlotSet *)a3, (EffectSlotSet *)a4,
-        (EffectSlotSet *)a5, (EffectSlotSet *)a6);
+        0, mainResource, itemResource, iconResource, cursorResource,
+        alternateResource);
     menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
@@ -2230,7 +2206,7 @@ void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
     }
     resourceIndex = menu->records->slots[index].unk8;
     if (resourceIndex >= 0) {
-        if (effHasFirstTextureHandle((s32)menu->mainResources[resourceIndex]) == 0) {
+        if (effHasFirstTextureHandle(menu->mainResources[resourceIndex]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)menu->mainResources[resourceIndex]);
             effResolveAndReleaseResource((EffectSlotSet *)menu->mainResources[resourceIndex + 8]);
         }
@@ -2265,7 +2241,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 preserveResourceHandles) {
     EffectSlotSet **res;
     if (preserveResourceHandles == MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES) {
         for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
-            if (effHasFirstTextureHandle((s32)(*res)) != 0) {
+            if (effHasFirstTextureHandle(*res) != 0) {
                 effReleaseTextureHandlesAndResetSlots(*res);
                 effReleaseTextureHandlesAndResetSlots(res[8]);
             }
@@ -2385,7 +2361,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
             s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
-                if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+                if (effHasFirstTextureHandle(window->mainResources[id]) == 0) {
                     effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id]));
                     effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id + 8]));
                 }
@@ -2404,7 +2380,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
         record = &window->records->slots[i];
         id = record->unk8;
         if (id >= 0) {
-            if (effHasFirstTextureHandle((s32)(window->mainResources[id])) != 0) {
+            if (effHasFirstTextureHandle(window->mainResources[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->mainResources[id]);
                 effReleaseTextureHandlesAndResetSlots(window->mainResources[id + 8]);
             }
@@ -2413,7 +2389,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
     record = &window->records->slots[selected];
     id = record->unk8;
     if (id >= 0) {
-        if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+        if (effHasFirstTextureHandle(window->mainResources[id]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id]));
             effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id + 8]));
         }

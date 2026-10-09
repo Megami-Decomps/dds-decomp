@@ -9,11 +9,8 @@ extern u32 func_0011B140();
 extern u32 func_0011B148();
 extern u32 func_0011B150();
 
-extern struct FrFontGlyph *func_001951C8(void *text, s8 fontIndex,
-    s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
-extern void frFontSetContextPair(struct FrFontGlyph *glyph, u32 x, u32 y);
+extern void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
-extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 value);
 
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
@@ -129,7 +126,7 @@ void dds3UpdateLinkedNodes(void) {
 void frFontSubmitAndFreeGlyphOwner(void *owner) {
     Dds3FontNode *node = owner;
 
-    frFontQueueGlyphInSelectedSlot(node->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(node->glyph);
     sdfReleaseChipBlock(node);
 }
 
@@ -147,7 +144,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
     if (x == 0x800000) {
         x = (0x200 - glyph->advance) * 8;
     }
-    frFontSetContextPair(glyph, x, y);
+    frFontSetGlyphPosition(glyph, x, y);
     node = sdfAllocAndClearQuadwords(sizeof(*node));
     node->glyph = glyph;
     dds3RegisterOwnedIntrusiveNode(&node->owner, &dds3FontNodeVTable);
@@ -155,7 +152,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, void *text) {
 }
 
 void itfConfigureOwnedGlyphChainFlag(Dds3FontNode *node, u8 value) {
-    frFontSetChainFlag(node->glyph, value);
+    frFontSetChildChainFirstOption(node->glyph, value);
 }
 
 void frFontReleaseOwnerStorage(void *memory) {

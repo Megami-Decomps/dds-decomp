@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -22,6 +23,7 @@
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -1031,7 +1033,6 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
 
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-extern s32 fileRequestIsReady(void *);
 
 /* Nonzero cache state bypasses requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
@@ -1047,7 +1048,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
@@ -1185,7 +1186,6 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 }
 
 extern SdfTex *kwlnHeldTextureReference;
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                                  s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
@@ -1223,9 +1223,8 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
 }
 
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
-extern void sdfAppendDmaPrimary(s32, void *, void *);
 
 void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     s32 halfWidth;
@@ -1241,9 +1240,9 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     void *packet;
     s32 index;
 
-    packet = sdfAllocPacketAligned(0x20);
+    packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
+    sdfAppendDmaPrimary((SdfListHead *)list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1277,7 +1276,6 @@ extern u32 effGetWindTextureHandle(void);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(s32, void *);
-extern void sdfAppendPacket(void *, s32);
 extern u32 btlMulColor(u32, u32);
 extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
 
@@ -1291,10 +1289,10 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
         btlRuntimeState.resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)effGetWindTextureHandle());
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
-    tag = sdfAllocPacketAligned(0x40);
+    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
     sdfAppendDmaTagToList(list, tag);
-    registers = sdfAllocPacketAligned(0x40);
+    registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1304,7 +1302,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     registers[1].unk10 = 0x44;
     registers[1].unk18 = 0x43;
     sdfAppendPacket((void *)list, (s32)registers);
-    registers = sdfAllocPacketAligned(0x40);
+    registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1326,7 +1324,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     if (btlRuntimeState.phaseSpeed > -0.02f) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
-    tag = sdfAllocPacketAligned(0x40);
+    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
     sdfAppendDmaTagToList(list, tag);
 }
@@ -1492,7 +1490,7 @@ void btlReleaseRuntimeResource(void) {
 
 
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
@@ -1893,13 +1891,13 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
     return 0;
 }
 
-extern void func_001958A0(void *, s32, s32);
+extern void frFontDrawGlyphChain(void *, s32, s32);
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = func_00197748(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    func_001958A0(textGlyph, 0, 0x60);
-    return frFontQueueGlyphInSelectedSlot(textGlyph);
+    frFontDrawGlyphChain(textGlyph, 0, 0x60);
+    return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index.
@@ -1922,8 +1920,8 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, BtlDebugMenuCursor *
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        func_001958A0(textGlyph, 0, 0x60);
-        frFontQueueGlyphInSelectedSlot(textGlyph);
+        frFontDrawGlyphChain(textGlyph, 0, 0x60);
+        frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
@@ -1956,7 +1954,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
     u32 selectedIndex;
     s32 rowY;
     func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
-    indexPackets = sdfAllocPacketAligned(0x20);
+    indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = selectionState->top;
     visibleRowCount = selectionState->rows;
@@ -2386,7 +2384,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }

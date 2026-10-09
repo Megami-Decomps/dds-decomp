@@ -369,12 +369,13 @@ extern void func_0031E020(struct CompactSlotPool *work, u32 flags);
 extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(u8 *node, f32 value);
 extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *context, s32 parameter);
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void func_0031B080(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
-extern u8 D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 
 typedef char MenuRuntimeListLayoutAssert[
     (sizeof(MenuRuntimeList) == 0x10 &&
@@ -409,8 +410,8 @@ s32 func_00318C00(MnuShootingWork *work) {
     while (index < list->capacity) {
         u32 stateWord = record->state.word;
         if ((stateWord & 1) != 0) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
 
             switch (kind) {
@@ -459,8 +460,8 @@ s32 func_00318C00(MnuShootingWork *work) {
     while (index < list->capacity) {
         u32 stateWord = record->state.word;
         if ((stateWord & 1) != 0) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
 
             switch (kind) {
@@ -509,7 +510,7 @@ s32 func_00318C00(MnuShootingWork *work) {
             mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80664C4C);
             break;
         }
-        mdlProcessContextNodesAndTransforms(D_00438928->model, (s32)D_00380788);
+        mdlProcessContextNodesAndTransforms(D_00438928->model, D_00380788[0]);
     }
 
     itfDrawFullExtentWorkPanels(work);

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
+#include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
@@ -354,11 +356,81 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1D48);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
-
 extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
+
+/* Insert a complete party record before actors with a larger priority. */
+void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+    DatPartyRecord saved;
+    s32 insertion = 0;
+    s32 i;
+
+    if (datGameState->party[0].flags & 2) {
+        do {
+            if ((u16)(datGameState->party[insertion].flags & 1) == 0) {
+                break;
+            }
+            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+                break;
+            }
+            insertion++;
+            if (insertion >= 5) {
+                break;
+            }
+        } while (datGameState->party[insertion].flags & 2);
+    }
+    memcpy(&saved, &datGameState->party[sourceIndex], sizeof(saved));
+    for (i = sourceIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
+        if (datGameState->party[i + 1].flags & 2) {
+            btlFindActiveActorByKind(i + 1)->unk2C4 = i;
+        }
+    }
+    for (i = 4; i > insertion; i--) {
+        memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
+        if (datGameState->party[i - 1].flags & 2) {
+            btlFindActiveActorByKind(i - 1)->unk2C4 = i;
+        }
+    }
+    memcpy(&datGameState->party[i], &saved, sizeof(saved));
+    btlCopyUnitStats((s32)unit, (s32)&saved);
+    unit->partyRecord.flags |= 2;
+    datGameState->party[i].flags |= 2;
+    unit->unk2C4 = i;
+    func_001A1CD0();
+    btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
+}
+
+/* Move a departing actor behind the remaining occupied party records. */
+void func_001A2258(BtlUnit *unit) {
+    DatPartyRecord saved;
+    DatGameState *scanState = datGameState;
+    s32 originalIndex;
+    s32 index;
+
+    originalIndex = unit->unk2C4;
+    memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
+    index = originalIndex;
+    if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
+        do {
+            memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
+            if (datGameState->party[index + 1].flags & 2) {
+                btlFindActiveActorByKind(index + 1)->unk2C4 = index;
+            }
+            index++;
+            if (index >= 4) {
+                break;
+            }
+            scanState = datGameState;
+        } while ((u16)(scanState->party[index + 1].flags & 1));
+    }
+    memcpy(&datGameState->party[index], &saved, sizeof(saved));
+    unit->partyRecord.flags &= ~2;
+    datGameState->party[index].flags &= ~2;
+    unit->unk2C4 = 6;
+    func_001A1CD0();
+    btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index,
+                       saved.unitId);
+}
 
 /* Swap complete records while keeping the actor in its original party slot. */
 void func_001A2608(BtlUnit *actor, u8 targetIndex) {
@@ -3251,14 +3323,16 @@ void btlPanelResourcesLoad(void) {
 }
 
 
-extern u32 func_002BD9C0(u32, u32);
 
 void btlLoadResourceBlock(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
@@ -3834,7 +3908,6 @@ typedef struct BtlPanelTransitionWork {
 
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
-extern u32 frFontMeasureLines(u32);
 s32 func_001AD970(const u8 *text) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
@@ -3860,8 +3933,8 @@ s32 func_001AD970(const u8 *text) {
     work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
-    work->width = frFontMeasureLines(glyph);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
     work->initial[1].x = 0x92 - work->width / 2;
@@ -4701,7 +4774,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
@@ -5680,7 +5753,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern s32 sdfConsCreateDrawPacket(s32 list, s32 texture, s32 context);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
@@ -5692,7 +5764,7 @@ extern void sdfQueueGouraudTexturedQuad(
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
                   s32 u, s32 v, s32 width, s32 height,
-                  const s32 *colors, s32 texture) {
+                  const s32 *colors, SdfTex *texture) {
     SdfListHead *list;
     s32 uFixed;
     s32 vFixed;
@@ -5701,7 +5773,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsCreateDrawPacket((s32)list, texture, 0);
+    sdfConsCreateDrawPacket(list, texture, 0);
     uFixed = u * 0x10;
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
@@ -5853,8 +5925,8 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 
     itfSetTextDrawLimit(0x13);
     glyph = func_001978E8(x << 4, y << 3, 0, color, text, 0);
-    func_001958A0(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }
 
@@ -5865,7 +5937,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -5876,7 +5948,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -6155,7 +6227,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 

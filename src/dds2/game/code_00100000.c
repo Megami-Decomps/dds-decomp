@@ -37,7 +37,7 @@ extern s32 func_00101D30(void);
 extern s32 kwlnRenderFrame(void);
 extern u32 func_00102740(void);
 extern u32 func_00102768(void);
-extern s32 frFontAdvanceSelectedGlyphSlot(void);
+extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
 extern void frFontReleaseAll(void);
 extern s32 func_001A1810(void);
 
@@ -58,7 +58,7 @@ s32 func_001001D8(void) {
     kwlnTaskCreate("basic_main", 0x3FC, 1, 1, func_00102740, 0, 0);
     kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, func_00102768, 0, 0);
     func_0019BEB8(0x100, 0x200);
-    kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontAdvanceSelectedGlyphSlot, frFontReleaseAll, 0);
+    kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
     fileManInit();
     itfMesInit();
     mnuInitializeTitleAudioAndEffects();

@@ -1,17 +1,21 @@
 #include "kwln.h"
+#include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
+#include "sdf_pac_state.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
@@ -54,10 +58,6 @@ s32 effCreateNodeFromDescriptor(s32);
 #define MDL_PAD_REPEAT_FLAG 2
 #define MDL_PART_SLOT_BYTES 0x10
 #define MDL_PART_VALUE_SIZE_THRESHOLD 0x11
-#define MDL_RESOURCE_BILLBOARD 0
-#define MDL_RESOURCE_EFFECT 1
-#define MDL_RESOURCE_TRACK_POLY 2
-#define MDL_RESOURCE_OBJECT 3
 #define MDL_MAP_POSITION_TAG 0x534F504D
 
 
@@ -136,7 +136,7 @@ extern char D_00421278[];
 
 
 
-extern s32 mdlGetNodeField2C(MdlCtx *, s32);
+extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 typedef struct MdlCountNode {
     u8 pad00[4];
@@ -176,15 +176,11 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-void sdfPacInitializeDispatchPacket(void *buffer, s32);
-
-void func_00346AD8(void *buffer);
-
-void sdfPacFeedInput(void *buffer, s32, s32);
+void sdfPacUsePacketPayloadMemory(void *buffer);
 
 void func_00233280(s32, s32, s32, s32);
 
-void func_00346AF8(void *buffer);
+void sdfPacReleasePacketQueueNodes(void *buffer);
 
 s32 mdlCountRecords(s32);
 
@@ -213,7 +209,6 @@ s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 extern s32 D_00453610[];
 
-void sdfAppendPacket(SdfListHead *, u32);
 
 extern f32 D_00453620[4] __attribute__((aligned(16)));
 
@@ -313,13 +308,13 @@ typedef struct MdlPackageRequest {
 void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s32 requestSecond) {
     MdlPackageRequest request;
 
-    sdfPacInitializeDispatchPacket(&request, 0);
+    sdfPacInitializeDispatchPacket((PacState *)&request, 0);
     if (flags & 2) {
-        func_00346AD8(&request);
+        sdfPacUsePacketPayloadMemory(&request);
     }
-    sdfPacFeedInput(&request, requestFirst, requestSecond);
+    sdfPacFeedInput((PacState *)&request, (void *)(u32)requestFirst, requestSecond);
     func_00233280(request.handle, first, second, flags);
-    func_00346AF8(&request);
+    sdfPacReleasePacketQueueNodes(&request);
 }
 
 void func_00233700(void *memory) {
@@ -346,7 +341,6 @@ extern s32 D_00436FAC;
 
 extern s32 D_00436FB0;
 
-extern void sdfReleaseMemorySlot(s32 *slot);
 
 /* Release all three handles in each viewer-table entry, then clear its tables and backing allocations. */
 void mdlReleaseViewerSlotResources(void) {
@@ -789,7 +783,7 @@ void mdlDestroyPartList(DevRequest *partList) {
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:
-                billDispatchByKind(partEntry->object);
+                billDispatchByKind((BillObj *)(u32)partEntry->object);
                 break;
             case MDL_PART_EFFECT:
                 effDestroyNode(partEntry->object);
@@ -1032,7 +1026,7 @@ void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
 void mdlDestroyResourceItem(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind(item->payload.part.handle);
+        billDispatchByKind((BillObj *)(u32)item->payload.part.handle);
         break;
     case MDL_RESOURCE_EFFECT:
         effDestroyNode(item->payload.part.handle);
@@ -1087,22 +1081,22 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
     s32 resourceHandle;
 
     switch (anchorRecord->type) {
-    case 0:
+    case MDL_RESOURCE_BILLBOARD:
         mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVector(resourceHandle, position);
         billInvokeCallback(resourceHandle);
         break;
-    case 1:
+    case MDL_RESOURCE_EFFECT:
         mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVectorToNodeInstance((struct EffNode *)resourceHandle, position);
         effUpdateNode(resourceHandle);
         break;
-    case 2:
+    case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
         break;
-    case 3:
+    case MDL_RESOURCE_OBJECT:
         mdlCondInitEntry((s32)anchorRecord);
         break;
     }
@@ -1377,7 +1371,7 @@ void mdlDrawViewerModelAndMotionSummary(void) {
             format = D_00421248;
         }
         formatted = sdfFormatSifPacket(&packet, format,
-                                       mdlGetNodeField2C(mdlViewerState.resources[0], 0), nodeCount - 1);
+                                       mdlGetNodeMotionIndex(mdlViewerState.resources[0], 0), nodeCount - 1);
     }
     sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
 }
@@ -1554,7 +1548,7 @@ void func_00235C20(void) {
                 s32 motionIndex;
 
                 referenceCount--;
-                motionIndex = mdlGetNodeField2C(mdlViewerState.resources[0], index);
+                motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], index);
                 if (mdlViewerState.unk0F == 0) {
                     format = D_00421238;
                 } else {
@@ -2015,7 +2009,6 @@ void mdlHandleViewerNodeCursorInput(void) {
 
 extern char D_00421318[];
 extern char D_004370C8[];
-extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
                                       s32, s32, s32, s32, s32, s32);
 
@@ -2043,7 +2036,7 @@ void mdlDrawViewerTexturePreview(void) {
         height = node->textures[index]->height;
         sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(0x7780, 0x7A20,
             0xFF0080, 0, D_004370C8, width, height));
-        sdfConsCreateDrawPacket(packetList, node->textures[index], 0);
+        sdfConsCreateDrawPacket((SdfListHead *)packetList, node->textures[index], 0);
         displayWidth = width << 4;
         displayHeight = height << 3;
         if (width < height) {
@@ -2576,11 +2569,7 @@ extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern void fileWaitReady(s32 file);
-extern s32 fileGetResourceHandle(s32 file);
-extern char *fileGetLoadedDataAddress(s32 file);
-extern s32 fileGetResourceSize(s32 file);
-extern void filePollEntryCleanup(s32 file);
+
 extern s32 func_0035C8F8();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -2608,12 +2597,12 @@ void mdlLoadViewerPresentationConfig(void) {
     if (sdfPathExists(D_003C88A8) == 0) {
         return;
     }
-    fileRequest = fileQueueDefaultCallbackRequest(D_003C88A8);
-    fileWaitReady(fileRequest);
-    resourceHandle = fileGetResourceHandle(fileRequest);
-    fileData = fileGetLoadedDataAddress(fileRequest);
-    fileSize = fileGetResourceSize(fileRequest);
-    filePollEntryCleanup(fileRequest);
+    fileRequest = (s32)fileQueueDefaultCallbackRequest(D_003C88A8);
+    fileWaitReady((struct FileRequest *)(u32)fileRequest);
+    resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
+    fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
+    fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
+    filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -2659,12 +2648,11 @@ void mdlLoadViewerPresentationConfig(void) {
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
 extern s32 func_0035C860(char *, const char *, ...);
-extern s32 fileQueueWindowSlotRequest(char *, char *, s32);
 
 void func_00238BD8(void) {
     char buffer[0x130];
     s32 size;
-    s32 request;
+    struct FileRequest *request;
 
     size = func_0035C860(buffer, D_00421488, D_00435CBC,
                         D_00453620[0], D_00453620[1], D_00453620[2],
@@ -2674,7 +2662,7 @@ void func_00238BD8(void) {
                         kwlnDrawVector.farB, kwlnDrawVector.color);
     request = fileQueueWindowSlotRequest(D_003C88A8, buffer, size);
     fileWaitReady(request);
-    filePollEntryCleanup(request);
+    filePollEntryCleanup((struct FileRequest *)request);
 }
 
 typedef struct MdlTaskDef {
@@ -3404,4 +3392,3 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
-

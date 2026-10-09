@@ -1,7 +1,10 @@
+#include "fld_area_work.h"
+#include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "field_stage.h"
@@ -74,91 +77,11 @@ extern s32 D_003BAB14;
 extern s32 D_003BAB18;
 extern s32 D_003BAB1C;
 extern s32 D_003BAB20;
-/* Native field-area work prefix, shared with the camera/motion unit.
- * Position is XYZ followed immediately by saved XYZ history, not a Vec4.
- * DDS2 inserts twelve bytes before the model variant and position/history tail. */
-typedef struct FldAreaWork {
-    u8 pad00[4];
-    char *fallbackResourceName; /* Last choice after override and saved scene names. */
-    u8 pad08[4];
-    s32 consumedFlags; /* Consumption markers, separate from game-state work flags. */
-    s32 area;
-    s32 floor; /* Zero-based; coordinate lookups use floor + 1. */
-    u8 pad18[8];
-    s32 unk20; /* Sequence initializers set this when reusing the current area. */
-    s32 unk24;
-    u8 pad28[0x28];
-    s32 mode;
-    u8 pad54[4];
-    s32 rowIdx;
-    u8 pad5C[8];
-    f32 negatedAngle;
-    u8 pad68[4];
-    f32 dist;
-    s32 sceneMode;
-    s32 sceneState;
-    u8 pad78[0xC];
-    s32 positionPending;
-    u8 pad88[8];
-    s32 unk90;
-    s32 unk94;
-    u8 pad98[0x28];
-    s32 unkC0;
-    u8 padC4[8];
-    s32 overlayMode;
-    s32 overlayCounter;
-    u8 padD4[0x10];
-    s32 encounterMode;
-    s32 unkE8;
-    u32 transitionCount; /* 0xEC */
-    s32 nextArea;
-    s32 nextFloor; /* Both queued values at -1 mean no request. */
-    u8 padF8[8];
-    s32 unk100; /* Consumed before pending-resource selection. */
-    s16 transitionMode; /* 0x104 */
-    u8 pad106[0xA];
-    u32 pendingSceneRequest; /* 0x110: pending scene request, cleared on exit */
-    s32 deferredExit; /* 0x114 */
-    s32 unk118;
-    u8 pad11C[0xC];
-    s16 sceneCommand;
-    u8 pad12A[2];
-    s32 commandEnabled;
-    s32 unk130;
-    s32 skipFade; /* 0x134 */
-    u8 pad138[4];
-    s32 playerModelVariant; /* Cached 0/1 player variant, or 2 for the location override. */
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 previousX; /* History starts here, not a homogeneous position W. */
-    f32 previousY;
-    f32 previousZ;
-    f32 targetX; /* XYZ installed when positionPending is consumed. */
-    f32 targetY;
-    f32 targetZ;
-    f32 angle; /* Current player heading in degrees. */
-    f32 targetAngle; /* Desired heading for the motion-unit updater. */
-    f32 unk16C;
-    f32 unk170;
-    f32 unk174;
-    s32 positionMode;
-    s32 unk17C;
-    s32 verticalStepDirection; /* Positive lowers Y; negative raises it. */
-    s32 unk184;
-    u32 pointState;
-    f32 facingPointX;
-    f32 facingPointZ;
-    u32 angleState;
-    f32 overrideAngle;
-} FldAreaWork;
-typedef char FldAreaWork_transitionMode_offset_check[
-    (u32)&((FldAreaWork *)0)->transitionMode == 0x104 ? 1 : -1];
-typedef char FldAreaWork_pendingSceneRequest_offset_check[
-    (u32)&((FldAreaWork *)0)->pendingSceneRequest == 0x110 ? 1 : -1];
-typedef char FldAreaWork_skipFade_offset_check[
-    (u32)&((FldAreaWork *)0)->skipFade == 0x134 ? 1 : -1];
-extern FldAreaWork fldAreaState;
+
+
+
+
+
 extern s32 D_0032E4DC[];
 extern u8 D_00324F88[];
 extern u8 D_003257F8[];
@@ -207,21 +130,6 @@ extern void fldActivateObjectById(s32);
 extern void mdlFlagSet(s32);
 extern void func_0011B150(s32);
 void fldDispatchDeferredFieldCommand(void);
-
-/* Contiguous player-scene work: saved transform, status words and deferred resource.
- * The data also exports a label at +0x3C for separate object-slot consumers. */
-typedef struct FieldPlayerSceneWork {
-    u128 position;
-    u128 rotation;
-    u8 pad20[0x14];
-    u32 primaryState;
-    u8 pad38[0x24];
-    u32 secondaryState;
-    u8 pad60[2];
-    s16 sequenceMode; /* 0x62: copied by the sequence initializer */
-    u8 pad64[0x1C];
-    s8 resourceName[0x20];
-} FieldPlayerSceneWork;
 
 extern FieldPlayerSceneWork D_0032F1A0;
 extern FieldStageCoordinate D_0032DDB0[];
@@ -520,7 +428,6 @@ void fldFormatSecondsText(char *text, f32 value) {
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(void *, void *);
 extern u8 D_0032B0A0[];
 extern char *D_0032B0A8[];
 
@@ -544,10 +451,10 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         }
         color |= 0x80000000;
     }
-    sdfAppendPacket(packetList, func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
                      0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x, y,
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x, y,
                         0xFF0080, D_0032B0A0[i], D_0032B0A8[i]));
         style = selected == i ? 6 : 0;
         if (values == NULL) {
@@ -559,7 +466,7 @@ void fldDrawRgbEditor(void *packetList, s32 x, s32 y, s32 selected, f32 *values)
         } else {
             fldFormatSecondsText(text, values[i]);
         }
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(x + 0x180,
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(x + 0x180,
                         y, 0xFF0080, style, text));
         y += 0x60;
     }
@@ -579,7 +486,7 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
     const char *label;
 
     color = (color & 0xFFFFFF) | 0x80000000;
-    sdfAppendPacket(packetList, func_0011D3E8(x + 0x510, y + 0x18,
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x510, y + 0x18,
                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
     for (i = 0; i != 3; i++) {
         switch (i) {
@@ -599,15 +506,15 @@ void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y, s32 selected,
             channel = (color >> 16) & 0xFF;
             break;
         }
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                         x, y, 0xFF0080, style, label));
-        sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                         x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
                         D_003BAAF8, channel));
         if (showNormalized != 0) {
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                             x, y + 0x180, 0xFF0080, style, label));
-            sdfAppendPacket(packetList, sdfCreateFormattedSifCommand(
+            sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
                             x + 0x240, y + 0x180, 0xFF0080, 0,
                             D_003BAB00, channel * (1.0f / 255.0f)));
         }
@@ -626,7 +533,7 @@ extern void fldSelectDisplayBuffer(s32);
 extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
-void func_0011E280(s32 fade, f32 x, f32 y, f32 z, f32 radius) {
+void func_0011E280(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     s32 color;
     s32 angle;
     s32 prev;
@@ -1826,7 +1733,8 @@ u32 fldGetPlayerSceneState(void) {
     return *fldGetPlayerSceneStateAddress();
 }
 
-u32 func_001243C0(void);
+extern s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update);
+s32 func_001243C0(ObjectTransform *relativeTransform, EffWorldNode *target);
 extern void func_001372D0(f32 *position);
 void fldSetSceneControlFlags(u32 mask);
 
@@ -1837,7 +1745,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3InvokeSlot1Handler(fldPlayerObject, func_001243C0);
+        dds3InvokeSlot1Handler((void *)fldPlayerObject, func_001243C0);
     }
     fldAreaState.unkE8 = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -1858,7 +1766,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 void fldResetPlayerSceneObjectState(void) {
     if (fldPlayerObject != 0) {
         fldClearSceneControlFlags(0x40);
-        dds3InvokeSlot1Handler(fldPlayerObject, 0);
+        dds3InvokeSlot1Handler((void *)fldPlayerObject, 0);
     }
     D_0032E498[0] = 4;
 }
@@ -2021,7 +1929,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
-u32 func_001243C0(void) {
+s32 func_001243C0(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
@@ -2643,7 +2551,7 @@ s32 fldProcSequence(void) {
         if (fldGetArchiveLoadPending() != 0) return 0;
         controller->stage++;
         if (fldAreaState.unk17C == 0 && fldAreaState.skipFade == 0 &&
-            fldAreaState.unk24 == 0 && kwlnFadeIsActive() == 0) {
+            fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
         if (kwlnTaskFindByPriority(0x3EA) == NULL && func_0014CAF8() == 0) {
@@ -2658,7 +2566,7 @@ s32 fldProcSequence(void) {
     case 4:
         D_003BAD58 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
-        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.unk24 != 0) {
+        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
             func_0013B1D8((EffWorldNode *)fldPlayerObject);
             break;
         }

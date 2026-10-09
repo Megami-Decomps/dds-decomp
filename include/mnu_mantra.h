@@ -7,6 +7,7 @@
 struct ItfMesSub;
 struct MenuList;
 struct MenuListNode;
+struct SdfMemBlock;
 typedef struct MantraPanelPool MantraPanelPool;
 struct MantraDrawPool;
 
@@ -67,7 +68,7 @@ typedef struct MantraMenuSrc {
 } MantraMenuSrc;
 
 typedef struct MantraFlagResource {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 capacity;
     u16 *flags;
     u16 data[176];

@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "fr_font_measure.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -76,7 +77,7 @@ extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, 
 
 extern void func_00196088(s32, s32, FrFontGlyph *);
 
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
@@ -586,7 +587,6 @@ MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, EffectSlotSet *reso
     return panel;
 }
 
-extern void effInitializeSlotWork(s32, s32);
 
 /* Reset low sprite flags only for a present first handle and a supported panel kind. */
 void mnuClearEntryFlags(MenuPanelHandles *group) {
@@ -598,7 +598,7 @@ void mnuClearEntryFlags(MenuPanelHandles *group) {
             u32 *flags = &entry->workEntries->states[0].flags;
 
             *flags &= ~1;
-            effInitializeSlotWork((s32)entry, 0);
+            effInitializeSlotWork(entry, 0);
         }
     }
 }
@@ -1501,7 +1501,6 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     }
 }
 
-extern u8 effHasFirstTextureHandle(s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 /* Rebuild one party row's icon and frame resources from its current selectors. */
@@ -1565,7 +1564,7 @@ void func_0027FCA0(MenuPageWindow *window, s32 index, s32 kind) {
 
     resourceIndex = window->records->slots[index].unk8;
     if (resourceIndex >= 0) {
-        if (effHasFirstTextureHandle((s32)window->handlesA[resourceIndex]) == 0) {
+        if (effHasFirstTextureHandle(window->handlesA[resourceIndex]) == 0) {
             effResolveAndReleaseResource(window->handlesA[resourceIndex]);
             effResolveAndReleaseResource(window->handlesB[resourceIndex]);
         }
@@ -1595,7 +1594,7 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
     s32 i;
 
     for (i = 0; i < 8U; i++, handle++) {
-        if (effHasFirstTextureHandle((s32)*handle) != 0) {
+        if (effHasFirstTextureHandle(*handle) != 0) {
             effReleaseTextureHandlesAndResetSlots(*handle);
             effReleaseTextureHandlesAndResetSlots(handle[8]);
         }
@@ -1721,7 +1720,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
             s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
-                if (effHasFirstTextureHandle((s32)window->handlesA[id]) == 0) {
+                if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
                     effResolveAndReleaseResource((EffectSlotSet *)window->handlesA[id]);
                     effResolveAndReleaseResource((EffectSlotSet *)window->handlesB[id]);
                 }
@@ -1740,7 +1739,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
         record = &window->records->slots[i];
         id = record->unk8;
         if (id >= 0) {
-            if (effHasFirstTextureHandle((s32)window->handlesA[id]) != 0) {
+            if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
                 effReleaseTextureHandlesAndResetSlots(window->handlesB[id]);
             }
@@ -1749,7 +1748,7 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
     record = &window->records->slots[selected];
     id = record->unk8;
     if (id >= 0) {
-        if (effHasFirstTextureHandle((s32)window->handlesA[id]) == 0) {
+        if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)window->handlesA[id]);
             effResolveAndReleaseResource((EffectSlotSet *)window->handlesB[id]);
         }
@@ -1950,8 +1949,8 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    func_001958A0(glyph, 1, param);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontDrawGlyphChain(glyph, 1, param);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1982,11 +1981,6 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 
-extern struct FrFontGlyph *func_001951C8(void *, s8, s8, s8, struct FrFontGlyph *);
-
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
-
-
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     struct FrFontGlyph *glyph;
@@ -1996,9 +1990,9 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     glyph = func_001951C8(text, 0, 0, 0, 0);
     frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;
-    frFontSetContextPair(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
-    func_001958A0(glyph, 1, param);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontSetGlyphPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
+    frFontDrawGlyphChain(glyph, 1, param);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
@@ -2018,8 +2012,8 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         func_00196088(0x1710, 0x5F0, glyph);
-        func_001958A0(glyph, 1, param);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontDrawGlyphChain(glyph, 1, param);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -2044,8 +2038,8 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
             func_003014F0(text, D_003BC740, remainingExp);
             glyph = func_001978E8(x + 0xDF0,
                 0x160, depth, color, text, 0);
-            func_001958A0(glyph, 1, surface);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
     if (slot->windowSprites != NULL) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -45,15 +46,15 @@ extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
 extern u16 D_00437E2C;
 
-extern void *effCreateModelOwner(void *);
+extern EffModelOwner *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
 extern void func_0035B6E0(const char *fmt, ...);
 
-extern u8 D_00380828[];
+extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 
 typedef struct EffectObjectNode {
@@ -86,7 +87,6 @@ extern void effFloorModelListRemove(EffectObjectNode *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];
@@ -150,7 +150,7 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
-void *effCreateModelOwner(void *input) {
+EffModelOwner *effCreateModelOwner(void *input) {
     FileJobPayload *source = input;
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
@@ -217,7 +217,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
@@ -306,7 +306,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
 extern void effFloorModelListPush(EffModelOwner *);
 
 /* Track floor models only while battle is active and the current actor is not fully marked. */
-void *effCreateFloorModelOwner(void *source) {
+EffModelOwner *effCreateFloorModelOwner(void *source) {
     EffModelOwner *owner;
     s32 battleActive;
 
@@ -319,10 +319,10 @@ void *effCreateFloorModelOwner(void *source) {
     return owner;
 }
 
-void effMarkFloorModelForDestruction(u32 *p) {
-    ((EffModelOwner *)p)->flags |= 2;
-    if (!(((EffModelOwner *)p)->flags & 4)) {
-        effDestroyModelOwner((EffModelOwner *)p);
+void effMarkFloorModelForDestruction(EffModelOwner *p) {
+    p->flags |= 2;
+    if (!(p->flags & 4)) {
+        effDestroyModelOwner(p);
     }
 }
 
@@ -372,7 +372,7 @@ void func_002DC808(EffModelOwner *owner) {
         owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlProcessContextNodesAndTransforms(owner->model, (s32)D_00380788[1]);
+    mdlProcessContextNodesAndTransforms(owner->model, D_00380788[1]);
 
     for (index = 1; index != 4; index++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -390,14 +390,14 @@ void func_002DC808(EffModelOwner *owner) {
     }
 }
 
-void effMarkFloorModelForUpdate(u32 *p) {
-    ((EffModelOwner *)p)->flags |= 1;
-    if (!(((EffModelOwner *)p)->flags & 4)) {
+void effMarkFloorModelForUpdate(EffModelOwner *p) {
+    p->flags |= 1;
+    if (!(p->flags & 4)) {
         if (!(effModelUpdateControlFlags & 1)) {
-            func_002DC808((EffModelOwner *)p);
+            func_002DC808(p);
         }
     } else if (effModelUpdateControlFlags & 1) {
-        ((EffModelOwner *)p)->flags |= 0x30;
+        p->flags |= 0x30;
     }
 }
 
@@ -847,7 +847,8 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
     return obj;
 }
 
-/* One animation track: segments of `length` frames each (plus one), looping if flags & 1. */
+/* One animation track: segments contribute their length plus a boundary frame;
+ * the loop flag wraps the frame by the total track length. */
 void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
@@ -859,7 +860,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     if (count == 1) {
         segment = 0;
     } else {
-        if (set->flags & 1) {
+        if (set->flags & EFF_ANIM_SET_LOOP) {
             local = frame % set->length;
         } else if (frame >= set->length) {
             segment = count - 1;
@@ -884,7 +885,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     {
         f32 scaleY = 2.0f;
 
-        if (!(set->flags & 4)) {
+        if (!(set->flags & EFF_ANIM_SET_DOUBLE_Y_SCALE)) {
             scaleY = 1.0f;
         }
         out->segment = segment;

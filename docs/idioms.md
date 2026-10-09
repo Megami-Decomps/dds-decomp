@@ -3745,6 +3745,23 @@ the old data include at that owner boundary; the routine copies the aggregate
 before selecting a row. The retail split's eight zero alignment bytes before
 the following jump table are not record fields or artificial C padding.
 
+## Texture-viewer switch-table alignment
+
+DDS1 `00104810` and DDS2 `00104700` display the canonical `SdfTex`
+dimensions, nine native pixel-format labels, `resourceKey`, and
+`battleTextureSlot`. The two format literals and 45-target switch table
+are owned solely by each function's assembly split; the label-pointer
+array remains a separate shared object.
+
+The retail table's terminal zero words are alignment, not extra cases.
+The natural C switch leaves an eight-byte alignment frontier in the unit
+comparator. Main's clean-clone full DDS1 build rejected it with 52 differing
+bytes, so the text-exact candidate is parked and production remains assembly.
+Do not manufacture cases, data objects, or padding to supply the bytes.
+A future landing needs corrected jump-table/rodata ownership and a passing
+full retail SHA-1, not instruction equality alone.
+
+
 
 ## Battle lift/settle task workspace
 
@@ -4637,3 +4654,241 @@ and callers consume its returned object pointer. A `void(void)` declaration
 only happened to preserve those registers in the old wrapper's machine code;
 the real three-pointer, pointer-returning contract is now explicit in both.
 This closure does not change the separately parked script-setter return ABI.
+
+## Viewer window shading uses signed byte state
+
+DDS1 `00230140` and DDS2 `0024AD48` load both `EvtRuntime` bytes
+at `+0x23C4/+0x23C5` with `lb`. The first is `windowShadeFade`:
+inactive windows subtract nine down to zero, active windows add three
+up to 94, and the overlay alpha is `128 - windowShadeFade`.
+The arithmetic assignments also reload the stored byte with `lbu`;
+that does not make the primary field unsigned. The cleanup functions
+reset the same signed owner field, and the active/inactive setters retain
+their zero/one stores. The packet-building bodies remain ASM: completing
+these primary fields does not resolve their packet-address scheduling.
+
+## Adjustment script wrappers return the script result
+
+DDS1 `00118558/00118620/00118648/00118670` and DDS2
+`00118B90/00118C58/00118C80/00118CA8` are true tail forwards
+to the selected unit script, `evtRunContext`, or another such forwarder.
+Their final instructions jump directly to the callee after restoring the
+frame; the surviving `v0` is the callee's result, not fall-through garbage.
+The adjustment evaluators consume that result as a signed word.
+These wrappers therefore return `s32` with an explicit `return` expression;
+the existing byte-mode conversion is unchanged. Both whole units still
+match, while the separately parked evaluators remain ASM.
+
+## Field controller, camera state and resource banks share one owner
+
+`fld_area_work.h` owns the complete `FldAreaWork`; the field, camera,
+script and billboard consumers no longer keep prefix views or word-array
+aliases. `area/floor` are at +10/+14, with `floor` zero-based. The separate
+resource-load state at +78/+7C/+80 is `resourceFlag/resourceArea/resourceFloor`,
+not another controller's area/floor.
+
+DDS2 inserts twelve bytes before the player-model/XYZ history tail.
+The retained map bank starts at +19C with four records in DDS1, and at
++1A8 with eight records in DDS2; DDS2's four texture records follow at +1E8.
+The five records once named `fldmix` by DDS2's script unit are the same
+map-bank entries 3 through 7, not a second layout. XYZ remains three
+coordinates followed immediately by saved XYZ history. Compile-time size
+and offset checks preserve both games' actual complete owner extents.
+
+## The kind-5 entry-blend yaw is a float payload field
+
+DDS1 `001122F0` loads `EffectObjectData +34` with `lwc1` directly
+into the yaw argument of `mdlBlendEntryPitchYawAndUpdate`.
+The primary `word34` field is therefore `f32`, not an integer word
+requiring a reinterpretation view. Its six existing initialization stores
+remain `= 0`; both complete initialization units retain their native bytes.
+
+## Actor-camera dispatch receives the actual camera payload
+
+DDS1 `001E3E58` and its matching DDS2 counterpart `001F17C8`
+receive a `BtlCamState *` as their second argument. In the canonical
+`BtlLinkedCommand`, the primary `camera` starts at +0, `frontCamera`
+at +30, and `backCamera` at +C0. Passing the command base therefore
+means `&action->camera`, not `&action->frontCamera`; the alternate
+caller passes `&action->backCamera`. Neither path needs a byte-pointer
+cast or an address-shaped second view.
+
+## DDS2 progress rows retain a signed ramp counter
+
+`002A0278` accesses the canonical 0x68-byte `BrsProgressAnimation`
+with signed `lw`/`sw` at +28 and `lb` at +2C. The `frames` counter
+increments and clamps to 0..120 before forming `150 - frames`.
+A nonzero `skipRamp` bypasses that ramp and uses the fixed fast
+step of 10000. These fields occupy the original padding; the
+level/profile bank origins, other fields, and DDS1 layout are unchanged.
+
+## DDS2 mantra navigation consumes the whole menu owner
+
+`0028D7C8` loads the flag resource from owner+7AC and the animation pool
+from owner+BEC. These are `MnuStatusResource.menu.slots` and
+`MnuStatusResource.menu.resource`, not the selection controller at C00.
+The reveal and neighbour-selection helpers take the whole typed owner.
+The unchanged rank-pass address-word interface decodes its argument at
+the three calls into these helpers; no alternate workspace layout is needed.
+
+## Model update arguments are draw-surface tables, not frame counters
+
+DDS2 `0033251C..00332544` reloads the original renderer argument, indexes
+four `SdfPoolNode *` entries, and calls each selected pool's `append` at +10.
+`mdlProcessContextNodesAndTransforms`, `mdlBlendEntryPitchYawAndUpdate`, and
+`evtStageTestUpdate` therefore forward `SdfPoolNode **surfaces` unchanged.
+The stage viewer's +08 model is `MdlCtx *`; its motion-state check is
+`model->first->state`, not an address-word view. Existing encoded-word
+transport and the SDK pool-to-list-head callback boundary are unchanged.
+
+## Basic object drawing uses the complete model owners
+
+DDS1 `00112100` and DDS2 `00112328` obtain `MdlCtx *` from the basic
+object's resource handle and operate on `context->inner->flags` in the
+complete `SdfModel`. Their old context/inner prefix typedefs are unnecessary.
+The draw-surface pointer table is forwarded unchanged through the model
+update API; no auxiliary flags view or SDK address-word conversion is needed.
+
+
+## Marked-actor camera dispatch forwards two owned camera records
+
+DDS1 `001DEE18` forwards its linked-command pointer unchanged, then forms
+the front/back camera arguments at +30/+C0 for `001E4AC0`. DDS2's
+`001F2758` has the same three-pointer contract. These are `BtlCamState *`
+members of `BtlLinkedCommand`, not integer-address parameters; the dispatch
+callback therefore accepts the command pointer directly.
+
+
+## Effect-preview selection has an unsigned count and status result
+
+DDS2 `002FE5B8` iterates its source records with `sltu` and transports an
+unsigned source index through the menu's floating-point value. Its shared
+exit explicitly copies the status word to `$v0`; the result is `u32`, not
+`void`. Creation-menu wrappers intentionally discard that result.
+
+
+## Actor-specific camera timing uses an owned signed frame counter
+
+DDS2 `001F3C30` initializes linked-command +140 to zero; `001F3E48`
+compares that signed word with the actor's motion frame and increments it.
+It is `BtlLinkedCommand.cameraFrame`, not unused byte padding. The update
+routine receives the same command pointer that the cursor dispatcher owns,
+so its formal and callers do not need integer-address conversions.
+
+## Removed debug text retains its fixed four-argument interface
+
+DDS1 `001FC924` supplies x, y, style and a text pointer to `001FB130`,
+even though retail's provider discards the output. Its unused formals
+match the recovered DDS2 `0020D1B0` interface; the empty body does not
+make it a zero-argument function or a variadic formatter.
+
+
+## Camera endpoint setup follows the linked-command index append
+
+DDS2 `001EC688` appends `action->link->unit` to the command's target
+index list, then forwards the unchanged command and its front/back camera
+members to `001F2E30`. The wrapper and constructor use a command pointer
+and two camera pointers; a second integer-address alias has no ownership
+or transport role.
+
+
+## Defeat queries borrow the complete battle unit
+
+DDS2 `001B2430` reads the unit's party-record status and HP with LHU at
+`+0x12E` and `+0x126`, and the battle work's flags at `+0x218`.
+Its exemption query `001B47E0` uses the same unit and its party-record
+unit ID at `+0x124`. These are `BtlUnit *` interfaces, not byte-buffer
+interfaces: their callers need neither byte-pointer casts nor a second
+UI-record projection of the party data.
+
+
+## Ring pulse rendering narrows the timer, not the unsigned mode
+
+DDS1 `00258FD0` guards its `u32` pulse mode with `sltiu ...,6`; no second
+unsigned cast is needed. The same renderer reads the stored `u16` timer
+with `lh` before progress conversion and the mode-five threshold test.
+Its explicit `s16` narrowing therefore preserves real signed consumption,
+while duration is already an `s16` field.
+
+## Solar indexed packets borrow point and packed-color buffers
+
+DDS2 `00311F20` reads `s32` XY pairs and `u32` RGBA words; its second
+argument is an unsigned XYZ2 tail word, followed by count, first-color
+selection and surface index. The four C callers in `002437F0` now use
+that real pointer/color contract rather than an integer point prototype.
+The `003C90DC` interior table origin remains unchanged: its preceding
+word holds the point-buffer address, decoded at the provider boundary.
+Changing that iterator to the primary table origin is separately parked
+because the equivalent DDS1 change regresses two existing exact bodies.
+
+
+## Room resource registration returns its slot index
+
+DDS1 `00138ED0` and DDS2 `0013BAB8` return the old `fldTaskSlotCount`
+before incrementing it (`0013A6A8` / `0013D290` move that value to `v0`).
+The paired action constructors immediately multiply the result by `0x140`
+to update the corresponding room record. Their `FldFileResource *`,
+`EffWorldNode *` interface therefore returns `s32`, even though the general
+file-resource dispatchers ignore it. Correcting the caller declarations
+does not change either still-ASM provider's body.
+
+
+## Linked-defeat camera dispatch has its own override
+
+DDS1 `001E4180` and DDS2 `001F1B00` read runtime callback slots at
+`+60C` and `+644`, respectively. Both deliberately pass the linked command,
+the destination camera pose, and integer `1`, then skip their default
+framing when the callback returns nonzero. `BtlState.defeatCameraHook`
+therefore has the shared `s32 (BtlLinkedCommand *, BtlCamState *, s32)`
+contract; it is distinct from the adjacent ordinary arrangement hook.
+The two dispatch bodies remain ASM.
+
+## Terminal glyph constructors preserve chain pointers
+
+DDS2 `0019F5E8` and `0019F6C8` return `FrFontGlyph *` and take a previous
+`FrFontGlyph *` as their sixth argument. Both native-matching definitions
+append text, update the resulting chain and return it. The terminal
+numeric/currency callers in `002665B0` now use that actual contract,
+with null previous chains and no integer-return reconstruction casts.
+The existing glyph typedef is declared before the first pointer import.
+
+
+## Battle effect payloads follow the mode's allocation
+
+DDS2 constructor `00229728` allocates and clears twelve bytes for mode
+779's guard state and eight bytes for mode 782's marked-scene/summon
+state. The former owns the temporary unit at `+0`, selected guard at
+`+4` and result bytes at `+8/+9/+A`; the latter owns the active byte and
+the full-word selected party ID at `+4`. They are distinct members of
+`BattleEffectPayload`, not prefix views of mode 786's larger linked
+effect record. Unit creation, cancellation and the marked-state getter
+consume their actual variant; destruction borrows `BtlUnit *`, not a
+scalar address word.
+
+Mode 789 instead allocates sixteen bytes: its actor is at `+0`, Brahma
+ratio at `+4`, and pending replacement byte at `+8`. Its registered actor
+creation/destruction, ratio methods and `00222100` use that variant rather
+than mode 786's linked-effect record. The replacement routine retains the
+script task while reusing one scheduler-task local for its dependent effect
+and sound, whose conditions freshly read the script handle before starting.
+
+## Template clones retain the common particle-kind owner
+
+The radius updater and template-clone helpers in DDS1 `00151F58` and
+DDS2 `00159B48` address the same 0x18-byte `ParKindState` at template
+offset `+0x30`. Its `+0x04` halfword is the template entry count:
+the clone reads it for each supported resource kind when sizing the
+per-particle subrecords. Embed this owner rather than casting the
+address of a standalone kind halfword to `ParKindState *`; the count
+remains at template offset `+0x34` and the template stays 0x180 bytes.
+
+
+## Quantized strip preparation retains its configuration pointer
+
+DDS1 `002AFE68` and DDS2 `002F3258` consume the existing
+`EffBillQuantizedConfig` as their second argument. Both the shared-texture
+and retained-frame constructors pass that owner directly; an owned class's
+payload is the same configuration, not an integer argument or a second
+record view. The first argument remains the existing three-word buffer
+API. The two large preparation bodies remain assembly while their
+placement and scheduling differences are unresolved.

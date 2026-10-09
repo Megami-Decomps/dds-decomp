@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "sdf_texture_draw_packet.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -85,7 +87,6 @@ extern void sdfGraphSetDisplayMode(s32 arg0);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern s32 effMiscRandMod(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
@@ -481,7 +482,6 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
     }
 }
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
                                         s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
 

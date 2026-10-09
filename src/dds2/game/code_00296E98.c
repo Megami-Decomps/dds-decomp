@@ -499,7 +499,6 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
     func_00299018(partyWork, rewardState);
 }
 
-extern void mnuReleaseStaffMenuResources(s32);
 extern void evtStageTestInit(s32);
 
 
@@ -509,18 +508,18 @@ extern void mnuForwardTableByte(s32);
 /* Build the selected reward row's skill-package group and sprite, then
  * forward the selected unit ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    u32 *group = work->staffSlots.baseResources;
+    StaffSlots *group = &work->staffSlots;
     MenuPanelGroup *panel;
 
-    mnuReleaseStaffMenuResources((s32)group);
+    mnuReleaseStaffMenuResources(group);
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
-    panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
+    panel = mnuCreatePanelGroup((s32)work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
-        mnuCreateSpriteState((struct EffectSlotSet *)work->staffSlots.baseResources[1],
+        mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],
-                             (struct EffectSlotSet *)work->staffSlots.baseResources[0]);
+                             work->staffSlots.baseResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
@@ -528,7 +527,6 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuDestroyEffectResources(MenuEffectResources *);
-extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuReleaseTitleEffectSprites(StaffSlots *);
 extern void mnuResetWorkFloats(void);
 
@@ -542,7 +540,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuDestroyEffectResources(&ctx->campEffect.resources);
-    mnuReleaseStaffMenuTextureHandles((s32)&ctx->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&ctx->staffSlots);
     mnuReleaseTitleEffectSprites(&ctx->staffSlots);
     mnuResetWorkFloats();
 }
@@ -811,7 +809,6 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
-extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
@@ -836,9 +833,11 @@ void func_00299B98(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
         mnuResetPartyPanelFade(window, page, 0, 0);
-        mnuSetWindowResource(page, window, work->staffSlots.baseResources[0],
-                             (s32)work->staffSlots.pairResources[0],
-                             (s32)work->staffSlots.pairResources[1], 0, 0);
+        mnuSetWindowResource(page, window,
+                             work->staffSlots.baseResources[0],
+                             (struct EffectSlotSet *)work->staffSlots.pairResources[0],
+                             (struct EffectSlotSet *)work->staffSlots.pairResources[1],
+                             0, 0);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
         mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
 

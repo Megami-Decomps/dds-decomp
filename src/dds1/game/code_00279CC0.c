@@ -24,7 +24,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
@@ -35,7 +35,6 @@ extern void func_00272778(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 
 extern void ptySkillMenuCopyPageState(s32);
 
@@ -115,7 +114,7 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     window = menu[9];
     ((MenuWindowContainer *)window)->list->stateFlags |= 8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, window, 0x53);
-    mnuDrawStaffGridLabelsForKind(3, *(s32 *)(context + 0x78));
+    mnuDrawStaffGridLabelsForKind(3, (struct EffectSlotSet *)(u32)(*(s32 *)(context + 0x78)));
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -126,8 +125,8 @@ s32 func_0027A0A8(KwlnTask *callback) {
 void mnuDrawSelectionLabel(s32 selection) {
     FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
-    func_001958A0(item, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(item);
+    frFontDrawGlyphChain(item, 1, 0x53);
+    frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
 extern s32 ptyGetAffinityKind(s32, s32);
@@ -175,8 +174,8 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
         }
 
         if (glyph != 0) {
-            func_001958A0(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
 }
@@ -345,7 +344,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
             func_0027A140(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
         }
     }
-    mnuDrawStaffGridLabelsForKind(2, ((MenuContextSprites *)context)->sprite78);
+    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
@@ -367,18 +366,16 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     effSetSlotIndexedResource((EffTimedState *)(packet + 0x28), assets->material, 0, 0xc);
     effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerB->records + 0x94),
                               assets->material, 1, 0xc);
-    effSetMaterialSlots(assets->sprites[4], 0, 0, (u32)assets->layerB->records);
-    effSetMaterialSlots(assets->sprites[4], 1, 0, (s32)assets->layerB->records + 0x6c);
-    effSetMaterialSlots(assets->sprites[4], 2, 0, (s32)assets->layerB->records + 0x6c);
-    effSetMaterialSlots(assets->sprites[4], 3, 0, (u32)assets->layerB->records);
-    effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 0, 0, assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 1, 0, assets->layerB->records + 0x6C);
+    effSetMaterialSlots(assets->sprites[4], 2, 0, assets->layerB->records + 0x6C);
+    effSetMaterialSlots(assets->sprites[4], 3, 0, assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 4, 0, assets->layerB->records);
     effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerA->records + 0x28),
                               assets->material, 2, 0xd);
-    effSetSlotOverrideWork(assets->sprites[1], 0, (u32)assets->layerA->records);
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[2], 0,
-                                    assets->material, 3, 4);
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[3], 0,
-                                    assets->material, 4, 4);
+    effSetSlotOverrideWork(assets->sprites[1], 0, assets->layerA->records);
+    effConfigureIndexedSlotResource(assets->sprites[2], 0, assets->material, 3, 4);
+    effConfigureIndexedSlotResource(assets->sprites[3], 0, assets->material, 4, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);
@@ -392,8 +389,10 @@ extern u32 D_0037CD18[];
 extern u32 D_0037CD20[];
 
 void mnuRequestBaseAssets(MenuAssets *assets) {
-    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, &assets->sprites[0]);
-    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, &assets->sprites[4]);
+    effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0,
+                             (u32 *)&assets->sprites[0]);
+    effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0,
+                             (u32 *)&assets->sprites[4]);
     effRequestMappedResource(D_003B2348, D_0037CD20[0], (u32 *)&assets->material);
 }
 
@@ -413,41 +412,41 @@ void mnuReleaseAssets(MenuAssets *assets) {
 
 void mnuDrawCampBackdropDecoration(MenuAssets *assets, u32 drawArg) {
     uiDrawTexturedSurfaceAtFarDepth(drawArg);
-    itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 0, drawArg);
-    itfDrawGridWithResolvedSlot(0xfffffffffffffb90, 0x808, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 1, drawArg);
-    itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 2, drawArg);
-    itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 3, drawArg);
-    itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, (EffectSlotSet *)(u32)assets->sprites[4], 4, drawArg);
+    itfDrawGridWithResolvedSlot(0xffffffffffffff90, 0xa0, 0, 0x61, assets->sprites[4], 0, drawArg);
+    itfDrawGridWithResolvedSlot(0xfffffffffffffb90, 0x808, 0, 0x61, assets->sprites[4], 1, drawArg);
+    itfDrawGridWithResolvedSlot(0x1050, 0xfffffffffffffc18, 0, 0x61, assets->sprites[4], 2, drawArg);
+    itfDrawGridWithResolvedSlot(0x10b0, 0x3c0, 0, 0x61, assets->sprites[4], 3, drawArg);
+    itfDrawGridWithResolvedSlot(0x1300, 0xb70, 0, 0x61, assets->sprites[4], 4, drawArg);
     func_002C1548(0, drawArg);
-    itfGridLookupValueOrDefault(assets->sprites[4], 0);
-    itfGridLookupValueOrDefault(assets->sprites[4], 1);
-    itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, (EffectSlotSet *)(u32)assets->sprites[1], 0, drawArg);
-    itfGridLookupValueOrDefault(assets->sprites[1], 0);
+    itfGridLookupValueOrDefault((s32)assets->sprites[4], 0);
+    itfGridLookupValueOrDefault((s32)assets->sprites[4], 1);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0x60, assets->sprites[1], 0, drawArg);
+    itfGridLookupValueOrDefault((s32)assets->sprites[1], 0);
     uiDrawSurfaceAtNearDepth(drawArg);
 }
 
 extern void itfGridLookupValueOrDefault(s32, s32);
 
 void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
-    s32 icon = assets->sprites[2];
-    s32 *state = *(s32 **)(icon + 0x18);
+    EffectSlotSet *icon = assets->sprites[2];
+    s32 *state = *(s32 **)((u8 *)icon + 0x18);
 
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    func_002BF4E0(-0x4800, -0x1F80, 0, 0x50, 0, icon, 0, arg);
-    itfGridLookupValueOrDefault(assets->sprites[2], 0);
+    func_002BF4E0(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, arg);
+    itfGridLookupValueOrDefault((s32)assets->sprites[2], 0);
     icon = assets->sprites[3];
-    state = *(s32 **)(icon + 0x18);
+    state = *(s32 **)((u8 *)icon + 0x18);
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    func_002BF4E0(-0x2800, -0x1180, 0, 0x50, 0, icon, 0, arg);
-    itfGridLookupValueOrDefault(assets->sprites[3], 0);
+    func_002BF4E0(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, arg);
+    itfGridLookupValueOrDefault((s32)assets->sprites[3], 0);
 }
 
 void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
     sdfSubmitGsTestOneRegisterPacket(0x30000);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
-    itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)(u32)assets->sprites[0], 0, option);
+    itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets->sprites[0], 0, option);
     mnuDrawCursorIcons(assets, option);
     mnuDrawCampBackdropDecoration(assets, option);
 }

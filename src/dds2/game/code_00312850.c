@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_context.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 
@@ -34,7 +35,7 @@ extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
-extern void func_00313A58(u8 *);
+extern void func_00313A58(SdfGrid *);
 
 
 extern f32 sdfQuatDot(f32 *, f32 *);
@@ -47,13 +48,11 @@ extern void func_0030F8D0(f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
-extern void func_0019D550(u64, s32, s32);
-extern void frFontSetChildColors(u64, u64);
-extern u64 func_0019CE78(u64, u64, s32, u64, u64);
-extern void frFontSetContextPair(u64, s32, s32);
-extern void frFontStoreShiftedContextValue(u64, u64);
-extern void frFontSetChainFlag(u64, u8);
-extern void frFontSetFlagAndMeasureGlyphs(u64, s32);
+struct FrFontGlyph;
+
+extern void frFontDrawGlyphChain(u64, s32, s32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
@@ -341,7 +340,7 @@ SdfGridCell *sdfGridCursorUp(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_00313A58((u8 *)grid);
+    func_00313A58(grid);
     return cell;
 }
 
@@ -354,7 +353,7 @@ SdfGridCell *sdfGridCursorDown(SdfGrid *grid) {
     }
     cell += width;
     grid->cursor = cell;
-    func_00313A58((u8 *)grid);
+    func_00313A58(grid);
     return cell;
 }
 
@@ -368,7 +367,7 @@ SdfGridCell *sdfGridCursorLeft(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_00313A58((u8 *)grid);
+    func_00313A58(grid);
     return cell;
 }
 
@@ -381,7 +380,7 @@ u8 *sdfGridCursorRight(u8 *grid) {
         return NULL;
     }
     *(u8 **)(grid + 8) = cell;
-    func_00313A58(grid);
+    func_00313A58((SdfGrid *)grid);
     return cell;
 }
 
@@ -395,7 +394,7 @@ SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
         return result;
     }
     grid->cursor = sdfGridGetCell(grid, column, row);
-    func_00313A58((u8 *)grid);
+    func_00313A58(grid);
     return grid->cursor;
 }
 
@@ -422,7 +421,7 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
         return NULL;
     }
     grid->cursor = cell;
-    func_00313A58((u8 *)grid);
+    func_00313A58(grid);
     return cell;
 }
 
@@ -467,7 +466,43 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00312850", func_00313A58);
+void func_00313A58(SdfGrid *grid) {
+    SdfGridCell *origin = grid->viewportOrigin;
+    SdfGridCell *cursor = grid->cursor;
+    u32 width = grid->width;
+    s32 column = origin->index % width;
+    s32 row = origin->index / width;
+    s32 cursorColumn = cursor->index % width;
+    s32 cursorRow = cursor->index / width;
+    s32 nextRow = row;
+    if (cursorColumn < column + grid->columnMargin) {
+        column -= (column + grid->columnMargin) - cursorColumn;
+        if (column < 0) {
+            column = 0;
+        }
+    } else {
+        if (cursorColumn >= (column + grid->visibleColumns) - grid->columnMargin) {
+            column = column + cursorColumn + (grid->columnMargin - (column + grid->visibleColumns)) + 1;
+            column = (u32)column > width - grid->visibleColumns ?
+                width - grid->visibleColumns : column;
+        }
+    }
+    if (cursorRow < row + grid->rowMargin) {
+        nextRow = row - ((row + grid->rowMargin) - cursorRow);
+        if (nextRow < 0) {
+            nextRow = 0;
+        }
+    } else {
+        if (cursorRow >= (row + grid->visibleRows) - grid->rowMargin) {
+            nextRow = row + cursorRow + (grid->rowMargin - (row + grid->visibleRows)) + 1;
+            if ((u32)nextRow >= grid->cellCount / width - grid->visibleRows) {
+                nextRow = grid->cellCount / width - grid->visibleRows;
+            }
+        }
+    }
+    grid->viewportOrigin = &grid->cells[nextRow * width + column];
+}
+
 
 float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;

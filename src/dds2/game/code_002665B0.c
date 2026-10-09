@@ -90,9 +90,7 @@ typedef char MenuSlotState_gradient_check[((u32)&((MenuSlotState *)0)->gradientF
 typedef char MenuSlotState_reduced_check[((u32)&((MenuSlotState *)0)->reducedMode == 0x3F4) ? 1 : -1];
 
 extern void func_002665E8(MenuSlotState *);
-/* Historical callers intentionally omit the second reset argument. */
-extern void effReleaseSlotTextureReferencesAndResetWork();
-extern void func_00266460(u32, MenuEffectResources *);
+extern void func_00266460(EffectSlotSet *, MenuEffectResources *);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
@@ -113,7 +111,8 @@ extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 uiBlendColors(u32, u32, u32);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
 
 typedef struct EffectPair {
@@ -144,7 +143,6 @@ extern void func_002C1B68(u32 *, u32);
 
 extern s32 movAreTitleEffectsReady(s32, s32);
 
-extern void mnuReleaseStaffMenuResources(s32);
 
 
 
@@ -237,7 +235,7 @@ void func_002665E8(MenuSlotState *scene) {
             scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
         func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
-        func_00266460((u32)scene->resourceBank[2], &scene->campEffect.resources);
+        func_00266460(scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
@@ -271,30 +269,29 @@ void mnuReleaseResourceGroup(s32 address) {
     effResolveAndReleaseResource(group->resourceBank[1]);
 }
 
-/* Release/reset the mode-dependent texture sets, preserving the first short-arity call. */
-void mnuReleaseMenuResourceGroup(s32 address, u32 value) {
+/* Release textures from the active banks; preserveWork skips slot initialization. */
+void mnuReleaseMenuResourceGroup(s32 address, u32 preserveWork) {
     MenuSlotState *group = (MenuSlotState *)address;
     if (group->reducedMode == 0) {
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[0]);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[1], value);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[2], value);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[3], value);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[0], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[1], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[2], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[3], preserveWork);
         return;
     }
-    effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[0]);
-    effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[1], value);
+    effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[0], preserveWork);
+    effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[1], preserveWork);
 }
 
-/* Request the existing resource-group texture release with its extra value zero. */
+/* Release resource-group textures and reinitialize their slot work. */
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-typedef struct FrFontGlyph FrFontGlyph;
-extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern FrFontGlyph *func_0019F6C8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
@@ -319,8 +316,8 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
         text = D_003A47E8[slot].encodedText;
     }
     handle = (FrFontGlyph *)itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
-    func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 
@@ -372,9 +369,9 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     FrFontGlyph *sprite;
 
     func_0035C860(text, mnuNumberSpriteFormat, number);
-    sprite = (FrFontGlyph *)func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    func_0019D550(sprite, 1, priority);
-    frFontQueueGlyphInSelectedSlot(sprite);
+    sprite = func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    frFontDrawGlyphChain(sprite, 1, priority);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
@@ -461,9 +458,9 @@ void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node,
     color = mnuBlendListNodeColorByFlags(color, node);
     color = uiBlendColors(color, color & ~0xFF, width);
     glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
-    frFontSetChainFlag(glyph, chainFlags);
-    func_0019D550(glyph, 1, priority);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontSetChildChainFirstOption(glyph, chainFlags);
+    frFontDrawGlyphChain(glyph, 1, priority);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
@@ -709,7 +706,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
 
 /* Release staff/title texture work before the value record and allocation. */
 void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
-    mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&host->staffSlots);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
     effDestroyEffectList(host->titleEffectHandle);
     sdfReleaseResourceAllocation(host->allocation);
@@ -728,12 +725,32 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (movAreTitleEffectsReady(host->titleEffectHandle, (s32)host + 8) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources((s32)host + 8);
+    mnuReleaseStaffMenuResources(&host->staffSlots);
     host->loadState = 2;
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267B40);
+extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *);
+extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
+extern void func_002B2C88(s32, s32, s32, s32);
+
+void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
+    MenuPageWindow *window = &host->partyWindow;
+    s32 index;
+
+    mnuInitializeCampPanelResources(window, &host->staffSlots, 0, &host->partyPanel);
+    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(entry), host->partyWindow.lists[0]);
+    index = host->partyWindow.lists[0]->cursor->index;
+    mnuSetWindowResource(index, window, (EffectSlotSet *)host->staffSlots.baseResources[0],
+                         host->staffSlots.pairResources[0], host->staffSlots.pairResources[1], 0, 0);
+    mnuAttachPartyIconBundle(index, window, (u32)host->staffSlots.pairResources[0]);
+    host->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)host->staffSlots.baseResources[1],
+                                          host->staffSlots.pairResources[0], 0);
+    host->effectResource = mnuAllocateSimpleSprite((EffectSlotSet *)host->staffSlots.baseResources[1],
+                                                  host->staffSlots.pairResources[1],
+                                                  (EffectSlotSet *)host->staffSlots.baseResources[0]);
+    func_002B2C88((s32)window, 1, 1, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 
@@ -742,7 +759,7 @@ void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHos
     if (host->currentEffect == 0) {
         MenuProfilePanel *effect = mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, (EffectSlotSet *)host->staffSlots.baseResources[0],
+        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0],
                               host->staffSlots.pairResources[1], 1, 2);
     }
 }
@@ -2081,9 +2098,9 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }
-    font = (FrFontGlyph *)func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
-    func_0019D550(font, 1, 0x52);
-    frFontQueueGlyphInSelectedSlot(font);
+    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    frFontDrawGlyphChain(font, 1, 0x52);
+    frFontQueueGlyphForCurrentDrawBuffer(font);
 }
 
 s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *request) {

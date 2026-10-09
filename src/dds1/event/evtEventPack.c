@@ -9,6 +9,7 @@
 #include "evt_task.h"
 #include "eff_transform.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
@@ -212,7 +213,7 @@ extern char D_003D8090[];
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
-    void *request;
+    struct FileRequest *request;
 
     func_003003F0(D_003BC370);
     eventId = state->eventId;
@@ -226,10 +227,8 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
 struct SdfResource;
 struct FileRequest;
 struct FileWork;
-struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
-extern u32 fileGetResourceHandle(struct FileWork *);
-extern s32 filePollEntryCleanup(struct FileCleanup *);
+
+
 extern char D_003BC378[];
 
 /* Retain a ready pack and select its first entry-point record.
@@ -241,7 +240,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
 
     if (state->pendingRequest != NULL) {
         if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
-            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle(state->pendingRequest);
+            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
             filePollEntryCleanup(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (EvtPackHeader *)sdfResourceRetainAddress(state->resourceAllocation);

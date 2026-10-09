@@ -1,5 +1,7 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -12,7 +14,7 @@ typedef struct EffBillboardWork {
     u32 mode;   /* 0x10 */
     u32 color;  /* 0x14 */
     f32 scale;  /* 0x18 */
-    u32 handle; /* 0x1C */
+    struct BillObj *handle; /* 0x1C: owned billboard object */
 } EffBillboardWork;
 
 /* Creation parameters read by effCreateBillboardResourceWork. */
@@ -43,10 +45,7 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
 }
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
-extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(EffResourceRenderState *);
 extern f32 D_003B1540[][4];
 extern u32 D_003B1600[];
@@ -106,7 +105,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
 
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket((s32)packet, (void *)work->graphics6C, 0);
+    sdfConsAppendAssetPacket(packet, (void *)work->graphics6C, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];
@@ -123,7 +122,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         matrix[13] = entry->position[1];
         matrix[14] = entry->position[2];
         VU0_LOAD_MATRIX(matrix);
-        sdfConsAppendVuPacket((s32)packet, 0);
+        sdfConsAppendVuPacket(packet, 0);
         if (work->resource68 == 0) {
             remaining = 12;
             D_00452080.colors = D_003B1600;
@@ -271,8 +270,8 @@ EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
     EffBillboardWork *billboard = (EffBillboardWork *)sdfAllocSizeClassBlock(0x20);
 
     billboard->mode = params->mode;
-    billboard->handle = (u32)effCreateBillboardSharingIndexedResource(2);
-    billSetBillboardMode((struct BillObj *)billboard->handle, 2);
+    billboard->handle = effCreateBillboardSharingIndexedResource(2);
+    billSetBillboardMode(billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
     return billboard;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "kwln.h"
@@ -224,7 +225,6 @@ extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;
@@ -397,7 +397,6 @@ s32 func_00101D30(void) {
 }
 
 extern void sdfInitPacketList(void *);
-extern void sdfAppendDmaPrimary(void *, u8 *, void *);
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
@@ -455,7 +454,7 @@ s32 kwlnRenderFrame(void) {
     if (kwlnDrawOverlayEnabled != 0 && func_001200E0() == 0) {
         packetList = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfInitPacketList(packetList);
-        sdfAppendDmaPrimary(packetList, kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES, (void *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
+        sdfAppendDmaPrimary((SdfListHead *)packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
         texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */

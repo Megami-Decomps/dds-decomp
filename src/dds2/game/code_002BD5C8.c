@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "eff.h"
@@ -56,8 +57,8 @@ extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
 
@@ -75,15 +76,15 @@ void func_002BDAA8(s32 x, s32 y, s32 alpha, s32 entryId, s32 sprite, s32 spriteA
         func_0035C860(text, D_00437C38, required - current);
         color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
         glyph = func_0019F5E8(x, y, 0, color, text, 0);
-        frFontSetChainFlag((FrFontGlyph *)glyph, 4);
-        func_0019D550((FrFontGlyph *)glyph, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
         func_00306CD0(x + 0x80, y, 0, alpha, 0, sprite, spriteArg, 0x53);
         func_0035C860(text, D_00437C38, required);
         color = uiBlendColors(0xA09DC340, 0xA09DC300, alpha);
         glyph = func_0019F5E8(thresholdX, y, 0, color, text, 0);
-        func_0019D550((FrFontGlyph *)glyph, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
 }
 
@@ -118,10 +119,10 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
         func_0035C860(text, D_00437C40, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyph = func_0019F5E8(x + 0x1050, 0x360, depth, color, text, glyph);
         if (page->unk74 != 0) {
-            frFontSetChainFlag((FrFontGlyph *)glyph, 4);
+            frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
         }
-        func_0019D550((FrFontGlyph *)glyph, 1, param);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     } else {
         func_00306CD0(x, 0x20, depth, alpha, 0, page->cursor[0], 0, param);
     }
@@ -134,12 +135,12 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
             glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x418, depth, color, D_00435E5C[value], 0);
             style = page->unk75;
             if (style == 1 || (style == 2 && func_002BDA50(value) == 0)) {
-                frFontSetChainFlag((FrFontGlyph *)glyph, 4);
+                frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
             } else if (style == 2) {
-                frFontSetChainFlag((FrFontGlyph *)glyph, 3);
+                frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 3);
             }
-            func_0019D550((FrFontGlyph *)glyph, 1, param);
-            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+            frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, param);
+            frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
             if (page->flags & 1) {
                 func_00306CD0(x + 0xE30, 0x408, depth, alpha, 0, page->cursor[3], 0, param);
                 func_002BDAA8(x + 0x1020, 0x438, alpha, value, page->cursor[2], 0);
@@ -178,21 +179,18 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 }
 
 extern void func_00314500(u32, s32, char *);
-extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
-extern void frFontSetChildColors(s32, u32);
-extern void frFontSetContextPair(s32, s32, s32);
-
+extern void frFontSetChildColors(FrFontGlyph *, u32);
 void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     s32 item;
 
     color = (color & 0xFF) | 0xD7ABFA00;
     func_00314500(textId & 0xFFFF, 1, text);
-    item = func_0019CE78((s32 *)text, 0, 0, 0, 0);
-    frFontSetChildColors(item, color);
-    frFontSetContextPair(item, x, y);
-    func_0019D550((FrFontGlyph *)item, 1, param);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
+    item = (s32)(u32)func_0019CE78(text, 0, 0, 0, 0);
+    frFontSetChildColors((FrFontGlyph *)(u32)item, color);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)item, x, y);
+    frFontDrawGlyphChain((FrFontGlyph *)item, 1, param);
+    frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)item);
 }
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
@@ -214,8 +212,8 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             return;
         }
         item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);
-        func_0019D550((FrFontGlyph *)item, 1, param);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
+        frFontDrawGlyphChain((FrFontGlyph *)item, 1, param);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)item);
     }
 }
 
@@ -242,9 +240,9 @@ void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
             func_0035C860(text, D_00437C48, remainingExp);
             glyph = (FrFontGlyph *)func_0019F5E8(0x1A50,
                 0xD8, depth, color, text, 0);
-            frFontSetChainFlag(glyph, 3);
-            func_0019D550(glyph, 1, surface);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontSetChildChainFirstOption(glyph, 3);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
     if (slot->windowSprites != NULL) {

@@ -149,7 +149,6 @@ void sdfDestroyObjectList(SdfModel *owner);
 void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 s32 sdfAllocPacketAligned(s32 size);
-void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
 
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
@@ -969,7 +968,7 @@ void func_002D4CC8(s32 source, u32 packet, s32 variant) {
     sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
 }
 
-void sdfAppendDmaPrimary(s32 list, u32 source, SdfDmaNode *node) {
+void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
     node->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->unk0 = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
     node->unk10 = 0;

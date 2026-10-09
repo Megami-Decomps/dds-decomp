@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -18,6 +19,7 @@
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+#include "file_request_api.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -64,6 +66,8 @@ extern void fileLoadCtxSlideUpdate(void);
 extern u8 D_003E8B98[];
 extern u8 D_003E8BB0[];
 extern u8 D_003E8BD0[];
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 flagValue);
+extern void frFontSetChildColors(struct FrFontGlyph *glyph, u32 colorWord);
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -72,7 +76,7 @@ typedef struct EffectSurfaceNode {
     u8 pad_10[0x1C];
     u32 index;
     u32 pad_30;
-    void *resource;
+    struct BillObj *resource;
     void **jobs;
     struct SdfMemBlock *jobAllocation;
     void **queues;
@@ -152,8 +156,6 @@ extern u32 D_00439008;
 
 extern u32 D_0043900C;
 
-extern u32 func_0019CE78(u32, u32, u32, u32, u32);
-
 extern s32 D_00437CD8;
 
 extern s32 D_00437CE4;
@@ -169,8 +171,7 @@ extern u8 (*D_00437D58)[32];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
-extern void fileWaitReady(u32);
-extern void sdfReleaseMemorySlot(void *);
+
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
@@ -404,15 +405,10 @@ extern s32 fileScanSlotStates(void);
 
 extern s32 fileLoadMainBlobBegin(void);
 
-extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
 
-extern u32 fileGetResourceHandle(u32);
 
-extern u32 fileGetLoadedDataAddress(u32);
 
-extern u32 fileGetResourceSize(u32);
 
-extern void filePollEntryCleanup(u32);
 
 extern s32 fileDrawMenuFrame(s32);
 
@@ -649,26 +645,26 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439004);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
-    frFontSetChainFlag(handle, 3);
+    frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439008);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
-    D_0043900C = func_0019CE78(glyphSource, 0, 0, 0, 0);
+    D_0043900C = (u32)func_0019CE78((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
-    frFontSetContextPair(D_0043900C, x << 4, y << 3);
-    frFontSetChildColors(D_0043900C, colors);
-    func_0019D550(D_0043900C, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_0043900C);
+    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);
+    frFontSetChildColors((struct FrFontGlyph *)(u32)D_0043900C, colors);
+    frFontDrawGlyphChain(D_0043900C, 0, 0x56);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -677,7 +673,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
@@ -1267,7 +1263,7 @@ extern char D_0042B6A8[];
 
 s32 fileLoadIconFileAndResetSelection(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
     return fileResetSelection();
 }
 
@@ -1277,7 +1273,7 @@ s32 func_002CAED0(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
     return fileBeginSlotReset();
 }
 
@@ -2626,12 +2622,12 @@ s32 fileRunMenuState(KwlnTask *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode(job, (void *)next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
-        D_00439030 = fileGetResourceHandle(job);
-        D_00439034 = fileGetLoadedDataAddress(job);
-        D_00439038 = fileGetResourceSize(job);
-        filePollEntryCleanup(job);
+        D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)job);
+        D_00439034 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
+        D_00439038 = fileGetResourceSize((struct FileRequest *)(u32)job);
+        filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
     return 0;
 }
@@ -2698,8 +2694,6 @@ void fileResetMenuFlowState(void) {
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
-extern void *fileQueuePlainDispatchRequest(const char *);
-extern void func_002C81D0(u32);
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
@@ -2717,8 +2711,8 @@ void func_002CE208(s32 mode) {
     s32 world;
 
     func_001004A0();
-    request = fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    func_002C81D0((u32)request);
+    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
+    func_002C81D0((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {
@@ -2900,12 +2894,12 @@ void fileReleaseMenuResources(void) {
             dds3SetWorldObjectDataValue(world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileWaitReady(fileSaveIconRequest);
-            D_00439030 = fileGetResourceHandle(fileSaveIconRequest);
-            filePollEntryCleanup(fileSaveIconRequest);
+            fileWaitReady((struct FileRequest *)fileSaveIconRequest);
+            D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
+            filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot(&D_00439030);
+        sdfReleaseMemorySlot((s32 *)&D_00439030);
         kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
         func_00100498();
     }
@@ -5493,8 +5487,8 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (dst->resource != NULL) {
             billDispatchByKind(dst->resource);
         }
-        dst->resource = billCloneObjectRetainingSharedData((struct BillObj *)src->resource);
-        billMarkKindOneFlag((struct BillObj *)dst->resource);
+        dst->resource = billCloneObjectRetainingSharedData(src->resource);
+        billMarkKindOneFlag(dst->resource);
         if (dst->active != 0) {
             billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->active)->data0)->alphaTrack.surfaceIndex);
         }
@@ -5563,37 +5557,37 @@ void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resou
 }
 
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)effCreateBillboardSharingIndexedResource(resourceId);
-    node->resource = (void *)resource;
+    resource = effCreateBillboardSharingIndexedResource(resourceId);
+    node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode((struct BillObj *)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(0, resourceId);
-    node->resource = (void *)resource;
+    resource = billCreateIndexed(0, resourceId);
+    node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode((struct BillObj *)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(1, resourceId);
-    node->resource = (void *)resource;
-    billMarkKindOneFlag((struct BillObj *)(resource));
+    resource = billCreateIndexed(1, resourceId);
+    node->resource = resource;
+    billMarkKindOneFlag(resource);
     if (node->active != 0) {
         billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }

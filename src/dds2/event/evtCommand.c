@@ -1,4 +1,6 @@
+#include "fld_area_work.h"
 #include "common.h"
+#include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
@@ -29,6 +31,9 @@ void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
+s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
+                                     struct EffectObj *second, struct EffectObj *third,
+                                     struct EffectObj *fourth);
 s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
 
 
@@ -87,7 +92,6 @@ void dds3RemoveWorldObjectNode(void *unit);
 
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
-void *func_001287B8(u32 id);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
@@ -117,17 +121,6 @@ extern char D_00421F08[];
 
 
 /* Same room-name and inner-status offsets as the DDS1 event unit. */
-typedef struct EvtWorldUnitInner {
-    u8 pad00[0x88];
-    u32 statusFlags; /* 0x88 */
-} EvtWorldUnitInner;
-
-typedef struct EvtWorldUnit {
-    u8 pad00[8];
-    char *roomName; /* 0x08 */
-    u8 pad0C[0xC];
-    EvtWorldUnitInner *inner; /* 0x18 */
-} EvtWorldUnit;
 
 extern char D_00421F68[];
 
@@ -141,7 +134,7 @@ s32 fldParseRoomNumberFromName(char *name);
 
 s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
-extern u32 fldAreaState[];
+
 
 void evtSetWorldSlotValue(void *unit, u32 value);
 
@@ -151,9 +144,60 @@ extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
 extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240D20);
+/* Copy two source points into the primary effect object. */
+s32 func_00240D20(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240DE0);
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    if (point0 == NULL || point1 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, NULL, NULL) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
+
+/* Apply four effect parameters after resolving every input object. */
+s32 func_00240DE0(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
+    struct EffectObj *point2;
+    struct EffectObj *point3;
+
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    point2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
+    point3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
+
+    if (point0 == NULL || point1 == NULL || point2 == NULL || point3 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, point2, point3) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 s32 evtCommandEnablePathUnit(void)
 {
@@ -567,12 +611,14 @@ s32 evtCommandAddEffectUnitToWorld(void) {
 
 s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     EffWorldNode *unit;
+    CameraData *cameraData;
 
     if (scrReadIntParameter(0) < 0) {
         unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
-        ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
+        cameraData = unit->data;
+        cameraData->fovUpdatePending |= 1;
     }
     if (unit == NULL) {
         return 1;
@@ -581,7 +627,32 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00241AF8);
+/* Relink the selected camera owner to its path, reporting any failure. */
+s32 func_00241AF8(void) {
+    void *owner;
+    void *path;
+
+    if (scrReadIntParameter(0) < 0) {
+        owner = (void *)fldGetPlayerSceneState();
+    } else {
+        owner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+    }
+    if (owner == NULL) {
+        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    if (path == NULL) {
+        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    if (evtStageRelinkOwnedNodeResource(path, owner) == 0) {
+        func_0035B6E0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00241B98);
 
@@ -685,37 +756,26 @@ s32 evtCommandSetEffectUnitSecondVector(void) {
     return 1;
 }
 
-/* Slot 1 owns a path node with the same resource record as the slot provider. */
-typedef struct ObjectResource {
-    u32 owner;
-    u32 handle;
-    u32 value;
-    u32 resourceId;
-} ObjectResource;
-
-typedef struct ObjectWithResource {
-    u8 pad0[0x18];
-    ObjectResource *resource;
-} ObjectWithResource;
 
 extern void dds3EnsureSlotData(void *);
-extern void dds3SetSlotKey(ObjectWithResource *, u32);
-extern void dds3ReplaceObjectResource(ObjectWithResource *);
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *);
-extern void sdfSetFloatCounterDirection(u32, s32);
+extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
+extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
 s32 func_00241F10(void) {
     void *unit;
-    EvtWorldUnit *target;
+    EffWorldNode *target;
     ObjBase *data;
-    ObjectWithResource *slot;
+    EffWorldNode *slot;
     Dds3PathCurveWork *path;
+    Dds3SlotResource *resource;
     s32 room;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             func_0035B6E0(D_00421E68, scrReadIntParameter(1));
@@ -732,8 +792,9 @@ s32 func_00241F10(void) {
         dds3EnsureSlotData(unit);
         slot = data->slots[1];
     }
-    if (slot->resource->resourceId == 0) {
-        dds3SetSlotKey(slot, (u32)target);
+    resource = slot->data;
+    if (resource->sourceObject == NULL) {
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
     }
     path = dds3GetObjectResourceHandle(slot);
@@ -742,18 +803,18 @@ s32 func_00241F10(void) {
     switch (scrReadIntParameter(2)) {
     case 0:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
-        if (target->roomName != NULL) {
-            room = fldParseRoomNumberFromName(target->roomName);
+        if (target->value != 0) {
+            room = fldParseRoomNumberFromName((char *)target->value);
             if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 1);
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 1);
         }
         break;
     case 1:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
-        if (target->roomName != NULL) {
-            room = fldParseRoomNumberFromName(target->roomName);
+        if (target->value != 0) {
+            room = fldParseRoomNumberFromName((char *)target->value);
             if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 0);
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 0);
         }
         break;
     }
@@ -764,16 +825,17 @@ extern char D_00421E98[]; /* "re attach...!\n" */
 
 s32 func_00242100(void) {
     void *unit;
-    void *target;
+    EffWorldNode *target;
     ObjBase *data;
-    ObjectWithResource *slot;
+    EffWorldNode *slot;
     Dds3PathCurveWork *path;
+    Dds3SlotResource *resource;
     s32 targetId;
     s32 mode;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             targetId = scrReadIntParameter(1);
@@ -792,12 +854,13 @@ s32 func_00242100(void) {
         dds3EnsureSlotData(unit);
         slot = data->slots[1];
     }
-    if (slot->resource->resourceId == 0) {
-        dds3SetSlotKey(slot, (u32)target);
+    resource = slot->data;
+    if (resource->sourceObject == NULL) {
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
     } else {
         dds3RefreshStoredVec3(unit);
-        dds3SetSlotKey(slot, (u32)target);
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
         func_0035B6E0(D_00421E98);
     }
@@ -1003,7 +1066,7 @@ s32 evtCommandSetWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1022,7 +1085,7 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1034,32 +1097,32 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
 s32 evtCommandSetUnitRoomFloatState(void) {
-    u8 *unit;
+    EffWorldNode *unit;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
     }
     evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
-    roomName = ((EvtWorldUnit *)unit)->roomName;
+    roomName = (char *)unit->value;
     if (roomName == 0) {
         return 1;
     }
     roomNumber = fldParseRoomNumberFromName(roomName);
     if (roomNumber > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
     }
     return 1;
@@ -1068,32 +1131,32 @@ s32 evtCommandSetUnitRoomFloatState(void) {
 /* Apply the integer state and update a positive parsed room number's flag.
  * Unlike the float command, an integer value of zero sets the room flag. */
 s32 evtCommandSetUnitRoomIntegerState(void) {
-    u8 *unit;
+    EffWorldNode *unit;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
     }
     evtSetWorldSlotValue(unit, scrReadIntParameter(1));
-    roomName = ((EvtWorldUnit *)unit)->roomName;
+    roomName = (char *)unit->value;
     if (roomName == 0) {
         return 1;
     }
     roomNumber = fldParseRoomNumberFromName(roomName);
     if (roomNumber > 0) {
         if (scrReadIntParameter(1) == 0) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
     }
     return 1;
@@ -1111,7 +1174,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1132,7 +1195,7 @@ s32 evtCommandClearUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }

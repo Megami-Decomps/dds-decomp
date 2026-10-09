@@ -1,6 +1,9 @@
 #include "ee_mmi.h"
+#include "sdf_packet_list.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_append.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "sdf_primitive.h"
@@ -337,7 +340,6 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
 
-extern void sdfAppendPacket(SdfListHead *, u32);
 typedef struct SdfDrawPacket SdfDrawPacket;
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
@@ -485,7 +487,6 @@ void func_00108F00(void) {
     }
 }
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
@@ -583,7 +584,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket((SdfListHead *)command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
@@ -600,8 +601,6 @@ INCLUDE_ASM(const s32, "game/code_00107FD8", func_001093F8);
 
 
 extern u64 D_003245A0[]; /* index table; only the first 8 bytes are used */
-extern void sdfConsAppendClearPacket(void *, s32);
-extern void sdfConsAppendAssetPacket(void *, void *, s32);
 extern void *func_002E21A0(SdfPrimitiveRequest *);
 extern void func_002DA438(void *, u32);
 extern void sdfQueueAssetRelease(void *);
@@ -749,7 +748,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *
 
     glyph = func_00197748(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 typedef struct EvtSelState {
@@ -1503,8 +1502,8 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
 }
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
-extern s32 func_00194998(void);
-extern s32 func_00194988(void);
+extern s32 frFontGetParentGlyphCount(void);
+extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
@@ -1527,8 +1526,8 @@ s32 func_0010B590(KwlnTask *task) {
     sdfAppendPacket(list, (u32)packet);
     sdfAppendPacket(list, (u32)func_0011D3E8(0x70d0, 0x7968, 0xffff7f,
                                           0xf70, 0x98, 0x20000000, 0x40806040));
-    fontCount = func_00194998();
-    textCount = func_00194988();
+    fontCount = frFontGetParentGlyphCount();
+    textCount = frFontGetChildGlyphCount();
     gsCount = effGetFontListCount();
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x7980,
                     0xffff80, 0, D_0039E220, fontCount, textCount, gsCount));

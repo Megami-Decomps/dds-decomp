@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -97,10 +98,6 @@ extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 
 extern s32 strcmp(const char *a, const char *b);
 
-extern s32 func_0019CE78(s32 *, s32, s32, s32, s32);
-
-extern void frFontSetContextPair(s32, s32, s32);
-
 extern s32 D_003C99B8[];
 
 extern void evtViewerCleanupMessageWindow();
@@ -174,9 +171,9 @@ extern u8 D_003CDA88[];
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void frFontSetChildColors(s32, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern s32 func_0019D550(s32, s32, u32);
+extern s32 frFontDrawGlyphChain(s32, s32, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -793,13 +790,14 @@ void func_0025EE00(EvtRuntime *scene) {
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = func_0019CE78(D_003C99B8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)func_0019CE78((const char *)D_003C99B8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)fontHandle,
+        CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -1027,7 +1025,31 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F708);
+extern void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY);
+
+s32 func_0025F708(s32 target, const s32 *x, const s32 *y) {
+    s32 currentX;
+    s32 resultY;
+    s32 nextX;
+    f32 parameter = 0.5f;
+    f32 step = 0.25f;
+
+    func_0025F640(parameter, x, y, &currentX, &resultY);
+    for (;;) {
+        if (currentX == target || step < 0.0009999999310821295f) {
+            return resultY;
+        }
+        if (currentX < target) {
+            parameter += step;
+        }
+        if (target < currentX) {
+            parameter -= step;
+        }
+        step *= 0.5f;
+        func_0025F640(parameter, x, y, &nextX, &resultY);
+        currentX = nextX;
+    }
+}
 
 
 void mnuInitializeShopStatusBatches(MenuTerminalContext *scene) {
@@ -1073,7 +1095,7 @@ extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
-void func_0025F8B8(u32 object, MenuEffectResources *resources) {
+void func_0025F8B8(EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
@@ -1081,7 +1103,7 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
-    mappedResource = effCreateMappedResource(dataAddress);
+    mappedResource = effCreateMappedResource((const u8 *)dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(2, mapArguments.values, 11, &resources->packet);
     mnuSetCampEffectResourceHandles(object, mappedResource, resources);
@@ -1141,7 +1163,7 @@ void func_0025FA28(MenuTerminalContext *scene) {
     case 3:
         scene->effectSlots[1] = effLoadIndexedResource(
             "/facility/spr/shop/", D_003CE470[2], 0);
-        func_0025F8B8((u32)scene->effectSlots[1], &scene->campEffect.resources);
+        func_0025F8B8(scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
     scene->effectSlots[2] = effLoadIndexedResource(
@@ -1428,11 +1450,11 @@ void mnuCampClearListedItemCounts(void) {
 }
 
 MenuTerminalContext *mnuTerminalCreateContext(void) {
-    s32 handle;
+    struct SdfMemBlock *handle;
     MenuTerminalContext *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0x38C);
-    obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    handle = sdfAllocGeneralBlock(0x38C);
+    obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
@@ -1458,7 +1480,7 @@ void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->messageResources);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         mnuPanelTaskCompletionState = 2;
     }
 }
@@ -2108,9 +2130,9 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
-        frFontSetChildColors(handle, 0x80808040);
-        func_0019D550(handle, 0, flags);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
+        frFontDrawGlyphChain(handle, 0, flags);
+        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }
 

@@ -1,4 +1,5 @@
 #include "dsp_name.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -150,7 +151,7 @@ extern void func_002FE360(s32);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
@@ -1058,8 +1059,8 @@ PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index) {
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
-    func_001958A0(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 FrFontTextBank *frFontGetColoredGlyphResource(void) {
@@ -1270,7 +1271,6 @@ void func_002CEC40(SdfFlagListWork *work) {
 extern SdfPoolNode *D_00398098[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
 
@@ -138,7 +139,6 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
 extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 extern void sdfBuildPrimaryTestBlendPacket(void *);
 extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
@@ -173,13 +173,13 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
         packet->header.unk8 = 0x11000000;
         sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, &packet->header);
+        sdfAppendPacket(&packet->list, (u32)&packet->header);
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
     ctx->unk1A0 = 0;
     ctx->unk1A8 = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, &ctx->unk1A0);
+    sdfAppendPacket(&ctx->syncList, (u32)&ctx->unk1A0);
 }
 
 typedef struct SdfPacketOwner {

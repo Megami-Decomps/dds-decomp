@@ -17,6 +17,7 @@
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 #include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 
 struct EvtRuntime;
 struct EvtRuntime;
@@ -353,7 +354,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern u16 mdlGetNodeField2E(MdlCtx *ctx, s32 id);
+extern u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 id);
 extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern void sdfMotionSuspend(Motion *);
@@ -385,9 +386,9 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
             }
             motion = mdlFindNodeById(model, channel);
             sdfMotionInitialize(motion, 0, 0, 0.0f, 0.0f);
-            if (mdlGetNodeField2E(model, channel) != 0) {
-                if ((s32)mdlGetNodeField2E(model, channel) - 1 < frame) {
-                    sampleFrame = (s32)mdlGetNodeField2E(model, channel) - 1;
+            if (mdlGetNodeFrameCount(model, channel) != 0) {
+                if ((s32)mdlGetNodeFrameCount(model, channel) - 1 < frame) {
+                    sampleFrame = (s32)mdlGetNodeFrameCount(model, channel) - 1;
                 } else {
                     sampleFrame = frame;
                 }
@@ -429,18 +430,18 @@ void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
                                 0.0f, (f32)key->p0C.sb[3]);
             if (mode == 1) {
                 if (loopEnabled == mode) {
-                    count = (s32)mdlGetNodeField2E(model, channel);
+                    count = (s32)mdlGetNodeFrameCount(model, channel);
                     if (count != 0) {
-                        count = (s32)mdlGetNodeField2E(model, channel);
+                        count = (s32)mdlGetNodeFrameCount(model, channel);
                         sampleFrame = (frame - key->frame) % count;
                     } else {
                         sampleFrame = 0;
                     }
                 } else {
                     s32 relativeFrame = frame - key->frame;
-                    count = (s32)mdlGetNodeField2E(model, channel);
+                    count = (s32)mdlGetNodeFrameCount(model, channel);
                     if (count < relativeFrame) {
-                        sampleFrame = (s32)mdlGetNodeField2E(model, channel);
+                        sampleFrame = (s32)mdlGetNodeFrameCount(model, channel);
                     } else {
                         sampleFrame = frame - key->frame;
                     }
@@ -1128,7 +1129,7 @@ void evtViewerCleanupMessageWindow(EvtRuntime *viewer) {
     windowContext = viewer->windowContext;
     itfMesResetWindow(windowContext->handle);
     viewer->windowActive = 0;
-    viewer->pad23C4 = 0;
+    viewer->windowShadeFade = 0;
 }
 
 void evtViewerMarkWindowActive(EvtRuntime *viewer) {
@@ -1793,9 +1794,7 @@ void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
-extern s32 fileIsRequestReadyInCurrentMode(void *file);
-extern u32 fileGetResourceHandle(void *file);
-extern s32 filePollEntryCleanup(void *file);
+
 
 void func_00232E20(PolyMovieWork *assets) {
 
@@ -1806,10 +1805,10 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->mainResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->mainResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->mainResource.request) == 0) {
             return;
         }
-        assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->mainResource.request);
+        assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->mainResource.request);
         assets->mainResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->mainResource.handle);
         filePollEntryCleanup(assets->mainResource.request);
         assets->mainResource.request = 0;
@@ -1818,10 +1817,10 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->secondaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->secondaryResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->secondaryResource.request) == 0) {
             return;
         }
-        assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->secondaryResource.request);
+        assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->secondaryResource.request);
         assets->secondaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->secondaryResource.handle);
         filePollEntryCleanup(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
@@ -1830,10 +1829,10 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->tertiaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->tertiaryResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->tertiaryResource.request) == 0) {
             return;
         }
-        assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->tertiaryResource.request);
+        assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle((struct FileRequest *)assets->tertiaryResource.request);
         assets->tertiaryResource.address = (PmdHeader *)sdfResourceRetainAddress(assets->tertiaryResource.handle);
         filePollEntryCleanup(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;

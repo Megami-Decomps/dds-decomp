@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
@@ -119,8 +122,7 @@ extern SdfTex *D_003BD390;
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
-extern void *sdfAllocPacketAligned(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
+extern s32 sdfAllocPacketAligned(s32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
 extern s32 sdfGetPacketCursor(void);
 extern u16 D_003BDA24;
@@ -741,7 +743,6 @@ extern s32 D_003BDA20;
 extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern s32 sceDmaSync(void *, s32, s32);
-extern void sdfReleaseMemorySlot(void *);
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
@@ -799,7 +800,7 @@ SdfDrawPacket *sdfConsInitTextureDrawPacket(SdfDrawPacket *drawPacket, SdfTex *t
 /* Allocate and append texture state; return its packet address. */
 s32 sdfConsCreateDrawPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
     s32 packetBytes = sdfConsGetTextureDrawPacketSize(texture);
-    SdfDrawPacket *packet = sdfAllocPacketAligned(packetBytes);
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(packetBytes);
     s32 packetAddress = (s32)sdfConsInitTextureDrawPacket(packet, texture, contextOffset);
     sdfAppendPacket(packetList, packetAddress);
     return packetAddress;
@@ -838,7 +839,7 @@ void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 reg
 
 /* Allocate loopCount sprite loops with RGBAQ, UV, XYZ2, UV, XYZ2 registers. */
 void *sdfConsAllocateColumnPacket(s32 loopCount) {
-    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
+    void *packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, loopCount));
     sdfConsInitPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
     return packet;
 }
@@ -1048,7 +1049,6 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 
 }
 
 extern u8 D_00324350[];
-extern void sdfAppendReferencePacket(s32, void *);
 
 /* Append the second fixed program block as a DMA reference packet. */
 void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet) {
@@ -1059,7 +1059,7 @@ void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet
     packet->unused10 = 0;
     packet->unused18 = 0;
     packet->unused1C = 0;
-    sdfAppendReferencePacket(packetList, packet);
+    sdfAppendReferencePacket((SdfListHead *)packetList, (u32)packet);
 }
 
 
@@ -1106,10 +1106,10 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
 
 
 extern u8 D_00398580[];
-extern void sdfAppendReferencePacket(s32, void *);
 
 /* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
-void sdfConsAppendClearPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendClearPacket(SdfListHead *packetList,
+                             s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1118,7 +1118,7 @@ void sdfConsAppendClearPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
     referencePacket[0] = ((u64)((u32)D_00398580 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, referencePacket);
+    sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
 typedef struct VuLightingPacket {
@@ -1137,7 +1137,8 @@ void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {
 }
 
 /* Append inline matrix/lighting data using allocatePacket or the default allocator. */
-void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendVuPacket(SdfListHead *packetList,
+                           s32 (*allocatePacket)(s32)) {
     u64 *dmaPacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1146,16 +1147,16 @@ void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
     dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdfWriteVuLightingPacket((VuLightingPacket *)(dmaPacket + 2));
-    sdfAppendPacket((SdfListHead *)packetList, (u32)dmaPacket);
+    sdfAppendPacket(packetList, (u32)dmaPacket);
 }
 
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfAssetApplyEntryChanges(void *, s32);
 extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
-extern void sdfAppendReferencePacket(s32, void *);
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdfConsAppendAssetPacket(s32 packetList, void *asset, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
+                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1164,7 +1165,7 @@ void sdfConsAppendAssetPacket(s32 packetList, void *asset, s32 (*allocatePacket)
     referencePacket = (u64 *)allocatePacket(0x20);
     sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, referencePacket);
+    sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
 extern f32 D_003BD358;
@@ -1329,7 +1330,7 @@ u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttrib
 
     packetBytes = sdfMeasureVertexAttributePacketBytes(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }
@@ -1397,7 +1398,7 @@ u32 func_002E2BB8(u128 *positions, void *attributes, void *halfAttributes, void 
 
     bytes = sdfMeasureAlignedRecordBufferBytes(count);
     if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfAllocPacketAligned(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1464,7 +1465,7 @@ u32 func_002E2F68(const u128 *positions, const void *attributes,
 
     bytes = sdfMeasureVertexAttributePacketBytes(count);
     if (alloc == NULL) {
-        cursor = sdfAllocPacketAligned(bytes);
+        cursor = (u32 *)sdfAllocPacketAligned(bytes);
     } else {
         cursor = alloc(bytes);
     }
@@ -1532,7 +1533,7 @@ u32 sdfBuildWideVertexVifPacket(u128 *positions, void *byteAttributes, void *hal
 
     packetBytes = sdfMeasureAlignedDrawPacketSize(vertexCount);
     if (allocatePacket == NULL) {
-        cursor = sdfAllocPacketAligned(packetBytes);
+        cursor = (u32 *)sdfAllocPacketAligned(packetBytes);
     } else {
         cursor = allocatePacket(packetBytes);
     }

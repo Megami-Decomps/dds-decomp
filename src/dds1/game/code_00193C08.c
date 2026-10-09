@@ -44,7 +44,7 @@ void frFontSetEntryFlag(s32 slotId, s32 value) {
 }
 
 /* Reverse the four byte positions of a 32-bit word. */
-u32 func_00193C70(u32 word) {
+u32 frFontReverseWordBytes(u32 word) {
     u32 shiftedWord = word >> FR_FONT_BYTE_SHIFT;
     u32 lowerMiddleByte = word & FR_FONT_MIDDLE_BYTE_MASK;
     u32 outerBytes = word << FR_FONT_OUTER_BYTE_SHIFT;
@@ -97,11 +97,12 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
-void func_00193FD0(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
+void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
                   s32 drawFlags) {
     func_00193D70(x + glyph->x, y + glyph->y,
-                 glyph->unk18.b[0], glyph->unk18.b[1] >> FR_FONT_GLYPH_HEIGHT_SHIFT,
-                 glyph->u14.b[0], glyph->u10.word, depth, 1,
+                 glyph->childCountOrCellDimensions.cellDimensions.cellWidth,
+                 glyph->childCountOrCellDimensions.cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
+                 glyph->renderValueOrSetupOrShade.setupBytes.firstOption, glyph->parentDimensionsOrRenderWord.renderWord, depth, 1,
                  &glyph->link1C.cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }
 

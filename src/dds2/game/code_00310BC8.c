@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -23,12 +25,9 @@ extern void sdfReleaseChipBlock();
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern FrFontGlyph *func_0019F798(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern FrFontGlyph *func_0019CE78(void *, s8, s8, s8, FrFontGlyph *);
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 
@@ -347,14 +346,14 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     u32 result = frFontMeasureGlyphChain(handle);
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -362,77 +361,77 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
     FrFontGlyph *handle = func_0019CE78(glyphSource, 0, type, 0, 0);
     u32 result = 0;
     frFontSetChildColors(handle, colors);
-    frFontSetContextPair(handle, x << 4, y << 3);
-    frFontStoreShiftedContextValue(handle, depth);
+    frFontSetGlyphPosition(handle, x << 4, y << 3);
+    frFontStoreShiftedRenderValue(handle, depth);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
 u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 flag, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
 u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     FrFontGlyph *handle = func_0019F798(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
 u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     FrFontGlyph *handle = func_0019F5E8(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
 u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u8 opacity, u16 textId, FrFontTextBank *bank, s32 layoutFlags, s32 flag, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, depth, textId, bank, layoutFlags);
     u32 result = 0;
-    frFontSetChainFlag(handle, opacity);
+    frFontSetChildChainFirstOption(handle, opacity);
     frFontSetChildColors(handle, colors);
     if (flag & 0x100) {
-        frFontSetFlagAndMeasureGlyphs(handle, flag & 0xFF);
+        frFontSetSpacingAndMeasureGlyphs(handle, flag & 0xFF);
     }
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -443,7 +442,6 @@ extern void sdfInitPacketList(SdfListHead *);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
