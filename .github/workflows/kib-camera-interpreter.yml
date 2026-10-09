@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 100
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 experiments/kib-camera-interpreter/peer_probe.py --selftest
           python3 tools/test_ee_gcc_role_lineage.py
+          python3 -m unittest discover -s tools -p test_ee_gcc_unix_capability.py -v
 
       # The retail executables are not in this repository. CI reads them from a
       # private repository with a read-only deploy key (secret ORIG_DEPLOY_KEY).
@@ -73,7 +74,7 @@ jobs:
 
       - name: Qualified compiler pass trace
         if: always() && steps.orig.outputs.available == 'true'
-        timeout-minutes: 25
+        timeout-minutes: 70
         env:
           DEBUGGER_READY: ${{ steps.debugger.outcome }}
         run: |

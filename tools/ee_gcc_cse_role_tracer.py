@@ -597,7 +597,8 @@ def main():
                  Path(__file__).with_name("ee_gcc_probe.py").resolve(),
                  Path(__file__).with_name("ee_gcc_observe.py").resolve(),
                  Path(__file__).with_name("_ee_gcc_observer.py").resolve(),
-                 Path(__file__).with_name("ee_gcc_qemu_loopback.py").resolve()]
+                 Path(__file__).with_name("ee_gcc_qemu_loopback.py").resolve(),
+                 Path(__file__).with_name("ee_gcc_unix_capability.py").resolve()]
         for path in paths:
             if case.inputs.get(path) != digest(path.read_bytes()):
                 raise ValueError("required observer input missing or unhashed: " + str(path))
