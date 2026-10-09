@@ -5571,6 +5571,7 @@
 0x002A74F0	effCopyRingFrameVectors	inferred	eff ring buffer of 3-vector frames: copies 3 quadwords for a frame index
 0x002A7890	effBeginMatrixVuDrawPacket	inferred	Allocates a render packet, loads matrix rows into VU registers and appends packet header. [names_reviewed5.tsv]
 0x002A7B30	effSubmitIndexedRenderPacket	inferred	Invokes indexed render entry with current packet then clears packet handle. [names_reviewed5.tsv]
+0x002A7B68	effCreateQuadWork	inferred	allocates and initializes EffQuadWork, optionally loading a FileJobPayload; NULL path creates a blank owner for cloning
 0x002A7DF8	effReleaseRenderResources	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A7E58	effCloneRenderResourceWork	inferred	Allocates render-resource work, copies payload and duplicates its billboard or reference ownership. [names_reviewed5.tsv]
 0x002A7F78	effDuplicateRenderResourceOwner	inferred	Clones a billboard handle or retains a reference, releasing destination ownership first. [names_reviewed5.tsv]

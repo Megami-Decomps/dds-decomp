@@ -3341,7 +3341,46 @@ s32 func_00263FB0(KwlnTask *task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00264120);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern u8 D_003CE5CC[];
+extern u8 D_003CE5E8[];
+
+/* Complete an idle shop confirmation and queue its followup state. */
+s32 func_00264120(KwlnTask *task) {
+    MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    s32 *dispatchSlot = &state->popupState;
+    s32 operation;
+    s32 result = func_002C4038(&state->transitionWork, dispatchSlot,
+                             EVT_DISPATCH_OPERATION_POLL, task);
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatchSlot == 0 && evtGetMessageWindowControlState() == 0) {
+        operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
+        if (evtGetCapturedWindowPanelValue() == 0) {
+            func_00263FB0(task);
+            switch (operation) {
+            case 1:
+            case 2:
+            case 3:
+                mnuCampDisableUnavailableItemEntries(state);
+                break;
+            case 4:
+                evtAccumulateEligibleStageMultiplierValue(state);
+                break;
+            }
+            state->unkCD = 1;
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5CC);
+        } else {
+            state->unkCD = 0;
+            mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
+        }
+        evtMarkSceneFollowupReadyAndQueueAction(task);
+    }
+    return 0;
+}
+
 
 s32 evtDispatchSceneReadyFollowup(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);

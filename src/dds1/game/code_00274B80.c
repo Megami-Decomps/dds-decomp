@@ -134,7 +134,7 @@ typedef struct CampMenuContext {
     u8 pad70[4];
     s32 option;               /* 0x74 */
     s32 actor;                /* 0x78 */
-    s32 staffVariant;         /* 0x7C: passed with display to menu drawing */
+    EffectSlotSet *staffVariant; /* 0x7C: passed with display to menu drawing */
     s32 staffParam;           /* 0x80 */
     u8 pad84[0x5C];
     s32 variant;              /* 0xE0 */
@@ -759,7 +759,38 @@ void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
+/* Native staff selection-state allocation is 0x30 bytes. */
+typedef struct StaffMenuRuntime {
+    SdfMemBlock *allocation;
+    u8 pad04[0xC];
+    s32 staffMode;
+    s32 staffView;
+    u8 pad18[0xC];
+    s32 active;
+    u8 pad28[8];
+} StaffMenuRuntime;
+
+s32 func_00276368(KwlnTask *task, s32 flag) {
+    s32 context = kwlnTaskGetUserValue(task);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuRuntime));
+    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress(allocation);
+
+    ((CampMenuContext *)context)->menu = state;
+    memset(state, 0, sizeof(*state));
+    state->allocation = allocation;
+    state->staffView = flag;
+    if (flag == 0) {
+        state->staffMode = 0;
+    } else {
+        state->staffMode = 1;
+    }
+    func_002762B0(context);
+    state->active = 1;
+    mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
+                                              (s32)((CampMenuContext *)context)->staffVariant, 0, 1);
+    evtStageTestInit(0);
+    return 1;
+}
 
 s32 mnuStaffCloseSelectionState(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
@@ -866,18 +897,18 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
 
     effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)context->resource);
     mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
-                                               context->staffVariant, 0x3D, 1);
-    mnuSetWindowResource(index, page, context->staffVariant, context->staffParam);
-    mnuAttachPartyIconBundle(index, page, context->staffVariant);
-    context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
+                                               (s32)context->staffVariant, 0x3D, 1);
+    mnuSetWindowResource(index, page, (s32)context->staffVariant, context->staffParam);
+    mnuAttachPartyIconBundle(index, page, (s32)context->staffVariant);
+    context->sceneGroup = mnuCreatePanelGroup((s32)context->staffVariant);
     context->sprite = mnuCreateSpriteState((EffectSlotSet *)context->option,
                                         (EffectSlotSet *)context->unk68,
-                                        (EffectSlotSet *)context->staffVariant);
+                                        context->staffVariant);
     context->effect = mnuAllocateSimpleSprite((EffectSlotSet *)context->option,
                                             (EffectSlotSet *)context->unk68,
                                             (EffectSlotSet *)context->displayVariant,
                                             (EffectSlotSet *)context->unk60,
-                                            (EffectSlotSet *)context->staffVariant);
+                                            context->staffVariant);
     profilePanel = mnuCreateProfilePanel(record);
     context->extraResource = profilePanel;
     mnuCacheProfilePanelGridPositions(profilePanel, context->staffParam, 5, 0xE, 0xF);

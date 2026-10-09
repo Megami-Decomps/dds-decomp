@@ -5237,6 +5237,7 @@
 0x002E9A98	effResetSurfaceGridFrame	inferred	Resets grid frame to zero and sets its mode for subsequent updates. [names_reviewed5.tsv]
 0x002E9E48	effBeginMatrixVuDrawPacket	inferred	Allocates a render packet, loads matrix rows into VU registers and appends packet header. [names_reviewed5.tsv]
 0x002EA0E8	effSubmitIndexedRenderPacket	inferred	Invokes indexed render entry with current packet then clears packet handle. [names_reviewed5.tsv]
+0x002EA120	effCreateQuadWork	inferred	allocates and initializes EffQuadWork, optionally loading a FileJobPayload; NULL path creates a blank owner for cloning
 0x002EA410	effCloneRenderResourceWork	inferred	Allocates render-resource work, copies payload and duplicates its billboard or reference ownership. [names_reviewed5.tsv]
 0x002EA530	effDuplicateRenderResourceOwner	inferred	Clones a billboard handle or retains a reference, releasing destination ownership first. [names_reviewed5.tsv]
 0x002EA5D0	effResetRenderResourceKind	inferred	Sets the rendering class kind to its initial value. [names_reviewed5.tsv]
@@ -5254,6 +5255,7 @@
 0x002EBF40	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4343:func_002EBF40; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002EC300	effReleaseBillPointEntries	inferred	Releases each spaced billboard point entry then frees the backing allocation. [names_reviewed5.tsv]
 0x002ECEF0	effSeedBillboardFrameCounters	inferred	Assigns random negative starting counters to each billboard frame entry. [names_reviewed14.tsv]
+0x002ECF78	effCreateAlternatingAlphaRampPointSetRows	inferred	Builds timed point-set rows while reusing alpha-ramp ratios on alternating samples.
 0x002ED360	effReleaseBillboardFramePointSets	inferred	Releases every billboard frame point set and its entry storage. [names_reviewed14.tsv]
 0x002EDCF0	effCreateClassResourceWork	inferred	Allocates kind-sized work, copies payload and initializes class-specific resource and callback. [names_reviewed5.tsv]
 0x002EDDE0	effCreateClassResourceFromFile	inferred	Resolves the primary file buffer and creates the requested class resource work. [names_reviewed5.tsv]
@@ -5392,6 +5394,8 @@
 0x002F8378	effOrientClassResourceAlongTargetOffset	inferred	High: forms target minus model origin, stores its distance, computes and applies orientation and target position, and advances the class resource. [names_qp9.tsv]
 0x002F84F8	effApplyModelTransform	inferred	Loads effect vectors and scale into vf10 for model helpers, updates entry weight from animation and applies model transform.
 0x002F8590	effCreateDrawableAssetWithDefaultOpacity	inferred	Creates drawable asset work and initializes its draw opacity to one. [names_reviewed14.tsv]
+0x002F85D8	effCreateDrawableAssetWork	inferred	Registered createResource callback returns a fresh drawable-asset work owner with default opacity.
+0x002F85F0	effCloneDrawableAssetWork	inferred	Registered cloneResource callback creates a fresh drawable-asset work owner from the source resource owner.
 0x002F8608	effReleaseQueuedDrawableAssetWork	inferred	Queues an owned drawable asset for release and frees its holder. [names_reviewed14.tsv]
 0x002F8C38	effSyncFadeColorToTargets	inferred	walks owner list, merges alpha byte into packed color at +0x84 and forwards it to target [names_M36_SmallSweep5.tsv]
 0x002F8CF0	effUpdateSelectedActorAlpha	inferred	U1

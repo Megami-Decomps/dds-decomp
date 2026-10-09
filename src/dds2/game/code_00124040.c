@@ -20,13 +20,9 @@ extern s32 fldDeferredCommand;
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
 
@@ -263,9 +259,7 @@ extern s32 D_00435EF4;
 
 extern s32 D_00435EF8;
 
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 extern void mdlFlagSet(s32);
 

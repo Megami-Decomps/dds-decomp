@@ -63,9 +63,6 @@ void itfMesDestroyWindow(s32 window);
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 s32 func_0019C9F0(s32 window, s32 arg1, s32 arg2);
-void itfMesResetCursorState(void *arg0, s32 arg1);
-
-void itfResetCursorPositionAndState(void *arg0, s32 arg1);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
