@@ -31,7 +31,7 @@ typedef struct SdfBattleParameters {
     SdfBattleMoneyRewardBand moneyRewardBands[10]; /* 0x924 */
     f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
 #ifdef VERSION_DDS2
-    u8 padA6C[0x2C];
+    f32 gradeScale[11]; /* 0xA6C: grade -5..5, centre at 0xA80 */
     f32 solarScale[2][9]; /* 0xA98: row 0 for source flag 0x200, row 1 otherwise. */
     f32 partyEntryScaleA[7]; /* 0xAE0 */
     f32 enemyEntryScaleA[7]; /* 0xAFC */
