@@ -5,6 +5,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_track_poly_list.h"
 #include "mdl.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
@@ -101,13 +102,6 @@ void effTrackPolyUpdate(EffTrackPolyWork *work) {
         effTrackPolyReset(work);
     }
 }
-
-typedef struct EffTrackPolyList {
-    EffTrackPolyWork **items; /* 0x00 */
-    u32 count;                /* 0x04 */
-    SdfMemBlock *handle;               /* 0x08 */
-} EffTrackPolyList;
-
 
 /* Clone count tracks from one parameter block, each with its own data. */
 EffTrackPolyList *effTrackPolyCreateModelWorkList(EffTrackPolyParams *params, u32 count) {
