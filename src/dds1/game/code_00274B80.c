@@ -900,7 +900,7 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
                                                (s32)context->staffVariant, 0x3D, 1);
     mnuSetWindowResource(index, page, (s32)context->staffVariant, context->staffParam);
     mnuAttachPartyIconBundle(index, page, (s32)context->staffVariant);
-    context->sceneGroup = mnuCreatePanelGroup((s32)context->staffVariant);
+    context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
     context->sprite = mnuCreateSpriteState((EffectSlotSet *)context->option,
                                         (EffectSlotSet *)context->unk68,
                                         context->staffVariant);
