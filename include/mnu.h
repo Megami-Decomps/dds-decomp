@@ -222,7 +222,7 @@ typedef char MenuSprites_dds1_size_check[
 typedef struct MenuIconBundle {
 #ifdef VERSION_DDS2
     u32 unk0[3];
-    void *sprite[3];
+    struct EffectSlotSet *sprite[3];
 #else
     u8 pad0[0xC];
     struct EffectSlotSet *sprite[4];
@@ -565,6 +565,12 @@ typedef struct MenuPageWindow {
     s32 scrollOffset;
     s32 fade;
 } MenuPageWindow;
+
+#ifdef VERSION_DDS2
+MenuIconBundle *mnuCreateIconBundle(struct EffectSlotSet *resource);
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window,
+                              struct EffectSlotSet *resource);
+#endif
 
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */

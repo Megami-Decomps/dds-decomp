@@ -199,7 +199,6 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
-extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 
 
@@ -442,7 +441,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -2081,13 +2079,13 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-MenuIconBundle *mnuCreateIconBundle(u32 resource) {
+MenuIconBundle *mnuCreateIconBundle(EffectSlotSet *resource) {
     MenuIconLayout layout = D_0042AFD8;
     MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
     u32 i;
     memset(set, 0, 0x20);
     for (i = 0; i < 3; i++) {
-        EffectSlotSet *sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, layout.entry[i].id, 1);
+        EffectSlotSet *sprite = effCreateResourceSlotSet(resource, layout.entry[i].id, 1);
         set->sprite[i] = sprite;
         itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
@@ -2125,7 +2123,7 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource) {
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, EffectSlotSet *resource) {
     MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);
