@@ -4020,26 +4020,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 
 extern u32 effMiscRand(void *);
 
-typedef struct EffParticleFrameEntry {
-    u32 unk00;
-    s32 frame;
-    u32 unk08;
-    u32 unk0C;
-} EffParticleFrameEntry;
-
-void effRandomizeParticleFields(u8 *work) {
-    u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *entry = ((EffFrameState *)((EffClassWork *)work)->resource)->entries;
-
-    if (count != 0) {
-        do {
-            ((EffParticleFrameEntry *)entry)->frame = -1 - (effMiscRand(effSharedRandomState) & 3);
-            entry += 0x10;
-            index++;
-        } while (index < count);
-    }
-}
 
 
 typedef struct EffPointSetRow {
@@ -4052,6 +4032,23 @@ typedef struct EffPointSetRow {
 typedef struct EffPointSetTable {
     EffPointSetRow *rows;
 } EffPointSetTable;
+
+void effRandomizeParticleFields(EffClassWork *work) {
+    u32 index = 0;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
+
+    if (count != 0) {
+        do {
+            entry->key = -1 - (effMiscRand(effSharedRandomState) & 3);
+            entry++;
+            index++;
+        } while (index < count);
+    }
+}
+
+
+
 
 EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     u32 count = src->timed.count;
@@ -4292,9 +4289,9 @@ typedef struct EffScaleRange {
 
 extern float effMiscRandUnitFloat(void *);
 
-void effSeedBillScaleRange(u8 *work) {
-    EffBillRangeConfig *config = ((EffClassWork *)work)->payload;
-    EffScaleRange *range = (EffScaleRange *)((EffClassWork *)work)->resource;
+void effSeedBillScaleRange(EffClassWork *work) {
+    EffBillRangeConfig *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
     EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
     f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
