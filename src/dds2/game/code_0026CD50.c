@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "mnu_mantra_position_api.h"
 
 #define EVT_PARTY_SLOT_COUNT 5
 
@@ -126,8 +127,9 @@ void mnuReleaseMantraPanelPositionTable(void) {
 }
 
 /* Return a 32-byte panel record using the same signed low-halfword index convention. */
-s32 mnuGetMantraPanelPositionRecord(s32 index) {
-    return ((EvtLoadedRecord *)mnuMantraPanelPositionTable)->recordsAddress + ((index << 0x10) >> 0xb);
+struct MantraNodePos *mnuGetMantraPanelPositionRecord(s16 index) {
+    return (struct MantraNodePos *)(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->recordsAddress +
+                                    ((index << 0x10) >> 0xb));
 }
 
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
