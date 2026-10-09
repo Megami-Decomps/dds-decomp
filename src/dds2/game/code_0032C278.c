@@ -1559,41 +1559,40 @@ void sdfQueueGouraudTexturedTriangle(s32 list, s32 primitive, s32 x0, s32 y0, s3
 }
 
 /* Pack four vertices with individual UV and color and a common depth. */
-void sdfWriteGouraudTexturedQuadPacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+void sdfWriteGouraudTexturedQuadPacket(SdfGsGouraudTexturedQuadPayload *packet, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2,
                    s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth) {
-    u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xE400000000008001ULL;
-    packet[1] = 0xF5135135135130ULL;
-    packet[2] = (u32)(primitive | 0x11C);
-    packet[3] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[9] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[12] = (u3 & 0xFFFF) | (v3 << 16);
-    packet[13] = (u32)color3 | ((u64)0xFE00 << 46);
-    packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0xE400000000008001ULL;
+    packet->gifRegisters = 0xF5135135135130ULL;
+    packet->primitive = (u32)(primitive | 0x11C);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->vertices[3].uv = (u3 & 0xFFFF) | (v3 << 16);
+    packet->vertices[3].rgbaq = (u32)color3 | ((u64)0xFE00 << 46);
+    packet->vertices[3].xyz2 = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
 void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3,
                    s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsGouraudTexturedQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x90);
-    packet->unk0 = 0x20000008;
-    packet->unk8 = (((u64)0x50000008 << 16) | 0x1000) << 16;
-    sdfWriteGouraudTexturedQuadPacket((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
+    packet = (SdfGsGouraudTexturedQuadPacket *)alloc(0x90);
+    packet->dmaTag = 0x20000008;
+    packet->vifCommands = (((u64)0x50000008 << 16) | 0x1000) << 16;
+    sdfWriteGouraudTexturedQuadPacket(&packet->drawing, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
