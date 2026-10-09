@@ -5821,9 +5821,9 @@ typedef struct EffAnimationState {
 } EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
-    u8 *resource = (u8 *)((EffClassWork *)work)->resource;
-    u8 *payload = (u8 *)((EffAnimationState *)resource)->record;
-    float *positions = ((EffAnimationState *)resource)->positions;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
+    u8 *payload = (u8 *)state->record;
+    float *positions = state->positions;
     u32 count = ((FileSlotTable *)payload)->count;
     u32 i = 0;
 
@@ -5839,24 +5839,24 @@ u32 effClampSlotCount(u8 *p) {
     return effSlotCount(p, 200);
 }
 
-u32 *effCreateAnimationState(u32 unused, u32 count) {
+EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
-    u32 *state = (u32 *)sdfResourceRetainAddress(allocation);
+    EffAnimationState *state = (EffAnimationState *)sdfResourceRetainAddress(allocation);
 
-    ((EffAnimationState *)state)->allocation = allocation;
-    ((EffAnimationState *)state)->positions = (f32 *)(state + 4);
-    ((EffAnimationState *)state)->record = 0;
-    ((EffAnimationState *)state)->textureHandle = effRetainScalyTextureReference();
+    state->allocation = allocation;
+    state->positions = (f32 *)(state + 1);
+    state->record = 0;
+    state->textureHandle = effRetainScalyTextureReference();
     return state;
 }
 
-u32 *effActivateAnimationState(s32 work) {
-    s32 owner = (s32)((EffClassWork *)work)->resource;
-    s32 resource = ((EffAnimationState *)owner)->record;
-    u32 *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
+EffAnimationState *effActivateAnimationState(s32 work) {
+    EffAnimationState *owner = (EffAnimationState *)((EffClassWork *)work)->resource;
+    s32 resource = owner->record;
+    EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
 
-    resource = ((EffAnimationState *)owner)->record;
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
+    resource = owner->record;
+    state->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
                                ((FileSlotTable *)resource)->data1);
     return state;
 }
@@ -5866,43 +5866,43 @@ extern void fileReleaseGridRecordHandle(s32);
 extern void effReleaseScalyTextureReference(u32);
 
 void effReleaseAnimationFrameResources(u8 *work) {
-    u32 *state = (u32 *)((EffClassWork *)work)->resource;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
 
-    effReleaseScalyTextureReference(((EffAnimationState *)state)->textureHandle);
-    if (((EffAnimationState *)state)->record != 0) {
-        fileReleaseGridRecordHandle(((EffAnimationState *)state)->record);
+    effReleaseScalyTextureReference(state->textureHandle);
+    if (state->record != 0) {
+        fileReleaseGridRecordHandle(state->record);
     }
-    sdfReleaseResourceAllocation(((EffAnimationState *)state)->allocation);
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 void effSynchronizeFileTransform(u8 *work) {
-    u32 *record = (u32 *)((EffClassWork *)work)->resource;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
 
-    if (((EffAnimationState *)record)->record != 0) {
-        mnuRecordSetVector(((EffAnimationState *)record)->record, work);
-        fileSetRecordSecondVector(((EffAnimationState *)record)->record, work + 0x10);
-        dds3DispatchIndexedCallback(((EffAnimationState *)record)->record, ((EffClassWork *)work)->scale);
-        fileAcquireRecord(((EffAnimationState *)record)->record);
+    if (state->record != 0) {
+        mnuRecordSetVector(state->record, work);
+        fileSetRecordSecondVector(state->record, work + 0x10);
+        dds3DispatchIndexedCallback(state->record, ((EffClassWork *)work)->scale);
+        fileAcquireRecord(state->record);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2AE8);
 
-u32 *effCreatePrimarySlotAnimationState(u8 *work) {
+EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
-    u32 *state = effCreateAnimationState((u32)work, count);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(1, count, mapping);
+    state->record = fileAllocateGridRecordSlots(1, count, mapping);
     return state;
 }
 
-u32 *effCreateAlternateSlotAnimationState(u8 *work) {
+EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
-    u32 *state = effCreateAnimationState((u32)work, count);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(3, count, mapping);
+    state->record = fileAllocateGridRecordSlots(3, count, mapping);
     return state;
 }
 
