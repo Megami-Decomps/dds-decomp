@@ -5872,3 +5872,14 @@ four-`u64` `SdfPacket`; no alternate packet owner is needed. Credit
 Purist6c's complete prior overlay reconstruction for the owner-gap lead;
 the `00212998` body remains unlanded until an honest full match.
 
+
+## Boss camera selection takes a pose, not a second command
+
+DDS2 `00222450` saves incoming `$5` as its camera destination and `$6`
+as the rotation option, independently of the command in `$4`. Its
+declaration therefore takes `(BtlLinkedCommand *, BtlCamState *, s32)`.
+The `00223DD8` caller supplies `&unit->camera`, the real camera prefix
+at zero, rather than passing a command through an unprototyped call.
+This contract closure preserves all 253 existing C functions exactly;
+the 640-byte selector itself remains assembly (prior 34-word frontier).
+
