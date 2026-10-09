@@ -865,9 +865,9 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
 }
 
 /* Copy the source pair into the destination entry's two scalar slots. */
-void sdfAssetCopyPairToTextParam(SdfTextParam *source, SdfTextParam *destination) {
-    destination->unk28 = source->scalarPairFirst;
-    destination->unk2C = source->scalarPairSecond;
+void sdfCopyAssetScalarPairToDrawEntry(SdfAsset *source, SdfAssetEntry *destination) {
+    destination->y = source->scalarPairFirst;
+    destination->x = source->scalarPairSecond;
 }
 
 /* Apply the selected entry's groups and retain the other entry's captured bits.
@@ -885,7 +885,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
         sdfApplyAssetSecondaryEntry(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
-        sdfAssetCopyPairToTextParam(asset, drawEntry);
+        sdfCopyAssetScalarPairToDrawEntry(asset, drawEntry);
     }
     asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
@@ -907,7 +907,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex)
         sdfApplyAssetSecondaryEntry(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
-        sdfAssetCopyPairToTextParam(asset, drawEntry);
+        sdfCopyAssetScalarPairToDrawEntry(asset, drawEntry);
     }
     asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
