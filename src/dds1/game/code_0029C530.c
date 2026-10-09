@@ -5909,9 +5909,12 @@ typedef struct EffModelResource {
     s32 kind;
     MdlCtx *model;
     u32 attributes;
-    void *childResource;
-    void *source;
+    struct EffSpanTable *childResource;
+    struct EffSpanConfig *source;
 } EffModelResource;
+
+typedef char EffModelResource_size_must_be_0x40[
+    (sizeof(EffModelResource) == 0x40) ? 1 : -1];
 typedef struct EffSpanRecord {
     EffSpanEntry *entries;
     EffPointSet *pointSet;
@@ -6087,7 +6090,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     u32 size = effModelResourceOperations[kind].payloadSize;
     EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
 
-    effect->source = (u8 *)effect + headerSize;
+    effect->source = (EffSpanConfig *)((u8 *)effect + headerSize);
     effect->color = 0x80808080;
     effect->scale = 1.0f;
     effect->updateCount = 0;
@@ -6098,7 +6101,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState(secondary, param);
         effect->attributes = param;
-        effect->childResource = (void *)effModelResourceOperations[kind].createResource(effect->source, effect->model);
+        effect->childResource = (EffSpanTable *)effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
     }
     return effect;
@@ -6137,7 +6140,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     effect->model = model;
     effInitModelVUState(model);
     effect->attributes = work->attributes;
-    effect->childResource = (void *)effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
+    effect->childResource = (EffSpanTable *)effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
     effModelResourceOperations[effect->kind].initialize(effect);
     return effect;
 }
