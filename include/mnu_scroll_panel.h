@@ -36,7 +36,8 @@ typedef char MenuScrollPanel_dds2_handles_check[
 MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner);
 void mnuDestroyScrollPanel(MenuScrollPanel *menu);
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *menu);
-void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value,
+void mnuConfigurePanelResource(MenuScrollPanel *menu,
+                               struct EffectSlotSet *model, u32 value,
                                u32 color);
 #else
     u32 selection; /* 0x04 */
