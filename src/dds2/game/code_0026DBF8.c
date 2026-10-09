@@ -3236,7 +3236,7 @@ extern s32 func_002805E0(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnima
 extern s32 mnuDrawFadedMantraSingleCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_00281DC0(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_00283090(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027FDC8(s32, s32, s32, s32, s32, u8 *, s32);
 MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
     MantraPanelInit initCallbacks[14] = {
@@ -3284,7 +3284,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
         (MantraPanelDraw)func_00281DC0,
         (MantraPanelDraw)func_00283090,
-        (MantraPanelDraw)mnuDrawFadedMantraDualCyclePanel,
+        mnuDrawFadedMantraDualCyclePanel,
         (MantraPanelDraw)func_0027FDC8,
     };
     struct SdfMemBlock *handle;
@@ -4538,11 +4538,43 @@ void func_00283F90(u32 unused, s32 view) {
 void func_00283FA0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00283FA8);
+s32 func_00283FA8(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *unused,
+                  MantraPanelAnimation *panel, u32 packet) {
+    f32 phase;
+    f32 angle;
+    s32 drawX;
+    s32 drawY;
 
-extern s32 func_00283FA8(s32, s32, s32, s32, s32, u8 *, s32);
+    panel->stateA++;
+    if (panel->stateA >= 121) {
+        panel->stateA = 0;
+    }
+    panel->stateB++;
+    if (panel->stateB >= 61) {
+        panel->stateB = 0;
+    }
+    phase = panel->stateA / 120.0f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    angle = -phase * 6.2831853f;
+    drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
+    drawY = (s32)((f32)y + sdfEvaluateCosineViaSinePhaseShift(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xFB, 0, packet);
+    drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
+    drawY = (s32)((f32)y + sdfEvaluateCosineViaSinePhaseShift(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xFB, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0xFC, 0, packet);
+    return 0;
+}
 
-s32 mnuDrawFadedMantraDualCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+s32 mnuDrawFadedMantraDualCyclePanel(s32 x, s32 y, u32 z, s32 amount, MantraPanelPool *unused, MantraPanelAnimation *object, u32 packet) {
     f32 scale;
 
     switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {

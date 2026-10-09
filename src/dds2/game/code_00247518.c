@@ -142,7 +142,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
         if (to != NULL) {
             s32 start = *from;
             f32 span = *to - start;
-            f32 elapsed = viewer->curFrame - (start + node->metadataValue);
+            f32 elapsed = viewer->curFrame - (start + node->link.value);
 
             if (span != 0.0f) {
                 ratio = elapsed / span;
@@ -150,7 +150,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
         }
         func_0025E460((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
         *(s32 *)(out + 4) -= 35;
-        mnuDrawCampScaledTexture((SdfTex *)node->entryValue, (CampDisplayDefaults *)out);
+        mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
     }
 }
 
@@ -169,7 +169,7 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
                 EvtRuntimeChild *glyph = node->children;
                 EvtRuntimeChild *from;
 
-                while (glyph != NULL && position >= glyph->frame + node->metadataValue) {
+                while (glyph != NULL && position >= glyph->frame + node->link.value) {
                     glyph = glyph->next;
                 }
                 if (glyph != NULL) {
@@ -256,17 +256,17 @@ void func_002476B8(EvtRuntime *viewer) {
 
 /* Select the active entry (or fallback) and sync world selection and camera. */
 void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
-    s32 unit;
-    s32 first = viewer->activeEntryIndex;
+    EffWorldNode *unit;
+    EffWorldNode *first = viewer->overrideCamera;
 
     if (first != 0) {
         unit = first;
     } else {
-        unit = viewer->fallbackEntry;
+        unit = viewer->fallbackCamera;
     }
     if (unit != 0) {
-        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)unit);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)unit));
+        dds3SetWorldCameraObject(dds3GetWorldObject(), unit);
+        sdfSetViewFieldOfView(dds3GetCameraFieldOfView(unit));
     }
 }
 
@@ -318,7 +318,7 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
     EvtRuntimeChild *key;
     EvtRuntimeChild *selected;
     EvtUnit *unit;
-    s32 selectedValue;
+    EffWorldNode *selectedValue;
     s32 selectedTime;
 
     if (dds3GetWorldObject() != NULL) {
@@ -333,12 +333,12 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
                     if (node->type == 9) {
                         key = node->children;
                         while (key != NULL) {
-                            if (time >= key->frame + node->metadataValue && key->p08.sh[0] >= 0 &&
+                            if (time >= key->frame + node->link.value && key->p08.sh[0] >= 0 &&
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
-                                if (selectedTime < key->frame + node->metadataValue) {
-                                    selectedValue = (s32)node->info;
-                                    selectedTime = key->frame + node->metadataValue;
+                                if (selectedTime < key->frame + node->link.value) {
+                                    selectedValue = node->info;
+                                    selectedTime = key->frame + node->link.value;
                                     selected = key;
                                 }
                             }
@@ -350,8 +350,8 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
                 unit = evtUnitGetNestedValue(object);
                 if (selected != NULL) {
                     if (selected->p08.sh[1] != 0) {
-                        if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
-                            evtSetUnitValueTransition(unit, (EffWorldNode *)selectedValue, selected->duration);
+                        if ((EffWorldNode *)unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
+                            evtSetUnitValueTransition(unit, selectedValue, selected->duration);
                         }
                     } else {
                         if (unit->flags & 0x40000) {
@@ -373,6 +373,8 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
 
 extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
 extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
+/* Existing provider uses a legacy world-node prefix view. */
+struct PolyMovieObject;
 extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
@@ -516,32 +518,32 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     return (s32)result;
 }
 
-extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
+extern void evtSetMovieClipPositionClampedToDuration(struct PolyMovieObject *object, s32 arg1, s32 start, s32 end, s32 extra);
 
 
 
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset), endTime, and the current key's extra parameter. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
-    s32 table;
-    s32 slots;
-    s32 object;
+    EvtWorldTable *table;
+    EvtWorldSlot *slots;
+    EffWorldNode *object;
     EvtRuntimeGroup *node;
     s32 time;
     s32 extra;
     EvtRuntimeChild *glyph;
 
     if (dds3GetWorldObject() != 0) {
-        table = (s32)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data);
+        table = (EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data;
         if (table != 0) {
-            slots = (s32)((EvtWorldTable *)table)->slots;
+            slots = table->slots;
             if (slots != 0) {
-                object = (s32)((EvtWorldSlot *)slots)[EVT_WORLD_SLOT_MOVIE].head;
+                object = slots[EVT_WORLD_SLOT_MOVIE].head;
                 if (object != 0) {
                     do {
                         node = viewer->groups;
                         while (node != NULL) {
-                            if (node->info != NULL && (void *)object == dds3GetSlot(node->info, 1)) {
+                            if (node->info != 0 && object == dds3GetSlot(node->info, 1)) {
                                 if (node->type == 2) {
                                     time = 0;
                                     if (node->childCount != 0) {
@@ -553,15 +555,15 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                         extra = glyph->p0C.sh[1];
                                     }
                                 } else {
-                                    time = node->metadataValue;
+                                    time = node->link.value;
                                     extra = 0;
                                 }
-                                evtSetMovieClipPositionClampedToDuration(object, 0, time, endTime, extra);
+                                evtSetMovieClipPositionClampedToDuration((struct PolyMovieObject *)object, 0, time, endTime, extra);
                                 break;
                             }
                             node = node->next;
                         }
-                        object = (s32)((EffWorldNode *)object)->next;
+                        object = object->next;
                     } while (object != 0);
                 }
             }
@@ -693,24 +695,24 @@ void func_002496B0(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
 void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
-    u8 *list;
+    EffWorldNode *list;
     EvtRuntimeGroup *node;
     EvtRuntimeGroup *found;
 
     if (dds3GetWorldObject() != 0) {
-        list = (u8 *)((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        list = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (list != 0) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
-                if (node->info == (EffWorldNode *)list) {
+                if (node->info == list) {
                     found = node;
                     break;
                 }
             }
             if (found != 0) {
-                func_002496B0(position, list, node, viewer, 0);
+                func_002496B0(position, (u8 *)list, node, viewer, 0);
             }
-            list = (u8 *)((EffWorldNode *)list)->next;
+            list = list->next;
         }
     }
 }
@@ -944,7 +946,7 @@ void func_0024A158(s32 frame, EvtRuntime *viewer) {
 
             while (key != NULL) {
                 if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
-                    if (frame < key->frame + track->metadataValue) {
+                    if (frame < key->frame + track->link.value) {
                         break;
                     }
                     if (key->p10.sh[0] != 0) {
@@ -1142,7 +1144,7 @@ void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
             while (key != NULL) {
                 switch (track->type) {
                 case 3: case 26:
-                    useTrackTime = track->metadataByte1;
+                    useTrackTime = track->link.linkType;
                     /* These track kinds use the same indexed movie lookup. */
                 case 20: case 21:
                     if (key->p08.sb[0] < 0) {
@@ -1152,7 +1154,7 @@ void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
                     goto updateMovie;
                 case 18:
                     object = key->payload;
-                    useTrackTime = track->metadataByte1;
+                    useTrackTime = track->link.linkType;
 updateMovie:
                     if (object != NULL) {
                         movie = dds3GetObjectOwnedHandle(object)->slots[1];
@@ -1496,7 +1498,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
         category = D_003C953A[viewer->frameColumn + kind * 10];
         switch (category) {
         case 0:
-            key->frame = viewer->value - track->metadataValue;
+            key->frame = viewer->value - track->link.value;
             evtReorderListNodes(track);
             func_00249088(viewer->curFrame, viewer);
             break;

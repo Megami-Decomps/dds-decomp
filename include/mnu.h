@@ -752,7 +752,7 @@ typedef struct MenuTerminalContext {
     s32 retryFrames;
     s32 commandFrames; /* 0xBC */
     s32 phase;
-    u16 stateStep;
+    s16 stateStep;
     s8 pulseFrame;
     s8 unkC7;
     s32 unkC8;
@@ -877,7 +877,9 @@ typedef struct MovieMenuState {
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     struct MnuSpriteResourceGroup *resources; /* 0x30 */
     s32 unk34;           /* 0x34 */
-    u8 pad38[8];
+    u8 pad38[4];
+    s8 movieSkipped;     /* 0x3C: set when the opening movie is skipped */
+    u8 pad3D[3];
 } MovieMenuState;
 
 typedef char MovieMenuState_size_must_be_0x40[(sizeof(MovieMenuState) == 0x40) ? 1 : -1];

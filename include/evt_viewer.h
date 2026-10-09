@@ -16,7 +16,7 @@ typedef union EvtViewParam {
 typedef struct EvtRuntimeChild {
     u16 frame;
     u16 duration; /* Also the consecutive index in type-0xB groups. */
-    s32 interpolationMode;
+    s32 interpolationMode; /* Full-width track parameter; some serializers narrow it. */
     union {
         s8 parameterBytes[0x20];
         union {
@@ -44,22 +44,25 @@ typedef struct EvtCameraColorPayload {
 typedef char EvtCameraColorPayload_size[(sizeof(EvtCameraColorPayload) == 0x40) ? 1 : -1];
 
 /* Complete 0x84-byte entry: metadata, selected object and owned key list. */
+/* Eight-byte link record shared by serialized rows and runtime groups. */
+typedef struct EvtGroupLinkRecord {
+    u8 type, subtype;
+    s16 nameIndex, value;
+    s8 linkType, linkIndex;
+} EvtGroupLinkRecord;
 typedef struct EvtRuntimeGroup {
     s32 type;
     union {
         struct { u8 metadataFlag; u8 pad05[3]; };
         s32 setterId;
     };
-    s32 entryHeader; /* Signed runtime name-table index. */
+    s32 entryNameIndex; /* Signed runtime name-table index. */
     s32 argument0C;
-    EffWorldNode *info;
-    s32 argument14;
-    u8 pad18[4];
-    s16 metadataValue;
-    s8 metadataByte1;
-    s8 metadataByte2;
+    EffWorldNode *info; /* Retained world node for every group kind. */
+    union { s32 argument14; void *resourceData; struct { s16 resourceFirst, resourceSecond; }; };
+    EvtGroupLinkRecord link;
     u8 pad20[4];
-    union { s32 entryValue; SdfTex *texture; };
+    SdfTex *texture;
     s32 unk28;
     f32 savedFirstVector[4];
     f32 savedSecondVector[4];
@@ -92,9 +95,9 @@ typedef struct EvtRuntime {
     s32 previousGlyphPosition;
     s32 entryTotal;
     char entryName[256][32];
-    EffWorldNode *activeEntryIndex;
+    EffWorldNode *overrideCamera;
     u8 pad2028[4];
-    s32 fallbackEntry;
+    EffWorldNode *fallbackCamera;
     s32 entryCount;
     EvtRuntimeGroup *groups;
     EvtRuntimeGroup *lastGroup;
@@ -172,7 +175,8 @@ typedef struct EvtRuntime {
     s32 glyphTickCount;
     s32 editField;
     s32 framebufferQuadEnabled;
-    u8 pad23FC[8];
+    char *customColumnTitle; /* +0x23FC: reserved column heading text. */
+    s32 customColumnWidth; /* +0x2400: heading advance in character cells. */
     s32 unk2404;
     s32 colorSelection;
     s32 colorEditorActive;
@@ -225,6 +229,8 @@ typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];
 #else
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x24BC) ? 1 : -1];
 #endif
+typedef char EvtRuntime_customTitle_at23FC[((u32)&((EvtRuntime *)0)->customColumnTitle == 0x23FC) ? 1 : -1];
+typedef char EvtRuntime_customWidth_at2400[((u32)&((EvtRuntime *)0)->customColumnWidth == 0x2400) ? 1 : -1];
 typedef char EvtRuntime_camera_at23CC[((u32)&((EvtRuntime *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
 typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection == 0x2408) ? 1 : -1];
 typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
@@ -233,4 +239,12 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void evtViewerSetMinimumFromCurrent(EvtRuntime *viewer);
 void evtViewerSetMaximumFromCurrent(EvtRuntime *viewer);
 void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source);
+typedef char EvtLink_group_at18[((u32)&((EvtRuntimeGroup *)0)->link == 0x18) ? 1 : -1];
+typedef char EvtLink_resourceFirst_at14[((u32)&((EvtRuntimeGroup *)0)->resourceFirst == 0x14) ? 1 : -1];
+typedef char EvtLink_resourceSecond_at16[((u32)&((EvtRuntimeGroup *)0)->resourceSecond == 0x16) ? 1 : -1];
+typedef char EvtLink_name_at02[((u32)&((EvtGroupLinkRecord *)0)->nameIndex == 0x2) ? 1 : -1];
+typedef char EvtLink_value_at04[((u32)&((EvtGroupLinkRecord *)0)->value == 0x4) ? 1 : -1];
+typedef char EvtLink_type_at06[((u32)&((EvtGroupLinkRecord *)0)->linkType == 0x6) ? 1 : -1];
+typedef char EvtLink_index_at07[((u32)&((EvtGroupLinkRecord *)0)->linkIndex == 0x7) ? 1 : -1];
+typedef char EvtGroupLinkRecord_size[(sizeof(EvtGroupLinkRecord) == 8) ? 1 : -1];
 #endif

@@ -1,3 +1,5 @@
+#include "eff_resource_browser.h"
+#include "sdf_sif_command.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
@@ -6,6 +8,13 @@
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 
+extern u8 sdfPadButtonStates[0x20];
+extern s8 D_0040B7DB[];
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern s32 sdfAllocPacketAligned(s32);
+extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packetAddress);
+extern void *sdfConsAllocateColumnPacket(s32 count);
 extern s8 D_0043643D;
 
 #include "eff.h"
@@ -15,12 +24,10 @@ extern s8 D_0043643D;
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
-#define EFF_DISPATCH_RESULT_BYTES 8
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
 #define EFF_DIRECTORY_PATH_BYTES 0x70
 #define EFF_BUILTIN_NAME_COUNT 0x2F
 #define EFF_DIRECTORY_FLAG_CLEAR 0x1000
-#define EFF_RESOURCE_DESCRIPTOR_BYTES 0x44
 #define EFF_MATRIX_BYTES 0x40
 #define EFF_VECTOR_WORD_COUNT 4
 #define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
@@ -31,7 +38,7 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 
 
-extern EffHandler32 D_003B2060[];
+extern EffCreateHandler D_003B2060[];
 
 extern EffHandler D_003B2064[];
 
@@ -47,7 +54,7 @@ extern u32 effDataDirectoryIndex;
 
 extern char D_00436448[];
 
-extern void func_0035C860();
+extern s32 func_0035C860(char *destination, const char *format, ...);
 
 extern s32 sceDopen(void *path);
 
@@ -82,15 +89,14 @@ extern u8 sdfViewUpVector[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
-/* Allocate a result pair and store the selected callback's returned word.
-   Type, allocation, and callback are trusted; allocation occurs before dispatch. */
-EffResult *effAllocDispatch(s32 type, s32 handlerArg) {
-    EffResult *result = sdfAllocSizeClassBlock(EFF_DISPATCH_RESULT_BYTES);
-    s32 handlerResult = D_003B2060[type].handler(handlerArg);
+/* Allocate the dispatch owner before calling the selected payload constructor. */
+EffWork *effAllocDispatch(s32 type, void *params) {
+    EffWork *work = sdfAllocSizeClassBlock(sizeof(*work));
+    void *payload = D_003B2060[type].handler(params);
 
-    result->unk0 = type;
-    result->unk4 = handlerResult;
-    return result;
+    work->type = type;
+    work->payload = payload;
+    return work;
 }
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
@@ -104,9 +110,9 @@ void effTypeDispatchFree(EffWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-/* Return the raw payload word used as the type callback's argument. */
-u32 effGetHandlerArg(EffWork *work) {
-    return (u32)work->payload;
+/* Return the retained payload passed to this type's callbacks. */
+void *effGetHandlerArg(EffWork *work) {
+    return work->payload;
 }
 
 /* Read the pointed word without validating the pointer or asserting a record kind. */
@@ -200,7 +206,7 @@ u32 effGetSubSlot(EffWork *work, s32 unusedSlotValue) {
    Other types still dispatch with a zero argument; no type bounds check is added. */
 void effAllocSubWork(EffWork *work) {
     u32 type = work->type;
-    u32 handlerArg = 0;
+    void *handlerArg = NULL;
 
     switch (type) {
     case 0:
@@ -210,18 +216,18 @@ void effAllocSubWork(EffWork *work) {
         handlerArg = work->payload;
         break;
     case 2:
-        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 3:
-        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 4:
-        handlerArg = work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
         break;
     default:
         break;
     }
-    effAllocDispatch((EffWork *)type, handlerArg);
+    effAllocDispatch(type, handlerArg);
 }
 
 void func_001949D8(void) {
@@ -335,22 +341,6 @@ s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
     return strlen(entry->name);
 }
 
-/* Directory list roots and filename nodes have distinct allocation extents. */
-typedef struct EffResourceListNode {
-    u32 type;
-    char name[0x30];
-    struct EffResourceListNode *previous;
-    struct EffResourceListNode *next;
-} EffResourceListNode;
-
-typedef struct EffResourceList {
-    s32 resourceCount;
-    char *directoryPath;
-    EffResourceListNode *head;
-} EffResourceList;
-typedef char EffResourceList_size_must_be_12[(sizeof(EffResourceList) == 12) ? 1 : -1];
-typedef char EffResourceListNode_size_must_be_60[(sizeof(EffResourceListNode) == 60) ? 1 : -1];
-
 EffResourceList *func_00194BD0(char *path, s32 flags) {
     EffDirEnt entry;
     s32 directory;
@@ -429,51 +419,190 @@ void effFreeWorkList(EffResourceList *root) {
 
 
 
-typedef struct EffResourceDescriptor {
-    u32 word00;
-    u32 word04;
-    u32 word08;
-    s32 resourceCount;
-    u32 word10[5];
-    u32 word24;
-    u32 word28;
-    u32 word2C;
-    EffResourceListNode *word30;
-    EffResourceListNode *word34;
-    u32 word38;
-    u32 word3C;
-    EffResourceList *resourceList; /* 0x40: source list pointer copied into descriptor */
-} EffResourceDescriptor;
 
 /* Copy the source count, duplicate its head pointer, and store the source-list pointer.
    Other descriptor words retain their native defaults; no retain operation occurs here. */
 EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
-    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(EFF_RESOURCE_DESCRIPTOR_BYTES);
+    EffResourceDescriptor *resource = sdfAllocSizeClassBlock(sizeof(*resource));
 
-    resource->word00 = 0;
-    resource->word04 = 0xC8;
-    resource->word08 = 0;
+    resource->x = 0;
+    resource->y = 0xC8;
+    resource->result = 0;
     resource->resourceCount = list->resourceCount;
-    resource->word10[0] = 0;
-    resource->word10[1] = 0;
-    resource->word10[2] = 0;
-    resource->word10[3] = 0;
-    resource->word10[4] = 0;
-    resource->word24 = 0x53;
-    resource->word28 = 0x40806020;
-    resource->word2C = 0x30000000;
-    resource->word30 = list->head;
-    resource->word34 = list->head;
-    resource->word38 = 0;
-    resource->word3C = 0;
+    resource->word10 = 0;
+    resource->selectedIndex = 0;
+    resource->visibleIndex = 0;
+    resource->previewActive = 0;
+    resource->repeatDelay = 0;
+    resource->drawSurface = 0x53;
+    resource->borderColor = 0x40806020;
+    resource->fillColor = 0x30000000;
+    resource->firstVisibleEntry = list->head;
+    resource->selectedEntry = list->head;
+    resource->cachedEntry = 0;
+    resource->textureHandle = 0;
     resource->resourceList = list;
     return resource;
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_001950F0);
+
+/* Navigate the resource list, update its held preview, and submit fifteen rows. */
+s32 func_001950F0(EffResourceDescriptor *descriptor) {
+    EffResourceListNode *visibleEntry;
+    SdfListHead *packetList;
+    SdfPoolNode *surface;
+    s32 drawnRows;
+    s32 contentRow;
+
+    if (descriptor->repeatDelay != 0) {
+        descriptor->repeatDelay--;
+    } else if (descriptor->firstVisibleEntry == NULL) {
+        if (D_0040B7DB[0] < 0) {
+            descriptor->result = 2;
+        }
+    } else if (descriptor->result == 0) {
+        EffResourceListNode *navigationEntry;
+        EffResourceListNode *selectedEntry;
+        s32 navigationStep;
+        if ((sdfPadButtonStates[6] & 2) != 0) {
+            if (descriptor->selectedEntry->previous != NULL) {
+                descriptor->selectedEntry = descriptor->selectedEntry->previous;
+                descriptor->selectedIndex--;
+                if (descriptor->visibleIndex != 0) {
+                    descriptor->visibleIndex--;
+                }
+                if (descriptor->selectedEntry == descriptor->firstVisibleEntry) {
+                    if (descriptor->selectedEntry->previous != NULL) {
+                        descriptor->firstVisibleEntry = descriptor->selectedEntry->previous;
+                        descriptor->visibleIndex = 1;
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+            if (descriptor->selectedEntry->next != NULL) {
+                descriptor->selectedEntry = descriptor->selectedEntry->next;
+                descriptor->selectedIndex++;
+                descriptor->visibleIndex++;
+                if (descriptor->visibleIndex == 0xE) {
+                    if (descriptor->firstVisibleEntry->next != NULL) {
+                        descriptor->firstVisibleEntry = descriptor->firstVisibleEntry->next;
+                        descriptor->visibleIndex = 0xD;
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[9] & 2) != 0) {
+            selectedEntry = descriptor->selectedEntry;
+            for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
+                navigationEntry = selectedEntry->previous;
+                if (navigationEntry != NULL) {
+                    descriptor->selectedEntry = navigationEntry;
+                    descriptor->selectedIndex--;
+                    if (descriptor->visibleIndex != 0) {
+                        descriptor->visibleIndex--;
+                    }
+                    selectedEntry = descriptor->selectedEntry;
+                    if (selectedEntry == descriptor->firstVisibleEntry) {
+                        EffResourceListNode *previous = selectedEntry->previous;
+                        if (previous != NULL) {
+                            descriptor->firstVisibleEntry = previous;
+                            descriptor->visibleIndex = 1;
+                        }
+                    }
+                }
+            }
+        } else if ((sdfPadButtonStates[11] & 2) != 0) {
+            for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
+                navigationEntry = descriptor->selectedEntry->next;
+                if (navigationEntry != NULL) {
+                    descriptor->selectedEntry = navigationEntry;
+                    descriptor->selectedIndex++;
+                    descriptor->visibleIndex++;
+                    if (descriptor->visibleIndex == 0xE) {
+                        EffResourceListNode *next = descriptor->firstVisibleEntry->next;
+                        if (next != NULL) {
+                            descriptor->firstVisibleEntry = next;
+                            descriptor->visibleIndex = 0xD;
+                        }
+                    }
+                }
+            }
+        } else if ((s8)sdfPadButtonStates[3] < 0) {
+            descriptor->result = 2;
+        } else if ((s8)sdfPadButtonStates[1] < 0) {
+            descriptor->result = 1;
+        } else {
+            EffResourceListNode *cachedEntry = descriptor->cachedEntry;
+            selectedEntry = descriptor->selectedEntry;
+            if (cachedEntry != selectedEntry) {
+                s32 category = selectedEntry->type;
+                switch (category) {
+                case 1: {
+                    char resourceName[0x70];
+                    func_0035C860(resourceName, D_00436450,
+                        descriptor->resourceList->directoryPath, selectedEntry->name);
+                    effSetWorkTextureResource(descriptor, resourceName);
+                    descriptor->previewActive = category;
+                    selectedEntry = descriptor->selectedEntry;
+                    break;
+                }
+                case 2:
+                    descriptor->previewActive = 0;
+                    break;
+                case 4:
+                    descriptor->previewActive = 0;
+                    break;
+                default:
+                    descriptor->previewActive = 0;
+                    break;
+                }
+                descriptor->cachedEntry = selectedEntry;
+            }
+            if (descriptor->previewActive != 0) {
+                func_001956A8(descriptor);
+            }
+        }
+    }
+
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011F250(
+        0x8000 - (descriptor->x << 4), 0x8000 - (descriptor->y << 3),
+        0xFEFFFF, 0xC00, 0x620, descriptor->fillColor, descriptor->borderColor));
+    if (descriptor->previewActive != 0) {
+        sdfAppendPacket(packetList, (u32)func_0011F250(
+            0x8000 - (descriptor->x << 4),
+            0x8000 - ((descriptor->y - 0xC4) << 3),
+            0xFEFFFF, 0x800, 0x400, 0, 0x40806020));
+    }
+    contentRow = descriptor->y - 2;
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        0x8000 - ((descriptor->x - 2) << 4),
+        0x8000 - (contentRow << 3), 0xFF0000, 5,
+        descriptor->resourceList->directoryPath));
+    contentRow -= 0xC;
+    visibleEntry = descriptor->firstVisibleEntry;
+    drawnRows = 0;
+    while (visibleEntry != NULL) {
+        s32 selectionFlags = visibleEntry == descriptor->selectedEntry ? 4 : 0;
+        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+            0x8000 - ((descriptor->x - 2) << 4),
+            0x8000 - (contentRow << 3), 0xFF0000,
+            selectionFlags, visibleEntry->name));
+        drawnRows++;
+        contentRow -= 0xC;
+        if (drawnRows >= 0xF) {
+            break;
+        }
+        visibleEntry = visibleEntry->next;
+    }
+    surface = &kwlnDrawSurfaces[descriptor->drawSurface];
+    surface->append((SdfListHead *)surface, packetList);
+    return descriptor->result;
+}
+
 
 /* Release any retained texture reference, clear its handle, and free the work block. */
-void effFreeWork(EffWork *work) {
+void effFreeWork(EffResourceDescriptor *work) {
     SdfTex *texture;
 
     texture = work->textureHandle;
@@ -484,48 +613,48 @@ void effFreeWork(EffWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-/* Store two opaque message-header words; neither meaning is established by this setter. */
-void effSetMsgHeader(EffMsg *message, s32 first, s32 second) {
-    message->unk0 = first;
-    message->unk4 = second;
+/* Set the browser screen coordinates. */
+void effSetMsgHeader(EffResourceDescriptor *message, s32 first, s32 second) {
+    message->x = first;
+    message->y = second;
 }
 
-/* Return the opaque work parameter word unchanged. */
-u32 effGetWorkParam(EffWork *work) {
-    return work->unk14;
+/* Return the selected resource index as its native word. */
+u32 effGetWorkParam(EffResourceDescriptor *work) {
+    return work->selectedIndex;
 }
 
-/* Return the raw list-head word, without traversing or retaining the list. */
-u32 effGetWorkLink(EffWork *work) {
-    return work->listHead;
+/* Return the browser selection result as its native word. */
+u32 effGetWorkLink(EffResourceDescriptor *work) {
+    return work->result;
 }
 
 /* Format the prefix/name records through the native template and return the name record's first word.
    Buffer capacity and record pointers remain unchecked. */
-u32 effFormatMsgNames(EffMsg *message, void *destination) {
-    func_0035C860(destination, D_00436450, message->prefixRecord[1], message->nameRecord + 1);
-    return *message->nameRecord;
+u32 effFormatMsgNames(EffResourceDescriptor *message, void *destination) {
+    func_0035C860(destination, D_00436450, message->resourceList->directoryPath, message->selectedEntry->name);
+    return message->selectedEntry->type;
 }
 
-/* Store the first opaque work word; leave its field unnamed until a reader establishes meaning. */
-void effSetWorkFirst(EffWork *work, u32 value) {
-    work->unk20 = value;
+/* Set the navigation repeat delay. */
+void effSetWorkFirst(EffResourceDescriptor *work, u32 value) {
+    work->repeatDelay = value;
 }
 
-/* Store the second opaque work word without interpreting it. */
-void effSetWorkSecond(EffWork *work, u32 value) {
-    work->unk24 = value;
+/* Select the draw surface for browser packets. */
+void effSetWorkSecond(EffResourceDescriptor *work, u32 value) {
+    work->drawSurface = value;
 }
 
-/* Store the message's two opaque pair words without narrowing or interpretation. */
-void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
-    message->unk28 = first;
-    message->unk2C = second;
+/* Set the browser border and fill colors. */
+void effSetMsgPair(EffResourceDescriptor *message, u32 first, u32 second) {
+    message->borderColor = first;
+    message->fillColor = second;
 }
 
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
-void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
+void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureResource) {
     SdfTex *texture;
     SdfMemBlock *loadedResource;
     u32 resourceWords[4];
@@ -540,34 +669,26 @@ void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
     sdfReleaseResourceAllocation(loadedResource);
 }
 
-/* Overlay record: screen position words, then the held texture at +0x3C. */
-typedef struct EffTextureOverlay {
-    s32 x;
-    s32 y;
-    u8 pad08[0x34];
-    SdfTex *texture;
-} EffTextureOverlay;
-
 extern SdfPoolNode D_003805A8;
 
 
 /* Queue the overlay's texture as a quad at its screen position. */
-void func_001956A8(EffTextureOverlay *overlay) {
+void func_001956A8(EffResourceDescriptor *overlay) {
     SdfListHead *list;
-    s32 sprite;
+    void *sprite;
     KwlnSpriteVertex *vertex;
     SdfTex *texture;
 
-    if (overlay->texture != 0) {
+    if (overlay->textureHandle != 0) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         sprite = sdfConsAllocateColumnPacket(1);
-        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;
         vertex->r = 0x80;
-        texture = overlay->texture;
+        texture = overlay->textureHandle;
         vertex->corner[1].u = texture->width << 4;
         vertex->corner[1].v = texture->height << 4;
         vertex->corner[0].u = 0;
@@ -581,7 +702,7 @@ void func_001956A8(EffTextureOverlay *overlay) {
         vertex->corner[1].y = vertex->corner[0].y + 0x400;
         vertex->corner[1].mask = 0xFF0000;
         sdfConsCreateDrawPacket(list, texture, 0);
-        sdfAppendPacket(list, sprite);
+        sdfAppendPacket(list, (u32)sprite);
         D_003805A8.append((SdfListHead *)&D_003805A8, list);
     }
 }
