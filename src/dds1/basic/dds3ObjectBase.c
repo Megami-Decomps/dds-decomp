@@ -9,7 +9,6 @@
 #include "evt_unit.h"
 
 extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
 
 s32 dds3SelectSlotForObjectKind(u32 kind);
@@ -421,4 +420,3 @@ Dds3PathCurveWork *dds3GetSlot1Data(void *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
-

@@ -7481,7 +7481,6 @@ EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *owner) {
     return work;
 }
 
-extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
 
 void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
@@ -13038,4 +13037,3 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
-

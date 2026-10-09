@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "ee_mmi.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -386,7 +387,6 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern u8 *sdfConsFinalizePacketHeader(void *, s32);
 
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
 
 

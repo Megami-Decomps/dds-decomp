@@ -3,8 +3,6 @@
 #include "dds3_path.h"
 #include "dds3obj.h"
 
-extern Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *);
-extern void dds3FreePathObject(Dds3PathCurveWork *);
 
 /* Opaque fixed-size ring entry; this unit only selects its address. */
 typedef struct {
@@ -147,4 +145,3 @@ ObjBase *dds3CreateSlotResourceState(void *owner) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00111838", dds3SlotRingCursor);
-

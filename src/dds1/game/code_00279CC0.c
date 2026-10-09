@@ -20,7 +20,7 @@ struct MenuListNode;
 
 typedef struct MenuList MenuList;
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
@@ -776,9 +776,9 @@ MenuListNode *mnuRemoveListCursorNode(MenuList *list) {
 
 
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
-    node->sprites[row * 4 + col].sprite = sprite;
+    node->sprites[row * 4 + col].sprite = (EffectSlotSet *)(u32)sprite;
     node->sprites[row * 4 + col].effect = effect;
-    itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
 void *mnuWalkNodeList(s32 targetIndex, MenuList *list) {
