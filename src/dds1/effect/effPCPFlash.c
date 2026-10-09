@@ -247,7 +247,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakParams *src) {
     }
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk3C;
+    record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
@@ -517,7 +517,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
-    record->drawMode = work->unk44;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -759,7 +759,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreate(work->particleCount * 2);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -1018,7 +1018,7 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     angle = EFFECT_RING_START_ANGLE;
     record = effRecordPoolCreateFiveVertexGroups(ring->particleCount);
     record->scale = 1.0f;
-    record->drawMode = ring->unk54;
+    record->drawMode = ring->drawMode;
     ring->resourceHandle = record;
     step = EFFECT_RING_FULL_TURN / (u32)ring->particleCount;
     spread = ring->randomRange;
@@ -1275,7 +1275,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     }
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk48;
+    record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
@@ -1530,7 +1530,7 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleP
     work->updateCount = 0;
     record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk38;
+    record->drawMode = work->drawMode;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
@@ -1725,7 +1725,7 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     }
     record = effRecordPoolCreate(work->particleCount * 2);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
@@ -1989,7 +1989,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -2229,7 +2229,7 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadia
     work->updateCount = 0;
     record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk3C;
+    record->drawMode = work->drawMode;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
