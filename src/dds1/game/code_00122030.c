@@ -1916,7 +1916,38 @@ u8 fldTestSceneControlFlags(u32 mask) {
     return (fldSceneControlFlags & mask) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00122030", func_00125E08);
+extern s32 D_003BABF4;
+extern char D_0039FD30[], D_0039FD40[];
+extern s32 fldProcDraw(void);
+
+/* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
+void func_00125E08(FieldSequenceRecord *record, u32 mode) {
+    FieldSequenceRecord *scene = (FieldSequenceRecord *)&D_0032F1A0;
+    FldSequenceController *controller = &fldSceneLifecycleFlags;
+
+    controller->stage = 0;
+    controller->flags = 0;
+    scene->unk_34 = mode;
+    if (mode == 0) {
+        scene->unk_3c = record->unk_3c;
+        scene->unk_38 = record->unk_38;
+        strcpy(scene->name, record->name);
+        scene->stage = record->stage;
+        scene->code = record->code;
+        scene->kind = record->kind;
+        scene->unk_62 = record->unk_62;
+        scene->enabled = record->enabled;
+        scene->mode = record->mode;
+        scene->link = record->link;
+        strcpy(scene->detail, record->detail);
+        strcpy(scene->note, record->note);
+        scene->options = record->options;
+    }
+    kwlnTaskCreate((s32)D_0039FD30, 0x3F7, 0, 0, (s32)fldProcSequence, 0, 0);
+    kwlnTaskCreate((s32)D_0039FD40, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
+    D_003BABF4 = 1;
+    fldTestDrawCreate();
+}
 
 extern s32 D_003BABF4;
 
