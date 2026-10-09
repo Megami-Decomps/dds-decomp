@@ -169,7 +169,7 @@ extern void *sdfAllocSizeClassBlock(s32);
 
 extern u32 *fileResolveSecondaryBuffer(void *);
 
-extern u32 effCreateModelResourceWithInlineData(u16, void *, void *, u32);
+extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
 extern u32 effCreateResourceInstance(u16, void *, void *, u32);
 
@@ -5648,7 +5648,7 @@ u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AFE68);
 
-extern void func_002AFE68(u32 *, u8 *);
+extern void func_002AFE68(u32 *, EffBillQuantizedConfig *);
 
 u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *work) {
     u32 *buffer = effAllocateQuantizedBuffer(work);
@@ -5659,7 +5659,7 @@ u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *work) {
 }
 
 u32 *effPrepareOwnedQuantizedTexture(u8 *work) {
-    u8 *anim = ((EffClassWork *)work)->payload;
+    EffBillQuantizedConfig *anim = (EffBillQuantizedConfig *)((EffClassWork *)work)->payload;
     u8 *owner = (u8 *)((EffClassWork *)work)->resource;
     u32 *buffer = effAllocateQuantizedBuffer(anim);
 
@@ -5945,7 +5945,7 @@ typedef struct EffModelResource {
     s32 kind;
     MdlCtx *model;
     u32 attributes;
-    u32 childResource;
+    void *childResource;
     void *source;
 } EffModelResource;
 typedef struct EffSpanRecord {
@@ -5960,7 +5960,7 @@ typedef struct EffSpanTable {
     u32 count;
     u16 total;
     u8 pad0A[2];
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 } EffSpanTable;
 
 typedef struct EffSpanConfig {
@@ -5989,10 +5989,10 @@ typedef struct EffSpanConfig {
 } EffSpanConfig;
 
 
-void effSeedParticleSpanParameters(u8 *work) {
+void effSeedParticleSpanParameters(EffModelResource *work) {
     u32 index = 0;
-    EffSpanTable *table = (EffSpanTable *)((EffModelResource *)work)->childResource;
-    EffSpanConfig *config = ((EffModelResource *)work)->source;
+    EffSpanTable *table = work->childResource;
+    EffSpanConfig *config = work->source;
     u32 total = table->total;
     u32 per = config->perSpan;
     u32 spans = total / per;
@@ -6032,7 +6032,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     u32 count = sdfCountMapPositionRecords(model->inner);
     u32 spans;
     u32 partialSpan;
-    u8 *allocation;
+    struct SdfMemBlock *allocation;
     EffSpanTable *table;
     EffSpanRecord *record;
     EffSpanEntry *entries;
@@ -6054,10 +6054,10 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     if (config->unkAC == 0) {
         config->unkAC = 1;
     }
-    allocation = (u8 *)sdfAllocGeneralBlock(sizeof(EffSpanTable) +
+    allocation = sdfAllocGeneralBlock(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
-    table = (EffSpanTable *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
-    table->allocation = (u32)allocation;
+    table = (EffSpanTable *)sdfResourceRetainAddress(allocation);
+    table->allocation = allocation;
     table->records = (EffSpanRecord *)(table + 1);
     entries = (EffSpanEntry *)(table->records + count);
     table->total = total;
@@ -6093,17 +6093,17 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
 
 extern void effReleaseModelPointSetAsset(s32);
 
-void effReleaseParticleList(u8 *list) {
+void effReleaseParticleList(EffSpanTable *list) {
     u32 i;
-    EffSpanRecord *entry = ((EffSpanTable *)list)->records;
+    EffSpanRecord *entry = list->records;
 
-    for (i = 0; i < ((EffSpanTable *)list)->count; i++, entry++) {
+    for (i = 0; i < list->count; i++, entry++) {
         effReleaseModelPointSetAsset((s32)entry->pointSet);
         if (entry->references != 0) {
             effReleaseResourceRefs((u8 *)entry->references);
         }
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffSpanTable *)list)->allocation));
+    sdfReleaseResourceAllocation(list->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1560);
@@ -6111,7 +6111,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1560);
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1D68);
 
 
-u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
+EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
     u32 headerSize = 0x40;
     u32 size = effModelResourceOperations[kind].payloadSize;
     EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
@@ -6127,16 +6127,16 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState(secondary, param);
         effect->attributes = param;
-        effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
+        effect->childResource = (void *)effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
     }
-    return (u32)effect;
+    return effect;
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer(work);
-    return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+    return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
 typedef struct EffModelCreateRequest {
@@ -6152,13 +6152,13 @@ typedef struct EffModelCreateRequest {
 /* Battle actor subset used by effect filters (matches the battle unit offsets). */
 
 void effDestroyModelResource(EffModelResource *effect) {
-    effModelResourceOperations[effect->kind].destroyResource((void *)effect->childResource);
+    effModelResourceOperations[effect->kind].destroyResource(effect->childResource);
     effDestroyModelContext(effect->model);
     sdfReleaseChipBlock(effect);
 }
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
-    EffModelResource *effect = (EffModelResource *)effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
+    EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
     s32 x = mdlGetContextResourceGroup(work->assetId);
     s32 y = mdlGetContextResourceId(work->assetId);
     MdlCtx *model = func_00217680(x, y);
@@ -6166,7 +6166,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     effect->model = model;
     effInitModelVUState(model);
     effect->attributes = work->attributes;
-    effect->childResource = effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
+    effect->childResource = (void *)effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
     effModelResourceOperations[effect->kind].initialize(effect);
     return effect;
 }
