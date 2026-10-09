@@ -989,7 +989,31 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->entryFirst, 0, &ctx->entryCursor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002521C8);
+extern const char *D_003C94C8[];
+extern s8 D_003C9520[];
+extern char D_00437518[];
+
+/* Header row of the frame list: one text cell per column of the selected group's table row. */
+s32 func_002521C8(SdfListHead *list, s32 x, s32 y, u8 *data) {
+    EvtRuntime *ctx = (EvtRuntime *)data;
+    s32 type = ctx->frameGroup->type;
+    s32 i;
+    s32 kind;
+
+    for (i = 0; i < D_003C9538[type].columns; i++) {
+        kind = D_003C9538[type].columnTypes[i];
+        if (kind == 0x15) {
+            ctx->frameTextFormat = D_00437518;
+            ctx->frameTextWidth = 0;
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004374D0, D_00437518));
+            x += ctx->frameTextWidth * 0xC0;
+        } else {
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004374D0, D_003C94C8[kind]));
+            x += D_003C9520[D_003C9538[type].columnTypes[i]] * 0xC0;
+        }
+    }
+    return 1;
+}
 
 extern char D_004375A8[]; /* "%4d" */
 extern char D_004375B0[]; /* " ---" */
@@ -1033,6 +1057,8 @@ extern char D_00437628[]; /* "OUT" */
 extern char D_00437630[]; /* "IN" */
 extern char D_00437640[]; /* "X" */
 
+/* Format each enabled column of a timeline key. Some columns reuse the
+ * preceding scalar selection; the selected group kind is fixed for this row. */
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AE0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AF0);
@@ -1053,8 +1079,6 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
 
-/* Format each enabled column of a timeline key. Some columns reuse the
- * preceding scalar selection; the selected group kind is fixed for this row. */
 void func_00252378(s32 list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
