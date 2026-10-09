@@ -493,14 +493,15 @@ void mdlMarkAndProcessObjectNodes(void) {
 }
 
 /* DDS1 resource owner: same lifetime fields as DDS2, with a shorter payload. */
+struct FileQueue;
 typedef struct EffResourceOwner {
     u32 count;
     u32 unk04;
     u8 pad_08[0x34];
     u32 plainEntry; // 0x3C: add the model entry plain instead of flagged
     u8 pad_40[4];
-    void **entries;
-    void *buffer;
+    struct FileQueue **entries; /* 0x44: retained queue-pointer array */
+    struct SdfMemBlock *queueAllocation; /* 0x48: queue-pointer array descriptor */
     MdlCtx *model;
 } EffResourceOwner;
 
@@ -509,7 +510,6 @@ typedef struct {
     u32 last;
 } EffectModelHeaderCopy;
 
-struct FileQueue;
 extern void *sdfAllocSizeClassBlock(s32);
 
 u8 *func_0029B368(void *source) {
@@ -536,8 +536,8 @@ u8 *func_0029B368(void *source) {
         }
         data = (u8 *)fileResolveSecondaryBuffer(source);
         if (data != NULL) {
-            owner->buffer = sdfAllocGeneralBlock(owner->count * 4);
-            owner->entries = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)owner->buffer));
+            owner->queueAllocation = sdfAllocGeneralBlock(owner->count * 4);
+            owner->entries = sdfResourceRetainAddress(owner->queueAllocation);
             owner->entries[0] = fileCloneQueueEntries((struct FileQueue *)data);
             for (i = 1; i < owner->count; i++) {
                 owner->entries[i] = fileQueueClone(owner->entries[0]);
@@ -555,11 +555,11 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
     }
-    if (owner->buffer != 0) {
+    if (owner->queueAllocation != 0) {
         for (i = 0; i < owner->count; i++) {
             fileQueueDestroy(owner->entries[i]);
         }
-        sdfReleaseResourceAllocation(owner->buffer);
+        sdfReleaseResourceAllocation(owner->queueAllocation);
     }
     sdfReleaseChipBlock(owner);
 }
@@ -593,15 +593,15 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
         }
     }
     dst->count = sdfCountMapPositionRecords(dst->model->inner);
-    if (src->buffer != 0) {
-        if (dst->buffer != 0) {
+    if (src->queueAllocation != 0) {
+        if (dst->queueAllocation != 0) {
             for (i = 0; i < dst->count; i++) {
                 fileQueueDestroy(dst->entries[i]);
             }
-            sdfReleaseResourceAllocation(dst->buffer);
+            sdfReleaseResourceAllocation(dst->queueAllocation);
         }
-        dst->buffer = sdfAllocGeneralBlock(dst->count * 4);
-        dst->entries = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)dst->buffer));
+        dst->queueAllocation = sdfAllocGeneralBlock(dst->count * 4);
+        dst->entries = sdfResourceRetainAddress(dst->queueAllocation);
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
         }
