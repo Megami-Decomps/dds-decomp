@@ -111,5 +111,9 @@ struct MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(struct MenuWindowCo
 
 struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);
 struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
+#ifdef VERSION_DDS2
+/* Scroll to the last visible page and return the resulting cursor, or NULL. */
+struct MenuListNode *mnuScrollListToEnd(struct MenuList *list);
+#endif
 
 #endif

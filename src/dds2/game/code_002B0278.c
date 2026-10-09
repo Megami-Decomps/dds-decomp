@@ -3571,7 +3571,7 @@ MenuListNode *mnuRetreatListCursorDefault(MenuList *list) {
     return mnuListRetreatCursor(list, 0, 0);
 }
 
-s32 mnuScrollListToEnd(MenuList *list) {
+MenuListNode *mnuScrollListToEnd(MenuList *list) {
     s32 i;
 
     if (list->cursor == NULL) {
@@ -3586,7 +3586,7 @@ s32 mnuScrollListToEnd(MenuList *list) {
                 }
                 list->cursor = list->last;
                 list->windowOffset = list->visibleCount - 1;
-                return (s32)list->last;
+                return list->last;
             }
             break;
         }
@@ -3598,14 +3598,14 @@ s32 mnuScrollListToEnd(MenuList *list) {
     if (mnuListContainsFinalNode(list)) {
         list->windowOffset = list->visibleCount - 1;
         list->cursor = list->last;
-        return (s32)list->last;
+        return list->last;
     }
     if (list->cursor == list->head) {
         list->cursor = list->cursor->next;
         list->windowOffset = 1;
     }
     mnuUpdateListScrollFlags((u8 *)list);
-    return (s32)list->cursor;
+    return list->cursor;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8E30);
