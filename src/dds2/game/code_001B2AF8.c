@@ -875,7 +875,48 @@ s32 btlHasSpecialAbilityOrModelFlag(DatPartyRecord *record) {
     return mdlFlagTest(0x820) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B4600);
+/* Roll the defeat chance for a petrified actor and the command's attack kind. */
+s32 func_001B4600(BtlUnit *unit, s32 command) {
+    s32 kind;
+    s32 chance;
+    f32 ratio;
+    DatPartyRecord *record;
+
+    if ((unit->partyRecord.status & 0x7FFF) != 0x800) {
+        return 0;
+    }
+    if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
+        return 0;
+    }
+    kind = btlGetActorIndexedSignedValue(unit, command);
+    switch (kind) {
+    case 2:
+    case 3:
+    case 4:
+        return 0;
+    case 7:
+        if (datCommandRecords[command].effectType != 0) {
+            return 0;
+        }
+        break;
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        break;
+    default:
+        return 0;
+    }
+    record = &unit->partyRecord;
+    chance = evtRunContext(0x13, (s32)record, 0, command, 0);
+    ratio = 1.0f;
+    if (btlCheckSpecialAbility(record, 0x253) != 0) {
+        ratio = datAbilityParameters[0x253 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    chance = (s32)((f32)chance * ratio);
+    btlBossDebugPrintf("btl:stone dead=%d%%[ratio=%.2f]\n", chance, (f64)ratio);
+    return btlRollAiBucket() < chance;
+}
 
 s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *unit) {
     s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->actorEligibilityOverride;
