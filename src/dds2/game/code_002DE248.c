@@ -8891,10 +8891,10 @@ typedef struct EffQueuedFileObject {
 } EffQueuedFileObject;
 
 /* Runtime option (+0x0C) selects the descriptor transfer mode (+0x08). */
-u8 *effFindAssetData(u8 *work) {
-    FileJob *requested = (FileJob *)((FileJob *)work)->id;
+u8 *effFindAssetData(FileJob *entry) {
+    FileJobPayload *requested = (FileJobPayload *)entry->id;
     u16 type = requested->type;
-    u16 id = requested->option;
+    u16 option = requested->option;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -8904,7 +8904,7 @@ u8 *effFindAssetData(u8 *work) {
                 do {
                     u8 *asset = current->asset;
                     if (((EffFileJobRequest *)asset)->fileKind != 6) {
-                        if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == id) {
+                        if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == option) {
                             return asset;
                         }
                     } else if (type == 6) {
@@ -8923,10 +8923,10 @@ u8 *effFindAssetData(u8 *work) {
     return NULL;
 }
 
-u32 effFindAssetObject(u8 *work) {
-    FileJob *requested = (FileJob *)((FileJob *)work)->id;
+u32 effFindAssetObject(FileJob *entry) {
+    FileJobPayload *requested = (FileJobPayload *)entry->id;
     u16 type = requested->type;
-    u16 id = requested->option;
+    u16 option = requested->option;
     u16 i;
     for (i = 0; i < 24; i++) {
         EffectAssetLink *links = D_003FF128[i];
@@ -8935,7 +8935,7 @@ u32 effFindAssetObject(u8 *work) {
             if (current->asset != NULL) {
                 do {
                     u8 *asset = current->asset;
-                    if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == id) {
+                    if (((EffFileJobRequest *)asset)->fileKind == type && ((EffFileJobRequest *)asset)->transferMode == option) {
                         return current->object;
                     }
                     current++;
@@ -9607,11 +9607,13 @@ void effCreateObjectParticleTask(void) {
 
 extern char D_0042CF58[];
 
+extern FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry);
+
 s32 effPollPartResource(void) {
     u8 request[0x110];
     s32 state;
     s32 result = 0x400001;
-    s32 entry;
+    FileJob *entry;
 
     effPollResourceBankSlot(D_0042CF58, 0x20, request);
     state = ((EffResourceBankSlot *)request)->state;
@@ -9619,8 +9621,8 @@ s32 effPollPartResource(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            entry = fileAppendJobFromEntry(effFileQueue, request);
-            strcpy((char *)(entry + 0x9C), *(char **)effFindAssetData(entry));
+            entry = fileAppendJobFromEntry((FileQueue *)effFileQueue, request);
+            strcpy(entry->name, *(char **)effFindAssetData(entry));
         }
         result = 0x400002;
     }
@@ -10551,12 +10553,12 @@ u32 fileLoadEffectSlotA(void) {
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_0045C270, entry, 0x80);
         effQueuedFileHandle = entry->id;
-        resource = (EffFileJobRequest *)effFindAssetData((u8 *)entry);
+        resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob((u8 *)resource);
-        effQueuedFileObject = effFindAssetObject((u8 *)entry);
+        effQueuedFileObject = effFindAssetObject(entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
