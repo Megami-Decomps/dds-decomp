@@ -8,6 +8,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
+#include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
 #include "evt_solar.h"
@@ -89,7 +90,6 @@ s32 sdfCheckPendingWorkWithInterrupts(void);
 
 void *dds3GetWorldSecondaryObject(void);
 
-s32 dds3GetWorldObjectValue(EffWorldNode *world);
 
 void evtCreateWorldObjectForKey(s32 highPart, s32 lowPart);
 
