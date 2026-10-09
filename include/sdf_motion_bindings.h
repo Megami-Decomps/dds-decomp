@@ -31,10 +31,10 @@ typedef struct SdfMotionKeyInterval {
     f32 weight;
 } SdfMotionKeyInterval;
 
-/* Key-frame words are followed by a variable-length key payload. */
+/* The first word advances to the next binding record; aligned key-frame words
+ * and a variable-length key payload follow the fixed header. */
 typedef struct SdfMotionKeyTrack {
-    u16 unk00;
-    u16 unk02;
+    u32 nextTrackOffsetBytes;
     u16 keyCount;
     u16 keyStride;
     u16 keyFrames[1];
