@@ -6889,7 +6889,73 @@ void btlResetEffectState(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041B4D0);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00226C98);
+void func_00226C98(BtlUnit *unit, BtlOperandEntry *entry) {
+    BattleActionContext *ctx = (BattleActionContext *)btlGetRuntime();
+    BattleLinkedEffectState *effect = &ctx->effect->linked;
+    BtlUnit *mainUnit;
+    BtlUnit *twin;
+    BtlUnit *scan;
+
+    if (unit->status.flags & 0x400) {
+        effect->linkedUnit = unit;
+    }
+    twin = NULL;
+    mainUnit = NULL;
+    for (scan = ctx->firstUnit; scan != NULL; scan = scan->nextActor) {
+        s32 scanFlags = scan->status.flags;
+        if (scanFlags & 1) {
+            if (scanFlags & 0x400) {
+                switch (scan->partyRecord.unitId) {
+                case 0x12E:
+                    mainUnit = scan;
+                    break;
+                case 0x12F:
+                    twin = scan;
+                    break;
+                }
+            }
+        }
+    }
+    if (entry->flags & 0x40) {
+        btlBindEffectUnitAndClearStateFlags(unit);
+        effect->active = 0;
+        effect->value = 0;
+        effect->phase = 1;
+    } else if (entry->flags & 0x80) {
+        btlBeginEffectActorFadeOut();
+        if (mainUnit->status.flags & 0xE0) {
+            effect->active = 0;
+        } else {
+            effect->active = 1;
+        }
+    }
+    if ((unit->status.flags & 0x400) && unit->partyRecord.unitId == 0x12F) {
+        effect->value -= entry->hpDelta;
+        btlBossDebugPrintf("btl:RAHU damage = %d\n", effect->value);
+    }
+    if (unit == mainUnit && !(unit->gunResourceFlags & 4)) {
+        if (twin->status.flags & 0xE0) {
+            if (!(effect->timer & 2)) {
+                btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
+            }
+            effect->timer |= 2;
+        } else {
+            effect->timer &= ~2;
+        }
+    }
+    if (unit == twin) {
+        if (!(effect->timer & 2)) {
+            if (mainUnit->status.flags & 0xE0) {
+                if (!(effect->timer & 4)) {
+                    btlRestoreUnitMinimumValueAndClearStatus(unit, entry);
+                }
+                effect->timer |= 4;
+            } else {
+                effect->timer &= ~4;
+            }
+        }
+    }
+}
 
 s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
     BattleEffectPayload *effect;
