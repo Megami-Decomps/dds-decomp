@@ -5906,3 +5906,12 @@ following call's delay slot, and uses that snapshot to decide whether to
 start the command-sound tasks. This is the inner routine's real result,
 not a fabricated return or a fall-through register value.
 
+
+## Movie packet builders borrow the complete stream owner
+
+DDS2 `func_002A7B28` takes `MovObj *`, as the existing
+`mnuMovieDrawNextProc` caller already supplies, plus `SdfPoolNode *`.
+Use the canonical nested stream-frame fields and pool append callback
+when reconstructing it; an integer-address or second movie-record view
+is not its contract. The 512-byte packet body remains assembly.
+
