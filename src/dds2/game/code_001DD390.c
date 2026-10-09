@@ -684,7 +684,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
     work->indices = btlAllocateIndexList(13);
     allocation = sdfAllocGeneralBlock(0x48EC);
     work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(allocation);
-    work->allocationHandle = (u32)allocation;
+    work->allocationHandle = allocation;
     work->ownerId = 0;
     btlResetIndexWork(work);
 }
@@ -692,7 +692,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     if (object->allocationHandle != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(object->allocationHandle));
+        sdfReleaseResourceAllocation(object->allocationHandle);
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {
@@ -5206,7 +5206,7 @@ void func_001E9410(void) {
         data->fovUpdatePending |= 1;
     }
     camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), D_003B6D50, D_003B6D60);
-    camera->value = D_00436A98;
+    camera->value = (const char *)D_00436A98;
     effObjSetInnerFloat(camera, 10.0f);
     dds3EnsureSlotData(camera);
     func_001129C8(camera, 0);
@@ -5393,7 +5393,7 @@ s32 btlGetWorldObjectDefault(void) {
     if (data->value == 0) {
         return D_00436A9C;
     }
-    return data->value;
+    return (s32)data->value;
 }
 
 s32 btlIsWorldMotionIdle(void) {

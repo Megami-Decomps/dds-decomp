@@ -210,8 +210,7 @@ typedef struct BattleActorPanelPresentation {
     s8 hpState;
     s8 mpState;
     u8 pad1B6[2];
-    s32 offsetX;
-    s32 offsetY;
+    s32 offset[2];
     s32 unk1C0;
     s32 unk1C4;
     s16 hpHighlightLevel;

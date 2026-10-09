@@ -225,33 +225,27 @@ BtlRuntimeTask *sndCreateEarringTask(void) {
     return task;
 }
 
-typedef struct BtlAt3LoadArgs {
-    s32 loadHandle;
-    s32 state;
-    s32 index;
-} BtlAt3LoadArgs;
-
 extern char D_00419468[]; /* "/soundat3/%s.at3" */
 
-s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
+s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    s32 resource;
+    struct SdfMemBlock *resource;
     s32 data;
     s32 size;
     if (args->state == 0) {
-        func_0035C860(path, D_00419468, D_003E0F60[args->index].fileName);
-        args->loadHandle = (s32)fileQueueDefaultCallbackRequest(path);
+        func_0035C860(path, D_00419468, D_003E0F60[args->entryIndex].fileName);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
-    } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->loadHandle) != 0) {
+    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
-        data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->loadHandle);
-        filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
-        func_002A27A8(data, size, D_003E0F60[args->index].volume);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
+        resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+        data = sdfResourceRetainAddress(resource);
+        size = (s32)fileGetResourceSize(args->request);
+        filePollEntryCleanup(args->request);
+        func_002A27A8(data, size, D_003E0F60[args->entryIndex].volume);
+        sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
     }
@@ -261,23 +255,18 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
 
 BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
-    SoundTaskArgs *args;
+    Atrac3LoadTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->unk_08 = value;
-    args->option = 0;
-    args->value = 0;
+    args->entryIndex = value;
+    args->state = 0;
+    args->request = 0;
     return task;
 }
-
-typedef struct BtlDeadLoadArgs {
-    BtlUnit *unit;
-    void *handle;
-} BtlDeadLoadArgs;
 
 void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -300,24 +289,25 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_0035C860(path, D_00419318, D_00419308, unit->partyRecord.unitId);
         }
-        args->handle = fileQueueDefaultCallbackRequest(path);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
     }
     work->earringPlaybackCount++;
 }
 
-s32 sndDeadAtracPlaybackTask(u32 *args) {
+s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
     s32 data;
     s32 size;
-    if (args[1] == 0) {
+    if (args->request == 0) {
         return 1;
     }
-    if (args[2] == 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args[1]) != 0) {
-            args[2] = fileGetResourceHandle((struct FileRequest *)args[1]);
-            data = sdfResourceRetainAddress((struct SdfMemBlock *)(args[2]));
-            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args[1]);
-            filePollEntryCleanup((struct FileRequest *)(u32)args[1]);
+    if (args->resourceAllocation == 0) {
+        if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+            args->resourceAllocation =
+                (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+            data = sdfResourceRetainAddress(args->resourceAllocation);
+            size = (s32)fileGetResourceSize(args->request);
+            filePollEntryCleanup(args->request);
             func_002A27A8(data, size, 2);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
@@ -331,17 +321,17 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
     return 0;
 }
 
-void sndFinishEarringPlaybackTask(s32 *taskArgs) {
+void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
-    if (taskArgs[2] != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskArgs[2]));
+    if (taskArgs->resourceAllocation != 0) {
+        sdfReleaseResourceAllocation(taskArgs->resourceAllocation);
     }
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
 
 BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    SoundTaskArgs *args;
+    BtlDeadLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
@@ -351,9 +341,9 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     task->callback = sndDeadAtracPlaybackTask;
     task->onFinish = sndFinishEarringPlaybackTask;
     args = btlGetTaskArguments(task);
-    args->actor = owner;
-    args->option = 0;
-    args->unk_08 = 0;
+    args->unit = owner;
+    args->request = 0;
+    args->resourceAllocation = 0;
     return task;
 }
 

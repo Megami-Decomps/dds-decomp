@@ -1140,7 +1140,122 @@ s32 func_001B4918(BtlUnit *unit, BtlUnit *target) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B4AA0);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B4EB8);
+typedef struct BattleStartVoiceRow {
+    s32 flagId;       /* negative, or a model flag that must be set */
+    s8 voice[2][3][3]; /* [alternate][state][choice]; -1 marks an empty choice */
+    u8 pad16[2];
+} BattleStartVoiceRow;
+
+extern BattleStartVoiceRow D_003B5140[16];
+extern s8 D_003B52C0[16];
+extern char D_004158F8[], D_00415920[];
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+
+extern char D_00415878[]; /* "btl:start voice off[ESC_OFF]\n" */
+extern char D_00415898[]; /* "btl:start voice off[SERIAL]\n" */
+extern char D_004158B8[]; /* "btl:start voice off[RAND]\n" */
+extern char D_004158D8[]; /* "btl:start voice off[UNIT NON]\n" */
+extern char D_00415948[]; /* "btl:start voice off[STATE=%X,ID=%X]\n" */
+extern char D_00415970[]; /* "btl:start voice on[VOICE=%X,STATE=%X,ID=%X]\n" */
+
+s8 func_001B4EB8(void) {
+    BtlState *state;
+    BtlUnit *candidates[3];
+    BtlUnit *unit;
+    BtlUnit *chosen;
+    s8 *voices;
+    u32 hp;
+    u32 damage;
+    s32 count;
+    s32 category;
+    u32 i;
+    s8 voice;
+
+    state = (BtlState *)btlGetRuntime();
+    if (datBattleSceneRecords[state->battleMode].unk00 != 0) {
+        btlBossDebugPrintf(D_00415878);
+        return -1;
+    }
+    if ((state->battleFlags & 0x4000) || state->eventReady == 5) {
+        btlBossDebugPrintf(D_00415898);
+        return -1;
+    }
+    if (state->encounterKind != 3 && (u32)btlRollAiBucket() >= 10) {
+        btlBossDebugPrintf(D_004158B8);
+        return -1;
+    }
+    count = 0;
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x200) {
+                s32 flagId = D_003B5140[unit->partyRecord.unitId].flagId;
+                if (flagId < 0 || mdlFlagTest(flagId)) {
+                    if ((unit->partyRecord.status & 0x7FFF) == 0) {
+                        candidates[count++] = unit;
+                    }
+                }
+            }
+        }
+    }
+    if (count == 0) {
+        btlBossDebugPrintf(D_004158D8);
+        return -1;
+    }
+    chosen = candidates[effMiscRandMod(0, count)];
+    if (chosen->partyRecord.unitId == 5 && mdlFlagTest(0x834)) {
+        return -1;
+    }
+    if (state->encounterKind == 3) {
+        if (!mdlFlagTest(0x81A)) {
+            return -1;
+        }
+        if ((u32)btlRollAiBucket() >= 50) {
+            btlBossDebugPrintf(D_004158F8);
+            return -1;
+        }
+        voice = D_003B52C0[chosen->partyRecord.unitId];
+        btlBossDebugPrintf(D_00415920, voice);
+        return voice;
+    }
+    category = 2;
+    hp = btlReadCurrentUnitHp(&chosen->partyRecord);
+    for (unit = state->units; unit != NULL; unit = unit->nextActor) {
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x400) {
+                damage = func_001AF4A0(unit, chosen, 0, 1, 1, 1, 0);
+                /* Keep the first decisive category; later damage calls still run.
+                 * The high threshold wins even when unsigned arithmetic wraps. */
+                if (category == 2) {
+                    if (hp + hp * 10 / 100 < damage) {
+                        category = 0;
+                    } else if (damage * 2 < hp) {
+                        category = 1;
+                    }
+                }
+            }
+        }
+    }
+    if (chosen->status.flags & 0x1000) {
+        voices = D_003B5140[chosen->partyRecord.unitId].voice[1][category];
+    } else {
+        voices = D_003B5140[chosen->partyRecord.unitId].voice[0][category];
+    }
+    count = 0;
+    for (i = 0; i < 3; i++) {
+        if (voices[i] >= 0) {
+            count++;
+        }
+    }
+    if (count == 0) {
+        btlBossDebugPrintf(D_00415948, category, chosen->partyRecord.unitId);
+        return -1;
+    }
+    voice = voices[effMiscRandMod(0, count)];
+    btlBossDebugPrintf(D_00415970, voice, category, chosen->partyRecord.unitId);
+    return voice;
+}
+
 
 u32 func_001B5268(void) {
     btlGetRuntime();
@@ -1374,6 +1489,22 @@ s32 btlCountFlaggedSceneActors(void) {
 extern s16 btlGetActorIdForClass(s8);
 
 extern void btlGetActorClassPair(s8, u32 *, u32 *);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415878);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415898);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004158B8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004158D8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004158F8);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415920);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415948);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415970);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004159A0);
 
@@ -4930,7 +5061,96 @@ void func_001C68D0(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C6B98);
+void func_001C6B98(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 kind) {
+    switch (kind) {
+    case 0:
+        if (work->activeEntries[slot].presentation.hpState == 2) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+        } else {
+            if (work->activeEntries[slot].presentation.hpState == 0 || work->activeEntries[slot].presentation.hpState >= 0x10) {
+                if (unit->partyRecord.hp < work->activeEntries[slot].presentation.hpLevel) {
+                    if (work->activeEntries[slot].presentation.hpState == 0 || work->activeEntries[slot].presentation.hpState == 0x10) {
+                        work->activeEntries[slot].presentation.hpEffectState = 0x11;
+                        work->activeEntries[slot].presentation.hpEffectFade = 0xFF;
+                        work->activeEntries[slot].presentation.hpPulseFrame = 0;
+                        memset(&work->activeEntries[slot].presentation.hpBarPulse, 0, sizeof(BattleStatPulse));
+                        memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
+                        memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
+                        memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
+                        work->activeEntries[slot].presentation.unk1C0 = 0;
+                        work->activeEntries[slot].presentation.offset[0] = 0;
+                        work->activeEntries[slot].presentation.offset[1] = 0;
+                    }
+                    work->activeEntries[slot].presentation.hpTarget = work->activeEntries[slot].presentation.hpLevel;
+                } else if (work->activeEntries[slot].presentation.hpLevel < unit->partyRecord.hp) {
+                    if (work->activeEntries[slot].presentation.hpState == 0) {
+                        work->activeEntries[slot].presentation.hpState = 0x20;
+                        work->activeEntries[slot].presentation.hpHighlightLevel = 0x7F;
+                        work->activeEntries[slot].presentation.hpEffectState = 0x21;
+                        work->activeEntries[slot].presentation.hpEffectFade = 0xFF;
+                    }
+                    work->activeEntries[slot].presentation.hpTarget = work->activeEntries[slot].presentation.hpLevel;
+                }
+            }
+            switch (work->activeEntries[slot].presentation.hpState) {
+            case 0:
+                work->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
+                return;
+            case 0x10:
+            case 0x20:
+                work->activeEntries[slot].presentation.hpPulseFrame = 0;
+                memset(&work->activeEntries[slot].presentation.hpBarPulse, 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
+                work->activeEntries[slot].presentation.unk1C0 = 0;
+                work->activeEntries[slot].presentation.offset[0] = 0;
+                work->activeEntries[slot].presentation.offset[1] = 0;
+                work->activeEntries[slot].presentation.hpState++;
+                break;
+            }
+        }
+        break;
+    case 1:
+        if (work->activeEntries[slot].presentation.mpState == 2) {
+            work->activeEntries[slot].presentation.mpState = 0;
+            work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+        } else {
+            if (work->activeEntries[slot].presentation.mpState == 0) {
+                if (unit->partyRecord.mp < work->activeEntries[slot].presentation.mpLevel) {
+                    work->activeEntries[slot].presentation.mpState = 0x10;
+                    work->activeEntries[slot].presentation.mpHighlightLevel = 0x7F;
+                    work->activeEntries[slot].presentation.mpEffectState = 0x11;
+                    work->activeEntries[slot].presentation.mpEffectFade = 0xFF;
+                    work->activeEntries[slot].presentation.mpTarget = work->activeEntries[slot].presentation.mpLevel;
+                } else if (work->activeEntries[slot].presentation.mpLevel < unit->partyRecord.mp) {
+                    work->activeEntries[slot].presentation.mpState = 0x20;
+                    work->activeEntries[slot].presentation.mpHighlightLevel = 0x7F;
+                    work->activeEntries[slot].presentation.mpEffectState = 0x21;
+                    work->activeEntries[slot].presentation.mpEffectFade = 0xFF;
+                    work->activeEntries[slot].presentation.mpTarget = work->activeEntries[slot].presentation.mpLevel;
+                }
+            }
+            switch (work->activeEntries[slot].presentation.mpState) {
+            case 0:
+                work->activeEntries[slot].presentation.mpLevel = unit->partyRecord.mp;
+                break;
+            case 0x10:
+            case 0x20:
+                work->activeEntries[slot].presentation.mpPulseFrame = 0;
+                memset(&work->activeEntries[slot].presentation.mpBarPulse, 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
+                memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
+                work->activeEntries[slot].presentation.unk1C4 = 0;
+                work->activeEntries[slot].presentation.mpState++;
+                break;
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C7020);
 

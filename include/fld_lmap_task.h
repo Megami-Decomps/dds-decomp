@@ -15,7 +15,7 @@ typedef struct MapRequestNode {
 } MapRequestNode;
 
 typedef struct MapRequestState {
-    u32 handle;
+    struct SdfMemBlock *allocation; /* 0x00: descriptor for the ring and nodes. */
     MapRequestNode *first;
     MapRequestNode *next;
     MapRequestNode *third;
@@ -35,6 +35,8 @@ typedef struct MapRequestRing {
 
 typedef char MapRequestNode_size_must_be_0x20[(sizeof(MapRequestNode) == 0x20) ? 1 : -1];
 typedef char MapRequestState_size_must_be_0x1C[(sizeof(MapRequestState) == 0x1C) ? 1 : -1];
+typedef char MapRequestState_allocation_offset_must_be_0[
+    ((u32)&((MapRequestState *)0)->allocation == 0) ? 1 : -1];
 typedef char MapRequestRing_nodes_offset_check[
     ((u32)&((MapRequestRing *)0)->nodes == 0x44) ? 1 : -1];
 

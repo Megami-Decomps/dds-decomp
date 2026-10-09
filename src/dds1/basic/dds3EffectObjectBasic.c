@@ -595,7 +595,37 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
     data->node = effEventCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
+EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    EffectObj *obj;
+    EffectDependencyState *data;
+    ObjBase *objectHandle;
+    EffWorldNode *worldNode;
+
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    if (obj == NULL) {
+        return NULL;
+    }
+    data = obj->data;
+    data->state = EFF_OBJ_STATE_PARAMETERS_READY;
+    obj->inner->scale[0] = scale;
+    obj->inner->scale[1] = scale;
+    obj->inner->scale[2] = scale;
+    data->flags = 0;
+    data->handle = NULL;
+    data->node = NULL;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    obj->value = name;
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
+    worldNode = dds3GetFirstWorldObjectNodeOfKind2();
+    if (worldNode != NULL) {
+        objectHandle->slots[5] = worldNode;
+        dds3EnsureWorldNodeInSlot(worldNode, obj);
+    }
+    return obj;
+}
 
 EffectObj *func_00115460(const char *name, void *firstVector, void *secondVector, f32 scale) {
     return func_00115398(name, firstVector, secondVector, scale);

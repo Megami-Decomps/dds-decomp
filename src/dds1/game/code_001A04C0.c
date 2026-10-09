@@ -556,7 +556,70 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A04C0", func_001A11F0);
+extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
+extern void btlSetScene(s32 sceneId);
+extern void itfMesSetFlags(s32 flags);
+extern void mdlFlagSet(s32 flag);
+
+/* Start a battle: pick the scene parameters for the encounter and enter the battle scene. */
+void func_001A11F0(s32 mode, s32 pack, s32 encounter) {
+    struct { s32 code; s32 parameter; } req;
+    u16 paramA;
+    u16 paramB;
+
+    func_001A0F10();
+    btlCreateDrawTasks();
+    switch (mode) {
+    case 0:
+        ((BtlState *)btlRuntime)->encounterPack = pack;
+        ((BtlState *)btlRuntime)->adjustmentGroupIndex = (u8)(encounter >> 24);
+        ((BtlState *)btlRuntime)->adjustmentEntryIndex = (u8)(encounter >> 16);
+        ((BtlState *)btlRuntime)->battleMode = (u16)encounter;
+        btlBossDebugPrintf("enc[pack:%X,no:%X,index:%X,encNo:%X]\n", pack, (u8)(encounter >> 24), (u8)(encounter >> 16), (u16)encounter);
+        if (pack > 0) {
+            paramA = D_003BAA3C[pack].encounterParamA;
+            ((BtlState *)btlRuntime)->encounterParamA = paramA;
+            paramB = D_003BAA3C[pack].encounterParamB;
+            ((BtlState *)btlRuntime)->encounterParamB = paramB;
+            evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, (s16)paramA, (s16)paramB);
+            if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
+                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
+                    evtPrintDeveloperConsoleMessage("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
+                    paramA = req.code;
+                    paramB = req.parameter;
+                    ((BtlState *)btlRuntime)->encounterParamA = paramA;
+                    ((BtlState *)btlRuntime)->encounterParamB = paramB;
+                }
+            }
+        } else {
+            ((BtlState *)btlRuntime)->encounterParamA = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1C;
+            ((BtlState *)btlRuntime)->encounterParamB = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1E;
+            if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
+                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
+                    ((BtlState *)btlRuntime)->encounterParamA = req.code;
+                    ((BtlState *)btlRuntime)->encounterParamB = req.parameter;
+                } else {
+                    ((BtlState *)btlRuntime)->encounterParamA = 0xC9;
+                    ((BtlState *)btlRuntime)->encounterParamB = 1;
+                }
+            }
+        }
+        btlSetScene(2);
+        break;
+    case 1:
+        btlSetScene(0xC);
+        break;
+    }
+    if (((BtlState *)btlRuntime)->encounterParamA == 0 && ((BtlState *)btlRuntime)->encounterParamB == 0) {
+        ((BtlState *)btlRuntime)->encounterParamA = 0xC9;
+        ((BtlState *)btlRuntime)->encounterParamB = 1;
+    }
+    itfMesSetFlags(1);
+    mdlFlagSet(0xC0F);
+    ((BtlState *)btlRuntime)->battleFlags |= 0x701C1;
+    ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
+    btlBossDebugPrintf("** btlStart **************\n");
+}
 
 void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();

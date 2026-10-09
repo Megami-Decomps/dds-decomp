@@ -570,11 +570,11 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
         for (i = 0; i < work->effectWork->count; i++) {
             mnuDestroyNodeJobQueues((s32 *)&work->effectWork->lists[i]);
         }
-        sdfReleaseResourceAllocation((SdfMemBlock *)work->effectWork->handle);
+        sdfReleaseResourceAllocation(work->effectWork->allocation);
         work->effectWork = NULL;
     }
     if (work->work24 != NULL) {
-        sdfReleaseResourceAllocation((SdfMemBlock *)work->work24->handle);
+        sdfReleaseResourceAllocation(work->work24->allocation);
         work->work24 = NULL;
     }
     slot = work->resourceSlots;

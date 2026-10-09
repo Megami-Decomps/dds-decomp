@@ -2591,7 +2591,7 @@ void *evtCreateBattleStageTestCamera(void) {
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
     EffWorldNode *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
-    cameraTarget->value = (u32)D_003BC7C8;
+    cameraTarget->value = D_003BC7C8;
     return func_00288458;
 }
 

@@ -170,7 +170,7 @@ EffWorldNode *evtSpawnActionObj11(s32 key, EvtWorldSourceTransformPrefix *source
 
     obj->data = source;
     obj->key = key;
-    obj->value = value;
+    obj->value = (const char *)value;
     return obj;
 }
 

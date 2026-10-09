@@ -206,17 +206,17 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     s32 listBytes = listCount * 8;
     s32 allocationSize = listBytes + 16;
     s32 i;
-    u32 handle;
+    struct SdfMemBlock *allocation;
     MnuEffectWork *work;
     MnuEffectList *list;
     MnuEffectRecord *records;
 
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
-    handle = (u32)sdfAllocGeneralBlock(allocationSize);
-    work = (MnuEffectWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
+    allocation = sdfAllocGeneralBlock(allocationSize);
+    work = (MnuEffectWork *)sdfMemoryGetBlockAddress(allocation);
     memset(work, 0, allocationSize);
-    work->handle = handle;
+    work->allocation = allocation;
     work->count = listCount;
     work->lists = (MnuEffectList *)(work + 1);
     list = work->lists;

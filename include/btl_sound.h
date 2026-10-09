@@ -17,8 +17,11 @@ typedef struct BattleEffect BattleEffect;
 struct EffBattleEntryList;
 struct EffParamWork;
 struct SdfMemBlock;
+struct FileRequest;
 struct BtlUnit;
 struct BtlRuntimeTask;
+struct SoundLoadNode;
+struct SoundFileNode;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
@@ -102,9 +105,44 @@ typedef struct TimedUnitEffectArgs {
 
 typedef struct EffectLoadArgs {
     SoundResourceNode *effect;
-    void *loadHandle;
+    struct FileRequest *request;
     const char *name;
 } EffectLoadArgs;
+
+typedef char EffectLoadArgs_size_must_be_0x0C[
+    (sizeof(EffectLoadArgs) == 0x0C) ? 1 : -1];
+typedef char EffectLoadArgs_request_offset_must_be_4[
+    ((u32)&((EffectLoadArgs *)0)->request == 4) ? 1 : -1];
+typedef char EffectLoadArgs_name_offset_must_be_8[
+    ((u32)&((EffectLoadArgs *)0)->name == 8) ? 1 : -1];
+
+/* Callback arguments stored in the 12-byte earring playback task. */
+typedef struct BtlDeadLoadArgs {
+    struct BtlUnit *unit; /* 0x00 */
+    struct FileRequest *request; /* 0x04 */
+    struct SdfMemBlock *resourceAllocation; /* 0x08: retained until task finish. */
+} BtlDeadLoadArgs;
+
+typedef char BtlDeadLoadArgs_size_must_be_0x0C[
+    (sizeof(BtlDeadLoadArgs) == 0x0C) ? 1 : -1];
+typedef char BtlDeadLoadArgs_request_offset_must_be_4[
+    ((u32)&((BtlDeadLoadArgs *)0)->request == 4) ? 1 : -1];
+typedef char BtlDeadLoadArgs_resourceAllocation_offset_must_be_8[
+    ((u32)&((BtlDeadLoadArgs *)0)->resourceAllocation == 8) ? 1 : -1];
+
+/* Fixed task payload for asynchronous ATRAC3 sample effects. */
+typedef struct Atrac3LoadTaskArgs {
+    struct FileRequest *request; /* 0x00 */
+    s32 state; /* 0x04 */
+    s32 entryIndex; /* 0x08 */
+} Atrac3LoadTaskArgs;
+
+typedef char Atrac3LoadTaskArgs_size_must_be_0x0C[
+    (sizeof(Atrac3LoadTaskArgs) == 0x0C) ? 1 : -1];
+typedef char Atrac3LoadTaskArgs_state_offset_must_be_4[
+    ((u32)&((Atrac3LoadTaskArgs *)0)->state == 4) ? 1 : -1];
+typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
+    ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
 struct ActiveSoundNode;
 struct SoundResourceLink;
@@ -139,8 +177,72 @@ typedef struct SoundDataFileArgs {
 typedef char SoundDataFileArgs_size_must_be_4[
     (sizeof(SoundDataFileArgs) == 4) ? 1 : -1];
 
+/* Fixed header followed by the copied filename in sound MotSE load tasks. */
+typedef struct SoundFileTaskArgs {
+#ifdef VERSION_DDS1
+    struct SoundLoadNode *node; /* 0x00 */
+#else
+    struct SoundFileNode *node; /* 0x00 */
+#endif
+    struct FileRequest *request; /* 0x04: queued file request */
+    struct SdfMemBlock *resourceAllocation; /* 0x08: retained file allocation */
+#ifdef VERSION_DDS1
+    u32 blockIndex; /* 0x0C */
+#else
+    s32 frames; /* 0x0C */
+#endif
+    const char *filename; /* 0x10: points to inline bytes after this header */
+} SoundFileTaskArgs;
+
+typedef char SoundFileTaskArgs_size_must_be_0x14[
+    (sizeof(SoundFileTaskArgs) == 0x14) ? 1 : -1];
+typedef char SoundFileTaskArgs_node_offset_must_be_0[
+    ((u32)&((SoundFileTaskArgs *)0)->node == 0) ? 1 : -1];
+typedef char SoundFileTaskArgs_request_offset_must_be_4[
+    ((u32)&((SoundFileTaskArgs *)0)->request == 4) ? 1 : -1];
+typedef char SoundFileTaskArgs_allocation_offset_must_be_8[
+    ((u32)&((SoundFileTaskArgs *)0)->resourceAllocation == 8) ? 1 : -1];
+typedef char SoundFileTaskArgs_index_offset_must_be_C[
+#ifdef VERSION_DDS1
+    ((u32)&((SoundFileTaskArgs *)0)->blockIndex == 0x0C) ? 1 : -1];
+#else
+    ((u32)&((SoundFileTaskArgs *)0)->frames == 0x0C) ? 1 : -1];
+#endif
+typedef char SoundFileTaskArgs_filename_offset_must_be_10[
+    ((u32)&((SoundFileTaskArgs *)0)->filename == 0x10) ? 1 : -1];
+
 s32 sndLoadDataFile(const SoundDataFileArgs *data);
 struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
+void sndStartFileLoad(SoundFileTaskArgs *args);
+u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *args);
+#ifdef VERSION_DDS1
+struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundLoadNode *node, u32 blockIndex, const char *filename);
+#else
+struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundFileNode *node, s32 frames, char *filename);
+#endif
+
+/* Both factories store full words; callbacks use the low 16 duration bits. */
+typedef struct BtlTintAcquireArgs {
+    u32 color;
+    u32 frames;
+} BtlTintAcquireArgs;
+
+typedef struct BtlTintReleaseArgs {
+    u32 frames;
+} BtlTintReleaseArgs;
+
+typedef char BtlTintAcquireArgs_size_must_be_8[sizeof(BtlTintAcquireArgs) == 8 ? 1 : -1];
+typedef char BtlTintReleaseArgs_size_must_be_4[sizeof(BtlTintReleaseArgs) == 4 ? 1 : -1];
+
+s32 btlQueueTintTransitionWhenEnabled(const BtlTintAcquireArgs *args);
+s32 sndTickFadeCounter(const BtlTintReleaseArgs *args);
+#ifdef VERSION_DDS1
+struct BtlRuntimeTask *sndCreateAcquireTask(u32 color, u32 frames);
+#else
+struct BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames);
+#endif
+struct BtlRuntimeTask *sndCreateReleaseTask(u32 frames);
+struct BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames);
 
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
