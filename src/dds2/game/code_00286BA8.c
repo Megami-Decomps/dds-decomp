@@ -45,7 +45,7 @@ struct MenuListNode {
 
 extern MenuList *func_002884C0(void);
 extern s32 mdlFlagTest(s32);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
