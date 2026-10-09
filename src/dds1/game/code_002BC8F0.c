@@ -1001,7 +1001,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfConsCreateDrawPacket(packetList, texture, 0);
     sdfAppendPacket(packetList, packet);
     drawSurface = &kwlnDrawSurfaces[surfaceId];
-    drawSurface->append((SdfListHead *)drawSurface, packetList);
+    drawSurface->append(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 

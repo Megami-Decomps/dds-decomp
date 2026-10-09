@@ -187,7 +187,7 @@ typedef struct MnuShootingWork {
     FadeNumber lowerNumber;
     FadeNumber upperNumber;
     FadeGauge gauge;
-    u8 pad14C[0x1C];
+    FadeNumber pauseFade;             /* 0x14C: pause-menu choice glyphs. */
     /* SDK fade payloads: round number, score triplet, and choice renderers. */
     FadeNumber roundFade;             /* 0x168 */
     FadeEntry scoreFade;             /* 0x184 */
@@ -215,5 +215,8 @@ typedef char ShootingInputOffsetsAssert[
 typedef char ShootingPoolOffsetsAssert[
     ((unsigned long)&((MnuShootingWork *)0)->spriteWork == 0x28 &&
      (unsigned long)&((MnuShootingWork *)0)->tintWork == 0x2C) ? 1 : -1];
+typedef char ShootingPauseFadeOffsetsAssert[
+    ((unsigned long)&((MnuShootingWork *)0)->pauseFade == 0x14C &&
+     (unsigned long)&((MnuShootingWork *)0)->pauseFade.displayValue == 0x164) ? 1 : -1];
 typedef char ShootingFadeOffsetsAssert[((unsigned long)&((MnuShootingWork*)0)->strip==0xB4 && (unsigned long)&((MnuShootingWork*)0)->lowerNumber==0xCC && (unsigned long)&((MnuShootingWork*)0)->upperNumber==0xE8 && (unsigned long)&((MnuShootingWork*)0)->gauge==0x104 && (unsigned long)&((MnuShootingWork*)0)->roundFade==0x168 && (unsigned long)&((MnuShootingWork*)0)->scoreFade==0x184 && (unsigned long)&((MnuShootingWork*)0)->choiceFade==0x19C && (unsigned long)&((MnuShootingWork*)0)->frame==0x1B8 && (unsigned long)&((MnuShootingWork*)0)->fadeResources.fadeSprites==0x34)?1:-1];
 #endif /* MNU_SHOOTING_H */

@@ -43,6 +43,16 @@ typedef struct EvtCameraColorPayload {
 } EvtCameraColorPayload;
 typedef char EvtCameraColorPayload_size[(sizeof(EvtCameraColorPayload) == 0x40) ? 1 : -1];
 
+/* Serialized and embedded group-link metadata share these eight bytes. */
+typedef struct EvtGroupMetadata {
+    u8 type;
+    u8 flag;
+    s16 entry;
+    s16 value;
+    s8 extra1;
+    s8 extra2;
+} EvtGroupMetadata;
+
 /* Complete 0x84-byte entry: metadata, selected object and owned key list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
@@ -53,13 +63,13 @@ typedef struct EvtRuntimeGroup {
     s32 entryHeader; /* Signed runtime name-table index. */
     s32 argument0C;
     EffWorldNode *info;
-    s32 argument14;
-    u8 pad18[4];
-    s16 metadataValue;
-    s8 metadataByte1;
-    s8 metadataByte2;
+    union {
+        void *resourceData;
+        struct { u16 resourceGroup, resourceId; } resourceIds;
+    };
+    EvtGroupMetadata metadata;
     u8 pad20[4];
-    union { s32 entryValue; SdfTex *texture; };
+    SdfTex *texture; /* Retained kind-0x18 texture; released with the group. */
     s32 unk28;
     f32 savedFirstVector[4];
     f32 savedSecondVector[4];
@@ -219,6 +229,8 @@ s32 evtViewerStartUpdate(struct KwlnTask *task);
 struct KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
+typedef char EvtGroupMetadata_size[(sizeof(EvtGroupMetadata) == 8) ? 1 : -1];
+typedef char EvtRuntimeGroup_metadata_offset[((u32)&((EvtRuntimeGroup *)0)->metadata == 0x18) ? 1 : -1];
 typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];

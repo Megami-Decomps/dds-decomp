@@ -1242,7 +1242,7 @@ void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
 
     node = sdfStreamNodeListHead;
     while (node != 0) {
-        if (node->unk1A + node->unk13 < 2 &&
+        if (node->completedBufferCount + node->unk13 < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
             sdfStartStreamNodeIpuTransfer(node);
@@ -1278,7 +1278,7 @@ void sdfIpuDmaCompletionWorker(void) {
         if (work->playbackPhase == SDF_STREAM_PLAYBACK_INITIAL) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
-        work->unk1A++;
+        work->completedBufferCount++;
         D_003BDAA4 = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
@@ -1351,10 +1351,10 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
 void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     s32 interruptsEnabled = func_00312C08();
-    s32 pendingBuffers = node->unk1A;
+    s32 pendingBuffers = node->completedBufferCount;
     s32 remainingBuffers = pendingBuffers - 1;
     if (pendingBuffers > 0) {
-        node->unk1A = remainingBuffers;
+        node->completedBufferCount = remainingBuffers;
         node->transferPacketIndex ^= 1;
         node->unk13++;
     }
@@ -1371,7 +1371,7 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
 s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     u32 *selectedBuffer;
-    if (node->unk1A == 0) {
+    if (node->completedBufferCount == 0) {
         return 0;
     }
     selectedBuffer = (u32 *)(node->transferPacketIndex * 4 + (s32)node + 0x28);

@@ -64,7 +64,7 @@ typedef struct EffGsPacket {
 
 
 static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 extern s32 sdfAllocPacketAligned(s32);
@@ -184,7 +184,6 @@ extern void effReleaseSurfaceGridBuffers(s32);
 extern s32 func_00151FC0(void);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 
 extern EffPacketParams D_003DC9E0;
@@ -2713,7 +2712,6 @@ extern u32 D_0037EA20[20];
 extern u32 D_0037EA70[16];
 extern SdfTex *func_0029C048(void *, RefObj *);
 struct SdfAsset;
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 
 void func_002A3E10(u8 *work, void *matrix) {
     EffTrackSet *track = (EffTrackSet *)work;
@@ -2762,7 +2760,7 @@ void func_002A3E10(u8 *work, void *matrix) {
             texture = func_0029C048(surface, reference);
         }
 setTexture:
-        sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)track->handle, (u32)texture);
+        sdfSetAssetPrimaryTextureAddress(track->handle, texture);
     }
     sdfConsAppendAssetPacket(list, track->handle, 0);
 
@@ -4807,7 +4805,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, (u32)packet);
         }
-        D_0037ECF0[set->type]->append((SdfListHead *)D_0037ECF0[set->type], list);
+        D_0037ECF0[set->type]->append(D_0037ECF0[set->type], list);
     }
 }
 
@@ -6542,7 +6540,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, (u32)packet);
         }
-        D_0037EE68[set->type]->append((SdfListHead *)D_0037EE68[set->type], list);
+        D_0037EE68[set->type]->append(D_0037EE68[set->type], list);
     }
 }
 

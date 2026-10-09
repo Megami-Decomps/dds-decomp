@@ -862,7 +862,7 @@ void func_001A6E88(ItfMesState *panel) {
         itfSendTablePacket(list, 0, 0);
     }
     surface = &kwlnDrawSurfaces[panel->unk10];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7120);
@@ -906,7 +906,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
         itfSendTablePacket((SdfListHead *)packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[object->unk10];
-    surface->append((SdfListHead *)surface, (SdfListHead *)packet);
+    surface->append(surface, (SdfListHead *)packet);
 }
 
 s32 sndVisitQueuedResources(void) {
@@ -966,7 +966,7 @@ void func_001A7798(UiSprite *sprite) {
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList((SdfListHead *)packet);
     itfEmitQuadListA(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, (SdfListHead *)packet);
-    D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)packet);
+    D_00380708.append(&D_00380708, (SdfListHead *)packet);
 }
 
 void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
@@ -1154,7 +1154,7 @@ s32 sndUpdateTestMsgTask(KwlnTask *task) {
         sdfInitPacketList((SdfListHead *)mem);
         itfSendTablePacket((SdfListHead *)mem, 0, 0);
         itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, (SdfListHead *)mem);
-        D_003805A8.append((SdfListHead *)&D_003805A8, (SdfListHead *)mem);
+        D_003805A8.append(&D_003805A8, (SdfListHead *)mem);
         return 0;
     }
     return 0;
@@ -1201,7 +1201,7 @@ s32 func_001A8938(void) {
     sdfAppendPacket((SdfListHead *)list,
                     (u32)sdfFormatSifPacket(&packet, "FOVY: %6.2f",
                         sdfSceneProjectionParameters.camera.fov * radiansToDegrees));
-    D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)list);
+    D_00380708.append(&D_00380708, (SdfListHead *)list);
     if (D_0037F543[0] < 0) {
         return -1;
     }
@@ -1372,7 +1372,7 @@ s32 func_001A8BD0(void) {
     sdfAppendPacket(list,
         (u32)func_0011F250((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
     if ((s8)D_0037F510.unk32 < 0) {
         kwlnDrawOverlayEnabled ^= 1;
@@ -1528,7 +1528,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
     sdfAppendPacket((SdfListHead *)list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, (SdfListHead *)list);
+    surface->append(surface, (SdfListHead *)list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {

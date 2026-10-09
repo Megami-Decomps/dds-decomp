@@ -107,7 +107,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
     sdfAppendPacket(list, (u32)func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, (SdfListHead *)list);
+    surface->append(surface, (SdfListHead *)list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {

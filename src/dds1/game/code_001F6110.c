@@ -1016,7 +1016,7 @@ void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32
                       xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,
                       xFixed + 0x7200, yFixed + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, bottomRightColor,
                       0xFF0000, 0);
-        surface->append((SdfListHead *)surface, packet);
+        surface->append(surface, packet);
     }
 }
 
@@ -2816,7 +2816,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     }
 
     surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
-    surface->append((SdfListHead *)surface, packetList);
+    surface->append(surface, packetList);
     return descriptor->selectionStatus;
 }
 
@@ -2937,7 +2937,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         sdfConsCreateDrawPacket(list, texture, 0);
         sdfAppendPacket(list, sprite);
         surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
-        surface->append((SdfListHead *)surface, list);
+        surface->append(surface, list);
     }
 }
 

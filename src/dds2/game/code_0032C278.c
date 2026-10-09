@@ -117,9 +117,7 @@ extern SdfPacketSlot D_0040B308[];
 
 extern SdfResource *sdfResourceListHead;
 
-void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
-void sdfConnectPacketLists();
 
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 
@@ -489,7 +487,7 @@ void sdfSetPacketCursorAligned(s32 cursorAddress) {
 /* Clear all links and metadata before building a new packet list. */
 void sdfInitPacketList(SdfListHead *list) {
     list->unkC = 0xFFFF;
-    list->unk0 = 0;
+    list->nextList = NULL;
     list->first = 0;
     list->last = 0;
     list->firstReferenceSource = 0;
@@ -576,39 +574,39 @@ void sdfAppendCallPacket(SdfListHead *list, u32 packetAddress) {
 }
 
 /* Prepend a nonempty packet list, connecting its DMA tail to the former first list. */
-void sdfPrependPacketList(SdfListHead *destinationList, SdfListHead *incomingList) {
+void sdfPrependPacketList(SdfPoolNode *destinationList, SdfListHead *incomingList) {
     SdfListHead *firstList;
 
     if (incomingList->last == 0) {
         return;
     }
-    firstList = (SdfListHead *)destinationList->first;
+    firstList = destinationList->first;
     if (firstList == NULL) {
-        destinationList->last = (u32)incomingList;
+        destinationList->last = incomingList;
     } else {
         sdfConnectPacketLists(incomingList, firstList);
     }
-    incomingList->unk0 = (u32)firstList;
-    destinationList->first = (u32)incomingList;
+    incomingList->nextList = firstList;
+    destinationList->first = incomingList;
 }
 
-void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
-    u32 *last;
+void sdfAppendPacketList(SdfPoolNode *list, SdfListHead *item) {
+    SdfListHead *last;
 
     if (item->first != 0) {
-        last = (u32 *)list->last;
+        last = list->last;
         if (last == NULL) {
-            list->first = (u32)item;
+            list->first = item;
         }
         else {
-            *last = (u32)item;
-            sdfConnectPacketLists(last);
+            last->nextList = item;
+            sdfConnectPacketLists(last, item);
         }
-        list->last = (u32)item;
+        list->last = item;
     }
 }
 
-s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
+s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
     if (mode == 1) {
         sdfPrependPacketList(list, packet);
     }
@@ -646,10 +644,7 @@ SdfDmaTag *sdfLinkReferenceDmaNode(SdfDmaTag *previousTag, SdfDmaTag *sourceTag)
 
 /* Insert differing nonzero reference sources before linking the incoming DMA chain.
  * Zero incoming sources inherit prior state; the locals cover both source slots. */
-void sdfConnectPacketLists(previousList, incomingList)
-    SdfListHead *previousList;
-    SdfListHead *incomingList;
-{
+void sdfConnectPacketLists(SdfListHead *previousList, SdfListHead *incomingList) {
     SdfDmaTag *tailTag = (SdfDmaTag *)previousList->last;
     u32 previousSource;
     u32 incomingSource;
@@ -702,25 +697,25 @@ void sdfChainReferenceNodes(SdfListHead *list) {
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *tail = NULL;
-    s32 head = 0;
+    SdfListHead *head = NULL;
 
     for (; node != NULL; node = node->next) {
-        node->prepend((SdfListHead *)node, 0, NULL);
+        node->prepend(node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                sdfConnectPacketLists(tail, (SdfListHead *)node->first);
+                sdfConnectPacketLists(tail, node->first);
             } else {
                 head = node->first;
-                sdfChainReferenceNodes((SdfListHead *)head);
+                sdfChainReferenceNodes(head);
             }
-            tail = (SdfListHead *)node->last;
+            tail = node->last;
         }
     }
     if (tail != NULL) {
         ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
         ((SdfDmaTag *)tail->last)->address = 0;
     }
-    return (SdfListHead *)(u32)head;
+    return head;
 }
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {

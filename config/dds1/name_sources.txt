@@ -4990,7 +4990,11 @@
 0x00282BE8	mnuDrawPanelListDefault	inferred	Draws menu panel list using default override value. [names_reviewed8.tsv]
 0x00282C10	mnuCreatePanelState	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00282C70	mnuDestroyPanelState	inferred	Releases a panel's resource list handle when present, then frees the panel.
+0x00282CA8	mnuSetPanelFirstGridSlot	inferred	Stores MenuPanelState.firstSlot and its grid index, then initializes its quantized bounds.
+0x00282CD0	mnuSetPanelSecondGridSlot	inferred	Stores MenuPanelState.secondSlot and its grid index.
 0x00282CF8	mnuInitializePanelResource	inferred	Obtains a resource-list handle for mode two and saves it in the panel state.
+0x00282D28	mnuSetPanelThirdGridSlot	inferred	Stores MenuPanelState.thirdSlot and its grid index.
+0x00282D50	mnuSetPanelFourthGridSlot	inferred	Stores MenuPanelState.fourthSlot and its grid index, then stores the companion value.
 0x00282D98	mnuSetPanelState	inferred	Assigns panel state word used by the panel render path. [names_reviewed5.tsv]
 0x00282F98	mnuCreatePanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00283038	mnuDestroyPanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
