@@ -380,9 +380,9 @@ void kwlnDrawSpriteCell(u32 packetList, s32 column, s32 row, s32 columnCount, s3
 }
 
 /* Append the same cell rectangle with caller-selected depth. */
-void kwlnDrawSpriteCellZ(u32 packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
+void kwlnDrawSpriteCellZ(SdfListHead *packetList, s32 column, s32 row, s32 columnCount, s32 rowCount, s32 depth) {
     s32 columnSpan = KWLN_CELL_COLUMN_SPAN, rowSpan = KWLN_CELL_ROW_SPAN;
-    sdfAppendPacket((SdfListHead *)packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
+    sdfAppendPacket(packetList, func_0011D3E8(column * 0x10 + 0x6FD0, row * 8 + 0x78E8, depth,
                                            columnCount * columnSpan + rowSpan, rowCount * rowSpan + 0x30,
                                            0x60000000, 0x40806020));
 }

@@ -6450,3 +6450,40 @@ converts the completed packet to the physical `u32` append argument.
 Do not invent another packet view, alter the SDK helper's scalar contract,
 or collapse the genuinely consumed header and payload locals.
 
+
+The field sprite submission family similarly keeps the actual `void *`
+returned by `sdfConsAllocateColumnPacket`. Only the separate
+`FldSpriteVertex *` payload is dereferenced; the packet itself is forwarded
+opaquely to the SDK offset helper and physical append. Keep those two real
+locals and the existing payload owner, without encoding the allocated
+packet in `s32` or inventing a second sprite/header view.
+
+
+## Model viewer lists retain their primary work owners
+
+The paired viewer option callbacks keep the reset-list factory result in
+`MdlOptionState.packetList` at `+0x30`, then pass that same list to packet
+and surface append routines. The separate `MdlCtrlState.packetList` at
+`+0x08` feeds the packed-color label renderer. Both are `SdfListHead *`;
+the two work structures remain distinct, with their original sizes
+(`0x38` and `0x0C`) and offsets. No integer encoding or alternate work
+view is needed at either CPU list boundary.
+
+
+The depth-selected cell helper `kwlnDrawSpriteCellZ` likewise accepts a
+`SdfListHead *` in both games. It forwards that CPU list unchanged to
+`sdfAppendPacket`; only the generated rectangle packet is the physical
+second argument. The depth, cell-span arithmetic and packet constructor
+retain their existing contracts.
+
+
+## Battle texture preview retains its allocated CPU packet
+
+`btlDrawResourcePreview` keeps the column factory's true `void *` result
+beside the existing `KwlnSpriteVertex *` payload cursor. Only the latter
+owns the vertex fields. The SDK `+0x20` helper still takes and returns a
+scalar address/extent word, and append still consumes a physical `u32`;
+those are the two explicit word boundaries, not alternate CPU views.
+Local declarations must agree with those actual provider contracts in
+both games, even when an older wrong pointer return happened to match.
+
