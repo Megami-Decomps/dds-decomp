@@ -44,13 +44,13 @@ typedef char SdfItem_commandData_at_44[
 
 typedef struct SdfItemListRef {
     SdfItemList *items; /* 0x00 */
-    void *assets;      /* 0x04: serialized material/asset list */
+    u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
     s32 slotPairCount; /* 0x08: passed to sdfModelAllocateSlotPairs */
     struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
 } SdfItemListRef;
 
 typedef char SdfItemListRef_size_must_be_0x10[(sizeof(SdfItemListRef) == 0x10) ? 1 : -1];
-typedef char SdfItemListRef_assets_at_4[((u32)&((SdfItemListRef *)0)->assets == 4) ? 1 : -1];
+typedef char SdfItemListRef_serializedAssetData_at_4[((u32)&((SdfItemListRef *)0)->serializedAssetData == 4) ? 1 : -1];
 typedef char SdfItemListRef_slotPairCount_at_8[((u32)&((SdfItemListRef *)0)->slotPairCount == 8) ? 1 : -1];
 typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkTable == 0xC) ? 1 : -1];
 
