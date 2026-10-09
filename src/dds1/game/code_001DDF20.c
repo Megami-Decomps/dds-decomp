@@ -6802,14 +6802,14 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
     node->work.refCount = count;
     if (count == 0) {
         u32 i = 0;
-        u32 *resources = (u32 *)node->work.resourceHandles;
-        u32 *requests = (u32 *)node->work.fileRequests;
+        struct SdfMemBlock **resources = node->work.resourceHandles;
+        struct FileRequest **requests = node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
-                filePollEntryCleanup((struct FileRequest *)(u32)*requests);
+                filePollEntryCleanup(*requests);
             }
             if (*resources != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resources));
+                sdfReleaseResourceAllocation(*resources);
             }
         }
         if (node->next != 0) {
@@ -6939,8 +6939,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
-            size = sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
+            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
             func_0026ABA8(data, size, 2);
             func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
@@ -7013,14 +7013,13 @@ void func_001F44C0(void) {
             for (slot = 0; slot < 0x1D; slot++) {
                 if (owner->work.fileRequests[slot] != 0) {
                     if (fileIsRequestReadyInCurrentMode(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
+                            owner->work.fileRequests[slot]) != 0) {
                         u32 resource = fileGetResourceHandle(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]);
+                            owner->work.fileRequests[slot]);
 
-                        struct FileRequest *completedRequest =
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot];
+                        struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
-                        owner->work.resourceHandles[slot] = resource;
+                        owner->work.resourceHandles[slot] = (struct SdfMemBlock *)resource;
                         filePollEntryCleanup(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
@@ -7067,11 +7066,9 @@ void func_001F44C0(void) {
             for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
                 if (owner->flags & 4) {
                     SoundSlotWork *work = &owner->work;
-                    struct SdfMemBlock *block =
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot];
+                    struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemoryGetBlockSize(block);
-                    u32 address = sdfMemoryGetBlockAddress(
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot]);
+                    u32 address = sdfMemoryGetBlockAddress(work->resourceHandles[owner->work.pendingSlot]);
 
                     func_002E9450((s32)address, size);
                     owner->flags = (owner->flags & ~4) | 8;
@@ -7090,7 +7087,7 @@ s32 sndHasOccupiedNodeSlots(void) {
     while (node != 0) {
         if ((node->flags & 2) == 0) {
             u32 index = 0;
-            u32 *requests = (u32 *)node->work.fileRequests;
+            struct FileRequest **requests = node->work.fileRequests;
             for (; index < 0x1D; index++) {
                 if (*requests != 0) {
                     return 1;
