@@ -6500,22 +6500,14 @@ typedef struct SoundLoadNode {
     u32 position;
 } SoundLoadNode;
 
-typedef struct SoundFileRequest {
-    SoundLoadNode *node;
-    void *handle;
-    u32 resourceHandle;
-    u32 blockIndex;
-    const char *name;
-} SoundFileRequest;
-
-void sndStartFileLoad(SoundFileRequest *request) {
+void sndStartFileLoad(SoundFileTaskArgs *request) {
     SoundLoadNode *node = request->node;
 
-    request->handle = fileQueueDefaultCallbackRequest(request->name);
+    request->request = fileQueueDefaultCallbackRequest(request->filename);
     node->flags |= 1;
     node->position = (request->blockIndex + 0x200) << 16;
     node->state = 2;
-    btlBossDebugPrintf("btl:sound file load start[%s]\n", request->name);
+    btlBossDebugPrintf("btl:sound file load start[%s]\n", request->filename);
 }
 
 extern char D_003A50D8[];
@@ -6528,20 +6520,20 @@ extern char D_003A5138[];
 
 extern void func_002E9450(s32, s32);
 
-u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
+u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     SoundLoadNode *node = request->node;
     if (sndHasActiveFileLoad()) {
         btlBossDebugPrintf(D_003A50D8);
         return 0;
     }
     if ((node->flags & 2) == 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)request->handle)) {
+        if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
             s32 data;
-            btlBossDebugPrintf(D_003A50F0, request->name);
-            request->resourceHandle = fileGetResourceHandle((struct FileRequest *)request->handle);
-            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)request->handle);
-            data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
+            btlBossDebugPrintf(D_003A50F0, request->filename);
+            request->resourceAllocation = (struct SdfMemBlock *)fileGetResourceHandle(request->request);
+            size = (s32)fileGetResourceSize(request->request);
+            data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_002E9450(data, size);
                 node->flags |= 8;
@@ -6552,17 +6544,17 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
-        filePollEntryCleanup((struct FileRequest *)(u32)request->handle);
+        sdfReleaseResourceAllocation(request->resourceAllocation);
+        filePollEntryCleanup(request->request);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
     return 0;
 }
 
-u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename) {
+BtlRuntimeTask *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename) {
     u8 *task = btlAllocTask(strlen(filename) + 20);
-    SoundFileRequest *request;
+    SoundFileTaskArgs *request;
     char *name;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -6575,9 +6567,9 @@ u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename
     name = (char *)(request + 1);
     request->node = node;
     request->blockIndex = variant;
-    request->name = name;
+    request->filename = name;
     strcpy(name, filename);
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 s32 sndLoadDataFile(const SoundDataFileArgs *data) {
