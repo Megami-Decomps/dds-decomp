@@ -1551,7 +1551,89 @@ u32 btlHasRegisteredPsechgPanelTask(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AD758);
+/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
+ * the later panel updater handles the other five points and their fades. */
+typedef struct BattlePhasePanelWork {
+    s32 frames;
+    s32 mode;
+    s8 phase;
+    u8 pad09[0xF];
+    s32 waitCounter; /* 0x18: delay before the first slide */
+    u8 pad1C[0x1C];
+    BattleSelectionPosition current[8]; /* 0x38 */
+    BattleSelectionPosition saved[8];   /* 0x78 */
+    s32 fade[8][4];                    /* 0xB8 */
+} BattlePhasePanelWork;
+
+typedef char BattlePhasePanelWork_size_must_be_0x138[
+    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
+
+typedef char BattlePhasePanelWork_waitCounter_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
+
+typedef char BattlePhasePanelWork_current_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
+
+typedef char BattlePhasePanelWork_saved_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
+
+typedef char BattlePhasePanelWork_fade_offset_check[
+    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
+
+typedef struct BtlPsechgPositions {
+    BattleSelectionPosition points[5];
+} BtlPsechgPositions;
+
+extern const BtlPsechgPositions D_003A2270;
+extern const BtlPsechgPositions D_003A2298;
+extern s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *);
+extern void btlReleasePsechgPanelWork(KwlnTask *);
+extern void btlSetTrackedTaskHandle(s32, s32);
+extern void func_00101A80(KwlnTask *, KwlnTask *);
+
+/* Create the phase-gated PSECHG panel with one of two initial point sets. */
+s32 func_001AD758(s32 variant) {
+    BtlPsechgPositions firstPoints = D_003A2270;
+    BtlPsechgPositions secondPoints = D_003A2298;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    KwlnTask *previous = (KwlnTask *)btlGetTrackedTaskHandle(6);
+    BattlePhasePanelWork *work;
+    BtlPsechgPositions *points;
+    s32 *destination;
+    s32 *source;
+    KwlnTask *task;
+    s32 i;
+
+    if (btlHasRegisteredPsechgPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(previous, 0);
+    }
+    if ((battle->battleFlags & 0x200) == 0) {
+        battle->battleFlags |= 0x200;
+    }
+    btlTrackedTaskHandles->phaseGate = 0;
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    if (variant == 0) {
+        work->mode = 0;
+        points = &firstPoints;
+    } else {
+        work->mode = 1;
+        points = &secondPoints;
+    }
+    /* Copy the five coordinate pairs into the current rows. */
+    destination = &work->current[0].y;
+    source = (s32 *)points->points;
+    for (i = 0; i < 5; i++) {
+        destination[-1] = source[0];
+        destination[0] = source[1];
+        destination += 2;
+        source += 2;
+    }
+    task = kwlnTaskCreate(D_003BB3BC, 0x2B0E, 1, 1, btlUpdatePhaseGatedTaskUntilTimeout,
+                          btlReleasePsechgPanelWork, (u32)work);
+    func_00101A80(battle->scriptOwner, task);
+    btlSetTrackedTaskHandle(6, (s32)task);
+    return 1;
+}
 
 u32 btlHasRegisteredSkillNamePanelTask(void) {
     KwlnTask *task;
@@ -2251,35 +2333,6 @@ void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
     sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(7, 0);
 }
-
-/* AD758 allocates 0x138 bytes. The strip renderer uses the first three rows;
- * the later panel updater handles the other five points and their fades. */
-typedef struct BattlePhasePanelWork {
-    s32 frames;
-    s32 mode;
-    s8 phase;
-    u8 pad09[0xF];
-    s32 waitCounter; /* 0x18: delay before the first slide */
-    u8 pad1C[0x1C];
-    BattleSelectionPosition current[8]; /* 0x38 */
-    BattleSelectionPosition saved[8];   /* 0x78 */
-    s32 fade[8][4];                    /* 0xB8 */
-} BattlePhasePanelWork;
-
-typedef char BattlePhasePanelWork_size_must_be_0x138[
-    (sizeof(BattlePhasePanelWork) == 0x138) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_waitCounter_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->waitCounter == 0x18) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_current_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->current == 0x38) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_saved_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->saved == 0x78) ? 1 : -1];
-
-typedef char BattlePhasePanelWork_fade_offset_check[
-    ((u32)&((BattlePhasePanelWork *)0)->fade == 0xB8) ? 1 : -1];
 
 typedef struct BattlePhaseSlotIds { s32 values[3]; } BattlePhaseSlotIds;
 
