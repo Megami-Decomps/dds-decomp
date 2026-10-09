@@ -157,7 +157,6 @@ extern struct BtlRuntimeTask *func_001F0920(u32 value);
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
 
-extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
 
 
 extern void btlRefreshUnitEffects(void);

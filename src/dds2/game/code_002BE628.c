@@ -148,9 +148,7 @@ extern s8 D_003E792A[];
 
 
 
-extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 
-extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
 
 extern void evtStageTestAdvanceMotionQueue(void);
 

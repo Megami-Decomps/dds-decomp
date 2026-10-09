@@ -444,8 +444,6 @@ extern s32 btlIsActorModeAcceptedByBattleHook(u8 *);
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlRefreshUnitMotionSelection(u8 *);
 extern void btlRefreshUnitEffectMotionAndEntry(u8 *);
-extern void mdlAddEntryFlagged(void *, s32, s32);
-extern void mdlAddEntryPlain(void *, s32, s32);
 extern void evtPrepareUnitMotionState(struct EvtUnit *, s32, s32, s32, s32);
 extern void evtStoreUnitMotionShortParameters(struct EvtUnit *, s32, s32);
 extern s32 btlGetSlotRateKind(u8 *, s32);

@@ -7,7 +7,6 @@ struct WideSlot;
 struct CompactSlot;
 extern struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32, u32, u32, s8, struct WideSlotPool *);
 extern struct CompactSlot *itfClaimCompactSlotWithPayload(u32, u32, struct CompactSlotPool *);
-extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 extern s32 func_003242D0(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern u32 mnuAdvanceWorkEntry(MenuWorkEntry *, s32);

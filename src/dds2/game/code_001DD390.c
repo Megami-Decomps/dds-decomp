@@ -55,9 +55,7 @@ extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 extern f32 effMiscRandUnitFloat(void *state);
 
-extern void mdlAddEntryPlain(void *, s32, s32);
 
-extern void mdlAddEntryFlagged(void *, s32, s32);
 
 extern u8 effSharedRandomState[];
 

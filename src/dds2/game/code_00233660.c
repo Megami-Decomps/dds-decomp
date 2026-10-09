@@ -38,12 +38,6 @@ extern s32 D_003C88C8[];
 
 extern void func_00103388(s32, s32, s32, s32);
 
-extern s32 mdlHasNode(s32, s16);
-
-extern void mdlAddEntryFlaggedEx(s32, s16, s16, f32, f32);
-
-extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
-
 
 
 
@@ -1234,7 +1228,6 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
 
 extern MdlCtx *func_00232198(s16 a, s16 b);
 
-extern void mdlAddEntryFlagged(MdlCtx *loaded, s32 a, s32 b);
 
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlCtx *loaded;
@@ -1371,7 +1364,7 @@ void mdlAddViewEntryFlagged(void) {
         width = height;
     }
     state->activeEntryId = state->selectedEntryId;
-    mdlAddEntryFlaggedEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
+    mdlAddEntryFlaggedEx(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
 }
 
 void mdlAddPlainViewerEntryForSelectedNode(void) {
@@ -1388,7 +1381,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
         width = height;
     }
     state->activeEntryId = state->selectedEntryId;
-    mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
+    mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
 }
 
 extern u32 func_00232F08(void);

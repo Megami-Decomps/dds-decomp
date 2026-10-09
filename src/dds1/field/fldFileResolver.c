@@ -376,12 +376,7 @@ extern u8 D_003BAC90[];
 extern void func_00288788(u32 arg0);
 extern void mdlSuspendAllContextMotions(MdlCtx *ctx);
 extern void mdlResumeAllContextMotions(MdlCtx *ctx);
-extern void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
-                               f32 blendDurationFrames);
 extern void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value);
-extern void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
-extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern s32 D_0032E4C8[];
 extern s32 D_003BAE30;
 extern s32 D_003BAE1C;

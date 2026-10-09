@@ -1525,7 +1525,6 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
 
 extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 
 /* These two three-ID resource families retain the saved motion for selectors 16/17. */
