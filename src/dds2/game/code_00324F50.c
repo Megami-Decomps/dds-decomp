@@ -61,7 +61,12 @@ void *func_00324F50(u32 *owner, u32 resource) {
     return handle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324F50", mnuRemoveLinkedResourceByHandle);
+/* Unlink the owner list node that carries the handle and notify its callbacks. */
+void mnuRemoveLinkedResourceByHandle(u32 *owner, u32 handle) {
+    SdfListNode *node = mnuFindResourceNodeByHandle((MnuCallbackList *)owner[1], handle);
+
+    dds3RemoveListNodeAndNotify((MnuCallbackList *)owner[1], node);
+}
 
 DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list) {
     SdfListNode *node;
