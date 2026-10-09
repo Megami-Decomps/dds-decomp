@@ -137,7 +137,8 @@ typedef struct BattleIndexWork {
     s32 unk20;
 #ifdef VERSION_DDS1
     s32 slot; /* DDS1 001D2A10 stores the complete action-classification result. */
-    u8 pad28[5];
+    s32 adjustedValue; /* DDS1 001D2AA0 / 001D2AC8. */
+    s8 resultKind; /* DDS1 001D2AB0 / 001D2AC4. */
 #else
     s32 slot;
     s32 adjustedValue;

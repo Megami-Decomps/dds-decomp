@@ -36,6 +36,8 @@ extern void sdfSetViewFieldOfView(f32);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
+extern void func_002476B8(EvtRuntime *viewer);
+extern void evtViewerApplySelectedEntry(EvtRuntime *viewer);
 extern u8 D_004372C0[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
@@ -52,7 +54,6 @@ extern void effSetCh72Id(SdfTex *sourceHandle);
 extern void effSetCh75Id(SdfTex *texture);
 extern void effSetCh76Id(SdfTex *sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
-
 
 
 void func_00249088(s32 arg0, void *arg1);
@@ -95,14 +96,10 @@ typedef struct EvtViewerObjectData {
 } EvtViewerObjectData;
 
 
-
-
 /* Handles retained by the viewer and by its owning task context. */
 
 
-
 /* Script-command parameter slots are interpreted according to track kind. */
-
 
 
 u16 evtViewerPopHistory(EvtRuntime *viewer);
@@ -124,58 +121,6 @@ extern void evtReorderListNodes(EvtRuntimeGroup *track);
 typedef struct CampDisplayDefaults CampDisplayDefaults;
 extern void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
-
-/* Interpolates parameter keys at the viewer's current frame, accounting for
- * the track offset. DDS2 subtracts 35 from the second output word before applying it. */
-void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node, u16 *from, u16 *to) {
-    u8 out[0x20];
-    f32 ratio = 0.0f;
-
-    if (from != NULL) {
-        if (to != NULL) {
-            s32 start = *from;
-            f32 span = *to - start;
-            f32 elapsed = viewer->curFrame - (start + node->metadata.value);
-
-            if (span != 0.0f) {
-                ratio = elapsed / span;
-            }
-        }
-        func_0025E460((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
-        *(s32 *)(out + 4) -= 35;
-        mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
-    }
-}
-
-/* Applies kind-24 parameter tracks using bracketing keys, or the pending key
- * when keyMode is 1. Traversal uses the shared timeline-key record. */
-void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
-    EvtRuntimeGroup *node = viewer->groups;
-    s32 position = viewer->curFrame;
-
-    while (node != NULL) {
-        if (node->type == 24) {
-            if (node->unk28 == 1) {
-                u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
-                evtViewerApplyInterpolatedNodeKey(viewer, node, key, NULL);
-            } else {
-                EvtRuntimeChild *glyph = node->children;
-                EvtRuntimeChild *from;
-
-                while (glyph != NULL && position >= glyph->frame + node->metadata.value) {
-                    glyph = glyph->next;
-                }
-                if (glyph != NULL) {
-                    from = glyph->prev;
-                } else {
-                    from = node->lastChild;
-                }
-                evtViewerApplyInterpolatedNodeKey(viewer, node, (u16 *)from, (u16 *)glyph);
-            }
-        }
-        node = node->next;
-    }
-}
 
 
 /* Native five-word draw-vector parameters; the timeline swaps x and y. */
@@ -209,61 +154,6 @@ extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
 extern void func_0025EE00(EvtRuntime *);
 
-void func_002476B8(EvtRuntime *viewer) {
-    if (viewer->blurRectangleEnabled != 0) {
-        effDrawBlurRectangle(&effGetLoadDescA()->source);
-    }
-    if (viewer->texturedBlurEnabled != 0) {
-        effEnableTexturedBlur();
-    } else {
-        effDisableTexturedBlur();
-    }
-    if (viewer->texturedSquareEnabled != 0) {
-        effEnableTexturedSquare();
-    } else {
-        effDisableTexturedSquare();
-    }
-    if (viewer->filterBlurEnabled != 0) {
-        effEnableFilterBlur();
-    } else {
-        effDisableFilterBlur();
-    }
-    if (viewer->staggeredBlurEnabled != 0) {
-        effEnableStaggeredBlur();
-    } else {
-        effDisableStaggeredBlur();
-    }
-    if (viewer->framebufferQuadEnabled != 0) {
-        effEnableFramebufferQuad();
-    } else {
-        effDisableFramebufferQuad();
-    }
-    if (viewer->colorRectangleEnabled != 0) {
-        effEnableColorRectangle();
-    } else {
-        effDisableColorRectangle();
-    }
-    func_0025EE00(viewer);
-    evtViewerApplyParameterKeyTracks(viewer);
-}
-
-/* Select the active entry (or fallback) and sync world selection and camera. */
-void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
-    s32 unit;
-    s32 first = viewer->activeEntryIndex;
-
-    if (first != 0) {
-        unit = first;
-    } else {
-        unit = viewer->fallbackEntry;
-    }
-    if (unit != 0) {
-        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)unit);
-        sdfSetViewFieldOfView(dds3GetCameraFieldOfView((EffWorldNode *)unit));
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_00247518", func_00247858);
 
 extern s32 func_0035B6E0(const char *, ...);
 
@@ -297,8 +187,8 @@ void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s3
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00247EE0);
-INCLUDE_ASM(const s32, "game/code_00247518", func_00248000);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_00247EE0);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_00248000);
 
 
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
@@ -475,7 +365,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
     evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00249088);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_00249088);
 
 /* Returns the address word of the nearest kind-2 key at/before the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
@@ -510,7 +400,6 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
 }
 
 extern void evtSetMovieClipPositionClampedToDuration(s32 object, s32 arg1, s32 start, s32 end, s32 extra);
-
 
 
 /* Clamps each movie object's playback interval using its linked track's first
@@ -1019,7 +908,7 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024A400);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024A400);
 
 void func_0024A5F8(EvtRuntime *viewer) {
 }
@@ -1339,7 +1228,7 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
     viewer->windowActive = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024AD48);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024AD48);
 
 s32 evtViewerTestIndexedCondition(u32 encodedId) {
     u32 idx;
@@ -1357,13 +1246,13 @@ u32 func_0024B078(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004227A0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004227A0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004227B0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004227B0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004227C0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004227C0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004227D0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004227D0);
 
 s32 func_0024B080(s32 arg0, s32 arg1, EvtRuntime *viewer) {
     switch ((u32)viewer->inputA) {
@@ -1429,52 +1318,52 @@ s32 func_0024B080(s32 arg0, s32 arg1, EvtRuntime *viewer) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024B268);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024B268);
 
 u32 func_0024B678(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229A0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229A0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229B0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229B0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229C0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229C0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229D0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229D0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229E0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229E0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_004229F0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_004229F0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A00);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A00);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A10);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A10);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A20);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A20);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A30);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A30);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A40);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A40);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A50);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A50);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A60);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A60);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A70);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A70);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A80);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A80);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422A90);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422A90);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422AA0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422AA0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422AB0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422AB0);
 
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00422AC0);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00422AC0);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024B6A8);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024B6A8);
 
 /* Store the edited timing or selector halfword in the pending timeline key. */
 s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *viewer) {
@@ -1515,7 +1404,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024C650);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024C650);
 
 /* Store the command value as a halfword and clear its extra halfword when tagged. */
 s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
@@ -1590,7 +1479,7 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CA28);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024CA28);
 
 u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *key = evtEventViewerGetPendingNode(viewer);
@@ -1635,7 +1524,7 @@ u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", evtViewCmdResolveSlot);
+INCLUDE_ASM(const s32, "game/code_00247DE0", evtViewCmdResolveSlot);
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
@@ -1672,7 +1561,7 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     return handled ? -1 : 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024CE18);
+INCLUDE_ASM(const s32, "game/code_00247DE0", func_0024CE18);
 
 u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     if (evtEventViewerGetPendingNode(viewer) != 0) {
@@ -1684,7 +1573,7 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime
 }
 
 /* Restore default effect parameters for the selected timeline key. */
-INCLUDE_RODATA(const s32, "game/code_00247518", D_00423050);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", D_00423050);
 
 s32 func_0024D148(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
@@ -2027,7 +1916,6 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-
 void func_0024DBB8(PolyMovieWork *assets) {
 
     if (assets->flags & 8) {
@@ -2075,77 +1963,77 @@ void func_0024DBB8(PolyMovieWork *assets) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00247518", evtViewerTaskName);
+INCLUDE_RODATA(const s32, "game/code_00247DE0", evtViewerTaskName);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372B0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B2);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372B2);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B4);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372B4);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372B8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372B8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372C0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372C0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372C8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372C8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372CC);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372CC);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372D0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372D0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372D8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372D8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372E0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372E0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372E8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372E8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372F0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372F0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004372F8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004372F8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437300);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437300);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437308);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437308);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437310);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437310);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437318);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437318);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437320);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437320);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437328);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437328);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437330);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437330);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437338);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437338);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437340);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437340);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437348);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437348);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437350);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437350);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437358);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437358);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437360);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437360);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437368);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437368);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437370);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437370);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437378);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437378);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437380);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437380);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437388);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437388);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437390);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437390);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_00437398);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_00437398);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004373A0);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004373A8);
 
-INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
+INCLUDE_SDATA(const s32, "game/code_00247DE0", D_004373B0);
 
