@@ -12,6 +12,8 @@ void itfMesReplaceWindowHighFlags(s32 window, u32 highFlags);
 /* Set or clear only bits from the high-half mask. */
 void itfMesSetWindowHighFlags(s32 window, u32 mask);
 void itfMesClearWindowHighFlags(s32 window, u32 mask);
+void itfMesSetWindowPanelValue(s32 window, u32 panelMask);
+void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
 void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 void itfMesFinishWindowAndClearStatus(s32 window);
 
