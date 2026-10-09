@@ -26,12 +26,6 @@ extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern u32 effModelUpdateControlFlags;
 
-extern void *fileResolvePrimaryBuffer(FileJobPayload *);
-
-extern void *fileResolveSecondaryBuffer(FileJobPayload *);
-
-
-
 extern void sdfTexReleaseReference(struct SdfTex *texture);
 
 
