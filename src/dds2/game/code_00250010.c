@@ -4,6 +4,7 @@
 #include "evt_viewer.h"
 
 #include "evt_world.h"
+#include "evt_picture.h"
 #include "eff_object.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -139,12 +140,7 @@ extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
 
-extern char evtPictureTaskName[];
-extern void evtUpdatePictureWhenFlagged();
-extern void evtPictureReleaseTaskTextureAndState();
-extern EvtPictureWork *evtAllocateContext(void);
-extern void evtSetConvertedContextValue(EvtPictureWork *, const char *);
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, void *, void *, u32);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 
 /* Create a task with an initialized event payload. */
@@ -198,7 +194,7 @@ void evtAdvanceSkyTransition(void) {
     }
 }
 
-s32 evtUpdateSkyTask(void) {
+s32 evtUpdateSkyTask(KwlnTask *task) {
     evtAdvanceSkyTransition();
     func_00134A18();
     if (evtSkyOverlayEnabled != 0) {
@@ -208,7 +204,7 @@ s32 evtUpdateSkyTask(void) {
     return 0;
 }
 
-void evtResetSkyTaskFlags(void) {
+void evtResetSkyTaskFlags(KwlnTask *task) {
     evtSkyTransitionActive = 0;
     evtSkyOverlayEnabled = 0;
 }
@@ -4304,4 +4300,3 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C0);
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377C8);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377D0);
-

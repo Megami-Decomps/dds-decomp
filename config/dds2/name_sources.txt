@@ -2969,7 +2969,7 @@
 0x0020D448	btlScanDirectory	inferred	lists entries of a dir by extension filter bitmask (tmx,p2a,pb,ep,epl,tlp,f2)
 0x0020DA28	btlCreateResourceDescriptor	inferred	allocates the 0x48 BtlResourceDescriptor consumed by btlDestroyResourceDescriptor [names_M36_SmallSweep5.tsv]
 0x0020DAB8	btlUpdateAndDrawResourceBrowser	inferred	Handles browser navigation, updates the selected entry preview and submits the visible browser rows; returns the selection status.
-0x0020DFB0	btlSetResourceNameHeaderPair	inferred	Stores two argument words in resource-name record header at offsets 0 and 4. [names_R_FuncNames6.tsv]
+0x0020DFB0	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x0020E1E0	btlDrawResourcePreview	inferred	Paired native function builds and submits the resource preview panel from the descriptor texture.
 0x0020E300	btlCreateResourceNameRecord	inferred	Allocates and initializes 0x38-byte battle resource-name record then copies its name. [names_R_FuncNames6.tsv]
 0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
@@ -6950,3 +6950,5 @@
 0x00476480	sdfPadPorts	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_00476480[i]); Instruction-aligned data counterpart of DDS1 D_003F9B00 in the matched sdfPadUpdatePorts() twin. Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x0020DFC8	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
+0x002EB968	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
