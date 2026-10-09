@@ -10,20 +10,13 @@
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 
-typedef struct EffectHandler {
-    u32 (*handler)(u32);
-    u8 pad04[0x2C];
-} EffectHandler;
-
-extern EffectHandler D_003AA770[];
-
 EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
     EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
     u32 argument = (u32)source->instance;
 
     copy->type = source->type;
     copy->arg = source->arg;
-    copy->instance = D_003AA770[source->type].handler(argument);
+    copy->instance = effNodeTypeOperations[source->type].cloneInstanceWord(argument);
     return copy;
 }
 

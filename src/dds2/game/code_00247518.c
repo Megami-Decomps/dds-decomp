@@ -13,6 +13,7 @@
 #include "eff_event_draw.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
@@ -269,7 +270,6 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247858);
 
 extern s32 func_0035B6E0(const char *, ...);
-extern void effSetNodeParameterValue();
 
 /* Applies duration-scaled alpha to the selected effect for supported track
  * kinds. The key's duration is used directly, without validation here. */

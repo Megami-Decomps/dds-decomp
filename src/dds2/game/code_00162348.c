@@ -256,7 +256,7 @@ ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle;
     BillObj *billboard;
 
-    particle = parKindConstructorEntries[source->dispatchIndex].func();
+    particle = parKindConstructorEntries[source->dispatchIndex].func(source);
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
         billboard = billCloneObjectRetainingSharedData(source->billboard);

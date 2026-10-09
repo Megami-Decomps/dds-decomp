@@ -14,6 +14,7 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "dds3obj.h"
 #include "kwln_task_lifecycle.h"
@@ -60,7 +61,6 @@ typedef struct EffNode EffNode;
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern u8 fldTestSceneControlFlags(u32);
-extern void effDestroyNode(EffNode *);
 
 extern f32 fldAngleDifference(f32, f32);
 
@@ -318,7 +318,6 @@ extern char fldTitleTaskName[]; /* "fldTitle" */
 
 extern char D_00413C80[]; /* "fldTitleMini" */
 
-extern void effUpdateNode(u32 arg0);
 
 extern void ddsReleaseUnitObject(EffWorldNode *node);
 
@@ -447,7 +446,6 @@ extern s32 fldTestMapSlotAuxiliaryFlag();
 
 extern void dds3SetObjectFlags();
 
-extern void effRestartNodeInstance(EffNode *node);
 
 
 typedef struct FieldPair48 {
@@ -2775,7 +2773,7 @@ void fldReleaseTextureSlots(void) {
 
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
-            effDestroyNode(fldEffectTextureNodes[i]);
+            effDestroyNode((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
             sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
@@ -2811,7 +2809,7 @@ void func_0014B5D8(void) {
             func_00336538(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(matrix);
             effApplyNodeTransformMatrix((EffNode *)fldEffectTextureNodes[i], matrix);
-            effUpdateNode(fldEffectTextureNodes[i]);
+            effUpdateNode((EffNode *)(u32)fldEffectTextureNodes[i]);
         }
     }
 }
@@ -2828,7 +2826,7 @@ void fldLoadResourceByIndex(s32 index) {
 
 void fldReleaseIndexedResourceEffect(void) {
     if (fldIndexedResourceEffect != 0) {
-        effDestroyNode(fldIndexedResourceEffect);
+        effDestroyNode((EffNode *)(u32)fldIndexedResourceEffect);
         fldIndexedResourceEffect = 0;
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldIndexedResourceHandle);
         fldIndexedResourceHandle = 0;
@@ -2848,7 +2846,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
         position[1] = state->y;
         position[2] = state->z;
         effCopyVectorToNodeInstance((EffNode *)fldIndexedResourceEffect, position);
-        effUpdateNode(fldIndexedResourceEffect);
+        effUpdateNode((EffNode *)(u32)fldIndexedResourceEffect);
     }
 }
 
@@ -2871,7 +2869,7 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(handle);
+        effRestartNodeInstance((EffNode *)(u32)handle);
         effCopyVectorToNodeInstance((EffNode *)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
@@ -2898,7 +2896,7 @@ void mnuReleaseResourceEntries(void) {
     fldSecondaryEffectPositionPending = 0;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0) {
-            effDestroyNode(mnuPositionedResourceNodes[i]);
+            effDestroyNode((EffNode *)(u32)mnuPositionedResourceNodes[i]);
             mnuPositionedResourceNodes[i] = 0;
         }
     }
@@ -2908,7 +2906,7 @@ void fldUpdateMenuResourceEffects(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0 && mnuPositionedResourceActive[i] != 0) {
-            effUpdateNode(mnuPositionedResourceNodes[i]);
+            effUpdateNode((EffNode *)(u32)mnuPositionedResourceNodes[i]);
         }
     }
 }
@@ -3065,15 +3063,15 @@ void fldFreeSceneResources(void) {
         D_004362DC = 0;
     }
     if (D_004362E8 != 0) {
-        effDestroyNode(D_004362E8);
+        effDestroyNode((EffNode *)(u32)D_004362E8);
         D_004362E8 = 0;
     }
     if (D_004362F4 != 0) {
-        effDestroyNode(D_004362F4);
+        effDestroyNode((EffNode *)(u32)D_004362F4);
         D_004362F4 = 0;
     }
     if (fldAreaDamageEffect != 0) {
-        effDestroyNode(fldAreaDamageEffect);
+        effDestroyNode((EffNode *)(u32)fldAreaDamageEffect);
         fldAreaDamageEffect = 0;
     }
 }
@@ -3107,7 +3105,7 @@ void fldResetObjectSlots(void) {
         fldObjectSlots[i].unk8 = 0;
         fldObjectSlots[i].activationRequested = 0;
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode(fldObjectSlots[i].effectNode);
+            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
         }
         fldObjectSlots[i].effectNode = 0;
     }
@@ -3144,7 +3142,7 @@ void fldReleaseObjectSlots(void) {
 
     for (i = 0; i < 32; i++) {
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode(fldObjectSlots[i].effectNode);
+            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
             fldObjectSlots[i].effectNode = 0;
         }
     }
@@ -3172,7 +3170,7 @@ void func_0014D0E8(void) {
                 case 0:
                 case 3:
                     if (D_004362E8 != 0) {
-                        effDestroyNode(D_004362E8);
+                        effDestroyNode((EffNode *)(u32)D_004362E8);
                         D_004362E8 = 0;
                     }
                     if (fldAreaState.area == 29 || fldAreaState.area == 30) {
@@ -3185,7 +3183,7 @@ void func_0014D0E8(void) {
                     break;
                 case 1:
                     if (D_004362F4 != 0) {
-                        effDestroyNode(D_004362F4);
+                        effDestroyNode((EffNode *)(u32)D_004362F4);
                         D_004362F4 = 0;
                     }
                     D_004362F4 = effCreateNodeFromDescriptor(D_004362F0);
@@ -3214,11 +3212,11 @@ void func_0014D0E8(void) {
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].unk8 = 3;
                 if (D_004362E8 != 0) {
-                    effDestroyNode(D_004362E8);
+                    effDestroyNode((EffNode *)(u32)D_004362E8);
                     D_004362E8 = 0;
                 }
                 if (D_004362F4 != 0) {
-                    effDestroyNode(D_004362F4);
+                    effDestroyNode((EffNode *)(u32)D_004362F4);
                     D_004362F4 = 0;
                 }
             }
@@ -3245,8 +3243,8 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
     pos[1] = y;
     pos[2] = z;
     pos[3] = 1.0f;
-    effRestartNodeInstance(fldAreaDamageEffect);
-    effCopyVectorToNodeInstance((EffNode *)fldAreaDamageEffect, pos);
+    effRestartNodeInstance((EffNode *)(u32)fldAreaDamageEffect);
+    effCopyVectorToNodeInstance((EffNode *)(u32)fldAreaDamageEffect, pos);
     fldAreaDamageEffectPlaced = 1;
     return 1;
 }
@@ -3832,13 +3830,13 @@ void fldReleaseWeatherEffects(void) {
         sdfTexReleaseReferenceViaHandler(D_004363B4);
         D_004363B4 = 0;
     }
-    effDestroyNode(fldDamEffectNode);
+    effDestroyNode((EffNode *)(u32)fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00436380);
     D_00436380 = 0;
     D_00436384 = 0;
-    effDestroyNode(fldYukEffectNode);
+    effDestroyNode((EffNode *)(u32)fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00436390);
@@ -3855,7 +3853,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(fldDamEffectNode);
+        effRestartNodeInstance((EffNode *)(u32)fldDamEffectNode);
         effCopyVectorToNodeInstance((EffNode *)fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
@@ -3863,7 +3861,7 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(fldYukEffectNode);
+        effRestartNodeInstance((EffNode *)(u32)fldYukEffectNode);
         effCopyVectorToNodeInstance((EffNode *)fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
@@ -3871,10 +3869,10 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 
 void fldUpdateWeatherEffectNodes(void) {
     if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        effUpdateNode(fldDamEffectNode);
+        effUpdateNode((EffNode *)(u32)fldDamEffectNode);
     }
     if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        effUpdateNode(fldYukEffectNode);
+        effUpdateNode((EffNode *)(u32)fldYukEffectNode);
     }
 }
 

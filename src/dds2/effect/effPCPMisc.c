@@ -76,7 +76,6 @@ extern u8 D_003B1A38[];
 extern u8 D_003B1A88[];
 
 extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
-extern void effDestroyNode(struct EffNode *node);
 
 
 extern void sdfComposeVuMatrixFromRegisters(void);
@@ -3182,8 +3181,6 @@ extern f32 func_00208000(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);
-extern void effSetNodeParameterValue(struct EffNode *node, u32 value);
-extern void effUpdateNode(struct EffNode *node);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */

@@ -259,7 +259,7 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
 }
 
 ParObj *parInstantiateKind(ParObj *source) {
-    ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func();
+    ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func(source);
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
         BillObj *billboard = billCloneObjectRetainingSharedData(source->billboard);
