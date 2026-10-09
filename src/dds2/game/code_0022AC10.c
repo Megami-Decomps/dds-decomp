@@ -2023,7 +2023,42 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F068);
+extern s32 D_00435E48;
+extern s32 D_00435E4C;
+extern s32 D_00435E5C;
+void func_0022F068(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    u32 i;
+
+    state->debug.selectedUnit = NULL;
+    state->debug.actionMenu.count = 7;
+    state->debug.actionMenu.rows = 7;
+    state->debug.modelMenu.rows = 0xF;
+    state->debug.motionMenu.count = 0x1D;
+    state->debug.motionMenu.rows = 0xF;
+    state->debug.gunMenu.count = 0x60;
+    state->debug.gunMenu.rows = 0xF;
+    if (state->unk_E0C == 0) {
+        state->debug.modelMenu.count = 0x180;
+    } else {
+        state->debug.modelMenu.count = 0x30;
+    }
+    for (i = 0; i < 0x30; i++) {
+        if (i < 0x20) {
+            state->debug.table0[i] = D_00435E48 + i * 0x11;
+        } else {
+            state->debug.table0[i] = D_00435E48 + (i - 0x20) * 0x11;
+        }
+    }
+    for (i = 0; i < 0x180; i++) {
+        state->debug.table1[i] = D_00435E4C + i * 0x11;
+    }
+    for (i = 0; i < 0x60; i++) {
+        state->debug.table2[i] = D_00435E5C + 0xFA0 + i * 0x19;
+    }
+    state->debug.unk00 = 0;
+    state->unk_E0E = -1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F180);
 
@@ -2209,7 +2244,76 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_00230978);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_00230D90);
+extern u8 D_00436F5E;
+extern u8 D_00436F60;
+extern u8 D_00436F61;
+extern u8 D_00436F62;
+extern u8 D_00436F96;
+extern DatPartyRecord D_003C0620[][5];
+extern s32 D_003C3248[5][24];
+extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
+extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
+extern void mdlFlagSet(u32);
+extern void mdlFlagClear(u32);
+
+void func_00230D90(void) {
+    u32 i;
+    u32 n;
+
+    if (D_00436F5E != 0) {
+        i = 0;
+        btlGetRuntime();
+        datGameState->partyCount = 0;
+        if (D_003C0620[D_00436F61][0].unitId != 0) {
+            do {
+                if (D_00436F62 != D_00436F61) {
+                    memcpy(&datGameState->party[i], &D_003C0620[D_00436F61][i], sizeof(DatPartyRecord));
+                }
+                if (D_00436F96 != 0) {
+                    for (n = 0; D_003C3248[i][n] >= 0; n++) {
+                        datGameState->party[i].effectData[n] = D_003C3248[i][n];
+                    }
+                    for (; n < 24; n++) {
+                        datGameState->party[i].effectData[n] = 0;
+                    }
+                    datGameState->party[i].unk20 = 0;
+                }
+                if (i < D_00436F60) {
+                    datGameState->party[i].flags |= 0x1002;
+                } else {
+                    datGameState->party[i].flags = (datGameState->party[i].flags | 0x1000) & ~2;
+                }
+                datGameState->partyOrder[i] = i;
+                datGameState->party[i].maxHp = btlComputeSkillAdjustedMaxHp(&datGameState->party[i]);
+                datGameState->party[i].maxMp = btlComputeSkillAdjustedMaxMp(&datGameState->party[i]);
+                if (datGameState->party[i].maxHp < datGameState->party[i].hp || D_00436F96 != 0) {
+                    datGameState->party[i].hp = datGameState->party[i].maxHp;
+                }
+                if (datGameState->party[i].maxMp < datGameState->party[i].mp || D_00436F96 != 0) {
+                    datGameState->party[i].mp = datGameState->party[i].maxMp;
+                }
+                datGameState->party[i].menuValue = 0xA1;
+                datGameState->partyCount++;
+                i++;
+            } while (i < 5 && D_003C0620[D_00436F61][i].unitId != 0);
+        }
+        for (; i < 5; i++) {
+            memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+        }
+        datGameState->inventory.counts[0] = 0;
+        for (i = 1; i < 0x100; i++) {
+            ptyAdjustItemQuantity(i, 0x63);
+        }
+        datGameState->inventory.counts[0x53] = 1;
+        datGameState->inventory.counts[0x54] = 1;
+        mdlFlagClear(0x801);
+        mdlFlagSet(0x805);
+        mdlFlagSet(0x806);
+        datGameState->world.slotFlags |= 0xC;
+        D_00436F62 = D_00436F61;
+        D_00436F96 = 0;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C300);
 
