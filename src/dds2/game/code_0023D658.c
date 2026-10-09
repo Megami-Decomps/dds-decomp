@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "mdl_motion_api.h"
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -107,7 +108,7 @@ typedef struct EvtSourceVec {
 } EvtSourceVec;
 
 extern void effObjSetInnerThirdVec(void *object, void *vector);
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
 
@@ -118,7 +119,6 @@ extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
-extern s32 mdlCheckNodeByte30(MdlCtx *arg0, s32 arg1);
 
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -682,9 +682,9 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     toRad = 0.017453293f;
     x = bfWaitReadArgFloat(1) * toRad;
     y = bfWaitReadArgFloat(2) * toRad;
-    func_00340DC8(x, y, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
     VU0_MOVE_VF(vf11, vf10);
-    func_00340DC8(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
     effMiscQuatMultiplyVU();
     VU0_STORE_VF($vf10, v);
     effObjSetInnerSecondVec(unit, v);
@@ -898,7 +898,7 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
     if (((unit->slotFlags[off] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->owner, scrReadIntParameter(1)) != 0;
+    return mdlGetNodeMotionTerminalStatus(unit->owner, scrReadIntParameter(1)) != 0;
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
@@ -1117,7 +1117,7 @@ u32 func_0023F938(void) {
     }
     targetAngle -= (angleDelta + angleDelta) / 3.0f;
 
-    func_00340DC8(0.0f, targetAngle * 0.017453293f, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, targetAngle * 0.017453293f, 0.0f);
     /* First write to this output vector; the SDK store touches only it. */
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
 
@@ -1168,7 +1168,7 @@ u32 func_0023FBA8(void) {
     }
     effObjFetchInnerSecondVecNorm(actor);
     referenceAngle = -(effMiscComputeQuaternionRotatedReferenceAngle() * 57.29577637f);
-    func_00340DC8(0.0f, unit->unkDC * 0.017453293f, 0.0f);
+    sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->unkDC * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
     frames = scrReadIntParameter(1);
@@ -1581,9 +1581,9 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
         toRad = 0.017453293f;
         x = bfWaitReadArgFloat(1) * toRad;
         y = bfWaitReadArgFloat(2) * toRad;
-        func_00340DC8(x, y, 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
         VU0_MOVE_VF(vf11, vf10);
-        func_00340DC8(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, bfWaitReadArgFloat(3) * toRad);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
         effObjSetInnerSecondVec(obj, v);

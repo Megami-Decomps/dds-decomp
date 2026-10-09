@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "btl_task_condition.h"
 #include "sdf.h"
@@ -2722,9 +2723,7 @@ void btlUpdateSpecialActorFormation(void) {
     }
 }
 
-extern s32 mdlGetNodeMotionIndex(MdlCtx *context, s32 searchId);
 
-extern s32 mdlGetNodeFrameAsInt(MdlCtx *context, s32 searchId);
 
 extern char D_00436CE0[];
 

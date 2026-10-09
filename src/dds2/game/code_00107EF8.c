@@ -235,7 +235,7 @@ extern void dds3AdminSetControlFlag(void);
 extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
 
 
-extern void func_0010AEC0(void);
+extern s32 func_0010AEC0(struct KwlnTask *);
 
 extern void *D_00438E64;
 
@@ -600,7 +600,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
 extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
 extern void *func_0033B050(SdfPrimitiveRequest *);
-extern void func_003332E8(void *, u32);
+extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern void sdfQueueAssetRelease(void *);
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
@@ -657,7 +657,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     SdfPoolNode *surface;
 
     asset = sdfCreateAssetWithDrawEntries();
-    func_003332E8(asset, bits);
+    sdfSetAssetPrimaryTextureAddress(asset, bits);
     list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
@@ -1389,7 +1389,43 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010AEC0);
+extern u16 D_00435D40;
+extern u16 D_00435D42;
+extern char D_00435D48[];
+extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+s32 func_0010AEC0(struct KwlnTask *task) {
+    SdfGeneralHeapStats heapStats;
+    SdfListHead *list;
+    void *packet;
+    s32 freePercent;
+    s32 originX = 0x7100;
+    s32 currentColumn;
+    s32 peakColumn;
+
+    sdfGetGeneralHeapStats(&heapStats);
+    freePercent = heapStats.freeBytes * 100 / heapStats.totalBytes;
+    list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
+    sdfInitPacketList(list);
+    packet = (void *)sdfAllocPacketAligned(0x40);
+    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
+    sdfAppendPacket(list, (u32)packet);
+    sdfAppendPacket(list, (u32)func_0011F250(0x70D0, 0x85A8, 0xFFFF7F, 0x1260, 0xC0, 0x20000000, 0x40806040));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x85C0, 0xFFFF80, 0, D_00435D48, freePercent));
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8080, 0x85C0, 0xFFFF80, 6, D_00435D48, D_00435D40));
+    currentColumn = (s32)((f32)freePercent / 100.0f * 200.0f) + 0x2A;
+    sdfCreatePacketA(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
+    peakColumn = (s32)((f32)D_00435D40 / 100.0f * 200.0f) + 0x2B;
+    sdfCreatePacketA(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    if (D_00435D42 >= 0x47 || D_00435D40 < freePercent) {
+        D_00435D40 = freePercent;
+        D_00435D42 = 0;
+    } else {
+        D_00435D42 = D_00435D42 + 1;
+    }
+    return 0;
+}
 
 void func_0010B110(void) {
 }
@@ -1736,6 +1772,8 @@ ScrData *bfParseFLW0(BfFlw0Header *header, s32 procedureIndex) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D40);
+
+INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D42);
 
 INCLUDE_SDATA(const s32, "game/code_00107EF8", D_00435D48);
 

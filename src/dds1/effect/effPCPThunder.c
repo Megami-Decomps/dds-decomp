@@ -2445,7 +2445,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void effInitializeColorState(struct EffectColorState *);
 extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
-extern void func_002E7F20(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
 void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
 
@@ -2870,7 +2870,7 @@ void func_001681C0(EffGroup *group) {
                 place.color = color;
                 delta[0] = start[0] - place.unk00[0];
                 delta[2] = start[2] - place.unk00[2];
-                func_002E7F20(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
+                sdfConvertEulerAnglesToQuaternionVU(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
                 effEventCopyFileRecordHeader((FileRecordHeader *)slot->node, (const FileRecordHeader *)&place);
                 effEventUpdateEffectParameters(slot->node);
@@ -2905,7 +2905,6 @@ typedef struct EffThunderDrawParams {
 extern EffThunderDrawParams D_003D64F0;
 extern EffThunderDrawParams D_003D6520;
 
-struct SdfTextParam;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern const f32 D_00354860[8][4];
 extern const u32 D_003547D0[28];

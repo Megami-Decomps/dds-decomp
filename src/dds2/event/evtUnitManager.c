@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -19,7 +20,7 @@ extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);
 extern void effObjSetInnerSecondVec(void *obj, void *vec);
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
 extern void effObjAddInnerFirstVec(void *obj, void *vec);
@@ -76,8 +77,6 @@ extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107D08(void);
 extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
-extern void sdfSetTextFloatPairOverride(void *, f32, f32);
-extern void sdfClearTextFloatPairOverride(void *);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
@@ -497,9 +496,9 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         overrideAux = 1;
     }
     if (overrideAux) {
-        sdfSetTextFloatPairOverride(unit->owner->inner, auxFirst, auxSecond);
+        sdfSetModelScalarOverrides(unit->owner->inner, auxFirst, auxSecond);
     } else {
-        sdfClearTextFloatPairOverride(unit->owner->inner);
+        sdfClearModelScalarOverrides(unit->owner->inner);
     }
 }
 
@@ -1029,7 +1028,7 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     if (unit->flags & 0x10) {
         dds3PreparePathVectorPair(unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
-        func_00340DC8(0.0f, 3.14159265f, 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
         effObjSetInnerSecondVec(unit->effObj, v);

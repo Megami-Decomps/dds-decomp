@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -983,7 +984,6 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void fldResetCameraModelHandles(void);
 
-extern void sdfSetTextFloatPairOverride(void *, f32, f32);
 
 extern void dds3SetObjectFlags(void *, s32);
 
@@ -1052,7 +1052,7 @@ void func_00123FB8(u128 *transform) {
         mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
         fldResetCameraModelHandles();
     }
-    sdfSetTextFloatPairOverride(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+    sdfSetModelScalarOverrides(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
     dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
         func_00133640(0, 0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
@@ -12,7 +13,6 @@ extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);
-extern void sdfWriteVuLightingPacket(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
@@ -44,7 +44,7 @@ typedef struct {
 } SdfMsg;
 
 extern void effMiscQuaternionToMatrixVU(void);
-extern void func_002E7F20(f32 x, f32 y, f32 z);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
@@ -76,7 +76,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
 SdfPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfPacket *packet, s32 index) {
-    u32 address = (node->address + (index << 7)) & 0x0FFFFFFF;
+    u32 address = (u32)(node->workspace + (index << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
     packet->vifCodes.fields.secondCode = 0x6C07C000;
@@ -217,7 +217,7 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->sourceItem = item;
     node->nodeId = item->nodeId;
-    func_002E7F20(item->rotationX, item->rotationY, item->rotationZ);
+    sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
     VU0_STORE_VF(vf10, node->quaternion);
     PCP_COPY_VECTOR(node->translation, &item->translation);
     PCP_COPY_VECTOR(node->scale, &item->scale);
@@ -339,7 +339,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     f32 *scale;
     f32 *translation;
     f32 (*transformed)[4];
-    u32 address;
+    u8 *workspace;
     SdfDrawNode *child;
 
         VU0_LOAD_VF_MEMORY(vf28, xAxis);
@@ -356,9 +356,9 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
-    address = drawNode->address;
-    if (address != 0) {
-        sdfWriteVuLightingPacket(address + (frame << 7));
+    workspace = drawNode->workspace;
+    if (workspace != NULL) {
+        sdfWriteVuLightingPacket((VuLightingPacket *)(workspace + (frame << 7)));
     }
     child = drawNode->children;
     if (child == 0) {

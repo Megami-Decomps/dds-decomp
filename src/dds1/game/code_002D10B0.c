@@ -1083,7 +1083,7 @@ extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 
-SdfTex *func_002D2800(SdfTex *source) {
+SdfTex *sdfTexClone(SdfTex *source) {
     SdfTex *texture;
     SdfTexRef *reference;
     SdfTex *original;

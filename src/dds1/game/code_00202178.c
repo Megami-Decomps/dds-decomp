@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
 #include "eff_transform.h"
@@ -2400,7 +2401,6 @@ void func_00207E68(void) {
     }
 }
 
-extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 s32 func_00207FF0(BtlUnit *unit, s32 animation) {
     BtlState *state;

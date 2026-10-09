@@ -1106,7 +1106,7 @@ extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
 extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
-SdfTex *func_0032B6B0(SdfTex *source) {
+SdfTex *sdfTexClone(SdfTex *source) {
     SdfTex *texture;
     SdfTexRef *reference;
     SdfTex *original;

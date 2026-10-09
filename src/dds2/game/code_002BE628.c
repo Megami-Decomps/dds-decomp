@@ -215,7 +215,7 @@ typedef struct StageTestState {
 
 extern StageTestState evtStageTestState;
 
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
 extern char D_0042B610[];
 
@@ -2795,7 +2795,7 @@ void mnuApplyModelCamera(MdlCtx *model) {
 void evtStageTestApplyEntryRotation(MdlCtx *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
-    func_00340DC8(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
+    sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
     mdlUpdateContextRotationBasisFromQuaternion(model);
 }

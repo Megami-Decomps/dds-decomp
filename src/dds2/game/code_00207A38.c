@@ -808,7 +808,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     return activeCount;
 }
 
-extern void func_00340DC8(f32, f32, f32);
+extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern f32 func_003532E8(f32, f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
@@ -820,7 +820,7 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     delta[0] = targetPosition[0] - origin[0];
     delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
-        func_00340DC8(0.0f, func_003532E8(delta[0], delta[2]), 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, func_003532E8(delta[0], delta[2]), 0.0f);
         return 1;
     }
     VU0_LOAD_VF($vf10, &D_003BE0D0);
@@ -846,7 +846,7 @@ s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 ang
         } else {
             x = -ffabsf(x);
         }
-        func_00340DC8(0.0f, func_003532E8(x, delta[2]), 0.0f);
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, func_003532E8(x, delta[2]), 0.0f);
         return 1;
     }
     return 0;
