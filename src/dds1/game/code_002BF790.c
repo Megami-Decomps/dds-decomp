@@ -733,7 +733,45 @@ void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 colo
     uiDrawUniformRgbaRange(x, y, z, width, height, color, 0, surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
+typedef struct GridPackedStripVertex {
+    u64 channels[2];
+    u64 xy;
+    u64 depth;
+} GridPackedStripVertex;
+
+void func_002C0DF8(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
+    u32 left = x + 0x7000;
+    u32 top = y + 0x7900;
+    u64 topWord = (u64)top << 32;
+    s32 packet;
+    GridPackedStripVertex *vertices;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    u64 right, bottom;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
+    vertices = (GridPackedStripVertex *)sdfConsMeasurePacketWithHeader(packet);
+    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
+    vertices[0].xy = (u64)left | topWord;
+    vertices[0].depth = z;
+    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    right = (u32)(left + width);
+    vertices[1].xy = right | topWord;
+    vertices[1].depth = z;
+    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
+    bottom = (u64)(top + height) << 32;
+    vertices[2].xy = (u64)left | bottom;
+    vertices[2].depth = z;
+    itfGridUnpackColorChannels(vertices[3].channels, colors[3]);
+    vertices[3].xy = right | bottom;
+    vertices[3].depth = z;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
     func_002C0DF8(x, y, z, width, height, vertexColors, 0, surfaceIndex);
