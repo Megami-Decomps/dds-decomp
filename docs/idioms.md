@@ -5627,3 +5627,47 @@ The three-resource movie loaders remain assembly: natural grouped paths
 and these pointer contracts retain the two-word argument-setup delay-slot
 swap at `+0x80`/`+0x84`, so this closure earns no new matched-body credit.
 
+
+## Model-node alpha update: visibility proves text, not a TU cutover
+
+For DDS2 `func_0031CBC8`, an identical-header control leaves `bc1f` instead
+of retail `bc1fl` at `+0xD8` (135/136 words). Compiling the authentic
+`mnuSetNodeModelBroadcastByte` definition before the unchanged caller makes
+all 136 words exact, confirming a real callee-visibility dependency.
+
+Moving the boundary to `0x31C8B0` is not qualified: that setter needs its
+existing no-sibcall setting to retain the retail `jal mdlBroadcastMasked`
+and epilogue, whereas `func_0031C940` has a native sibling jump at
+`0x31C9E4`, and `itfDrawModelInstanceImage` has two at `0x31D750` and
+`0x31D7C0`. The setter's post-call instructions only restore registers;
+there is no `$v0` extension or result transformation. Its real callee
+returns `void`, and no evidence supports inventing a different setter
+return contract. Keep the caller in assembly until independent source or
+contract evidence explains both the visibility and flag boundaries.
+
+
+## Model billboard parts forward opaque descriptor addresses
+
+The paired `mdlAddBillboardPart` providers at DDS1 `0x219AF8` and DDS2
+`0x234668` receive the PAC node's `dataCursor`, not a descriptor-table
+index. They do not dereference that descriptor: they forward its address
+to kind 1 of `billCreateIndexed` and store the returned billboard.
+Consequently the part helper uses `void *descriptor`, while the existing
+kind-dispatched `billCreateIndexed(s32, u32)` interface retains its opaque
+payload word. The conversion to that word is an actual dispatch boundary,
+not an integer prototype used to influence allocation.
+
+Both 88-byte provider bodies stay exact. The native parsers supply the
+address with `lw` from `PacWork.dataCursor`; no matching C caller needs an
+integer adapter, and this closure does not claim a parser-body match.
+
+## Terminal text uses the existing glyph pointer contracts
+
+DDS1 `code_00248580`'s atlas-slot and number-sprite clients return and queue
+`struct FrFontGlyph *` from the existing text providers; their handles are
+not integer IDs. The local declarations now agree with the providers,
+including `frFontDrawGlyphChain`'s `s8` option and `u32` priority. No provider
+or shared header changes are needed. The selected-row candidate at
+`0x248E68` remains ASM: its two independent instructions at `+0x9C/+0xA0`
+are still exchanged, so this adapter retirement claims no new body match.
+

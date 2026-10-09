@@ -138,11 +138,11 @@ extern void func_00276F70(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
+extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
 extern char mnuNumberSpriteFormat[];
 
-extern void frFontDrawGlyphChain(s32, s32, s32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct EffectPair {
     s32 firstValue;
     s32 secondValue;
@@ -165,7 +165,7 @@ void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
     effReleaseTextureHandlesAndResetSlots(work->secondResource);
 }
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 /* Fixed-width text rows used by both font drawing and message substitution.
  * The font helper decodes single-byte and two-byte characters from this data. */
 typedef struct MenuTextEntry {
@@ -179,7 +179,7 @@ extern MenuTextEntry D_003482A8[];
  * The signed-byte slot is not bounds checked; DDS1 has no DDS2 x-origin adjustment. */
 void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, s8 slot, s8 alternate) {
     u8 *text;
-    s32 handle;
+    struct FrFontGlyph *handle;
 
     if (alternate == 0) {
         text = D_00347C68[slot].encodedText;
@@ -188,7 +188,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
     frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 
@@ -237,12 +237,12 @@ void mnuRefreshThresholdNodeFlags(MenuProgressOwner *owner) {
 /* Draw formatted numeric text using a blend toward the color with its low byte clear. */
 void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number, u32 color, s32 priority) {
     char text[16];
-    s32 sprite;
+    struct FrFontGlyph *sprite;
 
     func_003014F0(text, mnuNumberSpriteFormat, number);
-    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
+    sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);

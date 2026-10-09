@@ -625,12 +625,12 @@ typedef char MdlPartEntry_object_offset_must_be_0x08[
 #define MDL_PART_OBJECT 3
 
 /* Append a newly created billboard to the next part-list slot. */
-void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
+void mdlAddBillboardPart(DevRequest *partList, void *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
-    partEntry->object = billCreateIndexed(1, descriptorIndex);
+    partEntry->object = billCreateIndexed(1, (u32)descriptor);
     partList->usedCount += 1;
 }
 
