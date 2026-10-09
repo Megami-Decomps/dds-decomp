@@ -3204,8 +3204,8 @@ void effDestroyClassWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCreateClassWorkFromRequest(EffClassWork *work) {
-    effCreateClassWork(work->kind, work->payload);
+EffClassWork *effCloneClassWork(EffClassWork *work) {
+    return effCreateClassWork(work->kind, work->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
