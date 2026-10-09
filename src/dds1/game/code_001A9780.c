@@ -230,11 +230,38 @@ void btlClearUnitStatusMask(void) {
     }
 }
 
-extern char D_003A1D78[];
-
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001A9D38);
+s32 func_001A9D38(BtlUnit *actor, s32 index) {
+    DatPartyRecord *record;
+    s32 chance;
+    f32 ratio;
+
+    if ((actor->partyRecord.status & 0x7FFF) != 0x800) {
+        return 0;
+    }
+    if (btlHasEnemyRecordDefeatExemptionFlag(actor)) {
+        return 0;
+    }
+    switch ((u32)btlGetActorIndexedSignedValue(actor, index)) {
+    case 0:
+    case 1:
+    case 5:
+    case 6:
+        break;
+    default:
+        return 0;
+    }
+    record = &actor->partyRecord;
+    chance = evtRunContext(0x12, (s32)record, 0, index, 0);
+    ratio = 1.0f;
+    if (btlCheckSpecialAbility(record, 0x233)) {
+        ratio = datAbilityParameters[0x233 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    chance = (s32)((f32)chance * ratio);
+    btlBossDebugPrintf("btl:stone dead=%d%%[ratio=%.2f]\n", chance, ratio);
+    return btlRollAiBucket() < chance;
+}
 
 extern char D_003A1DA0[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
