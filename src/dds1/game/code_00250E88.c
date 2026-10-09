@@ -470,7 +470,6 @@ MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
 
 extern s32 dspCloseChannel(void);
 extern s32 evtCreateMessageWindowIfMissing(s32);
-extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, void *);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
@@ -484,7 +483,7 @@ s32 func_00253640(void) {
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), (u32 *)*(u32 *)mnuGetSelectedNodeValue(), 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
-    mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), (void *)scene->attachedEffect);
+    mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), scene->attachedEffect);
     scene->stageFinished = 0;
     scene->stageStarted = 0;
     return 0;
@@ -494,8 +493,6 @@ extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void func_00258AF0(MnuGridFeedbackState *, u32);
 extern void evtFinishMessageWindowAndNotify(void);
-extern void mnuReleaseMenuVisualWorkResources(s32);
-
 void func_00253778(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
@@ -632,9 +629,8 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern void func_0024DD78(void);
 extern void func_00255E08(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
-extern s32 func_00249998(void *, s32, s32);
+extern s32 func_00249998(void *, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
-extern void effUpdateAttached(s32, s32, s32, s32, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern s64 evtGetMessageWindowControlState(void);

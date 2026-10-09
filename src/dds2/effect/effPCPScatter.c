@@ -10,6 +10,7 @@
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
+#include "eff_pcp_scatter_spin_ribbon.h"
 #include "eff_scatter_draw.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
@@ -183,105 +184,8 @@ extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
 
 
 
-typedef struct PcpScatterSpinWork PcpScatterSpinWork;
-typedef struct PcpScatterRibbonWork PcpScatterRibbonWork;
 
-typedef struct {
-    f32 origin[4];
-    f32 width;
-    f32 height;
-    u32 poolMode;
-    u8 respawn;
-    u8 pad1D[3];
-    u32 particleCount;
-    s32 delaySpread;
-    u32 fadeIn;
-    u32 fadeOut;
-    s32 duration;
-    s32 fadeDuration;
-    f32 angleStep;
-    f32 angleDamping;
-    f32 startRadius;
-    f32 endRadius;
-    f32 startRadiusJitter;
-    f32 endRadiusJitter;
-    u8 adjustAngle;
-    u8 pad51[3];
-    f32 endAngleStep;
-    u8 duplicateParticles;
-    u8 pad59[3];
-    s32 duplicateStartAge;
-    u32 particlesPerGroup;
-} PcpScatterSpinParams; /* 0x64 copied by the constructor. */
 
-typedef struct {
-    s32 age;
-    f32 radiusStep;
-    f32 angleStep;
-    f32 radius;
-    f32 angle;
-    f32 dirX;
-    f32 dirY;
-    f32 dirZ;
-} PcpScatterSpinParticle; /* 0x20 */
-
-struct PcpScatterSpinWork {
-    PcpScatterSpinParams params;
-    PcpScatterSpinParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
-    u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
-};
-
-typedef struct {
-    f32 origin[4];
-    f32 width;
-    f32 height;
-    u32 poolMode;
-    u8 respawn;
-    u8 pad1D[3];
-    u32 particleCount;
-    s32 delaySpread;
-    u32 fadeIn;
-    u32 fadeOut;
-    s32 duration;
-    s32 fadeDuration;
-    f32 heightStep;
-    u8 pad3C[4];
-    u8 duplicateParticles;
-    u8 pad41[3];
-    s32 duplicateStartAge;
-    u32 particlesPerGroup;
-} PcpScatterRibbonParams; /* 0x4C copied by the constructor. */
-
-typedef struct {
-    s32 age;
-    f32 height;
-    f32 heightStep;
-    f32 tiltAngle;
-    f32 tiltHalfAngle;
-    f32 tiltStep;
-    f32 radius;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-} PcpScatterRibbonParticle; /* 0x28 */
-
-struct PcpScatterRibbonWork {
-    PcpScatterRibbonParams params;
-    PcpScatterRibbonParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterPool *childWork;
-    SdfMemBlock *allocation;
-    u32 duplicateGroupCount;
-    EffParamWork **duplicatedHandles;
-    SdfMemBlock *duplicateAllocation;
-};
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);

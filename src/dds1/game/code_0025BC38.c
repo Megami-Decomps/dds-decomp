@@ -44,10 +44,10 @@ void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
 }
 
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
-extern s32 D_0036C698[];
+extern struct EffectSlotSet *D_0036C698[];
 
 void mnuDrawIconAlpha(s32 x, s32 y, s32 z, s32 alpha, s32 param) {
-    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, D_0036C698[0], 0x25, param);
+    func_002BF4E0(x << 4, y << 3, z, (u32)((f32)(alpha << 8) * 0.0078125f), 0, (s32)D_0036C698[0], 0x25, param);
 }
 
 struct MovieCueNode {
@@ -216,7 +216,7 @@ void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036C268[placementIndex][0]],
+                  (s32)D_0036C698[D_0036C268[placementIndex][0]],
                   D_0036C268[placementIndex][1],
                   context);
 }
@@ -230,7 +230,7 @@ void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036C268[placementIndex][0]],
+                  (s32)D_0036C698[D_0036C268[placementIndex][0]],
                   D_0036C268[placementIndex][1],
                   context);
 }
@@ -268,7 +268,7 @@ void func_0025C4C8(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[1],
+                  (s32)D_0036C698[1],
                   spriteIndex,
                   context);
 }
