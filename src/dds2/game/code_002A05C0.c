@@ -535,7 +535,7 @@ void mnuRunTitleStreamThread(void) {
     }
 }
 
-extern struct SdfThreadNode mnuTitleStreamThread;
+extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 
