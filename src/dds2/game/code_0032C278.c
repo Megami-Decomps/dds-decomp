@@ -906,8 +906,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfRefreshSceneNodePackets);
 
 typedef struct SdfSceneNode {
-    u8 pad00[4];
-    void (*handler)(); /* 0x4 */
+    SdfPacketPatchLink link; /* Native next/callback prefix at 0/4. */
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfPacket header;  /* 0x10 */
@@ -921,6 +920,10 @@ typedef struct SdfSceneNode {
 } SdfSceneNode;
 
 typedef char SdfSceneNode_size_must_be_0x220[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
+typedef char SdfSceneNode_view_at_8[
+    ((u32)&((SdfSceneNode *)0)->view == 8) ? 1 : -1];
+typedef char SdfSceneNode_payload_at_10[
+    ((u32)&((SdfSceneNode *)0)->header == 0x10) ? 1 : -1];
 
 extern void sdfRefreshSceneNodePackets();
 
@@ -928,7 +931,7 @@ extern void sdfRefreshSceneNodePackets();
 void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
-    node->handler = sdfRefreshSceneNodePackets;
+    node->link.patch = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
     node->regs[1] = SDF_GS_TEST_1;
