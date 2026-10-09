@@ -50,12 +50,7 @@ void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
 
 void func_00154F18(s32);
 
-void itfMesSetWindowHighFlags(s32 window, u32 mask);
-
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
-
-void itfMesClearWindowHighFlags(s32 window, u32 mask);
-
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
 void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
