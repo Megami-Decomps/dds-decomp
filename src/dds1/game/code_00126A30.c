@@ -1965,7 +1965,6 @@ extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(s32, u32, s32);
 extern void func_002D4CC8(s32, u32, s32);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 void fldSubmitPrimaryFramePacket(void) {
     s32 command = sdfAllocPacketAligned(0x20);

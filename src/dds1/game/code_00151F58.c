@@ -667,7 +667,6 @@ extern u8 kwlnFrameDrawPacketRecords[];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_002D4C80(s32, u32, s32);
 extern void func_002D4CC8(s32, u32, s32);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 extern void func_002E2A00(u8 *, const f32 *, u32, u32,
                         const BillTextureQuad *, const BillTextureQuad *, const f32 *);
 
