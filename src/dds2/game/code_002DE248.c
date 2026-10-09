@@ -623,6 +623,7 @@ static inline u32 effSlotCount(u8 *p, u32 max) {
 extern void sndLoadAndPlayStationedSe(u32);
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u16, u32);
+extern void effReleaseResourceRefs(EffTrackSet *);
 
 
 

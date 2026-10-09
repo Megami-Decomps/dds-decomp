@@ -205,6 +205,7 @@ extern void func_002DA420(void *, f32);
 extern EffPacketParams D_003DC9E0;
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
+extern void effReleaseResourceRefs(EffTrackSet *);
 
 extern void func_001FBA38(s32);
 
@@ -2563,8 +2564,7 @@ EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 shar
 
 
 /* Release the track set's retained reference, draw asset, and allocation. */
-void effReleaseResourceRefs(u8 *work) {
-    EffTrackSet *refs = (EffTrackSet *)work;
+void effReleaseResourceRefs(EffTrackSet *refs) {
     if (refs->columns != 0) {
         RefObj *ref = refs->shared;
         if (ref == NULL) {
@@ -2953,7 +2953,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 }
 
 void effReleaseClassDrawResources(s32 work) {
-    effReleaseResourceRefs((u8 *)((EffClassDrawState *)work)->trackSet);
+    effReleaseResourceRefs(((EffClassDrawState *)work)->trackSet);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
     sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
@@ -4594,7 +4594,7 @@ void effReleaseModelResources(EffectStripNode *work) {
         billDispatchByKind(work->resource);
     }
     if (work->trackSet != NULL) {
-        effReleaseResourceRefs((u8 *)work->trackSet);
+        effReleaseResourceRefs(work->trackSet);
     }
     if (work->active != 0) {
         fileReleaseGridRecordHandle(work->active);
@@ -6108,7 +6108,7 @@ void effReleaseParticleList(EffSpanTable *list) {
     for (i = 0; i < list->count; i++, entry++) {
         effReleaseModelPointSetAsset(entry->pointSet);
         if (entry->references != 0) {
-            effReleaseResourceRefs((u8 *)entry->references);
+            effReleaseResourceRefs(entry->references);
         }
     }
     sdfReleaseResourceAllocation(list->allocation);
