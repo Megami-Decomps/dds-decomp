@@ -1079,7 +1079,6 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00244658);
 
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *);
-extern void sdfReleaseChipBlock();
 
 void mnuShopReleaseSprites(ShopScene *scene) {
     MenuWindowContainer **slot = &scene->sprite;

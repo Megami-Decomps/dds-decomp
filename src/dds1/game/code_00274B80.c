@@ -1430,7 +1430,6 @@ s32 mnuBuildSkillCodeBitset(void) {
     return (s32)bits;
 }
 
-extern void sdfReleaseChipBlock(void *);
 
 void func_002782E0(u32 *bits) {
     sdfReleaseChipBlock(bits);

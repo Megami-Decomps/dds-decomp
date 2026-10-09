@@ -13,7 +13,6 @@ extern s32 dds3InvokeAreaCallback(void *arg);
 
 void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 
-void sdfReleaseChipBlock(void *arg);
 
 const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;

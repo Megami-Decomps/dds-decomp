@@ -746,7 +746,6 @@ u32 *mnuAllocateEmptyResourceListState(void) {
     return taskWords;
 }
 
-extern void sdfReleaseChipBlock(void *);
 extern void mnuReleaseMenuVisualWorkResources(s32);
 
 typedef struct MenuCleanupNode {

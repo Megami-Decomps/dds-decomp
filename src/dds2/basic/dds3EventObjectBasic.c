@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_event.h"
 
 
 void effObjFreeInner(EffWorldNode *object);
 void dds3DestroyObjectBase(ObjBase *resource);
-void sdfReleaseChipBlock(void *allocation);
 u8 effObjTestNodeFlags(ObjectTransform *node, u32 flags);
 
 void effObjClearNodeFlags(ObjectTransform *node, u32 flags);

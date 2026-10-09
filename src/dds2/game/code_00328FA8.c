@@ -13,7 +13,6 @@
 extern u32 D_0045F0FC[];
 
 extern void *func_0035A828(u32 size);
-extern void sdfReleaseChipBlock(void *memory);
 
 void func_00328FA8(u32 heapSize) {
     u32 recordBytes;

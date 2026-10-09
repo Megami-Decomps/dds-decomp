@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -13,7 +14,6 @@
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
 
-extern void sdfReleaseChipBlock(void *block);
 extern s32 func_0036DE70(void);
 extern void EIntr(void);
 

@@ -18,7 +18,6 @@ extern s8 D_0037F510[];
 
 
 
-extern void sdfReleaseChipBlock();
 
 
 

@@ -14,7 +14,6 @@ extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
 extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
-extern void sdfReleaseChipBlock(void *block);
 extern void dds3InterpolatePathVectorVU(s32 path);
 extern void dds3PreparePathVectorPair(s32 path);
 extern void effObjSetInnerFirstVec(void *obj, void *vec);

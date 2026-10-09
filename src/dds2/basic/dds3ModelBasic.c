@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 
 typedef struct {
     u8 pad[0x18];

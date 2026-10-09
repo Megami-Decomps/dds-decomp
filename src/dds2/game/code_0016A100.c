@@ -63,7 +63,6 @@ extern struct SdfPoolNode *D_00380828[4];
 
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
-extern void sdfReleaseChipBlock(void *p);
 
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 

@@ -4,7 +4,6 @@
 
 extern EffWorldNode *dds3ActiveWorld;
 
-void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(EffWorldNode *node);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);

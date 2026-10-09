@@ -13,7 +13,6 @@ extern SdfTex *sdfResourceListHead;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
-void sdfReleaseChipBlock(void *arg0);
 
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 

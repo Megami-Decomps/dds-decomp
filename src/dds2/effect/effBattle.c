@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "btl_sound.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -14,7 +15,6 @@ enum {
 
 extern char D_00414478[];
 extern void func_0035B6E0(const char *fmt, ...);
-extern void sdfReleaseChipBlock(void *);
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
 

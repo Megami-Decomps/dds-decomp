@@ -4,7 +4,6 @@
 #include "kwln.h"
 
 extern char dds3AdminTaskName[];
-extern void sdfReleaseChipBlock(void *);
 extern void *memcpy(void *, void *, s32);
 
 /* Return the named administration task's user state; the task must exist. */

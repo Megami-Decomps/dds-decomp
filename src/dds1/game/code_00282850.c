@@ -153,7 +153,6 @@ extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
 extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
-extern void sdfReleaseChipBlock();
 
 extern char D_003B2608[]; /* "battle stage test" */
 

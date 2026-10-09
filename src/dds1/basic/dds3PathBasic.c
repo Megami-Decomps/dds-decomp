@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
 #include "pcp_vu0.h"
@@ -11,7 +12,6 @@ void effMiscQuaternionNlerpVU(f32 blendAmount);
 void *memset(void *s, s32 c, u32 n);
 
 void effFreeBuffers(struct EffPrimitiveCurve *primitive);
-void sdfReleaseChipBlock(void *arg);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {
     effFreeBuffers(path->primitiveCurve);

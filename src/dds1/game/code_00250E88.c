@@ -42,7 +42,6 @@ extern MnuVariantSpritePlacement D_0036B7F0[];
 typedef struct ScrVmOperand ScrVmOperand;
 
 
-extern void sdfReleaseChipBlock(void *);
 
 void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
                    s32 maximumX, s32 maximumY) {

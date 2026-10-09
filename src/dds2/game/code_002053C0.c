@@ -1215,3 +1215,4 @@ BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link, u32 soundId, u
 }
 
 INCLUDE_RODATA(const s32, "game/code_002053C0", D_00419540);
+
