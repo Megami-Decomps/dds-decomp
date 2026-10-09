@@ -24,6 +24,7 @@
 #include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
+#include "eff_pcp_compact_fade.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -125,26 +126,6 @@ typedef struct {
     } resource;
 } EffPCPCompactWork;
 
-/* The two compact fade variants share their 0x3C work; only the SDK
-   resource payload copied during respawn differs between variants. */
-typedef struct {
-    f32 position[4];
-    u8 flags;
-    u8 pad11[3];
-    u32 color;
-    u32 baseColor;
-    s32 frame;
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    s32 startExtent;
-    s32 endExtent;
-    f32 unk34;
-    union {
-        EffResourceRectWork *rectangle;
-        EffBlurTemplate *blur;
-    } resource;
-} EffPCPCompactFadeWork;
 
 
 
