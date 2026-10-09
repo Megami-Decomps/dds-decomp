@@ -233,7 +233,8 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     func_00272D50(context);
     mnuForwardDupArg(context->activeWindow, (struct EffectSlotSet *)context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(
-        (MenuScrollPanel *)(u32)context->unk138, context->unkD8, 0, 1);
+        (MenuScrollPanel *)(u32)context->unk138,
+        (struct EffectSlotSet *)(u32)context->unkD8, 0, 1);
     mnuSeekListNode(0, context->activeWindow->list);
     return 1;
 }
@@ -296,7 +297,7 @@ s32 func_002734C0(KwlnTask *callback) {
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
             mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->unk138,
-                                                      context->unk6C, 0, 1);
+                                                      (struct EffectSlotSet *)(u32)context->unk6C, 0, 1);
         }
         window = context->activeWindow;
         if (window != NULL) {

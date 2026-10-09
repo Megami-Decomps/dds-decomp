@@ -133,7 +133,7 @@ s32 mnuStartStaffDisplay(KwlnTask *task) {
 u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel,
-                                               (s32)context->staffSlots.baseResources[3], 0, 1);
+                                               context->staffSlots.baseResources[3], 0, 1);
     return 1;
 }
 
