@@ -123,7 +123,7 @@ void sdfConnectPacketLists();
 
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 
-extern void *sdfPendingQueueHead;
+extern SdfPendingNode *sdfPendingQueueHead;
 
 extern s8 sdfPendingQueueRotationActive;
 
@@ -340,21 +340,16 @@ void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry) {
     }
 }
 
-typedef struct SdfLink {
-    struct SdfLink *next;
-    struct SdfLink *peer;
-} SdfLink;
-
-/* Detach the pending chain and clear each node's peer back-reference. */
-SdfLink *sdfDetachQueue(void) {
-    SdfLink *head = sdfPendingQueueHead;
-    SdfLink *link;
+/* Detach the pending chain and clear each callback owner's pending node. */
+SdfPendingNode *sdfDetachQueue(void) {
+    SdfPendingNode *head = sdfPendingQueueHead;
+    SdfPendingNode *link;
 
     sdfPendingQueueHead = NULL;
     link = head;
     if (head != NULL) {
         do {
-            link->peer->peer = NULL;
+            link->owner->pending = NULL;
             link = link->next;
         } while (link != NULL);
     }
