@@ -117,7 +117,33 @@ extern s32 frFontDrawGlyphChain();
 
 
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BFB8);
+extern void evtStageTestUpdateCamera(void);
+extern s32 evtGetMessageWindowControlState(void);
+extern char D_003D6458[];
+
+/* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
+s32 func_0029BFB8(KwlnTask *request) {
+    BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
+    s32 result;
+
+    evtStageTestUpdateCamera();
+    result = func_002C4038(&panel->transition, &panel->transition.state, 0, request);
+    if (result != 0) {
+        return result;
+    }
+    if (panel->transition.state == 0) {
+        if (evtGetMessageWindowControlState() == 0) {
+            if (panel->rewardMode != 0) {
+                func_0029BC58(panel);
+                mnuTitleApplySequenceState(panel);
+                panel->rewardMode = 0;
+            } else {
+                mnuSetPopupEntryFlagged(&panel->transition.state, D_003D6458);
+            }
+        }
+    }
+    return 0;
+}
 
 s32 itfRunPanelMode1(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
