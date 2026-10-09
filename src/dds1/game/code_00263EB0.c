@@ -158,7 +158,6 @@ u32 func_002642C8(void) {
 
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_0036D45C[];
 
 s32 func_002642D0(KwlnTask *request) {

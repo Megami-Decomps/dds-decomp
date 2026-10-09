@@ -21,6 +21,7 @@ extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 sdfDoubleBufferAllocation;
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_image_packets.h"
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
@@ -127,7 +128,6 @@ extern s32 D_00438A28;
 
 extern SdfPacketSlot D_0040B308[];
 
-extern SdfResource *sdfResourceListHead;
 
 
 
@@ -159,14 +159,14 @@ void sdfDestroyObjectList(SdfModel *owner);
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
 /* Walk the resource chain until the requested numeric ID is found. */
-SdfResource *sdfFindResourceById(s32 id) {
-    SdfResource *resource = sdfResourceListHead;
+SdfTex *sdfFindTextureByResourceKey(s32 resourceKey) {
+    SdfTex *texture = sdfResourceListHead;
 
-    while (resource != NULL) {
-        if (resource->id == id) {
-            return resource;
+    while (texture != NULL) {
+        if (texture->resourceKey == resourceKey) {
+            return texture;
         }
-        resource = resource->next;
+        texture = texture->prev;
     }
     return NULL;
 }

@@ -2464,13 +2464,7 @@ typedef struct EffRadialRingParams {
     u8 pad65[3];
 } EffRadialRingParams;
 
-/* Class kind 3 owns a separately allocated four-byte point-set reference. */
-typedef struct EffRingResource {
-    EffPointSet *pointSet;
-} EffRingResource;
-
 typedef char EffRadialRingParams_size_must_be_0x68[(sizeof(EffRadialRingParams) == 0x68) ? 1 : -1];
-typedef char EffRingResource_size_must_be_0x04[(sizeof(EffRingResource) == 0x04) ? 1 : -1];
 
 EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
     EffClassWork *effect = effAllocateActiveInstanceWork(kind, source);
@@ -2909,7 +2903,7 @@ u32 *effSegmentPointerSet(u8 *work) {
         ((EffRingSource *)work)->segments = 3;
         segments = 3;
     }
-    pointSet = (EffPointSet *)effCreatePointSet4(segments);
+    pointSet = effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
     groups = pointSet->rows / 4;
     *pointSetRef = (u32)pointSet;
@@ -3277,8 +3271,6 @@ void effResetClassRingFrame(EffClassWork *work) {
     ((EffRingResource *)work->resource)->pointSet->color = 0;
 }
 
-extern u8 *effCreatePointSet4(u32);
-
 /* Create a point-set reference and initialize four colors per segment. */
 EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
     EffRingResource *pointSetRef = sdfAllocSizeClassBlock(sizeof(EffRingResource));
@@ -3295,7 +3287,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
         work->segments = 3;
         segments = 3;
     }
-    pointSet = (EffPointSet *)effCreatePointSet4(segments);
+    pointSet = effCreatePointSet4(segments);
     first = work->firstColor;
     groups = pointSet->rows / 4;
     pointSetRef->pointSet = pointSet;
@@ -3506,7 +3498,7 @@ void effSetClassWorkScale(EffClassWork *work, float value) {
 
 extern EffPacketParams D_003DCA10[];
 
-u8 *effCreatePointSet4(u32 count) {
+EffPointSet *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
     s32 size = rows * 20;
     struct SdfMemBlock *base;
@@ -3529,7 +3521,7 @@ u8 *effCreatePointSet4(u32 count) {
     sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_003DCA10, 0, 0x2C);
     D_003DCA10[0].primitive = 0x4000;
-    return (u8 *)set;
+    return set;
 }
 
 /* Queue the draw asset for release and return the backing allocation. */

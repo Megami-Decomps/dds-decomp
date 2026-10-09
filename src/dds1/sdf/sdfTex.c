@@ -3,13 +3,13 @@
 #include "sdf_resource.h"
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
-extern SdfTex *sdfResourceListHead;
 extern SdfPendingRequest sdfTextureReleaseQueue;
 
 void *memcpy(void *arg0, void *arg1, u32 arg2);

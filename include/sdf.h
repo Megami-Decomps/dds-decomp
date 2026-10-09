@@ -508,14 +508,6 @@ void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source,
     u32 frameMask, s32 region, s32 mode);
 
-/* Linked named resource (0x24); DDS1/2 game/code_002D33C8/0032C278.c. */
-typedef struct SdfResource {
-    u32 unk00;
-    struct SdfResource *next;
-    u8 pad08[0x18];
-    s32 id;
-} SdfResource;
-
 /* Optional packed or five-float state block owned by an SdfAsset. */
 typedef union SdfSubParam {
     struct {
