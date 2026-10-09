@@ -4331,8 +4331,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     return queue;
 }
 
-void func_00294318(u32 unused, u32 handle) {
-    fileCloneQueueEntries((FileQueue *)handle);
+FileQueue *func_00294318(u32 unused, FileQueue *source) {
+    return fileCloneQueueEntries(source);
 }
 
 /* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start time (job+0x80) has been reached. */
