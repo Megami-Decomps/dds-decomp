@@ -1522,7 +1522,7 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029E898);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
 
 extern u8 D_0037E0E0[];
 

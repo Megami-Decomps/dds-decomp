@@ -1687,7 +1687,7 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E0900);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceFrameInstances);
 
 typedef struct EffBillOutput {
     u32 textureId;      // 0x00
