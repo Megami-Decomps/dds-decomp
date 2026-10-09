@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
@@ -45,7 +46,6 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-extern void sdfWriteVuLightingPacket(u32 arg0);
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
@@ -362,7 +362,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
-        sdfWriteVuLightingPacket(address + (frame << 7));
+        sdfWriteVuLightingPacket((VuLightingPacket *)(address + (frame << 7)));
     }
     child = drawNode->children;
     if (child == 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
@@ -12,7 +13,6 @@ extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);
-extern void sdfWriteVuLightingPacket(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
@@ -358,7 +358,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     VU0_STORE_MATRIX(transformed);
     address = drawNode->address;
     if (address != 0) {
-        sdfWriteVuLightingPacket(address + (frame << 7));
+        sdfWriteVuLightingPacket((VuLightingPacket *)(address + (frame << 7)));
     }
     child = drawNode->children;
     if (child == 0) {
