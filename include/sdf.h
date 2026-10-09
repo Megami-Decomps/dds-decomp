@@ -4,6 +4,7 @@
 #include "common.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
+#include "sdf_thread.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
@@ -633,12 +634,6 @@ typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
     ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
 typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
     ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
-
-/* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
-    s32 threadId;               /* 0x04 */
-} SdfThreadNode;
 
 extern s32 sdfTrackedThreadSemaphore;
 extern SdfThreadNode *sdfTrackedThreadHead;

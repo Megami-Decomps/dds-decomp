@@ -533,7 +533,7 @@ void mnuRunTitleStreamThread(void) {
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern struct SdfThreadNode mnuTitleStreamThread;
+extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 
