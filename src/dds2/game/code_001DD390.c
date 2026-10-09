@@ -122,22 +122,6 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 flags;
-} SoundLink;
-
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    struct SoundResourceNode *effect;
-    u32 flags;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 extern s128 D_003B6B80;
 
 typedef struct BtlCameraTaskArgs {
@@ -1760,8 +1744,6 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 extern void *dds3GetWorldObject(void);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
-
-extern void btlMarkTaskReady(SoundResourceLink *resource);
 
 extern void btlResetUnitModelProgress(BtlUnit *unit);
 
@@ -4490,8 +4472,6 @@ extern void func_002034A8(struct SoundResourceLink *);
 
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
-extern void btlUpdateUnitCommandEffect(struct SoundLink *);
-
 extern void btlDrawActorGroundDisc(BtlUnit *);
 
 void btlUpdateActorModelColorAndLinks(void) {
@@ -4588,10 +4568,6 @@ BtlUnit *btlCreateUnit(void) {
 }
 
 extern void sndFreeResourceNode(struct SoundResourceNode *);
-
-extern void sndFreeResourceLink(struct SoundResourceLink *);
-
-extern void sndFreeLink(struct SoundLink *);
 
 extern void btlReleaseActorModelResources(BtlUnit *);
 

@@ -87,22 +87,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 flags;
-} SoundLink;
-
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    struct SoundResourceNode *effect;
-    u32 flags;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 typedef struct SoundEntry {
     u32 unk0;
     u32 unk4;
@@ -381,8 +365,6 @@ extern BtlRuntimeTask *btlFindTaskByHandle(u64);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
-extern void btlMarkTaskReady(SoundResourceLink *resource);
-
 extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
@@ -420,15 +402,11 @@ extern void func_002034A8(struct SoundResourceLink *);
 
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
-extern void btlUpdateUnitCommandEffect(struct SoundLink *);
 
 extern void *memset(void *, s32, u32);
 
 extern void sndFreeResourceNode(struct SoundResourceNode *);
 
-extern void sndFreeResourceLink(struct SoundResourceLink *);
-
-extern void sndFreeLink(struct SoundLink *);
 
 extern void sndFreeListNode(struct ActiveSoundNode *);
 
@@ -2961,37 +2939,21 @@ void btlAdvanceCommandCursor(BtlLinkedCommand *action, BtlCamState *state) {
     CURSOR->frame++;
 }
 
-typedef struct {
-    u8 pad[0x11C];
-    u8 category;
-} BattleActorLink;
+BtlUnit *btlFindActorLinkByCategory(BtlLinkedCommand *command, s32 category) {
+    BtlUnit *candidate = command->link->unit;
 
-typedef struct {
-    u8 pad[0x18];
-    BattleActorLink *primary;
-} BattleActorLinks;
-
-typedef struct {
-    u8 pad[0x114];
-    BattleActorLinks *links;
-    BattleActorLink *secondary;
-    BattleActorLink *tertiary;
-} BattleActorLinkOwner;
-
-BattleActorLink *btlFindActorLinkByCategory(BattleActorLinkOwner *actor, s32 category) {
-    BattleActorLink *candidate = actor->links->primary;
-    if (candidate->category == category) {
+    if (candidate->lookupId == category) {
         return candidate;
     }
-    candidate = actor->secondary;
-    if (candidate != NULL && candidate->category == category) {
+    candidate = command->linkedA;
+    if (candidate != NULL && candidate->lookupId == category) {
         return candidate;
     }
-    candidate = actor->tertiary;
-    if (candidate != NULL && candidate->category == category) {
+    candidate = command->linkedB;
+    if (candidate != NULL && candidate->lookupId == category) {
         return candidate;
     }
-    return actor->links->primary;
+    return command->link->unit;
 }
 
 INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F5320);
@@ -5231,7 +5193,7 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
     SoundResourceLink *link = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
     link->owner = owner;
     link->effectHandle = 0;
-    link->flags = 0;
+    link->opaque0C = 0;
     link->effect = 0;
     return link;
 }
@@ -5255,7 +5217,7 @@ SoundLink *sndAllocLink(BtlUnit *owner) {
     SoundLink *link = sdfAllocAndClearQuadwords(0x10);
     link->owner = owner;
     link->effectHandle = 0;
-    link->flags = 0;
+    link->commandEffectId = 0;
     link->effect = 0;
     return link;
 }
@@ -5288,7 +5250,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }
-        link->flags = effectId;
+        link->commandEffectId = effectId;
     } else if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
         link->effect->referenceCount--;
@@ -5696,7 +5658,7 @@ typedef struct SoundFileNode {
 void sndStartFileLoad(SoundFileTaskArgs *args) {
     SoundFileNode *node = args->node;
     args->request = fileQueueDefaultCallbackRequest(args->filename);
-    node->flags |= 1;
+    node->flags |= SOUND_FILE_STATE_REQUEST_PENDING;
     node->position = (args->frames + 0x200) << 16;
     node->mode = 2;
     btlBossDebugPrintf("btl:sound file load start[%s]\n", args->filename);
@@ -5708,7 +5670,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
         btlBossDebugPrintf("btl:sound wait[motSE]\n");
         return 0;
     }
-    if ((node->flags & 2) == 0) {
+    if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
         if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
             s32 data;
@@ -5718,16 +5680,18 @@ u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_003422F8(data, size);
-                node->flags |= 8;
+                node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
                 btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", (u16)(node->position >> 16), size);
             }
-            node->flags = (node->flags & ~1) | 2;
+            node->flags = (node->flags & ~SOUND_FILE_STATE_REQUEST_PENDING) |
+                          SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED;
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
         sdfReleaseResourceAllocation(request->resourceAllocation);
         filePollEntryCleanup(request->request);
-        node->flags = (node->flags & ~8) | 0x10;
+        node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
+                      SOUND_FILE_STATE_COMPLETE;
         return 1;
     }
     return 0;

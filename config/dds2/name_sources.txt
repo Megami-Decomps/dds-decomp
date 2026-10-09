@@ -4190,6 +4190,7 @@
 0x00286F90	mnuCreateResourceTask	inferred	Creates the resource task with the same task arguments as already-named DDS1 mnuCreateResourceTask.
 0x00286FD8	mnuCheckResourceTask	inferred	Byte-identical DDS1 counterpart: Returns whether the named resource task exists and clears its stored ID when absent.
 0x00287008	mnuStopResourceTask	inferred	Byte-identical DDS1 counterpart: Destroys the stored resource task and clears its ID.
+0x00287078	mtrAdvanceMantraResourceLoadState	inferred	Advances the mantra resource-load state, creating and polling its file request before returning completion to the task owner.
 0x00287600	mtrUnitSelectInit	evidence	Prints its own debug string "mtrUnitSelectInit\n" via func_0010AE38; selects the current resource task with func_00312810 and calls func_002885E8 [names_L2_LiteSweep.tsv]
 0x00287638	mtrUnitSelectRelease	evidence	Prints its own debug string "mtrUnitSelectRelease\n" via func_0010AE38; selects the current resource task and calls func_00288710 [names_L2_LiteSweep.tsv]
 0x00287798	mtrMantraSelectInit	evidence	Prints its own debug string "mtrMantraSelectInit\n" via func_0010AE38; calls func_00267F68(0) then func_00289DC8 [names_L2_LiteSweep.tsv]

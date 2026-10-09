@@ -10,6 +10,8 @@
 #include "sdf_texture_file.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -115,6 +117,8 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_001263F0);
 #include "file_request_api.h"
 #include "file_pac.h"
 #include "fld_packed_resource_kind.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
@@ -701,9 +705,14 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 
 typedef struct FldScriptResource {
     u8 pad00[0x10];
-    u8 parameters[0x10];
-    struct MotionTable *unk20;
+    SdfItemListRef itemList;
+    struct MotionTable *motionTable;
 } FldScriptResource;
+
+typedef char FldScriptResource_itemList_at_10[
+    ((u32)&((FldScriptResource *)0)->itemList == 0x10) ? 1 : -1];
+typedef char FldScriptResource_motionTable_at_20[
+    ((u32)&((FldScriptResource *)0)->motionTable == 0x20) ? 1 : -1];
 
 typedef struct FldResourceName {
     u32 unk00;
@@ -715,7 +724,6 @@ extern u32 D_003BD7B4;
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern struct DevRequest *D_003BAC14;
-extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 extern EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
@@ -746,8 +754,8 @@ void fldCreateResourceScriptObjects(void) {
     world = dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, resource++) {
         script = resource->data;
-        evtCreateScriptObjectWithResource(resource->id, script->parameters,
-                                         script->unk20, D_003BAC14, resource->name);
+        evtCreateScriptObjectWithResource(resource->id, &script->itemList,
+                                         script->motionTable, D_003BAC14, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
@@ -1291,7 +1299,207 @@ void fldReleaseAreaResourceCache(void) {
     D_003C9200[0] = D_003BAC90[0];
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001281E0);
+extern s32 D_003BAC10;
+extern u32 D_003BAC30;
+extern s32 D_003BAE40;
+extern FldTransferChunk *D_003BAC18;
+extern u32 D_003BAC1C;
+extern FldTransferChunk *D_003BAC20;
+extern u32 D_003BAC24;
+extern FldTransferChunk *D_003BAC28;
+extern u32 D_003BAC2C;
+extern struct FileRequest *D_003BAC38;
+extern s32 D_003BAC4C;
+extern u32 fldCachedRoomResourceAllocation;
+extern u32 fldCachedRoomF1ResourceAllocation;
+extern u32 fldCachedRoomF2ResourceAllocation;
+extern u32 fldCachedRoomKF2ResourceAllocation;
+extern u32 fldAreaCachedResource;
+extern void fldSetSceneLocation(s32 area, s32 floor, s32 stage);
+extern void fldLoadPlayerModel(void);
+extern void fldInitSparkTable(void);
+extern void fldInitializeMenuResources(void);
+extern void fldUpdateSparkSlots(void);
+extern void fldActivateRoomFlagObjects(void);
+extern void fldInitializeActorMotionSlots(void);
+extern DevRequest *sndLoadNamedOffsetResourceList(const char *name);
+extern s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle);
+extern char D_003BAC98[];
+extern char D_003BACA0[];
+extern char D_003BACA8[];
+extern FieldPlayerSceneWork D_0032F1A0;
+extern void fldAllocateBackgroundBuffer(void);
+extern void fldResetObjectSlots();
+extern void fldReleaseTitleSlots();
+extern void fldReleaseSceneRecordChunk();
+extern void fldCreateResourceScriptObjects(void);
+extern u8 fldHasAreaResourceNameChanged(void);
+extern void fldLoadAreaPackedResources(void);
+extern void fldReleaseAreaResourceCache(void);
+extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
+
+const char D_0039FF18[] = "%sk%03d_%03d.f2";
+
+u32 func_001281E0(const char *name) {
+    char path[0x80];
+    char directory[0x40];
+    void *roomOffsets;
+    void *roomData;
+    FldTransferChunk *chunk;
+    struct FileRequest *request;
+    FieldPlayerSceneWork *sceneWork = &D_0032F1A0;
+    s32 area;
+    s32 room;
+    s32 isField;
+    PacWork *work;
+    s32 index;
+
+    D_003BAC30 = 0;
+    D_003BAC10 = 0;
+    fldCachedRoomF1ResourceAllocation = 0;
+    fldCachedRoomF2ResourceAllocation = 0;
+    fldCachedRoomKF2ResourceAllocation = 0;
+    D_003BAE40 = 0;
+    area = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) >> 16;
+    room = dds3GetWorldObjectValue(dds3GetWorldSecondaryObject()) & 0xFFFF;
+    fldSetSceneLocation(area, room - 1, 0);
+    if (fldAreaState.area != 1) {
+        if (fldAreaState.area < 200) {
+            fldLoadPlayerModel();
+            fldInitSparkTable();
+        }
+        if ((u32)(fldAreaState.area - 200) >= 300) {
+            fldAllocateBackgroundBuffer();
+        }
+    }
+    fldResetRecordState();
+    fldResetZoneRecordsAndActorSlots();
+    fldResetPendingSounds();
+    fldClearMenuEntries();
+    fldResetObjectSlots();
+    if (fldAreaState.unk20 == 0) {
+        fldInitializeMenuResources();
+        fldLoadAreaPackedResources();
+    } else if (fldHasAreaResourceNameChanged() != 0 || (u32)(fldAreaState.area - 0x1B) < 2) {
+        fldReleaseTitleSlots();
+        fldReleaseSceneRecordChunk();
+        fldReleaseAreaResourceCache();
+        fldLoadAreaPackedResources();
+    }
+    isField = (u32)(fldAreaState.area - 200) < 300;
+    if (fldAreaState.area < 100) {
+        isField = 1;
+    }
+    if (isField != 0) {
+        if (fldIsAreaFloorResourceReady(area, room) != 0) {
+            request = fldAreaLoadRequest;
+            fldAreaLoadRequest = NULL;
+            D_003BAC38 = request;
+            fldFreeDisplayObjects();
+        } else {
+            fldFormatAreaDirectory(directory, area, 1);
+            func_003014F0(path, D_0039FE38, directory, area, room);
+            request = fileQueuePlainDispatchRequest(path);
+            D_003BAC38 = request;
+            func_00288C50(request);
+        }
+        index = 0;
+        D_003BAC14 = NULL;
+        work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
+        fldCachedRoomResourceAllocation = 0;
+        for (; work != NULL; work = work->next) {
+            switch (index) {
+            case 0:
+                D_003BAC14 = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)work->dataCursor);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)work->resourceHandle);
+                fldCachedRoomResourceAllocation = 0;
+                break;
+            case 1:
+                fldCachedRoomF2ResourceAllocation = 0;
+                roomData = work->dataCursor;
+                chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+                D_003BAC24 = (u32)roomData;
+                D_003BAC20 = chunk;
+                fldRelocatePackedTransferChunk((u32)roomData, chunk);
+                fldProcessFieldRequest((FldSceneRequest *)func_001277A8((s32)chunk));
+                break;
+            case 2:
+                fldCachedRoomF1ResourceAllocation = 0;
+                roomData = work->dataCursor;
+                chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+                D_003BAC1C = (u32)roomData;
+                D_003BAC18 = chunk;
+                fldRelocatePackedTransferChunk((u32)roomData, chunk);
+                fldLoadSceneRequestFiles((FldLoadRequest *)func_001277A8((s32)chunk));
+                break;
+            }
+            index++;
+        }
+    }
+    if (isField == 0) {
+        fldCachedRoomResourceAllocation = (u32)fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
+        if (fldCachedRoomResourceAllocation == 0) {
+            func_003014F0(path, D_003BAC98, name);
+            D_003BAC14 = sndLoadNamedOffsetResourceList(path);
+        } else {
+            D_003BAC14 = sndBuildResourceHandleListFromOffsets(roomOffsets);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomResourceAllocation);
+            fldCachedRoomResourceAllocation = 0;
+        }
+    }
+    if (isField == 0) {
+        func_003014F0(path, D_003BACA0, name);
+        fldCachedRoomF2ResourceAllocation = (u32)fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomF2ResourceAllocation == 0) {
+            fldCachedRoomF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        }
+        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        D_003BAC24 = (u32)roomData;
+        D_003BAC20 = chunk;
+        fldRelocatePackedTransferChunk((u32)roomData, chunk);
+        fldProcessFieldRequest((FldSceneRequest *)func_001277A8((s32)chunk));
+    }
+    if (fldGetLocationCoordinateValue(area, room) & 0x10) {
+        fldFormatAreaDirectory(directory, area, 1);
+        func_003014F0(path, D_0039FF18, directory, area, room);
+        fldCachedRoomKF2ResourceAllocation = (u32)fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomKF2ResourceAllocation == 0) {
+            fldCachedRoomKF2ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        }
+        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        D_003BAC2C = (u32)roomData;
+        D_003BAC28 = chunk;
+        fldRelocatePackedTransferChunk((u32)roomData, chunk);
+        fldProcessFieldRequestAlternate((FldSceneRequest *)func_001277A8((s32)chunk));
+    }
+    if (isField == 0) {
+        func_003014F0(path, D_003BACA8, name);
+        fldCachedRoomF1ResourceAllocation = (u32)fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
+        if (fldCachedRoomF1ResourceAllocation == 0) {
+            fldCachedRoomF1ResourceAllocation = (u32)sdfReadNamedResource(path, &roomData, 0);
+        }
+        chunk = (FldTransferChunk *)((u8 *)roomData + 8);
+        D_003BAC1C = (u32)roomData;
+        D_003BAC18 = chunk;
+        fldRelocatePackedTransferChunk((u32)roomData, chunk);
+        fldLoadSceneRequestFiles((FldLoadRequest *)func_001277A8((s32)chunk));
+    }
+    fldCreateResourceScriptObjects();
+    fldActivateRoomFlagObjects();
+    if (sceneWork->unk58 != 0 && area < 200 && fldAreaCachedResource != 0) {
+        D_003BAC4C = (s32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
+        memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_003BAC4C),
+               (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)fldAreaCachedResource),
+               sdfMemoryGetBlockSize((struct SdfMemBlock *)fldAreaCachedResource));
+        evtRetainSceneResource(dds3GetWorldSecondaryObject(), (void *)D_003BAC4C);
+    }
+    fldInitializeActorMotionSlots();
+    fldAreaState.unk20 = 0;
+    if (fldAreaState.transitionMode != 0) {
+        fldUpdateSparkSlots();
+    }
+    return fldCachedRoomF1ResourceAllocation;
+}
 
 extern u32 func_00128780(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);

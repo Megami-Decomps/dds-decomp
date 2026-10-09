@@ -198,11 +198,11 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
-    void *mem = sdfAllocGeneralBlock(0x1E840);
+    struct SdfMemBlock *mem = sdfAllocGeneralBlock(0x1E840);
     DatGameState *state = (void *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x1E840);
-    state->header.backingAllocation = (s32)mem;
+    state->header.backingAllocation = mem;
     state->header.firstTick = 0;
     state->header.secondTick = 0;
     kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
@@ -211,13 +211,13 @@ void sdfCreateRuntimeTask(void) {
 }
 
 void sdfDestroyRuntimeTask(void) {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117A80();
     allocation = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)allocation);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
+    sdfDecrementAllocationReferenceCount(allocation);
+    sdfReleaseResourceAllocation(allocation);
     datGameState = 0;
 }
 
@@ -377,7 +377,7 @@ void func_00118008(void) {
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
 void sdfResetGameRuntime(s32 fullReset) {
-    s32 backingAllocation;
+    struct SdfMemBlock *backingAllocation;
 
     if (fullReset == 1) {
         sdfSaveResetSnapshot();

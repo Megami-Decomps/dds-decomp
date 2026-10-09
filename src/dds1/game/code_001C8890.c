@@ -185,25 +185,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 variant;
-    u16 unk_0E;
-} SoundLink;
-
-extern void btlUpdateUnitCommandEffect(SoundLink *);
-
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u32 variant;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 typedef struct SndPad {
     u8 pad00[0x21];
     s8 confirm;
@@ -3615,8 +3596,6 @@ extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
 
-extern void btlMarkTaskReady(SoundResourceLink *);
-
 extern void btlResetUnitModelProgress(BtlUnit *);
 
 extern void btlSetUnitPosition(BtlUnit *object, void *position);
@@ -6253,7 +6232,7 @@ void btlUpdateActorModelColorAndLinks(void) {
                 }
             }
             func_001F2818(unit->resourceLink);
-            btlUpdateUnitCommandEffect((SoundLink *)unit->link);
+            btlUpdateUnitCommandEffect(unit->link);
             func_001FC998(unit);
         }
     }

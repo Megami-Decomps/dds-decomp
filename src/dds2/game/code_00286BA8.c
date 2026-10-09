@@ -168,7 +168,7 @@ extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
 extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
 extern SdfTaskItemDesc D_003CFCE8;
 
-extern s32 func_00287078(MtrResourceLoadState *, u16);
+extern s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *, u16);
 
 extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 
@@ -227,7 +227,7 @@ void mnuStopResourceTask(void) {
 
 s32 func_00287030(void) {
     MnuStatusResource *selected = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
-    s32 result = func_00287078(&selected->resourceLoad, 0);
+    s32 result = mtrAdvanceMantraResourceLoadState(&selected->resourceLoad, 0);
 
     if (result != 0) {
         sdfAttachTaskItem(mnuMantraSelectionResource, &D_003CFCD4);
@@ -238,7 +238,7 @@ s32 func_00287030(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
+INCLUDE_ASM(const s32, "game/code_00286BA8", mtrAdvanceMantraResourceLoadState);
 
 /* Initialize the unit-selection state of the current resource-task work; return zero. */
 s32 mtrUnitSelectInit(void) {

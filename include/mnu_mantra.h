@@ -5,6 +5,7 @@
 #include "dat_state.h"
 
 struct ItfMesSub;
+struct FileRequest;
 struct MenuList;
 struct MenuListNode;
 struct SdfMemBlock;
@@ -30,12 +31,14 @@ typedef struct MtrSelectionFlags {
 } MtrSelectionFlags;
 
 typedef struct MtrResourceLoadState {
-    void *fileEntry;
+    struct FileRequest *fileEntry;
     u32 unk04;
     s16 state;
     u16 entryIndex;
     u32 partyMask;
 } MtrResourceLoadState;
+
+typedef char MtrResourceLoadStateFileEntryOffsetCheck[((u32)&((MtrResourceLoadState *)0)->fileEntry == 0x00) ? 1 : -1];
 
 typedef struct MtrEquipState {
     s32 state;

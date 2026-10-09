@@ -56,7 +56,7 @@ void dds3DestroyObjectBase(ObjBase *base) {
     if (base->devSlot != 0) {
         sdfReleaseDevSlot(base->devSlot, 1, 1);
     }
-    dds3DestroyWorldIndexNode((WorldIndexNode *)base->worldIndexNode);
+    dds3DestroyWorldIndexNode(base->worldIndexNode);
     sdfReleaseChipBlock(base);
 }
 
@@ -121,8 +121,8 @@ void *dds3GetSlot(EffWorldNode *object, s32 slotIndex) {
     return dds3GetObjectOwnedHandle(object)->slots[slotIndex];
 }
 
-/* Return the world-index node word also used when destroying the full base. */
-u32 dds3GetObjectIndexNode(void *object) {
+/* Return the object's world-index node. */
+WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object) {
     return dds3GetObjectOwnedHandle(object)->worldIndexNode;
 }
 
