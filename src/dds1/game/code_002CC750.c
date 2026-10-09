@@ -269,7 +269,64 @@ void ptyRebuildAllProfiles(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyRecomputeMaxVitals);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *unit);
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *unit);
+
+/* Recompute effective maxima from the profile plus optional stat gains, then
+ * preserve each current resource's proportion of its former maximum. */
+void ptyRecomputeMaxVitals(DatPartyRecord *unit, const s32 *statDeltas) {
+    DatPartyRecord adjusted = *unit;
+    u16 oldMaxHp;
+    u16 oldMaxMp;
+    s32 newMaxHp;
+    s32 newMaxMp;
+    f32 maximum;
+
+    if (statDeltas != NULL) {
+        s32 i;
+
+        for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
+            adjusted.baseStats[i] += ((const u8 *)statDeltas)[i * 4];
+        }
+    }
+
+    oldMaxHp = unit->maxHp;
+    oldMaxMp = unit->maxMp;
+    newMaxHp = datComputeSkillBoostedMaxHp(&adjusted);
+    newMaxMp = datComputeSkillBoostedMaxMp(&adjusted);
+
+    if (oldMaxHp != newMaxHp) {
+        u32 adjustedHp;
+
+        unit->maxHp = newMaxHp;
+        maximum = (f32)newMaxHp;
+        adjustedHp = (u32)((f32)unit->hp *
+            (maximum / (f32)oldMaxHp) + 0.49999f);
+        unit->hp = adjustedHp;
+    }
+    if (oldMaxMp != newMaxMp) {
+        u32 adjustedMp;
+
+        unit->maxMp = newMaxMp;
+        maximum = (f32)newMaxMp;
+        adjustedMp = (u32)((f32)unit->mp *
+            (maximum / (f32)oldMaxMp) + 0.49999f);
+        unit->mp = adjustedMp;
+    }
+
+    if (unit->hp == 0) {
+        unit->hp = 1;
+    }
+    if (unit->mp == 0) {
+        unit->mp = 1;
+    }
+    if (unit->hp > unit->maxHp) {
+        unit->hp = unit->maxHp;
+    }
+    if (unit->mp > unit->maxMp) {
+        unit->mp = unit->maxMp;
+    }
+}
 
 void ptyRecomputeMaxHpMp(DatPartyRecord *unit) {
     ptyRecomputeMaxVitals(unit, NULL);
