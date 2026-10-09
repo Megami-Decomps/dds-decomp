@@ -1858,7 +1858,38 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
     return value < 0 ? 0 : value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
+/* Largest number of uses the current camp row allows; zero for unsupported list types. */
+s32 func_00261198(MenuTerminalContext *scene) {
+    s32 count = 0;
+    CampWindowParams *item = &scene->window->list->cursor->camp;
+    s32 listType = scene->ownedWindows[0]->list->cursor->camp.value + 1;
+    s32 id = item->id;
+    s32 price = item->price;
+    s32 mode = item->mode;
+    s32 remaining;
+    u8 owned;
+
+    switch (listType) {
+    case 1:
+    case 2:
+    case 3:
+        count = datGameState->header.currency / price;
+        remaining = mnuCampCountRemainingUses(mode, id, scene);
+        if (remaining < count) {
+            count = remaining;
+        }
+        break;
+    case 4:
+        owned = datGameState->inventory.counts[id];
+        if (owned * price > 9999999) {
+            count = 9999999.0f / (f32)price;
+        } else {
+            count = owned;
+        }
+        break;
+    }
+    return count;
+}
 
 s32 func_00261290(MenuTerminalContext *scene) {
     CampWindowParams *item = &scene->window->list->cursor->camp;

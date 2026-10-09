@@ -353,7 +353,32 @@ s32 func_0026D590(u16 entry, s32 mode) {
     return satisfiedNeighbors == 0x3F;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026D710);
+typedef struct MantraNodeStates {
+    u8 pad00[8];
+    u16 *cells; /* 0x08: per-node state halfwords, indexed by record id */
+} MantraNodeStates;
+
+void func_0026D710(MantraNodeStates *states, s32 unused, s16 entry) {
+    EvtMantraNodePositionRecord *record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(entry);
+    u16 *origin = &states->cells[record->id];
+    s32 slot;
+
+    *origin |= 0x100;
+    for (slot = 0; slot < 6; slot++) {
+        EvtMantraNodePositionRecord *neighbor = record->neighbors[slot];
+
+        if (neighbor != NULL) {
+            u16 *cell = &states->cells[neighbor->id];
+            s32 kind = neighbor->packedHeader & 0xF;
+
+            if (kind == 1 || kind == 4 || ((neighbor->packedHeader & 0x10F) == 2 && ((*cell >> 8) & 8))) {
+                if ((*cell & 0xF) == 2) {
+                    *cell = (*cell & 0xFFF0) | 1;
+                }
+            }
+        }
+    }
+}
 
 extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
 

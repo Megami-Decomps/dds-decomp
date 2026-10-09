@@ -2300,7 +2300,21 @@ s32 func_002877A8(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
+void func_002878D8(s32 initialMotionIndex) {
+    MdlCtx *model = evtStageTestState.model;
+    StageTestSlot *slot = &evtStageTestState.queue.slot[0];
+    s8 motionIndex;
+
+    if (initialMotionIndex < 0) {
+        motionIndex = evtStageTestState.entries[slot->entryIndex].motionIndex;
+    } else {
+        motionIndex = initialMotionIndex;
+    }
+    if (model != NULL && motionIndex < mdlGetNodeRefHalf(model, 0)) {
+        mdlAddEntryFlagged(model, 0, motionIndex);
+        model->first->frameStep = evtStageTestState.entries[slot->entryIndex].frame;
+    }
+}
 
 extern u8 *D_003BAA20;
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
