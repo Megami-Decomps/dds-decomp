@@ -327,7 +327,8 @@ typedef char MenuPanelGroup_initialValue_offset[((u32)&((MenuPanelGroup *)0)->in
 #endif
 
 #ifdef VERSION_DDS2
-extern MenuPanelGroup *mnuCreatePanelGroup(s32 owner, struct EffectSlotSet *texture, s32 mode);
+extern MenuPanelGroup *mnuCreatePanelGroup(struct EffectSlotSet *owner,
+                                           struct EffectSlotSet *texture, s32 mode);
 #else
 extern MenuPanelGroup *mnuCreatePanelGroup(s32 parent);
 #endif

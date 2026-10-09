@@ -762,7 +762,8 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
 
-extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, s32, EffectSlotSet *, s32, s32);
+extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *,
+                                             EffectSlotSet *, s32, s32);
 
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
@@ -771,7 +772,7 @@ extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
-MenuPanelGroup *mnuCreatePanelGroup(s32 owner, EffectSlotSet *texture, s32 mode) {
+MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *owner, EffectSlotSet *texture, s32 mode) {
     MenuPanelGroup *group = (MenuPanelGroup *)sdfAllocSizeClassBlock(MNU_PANEL_GROUP_BYTES);
     MenuPanelItem **itemCursor = group->entries;
     s32 panelIndex;
@@ -1215,22 +1216,24 @@ MenuPanelItem *mnuCreatePanelItem(void) {
 
 /* Bind the panel item's nine sprite cells to their grid entries (the extra pair only when an extra grid
  * exists) and pick the panel's label entry. */
-void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, EffectSlotSet *secondaryGrid, s32 extraGrid, s32 panelIndex) {
+void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, EffectSlotSet *primaryGrid,
+                                      EffectSlotSet *secondaryGrid, s32 extraGrid,
+                                      s32 panelIndex) {
     s32 panelEntryIds[5] = {'F', 'H', 'G', 'I', 'J'};
 
     itfGridStorePosition(&item->spriteGridSlots[0], secondaryGrid, 4);
     itfGridStorePosition(&item->spriteGridSlots[1], secondaryGrid, 5);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[1].set, item->spriteGridSlots[1].index, 0xD40, 0x40, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[2], (EffectSlotSet *)primaryGrid, 0x51);
+    itfGridStorePosition(&item->spriteGridSlots[2], primaryGrid, 0x51);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[2].set, item->spriteGridSlots[2].index, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[3], (EffectSlotSet *)primaryGrid, 0x53);
+    itfGridStorePosition(&item->spriteGridSlots[3], primaryGrid, 0x53);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[3].set, item->spriteGridSlots[3].index, 0x4B0, 0x48, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[4], (EffectSlotSet *)primaryGrid, 0x52);
+    itfGridStorePosition(&item->spriteGridSlots[4], primaryGrid, 0x52);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[4].set, item->spriteGridSlots[4].index, 0x460, 0x20, 0, 0);
-    itfGridStorePosition(&item->spriteGridSlots[5], (EffectSlotSet *)primaryGrid, 0x54);
+    itfGridStorePosition(&item->spriteGridSlots[5], primaryGrid, 0x54);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[5].set, item->spriteGridSlots[5].index, 0x460, 0x20, 0, 0);
     if (extraGrid != 0) {
-        itfGridStorePosition(&item->spriteGridSlots[6], (EffectSlotSet *)primaryGrid, 0x56);
+        itfGridStorePosition(&item->spriteGridSlots[6], primaryGrid, 0x56);
         itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[6].set, item->spriteGridSlots[6].index, 0x4B0, 0x48, 0, 0);
         itfGridStorePosition(&item->spriteGridSlots[7], (EffectSlotSet *)extraGrid, 0x19);
         itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[7].set, item->spriteGridSlots[7].index, 0x460, 0x20, 0, 0);
@@ -1240,7 +1243,7 @@ void mnuInitializePanelGroupGridSlots(MenuPanelItem *item, s32 primaryGrid, Effe
         item->spriteGridSlots[7].set = 0;
         item->spriteGridSlots[7].index = 0;
     }
-    itfGridStorePosition(&item->spriteGridSlots[8], (EffectSlotSet *)primaryGrid, panelEntryIds[panelIndex]);
+    itfGridStorePosition(&item->spriteGridSlots[8], primaryGrid, panelEntryIds[panelIndex]);
     itfSetGridEntryQuantizedAndRefresh(item->spriteGridSlots[8].set, item->spriteGridSlots[8].index, 0x130, -0x30, 0, 0);
 }
 
