@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -4651,8 +4652,6 @@ extern SdfGraphObj D_003980E0;
 extern SdfPoolNode *D_00359D20[];
 extern SdfPoolNode *D_00359D30[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfCreateResourcePacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void sdfCreateDescriptorPacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32);
 
 /* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
  * model is created (and the update ends) on the first frame it is missing. */
@@ -4668,7 +4667,8 @@ void func_001D6FB0(BtlUnit *unit) {
     }
     unit->mirror->unk32C = sdfAllocPacketAligned(0x70000);
     packet = (u32)sdfAllocatePacketList(0);
-    sdfCreateResourcePacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
+    sdfCreateResourcePacket((SdfListHead *)packet, D_003980E0.buffers[2],
+                            0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
     D_00359D20[0]->append((SdfListHead *)D_00359D20[0], (SdfListHead *)packet);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
@@ -4684,7 +4684,8 @@ void func_001D6FB0(BtlUnit *unit) {
         return;
     }
     packet = (u32)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
+    sdfCreateDescriptorPacket((SdfListHead *)packet, D_003980E0.buffers[2],
+                              0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
     D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
     func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
 }
