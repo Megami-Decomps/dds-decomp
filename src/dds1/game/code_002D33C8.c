@@ -447,7 +447,7 @@ void sdfSetPacketCursorAligned(s32 cursorAddress) {
 
 void sdfInitPacketList(SdfListHead *list) {
     list->unkC = 0xFFFF;
-    list->unk0 = 0;
+    list->nextList = NULL;
     list->first = 0;
     list->last = 0;
     list->firstReferenceSource = 0;
@@ -546,7 +546,7 @@ void sdfPrependPacketList(SdfListHead *destinationList, SdfListHead *incomingLis
     } else {
         sdfConnectPacketLists(incomingList, firstList);
     }
-    incomingList->unk0 = (u32)firstList;
+    incomingList->nextList = firstList;
     destinationList->first = (u32)incomingList;
 }
 
@@ -656,25 +656,25 @@ void sdfChainReferenceNodes(SdfListHead *list) {
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *tail = NULL;
-    s32 head = 0;
+    SdfListHead *head = NULL;
 
     for (; node != NULL; node = node->next) {
         node->prepend((SdfListHead *)node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                sdfConnectPacketLists(tail, (SdfListHead *)node->first);
+                sdfConnectPacketLists(tail, node->first);
             } else {
                 head = node->first;
-                sdfChainReferenceNodes((SdfListHead *)head);
+                sdfChainReferenceNodes(head);
             }
-            tail = (SdfListHead *)node->last;
+            tail = node->last;
         }
     }
     if (tail != NULL) {
         ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
         ((SdfDmaTag *)tail->last)->address = 0;
     }
-    return (SdfListHead *)(u32)head;
+    return head;
 }
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {

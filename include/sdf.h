@@ -359,7 +359,7 @@ typedef struct SdfTex {
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfListHead {
-    u32 unk0;
+    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
     u32 first;
     u32 last;
     u32 unkC;
@@ -369,11 +369,17 @@ typedef struct SdfListHead {
     u32 unk1C;
 } SdfListHead;
 
+typedef char SdfListHead_link_layout[
+    (sizeof(SdfListHead) == 0x20 &&
+     (u32)&((SdfListHead *)0)->nextList == 0 &&
+     (u32)&((SdfListHead *)0)->first == 4 &&
+     (u32)&((SdfListHead *)0)->last == 8) ? 1 : -1];
+
 /* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
 typedef struct SdfPoolNode {
     struct SdfPoolNode *next; /* 0x00 */
-    u32 first;               /* 0x04 */
-    u32 last;                /* 0x08 */
+    SdfListHead *first;       /* 0x04 */
+    SdfListHead *last;        /* 0x08 */
     u32 unkC;
     void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
     s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
@@ -382,6 +388,11 @@ typedef struct SdfPoolNode {
 } SdfPoolNode;
 
 typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -1];
+typedef char SdfPoolNode_owner_layout[
+    ((u32)&((SdfPoolNode *)0)->first == 4 &&
+     (u32)&((SdfPoolNode *)0)->last == 8 &&
+     (u32)&((SdfPoolNode *)0)->append == 0x10 &&
+     (u32)&((SdfPoolNode *)0)->prepend == 0x14) ? 1 : -1];
 
 /* Callback-list hooks also accept the shared task-entry no-op. */
 typedef void (*SdfListCallback)();
