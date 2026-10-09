@@ -5793,3 +5793,41 @@ word; the resetters clear the complete `0x1C` bytes. Keep this payload as
 `pauseFade`, not a byte pad cast to its fade-state prefix. This owner closure
 does not solve the retained caller's retail JAL-versus-sibling-jump frontier.
 
+
+## DDS1 result-animation rows start at their phase byte
+
+The `0x68`-byte DDS1 result rows start at owner `+0xEF4` (level) and
+`+0x1234` (profile), not twenty bytes earlier. `func_00268AB8` operates on
+the profile phase at `0x1234 + index * 0x68`; `func_00267FF0` writes its
+icon and completion fields, and `func_00268D40` writes the initialization
+flag and previous progress at row `+0x60`/`+0x64`. The renderer
+`func_00268590` reads auxiliary color/X/Y at row `+0x54`/`+0x58`/`+0x5C`.
+These are the same record's tail, not a sixth sentinel or an overlapping
+rendering view. Both arrays still contain five rows; the owner stays
+`0x1590` bytes and DDS2's layout is unchanged.
+
+All fifteen existing header consumers remain exact under this primary
+owner correction. The four-icon renderer itself remains assembly:
+three genuine palette-copy/representation forms leave a smaller frame,
+different pointer/register retention and broad scheduling differences.
+
+## Effect allocations share a prefix, not a complete owner
+
+DDS1 mode `0x108` owns the `0x18`-byte timing/vertical-motion record;
+mode `0x10B` owns a distinct `0x10`-byte selected-boss record.
+`btlInitRandomBossSelection` (`00208D30`) and `btlSwapRandomBossSelection`
+(`00209238`) access the selected ID as a full word at `+0x0C`, not as the
+timer/active/phase bytes of the other allocation. Both complete owners
+embed `BtlEffectHeader` first. Generic actor/count code uses that prefix;
+mode-specific code recovers only its actual containing owner.
+
+Upstream `87e2edb1`'s matching `00209528` boss-vector reseed belongs to
+the latter owner. Its actor accesses migrate to `header.actor` without
+changing its control flow, provider calls or vector-copy work.
+
+DDS2's native `00229728` dispatch table assigns `00221BC8` to mode
+`0x315` (789), not `0x316`. `0022A11C` through `0022A17C` allocate and
+clear 16 bytes, matching the existing `BattleActionState`. Its alternate
+motion byte at `+9` is signed: `00221C48` uses `LB`, and `00221CA4` uses
+`SB`. This is a field of that owner, not a view of the DDS1 timing word.
+

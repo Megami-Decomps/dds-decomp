@@ -743,3 +743,4 @@ INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD270);
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD271);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", sdfActiveCounterRuntime);
+

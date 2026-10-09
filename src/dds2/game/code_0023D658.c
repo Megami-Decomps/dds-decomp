@@ -1617,3 +1617,4 @@ u32 evtOpCopyModelTransformFromSource(void) {
 INCLUDE_SDATA(const s32, "game/code_0023D658", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "game/code_0023D658", D_004371F0);
+
