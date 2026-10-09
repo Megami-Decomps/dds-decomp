@@ -166,12 +166,12 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00102F98);
 typedef struct KwlnNamedSlot {
     s32 kind;
     char name[32];
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
+    void *unk24;
+    void *unk28;
+    void *unk2C;
+    void *unk30;
     s32 unk34;
-    s32 unk38;
+    void *unk38;
     s32 previous;
     s32 next;
 } KwlnNamedSlot;
@@ -219,7 +219,55 @@ s32 kwlnFindNamedSlot(const char *name) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103218);
+extern char D_0039E018[];
+extern s32 D_003BA854;
+extern s32 D_003BA858;
+extern s32 D_003BA85C;
+
+/* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
+s32 func_00103218(const char *name) {
+    s32 slotIndex;
+
+    if (kwlnTaskGetTaskByName(D_0039E018) == NULL) {
+        return 0;
+    }
+    slotIndex = kwlnFindNamedSlot(name);
+    if (slotIndex < 0) {
+        return 0;
+    }
+    if (D_003C1C90[slotIndex].kind > 0) {
+        if (D_003C1C90[slotIndex].kind < 3) {
+            if (kwlnTaskIsRegistered((KwlnTask *)D_003C1C90[slotIndex].unk24) == 1) {
+                kwlnTaskDestroyWithHierarchy((KwlnTask *)D_003C1C90[D_003BA85C].unk24, 1);
+            }
+        }
+    }
+    D_003C1C90[slotIndex].kind = 0;
+    D_003C1C90[slotIndex].name[0] = 0;
+    D_003C1C90[slotIndex].unk24 = 0;
+    D_003C1C90[slotIndex].unk28 = 0;
+    D_003C1C90[slotIndex].unk2C = 0;
+    D_003C1C90[slotIndex].unk30 = 0;
+    D_003C1C90[slotIndex].unk34 = 0;
+    D_003C1C90[slotIndex].unk38 = 0;
+    if (D_003C1C90[slotIndex].previous < 0) {
+        D_003BA850 = D_003C1C90[slotIndex].next;
+    } else {
+        D_003C1C90[D_003C1C90[slotIndex].previous].next = D_003C1C90[slotIndex].next;
+    }
+    if (D_003C1C90[slotIndex].next < 0) {
+        D_003BA854 = D_003C1C90[slotIndex].previous;
+    } else {
+        D_003C1C90[D_003C1C90[slotIndex].next].previous = D_003C1C90[slotIndex].previous;
+    }
+    D_003C1C90[slotIndex].previous = -1;
+    D_003C1C90[slotIndex].next = -1;
+    if (D_003BA85C == slotIndex) {
+        D_003BA85C = D_003BA850;
+    }
+    D_003BA858--;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103400);
 
