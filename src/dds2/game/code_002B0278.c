@@ -3363,7 +3363,7 @@ void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s3
     itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
-void *mnuWalkNodeList(s32 index, MenuList *list) {
+MenuListNode *mnuWalkNodeList(s32 index, MenuList *list) {
     MenuListNode *node = list->first;
     s32 currentIndex = 0;
 

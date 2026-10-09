@@ -740,7 +740,6 @@ s32 mnuListContainsFinalNode(MenuList *list);
 
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect);
 
-void *mnuWalkNodeList(s32 index, MenuList *list);
 
 
 void mnuSelectFirstListNode(MenuList *list);
