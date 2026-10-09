@@ -3546,7 +3546,53 @@ s32 func_002646C8(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00264710);
+extern s32 func_00260C28(s32 row, s32 option);
+extern u32 mnuCampChooseSolarWeightedOption(s32 row);
+extern u8 mnuCampChooseWeightedTableValue(void);
+extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+
+s32 func_00264710(KwlnTask *task) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    struct MenuList *activeList = scene->window->list;
+    struct MenuListNode *selectedNode = scene->ownedWindows[0]->list->cursor;
+    s32 selection = selectedNode->sortKeyPrimary + 1;
+    s32 listedIndex;
+    s8 slot;
+
+    if (activeList->count != 0) {
+        listedIndex = mnuCampFindListedItemIndex(activeList->cursor->sortKeySecondary);
+    } else {
+        listedIndex = -1;
+    }
+    if (selection == 1 && listedIndex >= 0) {
+        scene->rewardMode = itmClaimFreeSlot(listedIndex);
+        slot = scene->rewardMode;
+        scene->padCF = (u8)listedIndex;
+        if (slot < 0) {
+            scene->rewardRow = (s8)func_00260C28(
+                listedIndex, mnuCampChooseSolarWeightedOption(listedIndex));
+            scene->remainingRewards = mnuCampChooseWeightedTableValue();
+        } else {
+            scene->rewardRow = (s8)func_00260C38(slot, listedIndex);
+            scene->remainingRewards = (s8)mnuCampFindFreeCompactEntryIndex(
+                slot, listedIndex);
+        }
+        scene->rewardIndex = 0;
+        scene->announceNextReward = 0;
+        scene->grantPendingReward = 0;
+        sndSetSequenceVolumePan(0x300001, 0x7F, 0x3F);
+        dspStartEntry(0x2C);
+    } else {
+        scene->padCF = (u8)-1;
+        scene->rewardRow = -1;
+        scene->remainingRewards = 0;
+        scene->announceNextReward = 0;
+        scene->grantPendingReward = 0;
+    }
+    scene->rewardDelay = 0;
+    return 1;
+}
 
 u32 func_00264848(void) {
     return 1;
