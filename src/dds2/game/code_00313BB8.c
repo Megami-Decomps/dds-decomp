@@ -1320,7 +1320,7 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
 }
 
 
-SdfFlagListWork *func_00316528(const SdfFlagListParams *source) {
+SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *source) {
     u32 count;
     u32 arrayBytes;
     SdfMemBlock *allocation;

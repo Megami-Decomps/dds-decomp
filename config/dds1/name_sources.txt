@@ -7340,3 +7340,4 @@
 0x002A93A0	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
 0x002A9630	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
 0x0014FF28	effConvertLegacyNodeDescriptor	inferred	Converts legacy version 1.0/1.01 effect descriptor payload sizes and type-1 scalar before node creation.
+0x002CEAE8	sdfCreateFlagListWork	inferred	Allocates count-sized flag-list vertex, color and mark arrays with their work owner; copies parameters and resets entries.

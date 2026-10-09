@@ -794,7 +794,7 @@ void effResetSelectionEntryBuffers(SdfFlagListWork *work) {
 }
 
 SdfFlagListWork *effCreateSelectionFlagListFromWork(const SdfFlagListParams *work) {
-    return func_00316528(work);
+    return sdfCreateFlagListWork(work);
 }
 
 SdfFlagListWork *effCreateSelectionFlagListFromFile(void *file) {
