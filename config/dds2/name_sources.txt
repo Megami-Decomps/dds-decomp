@@ -5394,6 +5394,8 @@
 0x002F8378	effOrientClassResourceAlongTargetOffset	inferred	High: forms target minus model origin, stores its distance, computes and applies orientation and target position, and advances the class resource. [names_qp9.tsv]
 0x002F84F8	effApplyModelTransform	inferred	Loads effect vectors and scale into vf10 for model helpers, updates entry weight from animation and applies model transform.
 0x002F8590	effCreateDrawableAssetWithDefaultOpacity	inferred	Creates drawable asset work and initializes its draw opacity to one. [names_reviewed14.tsv]
+0x002F85D8	effCreateDrawableAssetWork	inferred	Registered createResource callback returns a fresh drawable-asset work owner with default opacity.
+0x002F85F0	effCloneDrawableAssetWork	inferred	Registered cloneResource callback creates a fresh drawable-asset work owner from the source resource owner.
 0x002F8608	effReleaseQueuedDrawableAssetWork	inferred	Queues an owned drawable asset for release and frees its holder. [names_reviewed14.tsv]
 0x002F8C38	effSyncFadeColorToTargets	inferred	walks owner list, merges alpha byte into packed color at +0x84 and forwards it to target [names_M36_SmallSweep5.tsv]
 0x002F8CF0	effUpdateSelectedActorAlpha	inferred	U1
