@@ -6479,6 +6479,7 @@ effActiveInstanceOperations = 0x003E9950;
 effClassWorkOperations = 0x003E9B80;
 effClassResourceWorkOperations = 0x003E9D00;
 effBlockResourceOperations = 0x003E9DD8;
+effModelBlockOperations = 0x003E9E60;
 effModelResourceOperations = 0x003E9F08;
 effBattleCameraSnapshotSelection = 0x003FF4B0;
 effMappingState = 0x00400018;
