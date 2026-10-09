@@ -5938,7 +5938,8 @@ typedef struct EffSpanEntry {
 } EffSpanEntry;
 
 typedef struct EffModelResource {
-    u8 transform[0x20];
+    f32 position[4];
+    f32 orientation[4]; /* Quaternion. */
     f32 scale;
     u32 color;
     s32 updateCount;
@@ -6128,8 +6129,8 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     effect->scale = 1.0f;
     effect->updateCount = 0;
     effect->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->position);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->orientation);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
         effect->model = effLoadViewerModelWithVUState(secondary, param);
@@ -6197,20 +6198,20 @@ void effStepModelResourceCallbacks(EffModelResource *effect) {
     effDispatchModelResourceCallback(effect);
 }
 
-void effSetModelResourcePrimaryTransformVector(void *dst, void *src) {
-    PCP_COPY_VECTOR(dst, src);
+void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
+    PCP_COPY_VECTOR(effect->position, position);
 }
 
-void effSetModelResourceSecondaryTransformVector(void *work, void *src) {
-    PCP_COPY_VECTOR(&((EffModelResource *)work)->transform[0x10], src);
+void effSetModelResourceSecondaryTransformVector(EffModelResource *effect, const f32 *orientation) {
+    PCP_COPY_VECTOR(effect->orientation, orientation);
 }
 
-void effSetModelResourceColor(s32 work, u32 color) {
-    ((EffModelResource *)work)->color = color;
+void effSetModelResourceColor(EffModelResource *effect, u32 color) {
+    effect->color = color;
 }
 
-void effSetModelResourceScale(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
+    effect->scale = scale;
 }
 
 extern EffPacketParams D_003DCB60[];
