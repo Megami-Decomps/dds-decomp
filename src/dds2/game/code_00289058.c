@@ -14,7 +14,7 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
-extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void mdlFlagSet(u16);

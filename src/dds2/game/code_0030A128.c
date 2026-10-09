@@ -477,7 +477,7 @@ extern s32 func_0030BD10(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
-extern void kwlnFadeInStart();
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);

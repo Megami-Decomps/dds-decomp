@@ -2209,7 +2209,7 @@ u8 fldGetCampSceneControlMode(void) {
 extern void *dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
 extern void kwlnFadeStartIn(s32);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void func_00131688(void);
 extern u8 fldHasPendingSceneFlags(void);
 extern void fldSetCameraNodeModeWithTen(void);

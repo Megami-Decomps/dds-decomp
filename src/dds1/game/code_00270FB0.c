@@ -583,7 +583,7 @@ extern void mnuHandleCampFieldSkillInput();
 extern void func_002728F8();
 extern s32 func_002729C8(s32);
 extern void func_00101A80(s32, s32);
-extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 /* Share menu userdata across the input/draw/owner tasks, attach fade and cancel
  * tasks to drawing, then start the opening fade and mark camp active. */
