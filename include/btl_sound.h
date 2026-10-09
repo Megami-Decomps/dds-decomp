@@ -116,6 +116,20 @@ typedef char EffectLoadArgs_request_offset_must_be_4[
 typedef char EffectLoadArgs_name_offset_must_be_8[
     ((u32)&((EffectLoadArgs *)0)->name == 8) ? 1 : -1];
 
+/* Callback arguments stored in the 12-byte earring playback task. */
+typedef struct BtlDeadLoadArgs {
+    struct BtlUnit *unit; /* 0x00 */
+    struct FileRequest *request; /* 0x04 */
+    struct SdfMemBlock *resourceAllocation; /* 0x08: retained until task finish. */
+} BtlDeadLoadArgs;
+
+typedef char BtlDeadLoadArgs_size_must_be_0x0C[
+    (sizeof(BtlDeadLoadArgs) == 0x0C) ? 1 : -1];
+typedef char BtlDeadLoadArgs_request_offset_must_be_4[
+    ((u32)&((BtlDeadLoadArgs *)0)->request == 4) ? 1 : -1];
+typedef char BtlDeadLoadArgs_resourceAllocation_offset_must_be_8[
+    ((u32)&((BtlDeadLoadArgs *)0)->resourceAllocation == 8) ? 1 : -1];
+
 struct ActiveSoundNode;
 struct SoundResourceLink;
 struct SoundLink;
