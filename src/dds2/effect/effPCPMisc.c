@@ -5950,7 +5950,7 @@ typedef struct {
     f32 position[4];
     s32 fadeIn;
     s32 fadeOut;
-    f32 unk18;
+    f32 frameStep;
 } EffPCPEventParamHead;
 
 /* The 0x40 owner and its separate entry allocation serve create/clone/release. */
@@ -5967,30 +5967,17 @@ typedef struct {
     u32 color;
 } EffPCPMapEventWork;
 
-typedef struct EffPCPEventMotionNode {
-    u8 pad00[0x20];
-    f32 unk20;
-    u8 pad24[0xA];
-    u16 frameCount; /* Native motion setup copies the clip's first halfword here. */
-} EffPCPEventMotionNode;
-
-typedef struct EffPCPEventModelContext {
-    u8 pad00[0x18];
-    void *inner;
-    EffPCPEventMotionNode *motion;
-} EffPCPEventModelContext;
-
 void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
     u32 i = 0;
     u32 count;
-    EffPCPEventModelContext *model;
+    MdlCtx *model;
     EffPCPMapEventEntry *entry;
 
     model = effParamWorkGetData(work->modelResource);
-    model->motion->unk20 = work->params.unk18;
+    model->first->frameStep = work->params.frameStep;
     mdlAddEntryPlain(model, 0, 0);
-    work->frameLimit = model->motion->frameCount;
+    work->frameLimit = model->first->frameCount;
     count = sdfCountMapPositionRecords(model->inner);
     work->count = count;
     work->entriesHandle = sdfAllocGeneralBlock(count << 5);
