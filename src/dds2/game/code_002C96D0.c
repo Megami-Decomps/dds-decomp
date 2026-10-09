@@ -80,7 +80,7 @@ typedef struct EffectSurfaceNode {
     struct BillObj *resource;
     FileJobPayload **jobs;
     struct SdfMemBlock *jobAllocation;
-    void **queues;
+    struct FileQueue **queues;
     struct SdfMemBlock *queueAllocation;
     struct EffExpandedList *referenceHolder;
     FileSlotTable *active;
@@ -5712,7 +5712,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
             return;
         }
         dst->queueAllocation = sdfAllocGeneralBlock(size);
-        dst->queues = (void *)sdfResourceRetainAddress(dst->queueAllocation);
+        dst->queues = sdfResourceRetainAddress(dst->queueAllocation);
         for (i = 0; i < count; i++) {
             dst->queues[i] = fileQueueClone(src->queues[0]);
         }
@@ -5811,7 +5811,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     size = count * 4;
     if (size != 0) {
         node->queueAllocation = sdfAllocGeneralBlock(size);
-        node->queues = (void *)sdfResourceRetainAddress(node->queueAllocation);
+        node->queues = sdfResourceRetainAddress(node->queueAllocation);
         node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);
