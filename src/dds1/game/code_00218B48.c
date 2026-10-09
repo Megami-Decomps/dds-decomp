@@ -727,7 +727,7 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-void *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
+MdlPartEntry *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
     DevRequest *slotTable;
 
     slotTable = resource->sub->partList;
@@ -737,7 +737,7 @@ void *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
     if (slotIndex >= slotTable->usedCount) {
         return NULL;
     }
-    return (u8 *)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
+    return (MdlPartEntry *)((u8 *)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES);
 }
 
 typedef struct MdlPartRec {
@@ -844,30 +844,25 @@ typedef struct MdlEntryRec {
     u16 index;    /* 0x12 */
 } MdlEntryRec;
 
-typedef struct MdlSlotRec {
-    u8 pad00[8];
-    MdlObj *obj; /* 0x08 */
-} MdlSlotRec;
-
-extern void *sdfFindResourceById(s32 id);
+extern SdfResource *sdfFindResourceById(s32 id);
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
-    MdlSlotRec *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
+    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
-        MdlObj *object = partSlot->obj;
+        MdlObj *object = (MdlObj *)partSlot->object;
         if (object->inUse == 0) {
-            s32 resourceData = (s32)sdfFindResourceById(entryRecord->dataId);
-            if (resourceData != 0) {
+            SdfTex *texture = (SdfTex *)sdfFindResourceById(entryRecord->dataId);
+            if (texture != 0) {
                 MdlResourceItem *resourceItem;
                 u8 *attributes;
                 object->inUse = 1;
                 resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
                 /* Fill the object and resource data before attaching the owner. */
-                resourceItem->payload.object.objectAddress = (s32)object;
+                resourceItem->payload.object.object = object;
                 attributes = resourceItem->payload.object.attributes;
-                resourceItem->payload.object.data = resourceData;
+                resourceItem->payload.object.texture = texture;
                 resourceItem->payload.object.owner = owner;
                 resourceItem->payload.object.minimumTime = entryRecord->minimumTime;
                 attributes[1] = 1;
@@ -879,17 +874,16 @@ void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subty
 }
 
 /* Initialize once the owner's motion reaches the stored threshold; retain native float-to-signed-to-unsigned conversion. */
-void mdlCondInitEntry(s32 itemAddress) {
-    s32 objectAddress = ((MdlResourceItem *)itemAddress)->payload.object.objectAddress;
-    if (((MdlObj *)objectAddress)->initialized == 0) {
-        s32 minimumTime = ((MdlResourceItem *)itemAddress)->payload.object.minimumTime;
-        f32 motionTime = ((MdlResourceItem *)itemAddress)->payload.object.owner->first->currentFrame;
+void mdlCondInitEntry(MdlResourceItem *item) {
+    MdlObj *object = item->payload.object.object;
+    if (object->initialized == 0) {
+        s32 minimumTime = item->payload.object.minimumTime;
+        f32 motionTime = item->payload.object.owner->first->currentFrame;
         if ((u32)(s32)motionTime < (u32)minimumTime) {
             return;
         }
-        mdlObjInit((MdlObj *)objectAddress,
-                   (SdfTex *)((MdlResourceItem *)itemAddress)->payload.object.data,
-                   (SdfStreamParams *)((MdlResourceItem *)itemAddress)->payload.object.attributes);
+        mdlObjInit(object, item->payload.object.texture,
+                   (SdfStreamParams *)item->payload.object.attributes);
     }
 }
 
@@ -1018,7 +1012,7 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
         effTrackPolyUpdate(anchorRecord->payload.part.track);
         break;
     case MDL_RESOURCE_OBJECT:
-        mdlCondInitEntry((s32)anchorRecord);
+        mdlCondInitEntry(anchorRecord);
         break;
     }
 }
