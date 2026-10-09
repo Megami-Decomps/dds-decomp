@@ -308,7 +308,62 @@ void sdfSaveResetSnapshot(void) {
     D_003BD7A0 = datGameState->world.slotFlags;
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00117C48);
+extern void mdlFlagSet(s32 flag);
+extern void mnuApplyFlagArray(u8 *flags);
+extern void dds3ForEachFlagged(void);
+
+void func_00117C48(void) {
+    u32 index;
+
+    if (D_003BA9E5 != 0) {
+        mdlFlagSet(0xB90);
+    }
+    if (D_003BA9E6 != 0) {
+        mdlFlagSet(0xB91);
+    }
+    if (D_003BA9E7 != 0) {
+        mdlFlagSet(0xB92);
+    }
+    if (D_003BA9E8 != 0) {
+        mdlFlagSet(0xB93);
+    }
+    if (D_003BA9E9 != 0) {
+        mdlFlagSet(0xB94);
+    }
+    if (D_003BA9EA != 0) {
+        mdlFlagSet(0xB95);
+    }
+    if (D_003BA9F8 != 0) {
+        mdlFlagSet(0xC0E);
+    }
+
+    datGameState->header.unk0C = D_003BA9EC;
+    memcpy(datGameState->battleFlags, D_003C2E30, sizeof(datGameState->battleFlags));
+    datGameState->header.secondTick = D_003BA9F0;
+    datGameState->header.unk20 = D_003BA9F4;
+    datGameState->header.playTicks = datGameState->header.secondTick;
+    datGameState->header.unk24 = D_0032A200[0];
+    datGameState->header.unk28 = D_0032A200[1];
+    datGameState->header.unk2C = D_0032A200[2];
+    mnuApplyFlagEntries(D_003BD790);
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_003BD790);
+
+    memcpy(datGameState->mantraBits, (void *)sdfMemoryGetBlockAddress(D_003BD794), sizeof(datGameState->mantraBits));
+    sdfReleaseResourceAllocation(D_003BD794);
+
+    memcpy(datGameState->profileRecords, (void *)sdfMemoryGetBlockAddress(D_003BD798), sizeof(datGameState->profileRecords));
+    sdfReleaseResourceAllocation(D_003BD798);
+
+    memcpy(datGameState->templates, (void *)sdfMemoryGetBlockAddress(D_003BD79C), sizeof(datGameState->templates));
+    sdfReleaseResourceAllocation(D_003BD79C);
+
+    for (index = 0; index < 16; index++) {
+        datGameState->templates[index].level = 0;
+    }
+    dds3ForEachFlagged();
+    mnuApplyFlagArray(D_003C2E40);
+    datGameState->world.slotFlags = D_003BD7A0;
+}
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
 void sdfResetGameRuntime(s32 fullReset) {
