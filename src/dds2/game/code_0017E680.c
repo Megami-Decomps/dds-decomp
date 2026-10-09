@@ -53,22 +53,22 @@ extern SdfPoolNode *D_003B1630[];
 
 /* Create an effect resource work with index entries, its entry list inline at +0x74. */
 EffResourceWork *effCreateResourceEntryWork(s32 index) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     EffResourceWork *work;
     EffResourceEntry *entries;
     u32 asset;
     u32 i;
 
-    handle = (u32)sdfAllocGeneralBlock(index * 20 + 0x74);
-    work = (EffResourceWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(index * 20 + 0x74);
+    work = (EffResourceWork *)sdfResourceRetainAddress(allocation);
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
-    work->resource70 = handle;
+    work->backingAllocation = allocation;
     work->entryCount = index;
     work->scale[0] = 1.0f;
     work->scale[1] = 1.0f;
     work->scale[2] = 1.0f;
-    work->resource68 = 0;
+    work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work);
     asset = (u32)sdfCreateAssetWithDrawEntries();
     work->graphics6C = asset;
@@ -90,7 +90,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
 void effReleaseAttachedResources(EffResourceWork *effect) {
     sdfQueueAssetRelease(effect->graphics6C);
     effReleaseOptionalResource(effect);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->resource70));
+    sdfReleaseResourceAllocation(effect->backingAllocation);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -122,7 +122,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         matrix[14] = entry->position[2];
         VU0_LOAD_MATRIX(matrix);
         sdfConsAppendVuPacket(packet, 0);
-        if (work->resource68 == 0) {
+        if (work->streamAllocation == NULL) {
             remaining = 12;
             D_00452080.colors = D_003B1600;
             D_00452080.positions = D_003B1540;
@@ -138,7 +138,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         D_00452080.vertexCount = 48;
         while (remaining >= 48) {
             sdfAppendPacket(packet, func_00167A10(&D_00452080));
-            if (work->resource68 == 0) {
+            if (work->streamAllocation == NULL) {
                 D_00452080.colors += 48;
                 D_00452080.positions += 48;
             } else {
@@ -162,9 +162,9 @@ extern f32 sdfSinPoly(f32 angle);
 
 void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
                    f32 radiusScale, f32 height) {
-    s32 oldResource = work->resource68;
+    struct SdfMemBlock *oldResource = work->streamAllocation;
     u32 recordCount;
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     f32 (*positions)[4];
     f32 (*unitVectors)[4];
     u32 *colors;
@@ -178,14 +178,14 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     if (count < 3) {
         count = 3;
     }
-    if (oldResource != 0) {
+    if (oldResource != NULL) {
         effReleaseOptionalResource(work);
     }
     angle = 0.0f;
     recordCount = count * 3;
-    allocation = (u32)sdfAllocGeneralBlock(recordCount * 0x24);
-    work->resource68 = allocation;
-    positions = (f32 (*)[4])sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(recordCount * 0x24);
+    work->streamAllocation = allocation;
+    positions = (f32 (*)[4])sdfResourceRetainAddress(allocation);
     unitVectors = positions + recordCount;
     colors = (u32 *)(unitVectors + recordCount);
     work->vertexCount = recordCount;
@@ -234,8 +234,8 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
 }
 
 void effReleaseOptionalResource(EffResourceWork *effect) {
-    if (effect->resource68 != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->resource68));
+    if (effect->streamAllocation != NULL) {
+        sdfReleaseResourceAllocation(effect->streamAllocation);
         return;
     }
 }

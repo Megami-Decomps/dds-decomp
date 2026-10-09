@@ -39,7 +39,8 @@ typedef struct ActorSlotOrder {
     s8 state[8];
     u8 unk0A[2];
 #else
-    u8 unk00[4];
+    u8 unk00[2];
+    u16 flags; /* DDS2 scene-slot bits and the special-mode bit 0x1000. */
     s8 state[8];
 #endif
     s32 entries[8];
@@ -53,6 +54,9 @@ typedef struct ActorSlotOrder {
     f32 scalePercent[8][2];
 } ActorSlotOrder;
 typedef char ActorSlotOrder_size[(sizeof(ActorSlotOrder) == 0x274) ? 1 : -1];
+#ifdef VERSION_DDS2
+typedef char ActorSlotOrder_flags_offset[((unsigned long)&((ActorSlotOrder *)0)->flags == 0x02) ? 1 : -1];
+#endif
 typedef char ActorSlotOrder_slotValues_offset[((unsigned long)&((ActorSlotOrder *)0)->slotValues == 0x1F4) ? 1 : -1];
 typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrder *)0)->scalePercent == 0x234) ? 1 : -1];
 

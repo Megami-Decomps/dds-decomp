@@ -2207,11 +2207,11 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
-INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEBB0);
-
 extern char *D_00368B18[];
 
 /* Draw one row of the shadow-configuration menu. */
+INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEBB0);
+
 void func_0023BC30(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
@@ -4147,3 +4147,4 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
+

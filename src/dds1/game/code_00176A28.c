@@ -57,19 +57,19 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
 /* Allocate the resource group and initialize its matrix, scale and entry colors. */
 EffResourceWork *effCreateResourceEntryWork(u32 count)
 {
-    u32 allocation = (u32)sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
-    EffResourceWork *work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
+    EffResourceWork *work = (void *)sdfResourceRetainAddress(allocation);
     EffResourceEntry *entry;
     u32 i;
 
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
-    work->resource70 = allocation;
+    work->backingAllocation = allocation;
     work->entryCount = count;
     work->scale[0] = 1.0f;
     work->scale[1] = 1.0f;
     work->scale[2] = 1.0f;
-    work->resource68 = 0;
+    work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->graphics6C = sdfCreateAssetWithDrawEntries();
     func_002DA420(work->graphics6C, 1.0f);
@@ -85,7 +85,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
 void effReleaseAttachedResources(EffResourceWork *work) {
     sdfQueueAssetRelease(work->graphics6C);
     effReleaseOptionalResource(work);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->resource70));
+    sdfReleaseResourceAllocation(work->backingAllocation);
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -117,7 +117,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         matrix[14] = entry->position[2];
         VU0_LOAD_MATRIX(matrix);
         sdfConsAppendVuPacket(packet, 0);
-        if (work->resource68 == 0) {
+        if (work->streamAllocation == NULL) {
             remaining = 12;
             D_003D65E0.colors = D_00354CD0;
             D_003D65E0.positions = D_00354C10;
@@ -133,7 +133,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         D_003D65E0.vertexCount = 48;
         while (remaining >= 48) {
             sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
-            if (work->resource68 == 0) {
+            if (work->streamAllocation == NULL) {
                 D_003D65E0.colors += 48;
                 D_003D65E0.positions += 48;
             } else {
@@ -157,9 +157,9 @@ extern f32 sdfSinPoly(f32 angle);
 
 void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor, u32 outerColor,
                    f32 radiusScale, f32 height) {
-    u32 oldResource = work->resource68;
+    struct SdfMemBlock *oldResource = work->streamAllocation;
     u32 recordCount;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     f32 (*positions)[4];
     f32 (*unitVectors)[4];
     u32 *colors;
@@ -173,14 +173,14 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     if (count < 3) {
         count = 3;
     }
-    if (oldResource != 0) {
+    if (oldResource != NULL) {
         effReleaseOptionalResource(work);
     }
     angle = 0.0f;
     recordCount = count * 3;
-    allocation = (u32)sdfAllocGeneralBlock(recordCount * 0x24);
-    work->resource68 = allocation;
-    positions = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(recordCount * 0x24);
+    work->streamAllocation = allocation;
+    positions = (void *)sdfResourceRetainAddress(allocation);
     unitVectors = positions + recordCount;
     colors = (u32 *)(unitVectors + recordCount);
     work->vertexCount = recordCount;
@@ -229,8 +229,8 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
 }
 
 void effReleaseOptionalResource(EffResourceWork *work) {
-    if (work->resource68 != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->resource68));
+    if (work->streamAllocation != NULL) {
+        sdfReleaseResourceAllocation(work->streamAllocation);
         return;
     }
 }
