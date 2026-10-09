@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
@@ -92,8 +93,9 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
 }
 
 /* Select an asset packet from the root model's parsed resource table. */
-void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
-    return sdfInitAssetDrawEntryReferenceNode(((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
+SdfDmaTagHeader *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, SdfDmaTagHeader *packet, s32 frame) {
+    return (SdfDmaTagHeader *)sdfInitAssetDrawEntryReferenceNode(
+        ((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */
@@ -160,20 +162,12 @@ typedef struct {
     u32 address;
 } SdfIndexedCommand;
 
-typedef struct {
-    u16 quadwordCount;
-    u8 reservedByte;
-    u8 control;
-    u32 address;
-    u32 firstVifCode;
-    u32 secondVifCode;
-} SdfIndexedPayload;
-
-SdfIndexedPayload *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
+SdfDmaTagHeader *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommand *command,
+                                                    SdfDmaTagHeader *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
     u16 quadwordCount = packed;
-    SdfIndexedPayload *payload;
+    SdfDmaTagHeader *payload;
 
     payload = sdfModelWriteIndexedAssetPacket(node->root, assetIndex, packet, frame);
     payload->control = 0x30;
