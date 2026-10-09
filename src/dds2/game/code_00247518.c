@@ -371,7 +371,116 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_00248D70);
+extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 a, f32 b);
+extern s32 evtMovieInterpolateIntIfEnabled(s32 enable, f32 t, s32 a, s32 b);
+extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags);
+
+/* At time, applies the track's latest enabled mode keys, then interpolates the
+ * unit's byte and float parameters from the active kind-3/4 key to the next
+ * enabled key of the same kind. */
+void func_00248D70(EvtRuntimeGroup *track, s32 time) {
+    u32 objectMode = 0;
+    u32 unitMode = 2;
+    s32 pass;
+    s32 setFlags = 0;
+    s32 clearFlags = 0;
+    EvtUnit *unit = NULL;
+    EvtRuntimeChild *key;
+
+    key = track->children;
+    if (key != NULL) {
+        do {
+            if (time < key->frame) {
+                break;
+            }
+            switch (key->p08.sb[0]) {
+            case 0:
+            case 1:
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                    objectMode = key->p08.sb[0];
+                }
+                break;
+            case 2:
+            case 3:
+            case 4:
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                    unitMode = key->p08.sb[0];
+                    unit = evtUnitGetNestedValue(track->info);
+                }
+                break;
+            }
+            key = key->next;
+        } while (key != NULL);
+    }
+
+    for (pass = 0; pass < 1; pass++) {
+        EvtRuntimeChild *current = NULL;
+        EvtRuntimeChild *next;
+        s8 kind;
+        f32 t;
+        s32 startFrame;
+        s32 endFrame;
+
+        for (key = track->children; key != NULL; key = key->next) {
+            if ((key->p08.sb[0] == 3 || key->p08.sb[0] == 4) &&
+                evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                if (key->frame <= time) {
+                    current = key;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (current == NULL) {
+            break;
+        }
+        kind = current->p08.sb[0];
+        next = NULL;
+        for (key = track->children; key != NULL; key = key->next) {
+            if (key->p08.sb[0] == kind && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1 &&
+                time < key->frame) {
+                next = key;
+                break;
+            }
+        }
+        if (next == NULL) {
+            unit->unkD3 = current->p0C.b[1];
+            unit->unkD4 = current->p14.f;
+        } else {
+            startFrame = current->frame;
+            endFrame = next->frame;
+            if (endFrame != startFrame) {
+                t = (f32)(time - startFrame) / (f32)(endFrame - startFrame);
+            } else {
+                t = 0.0f;
+            }
+            if (next->p0C.sb[0] == 0 || next->p0C.sb[0] == 2) {
+                t = 0.0f;
+            }
+            unit->unkD3 = evtMovieInterpolateIntIfEnabled(0, t, current->p0C.b[1], next->p0C.b[1]);
+            if (next->p0C.b[0] < 2) {
+                t = 0.0f;
+            }
+            unit->unkD4 = evtMovieInterpolateFloatIfEnabled(0, t, current->p14.f, next->p14.f);
+        }
+        if (current->p0C.sb[0] == 1 || current->p0C.sb[0] == 3) {
+            setFlags |= 0x4000;
+        } else {
+            clearFlags |= 0x4000;
+        }
+        switch (current->p0C.sb[0]) {
+        case 2:
+        case 3:
+            setFlags |= 0x8000;
+            break;
+        default:
+            clearFlags |= 0x8000;
+            break;
+        }
+    }
+    evtPolygonMovieSetObjectMode(track->movie, objectMode, 0, 0);
+    evtPolygonMovieSetObjectMode(track->movie, unitMode, setFlags, clearFlags);
+}
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249088);
 
@@ -2060,3 +2169,4 @@ INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
+
