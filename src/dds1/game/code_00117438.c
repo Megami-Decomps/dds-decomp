@@ -58,7 +58,6 @@ extern void sdfSaveResetSnapshot(void);
 extern void func_00117C48(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
-extern void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
 f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
@@ -732,4 +731,3 @@ INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F9);
 INCLUDE_SDATA(const s32, "game/code_00117438", datGameState);
 
 INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA04);
-

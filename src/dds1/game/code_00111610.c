@@ -10,8 +10,6 @@ typedef struct {
 
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
 
-extern Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *);
-extern void dds3FreePathObject(Dds3PathCurveWork *);
 
 extern u32 dds3AdvanceWorldCounter(void);
 extern SlotEntry dds3SlotRingEntries[];
@@ -144,4 +142,3 @@ ObjBase *dds3CreateSlotResourceState(void *owner) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00111610", dds3SlotRingCursor);
-

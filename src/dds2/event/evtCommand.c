@@ -800,7 +800,6 @@ s32 evtCommandSetEffectUnitSecondVector(void) {
 extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
