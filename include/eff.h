@@ -106,8 +106,8 @@ typedef struct {
     struct MdlCtx *model;
     s32 idA;
     s32 idB;
-    f32 unk0C;
-    f32 unk10;
+    f32 startFrame;
+    f32 endFrame;
     u32 sampleInterval;
     s32 historyLength;
     u32 unk1C;
