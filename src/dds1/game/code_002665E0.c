@@ -121,7 +121,80 @@ void func_00267850(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *wor
 
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00267E20);
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_00267FF0);
+void func_00267FF0(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+    s32 y;
+    s32 bob;
+
+    switch (work->profileAnimation[index].iconState) {
+    case 0:
+        work->profileAnimation[index].iconColor = 0;
+        work->profileAnimation[index].iconPosition[0] = 0x12F;
+        work->profileAnimation[index].iconPosition[1] = 0x22;
+        work->profileAnimation[index].iconAngle = 0xB4;
+        break;
+    case 1:
+        work->profileAnimation[index].iconAngle = (work->profileAnimation[index].iconAngle + 15) % 360;
+        work->profileAnimation[index].iconColor =
+            (u32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 144.0f);
+        bob = (s32)(0.0f + (sdfSinPoly((f32)((work->profileAnimation[index].iconAngle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 22.0f);
+        work->profileAnimation[index].iconPosition[1] = 0x24 - bob;
+        work->profileAnimation[index].iconColor = (work->profileAnimation[index].iconColor > 0) ? ((work->profileAnimation[index].iconColor > 0x80) ? 0x80 : work->profileAnimation[index].iconColor) : 0;
+        y = work->profileAnimation[index].iconPosition[1];
+        work->profileAnimation[index].iconPosition[1] = (y < 0xF) ? 0xE : ((y > 0x24) ? 0x24 : y);
+        if (work->profileAnimation[index].iconColor >= 0x80) {
+            work->profileAnimation[index].iconState += 2;
+            work->profileAnimation[index].iconAngle = 0x78;
+        }
+        break;
+    case 2:
+        work->profileAnimation[index].iconState++;
+        work->profileAnimation[index].iconAngle = 0x78;
+        break;
+    default:
+        work->profileAnimation[index].iconColor -= 10;
+        work->profileAnimation[index].iconColor = (work->profileAnimation[index].iconColor > 0) ? ((work->profileAnimation[index].iconColor > 0x80) ? 0x80 : work->profileAnimation[index].iconColor) : 0;
+        y = work->profileAnimation[index].iconPosition[1] - 1;
+        work->profileAnimation[index].iconPosition[1] = y;
+        work->profileAnimation[index].iconPosition[1] = (y < 5) ? 4 : ((y > 0xE) ? 0xE : y);
+        if (work->profileAnimation[index].iconColor <= 0) {
+            work->profileAnimation[index].iconState = 0;
+        }
+        break;
+    }
+    switch (work->profileAnimation[index].completionState) {
+    case 0:
+        work->profileAnimation[index].auxiliaryColor = 0;
+        work->profileAnimation[index].auxiliaryPosition[0] = 0x122;
+        work->profileAnimation[index].auxiliaryPosition[1] = 0x15;
+        break;
+    case 1:
+        work->profileAnimation[index].auxiliaryColor += 10;
+        work->profileAnimation[index].auxiliaryColor = (work->profileAnimation[index].auxiliaryColor > 0)
+            ? ((work->profileAnimation[index].auxiliaryColor > 0x80) ? 0x80 : work->profileAnimation[index].auxiliaryColor)
+            : 0;
+        if (work->profileAnimation[index].auxiliaryColor >= 0x80) {
+            work->profileAnimation[index].completionState++;
+            work->profileAnimation[index].completionColor = 0;
+        }
+        break;
+    case 2:
+        work->profileAnimation[index].completionColor += 10;
+        work->profileAnimation[index].completionColor = (work->profileAnimation[index].completionColor > 0)
+            ? ((work->profileAnimation[index].completionColor > 0xFF) ? 0xFF : work->profileAnimation[index].completionColor)
+            : 0;
+        if (work->profileAnimation[index].completionColor >= 0xFF) {
+            work->profileAnimation[index].completionState++;
+        }
+        break;
+    default:
+        work->profileAnimation[index].completionColor -= 4;
+        work->profileAnimation[index].completionColor = (work->profileAnimation[index].completionColor > 0x80)
+            ? ((work->profileAnimation[index].completionColor > 0xFF) ? 0xFF : work->profileAnimation[index].completionColor)
+            : 0x80;
+        break;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00268590);
 
