@@ -9,6 +9,7 @@ extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 sdfDoubleBufferAllocation;
 #include "sdf.h"
+#include "sdf_image_packets.h"
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
@@ -212,17 +213,7 @@ void sdfRegisterTextureReleaseRequestHandler(void) {
 }
 
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
-typedef struct SdfResourcePacket {
-    u64 header[14];
-    SdfPacket transfer[2];
-    s32 quadwordCount;
-    u32 unkB4;
-    u32 unkB8;
-    u32 unkBC;
-    u64 tail[6];
-} SdfResourcePacket;
-
-void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfDescriptorSource *source,
+void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfTexResource *source,
     s32 sourceX, s32 sourceY, s32 width, s32 height, u32 arg6, u32 arg7, u32 arg8) {
     s32 quadwordCount;
 
@@ -241,9 +232,9 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfDescriptorSour
     packet->header[12] = 0x1000000000000004ULL;
     packet->header[13] = 0xE;
     sdfWriteImageTransferRegisters(packet->transfer, 0, 0, 0, 0, 0,
-        source->baseAddress, source->bufferWidth, source->pixelFormat,
+        source->word, source->width, source->format,
         sourceX, sourceY, width, height, 1);
-    quadwordCount = (sdfFormatBitsPerPixelB(source->pixelFormat) * width * height) >> 7;
+    quadwordCount = (sdfFormatBitsPerPixelB(source->format) * width * height) >> 7;
     packet->quadwordCount = quadwordCount;
     packet->unkB4 = arg6;
     packet->unkB8 = arg7;
@@ -266,7 +257,7 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
         allocate = sdfAllocPacketAligned;
     }
     packet = allocate(0xf0);
-    sdfBuildResourceTransferPacket((SdfResourcePacket *)packet, (SdfDescriptorSource *)source,
+    sdfBuildResourceTransferPacket((SdfResourcePacket *)packet, source,
         sourceX, sourceY, width, height, arg6, arg7, arg8);
     sdfAppendPacketRange(list, packet, packet + 0xc0);
 }
@@ -288,27 +279,13 @@ void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *li
     packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
     ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
     sdfBuildResourceTransferPacket((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
-        sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5, resourceAddress, arg7, arg8);
+        (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
+        resourceAddress, arg7, arg8);
     sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
     sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
 
-typedef struct SdfDescriptorPacket {
-    u64 header[4];
-    u64 transfer[8];
-    u64 imageReferenceTag;
-    u64 imageReferencePad;
-    u64 imageGifTag0;
-    u64 imageGifTag1;
-    u64 flushTag0;
-    u64 flushTag1;
-    u64 flushGifTag;
-    u64 flushRegister;
-    u64 zero;
-    u64 finishRegister;
-} SdfDescriptorPacket;
-
-void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfDescriptorSource *source,
+void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfTexResource *source,
                    s64 destinationX, s64 destinationY, s32 transferWidth,
                    s32 transferHeight, u32 sourceAddress) {
     s32 qwc;
@@ -317,11 +294,11 @@ void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfDescriptorSo
     packet->header[1] = 0x5000000611000000;
     packet->header[2] = 0x1000000000000004;
     packet->header[3] = 0xE;
-    sdfWriteImageTransferRegisters((SdfPacket *)packet->transfer, source->baseAddress, source->bufferWidth,
-                  source->pixelFormat, destinationX, destinationY, 0, 0, 0, 0, 0,
+    sdfWriteImageTransferRegisters(packet->transfer, source->word, source->width,
+                  source->format, destinationX, destinationY, 0, 0, 0, 0, 0,
                   transferWidth, transferHeight, 0);
 
-    qwc = (sdfFormatBitsPerPixelB(source->pixelFormat) * transferWidth * transferHeight) >> 7;
+    qwc = (sdfFormatBitsPerPixelB(source->format) * transferWidth * transferHeight) >> 7;
     packet->imageReferenceTag = 0x0800000000000000 | qwc;
     packet->imageReferencePad = 0;
     packet->imageGifTag0 = (u32)((qwc & SDF_DMA_QWC_MASK) | 0x30000000) |
@@ -344,7 +321,7 @@ void sdfCreateDescriptorPacket(SdfListHead *list, SdfTexResource *source,
         allocatePacket = sdfAllocPacketAligned;
     }
     packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
-    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)source,
+    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, source,
                   destinationX, destinationY, width, height, sourceAddress);
     sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }
