@@ -5,12 +5,7 @@
 #include "eff_transform.h"
 #include "pcp_vu0.h"
 
-extern void dds3InterpolatePathVectorVU(Dds3PathCurveWork *);
-extern void dds3PreparePathVectorPair(Dds3PathCurveWork *);
-extern f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *);
-extern void dds3InterpolatePathOutput(Dds3PathCurveWork *, WorldTransformParams *);
 extern void dds3LoadWorldTransformParams(EffWorldNode *, WorldTransformParams *);
-extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *);
 
 extern void effObjInnerVecInit(ObjectTransform *);
 

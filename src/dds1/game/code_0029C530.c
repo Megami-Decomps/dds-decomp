@@ -7092,7 +7092,6 @@ typedef struct EffCopiedPayloadWork {
     u32 parameter;
 } EffCopiedPayloadWork;
 
-extern void dds3FreePathObject(Dds3PathCurveWork *path);
 
 void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
     Dds3PathCurveWork **objects = work->payload->targets;
@@ -10366,4 +10365,3 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD200);
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD208);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD210);
-

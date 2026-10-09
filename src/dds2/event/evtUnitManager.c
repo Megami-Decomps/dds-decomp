@@ -15,9 +15,6 @@
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
-extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
-extern void dds3InterpolatePathVectorVU(s32 path);
-extern void dds3PreparePathVectorPair(s32 path);
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
@@ -43,19 +40,19 @@ struct PcpScatterWork4 {
 };
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
-f32 evtMeasurePathTrajectoryLength(s32 path) {
+f32 evtMeasurePathTrajectoryLength(Dds3PathCurveWork *path) {
     f32 saved;
     f32 length = 0.0f;
     f32 step = 0.05f;
     f32 t = step;
     f32 segment;
 
-    saved = evtGetValueScaleFactor(path);
-    evtScaleValueByMultiplier(path, 0.0f);
+    saved = evtGetValueScaleFactor((s32)path);
+    evtScaleValueByMultiplier((s32)path, 0.0f);
     dds3InterpolatePathVectorVU(path);
     do {
         VU0_MOVE_VF(vf11, vf10);
-        evtScaleValueByMultiplier(path, t);
+        evtScaleValueByMultiplier((s32)path, t);
         dds3InterpolatePathVectorVU(path);
         VU0_MOVE_VF(vf12, vf10);
         VU0_SUB(vf10, vf10, vf11);
@@ -64,7 +61,7 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
         VU0_MOVE_VF(vf10, vf12);
         t += step;
     } while (t <= 1.0f);
-    evtScaleValueByMultiplier(path, saved);
+    evtScaleValueByMultiplier((s32)path, saved);
     return length;
 }
 
@@ -836,7 +833,7 @@ s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
         work->endpointWork = NULL;
     }
     if (work->pathHandle != 0) {
-        dds3FreePathObject(work->pathHandle);
+        dds3FreePathObject((Dds3PathCurveWork *)work->pathHandle);
         work->pathHandle = 0;
     }
     sdfReleaseChipBlock(work);
@@ -1021,11 +1018,11 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
     sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
-    dds3InterpolatePathVectorVU(unit->pathHandle);
+    dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     effObjSetInnerPosition(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
-        dds3PreparePathVectorPair(unit->pathHandle);
+        dds3PreparePathVectorPair((Dds3PathCurveWork *)unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
