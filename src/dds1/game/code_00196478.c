@@ -1106,7 +1106,7 @@ void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
         for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
-            child->u10.word = color;
+            child->parentDimensionsOrRenderWord.renderWord = color;
         }
     }
 }
@@ -1116,7 +1116,7 @@ void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
         for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
-            child->u10.word = (child->u10.word & ~ITF_BYTE_MASK) | colorBits;
+            child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | colorBits;
         }
     }
 }
