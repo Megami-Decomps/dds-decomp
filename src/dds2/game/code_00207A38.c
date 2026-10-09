@@ -2830,7 +2830,7 @@ INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419880);
 
 INCLUDE_RODATA(const s32, "game/code_00207A38", D_00419890);
 
-s32 btlOpenPfsDebugDirectory(s32 directoryName) {
+s32 btlOpenPfsDebugDirectory(const char *directoryName) {
     char pathBuffer[BTL_DIRECTORY_PATH_BYTES];
 
     /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
