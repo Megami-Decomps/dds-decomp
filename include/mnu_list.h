@@ -44,7 +44,7 @@ struct MenuListNode {
      * Mantra lists retain a DatPartyRecord address in the same word. */
     union {
         u32 unk70;
-        s32 childPanel;
+        void *childPanel;
         char *title;
         struct DatPartyRecord *partyRecord;
     };

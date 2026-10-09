@@ -402,7 +402,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
-s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
+void *mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
     s32 panel = (s32)sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow((MenuPageBar *)panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
@@ -410,12 +410,13 @@ s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
     mnuDrawPanelSequenceByRow((MenuPageBar *)(panel + MNU_PERCENT_PANEL_BYTES), 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
         (EffectSlotSet *)host->imageHandles[1]);
-    return panel;
+    return (void *)panel;
 }
 
 /* Release both texture sets and the backing allocation for a nonzero panel pair. */
-void mnuReleaseDualPercentPanel(s32 panel) {
-    if (panel != 0) {
+void mnuReleaseDualPercentPanel(void *panelOwner) {
+    s32 panel = (s32)panelOwner;
+    if (panelOwner != NULL) {
         mnuReleaseSpriteTextures((u32 *)panel);
         mnuReleaseSpriteTextures((u32 *)(panel + MNU_PERCENT_PANEL_BYTES));
         sdfReleaseChipBlock(panel);
