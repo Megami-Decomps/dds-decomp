@@ -51,7 +51,6 @@ extern u32 D_003BC984;
 extern u32 D_003BC994;
 
 
-extern u32 effCurrentRenderPacket;
 
 extern s32 effSharedRibbonReferenceCount;
 

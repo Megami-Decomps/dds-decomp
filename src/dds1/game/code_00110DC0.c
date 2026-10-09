@@ -3,13 +3,11 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 
-s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 
 s32 dds3ExchangeAreaSlot(void *arg);
 
 extern s32 dds3InvokeAreaCallback(void *arg);
 
-void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 
 const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
@@ -140,7 +138,6 @@ void dds3DestroyObjectPointerChains(EffWorldNode *object) {
 }
 
 
-extern struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 
 u32 func_001110D0(void) {
     return 1;

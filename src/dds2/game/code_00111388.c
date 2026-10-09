@@ -26,13 +26,6 @@ EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
     return obj;
 }
 
-extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
-extern s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
-extern void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
-extern u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value);
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 void dds3EnsureWorldNodeInSlot(EffWorldNode *object, EffWorldNode *node) {
     WorldIndexNode *slot = dds3GetWorldSlotValue(object, func_00111388(((u8 *)node)[0xF]));
 
@@ -53,10 +46,7 @@ WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index) {
     return *slot;
 }
 
-extern WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 extern void *dds3GetWorldSecondaryObject(void);
-extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
 WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *object, s32 index, s32 (*filter)(u32)) {

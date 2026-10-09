@@ -73,6 +73,18 @@ typedef char WorldIndexNodeLayoutAssert[
      (unsigned long)&((WorldIndexNode *)0)->next == 8 &&
      (unsigned long)&((WorldIndexNode *)0)->previous == 0xC) ? 1 : -1];
 
+WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
+void dds3DestroyWorldIndexNode(WorldIndexNode *node);
+u32 dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
+u16 dds3GetWorldValueCount(WorldValueIndices *object);
+s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
+u32 dds3WriteIndexedWorldObjectWord(WorldValueIndices *object, u32 value);
+u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
+u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
+u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
+s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
+WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+
 void dds3EnsureWorldNodeInSlot(EffWorldNode *indexOwner, EffWorldNode *node);
 WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index);
 

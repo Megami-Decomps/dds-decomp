@@ -4218,7 +4218,163 @@ void fldApplyPendingSceneValueWithSpeed(s32 speed) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00135D80);
+/*BEGIN func_00135D80*/
+typedef struct {
+    u8 type;
+    u8 pad1[3];
+    s32 unk4; /* 0x04: exported to the display state as slot 14; never read back */
+    s32 fadeValue;
+    s32 swayMode;
+    u8 pad10[0xC];
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 fixedVectorX;
+    s32 fixedVectorY;
+    s32 fixedVectorZ;
+    f32 lightVectorAX;
+    f32 lightVectorAY;
+    f32 lightVectorAZ;
+    f32 lightDirectionAX;
+    f32 lightDirectionAY;
+    f32 lightDirectionAZ;
+    f32 lightVectorBX;
+    f32 lightVectorBY;
+    f32 lightVectorBZ;
+    f32 lightDirectionBX;
+    f32 lightDirectionBY;
+    f32 lightDirectionBZ;
+    f32 lightVectorCX;
+    f32 lightVectorCY;
+    f32 lightVectorCZ;
+    f32 lightDirectionCX;
+    f32 lightDirectionCY;
+    f32 lightDirectionCZ;
+    f32 finalVectorX;
+    f32 finalVectorY;
+    f32 finalVectorZ;
+    f32 unitColorA[3];
+    f32 unitLightDirection[3];
+    u8 padA4[0x30];
+    f32 unitColorB[3];
+} FldLightSet; /* 0xE0 bytes */
+
+extern s32 kwlnSetDrawColorTarget(s32, void *);
+extern s32 kwlnSetLightColorTarget(s32, s32, void *);
+extern s32 kwlnSetBackgroundColorTarget(s32, void *);
+extern s32 kwlnSetLightDirectionTarget(s32, s32, void *);
+extern s32 evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+extern void fldSetSwayMode(u32);
+extern u32 D_00436138, D_0043613C;
+extern f32 D_00436140;
+extern s32 D_00436144, D_00436148, D_0043614C;
+extern f32 D_00436150, D_00436154;
+extern u32 D_0043615C;
+extern f32 D_00436160;
+extern u32 D_00436164;
+
+void func_00135D80(s32 index, s32 mode) {
+    FldLightSet *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+    u32 previousIndex;
+
+    if (fldAreaState.area < 200) {
+        if (D_004360E8 == 0 && fldAreaState.area < 40) {
+            mode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (mode != 0) {
+            duration = defaultDuration;
+        }
+        if (mode >= 2) {
+            duration = mode;
+        }
+        if (D_00436128 != index) {
+            previousIndex = D_00436158;
+            if (D_00436138 == 0) {
+                previousIndex = D_00436128;
+            }
+            D_0043613C = fldSwayMode;
+            D_00436140 = fldSwayPhase;
+            D_00436144 = fldSwayOffset;
+            D_00436148 = D_00436118;
+            D_0043614C = D_0043611C;
+            D_00436150 = D_00436120;
+            D_00436154 = D_00436124;
+            D_00436158 = previousIndex;
+            D_0043615C = D_0043612C;
+            D_00436160 = D_00436130;
+            D_00436164 = D_00436134;
+            D_00436138 = 1;
+            D_00436128 = index;
+            if (fldAreaState.sceneCommand == 0) {
+                light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+                D_00389988[11] = index;
+                area = light->type;
+                D_00389988[13] = area;
+                D_00389988[14] = light->unk4;
+                value = light->fadeValue;
+                D_00389988[15] = value;
+                D_00389988[16] = light->swayMode;
+                fldSetFadeTarget(area, value, duration);
+                fldSetSwayMode(D_00389988[16]);
+                vec[0] = light->fixedVectorX * 0.00390625f;
+                vec[1] = light->fixedVectorY * 0.00390625f;
+                vec[2] = light->fixedVectorZ * 0.00390625f;
+                vec[3] = 0;
+                kwlnSetDrawColorTarget(duration, vec);
+                evtSetDrawVectorTarget(duration, light->unk1C, light->unk24, light->unk20, light->unk28);
+                dir[0] = light->lightDirectionAX;
+                dir[1] = light->lightDirectionAY;
+                dir[2] = light->lightDirectionAZ;
+                dir[3] = 0;
+                kwlnSetLightDirectionTarget(duration, 0, dir);
+                vec[0] = light->lightVectorAX;
+                vec[1] = light->lightVectorAY;
+                vec[2] = light->lightVectorAZ;
+                vec[3] = 0;
+                kwlnSetLightColorTarget(duration, 0, vec);
+                dir[0] = light->lightDirectionBX;
+                dir[1] = light->lightDirectionBY;
+                dir[2] = light->lightDirectionBZ;
+                dir[3] = 0;
+                kwlnSetLightDirectionTarget(duration, 1, dir);
+                vec[0] = light->lightVectorBX;
+                vec[1] = light->lightVectorBY;
+                vec[2] = light->lightVectorBZ;
+                vec[3] = 0;
+                kwlnSetLightColorTarget(duration, 1, vec);
+                dir[0] = light->lightDirectionCX;
+                dir[1] = light->lightDirectionCY;
+                dir[2] = light->lightDirectionCZ;
+                dir[3] = 0;
+                kwlnSetLightDirectionTarget(duration, 2, dir);
+                vec[0] = light->lightVectorCX;
+                vec[1] = light->lightVectorCY;
+                vec[2] = light->lightVectorCZ;
+                vec[3] = 0;
+                kwlnSetLightColorTarget(duration, 2, vec);
+                vec[0] = light->finalVectorX;
+                vec[1] = light->finalVectorY;
+                vec[2] = light->finalVectorZ;
+                vec[3] = 1.0f;
+                kwlnSetBackgroundColorTarget(duration, vec);
+                fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                              light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                              light->unitLightDirection[0], light->unitLightDirection[1],
+                              light->unitLightDirection[2]);
+            }
+        }
+    }
+}
+/*END func_00135D80*/
 
 void func_00136098(void) {
     dds3ClearObjectFlags(fldPlayerObject, 0x100);

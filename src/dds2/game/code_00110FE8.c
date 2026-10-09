@@ -5,7 +5,6 @@
 
 s32 dds3InvokeAreaCallback(void *arg);
 
-s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32));
 
 s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;
@@ -110,7 +109,6 @@ EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name
 }
 
 
-WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 
 s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
     WorldIndexNode **indexNodes;
@@ -126,7 +124,6 @@ s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
 
 s32 dds3ExchangeAreaSlot(void *arg);
 
-void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 
 void dds3DestroyObjectPointerChains(EffWorldNode *object) {

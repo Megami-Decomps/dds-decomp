@@ -483,7 +483,77 @@ void itfEmitPanelQuadPacket(UiSprite *panel, SdfListHead *command) {
     itfSendTablePacket(command, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00199AD8", func_0019A628);
+/*BEGIN func_0019A628*/
+extern u32 D_00357C98[];
+extern DrawColorRec D_00357D08;
+extern DrawColorRec D_00357D18;
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+
+/* Draw the framed panel: two bordered bands, then six texture-bound strips whose
+ * rectangles are rebuilt from the live panel bounds. */
+void func_0019A628(UiSprite *panel, SdfListHead *command) {
+    PanelRect rect;
+    UiSpriteTexturePayload *payload = (UiSpriteTexturePayload *)panel->payload;
+    s32 *color = &panel->unk2C;
+    s32 alpha;
+    s32 x;
+
+    alpha = panel->unk38 * 57 / 128;
+    D_00357C98[3] = alpha;
+    rect.x0 = panel->left;
+    rect.y0 = panel->top;
+    rect.x1 = panel->right;
+    rect.y1 = panel->bottom;
+    func_00198990(&rect, D_00357C98, panel->unk0C, 0x490, command);
+    alpha = panel->unk38 * 38 / 128;
+    D_00357C98[7] = alpha;
+    rect.x0 = panel->left + 0x720;
+    rect.y0 = panel->top;
+    rect.x1 = panel->left + 0x17E0;
+    rect.y1 = panel->bottom;
+    func_00198990(&rect, &D_00357C98[4], panel->unk0C, 0x680, command);
+    rect.x0 = panel->left - 0x140;
+    rect.y0 = panel->top + 0x48;
+    rect.x1 = panel->left + 0xB40;
+    rect.y1 = panel->bottom;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D08, color, panel->unk0C, payload->texture, 0, command);
+    if (panel->scrollSpan > 0 && panel->screenY != panel->top) {
+        alpha = 0x80 - ((panel->screenY - panel->top) << 7) / panel->scrollSpan;
+    } else {
+        alpha = panel->unk38;
+    }
+    D_00357C98[15] = alpha;
+    rect.x0 = panel->right - 0xB40;
+    rect.y0 = panel->top;
+    rect.x1 = panel->right + 0x140;
+    rect.y1 = panel->bottom - 0x48;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18, &D_00357C98[12], panel->unk0C, payload->texture, 0, command);
+    D_00357C98[11] = panel->unk38 * 70 / 128;
+    rect.x0 = panel->left - 0x140;
+    rect.y0 = panel->top - 0xB8;
+    rect.x1 = panel->left + 0x1A40;
+    rect.y1 = panel->top + 8;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18 - 1, &D_00357C98[8], panel->unk0C, payload->texture, 0, command);
+    rect.x0 = panel->left + 0x8B0;
+    rect.y0 = panel->top - 0x10;
+    rect.x1 = panel->left + 0xFC0;
+    rect.y1 = panel->top;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18 - 3, color, panel->unk0C, payload->texture, 0, command);
+    x = rect.x1;
+    rect.x0 = x;
+    rect.x1 = x + 0x1040;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18 - 2, color, panel->unk0C, payload->texture, 0, command);
+    rect.x0 = panel->left + 0x1020;
+    rect.y0 = panel->bottom - 0x10;
+    rect.x1 = panel->left + 0x1730;
+    rect.y1 = panel->bottom;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18 - 4, color, panel->unk0C, payload->texture, 0, command);
+    x = rect.x0;
+    rect.x1 = x;
+    rect.x0 = x - 0x1220;
+    itfQueueTextureBoundQuadPacket(&rect, &D_00357D18 - 2, color, panel->unk0C, payload->texture, 0, command);
+}
+/*END func_0019A628*/
 
 extern DrawColorRec D_00357D28;
 extern DrawColorRec D_00357D38;
