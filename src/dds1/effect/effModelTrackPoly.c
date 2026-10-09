@@ -27,7 +27,7 @@ typedef struct EffTrackPolyDraw {
     u16 flags;
     u8 pad06[2];
     u32 color;      /* 0x08 */
-    void *unk0C;
+    const u32 *indices;
     u128 *points;   /* 0x10: the same vertex records owned by track data */
     u8 pad14[0xC];
     u32 *colors;   /* 0x20: gradient color for each input vertex */
@@ -210,7 +210,7 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
     VU0_ADD(vf10, vf10, vf12);
 }
 extern EffTrackPolyDraw D_003D6640;
-extern u8 D_003556D0[];
+extern const u32 D_003556D0[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
 extern void func_002DA420(struct SdfTextParam *asset, f32 scale);
@@ -236,7 +236,7 @@ EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) 
     func_002DA420((struct SdfTextParam *)data->nodeHandle, 1.0f);
     memset(&D_003D6640, 0, sizeof(D_003D6640));
     D_003D6640.flags = 0x4000;
-    D_003D6640.unk0C = D_003556D0;
+    D_003D6640.indices = D_003556D0;
     return data;
 }
 
