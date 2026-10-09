@@ -15,6 +15,7 @@ extern void effMiscSeedRandomFromClock();
 #include "eff.h"
 #include "par_table.h"
 #include "par_kind_api.h"
+#include "fpu.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_VARIANT_MASK 0xFFFF
@@ -480,7 +481,24 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015A150);
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+
+/* vu0 routine: 1 - |dot(normalised eye - target, direction)|, how far the direction is from the view axis */
+f32 func_0015A150(void *unused, f32 *direction) {
+    f32 dot;
+    f32 alignment;
+
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, direction);
+    VU0_DOT_XYZ(dot, vf10, vf11);
+    alignment = ffabsf(dot);
+    return 1.0f - alignment;
+}
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
 u8 *billCreateUnitObject(s32 entryIndex) {

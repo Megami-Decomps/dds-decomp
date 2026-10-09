@@ -13,6 +13,7 @@ extern void *sdfCreateAssetWithDrawEntries();
 #include "eff.h"
 #include "par_table.h"
 #include "par_kind_api.h"
+#include "fpu.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_VARIANT_MASK 0xFFFF
@@ -451,7 +452,22 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
     return sdfAtan2(projectedDelta[1], projectedDelta[0]);
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
+extern u8 sdfViewEyeVector[], sdfViewTargetVector[];
+
+/* vu0 routine: 1 - |dot(normalised eye - target, axis)|, how far the axis is from the view direction */
+f32 func_00152560(void *self, f32 *axis) {
+    f32 dot;
+
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, axis);
+    VU0_DOT_XYZ(dot, vf10, vf11);
+    dot = ffabsf(dot);
+    return 1.0f - dot;
+}
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
 u8 *billCreateUnitObject(s32 entryIndex) {
