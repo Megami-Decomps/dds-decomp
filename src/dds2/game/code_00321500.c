@@ -603,15 +603,15 @@ void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
             if (record->parameters[1] == 0) {
                 entry->control.bits.repeatMode = 1;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             } else if (record->parameters[1] == 1) {
                 entry->control.bits.repeatMode = 2;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             } else if (record->parameters[1] == 2) {
                 entry->control.bits.repeatMode = 3;
                 entry->repeatCount = record->parameters[0];
-                entry->unk34 = record->parameters[2];
+                entry->repeatTargetRecordIndex = record->parameters[2];
             }
             break;
         }
@@ -707,7 +707,7 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
         if (!entry->flagsBits.halfRemainingCountReached) {
             if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
                 registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-                if (entry->remaining <= (registry->unk08 >> 1)) {
+                if (entry->remaining <= (registry->initialRemainingCount >> 1)) {
                     entry->flagsBits.halfRemainingCountReached = 1;
                 }
             }
