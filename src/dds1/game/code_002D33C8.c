@@ -577,7 +577,38 @@ s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
 
 extern void func_002D4240(SdfPoolNode *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D4240);
+/* Initialise a run of pool nodes and chain each to the next; the last node ends the chain. */
+void func_002D4240(SdfPoolNode *nodes, s32 count) {
+    SdfPoolNode *node = nodes;
+    SdfPoolNode *next;
+    s32 remaining = count - 1;
+
+    node->append = sdfAppendPacketList;
+    node->prepend = sdfPrependIfMode1;
+    node->first = 0;
+    node->last = 0;
+    node->unkC = 0;
+    node->unk18 = 0;
+    if (remaining == 0) {
+        node->next = NULL;
+        return;
+    }
+link:
+    next = node + 1;
+    remaining--;
+    node->next = next;
+    node = next;
+    next->append = sdfAppendPacketList;
+    next->prepend = sdfPrependIfMode1;
+    next->first = 0;
+    next->last = 0;
+    next->unkC = 0;
+    next->unk18 = 0;
+    if (remaining != 0) {
+        goto link;
+    }
+    node->next = NULL;
+}
 
 /* Make a REF DMA node for the payload following the source tag. */
 SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag) {
