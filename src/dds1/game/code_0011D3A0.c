@@ -175,7 +175,7 @@ s32 sdfCreateResetPacketList(void) {
     s32 packet;
 
     packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
+    sdfInitPacketList((struct SdfListHead *)packet);
     return packet;
 }
 

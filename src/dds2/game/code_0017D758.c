@@ -116,7 +116,6 @@ extern ScatterRenderState D_00452050;
 extern u8 D_003B14C0[];
 extern SdfPoolNode *D_003B1520[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_00167A10(ScatterRenderState *);
 struct SdfTextParam;

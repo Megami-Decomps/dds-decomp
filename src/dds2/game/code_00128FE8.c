@@ -233,7 +233,6 @@ extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 
 extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
-extern void sdfInitPacketList(SdfListHead *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -1055,7 +1054,7 @@ struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destinatio
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A270(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
@@ -1070,7 +1069,7 @@ struct SdfMemBlock *func_0012A270(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A2E8(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {
@@ -1085,7 +1084,7 @@ struct SdfMemBlock *func_0012A2E8(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_0012A360(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldAreaState;
 
     if (state->resourceArea == area) {

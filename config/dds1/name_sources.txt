@@ -837,6 +837,9 @@
 0x00127B98	fldIsAreaResourceReady	inferred	Tests the active area resource handle for completion and otherwise returns the field ready flag from D_0032E428[0].
 0x00127BD8	fldIsAreaFloorResourceReady	inferred	Byte-identical dds2 twin 0x0012A190; Checks the loaded area/floor identifiers and whether the resource file or readiness flag is ready. [names_conflicts.tsv]
 0x00127C40	fldLoadCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
+0x00127CB8	fldLoadCachedRoomF1ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%s.f1" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A270 is called for the matching "%s.f1" path.
+0x00127D30	fldLoadCachedRoomF2ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%s.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A2E8 is called for the matching "%s.f2" path.
+0x00127DA8	fldLoadCachedRoomKF2ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%sk%03d_%03d.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A360 is called for the same literal path.
 0x00127E20	fldFormatAreaResourceName	inferred	Builds the packed area resource file name (f%03d_000/00a-00d.LB); twin of D2 0x0012A3D8 [names_M53_Field.tsv]
 0x00127FD0	fldHasAreaResourceNameChanged	inferred	Formats the current area resource filename and compares it with the cached filename. [names_reviewed5.tsv]
 0x00128188	fldReleaseAreaResourceCache	inferred	Releases the two retained area handles, clears both globals and resets the first cached area-name byte.

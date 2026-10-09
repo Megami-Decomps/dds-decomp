@@ -71,7 +71,6 @@ extern SdfPoolNode *D_00354A48[];
 extern u32 D_00354A00[];
 extern SdfPoolNode D_00325248;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern s32 func_0015FE20(EffPacketParams *);
 
 

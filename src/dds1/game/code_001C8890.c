@@ -360,7 +360,6 @@ extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 
 extern s32 btlGetRuntime(void);
 
-extern s32 datItemSkillRecords;
 
 extern s32 datActionAnimationRecords;
 
@@ -2905,7 +2904,7 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
 }
 
 u32 func_001D3A20(s32 arg0) {
-    if ((*(u8 *)(*(s32 *)(arg0 + 4) * 8 + datItemSkillRecords + 1) & 4) != 0) {
+    if ((datItemSkillRecords[*(s32 *)(arg0 + 4)].unk01 & 4) != 0) {
         ptyAdjustItemQuantity(*(s32 *)(arg0 + 4), 0xffffffffffffffff);
     }
     return 1;
@@ -4511,7 +4510,6 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *);
 extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];

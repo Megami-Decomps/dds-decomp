@@ -1,3 +1,4 @@
+#include "dat_command.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
@@ -349,7 +350,6 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 extern s32 strcmp(const char *a, const char *b);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *packet);
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern s32 D_00368BA8[4];
@@ -989,17 +989,16 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources);
 
-extern u8 *datItemSkillRecords;
 
 s32 mnuShopHasPendingFlag(ShopScene *unused) {
     u8 *flags = datGameState->inventory.counts;
-    u8 *entry = datItemSkillRecords;
+    DatItemSkillRecord *entry = datItemSkillRecords;
     s32 found = 0;
     s32 i;
 
     for (i = 0; i < 0xC0; flags++, i++) {
         if ((u32)(i - 0xA0) >= 0x20 && *flags != 0) {
-            if ((*entry & 3) != 0) {
+            if ((entry->flags & 3) != 0) {
                 found = 1;
                 break;
             }
@@ -1008,7 +1007,7 @@ s32 mnuShopHasPendingFlag(ShopScene *unused) {
                 break;
             }
         }
-        entry += 8;
+        entry++;
     }
     return found;
 }
@@ -1275,11 +1274,6 @@ typedef struct ShopSourcePriceRow {
     ShopSourcePriceEntry entries[0x40];
 } ShopSourcePriceRow;
 
-typedef struct ShopItemPriceRecord {
-    u8 flags;
-    u8 pad01[3];
-    s32 price;
-} ShopItemPriceRecord;
 
 extern ShopSourcePriceRow D_00368CF0[];
 
@@ -1295,7 +1289,7 @@ s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
     rowIndex = (u8)campFlagRowValue(source);
     itemId = D_00368CF0[rowIndex].entries[index].itemId;
     if (halfPrice == 0) {
-        itemPrice = ((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price;
+        itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = D_00368CF0[rowIndex].pricePercent;
         pricePercent = D_00368CF0[rowIndex].entries[index].pricePercent;
         if (pricePercent == 0) {
@@ -1307,7 +1301,7 @@ s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
             price = price * (s32)D_0036A234[progressStage].percent / 100;
         }
     } else {
-        price = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price >> 1;
+        price = (u32)datItemSkillRecords[itemId].price >> 1;
     }
     return price;
 }
@@ -1328,7 +1322,7 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
     row = D_00369A88 + rowOffset;
     itemId = *(u16 *)(entry + 4);
     if (halfPrice == 0) {
-        itemPrice = ((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price;
+        itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = *(u16 *)(row + 2);
         pricePercent = entry[7];
         if (pricePercent == 0) {
@@ -1340,7 +1334,7 @@ s32 func_00244D10(s32 index, s32 halfPrice) {
             price = price * (s32)D_0036A234[progressStage].percent / 100;
         }
     } else {
-        price = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price >> 1;
+        price = (u32)datItemSkillRecords[itemId].price >> 1;
     }
     return price;
 }
@@ -1522,9 +1516,9 @@ s32 func_00245A40(ShopScene *scene) {
     for (i = 0; i < 0xC0; i++) {
         scene->atLimit = 1;
         if ((u32)(i - 0xA0) >= 0x20 && datGameState->inventory.counts[i] != 0) {
-            if ((((ShopItemPriceRecord *)datItemSkillRecords)[i].flags & 3) != 0) {
+            if ((datItemSkillRecords[i].flags & 3) != 0) {
                 parameters = &mnuAppendWindowListNode(scene->window, D_003BAA84[i])->camp;
-                value = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[i].price >> 1;
+                value = (u32)datItemSkillRecords[i].price >> 1;
                 parameters->id = i;
                 parameters->value = value;
                 parameters->price = value;
