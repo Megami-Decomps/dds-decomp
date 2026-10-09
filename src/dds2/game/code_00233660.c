@@ -2323,7 +2323,37 @@ s32 mdlCountActiveRecords(void) {
     return firstListCount + activeListCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00237A70);
+/* Record at the cursor index, counting list -1 first and then the active entry's list. */
+MdlRecord *func_00237A70(void) {
+    MdlCtx *resource = mdlViewerState.resources[0];
+    MdlRecord *firstList = mdlFindViewerRecord(resource, -1);
+    MdlRecord *secondList = mdlFindViewerRecord(resource, mdlViewerState.activeEntryId);
+    s32 index = mdlViewerState.unk42;
+    MdlRecord *record;
+
+    if (firstList != NULL) {
+        record = mdlGetFirstRecord((s32)firstList);
+        while (record != NULL) {
+            if (index == 0) {
+                return record;
+            }
+            index--;
+            record = mdlGetNextRecord(record);
+        }
+    }
+    if (secondList == NULL) {
+        return NULL;
+    }
+    record = mdlGetFirstRecord((s32)secondList);
+    while (record != NULL) {
+        if (index == 0) {
+            return record;
+        }
+        index--;
+        record = mdlGetNextRecord(record);
+    }
+    return NULL;
+}
 
 extern MdlRecord *func_00237A70(void);
 
