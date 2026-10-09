@@ -43,7 +43,7 @@ extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
-extern s32 func_0030A8A8(KwlnTask *);
+extern s32 fldLmapTaskUpdate(KwlnTask *);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
 extern void func_00342580(u32);
@@ -316,7 +316,7 @@ extern void fldInitializeLocalMapScene(void);
 extern s32 func_0030B1E8(void);
 extern void fldDrawLocalMapOverlay(void);
 
-s32 func_0030A8A8(KwlnTask *task) {
+s32 fldLmapTaskUpdate(KwlnTask *task) {
     LmapTaskState *state = (LmapTaskState *)kwlnTaskGetUserValue(task);
     s32 phase = state->phase;
     s32 result;
@@ -357,7 +357,7 @@ void fldStartLmapTask(s32 mode) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant(taskData);
-    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, func_0030A8A8, 0, taskData);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, taskData);
 }
 
 void fldStopLmapTask(void) {
@@ -492,14 +492,14 @@ void fldInitializeLocalMapScene(void) {
     sdfCounterInitializeDisplayAnimation();
 }
 
-extern s32 func_0030C690(void);
+extern s32 sdfPollCounterSelectionInput(void);
 extern void sdfCounterTickCountdownAndMapTimers(void);
 extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 sdfStepSelectedMapCameraTransition(void);
-extern s32 func_0030C0C0(void);
+extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern s8 D_0037F510[];
 extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
@@ -522,7 +522,7 @@ s32 func_0030B1E8(void) {
 
     switch (D_004388AC) {
     case 1:
-        result = func_0030C690();
+        result = sdfPollCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
@@ -540,7 +540,7 @@ s32 func_0030B1E8(void) {
         }
         break;
     case 2:
-        result = func_0030C690();
+        result = sdfPollCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
@@ -550,7 +550,7 @@ s32 func_0030B1E8(void) {
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
-        func_0030C0C0();
+        fldAdvanceLocalMapCameraTransition();
         if (result == 0) {
             D_004388AC = 1;
             sdfLatchBaseVectorsForSelection();

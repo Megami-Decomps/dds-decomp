@@ -31,7 +31,7 @@ struct FrFontGlyph;
 extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
-extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC7A0[];
 
@@ -552,7 +552,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
         variant = 0x12;
     }
     rangeIndex = mnuLookupRangeEntry(rangeId);
-    func_002BF4E0(x, y, depth, color, 1, (EffectSlotSet *)(u32)drawArg, rangeIndex * 2 + variant, texture);
+    effDrawSpriteWithCornerFade(x, y, depth, color, 1, (EffectSlotSet *)(u32)drawArg, rangeIndex * 2 + variant, texture);
 }
 
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPartyInfoSprites);
@@ -714,7 +714,7 @@ void mnuDrawAlternatingRatioBarEffects(s32 x, s32 y, s32 z, u32 opacity, MenuEff
 
     switch (owner->updateState) {
     case 0:
-        func_002BF4E0(x, y - 8, z, scale, 0, owner->leftGrid, 0, surface);
+        effDrawSpriteWithCornerFade(x, y - 8, z, scale, 0, owner->leftGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->leftGrid, 0);
         if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
             effInitializeSlotWork(owner->rightGrid, 0);
@@ -731,7 +731,7 @@ void mnuDrawAlternatingRatioBarEffects(s32 x, s32 y, s32 z, u32 opacity, MenuEff
             xOffset = -0x90;
         }
 
-        func_002BF4E0(x + owner->resourceSets[1]->workEntries[0].geometry.bounds[2] + xOffset,
+        effDrawSpriteWithCornerFade(x + owner->resourceSets[1]->workEntries[0].geometry.bounds[2] + xOffset,
                      y - 0x40, z, scale, 0, owner->rightGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->rightGrid, 0);
         if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
@@ -933,17 +933,17 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     u32 opacity = item->initialValue;
     u32 color;
 
-    func_002BF4E0(x, y, depth, opacity, 0,
+    effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                  item->groupGridSlots[0].set, item->groupGridSlots[0].index, layer);
     func_00284C48(x, y, depth, opacity, mode, item, layer);
-    func_002BF4E0(x, y, depth, opacity, 0,
+    effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                  item->groupGridSlots[1].set, item->groupGridSlots[1].index, layer);
-    func_002BF4E0(x, y, depth, opacity, 0,
+    effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                  item->groupGridSlots[4].set, item->groupGridSlots[4].index, layer);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
-        func_002BF4E0(x, y, depth, opacity, 0,
+        effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                      item->gridSlots[0].set, item->gridSlots[0].index, layer);
-        func_002BF4E0(x, y, depth, opacity, 0,
+        effDrawSpriteWithCornerFade(x, y, depth, opacity, 0,
                      item->gridSlots[4].set, item->gridSlots[4].index, layer);
     }
 
@@ -1012,7 +1012,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     s32 tile;
 
     if (progress == capacity) {
-        func_002BF4E0(x + 0x2A0, y - 0x30, z, opacity, 0,
+        effDrawSpriteWithCornerFade(x + 0x2A0, y - 0x30, z, opacity, 0,
                      panel->completed.set, panel->completed.index, surface);
         return;
     }
@@ -1022,7 +1022,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
                  - slots->workEntries[index].sourceWidth * percent / 100;
     slots->workEntries[index].parameters[2] = -croppedWidth;
     slots->workEntries[index].geometry.bounds[2] = (slots->workEntries[index].sourceWidth - croppedWidth) << 4;
-    func_002BF4E0(x, y, z, opacity, 0, slots, index, surface);
+    effDrawSpriteWithCornerFade(x, y, z, opacity, 0, slots, index, surface);
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
         itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
@@ -1034,7 +1034,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
         for (tile = 0; tile < 0x1200; tile += 0x200) {
             slots->workEntries[index].geometry.bounds[2] =
                 offset + (slots->workEntries[index].sourceWidth << 4);
-            func_002BF4E0(x + tile - baseShift, y, z, opacity, 0x21,
+            effDrawSpriteWithCornerFade(x + tile - baseShift, y, z, opacity, 0x21,
                          slots, index, surface);
             x += offset;
             offset += 0x80;
@@ -1668,7 +1668,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
     if (mnuGetAbilityTargetCategory(ability) == 1) {
         mask = mnuGetMatchingPartyEntryMask(entry);
 
-        if (func_002111A0(ability, mask) != 0) {
+        if (btlCheckPartyCommandCounterEligibility(ability, mask) != 0) {
             return 0;
         }
         func_002866B0(ability, (s32)target, entry);
@@ -1682,7 +1682,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
-                if (func_002111A0(ability, mask) == 0) {
+                if (btlCheckPartyCommandCounterEligibility(ability, mask) == 0) {
                     func_002866B0(ability, (s32)target, entry);
                     applied = 1;
                 }

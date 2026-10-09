@@ -19,7 +19,7 @@ extern void func_00306CD0(s32, s32, s32, u32, s32,
 extern void func_00294680(MenuTerminalContext *, s32, s32);
 extern void func_00296D90(MenuTerminalContext *, s32);
 
-extern void func_00295D38();
+extern void mnuDrawFadingValueListRow();
 
 extern void func_002958B0();
 
@@ -87,7 +87,7 @@ void func_00294758(MenuTerminalContext *object, s32 elapsedFrames) {
                   D_003D03F0[index][MENU_ICON_FRAME], 0x53);
 }
 
-void func_00294930(MenuTerminalContext *object, s32 elapsedFrames) {
+void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
     f32 elapsed = (f32)elapsedFrames - 0.0f;
     s32 frameCount = (s32)elapsed;
     f32 alpha;
@@ -170,7 +170,7 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_00294D50);
 
-void func_00294EB8(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
+void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 i;
 
@@ -210,7 +210,7 @@ extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFo
 extern char D_00437970[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
-void func_00295D38(s32 x, s32 y, s32 z, struct MenuList *list,
+void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
                    struct MenuListNode *node, s32 drawArg) {
     MnuShopListContext *context = (MnuShopListContext *)list->context;
     s32 row = node->index - list->head->index;

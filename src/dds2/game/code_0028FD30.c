@@ -30,7 +30,7 @@ typedef struct MenuPanelTransition {
     u16 action;
 } MenuPanelTransition;
 
-extern s32 func_00292478(void *, s32, s32);
+extern s32 mnuDispatchMantraPanelCommand(void *, s32, s32);
 
 
 typedef struct MantraPanelPool MantraPanelPool;
@@ -366,7 +366,7 @@ MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
 
 extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
-extern void func_0026D988(void *);
+extern void mnuMergePartyMantraProfileCapStates(void *);
 
 s32 func_00290A78(MnuStatusResource *object) {
     MantraMenuWork *menu;
@@ -390,10 +390,10 @@ s32 func_00290A78(MnuStatusResource *object) {
         }
     }
     if (menu->slots[5] != 0) {
-        func_0026D988(menu->slots);
+        mnuMergePartyMantraProfileCapStates(menu->slots);
     } else {
         menu->slots[5] = evtAllocateMantraSelectionWork(0, 0);
-        func_0026D988(menu->slots);
+        mnuMergePartyMantraProfileCapStates(menu->slots);
     }
     return 1;
 }
@@ -507,7 +507,7 @@ extern void func_00314298(DatPartyRecord *, const s32 *);
 extern s32 ptyAddClampedEntryValue(DatPartyRecord *entry, s32 statIndex, s32 amount);
 
 /* Apply one stat, or all five base stats, to each occupied party slot. */
-void func_00291038(s32 statIndex, s32 amount) {
+void ptyAdjustAllActiveRosterStats(s32 statIndex, s32 amount) {
     s32 index;
 
     for (index = 0; index < 5; index++) {
@@ -648,7 +648,7 @@ void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
 
-void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
+void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector, u16 id) {
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     MantraNodePos **neighbor;
@@ -812,7 +812,7 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427720);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 
-s32 func_00292478(void *context, s32 panelId, s32 action) {
+s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
     MnuStatusResource *object = context;
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
@@ -847,7 +847,7 @@ s32 func_00292478(void *context, s32 panelId, s32 action) {
         func_002790B8(object->menu.selectionController);
         return 0;
     case 4:
-        func_002917C0(object, state->flagBytes[3] & 15, id);
+        mnuAcquireMantraAndUnlockNeighbors(object, state->flagBytes[3] & 15, id);
         return 0;
     case 5:
         func_00291C68(object, state->flagBytes[3] & 15, id);
@@ -968,7 +968,7 @@ void func_00292A60(MnuStatusResource *object) {
 }
 
 void func_00292B90(MnuStatusResource *object) {
-    func_002917C0(object, 0, 8);
+    mnuAcquireMantraAndUnlockNeighbors(object, 0, 8);
 }
 
 
@@ -1026,7 +1026,7 @@ s32 func_00292CF0(MnuStatusResource *object) {
     for (i = 0; i < 23; i++) {
         if (steps[i].frame == (u16)(state->flags >> 8)) {
             state->flags = (state->flags & 0xF0FFFFFF) | ((steps[i].mode & 15) << 24);
-            if (func_00292478(object, steps[i].panelId, steps[i].action)) {
+            if (mnuDispatchMantraPanelCommand(object, steps[i].panelId, steps[i].action)) {
                 return 1;
             }
         }
@@ -1050,7 +1050,7 @@ s32 func_00292EA8(MnuStatusResource *object) {
     for (i = 0; i < 6; i++, step++) {
         if (step->frame == (u16)(state->flags >> 8)) {
             state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
-            if (func_00292478(object, step->panelId, step->action)) {
+            if (mnuDispatchMantraPanelCommand(object, step->panelId, step->action)) {
                 return 1;
             }
         }
@@ -1073,7 +1073,7 @@ s32 func_00292FF0(MnuStatusResource *object) {
     for (i = 0; i < 7; i++, step++) {
         if (step->frame == (u16)(state->flags >> 8)) {
             state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
-            if (func_00292478(object, step->panelId, step->action)) {
+            if (mnuDispatchMantraPanelCommand(object, step->panelId, step->action)) {
                 return 1;
             }
         }
@@ -1096,7 +1096,7 @@ s32 func_00293148(MnuStatusResource *object) {
     for (i = 0; i < 8; i++, step++) {
         if (step->frame == (u16)(state->flags >> 8)) {
             state->flags = (state->flags & 0xF0FFFFFF) | ((step->mode & 15) << 24);
-            if (func_00292478(object, step->panelId, step->action)) {
+            if (mnuDispatchMantraPanelCommand(object, step->panelId, step->action)) {
                 return 1;
             }
         }
@@ -1155,7 +1155,7 @@ void func_002933A8(MnuStatusResource *object) {
 
 
 
-s32 func_002933F0(MnuStatusResource *object) {
+s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     s32 finished = 0;

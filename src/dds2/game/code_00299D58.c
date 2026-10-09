@@ -42,7 +42,7 @@ extern FieldResourceRecord *D_00435E18;
 extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
 extern s32 evtGetMessageWindowControlState(void);
-extern void func_00299B98(BrsSkillPackageWork *, s32);
+extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 brsStartPartyPanelResourcesOnce(s32);
 extern void func_00341CF8(void);
@@ -285,7 +285,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
                 if ((scene->pendingSkillCount == 0 ||
                      scene->selectedRow == 0) &&
                     scene->selectionApplied == 0) {
-                    func_00299B98(scene, 0);
+                    brsSelectNextUnit(scene, 0);
                     mnuProcessItemSelection(scene);
                 }
                 prfCapPresentMessages(scene);
@@ -456,7 +456,7 @@ s32 func_0029A898(KwlnTask *request) {
     }
     if (*dispatchStatus == 0) {
         if (scene->selectedRow < scene->primaryRewards.count) {
-            func_00299B98(scene, 1);
+            brsSelectNextUnit(scene, 1);
             slots = scene->statGains;
             ptyAccumulateStatGains(slots, scene->selectedRewardRow->values.amount,
                                    scene->selectedRewardRow->unit);

@@ -172,7 +172,7 @@ s32 func_0029D000(DatPartyRecord *unit) {
     return 0;
 }
 
-s32 func_0029D008(BrsRewardBatch *batch, BrsRewardSummary *summary) {
+s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;
     /* Value blocks are interleaved with each row's party-record pointer. */
     u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
@@ -230,7 +230,7 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 
 
 
-s32 func_0029D2D8(BrsRewardBatch *batch) {
+s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
     s32 i;
     u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
 

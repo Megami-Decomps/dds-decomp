@@ -94,7 +94,7 @@ extern void itfResetBattleFadeState();
 
 extern void func_0019DD48();
 
-extern s32 func_0019DBA8();
+extern s32 frFontMeasureLineWidth();
 
 extern UiSprite *func_001A1858(s32 kind, u32 payload);
 
@@ -438,7 +438,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     func_0019DD48(0x1000, 0x4B0, optionBlock->glyphChain);
     rowsHeight = optionBlock->rowCount * ITF_MES_OPTION_ROW_SPACING * 8;
     for (rowIndex = 0; rowIndex < optionBlock->rowCount; rowIndex++) {
-        rowWidth = func_0019DBA8(rowIndex, optionBlock->glyphChain);
+        rowWidth = frFontMeasureLineWidth(rowIndex, optionBlock->glyphChain);
         if (maxRowWidth < rowWidth) {
             maxRowWidth = rowWidth;
         }

@@ -135,7 +135,7 @@ extern const u8 *D_0037CCC8[16];
 extern const u8 *D_003BAA8C;
 
 /* Draw each affinity requirement, including range markers and optional text. */
-void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
+void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
     s32 slot;
     s32 y = 0xA80;
 
@@ -305,7 +305,7 @@ void mnuDrawSkillMenuFrameIcons(s32 context) {
     itfDrawGridWithResolvedSlot(0xce0, 0x9e0, 0, 1, (EffectSlotSet *)(u32)((MenuContextSprites *)context)->sprite64, 2, 0x53);
 }
 
-extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawListFrames(s32 menu) {
     s32 i;
@@ -316,7 +316,7 @@ void mnuDrawListFrames(s32 menu) {
         if (i == 1) {
             x = 0xE70;
         }
-        func_002BF4E0(x, i * 0x320 + 0xC8, 0, 0x100, 1, ((MenuContextSprites *)menu)->frame6C, 7, 0x53);
+        effDrawSpriteWithCornerFade(x, i * 0x320 + 0xC8, 0, 0x100, 1, ((MenuContextSprites *)menu)->frame6C, 7, 0x53);
     }
 }
 
@@ -339,7 +339,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
         if (label != 0xFFFF) {
             label &= 0xFFFF;
             mnuDrawSelectionLabel(label);
-            func_0027A140(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
+            mnuDrawAffinityParticipantLabels(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
         }
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
@@ -476,13 +476,13 @@ void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
 
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    func_002BF4E0(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x4800, -0x1F80, 0, 0x50, 0, (s32)icon, 0, arg);
     itfGridLookupValueOrDefault((s32)assets->sprites[2], 0);
     icon = assets->sprites[3];
     state = *(s32 **)((u8 *)icon + 0x18);
     state[3] = 0x9000;
     state[4] = 0x3F00;
-    func_002BF4E0(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, arg);
+    effDrawSpriteWithCornerFade(-0x2800, -0x1180, 0, 0x50, 0, (s32)icon, 0, arg);
     itfGridLookupValueOrDefault((s32)assets->sprites[3], 0);
 }
 

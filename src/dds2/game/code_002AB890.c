@@ -21,7 +21,7 @@ extern void mnuCreateStaffImageSprite(s32);
 
 
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
-extern void func_002AB8F0(MenuStaffContext *);
+extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
 extern u8 func_002BDA50(s32 index);
 
@@ -51,7 +51,7 @@ typedef struct MenuCatalogItem {
 extern const MenuCatalogItem D_003E7200[18];
 extern char D_00437BC8[];
 
-void func_002AB8F0(MenuStaffContext *owner) {
+void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
     MenuWindowContainer *window;
     struct MenuListNode *node;
@@ -396,7 +396,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     memset(resource, 0, 0x54);
     resource->allocation = allocation;
     func_002ACB18((u32)context);
-    func_002AB8F0(context);
+    mnuBuildStaffItemWindows(context);
     mnuConfigurePanelResource(context->scrollPanel, context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);

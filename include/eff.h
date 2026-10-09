@@ -405,6 +405,21 @@ typedef struct BillTextureQuad {
 typedef char BillTextureQuad_size_must_be_0x10[
     (sizeof(BillTextureQuad) == 0x10) ? 1 : -1];
 
+/* Current billboard draw record copied independently of its shared child. */
+typedef struct BillSnapshot {
+    f32 x;
+    f32 y;
+    f32 halfWidth;
+    f32 halfHeight;
+    SdfTex *texture;
+    BillTextureQuad uv;
+} BillSnapshot;
+
+typedef char BillSnapshot_size_must_be_0x24[
+    (sizeof(BillSnapshot) == 0x24) ? 1 : -1];
+typedef char BillSnapshot_texture_offset_must_be_0x10[
+    ((u32)&((BillSnapshot *)0)->texture == 0x10) ? 1 : -1];
+
 /* Fifteen billboard quads precede the child manager in its 0x450 allocation. */
 typedef struct BillPacketWork {
     f32 positions[15][4]; /* 0x000 */

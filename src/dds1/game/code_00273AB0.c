@@ -22,7 +22,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00273A30(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
@@ -109,7 +109,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
-        func_002BF4E0(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
+        effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
@@ -233,7 +233,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     if (menu->secondaryObject->list->count != 0) {
         func_00273A30(context, 1);
     } else {
-        func_002BF4E0(0x550, 0x5D8, 0, menu->secondaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
+        effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->secondaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
@@ -311,7 +311,7 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
-        func_002BF4E0(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
+        effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
@@ -565,7 +565,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
             func_00272668(1, 0, 0, context, 1, 0x53);
         }
     } else {
-        func_002BF4E0(0x550, 0x5D8, 0, list->fadeScale, 1,
+        effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, list->fadeScale, 1,
                       ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         func_00272668(1, 0, 0, context, 1, 0x53);
     }

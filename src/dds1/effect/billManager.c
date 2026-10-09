@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -193,7 +194,7 @@ typedef struct BillStatePacket {
 
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(s32 source, u32 packet, s32 variant);
+extern void func_002D4C80(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant);
 extern SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
 extern f32 D_0034E040[4];
@@ -208,7 +209,7 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
     f32 direction[4];
     f32 dot;
     BillStatePacket *state;
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     u32 packet;
     u8 *geometry;
     BillChildPayload *child;
@@ -222,8 +223,8 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
     if (node->packetList == NULL) {
         node->packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(node->packetList);
-        framePacket = (void *)sdfAllocPacketAligned(0x40);
-        func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), (u32)framePacket, 0);
+        framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+        func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), framePacket, 0);
         sdfAppendDmaTagToList(node->packetList, (u32)framePacket);
         state = (BillStatePacket *)sdfAllocPacketAligned(0x40);
         state->dmaTag = 3;
@@ -396,12 +397,12 @@ void billFlushPairedQuadStreams(BillRenderPair *pair) {
 }
 
 extern SdfPoolNode D_00325228;
-extern void func_002D4CC8(const void *, void *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = D_003BD7F8;
     SdfListHead *list;
-    void *texture;
+    SdfDmaReferenceChainPacket *texture;
     BillStatePacket *packet;
 
     if (node != NULL) {
@@ -417,8 +418,8 @@ void billFlushPendingRenderPairs(void) {
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    texture = (void *)sdfAllocPacketAligned(0x40);
-    func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, texture, 0);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
+    func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
     sdfAppendDmaTagToList(list, (u32)texture);
     packet = (BillStatePacket *)sdfAllocPacketAligned(0x40);
     packet->dmaTag = 3;
@@ -726,14 +727,6 @@ void billReleaseSharedEntryBlock(BillData *block) {
 }
 
 
-typedef struct BillSnapshot {
-    f32 x;              /* 0x00 */
-    f32 y;              /* 0x04 */
-    f32 halfWidth;      /* 0x08 */
-    f32 halfHeight;     /* 0x0C */
-    u32 unk10;          /* 0x10 */
-    BillTextureQuad uv; /* 0x14 */
-} BillSnapshot;
 
 /* Copy the billboard's current source record (by kind) into a snapshot. */
 void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
@@ -747,7 +740,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = (u32)record->texture;
+    snapshot->texture = record->texture;
     snapshot->y = record->y;
     snapshot->halfWidth = record->halfWidth;
     snapshot->halfHeight = record->halfHeight;

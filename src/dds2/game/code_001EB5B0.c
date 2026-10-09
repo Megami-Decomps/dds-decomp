@@ -609,7 +609,7 @@ INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001EBE30);
 void func_001EC190(void) {
 }
 
-extern void func_001EE690(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
+extern void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
 void func_001EC198(BtlLinkedCommand *action) {
     BtlUnit *target;
@@ -633,8 +633,8 @@ void func_001EC198(BtlLinkedCommand *action) {
     } else {
         kind = 3;
     }
-    func_001EE690(action, &action->frontCamera, kind, 45.0f, 0.25f);
-    func_001EE690(action, &action->backCamera, kind, 1.0f, 0.5f);
+    btlFrameTargetExtremesCameraPose(action, &action->frontCamera, kind, 45.0f, 0.25f);
+    btlFrameTargetExtremesCameraPose(action, &action->backCamera, kind, 1.0f, 0.5f);
     action->motionParameter = 30.0f;
     action->flags |= 0x41;
 }
@@ -1187,7 +1187,7 @@ INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001EE458);
 
 extern u32 effMiscRand(void *state);
 
-void func_001EE690(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
+void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
 f32 angle, f32 blend) {
     f32 point[4];
     f32 plane[4];

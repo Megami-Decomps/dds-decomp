@@ -26,7 +26,7 @@ extern void sdfPadBuildButtonStates(void);
 extern void sdfTickThreadPriorityOverride(void);
 
 extern void func_00328FA8(u32 heapSize);
-extern void func_0032A440(u32 resourceAddress);
+extern void sdfInitializeGraphicsWorkers(u32 resourceAddress);
 extern void sdfInitGeneralHeap(u32 heapSize);
 extern void sdfTexInitializeLists(void);
 extern void sdfTexInitializeSemaphore(void);
@@ -91,7 +91,7 @@ void func_00328858(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
     sdfRegisterTextureReleaseRequestHandler();
     sdfPadInit();
     sdfStartQueuedThreadWakeWorker();
-    func_0032A440(resourceAddress);
+    sdfInitializeGraphicsWorkers(resourceAddress);
     sdfInitializeResourceQueuesAndTextureWords(0x40);
     sdfConsUploadDmaProgram(D_004389C0);
     effMiscSeedRandomFromClock(NULL);

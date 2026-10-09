@@ -51,7 +51,7 @@ typedef struct PrfRequirementRecord {
 } PrfRequirementRecord;
 extern PrfRequirementRecord D_00402BE0[176];
 PrfRequirementRecord *scrGetEntryDescriptor(u16);
-s32 func_00315C68(u32, u32, struct DatPartyRecord *, u32, u32 *);
+s32 prfReqEvaluateRules(u32, u32, struct DatPartyRecord *, u32, u32 *);
 s32 func_00315FA0(u32, struct DatPartyRecord *, u16);
 typedef char PrfRequirementRecord_size[(sizeof(PrfRequirementRecord)==0x2C)?1:-1];
 typedef char PrfRequirementRecord_rules[((u32)&((PrfRequirementRecord*)0)->rules==4)?1:-1];

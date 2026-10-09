@@ -9,7 +9,7 @@ extern void func_0026C900(void);
 extern void func_0029AA48(BrsSkillPackageWork *);
 
 extern void func_0029AC20(BrsSkillPackageWork *, s32);
-extern void func_0029B950(DatPartyRecord *, BrsSkillPackageWork *);
+extern void mnuRollExtraLevelReward(DatPartyRecord *, BrsSkillPackageWork *);
 extern u8 *D_00435E48;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void *memset(void *destination, s32 value, u32 size);
@@ -307,7 +307,7 @@ typedef struct StaffItemRow {
 extern StaffItemRow D_003D6330[7];
 
 /* Roll a staff reward: a chance-gated stat raise (mode 4) or an item grant (mode 5). */
-void func_0029B950(DatPartyRecord *unit, BrsSkillPackageWork *work) {
+void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
     u32 modulus;
     s32 threshold;
     s32 rollMode;
@@ -360,7 +360,7 @@ u32 func_0029BB28(KwlnTask *task) {
     DatPartyRecord *item = context->selectedRewardRow->unit;
     s32 mode;
 
-    func_0029B950(item, context);
+    mnuRollExtraLevelReward(item, context);
     mode = context->rewardMode;
     if (mode != 0 && mode != 5) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + item->unitId * 17);

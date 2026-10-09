@@ -14,7 +14,7 @@ extern void func_0031A830(MnuShootingWork *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern MenuWorkEntry D_0040ABF8;
 
-void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingWork *work) {
+void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingWork *work) {
     MenuProgressParameters *origin;
     MenuRegistry *registry;
     MenuRegistryParameters *parameters;

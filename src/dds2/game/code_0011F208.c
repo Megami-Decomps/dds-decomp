@@ -84,7 +84,7 @@ extern void func_00136EF8(void);
 
 extern void func_00134A18(void);
 
-extern void func_0012D3E0(void);
+extern void fldSubmitTexturedOverlaySprite(void);
 
 extern u32 D_00389988[];
 
@@ -617,7 +617,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
         } else {
             fldSelectDisplayBuffer(0x5E);
         }
-        func_0012D3E0();
+        fldSubmitTexturedOverlaySprite();
     }
     fldSelectDisplayBuffer(0x27);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);

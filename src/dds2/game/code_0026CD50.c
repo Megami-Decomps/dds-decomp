@@ -177,7 +177,7 @@ extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
-extern s32 func_00315C68(u32, u32, DatPartyRecord *, u16, u32 *);
+extern s32 prfReqEvaluateRules(u32, u32, DatPartyRecord *, u16, u32 *);
 
 extern s32 func_00315FA0(u32, DatPartyRecord *, u16);
 
@@ -224,7 +224,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                     *entry |= 0x100;
                 }
                 if ((node->packedHeader & 0xF) == 3) {
-                    if (func_00315C68(0, 4, unit, node->id, 0) == 0) {
+                    if (prfReqEvaluateRules(0, 4, unit, node->id, 0) == 0) {
                         goto unavailable;
                     }
                     if (mode != 0) {
@@ -241,7 +241,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                         if (evtTestMantraNodePartyRequirements(node->id, mode)) {
                             *entry |= 0x800;
                         }
-                        if (func_00315C68(1, 2, unit, node->id, 0)) {
+                        if (prfReqEvaluateRules(1, 2, unit, node->id, 0)) {
                             if ((*entry >> 8) & 8) {
                                 if (node->packedHeader & 0x100) {
                                     *entry = (*entry & 0xFFF0) | 0x101;
@@ -262,7 +262,7 @@ void mnuUpdateMantraRecordFlags(void *selection, s32 unitAddress, s32 mode) {
                     case 4:
                         if (func_00315FA0(1, unit, node->id)) {
                             *entry = (*entry & 0xFFF0) | 1;
-                        } else if (func_00315C68(1, 2, unit, node->id, 0)) {
+                        } else if (prfReqEvaluateRules(1, 2, unit, node->id, 0)) {
                             *entry = (*entry & 0xFFF0) | 1;
                         } else if ((*entry >> 8) & 2) {
                             *entry = (*entry & 0xFFF0) | 1;
@@ -439,7 +439,7 @@ s32 func_0026D7E8(u16 entry) {
 }
 
 /* The sixth work stores the combined availability state for the five profiles. */
-void func_0026D988(EvtMantraWork **selectionWorks) {
+void mnuMergePartyMantraProfileCapStates(EvtMantraWork **selectionWorks) {
     EvtMantraNodePositionRecord *node;
     u16 *combinedEntry;
     s32 recordCount;

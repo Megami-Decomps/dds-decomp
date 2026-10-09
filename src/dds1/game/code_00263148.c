@@ -330,7 +330,7 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
     mnuDrawBackdrop(&scene->assets, 0x20);
 }
 
-extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
 extern u32 uiBlendColors(u32, u32, s32);
 extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
 extern void frFontDrawGlyphChain(u32, s32, s32);
@@ -343,7 +343,7 @@ void func_00263A00(BrsSkillPackageWork *scene) {
     u32 glyph;
     u32 color;
 
-    func_002BF4E0(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
+    effDrawSpriteWithCornerFade(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
     delta = scene->commitComplete != 0
                 ? 0
                 : scene->availableStatPoints - scene->assignedStatPoints;

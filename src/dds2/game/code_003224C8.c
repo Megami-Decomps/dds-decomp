@@ -46,12 +46,11 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
-extern u8 *mnuGetResourceProgressStepState(void);
 s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
-extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
+extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
 
@@ -197,15 +196,15 @@ u32 mnuGetWorkEntryPool(void) {
 f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((registry->table->flags & 1) != 0) {
-        u8 *progressState = mnuGetResourceProgressStepState();
+        MenuProgressState *progressState = mnuGetResourceProgressStepState();
         MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->resourceRecordIndex);
         return entry->currentY +
-            (f32)((s32)*(u16 *)(progressState + 2) - resourceRecord->progress);
+            (f32)((s32)progressState->progress - resourceRecord->progress);
     }
     return entry->currentY;
 }
 
-extern void func_00321528(MnuCallbackList *, MenuRegistryRecord *);
+extern void mnuBuildNamedResourceList(MnuCallbackList *, MenuRegistryRecord *);
 extern void func_003232A0(MenuWorkEntry *, MenuShortRecordList *);
 
 void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
@@ -230,7 +229,7 @@ void mnuInitializeRegistryWorkEntry(MenuWorkEntry *entry, u32 tag,
     record = table->recordBase;
     func_003232A0(entry, record->lists);
     entry->callback = mnuCreateReleaseCallbackNode();
-    func_00321528(entry->callback, record);
+    mnuBuildNamedResourceList(entry->callback, record);
 }
 
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
@@ -242,7 +241,7 @@ void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
 }
 
 extern void func_003226D8(MenuWorkEntry *, MenuShortRecordList *, MenuShortRecord *);
-extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, MenuShortRecord *);
+extern s32 mnuAdvanceRegistryRow(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, MenuShortRecord *);
 
 /* Tick the packed countdown and dispatch the row's fixed-kind record. */
 s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
@@ -270,9 +269,9 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     }
     func_003226D8(entry, list, record);
     entry->elapsed++;
-    switch (func_003230A0(entry, table, row, record)) {
+    switch (mnuAdvanceRegistryRow(entry, table, row, record)) {
     case 1:
-        func_00321528(entry->callback, &table->recordBase[entry->recordIndex]);
+        mnuBuildNamedResourceList(entry->callback, &table->recordBase[entry->recordIndex]);
         return 0;
     case 2:
         entry->flags |= 0x8;
@@ -282,7 +281,7 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     }
 }
 
-s32 func_003230A0(MenuWorkEntry *entry, MenuRegistryTable *table,
+s32 mnuAdvanceRegistryRow(MenuWorkEntry *entry, MenuRegistryTable *table,
                   MenuRegistryRecord *row, MenuShortRecord *record) {
     s32 action = 0;
 
@@ -572,7 +571,7 @@ u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
 }
 
 /* Find the first active runtime record overlapping the work entry's hit rectangle. */
-MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *context) {
+MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *work, struct MnuShootingWork *context) {
     MenuRuntimeList *list = func_00321EC8();
     MenuRegistryParameters *parameters = NULL;
     MenuRuntimeRecord *record;
@@ -689,7 +688,7 @@ s32 func_00323BB8(struct MnuShootingWork *context) {
 }
 
 /* Test active runtime records against the fixed work pool and its hit bounds. */
-s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
+s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *list, struct MnuShootingWork *context) {
     s32 entryIndex;
 
     for (entryIndex = 0; entryIndex < 100; entryIndex++) {
@@ -1142,7 +1141,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
 }
 
 /* Update the active-effect entrance animation once per frame. */
-s32 func_00324B28(MenuWorkEntry *entry) {
+s32 mnuAdvanceWorkEntryEntrance(MenuWorkEntry *entry) {
     extern s32 D_004389B4;
     extern s32 D_004389B8;
     s32 phase = D_004389B4;

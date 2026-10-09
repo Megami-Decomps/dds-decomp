@@ -622,7 +622,7 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
-    D_0043900C = (u32)func_0019CE78((const char *)(u32)glyphSource, 0, 0, 0, 0);
+    D_0043900C = (u32)frFontBuildGlyphChain((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
     frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
     frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);

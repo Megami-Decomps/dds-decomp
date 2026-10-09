@@ -16,7 +16,7 @@ static inline u16 *mantraFlagEntry(MantraFlagResource *work, s32 id) {
     return work->flags + id;
 }
 
-void func_0028E350(MnuStatusResource *resource, u16 id) {
+void mnuApplyMantraUnlockToPartyList(MnuStatusResource *resource, u16 id) {
     MantraNodePos *position = mnuGetMantraNodePositionRecord((s16)id);
     struct MenuListNode *node = resource->list->first;
     u32 flags = 0;

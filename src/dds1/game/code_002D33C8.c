@@ -909,20 +909,20 @@ void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *lin
     sdfAppendPacket(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
 
-void func_002D4C80(s32 source, u32 packet, s32 variant) {
+void func_002D4C80(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x180, 1);
+        sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
         return;
     }
-    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 400, 1);
+    sdfBuildDmaReferenceChain(packet, source + 400, 1);
 }
 
-void func_002D4CC8(s32 source, u32 packet, s32 variant) {
+void func_002D4CC8(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x70, 1);
+        sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
         return;
     }
-    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0xb0, 1);
+    sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {

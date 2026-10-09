@@ -13,7 +13,7 @@ extern s32 dspStartEntry(s32);
 extern void evtStageTestQueueMotion(s32, u32);
 extern void evtStageTestSetPendingEffect(u32);
 
-void func_0029BC58(BrsSkillPackageWork *work) {
+void mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     DatPartyRecord *unit = work->selectedRewardRow->unit;
     s32 mode = work->rewardMode;
     s32 rewardIndex;
@@ -135,7 +135,7 @@ s32 func_0029BFB8(KwlnTask *request) {
     if (panel->transition.state == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (panel->rewardMode != 0) {
-                func_0029BC58(panel);
+                mnuStartRewardDialogAndMotion(panel);
                 mnuTitleApplySequenceState(panel);
                 panel->rewardMode = 0;
             } else {

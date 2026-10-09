@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_textured_rect.h"
@@ -176,10 +177,10 @@ extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
-extern void func_0032DB30(const void *, void *, s32);
+extern void func_0032DB30(s32, SdfDmaReferenceChainPacket *, s32);
 
 
-extern void func_0032DB78(const void *, void *, s32);
+extern void func_0032DB78(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern f32 D_0037F5B0[][4];
 
@@ -504,10 +505,10 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
 
 void func_00108D80(void) {
     void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
-    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    func_0032DB30(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_0032DB30((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
     sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
@@ -517,10 +518,10 @@ void func_00108D80(void) {
 
 void func_00108E20(void) {
     void *list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
-    void *framePacket;
+    SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
-    framePacket = (void *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    func_0032DB78(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES, framePacket, 0);
+    framePacket = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(EVT_FRAME_REFERENCE_PACKET_BYTES);
+    func_0032DB78((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * EVT_FRAME_DRAW_RECORD_BYTES), framePacket, 0);
     sdfAppendDmaTagToList((SdfListHead *)list, (u32)framePacket);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];

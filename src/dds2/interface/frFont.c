@@ -53,7 +53,7 @@ void frFontInitGlyph(FrFontGlyph *);
 u32 frFontGetGlyphCellWidth(u8);
 u32 frFontGetGlyphCellHeight(u8);
 extern u8 D_00436570;
-FrFontGlyph *func_0019CE78(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head);
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head);
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
 u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
@@ -396,7 +396,7 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontRecord *source, FrFontGlyph *destinat
 
 
 extern FntNode *frFontDetachFirstResourceNode(void);
-extern void func_0032AC30(SdfImageUploadRequest *);
+extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
@@ -426,7 +426,7 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     uploadRequest.destination = frFontWork.atlas.bufferBase << FR_FONT_ATLAS_DEST_SHIFT;
     uploadRequest.x = imagePosition[0];
     uploadRequest.y = imagePosition[1];
-    func_0032AC30(&uploadRequest);
+    sdfTexQueueImageUpload(&uploadRequest);
     return cachedItem;
 }
 
@@ -539,7 +539,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
 FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
-    FrFontGlyph *newGlyphChain = func_0019CE78(text, fontIndex, firstOption, secondOption, 0);
+    FrFontGlyph *newGlyphChain = frFontBuildGlyphChain(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
         return previousGlyph;
@@ -548,7 +548,7 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
 }
 
 /* Build a glyph chain for a byte string, appending to a supplied head. */
-FrFontGlyph *func_0019CE78(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head) {
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *head) {
     u32 length = 0;
     u32 offset;
     u32 code;
@@ -1134,7 +1134,7 @@ s32 func_0019DB30(FrFontGlyph *glyph) {
     return 0;
 }
 
-u32 func_0019DBA8(s32 requestedLine, FrFontGlyph *glyph) {
+u32 frFontMeasureLineWidth(s32 requestedLine, FrFontGlyph *glyph) {
     FrFontGlyph *node;
     s32 bottom;
     s32 currentY;

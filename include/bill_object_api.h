@@ -7,6 +7,7 @@ struct BillObj;
 struct BillData;
 struct BillOut;
 struct BillChildPayload;
+struct BillSnapshot;
 struct SdfTex;
 
 void billDispatchByKind(struct BillObj *obj);
@@ -32,5 +33,7 @@ void billReleaseSharedEntryBlock(struct BillData *data);
 void effReleaseSharedTextureRecord(struct BillChildPayload *child);
 struct BillChildPayload *billStepAnimationEntryAndUpdateChild(
     struct BillObj *billboard, struct BillOut *entry);
+void billCopyCurrentRecordToSnapshot(
+    struct BillObj *billboard, struct BillSnapshot *snapshot);
 
 #endif

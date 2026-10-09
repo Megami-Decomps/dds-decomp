@@ -574,7 +574,7 @@ extern char D_00438C00[];
 extern char D_00438C08[];
 extern char D_00438C10[];
 
-void func_00343188(const u8 *data, s32 size) {
+void sdfPrintHexMemoryDump(const u8 *data, s32 size) {
     s32 column = 0;
     s32 i;
 

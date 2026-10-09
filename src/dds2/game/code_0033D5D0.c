@@ -187,7 +187,7 @@ extern char *strcat(char *, char *);
 /* SifCommand is the complete 0x10-byte input value. Console rendering uses
  * source/end as x/y storage, argument as depth bits, and command as RGBA.
  * Its RPC source/end interpretation remains unchanged. */
-extern void *func_0033D5D0(SifCommand *input, const char *format, void *args);
+extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *args);
 extern void sdfDevConsInit(void);
 extern s32 func_00360E78(char *destination, const char *format, void *args);
 extern s32 sdfGetPacketCursor(void);
@@ -233,7 +233,7 @@ typedef char SdfConsolePacketHeader_size_must_be_0x60[
 typedef char SdfConsoleGlyph_size_must_be_0x28[
     sizeof(SdfConsoleGlyph) == 0x28 ? 1 : -1];
 
-void *func_0033D5D0(SifCommand *input, const char *format, void *arguments) {
+void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
     s32 formattedCount;
     u8 *start;
@@ -306,7 +306,7 @@ void *sdfFormatSifPacket(void *packet, const char *fmt, ...) {
     __builtin_va_list args;
 
     __builtin_stdarg_start(args, fmt);
-    return func_0033D5D0(packet, fmt, args);
+    return sdfBuildFormattedConsolePacket(packet, fmt, args);
 }
 
 void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
@@ -315,7 +315,7 @@ void *sdfCreateFormattedSifCommand(s32 source, s32 end, s32 argument, s32 index,
 
     sdfPktInit(&packet, source, end, argument, index);
     __builtin_stdarg_start(args, fmt);
-    return func_0033D5D0(&packet, fmt, args);
+    return sdfBuildFormattedConsolePacket(&packet, fmt, args);
 }
 
 void sdfPktSetCmd(SifCommand *packet, s32 index) {

@@ -110,7 +110,6 @@ s32 btlDispatchActionAnimationB(BtlLinkedCommand *command) {
 void func_0020CCA8(void) {
     btlRestoreHaritiFormation();
 }
-
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020CCC0);
 
 /* Mode 0x10E allocates this 0x24-byte transition, distinct from the
@@ -127,6 +126,7 @@ typedef struct BtlUnitScaleTransition {
 typedef char BtlUnitScaleTransitionLayout[
     (sizeof(BtlUnitScaleTransition) == 0x24 &&
      (u32)&((BtlUnitScaleTransition *)0)->range == 0x10) ? 1 : -1];
+
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *);
 

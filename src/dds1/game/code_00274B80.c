@@ -33,7 +33,7 @@ extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, u8 **);
 extern void func_002845F8(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
@@ -573,9 +573,9 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
     FrFontGlyph *glyph;
     s32 i;
 
-    func_002BF4E0(0x350, 0x938, 0, opacity, 1, sets[0], 0x25, 0x53);
-    func_002BF4E0(0x350, 0x990, 0, opacity, 1, sets[0], 0x26, 0x53);
-    func_002BF4E0(0x350, 0xBA0, 0, opacity, 1, sets[0], 0x27, 0x53);
+    effDrawSpriteWithCornerFade(0x350, 0x938, 0, opacity, 1, sets[0], 0x25, 0x53);
+    effDrawSpriteWithCornerFade(0x350, 0x990, 0, opacity, 1, sets[0], 0x26, 0x53);
+    effDrawSpriteWithCornerFade(0x350, 0xBA0, 0, opacity, 1, sets[0], 0x27, 0x53);
     for (i = 0; i < 4; i++) {
         if (!dim) {
             sets[entry->unitId]->workEntries[0].geometry.cornerColors[i] =
@@ -587,16 +587,16 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
                               0x80);
         }
     }
-    func_002BF4E0(0, 0x840, 0, iconOpacity, 1, sets[entry->unitId], 0, 0x53);
-    func_002BF4E0(0x4C0, 0x8B0, 0, opacity, 1, sets[0], 9, 0x53);
-    func_002BF4E0(0x4C0, 0xAE8, 0, opacity, 1, sets[0], 10, 0x53);
-    func_002BF4E0(0x560, 0xC98, 0, opacity, 1, sets[0], 0x1F, 0x53);
+    effDrawSpriteWithCornerFade(0, 0x840, 0, iconOpacity, 1, sets[entry->unitId], 0, 0x53);
+    effDrawSpriteWithCornerFade(0x4C0, 0x8B0, 0, opacity, 1, sets[0], 9, 0x53);
+    effDrawSpriteWithCornerFade(0x4C0, 0xAE8, 0, opacity, 1, sets[0], 10, 0x53);
+    effDrawSpriteWithCornerFade(0x560, 0xC98, 0, opacity, 1, sets[0], 0x1F, 0x53);
     hpBar->opacity = opacity;
     func_002845F8(0x6E0, 0x9B8, 0, color, entry->hp, -1, hpBar, 0x53);
     mpBar->opacity = opacity;
     func_002845F8(0x6E0, 0xA48, 0, color, entry->mp, -1, mpBar, 0x53);
-    func_002BF4E0(0x740, 0xCB0, 0, opacity, 1, sets[0], 0x1D, 0x53);
-    func_002BF4E0(0x11D0, 0xCB0, 0, opacity, 1, sets[0], 0x1E, 0x53);
+    effDrawSpriteWithCornerFade(0x740, 0xCB0, 0, opacity, 1, sets[0], 0x1D, 0x53);
+    effDrawSpriteWithCornerFade(0x11D0, 0xCB0, 0, opacity, 1, sets[0], 0x1E, 0x53);
     if (profile) {
         if (func_002CD240(profile, &name)) {
             mnuDrawCenteredLabel(0x650, 0xBC8, 0, color, profile, 0x53);
@@ -616,8 +616,8 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
     if (marker) {
-        func_002BF4E0(0x970, 0x8B0, 0, opacity, 1, sets[0], 0x1C, 0x53);
-        func_002BF4E0(0x970, 0x8B0, 0, opacity, 1, marker, 0, 0x53);
+        effDrawSpriteWithCornerFade(0x970, 0x8B0, 0, opacity, 1, sets[0], 0x1C, 0x53);
+        effDrawSpriteWithCornerFade(0x970, 0x8B0, 0, opacity, 1, marker, 0, 0x53);
     }
 }
 
@@ -1121,7 +1121,7 @@ void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *slots) {
     u32 i;
 
     for (i = 0; i < 10; i++) {
-        func_002BF4E0(positions.positions[i][0], positions.positions[i][1],
+        effDrawSpriteWithCornerFade(positions.positions[i][0], positions.positions[i][1],
                      0, opacity, 1, resource, indices.indices[i], 0x53);
     }
 }
@@ -1264,7 +1264,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         return;
     }
     if (mnuLookupRangeEntry(rangeId) == 3) {
-        func_002BF4E0(x + xOffset - 0x80, y, depth, fade, 1,
+        effDrawSpriteWithCornerFade(x + xOffset - 0x80, y, depth, fade, 1,
                       specialResource, style + 0xB, texture);
         return;
     }
@@ -1286,10 +1286,10 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:
     default:
-        func_002BF4E0(x, y, depth, fade, 1, costResource, dim != 0 ? 0xD : 0xC, texture);
+        effDrawSpriteWithCornerFade(x, y, depth, fade, 1, costResource, dim != 0 ? 0xD : 0xC, texture);
         break;
     case 2:
-        func_002BF4E0(x, y, depth, fade, 1, costResource, dim != 0 ? 0xF : 0xE, texture);
+        effDrawSpriteWithCornerFade(x, y, depth, fade, 1, costResource, dim != 0 ? 0xF : 0xE, texture);
         break;
     }
 }

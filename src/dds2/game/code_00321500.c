@@ -46,13 +46,12 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
-extern u8 *mnuGetResourceProgressStepState(void);
 void func_003214D0(u32, u32);
 s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
-extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
+extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
 
@@ -64,7 +63,7 @@ MnuCallbackList *mnuCreateReleaseCallbackNode(void) {
 extern void mnuClearResourceList(MnuCallbackList *list);
 
 /* Rebuild the row's named states and attach its tagged parameter groups. */
-void func_00321528(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
+void mnuBuildNamedResourceList(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
     s32 groupIndex;
     s32 recordIndex;
     MenuShortRecordList *group;
@@ -97,15 +96,15 @@ void func_00321528(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
     }
 }
 
-void func_003216A8(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
+void mnuUpdateLinkedTimedStateList(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
 void func_00321688(MnuCallbackList *left, MenuRuntimeList *right,
                    u32 value, u32 count, f32 angle) {
-    func_003216A8(left, right, value, count, 1, angle);
+    mnuUpdateLinkedTimedStateList(left, right, value, count, 1, angle);
 }
 
 
-void func_003216A8(MnuCallbackList *list, MenuRuntimeList *runtimeList,
+void mnuUpdateLinkedTimedStateList(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                    s32 x, s32 y, s32 enabled, f32 angle) {
     SdfListNode *node = list->head;
     MenuStateRecord *record;
@@ -118,9 +117,9 @@ void func_003216A8(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                 /* The native dispatcher retains separate kind paths even
                  * though both currently invoke the same spawn provider. */
                 if ((record->tag.flags & 0xF) >= 2) {
-                    func_00321A30(record, runtimeList, x, y, angle);
+                    mnuCreateRuntimeAnimationRecord(record, runtimeList, x, y, angle);
                 } else {
-                    func_00321A30(record, runtimeList, x, y, angle);
+                    mnuCreateRuntimeAnimationRecord(record, runtimeList, x, y, angle);
                 }
             }
             node = node->next;
@@ -143,9 +142,9 @@ void func_00321798(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                     /* Retain the two native kind paths, as in the unfiltered
                      * updater, though both use the same spawn provider. */
                     if (kind >= 2) {
-                        func_00321A30(record, runtimeList, x, y, angle);
+                        mnuCreateRuntimeAnimationRecord(record, runtimeList, x, y, angle);
                     } else {
-                        func_00321A30(record, runtimeList, x, y, angle);
+                        mnuCreateRuntimeAnimationRecord(record, runtimeList, x, y, angle);
                     }
                 }
             }
@@ -216,7 +215,7 @@ extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 extern f64 cos(f64);
 extern f64 sin(f64);
 
-MenuRuntimeRecord *func_00321A30(MenuStateRecord *state, MenuRuntimeList *runtimeList,
+MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *state, MenuRuntimeList *runtimeList,
                                   s32 x, s32 y, f32 angle) {
     s32 offsetX = 0;
     s32 offsetY;

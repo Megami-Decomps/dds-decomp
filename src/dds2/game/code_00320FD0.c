@@ -19,14 +19,6 @@ extern void *memcpy(void *, const void *, u32);
 extern void *memset(void *, s32, u32);
 
 /* Cadence phase and accumulated progress at mnuStepCounterState (8 bytes). */
-typedef struct MenuProgressState {
-    u8 unk0[2];
-    u16 progress;
-    u8 cadenceCount;
-    u8 cadenceLimit;
-    u8 progressStep;
-    u8 unk7;
-} MenuProgressState;
 
 extern MenuProgressState mnuStepCounterState;
 
@@ -167,8 +159,8 @@ void mnuCopyResourceProgressParameters(MenuProgressParameters *parameters) {
     memcpy(&D_0045C860, parameters, sizeof(MenuProgressParameters));
 }
 
-u8 * mnuGetResourceProgressStepState(void) {
-    return (u8 *)&mnuStepCounterState;
+MenuProgressState *mnuGetResourceProgressStepState(void) {
+    return &mnuStepCounterState;
 }
 
 /* Change the cadence without resetting its phase or accumulated progress. */

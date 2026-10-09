@@ -103,7 +103,7 @@ extern s32 D_00437C9C;
 extern s32 func_002B8E30();
 
 extern void func_002BE730();
-extern void func_002BED10(MenuQueuedCommand *entry);
+extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -270,7 +270,7 @@ void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
 
 /* Initialize both particle arrays for a queued menu command. */
-void func_002BED10(MenuQueuedCommand *entry) {
+void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
     enum {
         MOTION_ROWS = (s32)&((MenuQueuedCommand *)0)->motion,
         POSITION_X = (s32)&((MenuQueuedCommand *)0)->positions[0].x - MOTION_ROWS,
@@ -353,7 +353,7 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
         menu->fade = 0;
         break;
     case 1:
-        func_002BED10(entry);
+        mnuInitRandomLineEffect(entry);
         menu->fade = 0;
         break;
     case 2:
@@ -455,7 +455,7 @@ u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 
 /* Draw one party page: queued commands, level text, selection and HP/MP bars. */
-void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
+void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
                   s32 panelIndex, s32 surface) {
     char text[16];
     s32 commandArgs[6];
@@ -545,7 +545,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 
 
 extern void func_002BF830(s32, s32, s32, MenuPageWindow *, s32, s32);
-extern void func_002BFEA0(s32, s32, s32, MenuPageWindow *, s32, s32);
+extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 param) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
@@ -562,7 +562,7 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
         func_002BF830(x, y, z, menu, panelIndex, param);
         return;
     case 2:
-        func_002BFEA0(x, y, z, menu, panelIndex, param);
+        mnuDrawPartyMemberStatusPanel(x, y, z, menu, panelIndex, param);
         break;
     }
 }
@@ -1055,7 +1055,7 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     }
 }
 
-void func_002C1E48(s32 x, s32 y, s32 depth, u32 fade, MenuPageBar *bar, u32 flags) {
+void mnuDrawAndSwapPageBarEffect(s32 x, s32 y, s32 depth, u32 fade, MenuPageBar *bar, u32 flags) {
     u32 alpha = (fade << 8) >> 8;
 
     switch (bar->activeEffect) {
@@ -1104,10 +1104,10 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
     }
 }
 
-extern void func_002C1FF0(MenuPageBar *, s32, s32 *, s32, s32,
+extern void mnuInitializePageBar(MenuPageBar *, s32, s32 *, s32, s32,
                         EffectSlotSet *, const s32 *, s32);
 
-void func_002C1FF0(MenuPageBar *pair, s32 variant, s32 *settings, s32 positionY, s32 quantizedSpan,
+void mnuInitializePageBar(MenuPageBar *pair, s32 variant, s32 *settings, s32 positionY, s32 quantizedSpan,
                    EffectSlotSet *source, const s32 *table, s32 count) {
     s32 i;
 
@@ -1149,9 +1149,9 @@ void mnuDrawPanelSequenceByRow(MenuPageBar *pair, s32 variant, s32 *settings,
     s32 tableB[7] = {0x29, 0x26, 0x27, 0x28, 0x28, 0x2B, 0x2C};
 
     if (variant == 1) {
-        func_002C1FF0(pair, variant, settings, positionY, quantizedSpan, source, tableB, 7);
+        mnuInitializePageBar(pair, variant, settings, positionY, quantizedSpan, source, tableB, 7);
     } else {
-        func_002C1FF0(pair, variant, settings, positionY, quantizedSpan, source, tableA, 7);
+        mnuInitializePageBar(pair, variant, settings, positionY, quantizedSpan, source, tableA, 7);
     }
 }
 
@@ -1190,7 +1190,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
 extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
-extern void func_002C1E48(s32, s32, s32, u32, MenuPageBar *, u32);
+extern void mnuDrawAndSwapPageBarEffect(s32, s32, s32, u32, MenuPageBar *, u32);
 
 void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
                   s32 limit, MenuPageBar *pair, u32 flags) {
@@ -1211,7 +1211,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
         work->parameters[2] = ~(77 - barWidth);
         func_00306CD0(x, y, depth, fade, 1, texture, 0, flags);
         func_00306CD0(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
-        func_002C1E48(x, y, depth, fade, pair, flags);
+        mnuDrawAndSwapPageBarEffect(x, y, depth, fade, pair, flags);
     }
     if (pair->fadeOut == 0) {
         if (pair->fade < 256) {

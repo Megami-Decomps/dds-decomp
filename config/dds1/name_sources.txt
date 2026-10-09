@@ -4282,7 +4282,7 @@
 0x00246BE8	evtStageDispatchStartC	inferred	identical body to evtStageDispatchStart; third occurrence in file order
 0x00246C38	evtSetupDispatchSyncD	inferred	identical body to evtSetupDispatchSync; fourth occurrence in file order
 0x00246CB0	evtQueryStateProgress	inferred	mode 0 dispatch returning s64; bumps +0xA4 counter below 20 else applies D_0036AB64 entry
-0x00246D68	evtFetchDispatchStart	inferred	calls func_0025E108 with +0xA4 value then dispatches mode 1
+0x00246D68	evtFetchDispatchStart	inferred	calls mnuStepShopWindowTransition with +0xA4 value then dispatches mode 1
 0x00246DB8	evtSetupDispatchSyncE	inferred	identical body to evtSetupDispatchSync; fifth occurrence in file order
 0x00246E38	evtAdvanceStateStage	inferred	when +0xAC == 0xA stores halfword, applies func_002605B0 mode 6 and func_00260530 setup
 0x00246EA0	evtPollQuantitySelection	inferred	Fam
@@ -4860,7 +4860,7 @@
 0x0027AF28	mnuInitializeCampAssetSprites	inferred	Requires loaded menu resources and set, creates three sprites and initializes all panel colors. [names_reviewed5.tsv]
 0x0027B010	mnuReleaseAssets	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027B088	mnuDrawCampBackdropDecoration	inferred	Draws five surrounding decoration sprite cells plus central material overlays. [names_reviewed5.tsv]
-0x0027B1B0	mnuDrawCursorIcons	inferred	Sets scale/rotation on two icon objects and draws them with func_002BF4E0/F970.
+0x0027B1B0	mnuDrawCursorIcons	inferred	Sets scale/rotation on two icon objects and draws them with effDrawSpriteWithCornerFade/F970.
 0x0027B268	mnuDrawBackdrop	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027B2F8	mnuCreateListState	inferred	Allocates 0x40-byte menu list state, stores two bounds and eightfold item capacity, initializes selection/link fields.
 0x0027B368	mnuDestroyListState	inferred	Repeatedly removes list nodes, frees list and returns completion; twin 0x002B81C8. [names_R_FuncNames5.tsv]
@@ -7577,3 +7577,19 @@
 0x00196ED0	itfSkipEncodedTextOpcode	inferred	Inferred from the current C implementation in game/code_00196478.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00197068	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in game/code_00196478.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001D7258	btlWarpUnitToMotionReach	inferred	Inferred from the current C implementation in game/code_001C8890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F1CC8	sndUpdateEffectSourceFade	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001F44C0	btlPollMotionSoundResources	inferred	Inferred from the current C implementation in game/code_001DDF20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002111A0	btlCheckPartyCommandCounterEligibility	inferred	Inferred from the current C implementation in game/code_0020FC48.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0022FFC8	evtUpdateViewerMessageWindow	inferred	Inferred from the current C implementation in game/code_0022CBA0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002357B8	evtDrawFloatValueEditorRow	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00236828	evtUpdateNameEntryDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00238A88	evtUpdateWorldNodeListDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023A688	evtUpdateGroupListDialog	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023BC30	evtDrawShadowSettingsRow	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023C248	evtEditEffectSpriteFrame	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0023CA60	evtEditCameraColorKeyFrame	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0025E108	mnuStepShopWindowTransition	inferred	Inferred from the current C implementation in game/code_0025DF68.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0027A140	mnuDrawAffinityParticipantLabels	inferred	Inferred from the current C implementation in game/code_00279CC0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B3178	effInitializeFieldLightColors	inferred	Inferred from the current C implementation in game/code_0029C530.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BF4E0	effDrawSpriteWithCornerFade	inferred	Inferred from the current C implementation in game/code_002BEDC8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00239A90	evtHandleGroupPropertyMenu	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

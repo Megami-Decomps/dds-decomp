@@ -469,28 +469,6 @@ void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, E
     }
 }
 
-typedef struct EvtViewCmd {
-    s32 kind;           /* 0x0 */
-    u8 pad04[0x10];
-    s32 arg;            /* 0x14 */
-    u8 pad18[6];
-    s8 plain;           /* 0x1E */
-} EvtViewCmd;
-
-typedef struct EvtViewParams {
-    u16 word;           /* 0x0 */
-    u8 pad02[7];
-    s8 unk9;            /* 0x9 */
-    u8 pad0A[2];
-    union {
-        s8 names[4];    /* 0xC */
-        struct {
-            s8 flag;    /* 0xC */
-            s8 type;    /* 0xD */
-            s16 value;  /* 0xE */
-        } a;
-    } u;
-} EvtViewParams;
 
 extern void effObjSetFlags(s32 obj, s32 flags);
 extern void *func_00115298(void *resource, void *position, void *scale);
@@ -505,7 +483,7 @@ extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct Effe
                                                struct EffectObj *fourth);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
-s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtRuntime *viewer) {
+s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntimeChild *params, EvtRuntime *viewer) {
     f32 vec0[4];
     f32 vec1[4];
     s32 handle = 0;
@@ -525,39 +503,39 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     if (slot == 0x7F) {
         return -1;
     }
-    switch (cmd->kind) {
+    switch (cmd->type) {
     case 3:
     case 0x1A:
-        if (cmd->kind == 3) {
-            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)cmd->arg, vec0, vec1);
+        if (cmd->type == 3) {
+            handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)cmd->resourceData, vec0, vec1);
         } else {
-            handle = func_001150B0(cmd->arg, vec0, vec1);
+            handle = func_001150B0((s32)cmd->resourceData, vec0, vec1);
         }
-        if (params->u.a.flag != 0) {
+        if (params->p0C.sb[0] != 0) {
             effObjDispatchReadyState(handle);
         }
-        if (cmd->plain == 0) {
-            evtViewerBindNamedOwner((EffWorldNode *)handle, params->u.a.value, params->u.a.type, params->word, viewer);
+        if (cmd->metadata.extra1 == 0) {
+            evtViewerBindNamedOwner((EffWorldNode *)handle, params->p0C.sh[1], params->p0C.sb[1], params->frame, viewer);
         } else {
-            evtViewerBindNamedOwner((EffWorldNode *)handle, params->u.a.value, params->u.a.type, 0, viewer);
+            evtViewerBindNamedOwner((EffWorldNode *)handle, params->p0C.sh[1], params->p0C.sb[1], 0, viewer);
         }
         break;
     case 0x14:
     case 0x15:
-        switch (cmd->kind) {
+        switch (cmd->type) {
         case 0x14:
-            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)cmd->arg);
+            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)cmd->resourceData);
             break;
         case 0x15:
-            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)cmd->arg);
+            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)cmd->resourceData);
             break;
         }
-        n0 = evtEventViewerGetNameObject(params->u.names[0], viewer);
-        n1 = evtEventViewerGetNameObject(params->u.names[1], viewer);
-        n2 = evtEventViewerGetNameObject(params->u.names[2], viewer);
+        n0 = evtEventViewerGetNameObject(params->p0C.sb[0], viewer);
+        n1 = evtEventViewerGetNameObject(params->p0C.sb[1], viewer);
+        n2 = evtEventViewerGetNameObject(params->p0C.sb[2], viewer);
         effObjCopyMagatuhiSourceParameters((struct EffectObj *)handle, n0, n1, n2,
-                                           evtEventViewerGetNameObject(params->u.names[3], viewer));
-        if (params->unk9 != 0) {
+                                           evtEventViewerGetNameObject(params->p0C.sb[3], viewer));
+        if (params->p08.sb[1] != 0) {
             effObjDispatchReadyState(handle);
         }
         break;

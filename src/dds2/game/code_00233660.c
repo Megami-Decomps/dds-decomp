@@ -2538,7 +2538,7 @@ extern f32 D_003C89B0[][4];
 
 extern u32 D_003C89F0[];
 
-extern s32 func_00343188(s32, s32);
+extern s32 sdfPrintHexMemoryDump(s32, s32);
 
 /* Submit the selected resource in phase 3; keep the native bitwise input/once-flag test. */
 void mdlSubmitViewerResourceDrawPacket(void) {
@@ -2553,7 +2553,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
         drawPacket = (s32)func_00348188(D_003C89B0, D_003C89F0, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_004370F8 == 0)) {
             D_004370F8 = 1;
-            func_00343188(drawPacket, 0x100);
+            sdfPrintHexMemoryDump(drawPacket, 0x100);
         }
         sdfAppendPacket(packetList, (u32)drawPacket);
         D_00380048.append(&D_00380048, packetList);

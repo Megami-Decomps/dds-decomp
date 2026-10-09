@@ -3822,7 +3822,7 @@
 0x00263270	evtShowResultText	inferred	formats and prints counter/label texts with func_0026C918 then plays a sound
 0x00263380	evtOpenProgressResultPopupWhenIdle	inferred	Waits for dispatch and message-window idle before opening the progress result popup. [names_reviewed15.tsv]
 0x002636F8	evtResetStateProgressTimer	inferred	Clears the context's progress timer and submits its primary scene object's child to func_002B8988.
-0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to func_00294930 before dispatching the callback through func_002C4038.
+0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to mnuDrawSpriteMenuFadeOut before dispatching the callback through func_002C4038.
 0x00263880	evtApplyBaseRateProgressStep	inferred	Sets the progress multiplier to one and advances the camp counter once. [names_reviewed15.tsv]
 0x00263920	evtPollQuantitySelection	inferred	U3
 0x00263D40	evtUpdateSlotItemCompletionState	inferred	Checks the selected stage and item ownership, then updates the scene completion dispatch mode. [names_reviewed15.tsv]
@@ -4716,7 +4716,7 @@
 0x002BEE50	mnuQueueListEntry	inferred	picks the lower-count of two 0x1024-byte entry blocks and dispatches by kind [names_M59_D2Mid.tsv]
 0x002BEF90	mnuClearSpriteRecord	inferred	Clears the first seven words of a sprite record.
 0x002BEFB0	mnuClearPairedSpriteRecords	inferred	Clears two sprite records at fixed offsets in the selected menu entry.
-0x002C0330	mnuDispatchListPanel	inferred	DDS1 func_00282850 twin; picks the list layout routine (func_002BF830 / func_002BFEA0) from the panel mode
+0x002C0330	mnuDispatchListPanel	inferred	DDS1 func_00282850 twin; picks the list layout routine (func_002BF830 / mnuDrawPartyMemberStatusPanel) from the panel mode
 0x002C03B0	mnuCalcListEntryOffset	inferred	computes menu list draw offset (base 0xC80/0xF00) from a 3-int spacing table and entry index vs list count
 0x002C04C0	mnuAdvancePanelTransition	inferred	Increments panel value at +4 by 8 until 0x100; first-game twin 002829C0.
 0x002C04E0	mnuDrawPanelWithTemporaryOverride	inferred	Temporarily writes selected node override, draws at scroll-adjusted coordinates, then clears the override; first-game twin 002829E0.
@@ -5464,7 +5464,7 @@
 0x002FB460	effSetActiveSlotOpacity	inferred	High: writes the slot opacity and forwards it to the retained record's indexed float callback. [names_qp9.tsv]
 0x002FB480	effApplySharedModelParameters	inferred	U3
 0x002FB790	effReleaseSharedResourceReference	inferred	Decrements resource reference count at +0x10, releases owned data at zero, then releases owner's handle at +0x47C.
-0x002FB840	effCloneEffectRequest	inferred	copies 0x44C-byte blob from source request into new work from func_002FB5C0 then bumps shared resource refcount
+0x002FB840	effCloneEffectRequest	inferred	copies 0x44C-byte blob from source request into new work from effCreateSharedEffectResourceWork then bumps shared resource refcount
 0x002FB948	effShareReferenceCountedEffectObject	inferred	Copies an effect object pointer and increments its reference counter. [names_reviewed14.tsv]
 0x002FC160	effResetFileResourceStores	inferred	Resets both effect file resource stores. [names_reviewed9.tsv]
 0x002FC180	effSetBattleOffset	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described setBattleEffectOffset behavior.
@@ -5743,7 +5743,7 @@
 0x00312DF8	sdfReleaseCurrentTaskOwnedResources	inferred	src/dds2/game/code_00310BC8.c func_00312DF8: Gets current task user value and destroys its buffers and resource allocation. Twin of DDS1 func_002CB990. [names_reviewed24.tsv]
 0x00312FD0	sdfGridGetCell	inferred	twin of DDS1 0x002CBB68 [names_M34_SmallSweep3.tsv]
 0x00313040	sdfGridGetCellValue	inferred	twin of DDS1 0x002CBBD8 [names_M34_SmallSweep3.tsv]
-0x00313210	sdfGridSetCursorCell	inferred	bounds-checks column/row, sets cursor via sdfGridGetCell, rescrolls with func_00313A58 [names_M49_GridSdf.tsv]
+0x00313210	sdfGridSetCursorCell	inferred	bounds-checks column/row, sets cursor via sdfGridGetCell, rescrolls with sdfGridFollowCursorWithinMargins [names_M49_GridSdf.tsv]
 0x00313810	sdfGridSelectFilledCell	inferred	like sdfGridSetCursorCell but only when the cell value is nonzero [names_M49_GridSdf.tsv]
 0x00313898	sdfGridDrawVisibleCells	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:1134:func_00313898; Traverses the visible row/column window beginning at viewportOrigin and invokes drawCell at cellWidth/cellHeight-spaced screen positions.; source=names_P5.tsv:9 [names_qp11.tsv]
 0x003139D8	sdfGridReleaseAllCells	inferred	re-indexes every cell and calls releaseCell on nonzero values [names_M49_GridSdf.tsv]
@@ -7169,3 +7169,104 @@
 0x0024ABD0	evtUpdateViewerMessageWindow	inferred	Inferred from the current C implementation in game/code_00247518.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00253938	evtUpdateWorldNodeListDialog	inferred	Inferred from the current C implementation in game/code_00250010.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00255538	evtUpdateGroupListDialog	inferred	Inferred from the current C implementation in game/code_00250010.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00129940	fldActivateRoomFlagObjects	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0012D3E0	fldSubmitTexturedOverlaySprite	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019EDC0	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in game/code_0019E138.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001B2AF8	btlTryEscapeWithPhaseAdjustment	inferred	Inferred from the current C implementation in game/code_001B2AF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001EE690	btlFrameTargetExtremesCameraPose	inferred	Inferred from the current C implementation in game/code_001EB5B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00256CF0	evtViewerEditShadowProperties	inferred	Inferred from the current C implementation in game/code_00250010.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00257910	evtEditCameraColorKeyFrame	inferred	Inferred from the current C implementation in game/code_00250010.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0025FA28	mnuShopLoadSpriteAssets	inferred	Inferred from the current C implementation in game/code_0025DA20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00260020	mnuBuildEnabledCampEntryWindow	inferred	Inferred from the current C implementation in game/code_0025DA20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00261B98	mnuRebuildCampSaleItemWindow	inferred	Inferred from the current C implementation in game/code_0025DA20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00263FB0	evtApplyShopQuantityTransaction	inferred	Inferred from the current C implementation in game/code_0025DA20.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00268EC8	mnuDrawTerminalFrameAndSlotLabels	inferred	Inferred from the current C implementation in game/code_002665B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002690A8	mnuSetTerminalPanelMotionMode	inferred	Inferred from the current C implementation in game/code_002665B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0026D988	mnuMergePartyMantraProfileCapStates	inferred	Inferred from the current C implementation in game/code_0026CD50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00270568	mnuDrawMantraBackgroundSelectionIcons	inferred	Inferred from the current C implementation in game/code_0026DBF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0027C558	mnuDrawMantraPanelATransition	inferred	Inferred from the current C implementation in game/code_0026DBF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00284818	mnuSpawnMantraSparkle	inferred	Inferred from the current C implementation in game/code_0026DBF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00287C20	mtrMantraEquipUpdate	inferred	Inferred from the current C implementation in game/code_00286BA8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002884C0	mtrBuildUnitSelectionList	inferred	Inferred from the current C implementation in game/code_00286BA8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00288BD8	mtrDrawSelectionFadeAndScale	inferred	Inferred from the current C implementation in game/code_00286BA8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00289710	mnuSelectAvailableMantraNeighbor	inferred	Inferred from the current C implementation in game/code_00289058.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028A018	mtrChkMantraCompleteMaster	inferred	Inferred from the current C implementation in game/code_00289058.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028B1B0	mnuDrawMantraPhaseOpacity	inferred	Inferred from the current C implementation in game/code_00289058.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028B318	mnuPollMantraNodeNavigation	inferred	Inferred from the current C implementation in game/code_00289058.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028C8F8	mnuHandleMantraGridInput	inferred	Inferred from the current C implementation in game/code_00289058.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028E350	mnuApplyMantraUnlockToPartyList	inferred	Inferred from the current C implementation in game/code_0028E350.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028E568	mnuActivateMantraNode	inferred	Inferred from the current C implementation in game/code_0028E568.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00291038	ptyAdjustAllActiveRosterStats	inferred	Inferred from the current C implementation in game/code_0028FD30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002917C0	mnuAcquireMantraAndUnlockNeighbors	inferred	Inferred from the current C implementation in game/code_0028FD30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00292478	mnuDispatchMantraPanelCommand	inferred	Inferred from the current C implementation in game/code_0028FD30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002933F0	mnuUpdateMantraTutorial	inferred	Inferred from the current C implementation in game/code_0028FD30.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00294930	mnuDrawSpriteMenuFadeOut	inferred	Inferred from the current C implementation in game/code_00294730.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00294EB8	mnuDrawWindowBorderAndScrollBar	inferred	Inferred from the current C implementation in game/code_00294730.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00295D38	mnuDrawFadingValueListRow	inferred	Inferred from the current C implementation in game/code_00294730.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00298648	mnuDrawCommandClosePhase	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00299018	brsApplyPartyRewards	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00299B98	brsSelectNextUnit	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0029B950	mnuRollExtraLevelReward	inferred	Inferred from the current C implementation in game/code_0029AFC0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0029BC58	mnuStartRewardDialogAndMotion	inferred	Inferred from the current C implementation in game/code_0029BC58.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0029D008	brsBuildPartyRewardBatch	inferred	Inferred from the current C implementation in game/code_0029CC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0029D2D8	brsBuildLevelUpList	inferred	Inferred from the current C implementation in game/code_0029CC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A1790	mnuCopySoundStreamOnStatusChange	inferred	Inferred from the current C implementation in game/code_002A05C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A30C0	mnuUpdateTitleMenuTask	inferred	Inferred from the current C implementation in game/code_002A05C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A4208	mnuDrawExpandingMovieMenuPulseBar	inferred	Inferred from the current C implementation in game/code_002A3AE8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A6F88	mnuDrawScrollingStaffBackdrop	inferred	Inferred from the current C implementation in game/code_002A5260.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A7260	mnuShuffleTitlePaletteSpriteOrder	inferred	Inferred from the current C implementation in game/code_002A5260.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A75A8	mnuAdvanceStaffTextScroll	inferred	Inferred from the current C implementation in game/code_002A5260.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002AB8F0	mnuBuildStaffItemWindows	inferred	Inferred from the current C implementation in game/code_002AB890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002ADDA0	mnuStaffUseSelectedItemTask	inferred	Inferred from the current C implementation in game/code_002AD3B8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002AE580	mnuUpdateStaffPartySelectionState	inferred	Inferred from the current C implementation in game/code_002AD3B8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002AF020	mnuHandleStaffSelectionPageInput	inferred	Inferred from the current C implementation in game/code_002AD3B8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002AF5E0	mnuDrawStaffValuePage	inferred	Inferred from the current C implementation in game/code_002AD3B8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B3788	mnuDrawSelectedStaffPartyView	inferred	Inferred from the current C implementation in game/code_002B0278.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B4298	mnuDrawSkillCategoryEntry	inferred	Inferred from the current C implementation in game/code_002B0278.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B45D8	mnuRefreshSkillWindowOwnershipFlags	inferred	Inferred from the current C implementation in game/code_002B0278.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B5240	mnuUpdateEmptySkillSelectionCursor	inferred	Inferred from the current C implementation in game/code_002B0278.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B7C10	mnuDrawLayeredCampGridAndSparks	inferred	Inferred from the current C implementation in game/code_002B0278.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002B9218	mnuDrawWindowListEntries	inferred	Inferred from the current C implementation in game/code_002B8FC8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BC498	mnuDrawPartyVitalPanelSequences	inferred	Inferred from the current C implementation in game/code_002B8FC8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BDAA8	mnuDrawRemainingAndTotalCounts	inferred	Inferred from the current C implementation in game/code_002BD5C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BE240	mnuDrawPartyProfileAndExpOverlay	inferred	Inferred from the current C implementation in game/code_002BD5C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BED10	mnuInitRandomLineEffect	inferred	Inferred from the current C implementation in game/code_002BE628.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002BFEA0	mnuDrawPartyMemberStatusPanel	inferred	Inferred from the current C implementation in game/code_002BE628.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002C1FF0	mnuInitializePageBar	inferred	Inferred from the current C implementation in game/code_002BE628.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002E6F48	effUpdateRadialFanVertices	inferred	Inferred from the current C implementation in game/code_002DE248.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002F8040	effUpdateActorPoseFromModelResource	inferred	Inferred from the current C implementation in game/code_002DE248.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002FB5C0	effCreateSharedEffectResourceWork	inferred	Inferred from the current C implementation in game/code_002DE248.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002FEDD0	effHandleDebugOrbitInput	inferred	Inferred from the current C implementation in game/code_002DE248.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x003078A8	itfGridApplyTimedBoundsAndAlpha	inferred	Inferred from the current C implementation in game/code_00306F80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00307A68	itfGridShrinkBoundsAndFadeThresholdAlpha	inferred	Inferred from the current C implementation in game/code_00306F80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00307EF8	itfGridShrinkBoundsAndFadeAlpha	inferred	Inferred from the current C implementation in game/code_00306F80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00308058	itfInitDoubleBufferedScenePackets	inferred	Inferred from the current C implementation in game/code_00306F80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00308AF0	itfDrawGradientLine	inferred	Inferred from the current C implementation in game/code_00306F80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0030A8A8	fldLmapTaskUpdate	inferred	Inferred from the current C implementation in game/code_0030A128.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0030C0C0	fldAdvanceLocalMapCameraTransition	inferred	Inferred from the current C implementation in game/code_0030B838.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0030C690	sdfPollCounterSelectionInput	inferred	Inferred from the current C implementation in game/code_0030B838.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x003103C8	sdfSampleBernsteinCurve	inferred	Inferred from the current C implementation in game/code_0030F2A8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00313A58	sdfGridFollowCursorWithinMargins	inferred	Inferred from the current C implementation in game/code_00312850.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00315C68	prfReqEvaluateRules	inferred	Inferred from the current C implementation in game/code_00313BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0031A288	mnuApplyShootingRuntimeRecordEvent	inferred	Inferred from the current C implementation in game/code_0031A288.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00321528	mnuBuildNamedResourceList	inferred	Inferred from the current C implementation in game/code_00321500.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x003216A8	mnuUpdateLinkedTimedStateList	inferred	Inferred from the current C implementation in game/code_00321500.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00321A30	mnuCreateRuntimeAnimationRecord	inferred	Inferred from the current C implementation in game/code_00321500.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x003230A0	mnuAdvanceRegistryRow	inferred	Inferred from the current C implementation in game/code_003224C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00323988	mnuFindOverlappingRuntimeRecord	inferred	Inferred from the current C implementation in game/code_003224C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00323DF0	mnuDispatchRuntimeWorkOverlaps	inferred	Inferred from the current C implementation in game/code_003224C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00324B28	mnuAdvanceWorkEntryEntrance	inferred	Inferred from the current C implementation in game/code_003224C8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0032A440	sdfInitializeGraphicsWorkers	inferred	Inferred from the current C implementation in game/code_00329F60.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0032AC30	sdfTexQueueImageUpload	inferred	Inferred from the current C implementation in game/code_00329F60.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0033D5D0	sdfBuildFormattedConsolePacket	inferred	Inferred from the current C implementation in game/code_0033D5D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00343188	sdfPrintHexMemoryDump	inferred	Inferred from the current C implementation in game/code_003425B0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019CE78	frFontBuildGlyphChain	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019DBA8	frFontMeasureLineWidth	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0011CA88	ptyRefreshEntryFromSavedTemplate	inferred	Inferred from the current C implementation in newdata/datCalc.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x003475A0	sdfPacStartResourceChunk	inferred	Inferred from the current C implementation in sdf/sdfPacDecode.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002C1E48	mnuDrawAndSwapPageBarEffect	inferred	Inferred from the current C implementation in game/code_002BE628.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002A2198	mnuStartFixedSoundStream	inferred	Inferred from the current C implementation in game/code_002A05C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00254940	evtUpdateGroupPropertyDialog	inferred	Inferred from the current C implementation in game/code_00250010.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001D18D8	btlFinalizeBattleRewards	inferred	Inferred from the current C implementation in game/code_001CFEF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00297970	mnuDrawCampCommandTransition	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x001A9130	itfEditOverlayColor	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

@@ -143,7 +143,7 @@ typedef struct MenuWorkEntry {
     f32 segmentStartX, segmentStartY, segmentStartAngleRadians;
     s16 recordIndex;
     s16 shortListIndex;
-    s16 frameCounter; /* 0x30: frames shown of the current short record (func_003230A0) */
+    s16 frameCounter; /* 0x30: frames shown of the current short record (mnuAdvanceRegistryRow) */
     s16 repeatCount;
     u16 repeatTargetRecordIndex; /* 0x34: destination record selected after a type-0x12 repeat */
     s16 remaining;
@@ -292,15 +292,27 @@ typedef struct MenuProgressParameters {
     s32 x;
     s32 y;
 } MenuProgressParameters;
+/* Progress cadence and accumulated progress share an eight-byte record. */
+typedef struct MenuProgressState {
+    u8 unk0[2];
+    u16 progress;
+    u8 cadenceCount;
+    u8 cadenceLimit;
+    u8 progressStep;
+    u8 unk7;
+} MenuProgressState;
+
+typedef char MenuProgressStateLayoutAssert[
+    (sizeof(MenuProgressState) == 8 &&
+     (unsigned long)&((MenuProgressState *)0)->progress == 2) ? 1 : -1];
 
 typedef struct MenuRegistryParameters {
-    union {
-        u8 pad00[0x26];
-        struct {
-            u8 pad00To24[0x24];
-            s16 hitOffsetX;
-        };
-    };
+    s32 kind;
+    u8 pad04[8];
+    s16 xOffset, yOffset;
+    u8 pad10[4];
+    s32 rotationX, rotationY, rotationZ, scale;
+    s16 hitOffsetX;
     s16 hitOffsetY;
     union {
         u8 pad28[2];
@@ -382,6 +394,13 @@ typedef char MenuResourceLayoutsAssert[
      (unsigned long)&((MenuRegistry*)0)->initialRemainingCount==8 &&
      sizeof(((MenuRegistry*)0)->initialRemainingCount)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->kind==0 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->xOffset==0x0C &&
+     (unsigned long)&((MenuRegistryParameters*)0)->yOffset==0x0E &&
+     (unsigned long)&((MenuRegistryParameters*)0)->rotationX==0x14 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->rotationY==0x18 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->rotationZ==0x1C &&
+     (unsigned long)&((MenuRegistryParameters*)0)->scale==0x20 &&
      (unsigned long)&((MenuRegistryParameters*)0)->hitOffsetX==0x24 &&
      sizeof(((MenuRegistryParameters*)0)->hitOffsetX)==2 &&
      (unsigned long)&((MenuRegistryParameters*)0)->hitWidth==0x28 &&
@@ -410,6 +429,7 @@ void mnuInitializeRegistryWorkEntry(MenuWorkEntry *, u32, s32, s32, s32, f32);
 MenuWorkEntry *mnuCreateAnimatedEffect(u32, f32, f32, f32);
 
 MenuProgressParameters *mnuGetResourceProgressParameters(void);
+MenuProgressState *mnuGetResourceProgressStepState(void);
 void mnuCopyResourceProgressParameters(MenuProgressParameters *);
 void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
@@ -434,6 +454,6 @@ void func_003191B0(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319A58(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319E48(MenuRuntimeRecord *);
-void func_0031A288(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
+void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *, MenuWorkEntry *, struct MnuShootingWork *);
 void func_0031A638(MenuRuntimeRecord *, MenuRuntimeRecord *, struct MnuShootingWork *);
 #endif

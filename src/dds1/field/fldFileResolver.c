@@ -1,3 +1,4 @@
+#include "sdf_gs_header.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -2358,31 +2359,31 @@ void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
 
 extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void func_002D4C80(s32, u32, s32);
-extern void func_002D4CC8(s32, u32, s32);
+extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
+extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
 void fldSubmitPrimaryFramePacket(void) {
-    s32 command = sdfAllocPacketAligned(0x20);
-    s32 texture;
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
-    sdfInitPacketList((SdfListHead *)command);
-    texture = sdfAllocPacketAligned(0x40);
+    sdfInitPacketList(command);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
-    sdfAppendDmaTagToList((SdfListHead *)command, texture);
+    sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitAlternateFramePacket(void) {
-    s32 command = sdfAllocPacketAligned(0x20);
-    s32 texture;
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    SdfDmaReferenceChainPacket *texture;
     SdfPoolNode *descriptor;
-    sdfInitPacketList((SdfListHead *)command);
-    texture = sdfAllocPacketAligned(0x40);
+    sdfInitPacketList(command);
+    texture = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8((s32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), texture, 0);
-    sdfAppendDmaTagToList((SdfListHead *)command, texture);
+    sdfAppendDmaTagToList(command, (u32)texture);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 extern f32 D_0032F4E0[][4];

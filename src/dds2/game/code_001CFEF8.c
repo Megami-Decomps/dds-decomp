@@ -839,7 +839,7 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void brsTaskStart(void);
 
 /* Prepare the outcome tasks, then settle battle money and participant EP. */
-void func_001D18D8(BtlState *scene) {
+void btlFinalizeBattleRewards(BtlState *scene) {
     BtlRuntimeTask *task;
     ActionStateLink *actor;
     BtlUnit *unit;

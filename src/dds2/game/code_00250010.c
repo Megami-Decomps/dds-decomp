@@ -45,7 +45,7 @@ extern void func_00134A18(void);
 
 extern void fldSelectDisplayBuffer(s32 id);
 
-extern void func_0012D3E0(void);
+extern void fldSubmitTexturedOverlaySprite(void);
 
 
 
@@ -86,7 +86,7 @@ extern s32 effEventAdvanceScatterBlurSetup(void);
 extern s32 effEventAdvanceScaleBlurSetup(void);
 extern s32 effEventAdvanceScreenDrawSetup(void);
 extern s32 func_002570F8(EvtRuntime *runtime);
-extern s32 func_00257910(EvtRuntime *runtime);
+extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern s32 func_002582D0(EvtRuntime *runtime);
 extern void *D_004364B0;
 extern void *D_0043653C;
@@ -207,7 +207,7 @@ s32 evtUpdateSkyTask(KwlnTask *task) {
     func_00134A18();
     if (evtSkyOverlayEnabled != 0) {
         fldSelectDisplayBuffer(0x53);
-        func_0012D3E0();
+        fldSubmitTexturedOverlaySprite();
     }
     return 0;
 }
@@ -1962,7 +1962,7 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00424080);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
 
-s32 func_00254940(s32 x, s32 y, EvtRuntime *runtime) {
+s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
     SdfListHead *packets;
     EvtRuntimeGroup *group;
     EvtRuntimeChild *child;
@@ -2892,7 +2892,7 @@ void func_00256AE0(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
 
 /* Shadow-configuration menu: draw it, move the row cursor, and step the
  * selected row's mode, alpha or Y offset; confirm returns 1, cancel -1. */
-s32 func_00256CF0(s32 x, s32 y, EvtRuntime *ctx) {
+s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     EvtRuntimeChild *node = evtEventViewerGetPendingNode(ctx);
     s32 list = (s32)sdfCreateResetPacketList();
     s32 lastRow = 0;
@@ -3324,7 +3324,7 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_004377A0);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_004377A8);
 
-s32 func_00257910(EvtRuntime *runtime) {
+s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
     EvtCameraColorPayload *key;
     s32 packetList;
     s32 selectedChannel;
@@ -3650,7 +3650,7 @@ s32 func_00258700(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         status = func_002570F8(runtime);
         break;
     case 0x19:
-        status = func_00257910(runtime);
+        status = evtEditCameraColorKeyFrame(runtime);
         break;
     case 0x6:
         status = func_002582D0(runtime);

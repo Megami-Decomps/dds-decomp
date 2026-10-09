@@ -481,7 +481,7 @@ typedef char EvtScriptContextSizeCheck[sizeof(EvtScriptContext) == 0x18 ? 1 : -1
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
-extern void func_0011CA88(DatPartyRecord *entry);
+extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry);
 
 
 extern s32 scrSetIntegerReturnValue();
@@ -1522,7 +1522,7 @@ extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 extern u16 D_003862D0[16][4];
 
 /* Restore special-character banks, occupied stock skills and four presets. */
-void func_0011CA88(DatPartyRecord *entry) {
+void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry) {
     u16 unitId = entry->unitId;
     u32 stockId;
     u16 occupied;
@@ -1579,7 +1579,7 @@ void dds3ForEachFlagged(void) {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
 
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
-            func_0011CA88(entry);
+            ptyRefreshEntryFromSavedTemplate(entry);
         }
     }
 }

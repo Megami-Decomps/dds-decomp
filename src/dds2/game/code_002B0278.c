@@ -1403,7 +1403,7 @@ void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSprite
 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
 
-s32 func_002B3788(KwlnTask *callback) {
+s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(callback);
     MenuContext *context = (MenuContext *)contextAddress;
     DatGameState *gameState = datGameState;
@@ -1648,7 +1648,7 @@ typedef struct MnuCategoryPositions {
 extern const MnuCategoryPositions D_0042AE28;
 extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *, u16);
 
-void func_002B4298(s32 x, s32 y, s32 depth, MenuList *list,
+void mnuDrawSkillCategoryEntry(s32 x, s32 y, s32 depth, MenuList *list,
                    MenuListNode *node, s32 texture) {
     MnuCategoryPositions categoryPositions = D_0042AE28;
     MenuContext *context = (MenuContext *)list->context;
@@ -1734,7 +1734,7 @@ extern s32 ptyHasSkill(DatPartyRecord *, s32);
 extern u32 scrGetSecondaryScriptFlag(DatPartyRecord *, u16);
 
 /* Secondary script bits enable the category marker independently of learned skills. */
-void func_002B45D8(MenuContext *context) {
+void mnuRefreshSkillWindowOwnershipFlags(MenuContext *context) {
     MenuWindowContainer **windows = ((SkillMenuRuntime *)context->party)->skillWindows;
     DatPartyRecord *owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
     s32 windowIndex;
@@ -1963,7 +1963,7 @@ void mnuHighlightSelectedListNode(KwlnTask *task) {
     }
 }
 
-s32 func_002B5240(KwlnTask *callback) {
+s32 mnuUpdateEmptySkillSelectionCursor(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     SkillMenuRuntime *work = (SkillMenuRuntime *)context->party;
     s32 index = -1;
@@ -2097,7 +2097,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         mnuInitPartyPanelSlots(&context->partyPanel);
         mnuRefreshPartyPanelBars(&context->partyWindow);
         mnuSetPopupEntryFlagged(context->popupState, D_003E7790);
-        func_002B45D8(context);
+        mnuRefreshSkillWindowOwnershipFlags(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
@@ -2983,7 +2983,7 @@ extern void uiDrawActiveSurfaceWithTestMode(u32);
 extern void uiConfigureSurfaceAlphaState(s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 
-void func_002B7C10(MenuCampEffect *set, s32 surface) {
+void mnuDrawLayeredCampGridAndSparks(MenuCampEffect *set, s32 surface) {
     MenuBadgePlace strip = D_0042AE90;
     u32 firstLayerBit = set->resources.packet.type & 1;
     MenuCampBackdropLayout layout = D_0042AEA0;
@@ -3068,7 +3068,7 @@ void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
     if (!(set->resources.packet.type & 4)) {
         mnuDrawBadgeFade(set, arg);
     }
-    func_002B7C10(set, arg);
+    mnuDrawLayeredCampGridAndSparks(set, arg);
 }
 
 void mnuEnableCampBadgeFade(u32 *flags) {
