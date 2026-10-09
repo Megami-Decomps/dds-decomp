@@ -671,7 +671,7 @@ s32 func_003233E8(s32 context) {
                               (s32)entry->x0, currentYInteger, entry->scale0);
             }
 
-            if (entry->flagsBits.unk5) {
+            if (entry->flagsBits.halfRemainingCountReached) {
                 entry->flagsBits.unk6++;
                 if (entry->flagsBits.unk6 >= 11) {
                     entry->flagsBits.unk6 = 0;
@@ -704,11 +704,11 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     }
     if (entry->flagsBits.updated) {
         entry->flagsBits.updated = 0;
-        if (!entry->flagsBits.unk5) {
+        if (!entry->flagsBits.halfRemainingCountReached) {
             if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
                 registry = mnuGetMenuRecordRegistryEntry(entry->tag);
                 if (entry->remaining <= (registry->unk08 >> 1)) {
-                    entry->flagsBits.unk5 = 1;
+                    entry->flagsBits.halfRemainingCountReached = 1;
                 }
             }
         }
@@ -993,11 +993,11 @@ s32 func_00324070(MenuWorkEntry *input) {
     return 0;
 }
 
-extern char D_0045C890[12];
+extern MenuInputActionSnapshotStorage D_0045C890;
 
-/* Copy the 12-byte resource progress parameter block. */
-void mnuSetInputActionSnapshot(u8 *src) {
-    memcpy(D_0045C890, src, sizeof(D_0045C890));
+/* Copy the twelve-byte input-action snapshot into its backing storage. */
+void mnuSetInputActionSnapshot(const MenuInputActionSnapshot *snapshot) {
+    memcpy(&D_0045C890.snapshot, snapshot, sizeof(*snapshot));
 }
 
 MenuWorkEntry *mnuGetActiveEffectWorkEntry(void) {
@@ -1200,7 +1200,7 @@ extern void sdfVectorScale(f32 factor, f32 *vector);
 s32 func_00324840(void) {
     MenuWorkEntry *work = mnuActiveEffectEntry;
     u32 kindMask = 0;
-    s8 *input = (s8 *)D_0045C890;
+    MenuInputActionSnapshot *input = &D_0045C890.snapshot;
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
     MenuMovementRecord18 *progress = mnuGetMovementRecordByIndex((u16)work->tag);
 
@@ -1217,14 +1217,14 @@ s32 func_00324840(void) {
         f32 length;
 
         memset(movement, 0, sizeof(movement));
-        if (input[0] != 0) {
+        if (input->verticalNegative != 0) {
             movement[1] = -1.0f;
-        } else if (input[1] != 0) {
+        } else if (input->verticalPositive != 0) {
             movement[1] = 1.0f;
         }
-        if (input[2] != 0) {
+        if (input->horizontalNegative != 0) {
             movement[0] = -1.0f;
-        } else if (input[3] != 0) {
+        } else if (input->horizontalPositive != 0) {
             movement[0] = 1.0f;
         }
 
@@ -1248,10 +1248,10 @@ s32 func_00324840(void) {
         }
 
         kindMask = 0;
-        if (input[4] != 0) {
+        if (input->actionSlot0 != 0) {
             kindMask = 0x21;
         }
-        if (input[5] != 0) {
+        if (input->actionSlot1 != 0) {
             kindMask |= 0x10;
         }
     }
@@ -1265,7 +1265,7 @@ s32 func_00324840(void) {
     {
         MenuWorkFlags flags;
         flags.word = work->flags;
-        if (flags.bits.unk5) {
+        if (flags.bits.halfRemainingCountReached) {
             MenuWorkFlags updated = flags;
             updated.bits.unk6++;
             work->flags = updated.word;

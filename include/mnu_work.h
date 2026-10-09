@@ -10,6 +10,28 @@ struct MnuShootingWork;
 struct MnuModelNode;
 struct ModelInstance;
 
+typedef struct MenuInputActionSnapshot {
+    s8 verticalNegative;
+    s8 verticalPositive;
+    s8 horizontalNegative;
+    s8 horizontalPositive;
+    s8 actionSlot0;
+    s8 actionSlot1;
+    u8 reserved06[6];
+} MenuInputActionSnapshot;
+
+typedef struct MenuInputActionSnapshotStorage {
+    MenuInputActionSnapshot snapshot;
+    u8 unknown0C[4];
+} MenuInputActionSnapshotStorage;
+
+typedef char MenuInputActionSnapshotLayoutAssert[
+    (sizeof(MenuInputActionSnapshot) == 12 &&
+     sizeof(MenuInputActionSnapshotStorage) == 16 &&
+     (unsigned long)&((MenuInputActionSnapshotStorage *)0)->snapshot == 0) ? 1 : -1];
+
+void mnuSetInputActionSnapshot(const MenuInputActionSnapshot *snapshot);
+
 /* Eight-byte initial parameters copied together into the named state record. */
 typedef struct MenuInitialTag {
     u8 reserved;
@@ -74,7 +96,7 @@ typedef struct MenuWorkFlagBits {
     u32 finished : 1;
     u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
     u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
-    u32 unk5 : 1;
+    u32 halfRemainingCountReached : 1; /* bit 5: latched at half the initial remaining count */
     u32 unk6 : 8;
     u32 inputDisabled : 1;
     u32 mode : 4;
