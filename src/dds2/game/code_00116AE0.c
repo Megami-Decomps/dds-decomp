@@ -18,7 +18,7 @@ EffWorldNode *evtCreateScriptObject(s32 a, void *b, MotionTable *c, EffWorldNode
 
     work->motionTable = c;
     object->key = a;
-    object->value = (u32)e;
+    object->value = e;
     work->fallbackModelObject = d;
     work->itemList = b;
     work->loadedModelResource = NULL;
@@ -34,7 +34,7 @@ EffWorldNode *evtCreateScriptObjectWithResource(s32 a, void *b, MotionTable *c, 
     work->loadedModelResource = d;
     work->itemList = b;
     work->motionTable = c;
-    object->value = (u32)e;
+    object->value = e;
     return object;
 }
 

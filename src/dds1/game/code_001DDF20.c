@@ -250,16 +250,14 @@ extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *);
 
-extern s64 func_001F0B90(void);
+extern s64 func_001F0B90(const BtlTintReleaseArgs *args);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
 
 extern u32 sndFinishEarringPlayback(void);
 
-extern s32 sndTickFadeCounter();
 
-extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
@@ -4631,75 +4629,75 @@ void btlStepTintTransition(void) {
     }
 }
 
-typedef struct SoundTransition {
-    u32 currentResource;
+typedef struct BtlTintTransition {
+    u32 currentColor;
     u8 unk_04[0x14];
-    u32 previousResource;
-    u32 queuedResource;
-    u16 soundId;
-    u16 queuedId;
-} SoundTransition;
+    u32 sourceColor;
+    u32 targetColor;
+    u16 framesRemaining;
+    u16 durationFrames;
+} BtlTintTransition;
 
-void btlQueueTintTransition(u32 resource, u16 soundId) {
-    SoundTransition *transition;
-    if (soundId == 0) {
-        transition = (SoundTransition *)D_0035F5D0;
-        transition->soundId = 0;
-        transition->currentResource = resource;
-        transition->queuedResource = resource;
+void btlQueueTintTransition(u32 color, u16 frames) {
+    BtlTintTransition *transition;
+    if (frames == 0) {
+        transition = (BtlTintTransition *)D_0035F5D0;
+        transition->framesRemaining = 0;
+        transition->currentColor = color;
+        transition->targetColor = color;
         return;
     }
-    transition = (SoundTransition *)D_0035F5D0;
-    transition->soundId = soundId;
-    transition->queuedId = soundId;
-    transition->previousResource = transition->currentResource;
-    transition->queuedResource = resource;
+    transition = (BtlTintTransition *)D_0035F5D0;
+    transition->framesRemaining = frames;
+    transition->durationFrames = frames;
+    transition->sourceColor = transition->currentColor;
+    transition->targetColor = color;
 }
 
-void btlQueueTintTransitionToZero(u16 soundId) {
-    SoundTransition *transition;
-    if (soundId == 0) {
-        transition = (SoundTransition *)D_0035F5D0;
-        transition->soundId = 0;
-        transition->currentResource = 0;
-        transition->queuedResource = 0;
+void btlQueueTintTransitionToZero(u16 frames) {
+    BtlTintTransition *transition;
+    if (frames == 0) {
+        transition = (BtlTintTransition *)D_0035F5D0;
+        transition->framesRemaining = 0;
+        transition->currentColor = 0;
+        transition->targetColor = 0;
         return;
     }
-    transition = (SoundTransition *)D_0035F5D0;
-    transition->previousResource = transition->currentResource;
-    transition->queuedResource = 0;
-    transition->soundId = soundId;
-    transition->queuedId = soundId;
+    transition = (BtlTintTransition *)D_0035F5D0;
+    transition->sourceColor = transition->currentColor;
+    transition->targetColor = 0;
+    transition->framesRemaining = frames;
+    transition->durationFrames = frames;
 }
 
 extern s32 btlBlendColor(s32, s32, f32);
 
 void btlStepBlendColor(void) {
-    SoundTransition *transition = (SoundTransition *)D_0035F5D0;
+    BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
 
-    if (transition->soundId != 0) {
-        transition->currentResource = btlBlendColor(transition->queuedResource, transition->previousResource, (f32)transition->soundId / (f32)transition->queuedId);
-        transition->soundId--;
+    if (transition->framesRemaining != 0) {
+        transition->currentColor = btlBlendColor(transition->targetColor, transition->sourceColor, (f32)transition->framesRemaining / (f32)transition->durationFrames);
+        transition->framesRemaining--;
     } else {
-        transition->currentResource = transition->queuedResource;
+        transition->currentColor = transition->targetColor;
     }
     btlStepTintTransition();
 }
 
 void btlDrawTintIfVisible(void) {
-    SoundTransition *transition = (SoundTransition *)D_0035F5D0;
+    BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
 
-    if ((transition->currentResource & 0xFF000000) != 0) {
+    if ((transition->currentColor & 0xFF000000) != 0) {
         func_00187C08(transition);
     }
 }
 
 void sndResetTransition(void) {
-    SoundTransition *transition = (SoundTransition *)D_0035F5D0;
+    BtlTintTransition *transition = (BtlTintTransition *)D_0035F5D0;
     D_003BB694 = 0;
     btlTintTransitionHoldCount = 0;
-    transition->soundId = 0;
-    transition->currentResource = 0;
+    transition->framesRemaining = 0;
+    transition->currentColor = 0;
 }
 
 void btlClearTintAndEnableCamera(void) {
@@ -5146,32 +5144,30 @@ BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
     return task;
 }
 
-s32 btlQueueTintTransitionWhenEnabled(u32 *arguments) {
+s32 btlQueueTintTransitionWhenEnabled(const BtlTintAcquireArgs *args) {
     s32 context = btlGetRuntime();
     if ((*(u32 *)(context + 0x1F4) & 0x20000000) == 0) {
-        btlQueueTintTransition(arguments[0], *(u16 *)(arguments + 1));
+        btlQueueTintTransition(args->color, (u16)args->frames);
     }
     btlTintTransitionHoldCount++;
     return 1;
 }
 
-SoundTask *sndCreateAcquireTask(u32 soundId, u32 flags) {
-    SoundTask *task = (SoundTask *)btlAllocTask(8);
-    u32 *data;
+BtlRuntimeTask *sndCreateAcquireTask(u32 color, u32 frames) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlTintAcquireArgs));
+    BtlTintAcquireArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 5;
-    task->callback.acquireSound = btlQueueTintTransitionWhenEnabled;
+    task->callback = btlQueueTintTransitionWhenEnabled;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
-    data = btlGetTaskArguments(task);
-    data[0] = soundId;
-    data[1] = flags;
+    args = btlGetTaskArguments(task);
+    args->color = color;
+    args->frames = frames;
     return task;
 }
 
-s32 sndTickFadeCounter(soundId)
-    u16 *soundId;
-{
+s32 sndTickFadeCounter(const BtlTintReleaseArgs *args) {
     s32 context = btlGetRuntime();
 
     if (btlTintTransitionHoldCount == 0) {
@@ -5184,33 +5180,32 @@ s32 sndTickFadeCounter(soundId)
     if ((*(u32 *)(context + 0x1F4) & 0x20000000) != 0) {
         return 1;
     }
-    btlQueueTintTransitionToZero(*soundId);
+    btlQueueTintTransitionToZero((u16)args->frames);
     return 1;
 }
 
-SoundTask *sndCreateReleaseTask(sound)
-    u32 *sound;
-
-{
-    SoundTask *task = (SoundTask *)btlAllocTask(4);
+BtlRuntimeTask *sndCreateReleaseTask(u32 frames) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlTintReleaseArgs));
+    BtlTintReleaseArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 6;
-    task->callback.releaseSound = sndTickFadeCounter;
+    task->callback = sndTickFadeCounter;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
-    *(u32 *)btlGetTaskArguments(task) = (u32)sound;
+    args = btlGetTaskArguments(task);
+    args->frames = frames;
     return task;
 }
 
-s64 func_001F0B90(void) {
+s64 func_001F0B90(const BtlTintReleaseArgs *args) {
     btlTintTransitionHoldCount = 1;
-    return sndTickFadeCounter();
+    return sndTickFadeCounter(args);
 }
 
-SoundTask *btlCreateSoundReleaseTask(void) {
-    SoundTask *task = (SoundTask *)sndCreateReleaseTask();
+BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames) {
+    BtlRuntimeTask *task = sndCreateReleaseTask(frames);
     task->taskId = 8;
-    task->callback.update = func_001F0B90;
+    task->callback = func_001F0B90;
     return task;
 }
 
@@ -5537,7 +5532,7 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
         }
         effect->flags &= ~2;
     }
-    args->loadHandle = fileQueueDefaultCallbackRequest(args->name);
+    args->request = fileQueueDefaultCallbackRequest(args->name);
     effect->flags |= 1;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
@@ -5546,20 +5541,20 @@ extern char D_003A4C88[];
 
 s32 sndPollEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
-    s32 resource;
+    struct SdfMemBlock *resource;
 
     if (effect->flags & 2) {
         return 1;
     }
-    if (!fileIsRequestReadyInCurrentMode((struct FileRequest *)args->loadHandle)) {
+    if (!fileIsRequestReadyInCurrentMode(args->request)) {
         return 0;
     }
     btlBossDebugPrintf(D_003A4C88, args->name);
-    resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
+    resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
     effect->resourceHandle =
-        sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
-    filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
+        sndMixerClone((void *)sdfResourceRetainAddress(resource));
+    sdfReleaseResourceAllocation(resource);
+    filePollEntryCleanup(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -6500,22 +6495,14 @@ typedef struct SoundLoadNode {
     u32 position;
 } SoundLoadNode;
 
-typedef struct SoundFileRequest {
-    SoundLoadNode *node;
-    void *handle;
-    u32 resourceHandle;
-    u32 blockIndex;
-    const char *name;
-} SoundFileRequest;
-
-void sndStartFileLoad(SoundFileRequest *request) {
+void sndStartFileLoad(SoundFileTaskArgs *request) {
     SoundLoadNode *node = request->node;
 
-    request->handle = fileQueueDefaultCallbackRequest(request->name);
+    request->request = fileQueueDefaultCallbackRequest(request->filename);
     node->flags |= 1;
     node->position = (request->blockIndex + 0x200) << 16;
     node->state = 2;
-    btlBossDebugPrintf("btl:sound file load start[%s]\n", request->name);
+    btlBossDebugPrintf("btl:sound file load start[%s]\n", request->filename);
 }
 
 extern char D_003A50D8[];
@@ -6528,20 +6515,20 @@ extern char D_003A5138[];
 
 extern void func_002E9450(s32, s32);
 
-u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
+u32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     SoundLoadNode *node = request->node;
     if (sndHasActiveFileLoad()) {
         btlBossDebugPrintf(D_003A50D8);
         return 0;
     }
     if ((node->flags & 2) == 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)request->handle)) {
+        if (fileIsRequestReadyInCurrentMode(request->request)) {
             s32 size;
             s32 data;
-            btlBossDebugPrintf(D_003A50F0, request->name);
-            request->resourceHandle = fileGetResourceHandle((struct FileRequest *)request->handle);
-            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)request->handle);
-            data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
+            btlBossDebugPrintf(D_003A50F0, request->filename);
+            request->resourceAllocation = (struct SdfMemBlock *)fileGetResourceHandle(request->request);
+            size = (s32)fileGetResourceSize(request->request);
+            data = sdfResourceRetainAddress(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_002E9450(data, size);
                 node->flags |= 8;
@@ -6552,17 +6539,17 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
-        filePollEntryCleanup((struct FileRequest *)(u32)request->handle);
+        sdfReleaseResourceAllocation(request->resourceAllocation);
+        filePollEntryCleanup(request->request);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
     return 0;
 }
 
-u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename) {
+BtlRuntimeTask *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename) {
     u8 *task = btlAllocTask(strlen(filename) + 20);
-    SoundFileRequest *request;
+    SoundFileTaskArgs *request;
     char *name;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
@@ -6575,9 +6562,9 @@ u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename
     name = (char *)(request + 1);
     request->node = node;
     request->blockIndex = variant;
-    request->name = name;
+    request->filename = name;
     strcpy(name, filename);
-    return task;
+    return (BtlRuntimeTask *)task;
 }
 
 s32 sndLoadDataFile(const SoundDataFileArgs *data) {
@@ -7137,12 +7124,6 @@ SoundTask *sndCreateEarringTask(void) {
     return task;
 }
 
-typedef struct BattleVoiceLoad {
-    u32 request;
-    s32 state;
-    s32 index;
-} BattleVoiceLoad;
-
 extern BattleVoiceEntry D_00377650[];
 
 extern char D_003A5328[];
@@ -7151,26 +7132,26 @@ extern char D_003A5340[];
 
 extern char D_003A5358[];
 
-s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
+s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
-    s32 resource;
+    struct SdfMemBlock *resource;
     u32 data;
     u32 size;
 
     if (args->state == 0) {
-        func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
-        args->request = (u32)fileQueueDefaultCallbackRequest(path);
+        func_003014F0(path, D_003A5328, D_00377650[args->entryIndex].fileName);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
-    } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->request) != 0) {
+    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle((struct FileRequest *)args->request);
-        data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->request);
-        filePollEntryCleanup((struct FileRequest *)(u32)args->request);
-        func_0026ABA8(data, size, D_00377650[args->index].volume);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
+        resource = (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+        data = sdfResourceRetainAddress(resource);
+        size = (s32)fileGetResourceSize(args->request);
+        filePollEntryCleanup(args->request);
+        func_0026ABA8(data, size, D_00377650[args->entryIndex].volume);
+        sdfReleaseResourceAllocation(resource);
         btlBossDebugPrintf(D_003A5358);
         return 1;
     }
@@ -7180,7 +7161,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
 
 void *sndCreateAtracEffectLoadTask(u32 owner) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    Atrac3LoadTaskArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x58;
@@ -7188,17 +7169,11 @@ void *sndCreateAtracEffectLoadTask(u32 owner) {
     *(void **)(task + 0x4C) = sndPollAtrac3SELoadTask;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = 0;
-    arguments[1] = 0;
-    arguments[2] = owner;
+    arguments->request = 0;
+    arguments->state = 0;
+    arguments->entryIndex = owner;
     return task;
 }
-
-typedef struct BtlDeadLoadArgs {
-    BtlUnit *unit;
-    u32 request;
-    u32 resource;
-} BtlDeadLoadArgs;
 
 extern char D_003A5370[];
 
@@ -7222,7 +7197,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_003014F0(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
         }
-        args->request = (u32)fileQueueDefaultCallbackRequest(path);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5370, path);
     }
     ++*(u16 *)(work + 0x260);
@@ -7234,21 +7209,20 @@ extern char D_003A53B0[];
 
 extern char D_003A53D0[];
 
-u32 sndUpdateEarringDeadPlayback(u32 *args) {
-    u32 resource;
+u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
     u32 data;
     u32 size;
 
-    if (args[1] == 0) {
+    if (args->request == 0) {
         return 1;
     }
-    if (args[2] == 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args[1]) != 0) {
-            resource = fileGetResourceHandle((struct FileRequest *)args[1]);
-            args[2] = resource;
-            data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args[1]);
-            filePollEntryCleanup((struct FileRequest *)(u32)args[1]);
+    if (args->resourceAllocation == 0) {
+        if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+            args->resourceAllocation =
+                (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+            data = sdfResourceRetainAddress(args->resourceAllocation);
+            size = (s32)fileGetResourceSize(args->request);
+            filePollEntryCleanup(args->request);
             func_0026ABA8(data, size, 2);
             mnuPrintTitleDebugBanner();
             func_003003F0(D_003A5390);
@@ -7263,17 +7237,17 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
     return 0;
 }
 
-void sndFinishEarringPlaybackTask(u32 *sound) {
+void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *args) {
     u8 *state = (u8 *)btlGetRuntime();
-    if (sound[2]) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sound[2]));
+    if (args->resourceAllocation != 0) {
+        sdfReleaseResourceAllocation(args->resourceAllocation);
     }
     --*(u16 *)(state + 0x260);
 }
 
 void *sndCreateEarringPlaybackTask(u8 *owner) {
     u8 *task = btlAllocTask(12);
-    u32 *arguments;
+    BtlDeadLoadArgs *arguments;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
@@ -7284,9 +7258,9 @@ void *sndCreateEarringPlaybackTask(u8 *owner) {
     *(void **)(task + 0x4C) = sndUpdateEarringDeadPlayback;
     *(void **)(task + 0x50) = sndFinishEarringPlaybackTask;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = (u32)owner;
-    arguments[1] = 0;
-    arguments[2] = 0;
+    arguments->unit = (BtlUnit *)owner;
+    arguments->request = 0;
+    arguments->resourceAllocation = 0;
     return task;
 }
 

@@ -1577,7 +1577,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
 
 extern u8 D_0037E0E0[];
 
-extern void func_002A3E10(u8 *, void *);
+extern void func_002A3E10(EffTrackSet *, Matrix4 *);
 
 typedef struct EffBillOutput {
     u32 textureId;      // 0x00
@@ -1646,7 +1646,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetCellIndices(u8 *work) {
@@ -1726,7 +1726,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetParticleIndices(u8 *work) {
@@ -1806,7 +1806,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void effClearAnimatedFrames(u8 *work) {
@@ -1944,7 +1944,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetEmitterIndices(u8 *work) {
@@ -2070,7 +2070,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void effClearStripFrames(u8 *work) {
@@ -2199,7 +2199,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetTrailIndices(u8 *work) {
@@ -2280,7 +2280,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetQuadIndices(u8 *work) {
@@ -2406,7 +2406,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, mtx);
+    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 
@@ -2703,8 +2703,7 @@ extern u32 D_0037EA70[16];
 extern SdfTex *func_0029C048(void *, RefObj *);
 struct SdfAsset;
 
-void func_002A3E10(u8 *work, void *matrix) {
-    EffTrackSet *track = (EffTrackSet *)work;
+void func_002A3E10(EffTrackSet *track, Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -3033,7 +3032,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[0];
+    EffPointSet *out = (EffPointSet *)(u32)list[0];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -3055,10 +3054,10 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
+    out->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
-        ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-        ((EffBillOutput *)out)->outputMode = ((EffBillOutputHeader *)config)->outputMode;
+        out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -3068,7 +3067,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups((EffPointSet *)out, (Matrix4 *)mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
 
@@ -3265,7 +3264,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002A3E10(out, mtx);
+        func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
     }
 }
 
@@ -5113,7 +5112,7 @@ void effReleaseRingFadeTable(s32 work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
 
-extern void func_002AE498(u8 *, void *);
+extern void func_002AE498(EffRibbonWork *, Matrix4 *);
 
 void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
@@ -5154,7 +5153,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, mtx);
+    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *work) {
@@ -5322,7 +5321,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, mtx);
+    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 void effResetParticleBillFrameCounters(u8 *work) {
@@ -5491,7 +5490,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498(out, mtx);
+    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 EffClassWork *effAllocateBlock(u16 kind, void *source) {

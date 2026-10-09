@@ -78,7 +78,7 @@ typedef char WorldValueIndices_size_must_be_0x08[(sizeof(WorldValueIndices) == 0
 struct EffWorldNode {
     u32 word0;
     u32 key; /* Kind 2: evtSpawnActionObj2 at 00111188. */
-    u32 value; /* Scalar or native caption address, selected by kind. */
+    const char *value; /* Native caption string for named kinds; other kinds keep a scalar here. */
     u32 kindTag; /* Kind occupies the high byte; constructor clears low 24 bits. */
     EffWorldOps *ops;
     u32 word14;

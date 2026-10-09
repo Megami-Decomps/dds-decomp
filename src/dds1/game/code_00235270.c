@@ -4478,7 +4478,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                     group->info = modelObject;
                     group->entryHeader = evtEventViewerAddName(names + packages[row].nameIndex * 32, runtime);
                 }
-                group->info->value = (u32)runtime->entryName[group->entryHeader];
+                group->info->value = runtime->entryName[group->entryHeader];
                 group->resourceIds.resourceGroup = packageId;
                 group->resourceIds.resourceId = partId;
                 if (evtGetWorldUnitNestedValue(objectKey)->owner->first != NULL) {

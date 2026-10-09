@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "btl_task_condition.h"
 #include "pcp_vu0.h"
 #include "btl_state.h"
@@ -158,7 +159,6 @@ extern s32 btlReleaseScriptResource();
 
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 
-extern s32 btlCreateSoundReleaseTask();
 
 extern s32 btlCreateWaitUnitListIdleTask();
 

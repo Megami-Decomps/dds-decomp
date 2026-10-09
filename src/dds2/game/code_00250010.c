@@ -4589,7 +4589,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
             group->info = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 5);
             group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +
                 ((EvtPmdModelResource *)work->mainEntry3Data)[row].nameIndex * 32, runtime);
-            group->info->value = (u32)runtime->entryName[group->entryHeader];
+            group->info->value = runtime->entryName[group->entryHeader];
             group->resourceIds.resourceGroup = resourceGroup;
             group->resourceIds.resourceId = resourceId;
             if (evtGetWorldUnitNestedValue(objectId)->owner->first != NULL) {
