@@ -4619,7 +4619,65 @@ void effFreeIndexedEntries(EffClassWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB058);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB728);
+typedef struct Matrix4 Matrix4;
+void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
+
+/* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
+void func_002EB728(EffClassWork *work) {
+    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
+    EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
+    s32 frame = work->frame;
+    s32 time = header->time.duration;
+    s32 count;
+    s32 i;
+    f32 tint[4];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 rowColor[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (time < frame && time != 0) {
+        return;
+    }
+    count = header->count;
+    second = effSampleColorAlphaTracks(&header->colorTrack, &header->alphaTrack, frame, time);
+    color1[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
+    for (i = 0; i < count; i++, row++) {
+        if (row->key > 0) {
+            EffPointSet *set = row->set;
+
+            rowColor[0] = row->color;
+            EE_MMI_RGBA_UNPACK(rowColor, 1.0f / 128.0f);
+            VU0_LOAD_VF(vf11, tint);
+            VU0_MUL(vf10, vf10, vf11);
+            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            blended[0] = packed;
+            set->color = blended[0];
+            set->type = ((u32 *)header)[10];
+            set->flag = ((u8 *)header)[0x5C];
+            effDrawFivePointGroups(set, mtx);
+        }
+    }
+}
 
 extern void effResetDispatchCounter(EffClassWork *);
 
@@ -9085,8 +9143,6 @@ void effApplyBattleCameraToObject(work)
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", effQueueEffectFileJob);
-
 /* Effect asset/creation descriptor (0x20), separate from the runtime FileJob. */
 typedef struct EffFileJobRequest {
     char *name;
@@ -9101,6 +9157,57 @@ typedef struct EffFileJobRequest {
     u8 pad1A[2];
     const char *secondaryCommandPath;
 } EffFileJobRequest;
+
+/* Debug parameter table: each 0x18-byte row points at the variable it edits. */
+typedef struct EffTunableRow {
+    u8 pad00[8];
+    void *target; /* 0x08 */
+    u8 pad0C[0xC];
+} EffTunableRow;
+
+typedef struct EffTunableTable {
+    u8 pad00[0xC];
+    s32 selected; /* 0x0C */
+    u8 pad10[4];
+    EffTunableRow *rows; /* 0x14 */
+} EffTunableTable;
+
+typedef union EffTunableBuffer {
+    u8 raw[0x74];
+    struct {
+        u8 pad00[0x20];
+        f32 values[1]; /* 0x20 */
+    };
+} EffTunableBuffer;
+
+extern EffTunableTable D_003FE240;
+extern u16 D_00438644;
+extern f32 D_00438648;
+extern u8 D_00459E30[];
+
+/* Queue the file job for an effect request, seeding its output buffer from the defaults first. */
+FileJobPayload *effQueueEffectFileJob(EffFileJobRequest *request) {
+    FileJobPayload *job;
+
+    if (request->output != NULL) {
+        if (request->fileKind == 6) {
+            memcpy(request->output, D_00459E30, 0x74);
+        }
+        if (request->fileKind == 0x19) {
+            void *target = D_003FE240.rows[D_003FE240.selected].target;
+
+            if (target == &D_00438644) {
+                D_00438648 = ((EffTunableBuffer *)request->output)->values[D_00438644];
+            } else if (target == &D_00438648) {
+                ((EffTunableBuffer *)request->output)->values[D_00438644] = D_00438648;
+            }
+        }
+        fileJobSetPrimaryData(effQueuedFileHandle, request->output, request->size, request->transferMode);
+    }
+    job = fileJobCreateFromJob(effQueuedFileHandle);
+    effApplyBattleCameraToObject(job);
+    return job;
+}
 
 FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
     FileJobPayload *job;

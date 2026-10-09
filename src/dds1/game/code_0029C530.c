@@ -7009,7 +7009,71 @@ void effResetDefaultColorTables(void) {
     D_003BC9AC = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B3178);
+/* Payload of resource kind 2: two colours plus the position request that feeds the shared light vector. */
+typedef struct EffFieldColorConfig {
+    u32 firstColor;   /* 0x00 */
+    u32 secondColor;  /* 0x04 */
+    EffectVectorRequest direction; /* 0x08 */
+} EffFieldColorConfig;
+
+void func_002B3178(EffActiveResource *work) {
+    EffectVectorRequest request;
+    EffFieldColorConfig *config;
+    u32 handle;
+    s32 color1[4];
+    s32 color2[4];
+
+    btlGetRuntime();
+    config = work->payload;
+    if (work->frame == 0) {
+        request.count = config->direction.count;
+        request.size = config->direction.size;
+        request.unk04 = config->direction.unk04;
+        handle = 0;
+        switch (config->direction.kind) {
+        case 0:
+        case 1:
+            handle = effBTLFieldColorGetOriginalSelector();
+            request.kind = 0;
+            break;
+        case 2:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 0;
+            break;
+        case 3:
+            handle = effBTLFieldColorGetOriginalSelector();
+            request.kind = 1;
+            break;
+        case 4:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 2;
+            break;
+        case 5:
+            PCP_COPY_VECTOR(D_003DCBE0, work);
+            break;
+        case 6:
+            handle = effBTLFieldColorGetOverrideSelector();
+            request.kind = 6;
+            break;
+        case 7:
+            handle = effBTLFieldColorGetFinalSelector();
+            request.kind = 7;
+            break;
+        }
+        if (handle != 0) {
+            effBattleMiscQueryPosition((void *)handle, &request, D_003DCBE0);
+        }
+        color1[0] = config->firstColor;
+        EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, D_003DCB90);
+        ((f32 *)D_003DCB90)[3] = 1.0f;
+        color2[0] = config->secondColor;
+        EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, D_003DCBD0);
+        ((f32 *)D_003DCBD0)[3] = 1.0f;
+        D_003BC9AC = 1;
+    }
+}
 
 /* Copied payload plus the five effect/target slots released together. */
 typedef struct EffCopiedPayload {

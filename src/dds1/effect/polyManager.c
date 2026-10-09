@@ -252,7 +252,50 @@ void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     parPrependCellNode(obj->strip);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015DC70);
+/* Build the closed ring of one basic-ring cell: origin point, then a rotated ring point per pair. */
+void func_0015DC70(PolyNode *node, s32 index) {
+    ParSystem *strip = node->strip;
+    ParCell *cell = &strip->cells[index];
+    f32 radius = node->radius;
+    f32 origin[4];
+    f32 offset[4];
+    f32 angle;
+    f32 step;
+    f32 cosine;
+    f32 sine;
+    u128 *p;
+    u128 *hist;
+    s32 half;
+    s32 pairs;
+    s32 i;
+
+    step = EFFECT_RING_FULL_TURN / (f32)node->segments;
+    cell->vertexCount = strip->vertexWordCount;
+    p = cell->history;
+    half = strip->vertexWordCount / 2;
+    VU0_LOAD_MATRIX(node->matrix);
+    angle = 0.0f;
+    PCP_COPY_VECTOR_F32(origin, node->origin);
+    pairs = half - 1;
+    for (i = 0; i < pairs; i++) {
+        cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+        sine = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf11, origin);
+        VU0_STORE_VF(vf11, p);
+        offset[0] = cosine * radius;
+        offset[1] = 0.0f;
+        offset[2] = sine * radius;
+        VU0_LOAD_VF(vf10, offset);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, p + 1);
+        p += 2;
+        angle += step;
+    }
+    hist = cell->history;
+    PCP_COPY_VECTOR(p, hist);
+    PCP_COPY_VECTOR(p + 1, hist + 1);
+}
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
 void polyStripPushPairsApart(PolyNode *node, s32 index) {
