@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_effect_table.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
@@ -1230,15 +1231,6 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s
     return task;
 }
 
-typedef struct {
-    u8 unknown00[2];
-    u16 kind;
-    u8 unknown04[4];
-} BtlTaskCategoryRow;
-
-typedef char BtlTaskCategoryRow_size[(sizeof(BtlTaskCategoryRow) == 8) ? 1 : -1];
-
-extern BtlTaskCategoryRow *D_00435E34;
 extern void func_00206EA8(ActionStateLink *, BtlUnit *);
 
 /* The formation task allocates five words, independently of the sound work. */
