@@ -111,7 +111,8 @@ typedef struct MdlViewState {
     s16 unk50;
     s16 unk52;
     f32 viewerScale; /* 0x54: viewer zoom, in hundredths */
-    u8 pad58[0x38];
+    u8 pad58[8];
+    u128 unk60[3]; /* 0x60: quadword slots; their alignment makes the state quadword aligned */
     MdlCtx *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
     s32 packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
@@ -1446,7 +1447,105 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421248);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235970);
+extern u32 func_00232F08(void);
+extern u32 mdlGetTableWord(s32 tableIndex);
+extern void mdlDestroyContext(MdlCtx *resource);
+extern void func_00233938(void);
+extern void mdlFreeViewResources(void);
+extern u8 sdfPfsDebugMode;
+
+/* Step the viewer's selected row, then apply that row's pending resource or
+ * entry selection when the confirm buttons are pressed. */
+void func_00235970(void) {
+    s32 pageStep;
+    s32 motionIndex;
+    s32 entryCount;
+    s32 referenceCount;
+
+    if (mdlUpdateViewerCursor(&mdlViewerState.unk20, 5) != 0) {
+        return;
+    }
+    pageStep = mdlViewerState.unk0F == 0 ? 10 : 16;
+    if (sdfPadButtonStates[0] < 0) {
+        mdlViewerState.selectedNodeId++;
+        if (mdlViewerState.selectedNodeId == 4) {
+            mdlViewerState.selectedNodeId = 0;
+        }
+        motionIndex = mdlGetNodeMotionIndex(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
+        if (motionIndex < 0) {
+            motionIndex = 0;
+        }
+        mdlViewerState.selectedEntryId = motionIndex;
+    }
+    switch (mdlViewerState.unk20) {
+    case 0:
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, func_00232F08(), 1) != 0) {
+            entryCount = mdlGetTableWord(mdlViewerState.unk1C);
+            if (mdlViewerState.unk1E < entryCount) {
+                return;
+            }
+            mdlViewerState.unk1E = entryCount - 1;
+            return;
+        }
+        break;
+    case 1:
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1E, mdlGetTableWord(mdlViewerState.unk1C), pageStep) != 0) {
+            return;
+        }
+        break;
+    case 2:
+        referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], mdlViewerState.selectedNodeId);
+        if (referenceCount == 0) {
+            return;
+        }
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.selectedEntryId, referenceCount, pageStep) != 0) {
+            return;
+        }
+        break;
+    case 3:
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.entryHeight, 100, 10) != 0) {
+            return;
+        }
+        break;
+    case 4:
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.entryWidth, 100, 10) != 0) {
+            return;
+        }
+        break;
+    }
+    if (sdfPadButtonStates[12] < 0) {
+        if (sdfPfsDebugMode == 0) {
+            return;
+        }
+        mdlFreeViewResources();
+        func_00233938();
+        if (mdlViewerState.resourceGroup == func_00232F08() - 1) {
+            mdlViewerState.resourceId = 0;
+            mdlViewerState.unk1C = mdlViewerState.resourceGroup;
+            mdlViewerState.unk1E = 0;
+        }
+        mdlLoadViewerResourceAndResetCursors();
+        return;
+    }
+    if (mdlViewerState.unk20 < 2) {
+        if (sdfPadButtonStates[1] >= 0) {
+            return;
+        }
+        if (mdlViewerState.resourceGroup == mdlViewerState.unk1C && mdlViewerState.resourceId == mdlViewerState.unk1E) {
+            return;
+        }
+        mdlDestroyContext(mdlViewerState.resources[0]);
+        mdlViewerState.resources[0] = NULL;
+        mdlViewerState.resourceGroup = mdlViewerState.unk1C;
+        mdlViewerState.resourceId = mdlViewerState.unk1E;
+        mdlLoadViewerResourceAndResetCursors();
+        return;
+    } else if (sdfPadButtonStates[1] < 0) {
+        mdlAddViewEntryFlagged();
+    } else if (sdfPadButtonStates[3] < 0) {
+        mdlAddPlainViewerEntryForSelectedNode();
+    }
+}
 
 extern char D_00437070[];
 extern char D_00437078[];
