@@ -193,7 +193,6 @@ extern s64 fldGetPlayerSceneState(void);
 
 extern u32 D_003BACF8;
 
-extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
@@ -1366,7 +1365,7 @@ void func_00129178(s32 x, s32 y, s32 width, s32 height,
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
-    list = (SdfListHead *)sdfCreateResetPacketList();
+    list = sdfCreateResetPacketList();
     sdfConsCreateDrawPacket(list, texture, 0);
     left = (x << 4) + 0x7000;
     top = (y << 3);
@@ -2389,7 +2388,7 @@ void fldStartQuadPacketList(s32 quadState) {
     s32 packet;
     u32 packetList;
 
-    packetList = sdfCreateResetPacketList();
+    packetList = (u32)sdfCreateResetPacketList();
     ((FldQuadState *)quadState)->packetList = packetList;
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
