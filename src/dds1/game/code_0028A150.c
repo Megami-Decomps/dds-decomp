@@ -121,8 +121,6 @@ typedef struct FileRecordType {
 
 extern struct EffExpandedList *func_0029C230(u32);
 
-extern void *fileDuplicateJob(void *);
-
 struct SdfMemBlock;
 
 
@@ -4132,8 +4130,7 @@ void fileWriteToPfs(FileJobPayload *job, s32 slot) {
     func_00310A68(D_003BC938, 0);
 }
 
-void *fileDuplicateJob(void *source) {
-    FileJobPayload *request = source;
+FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
     FileJobPayload *job = fileCreateJob(request->type);
     if (request->primary.size != 0) {
         fileJobSetPrimaryData(job, fileResolvePrimaryBuffer(request), request->primary.size, request->option);
@@ -4162,7 +4159,7 @@ void *fileJobCreateFromCommandState(entry)
         buffer = (void *)sdfResourceRetainAddress(allocation);
         sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        job = fileDuplicateJob(buffer);
+        job = fileDuplicateJob((FileJobPayload *)buffer);
         sdfReleaseResourceAllocation(allocation);
         return job;
     }
@@ -4550,8 +4547,8 @@ FileJob *fileAppendJob(FileQueue *queue, u32 id) {
     return job;
 }
 
-FileJob *fileDuplicateAndAppendJob(FileQueue *queue, void *source) {
-    void *job = fileDuplicateJob(source);
+FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
+    FileJobPayload *job = fileDuplicateJob(source);
     return fileAppendJob(queue, (u32)job);
 }
 
@@ -4891,7 +4888,7 @@ FileQueue *func_002959E8(s32 entry) {
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
          i < image->count; i++, src++) {
         if ((src->flags & 1) == 0) {
-            copy = fileDuplicateAndAppendJob(queue, (u8 *)image + src->id);
+            copy = fileDuplicateAndAppendJob(queue, (FileJobPayload *)((u8 *)image + src->id));
         } else {
             copy = fileJobDuplicateAfter(queue, fileQueueGetAt(queue, src->id));
         }
