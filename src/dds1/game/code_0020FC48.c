@@ -1526,9 +1526,7 @@ void btlReleaseRuntimeResource(void) {
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
 extern u8 D_00325860[];
 

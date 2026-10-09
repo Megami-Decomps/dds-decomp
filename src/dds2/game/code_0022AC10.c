@@ -178,9 +178,7 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 
 
 
-extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
-extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
