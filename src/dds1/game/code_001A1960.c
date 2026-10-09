@@ -5354,7 +5354,7 @@ void btlReleaseTrackedTaskResource(void) {
     btlSetTrackedTaskHandle(8, 0);
 }
 
-extern void func_001B8838(u8 *, s8);
+extern void func_001B8838(BattleActorPanelWork *, s8);
 extern void btlUpdateActorSlotStates(u8 *, s8);
 extern void func_001B8BB0(BtlTask *, BattleActorPanelWork *, s32);
 
@@ -5379,7 +5379,7 @@ void func_001B83D8(BtlTask *task, s8 mode, s8 value) {
         panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
         if (panelTask != NULL) {
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
-            func_001B8838((u8 *)panel, mode);
+            func_001B8838(panel, mode);
             btlUpdateActorSlotStates((u8 *)panel, 0);
             panel->activeEntries[slot].presentation.presentationState = 2;
             panel->activeEntries[slot].presentation.presentationValue = value;
@@ -5420,7 +5420,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
         if (task != 0) {
             entry = (u8 *)kwlnTaskGetUserValue(task);
             if (mode != 2) {
-                func_001B8838(entry, mode);
+                func_001B8838((BattleActorPanelWork *)entry, mode);
             }
             offset = slot * 0x290 + 0x10;
             slotEntry = (BtlSlotRow *)(entry + offset);
@@ -5490,7 +5490,39 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B8838);
+void func_001B8838(BattleActorPanelWork *work, s8 mode) {
+    s32 slot;
+    s32 remaining;
+
+    slot = 0;
+    remaining = 2;
+    do {
+        if ((u32)((u8)work->activeEntries[slot].presentation.presentationState - 1) < 2) {
+            if (mode == 0) {
+                work->activeEntries[slot].presentation.presentationState = 3;
+            } else if (mode != 2) {
+                work->activeEntries[slot].presentation.presentationState = 4;
+            }
+        }
+        if (work->activeEntries[slot].presentation.hpState == 3) {
+            work->activeEntries[slot].presentation.hpState = 0;
+            work->activeEntries[slot].presentation.hpPulseFrame = 0;
+            memset(&work->activeEntries[slot].presentation.hpBarPulse, 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[0], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[1], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.hpBarPulses[2], 0, sizeof(BattleStatPulse));
+        }
+        if (work->activeEntries[slot].presentation.mpState == 3) {
+            work->activeEntries[slot].presentation.mpState = 0;
+            work->activeEntries[slot].presentation.mpPulseFrame = 0;
+            memset(&work->activeEntries[slot].presentation.mpBarPulse, 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[0], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[1], 0, sizeof(BattleStatPulse));
+            memset(&work->activeEntries[slot].presentation.mpBarPulses[2], 0, sizeof(BattleStatPulse));
+        }
+        slot++;
+    } while (--remaining >= 0);
+}
 
 void func_001B89B0(BattleActorPanelWork *work, s8 mode) {
     s32 slot;

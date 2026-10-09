@@ -22,6 +22,7 @@
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
+#include "dds3obj.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -3227,8 +3228,6 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     func_001127A0(object, 0);
     return counter;
 }
-
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 id, s32 kind);
 
 extern void *dds3SetSlotByKind(void *object, void *slot);
 

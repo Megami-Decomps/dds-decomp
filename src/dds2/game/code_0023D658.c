@@ -48,7 +48,6 @@ typedef struct {
 extern Entry270 *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *, f32 *, f32 *, f32 *, f32 *);
 
-extern void *dds3FindWorldObjectNodeByKey(void *arg0, s32 arg1, s32 arg2);
 
 extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3FreePathObject(s32);
