@@ -192,8 +192,8 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
     if (resourceWork != NULL) {
 
         dspCloseChannel();
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->resourceIdA);
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->resourceIdB);
+        sdfQueueGeneralAllocationRelease(resourceWork->resourceAllocationA);
+        sdfQueueGeneralAllocationRelease(resourceWork->resourceAllocationB);
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
