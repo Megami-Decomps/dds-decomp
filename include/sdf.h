@@ -353,13 +353,7 @@ typedef struct SdfTex {
 } SdfTex;
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct SdfSemaObj {
-    s32 semaphoreId;
-    void *unk4;
-    void *releaseTail;
-    void *unkC;
-    s32 packetTail;
-} SdfSemaObj;
+
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfListHead {
