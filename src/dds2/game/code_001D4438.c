@@ -335,20 +335,6 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-typedef struct SoundLink {
-    u32 owner;
-    s32 effectHandle;
-    u32 *effect;
-    u16 flags;
-} SoundLink;
-
-typedef struct SoundResourceLink {
-    u32 owner;
-    s32 effectHandle;
-    u32 *effect;
-    u32 flags;
-} SoundResourceLink;
-
 typedef struct SoundEntry {
     u32 unk0;
     u32 unk4;
