@@ -83,7 +83,26 @@ void evtReleaseSceneResource(EffWorldNode *worldNode) {
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", evtStartSceneResourceTask);
+s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
+    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
+    void *resource = (void *)worldData->unk1C;
+    s32 scriptIndex;
+
+    if (resource == NULL) {
+        return 0;
+    }
+    if (taskName == NULL) {
+        return 0;
+    }
+    scriptIndex = bfFindScriptIndexByName(resource, taskName);
+    if (scriptIndex < 0) {
+        return 0;
+    }
+    if (kwlnTaskGetTaskByName(taskName) != NULL) {
+        return 0;
+    }
+    return scrCreateTaskForProcessId(0x3EA, (s32)resource, scriptIndex);
+}
 
 /* Destroy the task selected by taskName; NULL or an absent task is a no-op.
  * unusedContext is not read. The nested early return retains the matched
