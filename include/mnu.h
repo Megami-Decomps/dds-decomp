@@ -841,6 +841,12 @@ typedef char MenuProgressHost_size_must_be_0x82C[(sizeof(MenuProgressHost) == 0x
 #endif
 
 #ifndef VERSION_DDS2
+void mnuSetupStaffMenuProfilePage(struct DatPartyRecord *source, MenuProgressHost *work);
+void mnuReleaseMenuVisualWorkResources(MenuProgressHost *work);
+void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer);
+#endif
+
+#ifndef VERSION_DDS2
 /* DDS1 staff movie task work allocated by mnuMovieCreateTask (0x20 bytes). */
 struct SdfMemBlock;
 struct MnuSpriteResourceGroup;

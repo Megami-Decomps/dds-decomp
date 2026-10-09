@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 #include "sdf_task_work.h"
 #include "mnu_scene_work.h"
 #include "dsp_name.h"
@@ -173,7 +174,6 @@ extern DspUnitSpriteTable D_003BC440[];
 extern DspMantraName *D_003BAA78;
 extern void *memset(void *, s32, u32);
 extern u32 strlen(const char *);
-extern void effUpdateAttached(s32, s32, s32, DspEffectRoot *, s32);
 extern s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option);
 
 /* Draw the selected mantra's display: sprite, fade-driven effect and its name (shifted left for long names). */

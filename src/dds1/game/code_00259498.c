@@ -315,7 +315,7 @@ typedef struct MnuSpritePlacement {
 
 
 extern MnuSpritePlacement D_0036B510[];
-extern s32 D_0036C698[];
+extern struct EffectSlotSet *D_0036C698[];
 extern char D_003BC4C8[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
@@ -327,19 +327,19 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                   MenuSceneMetadata *scene, s32 context) {
     char currencyText[16];
     u32 color = alpha | 0xA09DC300;
-    s32 resource;
+    struct EffectSlotSet *resource;
 
     resource = D_0036C698[D_0036B510[19].resourceIndex];
     func_002BF4E0((x + D_0036B510[19].x) << 4,
                   (y + D_0036B510[19].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
-                  resource,
+                  (s32)resource,
                   D_0036B510[19].spriteIndex, context);
     resource = D_0036C698[D_0036B510[34].resourceIndex];
     func_002BF4E0((x + D_0036B510[34].x) << 4,
                   (y + D_0036B510[34].y) << 3, depth,
                   (u32)((f32)(alpha << 8) * 0.0078125f), 0,
-                  resource,
+                  (s32)resource,
                   D_0036B510[34].spriteIndex, context);
     if (datGameState->header.currency != scene->displayedCurrency) {
         sndSetSequenceVolumePan(0x13, 0x7F, 0x3F);

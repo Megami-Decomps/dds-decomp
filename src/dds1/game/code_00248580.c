@@ -699,7 +699,8 @@ void mnuReleaseMenuVisualWorkResources(MenuProgressHost *work) {
 }
 
 /* Forward coordinates/mode to the retained profile panel; do not advance other visuals. */
-void effUpdateAttached(s32 x, s32 y, s32 mode, MenuProgressHost *work, s32 layer) {
+void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer) {
+    MenuProgressHost *work = (MenuProgressHost *)owner;
     mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect, layer);
 }
 

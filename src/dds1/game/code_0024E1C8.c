@@ -38,7 +38,7 @@ extern char D_003AF758[];
 extern char D_003AF780[];
 
 extern TaskWork *mnuSceneResourceContext;
-extern s32 D_0036C698[];
+extern EffectSlotSet *D_0036C698[];
 extern u8 D_0036C648[];
 
 typedef s16 MnuSpritePlacement[4];
@@ -106,7 +106,7 @@ void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 conte
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          0,
-                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                          D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                          context);
 }
@@ -118,7 +118,7 @@ void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          0,
-                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                          mode,
                          context);
 }
@@ -130,14 +130,14 @@ void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                          z,
                          (u32)((f32)(alpha << 8) * 0.0078125f),
                          flags,
-                         D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                         (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                          D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                          context);
 }
 
 void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                    s32 context, f32 rotation) {
-    ((EffectSlotSet *)D_0036C698[
+    (D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
         ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = rotation;
     func_002BF4E0((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
@@ -145,10 +145,10 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  (s32)D_0036C698[D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                   context);
-    ((EffectSlotSet *)D_0036C698[
+    (D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
         ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = 0.0f;
 }
@@ -157,7 +157,7 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -178,7 +178,7 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   0,
-                  D_0036C698[D_0036B510[placementIndex]
+                  (s32)D_0036C698[D_0036B510[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                   context);
@@ -186,7 +186,7 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     {
         /* Reload the resource after drawing before restoring native size. */
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -204,7 +204,7 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -231,14 +231,14 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036B510[placementIndex]
+                  (s32)D_0036C698[D_0036B510[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                   context);
 
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -256,7 +256,7 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
@@ -277,14 +277,14 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036B510[placementIndex]
+                  (s32)D_0036C698[D_0036B510[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B510[placementIndex][MNU_SPRITE_INDEX],
                   context);
 
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]]
@@ -303,7 +303,7 @@ void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -316,11 +316,11 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  (s32)D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
                   context);
     {
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -333,7 +333,7 @@ void mnuDrawScaledVariantSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
 void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, f32 scaleX, f32 scaleY, s32 context) {
     {
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -346,11 +346,11 @@ void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+                  (s32)D_0036C698[D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036B7F0[placementIndex][MNU_SPRITE_INDEX],
                   context);
     {
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036B7F0[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036B7F0[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -364,7 +364,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -391,7 +391,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   z,
                   (u32)((f32)(alpha << 8) * 0.0078125f),
                   flags,
-                  D_0036C698[D_0036BC68[placementIndex]
+                  (s32)D_0036C698[D_0036BC68[placementIndex]
                                          [MNU_SPRITE_RESOURCE_INDEX]],
                   D_0036BC68[placementIndex][MNU_SPRITE_INDEX],
                   context);
@@ -399,7 +399,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     {
         /* Reload the resource after drawing before restoring native size. */
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[
+            D_0036C698[
                 D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[D_0036BC68[placementIndex][MNU_SPRITE_INDEX]].geometry.bounds[2] =
@@ -416,7 +416,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[6].geometry.bounds[2] =
@@ -430,11 +430,11 @@ void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         (s32)((f32)(y + D_0036BC68[placementIndex][MNU_SPRITE_Y_OFFSET]) *
               scaleY) << 3,
         z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-        D_0036C698[D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
+        (s32)D_0036C698[D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]],
         6, context);
     {
         /* Reload the resource after drawing before restoring native size. */
-        EffectSlotSet *resource = (EffectSlotSet *)D_0036C698[
+        EffectSlotSet *resource = D_0036C698[
             D_0036BC68[placementIndex][MNU_SPRITE_RESOURCE_INDEX]];
 
         resource->workEntries[6].geometry.bounds[2] =
@@ -494,7 +494,7 @@ void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    f32 scaleY) {
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
+            D_0036C698[D_0036B7F0[placementIndex][0]];
 
         resource->workEntries[spriteIndex].geometry.bounds[2] =
             (s32)(scaleX * (f32)resource->workEntries[spriteIndex].sourceWidth) << 4;
@@ -505,10 +505,10 @@ void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         (s32)((f32)(x + D_0036B7F0[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
         (s32)((f32)(y + D_0036B7F0[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
         z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
-        D_0036C698[5], spriteIndex, context);
+        (s32)D_0036C698[5], spriteIndex, context);
     {
         EffectSlotSet *resource =
-            (EffectSlotSet *)D_0036C698[D_0036B7F0[placementIndex][0]];
+            D_0036C698[D_0036B7F0[placementIndex][0]];
 
         resource->workEntries[spriteIndex].geometry.bounds[2] =
             resource->workEntries[spriteIndex].sourceWidth << 4;
@@ -525,7 +525,7 @@ void mnuRequestMantraResources(MnuResourceTaskWork *work) {
 
     for (i = 0; i < 14; i++) {
         if (D_0036C698[i] == 0) {
-            effRequestResourceByMode("/facility/spr/mantra/", &D_0036C568[i * 0x10], 0, &D_0036C698[i]);
+            effRequestResourceByMode("/facility/spr/mantra/", &D_0036C568[i * 0x10], 0, (u32 *)&D_0036C698[i]);
         }
     }
 }
@@ -546,7 +546,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_MANTRA_RESOURCE_SLOT_COUNT; ++slotIndex) {
         if (D_0036C698[slotIndex] != 0) {
-            effDestroyResourceSlotSet((EffectSlotSet *)D_0036C698[slotIndex]);
+            effDestroyResourceSlotSet(D_0036C698[slotIndex]);
             D_0036C698[slotIndex] = 0;
         }
     }
@@ -567,7 +567,7 @@ MnuResourceTaskWork *func_0024F608(void) {
     mnuResetTitleStreamLocked();
     func_0026A5F0(0x10);
     mnuTitleStreamUpdateAndLogBgm();
-    memset(D_0036C698, 0, sizeof(s32) * MNU_MANTRA_RESOURCE_SLOT_COUNT);
+    memset(D_0036C698, 0, sizeof(D_0036C698[0]) * MNU_MANTRA_RESOURCE_SLOT_COUNT);
     mnuRequestMantraResources(resourceWork);
     resourceWork->drawPool = mnuCreateSpriteResource(0x3C, 8, 0);
     if (resourceWork->staffMenuContext == NULL) {
@@ -645,22 +645,10 @@ void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) 
 }
 
 /* Resource-task -> list -> selection chain used by the mantra display. */
-typedef struct MnuResourceSelectionNode {
-    u8 pad00[0x70];
-    u32 selectionAddress;
-} MnuResourceSelectionNode;
-
-typedef struct MnuResourceList {
-    u8 pad00[0x1C];
-    MnuResourceSelectionNode *selectionNode;
-    u8 pad20[0xC];
-    void (*drawCallback)();
-    s32 *drawValues;
-} MnuResourceList;
-
 typedef struct MnuResourceTask {
-    u8 pad00[0xC];
-    MnuResourceList *menuList;
+    struct SdfMemBlock *allocation;
+    u32 unk04[2];
+    struct MenuList *menuList;
 } MnuResourceTask;
 
 typedef struct MnuPartyRecord {
@@ -670,9 +658,12 @@ typedef struct MnuPartyRecord {
     u8 pad06[0x19E];
 } MnuPartyRecord;
 
-extern MnuResourceList *mnuCreateListState(s32, s32, s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
+
+typedef char MnuResourceTask_size_must_be_0x10[(sizeof(MnuResourceTask) == 0x10) ? 1 : -1];
+typedef char MnuResourceTask_menuList_offset_must_be_0x0C[
+    ((u32)&((MnuResourceTask *)0)->menuList == 0x0C) ? 1 : -1];
 
 /* Build party selections in unit-ID order from the five present rows.
  * i honestly serves first as a row index, then as the remaining order-table counter. */
@@ -680,11 +671,11 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     u16 partyOrder[MNU_PARTY_ORDER_COUNT];
     s32 i = 0;
     u16 *orderCursor;
-    MnuResourceList *list = mnuCreateListState(0, 6, 0x1A);
+    struct MenuList *list = mnuCreateListState(0, 6, 0x1A);
 
     list->drawCallback = func_00254C68;
-    list->drawValues = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
-    memset(list->drawValues, 0, MNU_LIST_DRAW_VALUE_BYTES);
+    list->context = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
+    memset(list->context, 0, MNU_LIST_DRAW_VALUE_BYTES);
     memset(partyOrder, 0, sizeof(partyOrder));
     do {
         s32 recordOffset = i * sizeof(MnuPartyRecord) + MNU_GAME_PARTY_RECORD_OFFSET;
@@ -699,11 +690,12 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     i = MNU_PARTY_ORDER_COUNT - 1;
     do {
         if (*orderCursor != 0) {
-            MnuResourceSelectionNode *selectionNode =
-                (MnuResourceSelectionNode *)mnuListAppendNode((struct MenuList *)list, NULL);
+            struct MenuListNode *selectionNode = mnuListAppendNode(list, NULL);
             MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
-            selectionNode->selectionAddress = (u32)progress;
-            mnuInitializeProfileProgress(*orderCursor - 1, progress);
+            u16 partySlot = *orderCursor;
+
+            selectionNode->unk70 = (u32)progress;
+            mnuInitializeProfileProgress(partySlot - 1, progress);
         }
         orderCursor++;
     } while (--i >= 0);
@@ -716,7 +708,7 @@ u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *task;
 
     task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    return task->menuList->selectionNode->selectionAddress;
+    return task->menuList->cursor->unk70;
 }
 
 /* Clear the list's two animation flags and request its default retreat. */
@@ -734,48 +726,32 @@ void mnuResetResourceAnimation(void) {
 }
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
-u32 *mnuAllocateEmptyResourceListState(void) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
-    u32 *taskWords = (u32 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
+MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
+    MnuResourceTask *task = (MnuResourceTask *)sdfMemoryGetBlockAddress(allocation);
 
-    memset(taskWords, 0, MNU_RESOURCE_LIST_WORK_BYTES);
-    taskWords[0] = allocationHandle;
-    mnuBuildMantraPartyList((MnuResourceTask *)taskWords);
-    taskWords[1] = 0;
-    taskWords[2] = 0;
-    return taskWords;
+    memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
+    task->allocation = allocation;
+    mnuBuildMantraPartyList(task);
+    task->unk04[0] = 0;
+    task->unk04[1] = 0;
+    return task;
 }
 
-extern void mnuReleaseMenuVisualWorkResources(s32);
-
-typedef struct MenuCleanupNode {
-    u8 pad00[0x58];
-    struct MenuCleanupNode *next;
-    u8 pad5C[0x14];
-    void *resource;
-} MenuCleanupNode;
-
-typedef struct MenuCleanupOwner {
-    u8 pad00[0x1C];
-    MenuCleanupNode *first;
-    u8 pad20[0x10];
-    void *resource;
-} MenuCleanupOwner;
-
 /* Tear down the linked resource nodes and release the task's allocation. */
-void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
-    MenuCleanupOwner *listOwner = (MenuCleanupOwner *)taskData[3];
-    MenuCleanupNode *nodeCursor = listOwner->first;
-    u8 *sceneMetadata = (u8 *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
+    struct MenuList *list = task->menuList;
+    struct MenuListNode *nodeCursor = list->cursor;
+    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
-        sdfReleaseChipBlock(nodeCursor->resource);
+        sdfReleaseChipBlock((void *)(u32)nodeCursor->unk70);
         nodeCursor = nodeCursor->next;
     }
-    sdfReleaseChipBlock(listOwner->resource);
-    mnuDestroyListState((struct MenuList *)listOwner);
-    mnuReleaseMenuVisualWorkResources(*(s32 *)(sceneMetadata + 0x24));
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskData[0]));
+    sdfReleaseChipBlock(list->context);
+    mnuDestroyListState(list);
+    mnuReleaseMenuVisualWorkResources(sceneMetadata->attachedEffect);
+    sdfReleaseResourceAllocation(task->allocation);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);
@@ -972,7 +948,7 @@ u8 *func_00250820(u16 profileId) {
 s32 func_002508D8(u16 profileId) {
     MnuResourceTask *task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     MnuProfileProgress *progress =
-        (MnuProfileProgress *)task->menuList->selectionNode->selectionAddress;
+        (MnuProfileProgress *)task->menuList->cursor->unk70;
     u8 *requiredProfiles = func_00250820(profileId);
 
     if (requiredProfiles == NULL) {
