@@ -141,7 +141,8 @@ typedef struct MantraMenuWork {
     };
     s16 scrollX;
     s16 scrollY;
-    u8 pad55C[4];
+    s16 scrollEndX;
+    s16 scrollEndY;
     MantraNodePos *defaultSelector;
     MantraNodePos *alternateSelector;
     u8 pad568[4];

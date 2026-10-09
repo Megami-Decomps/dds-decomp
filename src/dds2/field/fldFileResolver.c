@@ -5,6 +5,7 @@
 #include "fld.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
+#include "evt_action_object.h"
 
 
 extern FldFileResource *D_00438EC0;
@@ -754,8 +755,6 @@ void func_00128FE8(u32 batchAddress, u32 batchCount, s32 appended) {
     }
 }
 
-extern s32 evtSpawnActionObj2(u32, u32);
-
 extern void *dds3GetWorldSecondaryObject(void);
 
 typedef struct FldActionSpawn {
@@ -775,13 +774,13 @@ typedef struct FldSceneRequest {
 
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
-    s32 handle;
+    struct EffWorldNode *node;
 
     dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, list++) {
-        handle = evtSpawnActionObj2(list->firstValue, list->secondValue);
+        node = evtSpawnActionObj2(list->firstValue, list->secondValue);
         if (i == 0) {
-            fldAreaState.taskHandle = handle;
+            fldAreaState.taskHandle = (s32)node;
         }
     }
 }

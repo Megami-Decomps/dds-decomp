@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
+#include "evt_action_object.h"
 
 s32 func_00111160(u32 kind) {
     s32 result = 0;
