@@ -50,8 +50,6 @@ extern s8 brsTaskState;
 extern void sndEnsureMidiBankResident(s32);
 
 
-extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
-
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuRequestEffectResources(MenuEffectResources *);
@@ -612,7 +610,7 @@ s8 brsTaskHasPendingRows(void) {
 }
 
 s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
-    if (context->teardownHandle != 0) {
+    if (context->teardownResource != NULL) {
         brsUpdateBlocked = 0;
     }
     return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
@@ -726,7 +724,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
+    mnuUpdateFiveListEntries(panel, work->unitResource);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],
@@ -744,7 +742,7 @@ extern void mnuResetWorkFloats(void);
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
-    effDestroyResourceSlotSet((struct EffectSlotSet *)ctx->unitHandle);
+    effDestroyResourceSlotSet(ctx->unitResource);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
@@ -762,8 +760,9 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
-    mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
-    effRequestResourceByMode(D_00428358, D_00428368, 0, (s32)&work->unitHandle);
+    mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
+    effRequestResourceByMode(D_00428358, D_00428368, 0,
+                             (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = 1;
     kwlnFadeInStart(0, 0, 0, 1);
@@ -771,7 +770,6 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 movAreTitleEffectsReady(s32, StaffSlots *);
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -783,13 +781,13 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(ctx->fadeTarget, &ctx->staffSlots) == 0) {
+    if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002C6CE8() == 1) {
         return 1;
     }
-    if (ctx->unitHandle == 0) {
+    if (ctx->unitResource == NULL) {
         return 1;
     }
     if (mnuBindCampEffectWhenLoaded(&ctx->campEffect) == 0) {
@@ -854,19 +852,19 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardSummary *rewards;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     BrsProgressRow *party;
     BrsRewardBatch *rewardState;
     BrsRewardBatch *primary;
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfResourceRetainAddress(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
-    work->handle = handle;
+    work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
-    work->fadeTarget = (s32)mnuAllocateValueRecord(1);
+    work->resourceList = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
@@ -883,9 +881,9 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
-    work->teardownHandle = 0;
+    work->teardownResource = NULL;
     effRequestResourceByMode(D_00428358, "easy_r01.spr", 0,
-                            (s32)&work->teardownHandle);
+                            (u32 *)&work->teardownResource);
     return work;
 }
 
@@ -897,16 +895,16 @@ extern s32 dspCloseChannel(void);
 void brsStaffTaskDestroy(KwlnTask *taskArg) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
 
-    if (context->teardownHandle != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)context->teardownHandle);
+    if (context->teardownResource != NULL) {
+        effDestroyResourceSlotSet(context->teardownResource);
     }
     mnuDrainPanelTransitions(&context->transition.data, taskArg);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
-    effDestroyEffectList((struct EffectList *)(u32)context->fadeTarget);
+    effDestroyEffectList(context->resourceList);
     dspCloseChannel();
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
+    sdfReleaseResourceAllocation(context->allocation);
     brsTaskState = 2;
 }
 

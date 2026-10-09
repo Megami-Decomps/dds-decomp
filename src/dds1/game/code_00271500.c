@@ -16,12 +16,6 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 
-extern u32 mnuGetValueRecordOwner(const EffectList *);
-
-extern s32 effAppendListEntry(EffectList *, u32, u32, u32, u32);
-
-extern s32 effPollResourceList(EffectList *);
-
 extern u32 D_0037C248[][2];
 
 extern u32 D_0037C2C8[][2];

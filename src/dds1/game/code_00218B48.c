@@ -11,6 +11,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "mdl_resource_entries.h"
@@ -28,6 +29,7 @@
 #include "eff_node.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
+#include "evt_world_source_transform.h"
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
@@ -713,12 +715,12 @@ void mdlDestroyPartList(DevRequest *partList) {
 
 
 /* Prepend a cleared, typed resource item to the owner's list. */
-MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 subtype) {
+MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 motionSlotIndex) {
     MdlResourceItem *item = sdfAllocAndClearQuadwords(sizeof(MdlResourceItem));
     MdlResourceItem *previousHead = owner->resourceItems;
     item->type = type;
     item->next = previousHead;
-    item->subtype = subtype;
+    item->motionSlotIndex = motionSlotIndex;
     owner->resourceItems = item;
     return item;
 }
@@ -760,7 +762,7 @@ typedef struct MdlPartRec {
 
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, void *(*createPart)(MdlPartEntry *)) {
+void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 motionSlotIndex, s32 type, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
@@ -777,7 +779,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
             SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
 
             if (chunkRecord != NULL) {
-                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
+                MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, motionSlotIndex);
 
                 resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
@@ -789,7 +791,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
 }
 
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 subtype) {
+void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
     EffTrackPolyParams effectParams;
     MdlResourceItem *resourceItem;
 
@@ -806,7 +808,7 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s3
     effectParams.gradientColors[1] = record->gradientColors[1];
     effectParams.gradientColors[2] = record->gradientColors[2];
     effectParams.gradientColors[3] = record->gradientColors[3];
-    resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, subtype);
+    resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, motionSlotIndex);
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
@@ -826,21 +828,19 @@ typedef struct MdlEntryRec {
     u16 index;    /* 0x12 */
 } MdlEntryRec;
 
-extern SdfResource *sdfFindResourceById(s32 id);
-
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
+void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 motionSlotIndex) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
         MdlObj *object = (MdlObj *)partSlot->object;
         if (object->inUse == 0) {
-            SdfTex *texture = (SdfTex *)sdfFindResourceById(entryRecord->dataId);
+            SdfTex *texture = sdfFindTextureByResourceKey(entryRecord->dataId);
             if (texture != 0) {
                 MdlResourceItem *resourceItem;
                 u8 *attributes;
                 object->inUse = 1;
-                resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, subtype);
+                resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_OBJECT, motionSlotIndex);
                 /* Fill the object and resource data before attaching the owner. */
                 resourceItem->payload.object.object = object;
                 attributes = resourceItem->payload.object.attributes;
@@ -870,33 +870,33 @@ void mdlCondInitEntry(MdlResourceItem *item) {
 }
 
 /* Dispatch the five record kinds, retaining the game's native return behavior. */
-void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
+void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
-        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
+        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
         return;
     case MDL_VIEWER_RECORD_KIND_EFFECT_PART:
-        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
+        mdlBindViewerPartRecords(owner, (MdlPartRec *)record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-        mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, subtype);
+        mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, motionSlotIndex);
         return;
     case MDL_VIEWER_RECORD_KIND_STREAM:
         mdlLoadViewerStreamRecord(owner, record);
         return;
     case MDL_VIEWER_RECORD_KIND_OBJECT_PART:
-        mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, subtype);
+        mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, motionSlotIndex);
         break;
     }
 }
 
-/* Find the requested record list and apply each relative-linked entry with the supplied subtype. */
-void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
+/* Find the requested record list and associate each entry with this motion slot. */
+void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 motionSlotIndex) {
     MdlRecord *recordList = mdlFindViewerRecord(owner, recordId);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlGetFirstRecord(recordList);
         while (recordCursor != NULL) {
-            mdlDispatchResourceEntry(owner, recordCursor, subtype);
+            mdlDispatchResourceEntry(owner, recordCursor, motionSlotIndex);
             recordCursor = mdlGetNextRecord(recordCursor);
         }
     }
@@ -918,12 +918,12 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
     sdfReleaseChipBlock((void *)item);
 }
 
-/* Unlink matching subtypes without losing the incoming link when consecutive items are removed. */
-void mdlRemoveResourceSubtype(MdlCtx *owner, s32 subtype) {
+/* Release all items for this slot without losing the link across consecutive matches. */
+void mdlRemoveResourcesForMotionSlot(MdlCtx *owner, s32 motionSlotIndex) {
     MdlResourceItem **itemLink = &owner->resourceItems;
     MdlResourceItem *item = *itemLink;
     while (item != 0) {
-        if (item->subtype == subtype) {
+        if (item->motionSlotIndex == motionSlotIndex) {
             MdlResourceItem *nextItem = item->next;
             mdlDestroyResourceItem(item);
             *itemLink = nextItem;
@@ -1976,7 +1976,7 @@ void mdlApplyViewerResourceMenuAction(void) {
             resource = mdlViewerState.resources[i];
             motion = resource->first;
             if (motion != NULL) {
-                entryId = resource->current.h.arg;
+                entryId = resource->current.h.motionIndex;
                 if (motion->loopEnabled == 0) {
                     sdfMotionInitializeAtZeroTime(motion, entryId, 0);
                 } else {
@@ -1988,7 +1988,7 @@ void mdlApplyViewerResourceMenuAction(void) {
     }
     mdlViewerState.unk1C = mdlViewerState.resourceGroup = mdlGetContextResourceGroup(mdlViewerState.resources[0]);
     mdlViewerState.unk1E = mdlViewerState.resourceId = mdlGetContextResourceId(mdlViewerState.resources[0]);
-    i = mdlViewerState.resources[0]->current.h.arg;
+    i = mdlViewerState.resources[0]->current.h.motionIndex;
     if (i < 0) {
         i = 0;
     }
@@ -3378,18 +3378,17 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
     EffWorldNode *target;
     EffWorldNode *source;
-    f32 *base;
+    EvtWorldSourceTransformPrefix *sourceTransform;
 
     target = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetId, 5);
     if (target != NULL) {
         source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
-            base = source->data;
-            effObjSetInnerPosition(target, (u128 *)base);
+            sourceTransform = source->data;
+            effObjSetInnerPosition(target, (u128 *)&sourceTransform->position);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
-            base += 4;
-                        VU0_LOAD_VF(vf11, base);
+                        VU0_LOAD_VF(vf11, sourceTransform->rotation);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
             effObjSetInnerRotation(target, (u128 *)quaternion);

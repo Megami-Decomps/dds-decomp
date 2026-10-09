@@ -5051,7 +5051,7 @@ void fldUpdateTargetGuideEffects(void) {
             goto apply_animation;
         }
 compare_animation:
-        changeAnimation = animation != (s32)model->current.h.arg;
+        changeAnimation = animation != (s32)model->current.h.motionIndex;
 apply_animation:
         if (changeAnimation) {
             model->first->frameStep = 1.0f;
