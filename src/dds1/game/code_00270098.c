@@ -212,7 +212,7 @@ void mnuDrawMovieProgressCounter(void) {
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = (SdfListHead *)D_003DC570[0];
         sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.unk48, (s32)mnuMovieDrawContext.soundNode.cycleLength));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }
 }
 
@@ -228,9 +228,9 @@ s32 mnuMovieViewer(void) {
     s32 nextTop;
 
     if ((s8)D_00324510[1][0][0x0D] != 0) {
-        mnuMovieDrawContext.soundNode.playbackMode = 1;
+        mnuMovieDrawContext.soundNode.playbackCadenceStep = 1;
     } else {
-        mnuMovieDrawContext.soundNode.playbackMode = 0x1E;
+        mnuMovieDrawContext.soundNode.playbackCadenceStep = 0x1E;
     }
 
     if ((s8)D_00324510[1][0][0x08] < 0) {
