@@ -3,12 +3,7 @@
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf.h"
-
-/* Picture task data: active flags and the attached texture. */
-typedef struct {
-    u32 flags;
-    void *texture;
-} Picture;
+#include "evt_picture.h"
 
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 
@@ -20,7 +15,7 @@ extern s32 sdfAllocPacketAligned(s32 size);
 extern void itfSendTablePacket(SdfListHead *packet, s32 index, s32 flag);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
-void evtSubmitPictureDrawPacket(void *texture) {
+void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
     SdfListHead *packet;
 
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -32,10 +27,10 @@ void evtSubmitPictureDrawPacket(void *texture) {
 
 /* Run the picture's own update step while its active flag is set. */
 s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
-    Picture *picture;
+    EvtPictureWork *picture;
 
-    picture = (Picture *)kwlnTaskGetUserValue(task);
-    if (picture->flags & 1) {
+    picture = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    if (picture->flags & EVT_PICTURE_FLAG_DRAW_ENABLED) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
         }
@@ -46,11 +41,11 @@ s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
 
 /* Drop the picture's texture, then free the task data. */
 void evtPictureReleaseTaskTextureAndState(KwlnTask *task) {
-    Picture *picture;
+    EvtPictureWork *picture;
 
-    picture = (Picture *)kwlnTaskGetUserValue(task);
+    picture = (EvtPictureWork *)kwlnTaskGetUserValue(task);
     if (picture->texture != 0) {
-        sdfTexReleaseReferenceViaHandler((struct SdfTex *)picture->texture);
+        sdfTexReleaseReferenceViaHandler(picture->texture);
         picture->texture = 0;
     }
     sdfReleaseChipBlock(picture);

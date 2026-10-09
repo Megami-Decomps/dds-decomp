@@ -273,7 +273,7 @@ typedef struct EffResourceOps {
  * Callback arity varies between creation and frame-notification paths. */
 typedef struct EffClassOps {
     void (*initialize)();      /* 0x00 */
-    u32 (*createResource)();    /* 0x04 */
+    void *(*createResource)(); /* 0x04 */
     void (*destroyResource)(); /* 0x08 */
     void (*update)();          /* 0x0C */
     void (*draw)();            /* 0x10 */
@@ -3187,16 +3187,16 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
+    ((EffClassWork *)effect)->resource = (u32)effClassWorkOperations[kind].createResource(source);
     effClassWorkOperations[kind].initialize(effect);
     return (EffClassWork *)effect;
 }
 
-void effCreateClassWorkFromFile(s32 request) {
+EffClassWork *effCreateClassWorkFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
-    effCreateClassWork(((FileJob *)request)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassWork(request->option, source);
 }
 
 void effDestroyClassWork(EffClassWork *work) {
@@ -3204,8 +3204,8 @@ void effDestroyClassWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCreateClassWorkFromRequest(EffClassWork *work) {
-    effCreateClassWork(work->kind, work->payload);
+EffClassWork *effCloneClassWork(EffClassWork *work) {
+    return effCreateClassWork(work->kind, work->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
@@ -4125,15 +4125,15 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9160);
 
 extern void effResetDispatchCounter(EffClassWork *);
 
-void effResetIndexedInstanceFrames(u8 *work) {
+void effResetRadialClassResourceFrames(EffClassWork *work) {
     u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *entry = ((EffFrameState *)((EffClassWork *)work)->resource)->entries;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
 
     if (count != 0) {
         do {
-            effResetDispatchCounter(*(EffClassWork **)entry);
-            entry += 4;
+            effResetDispatchCounter(*entry);
+            entry++;
             index++;
         } while (index < count);
     }
@@ -4141,17 +4141,17 @@ void effResetIndexedInstanceFrames(u8 *work) {
 
 extern EffClassWork *effCreateClassResourceWork(u16, void *);
 
-u8 *func_002A93A0(EffBillPointConfig *config) {
+EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config) {
     u32 count = config->timed.count;
-    u8 *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
-    u32 *entries = (u32 *)(allocation + 4);
+    EffClassWorkList *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
+    EffClassWork **entries = (EffClassWork **)(allocation + 1);
     EffBillPointConfig copy;
     u32 index;
     f32 step;
     f32 position;
     f32 offset;
 
-    *(u32 **)allocation = entries;
+    allocation->entries = entries;
     if ((u32)config->layers < 3) {
         config->layers = 3;
     }
@@ -4167,7 +4167,7 @@ u8 *func_002A93A0(EffBillPointConfig *config) {
         EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
         u8 **resourceSlot = (u8 **)resourceWork->resource;
 
-        *entries++ = (u32)resourceWork;
+        *entries++ = resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
         offset = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f;
         position += step + step * offset * 0.25f;
@@ -4177,17 +4177,17 @@ u8 *func_002A93A0(EffBillPointConfig *config) {
 
 extern void effDestroyClassResourceWork(EffClassWork *);
 
-void effReleaseBillFrameEntries(u8 *work) {
-    u8 *config = ((EffClassWork *)work)->payload;
-    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+void effDestroyRadialClassResourceEntries(EffClassWork *work) {
+    u8 *config = work->payload;
+    EffClassWorkList *state = (EffClassWorkList *)work->resource;
     u32 count = ((EffBillTimedHeader *)config)->count;
     u32 index = 0;
-    u8 *entry = *(u8 **)state;
+    EffClassWork **entry = state->entries;
 
     if (count != 0) {
         do {
-            effDestroyClassResourceWork(*(EffClassWork **)entry);
-            entry += 4;
+            effDestroyClassResourceWork(*entry);
+            entry++;
         } while (++index < count);
     }
     sdfReleaseChipBlock(state);
@@ -4195,15 +4195,15 @@ void effReleaseBillFrameEntries(u8 *work) {
 
 extern void effAdvanceClassResourceFrame(EffClassWork *);
 
-void effReleaseTrackEntriesA(u8 *work) {
+void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
     u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *entry = *(u8 **)(u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
 
     if (count != 0) {
         do {
-            effAdvanceClassResourceFrame(*(s32 *)entry);
-            entry += 4;
+            effAdvanceClassResourceFrame(*entry);
+            entry++;
             index++;
         } while (index < count);
     }
@@ -4405,16 +4405,16 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
     memcpy(effect->payload, source, size);
-    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
+    effect->resource = (u32)effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
 
-void effCreateClassResourceFromFile(s32 request) {
+EffClassWork *effCreateClassResourceFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
-    effCreateClassResourceWork(((FileJob *)request)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassResourceWork(request->option, source);
 }
 
 void effDestroyClassResourceWork(EffClassWork *work) {
@@ -8395,11 +8395,11 @@ void effPollResourceBankSlot(char *path, u32 flags, void *record) {
     if (effResourceBankEntries == 0) {
         effResourceBankEntries = btlScanDirectory(path, flags);
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
-        btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
         return;
     }
     btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
-    selection->state = func_001FBF48(effResourceBankDescriptor);
+    selection->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
     selection->label = btlFormatSelectedResourceName(effResourceBankDescriptor, selection->fullName);
     selection->variant = btlGetResourcePathVariant(effResourceBankDescriptor);
     btlTrimResourceName(effResourceBankDescriptor, selection->name);
@@ -8517,10 +8517,10 @@ void effPollResourceBank(s32 flags, void *out) {
             }
         }
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
-        btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
-        record->state = func_001FBF48(effResourceBankDescriptor);
+        record->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
         record->value = btlGetResourcePathVariant(effResourceBankDescriptor);
         if (record->state == BTL_RESOURCE_SELECTION_ACCEPTED) {

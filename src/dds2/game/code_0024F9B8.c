@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_world.h"
+#include "evt_picture.h"
 #include "evt_polygon_movie.h"
 #include "file.h"
 #include "file_request_api.h"
@@ -100,14 +101,14 @@ void evtSetContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
-    context->flags = context->flags | 1;
+    context->flags = context->flags | EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtClearContextFlag(KwlnTask *task) {
     EvtPictureWork *context;
 
     context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
-    context->flags = context->flags & 0xfffffffe;
+    context->flags = context->flags & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
 }
 
 void evtDestroyTaskHierarchy(u32 task) {
