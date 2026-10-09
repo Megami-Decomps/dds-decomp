@@ -57,14 +57,8 @@ extern void *D_0040B4F8[];
 
 
 
-typedef struct {
-    SdfMotionBindingHead pair;
-    s32 unk8;
-    s32 unkC;
-} TmpBuf;
 
 
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 
 extern void *D_0040B380[];
 
@@ -414,12 +408,13 @@ s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
     return D_0040B368[(u16)selector](object, selector);
 }
 
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
+void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
+                          void *dispatch, s32 nodeIndex) {
     SdfDrawNode *drawNode;
 
-    sdfSetMotionPointerPair(tmp, src, tbl);
-    drawNode = sdfModelFindDrawNode(((Motion *)src)->owner, x);
-    ((TmpBuf *)tmp)->unkC = (s32)drawNode;
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&binding->keys, motion, dispatch);
+    drawNode = sdfModelFindDrawNode(motion->owner, nodeIndex);
+    binding->node = drawNode;
 }
 
 void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {

@@ -26,11 +26,6 @@ typedef struct VObj {
     VTab *vtable;
 } VObj;
 
-typedef struct {
-    SdfMotionBindingHead pair;
-    s32 unk8;
-    s32 unkC;
-} TmpBuf;
 
 typedef SdfMotionTextParamSnapshot Blk;
 
@@ -62,7 +57,6 @@ void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
                                void *dispatch, s32 options);
 extern void effMiscQuaternionNlerpVU(f32 amount);
@@ -415,12 +409,13 @@ s32 sdfDispatchMotionBySelector(void *a0, s32 a1) {
     return D_003981B8[(u16)a1](a0, a1);
 }
 
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
+void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
+                          void *dispatch, s32 nodeIndex) {
     SdfDrawNode *drawNode;
 
-    sdfSetMotionPointerPair(tmp, src, tbl);
-    drawNode = sdfModelFindDrawNode(((Motion *)src)->owner, x);
-    ((TmpBuf *)tmp)->unkC = (s32)drawNode;
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&binding->keys, motion, dispatch);
+    drawNode = sdfModelFindDrawNode(motion->owner, nodeIndex);
+    binding->node = drawNode;
 }
 
 void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
