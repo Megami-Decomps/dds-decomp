@@ -1417,7 +1417,7 @@ void effReleaseKindWork(EffKindWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-s32 effCloneKindWork(EffKindWork *source) {
+EffKindWork *effCloneKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E9810[copy->kind].initialize != NULL) {
         EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
@@ -1425,7 +1425,7 @@ s32 effCloneKindWork(EffKindWork *source) {
         copy->target = child;
         D_003E9810[copy->kind].initialize(copy, parameter);
     }
-    return (s32)copy;
+    return copy;
 }
 
 void effKindWorkFrameReset(EffKindWork *work) {
@@ -1516,7 +1516,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
 }
 
 /* Recreate alternate-kind work, retaining its secondary asset when initialization is supported. */
-s32 effCloneAlternateKindWork(EffKindWork *source) {
+EffKindWork *effCloneAlternateKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateAlternateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E98A0[copy->kind].initialize != NULL) {
         EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
@@ -1524,7 +1524,7 @@ s32 effCloneAlternateKindWork(EffKindWork *source) {
         copy->target = child;
         D_003E98A0[copy->kind].initialize(copy, parameter);
     }
-    return (s32)copy;
+    return copy;
 }
 
 void effAlternateKindWorkFrameReset(EffKindWork *work) {

@@ -6378,3 +6378,49 @@ the native store-before-copy sequence. Do not restore an integer texture
 field to conceal that source-level distinction. Physical packet submission
 addresses and the allocator's genuine address-word interface stay unchanged.
 
+
+## DDS2 kind clones return their allocated work
+
+`effCloneKindWork` and `effCloneAlternateKindWork` return `EffKindWork *`,
+not an encoded integer. Their native `v0` is the allocated copy, including
+after the optional secondary-asset retain and texture initialization.
+The `fileJobTypeOperations` child callbacks at `0x003E9214` and `0x003E923C`
+feed `fileJobCreateChild`, which stores the result in `FileJobPayload.data`.
+That caller already uses the truthful `void *` callback return; no extra
+pointer decode, callback cast, or shared-header cutover is necessary.
+
+## Rebase annulment parks onto the current primary context
+
+DDS2 `func_001E72B0` (`0x001E72B0`, 200 bytes) uses the existing
+`BtlActorModelBlendArgs` allocation and `BtlUnit` owner. Its historical
+49/50-word draft had BEQ instead of retail BEQL at `+0x88`. Splicing the
+natural body into the current unit with the canonical status/timer fields,
+`mdlGetNodeMotionIndex`, and the actual typed effect provider closes all
+50 words and gates `game/code_001DD390` at 287 match, 0 differ.
+The obsolete following `u32 *` callback declaration is removed; the creator
+uses the same real argument packet. No TU move, visibility attribute,
+declaration-order change, or compiler-flag override is involved.
+
+
+## Frame-reference submission retains its list owner
+
+The paired frame-reference submissions (`00108E60`/`00108D80` and
+`00108F00`/`00108E20`) allocate a `0x20`-byte `SdfListHead`, initialize it,
+append a separate `SdfDmaReferenceChainPacket`, then pass that same list
+to the selected surface. Declare the local as `SdfListHead *` instead of
+re-decoding `void *` at the tag append. The frame packet's `u32` conversion
+is still required by the physical DMA tag append interface.
+
+
+## Interface draw packets keep the typed header owner
+
+The nine triangle, quad, sprite and indexed-list writers in DDS1
+`code_00196478` and DDS2 `code_0019E138` retain `SdfDrawPacket *` from
+allocation through header initialization. Their variable payload cursor
+remains a `u64 *` returned by the existing SDK address-word offset helper.
+`sdfConsMeasurePacketWithHeader` is the real scalar `+0x20` operation, so
+its address-word boundary stays explicit; packet submission separately
+converts the completed packet to the physical `u32` append argument.
+Do not invent another packet view, alter the SDK helper's scalar contract,
+or collapse the genuinely consumed header and payload locals.
+

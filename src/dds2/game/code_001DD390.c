@@ -4297,9 +4297,33 @@ typedef struct BtlActorModelBlendArgs {
 
 typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E72B0);
+u32 func_001E72B0(BtlActorModelBlendArgs *args) {
+    BtlUnit *unit;
+    BtlUnit *target;
 
-extern u32 func_001E72B0(u32 *);
+    if (args->index < 0) {
+        return 1;
+    }
+    unit = args->unit;
+    target = args->target;
+    if (args->stage == 0) {
+        if (unit->status.flags & 2) {
+            args->previousModelValue = mdlGetNodeMotionIndex(unit->ext->owner, 0);
+        } else {
+            args->previousModelValue = unit->unkEC;
+        }
+        unit->unkF8 = 0;
+        unit->unkFA = 1;
+        btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
+    } else {
+        if (unit != target) {
+            func_001E40F0(unit, target, args->previousModelValue);
+        }
+        return 1;
+    }
+    args->stage++;
+    return 0;
+}
 
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 index, u32 value, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(BtlActorModelBlendArgs));

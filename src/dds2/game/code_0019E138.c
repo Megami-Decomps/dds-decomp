@@ -1375,13 +1375,13 @@ SdfTex *itfLoadTextureFromAsset(const char *path) {
 /* Emit three per-vertex RGBA/XYZ2 records; PRIM's low bits select a triangle.
  * Coordinates receive the native GS screen biases; no clipping is performed. */
 void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s32 yOffset, u32 tail, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_TRIANGLE_VERTEX_COUNT));
+    sdfConsInitPacketHeader(packet, ITF_TRIANGLE_PRIMITIVE_BITS, 2, 0x51, ITF_TRIANGLE_VERTEX_COUNT);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < ITF_TRIANGLE_VERTEX_COUNT; i++) {
         dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
         dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
@@ -1392,18 +1392,18 @@ void itfDrawTriFlat3(DrawVertex *vertices, DrawColorRec *colors, s32 xOffset, s3
         vertices++;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Emit an indexed four-vertex triangle fan with a color record per vertex. */
 void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, u32 tail, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_QUAD_VERTEX_COUNT));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, ITF_QUAD_VERTEX_COUNT));
+    sdfConsInitPacketHeader(packet, ITF_QUAD_FAN_PRIMITIVE_BITS, 2, 0x51, ITF_QUAD_VERTEX_COUNT);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1415,7 +1415,7 @@ void itfDrawQuadFlat4(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Draw three adjacent quads using zero-alpha/source-alpha edge color records.
@@ -1460,13 +1460,13 @@ void func_001A09C0(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 border
 /* Emit a textured triangle fan: each four-float input supplies S/T/Q only.
  * The fourth float is skipped, and the context word is shifted without masking. */
 void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, ITF_QUAD_VERTEX_COUNT));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, (flag << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, ITF_QUAD_VERTEX_COUNT));
+    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_TEXTURED_FAN_PRIMITIVE_BITS, 3, 0x512, ITF_QUAD_VERTEX_COUNT);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < ITF_QUAD_VERTEX_COUNT; i++) {
         f32 *uvDst = (f32 *)dst;
 
@@ -1484,7 +1484,7 @@ void itfDrawQuadTextured4(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, 
         vertices++;
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Bind the texture and emit one two-corner sprite using two packed UV pairs.
@@ -1493,17 +1493,17 @@ void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorD
     DrawVertex *vertices = vertexData;
     DrawColorRec *uv = uvData;
     DrawColorRec *colors = colorData;
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, (flag << 9) | ITF_TEXTURED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_TEXTURED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = vertices[0].x + ITF_GS_X_BIAS;
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1513,22 +1513,22 @@ void itfQueueTextureBoundQuadPacket(void *vertexData, void *uvData, void *colorD
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)(u32)tail;
     sdfConsCreateDrawPacket(command, texture, flag);
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Emit a colored textured sprite without binding a texture in this function. */
 void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 x0, y0, x1, y1;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, (flag << 9) | ITF_COLORED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_COLORED_SPRITE_PRIMITIVE_BITS, 5, 0x53531, 1);
     x0 = vertices[0].x + ITF_GS_X_BIAS;
     y0 = vertices[0].y + ITF_GS_Y_BIAS;
     x1 = vertices[1].x + ITF_GS_X_BIAS;
     y1 = vertices[1].y + ITF_GS_Y_BIAS;
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst[2] = (u64)uv->components[0] | ((u64)uv->components[1] << 32);
@@ -1537,17 +1537,17 @@ void itfQueueColoredTexturedQuadPacket(DrawVertex *vertices, DrawColorRec *uv, D
     dst[6] = (u64)uv->components[2] | ((u64)uv->components[3] << 32);
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)tail;
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Despite the current name, PRIM selects a two-corner sprite, not a line. */
 void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 tail, s32 flag, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, (flag << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(3, 1));
+    sdfConsInitPacketHeader(packet, (flag << 9) | ITF_SPRITE_PRIMITIVE_BITS, 3, 0x551, 1);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     dst[0] = (u64)colors->components[0] | ((u64)colors->components[1] << 32);
     dst[1] = (u64)colors->components[2] | ((u64)colors->components[3] << 32);
     dst += 2;
@@ -1556,20 +1556,20 @@ void itfEmitColoredLinePacket(DrawVertex *vertices, DrawColorRec *colors, u32 ta
     dst += 2;
     dst[1] = (u64)tail;
     dst[0] = (u64)(u32)(vertices[1].x + ITF_GS_X_BIAS) | ((u64)(vertices[1].y + ITF_GS_Y_BIAS) << 32);
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Emit an indexed triangle strip, packing two vertices per GIF loop.
  * Header loop count truncates odd vertex counts; the native writer does not. */
 void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 pairCount = count >> 1;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, pairCount));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, pairCount));
+    sdfConsInitPacketHeader(packet, ITF_TRIANGLE_STRIP_PRIMITIVE_BITS, 4, 0x5151, pairCount);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1581,18 +1581,18 @@ void itfEmitQuadListWide(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexI
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Emit indexed RGBA/XYZ2 records with the line-strip primitive. */
 void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    sdfConsInitPacketHeader(packet, ITF_LINE_STRIP_PRIMITIVE_BITS, 2, 0x51, count);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1604,18 +1604,18 @@ void itfEmitQuadListA(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 /* Emit indexed RGBA/XYZ2 records with independent line primitives. */
 void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexIndex, u8 *colorIndex, s32 count, u32 tail, SdfListHead *command) {
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    sdfConsInitPacketHeader(packet, ITF_LINES_PRIMITIVE_BITS, 2, 0x51, count);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < count; i++) {
         DrawVertex *vertex = &vertices[*vertexIndex++];
         DrawColorRec *color = &colors[*colorIndex++];
@@ -1627,7 +1627,7 @@ void itfEmitQuadListB(DrawVertex *vertices, DrawColorRec *colors, u8 *vertexInde
         dst[0] = (u64)(u32)(vertex->x + ITF_GS_X_BIAS) | ((u64)(vertex->y + ITF_GS_Y_BIAS) << 32);
         dst += 2;
     }
-    sdfAppendPacket(command, packet);
+    sdfAppendPacket(command, (u32)packet);
 }
 
 extern s32 sdfAllocPacketAligned(s32);
