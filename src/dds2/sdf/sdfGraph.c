@@ -15,7 +15,7 @@ extern u8 D_004389D8;
 
 extern u8 D_0043913C;
 
-void func_00329CE0(void *arg0, s32 arg1, s32 arg2);
+void sdfGraphApplyModeDefaults(void *arg0, s32 arg1, s32 arg2);
 
 extern SdfGraphObj D_0040B290;
 
@@ -25,7 +25,7 @@ SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
 void sdfGraphSetDisplayMode(s32 mode) {
     D_004389D8 = (u8)mode;
-    func_00329CE0(&D_0040B290, mode, 0);
+    sdfGraphApplyModeDefaults(&D_0040B290, mode, 0);
     D_0043913C = 1;
 }
 

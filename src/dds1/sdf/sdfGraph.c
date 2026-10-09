@@ -14,13 +14,13 @@ extern SdfGraphObj D_003980E0;
 extern u8 D_003BD2E8;
 extern u8 D_003BD9DC;
 
-void func_002D0E30(void *arg0, s32 arg1, s32 arg2);
+void sdfGraphApplyModeDefaults(void *arg0, s32 arg1, s32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
 void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD2E8 = (u8)arg0;
-    func_002D0E30(&D_003980E0, arg0, 0);
+    sdfGraphApplyModeDefaults(&D_003980E0, arg0, 0);
     D_003BD9DC = 1;
 }
 

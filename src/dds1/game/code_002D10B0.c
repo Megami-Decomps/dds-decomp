@@ -276,7 +276,7 @@ void sdfServiceGraphicsBuffers(void) {
     }
 }
 
-extern void func_002D0E30(SdfGraphObj *, s32, s32);
+extern void sdfGraphApplyModeDefaults(SdfGraphObj *, s32, s32);
 extern s32 sdfCreateThread(void *, void *, s32, s32);
 extern s32 _StartThread(s32, s32);
 extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
@@ -296,7 +296,7 @@ void func_002D1590(s32 size) {
 
     sceGsResetPath();
     D_003BD2E8 = 1;
-    func_002D0E30(graph, 1, 1);
+    sdfGraphApplyModeDefaults(graph, 1, 1);
     sdfGraphRecreateBuffers(graph);
     D_003BD2E9 = 0;
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;

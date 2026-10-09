@@ -237,4 +237,4 @@ void func_00329C20(const char *modulePath, const char *optionalModulePath) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329600", func_00329CE0);
+INCLUDE_ASM(const s32, "game/code_00329600", sdfGraphApplyModeDefaults);

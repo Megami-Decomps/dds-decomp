@@ -265,7 +265,7 @@
       "expected_shifted_symbols": 0,
       "fallback_symbols": [
         "func_002D0750",
-        "func_002D0E30"
+        "sdfGraphApplyModeDefaults"
       ],
       "retained_sections": [
         {
