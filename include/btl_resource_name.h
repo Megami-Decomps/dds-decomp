@@ -4,7 +4,24 @@
 #include "common.h"
 #include "btl_resource_selection.h"
 
-struct BtlResourceNameRecord;
+typedef struct BtlResourceNameRecord {
+    s32 x; /* UI origin; no unit conversion is applied by the prompt. */
+    s32 y;
+    u32 selectionStatus; /* Pending, accepted, or canceled. */
+    s32 selection; /* Keyboard selection or overwrite yes/no choice. */
+    s32 nameLength;
+    u32 maximumNameLength;
+    s32 overwritePromptActive;
+    char extension[5];
+    char resourceName[0x17];
+} BtlResourceNameRecord;
+
+typedef char BtlResourceNameRecordSizeCheck[
+    (sizeof(BtlResourceNameRecord) == 0x38) ? 1 : -1];
+typedef char BtlResourceNameRecordExtensionOffsetCheck[
+    ((u32)&((BtlResourceNameRecord *)0)->extension == 0x1C) ? 1 : -1];
+typedef char BtlResourceNameRecordNameOffsetCheck[
+    ((u32)&((BtlResourceNameRecord *)0)->resourceName == 0x21) ? 1 : -1];
 
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension);
 void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord);
