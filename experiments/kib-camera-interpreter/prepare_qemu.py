@@ -52,8 +52,18 @@ def main():
                  if line.startswith("[GNUPG:] VALIDSIG ")]
         if not any(row[2] == SIGNER or row[-1] == SIGNER for row in valid):
             raise RuntimeError("release_signer_mismatch")
+        STAGE = "extract_verified_archive"
         with tarfile.open(archive) as source:
-            source.extractall(work, filter="data")
+            try:
+                source.extractall(work, filter="data")
+            except tarfile.FilterError as exc:
+                # Only official, signature-verified archive member metadata.
+                member = getattr(exc, "tarinfo", None)
+                print(json.dumps(dict(status="official_archive_filter_rejected",
+                                      member=member.name if member else None,
+                                      link=member.linkname if member else None,
+                                      category=type(exc).__name__)))
+                raise
         source = work / ("qemu-" + VERSION)
         build = source / "build"
         build.mkdir()
