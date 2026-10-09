@@ -413,15 +413,23 @@ typedef struct {
     f32 z;
 } FldPoint;
 
+typedef struct FldIcon {
+    u32 kind;
+    FldPoint *position;
+} FldIcon;
+
 typedef struct {
-    u8 pad0[0x10];
-    s32 value;
+    char *name;
+    u32 nodeIndex;
+    FldIcon *icons;
+    u32 iconCount;
+    s32 floor;
     FldPoint *pointA; /* 0x14 */
     FldPoint *pointB; /* 0x18 */
 } FldItem; /* 0x1C bytes */
 
 typedef struct {
-    u8 pad0[4];
+    char *name;
     FldItem *items;
     u32 count;
     SdfItemListRef *model; /* 0xC */
@@ -544,24 +552,13 @@ typedef struct FldTitleBannerMenu {
     u16 reserved;
 } FldTitleBannerMenu; /* 8-byte allocation from fldInitializeTitleBannerTask. */
 
-typedef struct {
-    u8 pad0[0xC];
-    s32 *drawNodeHandle;
-} FldEmitterRes;
+extern SdfPoolNode *D_00380838[4];
 
-typedef struct {
-    FldEmitterRes *res;
-    u8 pad4[0x4C];
-    f32 pos[4];
-} FldEmitter;
+extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
-extern struct SdfPoolNode *D_00380838[4];
+extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
-extern void sdfDrawNodeBuildMatrix();
-
-extern void sdfModelUpdateCurrentFrameTransforms();
-
-extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
+extern void func_003320E8(SdfPoolNode **, SdfModel *);
 
 s32 func_001442D0(void) {
     FldTitleBannerMenu *menu;
@@ -1185,19 +1182,19 @@ void fldReleaseSceneRecordChunk(void) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145818);
 
-void fldSetEmitterPosition(FldEmitter *emitter, f32 x, f32 y, f32 z) {
+void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
-    s32 handle;
+    SdfDrawNode *handle;
 
     memset(pos, 0, sizeof(pos));
     pos[3] = 1.0f;
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    handle = *emitter->res->drawNodeHandle;
+    handle = *(SdfDrawNode **)emitter->list->buffer;
     VU0_LOAD_VF_MEMORY(vf10, pos);
     VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, emitter->pos);
+    VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
     func_003320E8(D_00380838, emitter);
@@ -1219,7 +1216,7 @@ typedef struct {
 extern FldProjectedSprite D_0039A0E0[];
 
 /* Convert projected GS coordinates to the field's centered sprite origin. */
-void func_00145948(s32 index, u32 color, f32 x, f32 y) {
+void func_00145948(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0039A0E0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1251,37 +1248,19 @@ s32 fldFindRecordItem(s32 scene, u32 index) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
             if (i == scene && j == index) {
-                result = item->value + 1;
+                result = item->floor + 1;
             }
         }
     }
     return result;
 }
 
-typedef struct FldModelNodeView {
-    u8 pad0[4];
-    struct FldModelNodeView *next;
-    struct FldModelNodeView *owner;
-    struct FldModelNodeView *children;
-    u8 pad10[4];
-    u16 flags;
-} FldModelNodeView;
-
-typedef struct {
-    u8 pad0[0xC];
-    FldModelNodeView **entries;
-} FldModelNodeListView;
-
-typedef struct {
-    FldModelNodeListView *list;
-} FldModelView;
-
-void func_00146150(FldModelView *model, s32 index, s32 clearFlag) {
-    FldModelNodeView *parent = model->list->entries[index + 1];
-    FldModelNodeView *first;
-    FldModelNodeView *node;
-    FldModelNodeView *next;
-    FldModelNodeView *headNext;
+void func_00146150(SdfModel *model, s32 index, s32 clearFlag) {
+    SdfDrawNode *parent = ((SdfDrawNode **)model->list->buffer)[index + 1];
+    SdfDrawNode *first;
+    SdfDrawNode *node;
+    SdfDrawNode *next;
+    SdfDrawNode *headNext;
     u16 flags;
 
     if (parent->children == NULL) {
@@ -1298,7 +1277,7 @@ void func_00146150(FldModelView *model, s32 index, s32 clearFlag) {
         return;
     }
     node = headNext;
-    if (parent != node->owner || first == node) {
+    if (parent != node->parent || first == node) {
         return;
     }
     for (;;) {
@@ -1312,7 +1291,7 @@ void func_00146150(FldModelView *model, s32 index, s32 clearFlag) {
             return;
         }
         node = next;
-        if (parent != node->owner) {
+        if (parent != node->parent) {
             return;
         }
         if (first != node) {
@@ -1332,17 +1311,699 @@ s32 fldGetMaxItemValue(void) {
     for (i = 0; i < (s32)fldSceneRecordCount; i++, rec++) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
-            if (max < item->value) {
-                max = item->value;
+            if (max < item->floor) {
+                max = item->floor;
             }
         }
     }
     return max + 1;
 }
 
+#include "field_stage.h"
+extern s32 D_00436240, D_0043624C, D_00436250, D_00436254;
+extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
+extern f32 D_00436290, D_00436294, D_004362A4, D_004362A8, D_004362AC;
+extern f32 D_00384790[16], sdfViewMatrix[16];
+extern f32 D_0037FA20[4] __attribute__((aligned(16)));
+extern void frFontSetSharedRenderFlags(u32);
+extern void sdfInvertScaledVuTransform(void);
+extern s32 fldFindNextMarkedValue(s32), fldFindPreviousMarkedValue(s32);
+extern void fldSelectDisplayBuffer(u32);
+extern void func_0012BE18(s32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
+extern s32 func_00123EE0(s32, f32, f32);
+extern s32 fldGetFloorFlag(s32, s32, s32);
+extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
+typedef char FldPoint_size_must_be_C[(sizeof(FldPoint) == 0xC) ? 1 : -1];
+typedef char FldIcon_size_must_be_8[(sizeof(FldIcon) == 8) ? 1 : -1];
+typedef char FldItem_size_must_be_1C[(sizeof(FldItem) == 0x1C) ? 1 : -1];
+typedef char FldSceneRecord_size_must_be_14[(sizeof(FldSceneRecord) == 0x14) ? 1 : -1];
+
+
+typedef struct FrFontGlyph FrFontGlyph;
+extern FrFontGlyph *D_00438ED4;
+extern s32 D_00436240;
+extern s32 D_00436248;
+extern s32 D_00436250, D_00436254;
+extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
+extern f32 D_00436290, D_004362A4, D_004362A8, D_004362AC;
+
+extern f32 sdfViewMatrix[16];
+extern void func_0012BE18(s32);
+extern void fldSelectDisplayBuffer(u32);
+extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+extern s32 func_00123EE0(s32, f32, f32);
+extern s32 fldGetFloorFlag(s32, s32, s32);
+extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
+extern void func_00145A08(s32, f32, f32, f32);
+extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
+extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
+extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern f32 sdfSinPoly(f32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
+extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
+extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
+extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
+extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
+
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413700);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00146250);
+void func_00146250(void) {
+    s32 proposed;
+    s32 selectedFloor;
+    s32 itemVisible;
+    s32 i, j, k;
+    FldSceneRecord *record;
+    FldItem *item;
+    FieldStageCoordinate *stage;
+    f32 left = 0.0f, top = 0.0f, right = 0.0f, bottom = 0.0f;
+    f32 sceneX, sceneZ;
+    f32 playerX, playerY;
+    f32 minX, maxZ, maxX, minZ;
+    f32 focus[4] __attribute__((aligned(16)));
+    s32 labelAlpha;
+    u32 labelColor;
+
+    proposed = fldGetMaxItemValue();
+    frFontSetSharedRenderFlags(0x5E);
+    VU0_LOAD_MATRIX(D_00384790);
+    sdfInvertScaledVuTransform();
+    D_00436288 = D_0043624C;
+    if ((s8)D_0037F510[1][0][8] < 0 && D_00436288 < proposed) {
+        proposed = D_00436288 + 1;
+        if (!D_00436240) proposed = fldFindNextMarkedValue(D_00436288);
+        if (D_00436288 != proposed) {
+            sndSetSequenceVolumePan(2, 127, 63);
+            D_0043628C = D_00436288;
+            D_00436288 = proposed;
+            D_00436290 = -2500.0f;
+            D_0043629C = -24;
+            D_00436294 = 0.0f;
+            D_00436298 = 0;
+            D_004362A0 = 0;
+        }
+    }
+    if ((s8)D_0037F510[1][0][10] < 0 && D_00436288 >= 2) {
+        proposed = D_00436288 - 1;
+        if (!D_00436240) proposed = fldFindPreviousMarkedValue(D_00436288);
+        if (D_00436288 != proposed) {
+            sndSetSequenceVolumePan(2, 127, 63);
+            D_0043628C = D_00436288;
+            D_00436288 = proposed;
+            D_00436290 = 2500.0f;
+            D_0043629C = 24;
+            D_00436294 = 0.0f;
+            D_00436298 = 0;
+            D_004362A0 = 0;
+        }
+    }
+    if (D_00436298 < 128) D_00436298 += 16;
+    if (D_0043629C < 0) { D_0043629C += 4; D_004362A0 += 4; }
+    if (D_0043629C > 0) { D_0043629C -= 4; D_004362A0 -= 4; }
+    if (D_00436290 < 1000.0f && D_00436290 > -1000.0f) {
+        D_00436290 = 0.0f;
+    } else if (D_00436290 > 0.0f) {
+        D_00436290 -= 500.0f; D_00436294 -= 500.0f;
+    } else if (D_00436290 < 0.0f) {
+        D_00436290 += 500.0f; D_00436294 += 500.0f;
+    } else { D_00436290 = 0.0f; }
+    D_0043624C = D_00436288;
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00384790);
+    fldSelectDisplayBuffer(0x56);
+    func_0012BE18(0);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+    fldSelectDisplayBuffer(0x57);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSelectDisplayBuffer(0x56);
+    fldSubmitFrameQuad(1, 1, 128, 1, 0, 0, 1, 1);
+    stage = fldFindStageCoordinateRecord(fldAreaState.area, D_00436288);
+    if (stage != NULL) {
+        s32 run;
+        f32 step = (f32)stage->cellSize;
+        u32 color;
+        evtSetDrawSurfaceIndex(0x56);
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        color = D_00436240 ? 0x80000080 : 0x80000000;
+        for (j = 0, sceneZ = stage->originZ; j < stage->rows;
+             j++, sceneZ -= step) {
+            if (sceneZ > (f32)D_00436254 + 8400.0f) continue;
+            if (sceneZ < (f32)D_00436254 - 8400.0f) break;
+            run = 0;
+            for (i = 0, sceneX = stage->originX; i < stage->cols;
+                 i++, sceneX += step) {
+                if (sceneX < (f32)D_00436250 - 11400.0f) continue;
+                if (sceneX > (f32)D_00436250 + 11400.0f) break;
+                if (func_00123EE0(D_00436288, sceneX, sceneZ)) {
+                    if (run == 0) { left = sceneX - 50.0f; top = sceneZ + 50.0f; }
+                    bottom = sceneZ - step - 50.0f;
+                    right = sceneX + step + 50.0f;
+                    run++;
+                } else {
+                    if (run > 0) evtSubmitQuadFromVertices(left, D_00436290 - 10.0f, top,
+                    right, D_00436290 - 10.0f, top,
+                    left, D_00436290 - 10.0f, bottom,
+                    right, D_00436290 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
+                    run = 0;
+                }
+            }
+            if (run > 0) evtSubmitQuadFromVertices(left, D_00436290 - 10.0f, top,
+                    right, D_00436290 - 10.0f, top,
+                    left, D_00436290 - 10.0f, bottom,
+                    right, D_00436290 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
+            run = 0;
+        }
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+
+
+    /* Scene visibility and outline passes, then the DDS2 ground tint. */
+    if (D_00436240 != 0) {
+        fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    }
+
+    selectedFloor = D_00436288 - 1;
+    record = (FldSceneRecord *)fldSceneRecords;
+    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            itemVisible = 0;
+            if (selectedFloor == item->floor) {
+                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                if (D_00436240 != 0) {
+                    itemVisible = 1;
+                }
+            }
+            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+        }
+    }
+    for (i = 0; i < fldSceneRecordCount; i++) {
+        D_003A5470[i]->color = 0x80808080;
+        fldSetEmitterPosition(D_003A5470[i], 0.0f, D_00436290, 0.0f);
+    }
+
+    fldSelectDisplayBuffer(0x56);
+    func_0012BE18(0);
+    fldSubmitPrimaryFramePacket();
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+
+    record = (FldSceneRecord *)fldSceneRecords;
+    selectedFloor = D_00436288 - 1;
+    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            itemVisible = 0;
+            if (selectedFloor == item->floor) {
+                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                if (D_00436240 != 0) {
+                    itemVisible = 1;
+                }
+            }
+            func_00146150(D_003A5470[i], item->nodeIndex, itemVisible);
+        }
+        D_003A5470[i]->color = 0x80808080;
+        fldSetEmitterPosition(D_003A5470[i], -50.0f, D_00436290, 50.0f);
+        fldSetEmitterPosition(D_003A5470[i], 50.0f, D_00436290, 50.0f);
+        fldSetEmitterPosition(D_003A5470[i], -50.0f, D_00436290, -50.0f);
+        fldSetEmitterPosition(D_003A5470[i], 50.0f, D_00436290, -50.0f);
+
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            func_00146150(D_003A5470[i], item->nodeIndex,
+                          selectedFloor == item->floor);
+        }
+        D_003A5470[i]->color = 0x10101010;
+        fldSetEmitterPosition(D_003A5470[i], 0.0f, D_00436290, 0.0f);
+        D_003A5470[i]->color = 0x80808080;
+    }
+
+    fldSelectDisplayBuffer(0x5A);
+    fldSubmitAlternateFramePacket();
+    if (stage != NULL) {
+        f32 step;
+        s32 run;
+
+        evtSetDrawSurfaceIndex(0x5A);
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(0);
+        step = stage->cellSize;
+        sceneZ = stage->originZ;
+        for (j = 0; j < stage->rows; j++, sceneZ -= step) {
+            if ((f32)D_00436254 + 8400.0f < sceneZ) {
+                continue;
+            }
+            if (sceneZ < (f32)D_00436254 - 8400.0f) {
+                break;
+            }
+            run = 0;
+            sceneX = stage->originX;
+            for (i = 0; i < stage->cols; i++, sceneX += step) {
+                if (sceneX < (f32)D_00436250 - 11400.0f) {
+                    continue;
+                }
+                if ((f32)D_00436250 + 11400.0f < sceneX) {
+                    break;
+                }
+                if (func_00123EE0(D_00436288, sceneX, sceneZ) != 0) {
+                    if (run == 0) {
+                        left = sceneX - 50.0f;
+                        top = sceneZ + 50.0f;
+                    }
+                    bottom = sceneZ - step - 50.0f;
+                    right = sceneX + step + 50.0f;
+                    run++;
+                } else {
+                    if (run > 0) {
+                        evtSubmitQuadFromVertices(
+                            left, D_00436290 - 10.0f, top,
+                            right, D_00436290 - 10.0f, top,
+                            left, D_00436290 - 10.0f, bottom,
+                            right, D_00436290 - 10.0f, bottom,
+                            0x8059656E, 0x8059656E, 0x8059656E, 0x8059656E);
+                    }
+                    run = 0;
+                }
+            }
+            if (run > 0) {
+                evtSubmitQuadFromVertices(
+                    left, D_00436290 - 10.0f, top,
+                    right, D_00436290 - 10.0f, top,
+                    left, D_00436290 - 10.0f, bottom,
+                    right, D_00436290 - 10.0f, bottom,
+                    0x8059656E, 0x8059656E, 0x8059656E, 0x8059656E);
+            }
+            run = 0;
+        }
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+
+
+
+
+    func_0012BE18(0);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    D_004362A8 += 0.4f;
+    D_004362AC += 0.2f;
+    PCP_COPY_VECTOR_F32(focus, D_0037FA20);
+
+    if (D_00436298 >= 128) {
+        selectedFloor = D_00436288 - 1;
+        record = (FldSceneRecord *)fldSceneRecords;
+        for (i = 0; i < fldSceneRecordCount; i++, record++) {
+            sceneX = 0.0f;
+            sceneZ = 0.0f;
+            item = record->items;
+            for (j = 0; j < record->count; j++, item++) {
+                itemVisible = 0;
+                if (selectedFloor == item->floor) {
+                    if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                    if (D_00436240 != 0) {
+                        itemVisible = 1;
+                    }
+                }
+                if (itemVisible != 0) {
+                    FldIcon *icon = item->icons;
+
+                    if (icon != NULL) {
+                        for (k = 0; k < item->iconCount; k++, icon++) {
+                            s32 spriteIndex = 0;
+                            s32 iconVisible;
+                            f32 offsetX = 0.0f;
+                            f32 offsetZ = 0.0f;
+                            f32 projectedX;
+                            f32 projectedY;
+
+                            iconVisible = 0;
+                            switch (icon->kind) {
+                            case 1:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 8;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 2:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 9;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 3:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 10;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 4:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 5;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 5:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 2;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 6:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 4;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 7:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 6;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 8:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 7;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 9:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 3;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 10:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 12;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 11:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 11;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 12:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 13;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 13:
+                                if (D_00436240 != 0 ||
+                                    func_00123EE0(D_00436288,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 14;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            default:
+                                spriteIndex = 11;
+                                break;
+                            }
+                            if (iconVisible != 0) {
+                                f32 x;
+                                f32 z;
+
+                                x = icon->position->x + sceneX + offsetX;
+                                offsetX = focus[0] - x;
+                                if (offsetX < 0.0f) {
+                                    offsetX = -offsetX;
+                                }
+                                z = icon->position->z + sceneZ + offsetZ;
+                                offsetZ = focus[2] - z;
+                                if (offsetZ < 0.0f) {
+                                    offsetZ = -offsetZ;
+                                }
+                                if (offsetX < 80000.0f && offsetZ < 80000.0f) {
+                                    fldProjectPointSetupAlt(&projectedX, &projectedY,
+                                                            x, D_00436290, z);
+                                    func_00145948(projectedX, projectedY,
+                                                  spriteIndex, 0x80808080);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (D_00436288 == fldAreaState.unkC0) {
+            f32 worldX;
+            f32 worldZ;
+            f32 distanceX;
+            f32 distanceZ;
+
+            fldGetSceneEntryPosition(D_00436248, &sceneX, &sceneZ);
+            fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
+            func_0012BE18(1);
+            worldX = fldAreaState.x + sceneX;
+            distanceX = focus[0] - worldX;
+            if (distanceX < 0.0f) {
+                distanceX = -distanceX;
+            }
+            worldZ = fldAreaState.z + sceneZ;
+            distanceZ = focus[2] - worldZ;
+            if (distanceZ < 0.0f) {
+                distanceZ = -distanceZ;
+            }
+            fldProjectPointSetupAlt(&playerX, &playerY,
+                                    worldX, D_00436290, worldZ);
+            if (distanceX < 80000.0f && distanceZ < 80000.0f) {
+                func_0012BE18(1);
+                func_00145A08(1, playerX, playerY, -fldAreaState.negatedAngle);
+                func_0012BE18(0);
+                func_00145A08(0, playerX, playerY, fldAreaState.angle);
+            }
+        }
+    }
+
+    /* DDS2's location-flag overlay also runs during the floor fade. */
+    if (D_00436288 == fldAreaState.unkC0 && fldAreaState.commandEnabled != 0
+        && fldAreaState.sceneCommand == 0) {
+        s32 maskX;
+        s32 maskY;
+        s32 spriteX;
+        s32 spriteY;
+
+        fldGetSceneEntryPosition(D_00436248, &sceneX, &sceneZ);
+        fldProjectPointSetupAlt(&playerX, &playerY,
+                                fldAreaState.x + sceneX, D_00436290,
+                                fldAreaState.z + sceneZ);
+        maskX = (s32)(playerX - 2048.0f);
+        maskY = (s32)(playerY - 2048.0f);
+        fldSelectDisplayBuffer(0x5E);
+        fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+        func_0012BE18(1);
+        fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+        fldSubmitGsQuadTagged(maskX + 219, maskY + 93,
+                              72, 37, 0, 0, 0, 128);
+        fldSubmitFrameQuad(1, 0, 128, 1, 1, 0, 1, 1);
+        func_0012BE18(0);
+        fldSubmitGsQuadTagged(0, 0, 512, 224, 26, 17, 8, 128);
+        fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
+        spriteX = (s32)(playerX - 2048.0f) + 219;
+        spriteY = (s32)(playerY - 2048.0f) * 2 + 224;
+        fldSubmitSpriteRect(spriteX, spriteY - 39, 74, 39,
+                            2, 2, 74, 39, 0x80808080, D_0044F7F0[9]);
+        fldSubmitSpriteRect(spriteX, spriteY, 74, 39,
+                            2, 41, 74, -39, 0x80808080, D_0044F7F0[9]);
+        func_0012BE18(1);
+        fldSubmitSpriteRect(-27, -23, 560, 180, 1, 36, 62, 27,
+                            0x80808080, D_0044F7F0[8]);
+        func_0012BE18(0);
+    }
+
+    fldSelectDisplayBuffer(0x5E);
+    func_0012BE18(0);
+    func_0012BE18(0);
+    fldSubmitSpriteRect(341, 403, 22, 22, 48, 2, -22, 22,
+                        0x80808080, D_0044F7F0[6]);
+    fldSubmitSpriteRect(363, 403, 112, 22, 26, 2, 1, 22,
+                        0x80808080, D_0044F7F0[6]);
+    fldSubmitSpriteRect(475, 403, 22, 22, 26, 2, 22, 22,
+                        0x80808080, D_0044F7F0[6]);
+    fldSubmitSpriteRect(454, 401, 58, 44, 1, 1, 58, 44,
+                        0x80808080, fldAreaState.fieldTextures[3].texture);
+    fldSubmitSpriteRect(354, 406, 61, 16, 2, 2, 61, 16,
+                        0x80808080, D_0044F7F0[5]);
+    fldSubmitSpriteRect(424, 406, 61, 16, 64, 2, 61, 16,
+                        0x80808080, D_0044F7F0[5]);
+
+    top = sdfSinPoly(D_004362A4);
+    i = (s32)(top * 32.0f) + 96;
+    D_004362A4 += 0.2f;
+    i = i + (i << 8) + (i << 16)
+                 + 0x80000000U;
+    fldGetVisibleSceneBounds(&minX, &maxZ, &maxX, &minZ);
+    minX = (s32)((minX - 600.0f) / 600.0f) * 600;
+    maxX = (s32)((maxX + 600.0f) / 600.0f) * 600;
+    maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
+    minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+
+    if ((f32)D_00436254 < maxZ) {
+        fldSubmitSpriteRect(241, 6, 29, 41, 41, 20, 29, 41,
+                            i, D_0044F7F0[5]);
+    } else {
+        fldSubmitSpriteRect(243, 15, 25, 25, 2, 26, 25, 25,
+                            0x80808080, D_0044F7F0[6]);
+    }
+    if (minZ < (f32)D_00436254) {
+        fldSubmitSpriteRect(241, 401, 29, 41, 41, 61, 29, -41,
+                            i, D_0044F7F0[5]);
+    } else {
+        fldSubmitSpriteRect(243, 408, 25, 25, 2, 51, 25, -25,
+                            0x80808080, D_0044F7F0[6]);
+    }
+    if ((f32)D_00436250 < maxX) {
+        fldSubmitSpriteRect(465, 209, 41, 29, 73, 20, 41, 29,
+                            i, D_0044F7F0[5]);
+    } else {
+        fldSubmitSpriteRect(472, 211, 25, 25, 29, 26, 25, 25,
+                            0x80808080, D_0044F7F0[6]);
+    }
+    if (minX < (f32)D_00436250) {
+        fldSubmitSpriteRect(6, 209, 41, 29, 114, 20, -41, 29,
+                            i, D_0044F7F0[5]);
+    } else {
+        fldSubmitSpriteRect(15, 211, 25, 25, 54, 26, -25, 25,
+                            0x80808080, D_0044F7F0[6]);
+    }
+    fldSubmitSpriteRect(247, 38, 18, 18, 2, 20, 18, 18,
+                        0x80808080, D_0044F7F0[5]);
+    fldSubmitSpriteRect(247, 393, 18, 18, 21, 20, 18, 18,
+                        0x80808080, D_0044F7F0[5]);
+    fldSubmitSpriteRect(457, 215, 18, 18, 2, 39, 18, 18,
+                        0x80808080, D_0044F7F0[5]);
+    fldSubmitSpriteRect(38, 215, 18, 18, 21, 39, 18, 18,
+                        0x80808080, D_0044F7F0[5]);
+    fldSubmitSpriteRect(280, 16, 18, 25, 38, 3, 18, 25,
+                        0x80808080, fldAreaState.fieldTextures[0].texture);
+    fldSubmitSpriteRect(298, 16, 182, 25, 54, 3, 1, 25,
+                        0x80808080, fldAreaState.fieldTextures[0].texture);
+    fldSubmitSpriteRect(480, -1, 32, 57, 1, 2, 32, 57,
+                        0x80808080, fldAreaState.fieldTextures[0].texture);
+    fldSubmitSpriteRect(292, 42, 22, 22, 2, 2, 22, 22,
+                        0x80808080, D_0044F7F0[6]);
+    fldSubmitSpriteRect(314, 42, 171, 22, 23, 2, 1, 22,
+                        0x80808080, D_0044F7F0[6]);
+    fldSubmitSpriteRect(485, 42, 22, 22, 26, 2, 22, 22,
+                        0x80808080, D_0044F7F0[6]);
+
+    {
+        const u8 *title = (const u8 *)D_0039A1D0[fldAreaState.area % 100].s;
+
+        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - D_00438ED8 * 6) << 4, 128, 0, 0xA09DC380,
+            title, 0);
+        frFontStoreShiftedRenderValue(D_00438ED4, 0xFFFFFF);
+        frFontDrawGlyphInDefaultMode(D_00438ED4);
+        frFontQueueGlyphForCurrentDrawBuffer(D_00438ED4);
+    }
+
+    fldSelectDisplayBuffer(0x5E);
+    func_0012BE18(0);
+    fldSubmitFrameQuad(1, 5, 128, 3, 0, 0, 1, 2);
+
+    if (D_0043629C != 0 && (u32)D_0043628C - 1U < 40U
+        && D_0044FCF0[D_0043628C] >= 2) {
+        s32 labelIndex;
+
+        labelAlpha = D_004362A0;
+        if (labelAlpha < 0) {
+            labelAlpha = -labelAlpha;
+        }
+        labelAlpha = 128 - (labelAlpha << 3);
+        if (labelAlpha < 0) {
+            labelAlpha = 0;
+        }
+        labelColor = labelAlpha | 0x78759B00;
+        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_0043628C);
+        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - (D_0044FCF0[D_0043628C] / 2) * 12) << 4,
+            (D_004362A0 + 44) << 3, 0, labelColor,
+            (const u8 *)D_003A25AC[labelIndex].s, 0);
+        frFontStoreShiftedRenderValue(D_00438ED4, 0xFFFFFF);
+        frFontDrawGlyphWithSharedFlags(D_00438ED4, 1);
+        frFontQueueGlyphForCurrentDrawBuffer(D_00438ED4);
+    }
+
+    if ((u32)D_00436288 - 1U < 40U && D_0044FCF0[D_00436288] >= 2) {
+        s32 labelIndex;
+
+        labelAlpha = D_0043629C;
+        if (labelAlpha < 0) {
+            labelAlpha = -labelAlpha;
+        }
+        labelAlpha = 128 - (labelAlpha << 3);
+        if (labelAlpha < 0) {
+            labelAlpha = 0;
+        }
+        labelColor = labelAlpha | 0x78759B00;
+        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_00436288);
+        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - (D_0044FCF0[D_00436288] / 2) * 12) << 4,
+            (D_0043629C << 3) + 348, 0, labelColor,
+            (const u8 *)D_003A25AC[labelIndex].s, 0);
+        frFontStoreShiftedRenderValue(D_00438ED4, 0xFFFFFF);
+        frFontDrawGlyphWithSharedFlags(D_00438ED4, 1);
+        frFontQueueGlyphForCurrentDrawBuffer(D_00438ED4);
+    }
+
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148188);
 
@@ -1533,7 +2194,7 @@ typedef struct FldFogParams {
 
 extern FldFogParams D_0037FB30;
 
-extern u128 D_0037FA20;
+
 
 extern u128 D_0037FA30;
 
