@@ -29,7 +29,6 @@ extern MnuMovieList mnuMovieList;
 
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 

@@ -70,8 +70,11 @@ extern void sdfPacUseHighAddressAllocator(void *);
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
- * A pending non-PAC entry returns one; entry is required. */
-s32 filePollEntryCleanup(FileCleanup *entry) {
+ * A pending non-PAC request returns one; request is required. */
+s32 filePollEntryCleanup(struct FileRequest *request) {
+    FileCleanup *entry;
+
+    entry = (FileCleanup *)request;
     if (entry->kind == FILE_REQUEST_KIND_PAC) {
         return btlDestroyStageTask(entry);
     }

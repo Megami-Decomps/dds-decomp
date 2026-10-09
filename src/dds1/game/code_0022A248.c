@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "evt_viewer.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
@@ -161,7 +162,6 @@ void *evtGetTestTaskUpdateCallback(void) {
 
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 sdfPathExists(char *);

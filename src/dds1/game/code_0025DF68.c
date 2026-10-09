@@ -253,7 +253,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
     glyph = itfCreateConvertedTextGlyph(0x570, (rowOffset + 0x99) << 3, z,
                                         style, (const u8 *)node->value, NULL);
     if (selected) {
-        frFontSetChainFlag(glyph, 4);
+        frFontSetChildChainFirstOption(glyph, 4);
     }
     frFontDrawGlyphChain(glyph, 1, drawArg);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -269,7 +269,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
     func_003014F0(text, D_003BC500, value);
     glyph = func_001978E8(0xFF0, (rowOffset + 0x9D) << 3, z, style, text, NULL);
     if (selected) {
-        frFontSetChainFlag(glyph, 4);
+        frFontSetChildChainFirstOption(glyph, 4);
     }
     frFontDrawGlyphChain(glyph, 1, drawArg);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -377,7 +377,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
         func_003014F0(text, D_003BC4F0, scene->counter);
         glyph = func_00197A98(0xDD0, (155 + row * 21) << 3, depth,
                               color, text, 0);
-        frFontSetChainFlag(glyph, 4);
+        frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
@@ -430,7 +430,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     if (inner->count != 0) {
         func_003014F0(text, D_003BC508, 0);
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
-        frFontSetChainFlag(glyph, 4);
+        frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
@@ -451,7 +451,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
     func_003014F0(text, D_003BC508, 0);
     glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
-    frFontSetChainFlag(glyph, 4);
+    frFontSetChildChainFirstOption(glyph, 4);
     frFontDrawGlyphChain(glyph, 1, option);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
@@ -471,7 +471,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     if (inner->count != 0) {
         func_003014F0(text, D_003BC508, inner->cursor->camp.value * panel->counter);
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
-        frFontSetChainFlag(glyph, 4);
+        frFontSetChildChainFirstOption(glyph, 4);
         frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }

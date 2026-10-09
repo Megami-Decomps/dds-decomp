@@ -159,7 +159,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
 
     func_003014F0(text, D_003BC568, info->totalExp);
     glyph = func_001979C8(x, y, z, w, text, 0);
-    frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
@@ -170,7 +170,7 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const Brs
 
     func_003014F0(text, D_003BC568, info->macca);
     glyph = func_001979C8(x, y, z, w, text, 0);
-    frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }

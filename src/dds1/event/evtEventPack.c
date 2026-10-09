@@ -227,9 +227,8 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
 struct SdfResource;
 struct FileRequest;
 struct FileWork;
-struct FileCleanup;
 
-extern s32 filePollEntryCleanup(struct FileCleanup *);
+
 extern char D_003BC378[];
 
 /* Retain a ready pack and select its first entry-point record.

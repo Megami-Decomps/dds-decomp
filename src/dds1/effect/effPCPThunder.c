@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
@@ -3034,7 +3035,6 @@ void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source)
 extern SdfPoolNode *D_003548E0[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */

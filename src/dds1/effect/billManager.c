@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -18,8 +19,6 @@ BillData *billCreateAnimationDataFromResource(void *arg);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern void sdfAppendPacket(SdfListHead *list, u32 packet);
-extern void sdfAppendReferencePacket(SdfListHead *list, u32 packet);
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
