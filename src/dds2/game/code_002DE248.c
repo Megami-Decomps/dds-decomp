@@ -7838,22 +7838,22 @@ void effApplyModelTransform(u8 *work) {
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
-s32 *effCreateDrawableAssetWithDefaultOpacity() {
-    s32 *work = sdfAllocAndClearQuadwords(0xC);
-    s32 *position;
-    work[2] = 0;
-    position = (s32 *)sdfCreateAssetWithDrawEntries();
-    work[1] = (s32)position;
-    ((EffDrawableAsset *)position)->opacity = 1.0f;
+EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
+    EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(0xC);
+    EffDrawableAsset *position;
+    work->state = 0;
+    position = (EffDrawableAsset *)sdfCreateAssetWithDrawEntries();
+    work->asset = (s32)position;
+    position->opacity = 1.0f;
     return work;
 }
 
-void func_002F85D8(void) {
-    effCreateDrawableAssetWithDefaultOpacity();
+EffDrawableAssetWork *effCreateDrawableAssetWork(void) {
+    return effCreateDrawableAssetWithDefaultOpacity();
 }
 
-void func_002F85F0(s32 owner) {
-    effCreateDrawableAssetWithDefaultOpacity((u32)((EffActiveResource *)owner)->payload);
+EffDrawableAssetWork *effCloneDrawableAssetWork(EffActiveResource *owner) {
+    return effCreateDrawableAssetWithDefaultOpacity(owner->payload);
 }
 
 void effReleaseQueuedDrawableAssetWork(u32 work) {
