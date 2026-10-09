@@ -161,7 +161,6 @@ void *evtGetTestTaskUpdateCallback(void) {
 }
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void kwlnDrawSpriteCell(u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 sdfPathExists(char *);

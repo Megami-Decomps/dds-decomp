@@ -21,7 +21,6 @@ BillData *billCreateAnimationDataFromResource(void *arg);
 extern BillDispatch D_003AA998[];
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 typedef struct DmaPacketHeader DmaPacketHeader;
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 source, s32 bytes);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);

@@ -4510,7 +4510,6 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *);
 extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];

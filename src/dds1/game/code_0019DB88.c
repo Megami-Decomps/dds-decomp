@@ -621,7 +621,6 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
 
 extern DrawColorRec D_00357FC8[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void func_00198990(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
@@ -703,7 +702,6 @@ extern u8 D_00358008[];
 extern u8 D_00357FF8[];
 extern s32 D_00358018[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern void itfSendTablePacket(SdfListHead *, s32, s32);
 
@@ -790,7 +788,6 @@ extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
 
 void func_0019F770(UiSprite *sprite) {

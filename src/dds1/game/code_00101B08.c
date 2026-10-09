@@ -398,7 +398,6 @@ s32 func_00101E40(void) {
 }
 
 
-extern void sdfInitPacketList(void *);
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
@@ -455,7 +454,7 @@ s32 kwlnRenderFrame(void) {
     }
     if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {
         packetList = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
-        sdfInitPacketList(packetList);
+        sdfInitPacketList((SdfListHead *)packetList);
         sdfAppendDmaPrimary((SdfListHead *)packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
         texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
