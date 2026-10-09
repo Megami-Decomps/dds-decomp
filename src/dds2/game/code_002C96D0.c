@@ -5,6 +5,7 @@
 #include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
+#include "eff_update_flags.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -4891,7 +4892,7 @@ void fileQueueUpdate(FileQueue *queue)
         }
         fileJobInvokeTypeCallback((FileJobPayload *)job->id);
     }
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         queue->unk84++;
     }
 }
@@ -5663,7 +5664,7 @@ extern void fileSetRecordSecondVector();
 
 /* Original-style implicit int; callers ignore its result. */
 fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
-    if ((effModelUpdateControlFlags & 2) == 0 && obj->active != 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0 && obj->active != 0) {
         fileAcquireRecord((FileSlotTable *)obj->active);
     }
 }
