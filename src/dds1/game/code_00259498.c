@@ -368,13 +368,15 @@ void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
 }
 
 
-MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
+MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 cueDuration,
+                                                u8 initialGenerations,
+                                                u8 variant) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x48);
     MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
-    resource->owner = owner;
-    resource->sprite = sprite;
+    resource->cueDuration = cueDuration;
+    resource->initialGenerations = initialGenerations;
     resource->variant = variant;
     resource->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
     return resource;
@@ -402,13 +404,13 @@ SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *group, SpriteSpawnNode *p
         node->y = parent->y + steps.offsets[direction * 2 + 1];
         node->generations = parent->generations - 1;
         node->direction = direction;
-        node->framesLeft = node->duration = group->owner - 5;
+        node->framesLeft = node->duration = group->cueDuration - 5;
     } else {
         node->x = (s32)(effMiscRandUnitFloat(0) * 30.0f) * 26 + 16;
         node->y = (s32)(effMiscRandUnitFloat(0) * 20.0f) * 18 + 50;
-        node->generations = group->sprite;
+        node->generations = group->initialGenerations;
         node->direction = 0;
-        node->framesLeft = node->duration = group->owner;
+        node->framesLeft = node->duration = group->cueDuration;
     }
     return node;
 }

@@ -690,7 +690,7 @@ typedef char MenuTerminalWindowState_size_must_be_0x14[(sizeof(MenuTerminalWindo
 
 
 typedef struct DspScrollingStrip {
-    void *resource;
+    struct EffectSlotSet *resource;
     s32 frameIndex;
     s32 horizontalOffset;
     s32 verticalOffset;
@@ -701,7 +701,7 @@ typedef struct DspScrollingStripState {
     s32 unk0;
     s32 layout;
     s32 unk8;
-    void *resource;
+    struct EffectSlotSet *resource;
     s32 layer;
     s32 unk14;
     s32 unk18;
@@ -713,7 +713,9 @@ typedef char DspScrollingStripState_size_must_be_0x94[(sizeof(DspScrollingStripS
 typedef char DspScrollingStripState_strips_offset[((u32)&((DspScrollingStripState *)0)->strips == 0x1C) ? 1 : -1];
 typedef char DspScrollingStripState_firstSpeed_offset[((u32)&((DspScrollingStripState *)0)->strips[0].scrollSpeed == 0x2C) ? 1 : -1];
 
-void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer);
+void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
+                                struct EffectSlotSet *resource, s32 firstFrame,
+                                s32 layer);
 void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
 void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
 void func_0026BEC0(s32 x, s32 y, s32 flags, s32 scale, DspScrollingStripState *state, s32 option);
