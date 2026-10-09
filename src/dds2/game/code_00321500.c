@@ -237,15 +237,15 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
-extern MenuRuntimeRecord *func_00321F18(MenuRuntimeList *);
+extern MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *);
 extern MenuRuntimeCallback D_0043899C;
 extern f64 cos(f64);
 extern f64 sin(f64);
 
-MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
+MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
                            s32 offsetX, s32 offsetY, s32 direction,
                            s16 speed, s16 remaining, f32 angle) {
-    MenuRuntimeRecord *record = func_00321F18(list);
+    MenuRuntimeRecord *record = mnuAcquireRuntimeRecordSlot(list);
 
     if (record == NULL) {
         return NULL;
@@ -286,12 +286,13 @@ MenuRuntimeList *func_00321ED8(void) {
     return &D_0045C880;
 }
 
-void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
+/* Clears only record storage; the list header and activeCount are unchanged. */
+void mnuClearRuntimeRecordStorage(MenuRuntimeList *list) {
     memset(list->records, 0, list->capacity * sizeof(*list->records));
 }
 
 
-MenuRuntimeRecord *func_00321F18(MenuRuntimeList *list) {
+MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *list) {
     MenuRuntimeRecord *record;
     s32 i;
     u32 count;
