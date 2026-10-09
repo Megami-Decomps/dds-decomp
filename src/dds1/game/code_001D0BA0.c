@@ -691,11 +691,11 @@ extern s32 btlSelectActorAction(s32);
 
 extern s32 btlCalculateHuntEpReward(u8 *, u8 *);
 
-/* Native caller supplies actor,target; concrete provider currently declares (void). */
-extern u32 func_001A7ED8();
+/* Native hunt interface passes actor and target; HP recovery is zero in this title. */
+extern u32 func_001A7ED8(BtlUnit *actor, BtlUnit *target);
 
 /* Native caller supplies actor,target; concrete provider consumes only actor. */
-extern s32 btlCalculateAbilityRecoveryAmount();
+extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
 
@@ -708,8 +708,8 @@ extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
 extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 
-/* Native caller supplies kind,press; concrete provider currently declares (void). */
-extern void btlFindSoundTaskByWorkValue();
+/* Native resolver hook passes kind and press; both are unused by this title's no-op. */
+extern void btlFindSoundTaskByWorkValue(s32 kind, s32 press);
 
 extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
@@ -1963,7 +1963,8 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
     }
 }
 
-void btlFindSoundTaskByWorkValue(void) {
+/* Resolver hook receives kind and press; both are unused by this title's no-op. */
+void btlFindSoundTaskByWorkValue(s32 kind, s32 press) {
 }
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */

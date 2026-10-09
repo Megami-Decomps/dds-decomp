@@ -4337,11 +4337,13 @@ s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
     return ep;
 }
 
-u32 func_001B2380(void) {
+/* Recovery hooks receive the acting and selected units. This HP hook is
+ * inactive; the MP implementation below does not use the selected unit. */
+u32 func_001B2380(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
-s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit) {
+s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit, BtlUnit *target) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility(&unit->partyRecord, 0x26E) != 0) {
         recovery = (s32)(unit->partyRecord.maxMp * datAbilityParameters[0x26E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
