@@ -86,7 +86,7 @@ typedef struct FileJob {
     u32 color;        /* 0x64 */
     u32 xformFlags;   /* 0x68 */
     u8 unk6C[0x14];
-    s32 unk80;
+    s32 startFrame;   /* 0x80: earliest queue frame eligible for updates */
     u32 scaleFlags;   /* 0x84 */
     u8 unk88[8];
     u32 id;

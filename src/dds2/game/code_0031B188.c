@@ -35,7 +35,7 @@ typedef struct FileQueue {
     f32 transformValue;
     u8 pad78[8];
     s32 count;
-    u32 unk84;
+    u32 updateFrame;
     FileJob *last;
     FileJob *first;
 } FileQueue;
@@ -491,7 +491,7 @@ void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
                         fileQueueSetPosition(record->queue, position);
                     }
                     fileQueueUpdate(record->queue);
-                    if (record->queue->unk84 == D_0040AE10[(record->flags >> 1) & 0xFF] ||
+                    if (record->queue->updateFrame == D_0040AE10[(record->flags >> 1) & 0xFF] ||
                         ((record->flags >> 11) & 1)) {
                         mnuClearNodeBroadcastFlag((u8 *)record);
                     }

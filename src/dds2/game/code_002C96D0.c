@@ -460,7 +460,7 @@ typedef struct FileQueue {
     f32 transformValue; /* 0x74 */
     u8 pad78[8];
     s32 count;
-    u32 unk84;
+    u32 updateFrame;
     /* Disk reads at 295A90/2D5B38 use a relative job offset here;
      * runtime append at 293F60/2D3FC8 stores the tail pointer. */
     union {
@@ -4732,7 +4732,7 @@ FileQueue *fileQueueCreate(void) {
     FileQueue *queue = sdfAllocSizeClassBlock(0x90);
     memset(queue, 0, 0x90);
     queue->count = 0;
-    queue->unk84 = 0;
+    queue->updateFrame = 0;
     fileQueueInitTransform(queue);
     return queue;
 }
@@ -4843,9 +4843,9 @@ void fileQueueUpdate(FileQueue *queue)
         PCP_COPY_VECTOR(queue->quat, savedQuat);
     }
     total = queue->scale * queue->transformValue;
-    limit = queue->unk84;
+    limit = queue->updateFrame;
     for (job = queue->first; job != NULL; job = job->next) {
-        if (limit < job->unk80) {
+        if (limit < job->startFrame) {
             continue;
         }
         if (job->scaleFlags & 2) {
@@ -4876,7 +4876,7 @@ void fileQueueUpdate(FileQueue *queue)
         fileJobInvokeTypeCallback((FileJobPayload *)job->id);
     }
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        queue->unk84++;
+        queue->updateFrame++;
     }
 }
 
@@ -4924,7 +4924,7 @@ void fileQueueNotifyAllJobsComplete(u8 *owner) {
         fileJobNotifyComplete(((FileJob *)job)->id);
         job = (u8 *)((FileJob *)job)->next;
     }
-    ((FileQueue *)owner)->unk84 = 0;
+    ((FileQueue *)owner)->updateFrame = 0;
 }
 
 void fileQueueSetPosition(FileQueue *queue, void *vec)
@@ -5194,7 +5194,7 @@ void func_002D50D8(FileQueue *queue, s32 slot) {
         fd = func_00369B70(path, 0x602);
     }
     header = *queue;
-    header.unk84 = 0;
+    header.updateFrame = 0;
     size = sizeof(FileQueue);
     header.entryOffset = size;
     header.first = NULL;
@@ -5299,7 +5299,7 @@ void func_002D55B0(FileQueue *queue, s32 slot) {
     func_0036A420(fd, &image, sizeof(image));
 
     header = *queue;
-    header.unk84 = 0;
+    header.updateFrame = 0;
     size = sizeof(FileQueue);
     header.entryOffset = size;
     header.first = NULL;
