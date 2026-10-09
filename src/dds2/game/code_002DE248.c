@@ -621,7 +621,7 @@ static inline u32 effSlotCount(u8 *p, u32 max) {
 
 extern void sndLoadAndPlayStationedSe(u32);
 
-extern u32 effCreateTrackSetWithSharedReferences(u32, u16, u32);
+extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u16, u32);
 
 
 
@@ -1644,7 +1644,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     body += headerSize;
     ((EffBillFrameState *)node)->allocation = base;
     ((EffBillFrameState *)node)->entries = body;
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 0, handle);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 0, handle);
     return node;
 }
 
@@ -1734,7 +1734,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     body += headerSize;
     ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
@@ -1814,7 +1814,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     body += headerSize;
     ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
 }
 
@@ -1932,7 +1932,7 @@ extern u8 *billAllocateAnimatedTransformEntries();
 u8 *billCreateAnimatedTransform(EffBillAnimatedFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
+    ((EffBillFrameState *)work)->asset = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2059,7 +2059,7 @@ extern u8 *billAllocEmitterNode();
 u8 *billCreateEmitterTransform(EffBillEmitterFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
+    ((EffBillFrameState *)work)->asset = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2186,7 +2186,7 @@ extern u8 *billAllocStripNode();
 u8 *billCreateStripTransform(EffBillStripFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
+    ((EffBillFrameState *)work)->asset = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2276,7 +2276,7 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     body += headerSize;
     ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
     return node;
 }
 
@@ -2392,7 +2392,7 @@ extern u8 *billAllocQuadNode();
 u8 *billCreateQuadTransform(EffBillQuadFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
+    ((EffBillFrameState *)work)->asset = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2655,7 +2655,7 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E54);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00437E58);
 
-u32 effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
+EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
     EffTrackSet *effect = effCreateTrackSet(count, kind);
 
     if (effect->columns != 0) {
@@ -3102,7 +3102,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     state->scales = scales;
     memcpy(source->classConfig, source, sizeof(source->classConfig));
     state->effect = effCreateClassWork(1, source->classConfig);
-    tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 2, 0);
+    tracks = effCreateTrackSetWithSharedReferences(count, 2, 0);
     first = source->ring.firstColor;
     state->references = (u32)tracks;
     colors = (u32 *)tracks->tail;
@@ -4893,7 +4893,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->color = 0x80808080;
     node->opacity = 1.0f;
     node->active = 0;
-    node->transform = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
+    node->transform = (u32)effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
     node->resource = effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
@@ -4920,7 +4920,7 @@ void effReleaseModelResources(EffectStripNode *p) {
         billDispatchByKind(p->resource);
     }
     if (p->transform != 0) {
-        effReleaseResourceRefs(p->transform);
+        effReleaseResourceRefs((EffTrackSet *)p->transform);
     }
     if (p->active != 0) {
         fileReleaseGridRecordHandle(p->active);
@@ -6371,7 +6371,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
         record->entries = entries;
         entries += spans;
         if (config->drawReferences) {
-            tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(spans, 0, 0);
+            tracks = effCreateTrackSetWithSharedReferences(spans, 0, 0);
             record->references = tracks;
             tracks->type = (u32)config->referenceAlphaTrack.surfaceIndex;
             tracks->flag = config->pointSetFlag;
@@ -6382,14 +6382,14 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     return table;
 }
 
-extern void effReleaseModelPointSetAsset(s32);
+extern void effReleaseModelPointSetAsset(EffPointSet *);
 
 void effReleaseParticleList(EffSpanTable *list) {
     EffSpanRecord *entry = list->records;
     u32 i;
 
     for (i = 0; i < list->count; i++) {
-        effReleaseModelPointSetAsset((s32)entry->pointSet);
+        effReleaseModelPointSetAsset(entry->pointSet);
         if (entry->references != 0) {
             effReleaseResourceRefs(entry->references);
         }
@@ -6515,9 +6515,9 @@ EffPointSet *effCreatePointSet3(s32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effReleaseModelPointSetAsset(EffPointSet *set) {
+    sdfQueueAssetRelease((s32)set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
