@@ -76,7 +76,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */
 SdfPacket *sdfModelWriteAddressPacket(SdfDrawNode *node, SdfPacket *packet, s32 index) {
-    u32 address = (node->address + (index << 7)) & 0x0FFFFFFF;
+    u32 address = (u32)(node->workspace + (index << 7)) & 0x0FFFFFFF;
 
     packet->dmaTag.bits = ((s64)address << 32) | 0x30000008;
     packet->vifCodes.fields.secondCode = 0x6C07C000;
@@ -339,7 +339,7 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     f32 *scale;
     f32 *translation;
     f32 (*transformed)[4];
-    u32 address;
+    u8 *workspace;
     SdfDrawNode *child;
 
         VU0_LOAD_VF_MEMORY(vf28, xAxis);
@@ -356,9 +356,9 @@ void sdfModelUpdateDrawNodeTransforms(SdfDrawNode *drawNode, void *parentMatrix,
     sdfMultiplyVuMatrixInPlace();
     transformed = drawNode->worldMatrix;
     VU0_STORE_MATRIX(transformed);
-    address = drawNode->address;
-    if (address != 0) {
-        sdfWriteVuLightingPacket((VuLightingPacket *)(address + (frame << 7)));
+    workspace = drawNode->workspace;
+    if (workspace != NULL) {
+        sdfWriteVuLightingPacket((VuLightingPacket *)(workspace + (frame << 7)));
     }
     child = drawNode->children;
     if (child == 0) {
