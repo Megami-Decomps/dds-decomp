@@ -143,7 +143,7 @@ typedef union {
 } PolyRing;
 
 void polyUpdateBasicRingCells(PolyNode *obj);
-void func_00165860(PolyNode *node, s32 index);
+void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -220,7 +220,7 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
             s32 age = *ages;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                func_00165860(obj, index);
+                polyBuildBasicRadialFan(obj, index);
                 *ages = 0;
             } else if (age >= 0) {
                 entry->color = ((u32)(alphaStep * (f32)(duration - age)) << 24) | 0x808080;
@@ -252,7 +252,7 @@ void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     parPrependCellNode(obj->strip);
 }
 
-void func_00165860(PolyNode *node, s32 index) {
+void polyBuildBasicRadialFan(PolyNode *node, s32 index) {
     ParSystem *strip = node->strip;
     ParCell *cell = &strip->cells[index];
     f32 radius = node->radius;
@@ -354,7 +354,7 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
 }
 
 /* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
-PolyBand *func_00165B98(PolyRingHead *templateHead) {
+PolyBand *polyCreateBandNode(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     PolyBand *band = (PolyBand *)sdfResourceRetainAddress(allocation);
@@ -605,7 +605,7 @@ void func_001661C8(PolyBand *obj) {
     parPrependCellNode(obj->strip);
 }
 
-PolyArc *func_00166350(PolyArc *source) {
+PolyArc *polyCreateArcRingNode(PolyArc *source) {
     s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
     s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
@@ -795,8 +795,8 @@ void func_001667F8(PolyArc *obj) {
     parPrependCellNode(obj->strip);
 }
 
-/* Rotating-band counterpart of func_00165B98: twenty-byte records follow the header. */
-PolyRotatingBand *func_00166980(PolyRingHead *templateHead) {
+/* Rotating-band counterpart of polyCreateBandNode: twenty-byte records follow the header. */
+PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     PolyRotatingBand *band = (PolyRotatingBand *)sdfResourceRetainAddress(allocation);

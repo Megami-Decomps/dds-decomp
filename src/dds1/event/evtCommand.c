@@ -199,7 +199,7 @@ extern char D_003AC9E0[];
 extern char D_003AC958[];
 
 /* Apply four effect parameters after resolving every input object. */
-s32 func_00226180(void) {
+s32 evtCommandSetMagatuhiSourcePoints(void) {
     struct EffectObj *primary;
     struct EffectObj *point0;
     struct EffectObj *point1;

@@ -801,7 +801,7 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
 
-void func_00142408(void) {
+void fldLoadAreaModelTransfers(void) {
     char path[128];
     char directory[64];
     u32 resourceAddress;
@@ -906,7 +906,7 @@ void fldInitSceneMapLabels(void) {
 
     if (sceneId < 0xC8) {
         fldCacheMapLabelLengths(sceneId % 100);
-        func_00142408();
+        fldLoadAreaModelTransfers();
     }
 }
 
@@ -1110,7 +1110,7 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
-extern s32 func_00121ED8(s32, f32, f32);
+extern s32 fldTestStageExplorationCell(s32, f32, f32);
 extern s32 fldGetFloorFlag(s32, s32, s32);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
@@ -1213,7 +1213,7 @@ void func_00142D78(void) {
                  i++, sceneX += step) {
                 if (sceneX < (f32)D_003BAEBC - 11400.0f) continue;
                 if (sceneX > (f32)D_003BAEBC + 11400.0f) break;
-                if (func_00121ED8(D_003BAEF0, sceneX, sceneZ)) {
+                if (fldTestStageExplorationCell(D_003BAEF0, sceneX, sceneZ)) {
                     if (run == 0) { left = sceneX - 50.0f; top = sceneZ + 50.0f; }
                     bottom = sceneZ - step - 50.0f;
                     right = sceneX + step + 50.0f;
@@ -1328,7 +1328,7 @@ void func_00142D78(void) {
                 if ((f32)D_003BAEBC + 11400.0f < sceneX) {
                     break;
                 }
-                if (func_00121ED8(D_003BAEF0, sceneX, sceneZ) != 0) {
+                if (fldTestStageExplorationCell(D_003BAEF0, sceneX, sceneZ) != 0) {
                     if (run == 0) {
                         left = sceneX - 50.0f;
                         top = sceneZ + 50.0f;
@@ -1401,7 +1401,7 @@ void func_00142D78(void) {
                             switch (icon->kind) {
                             case 1:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 8;
@@ -1410,7 +1410,7 @@ void func_00142D78(void) {
                                 break;
                             case 2:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 9;
@@ -1419,7 +1419,7 @@ void func_00142D78(void) {
                                 break;
                             case 3:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 10;
@@ -1428,7 +1428,7 @@ void func_00142D78(void) {
                                 break;
                             case 4:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 5;
@@ -1437,7 +1437,7 @@ void func_00142D78(void) {
                                 break;
                             case 5:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 2;
@@ -1446,7 +1446,7 @@ void func_00142D78(void) {
                                 break;
                             case 6:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 4;
@@ -1455,7 +1455,7 @@ void func_00142D78(void) {
                                 break;
                             case 7:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 6;
@@ -1464,7 +1464,7 @@ void func_00142D78(void) {
                                 break;
                             case 8:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 7;
@@ -1477,7 +1477,7 @@ void func_00142D78(void) {
                                 break;
                             case 10:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 12;
@@ -1491,7 +1491,7 @@ void func_00142D78(void) {
                                 break;
                             case 12:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 13;
@@ -1500,7 +1500,7 @@ void func_00142D78(void) {
                                 break;
                             case 13:
                                 if (D_003BAEAC != 0 ||
-                                    func_00121ED8(D_003BAEF0,
+                                    fldTestStageExplorationCell(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 14;
@@ -1699,7 +1699,7 @@ extern void sdfInvertScaledVuTransform(void);
 extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
 
-void func_001447D0(void) {
+void fldDrawFieldBackdropFrame(void) {
     s32 i;
     s32 x;
     s32 y;
@@ -2417,7 +2417,7 @@ void fldCheckSceneReady(void) {
 
 void func_001470E0(void) {
     if (fldSceneReady == 1) {
-        func_001447D0();
+        fldDrawFieldBackdropFrame();
         func_00142D78();
     }
 }
@@ -2501,7 +2501,7 @@ extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
 extern void func_002DD688(f32 angle);
 
-void func_00147638(void) {
+void fldUpdateEffectTextureTransforms(void) {
     f32 vec[4];
     u8 mat[64];
     f32 angle;
@@ -3600,7 +3600,7 @@ extern s32 D_003D62DC[];
 struct EffWorldNode;
 
 
-s32 func_0014BA50(s32 index, s32 reserved) {
+s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
     s32 slot;
     s32 i;
     s32 candidate;
@@ -3665,7 +3665,7 @@ extern FldSparkController fldSparkControlState;
 
 extern void func_0014B688();
 
-extern s32 func_0014BA50(s32, s32);
+extern s32 fldBindSparkSlotObject(s32, s32);
 
 void fldUpdateSparkSlots(void) {
     s32 i;
@@ -3673,7 +3673,7 @@ void fldUpdateSparkSlots(void) {
     func_0014B688();
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
-            func_0014BA50(i, fldSparkSlots[i].unk28);
+            fldBindSparkSlotObject(i, fldSparkSlots[i].unk28);
         }
     }
 }
@@ -3705,7 +3705,7 @@ extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
-void func_0014C210(void) {
+void fldDrawWeatherLimitTimer(void) {
     s32 digitOrigins[10][2];
     s32 remainingFrames;
     s32 remainingSeconds;
@@ -3718,7 +3718,7 @@ void func_0014C210(void) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
-    func_00108FA0(20, 20, 113, 31, 1, 0, 113, 31,
+    kwlnDrawTexturedColorQuad(20, 20, 113, 31, 1, 0, 113, 31,
                   vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
     remainingSeconds = remainingFrames / 30;
     if (remainingSeconds >= 100) {
@@ -3726,11 +3726,11 @@ void func_0014C210(void) {
     }
     digit = remainingSeconds / 10;
     if (digit > 0) {
-        func_00108FA0(92, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+        kwlnDrawTexturedColorQuad(92, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
                       vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
     }
     digit = remainingSeconds % 10;
-    func_00108FA0(105, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+    kwlnDrawTexturedColorQuad(105, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
                   vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
 }
 
@@ -3794,7 +3794,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0928);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0978);
 
-void func_0014C648(void) {
+void fldUpdateSparkMessageSequence(void) {
     f32 position[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     f32 rotation[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     s32 choice;
@@ -3918,7 +3918,7 @@ void func_0014C648(void) {
         kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
         break;
     case 10:
-        func_0014C210();
+        fldDrawWeatherLimitTimer();
         if (++fldSparkControlState.unk2C > 10) {
             effObjClearFlags(fldSparkControlState.object, 1);
             dds3RemoveWorldObjectNode(fldSparkControlState.object);
@@ -3929,7 +3929,7 @@ void func_0014C648(void) {
         }
         break;
     case 7:
-        func_0014C210();
+        fldDrawWeatherLimitTimer();
         fldSparkControlState.dialogPhase = 0;
         fldSparkControlState.phase = 1;
         fldPreparePlayerSceneCameraTarget();
@@ -3946,7 +3946,7 @@ s32 func_0014CAF8(void) {
     return D_003D62C8[0];
 }
 
-void func_0014CB08(void) {
+void fldUpdateSparkEncounterScene(void) {
     f32 firstVector[4];
     f32 secondVector[4];
     s32 phase;
@@ -4000,7 +4000,7 @@ void func_0014CB08(void) {
             }
         }
 
-        func_0014C210();
+        fldDrawWeatherLimitTimer();
         if (fldSparkControlState.countdown < 31) {
             fldSparkControlState.countdown = 0;
             func_002E8DD0(0x670017);

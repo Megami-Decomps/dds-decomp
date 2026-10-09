@@ -185,7 +185,7 @@ extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 const char D_004127C0[16] = "player_a";
 
 /* Resolve positive named-chunk IDs into the model family's resource slots. */
-void func_00111E00(ObjBase *base, MdlCtx *model) {
+void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     const char *modelName;
     SdfModel *inner;
     s32 family;

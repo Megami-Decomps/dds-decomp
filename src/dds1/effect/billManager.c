@@ -199,7 +199,7 @@ extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);
 extern f32 D_0034E040[4];
 extern f32 D_0034E050[4];
 extern BillRenderPair *D_003BD7F8;
-extern void func_00150EB0(BillRenderPair *node);
+extern void billFlushPairedQuadStreams(BillRenderPair *node);
 
 /* Initialize the paired texture/state list, then append one quad to each
  * child stream. The second child owns the geometry and common batch count. */
@@ -351,14 +351,14 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
     PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
-        func_00150EB0(node);
+        billFlushPairedQuadStreams(node);
     }
 }
 
 extern u32 func_002E2BB8(u128 *positions, void *attributes, void *halfAttributes,
                          void *wordAttributes, s32 count, void *(*alloc)(s32));
 
-void func_00150EB0(BillRenderPair *pair) {
+void billFlushPairedQuadStreams(BillRenderPair *pair) {
     u32 colors[7][2];
     u16 uv[7][4][4];
     BillPacketWork *data[2];
@@ -408,7 +408,7 @@ void billFlushPendingRenderPairs(void) {
         do {
             BillPacketWork *work = node->children[1]->work;
             if (work->count != 0) {
-                func_00150EB0(node);
+                billFlushPairedQuadStreams(node);
             }
             D_00325228.append(&D_00325228, node->packetList);
             node->packetList = NULL;

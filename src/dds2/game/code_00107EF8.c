@@ -528,7 +528,7 @@ void func_00108E20(void) {
     }
 }
 
-void func_00108EC0(s32 x, s32 y, s32 width, s32 height,
+void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
     SdfListHead *list;
@@ -631,7 +631,7 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
     evtSubmitGradientRectAtDepth(x, y, width, height, EVT_QUAD_DEFAULT_DEPTH, topLeftColor, topRightColor, bottomRightColor, bottomLeftColor);
 }
 
-void func_00109538(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
+void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
     s32 coords[3][2];
     s32 command;
     s32 packet;
@@ -1644,7 +1644,7 @@ extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
 extern const char D_004113A0[];
 
-s32 func_0010B7B8(KwlnTask *task) {
+s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     s32 heapRatio;
     SdfListHead *list;
@@ -1675,14 +1675,14 @@ s32 func_0010B7B8(KwlnTask *task) {
 void func_0010B8D0(void) {
 }
 
-extern s32 func_0010B7B8(KwlnTask *task);
+extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
 extern void func_0010B8D0(void);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)func_0010B7B8, func_0010B8D0, NULL);
+        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, func_0010B8D0, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
     }

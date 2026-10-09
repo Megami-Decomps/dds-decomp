@@ -521,7 +521,7 @@ const char D_003A1C88[] = "btl:escape=%d%%[ratio=%.2f]\n";
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 func_001A8640(BtlUnit *actor) {
+s32 btlRollEscapeChance(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *enemy;
     s32 noEligibleEnemy;

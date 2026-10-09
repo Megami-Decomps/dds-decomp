@@ -496,7 +496,7 @@ extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
-extern struct EffectObj *func_00115840(s32 kind, struct EffNodeDescriptor *descriptor);
+extern struct EffectObj *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
 extern void effObjDispatchReadyState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
                                                struct EffectObj *second, struct EffectObj *third,
@@ -544,10 +544,10 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     case 0x15:
         switch (cmd->kind) {
         case 0x14:
-            handle = (s32)func_00115840(1, (struct EffNodeDescriptor *)cmd->arg);
+            handle = (s32)effForwardMagatuhiDescriptor(1, (struct EffNodeDescriptor *)cmd->arg);
             break;
         case 0x15:
-            handle = (s32)func_00115840(2, (struct EffNodeDescriptor *)cmd->arg);
+            handle = (s32)effForwardMagatuhiDescriptor(2, (struct EffNodeDescriptor *)cmd->arg);
             break;
         }
         n0 = evtEventViewerGetNameObject(params->u.names[0], viewer);

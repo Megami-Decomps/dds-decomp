@@ -1194,13 +1194,10 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
     return 0;
 }
 
-extern MdlCtx *func_00232198(s16 a, s16 b);
-
-
 void mdlLoadViewerResourceAndResetCursors(void) {
     MdlCtx *loaded;
 
-    loaded = func_00232198(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
+    loaded = mdlCreateContextFromResourceKey(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
     mdlViewerState.resources[0] = loaded;
     mdlViewerState.activeEntryId = 0;
     mdlViewerState.selectedEntryId = 0;
@@ -1973,9 +1970,6 @@ u32 func_00236E58(void) {
     func_00236E50();
     return 0;
 }
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *resource);
-extern u16 mdlGetContextResourceId(MdlCtx *resource);
 
 void mdlApplyViewerResourceMenuAction(void) {
     s32 i;

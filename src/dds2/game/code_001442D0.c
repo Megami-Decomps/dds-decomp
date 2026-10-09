@@ -43,7 +43,7 @@ extern MdlCtx *D_00435F20;
 extern void func_001542D8(void);
 extern void func_001523F0(void);
 extern void func_001525F0(void);
-extern void func_00152C88(void);
+extern void fldUpdateTargetGuideEffects(void);
 extern void func_00153068(void);
 extern s32 func_001515E0(f32 x, f32 z, s16 *gridX, s16 *gridY);
 
@@ -503,7 +503,7 @@ extern FldSparkController fldSparkControlState;
 
 extern void func_0014F5F0();
 
-extern s32 func_0014F980(s32, s32);
+extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
@@ -2021,7 +2021,7 @@ extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
 extern void func_0012BE18(s32 mode);
 
-void func_00148488(void) {
+void fldDrawScrollingLayerOverlay(void) {
     s32 textureRow;
     s32 panelOffset;
 
@@ -2753,7 +2753,7 @@ void fldCheckSceneReady(void) {
 
 void func_0014B050(void) {
     if (fldSceneReady == 1) {
-        func_00148488();
+        fldDrawScrollingLayerOverlay();
         func_00146250();
     }
 }
@@ -2822,7 +2822,7 @@ extern u32 fldPlayerObject;
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void func_00336538(f32 angle);
 
-void func_0014B5D8(void) {
+void fldUpdatePositionedTextureNodes(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));
     f32 angle;
@@ -3288,7 +3288,7 @@ extern void func_0012BE18(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 extern f32 sdfSinPoly(f32);
-extern void func_0012B690(s32, s32, s32, s32, s32, s32, s32, s32, u32,
+extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, SdfTex *);
 extern f32 D_0043634C;
 
@@ -3324,12 +3324,12 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                 color |= (color << 8) | (color << 16);
             }
             func_0012BE18(1);
-            func_0012B690(x + 0x1B6, y + 0x2E, 0x23, 0xB,
+            evtSubmitTexturedRectPacket(x + 0x1B6, y + 0x2E, 0x23, 0xB,
                           0x3B, 0x25, 0x23, 0xB,
                           color | 0x30000000, color | 0x30000000,
                           color | 0x30000000, color | 0x30000000,
                           fldAreaState.fieldTextures[2].texture);
-            func_0012B690(x + 0x1D8, y + 0x26, 0x1B, 0x21,
+            evtSubmitTexturedRectPacket(x + 0x1D8, y + 0x26, 0x1B, 0x21,
                           0x64, 2, 0x1B, 0x21,
                           color | 0x5A000000, color | 0x5A000000,
                           color | 0x5A000000, color | 0x5A000000,
@@ -4035,7 +4035,7 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     return 1;
 }
 
-s32 func_0014F980(s32 index, s32 reserved) {
+s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
     s32 slot;
     s32 i;
     s32 candidate;
@@ -4098,7 +4098,7 @@ void fldUpdateSparkSlots(void) {
     func_0014F5F0();
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
-            func_0014F980(i, fldSparkSlots[i].unk28);
+            fldAttachSparkSlotToWorldObject(i, fldSparkSlots[i].unk28);
         }
     }
 }
@@ -4174,7 +4174,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E48);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E98);
 
-void func_00150A60(void) {
+void fldUpdateDevilizeEventSequence(void) {
     f32 position[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     f32 rotation[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     s32 choice;
@@ -4905,7 +4905,7 @@ extern f32 D_00451D4C[];
 extern void effObjSetNodeFlags(ObjectTransform *inner, u32 flags);
 extern void effObjClearNodeFlags(ObjectTransform *inner, u32 flags);
 
-void func_00152C88(void) {
+void fldUpdateTargetGuideEffects(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothedPosition[4] __attribute__((aligned(16)));
     f32 axis[4] __attribute__((aligned(16)));
@@ -5039,7 +5039,7 @@ s32 fldReportCampVolumeError(void) {
     }
 }
 
-void func_00153410(void) {
+void fldUpdateTargetGuideController(void) {
     if (fldTargetGuideState.disabled != 1) {
         if (fldAreaState.targetGuideActive == 0 && fldTestSceneControlFlags(0x40) == 0) {
             if (fldTargetGuideState.unk64 == 14) {
@@ -5054,7 +5054,7 @@ void func_00153410(void) {
             func_001542D8();
             func_001523F0();
             func_001525F0();
-            func_00152C88();
+            fldUpdateTargetGuideEffects();
             func_00153068();
             func_001515E0(fldAreaState.x, fldAreaState.z, &D_00438EF8.x, &D_00438EF8.y);
             fldTargetGuideState.previousGridX = fldTargetGuideState.gridX;
@@ -5119,7 +5119,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 
-void func_001536B8(s32 mode) {
+void fldSetTargetGuideMode(s32 mode) {
     s32 previousMode;
 
     if (func_00153560(fldAreaState.area, fldAreaState.floor + 1) == 0) {
@@ -5136,7 +5136,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
@@ -5147,7 +5147,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(5);
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         break;
     case 2:
         fldUpdateViewAngle();
@@ -5155,7 +5155,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.yaw = 180.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(6);
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         break;
     case 3:
         fldTargetGuideState.gridX = D_003AA6A8[1].x;
@@ -5166,7 +5166,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
@@ -5179,7 +5179,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
@@ -5192,7 +5192,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
@@ -5205,7 +5205,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
@@ -5217,7 +5217,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.yaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(6);
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         break;
     case 8:
@@ -5229,7 +5229,7 @@ void func_001536B8(s32 mode) {
             fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
             func_001519E8(3);
             fldTargetGuideState.updateFlags |= 2;
-            func_00152C88();
+            fldUpdateTargetGuideEffects();
             func_00341C78(0x690061);
             sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         }
@@ -5243,7 +5243,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
@@ -5255,7 +5255,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.targetYaw = 0.0f;
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(6);
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         break;
     case 11:
@@ -5267,7 +5267,7 @@ void func_001536B8(s32 mode) {
             fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
             func_001519E8(3);
             fldTargetGuideState.updateFlags |= 2;
-            func_00152C88();
+            fldUpdateTargetGuideEffects();
             func_00341C78(0x690061);
             sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         }
@@ -5281,7 +5281,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(7);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
         func_00341C78(0x690061);
         break;
@@ -5294,7 +5294,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(7);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
         func_00341C78(0x690061);
         break;
@@ -5308,7 +5308,7 @@ void func_001536B8(s32 mode) {
         fldTargetGuideState.position[2] = fldTargetGuideState.targetYaw;
         func_001519E8(8);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
         break;
     case 15:
@@ -5320,7 +5320,7 @@ void func_001536B8(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
-        func_00152C88();
+        fldUpdateTargetGuideEffects();
         func_00341C78(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
@@ -5351,7 +5351,7 @@ typedef char FieldGuideObjectSlot_size_must_be_0x14[
 
 extern FieldGuideObjectSlot D_00451DB0[15];
 
-void func_00153D60(s32 gridX, s32 gridY, s32 slot) {
+void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
     f32 position[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
     f32 stepX;
@@ -5403,7 +5403,7 @@ void func_00153D60(s32 gridX, s32 gridY, s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00153FA0);
 
-void func_001540E8(void) {
+void fldCreateChaseCameraObject(void) {
     f32 position[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
     f32 rotation[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
     f32 axis[4] __attribute__((aligned(16))) = {0, 1.0f, 0, 1.0f};

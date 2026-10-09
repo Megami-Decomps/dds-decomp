@@ -124,7 +124,7 @@ extern SceneSlotFadeWork *D_00438F54;
 
 extern s32 func_00206090();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
-extern s32 func_001AC648();
+extern s32 btlMarkInactiveActorCandidates();
 extern void func_001AEEA8();
 extern void kwlnFadeBackgroundStartOut();
 extern void kwlnDrawSetOverlayTransition();
@@ -502,10 +502,6 @@ typedef struct ActiveSoundNode {
 } ActiveSoundNode;
 
 extern void btlRunTask(BtlRuntimeTask *);
-
-extern s32 mdlGetContextResourceGroup(s32);
-
-extern s32 mdlGetContextResourceId(s32);
 
 extern f32 func_00208000(s32, f32 *, f32 *);
 
@@ -2049,7 +2045,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     unit->status.flags = flags & ~1;
     if (flags & 0x200) {
         btlRepositionPartyAroundBattleCenter();
-        func_001AC648();
+        btlMarkInactiveActorCandidates();
     }
     if (btlCountTasksByKind(0x3F) != 0) {
         return;

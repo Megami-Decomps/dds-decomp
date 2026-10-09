@@ -572,7 +572,7 @@ extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 
 /* Instantiate a model context from the group's resource list and item list, then
  * start every populated slot's motion owner. */
-MdlCtx *func_00217680(u32 group, u32 id) {
+MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     BattleGroupNode *node = func_00217298(group, id);
     MdlCtx *ctx = sdfAllocAndClearQuadwords(sizeof(MdlCtx));
     MdlCtx *head;

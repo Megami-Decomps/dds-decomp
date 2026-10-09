@@ -1671,7 +1671,7 @@ extern TextVector D_003B43B8[4];
 
 /* Draw filled and remaining quad regions. The optional highlight is produced
  * as signed fixed-point vectors and passed as their four-word RGBA image. */
-void func_001A1668(s32 value, s32 limit, s32 highlight,
+void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
                    DrawVertex *bounds, u32 tail, DrawColorRec *filledColor,
                    DrawColorRec *remainingColor, SdfListHead *command) {
     DrawVertex vertices[6];

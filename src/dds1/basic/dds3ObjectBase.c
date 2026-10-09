@@ -171,7 +171,7 @@ extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
 const char D_0039F640[16] = "player_a";
 
-void func_00111BD8(ObjBase *base, MdlCtx *model) {
+void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
     const char *modelName;
     SdfModel *inner;
     s32 family;

@@ -46,13 +46,6 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
 
-extern MdlCtx *func_00217680(s32, s32);
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
-
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);
 
@@ -84,7 +77,7 @@ extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 
 /* Apply and restore a selected group's two-color and direction keyframe. */
-void func_001624D0(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
+void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
     BtlUnit *selected[16];
     f32 direction[4];
     u32 packedStart[4];
@@ -350,7 +343,7 @@ void *effParamCreateInitWork(void *package) {
     MdlCtx *work;
 
     mdlLoadViewerPackage(EFF_VIEWER_RESOURCE_GROUP, D_003BB044, EFF_VIEWER_LOAD_FLAGS, (u8 *)package + 0x10, *(u32 *)package);
-    work = func_00217680(EFF_VIEWER_RESOURCE_GROUP, D_003BB044);
+    work = mdlCreateContextFromResourceKey(EFF_VIEWER_RESOURCE_GROUP, D_003BB044);
     effParamInitWork(work);
     D_003BB044++;
     return work;
@@ -373,7 +366,7 @@ void *effParamAssembleWork(void *source) {
 
     resourceGroup = mdlGetContextResourceGroup(source);
     resourceId = mdlGetContextResourceId(source);
-    work = func_00217680(resourceGroup, resourceId);
+    work = mdlCreateContextFromResourceKey(resourceGroup, resourceId);
     effParamInitWork(work);
     return work;
 }

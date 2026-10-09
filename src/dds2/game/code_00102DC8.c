@@ -430,7 +430,7 @@ extern u8 D_00435C48[2][2];
 extern u8 D_00438D98[2];
 extern u32 D_00438DA0[2];
 
-void func_001038D0(void) {
+void kwlnResetPadInputAndMotorState(void) {
     s32 port;
     s32 bank;
     s32 i;
@@ -930,7 +930,7 @@ extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
-void func_00105070(s32 bufferIndex) {
+void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     sdfInitPacketList(&D_00380870[bufferIndex].initialList);
     sdfConsAppendProgramReferencePacket((s32)&D_00380870[bufferIndex].initialList,
                                         &D_00380870[bufferIndex].programReference);
@@ -962,7 +962,7 @@ void func_00105070(s32 bufferIndex) {
 }
 
 extern void sdfGraphSetDisplayMode(s32);
-extern void func_00105070(s32);
+extern void kwlnInitializeFrameDrawPackets(s32);
 extern void func_001057B0(void);
 extern u8 D_00435BC8;
 extern void evtEnsureDrawVectorState(void);
@@ -972,8 +972,8 @@ void evtResetDisplayProjectionAndVectorState(void) {
     sdfGraphSetDisplayMode(1);
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
     sdfCameraBuildProjection(&D_0037F980.camera);
-    func_00105070(0);
-    func_00105070(1);
+    kwlnInitializeFrameDrawPackets(0);
+    kwlnInitializeFrameDrawPackets(1);
     func_001057B0();
     D_00435BC8 = 0;
     evtEnsureDrawVectorState();
@@ -1000,7 +1000,7 @@ extern f32 D_0037F950[4];
 extern u8 D_00384750[0x40];
 
 /* Rebuild the held-texture render target's view and both frame banks. */
-void func_00105290(void) {
+void kwlnInitHeldTextureScenePackets(void) {
     s32 i;
 
     D_00384730.width = D_00435CCC;
@@ -1027,7 +1027,7 @@ void func_00105290(void) {
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern void kwlnTextureReleaseHeldReference(void);
-extern void func_00105290(void);
+extern void kwlnInitHeldTextureScenePackets(void);
 extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
@@ -1059,7 +1059,7 @@ s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
     D_0037F7B0.camera.aspect = value;
     D_0037F7B0.camera.width = width;
     D_0037F7B0.camera.height = height;
-    func_00105290();
+    kwlnInitHeldTextureScenePackets();
     return 1;
 }
 
