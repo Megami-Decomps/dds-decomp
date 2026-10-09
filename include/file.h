@@ -57,6 +57,7 @@ void *fileResolvePrimaryBuffer(FileJobPayload *job);
 void *fileResolveSecondaryBuffer(FileJobPayload *job);
 FileJobPayload *fileJobCreateFromJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateChild(FileJobPayload *request);
+FileJobPayload *fileDuplicateJob(FileJobPayload *request);
 void fileJobDestroy(FileJobPayload *job);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
