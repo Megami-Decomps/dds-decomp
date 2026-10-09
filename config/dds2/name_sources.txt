@@ -658,6 +658,9 @@
 0x0012A150	fldIsAreaResourceReady	inferred	Checks either the pending area file handle or the resource readiness flag.
 0x0012A190	fldIsAreaFloorResourceReady	inferred	Checks the loaded area/floor identifiers and whether the resource file or readiness flag is ready.
 0x0012A1F8	fldLoadCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
+0x0012A270	fldLoadCachedRoomF1ResourceIfLocationMatches	inferred	DDS2 func_0012A6F0 calls this helper for the "%s.f1" cache path and retains its returned SdfMemBlock descriptor; paired D1 address 0x00127CB8 has the same role.
+0x0012A2E8	fldLoadCachedRoomF2ResourceIfLocationMatches	inferred	DDS2 func_0012A6F0 calls this helper for the "%s.f2" cache path and retains its returned SdfMemBlock descriptor; paired D1 address 0x00127D30 has the same role.
+0x0012A360	fldLoadCachedRoomKF2ResourceIfLocationMatches	inferred	DDS2 func_0012A6F0 calls this helper for the "%sk%03d_%03d.f2" cache path and retains its returned SdfMemBlock descriptor; paired D1 address 0x00127DA8 has the same role.
 0x0012A3D8	fldFormatAreaResourceName	inferred	"%sf%03d_000.LB" / _00a.LB for areas 0x17,0x18,0x1B when flag 0x19
 0x0012A4E0	fldHasAreaResourceNameChanged	inferred	Formats the current area resource filename and compares it with the cached filename. [names_reviewed5.tsv]
 0x0012A510	fldLoadAreaPackedResources	inferred	Walks packed archive entries kinds 1..6 and dispatches loaders
