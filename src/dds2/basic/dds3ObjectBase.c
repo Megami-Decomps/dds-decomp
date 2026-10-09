@@ -10,7 +10,6 @@
 #include "mdl.h"
 #include "evt_unit.h"
 
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 
@@ -433,4 +432,3 @@ Dds3PathCurveWork *dds3GetSlot1Data(void *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
-

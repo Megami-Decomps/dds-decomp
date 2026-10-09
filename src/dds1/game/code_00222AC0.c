@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "fpu.h"
 #include "mdl_motion_api.h"
 #include "itf_mes_window.h"
@@ -65,10 +66,6 @@ extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 extern void effObjDispatchReadyState(void *arg0);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
-extern void dds3FreePathObject(s32);
-extern s32 dds3CreatePathCurveWork(void *);
-extern void dds3InterpolatePathVectorVU(s32);
-extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
@@ -180,25 +177,25 @@ void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 object
 }
 
 void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, s32 mode, s32 dirFlag, s32 sideMode) {
-    void *pathSource;
-    s32 path;
+    EffWorldNode *pathSource;
+    Dds3PathCurveWork *path;
 
     pathSource = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x10);
     if (pathSource == NULL) {
         return;
     }
     if (work->pathHandle != 0) {
-        dds3FreePathObject(work->pathHandle);
+        dds3FreePathObject((Dds3PathCurveWork *)work->pathHandle);
     }
     path = dds3CreatePathCurveWork(pathSource);
-    work->pathHandle = path;
+    work->pathHandle = (s32)path;
     work->pathSpeed = 40.0f / evtMeasurePathTrajectoryLength(path);
     if (dirFlag == 0) {
-        evtScaleValueByMultiplier(path, 0.0f);
-        sdfSetFloatCounterDirection(path, 0);
+        evtScaleValueByMultiplier((s32)path, 0.0f);
+        sdfSetFloatCounterDirection((s32)path, 0);
     } else {
-        evtScaleValueByMultiplier(path, 1.0f);
-        sdfSetFloatCounterDirection(path, 1);
+        evtScaleValueByMultiplier((s32)path, 1.0f);
+        sdfSetFloatCounterDirection((s32)path, 1);
         work->pathSpeed = -work->pathSpeed;
     }
     switch (mode) {

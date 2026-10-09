@@ -85,7 +85,6 @@ extern u32 sdfRollActionHit(s32 channel, s32 arg1, DatPartyRecord *item);
 
 extern void scrDestroyWorkTask(void);
 
-extern void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes *table, f32 time);
 
 /* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
 f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
@@ -751,4 +750,3 @@ INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DC5);
 INCLUDE_SDATA(const s32, "game/code_001176A0", datGameState);
 
 INCLUDE_SDATA(const s32, "game/code_001176A0", D_00435DD4);
-

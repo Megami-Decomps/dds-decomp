@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -69,13 +70,9 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
-extern void sdfBuildPrimaryTestBlendPacket(void *);
 
-extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
-extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
@@ -102,8 +99,10 @@ extern void func_002D33C8(u32, s32, f32);
  * Each blend builder fills the 0x40-byte packet area after the list head. */
 typedef struct SdfDrawPacketGroup {
     SdfListHead list;
-    SdfDmaTagHeader header;
-    u8 pad30[0x30];
+    union {
+        SdfGsBlendPacket blend;
+        SdfDmaTagHeader dma;
+    } packet;
 } SdfDrawPacketGroup;
 
 typedef struct SdfDrawPacketGroups {
@@ -112,6 +111,13 @@ typedef struct SdfDrawPacketGroups {
     u64 unk1A0;
     u64 unk1A8;
 } SdfDrawPacketGroups;
+
+typedef char SdfDrawPacketGroup_size_must_be_0x60[
+    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
+typedef char SdfDrawPacketGroup_packet_at_0x20[
+    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
+typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
+    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
 
 
 typedef struct SdfPacketOwner {
@@ -127,15 +133,15 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].header);
-    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].header);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].header);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
+    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].packet.blend);
+    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].packet.blend);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].packet.blend);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].packet.blend);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
-        packet->header.firstVifCode = 0x11000000;
+        packet->packet.dma.firstVifCode = 0x11000000;
         sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, (u32)&packet->header);
+        sdfAppendPacket(&packet->list, (u32)&packet->packet.blend);
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);

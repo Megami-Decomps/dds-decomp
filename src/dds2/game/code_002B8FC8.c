@@ -808,9 +808,9 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
     do {
         s32 selected = node == list->cursor;
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
-        u32 sprite = node->sprites[index].sprite;
+        struct EffectSlotSet *sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);

@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -914,7 +915,6 @@ extern s32 fldFindSearchId(const char *);
 extern void dds3EnsureSlotData(void *);
 extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern void evtScaleSlotByClampedMultiplier(void *, f32);
 extern void dds3InvokeMoverUpdate(EffWorldNode *);
@@ -2648,7 +2648,7 @@ void fldStartQuadPacketList(FldQuadState *quad) {
     packetList = (u32)sdfCreateResetPacketList();
     quad->packetList = packetList;
     packet = sdfAllocPacketAligned(0x40);
-    sdfBuildPrimaryAlphaBlendDmaPacket(packet);
+    sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)packet);
     sdfAppendPacket((SdfListHead *)quad->packetList, packet);
 }
 
