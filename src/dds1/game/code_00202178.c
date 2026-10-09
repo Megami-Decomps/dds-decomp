@@ -1531,7 +1531,99 @@ void func_00205EE0(void) {
     func_00205BD8();
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00205EF8);
+extern s32 btlHasEffectActor(void);
+
+s32 func_00205EF8(BtlUnit *unit, s32 code, s32 unused) {
+    BtlState *battle;
+    BattleEffectState *effect;
+    BtlUnit *actor;
+    BtlUnit *first;
+    BtlUnit *second;
+    BtlRuntimeTask *task;
+    s32 secondLow;
+    s32 firstLow;
+
+    if ((unit->flags & 0x400) == 0) {
+        return code;
+    }
+    if ((unit->flags & 1) == 0) {
+        return -1;
+    }
+
+    battle = (BtlState *)btlGetRuntime();
+    effect = battle->effect;
+    first = NULL;
+    second = NULL;
+    for (actor = battle->units; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (actor->partyRecord.unitId) {
+                case 0x107:
+                    second = actor;
+                    break;
+                case 0x108:
+                    first = actor;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (effect->active != 0) {
+        if (effect->active == 1) {
+            if (second == NULL || first == NULL) {
+                return code;
+            }
+            if (code == 1) {
+                if (unit == second && first->unkEC == 0x11) {
+                    return code;
+                }
+                if (unit == first && second->unkEC == 0x10) {
+                    return code;
+                }
+                if (unit->partyRecord.unitId == 0x107) {
+                    return 0x10;
+                }
+                if (unit->partyRecord.unitId == 0x108) {
+                    return 0x11;
+                }
+            }
+            switch (code) {
+            case 0:
+            case 2:
+            case 10:
+                secondLow = btlIsCurrentValueBelowQuarterThreshold(second);
+                firstLow = btlIsCurrentValueBelowQuarterThreshold(first);
+                if (secondLow != 0) {
+                    return firstLow != 0 ? 10 : 0x12;
+                }
+                return firstLow != 0 ? 0x13 : 0;
+            }
+            if (code == 11) {
+                return unit == second ? 0x10 : 0x11;
+            }
+        }
+    } else {
+        if (second == unit) {
+            if (code == 1 && btlHasEffectActor() != 0) {
+                task = (BtlRuntimeTask *)btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f);
+                task->startDelay = code;
+                btlStartTask(task);
+                return -1;
+            }
+            if (code == 0x10) {
+                if (first == NULL) {
+                    return 0x11;
+                }
+                if ((first->flags & 0xE0) != 0) {
+                    return 0x11;
+                }
+            }
+        }
+    }
+    return code;
+}
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
     BattleEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
@@ -1626,7 +1718,85 @@ s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit) {
     return unit->displaySpecies;
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00206450);
+extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
+
+void func_00206450(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleEffectState *effect;
+    f32 vector[4] __attribute__((aligned(16)));
+    f32 height;
+    f32 speed;
+    f32 limit;
+
+    if ((battle->battleFlags & 0x80000) == 0) {
+        return;
+    }
+    effect = battle->effect;
+    if (effect->actor != 0) {
+        BtlUnit *selected = effect->actor;
+        BtlUnit *actor;
+        if ((selected->flags & 2) == 0) {
+            return;
+        }
+        effObjFetchInnerFirstVec(selected->effectObject);
+        VU0_STORE_VF(vf10, (u128 *)vector);
+        if (!(vector[1] > -125.0f)) {
+            return;
+        }
+        actor = effect->actor;
+        limit = actor->species == 0x16 ? -62.5f : -125.0f;
+        height = effect->height - effect->speed;
+        speed = effect->speed / 1.11f;
+        effect->height = height;
+        effect->speed = speed;
+        if (height < limit) {
+            effect->height = limit;
+        }
+        vector[1] = effect->height;
+        effObjSetInnerFirstVec(actor->effectObject, (u128 *)vector);
+        return;
+    }
+
+    {
+        BtlUnit *unit = battle->units;
+        if (unit == NULL) {
+            return;
+        }
+        {
+            f32 ceiling = -1.0f;
+            f32 decay = 1.05f;
+            f32 zero = 0.0f;
+
+            while (unit != NULL) {
+                u32 flags = unit->flags;
+
+                if (flags & 1) {
+                    if (flags & 0x200) {
+                        if (flags & 2) {
+                            effObjFetchInnerFirstVec(unit->effectObject);
+                            VU0_STORE_VF(vf10, (u128 *)vector);
+                            if (vector[1] < ceiling) {
+                                height = effect->height + effect->speed;
+                                speed = effect->speed * decay;
+                                effect->height = height;
+                                effect->speed = speed;
+                                if (height > zero) {
+                                    effect->height = zero;
+                                }
+                                vector[1] = effect->height;
+                                effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
+                            } else {
+                                vector[1] = 0.0f;
+                                effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
+                            }
+                        }
+                    }
+                }
+                unit = unit->next;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00202178", func_00206608);
 
