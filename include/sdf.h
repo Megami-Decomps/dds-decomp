@@ -458,7 +458,9 @@ typedef struct SdfNode {
 
 /* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
 typedef struct SdfAsset {
-    u8 pad00[8];
+    u8 pad00[6];
+    u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
+    u8 pad07;
     void *entries[2];
     u32 unk10;
     u32 unk14;
@@ -475,6 +477,11 @@ typedef struct SdfAsset {
     f32 unk40;
     f32 unk44;
 } SdfAsset;
+
+typedef char SdfAsset_size_must_be_0x48[
+    (sizeof(SdfAsset) == 0x48) ? 1 : -1];
+typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
+    ((u32)&((SdfAsset *)0)->dirtyFlags == 0x06) ? 1 : -1];
 
 /* Draw entries store six transform floats and expose the same bytes as three qwords. */
 typedef union SdfDrawTransform {

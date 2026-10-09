@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 
 #include "sdf.h"
+#include "sdf_asset_state.h"
 #include "sdf_pending.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
@@ -521,27 +522,27 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
 }
 
 /* Store the first primary-state word and dirty both draw entries. */
-void func_00333270(SdfTextParam *param, u32 value) {
-    param->unk10 = value;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 value) {
+    asset->unk10 = value;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the second primary-state word and dirty both draw entries. */
-void func_00333288(SdfTextParam *param, u32 value) {
-    param->unk14 = value;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 value) {
+    asset->unk14 = value;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the third primary-state word and dirty both draw entries. */
-void func_003332A0(SdfTextParam *param, u32 value) {
-    param->unk20 = value;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 value) {
+    asset->unk20 = value;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store raw bits in the fourth primary-state word, without float conversion. */
-void func_003332B8(SdfTextParam *param, u32 bits) {
-    *(u32 *)&param->unk28 = bits;
-    param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
+void sdfSetPrimaryStateWordFourth(SdfAsset *asset, u32 bits) {
+    asset->unk28 = bits;
+    asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the primary-state float and dirty both draw entries. */
@@ -664,7 +665,7 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
 
     sdfLiveAssetCount++;
     asset = sdfAllocAndClearQuadwords(SDF_ASSET_BYTES);
-    asset->pad00[6] = SDF_ASSET_ALL_STATE_DIRTY;
+    asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
         entryWords = sdfAllocSizeClassBlock(SDF_ASSET_DRAW_ENTRY_BYTES);
         asset->entries[entryIndex] = entryWords;
@@ -695,11 +696,11 @@ u8 *sdfParseAssetParameterFlags(SdfTextParam *param, DevRequest *resourceLookup,
     parameterFlags = *(u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
-        func_00333270(param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordFirst((SdfAsset *)param, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_SECOND_PRESENT) {
-        func_00333288(param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordSecond((SdfAsset *)param, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
@@ -725,11 +726,11 @@ u8 *sdfParseAssetParameterFlags(SdfTextParam *param, DevRequest *resourceLookup,
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_THIRD_PRESENT) {
-        func_003332A0(param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordThird((SdfAsset *)param, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FOURTH_PRESENT) {
-        func_003332B8(param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordFourth((SdfAsset *)param, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {
@@ -879,7 +880,7 @@ void sdfAssetCopyPairToTextParam(SdfTextParam *source, SdfTextParam *destination
 /* Apply the selected entry's groups and retain the other entry's captured bits.
  * entryIndex is unchecked and expected to be zero or one. */
 void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
-    u8 dirtyFlags = asset->pad00[6];
+    u8 dirtyFlags = asset->dirtyFlags;
     void *drawEntry = asset->entries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
@@ -893,13 +894,13 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
         sdfAssetCopyPairToTextParam(asset, drawEntry);
     }
-    asset->pad00[6] = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
+    asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
 
 /* Nonzero forced mode refreshes primary state even when its change bit is clear.
  * Retain the other entry's captured bits; entryIndex remains unchecked. */
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex) {
-    u8 dirtyFlags = asset->pad00[6];
+    u8 dirtyFlags = asset->dirtyFlags;
     void *drawEntry = asset->entries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
@@ -915,7 +916,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex)
     if (dirtyFlags & (SDF_ASSET_PAIR_STATE_BIT << entryIndex)) {
         sdfAssetCopyPairToTextParam(asset, drawEntry);
     }
-    asset->pad00[6] = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
+    asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
 
 SdfAsset *sdfCreateAssetWithDrawEntries(void);
@@ -962,7 +963,7 @@ void sdfApplyResourceListEntriesWithForcedTexture(DevRequest *list, s32 entryInd
 void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     SdfSubParam *subParameters;
 
-    destination->pad00[6] = SDF_ASSET_ALL_STATE_DIRTY;
+    destination->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     destination->unk10 = source->unk10;
     destination->unk14 = source->unk14;
     destination->unk1C = source->unk1C;
