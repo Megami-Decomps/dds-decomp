@@ -4329,8 +4329,6 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     return table;
 }
 
-extern void effReleasePointSetAsset(s32);
-
 void effFreeIndexedEntries(u8 *work) {
     u32 *header = (u32 *)((EffClassWork *)work)->resource;
     u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
@@ -4338,7 +4336,7 @@ void effFreeIndexedEntries(u8 *work) {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effReleasePointSetAsset(*entry);
+        effReleasePointSetAsset((EffPointSet *)*entry);
         entry += 4;
     }
     sdfReleaseChipBlock(header);
@@ -4589,7 +4587,7 @@ void effReleaseBillPointEntries(u8 *work) {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effReleasePointSetAsset((s32)((EffScaleRangeEntry *)entry)->set);
+        effReleasePointSetAsset(((EffScaleRangeEntry *)entry)->set);
         entry += 12;
     }
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffScaleRange *)header)->allocation));
@@ -4694,7 +4692,7 @@ void effReleaseBillboardFramePointSets(s32 *work) {
     s32 *entry = (s32 *)*entries;
     u32 i;
     for (i = 0; i < count; i++, entry += 3) {
-        effReleasePointSetAsset(entry[0]);
+        effReleasePointSetAsset((EffPointSet *)entry[0]);
     }
     sdfReleaseChipBlock(entries);
 }
@@ -4805,9 +4803,9 @@ EffPointSet *effCreatePointSet5(s32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effReleasePointSetAsset(EffPointSet *set) {
+    sdfQueueAssetRelease((s32)set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
