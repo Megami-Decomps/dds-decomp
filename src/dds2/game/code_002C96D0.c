@@ -105,8 +105,6 @@ struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-extern void *fileDuplicateJob(void *);
-
 struct SdfMemBlock;
 
 
@@ -445,8 +443,6 @@ extern void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceI
 extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job);
 extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
-
-extern FileJobPayload *fileCreateJob(u16 type);
 
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
 extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
@@ -4452,9 +4448,9 @@ void fileJobDestroy(FileJobPayload *job) {
 }
 
 void fileJobFreePrimaryBuffer(FileJobPayload *job) {
-    void *buffer = job->primary.allocation;
-    if (buffer != NULL) {
-        sdfReleaseResourceAllocation(buffer);
+    struct SdfMemBlock *allocation = job->primary.allocation;
+    if (allocation != NULL) {
+        sdfReleaseResourceAllocation(allocation);
         job->primary.offset = 0;
         job->primary.size = 0;
         job->primary.allocation = NULL;
@@ -4462,9 +4458,9 @@ void fileJobFreePrimaryBuffer(FileJobPayload *job) {
 }
 
 void fileJobFreeSecondaryBuffer(FileJobPayload *job) {
-    void *buffer = job->secondary.allocation;
-    if (buffer != NULL) {
-        sdfReleaseResourceAllocation(buffer);
+    struct SdfMemBlock *allocation = job->secondary.allocation;
+    if (allocation != NULL) {
+        sdfReleaseResourceAllocation(allocation);
         job->secondary.offset = 0;
         job->secondary.size = 0;
         job->secondary.allocation = NULL;
@@ -4536,15 +4532,10 @@ void fileDispatchJobTypeCallback(void *work, u32 color) {
     }
 }
 
-void fileJobSetPrimaryData(job, src, size, option)
-    FileJobPayload *job;
-    void *src;
-    s32 size;
-    u16 option;
-{
+void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option) {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->primary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->primary.allocation = sdfAllocGeneralBlock(size);
         job->primary.offset = sdfResourceRetainAddress(job->primary.allocation);
         job->primary.size = size;
         job->option = option;
@@ -4555,31 +4546,26 @@ void fileJobSetPrimaryData(job, src, size, option)
 void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 commandId, u16 option) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
+    struct SdfMemBlock *allocation;
+    void *buffer;
 
     command = sdfDevCreateCommandState((const char *)commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetPrimaryData(job, (void *)address, size, option);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        fileJobSetPrimaryData(job, buffer, size, option);
+        sdfReleaseResourceAllocation(allocation);
         return;
     }
 }
 
-void fileJobSetSecondaryData(job, src, size, selector)
-    FileJobPayload *job;
-    void *src;
-    s32 size;
-    u16 selector;
-{
+void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector) {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->secondary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->secondary.allocation = sdfAllocGeneralBlock(size);
         job->secondary.offset = sdfResourceRetainAddress(job->secondary.allocation);
         job->secondary.size = size;
         job->primary.selector = selector;
@@ -4590,18 +4576,18 @@ void fileJobSetSecondaryData(job, src, size, selector)
 void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 commandId, u16 selector) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
+    struct SdfMemBlock *allocation;
+    void *buffer;
 
     command = sdfDevCreateCommandState((const char *)commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        fileJobSetSecondaryData(job, (void *)address, size, selector);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        fileJobSetSecondaryData(job, buffer, size, selector);
+        sdfReleaseResourceAllocation(allocation);
         return;
     }
 }
@@ -4624,8 +4610,7 @@ void fileWriteToPfs(s32 data, s32 slotIndex) {
     func_0036BCD0(D_00437E20, 0);
 }
 
-void *fileDuplicateJob(void *source) {
-    FileJobPayload *request = source;
+FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
     FileJobPayload *job = fileCreateJob(request->type);
 
     if (request->primary.size != 0) {
@@ -4639,24 +4624,22 @@ void *fileDuplicateJob(void *source) {
 
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
-void *fileJobCreateFromCommandState(entry)
-    s32 entry;
-{
+FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
-    void *job;
+    struct SdfMemBlock *allocation;
+    void *buffer;
+    FileJobPayload *job;
 
-    command = sdfDevCreateCommandState((const char *)entry);
+    command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        job = fileDuplicateJob((void *)address);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        job = fileDuplicateJob((FileJobPayload *)buffer);
+        sdfReleaseResourceAllocation(allocation);
         return job;
     }
 }
@@ -5067,8 +5050,8 @@ FileJob *fileAppendJob(FileQueue *queue, u32 id) {
     return job;
 }
 
-FileJob *fileDuplicateAndAppendJob(FileQueue *queue, void *source) {
-    void *job = fileDuplicateJob(source);
+FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
+    FileJobPayload *job = fileDuplicateJob(source);
     return fileAppendJob(queue, (u32)job);
 }
 
@@ -5186,9 +5169,203 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D50D8);
+extern char D_003E9588[];
+extern s32 func_0036A420(s32 fd, void *data, s32 size);
+extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D55B0);
+/* Export a queue: the queue header, one relocated record per job, then each
+ * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
+void func_002D50D8(FileQueue *queue, s32 slot) {
+    char path[0xD0];
+    FileJobPayload payload;
+    FileQueue header;
+    FileJob record;
+    s32 fd;
+    s32 count;
+    s32 offset;
+    s32 size;
+    FileJob *job;
+
+    if (sdfPfsDebugMode != 0) {
+        func_0035C860(path, D_00437E10, slot);
+        fd = func_00369B70(path, 0x602, 0x1B6);
+    } else {
+        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slot);
+        fd = func_00369B70(path, 0x602);
+    }
+    header = *queue;
+    header.unk84 = 0;
+    size = sizeof(FileQueue);
+    header.entryOffset = size;
+    header.first = NULL;
+    count = fileQueueCountLinkedJobs(queue);
+    func_0036A420(fd, &header, sizeof(FileQueue));
+    offset = count * sizeof(FileJob) + sizeof(FileQueue);
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        record = *job;
+        if ((job->flags & 1) == 0) {
+            if ((job->flags & 2) == 0) {
+                size = fileJobSerializedSize((FileJobPayload *)job->id);
+            } else {
+                payload = *(FileJobPayload *)job->id;
+                payload.secondary.offset = 0;
+                payload.secondary.size = 0;
+                payload.secondary.allocation = NULL;
+                size = fileJobSerializedSize(&payload);
+            }
+            record.id = offset;
+        } else {
+            size = 0;
+            record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
+        }
+        if (job->flags & 2) {
+            record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
+        }
+        record.next = NULL;
+        record.prev = NULL;
+        func_0036A420(fd, &record, sizeof(FileJob));
+        offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
+    }
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        s32 blocks;
+        s32 aligned;
+        s32 padding;
+
+        if (job->flags & 1) {
+            continue;
+        }
+        if ((job->flags & 2) == 0) {
+            size = fileJobSerializedSize((FileJobPayload *)job->id);
+            func_002D3B48(fd, (FileJobPayload *)job->id);
+        } else {
+            payload = *(FileJobPayload *)job->id;
+            payload.secondary.offset = 0;
+            payload.secondary.size = 0;
+            payload.secondary.allocation = NULL;
+            size = fileJobSerializedSize(&payload);
+            func_002D3B48(fd, &payload);
+        }
+        blocks = size >> 4;
+        if ((size & 0xF) != 0) {
+            aligned = (blocks + 1) << 4;
+        } else {
+            aligned = blocks << 4;
+        }
+        padding = aligned - size;
+        if (padding > 0) {
+            func_0036A420(fd, D_003E9588, padding);
+        }
+    }
+    func_00369DF8(fd);
+    func_0036BCD0(D_00437E20, 0);
+}
+
+/* Sixteen-byte preamble of a saved file queue. */
+typedef struct FileQueueImageHeader {
+    s32 version;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+} FileQueueImageHeader;
+
+extern char D_003E9598[];
+
+/* Save a queue image: the queue header, one relocated record per job, then each
+ * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
+void func_002D55B0(FileQueue *queue, s32 slot) {
+    char path[0xD0];
+    FileJobPayload payload;
+    FileQueue header;
+    FileJob record;
+    FileQueueImageHeader image;
+    s32 fd;
+    s32 count;
+    s32 offset;
+    s32 size;
+    FileJob *job;
+
+    if (sdfPfsDebugMode != 0) {
+        func_0035C860(path, D_00437E10, slot);
+        fd = func_00369B70(path, 0x602, 0x1B6);
+    } else {
+        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slot);
+        fd = func_00369B70(path, 0x602);
+    }
+    image.version = 5;
+    image.unk4 = 0;
+    image.unkC = 1.03f;
+    func_0036A420(fd, &image, sizeof(image));
+
+    header = *queue;
+    header.unk84 = 0;
+    size = sizeof(FileQueue);
+    header.entryOffset = size;
+    header.first = NULL;
+    count = fileQueueCountLinkedJobs(queue);
+    func_0036A420(fd, &header, sizeof(FileQueue));
+    offset = count * sizeof(FileJob) + sizeof(FileQueue);
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        record = *job;
+        if ((job->flags & 1) == 0) {
+            if ((job->flags & 2) == 0) {
+                size = fileJobSerializedSize((FileJobPayload *)job->id);
+            } else {
+                payload = *(FileJobPayload *)job->id;
+                payload.secondary.offset = 0;
+                payload.secondary.size = 0;
+                payload.secondary.allocation = NULL;
+                size = fileJobSerializedSize(&payload);
+            }
+            record.id = offset;
+        } else {
+            size = 0;
+            record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
+        }
+        if (job->flags & 2) {
+            record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
+        }
+        record.next = NULL;
+        record.prev = NULL;
+        func_0036A420(fd, &record, sizeof(FileJob));
+        offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
+    }
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        s32 blocks;
+        s32 aligned;
+        s32 padding;
+
+        if (job->flags & 1) {
+            continue;
+        }
+        if ((job->flags & 2) == 0) {
+            size = fileJobSerializedSize((FileJobPayload *)job->id);
+            func_002D3B48(fd, (FileJobPayload *)job->id);
+        } else {
+            payload = *(FileJobPayload *)job->id;
+            payload.secondary.offset = 0;
+            payload.secondary.size = 0;
+            payload.secondary.allocation = NULL;
+            size = fileJobSerializedSize(&payload);
+            func_002D3B48(fd, &payload);
+        }
+        blocks = size >> 4;
+        if ((size & 0xF) != 0) {
+            aligned = (blocks + 1) << 4;
+        } else {
+            aligned = blocks << 4;
+        }
+        padding = aligned - size;
+        if (padding > 0) {
+            func_0036A420(fd, D_003E9598, padding);
+        }
+    }
+    func_00369DF8(fd);
+    func_0036BCD0(D_00437E20, 0);
+}
 
 FileQueue *func_002D5AA8(s32 entry) {
     DevState *command = sdfDevCreateCommandState(entry);
@@ -5216,7 +5393,7 @@ FileQueue *func_002D5AA8(s32 entry) {
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
          i < image->count; i++, src++) {
         if ((src->flags & 1) == 0) {
-            copy = fileDuplicateAndAppendJob(queue, (u8 *)image + src->id);
+            copy = fileDuplicateAndAppendJob(queue, (FileJobPayload *)((u8 *)image + src->id));
         } else {
             copy = fileJobDuplicateAfter(queue, fileQueueGetAt(queue, src->id));
         }

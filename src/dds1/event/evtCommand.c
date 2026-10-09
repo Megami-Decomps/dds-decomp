@@ -152,7 +152,6 @@ extern u32 evtPendingEventSelection;
 
 
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *id);
 
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
@@ -1326,4 +1325,3 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA40);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA58);
-

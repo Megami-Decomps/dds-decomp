@@ -421,16 +421,6 @@ typedef struct SdfResEntry {
     u32 baseAddress; /* Shifted right six bits when patching a GS texture base. */
 } SdfResEntry;
 
-/* Large DMA packet fields at +0x30/+0x80 (0x88); DDS1/2 game/code_002D33C8/0032C278.c. */
-typedef struct SdfBigPacket {
-    u8 pad00[8];
-    s32 resourceIndexXor;
-    u8 pad0C[0x24];
-    u64 unk30; /* Low 14 bits receive the indexed texture base. */
-    u8 pad38[0x48];
-    u64 unk80; /* Low 14 bits receive the indexed texture base. */
-} SdfBigPacket;
-
 /* Two-slot packet builder and source/mode state (0x60); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfPacketBuilder {
     u8 pad00[4];

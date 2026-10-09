@@ -87,7 +87,100 @@ void func_00227288(void) {
     btlUpdateLinkedEffectUnitTransforms();
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit);
+extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 amount);
+
+s32 func_002272A0(BtlUnit *unit, s32 code, s32 unused) {
+    BtlState *battle;
+    BattleLinkedEffectState *effect;
+    BtlUnit *actor;
+    BtlUnit *first;
+    BtlUnit *second;
+    BtlRuntimeTask *task;
+    s32 secondLow;
+    s32 firstLow;
+
+    if ((unit->flags & 0x400) == 0) {
+        return code;
+    }
+    if ((unit->flags & 1) == 0) {
+        return -1;
+    }
+
+    battle = (BtlState *)btlGetRuntime();
+    effect = &battle->effect->linked;
+    first = NULL;
+    second = NULL;
+    for (actor = battle->units; actor != NULL; actor = actor->nextActor) {
+        u32 flags = actor->flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (actor->partyRecord.unitId) {
+                case 0x12E:
+                    first = actor;
+                    break;
+                case 0x12F:
+                    second = actor;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (effect->active != 0) {
+        if (effect->active == 1) {
+            if (second == NULL || first == NULL) {
+                return code;
+            }
+            if (code == 1) {
+                if (unit == second && first->unkEC == 0x11) {
+                    return code;
+                }
+                if (unit == first && second->unkEC == 0x10) {
+                    return code;
+                }
+                if (unit->partyRecord.unitId == 0x12E) {
+                    return 0x11;
+                }
+                if (unit->partyRecord.unitId == 0x12F) {
+                    return 0x10;
+                }
+            }
+            switch (code) {
+            case 0:
+            case 2:
+            case 10:
+                secondLow = btlIsCurrentValueBelowQuarterThreshold(second);
+                firstLow = btlIsCurrentValueBelowQuarterThreshold(first);
+                if (secondLow != 0) {
+                    return firstLow != 0 ? 10 : 0x12;
+                }
+                return firstLow != 0 ? 0x13 : 0;
+            }
+            if (code == 11) {
+                return unit == second ? 0x10 : 0x11;
+            }
+        }
+    } else {
+        if (second == unit) {
+            if (code == 1 && btlHasEffectActor() != 0) {
+                task = btlCreateStiffenDamageShakeTask(unit, 8.0f);
+                task->startDelay = code;
+                btlStartTask(task);
+                return -1;
+            }
+            if (code == 0x10) {
+                if (first == NULL) {
+                    return 0x11;
+                }
+                if ((first->flags & 0xE0) != 0) {
+                    return 0x11;
+                }
+            }
+        }
+    }
+    return code;
+}
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
