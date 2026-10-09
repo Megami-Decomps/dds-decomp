@@ -58,8 +58,6 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
     return length;
 }
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_003BD358, D_003BD35C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);

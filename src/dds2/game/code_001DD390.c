@@ -65,7 +65,6 @@ extern void func_001EC5F0(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void func_001E38F0(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
 
@@ -493,7 +492,6 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
@@ -579,7 +577,6 @@ extern void evtSetUnitAlphaTransition(EvtUnit *, s32, u32);
 
 extern void func_002A27A8(s32, s32, u8);
 
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
@@ -2756,7 +2753,6 @@ extern void func_003325F8(SdfModel *, SdfModel *);
 
 extern void func_003320E8(SdfPoolNode **, SdfModel *);
 
-extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 

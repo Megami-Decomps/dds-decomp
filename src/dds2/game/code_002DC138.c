@@ -49,7 +49,6 @@ extern void func_0035B6E0(const char *fmt, ...);
 
 extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 
 typedef struct EffectObjectNode {
@@ -72,16 +71,13 @@ extern s32 btlGetRuntime(void);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
-extern void mdlDestroyContext(MdlCtx *);
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];
 

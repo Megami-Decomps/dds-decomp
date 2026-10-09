@@ -12,6 +12,7 @@
 #include "btl_ui.h"
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
+#include "mdl.h"
 
 
 extern s32 btlGetRuntime(void);
@@ -261,7 +262,6 @@ extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 struct MdlCtx;
 struct SdfPoolNode;
-extern void mdlProcessContextNodesAndTransforms(struct MdlCtx *, struct SdfPoolNode **);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
@@ -692,7 +692,6 @@ extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
-extern void mdlBroadcastMasked(s32, s32);
 extern void func_001AB160(BtlUnit *);
 extern s32 func_001E6428(s32 owner, s32 option);
 

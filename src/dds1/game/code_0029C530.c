@@ -1634,7 +1634,7 @@ void billReleaseCellNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029F168);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceCellInstances);
 
 void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -1978,7 +1978,7 @@ void billReleaseEmitterNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0FA0);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceEmitterInstances);
 
 void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
@@ -2107,7 +2107,7 @@ void billReleaseStripNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A1948);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceStripInstances);
 
 void billUpdateStripDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
@@ -2188,7 +2188,7 @@ void billReleaseTrailNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A22B8);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceTrailInstances);
 
 void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
@@ -2314,7 +2314,7 @@ void billReleaseQuadNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A2E18);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceQuadInstances);
 
 void billUpdateQuadDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
@@ -7155,10 +7155,10 @@ EffActiveResource *effCreateResourceInstance(u16 kind, void *source, void *secon
     return effect;
 }
 
-EffActiveResource *effCreateActiveResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
-    return effCreateResourceInstance(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+EffActiveResource *effCreateActiveResourceFromFile(FileJobPayload *request) {
+    void *first = fileResolvePrimaryBuffer(request);
+    void *second = fileResolveSecondaryBuffer(request);
+    return effCreateResourceInstance(request->option, first, second, request->secondary.size);
 }
 
 void effDestroyResourceInstance(EffActiveResource *work) {

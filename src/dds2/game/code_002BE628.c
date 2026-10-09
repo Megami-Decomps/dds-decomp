@@ -125,7 +125,6 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 
 extern void evtStageTestStop(void);
