@@ -59,7 +59,7 @@ Dds3PathCurveWork *dds3CreatePathCurveWork(struct EffWorldNode *object);
 void dds3FreePathObject(Dds3PathCurveWork *path);
 Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *object);
 void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path);
-void dds3PreparePathVectorPair(Dds3PathCurveWork *path);
+void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *path);
 void dds3InterpolatePathOutput(Dds3PathCurveWork *path, struct WorldTransformParams *out);
 f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *path);
 s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
