@@ -10443,7 +10443,42 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00202958);
+s32 func_00202958(SoundEffectSourceArgs *args) {
+    BtlUnit *owner;
+    u32 flags;
+
+    btlGetRuntime();
+    owner = args->owner.unit;
+
+    if (args->effect == NULL) {
+        args->effect = func_00168548(args->source->resourceHandle, 0, owner, 0);
+        args->effect->flags |= 1;
+    }
+    if (args->frameCount < 12) {
+        args->effect->color = ((u32)((f32)args->frameCount * 128.0f / 12.0f) << 24) | 0x808080;
+    } else if (btlFindTaskByHandle(args->resource) == 0) {
+        if (args->fadeOutFrame != 12) {
+            args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / 12.0f) * 128.0f) << 24) | 0x808080;
+            args->fadeOutFrame++;
+        } else {
+            return 1;
+        }
+    } else {
+        args->effect->color = 0x80808080;
+    }
+    effBTLFieldColorSetSelectors((s32)owner, (u32)owner, 0, 0);
+    flags = owner->status.flags;
+    if (flags & 4) {
+        args->effect->flags |= 8;
+    } else {
+        args->effect->flags &= ~8;
+    }
+    if (flags & 2) {
+        func_00168978(args->effect);
+    }
+    args->frameCount++;
+    return 0;
+}
 
 void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
     SoundResourceNode *effect;
