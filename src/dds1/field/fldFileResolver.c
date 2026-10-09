@@ -10,6 +10,8 @@
 #include "sdf_texture_file.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
 
 
 extern FldFileResource *D_003BD7B8;
@@ -701,9 +703,14 @@ void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
 
 typedef struct FldScriptResource {
     u8 pad00[0x10];
-    u8 parameters[0x10];
-    struct MotionTable *unk20;
+    SdfItemListRef itemList;
+    struct MotionTable *motionTable;
 } FldScriptResource;
+
+typedef char FldScriptResource_itemList_at_10[
+    ((u32)&((FldScriptResource *)0)->itemList == 0x10) ? 1 : -1];
+typedef char FldScriptResource_motionTable_at_20[
+    ((u32)&((FldScriptResource *)0)->motionTable == 0x20) ? 1 : -1];
 
 typedef struct FldResourceName {
     u32 unk00;
@@ -715,7 +722,6 @@ extern u32 D_003BD7B4;
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern struct DevRequest *D_003BAC14;
-extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
 extern EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
@@ -746,8 +752,8 @@ void fldCreateResourceScriptObjects(void) {
     world = dds3GetWorldSecondaryObject();
     for (i = 0; i < count; i++, resource++) {
         script = resource->data;
-        evtCreateScriptObjectWithResource(resource->id, script->parameters,
-                                         script->unk20, D_003BAC14, resource->name);
+        evtCreateScriptObjectWithResource(resource->id, &script->itemList,
+                                         script->motionTable, D_003BAC14, resource->name);
         /* Retail fills both 16-byte stack vectors before creating the object. */
         if (resource->transform != NULL) {
             position[0] = resource->transform[0];
