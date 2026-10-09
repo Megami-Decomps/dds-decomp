@@ -324,7 +324,7 @@ extern char D_00413C80[]; /* "fldTitleMini" */
 extern void ddsReleaseUnitObject(EffWorldNode *node);
 
 typedef struct {
-    s32 objectHandle;
+    EffWorldNode *objectHandle;
     s32 unk4;
     u8 pad8[0xC];
 } FldEnt14; /* 0x14 bytes */
@@ -3944,11 +3944,46 @@ s32 fldFindResourceRecordIndex(s32 category, s32 id) {
     return 0;
 }
 
+extern FldVec4 D_00413DB8;
+extern FldVec4 D_00413DC8;
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DB8);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DC8);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014F5F0);
+const char D_00413DD8[] = "HUNT_MDL_UNIT";
+
+/* Create the sixteen (plus one) hunt-unit objects used by the field spark controller. */
+void func_0014F5F0(void) {
+    FldVec4 position = D_00413DB8;
+    FldVec4 rotation;
+    FldEnt14 *entry;
+    MdlCtx *model;
+    s32 i;
+
+    memset(&rotation, 0, sizeof(rotation));
+    {
+        FldVec4 scale = D_00413DC8;
+
+        for (i = 0; i < 17; i++) {
+            fldSparkObjectEntries[i].objectHandle = 0;
+            fldSparkObjectEntries[i].unk4 = -1;
+            *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
+        }
+        for (i = 0; i < 17; i++) {
+            entry = &fldSparkObjectEntries[i];
+            entry->objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
+            dds3SetWorldNodeValue(entry->objectHandle, (u32)D_00413DD8);
+            func_00112058(entry->objectHandle, 1, 0x130);
+            effObjSetInnerThirdVec(entry->objectHandle, (u128 *)&scale);
+            model = (MdlCtx *)dds3GetObjectBaseResourceHandle(entry->objectHandle);
+            model->first->frameStep = 1.0f;
+            mdlAddEntryFlagged(model, 0, 0);
+            model->flags |= 1;
+            dds3SetObjectFlags(entry->objectHandle, 0x400);
+            func_0014BF98(evtUnitGetNestedValue(entry->objectHandle));
+        }
+    }
+}
 
 void fldClearObjectEntryHandles(void) {
     FldEnt14 *entry = fldSparkObjectEntries;
@@ -4480,15 +4515,55 @@ void fldReleaseTargetGuideResource(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001515E0);
-
 extern s16 D_004363BC;
-
 extern s16 D_004363BE;
-
 extern s16 D_004363C0;
-
 extern s16 D_004363C2;
+
+typedef struct FieldCellGrid {
+    u16 width;
+    u16 height;
+} FieldCellGrid;
+
+/* Find the occupied grid cell nearest to a world position; returns -1 when it is cell (0, 0). */
+s32 func_001515E0(f32 x, f32 z, s16 *outX, s16 *outY) {
+    f32 originX = D_004363BC;
+    f32 originY = D_004363BE;
+    f32 nearest = 10000.0f;
+    s16 bestCol = 0;
+    s16 bestRow = 0;
+    s16 row;
+    s16 col;
+
+    if (D_004363D0 == 0) {
+        *outX = 0;
+        *outY = 0;
+        return 0;
+    }
+    for (row = 0; row < ((FieldCellGrid *)D_004363D0)->height; row++) {
+        for (col = 0; col < ((FieldCellGrid *)D_004363D0)->width; col++) {
+            s32 offset = (((FieldCellGrid *)D_004363D0)->width * row + col) * 2;
+
+            if (*(u8 *)(D_004363D4 + offset) != 0) {
+                f32 dx = x - (originX + (f32)D_004363C0 * (f32)col);
+                f32 dz = z - (originY + (f32)-D_004363C2 * (f32)row);
+                f32 distance = fsqrtf(dx * dx + dz * dz);
+
+                if (distance < nearest) {
+                    nearest = distance;
+                    bestRow = row;
+                    bestCol = col;
+                }
+            }
+        }
+    }
+    *outX = bestCol;
+    *outY = bestRow;
+    if (bestCol != 0 || bestRow != 0) {
+        return 0;
+    }
+    return -1;
+}
 
 void fldMapGridToScreenPosition(s16 x, s16 y, f32 *outX, f32 *outY) {
     f32 scaleX = (f32)D_004363C0;
