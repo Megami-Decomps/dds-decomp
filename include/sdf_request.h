@@ -5,5 +5,7 @@
 
 /* Operations on the complete buffered-request owner, distinct from draw packets. */
 void sdfDestroyDevRequest(DevRequest *request);
+void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
+void sdfDevBufferedRequestGrow(DevRequest *request);
 
 #endif

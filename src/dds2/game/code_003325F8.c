@@ -16,8 +16,6 @@
 
 extern u32 sdfForcedAssetTextureMode;
 
-extern void sdfDevBufferedRequestGrow(DevRequest *request);
-extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
