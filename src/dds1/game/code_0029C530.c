@@ -4278,7 +4278,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
 }
 
 typedef struct EffScaleRange {
-    u8 *entries;
+    EffScaleRangeEntry *entries;
     f32 start;
     f32 delta;
     struct SdfMemBlock *allocation;
@@ -4293,7 +4293,7 @@ void effSeedBillScaleRange(EffClassWork *work) {
     EffBillRangeConfig *config = work->payload;
     EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
-    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
+    EffScaleRangeEntry *entry = range->entries;
     f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
     u32 index;
     u32 count;
@@ -4335,7 +4335,7 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     allocation = sdfAllocGeneralBlock(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
     table = (EffScaleRange *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     table->allocation = allocation;
-    table->entries = (u8 *)(table + 1);
+    table->entries = (EffScaleRangeEntry *)(table + 1);
     if ((u32)src->layers < 3) {
         src->layers = 3;
     }
@@ -4347,7 +4347,7 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     alphaC = src->colorC >> 24;
     rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
     rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
-    row = (EffScaleRangeEntry *)table->entries;
+    row = table->entries;
     for (i = 0; i < count; i++) {
         EffPointSet *set = effCreatePointSet5(src->layers);
         u32 n;
@@ -4384,7 +4384,7 @@ void effReleaseBillPointEntries(EffClassWork *work) {
     EffScaleRange *range = (EffScaleRange *)work->resource;
     u32 count = config->count;
     u32 index = 0;
-    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
+    EffScaleRangeEntry *entry = range->entries;
 
     if (count != 0) {
         do {
