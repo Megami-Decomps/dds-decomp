@@ -503,7 +503,6 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern char D_003B2AA0[];
 
-extern void fileQueueDestroy(u32);
 
 
 void effDestroyModelContext(MdlCtx *model);
@@ -7478,7 +7477,7 @@ void effInvokeFileJobWithBattleCamera(u32 job) {
 
 void effFileJobQueueRelease(u32 job) {
     if (effAuxiliaryFileQueue != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
@@ -7963,7 +7962,7 @@ extern s32 fileQueueCreate(void);
 
 u32 effReinitializeFileQueue(void) {
     if (effTemporaryFileJob != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
@@ -7971,7 +7970,7 @@ u32 effReinitializeFileQueue(void) {
         effTemporaryFileJob = 0;
     }
     if (effFileQueue != 0) {
-        fileQueueDestroy(effFileQueue);
+        fileQueueDestroy((struct FileQueue *)effFileQueue);
     }
     effFileQueue = fileQueueCreate();
     D_0038EA6C[0] = 0;
@@ -8215,7 +8214,7 @@ u32 effPollNamedFileJob(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            fileQueueDestroy(effFileQueue);
+            fileQueueDestroy((struct FileQueue *)effFileQueue);
         }
         strcpy((char *)D_003DF8D0, ((EffResourceBankSlot *)record)->name);
         effFileQueue = func_002959E8(record);
@@ -8390,11 +8389,11 @@ void effResetFileResources(void) {
     D_003BD954 = 0;
     D_003BD058 = 0;
     if (effFileQueue != 0) {
-        fileQueueDestroy(effFileQueue);
+        fileQueueDestroy((struct FileQueue *)effFileQueue);
         effFileQueue = 0;
     }
     if (effAuxiliaryFileQueue != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {

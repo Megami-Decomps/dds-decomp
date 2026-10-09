@@ -2533,7 +2533,19 @@ void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) 
     effect->z = effect->z * scale;
 }
 
-INCLUDE_ASM(const s32, "game/code_00151F58", effCloneSingleParticleTemplate);
+/* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
+s32 effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
+    EffTemplatePacketList *clone = (EffTemplatePacketList *)sdfAllocSizeClassBlock(0x150);
+    s32 tailBytes = 0;
+
+    memset(clone, 0, 0x150);
+    memcpy(clone, source, source->templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
+    clone->packetCount = 1;
+    clone->packetTag = 0;
+    func_00153740((s32)clone);
+    return (s32)clone;
+}
 
 void effFreeSingleParticleTemplate(u32 effect) {
     effDestroyResources();

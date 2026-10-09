@@ -286,7 +286,7 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
         if (record->state.word & MNU_WORK_ACTIVE) {
             if ((record->state.kind & 0xF) >= 4) {
                 work = mnuGetActiveEffectWorkEntry();
-                record->baseX = work->x0;
+                record->baseX = work->currentX;
                 record->baseY = mnuEvaluateTimedValue(work);
             }
             pi = 3.1415926f;
@@ -419,7 +419,7 @@ MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
-        if (record->kind == 0x40) {
+        if (record->kind == MENU_SHORT_RECORD_KIND_FIXED) {
             return record;
         }
     }
@@ -430,7 +430,7 @@ MenuShortRecord *func_003225C0(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
-        if (record->kind == 0x40) {
+        if (record->kind == MENU_SHORT_RECORD_KIND_FIXED) {
             return record;
         }
     }
@@ -467,7 +467,8 @@ u8 *mnuFindMarkedShortListRecord(MenuByteRecordList *list) {
             return NULL;
         }
         for (recordIndex = 0; recordIndex < list->count; recordIndex++) {
-            if ((*record & 0xF0) == 0x10) {
+            if ((*record & MENU_REPEAT_DIRECTIVE_KIND_MASK) ==
+                MENU_REPEAT_DIRECTIVE_KIND_TAG) {
                 return record;
             }
             record += 8;
@@ -518,10 +519,10 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     if ((registry->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
         MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->resourceRecordIndex);
-        return entry->y0 +
+        return entry->currentY +
             (f32)((s32)*(u16 *)(progressState + 2) - resourceRecord->progress);
     }
-    return entry->y0;
+    return entry->currentY;
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", mnuInitializeRegistryWorkEntry);
@@ -581,35 +582,47 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
     MenuShortRecord *record;
 
-    entry->control.bits.loopMode = 0;
+    entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_NONE;
     record = (MenuShortRecord *)mnuFindMarkedShortListRecord(list);
     if (record != NULL) {
         switch (record->kind) {
-        case 0x11:
-            entry->control.bits.loopMode = 1;
-            if (record->parameters[1] == 0) {
-                entry->control.bits.repeatMode = 1;
+        case MENU_REPEAT_DIRECTIVE_KIND_REPEAT:
+            entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_RESTART_OR_ADVANCE;
+            if (record->parameters[1] ==
+                MENU_REPEAT_SELECTOR_DECREMENT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_DECREMENT_COUNT;
                 entry->repeatCount = record->parameters[0];
-            } else if (record->parameters[1] == 1) {
-                entry->control.bits.repeatMode = 2;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REPEAT_COUNT_LT_REMAINING) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING;
                 entry->repeatCount = record->parameters[0];
-            } else if (record->parameters[1] == 2) {
-                entry->control.bits.repeatMode = 3;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REMAINING_LT_REPEAT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT;
                 entry->repeatCount = record->parameters[0];
             }
             break;
-        case 0x12:
-            entry->control.bits.loopMode = 2;
-            if (record->parameters[1] == 0) {
-                entry->control.bits.repeatMode = 1;
+        case MENU_REPEAT_DIRECTIVE_KIND_REPEAT_TO_TARGET:
+            entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_TARGET_CAPABLE;
+            if (record->parameters[1] ==
+                MENU_REPEAT_SELECTOR_DECREMENT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_DECREMENT_COUNT;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
-            } else if (record->parameters[1] == 1) {
-                entry->control.bits.repeatMode = 2;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REPEAT_COUNT_LT_REMAINING) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
-            } else if (record->parameters[1] == 2) {
-                entry->control.bits.repeatMode = 3;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REMAINING_LT_REPEAT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
             }
@@ -639,13 +652,13 @@ s32 func_003233E8(s32 context) {
 
             memset(vector, 0, sizeof(vector));
             /* Save X across advancement, then reuse the scalar for step length. */
-            value = entry->x0;
+            value = entry->currentX;
             previousY = mnuEvaluateTimedValue(entry);
             if (mnuAdvanceRegistryWorkEntry(entry) != 0) {
                 continue;
             }
 
-            currentX = entry->x0;
+            currentX = entry->currentX;
             vector[0] = currentX;
             currentY = (f32)(s32)mnuEvaluateTimedValue(entry);
             currentYInteger = (s32)currentY;
@@ -660,7 +673,7 @@ s32 func_003233E8(s32 context) {
             /* Store the clamped movement step scale in the second byte. */
             entry->movementEffectScale = movementEffectScale;
 
-            if (entry->x0 < -50.0f || (f32)parameters->width + 50.0f < entry->x0 ||
+            if (entry->currentX < -50.0f || (f32)parameters->width + 50.0f < entry->currentX ||
                 (f32)currentYInteger < -200.0f ||
                 (f32)parameters->height + 64.0f < (f32)currentYInteger) {
                 entry->flagsBits.pendingDeactivate = 1;
@@ -668,7 +681,8 @@ s32 func_003233E8(s32 context) {
 
             if (context == 0) {
                 func_00321688(entry->callback, (u32)runtimeList,
-                              (s32)entry->x0, currentYInteger, entry->scale0);
+                              (s32)entry->currentX, currentYInteger,
+                              entry->currentAngleRadians);
             }
 
             if (entry->flagsBits.halfRemainingCountReached) {
@@ -811,8 +825,8 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
     if (parameters->hitWidth == 0) {
         return NULL;
     }
-    left = (s32)(work->x0 + (f32)parameters->hitOffsetX);
-    top = (s32)(work->y0 + (f32)parameters->hitOffsetY);
+    left = (s32)(work->currentX + (f32)parameters->hitOffsetX);
+    top = (s32)(work->currentY + (f32)parameters->hitOffsetY);
     right = left + parameters->hitWidth;
     bottom = top + parameters->hitHeight;
     record = list->records;
@@ -862,7 +876,7 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
             if (entry->flagsBits.finished || entry->control.bits.countdownEnabled) {
                 continue;
             }
-            entryX = (s32)entry->x0;
+            entryX = (s32)entry->currentX;
             entryY = (s32)mnuEvaluateTimedValue(entry);
             registry = mnuGetMenuRecordRegistryEntry(entry->tag);
             parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
@@ -959,7 +973,7 @@ s32 func_00324070(MenuWorkEntry *input) {
             continue;
         }
 
-        entryX = (s32)entry->x0;
+        entryX = (s32)entry->currentX;
         entryY = (s32)mnuEvaluateTimedValue(entry);
         registry = mnuGetMenuRecordRegistryEntry(entry->tag);
         parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
@@ -973,8 +987,8 @@ s32 func_00324070(MenuWorkEntry *input) {
         bottom = top + parameters->hitHeight;
         inputRecord = mnuGetMovementRecordByIndex(input->tag);
         parameters = mnuGetMenuRegistryParametersByIndex(inputRecord->parameterTag);
-        inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
-        inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
+        inputLeft = (s32)(input->currentX + (f32)parameters->hitOffsetX);
+        inputTop = (s32)(input->currentY + (f32)parameters->hitOffsetY);
         inputRight = inputLeft + parameters->hitWidth;
         inputBottom = inputTop + parameters->hitHeight;
 
@@ -1012,7 +1026,7 @@ void mnuInitializeActiveEffectWorkEntry(MenuWorkEntry *entry) {
     entry->flags |= 0x4010;
     entry->tag = MNU_WORK_TAG_MOVEMENT_TABLE;
     entry->remaining = 1;
-    entry->scale0 = 1.5707963f;
+    entry->currentAngleRadians = 1.5707963f;
     mnuActiveEffectEntry = entry;
 }
 
@@ -1231,19 +1245,19 @@ s32 func_00324840(void) {
         length = sdfVec3Normalize(movement);
         if (length != 0.0f) {
             sdfVectorScale((f32)progress->movementScale, movement);
-            work->x0 += movement[0];
-            work->y0 += movement[1];
-            if (work->x0 < 16.0f) {
-                work->x0 = 16.0f;
+            work->currentX += movement[0];
+            work->currentY += movement[1];
+            if (work->currentX < 16.0f) {
+                work->currentX = 16.0f;
             }
-            if (work->y0 < 16.0f) {
-                work->y0 = 16.0f;
+            if (work->currentY < 16.0f) {
+                work->currentY = 16.0f;
             }
-            if (work->x0 > (f32)(parameters->width - 16)) {
-                work->x0 = (f32)(parameters->width - 16);
+            if (work->currentX > (f32)(parameters->width - 16)) {
+                work->currentX = (f32)(parameters->width - 16);
             }
-            if (work->y0 > (f32)(parameters->height - 16)) {
-                work->y0 = (f32)(parameters->height - 16);
+            if (work->currentY > (f32)(parameters->height - 16)) {
+                work->currentY = (f32)(parameters->height - 16);
             }
         }
 
@@ -1258,7 +1272,8 @@ s32 func_00324840(void) {
 
     func_00321798((MnuCallbackList *)work->callback,
                   func_00321ED8(), kindMask,
-                  (s32)work->x0, (s32)work->y0, kindMask, work->scale0);
+                  (s32)work->currentX, (s32)work->currentY, kindMask,
+                  work->currentAngleRadians);
 
     func_00322418();
 
@@ -1311,7 +1326,7 @@ s32 func_00324B28(MenuWorkEntry *entry) {
     switch (phase) {
     case 0:
         flags.word = entry->flags;
-        entry->x0 = -200.0f;
+        entry->currentX = -200.0f;
         D_004389B4 = 2;
         mode = flags.bits.mode;
         if (flags.bits.finished) {
@@ -1326,20 +1341,20 @@ s32 func_00324B28(MenuWorkEntry *entry) {
     case 2:
         if (++D_004389B8 >= 31) {
             D_004389B4 = 3;
-            entry->x0 = 120.0f;
+            entry->currentX = 120.0f;
             positionY = 400.0f;
-            entry->y0 = positionY;
+            entry->currentY = positionY;
             D_004389B8 = 0;
         }
         break;
     case 3:
-        positionY = entry->y0;
+        positionY = entry->currentY;
         positionY -= 2.0f;
         if (++D_004389B8 >= 31) {
             phase = 1;
         }
         D_004389B4 = phase;
-        entry->y0 = positionY;
+        entry->currentY = positionY;
         break;
     case 1: {
         u32 completionFlags = entry->flags;

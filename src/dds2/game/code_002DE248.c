@@ -42,7 +42,6 @@ extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 
 extern void func_00200930(f32 *, f32 *, s32);
 typedef struct FileQueue FileQueue;
-extern FileQueue *fileCloneQueueEntries(FileQueue *);
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -647,9 +646,7 @@ extern EffClassWork *effAllocateBlockWithModel(u16, void *);
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
-extern void fileQueueDestroy(s32);
 
-extern void *fileQueueClone(void *);
 
 
 
@@ -3545,8 +3542,8 @@ typedef struct EffectSlotNode54 {
     BillObj *billResource; // 0x34
     FileJobPayload **jobs;             // 0x38
     struct SdfMemBlock *jobAllocation;         // 0x3C
-    u32 *queues;           // 0x40
-    u32 queueBuffer;       // 0x44
+    FileQueue **queues;    // 0x40: cloned queues, one per active record
+    struct SdfMemBlock *queueBuffer; // 0x44: backing allocation descriptor
     struct EffExpandedList *resourceHolder; // 0x48
     FileSlotTable *record; // 0x4C
     u16 active;            // 0x50
@@ -3658,7 +3655,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueBuffer));
+        sdfReleaseResourceAllocation(node->queueBuffer);
     }
     if (node->index != 0) {
         for (i = 0; i < node->count; i++) {
@@ -3744,7 +3741,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(dst->queues[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->queueBuffer));
+            sdfReleaseResourceAllocation(dst->queueBuffer);
             dst->queues = 0;
             dst->queueBuffer = 0;
         }
@@ -3752,10 +3749,10 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         if (size == 0) {
             return;
         }
-        dst->queueBuffer = (u32)sdfAllocGeneralBlock(size);
-        dst->queues = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->queueBuffer));
+        dst->queueBuffer = sdfAllocGeneralBlock(size);
+        dst->queues = sdfResourceRetainAddress(dst->queueBuffer);
         for (i = 0; i < count; i++) {
-            dst->queues[i] = (u32)fileQueueClone((void *)src->queues[0]);
+            dst->queues[i] = fileQueueClone(src->queues[0]);
         }
         break;
     case 7:
@@ -3870,7 +3867,6 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
     }
 }
 
-extern void *fileQueueClone(void *);
 
 void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
     u32 count = node->record->count;
@@ -3881,17 +3877,17 @@ void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueBuffer));
+        sdfReleaseResourceAllocation(node->queueBuffer);
         node->queues = 0;
         node->queueBuffer = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->queueBuffer = (u32)sdfAllocGeneralBlock(size);
-        node->queues = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->queueBuffer));
-        node->queues[0] = (u32)fileCloneQueueEntries((FileQueue *)source);
+        node->queueBuffer = sdfAllocGeneralBlock(size);
+        node->queues = sdfResourceRetainAddress(node->queueBuffer);
+        node->queues[0] = fileCloneQueueEntries((FileQueue *)source);
         for (i = 1; i < count; i++) {
-            node->queues[i] = (u32)fileQueueClone((void *)node->queues[0]);
+            node->queues[i] = fileQueueClone(node->queues[0]);
         }
     }
 }
@@ -8248,7 +8244,7 @@ typedef struct EffectSlotNode80 {
     u8 pad30[0x30];
     MdlCtx *model;           // 0x60
     void *deviceSlot;       // 0x64
-    u32 resourceEntries;    // 0x68
+    FileQueue **resourceEntries; // 0x68: per-record cloned queues
     struct SdfMemBlock *entryAllocation;    // 0x6C: queue-clone array descriptor
     FileSlotTable *record;  // 0x70: primary slot-table owner
     u8 *positions;          // 0x74
@@ -8348,7 +8344,6 @@ s32 *func_002FA5F0(FileJobPayload *request) {
     return work;
 }
 
-extern void fileQueueDestroy(s32);
 
 void effDestroyOwnedResources(s32 *work) {
     u32 i;
@@ -8361,7 +8356,7 @@ void effDestroyOwnedResources(s32 *work) {
     if (((EffectSlotNode80 *)work)->entryAllocation != 0) {
         u32 count = ((EffectSlotNode80 *)work)->record->count;
         for (i = 0; i < count; i++) {
-            fileQueueDestroy(((s32 *)((EffectSlotNode80 *)work)->resourceEntries)[i]);
+            fileQueueDestroy(((EffectSlotNode80 *)work)->resourceEntries[i]);
         }
         sdfReleaseResourceAllocation(((EffectSlotNode80 *)work)->entryAllocation);
     }
@@ -8414,7 +8409,7 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
         }
         if (dst->entryAllocation != 0) {
             for (i = 0; i < count; i++) {
-                fileQueueDestroy(((s32 *)dst->resourceEntries)[i]);
+                fileQueueDestroy(dst->resourceEntries[i]);
             }
             sdfReleaseResourceAllocation(dst->entryAllocation);
             dst->resourceEntries = 0;
@@ -8426,7 +8421,7 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
         dst->entryAllocation = sdfAllocGeneralBlock(count * 4);
         dst->resourceEntries = sdfResourceRetainAddress(dst->entryAllocation);
         for (i = 0; i < count; i++) {
-            ((void **)dst->resourceEntries)[i] = fileQueueClone(((void **)src->resourceEntries)[0]);
+            dst->resourceEntries[i] = fileQueueClone(src->resourceEntries[0]);
         }
         kind = src->resourceKind;
         break;
@@ -8486,7 +8481,7 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) 
 
     if (obj->entryAllocation != 0) {
         for (i = 0; i < count; i++) {
-            fileQueueDestroy((s32)(u32)((void **)obj->resourceEntries)[i]);
+            fileQueueDestroy(obj->resourceEntries[i]);
         }
         sdfReleaseResourceAllocation(obj->entryAllocation);
         obj->resourceEntries = 0;
@@ -8496,9 +8491,9 @@ void effRebuildResourceEntryClones(EffectSlotNode80 *obj, FileQueue *secondary) 
     if (size != 0) {
         obj->entryAllocation = sdfAllocGeneralBlock(size);
         obj->resourceEntries = sdfResourceRetainAddress(obj->entryAllocation);
-        ((void **)obj->resourceEntries)[0] = fileCloneQueueEntries(secondary);
+        obj->resourceEntries[0] = fileCloneQueueEntries(secondary);
         for (i = 1; i < count; i++) {
-            ((void **)obj->resourceEntries)[i] = fileQueueClone(((void **)obj->resourceEntries)[0]);
+            obj->resourceEntries[i] = fileQueueClone(obj->resourceEntries[0]);
         }
     }
 }
@@ -8859,7 +8854,7 @@ void effInvokeFileJobWithBattleCamera(u32 work) {
 
 void effFileJobQueueRelease(u32 job) {
     if (effAuxiliaryFileQueue != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
@@ -9411,7 +9406,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002FD900);
 
 u32 effReinitializeFileQueue(void) {
     if (effTemporaryFileJob != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
@@ -9419,7 +9414,7 @@ u32 effReinitializeFileQueue(void) {
         effTemporaryFileJob = 0;
     }
     if (effFileQueue != 0) {
-        fileQueueDestroy(effFileQueue);
+        fileQueueDestroy((struct FileQueue *)effFileQueue);
     }
     effFileQueue = fileQueueCreate();
     D_003FF1C4[0] = 0;
@@ -9709,7 +9704,7 @@ u32 effPollNamedFileJob(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            fileQueueDestroy(effFileQueue);
+            fileQueueDestroy((struct FileQueue *)effFileQueue);
         }
         strcpy((char *)D_0045C1A0, ((EffResourceBankSlot *)record)->name);
         effFileQueue = func_002D5AA8(record);
@@ -9875,11 +9870,11 @@ void effResetFileResources(void) {
     D_00439074 = 0;
     D_004386B0 = 0;
     if (effFileQueue != 0) {
-        fileQueueDestroy(effFileQueue);
+        fileQueueDestroy((struct FileQueue *)effFileQueue);
         effFileQueue = 0;
     }
     if (effAuxiliaryFileQueue != 0) {
-        fileQueueDestroy(effAuxiliaryFileQueue);
+        fileQueueDestroy((struct FileQueue *)effAuxiliaryFileQueue);
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {

@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "file_request_api.h"
@@ -1932,8 +1933,6 @@ void mdlAdjustViewerScale(void) {
     }
 }
 
-extern void sdfAppendFillRectanglePacket();
-
 /* Draw the motion progress bar: timeline frame, playhead marker and "[time/length]" label, then the zoom value. */
 void mdlDrawViewerMotionTimeline(void) {
     s32 packetList;
@@ -1944,9 +1943,9 @@ void mdlDrawViewerMotionTimeline(void) {
 
     mdlAppendViewerRectToDrawList(0x81D0, 0x7948, 0xFF007F, 0xD20, 0xF0, 0);
     packetList = mdlViewerState.packetList;
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
-    sdfAppendFillRectanglePacket(packetList, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
+    sdfAppendFillRectanglePacket((SdfListHead *)packetList, 0x80303030, 0, 0x8200, 0x7990, 0x8EC0, 0x7990, 0xFF0080, 0);
+    sdfAppendFillRectanglePacket((SdfListHead *)packetList, 0x80303030, 0, 0x8200, 0x7960, 0x8200, 0x79C0, 0xFF0080, 0);
+    sdfAppendFillRectanglePacket((SdfListHead *)packetList, 0x80303030, 0, 0x8EC0, 0x7960, 0x8EC0, 0x79C0, 0xFF0080, 0);
     resource = mdlViewerState.resources[0];
     motion = resource->first;
     if (motion != NULL) {
@@ -1955,7 +1954,7 @@ void mdlDrawViewerMotionTimeline(void) {
             playheadX = 0;
         }
         playheadX += 0x8200;
-        sdfAppendFillRectanglePacket(packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
+        sdfAppendFillRectanglePacket((SdfListHead *)packetList, 0x800000E0, 0, playheadX, 0x7960, playheadX, 0x79C0, 0xFF0090, 0);
         sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[%5.1f/%-3d]", motion->currentFrame, motion->frameCount)));
     } else {
         sdfAppendPacket((SdfListHead *)(mdlViewerState.packetList), (u32)(sdfCreateFormattedSifCommand(0x8200, 0x79C0, 0xFF0080, 0, "[---.-/---]")));
@@ -2084,9 +2083,6 @@ extern char D_003ABDA8[];
 extern char D_003BBC88[];
 
 
-extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
-                                        s32, s32, s32, s32, s32, s32);
-
 void mdlDrawViewerTexturePreview(void) {
     s32 index = 0;
     s32 count = 0;
@@ -2125,7 +2121,7 @@ void mdlDrawViewerTexturePreview(void) {
                 displayHeight = ((height << 8) / width) << 3;
             }
         }
-        sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7AE0,
+        sdfAppendTexturedLinePacket((SdfListHead *)packetList, 0x80808080, 0, 0x7180, 0x7AE0,
             0, 0, displayWidth + 0x7180, displayHeight + 0x7AE0,
             width << 4, height << 4, 0xFF0080, 0);
     }

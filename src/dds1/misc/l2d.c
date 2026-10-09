@@ -2,12 +2,10 @@
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "dds3_owned_node.h"
 
 extern SdfPoolNode D_003255A8;
-
-extern void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top,
-                          s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32));
 
 /* Emit one filled rectangle into a fresh packet list. */
 void l2dDrawColoredRect(void *owner)

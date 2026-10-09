@@ -540,8 +540,6 @@ typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
 extern u32 sdfCountMapPositionRecords(SdfModel *model);
-extern FileQueue *fileQueueClone(FileQueue *);
-extern FileQueue *fileCloneQueueEntries(FileQueue *);
 extern void *func_002DCCE8(void *);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
@@ -598,7 +596,6 @@ void *func_002DCCE8(void *input) {
     return owner;
 }
 
-extern void fileQueueDestroy(FileQueue *);
 
 void effDestroyResourceOwner(void *work) {
     EffResourceOwner *owner = work;
