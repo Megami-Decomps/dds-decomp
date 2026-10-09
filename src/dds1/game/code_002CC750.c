@@ -1147,14 +1147,14 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
 SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *source) {
     u32 count;
     u32 arrayBytes;
-    u32 resource;
+    SdfMemBlock *allocation;
     u8 *buffer;
     SdfFlagListWork *work;
 
     count = source->count;
     arrayBytes = count * (sizeof(f32[2][4]) + sizeof(u32[2]) + sizeof(SdfFlagListMark));
-    resource = (u32)sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
-    buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
+    allocation = sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
+    buffer = (u8 *)sdfResourceRetainAddress(allocation);
     work = (SdfFlagListWork *)(buffer + arrayBytes);
     work->vertices = (f32 (*)[4])buffer;
     buffer += count * sizeof(f32[2][4]);
@@ -1162,7 +1162,7 @@ SdfFlagListWork *func_002CEAE8(const SdfFlagListParams *source) {
     buffer += count * sizeof(u32[2]);
     work->marks = (SdfFlagListMark *)buffer;
     work->unk04 = 0x80808080;
-    work->resource = resource;
+    work->allocation = allocation;
     work->frame = 0;
     memcpy(&work->params, source, sizeof(work->params));
     sdfResetFlagListEntries(work);
@@ -1174,7 +1174,7 @@ SdfFlagListWork *sdfInitializeFlagListFromResource(void *file) {
 }
 
 void sdfReleaseFlagListResource(SdfFlagListWork *work) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->resource));
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 extern f32 sdfViewTargetVector[4];

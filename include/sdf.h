@@ -698,7 +698,7 @@ typedef struct SdfFlagListWork {
     f32 (*vertices)[4];
     u32 *colors;
     SdfFlagListParams params;
-    u32 resource;
+    SdfMemBlock *allocation;
 } SdfFlagListWork;
 
 typedef char SdfColorTrack_size_must_be_0x24[(sizeof(SdfColorTrack) == 0x24) ? 1 : -1];
@@ -717,6 +717,8 @@ typedef char SdfAlphaTrack_fields_offset[((unsigned long)&((SdfAlphaTrack *)0)->
 typedef char SdfFlagListParams_size_must_be_0x40[(sizeof(SdfFlagListParams) == 0x40) ? 1 : -1];
 typedef char SdfFlagListMark_size_must_be_0x08[(sizeof(SdfFlagListMark) == 0x08) ? 1 : -1];
 typedef char SdfFlagListWork_size_must_be_0x58[(sizeof(SdfFlagListWork) == 0x58) ? 1 : -1];
+typedef char SdfFlagListWork_allocation_offset_must_be_0x54[
+    ((unsigned long)&((SdfFlagListWork *)0)->allocation == 0x54) ? 1 : -1];
 
 void sdfResetFlagListEntries(SdfFlagListWork *);
 void sdfReleaseFlagListResource(SdfFlagListWork *);
