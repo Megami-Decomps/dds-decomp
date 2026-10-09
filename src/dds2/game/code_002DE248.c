@@ -4329,17 +4329,17 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     return table;
 }
 
-void effFreeIndexedEntries(u8 *work) {
-    u32 *header = (u32 *)((EffClassWork *)work)->resource;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u32 *entry = (u32 *)header[0];
+void effFreeIndexedEntries(EffClassWork *work) {
+    EffPointSetTable *table = (EffPointSetTable *)work->resource;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetRow *entry = table->rows;
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effReleasePointSetAsset((EffPointSet *)*entry);
-        entry += 4;
+        effReleasePointSetAsset(entry->set);
+        entry++;
     }
-    sdfReleaseChipBlock(header);
+    sdfReleaseChipBlock(table);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB058);
@@ -4580,17 +4580,17 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     return table;
 }
 
-void effReleaseBillPointEntries(u8 *work) {
-    u32 *header = (u32 *)((EffClassWork *)work)->resource;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u32 *entry = (u32 *)header[0];
+void effReleaseBillPointEntries(EffClassWork *work) {
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effReleasePointSetAsset(((EffScaleRangeEntry *)entry)->set);
-        entry += 12;
+        effReleasePointSetAsset(entry->set);
+        entry++;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffScaleRange *)header)->allocation));
+    sdfReleaseResourceAllocation(range->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
@@ -4686,15 +4686,15 @@ EffAlternatingPointSetTable *func_002ECF78(EffBillPointConfig *src) {
     return table;
 }
 
-void effReleaseBillboardFramePointSets(s32 *work) {
-    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
-    s32 *entries = (s32 *)work[0x30 / 4];
-    s32 *entry = (s32 *)*entries;
+void effReleaseBillboardFramePointSets(EffClassWork *work) {
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffAlternatingPointSetTable *table = (EffAlternatingPointSetTable *)work->resource;
+    EffAlternatingPointSetRow *entry = table->rows;
     u32 i;
-    for (i = 0; i < count; i++, entry += 3) {
-        effReleasePointSetAsset((EffPointSet *)entry[0]);
+    for (i = 0; i < count; i++, entry++) {
+        effReleasePointSetAsset(entry->set);
     }
-    sdfReleaseChipBlock(entries);
+    sdfReleaseChipBlock(table);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002ED3D0);
