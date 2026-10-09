@@ -2590,8 +2590,8 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
     return sdfLoadMapRecordLookAtBasis(unit->ext->owner->inner, mode);
 }
 
-void btlSetAlternateEffectParameterOrMuzzlePosition(void) {
-    if (btlSetActorAlternateEffectParameter() == 0) {
+void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
+    if (btlSetActorAlternateEffectParameter(unit, mode) == 0) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
     }
 }
