@@ -2653,6 +2653,8 @@ void fileResetMenuFlowState(void) {
 
 #include "file_pac.h"
 
+extern void *memset(void *dst, s32 value, s32 size);
+
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
@@ -3524,7 +3526,6 @@ s32 fileTestSavedSlotFlags(u32 kind) {
     return fileTestSlotFlagsBit(kind, (s32 *)&datGameState->world.slotFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1058);
 
 typedef struct FileConfigCountdown {
     s32 ticks;
@@ -3561,6 +3562,58 @@ typedef struct FileConfigTask {
     f32 labelFade;
     u32 pending;    /* 0x38: zero when no load can start */
 } FileConfigTask;
+
+extern struct MenuList *mnuCreateListState(s32, s32, s32);
+extern void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list, FileConfigListNode *node, s32 drawArg);
+extern void mnuResetTitleStreamLocked(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern void func_002A2200(s32);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
+extern char D_00437DF0[];
+extern char *D_003E9000[];
+
+/* Allocate the save/config task, its five-row list and its effect resource slots. */
+s32 func_002D1058(s32 mode) {
+    struct SdfMemBlock *block;
+    FileConfigTask *task;
+    struct MenuList *list;
+    FileConfigListNode *node;
+    s32 i;
+
+    block = sdfAllocGeneralBlock(0x40);
+    task = (FileConfigTask *)sdfResourceRetainAddress(block);
+    memset(task, 0, 0x40);
+    task->memory = block;
+    task->state = mode;
+    task->ticks = 0;
+    task->result = 0;
+    list = mnuCreateListState(0, 5, 0x23);
+    task->frame = (u32)list;
+    list->drawCallback = func_002D1930;
+    for (i = 0; i < 5; i++) {
+        node = (FileConfigListNode *)mnuListAppendNode((struct MenuList *)task->frame, NULL);
+        node->resource = sdfAllocSizeClassBlock(4);
+        memset(node->resource, 0, 4);
+    }
+    switch (mode) {
+    case 1:
+        for (i = 0; i < 5; i++) {
+            effRequestResourceByMode(D_00437DF0, D_003E9000[5 + i], 0, &task->slots[i]);
+        }
+        mnuResetTitleStreamLocked();
+        func_002A2200(0x14);
+        mnuResetTitleStreamAfterFileIdle();
+        kwlnFadeOutStart(0, 0, 0, 0xF);
+        break;
+    default:
+        for (i = 0; i < 4; i++) {
+            effRequestResourceByMode(D_00437DF0, D_003E9000[i], 0, &task->slots[i]);
+        }
+        task->slots[i] = 0;
+        break;
+    }
+    return (s32)task;
+}
 
 
 
