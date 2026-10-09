@@ -114,3 +114,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E9);
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfCurrentBufferIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", sdfGsImageUploadSemaphore);
+
