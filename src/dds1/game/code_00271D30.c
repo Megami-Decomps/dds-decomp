@@ -104,8 +104,8 @@ extern void func_002E9708(void);
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
-    u32 allocation = (u32)sdfAllocGeneralBlock(sizeof(StaffMenuWork));
-    StaffMenuWork *menu = (StaffMenuWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
+    StaffMenuWork *menu = (StaffMenuWork *)sdfResourceRetainAddress(allocation);
 
     memset(menu, 0, sizeof(*menu));
     menu->resource = allocation;
@@ -144,7 +144,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
     effDestroyEffectList(menu->resourceQueue);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->resource));
+    sdfReleaseResourceAllocation(menu->resource);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_002E9730();
 }

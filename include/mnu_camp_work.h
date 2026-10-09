@@ -13,7 +13,7 @@ struct EffMappedResource;
 /* The camp task userdata owner allocated and shared by the input, draw, and
  * teardown tasks. Its complete native allocation is 0x924 bytes. */
 typedef struct StaffMenuWork {
-    u32 resource;
+    struct SdfMemBlock *resource;
     u8 pad04[4];
     MenuPopupState panel;
     s32 value54;
