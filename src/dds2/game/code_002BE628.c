@@ -1001,7 +1001,33 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
 extern void func_002C1FF0(MenuPageBar *, s32, s32 *, s32, s32,
                         EffectSlotSet *, const s32 *, s32);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1FF0);
+void func_002C1FF0(MenuPageBar *pair, s32 variant, s32 *settings, s32 positionY, s32 quantizedSpan,
+                   EffectSlotSet *source, const s32 *table, s32 count) {
+    s32 i;
+
+    memset(pair, 0, 0x50);
+    pair->variant = variant;
+    pair->quantizedSpan = quantizedSpan;
+    pair->positionY = positionY;
+    pair->activeEffect = 0;
+    pair->settingIndex = 0;
+    pair->settings = settings;
+    pair->textures[0] = effCreateResourceSlotSet(source, table[0], 1);
+    switch (variant) {
+    case 1:
+        for (i = 1; i < count; i++) {
+            pair->textures[i] = effCreateResourceSlotSet(source, table[i], 1);
+        }
+        break;
+    default:
+        for (i = 1; i < count; i++) {
+            pair->textures[i] = effCreateResourceSlotSet(source, table[i], 1);
+        }
+        break;
+    }
+    mnuCreatePairedEffects(pair);
+    mnuCyclePairedEffectSetting(pair);
+}
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B160);
 

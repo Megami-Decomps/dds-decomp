@@ -24,6 +24,7 @@
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
+#include "sdf_texture_file.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -2653,11 +2654,12 @@ void fileResetMenuFlowState(void) {
 
 #include "file_pac.h"
 
+extern void *memset(void *dst, s32 value, s32 size);
+
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
 extern void func_002C7CE8(void *);
-extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -2677,52 +2679,52 @@ void func_002CE208(s32 mode) {
     while (node != NULL) {
         switch (index) {
         case 0:
-            D_00437D5C = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D5C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 1:
-            D_00437D60 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D60 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 2:
-            D_00437D64 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D64 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 3:
-            D_00437D68 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D68 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 4:
-            D_00437D6C = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D6C = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 5:
-            D_00437D70 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D70 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 6:
-            D_00437D74 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D74 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 7:
-            D_00437D78 = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_00437D78 = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 8:
-            D_003E7FA8[0] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[0] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 9:
-            D_003E7FA8[1] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[1] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 10:
-            D_003E7FA8[2] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 11:
-            D_003E7FA8[3] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[3] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 12:
-            D_003E7FA8[4] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[4] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 13:
-            D_003E7FA8[5] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[5] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 14:
-            D_003E7FA8[6] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[6] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         case 15:
-            D_003E7FA8[7] = (s32)sdfTexAcquireResourceTexture((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle));
+            D_003E7FA8[7] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfMemoryGetBlockAddress((struct SdfMemBlock *)node->resourceHandle)));
             break;
         }
         sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
@@ -3524,7 +3526,6 @@ s32 fileTestSavedSlotFlags(u32 kind) {
     return fileTestSlotFlagsBit(kind, (s32 *)&datGameState->world.slotFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1058);
 
 typedef struct FileConfigCountdown {
     s32 ticks;
@@ -3561,6 +3562,58 @@ typedef struct FileConfigTask {
     f32 labelFade;
     u32 pending;    /* 0x38: zero when no load can start */
 } FileConfigTask;
+
+extern struct MenuList *mnuCreateListState(s32, s32, s32);
+extern void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list, FileConfigListNode *node, s32 drawArg);
+extern void mnuResetTitleStreamLocked(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern void func_002A2200(s32);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
+extern char D_00437DF0[];
+extern char *D_003E9000[];
+
+/* Allocate the save/config task, its five-row list and its effect resource slots. */
+s32 func_002D1058(s32 mode) {
+    struct SdfMemBlock *block;
+    FileConfigTask *task;
+    struct MenuList *list;
+    FileConfigListNode *node;
+    s32 i;
+
+    block = sdfAllocGeneralBlock(0x40);
+    task = (FileConfigTask *)sdfResourceRetainAddress(block);
+    memset(task, 0, 0x40);
+    task->memory = block;
+    task->state = mode;
+    task->ticks = 0;
+    task->result = 0;
+    list = mnuCreateListState(0, 5, 0x23);
+    task->frame = (u32)list;
+    list->drawCallback = func_002D1930;
+    for (i = 0; i < 5; i++) {
+        node = (FileConfigListNode *)mnuListAppendNode((struct MenuList *)task->frame, NULL);
+        node->resource = sdfAllocSizeClassBlock(4);
+        memset(node->resource, 0, 4);
+    }
+    switch (mode) {
+    case 1:
+        for (i = 0; i < 5; i++) {
+            effRequestResourceByMode(D_00437DF0, D_003E9000[5 + i], 0, &task->slots[i]);
+        }
+        mnuResetTitleStreamLocked();
+        func_002A2200(0x14);
+        mnuResetTitleStreamAfterFileIdle();
+        kwlnFadeOutStart(0, 0, 0, 0xF);
+        break;
+    default:
+        for (i = 0; i < 4; i++) {
+            effRequestResourceByMode(D_00437DF0, D_003E9000[i], 0, &task->slots[i]);
+        }
+        task->slots[i] = 0;
+        break;
+    }
+    return (s32)task;
+}
 
 
 

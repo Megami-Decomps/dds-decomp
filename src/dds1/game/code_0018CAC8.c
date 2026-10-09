@@ -10,6 +10,7 @@
 #include "fpu.h"
 #include "eff.h"
 #include "eff_math.h"
+#include "sdf_texture_file.h"
 
 #define EFF_DISPATCH_RESULT_BYTES 8
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
@@ -45,7 +46,6 @@ extern char D_003BB058[];
 extern char D_003BB060[];
 extern char *D_003557A8[];
 extern s32 func_00310320(s32 directory, EffDirEnt *entry);
-extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);
@@ -524,7 +524,7 @@ void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
         work->textureHandle = NULL;
     }
     loadedResource = sdfReadNamedResource(textureResource, resourceWords, 0);
-    texture = sdfTexAcquireResourceTexture((void *)resourceWords[0]);
+    texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceWords[0]));
     work->textureHandle = texture;
     sdfReleaseResourceAllocation(loadedResource);
 }

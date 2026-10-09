@@ -77,7 +77,76 @@ extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void mnuReleasePanelEntryPool(void);
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
+const char D_00425F70[] = "*****************[mtrMantraUpdate():[0x%x]]*****************\n";
+
+extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
+extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern s32 func_00316020(DatPartyRecord *, u16);
+extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
+extern s32 ptyGetProfileRecordCap(u16);
+extern void func_00314868(DatPartyRecord *, u16);
+extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
+
+/* Recompute every mantra node's unlock state for a party member and report changes. */
+void func_00286BA8(DatPartyRecord *record) {
+    s32 modelFlagState;
+    MantraFlagResource *current;
+    MantraFlagResource *source;
+    MantraNodePos *node;
+    u16 *cur;
+    u16 *src;
+    s32 i;
+    s32 j;
+    u16 oldFlags;
+
+    evtPrintDeveloperConsoleMessage(D_00425F70, record->unitId);
+    modelFlagState = mnuGetActiveMantraModelFlagState();
+    current = evtAllocateMantraSelectionWork(NULL, 1);
+    mnuValidateProfileEntry(current, record);
+    source = evtAllocateMantraSelectionWork(record, 1);
+    node = mnuGetMantraNodePositionRecord(0);
+    cur = current->flags;
+    src = source->flags;
+    for (i = 0; i < 176; i++, node++, cur++, src++) {
+        if (node->id != 0 && modelFlagState >= node->modelFlagState && func_00316020(record, node->id) != 0) {
+            oldFlags = *cur;
+            if ((oldFlags & 0xF) == 3) {
+                if ((*src & 0xF) != 3) {
+                    if ((node->selector.packed & 0xF) != 3) {
+                        if ((node->selector.packed & 0xF) != 4) {
+                            *cur = (oldFlags & 0xFFF0) | (*src & 0xF);
+                            if ((*src >> 8) & 8) {
+                                *cur |= 0x800;
+                            }
+                        }
+                    }
+                }
+            } else if ((node->selector.packed & 0xF) == 2 && ((*src >> 8) & 8)) {
+                *cur = oldFlags | 0x800;
+                for (j = 0; j < 6; j++) {
+                    if (node->neighbors[j] != NULL && node->neighbors[j]->id != 0) {
+                        if ((current->flags[node->neighbors[j]->id] >> 8) & 1) {
+                            *cur = (*cur & 0xFFF0) | 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            if ((node->selector.packed & 0x10F) == 0x102 && ((*src >> 8) & 1)) {
+                *ptyGetProfileRecordPointer(record, node->id) = ptyGetProfileRecordCap(node->id);
+                func_00314868(record, node->id);
+            }
+            if (oldFlags != *cur) {
+                scrSetEntryLowFlags(record, node->id, *cur);
+            }
+        }
+    }
+    evtReleaseMantraSelectionWork(current);
+    evtReleaseMantraSelectionWork(source);
+}
 
 /* Process each of the 32 game-state records whose flags bit 0 is set, then print the native mantra banner. */
 void func_00286E20(void) {

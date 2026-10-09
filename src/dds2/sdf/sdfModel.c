@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_asset_packets.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
-extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 
 /* One DMA tag followed by two VIF codes; all aliases retain the 16-byte packet layout. */
 typedef struct {
@@ -96,7 +96,7 @@ SdfPacket *sdfModelWriteFixedPacket(SdfPacket *packet) {
 
 /* Select an asset packet from the root model's parsed resource table. */
 void *sdfModelWriteIndexedAssetPacket(SdfModel *model, s32 index, void *packet, s32 frame) {
-    return sdfInitNodeHeaderFromWords(((u32 **)model->resources->buffer)[index], packet, frame);
+    return sdfInitAssetDrawEntryReferenceNode(((struct SdfAsset **)model->resources->buffer)[index], packet, frame);
 }
 
 /* A command-list entry: a kind byte followed by per-kind payload words. */
@@ -232,25 +232,25 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
-    u32 *cursor;
-    u32 commandAddress;
+    u32 **cursor;
+    u32 *commandList;
 
     sdfDrawNodeSetFromItem(node, item);
     switch (item->commandSetupMode) {
     case 0:
         for (pass = 0; pass != 2; pass++) {
             for (slot = 0; slot != 3; slot++) {
-                sdfDrawNodeBuildCommandList(node, (u32 *)item->commandData.inlineCommandAddresses[slot],
+                sdfDrawNodeBuildCommandList(node, item->commandData.inlineCommandLists[slot],
                               slot, 0, pass);
             }
         }
         break;
     case 1:
-        if (item->commandData.commandList.commandAddresses != NULL) {
+        if (item->commandData.commandList.commandLists != NULL) {
             for (pass = 0; pass != 2; pass++) {
-                cursor = item->commandData.commandList.commandAddresses;
-                while ((commandAddress = *cursor++) != 0) {
-                    sdfDrawNodeBuildCommandList(node, (u32 *)commandAddress, 0, 1, pass);
+                cursor = item->commandData.commandList.commandLists;
+                while ((commandList = *cursor++) != NULL) {
+                    sdfDrawNodeBuildCommandList(node, commandList, 0, 1, pass);
                 }
             }
         }

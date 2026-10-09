@@ -14,13 +14,13 @@ extern SdfGraphObj D_003980E0;
 extern u8 D_003BD2E8;
 extern u8 D_003BD9DC;
 
-void func_002D0E30(void *arg0, s32 arg1, s32 arg2);
+void sdfGraphApplyModeDefaults(void *arg0, s32 arg1, s32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
 void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD2E8 = (u8)arg0;
-    func_002D0E30(&D_003980E0, arg0, 0);
+    sdfGraphApplyModeDefaults(&D_003980E0, arg0, 0);
     D_003BD9DC = 1;
 }
 
@@ -82,7 +82,7 @@ extern u8 D_003BD2E9;
 extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 
 /* Reset the GS with the interlace setting of the current display mode. */
-void func_002D1020(void) {
+void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
     u16 interlace = D_003980BA[D_003BD2E8].interlace;
@@ -106,7 +106,7 @@ void func_002D1020(void) {
 }
 
 
-s32 func_002D1080(s32 channel) {
+s32 sdfGraphWakeDisplayThread(s32 channel) {
     if (channel == 1) {
         iWakeupThread(D_003BD9D8);
     }

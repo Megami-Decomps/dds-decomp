@@ -21,7 +21,7 @@ typedef struct PacState {
     s32 consumedBytes; /* 0x18 */
     u8 *outputCursor; /* 0x1C */
     s32 pendingBytes; /* 0x20 */
-    struct PacBuf *decoder; /* 0x24 */
+    u8 *decoder; /* 0x24: decoder work block, held as a byte pointer */
     struct PacBuf *resourceBuffer; /* 0x28 */
     union {
         struct PacBuf *resource;
