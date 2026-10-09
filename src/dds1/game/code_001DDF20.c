@@ -6691,9 +6691,9 @@ typedef struct SoundTaskArgs {
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
-u32 sndBuildMotSeResourceKey(u32 *sound, u32 slot) {
-    u32 id = ((SoundSlotOwner *)sound)->id;
-    u32 category = ((SoundSlotOwner *)sound)->category;
+u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
+    u32 id = sound->id;
+    u32 category = sound->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
     s32 scaledId = id * 0x20;
@@ -6726,7 +6726,7 @@ extern char D_003A5198[];
 extern char D_003A51A8[];
 
 /* Queue available motion-SE files into fileRequests, including slot 11's stream. */
-void sndLoadMotSeFiles(u32 *sound) {
+void sndLoadMotSeFiles(SoundSlotOwner *sound) {
     char filename[0x70];
     u32 slot = 0;
     s32 offset = 0x10;
@@ -6736,18 +6736,18 @@ void sndLoadMotSeFiles(u32 *sound) {
         if (id != 0) {
             if (slot != 0xB) {
                 func_003014F0(filename, D_003A5158, D_003BB6B0, id >> 16);
-            } else if (sound[1] == 0) {
-                func_003014F0(filename, D_003A5178, D_003A5188, sound[2]);
+            } else if (sound->category == 0) {
+                func_003014F0(filename, D_003A5178, D_003A5188, sound->id);
             } else {
-                func_003014F0(filename, D_003A5198, D_003A5188, sound[2]);
+                func_003014F0(filename, D_003A5198, D_003A5188, sound->id);
             }
-            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
+            *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
         }
         slot++;
         offset += 4;
     } while (slot < 0x1D);
-    sound[0] |= 1;
+    sound->flags |= SOUND_SLOT_FILE_LOAD_PENDING;
 }
 
 /* Find the shared category/id owner, returning null if absent. */
@@ -6791,7 +6791,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     }
     context->soundSlotOwners = node;
     if (mdlFlagTest(0xC0F) == 0) {
-        sndLoadMotSeFiles((u32 *)node);
+        sndLoadMotSeFiles(node);
     }
     return node;
 }
@@ -6802,14 +6802,14 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
     node->work.refCount = count;
     if (count == 0) {
         u32 i = 0;
-        u32 *resources = (u32 *)node->work.resourceHandles;
-        u32 *requests = (u32 *)node->work.fileRequests;
+        struct SdfMemBlock **resources = node->work.resourceHandles;
+        struct FileRequest **requests = node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
-                filePollEntryCleanup((struct FileRequest *)(u32)*requests);
+                filePollEntryCleanup(*requests);
             }
             if (*resources != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resources));
+                sdfReleaseResourceAllocation(*resources);
             }
         }
         if (node->next != 0) {
@@ -6845,7 +6845,7 @@ void btlStartMoveOtherUnitsTask(void *owner, s32 soundId) {
 s32 sndHasActiveFileLoad(void) {
     SoundSlotOwner *node = ((BtlActorWork *)btlGetRuntime())->soundSlotOwners;
     while (node) {
-        if (node->flags & 8) {
+        if (node->flags & SOUND_SLOT_TRACK_LOADING) {
             return 1;
         }
         node = node->next;
@@ -6860,10 +6860,10 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (owner == 0) {
         return;
     }
-    if (owner->flags & 1) {
+    if (owner->flags & SOUND_SLOT_FILE_LOAD_PENDING) {
         return;
     }
-    if (!(owner->flags & 2)) {
+    if (!(owner->flags & SOUND_SLOT_FILES_READY)) {
         return;
     }
     if (owner->work.resourceHandles[args->slot] == 0) {
@@ -6875,9 +6875,9 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (args->slot != 0xB) {
         owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->slot);
         owner->work.pendingSlot = args->slot;
-        owner->flags |= 4;
-        owner->flags &= ~8;
-        owner->flags &= ~0x10;
+        owner->flags |= SOUND_SLOT_TRACK_LOAD_REQUESTED;
+        owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
+        owner->flags &= ~SOUND_SLOT_TRACK_READY;
     }
 }
 
@@ -6914,10 +6914,10 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     if (owner == 0) {
         return 1;
     }
-    if (owner->flags & 1) {
+    if (owner->flags & SOUND_SLOT_FILE_LOAD_PENDING) {
         return 1;
     }
-    if (!(owner->flags & 2)) {
+    if (!(owner->flags & SOUND_SLOT_FILES_READY)) {
         return 1;
     }
     soundWork = &owner->work;
@@ -6925,8 +6925,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         return 1;
     }
     if (args->slot != 0xB) {
-        key = sndBuildMotSeResourceKey((u32 *)owner, args->slot);
-        if (owner->flags & 0x10) {
+        key = sndBuildMotSeResourceKey(owner, args->slot);
+        if (owner->flags & SOUND_SLOT_TRACK_READY) {
             sndSetStationedSeHighVolume(key);
             btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
             return 1;
@@ -6939,8 +6939,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
-            size = sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
+            data = (void *)sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
+            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
             func_0026ABA8(data, size, 2);
             func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();
@@ -6952,8 +6952,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         return 1;
     }
     if (args->waitFrames > 90) {
-        owner->flags &= ~8;
-        owner->flags |= 0x10;
+        owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
+        owner->flags |= SOUND_SLOT_TRACK_READY;
         btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);
         return 1;
     }
@@ -7006,21 +7006,20 @@ void func_001F44C0(void) {
     s32 tracksReady;
 
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-        if ((owner->flags & 2) == 0) {
+        if ((owner->flags & SOUND_SLOT_FILES_READY) == 0) {
             u32 slot;
             s32 requestsPending = 0;
 
             for (slot = 0; slot < 0x1D; slot++) {
                 if (owner->work.fileRequests[slot] != 0) {
                     if (fileIsRequestReadyInCurrentMode(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
+                            owner->work.fileRequests[slot]) != 0) {
                         u32 resource = fileGetResourceHandle(
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]);
+                            owner->work.fileRequests[slot]);
 
-                        struct FileRequest *completedRequest =
-                            (struct FileRequest *)(u32)owner->work.fileRequests[slot];
+                        struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
-                        owner->work.resourceHandles[slot] = resource;
+                        owner->work.resourceHandles[slot] = (struct SdfMemBlock *)resource;
                         filePollEntryCleanup(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
@@ -7029,7 +7028,7 @@ void func_001F44C0(void) {
                 }
             }
             if (requestsPending == 0) {
-                owner->flags = (owner->flags & ~1) | 2;
+                owner->flags = (owner->flags & ~SOUND_SLOT_FILE_LOAD_PENDING) | SOUND_SLOT_FILES_READY;
                 btlBossDebugPrintf("btl:motSE file load all end[%p]\n", owner);
             }
         }
@@ -7044,16 +7043,16 @@ void func_001F44C0(void) {
 
     tracksReady = 1;
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-        if (owner->flags & 8) {
+        if (owner->flags & SOUND_SLOT_TRACK_LOADING) {
             u32 loaded = sndFindPackedTrackLoadStatus((u32)owner->work.pendingSoundId);
 
             if (loaded != 0) {
                 u32 flags = owner->flags;
 
-                if (flags & 8) {
+                if (flags & SOUND_SLOT_TRACK_LOADING) {
                     tracksReady = 0;
                 }
-                owner->flags = (flags & ~8) | 0x10;
+                owner->flags = (flags & ~SOUND_SLOT_TRACK_LOADING) | SOUND_SLOT_TRACK_READY;
             } else {
                 tracksReady = 0;
             }
@@ -7065,17 +7064,15 @@ void func_001F44C0(void) {
             btlBossDebugPrintf("btl:motSE wait[skillSE]\n");
         } else {
             for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-                if (owner->flags & 4) {
+                if (owner->flags & SOUND_SLOT_TRACK_LOAD_REQUESTED) {
                     SoundSlotWork *work = &owner->work;
-                    struct SdfMemBlock *block =
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot];
+                    struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemoryGetBlockSize(block);
-                    u32 address = sdfMemoryGetBlockAddress(
-                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot]);
+                    u32 address = sdfMemoryGetBlockAddress(work->resourceHandles[owner->work.pendingSlot]);
 
                     func_002E9450((s32)address, size);
-                    owner->flags = (owner->flags & ~4) | 8;
-                    owner->flags &= ~0x10;
+                    owner->flags = (owner->flags & ~SOUND_SLOT_TRACK_LOAD_REQUESTED) | SOUND_SLOT_TRACK_LOADING;
+                    owner->flags &= ~SOUND_SLOT_TRACK_READY;
                     break;
                 }
             }
@@ -7088,9 +7085,9 @@ s32 sndHasOccupiedNodeSlots(void) {
     s32 context = btlGetRuntime();
     SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
-        if ((node->flags & 2) == 0) {
+        if ((node->flags & SOUND_SLOT_FILES_READY) == 0) {
             u32 index = 0;
-            u32 *requests = (u32 *)node->work.fileRequests;
+            struct FileRequest **requests = node->work.fileRequests;
             for (; index < 0x1D; index++) {
                 if (*requests != 0) {
                     return 1;
@@ -7159,19 +7156,19 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     return 0;
 }
 
-void *sndCreateAtracEffectLoadTask(u32 owner) {
-    u8 *task = btlAllocTask(12);
+BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(Atrac3LoadTaskArgs));
     Atrac3LoadTaskArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x58;
-    *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(void **)(task + 0x4C) = sndPollAtrac3SELoadTask;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x58;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->callback = sndPollAtrac3SELoadTask;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
     arguments->request = 0;
     arguments->state = 0;
-    arguments->entryIndex = owner;
+    arguments->entryIndex = entryIndex;
     return task;
 }
 
@@ -7245,20 +7242,20 @@ void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *args) {
     --*(u16 *)(state + 0x260);
 }
 
-void *sndCreateEarringPlaybackTask(u8 *owner) {
-    u8 *task = btlAllocTask(12);
+BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlDeadLoadArgs));
     BtlDeadLoadArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x59;
-    *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(void **)(task + 0x48) = sndStartDeadAtracLoad;
-    *(void **)(task + 0x4C) = sndUpdateEarringDeadPlayback;
-    *(void **)(task + 0x50) = sndFinishEarringPlaybackTask;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->taskId = 0x59;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->ownerId = unit->identity;
+    task->onStart = sndStartDeadAtracLoad;
+    task->callback = sndUpdateEarringDeadPlayback;
+    task->onFinish = sndFinishEarringPlaybackTask;
     arguments = btlGetTaskArguments(task);
-    arguments->unit = (BtlUnit *)owner;
+    arguments->unit = unit;
     arguments->request = 0;
     arguments->resourceAllocation = 0;
     return task;

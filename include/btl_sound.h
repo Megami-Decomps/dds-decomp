@@ -244,6 +244,14 @@ struct BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames);
 struct BtlRuntimeTask *sndCreateReleaseTask(u32 frames);
 struct BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames);
 
+#ifdef VERSION_DDS1
+struct BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex);
+#else
+struct BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex);
+#endif
+
+struct BtlRuntimeTask *sndCreateEarringPlaybackTask(struct BtlUnit *unit);
+
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
 
