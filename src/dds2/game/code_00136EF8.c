@@ -1562,7 +1562,7 @@ void fldCopyInfoTable(FldInfTable *src) {
     D_0038E2D0 = *src;
 }
 
-void func_00140238(void) {
+void fldStartSelectedActorTask(void) {
     s32 slot = D_004361CC;
     char *actor;
 
@@ -1864,7 +1864,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141898);
 extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
 
 /* Start the linked sequence of the first enabled waypoint actor that matches this field transition. */
-void func_00141B20(s32 mode, s32 index, FieldSequenceRecord *sequence) {
+void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *sequence) {
     s32 field;
     s32 motion;
     s32 kind;
@@ -2194,7 +2194,7 @@ void fldBeginNpcInteractionById(s32 id) {
 extern s32 func_0035B6E0(const char *, ...);
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
-s32 func_00143910(u32 key, f32 *x, f32 *y, f32 *z) {
+s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
@@ -2298,17 +2298,17 @@ void fldDrawTitleBannerFrame(s32 mode) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108EC0(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+    evtSubmitTexturedGradientQuad(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   fldAreaState.fieldTextures[1].texture);
-    func_00108EC0(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+    evtSubmitTexturedGradientQuad(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   fldAreaState.fieldTextures[1].texture);
-    func_00108EC0(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+    evtSubmitTexturedGradientQuad(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
                   fldAreaState.fieldTextures[1].texture);
     if (mode < 0x18) {
         evtSubmitPrimaryAlphaBlendMode(1);
-        func_00108EC0(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
+        evtSubmitTexturedGradientQuad(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
                       D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
-        func_00108EC0(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
+        evtSubmitTexturedGradientQuad(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
                       D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
         evtSubmitPrimaryAlphaBlendMode(0);
     }
@@ -2320,7 +2320,7 @@ void fldDrawTitleBannerCursor(s32 x, s32 y) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108EC0(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00389978[0]));
+    evtSubmitTexturedGradientQuad(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00389978[0]));
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 

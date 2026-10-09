@@ -202,7 +202,7 @@ extern void func_0032DEC8(void);
 extern s32 sdfGraphWakeDisplayThread(s32);
 extern void sceGsResetPath(void);
 
-void func_0032A230(void) {
+void sdfRunGraphicsTransferWorker(void) {
     u32 startTicks;
 
     D_004389E1 = 0;
@@ -309,7 +309,7 @@ void func_0032A440(s32 size) {
     sdfRegisterTextureReleaseRequestHandler();
     sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
     D_004389EC = sdfCreateSemaphore(0, 0x20, 0);
-    thread = sdfCreateThread((s32)func_0032A230, (s32)D_004601D0, 0x8000, 0x44);
+    thread = sdfCreateThread((s32)sdfRunGraphicsTransferWorker, (s32)D_004601D0, 0x8000, 0x44);
     D_00439138 = thread;
     _StartThread(thread, 0);
     sdfStartTrackedThread(&D_00439130, (s32)sdfServiceGraphicsBuffers, (s32)D_0045F1D0,

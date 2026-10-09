@@ -21,7 +21,7 @@ u32 effManagerUpdateAndDispatch(void) {
     parDrawPendingCellSystems();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
-    func_001602F8();
+    billSubmitTexturedQuadColumns();
     effDispatchActive();
     return 0;
 }

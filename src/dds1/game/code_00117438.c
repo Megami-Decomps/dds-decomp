@@ -370,7 +370,7 @@ typedef struct SdfResourceTable {
 const char D_0039F930[] = "sys:[%s]\n";
 
 /* Load a table's file and copy each size-prefixed segment into its own block. */
-void func_00118210(SdfResourceTable *table) {
+void sdfReloadChannelSegments(SdfResourceTable *table) {
     DevState *command;
     struct SdfMemBlock *block;
     s32 size;
@@ -424,7 +424,7 @@ void sdfResetChannels(void) {
     sdfFirePendingCallback();
     entry = D_0032A6F0;
     for (i = 0; i < 8; i++) {
-        func_00118210((SdfResourceTable *)entry);
+        sdfReloadChannelSegments((SdfResourceTable *)entry);
         entry += 0xA4;
     }
     func_001180F8();

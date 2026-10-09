@@ -209,7 +209,7 @@ extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
 extern void func_0012EEA0(s32, s32);
 extern void func_0012FF48(void);
-extern void func_0012EA50(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
@@ -837,7 +837,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern char D_0039FE08[], D_0039FE18[], D_0039FE28[];
 
 /* Restore the room's named objects and enable their retained path controllers. */
-void func_00127388(void) {
+void fldActivateRoomFlagObjects(void) {
     char modelName[16];
     char collisionName[16];
     char pathName[16];
@@ -2296,7 +2296,7 @@ void func_0012AEB0(void) {
 
 
 /* Submit the field overlay's fixed register state and textured sprite payload. */
-void func_0012B090(s32 mode) {
+void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -2359,7 +2359,7 @@ void func_0012B090(s32 mode) {
 
 
 /* Submit the field overlay's fixed register state and textured sprite payload. */
-void func_0012B2B0(s32 alpha) {
+void fldSubmitOverlayStateAndSprite(s32 alpha) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -2803,7 +2803,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-void func_0012C428(s32 a1, s32 a2) {
+void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -3211,7 +3211,7 @@ void func_0012EA40(u32 index, u32 value) {
     D_003BAD38 = value;
 }
 
-void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
+void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
     s32 currentMotion;
 
     if (D_0032E4C8[0] == 1) {
@@ -3603,7 +3603,7 @@ s32 fldUpdateCameraFrame(void) {
         node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
         func_0012EEA0(node, node);
         if (fldAreaState.unk118 == 1) {
-            func_0012EA50(0, 0, 6.0f);
+            fldUpdateCameraModelMotion(0, 0, 6.0f);
         }
         return 0;
     }
@@ -3670,24 +3670,24 @@ extern void effObjClearNodeFlags(void *, s32);
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_001312D8);
 
 extern s32 fldGetLocationCoordinateValue(s32, s32);
-extern void func_0012EA50(s32, s32, f32);
+extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
 void fldSetCameraNodeModeWithTen(void) {
     s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
-        func_0012EA50(node, 0x12, 10.0f);
+        fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
     }
-    func_0012EA50(node, 3, 10.0f);
+    fldUpdateCameraModelMotion(node, 3, 10.0f);
 }
 
 void fldSetCameraNodeModeWithZero(void) {
     s16 node = ((MdlCtx *)(u32)fldCameraModelObject)->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
-        func_0012EA50(node, 0x12, 0.0f);
+        fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;
     }
-    func_0012EA50(node, 3, 0.0f);
+    fldUpdateCameraModelMotion(node, 3, 0.0f);
 }
 
 
@@ -6056,7 +6056,7 @@ void fldCopyInfoTable(const void *source) {
 extern s32 D_003BAE40;
 extern u8 *fldFindActorEntryByName(const char *);
 
-void func_0013D650(void) {
+void fldStartSelectedActorTask(void) {
     s32 slot;
     char *actor;
 
@@ -6642,7 +6642,7 @@ void fldCopyActorWaypointTable(const void *source) {
 
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
-void func_0013FEC0(void) {
+void fldInitializeActorMotionSlots(void) {
     f32 rotation[4];
     f32 angle;
     EffWorldNode *world;

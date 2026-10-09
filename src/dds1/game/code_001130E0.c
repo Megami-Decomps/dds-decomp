@@ -601,7 +601,7 @@ INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F720);
 
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F730);
 
-s32 func_00113F28(EffWorldNode *object) {
+s32 effUpdateTransformOpacityMode(EffWorldNode *object) {
     EffectTransformData *data = object->data;
     SdfModel *model;
     u32 mode = data->opacityMode;
