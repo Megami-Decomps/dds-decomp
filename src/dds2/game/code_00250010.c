@@ -3754,7 +3754,7 @@ typedef struct EvtPmdFilePrefix {
 typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
 
 /* Build the directory after assigning each payload its serialized index. */
-void func_00258CC8(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtPmdFilePrefix header;
     PmdEntry entry;
     s32 directoryCount = 0;
@@ -4009,7 +4009,7 @@ typedef struct EvtSerializedChild {
 
 /* Filter groups by mode and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
-void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
 
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -4223,13 +4223,13 @@ extern s32 func_0035C860(char *buffer, const char *format, ...);
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 extern s32 func_00369DF8(s32 descriptor);
 extern s32 func_0036BCD0(const char *device, s32 flags);
-extern void func_00258CC8(s32 output, s32 format, EvtRuntime *runtime);
+extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
 extern char D_004377C8[];
 
 /* Save the runtime to its paired PM2/PM3 files. Mode zero uses the
  * viewer name; other modes use the selected event and cut identifiers. */
-s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
+s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     char pm2Path[64];
     char pm3Path[64];
     s32 pm2;
@@ -4278,12 +4278,12 @@ s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
         return 0;
     }
 
-    func_00258CC8(pm2, 2, runtime);
+    evtViewerWriteTrackDirectory(pm2, 2, runtime);
     for (section = 0; section < 26; section++) {
         switch (section) {
         case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
         case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
-        case 4: func_00259298(pm2, 2, runtime); break;
+        case 4: evtViewerWriteChildRecords(pm2, 2, runtime); break;
         case 5: evtWriteGroupHeader(pm2, runtime); break;
         case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
         case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
@@ -4306,10 +4306,10 @@ s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
     }
     func_00369DF8(pm2);
     func_0036BCD0(D_004377C8, 0);
-    func_00258CC8(pm3, 3, runtime);
+    evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
-            func_00259298(pm3, 3, runtime);
+            evtViewerWriteChildRecords(pm3, 3, runtime);
         }
     }
     func_00369DF8(pm3);
