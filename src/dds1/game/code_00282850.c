@@ -786,7 +786,7 @@ struct MenuPanelItem {
     MenuGridSlot gridSlots[5]; /* 0x5C */
     u8 pad84[4];
     u32 initialValue; /* 0x88 */
-    u32 selectionRamp; /* 0x8C */
+    s32 selectionRamp; /* 0x8C */
 };
 
 /* Allocate a zeroed native panel item and initialize its three default values. */

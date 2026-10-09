@@ -155,7 +155,7 @@ extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern u32 D_003BB3DC;
 
-extern u32 D_003BD834;
+extern SceneKindTable *D_003BD834;
 
 extern u32 D_003BD838;
 
@@ -4747,7 +4747,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2998);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B2AC8);
 
 void btlReleaseBattleScratchBlocks(void) {
-    sdfReleaseChipBlock((void *)D_003BD834);
+    sdfReleaseChipBlock(D_003BD834);
     sdfReleaseChipBlock((void *)D_003BD838);
 }
 
@@ -6149,32 +6149,32 @@ u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
     switch (kind) {
     case 0:
         func_001BD2C0(object, &count, 0, 2, 3);
-        *(u32 *)(D_003BD834 + 0x14) = count + 1;
+        D_003BD834->value[0] = count + 1;
         break;
     case 4:
         func_001BD708((u8 *)object, (u16 *)&count);
-        *(u32 *)(D_003BD834 + 0x24) = count;
+        D_003BD834->value[4] = count;
         break;
     case 2:
         btlBuildEligibleActorList(object, &count);
-        *(u32 *)(D_003BD834 + 0x1C) = count;
+        D_003BD834->value[2] = count;
         break;
     case 3:
-        *(u32 *)(D_003BD834 + 0x20) = 3;
+        D_003BD834->value[3] = 3;
         break;
     case 6:
-        *(u32 *)(D_003BD834 + 0x2C) = 1;
+        D_003BD834->value[6] = 1;
         break;
     default:
-        ((u32 *)(D_003BD834 + 0x14))[kind] = 0;
+        D_003BD834->value[kind] = 0;
         break;
     }
     if (unlimited == 0) {
-        if (((u32 *)(D_003BD834 + 0x14))[kind] >= 4) {
+        if (D_003BD834->value[kind] >= 4) {
             return 4;
         }
     }
-    return ((u32 *)(D_003BD834 + 0x14))[kind];
+    return D_003BD834->value[kind];
 }
 
 extern u16 D_00359960[12];
