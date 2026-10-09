@@ -15,7 +15,7 @@
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern u32 fileGetResourceHandle(void);
+
 
 
 extern u32 D_003BD11C;
@@ -217,11 +217,11 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
 }
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
-void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
+void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
     u32 allocation;
     EffectSlotSet *instance;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
@@ -229,11 +229,11 @@ void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
-void effCompleteRetainedResourceJob(u64 job, u32 *outInstance) {
+void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     u32 allocation;
     EffectSlotSet *instance;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
     filePollEntryCleanup(job);
@@ -269,12 +269,12 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 }
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
-void effCompleteMappedResourceJob(u64 job, u32 *outMappedResource) {
+void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResource) {
     u32 allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;
 
-    allocation = fileGetResourceHandle();
+    allocation = fileGetResourceHandle(job);
     sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     mappedResource = effCreateMappedResource(sourceAddress);
     *outMappedResource = (u32)mappedResource;
