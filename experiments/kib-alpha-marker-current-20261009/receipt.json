@@ -1,0 +1,47 @@
+{
+  "base_commit": "cbc821ea4259005436e3b76da0359a154972f1d3",
+  "baseline": {
+    "matches": 168,
+    "differences": 0
+  },
+  "typed_candidate": {
+    "matches": 168,
+    "differences": 1,
+    "target_bytes": 912,
+    "target_differing_words": 20,
+    "target_total_words": 228,
+    "older_function_size_regressions": [],
+    "residual_classes": {
+      "gpr_field_only": 20
+    },
+    "residual_min_offset": 292,
+    "residual_max_offset": 728,
+    "substitutions": [
+      {
+        "bank": "gpr",
+        "candidate": 16,
+        "retail": 17,
+        "fields": 6
+      },
+      {
+        "bank": "gpr",
+        "candidate": 17,
+        "retail": 16,
+        "fields": 8
+      },
+      {
+        "bank": "gpr",
+        "candidate": 18,
+        "retail": 19,
+        "fields": 6
+      },
+      {
+        "bank": "gpr",
+        "candidate": 19,
+        "retail": 18,
+        "fields": 8
+      }
+    ]
+  },
+  "qualification": "local pinned tools under private QEMU prefix; no full image/dev/runtime claim"
+}
