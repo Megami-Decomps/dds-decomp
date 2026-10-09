@@ -38,7 +38,22 @@ INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029DFB0);
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E220);
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E478);
+/* Fade a result row's portrait in; the row is ready once the opacity reaches 0x60. */
+void func_0029E478(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *unused, s32 context, s32 index) {
+    s32 remaining = 0x100 - work->fadeProgress;
+
+    if (work->fadeAnimation[index].portraitReady == 0) {
+        u32 opacity = uiBlendColors(0x80808060, 0x80808000, remaining) & 0xFF;
+
+        work->fadeAnimation[index].portraitOpacity = opacity;
+        work->fadeAnimation[index].portraitPosition[0] = 0;
+        work->fadeAnimation[index].portraitPosition[1] = 0;
+        if (work->fadeAnimation[index].portraitOpacity >= 0x60) {
+            work->fadeAnimation[index].portraitReady = 1;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E548);
 
