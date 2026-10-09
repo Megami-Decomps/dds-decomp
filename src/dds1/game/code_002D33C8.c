@@ -854,7 +854,7 @@ typedef struct SdfSceneDrawPacket {
     SdfGsContextRegisters contextOne; /* 0x60 */
     SdfGsContextRegisters contextTwo; /* 0xA0 */
     SdfGsCenteredBoundsRegisters centeredBounds;      /* 0xE0 */
-    u64 regs[8];         /* 0x130 */
+    SdfGsSceneBlendRegisters blendState;         /* 0x130 */
 } SdfSceneDrawPacket;
 
 extern u8 D_003BD332;
@@ -878,14 +878,14 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
     sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
     sdfBuildCenteredViewBoundsPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    packet->regs[0] = SDF_GS_SCENE_TEST;
-    packet->regs[1] = SDF_GS_TEST_1;
-    packet->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[3] = SDF_GS_ALPHA_1;
-    packet->regs[4] = SDF_GS_SCENE_TEST;
-    packet->regs[5] = SDF_GS_TEST_2;
-    packet->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[7] = SDF_GS_ALPHA_2;
+    packet->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
+    packet->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
+    packet->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
+    packet->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
+    packet->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
+    packet->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
     sdfInitDrawPacket(&packet->drawDefaults);
 }
 
@@ -900,7 +900,7 @@ typedef struct SdfSceneNode {
     SdfGsContextRegisters contextOne; /* 0x70 */
     SdfGsContextRegisters contextTwo; /* 0xB0 */
     SdfGsCenteredBoundsRegisters centeredBounds;    /* 0xF0 */
-    u64 regs[8];       /* 0x140 */
+    SdfGsSceneBlendRegisters blendState;       /* 0x140 */
     u64 framePacketWords[4]; /* 0x180 */
     SdfTexBuf texturePackets[2]; /* 0x1A0 */
 } SdfSceneNode;
@@ -919,14 +919,14 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     node->view = view;
     node->link.patch = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(&node->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    node->regs[0] = SDF_GS_SCENE_TEST;
-    node->regs[1] = SDF_GS_TEST_1;
-    node->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[3] = SDF_GS_ALPHA_1;
-    node->regs[4] = SDF_GS_SCENE_TEST;
-    node->regs[5] = SDF_GS_TEST_2;
-    node->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[7] = SDF_GS_ALPHA_2;
+    node->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
+    node->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
+    node->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
+    node->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
+    node->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
+    node->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
     sdfInitDrawPacket(&node->drawDefaults);
 }
 

@@ -908,7 +908,7 @@ typedef struct SdfSceneNode {
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
     SdfGsCenteredBoundsRegisters centeredBounds;
-    u64 regs[8];
+    SdfGsSceneBlendRegisters blendState;
     u64 framePacketWords[4];
     SdfTexBuf texturePackets[2];
 } SdfSceneNode;
@@ -1002,7 +1002,7 @@ typedef struct KwlnTextureScenePacket {
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
     SdfGsCenteredBoundsRegisters centeredBounds;
-    u64 regs[8];
+    SdfGsSceneBlendRegisters blendState;
 } KwlnTextureScenePacket;
 
 /* One 0x1F40-byte draw bank of the held-texture render target. */
