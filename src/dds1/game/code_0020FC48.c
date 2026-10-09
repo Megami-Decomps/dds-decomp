@@ -1935,7 +1935,6 @@ s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *sele
     return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
 }
 
-extern void sdfInitPacketList(void *);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
