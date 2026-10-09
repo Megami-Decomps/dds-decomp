@@ -76,7 +76,39 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     sceGsPutDispEnv(&D_004681D0);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfGraph", func_00329ED0);
+/* Display-mode defaults row; the u16 at +0xA selects interlace. */
+typedef struct SdfGraphModeInterlace {
+    u16 interlace;
+    u8 pad02[10];
+} SdfGraphModeInterlace;
+
+extern SdfGraphModeInterlace D_0040B26A[];
+extern u8 D_004389D9;
+extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
+
+/* Reset the GS with the interlace setting of the current display mode. */
+void func_00329ED0(void) {
+    s32 inter;
+    s32 ffmode;
+    u16 interlace = D_0040B26A[D_004389D8].interlace;
+
+    switch (interlace) {
+    case 0:
+        inter = 0;
+        ffmode = 1;
+        break;
+    case 1:
+        inter = 1;
+        ffmode = 0;
+        break;
+    default:
+        inter = 1;
+        ffmode = 1;
+        break;
+    }
+    sceGsResetGraph(D_004389D9, inter, 2, ffmode);
+    D_004389D9 = 1;
+}
 
 s32 func_00329F30(s32 channel) {
     if (channel == 1) {

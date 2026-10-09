@@ -420,7 +420,71 @@ u32 func_0019E910(void) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E918);
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EC00);
+/* Skip one encoded-text control without executing it; returns 1 for the stop codes and 2 for the voice trigger. */
+s32 func_0019EC00(s32 code, FrFontCtx *stream) {
+    s32 *position = &stream->encodedTextOffset;
+    u8 *bytes = stream->encodedText;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF413:
+        *position = payloadPosition + 4;
+        return 2;
+    case 0xF416:
+        *position = payloadPosition + 4;
+        break;
+    case 0xF206:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF214:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF215:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF218:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF10F:
+        break;
+    case 0xF110:
+        return 1;
+    case 0xF111:
+    case 0xF112:
+        break;
+    case 0xF104:
+        return 1;
+    case 0xF117:
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->encodedTextOffset += (payloadWords - 1) << 1;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
 

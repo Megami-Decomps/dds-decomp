@@ -269,6 +269,20 @@ typedef struct EffResourceOps {
     u32 payloadSize;           /* 0x18 */
 } EffResourceOps;
 
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
+
+
 /* Native class operations: callbacks followed by the copied payload size.
  * Callback arity varies between creation and frame-notification paths. */
 typedef struct EffClassOps {
@@ -293,6 +307,20 @@ typedef struct EffClassResourceOps {
 typedef char EffClassResourceOps_size_must_be_0x18[
     (sizeof(EffClassResourceOps) == 0x18) ? 1 : -1];
 
+/* Block-resource callbacks receive the owning class work, not the payload. */
+typedef struct EffBlockOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04: preserve the existing generic result ABI */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C: preserve the existing generic result ABI */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffBlockOps;
+
+typedef char EffBlockOps_size_must_be_0x1C[
+    (sizeof(EffBlockOps) == 0x1C) ? 1 : -1];
+
 struct EffModelResource;
 struct EffSpanConfig;
 struct EffSpanTable;
@@ -310,15 +338,15 @@ typedef struct EffModelResourceOps {
 typedef char EffModelResourceOps_size_must_be_0x18[
     (sizeof(EffModelResourceOps) == 0x18) ? 1 : -1];
 
-extern EffResourceOps effActiveInstanceOperations[];
+extern EffActiveInstanceOps effActiveInstanceOperations[];
 
 extern EffClassOps effClassWorkOperations[];
 
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
-extern EffResourceOps effBlockResourceOperations[];
+extern EffBlockOps effBlockResourceOperations[];
 
-extern EffResourceOps effModelBlockOperations[];
+extern EffBlockOps effModelBlockOperations[];
 
 extern EffResourceOps effRuntimeResourceOperations[];
 
@@ -1494,7 +1522,7 @@ void effReleaseBillFrameNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029E898);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
 
 extern u8 D_0037E0E0[];
 
@@ -1686,7 +1714,7 @@ void billReleaseParticleNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_0029FB48);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceParticleInstances);
 
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -1824,7 +1852,7 @@ void billReleaseAlternatingTransformNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0638);
+INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceAnimatedFrameTransforms);
 
 void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -2400,18 +2428,18 @@ EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
     return effect;
 }
 
-u8 *effCreateFileResourceInstance(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateActiveInstanceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceA(request->option, source, (u32)secondary);
 }
 
 void effDestroyActiveInstanceWork(EffClassWork *work) {
@@ -2437,7 +2465,7 @@ EffClassWork *effCreateActiveResource(EffClassWork *work) {
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].initialize();
+    effActiveInstanceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
@@ -5220,22 +5248,22 @@ EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 option) {
     return effect;
 }
 
-u8 *effCreateFileResourceInstanceB(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceB(request->option, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].destroyResource();
+    effBlockResourceOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5249,7 +5277,7 @@ EffClassWork *effDuplicateActiveResourceB(EffClassWork *work) {
 }
 
 void effResetBlockResourceFrame(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].initialize();
+    effBlockResourceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
@@ -5772,15 +5800,15 @@ EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     return effect;
 }
 
-void effResourceInstanceCreateFromFile(s32 request) {
+EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
-    effCreateResourceInstanceC(((FileJob *)request)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceC(request->option, source);
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    effModelBlockOperations[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5794,7 +5822,7 @@ EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    effModelBlockOperations[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
@@ -6471,12 +6499,13 @@ typedef struct EffActiveResource {
         s32 signedIndex;
         u16 shortIndex;
     } kind;
-    u32 resource;        // 0x30
+    void *resource;      // 0x30; heterogeneous kind-specific resource pointer
     u8 pad_34[4];
     void *payload;       // 0x38
     u8 pad_3C[4];
 } EffActiveResource;
 typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+typedef char EffActiveResourceResourceOffsetCheck[((u32)&((EffActiveResource *)0)->resource == 0x30) ? 1 : -1];
 
 /* Entire 40-byte payload copied for resource kind 1. */
 typedef struct EffActorLightConfig {
@@ -7117,7 +7146,7 @@ EffActiveResource *effCreateResourceInstance(u16 kind, void *source, void *secon
 
     if (btlIsRuntimeAllocated() != 0) {
         if (effRuntimeResourceOperations[kind].createResource != NULL) {
-            effect->resource = effRuntimeResourceOperations[kind].createResource(source, secondary, param);
+            effect->resource = (void *)effRuntimeResourceOperations[kind].createResource(source, secondary, param);
         }
         if (effRuntimeResourceOperations[kind].initialize != NULL) {
             effRuntimeResourceOperations[kind].initialize(effect);
@@ -7136,7 +7165,7 @@ void effDestroyResourceInstance(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
         void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].destroyResource;
         if (callback != NULL) {
-            callback((void *)work->resource);
+            callback(work->resource);
         }
     }
     sdfReleaseChipBlock(work);
@@ -7149,10 +7178,10 @@ EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
         effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0);
     } else {
-        u32 resource;
+        void *resource;
         u32 activeKind;
         effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
-        resource = effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        resource = (void *)effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
         activeKind = source->kind.index;
         effect->resource = resource;
         if (effRuntimeResourceOperations[activeKind].initialize != NULL) {

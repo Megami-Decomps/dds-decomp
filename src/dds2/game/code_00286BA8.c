@@ -899,7 +899,28 @@ s32 func_00288BD8(s32 x, s32 y, s32 depth, s32 alpha,
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288DD0);
+extern const s8 D_004262B0[];
+extern u32 frFontQueueTextAndOptionallyMeasure(s32, s32, u32, u32, s8, void *, s32, s32);
+
+/* Draw the selected mantra's two sprites, refresh the profile panel opacity and queue the mantra name. */
+s32 func_00288DD0(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource *resource, s32 drawContext) {
+    DatPartyRecord *record = (DatPartyRecord *)resource->list->cursor->items;
+    u32 entryId;
+    MenuProgressHost *host;
+    u8 scratch[0x20];
+    s8 spriteMap[9];
+
+    memcpy(spriteMap, D_004262B0, sizeof(spriteMap));
+    entryId = scrGetSelectedScriptEntryId(record) & 0xFFFF;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x24, 0, drawContext);
+    mnuDrawMantraSprite(x, y, z, alpha, spriteMap[record->unitId], 0, drawContext);
+    host = resource->progressHost;
+    host->currentEffect->opacity = (s32)((f32)(alpha << 8) * 0.0078125f);
+    mnuDrawCurrentProfilePanel(0x910, 0xB60, 1, host, 0x53);
+    memset(scratch, 0, sizeof(scratch));
+    return frFontQueueTextAndOptionallyMeasure(x + 0x10A, y + 0x144, z, (alpha & 0xFF) | 0xD7ABFA00, 0,
+                                               D_00435E50[entryId].encodedText, 0, drawContext);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
 

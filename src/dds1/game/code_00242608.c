@@ -1,4 +1,5 @@
 #include "dat_command.h"
+#include "itf_mes_window.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
@@ -60,7 +61,6 @@ extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
 extern struct EffectSlotSet *D_003BC520;
-extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
 extern u8 D_00368C40[];
@@ -2320,7 +2320,56 @@ s32 func_00247420(KwlnTask *task) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00247588);
+extern s32 D_003BC3D0[];
+extern s8 evtGetCapturedWindowPanelValue(void);
+
+s32 func_00247588(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
+    MenuSelectionPair options;
+    s32 *dispatchSlot = &state->dispatchState;
+    s32 result;
+    s32 selectedOperation;
+
+    memcpy(&options, D_003BC3D0, sizeof(options));
+    result = func_00285670(&state->transitionWork, dispatchSlot, 0, task);
+
+    if (result != 0) {
+        return result;
+    }
+    if (*dispatchSlot == 0 && evtGetMessageWindowControlState() == 0) {
+        if (state->extraOption != 0) {
+            selectedOperation = state->sprite->list->cursor->index + 1;
+        } else {
+            selectedOperation = options.values[state->sprite->list->cursor->index];
+        }
+        if (evtGetCapturedWindowPanelValue() == 0) {
+            func_00247420(task);
+            switch (selectedOperation) {
+            case 1:
+            case 2:
+                func_00245068(state);
+                break;
+            case 3:
+                evtAccumulateStateScore((s32)state);
+                break;
+            }
+        }
+        /* Operation two is the additional option; the baseline pair is one/three. */
+        switch (selectedOperation) {
+        case 2:
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAA0);
+            break;
+        case 1:
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA84);
+            break;
+        case 3:
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AABC);
+            break;
+        }
+    }
+    return 0;
+}
+
 
 s32 func_00247728(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
