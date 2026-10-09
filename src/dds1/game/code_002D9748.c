@@ -91,7 +91,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
-extern void func_002D33C8(u32, s32, f32);
+extern void func_002D33C8(SdfTex *, s32, f32);
 
 /* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
  * Each blend builder fills the 0x40-byte packet area after the list head. */
@@ -422,7 +422,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
     return clone;
 }
 
-/* Apply the scalar update only to assets whose byte at 0x18 is nonzero. */
+/* Apply the palette update only to textures with a nonempty color lookup table. */
 void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     s32 itemIndex;
     s32 itemCount;
@@ -432,10 +432,10 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     }
     itemCount = list->usedCount;
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        SdfAsset *asset = ((SdfAsset **)list->buffer)[itemIndex];
+        SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
-        if ((u8)asset->secondaryColor != 0) {
-            func_002D33C8((u32)asset, arg, value);
+        if (texture->paletteCount != 0) {
+            func_002D33C8(texture, arg, value);
         }
     }
 }
