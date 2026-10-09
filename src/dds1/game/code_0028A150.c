@@ -3090,7 +3090,7 @@ extern void func_002918F8();
 extern char D_003BC8E0[];
 
 /* Allocate the save/config task, its five-row list and its effect resource slots. */
-s32 func_00290FE0(s32 mode) {
+s32 fileCreateConfigTask(s32 mode) {
     char *names[4] = {
         "/camp/spr/n_con/n_con01.spr",
         "/camp/spr/n_con/n_con02.spr",
@@ -3174,7 +3174,7 @@ void fileConfigTaskDestroy(void) {
     }
 }
 
-extern s32 func_00290FE0(s32 mode);
+extern s32 fileCreateConfigTask(s32 mode);
 extern s32 func_00291418(void);
 
 extern s32 fileStartQueuedLoad(void);
@@ -3183,7 +3183,7 @@ extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, 
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = func_00290FE0(mode);
+        fileConfigTaskWork = fileCreateConfigTask(mode);
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, fileConfigTaskWork);
