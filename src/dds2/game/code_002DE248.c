@@ -2538,12 +2538,10 @@ void effResetActiveInstanceFrame(EffClassWork *work) {
     work->frame = 0;
 }
 
-void effAdvanceActiveInstanceFrame(work)
-s32 *work;
-{
+void effAdvanceActiveInstanceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9950[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9950[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -2552,7 +2550,7 @@ void effDispatchActiveInstanceDraw(s32 work) {
 }
 
 void effUpdateAndDrawActiveInstance(u32 work) {
-    effAdvanceActiveInstanceFrame();
+    effAdvanceActiveInstanceFrame((EffClassWork *)work);
     effDispatchActiveInstanceDraw(work);
 }
 
@@ -3138,7 +3136,7 @@ typedef struct EffClassRowOutput {
     u8 *rows;
 } EffClassRowOutput;
 
-extern void effAdvanceClassFrame();
+extern void effAdvanceClassFrame(EffClassWork *);
 
 void func_002E6B68(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3382,12 +3380,10 @@ void effInitializeClassFrame(EffClassWork *work) {
     work->frame = 0;
 }
 
-void effAdvanceClassFrame(work)
-s32 *work;
-{
+void effAdvanceClassFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9B80[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9B80[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -3396,7 +3392,7 @@ void effRunClassPostFrame(s32 work) {
 }
 
 void effUpdateClassFrame(u32 work) {
-    effAdvanceClassFrame();
+    effAdvanceClassFrame((EffClassWork *)work);
     effRunClassPostFrame(work);
 }
 
