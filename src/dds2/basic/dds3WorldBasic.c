@@ -10,19 +10,13 @@ void effObjNodeDestroy(EffWorldNode *node);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
 
-void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 
 void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);
 
-s32 dds3SeekWorldNode(WorldValueIndices *indexNode, u32 targetWord);
 
-u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
 
 void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);

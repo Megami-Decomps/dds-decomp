@@ -8,7 +8,6 @@ extern u32 dds3WorldCounter;
 
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 extern void dds3DestroyWorldNode(EffWorldNode *node);
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
 void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {

@@ -273,8 +273,6 @@ EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 ki
     return NULL;
 }
 
-extern struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
-extern void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 
 struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind) {
     EvtWorldTable *data = object->data;
