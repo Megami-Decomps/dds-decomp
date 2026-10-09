@@ -970,7 +970,7 @@ struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destinatio
     return NULL;
 }
 
-struct SdfMemBlock *func_00127CB8(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
             struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC74);
@@ -983,7 +983,7 @@ struct SdfMemBlock *func_00127CB8(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_00127D30(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
             struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC78);
@@ -996,7 +996,7 @@ struct SdfMemBlock *func_00127D30(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-struct SdfMemBlock *func_00127DA8(void **destination, s32 area, s32 room) {
+struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
             struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC7C);
