@@ -3228,7 +3228,7 @@ extern void func_0027FDC0(void);
 extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027B678(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_0027C558(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027C558(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027E360(s32, s32, s32, s32, s32, u8 *, s32);
@@ -3276,7 +3276,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawMantraPanelCTransition,
         (MantraPanelDraw)func_0027B678,
         (MantraPanelDraw)mnuDrawMantraPulseIconWithFadeState,
-        (MantraPanelDraw)func_0027C558,
+        func_0027C558,
         (MantraPanelDraw)func_0027D3D8,
         (MantraPanelDraw)mnuDrawMantraPanelSpriteTransition,
         (MantraPanelDraw)func_0027E360,
@@ -3887,7 +3887,154 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C558);
+s32 func_0027C558(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+                  MantraPanelAnimation *panel, u32 packet) {
+    f32 panelFade;
+    f32 sparkleFade;
+    f32 pulseFade;
+    f32 pulseRotation;
+    f32 pulseScale;
+    f32 orbitPhase;
+    f32 orbitFade;
+    f32 angle;
+    s32 drawAlpha;
+    s32 drawX;
+    s32 drawY;
+    s32 i;
+
+    switch ((panel->flags >> 19) & 0xF) {
+    case 6:
+        panelFade = panel->frame * 0.25f;
+        drawAlpha = alpha * panelFade;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        break;
+    case 8:
+        panelFade = panel->frame / 10.0f;
+        drawAlpha = alpha * panelFade;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        break;
+    case 7:
+        panelFade = panel->frame * 0.25f;
+        panelFade = 1.0f - panelFade;
+        drawAlpha = alpha * panelFade;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        break;
+    case 9:
+        panelFade = panel->frame / 10.0f;
+        panelFade = 1.0f - panelFade;
+        drawAlpha = alpha * panelFade;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        break;
+    case 0:
+        drawAlpha = alpha;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        break;
+    case 1:
+        panel->frame++;
+        panelFade = 1.0f;
+        if (panel->frame >= 30) {
+            if (panel->frame < 40) {
+                panelFade = (40 - panel->frame) / 10.0f;
+            } else {
+                panelFade = 0.0f;
+            }
+        }
+        if (panel->frame < 20) {
+            sparkleFade = 0.0f;
+        } else if (panel->frame < 30) {
+            sparkleFade = (panel->frame - 20) / 10.0f;
+        } else {
+            sparkleFade = 1.0f;
+        }
+        pulseFade = 0.0f;
+        if (panel->frame >= 10) {
+            if (panel->frame < 20) {
+                pulseFade = (panel->frame - 10) / 10.0f;
+            } else {
+                pulseFade = 1.0f;
+                if (panel->frame >= 60) {
+                    if (panel->frame < 80) {
+                        pulseFade = (80 - panel->frame) / 20.0f;
+                    } else {
+                        pulseFade = 0.0f;
+                    }
+                }
+            }
+        }
+        pulseRotation = 0.0f;
+        if (panel->frame >= 10) {
+            if (panel->frame < 80) {
+                pulseRotation = (panel->frame - 10) / 70.0f;
+            } else {
+                pulseRotation = 1.0f;
+            }
+        }
+        pulseRotation = 1.0f - sdfEvaluateCosineViaSinePhaseShift(pulseRotation * (3.14159265f / 2.0f));
+        pulseScale = 0.0f;
+        if (panel->frame >= 40) {
+            if (panel->frame < 73) {
+                pulseScale = (panel->frame - 40) / 33.0f;
+            } else {
+                pulseScale = 1.0f;
+            }
+        }
+        pulseScale = 1.0f - sdfEvaluateCosineViaSinePhaseShift(pulseScale * (3.14159265f / 2.0f));
+        orbitPhase = 0.0f;
+        if (panel->frame >= 20) {
+            if (panel->frame < 80) {
+                orbitPhase = (panel->frame + 170) / 250.0f;
+            } else {
+                orbitPhase = 1.0f;
+            }
+        }
+        orbitFade = 0.0f;
+        if (panel->frame >= 20) {
+            if (panel->frame < 35) {
+                orbitFade = (panel->frame - 20) / 15.0f;
+            } else {
+                orbitFade = 1.0f;
+            }
+        }
+        drawAlpha = alpha * panelFade;
+        btlDrawPanelA(x, y, z, drawAlpha, (u32)pool, (u32)panel, packet);
+        func_00284508(x, y, 0, drawAlpha, panel->spriteHandle, packet);
+        mnuDrawMantraSprite(x, y, 0, alpha, 0x77, 0, packet);
+        mnuDrawMantraSprite(x, y, z, (s32)(alpha * sparkleFade * 0.8f), 0x8B, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+        uiDrawActiveSurfaceRegion(packet);
+        mnuDrawMantraSprite(x, y, 0, alpha, 0x8E, 0x60, packet);
+        sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+        for (i = 0; i < 3; i++) {
+            s32 orbitAlpha;
+            angle = orbitPhase * -(3.14159265f * 2.0f) + i * (3.14159265f * 2.0f / 3.0f);
+            drawX = (f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * 14.0f;
+            drawY = (f32)y + -sdfSinPoly(angle) * 14.0f;
+            orbitAlpha = alpha * 0.7f * orbitFade;
+            mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
+            mnuDrawMantraScaledCenteredSprite(drawX, drawY, 0, orbitAlpha, 1.2f, 0x8D, 0, packet);
+        }
+        mnuDrawMantraSprite(x, y, z, (s32)(alpha * 0.3f * orbitFade), 0x8C, 0, packet);
+        sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+        uiDrawUniformColorRect((x - 0x80) << 4, (y - 0x80) << 3, 0, 0x1000, 0x800, 0, packet);
+        func_00284508(x, y, 0, (s32)(alpha * sparkleFade), panel->spriteHandle, packet);
+        drawAlpha = alpha * pulseFade;
+        mnuDrawMantraScaledRotatedCenteredSprite(x, y, 0, drawAlpha, 0xB8,
+                                               0, packet, pulseScale + 1.0f, pulseRotation * 1024.0f);
+        if (panel->frame >= 80) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
+
 
 void mnuInitMantraPanelSpriteView(u32 unused, s32 view) {
     MantraSparkleEmitter *spriteHandle;
