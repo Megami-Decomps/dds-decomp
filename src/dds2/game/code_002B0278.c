@@ -2633,7 +2633,26 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
 }
 
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
-INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
+/* Copy two four-word effect rows from their serialized representation. */
+void mnuCopyCampEffectRowData(const CampEffectRows *source, MenuEffectResources *resources) {
+    const u8 *sourceBytes = (const u8 *)source;
+    u32 copiedRows = 0;
+    u32 sourceWord = 0;
+
+    do {
+        u32 *destination = resources->rows.values[copiedRows];
+        u32 byteOffset = sourceWord * sizeof(u32);
+        s32 remaining;
+
+        for (remaining = 3; remaining >= 0; remaining--) {
+            *destination++ = *(const u32 *)(byteOffset + (u32)sourceBytes);
+            byteOffset += sizeof(u32);
+        }
+        copiedRows++;
+        sourceWord += 4;
+    } while (copiedRows < 2);
+}
+
 
 void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
                                     struct EffMappedResource *animation,

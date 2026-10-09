@@ -151,18 +151,6 @@ extern u32 evtPendingEventSelection;
 
 
 
-/* The room-name lookup and status flag share this world-unit layout. */
-typedef struct EvtWorldUnitInner {
-    u8 pad00[0x88];
-    u32 statusFlags; /* 0x88 */
-} EvtWorldUnitInner;
-
-typedef struct EvtWorldUnit {
-    u8 pad00[8];
-    char *roomName; /* 0x08 */
-    u8 pad0C[0xC];
-    EvtWorldUnitInner *inner; /* 0x18 */
-} EvtWorldUnit;
 
 extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *id);
 
@@ -659,12 +647,14 @@ s32 evtCommandAddEffectUnitToWorld(void) {
 
 s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     EffWorldNode *unit;
+    CameraData *cameraData;
 
     if (scrReadIntParameter(0) < 0) {
         unit = (EffWorldNode *)fldGetPlayerSceneState();
     } else {
         unit = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
-        ((EvtWorldUnit *)unit)->inner->statusFlags |= 1;
+        cameraData = unit->data;
+        cameraData->fovUpdatePending |= 1;
     }
     if (unit == NULL) {
         return 1;
@@ -796,32 +786,21 @@ s32 evtCommandSetEffectUnitSecondVector(void) {
     return 1;
 }
 
-/* Slot 1 owns a path node with the same resource record as the slot provider. */
-typedef struct ObjectResource {
-    u32 owner;
-    u32 handle;
-    u32 value;
-    u32 resourceId;
-} ObjectResource;
-
-typedef struct ObjectWithResource {
-    u8 pad0[0x18];
-    ObjectResource *resource;
-} ObjectWithResource;
 
 extern void dds3EnsureSlotData(void *);
-extern void dds3SetSlotKey(ObjectWithResource *, u32);
-extern void dds3ReplaceObjectResource(ObjectWithResource *);
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(ObjectWithResource *);
-extern void sdfSetFloatCounterDirection(u32, s32);
+extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
+extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
 s32 func_002272B0(void) {
     void *unit;
-    EvtWorldUnit *target;
+    EffWorldNode *target;
     ObjBase *data;
-    ObjectWithResource *slot;
+    EffWorldNode *slot;
     Dds3PathCurveWork *path;
+    Dds3SlotResource *resource;
     s32 room;
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
@@ -843,8 +822,9 @@ s32 func_002272B0(void) {
         dds3EnsureSlotData(unit);
         slot = data->slots[1];
     }
-    if (slot->resource->resourceId == 0) {
-        dds3SetSlotKey(slot, (u32)target);
+    resource = slot->data;
+    if (resource->sourceObject == NULL) {
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
     }
     path = dds3GetObjectResourceHandle(slot);
@@ -853,16 +833,16 @@ s32 func_002272B0(void) {
     switch (scrReadIntParameter(2)) {
     case 0:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 0);
-        if (target->roomName != NULL) {
-            room = fldParseRoomNumberFromName(target->roomName);
+        if (target->value != 0) {
+            room = fldParseRoomNumberFromName((char *)target->value);
             if (room > 0)
                 fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 1);
         }
         break;
     case 1:
         sdfSetFloatCounterDirection((u32 *)&path->direction, 1);
-        if (target->roomName != NULL) {
-            room = fldParseRoomNumberFromName(target->roomName);
+        if (target->value != 0) {
+            room = fldParseRoomNumberFromName((char *)target->value);
             if (room > 0)
                 fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 0);
         }
@@ -875,10 +855,11 @@ extern char D_003AC928[]; /* "re attach...!\n" */
 
 s32 func_002274A0(void) {
     void *unit;
-    void *target;
+    EffWorldNode *target;
     ObjBase *data;
-    ObjectWithResource *slot;
+    EffWorldNode *slot;
     Dds3PathCurveWork *path;
+    Dds3SlotResource *resource;
     s32 targetId;
     s32 mode;
 
@@ -903,12 +884,13 @@ s32 func_002274A0(void) {
         dds3EnsureSlotData(unit);
         slot = data->slots[1];
     }
-    if (slot->resource->resourceId == 0) {
-        dds3SetSlotKey(slot, (u32)target);
+    resource = slot->data;
+    if (resource->sourceObject == NULL) {
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
     } else {
         dds3RefreshStoredVec3(unit);
-        dds3SetSlotKey(slot, (u32)target);
+        dds3SetSlotKey(slot, target);
         dds3ReplaceObjectResource(slot);
         func_003003F0(D_003AC928);
     }
@@ -1141,13 +1123,13 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
 s32 evtCommandSetUnitRoomFloatState(void) {
-    u8 *unit;
+    EffWorldNode *unit;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
@@ -1157,7 +1139,7 @@ s32 evtCommandSetUnitRoomFloatState(void) {
         }
     }
     evtScaleSlotByClampedMultiplier(unit, bfWaitReadArgFloat(1));
-    roomName = ((EvtWorldUnit *)unit)->roomName;
+    roomName = (char *)unit->value;
     if (roomName == 0) {
         return 1;
     }
@@ -1175,13 +1157,13 @@ s32 evtCommandSetUnitRoomFloatState(void) {
 /* Apply the integer state and update a positive parsed room number's flag.
  * Unlike the float command, an integer value of zero sets the room flag. */
 s32 evtCommandSetUnitRoomIntegerState(void) {
-    u8 *unit;
+    EffWorldNode *unit;
     s32 roomNumber;
     char *roomName;
     s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
 
     do {
-        unit = (u8 *)evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
+        unit = evtFindWorldObjectByIdAndKind(objectKind, scrReadIntParameter(0));
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
@@ -1191,7 +1173,7 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
         }
     }
     evtSetWorldSlotValue(unit, scrReadIntParameter(1));
-    roomName = ((EvtWorldUnit *)unit)->roomName;
+    roomName = (char *)unit->value;
     if (roomName == 0) {
         return 1;
     }

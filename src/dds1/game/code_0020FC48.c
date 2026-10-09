@@ -1225,7 +1225,6 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
 extern u8 kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
-extern void sdfAppendDmaPrimary(s32, void *, void *);
 
 void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     s32 halfWidth;
@@ -1243,7 +1242,7 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
 
     packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
+    sdfAppendDmaPrimary((SdfListHead *)list, (u32)(kwlnFrameDrawPacketRecords + index * 0x1F40), (SdfDmaNode *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
