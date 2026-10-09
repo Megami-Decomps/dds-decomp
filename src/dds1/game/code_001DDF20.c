@@ -6580,25 +6580,28 @@ u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename
     return task;
 }
 
-s32 sndLoadDataFile(s32 *data) {
+s32 sndLoadDataFile(const SoundDataFileArgs *data) {
     char filename[0x70];
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode((BtlUnit *)data[0], filename);
+    sndFormatResourceNameFromUnitMode(data->unit, filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
 
-void *sndCreateDataFileLoadTask(u8 *owner) {
-    u8 *task = btlAllocTask(4);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = sndLoadDataFile;
-    *(u16 *)(task + 0x20) = 0x56;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
-    *(u32 *)btlGetTaskArguments(task) = (u32)owner;
+BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundDataFileArgs));
+    SoundDataFileArgs *args;
+
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = sndLoadDataFile;
+    task->taskId = 0x56;
+    task->ownerId = unit->identity;
+    task->onStart = NULL;
+    args = btlGetTaskArguments(task);
+    args->unit = unit;
     return task;
 }
 
