@@ -24,7 +24,6 @@ void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *
 
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
-void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame);
 extern void effMiscQuaternionNlerpVU(f32 amount);
 extern void effMiscQuaternionToMatrixVU(void);
 
@@ -298,9 +297,8 @@ void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *trac
 }
 
 /* Find the key interval containing frame and return its interpolation weight. */
-void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame) {
-    SdfMotionKeyBinding *binding;
-    SdfMotionKeyInterval *out;
+void sdfFindMotionKeyInterval(SdfMotionKeyBinding *binding,
+                              SdfMotionKeyInterval *out, f32 frame) {
     SdfMotionKeyTrack *track;
     u16 *keyFrames;
     u8 *keyData;
@@ -316,8 +314,6 @@ void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame) {
     u16 keyStride;
     u16 keyCount;
 
-    binding = bindingArg;
-    out = intervalArg;
     firstKeyIndex = 0;
     track = binding->track;
     keyCount = track->keyCount;
@@ -429,7 +425,7 @@ SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 a1, s
 void sdfMotionBlendDrawVector(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
     EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
         VU0_LERP_VF10_W(keyInterval.weight);
@@ -440,7 +436,7 @@ void sdfMotionBlendDrawVector(SdfMotionDrawBinding *binding, f32 frame) {
 void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
     EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
         VU0_LERP_VF10_COPY(keyInterval.weight);
@@ -473,7 +469,7 @@ SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, 
 void sdfMotionBlendScaleVector(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
     EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
         VU0_LERP_VF10_W(keyInterval.weight);
@@ -484,7 +480,7 @@ void sdfMotionBlendScaleVector(SdfMotionDrawBinding *binding, f32 frame) {
 void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     EE_MMI_LOAD_VEC3(vf10, keyInterval.firstKey);
     EE_MMI_LOAD_VEC3(vf11, keyInterval.secondKey);
         VU0_LERP_VF10_COPY(keyInterval.weight);
@@ -508,7 +504,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *binding, f32 frame) 
     f32 (*matrix)[4];
     f32 *keyData;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, keyData);
     keyData = keyInterval.secondKey;
@@ -530,7 +526,7 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 fram
     f32 (*matrix)[4];
     f32 *keyData;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     keyData = keyInterval.firstKey;
     EE_MMI_LOAD_S16X4_FIXED12(vf10, keyData);
     keyData = keyInterval.secondKey;
@@ -560,7 +556,7 @@ void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
     SdfDrawNode *node;
 
-    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
     if (*(u8 *)keyInterval.firstKey == 0) {
         node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
@@ -573,7 +569,7 @@ void func_00335108(SdfMotionKeyFlagBinding *binding, f32 t) {
     SdfMotionKeyInterval b;
     SdfDrawNode *node;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
     node = binding->node;
     if (*(u8 *)b.firstKey == 0) {
         node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
@@ -621,7 +617,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordSecondBinding(Motion *mo
 
 void sdfMotionApplyPrimaryWordSecondKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
-    sdfFindMotionKeyInterval(motion, buffer, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, (SdfMotionKeyInterval *)buffer, t1);
     sdfSetPrimaryStateWordSecond(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
@@ -631,7 +627,7 @@ void sdfMotionBlendPrimaryWordSecondKey(SdfMotionIndexedValueBinding *binding, f
     s32 key;
     s32 color;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->capturedWord, key, weight, 0.5f);
     sdfSetPrimaryStateWordSecond(binding->target, color);
@@ -651,7 +647,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFirstBinding(Motion *mot
 
 void sdfMotionApplyPrimaryWordFirstKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
-    sdfFindMotionKeyInterval(motion, buffer, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, (SdfMotionKeyInterval *)buffer, t1);
     sdfSetPrimaryStateWordFirst(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
@@ -661,7 +657,7 @@ void sdfMotionBlendPrimaryWordFirstKey(SdfMotionIndexedValueBinding *binding, f3
     s32 key;
     s32 color;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->capturedWord, key, weight, 0.5f);
     sdfSetPrimaryStateWordFirst(binding->target, color);
@@ -681,7 +677,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *mot
 
 void sdfMotionApplyPrimaryWordThirdKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
-    sdfFindMotionKeyInterval(motion, buffer, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, (SdfMotionKeyInterval *)buffer, t1);
     sdfSetPrimaryStateWordThird(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
@@ -691,7 +687,7 @@ void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *binding, f3
     s32 key;
     s32 color;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->capturedWord, key, weight, 0.5f);
     sdfSetPrimaryStateWordThird(binding->target, color);
@@ -711,7 +707,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *mo
 
 void sdfMotionApplyPrimaryWordFourthKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
-    sdfFindMotionKeyInterval(motion, buffer, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, (SdfMotionKeyInterval *)buffer, t1);
     sdfSetPrimaryStateWordFourth(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
@@ -721,7 +717,7 @@ void sdfMotionBlendPrimaryWordFourthKey(SdfMotionIndexedValueBinding *binding, f
     s32 key;
     s32 color;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, binding->capturedWord, key, weight, 0.5f);
     sdfSetPrimaryStateWordFourth(binding->target, color);
@@ -741,13 +737,13 @@ SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 un
 
 void sdfMotionApplyInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 t1) {
     SdfMotionKeyInterval sample;
-    sdfFindMotionKeyInterval(motion, &sample, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, &sample, t1);
     sdfSetPrimaryStateFloat(motion->target, sdfInterpolateMotionKeys(&sample));
 }
 
 void sdfMotionBlendInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 unused, f32 scale) {
     SdfMotionKeyInterval sample;
-    sdfFindMotionKeyInterval(motion, &sample, unused);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, &sample, unused);
     sdfSetPrimaryStateFloat(motion->target,
                   motion->capturedFloat + sdfInterpolateMotionKeys(&sample) * scale -
                       motion->capturedFloat * scale);
@@ -770,7 +766,7 @@ void sdfMotionApplyFiveFloatKeys(SdfMotionIndexedTextBinding *output, f32 t1) {
     u8 keys[16];
     u8 interpolated[32];
 
-    sdfFindMotionKeyInterval(output, keys, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)keys, t1);
     sdfMotionBlendFiveKeyValues(keys, interpolated);
     sdfCopyPrimaryTextScalars(output->target, (const f32 *)interpolated);
 }
@@ -780,7 +776,7 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionIndexedTextBinding *output, f32 t1, f3
     f32 b1[5];
     f32 b2[5];
 
-    sdfFindMotionKeyInterval(output, &b0, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b2);
     sdfMotionBlendFiveFloats(b1, output->capture.capturedValues, b2, t2);
     sdfCopyPrimaryTextScalars(output->target, b1);
@@ -806,7 +802,7 @@ void sdfMotionApplySecondaryTextKeys(SdfMotionIndexedTextBinding *output, f32 t1
     u8 keys[16];
     u8 interpolated[32];
 
-    sdfFindMotionKeyInterval(output, keys, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)keys, t1);
     sdfMotionBlendFiveKeyValues(keys, interpolated);
     sdfCopySecondaryTextScalars(output->target, (const f32 *)interpolated);
 }
@@ -816,7 +812,7 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionIndexedTextBinding *output, f32 t1
     f32 b1[5];
     f32 b2[5];
 
-    sdfFindMotionKeyInterval(output, &b0, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, &b0, t1);
     sdfMotionBlendFiveKeyValues(&b0, b1);
     sdfMotionBlendFiveFloats(b2, output->capture.capturedValues, b1, t2);
     sdfCopySecondaryTextScalars(output->target, b2);
@@ -841,7 +837,7 @@ SdfMotionIndexedValueBinding *sdfMotionCreateSecondaryColorBinding(Motion *motio
 
 void sdfMotionApplySecondaryColorKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
-    sdfFindMotionKeyInterval(motion, buffer, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion, (SdfMotionKeyInterval *)buffer, t1);
     sdfSetAssetSecondaryColor(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
@@ -851,7 +847,7 @@ void sdfMotionBlendSecondaryColorKey(SdfMotionIndexedValueBinding *output, f32 t
     s32 key;
     s32 color;
 
-    sdfFindMotionKeyInterval(output, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, &b, t);
     key = sdfMotionInterpolateKeyColor(&b);
     EE_MMI_RGBA_LERP(color, output->capturedWord, key, weight, 0.5f);
     sdfSetAssetSecondaryColor(output->target, color);
@@ -872,14 +868,14 @@ SdfMotionIndexedTextBinding *sdfMotionCreateDirectTextKeyBinding(Motion *motion,
 void sdfMotionApplySelectedTextKey(SdfMotionIndexedTextBinding *output, f32 t1) {
     u32 sample[4];
 
-    sdfFindMotionKeyInterval(output, sample, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)sample, t1);
     sdfCopyPrimaryTextScalars(output->target, sample[0]);
 }
 
 void sdfMotionApplySampleToTarget(SdfMotionIndexedTextBinding *output, f32 t1) {
     u32 sample[4];
 
-    sdfFindMotionKeyInterval(output, sample, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)sample, t1);
     sdfCopyPrimaryTextScalars(output->target, sample[0]);
 }
 
@@ -898,13 +894,13 @@ SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextSampleBinding(Motion *m
 void sdfMotionApplySampledSecondaryTextValue(SdfMotionIndexedTextBinding *output, f32 t1) {
     u32 sample[4];
 
-    sdfFindMotionKeyInterval(output, sample, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)sample, t1);
     sdfCopySecondaryTextScalars(output->target, sample[0]);
 }
 
 void sdfMotionSampleTextScalarsAtTime(SdfMotionIndexedTextBinding *output, f32 t1) {
     u32 sample[4];
 
-    sdfFindMotionKeyInterval(output, sample, t1);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)output, (SdfMotionKeyInterval *)sample, t1);
     sdfCopySecondaryTextScalars(output->target, sample[0]);
 }
