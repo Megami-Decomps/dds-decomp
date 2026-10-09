@@ -3916,7 +3916,53 @@ void func_0021F3E8(ActionStateLink *actor) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021F698);
+extern const char D_0041AAF8[];
+s32 func_0021F698(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = battle->units;
+    BtlUnit *choices[3];
+    BtlUnit **nextChoice;
+    u32 count = 0;
+    s32 unitId;
+    BattleSummonState *state;
+
+    if (unit != NULL) {
+        nextChoice = choices;
+        do {
+            u32 flags = unit->flags;
+            if (flags & 1) {
+                if (flags & 0x200) {
+                    if (!(flags & 0xE0) && count < 3) {
+                        *nextChoice++ = unit;
+                        count++;
+                    }
+                }
+            }
+            unit = unit->nextActor;
+        } while (unit != NULL);
+    }
+    if (count == 0) {
+        return 0x12A;
+    }
+    unit = choices[effMiscRandMod(NULL, count)];
+    btlBossDebugPrintf(D_0041AAF8, unit->partyRecord.unitId);
+    state = &battle->effect->summon;
+    unitId = unit->partyRecord.unitId;
+    state->selectedUnitId = unitId;
+    switch (unitId) {
+    case 1:
+        return 0x12A;
+    case 2:
+        return 0x12B;
+    case 5:
+        return 0x12C;
+    case 6:
+        return 0x12D;
+    default:
+        return 0x12A;
+    }
+}
+
 
 u32 btlHasActiveSpecialMotionActor(void) {
     ActionUnit *unit = ((BattleActionScene *)btlGetRuntime())->units;
@@ -3944,6 +3990,8 @@ u32 btlIsMarkedActionSceneStateActive(void) {
     }
     return battle->effect->summon.active != 0;
 }
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAF8);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021F848);
 
