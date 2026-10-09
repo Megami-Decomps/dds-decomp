@@ -22,6 +22,7 @@ typedef char MnuCallbackList_onRemove_offset_must_be_10[((u32)&((MnuCallbackList
 typedef char MnuCallbackList_onDestroy_offset_must_be_14[((u32)&((MnuCallbackList *)0)->onDestroy == 0x14) ? 1 : -1];
 
 MnuCallbackList *mnuCreateCallbackNode(u32 userData);
+MnuCallbackList *mnuCreateReleaseCallbackNode(void);
 void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *list);
 void dds3SetCallbackNodeFirstListener(MnuCallbackList *list, void (*callback)());
 void dds3SetCallbackNodeLastListener(MnuCallbackList *list, void (*callback)());
