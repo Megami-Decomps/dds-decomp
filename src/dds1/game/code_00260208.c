@@ -716,7 +716,6 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
 extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
-extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -727,7 +726,7 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
-    mnuAppendCampSpriteRequests((s32)work->resourceList, &work->staffSlots);
+    mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
     effRequestResourceByMode(D_003AFA88, D_003AFA98, 0,
                              (u32 *)&work->unitResource);
     mnuRequestBaseAssets(&work->assets);
@@ -737,7 +736,6 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 mnuStaffSlotsAllFilled(s32, StaffSlots *);
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -750,7 +748,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (mnuStaffSlotsAllFilled((s32)ctx->resourceList, &ctx->staffSlots) == 0) {
+    if (mnuStaffSlotsAllFilled(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002877A8() == 1) {
