@@ -2489,18 +2489,18 @@ EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
     return work;
 }
 
-u8 *effCreateFileResourceInstance(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateActiveInstanceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceA(request->option, source, (u32)secondary);
 }
 
 
@@ -5509,18 +5509,18 @@ EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
 
 extern EffClassWork *effCreateResourceInstanceB(u16, void *, u32);
 
-u8 *effCreateFileResourceInstanceB(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceB(request->option, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(EffClassWork *obj) {
@@ -6050,11 +6050,11 @@ EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     return work;
 }
 
-void effResourceInstanceCreateFromFile(s32 work) {
+EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    effCreateResourceInstanceC(((FileJob *)work)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceC(request->option, source);
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
