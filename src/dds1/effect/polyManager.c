@@ -96,7 +96,9 @@ typedef struct {
     f32 radialWidth;
     f32 radius;
     f32 radiusJitter;
-    u8 padD4[0xC];
+    void *dispatchArgB;            /* 0xD4 */
+    u8 padD8[4];
+    void *dispatchArgA;            /* 0xDC */
     ParSystem *strip;              /* 0xE0 */
     PolyArcRecord *records;        /* 0xE4 */
     struct SdfMemBlock *allocation; /* 0xE8 */
@@ -124,11 +126,21 @@ typedef struct {
     u32 spawnDelayGroupSize;
     f32 rotationXDegrees;
     f32 rotationStepDegrees;
-    u8 padE8[0xC];
+    void *dispatchArgB;            /* 0xE8 */
+    u8 padEC[4];
+    void *dispatchArgA;            /* 0xF0 */
     ParSystem *strip;              /* 0xF4 */
     PolyRotatingBandRecord *records; /* 0xF8 */
     struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
+
+/* The ring kinds share the template prefix and their leading parameter words;
+ * the creation paths clamp the segment count through this shared view. */
+typedef union {
+    PolyBand band;
+    PolyArc arc;
+    PolyRotatingBand rotating;
+} PolyRing;
 
 void polyUpdateBasicRingCells(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
@@ -138,6 +150,12 @@ extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);
 extern void func_002DD968(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
+extern void memset();
+extern void memcpy();
+extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
+void polyInitializeBandRecordAges(PolyBand *obj);
+void func_0015E8B8(PolyArc *obj);
+void func_0015EEF0(PolyRotatingBand *obj);
 
 /* Release the cell system, then the basic node itself. */
 void effPolyDestroyWork(PolyNode *obj) {
@@ -293,7 +311,29 @@ u32 polyBlendTimedTintColor(u32 elapsed, u32 duration, u32 color) {
     return packed;
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015DFA8);
+/* Create a band from its template: the template body, then the 0x40-byte parameter tail that follows it, with eight-byte records after the header. */
+PolyBand *func_0015DFA8(PolyRingHead *templateHead) {
+    u32 size = templateHead->entryCount * sizeof(PolyBandRecord) + sizeof(PolyBand);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    PolyBand *band = (PolyBand *)sdfResourceRetainAddress(allocation);
+
+    memset(band, 0, size);
+    memcpy(band, templateHead, templateHead->templateSize);
+    memcpy(&band->spawnDelayStep, (u8 *)templateHead + templateHead->templateSize, 0x40);
+    band->head.templateSize = sizeof(PolyRingHead);
+    band->records = (PolyBandRecord *)(band + 1);
+    band->allocation = allocation;
+    if (((PolyRing *)band)->band.segments < 3) {
+        ((PolyRing *)band)->band.segments = 3;
+    }
+    band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
+    parDispatchSub(band->strip, 0, band->unkEC, band->unkE4);
+    polyInitializeBandRecordAges(band);
+    VU0_LOAD_MATRIX(band->head.matrix);
+    VU0_STORE_MATRIX(band->head.matrixCopy);
+    parSetCellDrawBucket(band->strip, band->head.unk66);
+    return band;
+}
 
 /* Release the band's cell system and backing allocation handle, not the node itself. */
 void polyReleaseBandNodeResources(PolyBand *obj) {
@@ -523,7 +563,29 @@ void func_0015E5D8(PolyBand *obj) {
     parPrependCellNode(obj->strip);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015E760);
+PolyArc *func_0015E760(PolyArc *source) {
+    s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
+    s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    PolyArc *clone = (PolyArc *)sdfResourceRetainAddress(allocation);
+
+    memset(clone, 0, size);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy(&clone->spawnDelayStep, (u8 *)source + source->head.templateSize, tailBytes);
+    clone->head.templateSize = 0xC0;
+    clone->records = (PolyArcRecord *)(clone + 1);
+    clone->allocation = allocation;
+    if (((PolyRing *)clone)->arc.segments < 3) {
+        ((PolyRing *)clone)->arc.segments = 3;
+    }
+    clone->strip = parAllocateCellSystem(clone->head.entryCount, clone->segments, 1, 0);
+    parDispatchSub(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
+    func_0015E8B8(clone);
+    VU0_LOAD_MATRIX(clone->head.matrix);
+    VU0_STORE_MATRIX(clone->head.matrixCopy);
+    parSetCellDrawBucket(clone->strip, clone->head.unk66);
+    return clone;
+}
 
 /* Release the arc's cell system and backing allocation handle, leaving the node alive. */
 void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
@@ -691,7 +753,29 @@ void func_0015EC08(PolyArc *obj) {
     parPrependCellNode(obj->strip);
 }
 
-INCLUDE_ASM(const s32, "effect/polyManager", func_0015ED90);
+/* Rotating-band counterpart of func_0015DFA8: twenty-byte records follow the header. */
+PolyRotatingBand *func_0015ED90(PolyRingHead *templateHead) {
+    u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
+    PolyRotatingBand *band = (PolyRotatingBand *)sdfResourceRetainAddress(allocation);
+
+    memset(band, 0, size);
+    memcpy(band, templateHead, templateHead->templateSize);
+    memcpy(&band->spawnDelayStep, (u8 *)templateHead + templateHead->templateSize, 0x40);
+    band->head.templateSize = sizeof(PolyRingHead);
+    band->records = (PolyRotatingBandRecord *)(band + 1);
+    band->allocation = allocation;
+    if (((PolyRing *)band)->rotating.segments < 3) {
+        ((PolyRing *)band)->rotating.segments = 3;
+    }
+    band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
+    parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
+    func_0015EEF0(band);
+    VU0_LOAD_MATRIX(band->head.matrix);
+    VU0_STORE_MATRIX(band->head.matrixCopy);
+    parSetCellDrawBucket(band->strip, band->head.unk66);
+    return band;
+}
 
 /* Release the rotating band's cell system and backing allocation handle, not the node. */
 void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {

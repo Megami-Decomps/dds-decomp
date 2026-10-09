@@ -452,9 +452,13 @@ typedef struct MdlRecord {
 typedef struct MdlPartEntry {
     u32 kind;     /* 0x00: billboard, effect, or object */
     s32 state;    /* 0x04 */
-    s32 object;   /* 0x08 */
+    void *object; /* 0x08: billboard, effect, or object pointer */
     u8 pad0C[4];
 } MdlPartEntry;
+
+typedef char MdlPartEntry_size_must_be_0x10[(sizeof(MdlPartEntry) == 0x10) ? 1 : -1];
+typedef char MdlPartEntry_object_offset_must_be_0x08[
+    ((unsigned long)&((MdlPartEntry *)0)->object == 0x08) ? 1 : -1];
 
 
 #define MDL_PART_BILLBOARD 0
@@ -700,7 +704,7 @@ void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
-    partEntry->object = (s32)billCreateIndexed(1, descriptorIndex);
+    partEntry->object = billCreateIndexed(1, descriptorIndex);
     partList->usedCount += 1;
 }
 
@@ -710,7 +714,7 @@ void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
-    partEntry->object = (s32)effCreateNodeFromDescriptor(descriptor);
+    partEntry->object = effCreateNodeFromDescriptor(descriptor);
     partList->usedCount += 1;
 }
 
@@ -723,7 +727,7 @@ void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, SdfMemBlock *backi
     node->backingAllocation = backingAllocation;
     entry->kind = MDL_PART_OBJECT;
     entry->state = 0;
-    entry->object = (s32)node;
+    entry->object = node;
     list->usedCount += 1;
 }
 
@@ -758,10 +762,10 @@ void mdlDestroyPartList(DevRequest *partList) {
 
             switch (partEntry->kind) {
             case MDL_PART_BILLBOARD:
-                billDispatchByKind((BillObj *)(u32)partEntry->object);
+                billDispatchByKind((BillObj *)partEntry->object);
                 break;
             case MDL_PART_EFFECT:
-                effDestroyNode((EffNode *)(u32)partEntry->object);
+                effDestroyNode((EffNode *)partEntry->object);
                 break;
             case MDL_PART_OBJECT:
                 mdlObjDestroy((MdlObj *)partEntry->object);
@@ -789,22 +793,22 @@ void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
 }
 
 void mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    effCloneSourceWithTypeHandler((EffNode *)(u32)entry->object);
+    effCloneSourceWithTypeHandler((EffNode *)entry->object);
     entry->state = entry->state + 1;
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-s32 mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
+void *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
     DevRequest *slotTable;
 
     slotTable = resource->sub->partList;
     if (slotTable == NULL) {
-        return 0;
+        return NULL;
     }
     if (slotIndex >= slotTable->usedCount) {
-        return 0;
+        return NULL;
     }
-    return (s32)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
+    return (u8 *)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
 }
 
 typedef struct MdlPartRec {
@@ -819,7 +823,7 @@ typedef struct MdlPartRec {
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
-    MdlPartEntry *partSlot = (MdlPartEntry *)mdlFindViewerPartSlot(owner, partRecord->partIndex);
+    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
         SdfModel *model = owner->inner;
@@ -920,7 +924,7 @@ extern void *sdfFindResourceById(s32 id);
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 s32 mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
-    MdlSlotRec *partSlot = (MdlSlotRec *)mdlFindViewerPartSlot(owner, entryRecord->index);
+    MdlSlotRec *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
         MdlObj *object = partSlot->obj;

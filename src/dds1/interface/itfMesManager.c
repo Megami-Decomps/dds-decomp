@@ -33,13 +33,8 @@ s32 scrReadIntParameter(s32 arg0);
 
 void func_0014DAF0(s32 arg0);
 
-void itfMesSetWindowPanelValue(s32 window, u32 panelMask);
-
-void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
-
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
-void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 

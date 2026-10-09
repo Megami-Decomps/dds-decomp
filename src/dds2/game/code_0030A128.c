@@ -311,7 +311,40 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->append((SdfListHead *)drawSurface, packetList);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030A8A8);
+extern u8 func_0030ABF0(LmapTaskState *);
+extern void fldInitializeLocalMapScene(void);
+extern s32 func_0030B1E8(void);
+extern void fldDrawLocalMapOverlay(void);
+
+s32 func_0030A8A8(KwlnTask *task) {
+    LmapTaskState *state = (LmapTaskState *)kwlnTaskGetUserValue(task);
+    s32 phase = state->phase;
+    s32 result;
+
+    D_0043888C = state;
+    switch (phase) {
+    case 0:
+        if (func_0030ABF0(state)) {
+            D_0043888C->phase = 1;
+        }
+        break;
+    case 1:
+        fldInitializeLocalMapScene();
+        D_0043888C->phase = 2;
+        break;
+    case 2:
+        result = func_0030B1E8();
+        if (result == -1) {
+            return result;
+        }
+        if (result == phase) {
+            return 0;
+        }
+        fldDrawLocalMapOverlay();
+        break;
+    }
+    return 0;
+}
 
 void fldStartLmapTask(s32 mode) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(0x88);

@@ -108,8 +108,6 @@ typedef struct EffNodeInstance {
     u8 matrixB0[0x40]; /* 0xB0 */
 } EffNodeInstance;
 
-extern void func_00157AC8(EffNodeDescriptor *descriptor);
-
 /* Build the effect node for a resource descriptor; descriptors older than 1.03 are converted first, and ones up to 1.02 get an identity matrix. */
 EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     EffNode *node;
@@ -117,7 +115,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
 
     if (descriptor->version < 1.03f) {
         func_0035B6E0("old version!![%f]\n", descriptor->version);
-        func_00157AC8(descriptor);
+        effConvertLegacyNodeDescriptor(descriptor);
     }
     node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
     if (descriptor->version <= 1.02f) {
