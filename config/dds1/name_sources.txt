@@ -3853,6 +3853,7 @@
 0x00223E58	evtOpClearWorldObjectPendingValue	inferred	Clears the pending value and arms the world object timer. [names_reviewed8.tsv]
 0x00223EB0	evtOpModelLodChg	evidence	strings "call: MODEL_LOD_CHG(int,int)" / "success: MODEL_LOD_CHG(int,int)"; sets root->lodIndex after sdfGetLodChunkValue bound check [names_M52_EvtEff.tsv]
 0x00224048	evtOpSetWorldUnitRotationFromAngles	inferred	Converts supplied degree angles into the unit quaternion vector. [names_reviewed8.tsv]
+0x002241D0	evtOpDeprecatedModelMotion	inferred	Registered MODEL_MOTION script handler; resolves a unit, prepares motion state with mode 0, and logs that the command will be prohibited.
 0x00224268	evtOpSetUnitParams5	inferred	evt script opcode fetching 4 operands and forwarding to func_002223D8 (unit setup)
 0x00224308	evtOpSetUnitParams6	inferred	evt script opcode fetching 5 operands and forwarding to func_00222340
 0x002243C0	evtInvokeStoredWindowMotion	inferred	Invokes the motion slot stored for the current window callback. [names_reviewed8.tsv]
