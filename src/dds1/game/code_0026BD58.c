@@ -2,7 +2,6 @@
 
 extern u32 D_003BC5BC;
 
-extern u32 D_003BC5C8;
 
 extern u8 D_003BC590[];
 
@@ -23,7 +22,6 @@ extern s32 D_003BC5A8;
 
 extern s32 D_003BC5AC;
 
-extern u32 D_003BC5C8;
 
 void mnuRestartRuntimeAfterViewer(void) {
     evtDestroySecondaryWorldNode();

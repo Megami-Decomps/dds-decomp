@@ -713,7 +713,7 @@ void mnuMarkTitleStreamResetPending(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-extern u32 D_00437A38;
+extern s32 D_00437A38;
 
 /* Commit the ready load only for control 1, and select the native value 6. */
 void mnuAdvanceTitleStateUnderSemaphore(void) {
