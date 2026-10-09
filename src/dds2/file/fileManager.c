@@ -231,17 +231,20 @@ struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */
-u32 fileGetResourceHandle(FileWork *work) {
+u32 fileGetResourceHandle(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->resourceHandle;
 }
 
 /* Return the stored loaded-data address as its existing u32 representation. */
-u32 fileGetLoadedDataAddress(FileWork *work) {
+u32 fileGetLoadedDataAddress(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
-u32 fileGetResourceSize(FileWork *work) {
+u32 fileGetResourceSize(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->size;
 }
 
