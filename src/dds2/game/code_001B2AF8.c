@@ -3538,7 +3538,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416620);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BFB58);
 
-void btlReleaseRegisteredTaskBuffer(void) {
+void btlReleaseRegisteredTaskBuffer(s32 unused) {
     btlGetRuntime();
     sdfReleaseChipBlock((void *)D_004367F8);
     D_004367F8 = 0;
@@ -6978,7 +6978,59 @@ void fldCreateSceneCleanupTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CFC40);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", fldDestroySceneTasksAndBuffers);
+static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
+    if (btlGetTrackedTaskHandle(slot) != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(slot), 0);
+    }
+}
+
+void fldDestroySceneTasksAndBuffers(void) {
+    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+
+    if (scene->sceneObject != 0) {
+        kwlnTaskDestroyWithHierarchy(scene->sceneObject, 0);
+        scene->sceneObject = 0;
+    }
+    if (scene->spriteObject != 0) {
+        kwlnTaskDestroyWithHierarchy(scene->spriteObject, 0);
+        scene->spriteObject = 0;
+    }
+    if (scene->sceneStatus != 0) {
+        kwlnTaskDestroyWithHierarchy(scene->sceneStatus, 0);
+        scene->sceneStatus = 0;
+    }
+    if (btlHasRegisteredPsechgPanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(6), 0);
+    }
+    btlDestroyTrackedTaskIfPresent(5);
+    btlDestroyTrackedTaskIfPresent(1);
+    btlDestroyTrackedTaskIfPresent(0);
+    btlDestroyTrackedTaskIfPresent(8);
+    btlDestroyTrackedTaskIfPresent(3);
+    btlDestroyTrackedTaskIfPresent(9);
+    btlDestroyTrackedTaskIfPresent(10);
+    if (btlGetTrackedTaskHandle(2) != 0) {
+        btlReleaseSelectionTaskBuffer();
+    }
+    if (btlGetTrackedTaskHandle(12) != 0) {
+        btlDestroyTaskC();
+    }
+    if (btlGetTrackedTaskHandle(13) != 0) {
+        btlDestroyTaskD();
+    }
+    if (btlCommandPanelWork != NULL) {
+        btlReleaseAndClearChipBlock();
+    }
+    if (btlGetTrackedTaskHandle(4) != 0) {
+        btlReleaseRegisteredTaskBuffer(0);
+    }
+    btlDestroyTrackedTaskIfPresent(7);
+    btlReleaseResourceBlock();
+    sdfReleaseChipBlock(D_00438F58[1]);
+    sdfReleaseChipBlock(D_00438F58[0]);
+    sdfReleaseChipBlock(D_00438F54);
+    sdfReleaseChipBlock(btlTrackedTaskHandles);
+}
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416FA0);
 
