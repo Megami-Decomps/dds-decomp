@@ -13,15 +13,22 @@ import urllib.request
 VERSION = "11.1.2"
 SIGNER = "CEACC9E15534EBABB82D3FA03353C9CEF108B584"
 PREFIX = Path("/tmp/dds-camera-qemu")
+STAGE = "start"
+LAST_CODE = None
 
 def run(args, **kwargs):
+    global STAGE, LAST_CODE
+    STAGE = ("verify_signature" if "--verify" in args else
+             "import_release_key" if "--import" in args else Path(args[0]).name)
     result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             text=True, check=False, timeout=1200, **kwargs)
+    LAST_CODE = result.returncode
     if result.returncode:
         raise RuntimeError("command_failed")
     return result.stdout
 
 def main():
+    global STAGE
     # This official release and signer are listed on https://www.qemu.org/download/.
     with tempfile.TemporaryDirectory(prefix="dds-qemu-build-") as temp:
         work = Path(temp)
@@ -33,6 +40,7 @@ def main():
             ("https://download.qemu.org/" + signature.name, signature),
             ("https://keys.openpgp.org/vks/v1/by-fingerprint/" + SIGNER, key),
         ):
+            STAGE = "download_" + output.name
             with urllib.request.urlopen(url, timeout=120) as response:
                 output.write_bytes(response.read())
         home = work / "gnupg"
@@ -71,6 +79,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        print(json.dumps(dict(status="qemu_preparation_failed")))
+    except Exception as exc:
+        code = getattr(exc, "code", LAST_CODE)
+        print(json.dumps(dict(status="qemu_preparation_failed", stage=STAGE,
+                              category=type(exc).__name__, code=code if isinstance(code, int) else None)))
         raise SystemExit(2)

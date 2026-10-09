@@ -11,6 +11,7 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ee_gcc_role_lineage as lineage
 import ee_gcc_cse_role_tracer as cse
+import ee_gcc_cse_case as case_builder
 
 SOURCE = """void target(void) {
     /* begin */
@@ -86,6 +87,13 @@ class LineageTests(unittest.TestCase):
                                            "/repo/src/dds2/game/unit.c"))
         self.assertFalse(lineage.same_source(records[2]["source"]["file"],
                                             "/repo/src/dds1/game/unit.c"))
+
+    def test_leading_newline_anchors_exact_indentation(self):
+        spec = copy.deepcopy(SPEC)
+        spec["roles"][0]["begin"] = "\n    /* begin */"
+        spec["roles"][0]["end"] = "\n    /* end */"
+        span = lineage.role_spans(SOURCE, spec)[0]
+        self.assertEqual((2, 5), (span["first_line"], span["end_line_exclusive"]))
 
     def test_ambiguous_anchor_fails(self):
         with self.assertRaisesRegex(ValueError, "ambiguous"):
@@ -208,6 +216,42 @@ class CseTests(unittest.TestCase):
                  "stage": "first_cse", "input_stage": "02.jump", "uids": [row, copy.deepcopy(row)]}
         with self.assertRaisesRegex(ValueError, "unique"):
             cse.validate_watch(watch, "target")
+
+
+class CaseBuilderTests(unittest.TestCase):
+    WRAPPER = r'''run "$cc1" \
+    -Iinclude -Isrc "-DASM_ROOT=\"build/eeasm/asm/$version/nonmatchings/\"" \
+    "-DVERSION_$(echo $version | tr a-z A-Z)" \
+    -quiet -O2 $flags "$cc_in" -o "$cc_out"
+# DDS_KEEP_S=path
+run "$ee/ee/bin/as" -EL -G8 -g -Iinclude -o "$out" "$cc_out"
+'''
+
+    def test_current_wrapper_tokens_are_preserved(self):
+        cc, assembler = case_builder.invocation_templates(
+            self.WRAPPER, [], Path("/private/case/rtl"), Path("/private/case/candidate.o"))
+        self.assertIn('-DASM_ROOT="build/eeasm/asm/dds2/nonmatchings/"', cc)
+        self.assertIn("-DVERSION_DDS2", cc)
+        self.assertEqual(["-quiet", "-O2", "-da", "-dumpbase", "/private/case/rtl"],
+                         cc[4:9])
+        self.assertNotIn("-DSKIP_ASM", cc)
+        self.assertEqual(["-EL", "-G8", "-g", "-Iinclude", "-o",
+                          "/private/case/candidate.o", case_builder.ASSEMBLY_REL], assembler)
+
+    def test_unit_flags_follow_diagnostic_dump_flags(self):
+        cc, _ = case_builder.invocation_templates(
+            self.WRAPPER, ["-fexample"], Path("/private/rtl"), Path("/private/candidate.o"))
+        self.assertEqual("-fexample", cc[cc.index("-dumpbase") + 2])
+
+    def test_unsupported_shell_expansion_fails(self):
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            case_builder.invocation_templates(self.WRAPPER.replace("-quiet", "$UNREVIEWED"),
+                                               [], Path("/private/rtl"), Path("/private/a.o"))
+
+    def test_unit_flags_are_selected_exactly(self):
+        text = "game/other -fother\ngame/code_001DD390 -fselected # reviewed\n"
+        self.assertEqual(["-fselected"], case_builder.flags_for_unit(text))
+        self.assertEqual([], case_builder.flags_for_unit("game/other -fother\n"))
 
 
 if __name__ == "__main__":
