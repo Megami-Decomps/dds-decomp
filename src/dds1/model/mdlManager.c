@@ -150,7 +150,6 @@ void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevR
     groupNode->unk_B0 = 100.0f;
 }
 
-extern void mdlDestroyContext(MdlCtx *);
 
 extern void mdlDestroyPartList(DevRequest *);
 
