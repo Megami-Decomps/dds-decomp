@@ -163,6 +163,8 @@ typedef enum SdfStreamAudioMode {
 } SdfStreamAudioMode;
 
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+struct SdfStreamInputDmaTag;
+
 typedef struct SdfStreamFrameNode {
     struct SdfStreamFrameNode *streamPrev;
     struct SdfStreamFrameNode *streamNext;
@@ -194,7 +196,7 @@ typedef struct SdfStreamFrameNode {
     u32 cycleLength;
     u32 tickCount;
     s32 playbackFrameIndex;
-    void *inputDmaChain;
+    struct SdfStreamInputDmaTag *inputDmaChain;
     u8 headerReady;
     u8 done;
     u8 filledSlots;
