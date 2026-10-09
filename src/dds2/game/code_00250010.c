@@ -1033,6 +1033,8 @@ extern char D_00437628[]; /* "OUT" */
 extern char D_00437630[]; /* "IN" */
 extern char D_00437640[]; /* "X" */
 
+/* Format each enabled column of a timeline key. Some columns reuse the
+ * preceding scalar selection; the selected group kind is fixed for this row. */
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AE0);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423AF0);
@@ -1053,8 +1055,6 @@ INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B60);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00423B70);
 
-/* Format each enabled column of a timeline key. Some columns reuse the
- * preceding scalar selection; the selected group kind is fixed for this row. */
 void func_00252378(s32 list, s32 x, s32 y, s32 color,
                    EvtRuntimeChild *node, EvtRuntime *ctx) {
     char name[32];
