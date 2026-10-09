@@ -1536,7 +1536,7 @@ void func_00316C88(SdfFlagListWork *work) {
     sdfInitPacketList(packetList);
     sdfAppendPacket(packetList, (u32)func_00348158(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_0040A958[work->params.alpha.surfaceIndex];
-    surface->append((SdfListHead *)surface, packetList);
+    surface->append(surface, packetList);
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 

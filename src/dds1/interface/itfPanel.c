@@ -76,5 +76,5 @@ void itfBuildAndSubmitPanelPacket(UiSprite *panel, SdfPoolNode *packetOwner) {
     sdfInitPacketList(packetList);
     itfAppendGsPanelStatePacket(packetList);
     itfPanelDispatchHandler(panel, packetList);
-    packetOwner->append((SdfListHead *)packetOwner, packetList);
+    packetOwner->append(packetOwner, packetList);
 }

@@ -282,7 +282,7 @@ s32 mnuMovieViewer(void) {
     mnuMovieList.packets = (SdfListHead *)sdfAllocatePacketList(0);
     mnuDrawMovieList();
     mnuDrawMovieProgressCounter();
-    D_003255A8.append((SdfListHead *)&D_003255A8, mnuMovieList.packets);
+    D_003255A8.append(&D_003255A8, mnuMovieList.packets);
     D_003BD8E4 = D_003BD3A0[0];
     return 0;
 }
@@ -396,7 +396,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
             }
         }
     }
-    D_00325708.append((SdfListHead *)&D_00325708, packets);
+    D_00325708.append(&D_00325708, packets);
     return 0;
 }
 

@@ -754,7 +754,7 @@ void kwlnTextureAttachTask(SdfPoolNode *surface) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
-    surface->append((SdfListHead *)surface, packetList);
+    surface->append(surface, packetList);
 }
 
 /* Submit the default surface's map only when the control array's first byte is zero. */
@@ -1261,7 +1261,7 @@ void kwlnDrawBlurErrorCounters(void) {
             if (kwlnRippleBlurErrorCount > 0) {
                 sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
             }
-            D_00325708.append((SdfListHead *)&D_00325708, packetList);
+            D_00325708.append(&D_00325708, packetList);
         }
     }
 }

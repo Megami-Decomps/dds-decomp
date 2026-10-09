@@ -4259,7 +4259,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
 }
 
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
-    sdfQueueAssetRelease((s32)work->assetHandle);
+    sdfQueueAssetRelease(work->assetHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
     sdfReleaseChipBlock(work);
 }
@@ -4312,7 +4312,7 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
         sdfAppendPacket(list, func_00167A10(&D_004520B0));
     }
     entry = D_003B1FB8[node->drawKind];
-    entry->append((SdfListHead *)entry, list);
+    entry->append(entry, list);
 }
 
 void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {

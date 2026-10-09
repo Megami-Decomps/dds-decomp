@@ -3162,7 +3162,7 @@ s32 func_00239C08(KwlnTask *task) {
     sdfAppendPacket((SdfListHead *)D_00453660.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
-    D_00380708.append((SdfListHead *)&D_00380708,
+    D_00380708.append(&D_00380708,
                       (SdfListHead *)D_00453660.packetList);
     D_00438A48 = D_00453660.value;
     D_00438A4C = D_00453660.adjustment;

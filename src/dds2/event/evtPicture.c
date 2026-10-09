@@ -22,7 +22,7 @@ void evtSubmitPictureDrawPacket(struct SdfTex *texture) {
     sdfInitPacketList(packet);
     itfSendTablePacket(packet, 0, 0);
     itfQueueTextureBoundQuadPacket(D_003C9498, D_003C94A8, D_003C94B8, 0xFFF, texture, 0, packet);
-    D_003805A8.append((SdfListHead *)&D_003805A8, packet);
+    D_003805A8.append(&D_003805A8, packet);
 }
 
 /* Run the picture's own update step while its active flag is set. */

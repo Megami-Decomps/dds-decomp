@@ -3100,7 +3100,7 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     D_003D6520.color = history->color;
     sdfAppendPacket(list, func_0015FE20(&D_003D6520));
     surface = D_003548E0[history->surfaceIndex];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 

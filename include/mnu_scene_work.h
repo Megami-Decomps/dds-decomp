@@ -60,7 +60,8 @@ typedef struct MenuSceneWork {
     SdfGrid *gridHandle; /* 0x484 */
     MnuGridFeedbackState gridFeedback; /* 0x488 */
     s32 gridFrame; /* 0x490: pulse-grid animation frame */
-    u8 pad494[8];
+    u8 pad494[4];
+    s32 coordinateHistoryCursor; /* 0x498: next position in the ten-entry trail ring. */
     MenuSceneCoordinate coordinates[10]; /* 0x49C: copied grid-entry positions */
     s32 pendingMantras[8]; /* 0x4EC */
     u8 pad50C[0x24];
@@ -96,6 +97,7 @@ typedef char MenuSceneWorkLayoutAssert[
      (u32)&((MenuSceneWork *)0)->gridHandle == 0x484 &&
      (u32)&((MenuSceneWork *)0)->gridFeedback == 0x488 &&
      (u32)&((MenuSceneWork *)0)->gridFrame == 0x490 &&
+     (u32)&((MenuSceneWork *)0)->coordinateHistoryCursor == 0x498 &&
      (u32)&((MenuSceneWork *)0)->coordinates == 0x49C &&
      (u32)&((MenuSceneWork *)0)->pendingMantras == 0x4EC &&
      sizeof(((MenuSceneWork *)0)->pendingMantras) == 0x20 &&

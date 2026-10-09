@@ -122,7 +122,6 @@ extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern s32 func_00167A10(EffPacketParams *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
@@ -1097,7 +1096,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
     if (pool->sharedResource != NULL) {
         effPcpScatterResRelease(pool->sharedResource);
     }
-    sdfQueueAssetRelease((s32)pool->drawAsset);
+    sdfQueueAssetRelease(pool->drawAsset);
     sdfReleaseResourceAllocation(pool->allocation);
 }
 
@@ -1116,7 +1115,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
         D_00452020->texcoords = D_003B13F0;
     } else {
         D_00452020->texcoords = NULL;
@@ -1141,7 +1140,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         sdfAppendPacket(packet, func_00167A10(D_00452020));
     }
     surface = D_003B14B0[pool->unk10];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Acquire a new texture owner and store it in the pool. */

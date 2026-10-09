@@ -112,13 +112,11 @@ typedef struct SdfDescriptorSource {
 extern SdfDescriptorSource *sdfPacketResourceEntries[];
 
 void sdfTexRelease(SdfTex *texture);
-void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 void sdfDestroyObjectList(SdfModel *owner);
-void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 s32 sdfAllocPacketAligned(s32 size);
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
@@ -447,7 +445,7 @@ void sdfSetPacketCursorAligned(s32 cursorAddress) {
 
 void sdfInitPacketList(SdfListHead *list) {
     list->unkC = 0xFFFF;
-    list->unk0 = 0;
+    list->nextList = NULL;
     list->first = 0;
     list->last = 0;
     list->firstReferenceSource = 0;
@@ -534,39 +532,39 @@ void sdfAppendCallPacket(SdfListHead *list, u32 packetAddress) {
 }
 
 /* Prepend a nonempty packet list, connecting its DMA tail to the former first list. */
-void sdfPrependPacketList(SdfListHead *destinationList, SdfListHead *incomingList) {
+void sdfPrependPacketList(SdfPoolNode *destinationList, SdfListHead *incomingList) {
     SdfListHead *firstList;
 
     if (incomingList->last == 0) {
         return;
     }
-    firstList = (SdfListHead *)destinationList->first;
+    firstList = destinationList->first;
     if (firstList == NULL) {
-        destinationList->last = (u32)incomingList;
+        destinationList->last = incomingList;
     } else {
         sdfConnectPacketLists(incomingList, firstList);
     }
-    incomingList->unk0 = (u32)firstList;
-    destinationList->first = (u32)incomingList;
+    incomingList->nextList = firstList;
+    destinationList->first = incomingList;
 }
 
-void sdfAppendPacketList(SdfListHead *list, SdfListHead *item) {
-    s32 *last;
+void sdfAppendPacketList(SdfPoolNode *list, SdfListHead *item) {
+    SdfListHead *last;
 
     if (item->first != 0) {
-        last = (s32 *)list->last;
+        last = list->last;
         if (last == NULL) {
-            list->first = (u32)item;
+            list->first = item;
         }
         else {
-            *last = (s32)item;
+            last->nextList = item;
             sdfConnectPacketLists(last, item);
         }
-        list->last = (u32)item;
+        list->last = item;
     }
 }
 
-s32 sdfPrependIfMode1(SdfListHead *list, s32 mode, SdfListHead *packet) {
+s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
     if (mode == 1) {
         sdfPrependPacketList(list, packet);
     }
@@ -656,25 +654,25 @@ void sdfChainReferenceNodes(SdfListHead *list) {
 /* Flush every pool entry, chain the packet lists together and terminate the last. */
 SdfListHead *sdfFlushPoolNodes(SdfPoolNode *node) {
     SdfListHead *tail = NULL;
-    s32 head = 0;
+    SdfListHead *head = NULL;
 
     for (; node != NULL; node = node->next) {
-        node->prepend((SdfListHead *)node, 0, NULL);
+        node->prepend(node, 0, NULL);
         if (node->first != 0) {
             if (head != 0) {
-                sdfConnectPacketLists(tail, (SdfListHead *)node->first);
+                sdfConnectPacketLists(tail, node->first);
             } else {
                 head = node->first;
-                sdfChainReferenceNodes((SdfListHead *)head);
+                sdfChainReferenceNodes(head);
             }
-            tail = (SdfListHead *)node->last;
+            tail = node->last;
         }
     }
     if (tail != NULL) {
         ((SdfDmaTag *)tail->last)->kind = SDF_DMA_TAG_END_BYTE;
         ((SdfDmaTag *)tail->last)->address = 0;
     }
-    return (SdfListHead *)(u32)head;
+    return head;
 }
 
 void sdfClearLinkedPacketList(SdfLinkedPacketList *list) {

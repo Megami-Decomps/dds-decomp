@@ -288,7 +288,7 @@ void itfApplyWorkTintAndClearBuffers(u8 *work) {
     memset(&state->lowerNumber, 0, sizeof(state->lowerNumber));
     memset(&state->upperNumber, 0, sizeof(state->upperNumber));
     memset(&state->gauge, 0, sizeof(state->gauge));
-    memset(state->pad14C, 0, sizeof(state->pad14C));
+    memset(&state->pauseFade, 0, sizeof(state->pauseFade));
     memset(&state->roundFade, 0, sizeof(state->roundFade));
     memset(&state->scoreFade, 0, sizeof(state->scoreFade));
     memset(&state->frame, 0, sizeof(state->frame));
@@ -304,7 +304,7 @@ void itfClearTintAndWorkBuffers(u8 *work) {
     memset(&state->lowerNumber, 0, sizeof(state->lowerNumber));
     memset(&state->upperNumber, 0, sizeof(state->upperNumber));
     memset(&state->gauge, 0, sizeof(state->gauge));
-    memset(state->pad14C, 0, sizeof(state->pad14C));
+    memset(&state->pauseFade, 0, sizeof(state->pauseFade));
     memset(&state->roundFade, 0, sizeof(state->roundFade));
     memset(&state->scoreFade, 0, sizeof(state->scoreFade));
     memset(&state->frame, 0, sizeof(state->frame));
