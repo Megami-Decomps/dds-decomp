@@ -84,7 +84,7 @@ extern s32 fldPrimaryEffectPositionPending;
 
 extern s32 fldSecondaryEffectPositionPending;
 
-extern s32 dds3GetWorldObject(void);
+extern void *dds3GetWorldObject(void);
 
 extern EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
 
@@ -92,7 +92,6 @@ extern char D_003BB000[]; /* "BARIA" */
 
 extern char *D_003BAE44;
 
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 id, s32 kind);
 
 extern s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry);
 
@@ -201,8 +200,8 @@ extern void evtSetSolarOverlayFullyVisible(void);
 void fldFireRoomEffects(void);
 
 s32 fldCmdQueryActorEntrySceneStatus(void) {
-    s32 world = dds3GetWorldObject();
-    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *world = dds3GetWorldObject();
+    EffWorldNode *unit = dds3GetWorldPlayerObject(world);
     EffWorldNode *entry;
     s32 result;
 
@@ -235,8 +234,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
 }
 
 s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
-    s32 world = dds3GetWorldObject();
-    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *world = dds3GetWorldObject();
+    EffWorldNode *unit = dds3GetWorldPlayerObject(world);
     EffWorldNode *entry;
     s32 result;
 
@@ -287,8 +286,8 @@ s32 fldCmdReadSceneStatus(void) {
 }
 
 s32 fldCmdTestActorEntryCondition(void) {
-    s32 world = dds3GetWorldObject();
-    EffWorldNode *unit = dds3GetWorldPlayerObject((EffWorldNode *)world);
+    EffWorldNode *world = dds3GetWorldObject();
+    EffWorldNode *unit = dds3GetWorldPlayerObject(world);
     EffWorldNode *entry;
 
     if (unit == 0) {
@@ -436,7 +435,7 @@ s32 fldCmdSetLookAtHeading(void) {
     return 1;
 }
 
-extern s32 fldGetPlayerSceneState(void);
+extern u32 fldGetPlayerSceneState(void);
 
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
@@ -455,16 +454,16 @@ extern s32 D_003BAD28;
 s32 fldCmdCaptureObjectPose(void) {
     f32 pos[4];
     f32 rot[4];
-    s32 handle;
+    EffWorldNode *target;
     EffWorldNode *object;
-    s32 world;
+    EffWorldNode *world;
 
     if (scrReadIntParameter(0) == -1) {
-        handle = fldGetPlayerSceneState();
-        if (handle == 0) {
+        target = (EffWorldNode *)fldGetPlayerSceneState();
+        if (target == NULL) {
             return 1;
         }
-        object = dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
+        object = dds3SetWorldCameraObject(dds3GetWorldObject(), target);
         if (object == NULL) {
             return 1;
         }
@@ -481,11 +480,11 @@ s32 fldCmdCaptureObjectPose(void) {
         D_0032E400[0] = 4;
     } else {
         world = dds3GetWorldObject();
-        handle = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
-        if (handle == 0) {
+        target = dds3FindWorldObjectNodeByKey(world, scrReadIntParameter(0), 4);
+        if (target == NULL) {
             return 1;
         }
-        dds3SetWorldCameraObject(dds3GetWorldObject(), (EffWorldNode *)handle);
+        dds3SetWorldCameraObject(dds3GetWorldObject(), target);
     }
     return 1;
 }
