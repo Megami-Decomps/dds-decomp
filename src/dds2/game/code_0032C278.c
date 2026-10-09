@@ -1488,38 +1488,37 @@ void sdfQueueTexturedTriangle(s32 list, s32 color, s32 primitive, s32 x0, s32 y0
 }
 
 /* Pack four textured vertices with a common color and depth. */
-void sdfWriteTexturedQuadPacket(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfWriteTexturedQuadPacket(SdfGsTexturedQuadPayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2,
                    s32 x3, s32 y3, s32 u3, s32 v3, s32 depth) {
-    u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xA400000000008001ULL;
-    packet[1] = 0x5353535310ULL;
-    packet[2] = (u32)(primitive | 0x114);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[8] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[10] = (u3 & 0xFFFF) | (v3 << 16);
-    packet[11] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0xA400000000008001ULL;
+    packet->gifRegisters = 0x5353535310ULL;
+    packet->primitive = (u32)(primitive | 0x114);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->vertices[3].uv = (u3 & 0xFFFF) | (v3 << 16);
+    packet->vertices[3].xyz2 = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
 void sdfQueueTexturedQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
                    s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsTexturedQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x70);
-    packet->unk0 = 0x20000006;
-    packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    sdfWriteTexturedQuadPacket((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
+    packet = (SdfGsTexturedQuadPacket *)alloc(0x70);
+    packet->dmaTag = 0x20000006;
+    packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
+    sdfWriteTexturedQuadPacket(&packet->drawing, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
