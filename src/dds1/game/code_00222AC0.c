@@ -1007,7 +1007,7 @@ extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 
-u32 func_00224CD8(void) {
+u32 evtOpTurnUnitRelativeToWorldNode(void) {
     EvtUnit *unit;
     EffWorldNode *actor;
     EffWorldNode *source;
@@ -1090,7 +1090,7 @@ u32 func_00224CD8(void) {
 }
 
 
-u32 func_00224F48(void) {
+u32 evtOpRestoreUnitReferenceAngle(void) {
     EvtUnit *unit;
     EffWorldNode *actor;
     f32 rotation[4] __attribute__((aligned(16)));
