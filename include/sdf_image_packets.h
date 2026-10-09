@@ -48,4 +48,31 @@ typedef char SdfDescriptorPacket_image_reference_offset_must_be_0x60[
 typedef char SdfDescriptorPacket_flush_tag_offset_must_be_0x80[
     ((u32)&((SdfDescriptorPacket *)0)->flushTag0 == 0x80) ? 1 : -1];
 
+/* Metadata node plus the extended local-to-local image-copy payload (0x70). */
+typedef struct SdfGraphCopyPacket {
+    SdfNode node;
+    SdfPacket drawHeader;
+    SdfPacket transfer[2];
+} SdfGraphCopyPacket;
+
+typedef char SdfGraphCopyPacket_size_must_be_0x70[
+    (sizeof(SdfGraphCopyPacket) == 0x70) ? 1 : -1];
+typedef char SdfGraphCopyPacket_draw_header_offset_must_be_0x10[
+    ((u32)&((SdfGraphCopyPacket *)0)->drawHeader == 0x10) ? 1 : -1];
+typedef char SdfGraphCopyPacket_transfer_offset_must_be_0x30[
+    ((u32)&((SdfGraphCopyPacket *)0)->transfer == 0x30) ? 1 : -1];
+
+/* Metadata node followed by the resource-transfer payload (0x100). */
+typedef struct SdfPatchableResourcePacket {
+    SdfNode node;
+    SdfResourcePacket resourcePacket;
+} SdfPatchableResourcePacket;
+
+typedef char SdfPatchableResourcePacket_size_must_be_0x100[
+    (sizeof(SdfPatchableResourcePacket) == 0x100) ? 1 : -1];
+typedef char SdfPatchableResourcePacket_payload_offset_must_be_0x10[
+    ((u32)&((SdfPatchableResourcePacket *)0)->resourcePacket == 0x10) ? 1 : -1];
+typedef char SdfPatchableResourcePacket_transfer_offset_must_be_0x80[
+    ((u32)&((SdfPatchableResourcePacket *)0)->resourcePacket.transfer == 0x80) ? 1 : -1];
+
 #endif /* SDF_IMAGE_PACKETS_H */

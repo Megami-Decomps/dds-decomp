@@ -226,8 +226,10 @@ void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sour
     sdfAppendPacketRange(list, buffer, buffer + 0xc0);
 }
 
-void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk80 = (packet->unk80 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
+void sdfPatchPacketResourceField(SdfPatchableResourcePacket *packet, s32 entryIndex) {
+    packet->resourcePacket.transfer[0].unk0 =
+        (packet->resourcePacket.transfer[0].unk0 & ~0x3FFF) |
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex]->baseAddress >> 6);
 }
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
@@ -235,18 +237,19 @@ void sdfPatchPacketResourceField(SdfBigPacket *packet, s32 entryIndex) {
 void sdfCreatePatchableResourcePacket(SdfListHead *list, SdfLinkedPacketList *linkedList, s32 arg2, s32 arg3,
                    s32 arg4, s32 arg5, s32 resourceAddress, s32 arg7, s32 arg8,
                    s32 (*allocatePacket)(s32)) {
-    s32 packetAddress;
+    SdfPatchableResourcePacket *packet;
 
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
     }
-    packetAddress = allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
-    ((SdfNode *)packetAddress)->unk4 = (u32)sdfPatchPacketResourceField;
-    sdfBuildResourceTransferPacket((SdfResourcePacket *)(packetAddress + SDF_QWORD_BYTES),
+    packet = (SdfPatchableResourcePacket *)allocatePacket(SDF_PATCHABLE_PACKET_BYTES);
+    packet->node.unk4 = (u32)sdfPatchPacketResourceField;
+    sdfBuildResourceTransferPacket(&packet->resourcePacket,
         (SdfTexResource *)sdfPacketResourceEntries[0], arg2, arg3, arg4, arg5,
         resourceAddress, arg7, arg8);
-    sdfAppendLinkedPacketNode(linkedList, (u32 *)packetAddress);
-    sdfAppendPacketRange(list, packetAddress + SDF_QWORD_BYTES, packetAddress + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
+    sdfAppendLinkedPacketNode(linkedList, (u32 *)packet);
+    sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
+        (u32)packet + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
 
 void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfTexResource *source,
@@ -1251,8 +1254,10 @@ void sdfCreateExtendedPacket(s32 packetList, u32 destinationBufferAddress, s32 d
     sdfAppendPacket(packetList, packetAddress);
 }
 
-void sdfPatchPacketResourceReference(SdfBigPacket *packet, s32 entryIndex) {
-    packet->unk30 = (packet->unk30 & ~0x3FFF) | (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->resourceIndexXor]->baseAddress >> 6);
+void sdfPatchPacketResourceReference(SdfGraphCopyPacket *packet, s32 entryIndex) {
+    packet->transfer[0].unk0 =
+        (packet->transfer[0].unk0 & ~0x3FFF) |
+        (u64)(u32)(sdfPacketResourceEntries[entryIndex ^ packet->node.unk8]->baseAddress >> 6);
 }
 
 extern SdfGraphObj D_003980E0;
@@ -1262,16 +1267,16 @@ void sdfCreateGraphBufferCopyPacket(SdfListHead *drawList, SdfLinkedPacketList *
                    SdfTexResource *destination, s32 destinationX, s32 destinationY,
                    s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
                    s32 resourceIndexXor, s32 (*allocPacket)(s32)) {
-    SdfNode *packet;
+    SdfGraphCopyPacket *packet;
     SdfPacket *drawPacket;
 
     if (allocPacket == NULL) {
         allocPacket = sdfAllocPacketAligned;
     }
-    packet = (SdfNode *)allocPacket(0x70);
-    packet->unk8 = resourceIndexXor;
-    packet->unk4 = (u32)sdfPatchPacketResourceReference;
-    drawPacket = (SdfPacket *)(packet + 1);
+    packet = (SdfGraphCopyPacket *)allocPacket(0x70);
+    packet->node.unk8 = resourceIndexXor;
+    packet->node.unk4 = (u32)sdfPatchPacketResourceReference;
+    drawPacket = &packet->drawHeader;
 
     sdfInitializeExtendedDrawPacket(
         drawPacket, destination->word, destination->width,
