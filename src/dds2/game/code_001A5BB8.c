@@ -3092,7 +3092,7 @@ void btlClearAllActorEntrySlots(BtlUnit *unit) {
     } while (temp_v0 < 7);
 }
 
-s32 btlActorEntryIsExpired(UiObject *unit, s32 index) {
+s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index) {
     if (unit->entrySlots[index].code == 0) {
         return 0;
     }
@@ -3108,7 +3108,7 @@ typedef struct EntryPair {
 
 extern EntryPair D_003B4DF0[];
 
-s32 btlMatchActorEntryCode(UiObject *unit, s32 index) {
+s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
     if (D_003B4DF0[index].first != 0) {
         if (D_003B4DF0[index].first == value) {
@@ -3140,7 +3140,7 @@ void func_001ADD30(BtlUnit *unit, s32 index, s16 delta) {
     unit->entrySlots[index].code = code;
 }
 
-void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
+void btlSetActorEntryCode(BtlUnit *unit, s32 index, u16 code) {
     unit->entrySlots[index].code = code;
 }
 
@@ -3150,7 +3150,7 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
     unit->entrySlots[index].countdown = -1;
 }
 
-s16 btlGetActorEntryCode(UiObject *unit, s32 index) {
+s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
@@ -3164,7 +3164,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415238);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415250);
 
-f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
+f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     f32 factor;
     s32 stage;
 
