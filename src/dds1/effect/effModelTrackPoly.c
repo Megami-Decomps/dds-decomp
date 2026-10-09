@@ -435,7 +435,7 @@ void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
 extern SdfPoolNode *D_00355710[];
 extern SdfPoolNode D_00325248;
 extern s32 sdfAllocPacketAligned(s32);
-extern s32 func_0015FE20(EffTrackPolyDraw *);
+extern void *func_0015FE20(EffTrackPolyDraw *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with
  * two additional vertices overlapping the next strip (18 inputs total). */
@@ -476,14 +476,14 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
-            sdfAppendPacket(list, func_0015FE20(&D_003D6640));
+            sdfAppendPacket(list, (u32)func_0015FE20(&D_003D6640));
             D_003D6640.points += 0x10;
             D_003D6640.colors += 0x10;
         }
         if (pointsRemaining >= 4) {
             draw->height = pointsRemaining;
             draw->width = pointsRemaining - 2;
-            sdfAppendPacket(list, func_0015FE20(draw));
+            sdfAppendPacket(list, (u32)func_0015FE20(draw));
             draw->colors += pointsRemaining;
         }
     }

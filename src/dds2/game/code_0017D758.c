@@ -72,7 +72,7 @@ extern u8 D_003B14C0[];
 extern SdfPoolNode *D_003B1520[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern s32 func_00167A10(ScatterRenderState *);
+extern void *func_00167A10(ScatterRenderState *);
 struct SdfAsset;
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *, s32);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *, s32);
@@ -116,7 +116,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
-                sdfAppendPacket(packet, func_00167A10(&D_00452050));
+                sdfAppendPacket(packet, (u32)func_00167A10(&D_00452050));
                 D_00452050.points += 64;
                 D_00452050.colors += 16;
                 D_00452050.uv += 32;
@@ -124,7 +124,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
             if (remaining >= 4) {
                 draw->primitiveCount = remaining - 2;
                 draw->vertexCount = remaining;
-                sdfAppendPacket(packet, func_00167A10(draw));
+                sdfAppendPacket(packet, (u32)func_00167A10(draw));
             }
         }
     }
