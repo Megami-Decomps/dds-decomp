@@ -1286,7 +1286,88 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
     }
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011C0B0);
+extern s32 func_002D0B08(s32 rosterIndex);
+extern s32 D_00386048[][4];
+
+/* Add a roster member to the first free party slot: initialise it from its saved template or by
+ * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
+ * slot, -1 if the member is already present or -2 if the party is full. */
+s32 func_0011C0B0(s32 rosterIndex, s32 initFlags) {
+    DatPartyRecord *entry;
+    DatPartyRecord *party;
+    s32 slotIndex;
+    s32 occupiedCount;
+    s32 modelFlagIndex;
+    s32 *modelFlags;
+
+    if (dds3FindEntryIndex(rosterIndex) >= 0) {
+        return -1;
+    }
+
+    for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
+        entry = &datGameState->party[slotIndex];
+        if ((entry->flags & 1) == 0) {
+            break;
+        }
+    }
+    if (slotIndex == PTY_ACTIVE_ROSTER_COUNT) {
+        return -2;
+    }
+
+    memset(entry, 0, sizeof(*entry));
+    if ((datGameState->templates[rosterIndex].flags & 1) != 0 &&
+        datGameState->templates[rosterIndex].level != 0) {
+        func_0011B4B0(entry, rosterIndex, initFlags);
+    } else {
+        switch (rosterIndex) {
+        case 2:
+            ptyInitRosterAndClearItem(entry, initFlags);
+            break;
+        case 3:
+            func_0011B9A0(entry, initFlags);
+            break;
+        case 8:
+            ptyMergeSavedUnitTemplates(entry);
+            break;
+        default:
+            ptyCloneTemplateAtPartyMaxLevel(entry, rosterIndex);
+            break;
+        }
+    }
+
+    entry->flags &= ~2;
+    entry->hp = entry->maxHp;
+    entry->mp = entry->maxMp;
+    entry->status = 0;
+
+    occupiedCount = 0;
+    party = datGameState->party;
+    for (modelFlagIndex = 0; modelFlagIndex < PTY_ACTIVE_ROSTER_COUNT; modelFlagIndex++) {
+        if ((party->flags & 3) == 3) {
+            occupiedCount++;
+        }
+        party++;
+    }
+    if (occupiedCount == 0) {
+        ptyRebalanceFrontline(rosterIndex);
+    }
+
+    modelFlags = D_00386048[rosterIndex];
+    for (modelFlagIndex = 0; modelFlagIndex < 4U; modelFlagIndex++) {
+        s32 modelFlag = *modelFlags++;
+        if (modelFlag != 0) {
+            mdlFlagSet(modelFlag);
+        }
+    }
+
+    if (func_002D0B08(rosterIndex) != 0) {
+        entry->maxHp = datComputeSkillBoostedMaxHp(entry);
+        entry->maxMp = datComputeSkillBoostedMaxMp(entry);
+        entry->hp = entry->maxHp;
+        entry->mp = entry->maxMp;
+    }
+    return slotIndex;
+}
 
 void func_0011C328(u32 arg0) {
     func_0011C0B0(arg0, 0);
