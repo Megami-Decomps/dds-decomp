@@ -1375,7 +1375,7 @@ void sdfBuildPacket104x4(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, 
     packet[7] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void sdfBuildPacketE(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {

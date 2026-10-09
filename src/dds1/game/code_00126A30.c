@@ -190,7 +190,6 @@ extern u32 D_003BAD40;
 extern u32 D_003BAD1C;
 
 extern void *dds3GetWorldObject(void);
-extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 extern s64 fldGetPlayerSceneState(void);
 
 
@@ -5435,7 +5434,6 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 void func_0013DDF0(const char *name) {
     FldActorEntry *entry;
     char *entryName;
