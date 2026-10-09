@@ -868,7 +868,7 @@ void func_00319F48(void) {
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);
-    func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+    func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
     D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
                                                position[0], position[1], position[2], 0.5f);
@@ -886,7 +886,7 @@ void mnuUpdateTimedEffectPosition(void) {
         x = origin->x;
         y = origin->y;
         value = mnuEvaluateTimedValue(&D_0040ABF8);
-        func_0031CAE8(position, (s32)D_0040ABF8.x0 + x, (s32)value + y - 32);
+        func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
         fileQueueSetPosition(D_00438930->queue, position);
     }
 }

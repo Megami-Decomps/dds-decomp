@@ -33,7 +33,7 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
             if (func_003242D0(entry, 0) == 0) {
                 work->currentScore += 10000;
                 y = mnuEvaluateTimedValue(entry);
-                itfClaimWideSlotWithTaggedPayload((s32)(entry->x0 + (f32)originX),
+                itfClaimWideSlotWithTaggedPayload((s32)(entry->currentX + (f32)originX),
                     (s32)y + originY, 10000, 0, work->spriteWork);
             }
             evtPrintDeveloperConsoleMessage("ITEM GET !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", (D_0040ABF8.flags >> 15) & 0xF);
