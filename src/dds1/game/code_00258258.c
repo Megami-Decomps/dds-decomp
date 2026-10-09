@@ -167,7 +167,7 @@ void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
     u32 mode = pulse->mode;
     f32 progress;
 
-    if ((u32)mode >= 6) {
+    if (mode >= 6) {
         return;
     }
 
