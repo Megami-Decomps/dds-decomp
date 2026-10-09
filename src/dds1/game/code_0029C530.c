@@ -1580,15 +1580,6 @@ extern u8 D_0037E0E0[];
 
 extern void func_002A3E10(EffTrackSet *, Matrix4 *);
 
-typedef struct EffBillOutput {
-    u32 textureId;      // 0x00
-    u32 color;          // 0x04
-    u32 field_08;       // 0x08
-    u8 outputMode;      // 0x0C
-    u8 pad_0D[7];
-    u8 mode;            // 0x14
-} EffBillOutput;
-
 typedef struct EffMeshOutput {
     u32 field_00;       // 0x00
     u32 textureId;      // 0x04
@@ -1613,7 +1604,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -1635,9 +1626,9 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1647,7 +1638,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void billResetCellIndices(u8 *work) {
@@ -1693,7 +1684,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -1715,9 +1706,9 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1727,7 +1718,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void billResetParticleIndices(u8 *work) {
@@ -1773,7 +1764,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -1795,9 +1786,9 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1807,7 +1798,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void effClearAnimatedFrames(u8 *work) {
@@ -1911,7 +1902,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -1933,9 +1924,9 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -1945,7 +1936,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void billResetEmitterIndices(u8 *work) {
@@ -2037,7 +2028,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -2059,9 +2050,9 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2071,7 +2062,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void effClearStripFrames(u8 *work) {
@@ -2166,7 +2157,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -2188,9 +2179,9 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2200,7 +2191,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void billResetTrailIndices(u8 *work) {
@@ -2247,7 +2238,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -2269,9 +2260,9 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2281,7 +2272,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 void billResetQuadIndices(u8 *work) {
@@ -2373,7 +2364,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffTrackSet *out = (EffTrackSet *)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -2395,9 +2386,9 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
+    out->color = blended[0];
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -2407,7 +2398,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+    func_002A3E10(out, (Matrix4 *)mtx);
 }
 
 
@@ -3223,7 +3214,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[2];
+    EffTrackSet *out = (EffTrackSet *)list[2];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -3245,7 +3236,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_UNCLOBBERED(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = packed;
+    out->color = packed;
     if (packed & 0xFF000000) {
         EffClassWork *dst = (EffClassWork *)list[1];
 
@@ -3254,8 +3245,8 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         PCP_COPY_VECTOR(dst->transform, work);
         PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
         effRunClassPostFrame((s32)dst);
-        *(u32 *)out = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-        ((EffBillOutput *)out)->mode = ((EffBillOutputHeader *)config)->outputMode;
+        out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -3265,7 +3256,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002A3E10((EffTrackSet *)out, (Matrix4 *)mtx);
+        func_002A3E10(out, (Matrix4 *)mtx);
     }
 }
 
