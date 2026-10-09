@@ -6144,6 +6144,7 @@
 0x00330CE8	sdfModelWriteFixedPacket	inferred	Appends a packet with zero high half and a fixed 0x60000000 command.
 0x00330D00	sdfModelWriteIndexedAssetPacket	inferred	Selects the indexed asset in the nested chunk table and passes it with packet/frame parameters to func_00333950, which writes a 16-byte packet.
 0x00331238	sdfDrawNodePrependCommandNode	inferred	Allocates a command node and prepends it to the selected draw-node command list.
+0x003312A8	sdfDrawNodeBuildCommandList	inferred	Dispatches serialized command-list entries into packet and object-reference commands for a draw node.
 0x003314B0	sdfDrawNodeBuildMatrix	inferred	twin [names_M67_Named.tsv]
 0x00331500	sdfDrawNodeSetFromItem	inferred	twin [names_M67_Named.tsv]
 0x003316B0	sdfModelResetAndInitNodes	inferred	Frees node lists, resets root workspace and sets up two slots.
