@@ -181,6 +181,59 @@ class LineageTests(unittest.TestCase):
         self.assertNotIn("pattern_excerpt", lineage.describe(records[2]))
 
 
+class SourceCallBridgeTests(unittest.TestCase):
+    SOURCE = """void target(void) {
+    read_runtime();
+    clear_peer();
+    /* begin */
+    read_runtime();
+    consume();
+    clear_peer();
+    /* end */
+}
+"""
+    SPEC = {"schema": 1, "function": "target", "roles": [
+        {"name": "peer", "begin": "    /* begin */", "end": "    /* end */",
+         "call_bridge": {"begin": {"symbol": "read_runtime", "occurrence": 2},
+                         "end": {"symbol": "clear_peer", "occurrence": 2}}}]}
+
+    def inventory(self):
+        def call(uid, previous, following, name):
+            return (f'(call_insn {uid} {previous} {following} '
+                    f'(call (mem:SI (symbol_ref:SI ("{name}")) 0) (const_int 0)))\n')
+        text = HEADER + call(2, 0, 3, "read_runtime") + call(3, 2, 4, "clear_peer")
+        text += call(4, 3, 5, "read_runtime")
+        text += '(insn 5 4 6 (set (reg:SI 89) (reg:SI 90)))\n'
+        text += call(6, 5, 0, "clear_peer")
+        return lineage.parse_dump(text, "target")[0]
+
+    def test_bridge_works_without_source_notes(self):
+        original = self.inventory()
+        self.assertTrue(all(row["source"] is None for row in original.values()))
+        span = lineage.role_spans(self.SOURCE, self.SPEC)[0]
+        seeds, evidence = lineage.bridge_seeds(self.SOURCE, "target", span, original)
+        self.assertEqual({4, 5, 6}, seeds)
+        self.assertEqual(2, evidence["begin"]["source_call_count"])
+        self.assertEqual(2, evidence["begin"]["rtl_call_count"])
+
+    def test_source_call_outside_exact_span_is_rejected(self):
+        spec = copy.deepcopy(self.SPEC)
+        spec["roles"][0]["call_bridge"]["begin"]["occurrence"] = 1
+        span = lineage.role_spans(self.SOURCE, spec)[0]
+        with self.assertRaisesRegex(ValueError, "outside"):
+            lineage.bridge_seeds(self.SOURCE, "target", span, self.inventory())
+
+    def test_source_and_rtl_call_census_must_agree(self):
+        source = self.SOURCE.replace("    consume();", "    read_runtime();")
+        span = lineage.role_spans(source, self.SPEC)[0]
+        with self.assertRaisesRegex(ValueError, "census mismatch"):
+            lineage.bridge_seeds(source, "target", span, self.inventory())
+
+    def test_non_call_symbol_reference_cannot_anchor(self):
+        self.assertIsNone(lineage.direct_call_target(
+            '(set (reg:SI 90) (symbol_ref:SI ("read_runtime")))'))
+
+
 class CseTests(unittest.TestCase):
     def test_live_and_dump_feature_identity(self):
         pattern = '(set (reg:SI 84) (plus:SI (symbol_ref:SI ("object")) (const_int -128)))'
@@ -216,6 +269,79 @@ class CseTests(unittest.TestCase):
                  "stage": "first_cse", "input_stage": "02.jump", "uids": [row, copy.deepcopy(row)]}
         with self.assertRaisesRegex(ValueError, "unique"):
             cse.validate_watch(watch, "target")
+
+
+class DecisionSummaryTests(unittest.TestCase):
+    def archive(self, root):
+        symbol = {"code": "symbol_ref", "mode": "SI", "symbol": "SECRET_SYMBOL"}
+        register = {"code": "reg", "mode": "SI", "regno": 85}
+        def state(value):
+            return {"kind": "insn", "uid": 7, "pattern": {"code": "set", "mode": "VOID",
+                    "fields": [{"code": "reg", "mode": "SI", "regno": 84}, value]}}
+        events = [
+            {"event": "cse_enter", "requested_uids": [7], "watch_eligible_count": 2,
+             "watch_omitted_count": 1, "watch_source_sha256": "SECRET_HASH",
+             "watch_roles": {"7": ["peer"]}},
+            {"event": "insn_before", "uid": 7, "roles": ["peer"],
+             "source": {"file": "/PRIVATE/path.c", "line": 14}, "state": state(symbol)},
+            {"event": "call_enter", "uid": 7, "name": "notreg_cost", "call_id": 1,
+             "input": symbol, "return_pc": 3735928559},
+            {"event": "call_return", "uid": 7, "name": "notreg_cost", "call_id": 1, "result": 20},
+            {"event": "call_enter", "uid": 7, "name": "validate_change", "call_id": 2,
+             "old": symbol, "new": register, "in_group": 0, "location_pointer": "0xdeadbeef"},
+            {"event": "call_return", "uid": 7, "name": "validate_change", "call_id": 2,
+             "result": 1, "location_after": register},
+            {"event": "insn_after", "uid": 7, "state": state(register)},
+            {"event": "cse_exit", "missing_uids": [], "visits": {"7": 1}},
+            {"event": "exit", "status": "W00"},
+        ]
+        for index, event in enumerate(events, 1):
+            event["seq"] = index
+        (root / "events.jsonl").write_text("".join(json.dumps(e) + "\n" for e in events))
+        (root / "equivalence.json").write_text(json.dumps(
+            {"mode": "cse_roles", "function": "target", "all_equal": True,
+             "artifacts_equal": {"candidate.o": True}, "events": len(events)}))
+        return events
+
+    def test_bounded_summary_retains_validation_costs_and_omissions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.archive(root)
+            result = cse.summarize_decisions(root, limit_per_uid=1)
+            self.assertTrue(result["coverage_complete"])
+            self.assertEqual(1, result["unwatched_eligible_uids"])
+            row = result["uids"][0]
+            self.assertEqual("accepted", row["decisions"][0]["validation"])
+            self.assertEqual(20, row["cost_summary"][0]["cost"])
+            self.assertEqual(1, row["omitted_decisions"])
+            self.assertEqual(["became_register_reuse"],
+                             row["instruction_outcomes"][0]["observed_transitions"])
+
+    def test_private_fields_never_reach_summary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.archive(root)
+            public = json.dumps(cse.summarize_decisions(root))
+            for private in ("SECRET_SYMBOL", "SECRET_HASH", "/PRIVATE", "0xdeadbeef", "3735928559"):
+                self.assertNotIn(private, public)
+            self.assertNotIn("input_pattern_sha256", public)
+            self.assertNotIn('"pattern":', public)
+
+    def test_incomplete_event_log_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = self.archive(root)
+            (root / "events.jsonl").write_text("".join(json.dumps(e) + "\n" for e in events[:-1]))
+            with self.assertRaisesRegex(ValueError, "incomplete"):
+                cse.summarize_decisions(root)
+
+    def test_unqualified_pair_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.archive(root)
+            (root / "equivalence.json").write_text('{"all_equal":false}')
+            with self.assertRaisesRegex(ValueError, "all-equal"):
+                cse.summarize_decisions(root)
 
 
 class CaseBuilderTests(unittest.TestCase):

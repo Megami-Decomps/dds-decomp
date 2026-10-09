@@ -5,12 +5,17 @@
     {
       "name": "peer_rank_selection",
       "begin": "        case 34:\n        case 35:\n        case 36:\n",
-      "end": "        case 19:\n"
-    },
-    {
-      "name": "snapshot_restore_continuation",
-      "begin": "        case 40:\n        case 42:\n",
-      "end": "        case 41:\n"
+      "end": "        case 19:\n",
+      "call_bridge": {
+        "begin": {
+          "symbol": "btlGetRuntime",
+          "occurrence": 2
+        },
+        "end": {
+          "symbol": "btlClearUnitDefeatCandidate",
+          "occurrence": 2
+        }
+      }
     }
   ]
 }

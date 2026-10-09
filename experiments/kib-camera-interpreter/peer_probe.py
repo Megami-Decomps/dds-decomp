@@ -565,7 +565,54 @@ def inspect(repo):
         else:
             raise Blocked("status_load_not_reached")
 
+
+    class FirstPeerCleared(Exception):
+        pass
+
+    class StatusReuseVM(VM):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.status_reads = []
+
+        def read(self, address, width):
+            value = super().read(address, width)
+            base = PEERS[0] + 0x110
+            if address < base + 8 and base < address + width:
+                need(base <= address and address + width <= base + 8,
+                     "unexpected_status_overlap")
+                self.status_reads.append({"offset": address - base, "bytes": width})
+            return value
+
+        def callback(self, pc, target):
+            clearing = self.calls.get(target) == "clear"
+            if clearing:
+                need(number(self.r[4]) == PEERS[0],
+                     "first_clear_argument_not_first_peer")
+            super().callback(pc, target)
+            if clearing:
+                raise FirstPeerCleared()
+
+    first_following = [(pc, target) for pc, target in direct if pc > getters[0]]
+    need(first_following and first_following[0][1] == clear,
+         "first_peer_clear_call_structure_changed")
+    reuse = StatusReuseVM(words, read_native, calls, getters[0],
+                          first_following[0][0], cursor, gp, selected_kind=37)
+    reuse.put(SCRIPT, 4, val(37, "kind"))
+    reuse.put(PEERS[0] + 0x110, 8, val(0x221))
+    try:
+        reuse.run()
+    except FirstPeerCleared:
+        pass
+    else:
+        raise Blocked("first_peer_clear_not_reached")
+    need(reuse.runtime_count == 1 and reuse.clears == [0],
+         "first_peer_clear_fixture_not_unique")
+    need(reuse.status_reads
+         and reuse.status_reads[0] == {"offset": 0, "bytes": 8},
+         "first_peer_status_width_changed")
+
     return {
+        "opcode37_status_reads_before_first_clear": reuse.status_reads,
         "status": "bounded_native_semantics_observed",
         "native_status_widths": widths,
         "selftests": "passed", "static_calls": 52, "runtime_sites": 2,

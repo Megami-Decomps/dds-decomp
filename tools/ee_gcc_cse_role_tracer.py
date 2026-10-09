@@ -215,7 +215,11 @@ class CseRoleTracer(Tracer):
             self.bp(0x08105904, "cse_insn")
             self.log("cse_enter", function=self.function,
                      watch_source_sha256=self.watch["source_sha256"],
-                     requested_uids=sorted(self.wanted))
+                     requested_uids=sorted(self.wanted),
+                     watch_eligible_count=self.watch.get("eligible_count"),
+                     watch_omitted_count=self.watch.get("omitted_count"),
+                     watch_roles={str(uid): row["roles"] for uid, row in self.wanted.items()},
+                     role_origins=self.watch.get("role_origins", {}))
             return
         if name == "cse_exit":
             if self.current or self.calls:
@@ -343,6 +347,227 @@ class CseRoleTracer(Tracer):
         if not (self.found and self.completed):
             raise RuntimeError("missing target first-CSE completion gate")
 
+
+
+def expression_class(node):
+    if not isinstance(node, dict):
+        return "absent"
+    code, children = node.get("code"), node.get("fields", [])
+    if code == "const" and children:
+        return expression_class(children[0])
+    if code == "reg":
+        return "register_value"
+    if code == "symbol_ref":
+        return "symbol_address"
+    if code == "mem":
+        return "memory_reference"
+    if code == "lo_sum":
+        return "symbol_low_address" if decoded_features(node)["symbols"] else "other"
+    if code == "high":
+        return "symbol_high_address" if decoded_features(node)["symbols"] else "other"
+    if code in ("plus", "minus"):
+        kinds = [expression_class(child) for child in children if isinstance(child, dict)]
+        codes = [child.get("code") for child in children if isinstance(child, dict)]
+        if "symbol_address" in kinds and "const_int" in codes:
+            return "symbol_relative_address"
+        if "register_value" in kinds and "const_int" in codes:
+            return "register_relative_address"
+    if code == "const_int":
+        return "integer_constant"
+    return "other"
+
+
+def expression_summary(node):
+    if not isinstance(node, dict):
+        return {"class": "absent"}
+    data = decoded_features(node)
+    return {"class": expression_class(node), "root_opcode": node["code"],
+            "root_mode": node.get("mode", "VOID"),
+            "opcode_classes": sorted(set(data["codes"])),
+            "mode_classes": sorted({mode for _, mode in data["expression_modes"]}),
+            "register_occurrences": len(data["registers"]),
+            "symbol_occurrences": len(data["symbols"])}
+
+
+def set_sources(node):
+    if not isinstance(node, dict):
+        return []
+    if node.get("code") == "set":
+        fields = node.get("fields", [])
+        return [fields[1]] if len(fields) >= 2 else []
+    if node.get("code") == "parallel":
+        result = []
+        for field in node.get("fields", []):
+            for child in field if isinstance(field, list) else [field]:
+                result.extend(set_sources(child))
+        return result
+    return []
+
+
+def summarize_decisions(archive, limit_per_uid=12):
+    """Return disclosure-bounded decisions after a successful all-equal pair.
+
+    Never returns raw RTX, pointer values, symbol names, input hashes, or hook
+    bytes. Counts refer to the complete parsed log before presentation limits.
+    """
+    if not 1 <= limit_per_uid <= 64:
+        raise ValueError("summary limit must be 1..64")
+    archive = Path(archive)
+    receipt = json.loads((archive / "equivalence.json").read_text())
+    flags = receipt.get("artifacts_equal")
+    if (receipt.get("mode") != "cse_roles" or receipt.get("all_equal") is not True
+            or not isinstance(flags, dict) or not flags or not all(value is True for value in flags.values())):
+        raise ValueError("decision summary requires a successful all-equal CSE pair")
+    events = [json.loads(line) for line in (archive / "events.jsonl").read_text().splitlines() if line]
+    if (len(events) != receipt.get("events")
+            or [event.get("seq") for event in events] != list(range(1, len(events) + 1))):
+        raise ValueError("CSE event log is missing, reordered, or incomplete")
+    enters = [e for e in events if e.get("event") == "cse_enter"]
+    exits = [e for e in events if e.get("event") == "cse_exit"]
+    if len(enters) != 1 or len(exits) != 1 or events[-1].get("event") != "exit":
+        raise ValueError("CSE event log lacks complete target gates")
+    enter, finish = enters[0], exits[0]
+    wanted = enter["requested_uids"]
+    if len(set(wanted)) != len(wanted) or not 1 <= len(wanted) <= 64:
+        raise ValueError("invalid requested UID coverage")
+    records = {uid: {"uid": uid, "roles": enter.get("watch_roles", {}).get(str(uid), []),
+                     "source_line": None, "event_counts": {}, "instruction_visits": 0,
+                     "instruction_returns": 0, "decisions": [], "instruction_outcomes": []}
+               for uid in wanted}
+    calls, active_insns, errors = {}, {}, []
+    for event in events:
+        uid = event.get("uid")
+        if uid is None:
+            continue
+        if uid not in records:
+            raise ValueError("event outside the declared UID watch")
+        record, kind = records[uid], event["event"]
+        record["event_counts"][kind] = record["event_counts"].get(kind, 0) + 1
+        if kind == "insn_before":
+            if uid in active_insns:
+                errors.append("nested_selected_instruction")
+            record["instruction_visits"] += 1
+            record["roles"] = event.get("roles", record["roles"])
+            source = event.get("source") or {}
+            record["source_line"] = source.get("line")
+            active_insns[uid] = event["state"]
+        elif kind == "insn_after":
+            record["instruction_returns"] += 1
+            before = active_insns.pop(uid, None)
+            if before is None:
+                errors.append("instruction_return_without_entry")
+                continue
+            after = event["state"]
+            before_sources = [expression_summary(n) for n in set_sources(before.get("pattern"))]
+            after_sources = [expression_summary(n) for n in set_sources(after.get("pattern"))]
+            outcomes = []
+            for a, b in zip(before_sources, after_sources):
+                if a["class"] != b["class"]:
+                    if b["class"] == "register_value":
+                        outcomes.append("became_register_reuse")
+                    elif b["class"] in ("register_relative_address", "symbol_relative_address"):
+                        outcomes.append("became_" + b["class"])
+            record["instruction_outcomes"].append({
+                "before_kind": before.get("kind"), "after_kind": after.get("kind"),
+                "before_sources": before_sources[:8], "after_sources": after_sources[:8],
+                "source_count_before": len(before_sources), "source_count_after": len(after_sources),
+                "omitted_sources_before": max(0, len(before_sources) - 8),
+                "omitted_sources_after": max(0, len(after_sources) - 8),
+                "observed_transitions": outcomes})
+        elif kind == "call_enter":
+            call_id = event["call_id"]
+            if call_id in calls:
+                errors.append("duplicate_call_id")
+            calls[call_id] = event
+        elif kind == "call_return":
+            initial = calls.pop(event["call_id"], None)
+            if initial is None or initial.get("uid") != uid or initial.get("name") != event.get("name"):
+                errors.append("helper_return_without_matching_entry")
+                continue
+            name, result = event["name"], event["result"]
+            decision = {"event_kind": name, "event_sequence": event["seq"]}
+            if name in ("notreg_cost", "approx_reg_cost"):
+                if type(result) is not int:
+                    errors.append("non_integer_cost_result")
+                    continue
+                decision.update(cost=result, expression=expression_summary(initial.get("input")))
+            elif name == "validate_change":
+                grouped = bool(initial.get("in_group"))
+                decision.update(validation="accepted" if result else "rejected",
+                                grouped=grouped,
+                                effect=("provisional_group_member" if grouped else "applied")
+                                if result else "not_applied",
+                                before=expression_summary(initial.get("old")),
+                                proposed=expression_summary(initial.get("new")),
+                                location_after=expression_summary(event.get("location_after")))
+            elif name == "apply_change_group":
+                decision.update(validation="accepted" if result else "rejected",
+                                effect="group_applied" if result else "group_rejected")
+            elif name == "related":
+                decision.update(input=expression_summary(initial.get("input")),
+                                result=expression_summary(result))
+            else:
+                errors.append("unsupported_helper_result")
+                continue
+            record["decisions"].append(decision)
+        elif kind == "related_delta":
+            record["decisions"].append({"event_kind": kind, "event_sequence": event["seq"],
+                                        "constant_delta": event["delta"],
+                                        "expression": expression_summary(event.get("register"))})
+        elif kind in ("related_candidate", "related_selected"):
+            table = event.get("candidate") or {}
+            record["decisions"].append({"event_kind": kind, "event_sequence": event["seq"],
+                                        "expression": expression_summary(table.get("expression"))})
+    if calls:
+        errors.append("unfinished_helper_calls")
+    if active_insns:
+        errors.append("unfinished_selected_instructions")
+    output = []
+    for uid in wanted:
+        record = records[uid]
+        counts, costs = {}, {}
+        for decision in record["decisions"]:
+            if "validation" in decision:
+                key = decision["event_kind"] + ":" + decision["validation"] + ":" + decision["effect"]
+                counts[key] = counts.get(key, 0) + 1
+            if "cost" in decision:
+                expression = decision["expression"]
+                key = (decision["event_kind"], expression["class"],
+                       expression.get("root_mode"), decision["cost"])
+                costs[key] = costs.get(key, 0) + 1
+        cost_rows = [{"cost_function": name, "expression_class": kind,
+                      "root_mode": mode, "cost": value, "observations": count}
+                     for (name, kind, mode, value), count in sorted(costs.items())]
+        record["validation_counts"] = counts
+        record["cost_summary"] = cost_rows[:16]
+        record["cost_class_count"] = len(cost_rows)
+        record["omitted_cost_classes"] = max(0, len(cost_rows) - 16)
+        priority = {"validate_change": 0, "apply_change_group": 0,
+                    "related_delta": 1, "notreg_cost": 2, "approx_reg_cost": 2}
+        record["decisions"].sort(key=lambda row: (priority.get(row["event_kind"], 3),
+                                                 row["event_sequence"]))
+        record["decision_count"] = len(record["decisions"])
+        record["omitted_decisions"] = max(0, len(record["decisions"]) - limit_per_uid)
+        record["decisions"] = record["decisions"][:limit_per_uid]
+        record["outcome_count"] = len(record["instruction_outcomes"])
+        record["omitted_outcomes"] = max(0, record["outcome_count"] - limit_per_uid)
+        record["instruction_outcomes"] = record["instruction_outcomes"][:limit_per_uid]
+        record["coverage_complete"] = (record["instruction_visits"] > 0
+                                       and record["instruction_visits"] == record["instruction_returns"])
+        output.append(record)
+    missing = finish.get("missing_uids")
+    coverage = (missing == [] and not errors
+                and all(row["coverage_complete"] for row in output))
+    return {"schema": 1, "kind": "bounded_cse_decisions", "function": receipt.get("function"),
+            "artifacts_all_equal": True, "complete_event_log": True,
+            "event_count": len(events), "coverage_complete": coverage,
+            "missing_watched_uids": missing, "parse_gap_kinds": sorted(set(errors)),
+            "watched_uids": len(wanted), "eligible_uids": enter.get("watch_eligible_count"),
+            "role_origins": enter.get("role_origins", {}),
+            "unwatched_eligible_uids": enter.get("watch_omitted_count"),
+            "limit_per_uid": limit_per_uid, "uids": output,
+            "decision_presentation": "Validation/group outcomes first, then deltas and costs; event_sequence preserves original chronology.",
+            "interpretation": "Grouped validation is provisional until a group-apply result; instruction outcomes record the actual post-CSE pattern classes. These are candidate decisions, not retail RTL."}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
