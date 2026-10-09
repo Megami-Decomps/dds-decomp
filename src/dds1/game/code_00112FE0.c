@@ -26,7 +26,7 @@ extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern s32 dds3RegisterObjectInHandlerIndex(void *object);
 
 EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVector) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(5);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_FOLLOW_MODEL);
     EffectObjectData *data;
 
     if (obj != NULL) {
