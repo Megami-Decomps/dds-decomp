@@ -321,7 +321,35 @@ s32 sdfStepSelectedMapCameraTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030C0C0);
+/* Step the local-map camera transition toward fixed preset 3. */
+s32 func_0030C0C0(void) {
+    f32 t;
+    s32 index = 3;
+
+    if (D_004388C0 != 0) {
+        t = (45 - D_004388C0) / 45.0f;
+        t = 1.0f - t * t;
+        if (t > 1.0f) t = 1.0f;
+        fldLocalMapFirstCameraVector.v[0] = D_00400990.v[0] * (1.0f - t) + D_004008E0[index][0] * t;
+        fldLocalMapFirstCameraVector.v[1] = D_00400990.v[1] * (1.0f - t) + D_004008E0[index][1] * t;
+        fldLocalMapFirstCameraVector.v[2] = D_00400990.v[2] * (1.0f - t) + D_004008E0[index][2] * t;
+        fldLocalMapFirstCameraVector.v[3] = 1.0f;
+        sdfQuatSlerp(fldLocalMapSecondCameraVector.v, D_004009A0.v, D_00400920[index], t);
+        if ((s8)(D_004388C0 + 1) >= 45) D_004388C0 = 0;
+        else D_004388C0++;
+    } else {
+        fldLocalMapFirstCameraVector.v[0] = D_004008E0[index][0];
+        fldLocalMapFirstCameraVector.v[1] = D_004008E0[index][1];
+        fldLocalMapFirstCameraVector.v[2] = D_004008E0[index][2];
+        fldLocalMapFirstCameraVector.v[3] = D_004008E0[index][3];
+        sdfQuaternionNormalize(D_00400920[index]);
+        fldLocalMapSecondCameraVector.v[0] = D_00400920[index][0];
+        fldLocalMapSecondCameraVector.v[1] = D_00400920[index][1];
+        fldLocalMapSecondCameraVector.v[2] = D_00400920[index][2];
+        fldLocalMapSecondCameraVector.v[3] = D_00400920[index][3];
+    }
+    return 1;
+}
 
 typedef struct EffectObject EffectObject;
 
