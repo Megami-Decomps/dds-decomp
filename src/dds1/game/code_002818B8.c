@@ -60,7 +60,47 @@ void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, 
 
 INCLUDE_ASM(const s32, "game/code_002818B8", func_00281AE8);
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_00281BE0);
+typedef enum MenuPanelFadeKind {
+    MENU_PANEL_FADE_WIDTH,
+    MENU_PANEL_FADE_HEIGHT,
+    MENU_PANEL_FADE_SPRITE
+} MenuPanelFadeKind;
+
+extern void func_00281AE8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface);
+extern void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
+
+void func_00281BE0(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+    s32 i;
+
+    sdfSubmitGsAlphaOneRegisterPacket(0x48, surface);
+    for (i = 0; i < 2; i++) {
+        if (work[i].blend != 0) {
+            if (work[i].delay == 0) {
+                switch ((MenuPanelFadeKind)work[i].kind) {
+                case MENU_PANEL_FADE_WIDTH:
+                    mnuDrawWidthScaledPanelGradient(x, y, z, &work[i], surface);
+                    break;
+                case MENU_PANEL_FADE_HEIGHT:
+                    mnuDrawHeightScaledPanelGradient(x, y, z, &work[i], surface);
+                    break;
+                case MENU_PANEL_FADE_SPRITE:
+                    func_00281AE8(0, 0, z, &work[i], 0x54);
+                    break;
+                }
+                if (work[i].blend > 0x100) {
+                    work[i].blend -= work[i].highBlendStep;
+                } else {
+                    work[i].blend -= work[i].lowBlendStep;
+                }
+                if (work[i].blend <= 0) {
+                    mnuClearPanelWorkState(&work[i]);
+                }
+            } else {
+                work[i].delay--;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002818B8", func_00281D40);
 
