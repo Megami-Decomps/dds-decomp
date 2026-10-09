@@ -38,7 +38,7 @@ typedef struct GridDrawWork {
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
-extern void func_00306BF0(u32, u32, u32, u32, u32, u32, u32, u32);
+extern void func_00306BF0(s32, s32, s32, s32, EffectSlotSet *, s32, void *, s32);
 
 extern u32 kwlnGetDrawBufferIndex(void);
 
@@ -63,7 +63,7 @@ typedef struct GridAngleSlot {
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
 void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *object, u32 index, u32 surfaceIndex) {
     void *renderEntry = effGetSlotWorkOrOverride(object, index);
-    func_00306BF0(offsetX, offsetY, z, drawFlags, (u32)object, index, (s32)renderEntry, surfaceIndex);
+    func_00306BF0(offsetX, offsetY, z, drawFlags, object, index, renderEntry, surfaceIndex);
 }
 
 /* Update the indexed slot's description countdown and carry its active state forward. */

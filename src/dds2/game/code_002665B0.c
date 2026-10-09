@@ -111,7 +111,8 @@ extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 uiBlendColors(u32, u32, u32);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char mnuNumberSpriteFormat[];
 
 typedef struct EffectPair {
@@ -288,8 +289,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-typedef struct FrFontGlyph FrFontGlyph;
-extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_0019F6C8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
@@ -369,7 +369,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     FrFontGlyph *sprite;
 
     func_0035C860(text, mnuNumberSpriteFormat, number);
-    sprite = (FrFontGlyph *)func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
+    sprite = func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
@@ -2098,7 +2098,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }
-    font = (FrFontGlyph *)func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
     frFontQueueGlyphForCurrentDrawBuffer(font);
 }
