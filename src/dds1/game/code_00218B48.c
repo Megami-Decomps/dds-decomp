@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "file_request_api.h"
@@ -186,7 +187,6 @@ void mdlUpdateViewerSelectedModelFromPad(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-void sdfAppendPacket(SdfListHead *, u32);
 
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);

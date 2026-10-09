@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -73,7 +74,6 @@ extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
 extern void effBlurBuildSamplingQuad();
-extern void sdfAppendPacket();
 
 extern void effAppendBlurRenderState(void *, s32, u32);
 extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
@@ -219,7 +219,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         samplingPacket[3] = 0xE;
         samplingPacket[4] = 0x61;
         samplingPacket[5] = 0x14;
-        sdfAppendPacket(list, samplingPacket);
+        sdfAppendPacket(list, (u32)samplingPacket);
         textureAlphaPacket = (u64 *)sdfAllocPacketAligned(0x40);
         textureAlphaPacket[0] = 3;
         textureAlphaPacket[1] = 0x5000000310000000ULL;
@@ -229,7 +229,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         textureAlphaPacket[5] = 0x3B;
         textureAlphaPacket[6] = 0;
         textureAlphaPacket[7] = 0x3F;
-        sdfAppendPacket(list, textureAlphaPacket);
+        sdfAppendPacket(list, (u32)textureAlphaPacket);
         blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
@@ -239,7 +239,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         blendPacket[5] = 0x47;
         blendPacket[6] = source->blendControl;
         blendPacket[7] = 0x42;
-        sdfAppendPacket(list, blendPacket);
+        sdfAppendPacket(list, (u32)blendPacket);
         clampPacket = (u64 *)sdfAllocPacketAligned(0x30);
         clampPacket[0] = 2;
         clampPacket[1] = 0x5000000210000000ULL;
@@ -251,10 +251,10 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
             clampPacket[4] = 0x37C00000009ULL;
         }
         clampPacket[5] = 8;
-        sdfAppendPacket(list, clampPacket);
+        sdfAppendPacket(list, (u32)clampPacket);
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBlurBuildSamplingQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
-        sdfAppendPacket(list, drawPacket);
+        sdfAppendPacket(list, (u32)drawPacket);
         D_003803E8.append((SdfListHead *)&D_003803E8, list);
     }
 }
@@ -282,7 +282,7 @@ void func_0018F840(EffSolidRectParams *source) {
     blendPacket[5] = 0x47;
     blendPacket[6] = source->blendControl;
     blendPacket[7] = 0x42;
-    sdfAppendPacket(list, blendPacket);
+    sdfAppendPacket(list, (u32)blendPacket);
 
     drawPacket = effBuildDrawPacketWithFlags(0);
     color = source->color | 0x3F80000000000000ULL;
@@ -302,7 +302,7 @@ void func_0018F840(EffSolidRectParams *source) {
     drawPacket[8] = 0xFF000000000000ULL | bottomLeft;
     drawPacket[10] = 0xFF000000000000ULL | topRight;
     drawPacket[12] = 0xFF000000000000ULL | bottomRight;
-    sdfAppendPacket(list, drawPacket);
+    sdfAppendPacket(list, (u32)drawPacket);
     D_003803C8.append((SdfListHead *)&D_003803C8, list);
 }
 
