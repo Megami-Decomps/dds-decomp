@@ -6283,6 +6283,7 @@
 0x002D26A8	sdfTexUploadSecondaryResource	inferred	Uploads secondary texture data when a secondary resource exists. [names_reviewed8.tsv]
 0x002D2700	sdfTexListInsert	inferred	inserts tex node at head of global D_003BD308 list
 0x002D2728	sdfTexCreateResourceWithReference	inferred	Allocates a texture and reference, attaches resource pointers and links it. [names_reviewed8.tsv]
+0x002D2800	sdfTexClone	inferred	Copies an SdfTex descriptor, creates clone-reference state, resets transient buffers and rebuilds texture storage.
 0x002D2950	sdfTexAllocHead	inferred	readability/matching review (QP16)
 0x002D2A28	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x002D2A58	sdfTexAllocatePaletteData	inferred	Sets the texture palette byte size from its CLUT fields, allocates that retained palette buffer, and is called by file-header loading and clone setup.
@@ -6444,7 +6445,7 @@
 0x002D9FC8	sdfResourceListRelease	inferred	Optionally releases every resource before freeing the list
 0x002DA058	sdfAppendResourceListItem	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:348:func_002DA058; Grows buffered list at capacity, appends resource and increments count.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002DA0C0	sdfReduceResourceListCount	inferred	If enabled and the requested count is smaller, walks the excess indices and stores the new resource-list count; always calls func_002E7730 afterward.
-0x002DA118	sdfResourceListClone	inferred	creates a buffered request of the same count and copies each item through func_002D2800 [names_M33_SmallSweep2.tsv]
+0x002DA118	sdfResourceListClone	inferred	creates a buffered request of the same count and copies each item through sdfTexClone [names_M33_SmallSweep2.tsv]
 0x002DA1B0	sdfUpdateActiveResourceListScalars	inferred	Applies a scalar update to active members of a resource list. [names_reviewed8.tsv]
 0x002DA240	sdfRegisterResourceQueueCallbacks	inferred	Registers callbacks on two SDF resource queues, the second using sdfAssetRelease.
 0x002DA270	sdfCreateResourceList	inferred	Returns a buffered resource-list request with caller-selected capacity and fixed 4 and 8 creation parameters.
