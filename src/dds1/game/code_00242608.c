@@ -558,9 +558,9 @@ typedef struct CampNameLookup {
 s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32 nameIndex) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
-        if (strcmp(scene->entryName[track->entryHeader.word],
+        if (strcmp(scene->entryName[track->entryHeader],
                    lookup->nameTable[nameIndex]) == 0) {
-            return track->entryHeader.word;
+            return track->entryHeader;
         }
         track = track->next;
     }
@@ -571,7 +571,7 @@ s32 mnuCampFindMatchingEntryIndex(CampNameLookup *lookup, EvtRuntime *scene, s32
 void *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
-        if (strcmp(scene->entryName[track->entryHeader.word], name) == 0) {
+        if (strcmp(scene->entryName[track->entryHeader], name) == 0) {
             return track;
         }
         track = track->next;
