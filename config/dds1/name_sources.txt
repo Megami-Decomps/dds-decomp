@@ -6512,6 +6512,8 @@
 0x002DC458	sdfMotionBlendPrimaryWordSecondKey	inferred	Blends the captured target word with the indexed color and stores the second primary-state word; paired with the second-word apply callback.
 0x002DC578	sdfMotionApplyPrimaryWordFirstKey	inferred	Interpolates the indexed track color and stores the target asset's first primary-state word; table D_00398288 uses this as its sample callback.
 0x002DC5B8	sdfMotionBlendPrimaryWordFirstKey	inferred	Blends the captured target word with the indexed color and stores the first primary-state word; paired with the first-word apply callback.
+0x002DC6D8	sdfMotionApplyPrimaryWordThirdKey	inferred	Interpolates the indexed track color and stores the target asset's third primary-state word; table D_003982A0 uses this as its sample callback.
+0x002DC718	sdfMotionBlendPrimaryWordThirdKey	inferred	Blends the captured target word with the indexed color and stores the third primary-state word; paired with the third-word apply callback.
 0x002DC668	sdfMotionReadBoundTrackInteger	inferred	Copies bound motion track integer into the command result field. [names_reviewed6.tsv]
 0x002DC928	sdfMotionCopyTrackValueToBinding	inferred	Copies a motion track current value into its binding. [names_reviewed12.tsv]
 0x002DC938	sdfMotionCreateFloatBinding	inferred	Allocates indexed track work using the float-interpolation handler table. [names_reviewed6.tsv]
