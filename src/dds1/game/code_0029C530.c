@@ -3192,11 +3192,11 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     return (EffClassWork *)effect;
 }
 
-void effCreateClassWorkFromFile(s32 request) {
+EffClassWork *effCreateClassWorkFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
-    effCreateClassWork(((FileJob *)request)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassWork(request->option, source);
 }
 
 void effDestroyClassWork(EffClassWork *work) {
@@ -4410,11 +4410,11 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     return effect;
 }
 
-void effCreateClassResourceFromFile(s32 request) {
+EffClassWork *effCreateClassResourceFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
-    effCreateClassResourceWork(((FileJob *)request)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassResourceWork(request->option, source);
 }
 
 void effDestroyClassResourceWork(EffClassWork *work) {
