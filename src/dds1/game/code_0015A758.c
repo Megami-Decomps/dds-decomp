@@ -11,6 +11,7 @@
 #include "par_table.h"
 #include "par_draw_block.h"
 #include "eff.h"
+#include "eff_track_poly_list.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -419,8 +420,6 @@ extern void parUpdateBillboardCrossStrip(s32, s32, u32);
 
 extern void parUpdateBillboardCrossTriangle(s32, s32, u32);
 
-extern void parUpdateTrackPolygonCrossAxes(s32, s32, u32);
-
 void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
@@ -433,14 +432,12 @@ void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) 
         parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList, index, color);
+        parUpdateTrackPolygonCrossAxes(work->secondaryDraw.modelList, index, color);
         break;
     }
 }
 
 extern void parClearSlotFlag(s32);
-
-extern void effTrackPolyResetIndexedWork(s32);
 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
@@ -454,7 +451,7 @@ void parDispatchKindInit(ParKindState *work, s32 index) {
         parCellInit(work->secondaryDraw.system, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork((s32)work->secondaryDraw.modelList);
+        effTrackPolyResetIndexedWork(work->secondaryDraw.modelList, index);
         break;
     }
 }
@@ -513,11 +510,7 @@ void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color) {
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
-extern void effTrackPolyPushIndexedWorkEndpoints(s32, s32, void *);
-
-extern void effTrackPolySetIndexedColor(s32, s32, u32);
-
-void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color) {
+void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color) {
     u128 axis[2];
     VU0_MOVE_VF(vf11, vf12);
     VU0_SUB(vf10, vf10, vf11);
@@ -535,8 +528,8 @@ void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color) {
     VU0_MOVE_VF(vf10, vf12);
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
-    effTrackPolyPushIndexedWorkEndpoints(particle, index, axis);
-    effTrackPolySetIndexedColor(particle, index, (color & 0xFF000000) | 0x808080);
+    effTrackPolyPushIndexedWorkEndpoints(list, index, axis);
+    effTrackPolySetIndexedColor(list, index, (color & 0xFF000000) | 0x808080);
 }
 
 u32 func_0015B220(void) {

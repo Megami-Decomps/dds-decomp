@@ -13,6 +13,7 @@ extern void *sdfCreateAssetWithDrawEntries();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
+#include "eff_track_poly_list.h"
 #include "par_table.h"
 #include "par_kind_api.h"
 #include "fpu.h"
@@ -50,7 +51,6 @@ typedef struct EffEmitterHead {
 } EffEmitterHead;
 
 
-extern void effTrackPolyDestroyModelWorkList(s32);
 
 extern void effDestroyResources(EffEmitterHead *owner);
 
@@ -912,7 +912,7 @@ void effDestroyResources(EffEmitterHead *owner) {
         parReleaseCellSystem(owner->sub.secondaryDraw.system);
         break;
     case 4:
-        effTrackPolyDestroyModelWorkList((s32)owner->sub.secondaryDraw.modelList);
+        effTrackPolyDestroyModelWorkList(owner->sub.secondaryDraw.modelList);
         break;
     }
     billDispatchByKind(owner->billboard);
