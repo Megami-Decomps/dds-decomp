@@ -5169,6 +5169,7 @@
 0x002E5540	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E56A8	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002E5760	effCreateResourceInstanceA	inferred	twin of effCreateResourceInstanceB/C: allocate block, table[kind].init(source, extra) -> +0x30, table[kind].fn(block)
+0x002E5800	effCreateActiveInstanceFromFile	inferred	Type 10 callback constructs active-instance EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyActiveInstanceWork.
 0x002E5860	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002E58A8	effCreateActiveResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior.
 0x002E5978	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
@@ -5304,6 +5305,7 @@
 0x002F0A68	effReleaseCompactRingFadeTable	inferred	Releases shared ribbon resource and frees compact ring fade allocation. [names_reviewed5.tsv]
 0x002F10C0	effUpdateCompactRingDrawColorAndTransform	inferred	Blends compact-ring fade colors and writes quaternion-scaled draw matrix and alternate mode. [names_reviewed21.tsv]
 0x002F1228	effAllocateBlock	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlock behavior.
+0x002F1380	effCreateBlockResourceFromFile	inferred	Type 16 callback constructs block-resource EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyBlockResourceWork.
 0x002F13E0	effDestroyBlockResourceWork	inferred	Calls the kind-specific cleanup callback and frees a resource block. [names_reviewed5.tsv]
 0x002F14B8	effResetBlockResourceFrame	inferred	Calls the block-kind callback and clears the work frame. [names_reviewed5.tsv]
 0x002F1500	effAdvanceBlockResourceFrame	inferred	Calls block kind callback and advances frame only while effects are enabled. [names_reviewed5.tsv]
@@ -5328,7 +5330,7 @@
 0x002F31D0	effResetSlotAnimationRecord	inferred	Clears the nested animation record's state field. [names_reviewed5.tsv]
 0x002F3750	effReleaseBillboardFrameAsset	inferred	Releases frame asset and frees frame state allocation. [names_reviewed7.tsv]
 0x002F3988	effAllocateBlockWithModel	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior.
-0x002F3AD0	effResourceInstanceCreateFromFile	inferred	body calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
+0x002F3AD0	effCreateModelBlockFromFile	inferred	Type 17 callback constructs model-block EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyModelBlockWork.
 0x002F3B00	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002F3BD8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
 0x002F3C20	effAdvanceModelBlockFrame	inferred	Calls model block callback and increments frame while effect processing is enabled. [names_reviewed5.tsv]
