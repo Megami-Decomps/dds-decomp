@@ -55,12 +55,7 @@ typedef struct EvtRuntimeGroup {
     };
     union { s32 word; u16 shortValue; } entryHeader;
     s32 argument0C;
-    union {
-        EffWorldNode *info;
-        s32 transitionValue;
-        u32 handle;
-        struct PolyMovieObject *movie;
-    };
+    EffWorldNode *info;
     s32 argument14;
     u8 pad18[4];
     s16 metadataValue;
