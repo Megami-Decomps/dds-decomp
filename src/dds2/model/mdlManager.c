@@ -20,6 +20,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "sdf_model.h"
 #include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
 #include "mdl_resource_table.h"
@@ -127,7 +128,7 @@ void btlRemoveGroupId(s32 groupIndex, s32 wantedId) {
 }
 
 /* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, void *itemList, struct SdfMemBlock *requestAllocation) {
+void btlCreateGroupNode(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, struct SdfItemListRef *itemList, struct SdfMemBlock *requestAllocation) {
     BattleGroupNode *groupNode;
     BattleGroupNode *previousHead;
     s32 slotIndex;
@@ -328,7 +329,7 @@ void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex,
 }
 
 
-extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, void *, struct SdfMemBlock *);
+extern void btlCreateGroupNode(s32, s32, s32, DevRequest *, struct SdfItemListRef *, struct SdfMemBlock *);
 
 
 void mdlApplyGroupSetup(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
@@ -584,8 +585,6 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
 INCLUDE_ASM(const s32, "model/mdlManager", func_00231FD8);
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
-struct SdfItemListRef;
-extern SdfModel *sdfModelCreateWithItems(void *data, struct SdfItemListRef *itemList);
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 
 /* Instantiate a model context from the group's resource list and item list, then

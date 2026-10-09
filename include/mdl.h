@@ -14,6 +14,7 @@ typedef struct MdlCtx MdlCtx;
 struct MdlPartEntry;
 struct MdlObj;
 struct SdfMapPositionRecord;
+struct SdfItemListRef;
 struct SdfTex;
 struct EffTrackPolyWork;
 
@@ -73,7 +74,7 @@ typedef struct BattleGroupNode {
     u8 pad0D[3];
     MdlCtx *modelContext;
     DevRequest *resourceList;
-    void *itemList;
+    struct SdfItemListRef *itemList;
     struct SdfMemBlock *requestAllocation;
     BattleGroupSlot slots[8];
     s32 resourceHandle;
@@ -85,7 +86,7 @@ typedef struct BattleGroupNode {
 
 typedef struct MdlLoadPayload {
     DevRequest *resourceList;
-    void *itemList;
+    struct SdfItemListRef *itemList;
     struct SdfMemBlock *requestAllocation;
     MotionTable *motionData;
     struct SdfMemBlock *motionResource;
