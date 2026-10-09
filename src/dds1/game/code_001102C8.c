@@ -98,8 +98,8 @@ u32 dds3CreateWorldObjectData(EffWorldNode *object) {
         data->cameraObject = 0;
         data->playerObject = 0;
         data->indexedHandle = 0;
-        data->unk18 = 0;
-        data->unk1C = 0;
+        data->sceneResourceHandle = 0;
+        data->sceneResourceAddress = 0;
         data->resource = sdfAllocGeneralBlock(0xD8);
         if (data->resource == 0) {
             sdfReleaseChipBlock(data);

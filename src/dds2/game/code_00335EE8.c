@@ -4,11 +4,11 @@
 #include "pcp_vu0.h"
 #include "sdf_motion_bindings.h"
 
-extern s32 (*D_0040B480[])(void *a0, s32 a1);
+extern SdfMotionBindingDispatch D_0040B480;
 
 extern s32 (*D_0040B510[])(void *a0, s32 a1);
 
-extern u8 D_0040B518[];
+extern SdfMotionBindingDispatch D_0040B518;
 
 
 
@@ -22,7 +22,7 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
 
 /* Bind the selected pair of model slot indices and weights. */
 void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
-                                 Motion *motion, void *dispatch, s32 entryIndex) {
+                                 Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
     sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
                             motion, dispatch);
     destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
@@ -32,7 +32,7 @@ SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, motion, D_0040B518, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, &D_0040B518, entryIndex);
     return entry;
 }
 

@@ -73,6 +73,9 @@ struct MenuList {
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
+/* Reset the list viewport and optionally replay its saved cursor. */
+void mnuResetNodeLinks(struct MenuList *list, s32 restoreCursor);
+
 /* Select the indexed node and report whether the index exists. */
 s32 mnuSeekListNode(s32 index, struct MenuList *list);
 /* Height in native units: row step multiplied by the visible row count. */
@@ -108,6 +111,14 @@ struct MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(struct MenuWindowCo
                                                              struct MenuListNode *anchor,
                                                              const void *value, s32 mode,
                                                              u32 options);
+
+/* Walk the indexed entry and return its node, or NULL when it is absent. */
+#ifdef VERSION_DDS1
+/* DDS1 callers use a separate progress-owner view whose first node is at +0x10. */
+struct MenuListNode *mnuWalkNodeList(s32 targetIndex, void *listOwner);
+#else
+struct MenuListNode *mnuWalkNodeList(s32 index, struct MenuList *list);
+#endif
 
 struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);
 struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);

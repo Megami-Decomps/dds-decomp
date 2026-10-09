@@ -98,6 +98,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_001289A8);
 
 #include "fld_area_work.h"
 #include "evt_world.h"
+#include "evt_world_source_transform.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -152,12 +153,12 @@ extern FldUnitLightColor D_0038BB60;
 
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
-extern s32 fldCameraModelObject;
+extern MdlCtx *fldPlayerModelContext;
 extern s32 D_00389888[];
 
 extern void fldFreeDisplayObjects(void);
 
-extern s32 fldSecondarySceneModelHandle;
+extern MdlCtx *fldSecondarySceneModelContext;
 
 extern s32 fldSecondarySceneObject;
 
@@ -564,7 +565,6 @@ extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
-extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
@@ -699,10 +699,10 @@ void func_00128FE8(u32 batchAddress, u32 batchCount, s32 appended) {
                     }
                     break;
                 case 0:
-                    evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
                     break;
                 case 1:
-                    object = evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    object = evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
                     func_0013BAB8(resource, object);
                     break;
                 case 2:
@@ -3260,7 +3260,7 @@ void fldUpdateCameraProximity(void) {
         }
     }
     slot = dds3GetObjectOwnedHandle((EffWorldNode *)fldPlayerObject)->resourceSlots[4];
-    modelRef = *(u8 ***)(fldCameraModelObject + 0x18);
+    modelRef = (u8 **)fldPlayerModelContext->inner;
     if (mdlFlagTest(0x31)) {
         range = 56.0f;
         slot = 7;
@@ -3356,12 +3356,12 @@ void fldResetCameraModelHandles(void) {
 void fldReleaseCameraModel(u32 enabled) {
     if (enabled == 0) {
         D_004360D0 = 0;
-        if (fldCameraModelObject != 0) {
-            mdlResumeAllContextMotions((MdlCtx *)fldCameraModelObject);
+        if (fldPlayerModelContext != 0) {
+            mdlResumeAllContextMotions(fldPlayerModelContext);
         }
     } else {
         D_004360D0 = enabled;
-        mdlSuspendAllContextMotions((MdlCtx *)fldCameraModelObject);
+        mdlSuspendAllContextMotions(fldPlayerModelContext);
     }
 }
 
@@ -3378,7 +3378,7 @@ void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
             if (--D_004360D0 != 0) {
                 return;
             }
-            mdlResumeAllContextMotions((MdlCtx *)fldCameraModelObject);
+            mdlResumeAllContextMotions(fldPlayerModelContext);
         }
         currentMotion = D_004360CC;
         switch (motion) {
@@ -3405,73 +3405,73 @@ void fldUpdateCameraModelMotion(s32 modelMotion, s32 motion, f32 blendFrames) {
             break;
         }
         if (D_004360C4 == 1) {
-            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+            mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, motion, blendFrames, blendFrames);
             D_004360C4 = -1;
             if (motion == 2 && D_004360CC == 3) {
                 D_004360CC = motion;
-                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+                fldPlayerModelContext->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
             }
         } else if (D_004360C4 == 0x66) {
-            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+            mdlAddEntryPlainEx(fldPlayerModelContext, 1, 2, 0.0f, blendFrames);
             D_004360C4 = -1;
             D_004360CC = 0x66;
-            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+            fldPlayerModelContext->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
         } else if (D_004360C4 == 2) {
-            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
+            mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+            mdlAddEntryPlainEx(fldPlayerModelContext, 1, 2, 0.0f, blendFrames);
             D_004360C4 = -1;
             D_004360CC = 2;
-            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
+            fldPlayerModelContext->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
         } else if (D_004360C4 == 3) {
-            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 3, 0.0f, blendFrames);
+            mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+            mdlAddEntryPlainEx(fldPlayerModelContext, 1, 3, 0.0f, blendFrames);
             D_004360C4 = -1;
             D_004360CC = 3;
-            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 3, blendFrames, blendFrames);
+            fldPlayerModelContext->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 3, blendFrames, blendFrames);
         } else if (D_004360C4 == 5) {
-            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-            mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 5, 0.0f, blendFrames);
+            mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+            mdlAddEntryPlainEx(fldPlayerModelContext, 1, 5, 0.0f, blendFrames);
             D_004360C4 = -1;
             D_004360CC = 5;
-            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 5, blendFrames, blendFrames);
+            fldPlayerModelContext->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 5, blendFrames, blendFrames);
         } else if (D_004360C4 == 6) {
             if (motion == 1) {
-                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 2.0f);
-                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 6);
+                mdlSetNodeFrameStep(fldPlayerModelContext, 1, 2.0f);
+                mdlAddEntryPlain(fldPlayerModelContext, 1, 6);
                 D_004360C4 = -1;
             } else {
-                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 2.0f);
-                mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 4);
+                mdlSetNodeFrameStep(fldPlayerModelContext, 1, 2.0f);
+                mdlAddEntryPlain(fldPlayerModelContext, 1, 4);
                 D_004360C4 = -1;
                 D_004360CC = 4;
-                ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 4, blendFrames, blendFrames);
+                fldPlayerModelContext->first->frameStep = 1.0f;
+                mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, 4, blendFrames, blendFrames);
             }
         } else if (currentMotion != motion && D_004360CC != 5) {
             D_004360CC = motion;
-            ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.5f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+            fldPlayerModelContext->first->frameStep = 1.5f;
+            mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, motion, blendFrames, blendFrames);
             if (D_004360C8 == 0) {
-                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-                mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
+                mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+                mdlAddEntryFlaggedEx(fldPlayerModelContext, 1, motion, blendFrames, blendFrames);
             }
         }
         if (D_004360C8 > 0) {
             D_004360C8--;
         }
     } else if (modelMotion != motion) {
-        ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
-        mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
+        fldPlayerModelContext->first->frameStep = 1.0f;
+        mdlAddEntryFlaggedEx(fldPlayerModelContext, 0, motion, blendFrames, blendFrames);
         if (fldSecondarySceneObject != 0) {
-            ((MdlCtx *)fldSecondarySceneModelHandle)->first->frameStep = 1.0f;
-            mdlAddEntryFlaggedEx((MdlCtx *)fldSecondarySceneModelHandle, 0, motion, blendFrames, blendFrames);
+            fldSecondarySceneModelContext->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(fldSecondarySceneModelContext, 0, motion, blendFrames, blendFrames);
         }
     }
 }
@@ -3503,7 +3503,7 @@ void func_00131478(s32 motion, s32 selector) {
     memset(&position, 0, sizeof(position));
     position.f[3] = 1.0f;
 
-    cameraModel = (MdlCtx *)fldCameraModelObject;
+    cameraModel = fldPlayerModelContext;
     previousFrame = fldAreaState.unk178;
     currentFrame = cameraModel->first->currentFrame;
     fldAreaState.unk178 = currentFrame;
@@ -3577,7 +3577,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 8.0f && currentFrame >= 8.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xCA) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3587,7 +3587,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 18.0f && currentFrame >= 18.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xC9) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3598,7 +3598,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 88.0f && currentFrame >= 88.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xCA) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3608,7 +3608,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 18.0f && currentFrame >= 18.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xC9) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3618,7 +3618,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 42.0f && currentFrame >= 42.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xCA) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3628,7 +3628,7 @@ void func_00131478(s32 motion, s32 selector) {
         if (previousFrame < 63.0f && currentFrame >= 63.0f) {
             fldSetSequenceVolume(sequenceCategory, volume);
             D_004360D4 += (effMiscRand(NULL) >> 4 & 1) + 1;
-            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) {
+            if (sdfLoadMapRecordPositionVector(fldPlayerModelContext->inner, 0xC9) == 0) {
                 return;
             }
             VU0_STORE_VF(vf10, &position);
@@ -3687,18 +3687,18 @@ s32 func_001322D8(void) {
     s16 node;
 
     if (work->unk188 > 0) {
-        model = (MdlCtx *)fldCameraModelObject;
+        model = fldPlayerModelContext;
         node = model->current.h.arg;
         if (node != 7) {
             kwlnFadeStartIn(8);
             func_002A2200(0x26);
-            model = (MdlCtx *)fldCameraModelObject;
+            model = fldPlayerModelContext;
             model->first->frameStep = 1.0f;
             mdlAddEntryPlain(model, 0, 7);
         }
 
         {
-            Motion *const thresholdMotion = ((MdlCtx *)fldCameraModelObject)->first;
+            Motion *const thresholdMotion = fldPlayerModelContext->first;
             f32 currentFrame = thresholdMotion->currentFrame;
             if (work->unk178 < 13.0f && 13.0f <= currentFrame) {
                 kwlnPadStartMotor(0, 1, 10);
@@ -3707,7 +3707,7 @@ s32 func_001322D8(void) {
             }
         }
         {
-            Motion *const completionMotion = ((MdlCtx *)fldCameraModelObject)->first;
+            Motion *const completionMotion = fldPlayerModelContext->first;
             if (completionMotion->state == SDF_MOTION_STATE_TERMINAL) {
                 mnuMarkTitleStreamResetPending();
                 mnuResetTitleStreamLocked();
@@ -3746,7 +3746,7 @@ s32 func_00132408(void) {
             return -1;
         }
 
-        model = (MdlCtx *)fldCameraModelObject;
+        model = fldPlayerModelContext;
         if (model->current.h.arg != 4) {
             model->first->frameStep = 1.0f;
             mdlAddEntryPlain(model, 0, 4);
@@ -3754,7 +3754,7 @@ s32 func_00132408(void) {
             fldPlayMenuSound(0x22);
             kwlnPadStartMotor(0, 1, 15);
             kwlnPadStartMotor(1, 0x64, 15);
-            model = (MdlCtx *)fldCameraModelObject;
+            model = fldPlayerModelContext;
         }
 
         if (model->first->state == SDF_MOTION_STATE_TERMINAL) {
@@ -3794,7 +3794,7 @@ s32 fldUpdateCameraFrame(void) {
         func_001321F8();
         fldUpdateCameraTarget();
         func_00131B50();
-        node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
+        node = fldPlayerModelContext->current.h.arg;
         func_00131478(node, node);
         if (fldAreaState.unk118 == 1) {
             fldUpdateCameraModelMotion(0, 0, 6.0f);
@@ -3854,9 +3854,9 @@ void fldClearSceneModelColors(void) {
     u8 hasSecondObject;
 
     hasSecondObject = fldSecondarySceneObject != 0;
-    ((MdlCtx *)fldCameraModelObject)->inner->color = 0;
+    fldPlayerModelContext->inner->color = 0;
     if (hasSecondObject) {
-        ((MdlCtx *)fldSecondarySceneModelHandle)->inner->color = 0;
+        fldSecondarySceneModelContext->inner->color = 0;
     }
 }
 
@@ -3864,9 +3864,9 @@ void fldRestoreSceneModelColors(void) {
     u8 hasSecondObject;
 
     hasSecondObject = fldSecondarySceneObject != 0;
-    ((MdlCtx *)fldCameraModelObject)->inner->color = 0x80808080;
+    fldPlayerModelContext->inner->color = 0x80808080;
     if (hasSecondObject) {
-        ((MdlCtx *)fldSecondarySceneModelHandle)->inner->color = 0x80808080;
+        fldSecondarySceneModelContext->inner->color = 0x80808080;
     }
 }
 
@@ -3886,7 +3886,7 @@ void fldClearCameraObjectTransitionFlags(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00133B10);
 
 void fldSetCameraNodeModeWithTen(void) {
-    s16 node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
+    s16 node = fldPlayerModelContext->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
@@ -3895,7 +3895,7 @@ void fldSetCameraNodeModeWithTen(void) {
 }
 
 void fldSetCameraNodeModeWithZero(void) {
-    s16 node = ((MdlCtx *)fldCameraModelObject)->current.h.arg;
+    s16 node = fldPlayerModelContext->current.h.arg;
     if (fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;
@@ -3904,16 +3904,16 @@ void fldSetCameraNodeModeWithZero(void) {
 }
 
 void fldAddCameraModelEntry(s32 value) {
-    MdlCtx *object = (MdlCtx *)fldCameraModelObject;
+    MdlCtx *object = fldPlayerModelContext;
     object->first->frameStep = 1.0f;
     mdlAddEntryPlainEx(object, 0, value, 2.0f, 5.0f);
 }
 
 void fldAddCameraModelPair(s32 first, s32 second) {
-    mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 0, 1.0f);
-    mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
-    mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, first);
-    mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, second);
+    mdlSetNodeFrameStep(fldPlayerModelContext, 0, 1.0f);
+    mdlSetNodeFrameStep(fldPlayerModelContext, 1, 1.0f);
+    mdlAddEntryFlagged(fldPlayerModelContext, 0, first);
+    mdlAddEntryFlagged(fldPlayerModelContext, 1, second);
 }
 
 void func_00133DB8(void) {

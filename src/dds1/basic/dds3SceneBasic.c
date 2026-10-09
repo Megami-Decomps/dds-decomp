@@ -30,15 +30,15 @@ s32 evtLoadSceneResourceFrom(EffWorldNode *worldNode, const char *resourceName) 
     if (resourceName == NULL) {
         return 0;
     }
-    if (worldData->unk18 != 0) {
+    if (worldData->sceneResourceHandle != 0) {
         evtReleaseSceneResource(worldNode);
     }
     resourceHandle = sdfReadNamedResource(resourceName, &resourceAddress, 0);
     if (resourceAddress == 0) {
         return 0;
     }
-    worldData->unk18 = (u32)resourceHandle;
-    worldData->unk1C = resourceAddress;
+    worldData->sceneResourceHandle = (u32)resourceHandle;
+    worldData->sceneResourceAddress = resourceAddress;
     return 1;
 }
 
@@ -54,13 +54,13 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
     if (resourceHandle == NULL) {
         return result;
     }
-    if (worldData->unk18 != 0) {
+    if (worldData->sceneResourceHandle != 0) {
         evtReleaseSceneResource(worldNode);
     }
     resourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)resourceHandle);
     if (resourceAddress != 0) {
-        worldData->unk18 = (u32)resourceHandle;
-        worldData->unk1C = resourceAddress;
+        worldData->sceneResourceHandle = (u32)resourceHandle;
+        worldData->sceneResourceAddress = resourceAddress;
         return 1;
     }
     return result;
@@ -71,18 +71,18 @@ s32 evtRetainSceneResource(EffWorldNode *worldNode, void *resourceHandle) {
 void evtReleaseSceneResource(EffWorldNode *worldNode) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
-    if (worldData->unk18 != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)worldData->unk18);
+    if (worldData->sceneResourceHandle != 0) {
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)worldData->sceneResourceHandle);
     }
-    worldData->unk18 = 0;
-    worldData->unk1C = 0;
+    worldData->sceneResourceHandle = 0;
+    worldData->sceneResourceAddress = 0;
 }
 
 /* Starts the named script task on the scene object's resource; stays asm:
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
 s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
-    void *resource = (void *)worldData->unk1C;
+    void *resource = (void *)worldData->sceneResourceAddress;
     s32 scriptIndex;
 
     if (resource == NULL) {

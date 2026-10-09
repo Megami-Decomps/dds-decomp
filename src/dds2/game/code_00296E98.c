@@ -18,6 +18,11 @@ extern s32 func_002C6CE8(void);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
+extern void func_00294D50(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
+extern void func_00296B48(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
+
 extern s32 func_00298648(MenuTerminalContext *);
 extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00296D90(MenuTerminalContext *, s32);
@@ -44,8 +49,6 @@ extern s8 brsTaskState;
 
 extern void sndEnsureMidiBankResident(s32);
 
-
-extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
@@ -248,7 +251,213 @@ s32 mnuTickExtendedCommandPhase(MenuTerminalContext *work) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00297970);
+/* Draw the terminal's two panels through their change and reveal phases. */
+/* Retail 0x00297A38 and 0x00297A5C both clamp the same transition progress. */
+s32 func_00297970(MenuTerminalContext *scene) {
+    s32 category;
+    s32 frames;
+    f32 progress;
+    f32 opacity;
+    f32 position;
+
+    category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
+    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
+    func_00296D90(scene, 0xA09DC380);
+    switch (scene->phase) {
+    case 4:
+        if ((f32)scene->commandFrames > 0.0f) {
+            progress = ((f32)scene->commandFrames - 0.0f) / 10.0f;
+            if (progress > 1.0f) {
+                progress = 1.0f;
+            }
+            position = progress;
+        } else {
+            progress = 0.0f;
+            position = progress;
+        }
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        func_00294D50(0, (s32)(position * 64.0f) << 3, 0, scene,
+                      (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0,
+                                         (u8 *)scene->ownedWindows[0]->list, 0x53);
+        func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+
+        if ((f32)scene->commandFrames > 0.0f) {
+            /* Retail 0x00297B40-0x00297B54 round-trips through a clamped integer. */
+            frames = (s32)((f32)scene->commandFrames - 0.0f);
+            if (frames < 0) {
+                frames = 0;
+            }
+            progress = (f32)frames / 10.0f;
+            opacity = 0.0f;
+            if (!(progress < 0.5f)) {
+                opacity = (progress - 0.5f) * 2.0f;
+            }
+        } else {
+            progress = 0.0f;
+            opacity = progress;
+        }
+        position = progress;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (opacity > 1.0f) {
+            opacity = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        func_00294EB8(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+                      (s32)(opacity * 256.0f), 0x53);
+        func_00295030(0, 0, 0, scene, (s32)(opacity * 256.0f), 0, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(opacity * 96.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00297000((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            break;
+        case 4:
+            func_00297000((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            break;
+        }
+        break;
+    case 5:
+        if ((f32)scene->commandFrames > 0.0f) {
+            progress = ((f32)scene->commandFrames - 0.0f) / 10.0f;
+            if (progress > 1.0f) {
+                progress = 1.0f;
+            }
+            position = progress;
+        } else {
+            progress = 0.0f;
+            position = progress;
+        }
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        func_00294EB8(0, (s32)(position * 64.0f) << 3, 0, scene,
+                      (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        func_00295030(0, 0, 0, scene, (s32)((1.0f - progress) * 256.0f), 0, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4,
+                            0xA09DC300 | (s32)((1.0f - progress) * 96.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 3, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 2, 0x53);
+            break;
+        }
+        if ((f32)scene->commandFrames > 0.0f) {
+            frames = (s32)((f32)scene->commandFrames - 0.0f);
+            if (frames < 0) {
+                frames = 0;
+            }
+            progress = (f32)frames / 10.0f;
+            opacity = 0.0f;
+            if (!(progress < 0.5f)) {
+                opacity = (progress - 0.5f) * 2.0f;
+            }
+        } else {
+            progress = 0.0f;
+            opacity = progress;
+        }
+        position = progress;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (opacity > 1.0f) {
+            opacity = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        func_00294D50(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
+                      (s32)(opacity * 256.0f), 0x53);
+        func_00297000((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        progress = (f32)scene->commandFrames / 10.0f;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        func_00296B48(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
+        break;
+    case 8:
+        progress = (f32)scene->commandFrames / 10.0f;
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        func_00296430(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 0, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(progress * 96.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 1, 0x53);
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, (u32)((1.0f - progress) * 256.0f), 0, 0x53);
+            func_00296E98((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            break;
+        }
+        func_00296B48(0, 0, 0, (s32)scene, 0x100, 0x53);
+        mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, 0x100, 0x53);
+        break;
+    case 6:
+    case 7:
+        func_00294EB8(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
+        progress = 1.0f - (f32)scene->gradientFade.blend * 0.00390625f;
+        if (progress < 0.5f) {
+            progress = 0.0f;
+        }
+        func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 0, 0x53);
+        itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(progress * 96.0f), 0x53);
+        if (scene->stateStep < 10) {
+            scene->stateStep++;
+        }
+        progress = (f32)scene->stateStep / 10.0f;
+        func_00296B48(0, 0, 0, (s32)scene, (s32)(progress * 256.0f), 0x53);
+        if (scene->stateStep < 8) {
+            progress = (f32)scene->stateStep * 0.125f;
+        } else {
+            progress = 1.0f;
+        }
+        position = 1.0f - (progress + progress * progress) * 0.5f;
+        progress = 0.1f;
+        if (scene->stateStep >= 6) {
+            progress = (f32)(scene->stateStep - 6) * 0.25f;
+        }
+        mnuDrawIconFixedEntry((s32)(position * -128.0f) << 4, 0, 0, (s32)scene,
+                             (s32)(progress * 256.0f), 0x53);
+        switch (category) {
+        case 1:
+        case 2:
+        case 3:
+            func_00296E98((s32)scene, 0x100, 3, 0x53);
+            break;
+        case 4:
+            func_00296E98((s32)scene, 0x100, 2, 0x53);
+            break;
+        }
+        break;
+    }
+    return 0;
+}
+
 
 /* Phase machine for phases 9-12: 9 waits for the frame counter to pass 10.0f, 10 and 12 for it to reach 10.0f, 11 reports at once. */
 s32 mnuTickCommandWaitPhase(MenuTerminalContext *work) {
@@ -401,7 +610,7 @@ s8 brsTaskHasPendingRows(void) {
 }
 
 s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *context) {
-    if (context->teardownHandle != 0) {
+    if (context->teardownResource != NULL) {
         brsUpdateBlocked = 0;
     }
     return brsUpdateBlocked ? 0 : brsUiUpdateAllowed;
@@ -515,7 +724,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
+    mnuUpdateFiveListEntries(panel, work->unitResource);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],
@@ -533,7 +742,7 @@ extern void mnuResetWorkFloats(void);
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
-    effDestroyResourceSlotSet((struct EffectSlotSet *)ctx->unitHandle);
+    effDestroyResourceSlotSet(ctx->unitResource);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
@@ -551,8 +760,9 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     }
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
-    mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
-    effRequestResourceByMode(D_00428358, D_00428368, 0, (s32)&work->unitHandle);
+    mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
+    effRequestResourceByMode(D_00428358, D_00428368, 0,
+                             (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = 1;
     kwlnFadeInStart(0, 0, 0, 1);
@@ -560,7 +770,6 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     return 1;
 }
 
-extern s32 movAreTitleEffectsReady(s32, StaffSlots *);
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
@@ -572,13 +781,13 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (ctx->setupState == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(ctx->fadeTarget, &ctx->staffSlots) == 0) {
+    if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
     if (func_002C6CE8() == 1) {
         return 1;
     }
-    if (ctx->unitHandle == 0) {
+    if (ctx->unitResource == NULL) {
         return 1;
     }
     if (mnuBindCampEffectWhenLoaded(&ctx->campEffect) == 0) {
@@ -643,19 +852,19 @@ INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428368);
 
 BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardSummary *rewards;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     BrsProgressRow *party;
     BrsRewardBatch *rewardState;
     BrsRewardBatch *primary;
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    work = (void *)sdfResourceRetainAddress(allocation);
     memset(work, 0, sizeof(BrsSkillPackageWork));
-    work->handle = handle;
+    work->allocation = allocation;
     mnuClearPanelTransitionState(&work->transition.data);
-    work->fadeTarget = (s32)mnuAllocateValueRecord(1);
+    work->resourceList = mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
@@ -672,9 +881,9 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
-    work->teardownHandle = 0;
+    work->teardownResource = NULL;
     effRequestResourceByMode(D_00428358, "easy_r01.spr", 0,
-                            (s32)&work->teardownHandle);
+                            (u32 *)&work->teardownResource);
     return work;
 }
 
@@ -686,16 +895,16 @@ extern s32 dspCloseChannel(void);
 void brsStaffTaskDestroy(KwlnTask *taskArg) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
 
-    if (context->teardownHandle != 0) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)context->teardownHandle);
+    if (context->teardownResource != NULL) {
+        effDestroyResourceSlotSet(context->teardownResource);
     }
     mnuDrainPanelTransitions(&context->transition.data, taskArg);
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
-    effDestroyEffectList((struct EffectList *)(u32)context->fadeTarget);
+    effDestroyEffectList(context->resourceList);
     dspCloseChannel();
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
+    sdfReleaseResourceAllocation(context->allocation);
     brsTaskState = 2;
 }
 

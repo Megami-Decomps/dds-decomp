@@ -203,7 +203,7 @@ void mnuTitleDrawBurstSprites(s32 scaleInput, s32 arg1) {
 
 extern const s32 D_004284E0[9][3];
 extern s32 mdlFlagTest(u32);
-extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
     s32 table[9][3];
@@ -213,16 +213,16 @@ void brsDrawResultPanelSprites(BrsSkillPackageWork *work) {
 
     memcpy(table, D_004284E0, sizeof(table));
     count = mdlFlagTest(0x290) ? 9 : 8;
-    if (work->teardownHandle != 0) {
+    if (work->teardownResource != NULL) {
         for (i = 0; i < count; i++) {
             scale = (work->opacity << 8) >> 7;
             func_00306CD0(table[i][0] << 4, table[i][1] << 3,
-                         0, scale, 0, (void *)work->teardownHandle,
+                         0, scale, 0, work->teardownResource,
                          table[i][2], 0x53);
             if (i == 0) {
                 mnuTitleDrawBurstSprites(scale, 0x53);
                 func_00306CD0(0, 0, 0, 0x100, 0,
-                             (void *)work->teardownHandle, 0x25, 0x53);
+                             work->teardownResource, 0x25, 0x53);
             }
         }
     }
@@ -284,14 +284,14 @@ void func_0029C880(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 su
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
-            func_00306C28(x + 0x720, y + 0x20, 0, labelColor, 0, (struct EffectSlotSet *)work->teardownHandle, 0x20, 0x53);
+            func_00306C28(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             func_0035C860(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = func_0019F6C8(x + 0x900, y, z, packed, name, 0);
             frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)glyph, 3);
             frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
-            func_00306C28(x + 0x6E0, y + 0x88, 0, valueColor, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
+            func_00306C28(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
             y += 0xB8;
         }
     }
@@ -319,7 +319,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     color[1] = alpha;
     color[2] = alpha;
     color[3] = alpha;
-    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
+    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
 }
 
 extern s32 mdlFlagTest();
@@ -341,7 +341,7 @@ void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, 
         color[1] = alpha;
         color[2] = alpha;
         color[3] = alpha;
-        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
+        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownResource, 0x1B, 0x53);
     }
 }
 

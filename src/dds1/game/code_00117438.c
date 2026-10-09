@@ -4,6 +4,7 @@
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
+#include "evt_world_source_transform.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -139,10 +140,10 @@ void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
 
 
 
-EffWorldNode *evtSpawnActionObj11(s32 key, void *data, s32 value) {
+EffWorldNode *evtSpawnActionObj11(s32 key, EvtWorldSourceTransformPrefix *source, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x11);
 
-    obj->data = data;
+    obj->data = source;
     obj->key = key;
     obj->value = value;
     return obj;
@@ -521,7 +522,144 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
     return func_00118648(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
+extern s32 effMiscRandMod(s32 state, s32 modulus);
+
+s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+    s32 healing;
+    s32 damage;
+    u16 current;
+    u16 maximum;
+    s32 type;
+    s16 base;
+    s16 power;
+
+    healing = 0;
+    current = 0;
+    damage = 0;
+    maximum = 0;
+    switch (vital) {
+    case 1:
+        current = item->hp;
+        maximum = item->maxHp;
+        power = datCommandRecords[channel].hpPower;
+        type = datCommandRecords[channel].hpType;
+        base = datCommandRecords[channel].hpBase;
+        break;
+    case 2:
+        current = item->mp;
+        maximum = item->maxMp;
+        power = datCommandRecords[channel].mpPower;
+        type = datCommandRecords[channel].mpType;
+        base = datCommandRecords[channel].mpBase;
+        break;
+    default:
+        power = 0;
+        type = 0;
+        base = 0;
+        break;
+    }
+    switch (type) {
+    case 0:
+        break;
+    case 5:
+        healing = power + base;
+        break;
+    case 15:
+        healing = effMiscRandMod(0, power) + base;
+        break;
+    case 9:
+        healing = current * power / 100 + base;
+        if (healing <= 0) {
+            healing = 1;
+        }
+        break;
+    case 11:
+        healing = maximum * power / 100 + base;
+        if (healing <= 0) {
+            healing = 1;
+        }
+        break;
+    case 2:
+        switch (datCommandRecords[channel].effectType) {
+        case 0:
+            healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
+            break;
+        case 1:
+            healing = func_00118620(channel, queryArg, (u32)item, vital);
+            break;
+        }
+        healing += base;
+        if (healing == 0) {
+            healing = 1;
+        }
+        break;
+    case 7:
+        healing = sdfDispatchSubCmd(channel, queryArg, (u32)item, vital) + base;
+        if (healing == 0) {
+            healing = 1;
+        }
+        break;
+    case 4:
+    case 13:
+        damage = power + base;
+        if (type == 13) {
+            if (maximum < damage) {
+                damage = maximum;
+            }
+        }
+        break;
+    case 8:
+        damage = current * power / 100 + base;
+        if (damage == 0 && power > 0) {
+            damage = 1;
+        }
+        break;
+    case 10:
+        damage = maximum * power / 100 + base;
+        if (damage == 0 && power > 0) {
+            damage = 1;
+        }
+        break;
+    case 1:
+    case 12:
+    case 14:
+        switch (datCommandRecords[channel].effectType) {
+        case 0:
+            damage = sdfDispatchUnitScriptDefault5(channel, queryArg, (u32)item, vital);
+            break;
+        case 1:
+            damage = sdfDispatchUnitScriptDefault9(channel, queryArg, (u32)item, vital);
+            break;
+        }
+        damage += base;
+        if (type < 14) {
+            if (type >= 12) {
+                if (current < damage) {
+                    damage = current;
+                }
+            }
+        }
+        if (type == 14 && mode >= 2) {
+            damage = (u32)damage / mode;
+        }
+        if (damage == 0) {
+            damage = 1;
+        }
+        break;
+    case 6:
+        damage = func_00118648(channel, queryArg, (u32)item, vital) + base;
+        if (damage == 0) {
+            damage = 1;
+        }
+        break;
+    case 3:
+        if (power + base < current) {
+            damage = current - (power + base);
+        }
+        break;
+    }
+    return damage > 0 ? -damage : healing;
+}
 
 extern s32 datFlagToElementIndex(u32);
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);

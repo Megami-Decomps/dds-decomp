@@ -5,6 +5,7 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "eff_object.h"
+#include "evt_world_source_transform.h"
 #include "evt_unit.h"
 #include "eff.h"
 #include "eff_node.h"
@@ -329,8 +330,8 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     if (dds3TestObjectFlags(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
             effObjStepFollowAngleTowardPosition(
-                obj, dds3GetWorldNodeData(dds3FindWorldObjectNodeByKey(
-                    dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
+                obj, &((EvtWorldSourceTransformPrefix *)dds3GetWorldNodeData(dds3FindWorldObjectNodeByKey(
+                    dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)))->position.x);
         } else {
             effObjStepFollowAngleTowardZero(obj);
         }

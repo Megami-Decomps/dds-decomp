@@ -23,7 +23,7 @@ typedef struct SdfMotionBindingHead {
 } SdfMotionBindingHead;
 
 void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source,
-                             void *dispatch);
+                             SdfMotionBindingDispatch *dispatch);
 
 typedef struct SdfMotionKeyInterval {
     f32 *firstKey;
@@ -57,12 +57,18 @@ typedef struct SdfMotionIndexedBinding {
     SdfAsset *target;
 } SdfMotionIndexedBinding;
 
+void sdfMotionBindIndexedTrack(SdfMotionIndexedBinding *binding, Motion *motion,
+    SdfMotionBindingDispatch *dispatch, s32 options);
+
 /* Slot weights update a model entry and retain its complete previous pair. */
 typedef struct SdfMotionSlotPairBinding {
     SdfMotionKeyBinding keys;
     SdfSlotEntry *current;
     SdfSlotEntry previous;
 } SdfMotionSlotPairBinding;
+
+void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+    Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex);
 
 /* Color/word and scalar bindings capture one target word at +0x10. */
 typedef struct SdfMotionIndexedValueBinding {
@@ -103,7 +109,7 @@ typedef struct SdfMotionDrawTargetBinding {
 } SdfMotionDrawTargetBinding;
 
 void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
-                          void *dispatch, s32 nodeIndex);
+                          SdfMotionBindingDispatch *dispatch, s32 nodeIndex);
 
 typedef struct SdfMotionDrawBinding {
     SdfMotionKeyBinding keys;

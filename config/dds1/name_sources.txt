@@ -5282,6 +5282,7 @@
 0x00290E60	fileToggleSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TogglePartySlotBit: file/memory-card manager in game/code_0028A0E0
 0x00290F40	fileTestSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TestPartySlotBit: file/memory-card manager in game/code_0028A0E0
 0x00290FC0	fileTestSavedSlotFlags	inferred	DDS2 002D1038 twin; queries fileTestSlotFlagsBit on global save buffer [names_R_FuncNames2.tsv]
+0x00290FE0	fileCreateConfigTask	inferred	Allocates and retains the file-config task, creates its five-row menu list, and requests mode-specific effect resources before returning the task address.
 0x002911B8	fileConfigTaskDestroy	inferred	Releases config list, slot resources and task memory, matching the named DDS2 twin. [names_reviewed7.tsv]
 0x002912C8	mnuCreateConfigTasks	inferred	Byte-identical dds2 twin 0x002D1300; DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior. [names_conflicts.tsv]
 0x00291378	mnuConfigTasksDestroy	inferred	mnu menu, title, shop, or movie UI in game/code_0028A0E0.c
@@ -6314,8 +6315,8 @@
 0x002D3288	sdfTexAcquireResourceTexture	inferred	confidence=high; matched-C; src/dds1/sdf/sdfTex.c:133:func_002D3288; Finds cached resource texture and increments reference or builds texture/upload state; default upload-mode flag.; twin=0x0032C138, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002D32A0	sdfTexAcquireAlternateResourceTexture	inferred	confidence=high; matched-C; src/dds1/sdf/sdfTex.c:161:func_002D32A0; Processes the resource texture using packet variant one, complementary to sdfTexAcquireResourceTexture.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002D32B8	sdfTexBuildIntensityMap	inferred	Fam_Mid3
-0x002D3558	sdfFindResourceById	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D3598	sdfRegisterTextureReleaseRequestHandler	inferred	Binds texture release callback to the synchronized request slot rather than merely echoing initialization. [names_reviewed12.tsv]
+0x002D3558	sdfFindTextureByResourceKey	inferred	Searches the active SdfTex registry by resourceKey (+0x20), follows prev (+4), and returns the matched texture; paired with 0x0032C408.
 0x002D35B8	sdfBuildResourceTransferPacket	inferred	U2
 0x002D37A8	sdfCreateResourcePacket	inferred	sdf system, device, DMA, or task infrastructure in game/code_002D33C8.c
 0x002D38B8	sdfCreatePatchableResourcePacket	inferred	confidence=high; matched-C; src/dds1/game/code_002D33C8.c:121:func_002D38B8; Allocates a resource packet with a linked callback header, builds its payload from resource entry zero, then appends the header to the fixup list and the payload range to the draw list.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -7024,7 +7025,7 @@
 0x003BAAB4	evtWorkScriptTask	inferred	high confidence; src/dds1/game/code_00119900.c dds3WorkInit(): D_003BAAB4 = scrCreateTaskWithDefaultOption(); Script task created for the shared event-work context and used when running that context. [names_reviewed26.tsv]
 0x003BAAD0	dds3FontNodeVTable	inferred	confidence=high; src/dds1/game/code_0011CEB8.c:dds3CreateFontNode; Vtable supplied when registering a newly created owned font node. [names_qp9.tsv]
 0x003BAB34	fldPlayerObject	inferred	high confidence; src/dds1/game/code_0011D3A0.c fldCreatePlayerObject(): if (D_003BAB34 == 0) { World object created with the retail PLAYER_UNIT callback label and retained as the field player object. [names_reviewed26.tsv]
-0x003BAB38	fldCameraModelObject	inferred	confidence=high; matched_users=src/dds1/game/code_00126A30.c:fldAddCameraModelEntry, src/dds1/game/code_00126A30.c:fldAddCameraModelPair; Camera-model operations set this object node scale and append plain/flagged model entries; same observed DDS2 role. [names_qp9.tsv]
+0x003BAB38	fldPlayerModelContext	inferred	The player scene object’s world-node base resource, a borrowed MdlCtx used by field model animation and camera updates.
 0x003BAB54	fldPlayerModelResource	inferred	confidence=high; matched_users=src/dds1/game/code_0011D3A0.c:fldLoadPlayerModel, src/dds1/game/code_0011D3A0.c:fldUnloadPlayerModel; Resource loaded from native field player model paths and released/cleared by player-model teardown. [names_qp9.tsv]
 0x003BABD8	fldDeferredCommand	inferred	high confidence; src/dds1/game/code_0011D3A0.c fldSetDeferredFieldCommand(): D_003BABD8 = command; Pending field command dispatched once administration gates permit it, then cleared. [names_reviewed26.tsv]
 0x003BABDC	fldDeferredCommandParameter	inferred	high confidence; src/dds1/game/code_0011D3A0.c fldSetDeferredFieldCommand(): D_003BABDC = parameter; Parameter retained alongside the pending field command and passed to dispatch. [names_reviewed26.tsv]
