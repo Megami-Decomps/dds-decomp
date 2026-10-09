@@ -1706,7 +1706,7 @@ void mnuInitializeWindowFadeState(MenuFadeFields *menu) {
 }
 
 /* Snapshot the outgoing window and its resources before starting the next fade. */
-void mnuBeginWindowFadeTransition(void *windowAddress, void *work) {
+void mnuBeginWindowFadeTransition(MenuWindowContainer *windowAddress, MenuFadeFields *work) {
     MenuWindowContainer *window = windowAddress;
     MenuFadeFields *menu = work;
     if (menu->currentWindow != NULL) {
