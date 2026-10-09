@@ -547,7 +547,37 @@ void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color,
     func_002C0C20(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0C20);
+typedef struct GridPackedTriangleVertex {
+    u64 channels[2];
+    u64 xy;
+    u64 depth;
+} GridPackedTriangleVertex;
+
+void func_002C0C20(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+{
+    s32 packet;
+    GridPackedTriangleVertex *vertices;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14B, 6, 0x515151, 1);
+    vertices = (GridPackedTriangleVertex *)sdfConsMeasurePacketWithHeader(packet);
+    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
+    vertices[0].xy = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    vertices[0].depth = z;
+    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    vertices[1].xy = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    vertices[1].depth = z;
+    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
+    vertices[2].xy = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    vertices[2].depth = z;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 extern void func_002C0DF8(u32, u32, u32, u32, u32, const u32 *, u32, u32);
 

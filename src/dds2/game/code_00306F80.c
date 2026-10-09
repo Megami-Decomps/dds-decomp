@@ -645,7 +645,7 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
     quad->unk00[3] = value;
 }
 
-void func_00308650(const s32 *, const s32 *, u32, const u32 *, u32, u32, u32, u32);
+void func_00308650();
 
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
@@ -653,7 +653,37 @@ void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color,
     func_00308650((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308650);
+typedef struct GridPackedTriangleVertex {
+    u64 channels[2];
+    u64 xy;
+    u64 depth;
+} GridPackedTriangleVertex;
+
+void func_00308650(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+{
+    s32 packet;
+    GridPackedTriangleVertex *vertices;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14B, 6, 0x515151, 1);
+    vertices = (GridPackedTriangleVertex *)sdfConsMeasurePacketWithHeader(packet);
+    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
+    vertices[0].xy = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    vertices[0].depth = z;
+    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    vertices[1].xy = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    vertices[1].depth = z;
+    itfGridUnpackColorChannels(vertices[2].channels, colors[2]);
+    vertices[2].xy = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    vertices[2].depth = z;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 extern void func_00308828(u32, u32, u32, u32, u32, const u32 *, u32, u32);
 
