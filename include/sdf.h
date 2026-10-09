@@ -302,6 +302,7 @@ typedef struct SdfGraphObj {
     u8 auxiliaryFormat;
     SdfTexResource *buffers[3];
 } SdfGraphObj;
+void sdfGraphApplyModeDefaults(SdfGraphObj *graph, s32 mode, s32 initializeBuffers);
 /* A mode's 12-byte display defaults row, copied into SdfGraphObj. */
 typedef struct SdfGraphModeDefaults {
     s16 width;
