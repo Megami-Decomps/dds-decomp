@@ -288,15 +288,16 @@ MenuProgressParameters *mnuGetResourceProgressParameters(void);
 void mnuCopyResourceProgressParameters(MenuProgressParameters *);
 void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
-void func_00322540(MenuRegistryParameters *, u32);
-MenuRegistryParameters *func_00322550(u32);
+void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
+/* The native selector uses the low byte; the stored count is not checked. */
+MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex);
 
-void func_00323918(MenuWorkCallback);
-void func_00323920(MenuWorkCallback);
-void mnuSetActiveWorkVisitor(MenuWorkCallback);
-void func_003214C8(MenuRuntimeCallback);
-void func_00323930(MenuRuntimeWorkCallback);
-void func_00323938(MenuRuntimePairCallback);
+void mnuSetWorkEntryStartCallback(MenuWorkCallback callback);
+void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);
+void mnuSetActiveWorkVisitor(MenuWorkCallback callback);
+void mnuSetRuntimeRecordInitializationCallback(MenuRuntimeCallback callback);
+void mnuSetRuntimeWorkHitCallback(MenuRuntimeWorkCallback callback);
+void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback);
 
 void func_003191B0(MenuWorkEntry *, struct MnuShootingWork *);
 void func_00319388(MenuWorkEntry *, struct MnuShootingWork *);

@@ -45,7 +45,6 @@ extern s32 func_0011B158(s32, s32, u8);
 
 extern s32 datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
-extern s32 datItemSkillRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;
 
@@ -70,11 +69,6 @@ typedef struct RosterDetail {
     u8 pad8[0xC];
 } RosterDetail; /* 0x14 */
 
-typedef struct EventIndexRecord {
-    u8 pad00[2];
-    u16 index; /* 0x02 */
-    u8 pad04[4];
-} EventIndexRecord; /* stride 0x08 */
 
 
 typedef struct EvtScriptContext {
@@ -480,7 +474,7 @@ void ptyInitRuntime(void) {
 }
 
 u16 evtGetIndexedEventRecordId(s32 tableIndex) {
-    return ((EventIndexRecord *)datItemSkillRecords)[tableIndex].index;
+    return datItemSkillRecords[tableIndex].commandIndex;
 }
 
 /* Read the entry's level, capped at the script-visible maximum. */
@@ -1043,7 +1037,7 @@ s32 evtPushEntryIndexedStatOption(void) {
     s32 *contextWords = D_003C2E70;
     s32 statValue;
     u16 statOption = ((EvtScriptContext *)contextWords)->options;
-    u16 commandIndex = ((EventIndexRecord *)datItemSkillRecords)[((DatPartyRecord *)contextWords[2])->menuValue].index;
+    u16 commandIndex = datItemSkillRecords[((DatPartyRecord *)contextWords[2])->menuValue].commandIndex;
 
     switch (statOption) {
     case 1:

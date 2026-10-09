@@ -40,7 +40,6 @@ extern u8 D_00386350[];
 extern s32 func_0011C6A8(s32, s32, u8);
 
 
-extern s32 datItemSkillRecords;
 
 extern DatPartyRecord *dds3FindEntry();
 
@@ -71,11 +70,6 @@ typedef struct EventRosterStat {
     u8 pad08[0x0C];
 } EventRosterStat; /* stride 0x14 */
 
-typedef struct EventIndexRecord {
-    u8 pad00[2];
-    u16 index;            /* 0x02 */
-    u8 pad04[4];
-} EventIndexRecord; /* stride 0x08 */
 
 /* This separate script context is cleared as one native 24-byte allocation. */
 typedef struct EvtScriptContext {
@@ -552,7 +546,7 @@ void ptyInitRuntime(void) {
 }
 
 u16 evtGetIndexedEventRecordId(s32 tableIndex) {
-    return ((EventIndexRecord *)datItemSkillRecords)[tableIndex].index;
+    return datItemSkillRecords[tableIndex].commandIndex;
 }
 
 /* Read the entry's level, capped at the script-visible maximum. */
@@ -1384,7 +1378,7 @@ s32 evtPushEntryIndexedStatOption(void) {
     EvtScriptContext *context = &D_0043E5C0;
     s32 statValue;
     u16 statOption = context->options;
-    u16 commandIndex = ((EventIndexRecord *)datItemSkillRecords)[((DatPartyRecord *)context->first)->menuValue].index;
+    u16 commandIndex = datItemSkillRecords[((DatPartyRecord *)context->first)->menuValue].commandIndex;
     switch (statOption) {
     case 1:
         statValue = datCommandRecords[commandIndex].hpPower;
