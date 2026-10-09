@@ -112,7 +112,7 @@ typedef struct EffParticleRecord {
     u8 pad30[0x10];
 } EffParticleRecord;
 
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 extern f32 effMiscRandUnitFloat(void *);
 
 extern EffectConfig D_0034DF54[];
@@ -979,9 +979,9 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     }
     packet->f30 = phase;
     jitter = effect->radiusRange;
-    packet->f34 = effect->radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->f34 = effect->radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->speedRange;
-    packet->vel[0] = effect->f168 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->vel[0] = effect->f168 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     packet->f38 = effect->f160;
     packet->pos[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * effect->radius;
     packet->pos[1] = 0;
@@ -995,10 +995,10 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1158,10 +1158,10 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     f32 jitter;
 
     packet += packetIndex;
-    radialDistance = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    radialDistance = effect->radius * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
@@ -1175,23 +1175,23 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_0034DF38) * effect->jitterB + (1.0f - effect->jitterB));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterB + (1.0f - effect->jitterB));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->jitterA + (1.0f - effect->jitterA));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1517,10 +1517,10 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         packet->color = 0;
     }
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1659,15 +1659,15 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
-    packet->vel[0] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->vel[1] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->vel[2] = speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[2];
+    packet->vel[0] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->vel[1] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->vel[2] = speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_LENGTH_VF10(velocityLength);
     VU0_LOAD_MATRIX(effect->head.matrix);
@@ -1678,9 +1678,9 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
     packet->pos[1] = packet->vel[1] + effect->head.origin[1];
     packet->pos[2] = packet->vel[2] + effect->head.origin[2];
     if (effect->mode == 1) {
-        directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-        directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-        directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+        directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+        directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
         VU0_LOAD_VF(vf10, directionVector);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, directionVector);
@@ -1693,12 +1693,12 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
         packet->f38 = 0;
     }
     jitter = effect->jitterB;
-    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.frameCount;
+    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.frameCount;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -1863,15 +1863,15 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet += packetIndex;
     radius = effect->radius;
     jitter = effect->f178;
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    directionVector[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
-    packet->pos[0] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[0];
-    packet->pos[1] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[1];
-    packet->pos[2] = radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * directionVector[2];
+    packet->pos[0] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[0];
+    packet->pos[1] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[1];
+    packet->pos[2] = radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * directionVector[2];
     VU0_LOAD_MATRIX(effect->head.matrix);
     VU0_LOAD_VF(vf10, packet->pos);
     VU0_APPLY_MATRIX(vf10, vf10);
@@ -1879,23 +1879,23 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet->pos[0] += effect->head.origin[0];
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
-    packet->vel[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    packet->vel[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     packet->vel[1] = 0;
-    packet->vel[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    packet->vel[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, packet->vel);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_0034DF38) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
     packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2052,7 +2052,7 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex)
     packet->age = -1;
     packet->color = 0;
     jitter = effect->jitter;
-    radius = effect->radius * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    radius = effect->radius * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     packet->f30 = radius;
     angle = (3.14159265f * 2.0f) / effect->period * (packetIndex % effect->period);
     packet->vel[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
@@ -2068,10 +2068,10 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, packet);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2260,10 +2260,10 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2595,10 +2595,10 @@ void effInitParticleRecord(effect)
     record->angle = 0;
     effect->lastSpeed = effect->speed;
     jitter = effect->speedJitter;
-    record->speed = effect->speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    record->speed = effect->speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->angleJitter;
     if (jitter != 0) {
-        record->angle = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        record->angle = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         record->angle = 0;
     }
@@ -2708,9 +2708,9 @@ void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
     switch (effect->mode) {
     case 0:
         if (effect->randomDir) {
-            direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
-            direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
@@ -2728,11 +2728,11 @@ void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(D_0034DF38) * effect->jitter + (1.0f - effect->jitter);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
-            packet->f3C = (effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f) * gravity;
+            packet->f3C = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
         } else {
             /* This native branch initializes position, leaving the stored offset intact. */
             angle = (3.14159265f * 2.0f) / (u32)effect->head.packetCount * index;
@@ -2757,13 +2757,13 @@ void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
             packet->f34 = 0;
             packet->f38 = 0;
             PCP_COPY_VECTOR(packet->pos, effect->head.origin);
-            direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-            direction[1] = -((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
-            direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = -((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(D_0034DF38) * effect->jitter + (1.0f - effect->jitter);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             packet->vel[0] = direction[0] * speed * jitter;
             packet->vel[1] = direction[1] * speed * jitter;
             packet->vel[2] = direction[2] * speed * jitter;
@@ -2784,13 +2784,13 @@ void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
-            direction[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-            direction[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
-            direction[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
             VU0_LOAD_VF(vf10, direction);
             VU0_NORMALIZE_VF10();
             VU0_STORE_VF(vf10, direction);
-            jitter = effMiscRandUnitFloat(D_0034DF38) * effect->jitter + (1.0f - effect->jitter);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
             direction[0] *= speed * jitter;
             direction[1] *= speed * jitter;
             direction[2] *= speed * jitter;
@@ -2822,10 +2822,10 @@ void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }
@@ -2983,10 +2983,10 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
 
     packet += packetIndex;
     auxiliaryCursor += packetIndex;
-    radialDistance = effect->radius * ((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f);
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    radialDistance = effect->radius * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, directionVector);
@@ -2997,24 +2997,24 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     VU0_LOAD_VF(vf10, *auxiliaryCursor);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, *auxiliaryCursor);
-    directionVector[0] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     directionVector[1] = 0;
-    directionVector[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f;
+    directionVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
     VU0_LOAD_VF(vf10, directionVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, packet->vel);
-    packet->f30 = effect->f164 * (effMiscRandUnitFloat(D_0034DF38) * effect->f174 + (1.0f - effect->f174));
+    packet->f30 = effect->f164 * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f174 + (1.0f - effect->f174));
     packet->f34 = 0;
     packet->f38 = 0;
-    packet->f3C = effect->f15C * (effMiscRandUnitFloat(D_0034DF38) * effect->f170 + (1.0f - effect->f170));
+    packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
-        packet->spin = (effMiscRandUnitFloat(D_0034DF38) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
     } else {
         packet->spin = 0;
     }

@@ -399,7 +399,7 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
 
 typedef struct EffPCPTwinWork {
@@ -421,13 +421,13 @@ typedef struct EffPCPTwinWork {
 void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
     u128 mtx[4];
 
-    func_002DD688((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 6.283185f);
+    func_002DD688((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
     effParamWorkCallback2(work->pair[index][0], mtx);
     effParamWorkCallback2(work->pair[index][1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][0]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][1]), 0, 0);
-    work->counter[index] = effMiscRand(D_0034DF38) % 10;
+    work->counter[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
@@ -553,14 +553,14 @@ void effPcpSetTwinEffectColor(EffPCPTwinWork *work, u32 val) {
 void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
-    func_002DD688((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 6.283185f);
+    func_002DD688((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 6.283185f);
     VU0_STORE_MATRIX_NOCLOBBER(mtx);
     effParamWorkCallback2(work->handle[index * 2], mtx);
     effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
-    work->offset[index] = effMiscRandUnitFloat(D_0034DF38) * 150.0f;
-    work->delay[index] = effMiscRand(D_0034DF38) % 10;
+    work->offset[index] = effMiscRandUnitFloat(effDefaultRandomState) * 150.0f;
+    work->delay[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 
@@ -811,7 +811,7 @@ void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index) {
 
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, index & 1);
-    work->delay[index] = effMiscRand(D_0034DF38) % 10;
+    work->delay[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 
@@ -986,7 +986,7 @@ void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
                 sdfLoadMapRecordPositionVector(model->inner, point + 1);
                 VU0_STORE_VF(vf10, position);
                 PCP_COPY_VECTOR(work->samplePositions[captureRow][point], position);
-                work->animationFrames[captureRow][point] = effMiscRand(D_0034DF38);
+                work->animationFrames[captureRow][point] = effMiscRand(effDefaultRandomState);
                 work->sampleScales[captureRow][point] = 0;
                 work->sampleAges[captureRow][point] = 0;
             }
@@ -1148,20 +1148,20 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
         D_00354D40->unk44 = spread * 1.25f;
         D_00354D40->unk4C = spread * 12.5f;
-        radius = (effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         D_00354D40->vel[1] = 0;
         D_00354D40->vel[0] = sinv * radius;
         D_00354D40->vel[2] = cosv * radius;
         dir[0] = sinv;
-        dir[1] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f + 2.0f;
+        dir[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
         VU0_LOAD_VF($vf10, dir);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF($vf10, dir);
-        reach = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 350.0f;
+        reach = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
         scale[0] = reach;
         scale[1] = -reach;
@@ -1172,11 +1172,11 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, D_00354D40);
         if (scale[0] < 250.0f) {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
-            life = effMiscRand(D_0034DF38) % 5 + 5;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(effDefaultRandomState) % 5 + 5;
         } else {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 10.0f;
-            life = effMiscRand(D_0034DF38) % 6 + 15;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(effDefaultRandomState) % 6 + 15;
         }
         D_00354D40->lifetime = life;
         D_00354D40->speed = speed;
@@ -1277,18 +1277,18 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
         D_00354DA0->unk44 = spread * 1.25f;
         D_00354DA0->unk4C = spread * 12.5f;
-        radius = (effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         D_00354DA0->vel[1] = 0;
         D_00354DA0->vel[0] = sinv * radius;
         D_00354DA0->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354DA0->pos[0] = 0;
         D_00354DA0->pos[2] = 0;
         D_00354DA0->pos[1] = -height;
@@ -1298,11 +1298,11 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         D_00354DA0->pos[0] += D_00354DA0->vel[0];
         D_00354DA0->pos[2] += D_00354DA0->vel[2];
         if (height < 300.0f) {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
-            life = effMiscRand(D_0034DF38) % 5 + 5;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(effDefaultRandomState) % 5 + 5;
         } else {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 10.0f;
-            life = effMiscRand(D_0034DF38) % 6 + 15;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(effDefaultRandomState) % 6 + 15;
         }
         D_00354DA0->lifetime = life;
         D_00354DA0->speed = speed;
@@ -1376,17 +1376,17 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
-        spread = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
         D_00354E00->unk44 = spread * 1.25f;
         D_00354E00->unk4C = spread * 12.5f;
         D_00354E00->vel[1] = 0;
-        D_00354E00->vel[0] = sinv * ((effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 500.0f);
-        D_00354E00->vel[2] = cosv * ((effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 250.0f);
+        D_00354E00->vel[0] = sinv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        D_00354E00->vel[2] = cosv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E00->pos[0] = 0;
         D_00354E00->pos[2] = 0;
         D_00354E00->pos[1] = -height;
@@ -1396,11 +1396,11 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         D_00354E00->pos[0] += D_00354E00->vel[0];
         D_00354E00->pos[2] += D_00354E00->vel[2];
         if (height < 300.0f) {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
-            life = effMiscRand(D_0034DF38) % 5 + 5;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(effDefaultRandomState) % 5 + 5;
         } else {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 10.0f;
-            life = effMiscRand(D_0034DF38) % 6 + 15;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(effDefaultRandomState) % 6 + 15;
         }
         D_00354E00->lifetime = life;
         D_00354E00->speed = speed;
@@ -1474,18 +1474,18 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 60.0f * EFF_DEG2RAD;
         }
-        spread = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
         D_00354E60->unk44 = spread * 1.25f;
         D_00354E60->unk4C = spread * 12.5f;
-        radius = (effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 100.0f;
+        radius = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 100.0f;
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
         D_00354E60->vel[1] = 0;
         D_00354E60->vel[0] = sinv * radius;
         D_00354E60->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E60->pos[0] = 0;
         D_00354E60->pos[2] = 0;
         D_00354E60->pos[1] = -height;
@@ -1495,11 +1495,11 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         D_00354E60->pos[0] += D_00354E60->vel[0];
         D_00354E60->pos[2] += D_00354E60->vel[2];
         if (height < 300.0f) {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
-            life = effMiscRand(D_0034DF38) % 5 + 5;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(effDefaultRandomState) % 5 + 5;
         } else {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 10.0f;
-            life = effMiscRand(D_0034DF38) % 6 + 15;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(effDefaultRandomState) % 6 + 15;
         }
         D_00354E60->lifetime = life;
         D_00354E60->speed = speed;
@@ -1563,15 +1563,15 @@ void effPcpSpawnFixedOriginTwelve(EffPCPThunderGroup *group) {
     s32 life;
 
     for (i = 0; i < 12; i++) {
-        params = &D_00354EB8[effMiscRand(D_0034DF38) & 1];
-        params->speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 20.0f;
-        life = effMiscRand(D_0034DF38) % 6 + 15;
+        params = &D_00354EB8[effMiscRand(effDefaultRandomState) & 1];
+        params->speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 20.0f;
+        life = effMiscRand(effDefaultRandomState) % 6 + 15;
         params->pos[0] = -150.0f;
         params->pos[1] = -500.0f;
         params->pos[2] = 0;
         params->lifetime = life;
-        angle = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
-        dist = (effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 600.0f;
+        angle = effMiscRandUnitFloat(effDefaultRandomState) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
+        dist = (effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 600.0f;
         params->vel[0] = params->pos[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * dist;
         params->vel[1] = params->pos[1] + sdfSinPoly(angle) * dist;
         params->vel[2] = 0;
@@ -1634,19 +1634,19 @@ void effPcpSpawnSidewaysEight(EffPCPThunderGroup *group) {
     EffSpawnParams *params;
 
     for (i = 0; i < 8; i++) {
-        params = &D_00354F60[effMiscRand(D_0034DF38) & 1];
+        params = &D_00354F60[effMiscRand(effDefaultRandomState) & 1];
         if (i & 1) {
-            params->vel[0] = effMiscRandUnitFloat(D_0034DF38) * 500.0f;
+            params->vel[0] = effMiscRandUnitFloat(effDefaultRandomState) * 500.0f;
         } else {
-            params->vel[0] = effMiscRandUnitFloat(D_0034DF38) * -500.0f;
+            params->vel[0] = effMiscRandUnitFloat(effDefaultRandomState) * -500.0f;
         }
         params->vel[1] = 0;
-        params->vel[2] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 250.0f;
+        params->vel[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 250.0f;
         params->pos[0] = 0;
         params->pos[1] = -600.0f;
         params->pos[2] = 0;
-        func_002DD608((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
-        func_002DD9E8((effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        func_002DD608((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        func_002DD9E8((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         sdfMultiplyVuMatrixInPlace();
         VU0_LOAD_VF($vf10, params->pos);
                 VU0_ROTATE_VEC(vf10, vf10);
@@ -1802,17 +1802,17 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
             cosv = sdfSinPoly(angle);
             angle += 24.0f * EFF_DEG2RAD;
         }
-        spread = effMiscRandUnitFloat(D_0034DF38) * 0.5f + 0.5f;
+        spread = effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f;
         D_00355060->unk44 = spread * 1.25f;
         D_00355060->unk4C = spread * 12.5f;
         D_00355060->vel[1] = 0;
-        D_00355060->vel[0] = sinv * ((effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 500.0f);
-        D_00355060->vel[2] = cosv * ((effMiscRandUnitFloat(D_0034DF38) * 0.25f + 0.75f) * 250.0f);
+        D_00355060->vel[0] = sinv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 500.0f);
+        D_00355060->vel[2] = cosv * ((effMiscRandUnitFloat(effDefaultRandomState) * 0.25f + 0.75f) * 250.0f);
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(D_0034DF38) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
-        height = (effMiscRandUnitFloat(D_0034DF38) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00355060->pos[0] = 0;
         D_00355060->pos[2] = 0;
         D_00355060->pos[1] = -height;
@@ -1822,11 +1822,11 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         D_00355060->pos[0] += D_00355060->vel[0];
         D_00355060->pos[2] += D_00355060->vel[2];
         if (height < 300.0f) {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 2.5f + 5.0f;
-            life = effMiscRand(D_0034DF38) % 5 + 5;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = effMiscRand(effDefaultRandomState) % 5 + 5;
         } else {
-            speed = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 5.0f + 10.0f;
-            life = effMiscRand(D_0034DF38) % 6 + 15;
+            speed = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = effMiscRand(effDefaultRandomState) % 6 + 15;
         }
         D_00355060->lifetime = life;
         D_00355060->speed = speed;
@@ -3491,7 +3491,7 @@ void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
 }
 
 extern f32 effMiscRandUnitFloat(void *state);
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 
 /* Small PCP effect with a 4x4 matrix at 0x10 (0x68 bytes). */
 typedef struct EffPCPSpinWork {
@@ -3515,8 +3515,8 @@ EffPCPSpinWork *effSpinSingleCreateFromTable(void *src) {
     work->color = 0x80808080;
     work->handle0 = effParamCreateFromTable(src, 0);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
-    if (effMiscRand(D_0034DF38) & 1) {
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
+    if (effMiscRand(effDefaultRandomState) & 1) {
         work->angle += 3.14159265f;
     }
     return work;
@@ -3530,8 +3530,8 @@ EffPCPSpinWork *effSpinSingleClone(EffPCPSpinWork *src) {
     work->scale = 1.0f;
     work->color = 0x80808080;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
-    if (effMiscRand(D_0034DF38) & 1) {
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
+    if (effMiscRand(effDefaultRandomState) & 1) {
         work->angle += 3.14159265f;
     }
     work->handle0 = effParamWorkDuplicate(src->handle0);
@@ -3587,7 +3587,7 @@ EffPCPSpinWork *effSpinEffectCreateFromTable(void *src) {
     work->handle0 = effParamCreateFromTable(src, 0);
     work->handle1 = effParamCreateFromTable(src, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
 
@@ -3600,7 +3600,7 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     work->handle0 = effParamWorkDuplicate(src->handle0);
     work->handle1 = effParamWorkDuplicate(src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
 
@@ -3665,7 +3665,7 @@ EffPCPSpinWork *effPcpCreateSpinningPair(void *src) {
     work->handle0 = effParamCreateFromTable(src, 0);
     work->handle1 = effParamCreateFromTable(src, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
 
@@ -3678,7 +3678,7 @@ EffPCPSpinWork *effPcpCloneSpinningPair(EffPCPSpinWork *src) {
     work->handle0 = effParamWorkDuplicate(src->handle0);
     work->handle1 = effParamWorkDuplicate(src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->angle = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f;
+    work->angle = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f;
     return work;
 }
 
@@ -4854,15 +4854,15 @@ void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
     f32 ratio;
 
     if (spread > 0) {
-        entry->frame = -(effMiscRand(D_0034DF38) % spread);
+        entry->frame = -(effMiscRand(effDefaultRandomState) % spread);
     }
     ratio = work->head.startJitter;
-    entry->position = work->head.startPosition * (effMiscRandUnitFloat(D_0034DF38) * ratio + (1.0f - ratio)) * scale;
+    entry->position = work->head.startPosition * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio)) * scale;
     ratio = work->head.endJitter;
-    entry->positionStep = (work->head.endPosition * (effMiscRandUnitFloat(D_0034DF38) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
+    entry->positionStep = (work->head.endPosition * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio)) * scale - entry->position) / (f32)work->head.framesPerEntry;
     entry->angle = 3.14159265f * 2.0f / (f32)work->head.count * (f32)index;
     ratio = work->head.unk80;
-    entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(D_0034DF38) * ratio + (1.0f - ratio));
+    entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio));
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_001818A8);
@@ -4901,7 +4901,7 @@ EffPCPSprayWork *effSprayEffectCreateFromTable(void *src) {
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
         work->id[i] = i;
-        work->angle[i] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->angle[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamCreateFromTable(src, 0);
     return work;
@@ -4918,7 +4918,7 @@ EffPCPSprayWork *effSprayEffectClone(EffPCPSprayWork *src) {
     for (i = 0; i < work->count; i++) {
         work->handle[i] = 0;
         work->id[i] = i;
-        work->angle[i] = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+        work->angle[i] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
     }
     work->handle[0] = effParamWorkDuplicate(src->handle[0]);
     return work;
@@ -5154,7 +5154,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     for (i = 0; i < count; i++) {
         entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->frame = -(effMiscRand(D_0034DF38) % life);
+            entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         } else {
             entry->frame = 0;
         }
@@ -5205,7 +5205,7 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     for (i = 0; i < count; i++) {
         entry->event = effEventCreate(src->owner, 2, &place);
         if (life > 0) {
-            entry->frame = -(effMiscRand(D_0034DF38) % life);
+            entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         } else {
             entry->frame = 0;
         }
@@ -5242,12 +5242,12 @@ void effPcpDriftRandomizeSlot(EffPCPDriftEventWork *work, s32 index) {
     slot = &work->entries[index];
     scale = work->scale;
     spread = work->params.startJitter;
-    slot->position = work->params.startPosition * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) * scale;
+    slot->position = work->params.startPosition * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) * scale;
     spread = work->params.endJitter;
-    slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
+    slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
     slot->angle = 6.2831852f / (f32)work->params.count * (f32)index;
     spread = work->params.angleJitter;
-    slot->angleStep = work->params.angleStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    slot->angleStep = work->params.angleStep * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
 
@@ -5399,7 +5399,7 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
         entry->fragment = effThunderFragCreate(&src->fragmentParams);
         entry->eventA = effEventCreate(work->ownerA, 2, &place);
         entry->eventB = effEventCreate(work->ownerB, 2, &place);
-        entry->frame = -(effMiscRand(D_0034DF38) % life);
+        entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         entry++;
     }
     return work;
@@ -5450,7 +5450,7 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
         entry->fragment = effThunderFragCreate(&src->params.fragmentParams);
         entry->eventA = effEventCreate(src->ownerA, 2, &place);
         entry->eventB = effEventCreate(src->ownerB, 2, &place);
-        entry->frame = -(effMiscRand(D_0034DF38) % life);
+        entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         entry++;
     }
     return work;
@@ -5490,13 +5490,13 @@ void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
     slot = &work->entries[index];
     slot->phase = (3.14159265f * 2.0f) / work->params.count * index;
     spread = work->params.radiusJitter;
-    slot->radius = work->params.baseRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    slot->radius = work->params.baseRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     slot->tilt = 0;
     spread = work->params.tiltJitter;
-    if (effMiscRand(D_0034DF38) & 1) {
-        slot->tiltStep = work->params.baseTiltStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    if (effMiscRand(effDefaultRandomState) & 1) {
+        slot->tiltStep = work->params.baseTiltStep * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     } else {
-        slot->tiltStep = -work->params.baseTiltStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+        slot->tiltStep = -work->params.baseTiltStep * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     }
 }
 
@@ -5606,7 +5606,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 frame = entry->frame;
             }
             if (repeat != 0 && frame >= duration) {
-                entry->frame = -(effMiscRand(D_0034DF38) % delaySpread);
+                entry->frame = -(effMiscRand(effDefaultRandomState) % delaySpread);
             } else {
                 entry->frame = frame + 1;
             }
@@ -5689,7 +5689,7 @@ EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *sr
     for (i = 0; i < count; i++) {
         entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->frame = -(effMiscRand(D_0034DF38) % life);
+            entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         } else {
             entry->frame = 0;
         }
@@ -5740,7 +5740,7 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     for (i = 0; i < count; i++) {
         entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
-            entry->frame = -(effMiscRand(D_0034DF38) % life);
+            entry->frame = -(effMiscRand(effDefaultRandomState) % life);
         } else {
             entry->frame = 0;
         }
@@ -5777,16 +5777,16 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
     slot = &work->entries[index];
     scale = work->scale;
     slot->frame = 0;
-    slot->height = -work->params.startHeightRange * effMiscRandUnitFloat(D_0034DF38);
+    slot->height = -work->params.startHeightRange * effMiscRandUnitFloat(effDefaultRandomState);
     spread = work->params.heightJitter;
-    slot->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
-    slot->angle = effMiscRandUnitFloat(D_0034DF38) * (3.14159265f * 2.0f);
+    slot->heightStep = work->params.initialHeightStep * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
+    slot->angle = effMiscRandUnitFloat(effDefaultRandomState) * (3.14159265f * 2.0f);
     spread = work->params.angularJitter;
-    slot->angularStep = work->params.initialAngularStep * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    slot->angularStep = work->params.initialAngularStep * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     spread = work->params.startJitter;
-    slot->position = work->params.startPosition * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) * scale;
+    slot->position = work->params.startPosition * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) * scale;
     spread = work->params.endJitter;
-    slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
+    slot->positionStep = (work->params.endPosition * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
 }
 
 

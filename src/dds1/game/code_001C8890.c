@@ -9168,8 +9168,6 @@ void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     VU0_LOAD_VF(vf10, pos);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4668);
-
 /* Complete 0x60-byte camera-setup records. The seven bank boundaries and
  * their native 0x60 indexing establish the record and array extents. */
 typedef struct BtlCameraSetupPointPolicy {
@@ -9215,6 +9213,8 @@ extern f32 D_003BB690;
 
 /* Select a camera policy, construct its focus and eye, and initialize the
  * optional endpoint used by the camera cursor. */
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4668);
+
 void func_001E6BB0(BtlLinkedCommand *action, BtlCamState *out, s16 bank, s16 index) {
     f32 focus[4];
     f32 eye[4];

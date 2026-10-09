@@ -47,7 +47,7 @@ typedef struct EffEmit {
 
 extern u32 effMiscRand(void *state);
 
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 
 
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
@@ -110,7 +110,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
             recordCursor->param = effParamWorkDuplicate(parameterTemplate);
-            recordCursor->delay = -(effMiscRand(D_003AA868) % delayModulus);
+            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
             recordCursor++;
         }
     }
@@ -161,7 +161,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->t = 0;
     bezierSlot->step = cursorStep;
 
-    centeredRandom = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -180,7 +180,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[0][1] = jitteredPoint[1];
     bezierSlot->controlPoints[0][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[1] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -199,7 +199,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[1][1] = jitteredPoint[1];
     bezierSlot->controlPoints[1][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[2] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -219,7 +219,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     bezierSlot->controlPoints[2][1] = jitteredPoint[1];
     bezierSlot->controlPoints[2][2] = jitteredPoint[2];
 
-    centeredRandom = effMiscRandUnitFloat(D_003AA868) - 0.5f;
+    centeredRandom = effMiscRandUnitFloat(effDefaultRandomState) - 0.5f;
     jitterScale[0] = work->head.jitter[3] * (centeredRandom + centeredRandom);
     jitterScale[1] = jitterScale[0];
     jitterScale[2] = jitterScale[0];
@@ -286,7 +286,7 @@ void effUpdateChannelWork(EffChanWork *work) {
         if (recordTime < activeSteps) {
             recordCursor->delay++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(effMiscRand(D_003AA868) % delayModulus);
+            recordCursor->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
         } else {
             recordCursor->delay++;
         }
@@ -336,7 +336,7 @@ void effFillRandRecords(EffEmit *emitter) {
     }
     do {
         effJitterChannelControlPoints(channelWork, recordIndex);
-        recordCursor->delay = effMiscRand(&D_003AA868) % stepModulus;
+        recordCursor->delay = effMiscRand(&effDefaultRandomState) % stepModulus;
         bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;
