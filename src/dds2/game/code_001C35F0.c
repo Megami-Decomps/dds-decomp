@@ -280,7 +280,33 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3DB0);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3EC0);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C43F8);
+typedef struct BattlePanelColors {
+    u32 values[4];
+} BattlePanelColors;
+
+extern BtlResBlock *btlResourceBlock;
+extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern const BattlePanelColors D_00416870;
+
+void func_001C43F8(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    BattlePanelColors colors = D_00416870;
+    s32 x = work->activeEntries[slot].position[0];
+    s32 y = work->activeEntries[slot].position[1];
+    s32 state = work->activeEntries[slot].presentation.pendingSceneState;
+    u32 color;
+    s32 i;
+
+    if (state > 0 && (state < 4 || state == 5)) {
+        color = work->activeEntries[slot].presentation.unkF0 | 0x80808000;
+        for (i = 3; i >= 0; i--) {
+            colors.values[i] = color;
+        }
+        func_00306C28((x + work->activeEntries[slot].presentation.cursorOffset[0]) << 4,
+                      (y + work->activeEntries[slot].presentation.cursorOffset[1]) << 3, 0,
+                      colors.values, 0, btlResourceBlock->resA, work->activeEntries[slot].presentation.cursorOption,
+                      0x53);
+    }
+}
 
 extern f32 sdfSinPoly(f32);
 
@@ -500,13 +526,8 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C5D10);
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6010);
 
 
-typedef struct BattlePanelColors {
-    u32 values[4];
-} BattlePanelColors;
 
 extern const BattlePanelColors D_004168D8;
-extern BtlResBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
 void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {
     BattlePanelColors colors = D_004168D8;
