@@ -188,7 +188,6 @@ segments:
       - [0x1477A0, c, event/evtEventViewer]  # Nocturne __FILE__
       - [0x148518, c, game/code_00247518]
       - [0x14ED20, c, event/evtPolygonMovie]  # Nocturne __FILE__
-      - [0x1509B8, c, game/code_0024F9B8]
       - [0x150EF0, c, event/evtPicture]  # Nocturne __FILE__
       - [0x151010, c, game/code_00250010]
       - [0x15E230, c, event/evtEventPack]  # Nocturne __FILE__
@@ -384,7 +383,6 @@ segments:
       - [0x3233B0, .rodata, event/evtEventViewer]
       - [0x3234D0, .rodata, game/code_00247518]
       - [0x3240E0, .rodata, event/evtPolygonMovie]
-      - [0x324230, .rodata, game/code_0024F9B8]
       - [0x324380, .rodata, game/code_00250010]
       - [0x325830, .rodata, event/evtEventPack]
       - [0x3258C0, .rodata, game/code_0025DA20]
@@ -595,7 +593,7 @@ segments:
       - [0x338210, .sdata, game/code_002437F0]
       - [0x33822C, .sdata, game/code_00244F00]
       - [0x3382B0, .sdata, game/code_00247518]
-      - [0x3383B8, .sdata, game/code_0024F9B8]
+      - [0x3383B8, .sdata, event/evtPolygonMovie]
       - [0x3383C0, .sdata, game/code_00250010]
       - [0x3387D8, .sdata, event/evtEventPack]
       - [0x3387F0, .sdata, game/code_0025DA20]

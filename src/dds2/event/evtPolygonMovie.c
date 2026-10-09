@@ -797,3 +797,136 @@ SdfMemBlock *evtPolygonMovieCreateHeader(void **out) {
     return handle;
 }
 
+#include "common.h"
+#include "sdf_chip.h"
+#include "sdf_resource.h"
+#include "evt_viewer.h"
+#include "kwln.h"
+#include "sdf.h"
+#include "evt_world.h"
+#include "evt_picture.h"
+#include "evt_polygon_movie.h"
+#include "file.h"
+#include "file_request_api.h"
+#include "kwln_task_lifecycle.h"
+
+
+extern SdfTex *itfLoadTextureFromAsset(const char *);
+
+
+
+extern char D_004373B8[];
+
+/* Build the 0x20-byte PMD3 resource header, copy it into a fresh allocation and
+ * hand the retained address back through `out`. */
+SdfMemBlock *func_0024F9B8(u8 **out) {
+    u8 buffer[0x20];
+    s32 size = 0x20;
+    SdfMemBlock *handle;
+    u8 *address;
+
+    memset(buffer, 0, size);
+    memcpy(buffer + 8, D_004373B8, 4);
+    *(s32 *)(buffer + 0x14) = 9;
+    handle = sdfAllocGeneralBlock(size);
+    address = (u8 *)sdfResourceRetainAddress(handle);
+    memcpy(address, buffer, size);
+    *out = address;
+    return handle;
+}
+
+extern s32 func_0035C860(char *output, const char *format, ...);
+
+s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3) {
+    func_0035C860(path1, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1",
+                  event / 10 * 10, event, event, id, event, id);
+    func_0035C860(path2, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+                  event / 10 * 10, event, event, id, event, id);
+    return func_0035C860(path3, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+                         event / 10 * 10, event, event, id, event, id);
+}
+
+INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024FB48);
+
+
+extern u32 D_00435CBC;
+extern s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3);
+extern void *memset(void *dst, s32 value, u32 size);
+extern s32 sdfPathExists(char *path);
+extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
+extern void func_0024DAC0(KwlnTask *task);
+extern void func_0024DAE0(EvtRuntime *viewer);
+extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */
+
+/* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
+KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
+    char path0[0x40];
+    char path1[0x40];
+    char path2[0x40];
+    SdfMemBlock *viewerHandle;
+    EvtRuntime *viewer;
+    PolyMovieWork *work;
+    KwlnTask *task;
+
+    D_00435CBC = 0x80000000;
+    viewerHandle = sdfAllocGeneralBlock(0x24BC);
+    viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
+    memset(viewer, 0, 0x24BC);
+    viewer->resourceHandle = viewerHandle;
+    evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
+    work = evtPolygonMovieAllocWork();
+    work->eventId = event;
+    work->sceneId = id;
+    work->mainResource.request = fileQueueDefaultCallbackRequest(path0);
+    work->flags |= 2;
+    work->secondaryResource.request = fileQueueDefaultCallbackRequest(path1);
+    work->flags |= 4;
+    if (sdfPathExists(path2) != 0) {
+        work->tertiaryResource.request = fileQueueDefaultCallbackRequest(path2);
+        work->flags |= 0x10;
+    } else {
+        work->tertiaryResource.request = 0;
+        work->tertiaryResource.address = 0;
+    }
+    task = kwlnTaskCreate(D_00423360, taskId, 1, 1, evtViewerStartUpdate, func_0024DAC0, (u32)viewer);
+    viewer->windowContext = work;
+    work->task = task;
+    func_0024DAE0(viewer);
+    return task;
+}
+
+/* Flag operations act on the scheduler task's user-value context. */
+void evtSetContextFlag(KwlnTask *task) {
+    EvtPictureWork *context;
+
+    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    context->flags = context->flags | EVT_PICTURE_FLAG_DRAW_ENABLED;
+}
+
+void evtClearContextFlag(KwlnTask *task) {
+    EvtPictureWork *context;
+
+    context = (EvtPictureWork *)kwlnTaskGetUserValue(task);
+    context->flags = context->flags & ~EVT_PICTURE_FLAG_DRAW_ENABLED;
+}
+
+void evtDestroyTaskHierarchy(u32 task) {
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 1);
+}
+
+/* Allocate the picture task's flag and texture state. */
+EvtPictureWork *evtAllocateContext(void) {
+    EvtPictureWork *context = sdfAllocSizeClassBlock(8);
+    context->flags = 0;
+    context->texture = NULL;
+    return context;
+}
+
+void evtSetConvertedContextValue(EvtPictureWork *context, const char *path) {
+    context->texture = itfLoadTextureFromAsset(path);
+}
+
+INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_00423360);
+
+INCLUDE_SDATA(const s32, "event/evtPolygonMovie", D_004373B8);
+
