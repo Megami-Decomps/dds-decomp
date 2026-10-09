@@ -285,8 +285,6 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
-
 extern u32 mdlGroupJobSemaphore;
 
 extern BattleGroupNode *btlFindGroupedEntity(s32 group, s32 id);
