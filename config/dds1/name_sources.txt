@@ -2528,6 +2528,7 @@
 0x0019B750	itfMesScriptSetMessageOption	inferred	passes one script value and zero to func_0019C968
 0x0019B7A0	itfMesScriptSetMessagePair	inferred	passes two script values to func_0019C968
 0x0019B808	itfMesScriptSetMessageRange	inferred	passes two script values to func_0019C9F0
+0x0019B870	itfMesGetWindowTexture	inferred	Returns the retained SdfTex pointer stored as the message window's texture; it does not return a scalar manager word.
 0x0019B880	itfMesSetFlags	inferred	ORs a bitmask into the shared itfMes flags word D_003BB1E8
 0x0019B890	itfMesClearFlags	inferred	AND-NOTs a bitmask out of the shared itfMes flags word D_003BB1E8
 0x0019B8A8	itfMesCreateWindow	inferred	acquires a pool node, allocates the 0x1E0-byte message state, installs the sub resource, resets the blk14/blk24/blk40/blkA4 blocks and bumps the window count at D_003D6EA0 [names_M71_ItfBlur.tsv]
@@ -7311,7 +7312,7 @@
 0x003D68C0	frFontResourceList	inferred	high confidence; src/dds1/game/code_00193C08.c frFontListInsert(): FntNode *head = D_003D68C0.head; Sentinel-linked font resource list with a node count maintained on insertion. [names_reviewed26.tsv]
 0x003D6C80	frFontWork	inferred	high confidence; src/dds1/interface/frFont.c frFontFreeAllEntries(): if (D_003D6C80.entries[i].resource != NULL) { Font subsystem state containing resource entries and the glyph/resource slots released during shutdown. [names_reviewed26.tsv]
 0x003D6C84	frFontResourceRecords	inferred	confidence=high; src/dds1/interface/frFont.c:D_003D6C84; type=font-resource record[]; refs=frFontGetGlyphCellWidth,frFontGetGlyphCellHeight; Font-indexed resource records provide glyph cell width and height through their metrics pointers. [names_qp9.tsv]
-0x003D6EA0	itfMesWork	inferred	high confidence; src/dds1/interface/itfMesManager.c itfMesGetGlobalWindowValue(): return D_003D6EA0.windowTexture; Shared message-window state holding the window texture and allocation context used by panel construction. [names_reviewed26.tsv]
+0x003D6EA0	itfMesWork	inferred	high confidence; src/dds1/interface/itfMesManager.c itfMesGetWindowTexture(): return D_003D6EA0.windowTexture; Shared message-window state holding the window texture and allocation context used by panel construction. [names_reviewed26.tsv]
 0x003D6ECC	itfWindowSlots	inferred	high confidence; src/dds1/game/code_00199AD8.c itfPanelStartEntry(): rec = D_003D6ECC[window].ptr; Window-indexed registry containing panel records used by script-window commands. [names_reviewed26.tsv]
 0x003D7580	btlRuntimeState	inferred	confidence=high; matched_users=src/dds1/game/code_0020EA40.c:btlActivateRuntime, src/dds1/game/code_0020EA40.c:btlClearOverlayBuffers; Shared battle-runtime state governs activation, fade state, pending work and overlay options. [names_qp9.tsv]
 0x003D7A50	mdlViewerState	inferred	confidence=high; matched_users=src/dds1/game/code_00218B48.c:mdlAddPlainViewerEntryForSelectedNode, src/dds1/game/code_00218B48.c:mdlAddViewEntryFlagged; Shared model-viewer state owns resources, selected nodes, numeric ranges and viewer-task lifecycle. [names_qp9.tsv]
