@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
@@ -29,7 +30,6 @@ extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 #define SDF_ASSET_PAIR_STATE_DIRTY 0xC0
 #define SDF_ASSET_ALL_STATE_DIRTY 0xFF
 #define SDF_ASSET_ENTRY_COUNT 2
-#define SDF_TEXT_PAIR_OVERRIDE_BIT 2
 #define SDF_TEXT_PAIR_OVERRIDE_CLEAR_MASK 0xFD
 #define SDF_SUBPARAM_BYTES 0x18
 #define SDF_ASSET_BYTES 0x48
@@ -59,38 +59,6 @@ extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 #define SDF_PARAM_TEXTURE_INDEX_MASK 0xFFFF
 #define SDF_PARAM_PACKET_MODE_SHIFT 16
 
-typedef struct SdfTextParam {
-    u32 unk00;
-    u16 unk04;
-    u8 dirtyFlags; /* 0x06: set by parameter setters below */
-    u8 pad07[9]; /* 0x07 */
-    u32 unk10; /* 0x10 */
-    u32 unk14; /* 0x14 */
-    union {
-        u32 secondaryColor;
-        struct {
-            u8 unk18;
-            u8 overrideFlags; /* bit 0x2 selects overrideFirst/overrideSecond */
-            u8 unk1A;
-            u8 unk1B;
-        };
-    };
-    f32 unk1C; /* 0x1C */
-    u32 unk20; /* 0x20 */
-    u8 pad24[4]; /* 0x24 */
-    f32 unk28; /* 0x28 */
-    f32 unk2C; /* 0x2C */
-    u32 unk30; /* 0x30 */
-    u32 unk34; /* 0x34 */
-    SdfSubParam *primarySubParam; /* 0x38 */
-    SdfSubParam *secondarySubParam; /* 0x3C */
-    f32 scalarPairFirst; /* 0x40 */
-    f32 scalarPairSecond; /* 0x44 */
-    u8 pad48[0x40]; /* 0x48 */
-    f32 overrideFirst; /* 0x88 */
-    f32 overrideSecond; /* 0x8C */
-    void *chunkTable; /* 0x90: resource chunk searched by tag */
-} SdfTextParam;
 
 extern f32 D_00438A48;
 
@@ -208,7 +176,7 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
 }
 
 SdfChunkHeader *sdfChunkFindByTag(SdfModel *model, s32 tag) {
-    return sdfChunkFindById((SdfChunkHeader *)model->chunkTable, tag);
+    return sdfChunkFindById(model->chunkTable, tag);
 }
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
@@ -358,29 +326,29 @@ u32 sdfGetLodChunkValue(SdfModel *model) {
 }
 
 /* Store the override pair and select it instead of the shared defaults. */
-void sdfSetTextFloatPairOverride(SdfTextParam *param, f32 first, f32 second) {
-    param->overrideFirst = first;
-    param->overrideSecond = second;
-    param->overrideFlags = param->overrideFlags | SDF_TEXT_PAIR_OVERRIDE_BIT;
+void sdfSetModelScalarOverrides(SdfModel *model, f32 first, f32 second) {
+    model->scalarOverrideFirst = first;
+    model->scalarOverrideSecond = second;
+    model->flags = model->flags | SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 
 /* Clear only the pair-override selection bit. */
-void sdfClearTextFloatPairOverride(SdfTextParam *param) {
-    param->overrideFlags = param->overrideFlags & SDF_TEXT_PAIR_OVERRIDE_CLEAR_MASK;
+void sdfClearModelScalarOverrides(SdfModel *model) {
+    model->flags = model->flags & SDF_TEXT_PAIR_OVERRIDE_CLEAR_MASK;
 }
 
 /* Return the first override value when selected, otherwise its shared default. */
-f32 sdfGetFirstTextOverrideOrDefault(SdfTextParam *param) {
-    if ((param->overrideFlags & SDF_TEXT_PAIR_OVERRIDE_BIT) != 0) {
-        return param->overrideFirst;
+f32 sdfGetFirstModelScalar(SdfModel *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideFirst;
     }
     return D_00438A48;
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
-f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
-    if ((param->overrideFlags & SDF_TEXT_PAIR_OVERRIDE_BIT) != 0) {
-        return param->overrideSecond;
+f32 sdfGetSecondModelScalar(SdfModel *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideSecond;
     }
     return D_00438A4C;
 }
@@ -433,7 +401,7 @@ void sdfReduceResourceListCount(DevRequest *list, s32 newCount, s32 applyReducti
     sdfDevResizeBufferedRequest(list, newCount);
 }
 
-extern SdfTex *func_0032B6B0(SdfTex *);
+extern SdfTex *sdfTexClone(SdfTex *);
 /* Clone every texture into a new buffered list; null sources return null.
  * Entries remain address words, so bridge them explicitly at the texture API. */
 DevRequest *sdfResourceListClone(DevRequest *source) {
@@ -447,7 +415,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
     itemCount = source->usedCount;
     clone = sdfCreateConfiguredBufferedResourceList(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        ((u32 *)clone->buffer)[itemIndex] = (u32)func_0032B6B0((SdfTex *)((u32 *)source->buffer)[itemIndex]);
+        ((u32 *)clone->buffer)[itemIndex] = (u32)sdfTexClone((SdfTex *)((u32 *)source->buffer)[itemIndex]);
     }
     clone->usedCount = itemCount;
     return clone;
@@ -544,8 +512,8 @@ void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void func_003332E8(SdfTextParam *param, u32 textureAddress) {
-    *(u32 *)&param->unk2C = textureAddress;
+void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, u32 textureAddress) {
+    param->texture = (SdfTex *)textureAddress;
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
@@ -605,8 +573,8 @@ void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void func_00333490(SdfTextParam *param, u32 textureAddress) {
-    param->unk30 = textureAddress;
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, u32 textureAddress) {
+    param->secondaryTexture = (SdfTex *)textureAddress;
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
@@ -679,25 +647,24 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
 /* Consume supported presence bits in their native order and return the next byte.
  * Texture indices and packet modes are unchecked; unknown bits consume no payload. */
 u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 *serializedData) {
-    SdfTextParam *param = (SdfTextParam *)asset;
     u32 parameterFlags;
     u8 *parameterCursor;
     u32 packedTextureMode;
 
-    param->unk00 = *(u32 *)serializedData;
-    param->unk04 = *(u16 *)(serializedData + 4);
+    asset->unk00 = *(u32 *)serializedData;
+    asset->unk04 = *(u16 *)(serializedData + 4);
     parameterFlags = *(u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
-        sdfSetPrimaryStateWordFirst((SdfAsset *)param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordFirst(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_SECOND_PRESENT) {
-        sdfSetPrimaryStateWordSecond((SdfAsset *)param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordSecond(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
-        func_003332E8(param, ((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
+        sdfSetAssetPrimaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_SCALARS_PRESENT) {
@@ -711,7 +678,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        func_00333490(param, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfSetAssetSecondaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
         sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
@@ -719,15 +686,15 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_THIRD_PRESENT) {
-        sdfSetPrimaryStateWordThird((SdfAsset *)param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordThird(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FOURTH_PRESENT) {
-        sdfSetPrimaryStateWordFourth((SdfAsset *)param, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordFourth(asset, *(u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {
-        sdfSetPrimaryStateFloat((SdfAsset *)param, *(f32 *)parameterCursor);
+        sdfSetPrimaryStateFloat(asset, *(f32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SCALAR_PAIR_PRESENT) {
@@ -959,7 +926,7 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     destination->unk14 = source->unk14;
     destination->unk1C = source->unk1C;
     destination->secondaryColor = source->secondaryColor;
-    *(u16 *)&destination->pad00[4] = *(u16 *)&source->pad00[4];
+    destination->unk04 = source->unk04;
     destination->texture = source->texture;
     destination->unk20 = source->unk20;
     destination->unk28 = source->unk28;

@@ -12,6 +12,8 @@ typedef struct MdlCtx MdlCtx;
 #define MDL_REQUIRE_ANCHOR_ENABLE 4
 
 struct MdlPartEntry;
+struct MdlObj;
+struct SdfTex;
 struct EffTrackPolyWork;
 
 /* Known resource-item kinds; the owner stores this domain in a halfword. */
@@ -24,8 +26,8 @@ typedef enum MdlResourceKind {
 
 typedef struct MdlObjectAttachment {
     MdlCtx *owner;
-    s32 objectAddress;
-    s32 data;
+    struct MdlObj *object; /* Borrowed from the owner's heterogeneous part list. */
+    struct SdfTex *texture; /* Borrowed texture-list node used for stream creation. */
     s32 minimumTime;
     u8 attributes[8];
 } MdlObjectAttachment;

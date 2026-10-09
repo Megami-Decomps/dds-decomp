@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
@@ -1121,11 +1122,6 @@ void sdfConsAppendClearPacket(SdfListHead *packetList,
     sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
-typedef struct VuLightingPacket {
-    u128 matrix[4];
-    u128 scaledRows[3];
-    u32 tag[4];
-} VuLightingPacket;
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
 void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {

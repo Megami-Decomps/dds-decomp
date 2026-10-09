@@ -43,7 +43,7 @@ typedef struct SdfItemListRef {
     SdfItemList *items; /* 0x00 */
     void *assets;      /* 0x04: serialized material/asset list */
     s32 slotPairCount; /* 0x08: passed to sdfModelAllocateSlotPairs */
-    u32 chunkTable;    /* 0x0C: retained at SdfModel.chunkTable */
+    struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
 } SdfItemListRef;
 
 typedef char SdfItemListRef_size_must_be_0x10[(sizeof(SdfItemListRef) == 0x10) ? 1 : -1];

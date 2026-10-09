@@ -33,360 +33,6 @@ extern f32 sdfSinPoly(f32 angle);
 
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 
-/* Three consecutive packed colors returned by effGetGroupIndexRecord. */
-typedef struct PcpFlashColorSlot {
-    s32 first;
-    s32 second;
-    s32 third;
-} PcpFlashColorSlot;
-
-typedef struct PcpFlashStreakWork PcpFlashStreakWork;
-typedef struct PcpFlashRotatingParticle PcpFlashRotatingParticle;
-
-/* Spawn, rotation and draw passes share this 0x58-byte streak work.
-   The position-rotation routine uses the same parts pointer at 0x40. */
-struct PcpFlashStreakWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 scaleRampTime;
-    u32 randomRange;
-    u32 colorA;
-    u32 colorB;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 maxScale;
-    f32 rotationStepRange;
-    u32 unk3C;
-    PcpFlashRotatingParticle *parts;
-    s32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashOrbitParticle PcpFlashOrbitParticle;
-
-struct PcpFlashOrbitParticle {
-    u32 color;
-    s32 age;
-    f32 scale;
-    f32 initialScale;
-    f32 angle;
-};
-
-typedef struct PcpFlashScalingOrbitWork PcpFlashScalingOrbitWork;
-
-/* func_0016AFF0 */
-struct PcpFlashScalingOrbitWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 scaleRampTime;
-    u32 randomRange;
-    u32 colorA;
-    u32 colorB;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 orbitRadius;
-    f32 maxScale;
-    f32 tilt;
-    f32 angularStep;
-    u32 unk44;
-    PcpFlashOrbitParticle *parts;
-    u32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashAccumulatingParticle PcpFlashAccumulatingParticle;
-
-struct PcpFlashAccumulatingParticle {
-    u32 color;
-    s32 age;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 accumulator;
-};
-
-typedef struct PcpFlashAccumulatingWork PcpFlashAccumulatingWork;
-
-/* func_0016B800 */
-struct PcpFlashAccumulatingWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    u32 randomRange;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 unk30;
-    f32 unk34;
-    f32 orbitRadius;
-    f32 unk3C;
-    f32 tilt;
-    f32 increment;
-    f32 radialStep;
-    u32 unk4C;
-    PcpFlashAccumulatingParticle *parts;
-    u32 unk54;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-/* Shared 0x10-byte motion state: accumulator is an angle for orbit arcs and
-   a radius for radial triangles; stepSpeed is radial speed or arc height. */
-typedef struct PcpFlashMotionParticle PcpFlashMotionParticle;
-
-struct PcpFlashMotionParticle {
-    u32 color;
-    s32 age;
-    f32 accumulator;
-    f32 stepSpeed; /* 0x0C: multiplied by decay each step, then added to
-                       * accumulator; also read as the particle's height */
-};
-
-typedef struct PcpFlashOrbitArcWork PcpFlashOrbitArcWork;
-
-/* The orbit constructor and renderer share this 0x80-byte work record.
-   The 0x58-byte copied parameters are followed by the motion-particle array
-   pointer and draw/resource state. */
-struct PcpFlashOrbitArcWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    u32 randomRange;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 angularStep;
-    u32 unk54;
-    PcpFlashMotionParticle *parts;
-    u32 unk5C;
-    u32 tintColor;
-    f32 renderScale;
-    f32 orbitRadius;
-    f32 normalSpan;
-    f32 upSpan;
-    f32 acrossSpan;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashRotatingQuadParticle PcpFlashRotatingQuadParticle;
-
-struct PcpFlashRotatingQuadParticle {
-    u32 color;
-    s32 age;
-    f32 angularStep;
-    f32 scale;
-    f32 angle;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 initialScale;
-};
-
-typedef struct PcpFlashRotatingQuadWork PcpFlashRotatingQuadWork;
-
-/* func_0016C9F0 */
-struct PcpFlashRotatingQuadWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 scaleRampTime;
-    u32 randomRange;
-    u8 pad24[0x04];
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 maxScale;
-    f32 angularStepRange;
-    u32 unk48;
-    PcpFlashRotatingQuadParticle *parts;
-    u32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashRadialTriangleWork PcpFlashRadialTriangleWork;
-
-/* func_0016D2A8 */
-struct PcpFlashRadialTriangleWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 initialRadius;
-    f32 initialRadialSpeed;
-    f32 radialDamping;
-    u32 unk38;
-    PcpFlashMotionParticle *parts;
-    s32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashRadialStripParticle PcpFlashRadialStripParticle;
-
-struct PcpFlashRadialStripParticle {
-    u32 color;
-    s32 age;
-    f32 angularStep;
-    f32 thickness;
-    f32 radius;
-    f32 radialSpeed;
-    f32 angle;
-    f32 span;
-};
-
-typedef struct PcpFlashRadialStripWork PcpFlashRadialStripWork;
-
-/* func_0016D940 */
-struct PcpFlashRadialStripWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    u32 randomRange;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 unk30;
-    f32 unk34;
-    f32 maxScale;
-    f32 unk3C;
-    f32 initialRadius;
-    f32 initialRadialSpeed;
-    f32 radialDamping;
-    u32 unk4C;
-    u8 pad50[0x80];
-    PcpFlashRadialStripParticle *parts;
-    u32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashFadingOrbitWork PcpFlashFadingOrbitWork;
-
-/* func_0016E290 */
-struct PcpFlashFadingOrbitWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 scaleRampTime;
-    u32 randomRange;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 orbitRadius;
-    f32 maxScale;
-    f32 tilt;
-    f32 angularStep;
-    u32 unk4C;
-    PcpFlashOrbitParticle *parts;
-    u32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-typedef struct PcpFlashOffsetRadialWork PcpFlashOffsetRadialWork;
-
-/* func_0016EB00 */
-struct PcpFlashOffsetRadialWork {
-    f32 origin[3];
-    u8 pad0C[0x04];
-    s32 particleCount;
-    u8 restartRandomly;
-    u8 pad15[0x03];
-    s32 lifetime;
-    s32 fadeInTime;
-    s32 fadeOutTime;
-    u32 colorA;
-    u32 colorB;
-    f32 initialRadius;
-    f32 initialRadialSpeed;
-    f32 radialDamping;
-    f32 originOffset;
-    u32 unk3C;
-    PcpFlashMotionParticle *parts;
-    s32 updateCount;
-    u32 tintColor;
-    f32 renderScale;
-    SdfMemBlock *allocationHandle;
-    EffRecordPool *resourceHandle;
-};
-
-struct PcpFlashRotatingParticle {
-    u32 color;
-    s32 age;
-    f32 rotationStep;
-    f32 scale;
-    f32 position[3];
-    f32 unk1C;
-    f32 upSpan;
-    f32 acrossSpan;
-    f32 initialScale;
-};
-
-
 extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 void effFlashTrianglePulseSpawnFromTable(void *table) {
@@ -587,7 +233,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     }
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk3C;
+    record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
@@ -626,9 +272,7 @@ void effFlashRotatingStreakSetRenderScale(PcpFlashStreakWork *work, f32 value)
 
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 
-typedef struct PcpFlashQuadColorSlot {
-    s32 color[5];
-} PcpFlashQuadColorSlot;
+
 
 /* Alternate the center alpha arrangement for successive streak vertices. */
 void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 flag, s32 param) {
@@ -867,7 +511,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
-    record->drawMode = work->unk44;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -1108,7 +752,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreate(work->particleCount * 2);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -1334,12 +978,7 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
     effDrawQuadRecordPool(handle);
 }
 
-/* The orbit-arc particles follow the same work header used by its draw and
-   angle-update passes; this is an allocation container, not a second view. */
-typedef struct PcpFlashOrbitArcBlock {
-    PcpFlashOrbitArcWork header;
-    PcpFlashMotionParticle parts[1];
-} PcpFlashOrbitArcBlock;
+
 
 
 PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
@@ -1371,7 +1010,7 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     angle = EFFECT_RING_START_ANGLE;
     record = effRecordPoolCreateFiveVertexGroups(ring->particleCount);
     record->scale = 1.0f;
-    record->drawMode = ring->unk54;
+    record->drawMode = ring->drawMode;
     ring->resourceHandle = record;
     step = EFFECT_RING_FULL_TURN / (u32)ring->particleCount;
     spread = ring->randomRange;
@@ -1626,7 +1265,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     }
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk48;
+    record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
@@ -1880,7 +1519,7 @@ PcpFlashRadialTriangleWork *effFlashRadialTriangleCreate(PcpFlashRadialTriangleP
     work->updateCount = 0;
     record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk38;
+    record->drawMode = work->drawMode;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }
@@ -2076,7 +1715,7 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     }
     record = effRecordPoolCreate(work->particleCount * 2);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
@@ -2337,7 +1976,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     angle = -3.14159265f / 2.0f;
     record = effRecordPoolCreateFiveVertexGroups(work->particleCount);
     record->scale = 1.0f;
-    record->drawMode = work->unk4C;
+    record->drawMode = work->drawMode;
     work->resourceHandle = record;
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
@@ -2575,7 +2214,7 @@ PcpFlashOffsetRadialWork *effFlashOffsetRadialTriangleCreate(PcpFlashOffsetRadia
     work->updateCount = 0;
     record = effRecordPoolCreateTriple(work->particleCount);
     work->resourceHandle = record;
-    record->drawMode = work->unk3C;
+    record->drawMode = work->drawMode;
     for (i = 0; i < work->particleCount; i++) {
         work->parts[i].age = 0;
     }

@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfChunkHeader;
+
 /* Three optional SDK light sources; each points to color and direction vec4.
  * The callee advances through three pointer words, not scalar slot metadata. */
 typedef f32 (*SdfLightSources[3])[4];
@@ -84,7 +86,7 @@ typedef struct SdfDrawNode {
     u32 color;                   /* 0x1C */
     u8 pad20[8];
     SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
-    u32 address;                  /* 0x30 */
+    u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
     s32 boundsAddress;            /* 0x34: optional address of two local xyz box corners */
     void *sourceItem;             /* 0x38: item this node was built from */
     u8 pad3C[0x14];
@@ -112,8 +114,12 @@ typedef char SdfSlotPair_size_must_be_8[(sizeof(SdfSlotPair) == 8) ? 1 : -1];
 typedef char SdfSlotEntry_size_must_be_0x10[(sizeof(SdfSlotEntry) == 0x10) ? 1 : -1];
 
 
-/* SdfModel.flags controls indexed draw-node lookup and alternate item setup. */
+typedef char SdfDrawNode_workspace_at_30[
+    ((u32)&((SdfDrawNode *)0)->workspace == 0x30) ? 1 : -1];
+
+/* Model flags select indexed lookup, scalar overrides and alternate item setup. */
 #define SDF_MODEL_FIND_DRAW_NODE_BY_ID 0x01
+#define SDF_MODEL_USE_SCALAR_OVERRIDES 0x02
 #define SDF_MODEL_ALTERNATE_ITEM_SETUP 0x04
 
 
@@ -134,9 +140,9 @@ typedef struct SdfModel {
     f32 scaleVector[4];
     SdfLightingPacketStorage *lighting;
     u32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    u32 chunkTable;
+    f32 scalarOverrideFirst;
+    f32 scalarOverrideSecond;
+    struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
     /* Float scalar (DDS2 0x232074 / Nocturne 0x2B07D4), forwarded
      * as raw packet bits by DDS1 0x2D9530. */
     union {
@@ -148,6 +154,12 @@ typedef struct SdfModel {
 } SdfModel;
 
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
+typedef char SdfModel_chunkTable_at_90[
+    ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
+typedef char SdfModel_scalarOverrideFirst_at_88[
+    ((u32)&((SdfModel *)0)->scalarOverrideFirst == 0x88) ? 1 : -1];
+typedef char SdfModel_scalarOverrideSecond_at_8C[
+    ((u32)&((SdfModel *)0)->scalarOverrideSecond == 0x8C) ? 1 : -1];
 
 SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source);

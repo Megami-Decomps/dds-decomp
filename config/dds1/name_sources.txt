@@ -3665,9 +3665,9 @@
 0x00217DF8	mdlAddEntryPlainEx	inferred	wraps func_00217CA8 with flag 0, passing float pair through
 0x00217E10	mdlFindNodeById	inferred	walks node list for s16 id at +0x28
 0x00217E58	mdlGetNodeMotionIndex	inferred	Finds the named motion node; returns its unsigned motionIndex widened to s32, or -1 when absent.
-0x00217E88	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its frameCount, or zero when absent; preserves the existing title-specific result type.
+0x00217E88	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its unsigned 16-bit frameCount, or zero when absent.
 0x00217EB0	mdlGetNodeFrameAsInt	inferred	Finds the named motion node; numerically converts its currentFrame to s32, or returns zero when absent.
-0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
+0x00217EE0	mdlGetNodeMotionTerminalStatus	inferred	native state comparison returns 2 for missing motion and 1 or 0 for terminal or nonterminal
 0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00217FA0	mdlLoadRotationQuaternionVU	inferred	Loads SdfModel.rotationQuaternion at +0x60 into vf10; viewer and actor callers use it as the stored rotation quaternion.
@@ -6283,6 +6283,7 @@
 0x002D26A8	sdfTexUploadSecondaryResource	inferred	Uploads secondary texture data when a secondary resource exists. [names_reviewed8.tsv]
 0x002D2700	sdfTexListInsert	inferred	inserts tex node at head of global D_003BD308 list
 0x002D2728	sdfTexCreateResourceWithReference	inferred	Allocates a texture and reference, attaches resource pointers and links it. [names_reviewed8.tsv]
+0x002D2800	sdfTexClone	inferred	Copies an SdfTex descriptor, creates clone-reference state, resets transient buffers and rebuilds texture storage.
 0x002D2950	sdfTexAllocHead	inferred	readability/matching review (QP16)
 0x002D2A28	sdfTexGetPaletteByteSize	inferred	Returns colors-per-palette times bytes-per-color times palette count.
 0x002D2A58	sdfTexAllocatePaletteData	inferred	Sets the texture palette byte size from its CLUT fields, allocates that retained palette buffer, and is called by file-header loading and clone setup.
@@ -6435,16 +6436,16 @@
 0x002D9E98	sdfLoadMapRecordPositionVector	inferred	Resolves a map record by id and loads its transformed position. [names_reviewed8.tsv]
 0x002D9ED8	sdfGetUniqueChunkValue	inferred	Returns the first data word of the UNIQ chunk when it exists.
 0x002D9F08	sdfGetLodChunkValue	inferred	Returns the first data word of the LODC chunk when it exists.
-0x002D9F38	sdfSetTextFloatPairOverride	inferred	Sets two floating-point text parameters and enables their shared override flag.
-0x002D9F50	sdfClearTextFloatPairOverride	inferred	Clears only the flag enabling the floating-point text parameter pair override.
-0x002D9F60	sdfGetFirstTextOverrideOrDefault	inferred	Selects the first per-text override at offset 0x88 or the corresponding global default.
-0x002D9F80	sdfGetSecondTextOverrideOrDefault	inferred	Selects the second per-text override at offset 0x8C or the corresponding global default.
+0x002D9F38	sdfSetModelScalarOverrides	inferred	Stores both model scalar overrides and enables the model override flag.
+0x002D9F50	sdfClearModelScalarOverrides	inferred	Clears the model scalar override selection flag without changing either stored value.
+0x002D9F60	sdfGetFirstModelScalar	inferred	Returns the first model scalar override when selected, otherwise its shared default.
+0x002D9F80	sdfGetSecondModelScalar	inferred	Returns the second model scalar override when selected, otherwise its shared default.
 0x002D9FA0	sdfSetForcedAssetTextureMode	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:325:func_002D9FA0; Stores global forced texture mode used by asset rendering.; twin=0x00332E50, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002D9FA8	sdfCreateConfiguredBufferedResourceList	inferred	Creates a resource list backed by a buffered request with two fixed settings. [names_reviewed17.tsv]
 0x002D9FC8	sdfResourceListRelease	inferred	Optionally releases every resource before freeing the list
 0x002DA058	sdfAppendResourceListItem	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:348:func_002DA058; Grows buffered list at capacity, appends resource and increments count.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002DA0C0	sdfReduceResourceListCount	inferred	If enabled and the requested count is smaller, walks the excess indices and stores the new resource-list count; always calls func_002E7730 afterward.
-0x002DA118	sdfResourceListClone	inferred	creates a buffered request of the same count and copies each item through func_002D2800 [names_M33_SmallSweep2.tsv]
+0x002DA118	sdfResourceListClone	inferred	creates a buffered request of the same count and copies each item through sdfTexClone [names_M33_SmallSweep2.tsv]
 0x002DA1B0	sdfUpdateActiveResourceListScalars	inferred	Applies a scalar update to active members of a resource list. [names_reviewed8.tsv]
 0x002DA240	sdfRegisterResourceQueueCallbacks	inferred	Registers callbacks on two SDF resource queues, the second using sdfAssetRelease.
 0x002DA270	sdfCreateResourceList	inferred	Returns a buffered resource-list request with caller-selected capacity and fixed 4 and 8 creation parameters.
@@ -6457,9 +6458,11 @@
 0x002DA3F0	sdfSetPrimaryStateWordThird	inferred	Stores the third primary-state u32 at SdfAsset+0x20 and marks the primary state dirty.
 0x002DA408	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at SdfAsset+0x28 and marks the primary state dirty.
 0x002DA420	sdfSetPrimaryStateFloat	inferred	Stores the primary-state float at SdfAsset+0x1C and marks the primary state dirty.
+0x002DA438	sdfSetAssetPrimaryTextureAddress	inferred	Stores a texture-address word in the primary texture field and marks primary state dirty.
 0x002DA450	sdfSubParamCreate	inferred	allocates and inits 0x18 sub-param block with defaults
 0x002DA4C8	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA548	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]
+0x002DA5E0	sdfSetAssetSecondaryTextureAddress	inferred	Stores a texture-address word in the secondary texture field and marks secondary state dirty.
 0x002DA630	sdfSetSecondaryTextScalars	inferred	Stores five scalars in the secondary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA6B0	sdfCopySecondaryTextScalars	inferred	Copies five input scalars into the secondary text subparameter. [names_reviewed8.tsv]
 0x002DA718	sdfSetTextScalarPair	inferred	Stores the paired floats and marks their dirty flag. [names_reviewed8.tsv]
@@ -6498,6 +6501,8 @@
 0x002DBB30	sdfMotionBlendDrawVector	inferred	Interpolates two vector keys with VU0 and stores the result in the draw node. [names_reviewed6.tsv]
 0x002DBBB0	sdfMotionBlendDrawVectorWithCurrent	inferred	Blends vector keys, then blends with the current vector using the second weight. [names_reviewed6.tsv]
 0x002DBC60	sdfMotionCreateInterpolatedQuaternionBinding	inferred	Allocates a draw binding whose callbacks interpolate three-angle keys, convert them to a quaternion, and update the node quaternion and matrix.
+0x002DBCC0	sdfMotionApplyInterpolatedEulerRotation	inferred	Interpolates three-component rotation keys, converts them to a quaternion, and writes the draw-node rotation matrix.
+0x002DBD80	sdfMotionBlendInterpolatedEulerRotation	inferred	Interpolates three-component rotation keys, converts them to a quaternion, blends with the captured quaternion, and updates the draw-node matrix.
 0x002DBE60	sdfMotionCreateScaleVectorBinding	inferred	Allocates motion work with handler table followed by the scale-vector interpolator. [names_reviewed6.tsv]
 0x002DBEC0	sdfMotionBlendScaleVector	inferred	Interpolates vec3 keys and writes the model scale-vector slot. [names_reviewed6.tsv]
 0x002DBF40	sdfMotionBlendScaleVectorWithCurrent	inferred	Interpolates vec3 keys then blends with the current vector into the scale slot. [names_reviewed6.tsv]
@@ -6716,6 +6721,7 @@
 0x002E7CD0	effMiscQuaternionDotVU	inferred	VU component products vf10*vf11 are accumulated across all four lanes and returned as float; high confidence.
 0x002E7D48	effMiscAxisAngleToQuaternionVf11	inferred	Uses half-angle trigonometric functions to scale vf11.xyz and set vf11.w, parallel to named vf10 implementation; high confidence.
 0x002E7D98	effMiscQuaternionToMatrixVU	inferred	VU operations expand quaternion vf10 into vf28-vf31 rotation matrix; high confidence.
+0x002E7F20	sdfConvertEulerAnglesToQuaternionVU	inferred	Converts three Euler-angle inputs into a quaternion in VU registers.
 0x002E8180	effMiscSlerpQuaternionVu	inferred	Spherically interpolates quaternion vectors in VU registers using the shortest arc. [names_reviewed12.tsv]
 0x002E8278	effMiscQuaternionNlerpVU	inferred	Uses dot sign to select shorter arc, blends vf10/vf11 linearly and normalizes result; high confidence.
 0x002E82F8	effMiscComputeQuaternionRotatedReferenceAngle	inferred	Rotates a reference vector through the quaternion basis and computes its planar angle. [names_reviewed11.tsv]

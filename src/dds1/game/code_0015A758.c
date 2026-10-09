@@ -569,7 +569,7 @@ void parPrependRecordListNode(ParListNode *node) {
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
 
 void func_0015B648(ParReleaseRecord *record) {
-    func_002DA438(record->asset);
+    sdfSetAssetPrimaryTextureAddress(record->asset);
 }
 
 void parControlInit(void) {
