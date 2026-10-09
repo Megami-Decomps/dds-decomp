@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
 #include "kwln_task_lifecycle.h"

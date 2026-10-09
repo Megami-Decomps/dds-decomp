@@ -87,13 +87,15 @@ void func_0026E240(MnuSpriteResourceGroup *resources) {
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E388);
 
-MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
+MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 cueDuration,
+                                                     u8 initialGenerations,
+                                                     u8 variant) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x48);
     MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
-    resource->owner = owner;
-    resource->sprite = sprite;
+    resource->cueDuration = cueDuration;
+    resource->initialGenerations = initialGenerations;
     resource->variant = variant;
     resource->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
     return resource;
