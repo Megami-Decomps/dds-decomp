@@ -2022,29 +2022,29 @@ extern s32 D_003BAA84;
 void btlInitDrawTables(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
-    state->debugSelectedUnit = NULL;
-    state->debugActionMenu.count = 7;
-    state->debugActionMenu.rows = 7;
-    state->debugModelMenu.rows = 0xF;
-    state->debugMotionMenu.count = 0x1D;
-    state->debugMotionMenu.rows = 0xF;
-    state->debugGunMenu.count = 0x20;
-    state->debugGunMenu.rows = 0xF;
+    state->debug.selectedUnit = NULL;
+    state->debug.actionMenu.count = 7;
+    state->debug.actionMenu.rows = 7;
+    state->debug.modelMenu.rows = 0xF;
+    state->debug.motionMenu.count = 0x1D;
+    state->debug.motionMenu.rows = 0xF;
+    state->debug.gunMenu.count = 0x20;
+    state->debug.gunMenu.rows = 0xF;
     if (state->unk_E0C == 0) {
-        state->debugModelMenu.count = 0x180;
+        state->debug.modelMenu.count = 0x180;
     } else {
-        state->debugModelMenu.count = 0x20;
+        state->debug.modelMenu.count = 0x20;
     }
     for (i = 0; i < 0x20; i++) {
-        state->table0[i] = D_003BAA70 + i * 0x11;
+        state->debug.table0[i] = D_003BAA70 + i * 0x11;
     }
     for (i = 0; i < 0x180; i++) {
-        state->table1[i] = D_003BAA74 + i * 0x11;
+        state->debug.table1[i] = D_003BAA74 + i * 0x11;
     }
     for (i = 0; i < 0x20; i++) {
-        state->table2[i] = D_003BAA84 + 0xFA0 + i * 0x19;
+        state->debug.table2[i] = D_003BAA84 + 0xFA0 + i * 0x19;
     }
-    state->unk_6A4 = 0;
+    state->debug.unk00 = 0;
     state->unk_E0E = -1;
 }
 
