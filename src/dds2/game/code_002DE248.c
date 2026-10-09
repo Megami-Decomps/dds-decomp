@@ -3355,7 +3355,7 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
 void effCreateClassWorkFromFile(s32 request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer();
+    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
     effCreateClassWork(((FileJob *)request)->option, source);
 }
 
@@ -4731,7 +4731,7 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
 void effCreateClassResourceFromFile(s32 request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer();
+    source = fileResolvePrimaryBuffer((FileJobPayload *)request);
     effCreateClassResourceWork(((FileJob *)request)->option, source);
 }
 
@@ -6057,7 +6057,7 @@ u8 *effCreateResourceInstanceC(u16 kind, void *source) {
 void effResourceInstanceCreateFromFile(s32 work) {
     void *source;
 
-    source = fileResolvePrimaryBuffer();
+    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effCreateResourceInstanceC(((FileJob *)work)->option, source);
 }
 
