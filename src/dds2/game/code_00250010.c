@@ -4113,8 +4113,8 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                 mdlAddEntryPlainEx(evtGetWorldUnitNestedValue(objectId)->owner, 0, 0, 0.0f, 0.0f);
             }
             transform = group->info->inner;
-            PCP_COPY_VECTOR(group->savedFirstVector, transform->position);
-            PCP_COPY_VECTOR(group->savedSecondVector, transform->rotation);
+            PCP_COPY_VECTOR(group->savedPosition, transform->position);
+            PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
         }
     }
     for (row = 0; row < (s32)work->unk_44; row++) {

@@ -44,7 +44,6 @@ extern char D_003BC658[];
 extern char D_003BC660[];
 
 
-extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 extern s32 mnuMovieShutdownCounter;
 

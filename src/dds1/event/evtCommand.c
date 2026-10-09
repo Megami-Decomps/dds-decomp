@@ -761,7 +761,7 @@ s32 evtCommandDestroyEffectUnitById(void)
     return 1;
 }
 
-s32 evtCommandSetEffectUnitFirstVector(void) {
+s32 evtCommandSetEffectUnitPosition(void) {
     void *unit;
     f32 vec[4];
 
@@ -807,7 +807,7 @@ s32 evtCommandSetEffectUnitEulerRotation(void) {
     return 1;
 }
 
-s32 evtCommandSetEffectUnitSecondVector(void) {
+s32 evtCommandSetEffectUnitQuaternionRotation(void) {
     void *unit;
     f32 vec[4];
 
@@ -1322,3 +1322,4 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC9F8);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA40);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003ACA58);
+

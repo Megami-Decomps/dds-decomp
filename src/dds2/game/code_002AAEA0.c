@@ -150,7 +150,8 @@ u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
 
     context = kwlnTaskGetUserValue(task);
     mnuSwitchCampVisualCategory(5, context);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel, ((CampVisualWork *)context)->panelResource, 0, 0);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel,
+                              (struct EffectSlotSet *)(u32)((CampVisualWork *)context)->panelResource, 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -160,7 +161,8 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel, ((CampVisualWork *)context)->drawContext, 0, 1);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel,
+                              (struct EffectSlotSet *)(u32)((CampVisualWork *)context)->drawContext, 0, 1);
     return 1;
 }
 

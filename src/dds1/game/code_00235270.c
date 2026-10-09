@@ -3820,26 +3820,15 @@ s32 func_0023E7F8(s32 mode, EvtRuntime *runtime) {
     return 1;
 }
 
-/* A row table switches between 0x10-byte and 0x2C-byte entry formats. */
-typedef struct EvtRowTable {
-    u8 pad00[0x74];
-    s32 descriptor;   /* 0x74: format at descriptor + 0x14 */
-    u8 pad78[0x10];
-    s32 compactRows;  /* 0x88 */
-    s32 extendedRows; /* 0x8C */
-} EvtRowTable;
-
-typedef struct EvtRowDescriptor {
-    u8 pad00[0x14];
-    s32 format;
-} EvtRowDescriptor;
-
+/* PM2 row records borrow storage from the complete PolyMovieWork owner.
+ * Format 4 has eight inline payload bytes; later rows have four reserved
+ * bytes before their 32-byte payload. Neither record contains runtime links. */
 typedef struct EvtCompactRow {
     u16 value;
     u16 parameter;
     u16 flags;
     s16 variant;
-    u8 pad08[8];
+    u8 payload[8];
 } EvtCompactRow;
 
 typedef struct EvtExtendedRow {
@@ -3847,42 +3836,43 @@ typedef struct EvtExtendedRow {
     u16 parameter;
     u16 flags;
     s16 variant;
-    u8 pad08[0x24];
+    u8 reserved08[4];
+    u8 payload[0x20];
 } EvtExtendedRow;
 
-u16 evtGetRowValue(s32 table, s32 row) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->value;
+u16 evtGetRowValue(PolyMovieWork *work, s32 row) {
+    if (work->sub->kind == 4) {
+        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].value;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->value;
+    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].value;
 }
 
-s16 evtGetRowVariant(s32 table, s32 row) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->variant;
+s16 evtGetRowVariant(PolyMovieWork *work, s32 row) {
+    if (work->sub->kind == 4) {
+        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].variant;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->variant;
+    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].variant;
 }
 
-u16 evtGetRowParameter(s32 table, s32 row) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->parameter;
+u16 evtGetRowParameter(PolyMovieWork *work, s32 row) {
+    if (work->sub->kind == 4) {
+        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].parameter;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->parameter;
+    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].parameter;
 }
 
-u16 evtGetRowFlags(s32 table, s32 row) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
-        return ((EvtCompactRow *)(((EvtRowTable *)table)->compactRows + row * 0x10))->flags;
+u16 evtGetRowFlags(PolyMovieWork *work, s32 row) {
+    if (work->sub->kind == 4) {
+        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].flags;
     }
-    return ((EvtExtendedRow *)(((EvtRowTable *)table)->extendedRows + row * 0x2c))->flags;
+    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].flags;
 }
 
-s32 evtGetRowPayloadAddress(s32 table, s32 row) {
-    if (((EvtRowDescriptor *)((EvtRowTable *)table)->descriptor)->format == 4) {
-        return ((EvtRowTable *)table)->compactRows + row * 0x10 + 8;
+u8 * evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
+    if (work->sub->kind == 4) {
+        return ((EvtCompactRow *)work->subEntry4Kind4Data)[row].payload;
     }
-    return ((EvtRowTable *)table)->extendedRows + row * 0x2c + 0xc;
+    return ((EvtExtendedRow *)work->subEntry4OtherData)[row].payload;
 }
 
 typedef struct EvtLinkSource {
@@ -3921,7 +3911,905 @@ void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023EF90);
+#include "dds3obj.h"
+#include "dat_state.h"
+#include "sdf_texture_offset_list.h"
+
+/* PM1 section 2 and section 3 use the same 0x20-byte package record. */
+typedef struct EvtViewerPackageRecord {
+    s32 nameIndex;
+    s32 reserved04;
+    s32 packageId;
+    s32 partId;
+    u32 offset;
+    s32 length;
+    s32 loadOrder;
+    s32 reserved1C;
+} EvtViewerPackageRecord;
+
+/* PM1 auxiliary and texture section entries each occupy 0x10 bytes. */
+typedef struct EvtViewerResourceRecord {
+    s32 nameIndex;
+    u32 offset;
+    s32 kind;
+    s32 reserved0C;
+} EvtViewerResourceRecord;
+
+/* The section-21 wire record is also the group's link subobject at +0x18. */
+typedef struct EvtViewerLinkRecord {
+    u8 groupType;
+    u8 setterId;
+    s16 nameIndex;
+    s16 value;
+    s8 type;
+    s8 index;
+} EvtViewerLinkRecord;
+
+typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20) ? 1 : -1];
+typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
+typedef char EvtViewerLinkRecord_size[(sizeof(EvtViewerLinkRecord) == 8) ? 1 : -1];
+
+
+extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0, s32 resource1,
+                                            const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
+extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
+extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
+extern void mdlLoadViewerPackage(s32 packageId, s32 partId, s32 flags, void *data, s32 length);
+extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
+extern EvtUnit *evtGetWorldUnitNestedValue(s32 key);
+extern s32 evtStageRelinkOwnedNodeResource(void *target, void *owner);
+extern EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
+extern s32 evtPreloadBgm(s32 id);
+extern s32 evtIsBgmLoaded(s32 id);
+extern s32 fldTitleIsActive(void);
+extern void fldStartTitle(s32 id, s32 mode, s32 frames);
+extern void kwlnFadeBackgroundStartIn(s32 frames);
+extern void kwlnFadeBackgroundStartOut(s32 frames);
+
+typedef struct { u8 bytes[0x18]; } EvtRowPayload18;
+typedef struct { u8 bytes[0x20]; } EvtRowPayload20;
+typedef struct { u8 bytes[0x24]; } EvtRowPayload24;
+typedef struct { u8 bytes[0x28]; } EvtRowPayload28;
+typedef struct { u8 bytes[0x2C]; } EvtRowPayload2C;
+typedef struct { u8 bytes[0x30]; } EvtRowPayload30;
+typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
+
+extern EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *, s32, EvtRuntime *);
+extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
+extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
+extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
+/* The camp lookup receives the movie owner through its opaque API boundary. */
+extern s32 mnuCampFindMatchingEntryIndex(void *, EvtRuntime *, s32);
+
+
+
+s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
+    char motionName[64];
+    EvtWorldTable *worldTable;
+    s32 soundRowsPresent;
+    s16 timeiId;
+    s32 row;
+    s32 secondaryIndex;
+    s32 packageId;
+    s32 partId;
+    s32 objectKey;
+    EffWorldNode *node;
+    EffWorldNode *owner;
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *key;
+
+    EffWorldNode *world;
+    EvtCameraColorPayload *rain;
+    u8 *data;
+    void *payload;
+    s32 *header;
+    s32 rowCount;
+    s32 oldIndex;
+    s32 headerLast, headerFirst;
+
+    func_003003F0("start SetGameData\n");
+    soundRowsPresent = 0;
+    if (work->mainEntry2Data != NULL) {
+        packageId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId;
+        partId = ((EvtViewerPackageRecord *)work->mainEntry2Data)->partId;
+        evtCreateWorldObjectFromResource(packageId, partId, (s32)work->mainEntry10Data,
+            (s32)work->mainEntry11Data, (SdfTextureOffsetListHeader *)work->mainEntry12Data, 0);
+        group = evtEventViewerCreateEntry(0, runtime);
+        group->entryHeader = evtEventViewerAddName(
+            (char *)work->mainEntry1Data + ((EvtViewerPackageRecord *)work->mainEntry2Data)->nameIndex * 32, runtime);
+        group->resourceIds.resourceGroup = packageId;
+        group->resourceIds.resourceId = partId;
+    }
+    worldTable = ((EffWorldNode *)dds3GetWorldSecondaryObject())->data;
+    for (node = worldTable->slots[4].head; node != NULL; node = node->next) {
+        if (node->value != 0) {
+            const char *objectName;
+            group = evtEventViewerCreateEntry(2, runtime);
+            objectName = (char *)node->value;
+            group->info = node;
+            group->entryHeader = evtEventViewerAddName(objectName, runtime);
+        }
+    }
+    for (secondaryIndex = 2; secondaryIndex >= 0; secondaryIndex--) {
+        for (row = 0; row < (s32)work->unk_38; row++) {
+            if (((EvtViewerPackageRecord *)work->mainEntry3Data)[row].loadOrder == secondaryIndex) {
+                packageId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].packageId;
+                partId = ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].partId;
+                mdlLoadViewerPackage(packageId, partId, 0x103,
+                    (u8 *)work->data + ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].offset,
+                    ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].length);
+                objectKey = mdlSpawnCameraSlotViewerObject(packageId, partId);
+                group = evtEventViewerCreateEntry(1, runtime);
+                {
+                    EffWorldNode *modelObject;
+                    EvtViewerPackageRecord *packages;
+                    char *names;
+                    modelObject = dds3FindWorldObjectNodeByKey((void *)dds3GetWorldSecondaryObject(), objectKey, 5);
+                    packages = (EvtViewerPackageRecord *)work->mainEntry3Data;
+                    names = (char *)work->mainEntry1Data;
+                    group->info = modelObject;
+                    group->entryHeader = evtEventViewerAddName(names + packages[row].nameIndex * 32, runtime);
+                }
+                group->info->value = (u32)runtime->entryName[group->entryHeader];
+                group->resourceIds.resourceGroup = packageId;
+                group->resourceIds.resourceId = partId;
+                if (evtGetWorldUnitNestedValue(objectKey)->owner->first != NULL) {
+                    mdlAddEntryPlainEx(evtGetWorldUnitNestedValue(objectKey)->owner, 0, 0, 0.0f, 0.0f);
+                }
+                {
+                    ObjectTransform *transform = group->info->inner;
+                    PCP_COPY_VECTOR(group->savedPosition, transform->position);
+                    PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
+                }
+            }
+        }
+    }
+    for (row = 0; row < (s32)work->unk_44; row++) {
+        s32 entryNameIndex;
+        EvtViewerResourceRecord *resources;
+        u8 *resourceBase;
+        switch (((EvtViewerResourceRecord *)work->mainEntry7Data)[row].kind) {
+        case 0: group = evtEventViewerCreateEntry(3, runtime); break;
+        case 1: group = evtEventViewerCreateEntry(0x12, runtime); break;
+        case 2: group = evtEventViewerCreateEntry(0x14, runtime); break;
+        case 3: group = evtEventViewerCreateEntry(0x15, runtime); break;
+        case 4: group = evtEventViewerCreateEntry(0x1A, runtime); break;
+        default: continue;
+        }
+        entryNameIndex = evtEventViewerAddName(
+            (char *)work->mainEntry1Data + ((EvtViewerResourceRecord *)work->mainEntry7Data)[row].nameIndex * 32, runtime);
+        resources = (EvtViewerResourceRecord *)work->mainEntry7Data;
+        group->entryHeader = entryNameIndex;
+        resourceBase = (u8 *)work->data;
+        group->resourceData = resourceBase + resources[row].offset;
+    }
+    row = 0;
+    if ((s32)work->unk_54 > 0) {
+        s32 textureCount;
+        do {
+            s32 entryNameIndex;
+            EvtViewerResourceRecord *resources;
+            u8 *resourceBase;
+            SdfTex *texture;
+            group = evtEventViewerCreateEntry(0x18, runtime);
+            entryNameIndex = evtEventViewerAddName(
+                (char *)work->mainEntry1Data + ((EvtViewerResourceRecord *)work->mainEntry22Data)[row].nameIndex * 32, runtime);
+            resources = (EvtViewerResourceRecord *)work->mainEntry22Data;
+            group->entryHeader = entryNameIndex;
+            resourceBase = (u8 *)work->data;
+            texture = sdfTexAcquireResourceTexture(
+                (SdfTextureFileHeader *)(resourceBase + resources[row].offset));
+            textureCount = (s32)work->unk_54;
+            group->texture = texture;
+            row++;
+        } while (row < textureCount);
+    }
+    for (node = worldTable->slots[9].head; node != NULL; node = node->next) {
+        if (node->value != 0) {
+            const char *objectName;
+            group = evtEventViewerCreateEntry(9, runtime);
+            objectName = (char *)node->value;
+            group->info = node;
+            group->entryHeader = evtEventViewerAddName(objectName, runtime);
+        }
+    }
+    runtime->activeEntryIndex = 0;
+    for (node = worldTable->slots[16].head; node != NULL; node = node->next) {
+        if (node->value != 0) {
+            for (owner = worldTable->slots[4].head; owner != NULL; owner = owner->next) {
+                if (owner->value != 0) {
+                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    if (strcmp((char *)node->value, motionName) == 0) {
+                        evtStageRelinkOwnedNodeResource(node, owner);
+                    }
+                }
+            }
+            for (owner = worldTable->slots[9].head; owner != NULL; owner = owner->next) {
+                if (owner->value != 0) {
+                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    if (strcmp((char *)node->value, motionName) == 0) {
+                        evtStageRelinkOwnedNodeResource(node, owner);
+                    }
+                }
+            }
+            for (owner = worldTable->slots[7].head; owner != NULL; owner = owner->next) {
+                if (owner->value != 0) {
+                    func_003014F0(motionName, "%s_MOTION", (char *)owner->value);
+                    if (strcmp((char *)node->value, motionName) == 0) {
+                        evtStageRelinkOwnedNodeResource(node, owner);
+                    }
+                }
+            }
+        }
+    }
+    func_003003F0("end pm1 load\n");
+
+    /* Access each serialized row through its version-specific accessor. */
+    if (work->subEntry0Data != NULL) {
+        s32 metadata;
+        header = (s32 *)work->subEntry0Data;
+        runtime->headerThird = header[2];
+        headerLast = runtime->headerThird - 1;
+        headerFirst = header[0];
+        runtime->headerFirst = headerFirst;
+        if (headerFirst < 0) {
+            headerFirst = 0;
+        }
+        runtime->frameRange.word = header[1];
+        metadata = header[3];
+        runtime->curFrame = headerFirst;
+        runtime->headerMetadata = metadata;
+        if (headerLast < headerFirst) {
+            runtime->curFrame = headerLast;
+        }
+    }
+
+    /* 0023F500..0023F6F0: kind 0x1. */
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x1) {
+            for (group = runtime->groups; group != NULL; group = group->next) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
+                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key->p08.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                    key->p0C.i = *(s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    nameIndex = evtGetRowVariant(work, row);
+                    key->interpolationMode = evtEventViewerAddName(
+                        (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                    if (key->p08.sb[0] == 7) {
+                        const char *oldName;
+                        oldIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        oldName = (char *)work->subEntry1Data + nameIndex * 32;
+                        func_003003F0("oldtable index=%d string=%s\n", oldIndex, oldName);
+                        if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4) != -1) {
+                            s32 objectNameIndex;
+                            world = dds3GetWorldObject();
+                            objectNameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                            if (dds3FindObjectChainNodeByName(world,
+                                    work->subEntry1Data + objectNameIndex * 32) != NULL) {
+                                s32 linkedNameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                                key->p0C.h[0] = evtEventViewerAddName(
+                                    (char *)work->subEntry1Data + linkedNameIndex * 32, runtime);
+                            } else {
+                                key->p0C.h[0] = -1;
+                                func_003003F0("name not found \n");
+                            }
+                        }
+                    }
+                    key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+                    key->p14.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+                }
+            }
+        }
+    }
+
+    /* 0023F6F4..0023F7EC: kind 0x2. */
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x2) {
+            for (group = runtime->groups; group != NULL; group = group->next) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
+                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                    key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    {
+                        s32 interpolationNameIndex;
+                        EffWorldNode *camera;
+                        nameIndex = evtGetRowVariant(work, row);
+                        interpolationNameIndex = evtEventViewerAddName(
+                            (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                        camera = group->info;
+                        key->interpolationMode = interpolationNameIndex;
+                        dds3SetCameraFieldOfView(camera, key->p08.f);
+                    }
+                }
+            }
+        }
+    }
+
+    /* 0023F7F0..0023FAC8: native two jump tables both cover 3..0x1A.
+     * Do not replace the second accessor call with the outer switch value. */
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        switch (evtGetRowValue(work, row)) {
+        case 3: case 0x12: case 0x14: case 0x15: case 0x1A:
+            for (group = runtime->groups; group != NULL; group = group->next) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
+                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    switch (evtGetRowValue(work, row)) {
+                    case 3: case 0x1A:
+                        key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                        key->p0C.b[1] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x5);
+                        if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x6) < 0) {
+                            key->p0C.h[1] = -1;
+                        } else {
+                            nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x6);
+                            key->p0C.h[1] = evtEventViewerAddName(
+                                (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                        }
+                        key->p0C.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        if (work->sub->kind < 4) {
+                            key->duration = 0;
+                        } else {
+                            key->duration = evtGetRowFlags(work, row);
+                        }
+                        if (work->sub->kind < 9) {
+                            key->duration = 0;
+                        }
+                        break;
+                    case 0x14: case 0x15:
+                        key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                        key->duration = evtGetRowFlags(work, row);
+                        for (secondaryIndex = 0; secondaryIndex < 4; secondaryIndex++) {
+                            if (*(s8 *)(evtGetRowPayloadAddress(work, row) + 4 + secondaryIndex) < 0) {
+                                key->p0C.b[secondaryIndex] = -1;
+                            } else {
+                                nameIndex = *(s8 *)(evtGetRowPayloadAddress(work, row) + 4 + secondaryIndex);
+                                key->p0C.b[secondaryIndex] = evtEventViewerAddName(
+                                    (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                            }
+                        }
+                        key->p08.b[1] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
+                        if (work->sub->kind < 9) {
+                            key->duration = 0;
+                        }
+                        break;
+                    case 0x12:
+                        key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                        key->p0C.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                        if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2) < 0) {
+                            key->p08.h[1] = -1;
+                        } else {
+                            nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                            key->p08.h[1] = evtEventViewerAddName(
+                                (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    /* 0023FACC..0023FBD8: kind 0x9. */
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x9) {
+            for (group = runtime->groups; group != NULL; group = group->next) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
+                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key->duration = evtGetRowFlags(work, row);
+                    key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+                    if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x0) < 0) {
+                        key->p08.h[0] = -1;
+                    } else {
+                        nameIndex = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                        key->p08.h[0] = evtEventViewerAddName(
+                            (char *)work->subEntry1Data + nameIndex * 32, runtime);
+                    }
+                }
+            }
+        }
+    }
+
+    /* 0023FBDC..0023FE28: seven separate groups are always constructed.
+     * Version <7 swaps ordinal/flags sources relative to later versions. */
+    for (secondaryIndex = 0; secondaryIndex < 7; secondaryIndex++) {
+        group = evtEventViewerCreateEntry(0xA, runtime);
+        group->setterId = secondaryIndex;
+        for (row = 0; row < (s32)work->unk_A0; row++) {
+            if (evtGetRowValue(work, row) == 0xA &&
+                *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) == secondaryIndex) {
+                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key->p08.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                key->p0C.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+                if (work->sub->kind < 7) {
+                    key->duration = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0xA);
+                } else {
+                    key->duration = evtGetRowFlags(work, row);
+                }
+                {
+                    s32 interpolationMode = evtGetRowVariant(work, row);
+                    PmdHeader *format = work->sub;
+                    key->interpolationMode = interpolationMode;
+                    if (format->kind < 7) {
+                        s32 ordinal;
+                        payload = key->payload;
+                        ordinal = evtGetRowFlags(work, row);
+                        *(EvtRowPayload30 *)payload =
+                            *(EvtRowPayload30 *)(work->subEntry13Data + ordinal * 0x30);
+                    } else {
+                        s32 ordinal;
+                        payload = key->payload;
+                        ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0xA);
+                        *(EvtRowPayload30 *)payload =
+                            *(EvtRowPayload30 *)(work->subEntry13Data + ordinal * 0x30);
+                    }
+                }
+                key->p14.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+            }
+        }
+    }
+
+    /* 0023FE2C..0023FF00: kind 0xB. */
+    group = evtEventViewerCreateEntry(0xB, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0xB) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = evtGetRowFlags(work, row);
+            *(EvtRowPayload20 *)payload =
+                *(EvtRowPayload20 *)(work->subEntry14Data + ordinal * 0x20);
+        }
+    }
+
+    /* 0023FF04..00240030: kind 0xC. */
+    group = evtEventViewerCreateEntry(0xC, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0xC) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.i = *(s32 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+            if (work->sub->kind == 1) {
+                key->p08.h[1] = 0;
+            }
+            if (work->sub->kind == 2) {
+                key->p08.sh[1] -= 128;
+                if (key->p08.sh[1] < -255) {
+                    key->p08.h[1] = -255;
+                }
+                if (key->p08.sh[1] > 255) {
+                    key->p08.h[1] = 255;
+                }
+            }
+            key->p14.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+        }
+    }
+
+    /* 00240034..002400AC: kind 0x16. */
+    group = evtEventViewerCreateEntry(0x16, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x16) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+        }
+    }
+
+    /* 002400B0..002401A4: kind 0xD. */
+    group = evtEventViewerCreateEntry(0xD, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0xD) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload28 *)payload =
+                *(EvtRowPayload28 *)(work->subEntry15Data + ordinal * 0x28);
+        }
+    }
+
+    /* 002401A8..0024032C: kind 0xE. */
+    group = evtEventViewerCreateEntry(0xE, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0xE) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry16Data + ordinal * 0x2C);
+            key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != -1) {
+                    key->p10.h[0] = matchedNameIndex + 2;
+                } else {
+                    key->p10.h[0] = 0;
+                }
+            }
+        }
+    }
+
+    /* 00240330..002404B4: kind 0xF. */
+    group = evtEventViewerCreateEntry(0xF, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0xF) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry17Data + ordinal * 0x2C);
+            key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != -1) {
+                    key->p10.h[0] = matchedNameIndex + 2;
+                } else {
+                    key->p10.h[0] = 0;
+                }
+            }
+        }
+    }
+
+    /* 002404B8..0024063C: kind 0x17. */
+    group = evtEventViewerCreateEntry(0x17, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x17) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload2C *)payload =
+                *(EvtRowPayload2C *)(work->subEntry20Data + ordinal * 0x2C);
+            key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != -1) {
+                    key->p10.h[0] = matchedNameIndex + 2;
+                } else {
+                    key->p10.h[0] = 0;
+                }
+            }
+        }
+    }
+
+    /* 00240640..00240734: kind 0x1B. */
+    group = evtEventViewerCreateEntry(0x1B, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x1B) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload28 *)payload =
+                *(EvtRowPayload28 *)(work->subEntry24Data + ordinal * 0x28);
+        }
+    }
+
+    /* 00240738..00240820: kind 0x10. */
+    group = evtEventViewerCreateEntry(0x10, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x10) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload18 *)payload =
+                *(EvtRowPayload18 *)(work->subEntry18Data + ordinal * 0x18);
+            key->p14.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+        }
+    }
+
+    /* 00240824..002409A8: kind 0x11. */
+    group = evtEventViewerCreateEntry(0x11, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x11) {
+            s32 ordinal;
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            payload = key->payload;
+            key->p08.h[0] = *(u16 *)data;
+            ordinal = *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            *(EvtRowPayload24 *)payload =
+                *(EvtRowPayload24 *)(work->subEntry19Data + ordinal * 0x24);
+            key->p10.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+            if (*(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
+                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != -1) {
+                    key->p10.h[0] = matchedNameIndex + 2;
+                } else {
+                    key->p10.h[0] = 0;
+                }
+            }
+            key->p14.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+        }
+    }
+
+    /* 002409AC..00240A84: message track exists only for a live populated window. */
+    if (work->handle != -1 && itfMesGetEntryCount(work->handle) != 0) {
+        itfMesSetWindowPageAndRefresh(work->handle, 3, 0);
+        group = evtEventViewerCreateEntry(4, runtime);
+        for (row = 0; row < (s32)work->unk_A0; row++) {
+            if (evtGetRowValue(work, row) == 4) {
+                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key->duration = evtGetRowFlags(work, row);
+                key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            }
+        }
+        itfMesSetWindowHighFlags(work->handle, 0xD00000);
+    }
+
+    /* Primary rows precede version 6; later versions use the extended table. */
+    group = evtEventViewerCreateEntry(5, runtime);
+    if (work->sub->kind < 6) {
+        rowCount = work->unk_A0;
+    } else {
+        rowCount = work->unk_9C;
+    }
+    for (row = 0; row < rowCount; row++) {
+        if (work->sub->kind < 6) {
+            if (evtGetRowValue(work, row) == 5) {
+                soundRowsPresent = 1;
+                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
+            }
+        } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 5) {
+            soundRowsPresent = 1;
+            key = func_0022B7A0(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
+            key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
+        }
+    }
+    group = evtEventViewerCreateEntry(0x13, runtime);
+    if (work->sub->kind < 6) {
+        rowCount = work->unk_A0;
+    } else {
+        rowCount = work->unk_9C;
+    }
+    for (row = 0; row < rowCount; row++) {
+        if (work->sub->kind < 6) {
+            if (evtGetRowValue(work, row) == 0x13) {
+                soundRowsPresent = 1;
+                key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                key->p08.h[0] = *(u16 *)evtGetRowPayloadAddress(work, row);
+                key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 2);
+            }
+        } else if (((EvtExtendedRow *)work->secondEntry4Data)[row].value == 0x13) {
+            soundRowsPresent = 1;
+            key = func_0022B7A0(group, ((EvtExtendedRow *)work->secondEntry4Data)[row].parameter, runtime);
+            key->p08.h[0] = *(u16 *)((EvtExtendedRow *)work->secondEntry4Data)[row].payload;
+            key->p08.h[1] = *(u16 *)(((EvtExtendedRow *)work->secondEntry4Data)[row].payload + 2);
+        }
+    }
+
+    /* 00240D0C..00240D94: kind 0x6. */
+    group = evtEventViewerCreateEntry(0x6, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x6) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+        }
+    }
+
+    /* 00240D98..00240E24: kind 0x7. */
+    group = evtEventViewerCreateEntry(0x7, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x7) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+        }
+    }
+
+    /* 00240E28..00240ECC: kind 0x8. */
+    group = evtEventViewerCreateEntry(0x8, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x8) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+        }
+    }
+
+    /* 00240ED0..0024103C: kind 0x18. */
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x18) {
+            for (group = runtime->groups; group != NULL; group = group->next) {
+                const char *rowName;
+                s32 nameIndex;
+                nameIndex = evtGetRowVariant(work, row);
+                rowName = (char *)work->subEntry1Data + nameIndex * 32;
+                if (strcmp(runtime->entryName[group->entryHeader], rowName) == 0) {
+                    key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+                    key->p08.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+                    key->p08.b[1] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x1);
+                    key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+                    key->p0C.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x6);
+                    key->p10.b[0] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x8);
+                    key->p10.b[1] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0x9);
+                    key->p10.b[2] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0xA);
+                    key->p10.b[3] = *(u8 *)(evtGetRowPayloadAddress(work, row) + 0xB);
+                    key->p14.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0xC);
+                    key->p18.f = *(f32 *)(evtGetRowPayloadAddress(work, row) + 0x10);
+                }
+            }
+        }
+    }
+
+    /* 00241040..002411E4: kind 0x19. */
+    group = evtEventViewerCreateEntry(0x19, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x19) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+            key->p0C.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x4);
+            if (work->unk_100 != 0 && work->subEntry25Data != NULL) {
+                *(EvtRowPayload40 *)key->payload =
+                    *(EvtRowPayload40 *)(work->subEntry25Data + key->p08.sh[1] * 0x40);
+            }
+            if (work->sub->kind < 8 && key->p08.sh[0] == 0) {
+                s32 component;
+                rain = (EvtCameraColorPayload *)key->payload;
+                rain->parameters.w[3] = 0;
+                for (component = 2; component >= 0; component--) {
+                    rain->parameters.z[component] = 0;
+                }
+                func_003003F0("modify rain param\n");
+            }
+        }
+    }
+
+    /* 002411E8..00241288: kind 0x1C. */
+    group = evtEventViewerCreateEntry(0x1C, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x1C) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            key->p08.h[1] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x2);
+        }
+    }
+
+    /* 0024128C..00241314: kind 0x1D. */
+    group = evtEventViewerCreateEntry(0x1D, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x1D) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+        }
+    }
+
+    /* 00241318..00241360 plus cold .L00240BC8..00240C10.
+     * Exactly the first matching title row is restored, then scanning stops. */
+    group = evtEventViewerCreateEntry(0x1E, runtime);
+    timeiId = -1;
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x1E) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+            data = (u8 *)evtGetRowPayloadAddress(work, row);
+            timeiId = key->p08.sh[0];
+            key->p08.h[1] = *(u16 *)(data + 2);
+            break;
+        }
+    }
+
+    /* 00241364..002413EC: kind 0x20. */
+    group = evtEventViewerCreateEntry(0x20, runtime);
+    for (row = 0; row < (s32)work->unk_A0; row++) {
+        if (evtGetRowValue(work, row) == 0x20) {
+            key = func_0022B7A0(group, evtGetRowParameter(work, row), runtime);
+            key->duration = evtGetRowFlags(work, row);
+            key->p08.h[0] = *(u16 *)(evtGetRowPayloadAddress(work, row) + 0x0);
+        }
+    }
+
+    /* Continue with native .L002413F0: work->subEntry21Data link metadata. */
+    if (work->subEntry21Data != NULL) {
+        for (row = 0; row < (s32)work->unk_F8; row++) {
+            if (((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex != -1) {
+                for (group = runtime->groups; group != NULL; group = group->next) {
+                    if (strcmp(runtime->entryName[group->entryHeader],
+                        (char *)work->subEntry1Data + ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex * 32) == 0) {
+                        group->metadata.type = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].groupType;
+                        group->metadata.entry = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex;
+                        if (group->type == 2) {
+                            group->metadata.value = 0;
+                        } else {
+                            group->metadata.value = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].value;
+                        }
+                        group->metadata.extra1 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].type;
+                        group->metadata.extra2 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].index;
+                    }
+                }
+            } else {
+                for (group = runtime->groups; group != NULL; group = group->next) {
+                    s32 groupType = group->type;
+                    if (groupType == ((EvtViewerLinkRecord *)work->subEntry21Data)[row].groupType &&
+                        group->setterId == ((EvtViewerLinkRecord *)work->subEntry21Data)[row].setterId) {
+                        group->metadata.type = groupType;
+                        group->metadata.flag = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].setterId;
+                        group->metadata.entry = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex;
+                        group->metadata.value = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].value;
+                        group->metadata.extra1 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].type;
+                        group->metadata.extra2 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].index;
+                        evtResolveLinkGroupIndex((EvtLinkSource *)work, runtime, (EvtLink *)&group->metadata);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    {
+        s32 *ids = &datGameState->script.ints[200];
+        for (row = 0; row < 10; row++) {
+            *ids++ = -1;
+        }
+    }
+    if (soundRowsPresent == 1) {
+        evtPreloadBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
+        while (evtIsBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
+        }
+        func_003003F0("smg file load :eventViewer\n");
+    }
+    if (timeiId != -1) {
+        if (!fldTitleIsActive()) {
+            fldStartTitle(timeiId, -1, 30);
+            func_003003F0("timei file load=%d\n", timeiId);
+        } else {
+            func_003003F0("warning!! timei process doing!!\n");
+        }
+    }
+    if (mnuCampGetPrimaryOption(runtime) == 0) {
+        kwlnFadeBackgroundStartIn(0);
+    } else {
+        kwlnFadeBackgroundStartOut(0);
+    }
+    evtViewerDispatchFlagMode(runtime);
+    func_0022E5A0(runtime->curFrame, runtime);
+    evtViewerDispatchFlagMode(runtime);
+    func_003003F0("SetGameData PM2 Version = %d Stageno = %d\n",
+        work->sub->kind, ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
+    return 1;
+}
+
 
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
 extern void mnuStopMovieDrawTask(void);

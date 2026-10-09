@@ -8942,7 +8942,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     for (; i < 0xFF; i++, amount++) {
         record = sdfChunkFindRecordById(work->resource->model->inner, i);
         for (item = work->resource->model->resourceItems; item != NULL; item = item->next) {
-            if (item->payload.part.record == record) {
+            if (item->payload.part.mapPositionRecord == record) {
                 mdlSetResourceAmount(work->resource->model, item, *amount * scale);
                 break;
             }
@@ -13037,3 +13037,4 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
+

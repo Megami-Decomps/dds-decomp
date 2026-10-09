@@ -470,7 +470,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     }
 
     mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->display,
-                                              context->panelResource, 0, 1);
+                                              (struct EffectSlotSet *)(u32)context->panelResource, 0, 1);
     menu->fadeB = menu->fadeA = MNU_FULL_FADE;
     return 1;
 }
@@ -490,7 +490,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuSetPopupEntryFlagged(menu + 0x54, (s32)D_0037CA58);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
-        ((CampMenuContext *)menu)->displayVariant, 0, 1);
+        (struct EffectSlotSet *)(u32)((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
 s32 func_00275920(s32 callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
@@ -545,7 +545,7 @@ s32 func_00275920(s32 callback) {
                 mnuSetPopupEntryFlagged((s32)popup, D_0037CA58);
                 mnuActivatePanelAndConfigureGridResources(
                     (MenuScrollPanel *)(u32)context->display,
-                    context->displayVariant, 0, 1);
+                    (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
             }
         }
         mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
@@ -787,7 +787,7 @@ s32 func_00276368(KwlnTask *task, s32 flag) {
     func_002762B0(context);
     state->active = 1;
     mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
-                                              (s32)((CampMenuContext *)context)->staffVariant, 0, 1);
+                                              ((CampMenuContext *)context)->staffVariant, 0, 1);
     evtStageTestInit(0);
     return 1;
 }
@@ -842,7 +842,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
             mnuSetPopupEntryFlagged((s32)popupState, D_0037CA78);
             mnuActivatePanelAndConfigureGridResources(
                 (MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
-                ((CampMenuContext *)context)->displayVariant, 0, 1);
+                (struct EffectSlotSet *)(u32)((CampMenuContext *)context)->displayVariant, 0, 1);
             mnuClearListFlags(0, panelWork);
         }
         mnuPlayInputSound(0, inputFlags, 0);
@@ -1540,15 +1540,18 @@ s32 mnuCampMenuInit(KwlnTask *task) {
     switch (((MenuWindowContainer *)work->panel)->list->cursor->index) {
     case 0:
         mnuActivatePanelAndConfigureGridResources(
-            (MenuScrollPanel *)(u32)work->display, work->variant, 0, 1);
+            (MenuScrollPanel *)(u32)work->display,
+            (struct EffectSlotSet *)(u32)work->variant, 0, 1);
         break;
     case 2:
         mnuActivatePanelAndConfigureGridResources(
-            (MenuScrollPanel *)(u32)work->display, work->variant, 0x35, 0x36);
+            (MenuScrollPanel *)(u32)work->display,
+            (struct EffectSlotSet *)(u32)work->variant, 0x35, 0x36);
         break;
     default:
         mnuActivatePanelAndConfigureGridResources(
-            (MenuScrollPanel *)(u32)work->display, work->variant, 0x33, 0x34);
+            (MenuScrollPanel *)(u32)work->display,
+            (struct EffectSlotSet *)(u32)work->variant, 0x33, 0x34);
         break;
     }
     mnuSeekListNode(0, ((MenuWindowContainer *)work->panelList)->list);
@@ -1619,7 +1622,7 @@ s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
             mnuSetPopupEntryFlagged((s32)popup, D_0037CC20);
         }
         mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->display,
-                                  context->displayVariant, 0, 1);
+                                  (struct EffectSlotSet *)(u32)context->displayVariant, 0, 1);
     }
 
     mnuPlayInputSound(0, inputFlags, 0);

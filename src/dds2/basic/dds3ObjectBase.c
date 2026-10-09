@@ -432,3 +432,4 @@ Dds3PathCurveWork *dds3GetSlot1Data(void *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_00435D98);
+
