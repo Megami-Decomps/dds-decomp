@@ -12,11 +12,6 @@ typedef struct MantraNeighborRecord {
     u8 edgeFlags[4];
 } MantraNeighborRecord;
 
-typedef struct MantraNeighborState {
-    s32 unk00;
-    s32 unk04;
-    s32 status;
-} MantraNeighborState;
 
 extern MantraNeighborRecord D_0036AE80[89];
 extern u32 prfGetCapValue(u16);
@@ -27,16 +22,16 @@ extern u32 D_003E274C[];
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
 
-u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MantraNeighborState *states, MnuProfileProgress *target) {
+u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
     MantraNeighborRecord *record = &D_0036AE80[scene->sceneId];
     u32 flags = 0x100;
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
         flags = 0x101;
     }
-    if (states[record->neighbors[direction]].status == 1) {
+    if (states[record->neighbors[direction]].state == 1) {
         flags |= 0x12;
     }
-    if (states[record->neighbors[direction]].status == 2) {
+    if (states[record->neighbors[direction]].state == 2) {
         flags |= 0x10;
     }
     if (prfGetCapValue((u16)record->neighbors[direction]) ==

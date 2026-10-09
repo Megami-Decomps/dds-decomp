@@ -57,7 +57,7 @@ typedef struct MdlViewState {
     s8 unk0B;
     s8 unitStepMode;  /* 0x0C: toggled by the step button (D_003D24510[0x23]) */
     s8 unitStepSign;  /* 0x0D: +1/-1, derived from the input keys at 0x24/0x25 */
-    u8 unk0E;
+    s8 unk0E;
     s8 unk0F;
     s8 yawStepMode; /* 0x10: one yaw step per left/right button press */
     u8 pad11[3];
