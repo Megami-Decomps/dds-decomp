@@ -217,15 +217,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u32 variant;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
@@ -358,8 +349,6 @@ extern void *btlAllocTask(s32);
 extern void *btlAllocTask(s32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
-
-extern void btlMarkTaskReady(SoundResourceLink *);
 
 extern void btlSetUnitPosition(BtlUnit *object, void *position);
 
@@ -6000,7 +5989,7 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
     SoundResourceLink *node = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
     node->owner = owner;
     node->effectHandle = 0;
-    node->variant = 0;
+    node->opaque0C = 0;
     node->effect = 0;
     return node;
 }

@@ -87,15 +87,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    struct SoundResourceNode *effect;
-    u32 flags;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 typedef struct SoundEntry {
     u32 unk0;
     u32 unk4;
@@ -374,8 +365,6 @@ extern BtlRuntimeTask *btlFindTaskByHandle(u64);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 
-extern void btlMarkTaskReady(SoundResourceLink *resource);
-
 extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
@@ -417,8 +406,6 @@ extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 extern void *memset(void *, s32, u32);
 
 extern void sndFreeResourceNode(struct SoundResourceNode *);
-
-extern void sndFreeResourceLink(struct SoundResourceLink *);
 
 
 extern void sndFreeListNode(struct ActiveSoundNode *);
@@ -5222,7 +5209,7 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
     SoundResourceLink *link = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
     link->owner = owner;
     link->effectHandle = 0;
-    link->flags = 0;
+    link->opaque0C = 0;
     link->effect = 0;
     return link;
 }

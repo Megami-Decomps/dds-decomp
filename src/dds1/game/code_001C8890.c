@@ -185,15 +185,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-typedef struct SoundResourceLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u32 variant;
-    u8 refreshRequested;
-    u8 pad11[3];
-} SoundResourceLink;
-
 typedef struct SndPad {
     u8 pad00[0x21];
     s8 confirm;
@@ -3604,8 +3595,6 @@ extern void dds3SetObjectFlags(void *, s32);
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
-
-extern void btlMarkTaskReady(SoundResourceLink *);
 
 extern void btlResetUnitModelProgress(BtlUnit *);
 
