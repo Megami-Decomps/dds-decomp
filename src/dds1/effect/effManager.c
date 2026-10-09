@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 
 
@@ -54,13 +55,6 @@ typedef struct EffTypeOps {
     void (*fn28)();          /* 0x28 */
     void (*fn2C)(s32);       /* 0x2C */
 } EffTypeOps;
-
-typedef struct EffNode {
-    u32 type;
-    s32 arg;
-    s32 instance;
-    f32 unkC;
-} EffNode;
 
 extern EffTypeOps effNodeTypeOperations[];
 
