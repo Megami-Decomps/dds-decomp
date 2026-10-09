@@ -485,7 +485,51 @@ s32 func_0019EC00(s32 code, FrFontCtx *stream) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019EDC0);
+s32 func_0019EDC0(FrFontCtx *stream) {
+    u8 encodedText[3];
+    s32 value;
+    u8 *bytes = stream->encodedText;
+
+    if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
+        stream->encodedTextOffset += 4;
+    }
+    bytes = stream->encodedText;
+    for (;;) {
+        value = bytes[stream->encodedTextOffset++];
+        if (value == 0) {
+            break;
+        }
+        if ((value & 0xF0) == 0xF0) {
+            s32 result = func_0019EC00(value, stream);
+
+            if (result == 1) {
+                break;
+            }
+            if (result == 2) {
+                return 1;
+            }
+        } else if (value == 10) {
+            continue;
+        } else if (value < 0x80) {
+            encodedText[0] = value;
+            encodedText[1] = 0;
+        } else {
+            value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
+            if (value <= 0xC07F) {
+                encodedText[0] = (u32)value >> 8;
+                encodedText[1] = value;
+                encodedText[2] = 0;
+            } else {
+                value -= 0x4000;
+                encodedText[0] = (u32)value >> 8;
+                encodedText[1] = value;
+                encodedText[2] = 0;
+            }
+        }
+        bytes = stream->encodedText;
+    }
+    return 0;
+}
 
 s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub) {
     FrFontCtx args;
