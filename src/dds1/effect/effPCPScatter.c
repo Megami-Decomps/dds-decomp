@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -1155,7 +1156,6 @@ extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_002DA438(u32, u32);
 extern s32 func_0015FE20(EffPacketParams *);
 

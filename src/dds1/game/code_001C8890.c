@@ -4513,7 +4513,6 @@ extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u64 *);
 extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];
@@ -4542,7 +4541,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = 0x72801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
@@ -4561,7 +4560,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = 0x51801;
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     func_002D9748(overlay, model->inner);
@@ -4581,7 +4580,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         packet[3] = 0xE;
         packet[4] = D_00359CF0[i];
         packet[5] = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     mdlSetAllResourceFrames(model, frame);

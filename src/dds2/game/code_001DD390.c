@@ -2798,7 +2798,6 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_003325F8(SdfModel *, SdfModel *);
 extern void func_003320E8(SdfPoolNode **, SdfModel *);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -234,7 +235,6 @@ extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 typedef struct DmaPacketHeader {
     u16 quadwords;
@@ -250,9 +250,7 @@ typedef struct DmaPacketHeader {
 
 extern u8 D_0040B730[];
 
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 extern void func_0033AC10(void);
 extern void sdfInitializeObjectListRequest(void);

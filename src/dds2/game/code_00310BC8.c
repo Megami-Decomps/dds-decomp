@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
@@ -441,7 +442,6 @@ extern void sdfInitPacketList(SdfListHead *);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */

@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "sdf_packet_list.h"
 #include "eff_bill.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
@@ -61,7 +62,6 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
 extern void *func_0015FE20(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];
@@ -2680,7 +2680,7 @@ setTexture:
         packet->registerList = 0xE;
         packet->registerValue = 0x31801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
     }
 
     kind = track->kind;
@@ -2768,7 +2768,7 @@ setTexture:
         packet->registerList = 0xE;
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
     }
     effSubmitSurfacePacket(surface, list);
 }
@@ -3308,7 +3308,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCA10[0].colors = (u32 *)set->tail;
@@ -3336,7 +3336,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         if (set->type < 5) {
             effSubmitSurfacePacket(D_0037EB78[set->type], list);
@@ -3353,7 +3353,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             blendPacket->registerList = 0xE;
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(setup, blendPacket);
+            sdfAppendPacket(setup, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
             blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             blendPacket->dmaTag = 2;
@@ -3369,7 +3369,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
                 break;
             }
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(list, blendPacket);
+            sdfAppendPacket(list, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
         }
     }
@@ -4522,7 +4522,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCAD0[0].colors = (u32 *)set->tail;
@@ -4550,7 +4550,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         D_0037ECF0[set->type]->append((SdfListHead *)D_0037ECF0[set->type], list);
     }
@@ -6263,7 +6263,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_003DCB60[0].colors = (u32 *)set->tail;
@@ -6291,7 +6291,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         D_0037EE68[set->type]->append((SdfListHead *)D_0037EE68[set->type], list);
     }

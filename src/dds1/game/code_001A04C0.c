@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -21,7 +22,6 @@ extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
 extern f32 sdfSinPoly(f32);
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(s32, u64 *);
 extern u64 *func_001A0910(s32, s32, s32, s32, s32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -85,9 +85,9 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     }
     color |= (u32)alpha << 24;
     list = sdfCreateResetPacketList();
-    sdfAppendPacket(list, btlCreateGsTestRegisterPacket(0x33001, 0));
-    sdfAppendPacket(list, btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket(list, func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
+    sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
+    sdfAppendPacket(list, (u32)func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append((SdfListHead *)surface, (SdfListHead *)list);
 }
