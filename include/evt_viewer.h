@@ -16,7 +16,7 @@ typedef union EvtViewParam {
 typedef struct EvtRuntimeChild {
     u16 frame;
     u16 duration; /* Also the consecutive index in type-0xB groups. */
-    s32 interpolationMode;
+    s32 serializedValue;
     union {
         s8 parameterBytes[0x20];
         union {
