@@ -1815,7 +1815,119 @@ void func_001E3920(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s
 extern void func_001E3310(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 extern void func_001E3920(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E3E58);
+void func_001E3E58(BtlLinkedCommand *action, BtlCamState *pose,
+                   BtlUnit *target, s32 mode) {
+    BtlState *runtime;
+    BtlUnit *unit;
+    s32 actorCount;
+    struct {
+        f32 position[4];
+        f32 rotation[4];
+        f32 firstActorPosition[4];
+        f32 secondActorPosition[4];
+        f32 center[4];
+    } vectors __attribute__((aligned(16)));
+
+    if ((target->status.flags & 0x200) == 0) {
+        return;
+    }
+
+    runtime = (BtlState *)btlGetRuntime();
+    if (runtime->cameraArrangementHook != NULL &&
+        runtime->cameraArrangementHook(action, pose, mode) != 0) {
+        return;
+    }
+
+    actorCount = 0;
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        s32 flags;
+
+        if ((btlUnitStatusPair(unit) & 0x300) != 0x300) {
+            flags = unit->status.flags;
+        } else if (runtime->cameraPresetMode != 3) {
+            flags = unit->status.flags;
+        } else {
+            if (unit->lookupId != 1) {
+                func_001D6300((u8 *)unit, vectors.position);
+                vectors.position[2] = unit->position[2] - 45.0f;
+                btlSetUnitPosition((u8 *)unit, vectors.position);
+            }
+            flags = unit->status.flags;
+        }
+        {
+            s32 excludedFlags = flags & 0xC0;
+
+            if ((flags & 1) != 0) {
+                if (excludedFlags == 0) {
+                    if ((flags & 0x400) != 0) {
+                        actorCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (actorCount == 0) {
+        return;
+    }
+    if (runtime->cameraActorHighWater < actorCount) {
+        runtime->cameraActorHighWater = actorCount;
+    }
+
+    if (runtime->cameraActorConfiguration == 0x10003) {
+        func_001E3310(action, pose, target, mode);
+    } else {
+        func_001E3920(action, pose, target, mode);
+    }
+
+    func_001F66D8(0x400, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->status.flags;
+
+        if ((flags & 0x200) != 0) {
+            if ((flags & 0xE0) == 0) {
+                if ((flags & 0x80000) != 0) {
+                    btlUnitGetBodyPosVU((u8 *)unit);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.firstActorPosition);
+                    if (btlAimHorizontalDirectionVU(vectors.firstActorPosition, vectors.center) != 0) {
+                        VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
+                        btlSetUnitRotation((u8 *)unit, vectors.rotation);
+                    }
+                }
+            }
+        }
+    }
+
+    func_001F66D8(0x200, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->status.flags;
+
+        if ((flags & 0x400) != 0) {
+            if ((flags & 0x80000) != 0) {
+                btlUnitGetBodyPosVU((u8 *)unit);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vectors.secondActorPosition);
+                btlAimHorizontalDirectionClampedVU(vectors.secondActorPosition, vectors.center,
+                                                     0.34906585f);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
+                btlSetUnitRotation((u8 *)unit, vectors.rotation);
+            }
+        }
+    }
+
+    if (target != NULL && (target->status.flags & 2) != 0 &&
+        (runtime->cameraPresetMode == 1 ||
+         (runtime->cameraPresetMode == 3 && target->lookupId == 1))) {
+        s32 field = mdlGetNodeMotionIndex(target->ext->owner, 0);
+
+        if (field == 0xD || field == 0x12) {
+            btlRefreshUnitEffectMotionAndEntry((u8 *)target);
+        }
+    }
+
+    btlAdjustCameraDirectionForDefaultPlane(pose);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E4180);
 
