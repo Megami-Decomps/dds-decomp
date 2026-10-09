@@ -75,7 +75,7 @@ typedef struct BtlLinkedEffectArgs {
             u8 offsetIndex; /* 0x31: indexes the twelve display offsets */
         } linked;
         struct {
-            s32 elapsedTicks; /* 0x24 */
+            u32 elapsedTicks; /* 0x24: unsigned counter timing and float conversion */
             u8 kind; /* 0x28 */
             u8 offsetIndex; /* 0x29 */
         } counter;
