@@ -737,12 +737,12 @@ void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk28;
 }
 
-void *sdfMotionCreateFloatBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B480, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B480, options);
+    return binding;
 }
 
 void sdfMotionApplyInterpolatedFloat(SdfMotionIndexedValueBinding *motion, f32 t1) {
