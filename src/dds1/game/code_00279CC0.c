@@ -652,7 +652,81 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuRemoveListCursorNode);
+MenuListNode *mnuRemoveListCursorNode(MenuList *list) {
+    MenuListNode *node;
+    MenuListNode *cursor;
+    MenuListNode *previous;
+    MenuListNode *next;
+
+    if (list->count == 0) {
+        return NULL;
+    }
+    node = list->cursor;
+    if (node == NULL) {
+        return NULL;
+    }
+    cursor = node;
+    do {
+        if (node->index > 0) {
+            node->index--;
+        }
+        node = node->next;
+    } while (node != NULL);
+    node = cursor;
+    previous = node->prev;
+    next = node->next;
+    if (list->last->index - list->head->index + 1 <= list->visibleCount) {
+        if (list->head != list->first) {
+            cursor = previous;
+            list->head = list->head->prev;
+            list->cursor = previous;
+        } else if (node == list->head) {
+            if (next != NULL) {
+                list->head = next;
+                cursor = next;
+                list->cursor = next;
+            } else {
+                cursor = previous;
+                list->head = previous;
+                list->cursor = previous;
+                list->windowOffset--;
+            }
+        } else if (next != NULL) {
+            list->cursor = next;
+            cursor = next;
+        } else {
+            cursor = previous;
+            list->cursor = previous;
+            list->windowOffset--;
+        }
+    } else if (next != NULL) {
+        list->cursor = next;
+        cursor = next;
+    }
+    if (cursor == NULL) {
+        list->head = NULL;
+        list->first = NULL;
+        list->last = NULL;
+        list->windowOffset = 0;
+    }
+    if (previous != NULL) {
+        previous->next = next;
+    }
+    if (next != NULL) {
+        next->prev = previous;
+    }
+    if (previous == NULL) {
+        list->head = next;
+        list->first = next;
+    }
+    if (next == NULL) {
+        list->last = previous;
+    }
+    sdfReleaseChipBlock(node);
+    list->count--;
+    mnuUpdateListScrollFlags(list);
+    return list->cursor;
+}
 
 
 
