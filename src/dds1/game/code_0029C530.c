@@ -6745,8 +6745,8 @@ typedef struct EffActorLightConfig {
     EffectVectorRequest direction;
 } EffActorLightConfig;
 typedef char EffActorLightConfigSizeCheck[sizeof(EffActorLightConfig) == 0x28 ? 1 : -1];
-extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
+
+
 extern void btlUnitGetEffectPosVU(BtlUnit *);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
@@ -6884,9 +6884,6 @@ void func_002B2A48(EffActiveResource *work) {
         }
     }
 }
-
-
-extern void evtSetUnitRgbTransition(EvtUnit *, s32, u32);
 
 void effSyncLinkedActorChildParameter(void) {
     u8 *state = (u8 *)btlGetRuntime();

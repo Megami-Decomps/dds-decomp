@@ -473,7 +473,53 @@ u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvancePanelGroup);
+struct MenuPanelItem {
+    u8 pad00[0x10];
+    u32 value10;
+    s32 value14;
+    s32 value18;
+    u32 option;
+    s32 selection;
+    MenuGridSlot groupGridSlots[7]; /* 0x24 */
+    MenuGridSlot gridSlots[5]; /* 0x5C */
+    u8 pad84[4];
+    u32 initialValue; /* 0x88 */
+    s32 selectionRamp; /* 0x8C */
+};
+
+extern void mnuSetPanelItemValueAndOption(MenuPanelItem *item, s32 value, s32 option);
+extern void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *item, s32 layer);
+
+/* Draw the five stat panels of a group (values from the party record, if any), then ramp the
+ * group's fade value up to 0x100. */
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry, MenuPanelGroup *group, s32 drawFlags) {
+    s32 index;
+    s32 mode;
+    s32 value;
+    s32 offset = 0;
+
+    for (index = 0; index < 5; index++) {
+        value = 0;
+        if (entry != NULL) {
+            value = entry->baseStats[index];
+        }
+        mnuSetPanelItemValueAndOption(group->children[index], value, group->children[index]->option);
+        if (group->selection == index) {
+            mode = 1;
+        } else {
+            mode = ((s32)group->selection < 0) ? 0 : 2;
+        }
+        group->children[index]->initialValue = group->initialValue;
+        mnuDrawPanelItemValue(x, y + offset, depth, mode, group->children[index], drawFlags);
+        offset += 200;
+    }
+    if (group->initialValue < 0x100) {
+        group->initialValue += 0x10;
+    }
+    if (group->initialValue > 0x100) {
+        group->initialValue = 0x100;
+    }
+}
 
 void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option) {
     mnuSetPanelItemSelection(group->children[index], selection);
@@ -807,19 +853,6 @@ INCLUDE_ASM(const s32, "game/code_00282850", func_002845F8);
 void func_00284880(void) {
 }
 
-struct MenuPanelItem {
-    u8 pad00[0x10];
-    u32 value10;
-    s32 value14;
-    s32 value18;
-    u32 option;
-    s32 selection;
-    MenuGridSlot groupGridSlots[7]; /* 0x24 */
-    MenuGridSlot gridSlots[5]; /* 0x5C */
-    u8 pad84[4];
-    u32 initialValue; /* 0x88 */
-    s32 selectionRamp; /* 0x8C */
-};
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {

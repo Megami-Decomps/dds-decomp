@@ -180,7 +180,40 @@ ScrData *scrFindNamedProcessNode(char *name) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", bfFindScriptIndexByName);
+typedef struct BfFlw0Lookup {
+    u8 pad00[0x10];
+    s32 sectionCount;
+    u8 pad14[0xC];
+    ScrSection sections[1];
+} BfFlw0Lookup;
+
+/* Index of the named procedure in the FLW0 procedure section, or -1. */
+s32 bfFindScriptIndexByName(BfFlw0Lookup *header, const char *name) {
+    ScrLabel *procedures = NULL;
+    ScrSection *sections;
+    s32 i;
+    s32 k;
+
+    if (header == NULL) {
+        return -1;
+    }
+    sections = header->sections;
+    for (i = 0; i < header->sectionCount; i++) {
+        if (sections[i].type == 0) {
+            procedures = (ScrLabel *)((u8 *)header + sections[i].offset);
+            break;
+        }
+    }
+    if (procedures == NULL) {
+        return -1;
+    }
+    for (k = 0; k < sections[i].count; k++) {
+        if (strcmp(procedures[k].name, name) == 0) {
+            return k;
+        }
+    }
+    return -1;
+}
 
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_0039E288);
 

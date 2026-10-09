@@ -205,10 +205,9 @@ void fldInitializeDisplayPointerTable(void) {
 
 extern u32 fldPlayerObject;
 struct EffWorldNode;
-extern EvtUnit *evtUnitGetNestedValue(struct EffWorldNode *unit);
-extern void evtSetUnitStatusFlags(EvtUnit *unit);
+
+
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
-extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
 void fldApplySkyLightSetToPlayerVU(void) {

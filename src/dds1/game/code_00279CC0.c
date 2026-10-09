@@ -378,7 +378,29 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     effConfigureIndexedSlotResource(assets->sprites[3], 0, assets->material, 4, 4);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);
+extern char D_003B2330[];
+extern char D_003B2348[];
+extern u32 D_0037CD18[];
+extern u32 D_0037CD20[];
+
+/* Load the base sprite banks synchronously, bind the payloads, and reset the fifth bank's saved corner colors. */
+void func_0027AD80(MenuAssets *assets) {
+    s32 i;
+    s32 j;
+
+    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)D_0037CD18[1], 0);
+    assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)D_0037CD18[0], 0);
+    assets->material = effLoadMappedResource(D_003B2348, (const char *)D_0037CD20[0]);
+    mnuBindAssetEffectPayloads(assets);
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 4; j++) {
+            assets->sprites[4]->workEntries[i].savedColors[j] = 0x8080805A;
+        }
+    }
+}
 
 extern char D_003B2330[];
 
@@ -397,7 +419,30 @@ void mnuRequestBaseAssets(MenuAssets *assets) {
 }
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
-INCLUDE_ASM(const s32, "game/code_00279CC0", mnuInitializeCampAssetSprites);
+s32 mnuInitializeCampAssetSprites(MenuAssets *assets) {
+    s32 i;
+    s32 j;
+
+    if (assets->sprites[0] == NULL) {
+        return 0;
+    }
+    if (assets->sprites[4] == NULL) {
+        return 0;
+    }
+    if (assets->material == NULL) {
+        return 0;
+    }
+    assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
+    mnuBindAssetEffectPayloads(assets);
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 4; j++) {
+            assets->sprites[4]->workEntries[i].savedColors[j] = 0x8080805A;
+        }
+    }
+    return 1;
+}
 
 void mnuReleaseAssets(MenuAssets *assets) {
     u32 i;

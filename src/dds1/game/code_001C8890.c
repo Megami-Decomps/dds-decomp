@@ -296,9 +296,8 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 extern s64 func_001F0998(SceneLightRestoreArgs *);
-extern void evtSetUnitStatusFlags(EvtUnit *);
+
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
-extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
 extern s32 func_001F06E0(SceneLightRestoreArgs *);
 
@@ -434,10 +433,10 @@ s32 btlGetActorBedAssetIdFromIndex(s32 arg0);
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
 struct EvtUnit;
-extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
-extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
+
+
 /* Retail passes the full motion index; only the stored field is a halfword. */
-extern void evtUnitSetStoredParameter(struct EvtUnit *, s32);
+
 extern void evtSetTransitionMotionScale(struct EvtUnit *, f32);
 extern s32 btlIsCurrentValueBelowQuarterThreshold(void *);
 extern s32 btlTestActorStatusPredicate(BtlUnit *);
@@ -4515,13 +4514,11 @@ void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
     PCP_COPY_VECTOR(dst, unit->orientation);
 }
 
-extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
-
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode) {
     if ((u32)unit->status.flags & 2) {
         color = (color & 0xFFFFFF) | 0x80000000;
         *(u32 *)((u8 *)unit + 0x54) = (*(u32 *)((u8 *)unit + 0x54) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition(*(u32 *)((u8 *)unit + 0x320), mode, color);
+        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, color);
     }
 }
 
@@ -4533,7 +4530,7 @@ void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode) {
         base = (*(u32 *)((u8 *)unit + 0x54) & 0xFFFFFF) | 0x80000000;
         blended = (base & color) + (((base ^ color) & 0xFEFEFEFE) >> 1);
         *(u32 *)((u8 *)unit + 0x84) = (*(u32 *)((u8 *)unit + 0x84) & 0xFF000000) | (color & 0xFFFFFF);
-        evtSetUnitRgbTransition(*(u32 *)((u8 *)unit + 0x320), mode, blended);
+        evtSetUnitRgbTransition((EvtUnit *)*(u32 *)((u8 *)unit + 0x320), mode, blended);
     }
 }
 
@@ -5096,7 +5093,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         func_001D4E98(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
-            evtSetUnitAlphaTransition(*(u32 *)((u8 *)object + 0x320), 0, 0);
+            evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
             *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_003A3BC8, effect, model);
@@ -5125,7 +5122,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     }
     if (*(s8 *)(arguments + 3) == 0) {
         btlClearUnitDefeatCandidate(object);
-        evtSetUnitAlphaTransition(*(u32 *)((u8 *)object + 0x320), 0, 0);
+        evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
         *(u32 *)((u8 *)object + 0x84) = *(u32 *)((u8 *)object + 0x54) & 0xFFFFFF;
     }
     *(u32 *)((u8 *)object + 0x118) = (*(u32 *)((u8 *)object + 0x118) & ~1) | 2;
@@ -5421,8 +5418,6 @@ u8 *btlCreateUnitTask10(u8 *unit, f32 *spawnPosition, s32 value) {
     PCP_COPY_VECTOR(args, spawnPosition);
     return task;
 }
-
-extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
 
 u32 btlUnitFadeInTask(BtlFadeArgs *args) {
     u32 total = args->fadeIn + args->fadeOut;
