@@ -21,6 +21,7 @@
 #include "eff_pcp_group_set.h"
 #include "eff_pcp_block_set.h"
 #include "eff_pcp_staggered.h"
+#include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
@@ -224,19 +225,6 @@ extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
-/* Six delayed resource pairs share this 0x60-byte allocation throughout
-   creation, cloning, rerolling, update and release. */
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
-    u32 color;
-    f32 unk14; /* Settable size input; not read by the observed update. */
-    EffParamWork *handle[12];
-    u32 delay[6];
-} EffPCPDelayedPairs;
-
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 /* Three frame thresholds and their block-set inputs form the copied prefix. */
 typedef struct EffPCPRotateParams {
@@ -749,11 +737,11 @@ void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index) {
 
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, index & 1);
-    work->delay[index] = effMiscRand(effDefaultRandomState) % 10;
+    work->remainingDelay[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 
-EffPCPDelayedPairs *effCreateIndexedResourceWork(void *source) {
+EffPCPDelayedPairs *effPcpDelayedPairsCreate(void *source) {
     EffPCPDelayedPairs *work = sdfAllocSizeClassBlock(0x60);
     EffParamWork **handle = &work->handle[1];
     s32 i;
@@ -787,7 +775,7 @@ void effPcpDelayedPairsRelease(EffPCPDelayedPairs *work) {
     sdfReleaseChipBlock(work);
 }
 
-EffPCPDelayedPairs *effCopyIndexedResourceWork(EffPCPDelayedPairs *source) {
+EffPCPDelayedPairs *effPcpDelayedPairsClone(EffPCPDelayedPairs *source) {
     EffParamWork **sourceHandle;
     EffParamWork **workHandle;
     s32 i;
@@ -817,8 +805,8 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (work->delay[i] != 0) {
-            work->delay[i]--;
+        if (work->remainingDelay[i] != 0) {
+            work->remainingDelay[i]--;
         } else {
             obj[0] = effParamWorkGetData(work->handle[i * 2]);
             obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
