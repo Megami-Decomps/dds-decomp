@@ -8,6 +8,7 @@
 #include "mnu_result.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
+#include "itf_mes_resource.h"
 
 typedef struct UiQuadColor {
     s32 red;
@@ -195,21 +196,6 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
 extern s32 D_003BB2E0;
 
 extern u16 mnuMovieTaskState;
-
-typedef struct ItfMesTable ItfMesTable;
-
-typedef struct ItfMesEntry {
-    u32 itemList;
-    ItfMesTable *table;
-} ItfMesEntry;
-
-/* Variable-length message data consumed by itfMesCreateWindow. */
-typedef struct ItfMesSub {
-    u8 unk00[0x18];
-    u32 entryCount;
-    u8 unk1C[4];
-    ItfMesEntry entries[1];
-} ItfMesSub;
 
 typedef struct BattleInitState {
     u8 pad000[0x1F0];

@@ -10,8 +10,6 @@
 
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
-void dds3EnsureWorldNodeInSlot(void *arg0, void *arg1);
-
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 
 s32 dds3SelectSlotForObjectKind(u32 kind);
@@ -30,7 +28,7 @@ void mdlDestroyContext(MdlCtx *model);
 void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
-void func_00111480(void *slot, void *owner);
+void func_00111480(EffWorldNode *slot, EffWorldNode *owner);
 void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
@@ -47,8 +45,8 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
 void dds3DestroyObjectBase(ObjBase *base) {
-    void *owner;
-    void *handler;
+    EffWorldNode *owner;
+    EffWorldNode *handler;
     s32 slotIndex;
 
     owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
@@ -332,7 +330,7 @@ void dds3SetObjectModeAndDefaultWeight(void *object, u32 requestedMode) {
 /* Ensure the owner appears in its auxiliary handler's world index.
  * Return 0 for an absent handler, otherwise 1 after updating the index. */
 s32 dds3RegisterObjectInHandlerIndex(void *object) {
-    void *handler;
+    EffWorldNode *handler;
 
     handler = dds3GetSlot(object, DDS3_OBJECT_HANDLER_SLOT);
     if (handler == NULL) {

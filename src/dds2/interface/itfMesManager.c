@@ -18,18 +18,6 @@ extern ItfMesGlobals itfMesWork;
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
 
-typedef struct ItfMesRelocResource {
-    u8 pad00[8];
-    u32 magic;
-    u8 pad0C[4];
-    s32 fixupOffset;
-    s32 fixupCount;
-    u8 pad18[4];
-    u8 relocated;
-    u8 pad1D[3];
-    u8 payload[1];
-} ItfMesRelocResource;
-
 /* State of the interactive message-layout inspector. */
 typedef struct ItfMesDebugState {
     s32 selectedItem;
@@ -45,6 +33,8 @@ ItfMesEntry *itfMesGetEntry(ItfMesState *mes, s32 index);
 ItfMesEntry *itfMesGetNextEntry(ItfMesSub *sub);
 
 u32 itfMesGetTableItem(ItfMesTable *table, s32 index);
+
+void itfMesRelocate(ItfMesRelocHeader *resource);
 
 
 
@@ -800,10 +790,10 @@ ItfMesSub *itfMesSetSubResource(s32 window, ItfMesSub *sub) {
     ItfMesEntry *entry;
     s32 temporaryFontEntry;
     mes->sub = sub;
-    itfMesRelocate(sub);
+    itfMesRelocate((ItfMesRelocHeader *)sub);
     entry = itfMesGetNextEntry(sub);
     temporaryFontEntry = 0;
-    if (((ItfMesRelocResource *)sub)->magic == ITF_MES_MAGIC_MSG1) {
+    if (sub->magic == ITF_MES_MAGIC_MSG1) {
         temporaryFontEntry = *(s32 *)((u8 *)entry + 8);
     }
     mes->temporaryFontEntry = temporaryFontEntry;
@@ -1079,22 +1069,22 @@ void itfMesDestroyWindow(s32 window) {
 
 /* Relocate packed payload words once, then set the resource's relocated marker. */
 /* Semantic reference: Persona 4 func_00278d50 @ 00278D50 (src/itfMesManager.c). */
-void itfMesRelocate(ItfMesRelocResource *resource)
+void itfMesRelocate(ItfMesRelocHeader *resource)
 {
     u8 *payload;
     u8 *fixupTable;
     s32 fixupSize;
     if (resource->relocated == 0) {
         payload = resource->payload;
-        fixupTable = (u8 *)resource + resource->fixupOffset;
-        fixupSize = resource->fixupCount;
+        fixupTable = (u8 *)resource + resource->fixupTableOffset;
+        fixupSize = resource->fixupTableBytes;
         sdfRelocatePackedResourceWords((int *)payload, (int)payload, fixupTable, fixupSize);
         resource->relocated = 1;
     }
 }
 
 /* Recognize MSG0/MSG1 magic only; this is not complete format validation. */
-u32 itfMesIsMsgData(ItfMesRelocResource *resource) {
+u32 itfMesIsMsgData(ItfMesRelocHeader *resource) {
     u32 isMessageResource;
 
     isMessageResource = 0;

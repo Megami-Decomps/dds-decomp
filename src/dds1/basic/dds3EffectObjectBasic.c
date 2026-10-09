@@ -61,7 +61,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern void effCopyVector(void *source, void *destination);
 
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
-extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
