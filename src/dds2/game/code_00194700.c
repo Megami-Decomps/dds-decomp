@@ -29,7 +29,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 

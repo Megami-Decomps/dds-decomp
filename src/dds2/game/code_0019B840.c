@@ -174,7 +174,6 @@ void frFontUploadClearedTexture(void) {
     sdfReleaseResourceAllocation(allocation);
 }
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 /* Load only when the slot word is not exactly one; slot one borrows entry zero's allocation. */
 void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     s32 slotIndex = slotId & FR_FONT_BYTE_MASK;

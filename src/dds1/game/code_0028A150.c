@@ -499,11 +499,7 @@ extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 extern FileJob *fileJobCreate(void);
 
 
-extern void fileQueueSetPosition(FileQueue *queue, void *vec);
-extern void fileQueueSetRotation(FileQueue *queue, void *rot);
 extern void effMiscQuaternionToMatrixVU(void);
-extern void fileQueueSetScale(FileQueue *queue, f32 scale);
-extern void func_00294938(FileQueue *queue, u32 color);
 
 extern FileJob *fileQueueFindById(FileQueue *, u32);
 extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);
@@ -4296,10 +4292,10 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
         }
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
-    func_00294938(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4389,10 +4385,10 @@ FileQueue *fileQueueClone(FileQueue *source) {
         fileQueueAppend(queue, job);
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
-    func_00294938(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4405,7 +4401,7 @@ void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
 }
 
 /* Moves the queue to *vec and repositions every job: position = *vec + offset, plus each job's offset rotated by the queue quaternion (scaled when flag 0x80, y lowered by 5 for flag 0x04). */
-void fileQueueSetPosition(FileQueue *queue, void *vec)
+void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
 {
     f32 rot[16];
     f32 base[4];
@@ -4440,7 +4436,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
 }
 
 /* Sets the queue rotation to *rot: stores it as queue->quat, rotates queue->axis into queue->offset, notifies each job with its quat multiplied by *rot, then repositions the jobs at queue->position. */
-void fileQueueSetRotation(FileQueue *queue, void *rot)
+void fileQueueSetRotation(FileQueue *queue, const f32 rot[4])
 {
     f32 quat[4];
     f32 pos[4];
@@ -4494,13 +4490,13 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00294938);
+INCLUDE_ASM(const s32, "game/code_0028A150", fileQueueSetColor);
 
-void fileQueueCopyRotationFromSource(void *dst, void *src) {
+void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     s128 vec;
-    sdfVuMatrixToQuaternion(src);
+    sdfVuMatrixToQuaternion(matrix);
     VU0_STORE_VF(vf10, &vec);
-    fileQueueSetRotation(dst, &vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
 }
 
 FileJob *fileAppendJob(FileQueue *queue, u32 id) {
@@ -4515,9 +4511,9 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
     return fileAppendJob(queue, (u32)job);
 }
 
-FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry) {
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
     func_003003F0(D_003BC940);
-    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(entry));
+    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {

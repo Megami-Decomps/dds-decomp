@@ -516,7 +516,41 @@ void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
     layout->z[2] = 16;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
+void func_0025E390(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
+    EvtRuntimeChild *lower;
+    EvtRuntimeChild *upper;
+    EvtCameraColorPayload fallback;
+    EvtCameraColorPayload *lowerPayload;
+    EvtCameraColorPayload *upperPayload;
+    s32 currentFrame = viewer->curFrame;
+    s32 lowerFrame;
+    s32 upperFrame;
+    s32 duration;
+    f32 ratio;
+
+    mnuFindCampKeyTrackNeighbors(track, currentFrame, &lower, &upper);
+    if (lower != NULL) {
+        lowerFrame = lower->frame;
+        lowerPayload = lower->payload;
+    } else {
+        mnuInitializeCampListLayoutDefaults(out);
+        return;
+    }
+    if (upper != NULL) {
+        upperFrame = upper->frame;
+        upperPayload = upper->payload;
+        duration = upperFrame - lowerFrame;
+        if (upperFrame != lowerFrame) {
+            ratio = (f32)(currentFrame - lowerFrame) / (f32)duration;
+        } else {
+            ratio = 0.0f;
+        }
+    } else {
+        upperPayload = &fallback;
+        ratio = 0.0f;
+    }
+    evtBlendParamsH(1, ratio, &lowerPayload->parameters, &upperPayload->parameters, out);
+}
 
 /* Blend the display fields; control bytes always come from the lower key. */
 void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to,
@@ -1088,7 +1122,6 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
 extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);

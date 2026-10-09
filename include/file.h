@@ -72,6 +72,10 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
 struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
 struct FileQueue *fileQueueClone(struct FileQueue *source);
 void fileQueueDestroy(struct FileQueue *queue);
+void fileQueueSetPosition(struct FileQueue *queue, const f32 position[4]);
+void fileQueueSetRotation(struct FileQueue *queue, const f32 rotation[4]);
+void fileQueueSetScale(struct FileQueue *queue, f32 scale);
+void fileQueueUpdate(struct FileQueue *queue);
 
 /* Queue flags describe payload sharing and secondary-buffer links. */
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1
@@ -146,10 +150,13 @@ typedef char FileQueue_first_offset_must_be_0x8C[
     ((u32)&((FileQueue *)0)->first == 0x8C) ? 1 : -1];
 
 FileQueue *fileQueueCreate(void);
+void fileQueueSetColor(FileQueue *queue, u32 color);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
+void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]);
 void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
 void fileQueueSaveImage(FileQueue *queue, const char *filePath);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath);
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
 void fileJobCopyHeader(FileJob *destination, FileJob *source);
 void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);

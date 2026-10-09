@@ -10737,10 +10737,6 @@ SoundHandleNode *sndCreateSystemEffectHandle(void *actor, s32 index) {
 }
 
 
-extern void fileQueueSetPosition(s32, f32 *);
-
-extern void fileQueueUpdate(s32);
-
 void btlUpdateJobPositionFromModel(s32 *args) {
     SoundHandleNode *node = (SoundHandleNode *)args;
     f32 pos[4];
@@ -10751,8 +10747,8 @@ void btlUpdateJobPositionFromModel(s32 *args) {
     } else {
         VU0_STORE_VF(vf10, pos);
     }
-    fileQueueSetPosition((s32)node->queue, pos);
-    fileQueueUpdate((s32)node->queue);
+    fileQueueSetPosition(node->queue, pos);
+    fileQueueUpdate(node->queue);
 }
 
 void sndDestroyFileQueueWrapper(u32 queue) {

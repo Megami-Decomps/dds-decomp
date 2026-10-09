@@ -362,7 +362,6 @@ typedef struct FldSceneRequest {
 
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001263F0(u32, u32);
 
 /* Relocated collision headers contain their eight-word geometry header. */
@@ -3625,7 +3624,6 @@ void fldLoadBattleSkyAndFilter(void) {
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void fldLoadSkyResource(s32 area) {
     char path[64];
@@ -4217,7 +4215,6 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);

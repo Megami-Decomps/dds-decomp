@@ -6,7 +6,6 @@
 #include "kwln_task_lifecycle.h"
 extern ScrProcGlobals *datGameState;
 
-SdfMemBlock *sdfReadNamedResource(const char *path, u32 *outAddress, u32 *outSize);
 KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay,
                          s32 destroyDelay, TaskUpdate update, TaskDestroy destroy,
                          u32 userValue);

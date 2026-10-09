@@ -207,7 +207,6 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001289A8(u32, u32);
 
 extern f32 D_003897DC[];
@@ -3786,7 +3785,6 @@ extern u32 fldRainTextureData;
 
 extern char D_00413350[];
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 void fldLoadSkyResource(s32 area) {
