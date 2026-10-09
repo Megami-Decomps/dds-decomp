@@ -123,13 +123,13 @@ INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
-void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
+void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
                   s32 drawFlags) {
     func_0019BA00(x + glyph->x, y + glyph->y,
-                 glyph->childCountOrCellDimensions.cellDimensions.cellWidth,
-                 glyph->childCountOrCellDimensions.cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
+                 glyph->cellDimensions.cellWidth,
+                 glyph->cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
                  glyph->renderValueOrSetupOrShade.setupBytes.firstOption, glyph->parentDimensionsOrRenderWord.renderWord, depth, 1,
-                 &glyph->link1C.cachedItem->list->uv, &frFontWork.atlas, drawFlags);
+                 &glyph->cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }
 
 extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
