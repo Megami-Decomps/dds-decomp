@@ -3838,23 +3838,7 @@ void mnuDestroyWindowOwnedLists();
 
 void mnuRebuildScrollLists(u32 context, u32 counts);
 
-typedef struct MenuSlotWindow {
-    u8 unk0[0xC0];
-    u32 unkC0;
-    u8 unkC4[0x110 - 0xC4];
-    u32 unk110;
-    u8 unk114[0x2138 - 0x114];
-} MenuSlotWindow;
-
-typedef struct MenuWindowSet {
-    u32 flags;
-    u8 unk4[0x14];
-    MenuSlotWindow slots[5];
-    u8 unkA630[0xA698 - 0xA630];
-    s32 selected;
-} MenuWindowSet;
-
-void mnuClearPageSelection(MenuWindowSet *set);
+void mnuClearPageSelection(MenuPageWindow *menu);
 
 
 
