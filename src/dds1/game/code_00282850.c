@@ -49,7 +49,6 @@ extern char D_003BC7A0[];
 #define MNU_NO_SELECTION 0xffffffff
 #define MNU_PANEL_TEXTURE_COUNT 9
 #define MNU_POPUP_STATE_BYTES 0x4c
-#define MNU_POPUP_INSERT_BEFORE_TOP 0x20000
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_INPUT_PRIORITY_BIT 1
@@ -1087,7 +1086,7 @@ void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupS
                         }
                     }
                     state->entries[state->count++] = entry;
-                    if ((entry->flags & 0x20000) && state->count >= 2) {
+                    if ((entry->flags & MNU_POPUP_INSERT_BEFORE_TOP) && state->count >= 2) {
                         saved = state->entries[state->count - 1];
                         state->entries[state->count - 1] = state->entries[state->count - 2];
                         state->entries[state->count - 2] = saved;
