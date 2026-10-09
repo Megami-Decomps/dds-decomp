@@ -70,13 +70,7 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
     sceGsPutDispEnv(&D_003EB820);
 }
 
-/* Display-mode defaults row; the u16 at +0xA selects interlace. */
-typedef struct SdfGraphModeInterlace {
-    u16 interlace;
-    u8 pad02[10];
-} SdfGraphModeInterlace;
-
-extern SdfGraphModeInterlace D_003980BA[];
+extern SdfGraphModeDefaults D_003980B0[];
 extern u8 D_003BD2E9;
 extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 
@@ -84,7 +78,7 @@ extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
-    u16 interlace = D_003980BA[D_003BD2E8].interlace;
+    u16 interlace = D_003980B0[D_003BD2E8].interlace;
 
     switch (interlace) {
     case 0:

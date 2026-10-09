@@ -310,11 +310,13 @@ typedef struct SdfGraphModeDefaults {
     s16 height;
     u16 bufferFormat;
     u16 auxiliaryFormat;
-    u8 pad0A[2];
+    u16 interlace;
 } SdfGraphModeDefaults;
 
 typedef char SdfGraphModeDefaults_size_must_be_0xC[
     (sizeof(SdfGraphModeDefaults) == 0xC) ? 1 : -1];
+typedef char SdfGraphModeDefaults_interlace_must_be_at_0xA[
+    ((u32)&((SdfGraphModeDefaults *)0)->interlace == 0xA) ? 1 : -1];
 
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
 typedef struct SdfTex {
