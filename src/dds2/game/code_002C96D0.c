@@ -7751,7 +7751,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     s32 dataBytes = D_003E95C0[type].dataBytes;
     u32 headerSize = 0x30;
     u32 size;
-    u32 handle;
+    struct SdfMemBlock *allocation;
     FileSlotTable *rec;
     u8 *body;
     u8 *vec;
@@ -7759,8 +7759,8 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     size = slotBytes + headerSize;
     size += D_003E95C0[type].slotBytes * count;
     size += dataBytes * 2;
-    handle = (u32)sdfAllocGeneralBlock(size);
-    rec = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(size);
+    rec = (void *)sdfResourceRetainAddress(allocation);
     body = (u8 *)rec + headerSize;
     rec->type = type;
     rec->slots = (FileSlot *)body;
@@ -7772,7 +7772,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     rec->unk1C = body;
     rec->instances = count;
     rec->count = slotCount;
-    rec->handle = handle;
+    rec->allocation = allocation;
     rec->flags = 0;
     rec->references = 0;
     rec->spawnRemainder = 0.0f;
@@ -7788,7 +7788,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
 }
 
 void fileReleaseGridRecordHandle(FileSlotTable *record) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->handle));
+    sdfReleaseResourceAllocation(record->allocation);
 }
 
 void fileClearRecordReferences(FileSlotTable *record) {
