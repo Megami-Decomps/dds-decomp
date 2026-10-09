@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dds3obj.h"
 #include "sdf_resource.h"
+#include "sdf_dev_state.h"
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -41,11 +42,19 @@ s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);
 
 typedef struct SdfChannel {
-    u8 pad00[0xA4];
+    const char *path;
+    struct {
+        void **slot;
+        u32 unused;
+    } entries[20];
 } SdfChannel;
+
+typedef char SdfChannel_size_must_be_0xA4[(sizeof(SdfChannel) == 0xA4) ? 1 : -1];
 
 extern SdfChannel D_00385A90[8];
 extern void func_00118798(SdfChannel *channel);
+extern void func_0035B6E0(const char *fmt, ...);
+const char D_00412AB0[16] = "sys:[%s]\n";
 
 
 typedef struct EvtScaledValue {
@@ -358,9 +367,50 @@ u8 scrIsCurrentWorkTask(u32 expected) {
     return current == expected;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_001186F8);
+/* Load the channel file and copy its size-prefixed segments into table slots. */
+void func_00118798(SdfChannel *table) {
+    DevState *command;
+    struct SdfMemBlock *block;
+    s32 size;
+    u8 *address;
+    u32 segmentBytes;
+    u32 alignedBytes;
+    s32 i;
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118798);
+    /* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
+    s32 func_001186F8(void **slot, u32 unused) {
+        u32 blocks;
+        u32 advance;
+
+        size = *(s32 *)address;
+        if (*slot != 0) {
+            sdfFreeMemoryFromEitherHeap(*slot);
+        }
+        *slot = sdfAllocateBlockBySizeThreshold(size);
+        memcpy(*slot, address + 4, size);
+        segmentBytes = size + 4;
+        blocks = segmentBytes >> 4;
+        if ((segmentBytes & 0xF) != 0) {
+            advance = (blocks + 1) << 4;
+        } else {
+            advance = blocks << 4;
+        }
+        alignedBytes = advance;
+        return advance;
+    }
+
+    command = sdfDevCreateCommandState(table->path);
+    size = sdfDevQueueControlAndWait(command);
+    block = sdfAllocGeneralBlockHigh(size);
+    address = (u8 *)sdfResourceRetainAddress(block);
+    sdfDevQueueReadAndWait(command, address, size);
+    sdfDevWaitThenReleaseCommandState(command);
+    for (i = 0; table->entries[i].slot != 0; i++) {
+        address += func_001186F8(table->entries[i].slot, table->entries[i].unused);
+    }
+    sdfReleaseResourceAllocation(block);
+    func_0035B6E0(D_00412AB0, table->path);
+}
 
 void sdfResetChannels(void) {
     u32 i;
