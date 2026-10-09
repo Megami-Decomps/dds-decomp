@@ -398,7 +398,6 @@ s32 func_00101E40(void) {
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
-extern s32 sdfFlushPoolNodes(SdfPoolNode *);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
 extern void func_00106368(void);
@@ -503,7 +502,7 @@ s32 kwlnRenderFrame(void) {
         sdfAppendPacket((SdfListHead *)packetList, (u32)spritePacket);
         D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packetList);
     }
-    poolHead = (SdfListHead *)sdfFlushPoolNodes(kwlnDrawSurfaces);
+    poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_003BA844 = poolHead;
     if (D_003BA7FC != 0) {
         func_002EA5C0(poolHead->first);
