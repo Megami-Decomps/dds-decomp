@@ -396,8 +396,8 @@ s32 func_00101E40(void) {
 
 
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
-extern s32 *sdfConsAllocateColumnPacket(s32);
-extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
+extern void *sdfConsAllocateColumnPacket(s32);
+extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
 extern void func_00106368(void);
@@ -426,11 +426,11 @@ s32 kwlnRenderFrame(void) {
     s32 bufferIndex = kwlnGetDrawBufferIndex();
     u8 *groupHeads;
     u8 *packetGroups;
-    u64 *packetList;
+    SdfListHead *packetList;
     u64 *texturePacket;
     u64 *blendPacket;
     KwlnSpriteVertex *vertex;
-    s32 *spritePacket;
+    void *spritePacket;
     SdfListHead *poolHead;
     s32 edgeDistances[4];
     s32 i;
@@ -449,9 +449,9 @@ s32 kwlnRenderFrame(void) {
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
     if (kwlnDrawOverlayEnabled != 0 && func_0011E278() == 0) {
-        packetList = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
-        sdfInitPacketList((SdfListHead *)packetList);
-        sdfAppendDmaPrimary((SdfListHead *)packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
+        packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
+        sdfInitPacketList(packetList);
+        sdfAppendDmaPrimary(packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
         texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */
@@ -462,7 +462,7 @@ s32 kwlnRenderFrame(void) {
         texturePacket[5] = KWLN_FRAME_GS_TEXA;
         texturePacket[6] = 0;
         texturePacket[7] = KWLN_FRAME_GS_TEXFLUSH;
-        sdfAppendPacket((SdfListHead *)packetList, (u32)texturePacket);
+        sdfAppendPacket(packetList, (u32)texturePacket);
         blendPacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         blendPacket[0] = 3;
         blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -472,7 +472,7 @@ s32 kwlnRenderFrame(void) {
         blendPacket[5] = KWLN_FRAME_GS_TEST_PRIMARY;
         blendPacket[6] = 0x44;
         blendPacket[7] = KWLN_FRAME_GS_ALPHA_PRIMARY;
-        sdfAppendPacket((SdfListHead *)packetList, (u32)blendPacket);
+        sdfAppendPacket(packetList, (u32)blendPacket);
         edgeDistances[0] = D_003BA910[0] + KWLN_FRAME_HALF_WIDTH;
         edgeDistances[1] = D_003BA910[1] + KWLN_FRAME_HALF_HEIGHT;
         edgeDistances[2] = KWLN_FRAME_HALF_WIDTH - D_003BA910[0];
@@ -482,7 +482,7 @@ s32 kwlnRenderFrame(void) {
             edgeDistances[i] = edgeDistances[i] * kwlnDrawOverlayScale >> KWLN_FRAME_SCALE_FRACTION_BITS;
         }
         spritePacket = sdfConsAllocateColumnPacket(1);
-        vertex = sdfConsMeasurePacketWithHeader(spritePacket);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)spritePacket);
         vertex->r = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->g = KWLN_FRAME_NEUTRAL_COLOR;
         vertex->b = KWLN_FRAME_NEUTRAL_COLOR;
@@ -499,8 +499,8 @@ s32 kwlnRenderFrame(void) {
         vertex->corner[1].y = KWLN_FRAME_BOTTOM_BASE + edgeDistances[3] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
-        sdfAppendPacket((SdfListHead *)packetList, (u32)spritePacket);
-        D_00325708.append(&D_00325708, (SdfListHead *)packetList);
+        sdfAppendPacket(packetList, (u32)spritePacket);
+        D_00325708.append(&D_00325708, packetList);
     }
     poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_003BA844 = poolHead;

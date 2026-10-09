@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "btl_stage_task_cleanup.h"
@@ -474,7 +475,7 @@ extern void func_003365B8(f32);
 
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 
-extern void func_0033B530(u64, u8 *, s32, u8 *, u8 *);
+extern void func_0033B530(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
 extern s32 D_00435F30;
 
@@ -2239,8 +2240,8 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
 
 void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2) {
     s32 coords[6];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
     SdfPoolNode *descriptor;
@@ -2251,11 +2252,11 @@ void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
     coords[3] = y1 * 16;
     coords[4] = x2 * 16;
     coords[5] = y2 * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 3);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < 3; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2273,9 +2274,9 @@ void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
             ((u64)(coords[i * 2 + 1] + 0x7900) << 32);
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
@@ -2417,34 +2418,37 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     descriptor->append(descriptor, command);
 }
 
-/* Model draw input: angle for the VU0 matrix and a geometry packet value. */
-typedef struct FldModelPacketInput {
-    u8 pad00[0x40];
-    s32 geometryValue; /* 0x40 */
-    f32 angle;         /* 0x44 */
-} FldModelPacketInput;
+/* The marker producers supply the complete model draw input. */
+typedef struct FldMarkerPacket {
+    f32 pos[3];
+    s32 pad0C;
+    BillTextureQuad uv;
+    f32 quad[8];
+    s32 color;
+    f32 scale;
+} FldMarkerPacket;
 
-void fldSubmitModelPacket(SdfTex *texture, u8 *modelData) {
-    s32 command = sdfAllocPacketAligned(0x20);
-    s32 header;
-    s32 packet;
+void fldSubmitModelPacket(SdfTex *texture, FldMarkerPacket *modelData) {
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    DmaPacketHeader *header;
+    u8 *packet;
     f32 mat[16];
     SdfPoolNode *descriptor;
 
-    sdfInitPacketList((SdfListHead *)command);
-    header = sdfAllocPacketAligned(0x20);
-    sdfConsInitDmaPacketHeader((DmaPacketHeader *)header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
-    sdfAppendReferencePacket((SdfListHead *)command, header);
-    func_003365B8(((FldModelPacketInput *)modelData)->angle);
+    sdfInitPacketList(command);
+    header = (DmaPacketHeader *)sdfAllocPacketAligned(0x20);
+    sdfConsInitDmaPacketHeader(header, (u32)sdfTexGetPrimaryBuffer(texture), sdfTexGetPrimaryBufferSize(texture));
+    sdfAppendReferencePacket(command, (u32)header);
+    func_003365B8(modelData->scale);
     VU0_STORE_MATRIX(mat);
-    packet = sdfAllocPacketAligned(0x38);
-    sdfInitGeometryDmaPacket((u8 *)packet, mat);
-    sdfAppendPacket((SdfListHead *)command, packet);
-    packet = sdfAllocPacketAligned(0x80);
-    func_0033B530(packet, modelData, ((FldModelPacketInput *)modelData)->geometryValue, modelData + 0x10, modelData + 0x20);
-    sdfAppendPacket((SdfListHead *)command, packet);
+    packet = (u8 *)sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket(packet, mat);
+    sdfAppendPacket(command, (u32)packet);
+    packet = (u8 *)sdfAllocPacketAligned(0x80);
+    func_0033B530(packet, modelData->pos, modelData->color, &modelData->uv, modelData->quad);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitPrimaryFramePacket(void) {
@@ -2495,13 +2499,13 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     SdfPrimitiveRequest desc;
     f32 verts[12];
     s32 indices[3];
-    s32 command;
+    SdfListHead *command;
     SdfPoolNode *descriptor;
 
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    sdfConsAppendClearPacket((SdfListHead *)command, 0);
-    sdfConsAppendAssetPacket((SdfListHead *)command, (SdfAsset *)D_0043607C, 0);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    sdfConsAppendClearPacket(command, 0);
+    sdfConsAppendAssetPacket(command, (SdfAsset *)D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.stripWordCount = 1;
@@ -2520,9 +2524,9 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     indices[0] = a0;
     indices[1] = a1;
     indices[2] = a2;
-    sdfAppendPacket((SdfListHead *)command, (u32)func_0033B050(&desc));
+    sdfAppendPacket(command, (u32)func_0033B050(&desc));
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitTexturedOverlaySprite(void) {
@@ -2723,27 +2727,18 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     surface->append(surface, packetList);
 }
 
-typedef struct FldMarkerPacket {
-    f32 pos[3];
-    s32 pad0C;
-    s16 rot[8];
-    f32 quad[8];
-    s32 color;
-    f32 scale;
-} FldMarkerPacket;
-
 void fldDrawMarkerQuad(f32 *pos) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
-    packet.rot[0] = 0;
-    packet.rot[1] = 0;
-    packet.rot[2] = 0x200;
-    packet.rot[3] = 0;
-    packet.rot[4] = 0x200;
-    packet.rot[5] = 0x200;
-    packet.rot[6] = 0;
-    packet.rot[7] = 0x200;
+    packet.uv.components[0] = 0;
+    packet.uv.components[1] = 0;
+    packet.uv.components[2] = 0x200;
+    packet.uv.components[3] = 0;
+    packet.uv.components[4] = 0x200;
+    packet.uv.components[5] = 0x200;
+    packet.uv.components[6] = 0;
+    packet.uv.components[7] = 0x200;
     packet.quad[0] = -half;
     packet.quad[1] = -half;
     packet.quad[2] = half;
@@ -2760,21 +2755,21 @@ void fldDrawMarkerQuad(f32 *pos) {
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
     func_0012BE18(0);
-    fldSubmitModelPacket(fldMarkerTexture, (u8 *)&packet);
+    fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
 void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     FldMarkerPacket packet;
     f32 half = 36.0f;
 
-    packet.rot[0] = 0;
-    packet.rot[1] = 0;
-    packet.rot[2] = 0x200;
-    packet.rot[3] = 0;
-    packet.rot[4] = 0x200;
-    packet.rot[5] = 0x200;
-    packet.rot[6] = 0;
-    packet.rot[7] = 0x200;
+    packet.uv.components[0] = 0;
+    packet.uv.components[1] = 0;
+    packet.uv.components[2] = 0x200;
+    packet.uv.components[3] = 0;
+    packet.uv.components[4] = 0x200;
+    packet.uv.components[5] = 0x200;
+    packet.uv.components[6] = 0;
+    packet.uv.components[7] = 0x200;
     packet.quad[0] = -half;
     packet.quad[1] = -half;
     packet.quad[2] = half;
@@ -2791,7 +2786,7 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
     func_0012BE18(0);
-    fldSubmitModelPacket(fldMarkerTexture, (u8 *)&packet);
+    fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
 void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {

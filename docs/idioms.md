@@ -6562,3 +6562,29 @@ draw-header allocations under those same two primary pointer types.
 Its four real color-channel captures, coordinate array and color-selection
 loop remain the original consumed work, independent of list encoding.
 
+## Field model packets use their producer's complete input
+
+`fldSubmitModelPacket` consumes the same `FldMarkerPacket` that its two
+marker producers fill. Its position, canonical `BillTextureQuad`, corner
+array, packed color and final float cover the real `0x48` input; a second
+`FldModelPacketInput` prefix is unnecessary. The separate command-list,
+DMA header and opaque geometry allocations retain `SdfListHead *`,
+`DmaPacketHeader *` and `u8 *` until their physical-address submission.
+The SDK model formatter agrees with the existing billboard callers.
+
+The sound-selector fade/message helpers, indexed field triangle helper
+and optional frame vignette likewise retain real command-list pointers.
+The vignette's column buffer remains opaque, with explicit address-word
+conversion at the scalar SDK header-offset operation.
+
+The released field and event gradient-triangle bodies retain their
+existing coordinate workspaces, color captures and packing loops when
+the command-list and draw-header locals become their primary pointers.
+Owner recovery does not justify changing the published matching loops.
+
+The TEST/ALPHA state writers and panel-state writer are a different case:
+their allocation word goes directly through the SDK's scalar finalize
+operation and physical append, with a real `u64 *` or state-tail write
+cursor returned by that operation. Keep this genuine SDK word transport.
+
+
