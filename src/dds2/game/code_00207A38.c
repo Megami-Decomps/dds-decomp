@@ -1,3 +1,4 @@
+#include "kwln_sprite.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -3169,7 +3170,45 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawResourcePreview);
+extern s32 sdfConsAllocateColumnPacket(s32 arg0);
+extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
+
+/* Queue the descriptor's preview texture as a quad at its screen position. */
+void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
+    SdfListHead *list;
+    s32 sprite;
+    KwlnSpriteVertex *vertex;
+    SdfTex *texture;
+    SdfPoolNode *surface;
+
+    if (descriptor->texture != 0) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        sprite = sdfConsAllocateColumnPacket(1);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+        vertex->a = 0x80;
+        vertex->b = 0x80;
+        vertex->g = 0x80;
+        vertex->r = 0x80;
+        texture = descriptor->texture;
+        vertex->corner[1].u = texture->width << 4;
+        vertex->corner[1].v = texture->height << 4;
+        vertex->corner[0].u = 0;
+        vertex->corner[0].v = 0;
+        vertex->corner[1].flag = 0;
+        vertex->corner[0].flag = 0;
+        vertex->corner[0].x = (descriptor->originX << 4) + 0x7000;
+        vertex->corner[0].y = ((descriptor->originY + 0xEA) << 3) + 0x7900;
+        vertex->corner[0].mask = 0xFF0000;
+        vertex->corner[1].x = vertex->corner[0].x + 0x800;
+        vertex->corner[1].y = vertex->corner[0].y + 0x400;
+        vertex->corner[1].mask = 0xFF0000;
+        sdfConsCreateDrawPacket(list, texture, 0);
+        sdfAppendPacket(list, sprite);
+        surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
+        surface->append((SdfListHead *)surface, list);
+    }
+}
 
 /* Allocate the native name record and initialize its header and extension. */
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
