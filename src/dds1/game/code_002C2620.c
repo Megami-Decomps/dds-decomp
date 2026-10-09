@@ -23,7 +23,7 @@ extern s32 D_003BD974;
 extern s32 mdlFlagTest(u32);
 extern u32 sdfCounterGetDisplayWordPointer(void);
 extern void func_003014F0(char *, char *, s32);
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);

@@ -374,7 +374,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
 }
 
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspStartEntry(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern u8 *D_003BAA70;

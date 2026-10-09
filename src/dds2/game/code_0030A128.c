@@ -58,7 +58,7 @@ extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
 extern void func_0035C860(char *, char *, ...);
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
