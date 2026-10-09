@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "mc_poll.h"
@@ -73,7 +74,6 @@ extern s32 D_003BC878;
 extern s32 D_003BC87C;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
-extern void dds3SetWorldObjectDataValue();
 
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
@@ -2765,7 +2765,7 @@ void fileReleaseMenuResources(void) {
         }
         world = dds3GetWorldObject();
         if (world != 0) {
-            dds3SetWorldObjectDataValue(world, 1);
+            dds3SetWorldObjectDrawEnabled((EffWorldNode *)world, 1);
         }
         if (fileSaveIconRequest != 0) {
             fileWaitReady((struct FileRequest *)fileSaveIconRequest);

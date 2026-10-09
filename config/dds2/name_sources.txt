@@ -289,7 +289,7 @@
 0x00110860	dds3DestroyWorldObjectData	inferred	High: destroys all list nodes and releases list storage, scene state, and the object data block; DDS1 twin 0x00110638. [names_reviewed23.tsv]
 0x00110938	dds3UpdateWorldObjectLists	inferred	High: visits every nonempty per-kind list and invokes the nodes' update slot while caching the next link; DDS1 twin 0x00110710. [names_reviewed23.tsv]
 0x001109F0	dds3DrawWorldObjectList	inferred	High: honors drawEnabled and draws kind 2 after submitting the visible world background; DDS1 twin 0x001107C8. [names_reviewed23.tsv]
-0x00110A88	dds3SetWorldObjectDataValue	inferred	Stores a signed byte value in world object data when present. [names_reviewed8.tsv]
+0x00110A88	dds3SetWorldObjectDrawEnabled	inferred	Sign-extends the input byte into the world object's drawEnabled word at payload+0x20; the kind-2 draw dispatcher reads the gate.
 0x00110AA8	dds3AppendWorldObjectNode	inferred	High: creates a node of the requested kind and links it at the secondary world's list tail, setting its owner and incrementing count; DDS1 twin 0x00110880. [names_reviewed23.tsv]
 0x00110B50	dds3RemoveWorldObjectNode	inferred	High: updates the owning kind-list's head/tail, destroys the node, and decrements its list count; DDS1 twin 0x00110928. [names_reviewed23.tsv]
 0x00110BE0	dds3SetWorldCameraObject	inferred	Medium: assigns the selected camera/pose source slot; role inferred from DDS1 twin 0x001109B8 and its camera/model-viewer callers. [names_reviewed23.tsv]

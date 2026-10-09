@@ -199,9 +199,9 @@ u32 dds3DrawWorldObjectList(EffWorldNode *object) {
     return 1;
 }
 
-void dds3SetWorldObjectDataValue(EffWorldNode *object, s8 value) {
+void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled) {
     if (((EvtWorldTable *)object->data) != NULL) {
-        ((EvtWorldTable *)object->data)->drawEnabled = (s32)value;
+        ((EvtWorldTable *)object->data)->drawEnabled = (s32)enabled;
     }
 }
 
