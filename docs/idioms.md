@@ -5341,3 +5341,24 @@ the existing pause/initialized bitfields without changing their names or
 the `0x1E0` allocation. This completes the canonical owner, not the
 still-assembly controller. Credit PiM's released `6017625724` investigation
 for the earlier private identification of these fields.
+
+## Pending spatial sounds retain radius before XYZ
+
+DDS2's `FldClear18` is one `0x18`-byte owner: flags and sound ID at
+`+0/+4`, radius at `+8`, and world XYZ at `+C/+10/+14`.
+The `001445D0` producer stores its first float at `+8`; the placement
+caller supplies a radius followed by the actor's three coordinates.
+The `001447A0` consumer uses `+8` for both range and sound scaling.
+Rename the existing primary members and constructor parameters together;
+do not add a parallel position/radius view. This closure does not claim
+that the spatial-source update itself has been matched.
+
+## R5900 square-root operands use FT, not standard-MIPS FS
+
+The original EE assembler emits `0x46020044` for `sqrt.s $f1,$f2`
+and `0x46010084` for `sqrt.s $f2,$f1`. R5900 `SQRT.S` therefore reads
+the FT field. A generic MIPS decoder can incorrectly report F0 as the
+source for both words. In `001447A0`/`001415F8`, the two 500-unit checks
+really take the square root of the Y delta squared; do not rewrite them
+as full-distance or X-only checks based on that decoder output.
+
