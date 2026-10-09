@@ -2209,7 +2209,32 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEBB0);
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023BC30);
+extern char *D_00368B18[];
+
+/* Draw one row of the shadow-configuration menu. */
+void func_0023BC30(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    EvtRuntimeChild *node;
+    s32 color;
+
+    color = ctx->groupCursor + 2 == index ? 4 : 0;
+    node = evtEventViewerGetPendingNode(ctx);
+    switch (index) {
+    case 0:
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "SHADOW CONFIG"));
+        return;
+    case 2:
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "MODE   :%s", D_00368B18[ctx->shadowMode]));
+        return;
+    case 3:
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "ALPHA  :%3d", ctx->shadowAlpha));
+        return;
+    case 4:
+        if (node->parameterBytes[0] == 3) {
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "Y ZAHYO:%.1f", (double)ctx->shadowY));
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
 
