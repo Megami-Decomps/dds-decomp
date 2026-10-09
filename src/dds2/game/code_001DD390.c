@@ -38,9 +38,8 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 #include "file.h"
 
 struct FileWork;
-struct FileCleanup;
 
-extern s32 filePollEntryCleanup(struct FileCleanup *entry);
+
 
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void func_001F3C30(BtlLinkedCommand *action);
@@ -4312,7 +4311,7 @@ u32 btlPollGunLoad(s32 arg) {
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
     unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->handle)));
-    filePollEntryCleanup((struct FileCleanup *)args->handle);
+    filePollEntryCleanup((struct FileRequest *)(u32)args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
@@ -9373,7 +9372,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
                 work->primaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->frontHandle)));
-                filePollEntryCleanup((struct FileCleanup *)args->frontHandle);
+                filePollEntryCleanup((struct FileRequest *)(u32)args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
@@ -9383,7 +9382,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
                 work->secondaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileRequest *)args->sideHandle)));
-                filePollEntryCleanup((struct FileCleanup *)args->sideHandle);
+                filePollEntryCleanup((struct FileRequest *)(u32)args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
@@ -9968,7 +9967,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
     effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
-    filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
+    filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -10893,7 +10892,7 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
-        filePollEntryCleanup((struct FileCleanup *)request->loadHandle);
+        filePollEntryCleanup((struct FileRequest *)(u32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
@@ -11146,7 +11145,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     if (--owner->work.refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
             if (owner->work.fileRequests[i] != 0) {
-                filePollEntryCleanup((struct FileCleanup *)owner->work.fileRequests[i]);
+                filePollEntryCleanup((struct FileRequest *)(u32)owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->work.resourceHandles[i]));
@@ -11346,10 +11345,10 @@ void func_00205160(void) {
                     if (fileIsRequestReadyInCurrentMode(
                             (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
                         u32 resource = fileGetResourceHandle(
-                            (struct FileWork *)(u32)owner->work.fileRequests[slot]);
+                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]);
 
-                        struct FileCleanup *completedRequest =
-                            (struct FileCleanup *)(u32)owner->work.fileRequests[slot];
+                        struct FileRequest *completedRequest =
+                            (struct FileRequest *)(u32)owner->work.fileRequests[slot];
 
                         owner->work.resourceHandles[slot] = resource;
                         filePollEntryCleanup(completedRequest);
@@ -11479,7 +11478,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         resource = fileGetResourceHandle((struct FileRequest *)args->loadHandle);
         data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args->loadHandle);
-        filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
+        filePollEntryCleanup((struct FileRequest *)(u32)args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
@@ -11547,7 +11546,7 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
             args[2] = fileGetResourceHandle((struct FileRequest *)args[1]);
             data = sdfResourceRetainAddress((struct SdfMemBlock *)(args[2]));
             size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args[1]);
-            filePollEntryCleanup((struct FileCleanup *)args[1]);
+            filePollEntryCleanup((struct FileRequest *)(u32)args[1]);
             func_002A27A8(data, size, 2);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");

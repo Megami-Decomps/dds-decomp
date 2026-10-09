@@ -1795,7 +1795,6 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-extern s32 filePollEntryCleanup(void *file);
 
 void func_00232E20(PolyMovieWork *assets) {
 

@@ -16,8 +16,6 @@
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 
-
-
 extern u32 D_003BD11C;
 
 extern u32 D_003BD120;

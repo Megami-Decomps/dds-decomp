@@ -6,7 +6,6 @@
 
 struct FileWork;
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
-extern void filePollEntryCleanup(struct FileWork *);
 
 extern u32 mdlGroupJobSemaphore;
 
@@ -131,5 +130,5 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadReque
     destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle((struct FileRequest *)resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
 }

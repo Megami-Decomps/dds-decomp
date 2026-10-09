@@ -180,7 +180,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadReque
     destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle((struct FileRequest *)resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
 }
 
 
@@ -191,7 +191,7 @@ extern s32 sdfRelocatePackedResourcePayload();
 void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
     request->payload.requestHandle = fileGetResourceHandle((struct FileRequest *)resource);
     request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
     }
@@ -205,7 +205,7 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
     request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)resource);
     request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
     mdlExecuteAndFreeJob(request);
 }
 

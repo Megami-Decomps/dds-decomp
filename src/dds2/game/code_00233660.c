@@ -2574,7 +2574,6 @@ extern char D_00437118[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-extern void filePollEntryCleanup(s32 file);
 extern s32 func_0035C8F8();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -2607,7 +2606,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
     fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
     fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
-    filePollEntryCleanup((struct FileCleanup *)(u32)fileRequest);
+    filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -2667,7 +2666,7 @@ void func_00238BD8(void) {
                         kwlnDrawVector.farB, kwlnDrawVector.color);
     request = fileQueueWindowSlotRequest(D_003C88A8, buffer, size);
     fileWaitReady(request);
-    filePollEntryCleanup((s32)request);
+    filePollEntryCleanup((struct FileRequest *)request);
 }
 
 typedef struct MdlTaskDef {

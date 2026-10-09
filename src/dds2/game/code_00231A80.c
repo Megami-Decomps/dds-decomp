@@ -60,7 +60,6 @@ extern s32 sdfRelocatePackedResourcePayload();
 
 
 struct FileWork;
-extern void filePollEntryCleanup(struct FileWork *);
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
@@ -68,7 +67,7 @@ extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
     request->payload.requestHandle = fileGetResourceHandle((struct FileRequest *)resource);
     request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
     }
@@ -82,7 +81,7 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
     request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)resource);
     request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress((struct FileRequest *)resource));
-    filePollEntryCleanup(resource);
+    filePollEntryCleanup((struct FileRequest *)resource);
     mdlExecuteAndFreeJob(request);
 }
 
