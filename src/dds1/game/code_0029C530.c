@@ -4597,25 +4597,25 @@ void effReleaseModelResources(EffectStripNode *work) {
         effReleaseResourceRefs(work->trackSet);
     }
     if (work->active != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)work->active);
+        fileReleaseGridRecordHandle(work->active);
     }
     sdfReleaseChipBlock(work);
 }
 
 
 EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
-    FileKeyBlock *params = (FileKeyBlock *)((FileSlotTable *)work->active)->data1;
+    FileKeyBlock *params = (FileKeyBlock *)work->active->data1;
     EffectStripNode *node = effCreateStripNodeFromGrid(params);
     memcpy(node->copiedHeader, params, sizeof(node->copiedHeader));
-    effReplaceFileResourceRef(node, ((FileSlotTable *)work->active)->type, params);
+    effReplaceFileResourceRef(node, work->active->type, params);
     return node;
 }
 
 void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)node->active);
+        fileReleaseGridRecordHandle(node->active);
     }
-    node->active = (u32)fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
 }
 
 void effClearStripRecordReferences(EffectStripNode *node) {
