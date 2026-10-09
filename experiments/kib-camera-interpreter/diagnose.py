@@ -144,6 +144,9 @@ def main():
     text = original.decode("utf-8")
     patch = Path(__file__).with_name("candidate.patch").read_text(encoding="utf-8")
     candidate = apply_source_patch(text, patch)
+    old_selector = "                        case 36:\n                        default:\n"
+    require(candidate.count(old_selector) == 1, "selector_context_changed")
+    candidate = candidate.replace(old_selector, "                        case 36:\n", 1)
     require(text.count(ANCHOR) == 1, "anchor_count")
     require(candidate != text and ANCHOR not in candidate, "candidate_input")
     emit(dict(scope="focused_unit_diagnostic", base=BASE,
