@@ -34,8 +34,6 @@ extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_0035D5B0(const char *text, s32 delimiter);
 extern s32 func_0035CB10(const char *text, const char *suffix);
-extern s32 sdfMovieHandleLinearDeviceEvent(void *, s32, s32, s32, s32);
-extern s32 sdfMovieHandlePacDeviceEvent(void *, s32, s32, s32, s32);
 extern s32 D_00438D08;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];
