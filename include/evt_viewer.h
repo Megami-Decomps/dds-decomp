@@ -182,7 +182,8 @@ typedef struct EvtRuntime {
     s32 glyphTickCount;
     s32 editField;
     s32 framebufferQuadEnabled;
-    u8 pad23FC[8];
+    const char *frameTextFormat; /* 0x23FC: format of the frame-list cell being measured */
+    s32 frameTextWidth;          /* 0x2400: columns advanced by the formatter */
     s32 unk2404;
     s32 colorSelection;
     s32 colorEditorActive;

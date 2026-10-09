@@ -944,7 +944,31 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
+extern const char *D_003686F8[];
+extern s8 D_00368750[];
+extern char D_003BC0D0[];
+
+/* Header row of the frame list: one text cell per column of the selected group's table row. */
+s32 func_00237428(SdfListHead *list, s32 x, s32 y, u8 *data) {
+    EvtRuntime *ctx = (EvtRuntime *)data;
+    s32 type = ctx->frameGroup->type;
+    s32 i;
+    s32 kind;
+
+    for (i = 0; i < D_00368768[type].columns; i++) {
+        kind = D_00368768[type].columnTypes[i];
+        if (kind == 0x15) {
+            ctx->frameTextFormat = D_003BC0D0;
+            ctx->frameTextWidth = 0;
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003BC0D0));
+            x += ctx->frameTextWidth * 0xC0;
+        } else {
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003686F8[kind]));
+            x += D_00368750[D_00368768[type].columnTypes[i]] * 0xC0;
+        }
+    }
+    return 1;
+}
 
 extern char D_003BC160[]; /* "%4d" */
 extern char D_003BC168[]; /* " ---" */
