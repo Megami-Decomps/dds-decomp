@@ -90,7 +90,7 @@ typedef struct MantraNodePos {
     union {
         MenuPanelSelector selector;
         struct {
-            u32 kind : 4;
+            s32 kind : 4;
             s32 modelFlagState : 4;
             u32 reserved : 8;
             s16 id;
@@ -188,7 +188,8 @@ typedef struct MnuStatusResource {
     struct ItfMesSub *messageWindow;
     struct ItfMesSub *messageDefinition;
     MenuProgressHost *progressHost;
-    u8 pad4C[8];
+    s32 currency; /* 0x4C: copy of the saved currency taken when the menu opens */
+    u8 pad50[4];
     DatPartyRecord snapshot;
     MtrSelectionFlags flags;
     MtrResourceLoadState resourceLoad;

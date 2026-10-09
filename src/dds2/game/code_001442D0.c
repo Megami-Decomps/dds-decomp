@@ -4103,7 +4103,77 @@ void fldUpdateSparkSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014FD28);
+extern s32 D_004363B8;
+extern void fldReleaseCameraModel(s32);
+
+void func_0014FD28(void) {
+    FldSparkSequence *sequence;
+    s32 i;
+    s32 slot;
+    FldVec4 position __attribute__((aligned(16)));
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    D_004363B8++;
+    if (D_004363B8 % 5 == 0) {
+        if (fldSparkControlState.scheduledSounds > 0) {
+            fldSparkControlState.scheduledSounds--;
+            sndSetSequenceVolumePan(0x680014, 0x7F, 0x3F);
+        }
+    }
+    if (fldSparkControlState.sequenceRemaining == 0) {
+        i = fldSparkControlState.sequenceIndex;
+        sequence = &fldSparkControlState.entry->sequences[i];
+        fldSparkControlState.sequenceRemaining = sequence->count;
+        if (sequence->count == -1) {
+            fldSparkControlState.sequenceIndex = 0;
+            sequence = &fldSparkControlState.entry->sequences[0];
+            fldSparkControlState.sequenceRemaining = sequence->count;
+        }
+        for (i = 0; i < sequence->count; i++) {
+            slot = sequence->slots[i];
+            fldAttachSparkSlotToWorldObject(slot, 0);
+            fldSparkSlots[slot].unk28 = 0;
+            fldSparkSlots[slot].active = 1;
+            fldSparkControlState.scheduledSounds++;
+            fldSparkSlots[slot].unk2E = 0;
+        }
+        fldSparkControlState.sequenceIndex++;
+    }
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
+        switch (fldSparkSlots[i].active) {
+        case 0:
+            break;
+        case 1:
+            fldSparkSlots[i].unk2E++;
+            if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
+                fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
+                PCP_COPY_VECTOR(&position, fldSparkSlots[i].pos);
+                dx = fldAreaState.x - position.v[0];
+                dy = fldAreaState.y - position.v[1];
+                dz = fldAreaState.z - position.v[2];
+                if (fsqrtf(dx * dx + dy * dy + dz * dz) < 200.0f) {
+                    fldSetWeatherEffectPos(position.v[0], position.v[1], position.v[2]);
+                    fldAreaState.collectedCount++;
+                    fldAreaState.score += 0x32;
+                    fldSparkControlState.pickupDelay = 4;
+                    fldSparkControlState.sequenceRemaining--;
+                    sndSetSequenceVolumePan(0x680013, 0x7F, 0x3F);
+                    fldReleaseCameraModel(3);
+                    fldSparkControlState.modeCountdown += 3;
+                    fldFreeSparkSlot(i);
+                    fldSparkSlots[i].unk28 = 0;
+                    fldSparkSlots[i].active = 0;
+                    fldSparkSlots[i].unk2E = effMiscRand(0) % 270 + 30;
+                    fldSparkControlState.pulse = 0;
+                }
+            }
+
+            break;
+        }
+    }
+}
 
 s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
@@ -4335,7 +4405,6 @@ void func_001512D8(void) {
 }
 
 
-extern void fldReleaseCameraModel(s32);
 
 /* Releases scene presentation and camera resources before clearing the event
  * latch and installing the existing field-state values. */

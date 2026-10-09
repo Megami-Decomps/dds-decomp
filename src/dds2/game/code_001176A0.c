@@ -543,7 +543,146 @@ f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
     return datBattleParameters->partyHpScale[band];
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
+s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+    s32 healing;
+    s32 damage;
+    u16 current;
+    u16 maximum;
+    s32 type;
+    s16 base;
+    s16 power;
+
+    healing = 0;
+    current = 0;
+    damage = 0;
+    maximum = 0;
+    switch (vital) {
+    case 1:
+        current = item->hp;
+        maximum = item->maxHp;
+        power = datCommandRecords[channel].hpPower;
+        type = datCommandRecords[channel].hpType;
+        base = datCommandRecords[channel].hpBase;
+        break;
+    case 2:
+        current = item->mp;
+        maximum = item->maxMp;
+        power = datCommandRecords[channel].mpPower;
+        type = datCommandRecords[channel].mpType;
+        base = datCommandRecords[channel].mpBase;
+        break;
+    default:
+        power = 0;
+        type = 0;
+        base = 0;
+        break;
+    }
+    switch (type) {
+    case 0:
+        break;
+    case 5:
+        healing = power + base;
+        break;
+    case 15:
+        healing = effMiscRandMod(0, power) + base;
+        break;
+    case 9:
+        healing = current * power / 100 + base;
+        if (healing <= 0) {
+            healing = 1;
+        }
+        break;
+    case 11:
+        healing = maximum * power / 100 + base;
+        if (healing <= 0) {
+            healing = 1;
+        }
+        break;
+    case 2:
+        switch (datCommandRecords[channel].effectType) {
+        case 0:
+            healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
+            break;
+        case 1:
+            healing = func_00118C58(channel, queryArg, (u32)item, vital);
+            break;
+        }
+        healing += base;
+        if (healing == 0) {
+            healing = 1;
+        }
+        break;
+    case 7:
+        healing = sdfDispatchSubCmd(channel, queryArg, (u32)item, vital) + base;
+        if (healing == 0) {
+            healing = 1;
+        }
+        break;
+    case 4:
+    case 13:
+        damage = power + base;
+        if (type == 13) {
+            if (maximum < damage) {
+                damage = maximum;
+            }
+        }
+        break;
+    case 8:
+        damage = current * power / 100 + base;
+        if (damage == 0 && power > 0) {
+            damage = 1;
+        }
+        break;
+    case 10:
+        damage = maximum * power / 100 + base;
+        if (damage == 0 && power > 0) {
+            damage = 1;
+        }
+        break;
+    case 1:
+    case 12:
+    case 14:
+    case 16:
+        switch (datCommandRecords[channel].effectType) {
+        case 0:
+            damage = sdfDispatchPrimaryUnitScript(channel, queryArg, (u32)item, vital);
+            break;
+        case 1:
+            damage = sdfDispatchUnitScriptDefault9(channel, queryArg, (u32)item, vital);
+            break;
+        }
+        damage += base;
+        if (type == 16) {
+            damage = damage * sdfGetHpBracketScale((DatPartyRecord *)queryArg);
+        }
+        if (type < 14) {
+            if (type >= 12) {
+                if (current < damage) {
+                    damage = current;
+                }
+            }
+        }
+        if (type == 14 && mode >= 2) {
+            damage = (u32)damage / mode;
+        }
+        if (damage == 0) {
+            damage = 1;
+        }
+        break;
+    case 6:
+        damage = func_00118C80(channel, queryArg, (u32)item, vital) + base;
+        if (damage == 0) {
+            damage = 1;
+        }
+        break;
+    case 3:
+        if (power + base < current) {
+            damage = current - (power + base);
+        }
+        break;
+    }
+    return damage > 0 ? -damage : healing;
+}
 
 extern s32 datFlagToElementIndex(u32);
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
@@ -662,7 +801,6 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return result;
 }
 
-extern s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);

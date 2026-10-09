@@ -638,7 +638,55 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_003224C8", func_00323BB8);
+s32 func_00323BB8(struct MnuShootingWork *context) {
+    MenuRuntimeList *list = func_00321ED8();
+    MenuRuntimeList *targets = func_00321EC8();
+    MenuRuntimeRecord *record = list->records;
+    MenuRuntimeRecord *target;
+    s32 i;
+    s32 j;
+    s32 left;
+    s32 right;
+    s32 top;
+    s32 bottom;
+
+    for (i = 0; i < list->capacity; i++, record++) {
+        if (record->state.word & MNU_WORK_ACTIVE) {
+            if ((record->state.kind & 0xF) == 4) {
+                f32 x = (record->rotatedOffsetX + record->displacementX) + record->baseX;
+                f32 radiusX = (f32)D_0040B248[4][0];
+                f32 y = (record->rotatedOffsetY + record->displacementY) + record->baseY;
+                f32 radiusY = (f32)D_0040B248[4][1];
+
+                left = (s32)(x - radiusX);
+                right = (s32)(x + radiusX);
+                top = (s32)(y - radiusY);
+                bottom = (s32)(y + radiusY);
+                target = targets->records;
+                for (j = 0; j < targets->capacity; j++, target++) {
+                    if ((target->state.word & 0xF01) == 0x101) {
+                        s32 tx = (s32)((target->rotatedOffsetX + target->displacementX) + target->baseX);
+                        s32 ty = (s32)((target->rotatedOffsetY + target->displacementY) + target->baseY);
+                        s32 kind = target->state.kind & 0xF;
+                        s32 targetRadiusX = D_0040B248[kind][0];
+                        s32 targetRadiusY;
+
+                        if (right < tx - targetRadiusX || tx + targetRadiusX < left) {
+                            continue;
+                        }
+                        targetRadiusY = D_0040B248[kind][1];
+                        if (bottom < ty - targetRadiusY || ty + targetRadiusY < top) {
+                            continue;
+                        }
+                        mnuDeactivateListRecord(targets, target);
+                        mnuRuntimeRecordPairCallback(record, target, context);
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 /* Test active runtime records against the fixed work pool and its hit bounds. */
 s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {

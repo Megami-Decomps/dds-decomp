@@ -181,4 +181,12 @@ u8 mdlHasNode(MdlCtx *ctx, s32 searchId);
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
 
+/* VU helpers transfer vectors through vf10 and basis rows through vf28-vf30. */
+void mdlLoadPrimaryVectorVU(MdlCtx *ctx);
+void mdlStorePrimaryVectorVU(MdlCtx *ctx);
+void mdlLoadRotationQuaternionVU(MdlCtx *ctx);
+void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
+void mdlLoadTertiaryVectorVU(MdlCtx *ctx);
+void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
+
 #endif /* MDL_H */
