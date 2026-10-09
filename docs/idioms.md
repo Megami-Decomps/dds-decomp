@@ -2203,17 +2203,22 @@ Each row's party index is at `+4` and resource index at `+8`. Use the real
 another layout. Both games' page-resource and count consumers match with
 this primary owner.
 
+The primary, secondary and alternate page resources at `+0x0C/+0x14/+0x1C`
+are `EffectSlotSet *` in both games; `+0x10/+0x18/+0x20` remain signed slot
+indices. The count/list APIs consume the real `PartyPanel *` and its two
+count fields. Do not invent a separate count-prefix owner or transport these
+resolved resources through integer words at the page constructor boundary.
+
 `BrsSkillPackageWork` embeds `StaffSlots` at `+0x4F8` in DDS1 and `+0x51C`
 in DDS2. Pass its address to staff-bank APIs instead of treating adjacent
-scalar fields as an array. The bank retains genuine `u32` SDK handles:
-DDS2 `effLoadIndexedResource` returns that type, and
-`mnuInitializeCampPanelResources` decodes its first resolved handle only
-at the `EffectSlotSet *` constructor boundary.
+scalar fields as an array. Its resolved base, pair, main and extra banks
+retain `EffectSlotSet *` owners. Pass them directly to the page constructors;
+their resource formals are pointers, not serialized handle words.
 
 Keep page-selection clearing on the real `MenuPageWindow.slots` array.
 Direct indexing of the selected row's HP/MP animation states gives the
 native DDS2 helper without a second `MenuWindowSet`/`MenuSlotWindow` view.
-The final shared-header closure is 58 actual CPP consumers, all clean in
+That earlier shared-header closure was 58 actual CPP consumers, all clean in
 serial `check_unit` runs (2200 matching functions, zero differences).
 
 
@@ -5694,4 +5699,21 @@ carry the count at `0x11` and the amount at `0x12`. The sibling
 `EventRosterStat` layouts disagree (`0x0E/0x0F` in `code_001A5BB8.c`, `pad08`
 in `code_0011A118.c`), so `code_001D4438` keeps a unit-local `DatRosterDetail`
 view until a shared record is reconciled. This note claims no body match.
+
+## Title-audio states own the complete decoder record
+
+The title stream and secondary sound-buffer state are both `0x28`-byte
+`TitleAudioStreamState` records, not unrelated word arrays or a sample-only
+prefix view. Their compressed-data, PCM, decoder and allocation pointers
+occupy `0x14`, `0x18`, `0x1C` and `0x20`; load state is at `0x24`.
+The decoder remains an opaque SDK word array, while the allocation is the
+real `SdfMemBlock` descriptor. Explicit address-word conversions remain only
+at the SDK's word-valued address API and PCM-buffer representation boundary.
+
+Credit Basalt's released title-stream support for the complete owner evidence.
+The paired source-local cutover preserves every existing C function:
+DDS1 `code_00268AB8` gates `65 match, 0 differ` and DDS2 `code_002A05C0`
+gates `71 match, 0 differ` in the private proof. The condensed status snapshot
+still transfers just frame count, frame index and repeat frame. This owner
+closure does not claim a match for either assembly-retained stream updater.
 
