@@ -5671,3 +5671,17 @@ or shared header changes are needed. The selected-row candidate at
 `0x248E68` remains ASM: its two independent instructions at `+0x9C/+0xA0`
 are still exchanged, so this adapter retirement claims no new body match.
 
+## Viewer command history retains its runtime pointer
+
+`evtViewerPushCommandHistory` receives the same `EvtRuntime *` as its
+native option-handler callers. DDS1 `0x22FF30` and DDS2 `0x24AB38` immediately
+read that object's history count, update its action mode and append the
+three history halfwords; the argument is not an encoded task-user word.
+The paired declarations, nine callers in each game and the 44-byte
+forwarders (`0x230A38`/`0x24B678`) therefore pass the pointer directly.
+Actual task-user address decoding remains at the scheduler boundary.
+
+Both 100-byte providers and 44-byte forwarders remain exact under the
+existing unit flags. This source-only contract repair does not claim an
+option-confirm body match.
+
