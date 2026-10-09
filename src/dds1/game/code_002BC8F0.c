@@ -43,8 +43,6 @@ extern s32 effQueuedFileObject;
 
 extern s32 effTemporaryFileJob;
 
-extern s32 effAuxiliaryFileQueue;
-
 extern u32 effScalyTextureHandle;
 
 extern s32 effSharedStripReferenceCount;
@@ -153,21 +151,11 @@ extern s8 D_003BC9AC;
 
 extern f32 D_003BC9A8;
 
-extern s32 effFileQueue;
-
-extern s32 effFileQueue;
-
 extern char D_003BD080[];
 
 extern s32 func_003014F0(char *, const char *, ...);
 
 extern u8 D_003BD078[];
-
-extern s32 effFileQueue;
-
-extern s32 effCurrentFileQueueEntry;
-
-extern u32 effFileQueueNameRecord;
 
 extern u8 D_003BCF30[];
 
