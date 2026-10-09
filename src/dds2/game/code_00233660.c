@@ -274,13 +274,6 @@ extern char D_004370C0[]; /* "%5.2f" */
 
 #define MDL_PART_OBJECT 3
 
-typedef struct MdlNodeInfo {
-    s32 id;       /* 0x00 */
-    u8 pad04[0xC];
-    f32 pos[4];   /* 0x10 */
-} MdlNodeInfo;
-
-
 extern u8 sdfViewTargetVector[];
 
 
@@ -826,7 +819,7 @@ typedef struct MdlPartRec {
     s32 firstId;   /* 0x08 */
     u16 count;     /* 0x0C */
     u16 partIndex; /* 0x0E */
-    f32 value;     /* 0x10 */
+    f32 anchorScale; /* 0x10: distance scale for the anchored part position */
 } MdlPartRec;
 
 
@@ -838,11 +831,11 @@ s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype,
         SdfModel *model = owner->inner;
         s32 recordId = partRecord->firstId;
         s32 remainingRecords = partRecord->count;
-        f32 optionalValue = 0.0f;
+        f32 optionalAnchorScale = 0.0f;
 
-        /* Retain the native 17-byte size threshold for the optional value. */
+        /* Retain the native 17-byte size threshold for the optional anchor scale. */
         if (partRecord->size >= MDL_PART_VALUE_SIZE_THRESHOLD) {
-            optionalValue = partRecord->value;
+            optionalAnchorScale = partRecord->anchorScale;
         }
         do {
             SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
@@ -852,8 +845,8 @@ s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype,
 
                 resourceItem->payload.part.handle = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
-                resourceItem->payload.part.record = chunkRecord;
-                resourceItem->payload.part.value = optionalValue;
+                resourceItem->payload.part.mapPositionRecord = chunkRecord;
+                resourceItem->payload.part.anchorScale = optionalAnchorScale;
             }
         } while (--remainingRecords != 0);
     }
@@ -1028,12 +1021,12 @@ void mdlRemoveResourceSubtype(MdlCtx *owner, s32 subtype) {
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
 void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
-    MdlNodeInfo *nodeInfo = anchorRecord->payload.part.record;
-    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, nodeInfo->id);
-    f32 scale = anchorRecord->payload.part.value;
+    SdfMapPositionRecord *mapPosition = anchorRecord->payload.part.mapPositionRecord;
+    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, mapPosition->nodeId);
+    f32 scale = anchorRecord->payload.part.anchorScale;
 
     VU0_LOAD_MATRIX(drawNode->worldMatrix);
-    VU0_LOAD_VF(vf10, nodeInfo->pos);
+    VU0_LOAD_VF(vf10, &mapPosition->position);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf12, sdfViewTargetVector);
