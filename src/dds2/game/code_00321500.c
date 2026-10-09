@@ -794,24 +794,24 @@ void mnuVisitActiveRecords(s32 context) {
     }
 }
 
-void func_00323918(MenuWorkCallback records) {
-    D_004389A0 = records;
+void mnuSetWorkEntryStartCallback(MenuWorkCallback callback) {
+    D_004389A0 = callback;
 }
 
-void func_00323920(MenuWorkCallback records) {
-    D_004389A4 = records;
+void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback) {
+    D_004389A4 = callback;
 }
 
 void mnuSetActiveWorkVisitor(MenuWorkCallback callback) {
     D_004389A8 = callback;
 }
 
-void func_00323930(MenuRuntimeWorkCallback records) {
-    D_004389AC = records;
+void mnuSetRuntimeWorkHitCallback(MenuRuntimeWorkCallback callback) {
+    D_004389AC = callback;
 }
 
-void func_00323938(MenuRuntimePairCallback records) {
-    D_004389B0 = records;
+void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback) {
+    D_004389B0 = callback;
 }
 
 /* Remaining is interpreted as signed 16-bit; updated/finished flags stay latched. */
