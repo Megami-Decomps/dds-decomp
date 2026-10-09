@@ -847,9 +847,9 @@ void fldReleasePlayerSceneResources(void) {
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
             sceneWork = &D_0032F1A0;
-            effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
+            effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
-            effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
+            effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
@@ -902,7 +902,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldAreaState.unk90 = -1;
     fldAreaState.unk94 = -1;
     fldUpdateCameraTarget();
-    effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
     func_001372D0(position);
@@ -1030,9 +1030,9 @@ void func_00123FB8(u128 *transform) {
         PCP_COPY_VECTOR(inner->smoothedPosition, transform);
         PCP_COPY_VECTOR(inner->rotation, rotation);
     }
-    effObjSetInnerFirstVec(object, transform);
-    effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
-    effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
+    effObjSetInnerPosition(object, transform);
+    effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
+    effObjSetInnerScale((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
     fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
     effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
     if (fldAreaState.unk118 == 0) {

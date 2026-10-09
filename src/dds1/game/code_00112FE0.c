@@ -32,8 +32,8 @@ EffWorldNode *dds3SpawnCameraSlotObj5(s32 a, void *firstVector, void *secondVect
     if (obj != NULL) {
         obj->key = a;
         dds3EnsureSlotData(obj);
-        effObjSetInnerFirstVec(obj, firstVector);
-        effObjSetInnerSecondVec(obj, secondVector);
+        effObjSetInnerPosition(obj, firstVector);
+        effObjSetInnerRotation(obj, secondVector);
         effObjInnerVecBackup(obj->inner);
         data = ((EffectObjectData *)obj->data);
         data->handle = (ObjBase *)-1;

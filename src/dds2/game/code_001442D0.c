@@ -2830,7 +2830,7 @@ void func_0014B5D8(void) {
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
-    effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
+    effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
     angle = effMiscComputeQuaternionRotatedReferenceAngle();
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
@@ -3971,7 +3971,7 @@ void func_0014F5F0(void) {
             entry->objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
             dds3SetWorldNodeValue(entry->objectHandle, (u32)D_00413DD8);
             func_00112058(entry->objectHandle, 1, 0x130);
-            effObjSetInnerThirdVec(entry->objectHandle, (u128 *)&scale);
+            effObjSetInnerScale(entry->objectHandle, (u128 *)&scale);
             model = (MdlCtx *)dds3GetObjectBaseResourceHandle(entry->objectHandle);
             model->first->frameStep = 1.0f;
             mdlAddEntryFlagged(model, 0, 0);
@@ -4060,8 +4060,8 @@ s32 func_0014F980(s32 index, s32 reserved) {
     fldSparkControlState.cursor = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
         PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
-        effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
-        effObjSetInnerSecondVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
+        effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
+        effObjSetInnerRotation((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSparkObjectEntries[slot].objectHandle);
         model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
@@ -4081,7 +4081,7 @@ void fldFreeSparkSlot(s32 index) {
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.v[0] = fldSparkSlots[index].pos[0];
         vec.v[2] = fldSparkSlots[index].pos[2];
-        effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
+        effObjSetInnerPosition((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
         flags = (s32 *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)obj);
         *flags |= 1;
@@ -4928,14 +4928,14 @@ void func_00152C88(void) {
     position[0] = fldTargetGuideState.position[0];
     position[1] = 0.0f;
     position[2] = fldTargetGuideState.position[2];
-    effObjSetInnerFirstVec(D_00435F1C, (u128 *)position);
+    effObjSetInnerPosition(D_00435F1C, (u128 *)position);
 
     VU0_LOAD_VF(vf10, axis);
     angle = (D_00451D4C[0] * 3.14f) / 180.0f;
     effMiscAxisAngleToQuaternionVU(angle);
     /* SDK store: the quaternion is consumed by the following vector setter. */
     VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-    effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
+    effObjSetInnerRotation(D_00435F1C, (u128 *)rotation);
 
     if (fldTargetGuideState.updateFlags & 0x40) {
         effObjSetNodeFlags(D_00435F1C->inner, 8);
@@ -5389,9 +5389,9 @@ void func_00153D60(s32 gridX, s32 gridY, s32 slot) {
         PCP_COPY_VECTOR_F32(object->inner->position, position);
         PCP_COPY_VECTOR_F32(object->inner->smoothedPosition, position);
         PCP_COPY_VECTOR_F32(object->inner->rotation, rotation);
-        effObjSetInnerFirstVec(object, (u128 *)position);
-        effObjSetInnerSecondVec(object, (u128 *)rotation);
-        effObjSetInnerThirdVec(object, (u128 *)scale);
+        effObjSetInnerPosition(object, (u128 *)position);
+        effObjSetInnerRotation(object, (u128 *)rotation);
+        effObjSetInnerScale(object, (u128 *)scale);
 
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle(object);
         mdlAddEntryFlagged(model, 0, 0);
@@ -5431,9 +5431,9 @@ void func_001540E8(void) {
     PCP_COPY_VECTOR_F32(inner->position, position);
     PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
     PCP_COPY_VECTOR_F32(inner->rotation, rotation);
-    effObjSetInnerFirstVec(object, (u128 *)position);
-    effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
-    effObjSetInnerThirdVec(D_00435F1C, (u128 *)scale);
+    effObjSetInnerPosition(object, (u128 *)position);
+    effObjSetInnerRotation(D_00435F1C, (u128 *)rotation);
+    effObjSetInnerScale(D_00435F1C, (u128 *)scale);
     D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
     mdlAddEntryFlagged(D_00435F20, 0, 0x11);
     sdfSetModelScalarOverrides(D_00435F20->inner, 15.0f, 0.0f);

@@ -415,7 +415,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         btlUnitGetMuzzlePosVU(unit);
         return;
     }
-    effObjFetchInnerFirstVec(unit->effectObject);
+    effObjFetchInnerPosition(unit->effectObject);
     VU0_STORE_VF(vf10, pos);
     VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();

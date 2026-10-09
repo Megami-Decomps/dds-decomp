@@ -33,8 +33,8 @@ extern void func_002CF420(void);
 extern void fldApplyLightSetIndex(s32);
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
-    effObjSetInnerFirstVec(mnuTitleCameraObject, (u128 *)D_003DC1C0);
-    effObjSetInnerSecondVec(mnuTitleCameraObject, (u128 *)D_003DC1D0);
+    effObjSetInnerPosition(mnuTitleCameraObject, (u128 *)D_003DC1C0);
+    effObjSetInnerRotation(mnuTitleCameraObject, (u128 *)D_003DC1D0);
     return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 

@@ -966,7 +966,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     scale = unit->motionParameter * 0.1f;
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_STORE_VF(vf10, v);
-    effObjAddInnerFirstVec(obj, (u128 *)v);
+    effObjAddInnerPosition(obj, (u128 *)v);
     return 1;
 }
 
@@ -1023,14 +1023,14 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
     dds3InterpolatePathVectorVU(unit->pathHandle);
     VU0_STORE_VF($vf10, v);
-    effObjSetInnerFirstVec(unit->effObj, (u128 *)v);
+    effObjSetInnerPosition(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PreparePathVectorPair(unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
         VU0_STORE_VF($vf10, v);
-        effObjSetInnerSecondVec(unit->effObj, (u128 *)v);
+        effObjSetInnerRotation(unit->effObj, (u128 *)v);
     }
     return 1;
 }
