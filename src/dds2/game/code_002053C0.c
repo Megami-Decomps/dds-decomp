@@ -274,11 +274,6 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     return task;
 }
 
-typedef struct BtlDeadLoadArgs {
-    BtlUnit *unit;
-    void *handle;
-} BtlDeadLoadArgs;
-
 void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -300,24 +295,25 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_0035C860(path, D_00419318, D_00419308, unit->partyRecord.unitId);
         }
-        args->handle = fileQueueDefaultCallbackRequest(path);
+        args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf("btl:ATRAC3 dead load start[%s]\n", path);
     }
     work->earringPlaybackCount++;
 }
 
-s32 sndDeadAtracPlaybackTask(u32 *args) {
+s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
     s32 data;
     s32 size;
-    if (args[1] == 0) {
+    if (args->request == 0) {
         return 1;
     }
-    if (args[2] == 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args[1]) != 0) {
-            args[2] = fileGetResourceHandle((struct FileRequest *)args[1]);
-            data = sdfResourceRetainAddress((struct SdfMemBlock *)(args[2]));
-            size = (s32)fileGetResourceSize((struct FileRequest *)(u32)args[1]);
-            filePollEntryCleanup((struct FileRequest *)(u32)args[1]);
+    if (args->resourceAllocation == 0) {
+        if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+            args->resourceAllocation =
+                (struct SdfMemBlock *)fileGetResourceHandle(args->request);
+            data = sdfResourceRetainAddress(args->resourceAllocation);
+            size = (s32)fileGetResourceSize(args->request);
+            filePollEntryCleanup(args->request);
             func_002A27A8(data, size, 2);
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
@@ -331,17 +327,17 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
     return 0;
 }
 
-void sndFinishEarringPlaybackTask(s32 *taskArgs) {
+void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
-    if (taskArgs[2] != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskArgs[2]));
+    if (taskArgs->resourceAllocation != 0) {
+        sdfReleaseResourceAllocation(taskArgs->resourceAllocation);
     }
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
 
 BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    SoundTaskArgs *args;
+    BtlDeadLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
@@ -351,9 +347,9 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     task->callback = sndDeadAtracPlaybackTask;
     task->onFinish = sndFinishEarringPlaybackTask;
     args = btlGetTaskArguments(task);
-    args->actor = owner;
-    args->option = 0;
-    args->unk_08 = 0;
+    args->unit = owner;
+    args->request = 0;
+    args->resourceAllocation = 0;
     return task;
 }
 
