@@ -397,7 +397,7 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return MDL_NODE_FIELD_MISSING;
@@ -406,7 +406,7 @@ s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-u16 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
+u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
@@ -416,7 +416,7 @@ u16 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     if (matchedNode == NULL) {
         return 0;
