@@ -5255,6 +5255,7 @@
 0x002EBF40	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4343:func_002EBF40; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002EC300	effReleaseBillPointEntries	inferred	Releases each spaced billboard point entry then frees the backing allocation. [names_reviewed5.tsv]
 0x002ECEF0	effSeedBillboardFrameCounters	inferred	Assigns random negative starting counters to each billboard frame entry. [names_reviewed14.tsv]
+0x002ECF78	effCreateAlternatingAlphaRampPointSetRows	inferred	Builds timed point-set rows while reusing alpha-ramp ratios on alternating samples.
 0x002ED360	effReleaseBillboardFramePointSets	inferred	Releases every billboard frame point set and its entry storage. [names_reviewed14.tsv]
 0x002EDCF0	effCreateClassResourceWork	inferred	Allocates kind-sized work, copies payload and initializes class-specific resource and callback. [names_reviewed5.tsv]
 0x002EDDE0	effCreateClassResourceFromFile	inferred	Resolves the primary file buffer and creates the requested class resource work. [names_reviewed5.tsv]

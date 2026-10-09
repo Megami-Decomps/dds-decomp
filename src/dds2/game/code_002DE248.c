@@ -4620,7 +4620,7 @@ void effSeedBillboardFrameCounters(EffClassWork *work) {
 
 
 
-EffAlternatingPointSetTable *func_002ECF78(EffBillPointConfig *src) {
+EffAlternatingPointSetTable *effCreateAlternatingAlphaRampPointSetRows(EffBillPointConfig *src) {
     u32 count = src->timed.count;
     EffAlternatingPointSetTable *table;
     EffAlternatingPointSetRow *row;
