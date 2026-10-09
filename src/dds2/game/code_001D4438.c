@@ -167,15 +167,7 @@ extern void func_001C9BE8(s32);
 extern void func_001C98E8(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
-typedef struct SceneCheckArgs {
-    u16 mode;
-    u16 pad2;
-    s32 first;
-    s32 second;
-} SceneCheckArgs;
 
-extern s32 func_001ABDE8();
-extern s32 func_001ABA40();
 
 extern void btlReleaseBattleScratchBlocks(void);
 
