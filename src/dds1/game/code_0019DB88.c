@@ -1134,17 +1134,17 @@ extern char D_003BB288[];
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 func_0019FF60(void) {
     SifCommand packet;
-    s32 list;
+    SdfListHead *list;
     s32 row;
     s32 y;
     s16 previous;
     s32 highlight;
 
-    list = (s32)sdfCreateResetPacketList();
-    sdfAppendPacket((SdfListHead *)list,
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list,
         func_0011D3E8(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
-    sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet,
+    sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet,
         "BLUR:        %s", kwlnDrawOverlayEnabled ? D_003BB260 : D_003BB268));
 
     y = 0x7A20;
@@ -1152,13 +1152,13 @@ s32 func_0019FF60(void) {
         sdfPktInit(&packet, 0x82C0, D_003D73D0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         D_003D73D0.blink++;
         if (D_003D73D0.blink < 32 || (D_003D73D0.blink & 31) < 18) {
-            sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet, D_003BB270));
+            sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_003BB270));
         }
     }
 
     for (row = 0; row != 3; row++) {
         sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
-        sdfAppendPacket((SdfListHead *)list,
+        sdfAppendPacket(list,
             (u32)sdfFormatSifPacket(&packet, D_003BB278, D_00358348[row]));
         highlight = 0;
         if (D_003D73D0.editing != 0 && row == D_003D73D0.selection) {
@@ -1167,24 +1167,24 @@ s32 func_0019FF60(void) {
         sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
         switch (row) {
         case 0:
-            sdfAppendPacket((SdfListHead *)list,
+            sdfAppendPacket(list,
                 (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayAlpha));
             break;
         case 1:
-            sdfAppendPacket((SdfListHead *)list,
+            sdfAppendPacket(list,
                 (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayScale));
             break;
         case 2:
-            sdfAppendPacket((SdfListHead *)list,
+            sdfAppendPacket(list,
                 (u32)sdfFormatSifPacket(&packet, D_003BB288, D_003BA910[0], D_003BA910[1]));
             break;
         }
         y += 0x60;
     }
-    sdfAppendPacket((SdfListHead *)list,
+    sdfAppendPacket(list,
         func_0011D3E8((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
 
     if ((s8)D_00324510.unk32 < 0) {
         kwlnDrawOverlayEnabled ^= 1;

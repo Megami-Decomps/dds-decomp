@@ -53,13 +53,6 @@ typedef struct BrsResultTransition {
 } BrsResultTransition;
 
 typedef struct BrsFadeAnimation {
-#ifdef VERSION_DDS1
-    u8 pad00[0x14];
-    s8 state;
-    u8 pad15[7];
-    u32 opacity;
-    u8 pad20[8];
-#else
     s8 backgroundState;
     u8 pad01[7];
     u32 backgroundOpacity;
@@ -69,7 +62,6 @@ typedef struct BrsFadeAnimation {
     u32 portraitOpacity;
     s32 portraitX;
     s32 portraitY;
-#endif
 } BrsFadeAnimation;
 
 /* Both games use 0x68-byte progress rows, with different live field offsets. */
@@ -127,12 +119,9 @@ typedef struct BrsProgressAnimation {
 } BrsProgressAnimation;
 
 #ifdef VERSION_DDS1
-/* DDS1 skill-icon row (0x14 B). Row j = &skillIconRows[j]: row 0 base +0xD50, row 1 base +0xD64.
- * count +0x00: func_00264B08 lb/lbu/sb 0xD50 (row 0); func_00264D90 lb 0x14($5) with $5 = row 0 base
- * reads row 1 count, which gates the row 1 draw when 0 < count < 4.
- * opacity +0x08, x +0x0C, y +0x10 (func_00264B08 sw 0xD58/0xD5C/0xD60).
- * unk04 +0x04 and the pad bytes are [INFERENCE]. func_00264B08's 4-step loop also reads a count
- * at +0xDA0, past this 2-row array (unresolved). */
+/* Five 0x14-byte rows occupy +0xD50..+0xDB4. func_00264B08 updates the
+ * first row and then four following rows, including the last count at +0xDA0.
+ * Opacity, X and Y are at row +8, +C and +10; unk04 remains unidentified. */
 typedef struct BrsSkillIconRow {
     s8 count;
     u8 pad01[3];
@@ -191,11 +180,9 @@ typedef struct BrsSkillPackageWork {
     s8 resultPhase;
     s8 unkD4D;
     u8 padD4E[0x2];
-    BrsSkillIconRow skillIconRows[2];
-    u8 padD78[0x8];
-    u8 padD80[0x20];
+    BrsSkillIconRow skillIconRows[5];
     BrsFadeAnimation fadeAnimation[5];
-    u8 padE68[0x78];
+    u8 padE7C[0x64];
     BrsProgressAnimation levelAnimation[5];
     u8 pad10E8[0x138];
     BrsProgressAnimation profileAnimation[5];
@@ -231,6 +218,18 @@ typedef struct BrsSkillPackageWork {
 } BrsSkillPackageWork;
 
 typedef char BrsFadeAnimation_size_must_be_0x28[(sizeof(BrsFadeAnimation) == 0x28) ? 1 : -1];
+typedef char BrsFadeAnimation_backgroundOpacity_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->backgroundOpacity == 0x08) ? 1 : -1];
+typedef char BrsFadeAnimation_backgroundState_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->backgroundState == 0x00) ? 1 : -1];
+typedef char BrsFadeAnimation_portraitReady_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->portraitReady == 0x14) ? 1 : -1];
+typedef char BrsFadeAnimation_portraitOpacity_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->portraitOpacity == 0x1C) ? 1 : -1];
+typedef char BrsFadeAnimation_portraitX_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->portraitX == 0x20) ? 1 : -1];
+typedef char BrsFadeAnimation_portraitY_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->portraitY == 0x24) ? 1 : -1];
 typedef char BrsRewardRow_size_must_be_0x18[(sizeof(BrsRewardRow) == 0x18) ? 1 : -1];
 typedef char BrsRewardBatch_size_must_be_0x7C[(sizeof(BrsRewardBatch) == 0x7C) ? 1 : -1];
 typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressList) == 0xE0) ? 1 : -1];
@@ -242,6 +241,10 @@ typedef char BrsRewardSummary_size_must_be_0x2C[(sizeof(BrsRewardSummary) == 0x2
 typedef char BrsSkillPackageWork_size_must_be_0x1590[(sizeof(BrsSkillPackageWork) == 0x1590) ? 1 : -1];
 typedef char BrsSkillPackageWork_staffSlots_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->staffSlots == 0x4F8) ? 1 : -1];
+typedef char BrsSkillPackageWork_skillIconRows_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->skillIconRows == 0xD50) ? 1 : -1];
+typedef char BrsSkillPackageWork_fadeAnimation_offset_check[
+    ((u32)&((BrsSkillPackageWork *)0)->fadeAnimation == 0xDB4) ? 1 : -1];
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xEE0) ? 1 : -1];
@@ -269,18 +272,6 @@ typedef char BrsSkillPackageWork_staffSlots_offset_check[
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_fadeAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->fadeAnimation == 0xAF20) ? 1 : -1];
-typedef char BrsFadeAnimation_backgroundOpacity_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->backgroundOpacity == 0x08) ? 1 : -1];
-typedef char BrsFadeAnimation_backgroundState_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->backgroundState == 0x00) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitReady_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitReady == 0x14) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitOpacity_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitOpacity == 0x1C) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitX_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitX == 0x20) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitY_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitY == 0x24) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xB060) ? 1 : -1];
 typedef char BrsProgressAnimation_drawPhase_offset_check[

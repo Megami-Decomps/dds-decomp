@@ -2501,7 +2501,7 @@ void func_0012DE70(f32 x, f32 y, f32 z, s32 drawValue) {
     D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)quad.packetList);
 }
 
-void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
+void fldDrawFloorQuad(s32 x, s32 y, const char *format) {
     FldQuadState quad;
     SifCommand packet;
 
@@ -2517,7 +2517,7 @@ void fldDrawFloorQuad(s32 x, s32 y, s32 drawValue) {
     quad.unk10 = 0x0FFFFF7D;
     fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
+    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, format));
     fldAdvanceQuadRow(&quad);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)quad.packetList);
 }

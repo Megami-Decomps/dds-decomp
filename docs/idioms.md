@@ -5131,3 +5131,37 @@ and signed 16-bit wrap checks. The constructor's row `2`, column `1`
 pair produces the packed sentinel `0x00010002`. This owner completion
 does not match the still-assembly selector body.
 
+
+## Positioned field strings retain their format pointer
+
+Both `fldDrawFloorQuad` providers (`0012BAD8` / `0012E008`) forward
+their third argument directly as the `const char *` format of
+`sdfFormatSifPacket`. It is not a numeric draw value; the pointer
+formal removes the integer-to-pointer conversion without changing
+the emitted provider instructions. There were no existing C clients
+at this cutover. The diagnostic grid and field draw callback remain
+assembly until their independent control/coordinate differences match.
+
+
+## Result backgrounds and portraits share one complete row
+
+DDS1 has five `0x14`-byte skill-icon rows at `+D50..+DB4`, not two:
+`00264B08` handles the first row and then four following rows, including
+the final state byte at `+DA0`. The following five `0x28`-byte fade rows
+start at `+DB4`; backgrounds use row `+0/+8` and portraits use
+`+14/+1C/+20/+24`. The portrait producer `00266B10` and renderer
+`00266BC0` agree on absolute `DC8/DD0/DD4/DD8`. This is the same primary
+row layout already proved at DDS2 `+AF20`, not a second overlapping view.
+The DDS1 next section stays at `+EE0`, and the complete work stays `0x1590`.
+Completing this owner does not match its remaining assembly renderers.
+
+## Blur controllers keep the actual packet-list pointer
+
+The matched `0019FF60` / `001A8BD0` controllers retain
+`sdfCreateResetPacketList`'s `SdfListHead *` directly. No intermediate
+signed address word or repeated conversion is needed for its typed list
+consumers. Packet payloads still cross the real `u32 packetAddress` API
+explicitly. Their unchanged surface callback's legacy first-formal
+contract is separate SDF primary-owner debt; this local cutover does not
+introduce or certify a new surface view or claim new matching bodies.
+
