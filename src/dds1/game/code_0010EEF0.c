@@ -67,7 +67,6 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList();
 extern s32 func_0010EF68();
 extern void kwlnDrawSpriteCell();
 extern SdfPoolNode D_00325708;

@@ -16,6 +16,7 @@
 #include "btl_sound.h"
 #include "eff_field_color.h"
 #include "file.h"
+#include "eff_update_flags.h"
 #include "sdf.h"
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
@@ -2795,7 +2796,6 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 }
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void func_003325F8(SdfModel *, SdfModel *);
 extern void func_003320E8(SdfPoolNode **, SdfModel *);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
@@ -9697,15 +9697,15 @@ s32 sndUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
                                     args->sourceSelector, args->targetSelector);
         if (effBTLFieldColorTestFlags(2)) {
-            fileSetRenderFlag(1);
+            fileSetRenderFlag(EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH);
         } else if (effBTLFieldColorTestFlags(1)) {
             source = args->sourceOwner.unit;
             if (source != NULL && args->targetOwner.unit != NULL &&
                 (((source->flags & 0x200) && !(source->effectLink.flags & 0x20)) ||
                  ((args->targetOwner.unit->flags & 0x400) && (source->effectLink.flags & 0x20)))) {
-                fileSetRenderFlag(1);
+                fileSetRenderFlag(EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH);
             } else {
-                fileClearRenderFlag(1);
+                fileClearRenderFlag(EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH);
             }
         }
         switch (args->option) {

@@ -40,9 +40,9 @@ extern u32 D_004390D4;
 
 extern void (*sdfTickCallback)(void);
 
-extern u8 D_0045C870[];
+extern MenuRuntimeList D_0045C870;
 
-extern u8 D_0045C880[];
+extern MenuRuntimeList D_0045C880;
 
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
@@ -97,15 +97,6 @@ typedef struct MenuLengthData {
     s32 *firstRecords;
     s32 *secondRecords;
 } MenuLengthData;
-
-typedef struct MenuRuntimeList {
-    MenuRuntimeRecord *records;
-    s32 capacity;
-    u32 activeCount;
-    u32 unk0C;
-} MenuRuntimeList;
-
-
 
 struct MenuRegistryTable {
     u32 flags;
@@ -276,23 +267,23 @@ MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
 
 
 void func_00321E18(MenuRuntimeRecord *records, s32 capacity) {
-    memset(D_0045C870, 0, sizeof(MenuRuntimeList));
-    ((MenuRuntimeList *)D_0045C870)->records = records;
-    ((MenuRuntimeList *)D_0045C870)->capacity = capacity;
+    memset(&D_0045C870, 0, sizeof(D_0045C870));
+    D_0045C870.records = records;
+    D_0045C870.capacity = capacity;
 }
 
 void func_00321E70(MenuRuntimeRecord *records, s32 capacity) {
-    memset(D_0045C880, 0, sizeof(MenuRuntimeList));
-    ((MenuRuntimeList *)D_0045C880)->records = records;
-    ((MenuRuntimeList *)D_0045C880)->capacity = capacity;
+    memset(&D_0045C880, 0, sizeof(D_0045C880));
+    D_0045C880.records = records;
+    D_0045C880.capacity = capacity;
 }
 
 MenuRuntimeList *func_00321EC8(void) {
-    return (MenuRuntimeList *)D_0045C870;
+    return &D_0045C870;
 }
 
 MenuRuntimeList *func_00321ED8(void) {
-    return (MenuRuntimeList *)D_0045C880;
+    return &D_0045C880;
 }
 
 void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
@@ -396,12 +387,12 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
 }
 
 void func_003223F8(void) {
-    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C870);
+    mnuAdvanceMovingRuntimeRecords(&D_0045C870);
 }
 
 
 void func_00322418(void) {
-    mnuAdvanceMovingRuntimeRecords((MenuRuntimeList *)D_0045C880);
+    mnuAdvanceMovingRuntimeRecords(&D_0045C880);
 }
 
 
@@ -464,13 +455,13 @@ u8 *func_00322520(u32 taggedIndex) {
     return (u8 *)D_004390DC + index * 24;
 }
 
-void func_00322540(MenuRegistryParameters *records, u32 count) {
+void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count) {
     D_004390E4 = records;
     D_004390E8 = count;
 }
 
-MenuRegistryParameters *func_00322550(u32 taggedIndex) {
-    u8 index = taggedIndex;
+MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex) {
+    u8 index = parameterIndex;
     return &D_004390E4[index];
 }
 
@@ -803,24 +794,24 @@ void mnuVisitActiveRecords(s32 context) {
     }
 }
 
-void func_00323918(MenuWorkCallback records) {
-    D_004389A0 = records;
+void mnuSetWorkEntryStartCallback(MenuWorkCallback callback) {
+    D_004389A0 = callback;
 }
 
-void func_00323920(MenuWorkCallback records) {
-    D_004389A4 = records;
+void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback) {
+    D_004389A4 = callback;
 }
 
 void mnuSetActiveWorkVisitor(MenuWorkCallback callback) {
     D_004389A8 = callback;
 }
 
-void func_00323930(MenuRuntimeWorkCallback records) {
-    D_004389AC = records;
+void mnuSetRuntimeWorkHitCallback(MenuRuntimeWorkCallback callback) {
+    D_004389AC = callback;
 }
 
-void func_00323938(MenuRuntimePairCallback records) {
-    D_004389B0 = records;
+void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback) {
+    D_004389B0 = callback;
 }
 
 /* Remaining is interpreted as signed 16-bit; updated/finished flags stay latched. */
@@ -850,7 +841,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
     switch (tag & 0xFFFF0000) {
     case 0x01000000: {
         MenuMovementRecord18 *fixed = (MenuMovementRecord18 *)func_00322520(tag);
-        parameters = func_00322550(fixed->parameterTag);
+        parameters = mnuGetMenuRegistryParametersByIndex(fixed->parameterTag);
         break;
     }
     case 0x02010000: {
@@ -862,7 +853,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
             return NULL;
         }
         registry = mnuGetMenuRecordRegistryEntry(tag);
-        parameters = func_00322550(registry->parameterIndex);
+        parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
         break;
     }
     }
@@ -923,7 +914,7 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
             entryX = (s32)entry->x0;
             entryY = (s32)mnuEvaluateTimedValue(entry);
             registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-            parameters = func_00322550(registry->parameterIndex);
+            parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
 
             if (parameters->hitWidth != 0) {
                 s32 left = entryX + parameters->hitOffsetX;
@@ -1020,7 +1011,7 @@ s32 func_00324070(MenuWorkEntry *input) {
         entryX = (s32)entry->x0;
         entryY = (s32)mnuEvaluateTimedValue(entry);
         registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-        parameters = func_00322550(registry->parameterIndex);
+        parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
         if (parameters->hitWidth == 0) {
             continue;
         }
@@ -1030,7 +1021,7 @@ s32 func_00324070(MenuWorkEntry *input) {
         right = left + parameters->hitWidth;
         bottom = top + parameters->hitHeight;
         inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
-        parameters = func_00322550(inputRecord->parameterTag);
+        parameters = mnuGetMenuRegistryParametersByIndex(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
         inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
         inputRight = inputLeft + parameters->hitWidth;
