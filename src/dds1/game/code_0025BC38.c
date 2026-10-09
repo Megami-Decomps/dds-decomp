@@ -9,6 +9,7 @@
 #include "sdf_grid.h"
 #include "mnu_scene_work.h"
 #include "mnu_mantra_grid.h"
+#include "mnu_scene.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -168,7 +169,29 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
+extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuTickMantraSparkParticles(DspParticleState *);
+extern void func_00255B78(DspParticleState *, s32, s32);
+
+/* Sparkle state followed by the sprite resource handle it draws with. */
+typedef struct MnuSparkleSpriteWork {
+    DspParticleState sparkles;
+    s32 sprite; /* 0x6C */
+} MnuSparkleSpriteWork;
+
+void func_0025C0D8(MnuSparkleSpriteWork *work, s32 alpha, s32 context) {
+    DspParticleState *sparkles;
+    f32 factor;
+
+    func_0024E1C8(0, 0, 0, alpha, work->sprite, 0x2A, 0, context);
+    factor = (f32)work->sparkles.countdown / (f32)work->sparkles.period;
+    factor = 1.0f - factor;
+    factor = work->sparkles.strength * sdfSinPoly(factor * 3.14159265f) + 0.2f;
+    func_0024E1C8(0, 0, 0, (f32)alpha * factor, work->sprite, 0x2B, 0, context);
+    sparkles = &work->sparkles;
+    mnuTickMantraSparkParticles(sparkles);
+    func_00255B78(sparkles, work->sprite, context);
+}
 
 
 typedef s16 MnuSpritePlacement[4];
