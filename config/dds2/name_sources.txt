@@ -6998,3 +6998,4 @@
 0x00333478	sdfSetAssetSecondaryMode	inferred	Stores the secondary packet and palette mode at SdfAsset +0x34 and marks secondary draw state dirty.
 0x00345E18	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
 0x00331590	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
+0x00330DF0	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
