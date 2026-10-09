@@ -324,8 +324,6 @@ extern u8 D_003E9100[];
 
 extern void func_002E5E88(u8 *, void *);
 
-extern void effDrawFourPointGroups(u8 *, void *);
-
 extern void func_002F1888(u8 *, void *);
 
 
@@ -467,6 +465,9 @@ typedef struct Matrix4 {
         s128 rows[4];
     } u; // 0x00
 } Matrix4; // 0x40
+
+extern void effAssetQueueRelease(EffPointSet *);
+extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
 
 /* Native resource operations add cloning before the frame callbacks.
  * The final word is the copied payload size, not another callback.
@@ -3065,7 +3066,7 @@ u32 *effSegmentPointerSet(u8 *work) {
 }
 
 void effReleaseRingResourceHandle(u32 handle) {
-    effAssetQueueRelease(*(u32 *)handle);
+    effAssetQueueRelease((EffPointSet *)(u32)*(u32 *)handle);
     sdfReleaseChipBlock((void *)handle);
 }
 
@@ -3208,7 +3209,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups(out, mtx);
+        effDrawFourPointGroups((EffPointSet *)out, (Matrix4 *)mtx);
     }
 }
 
@@ -3446,7 +3447,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 }
 
 void effReleaseRingHandle(EffRingResource *handle) {
-    effAssetQueueRelease((u32)handle->pointSet);
+    effAssetQueueRelease(handle->pointSet);
     sdfReleaseChipBlock(handle);
 }
 
@@ -3583,7 +3584,7 @@ void billDrawCellBlendB(EffClassWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups((u8 *)out, mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
 
@@ -3687,14 +3688,13 @@ EffPointSet *effCreatePointSet4(u32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effAssetQueueRelease(EffPointSet *set) {
+    sdfQueueAssetRelease(set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void effDrawFourPointGroups(u8 *work, void *matrix) {
-    EffPointSet *set = (EffPointSet *)work;
+void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
     void *list;
     void *setup;
     EffGsPacket *packet;
