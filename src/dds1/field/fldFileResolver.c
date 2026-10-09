@@ -4809,7 +4809,7 @@ void fldResetRecordState(void) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00135360);
 
 
-s32 fldClassifyPositionInZoneWithMargin(f32 margin, f32 *out, s32 mode, s32 count, f32 *pos, FldValueRecord *zone) {
+s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
     f32 best = margin;
@@ -4885,7 +4885,7 @@ void func_00137EA0(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 fldGetPositionZoneClearance(f32 margin, s32 axisMode, s32 planeCount, f32 *position, FldValueRecord *zone) {
+f32 fldGetPositionZoneClearance(s32 axisMode, s32 planeCount, f32 margin, f32 *position, FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = margin;
