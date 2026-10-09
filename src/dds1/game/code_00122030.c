@@ -102,7 +102,7 @@ extern u32 D_0032E3D0[];
 
 extern u32 D_003BABE8;
 
-extern u32 fldCameraModelObject;
+extern MdlCtx *fldPlayerModelContext;
 
 extern void fldSetPendingAreaAndFloor(u32, u32);
 
@@ -853,7 +853,7 @@ void fldReleasePlayerSceneResources(void) {
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
-        fldCameraModelObject = 0;
+        fldPlayerModelContext = 0;
         *fldGetPlayerSceneStateAddress() = 0;
         fldReleaseResources();
     }
@@ -1033,16 +1033,16 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     effObjSetInnerPosition(object, transform);
     effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
     effObjSetInnerScale((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
-    fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
+    fldPlayerModelContext = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
     effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
     if (fldAreaState.unk118 == 0) {
-        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+        mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
     } else {
-        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
-        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
+        mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
+        mdlAddEntryFlagged(fldPlayerModelContext, 1, 2);
         fldResetCameraModelHandles();
     }
-    sdfSetModelScalarOverrides(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+    sdfSetModelScalarOverrides(fldPlayerModelContext->inner, 15.0f, 0.0f);
     dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
         func_00133640(0, 0);

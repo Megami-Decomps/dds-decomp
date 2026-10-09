@@ -998,9 +998,9 @@ void fldReleaseResources(void) {
 
 extern u32 fldSecondarySceneObject;
 
-extern u32 fldCameraModelObject;
+extern MdlCtx *fldPlayerModelContext;
 
-extern u32 fldSecondarySceneModelHandle;
+extern MdlCtx *fldSecondarySceneModelContext;
 
 void fldSnapshotAndReleasePlayerSceneObject(void) {
     FieldPlayerSceneWork *sceneWork;
@@ -1014,8 +1014,8 @@ void fldSnapshotAndReleasePlayerSceneObject(void) {
         }
         fldPlayerObject = 0;
         fldSecondarySceneObject = 0;
-        fldCameraModelObject = 0;
-        fldSecondarySceneModelHandle = 0;
+        fldPlayerModelContext = 0;
+        fldSecondarySceneModelContext = 0;
         *fldGetPlayerSceneStateAddress() = 0;
         fldReleaseResources();
     }
@@ -1169,17 +1169,17 @@ void fldSpawnPlayerUnits(f32 *input) {
         effObjSetInnerPosition(player, (u128 *)input);
         effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, (u128 *)work);
         effObjSetInnerScale((EffWorldNode *)fldPlayerObject, (u128 *)unitScale);
-        fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
+        fldPlayerModelContext = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
         effObjSetInnerFloat(fldPlayerObject, 90.0f);
 
         if (fldAreaState.unk118 == 0) {
-            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+            mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
         } else {
-            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
-            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
+            mdlAddEntryFlagged(fldPlayerModelContext, 0, 2);
+            mdlAddEntryFlagged(fldPlayerModelContext, 1, 2);
             fldResetCameraModelHandles();
         }
-        sdfSetModelScalarOverrides(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+        sdfSetModelScalarOverrides(fldPlayerModelContext->inner, 15.0f, 0.0f);
         fldSecondarySceneObject = 0;
 
         locationFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
@@ -1195,11 +1195,11 @@ void fldSpawnPlayerUnits(f32 *input) {
             effObjSetInnerPosition((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
             effObjSetInnerRotation((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
             effObjSetInnerScale((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
-            fldSecondarySceneModelHandle = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSecondarySceneObject);
+            fldSecondarySceneModelContext = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldSecondarySceneObject);
             effObjSetInnerFloat(fldSecondarySceneObject, 90.0f);
-            mdlAddEntryFlagged((MdlCtx *)fldSecondarySceneModelHandle, 0, 0);
-            sdfSetModelScalarOverrides(((MdlCtx *)fldSecondarySceneModelHandle)->inner, 15.0f, 0.0f);
-            ((MdlCtx *)fldSecondarySceneModelHandle)->inner->flags |= 8;
+            mdlAddEntryFlagged(fldSecondarySceneModelContext, 0, 0);
+            sdfSetModelScalarOverrides(fldSecondarySceneModelContext->inner, 15.0f, 0.0f);
+            fldSecondarySceneModelContext->inner->flags |= 8;
         }
 
         if (fldSecondarySceneObject != 0) {
