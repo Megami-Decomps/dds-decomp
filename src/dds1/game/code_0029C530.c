@@ -7378,14 +7378,6 @@ extern u8 D_003DF9A0[];
 
 extern void effComputeBattleCameraPositionVU(u8 *);
 
-extern void fileJobInvokePositionCallback(void *, void *);
-
-extern void fileJobInvokeRotationCallback(void *, void *);
-
-extern void fileJobInvokeScaleCallback(void *, f32);
-
-extern void fileDispatchJobTypeCallback(void *, u32);
-
 void effApplyBattleCameraToObject(work)
     void *work;
 {
@@ -7458,7 +7450,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJo
 void effInvokeFileJobWithBattleCamera(u32 job) {
     if (effAuxiliaryFileQueue == 0) {
         effApplyBattleCameraToObject();
-        fileJobInvokeTypeCallback(job);
+        fileJobInvokeTypeCallback((FileJobPayload *)job);
         return;
     }
 }
