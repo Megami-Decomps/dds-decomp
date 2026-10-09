@@ -381,8 +381,8 @@ typedef struct SdfPoolNode {
     SdfListHead *first;       /* 0x04 */
     SdfListHead *last;        /* 0x08 */
     u32 unkC;
-    void (*append)(SdfListHead *, SdfListHead *);      /* 0x10 */
-    s32 (*prepend)(SdfListHead *, s32, SdfListHead *); /* 0x14 */
+    void (*append)(struct SdfPoolNode *, SdfListHead *);      /* 0x10 */
+    s32 (*prepend)(struct SdfPoolNode *, s32, SdfListHead *); /* 0x14 */
     u32 unk18;
     u32 unk1C;
 } SdfPoolNode;

@@ -457,7 +457,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_003549D8[work->drawMode]->append((SdfListHead *)D_003549D8[work->drawMode], list);
+        D_003549D8[work->drawMode]->append(D_003549D8[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
@@ -469,7 +469,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         packet[3] = 0xE;
         packet[5] = 0x42;
         sdfAppendPacket(stateList, (u32)packet);
-        D_00325248.append((SdfListHead *)&D_00325248, stateList);
+        D_00325248.append(&D_00325248, stateList);
         packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -478,7 +478,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        D_00325248.append((SdfListHead *)&D_00325248, list);
+        D_00325248.append(&D_00325248, list);
     }
 }
 
@@ -588,7 +588,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
     surface = D_003549E8[pool->drawMode];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Address three quadword positions for one triangle. */
@@ -676,7 +676,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
         sdfAppendPacket(packet, func_0015FE20(D_003D6550));
     }
     surface = D_00354A48[pool->drawMode];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Address four quadword positions for one quad. */
@@ -741,7 +741,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         sdfAppendPacket(list, func_0015FE20(D_003D6550));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
-        D_00354A58[work->drawMode]->append((SdfListHead *)D_00354A58[work->drawMode], list);
+        D_00354A58[work->drawMode]->append(D_00354A58[work->drawMode], list);
     } else {
         stateList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
         sdfInitPacketList(stateList);
@@ -753,7 +753,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         packet[3] = 0xE;
         packet[5] = 0x42;
         sdfAppendPacket(stateList, (u32)packet);
-        D_00325248.append((SdfListHead *)&D_00325248, stateList);
+        D_00325248.append(&D_00325248, stateList);
         packet = (u64 *)sdfAllocPacketAligned(EFF_STATE_PACKET_BYTES);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -762,7 +762,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        D_00325248.append((SdfListHead *)&D_00325248, list);
+        D_00325248.append(&D_00325248, list);
     }
 }
 

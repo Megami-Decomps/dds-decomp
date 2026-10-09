@@ -249,7 +249,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBlurBuildSamplingQuad(source, billGetWorkTransformMatrix(drawPacket), 0);
         sdfAppendPacket(list, (u32)drawPacket);
-        D_003253E8.append((SdfListHead *)&D_003253E8, list);
+        D_003253E8.append(&D_003253E8, list);
     }
 }
 
@@ -297,6 +297,6 @@ void func_00187C08(EffSolidRectParams *source) {
     drawPacket[10] = 0xFF000000000000ULL | topRight;
     drawPacket[12] = 0xFF000000000000ULL | bottomRight;
     sdfAppendPacket(list, (u32)drawPacket);
-    D_003253C8.append((SdfListHead *)&D_003253C8, list);
+    D_003253C8.append(&D_003253C8, list);
 }
 

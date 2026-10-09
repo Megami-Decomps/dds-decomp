@@ -259,7 +259,7 @@ void effDrawMarkerBoxAtPoint(f32 *position) {
     pixel[1] = y;
     sdfAppendPacket(list, (u32)(func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)list);
+    scene->append(scene, (SdfListHead *)list);
 }
 
 /* Project a point and use color for both the marker's fill and border. */
@@ -281,7 +281,7 @@ void effDrawColoredBoxAtPoint(f32 *position, s32 color) {
     pixel[1] = y;
     sdfAppendPacket(list, (u32)(func_0011D3E8((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)list);
+    scene->append(scene, (SdfListHead *)list);
 }
 
 extern void *func_0011D570(s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -315,7 +315,7 @@ void effDrawMarkerLineBetweenPoints(f32 *from, f32 *to) {
     pixel[3] = y1;
     sdfAppendPacket(list, (u32)(func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)list);
+    scene->append(scene, (SdfListHead *)list);
 }
 
 /* Draw a GS line between two projected points, using color at both vertices. */
@@ -347,7 +347,7 @@ void effDrawColoredLineBetweenPoints(f32 *from, f32 *to, s32 color) {
     pixel[3] = y1;
     sdfAppendPacket(list, (u32)(func_0011D570((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)list);
+    scene->append(scene, (SdfListHead *)list);
 }
 
 /* Submit the native command at biased screen coordinates; payload args stay opaque. */
@@ -358,7 +358,7 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
     sdfInitPacketList(task);
     sdfAppendPacket(task, (u32)(sdfCreateFormattedSifCommand((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, arg2, (const char *)arg3)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)task);
+    scene->append(scene, (SdfListHead *)task);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
@@ -431,7 +431,7 @@ void func_0018EB08(const f32 *center, u32 color, f32 radius) {
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
     }
     surface = &kwlnDrawSurfaces[55];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_0018ED80);
@@ -558,7 +558,7 @@ void func_0018EED0(const f32 *center, u32 color, f32 radius, f32 height) {
     }
     sdfAppendPacket(list, (u32)func_002EF2B0(vertices, colors, 20, 0x80));
     surface = &kwlnDrawSurfaces[55];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 
@@ -572,7 +572,7 @@ void effSubmitSizedDrawPacket(s32 x, s32 y, s32 width, s32 height, s32 fillColor
     sdfInitPacketList(list);
     sdfAppendPacket(list, (u32)(func_0011D3E8(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
     scene = &kwlnPositionedTextSurface;
-    scene->append((SdfListHead *)scene, (SdfListHead *)list);
+    scene->append(scene, (SdfListHead *)list);
 }
 
 void effEnableRectangleBlur(void) {

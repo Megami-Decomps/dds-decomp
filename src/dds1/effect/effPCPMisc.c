@@ -4171,7 +4171,7 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
         sdfAppendPacket(list, func_0015FE20(&D_003D6610));
     }
     entry = D_00355688[node->drawKind];
-    entry->append((SdfListHead *)entry, list);
+    entry->append(entry, list);
 }
 
 void effPcpBuildConcentricBeamVertices(f32 radius, EffPCPBeamWork *work) {

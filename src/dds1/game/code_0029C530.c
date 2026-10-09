@@ -64,7 +64,7 @@ typedef struct EffGsPacket {
 
 
 static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 extern s32 sdfAllocPacketAligned(s32);
@@ -4805,7 +4805,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, (u32)packet);
         }
-        D_0037ECF0[set->type]->append((SdfListHead *)D_0037ECF0[set->type], list);
+        D_0037ECF0[set->type]->append(D_0037ECF0[set->type], list);
     }
 }
 
@@ -6540,7 +6540,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfAppendPacket(list, (u32)packet);
         }
-        D_0037EE68[set->type]->append((SdfListHead *)D_0037EE68[set->type], list);
+        D_0037EE68[set->type]->append(D_0037EE68[set->type], list);
     }
 }
 

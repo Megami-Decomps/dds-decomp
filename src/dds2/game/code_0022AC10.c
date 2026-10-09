@@ -1552,7 +1552,7 @@ void btlInitializeGraphicsRuntime(void) {
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->resource, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
-    D_00380608.append((SdfListHead *)&D_00380608, packetList);
+    D_00380608.append(&D_00380608, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
@@ -1560,7 +1560,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(packetList, kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
-    D_00380608.append((SdfListHead *)&D_00380608, packetList);
+    D_00380608.append(&D_00380608, packetList);
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
@@ -1573,7 +1573,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfClearLinkedPacketList(context);
     sdfCreateGraphBufferCopyPacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
-    D_00380608.append((SdfListHead *)&D_00380608, packetList);
+    D_00380608.append(&D_00380608, packetList);
     btlRuntimeState.options |= 1;
 }
 
@@ -2019,7 +2019,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 

@@ -179,7 +179,7 @@ s32 kwlnPrepareFrameDrawPackets(void) {
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
     drawSink = kwlnDrawSurfaces;
-    drawSink->append((SdfListHead *)drawSink, (SdfListHead *)(D_00325870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+    drawSink->append(drawSink, (SdfListHead *)(D_00325870 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
     return 0;
 }
 
@@ -259,13 +259,13 @@ s32 func_00101E40(void) {
             sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00327430 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
                 &D_003247B0, D_00329750);
             sceneNode = &kwlnDrawSurfaces[1];
-            sceneNode->append((SdfListHead *)sceneNode,
+            sceneNode->append(sceneNode,
                 (SdfListHead *)(D_00327430 - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
             sceneList = sdfCreateResetPacketList();
             sceneFrustum = (u64 *)sdfAllocPacketAligned(0x50);
             sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &D_00324960);
             sdfAppendPacket(sceneList, (u32)sceneFrustum);
-            sceneNode->append((SdfListHead *)sceneNode, sceneList);
+            sceneNode->append(sceneNode, sceneList);
         }
     }
     {
@@ -279,12 +279,12 @@ s32 func_00101E40(void) {
         VU0_STORE_MATRIX_UNCLOBBERED(D_00329790);
         sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00327600 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_00324980, D_00329790);
         overlayNode = &kwlnDrawSurfaces[85];
-        overlayNode->append((SdfListHead *)overlayNode, (SdfListHead *)(D_00327600 - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        overlayNode->append(overlayNode, (SdfListHead *)(D_00327600 - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         overlayList = sdfCreateResetPacketList();
         overlayFrustum = (u64 *)sdfAllocPacketAligned(0x50);
         sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)overlayFrustum, &D_00324B30);
         sdfAppendPacket(overlayList, (u32)overlayFrustum);
-        overlayNode->append((SdfListHead *)overlayNode, overlayList);
+        overlayNode->append(overlayNode, overlayList);
 
         sdfBuildLightingPacket(D_00327600 - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES, D_00324770, kwlnDefaultColorVector);
         *(u32 *)(D_00327600 - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
@@ -312,12 +312,12 @@ s32 func_00101E40(void) {
             &sdfSceneProjectionParameters, sdfViewMatrix);
         sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
         viewNode = &kwlnDrawSurfaces[7];
-        viewNode->append((SdfListHead *)viewNode, (SdfListHead *)(D_003270F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        viewNode->append(viewNode, (SdfListHead *)(D_003270F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         viewList = sdfCreateResetPacketList();
         viewFrustum = (u64 *)sdfAllocPacketAligned(0x50);
         sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)viewFrustum, &kwlnDrawVector);
         sdfAppendPacket(viewList, (u32)viewFrustum);
-        viewNode->append((SdfListHead *)viewNode, viewList);
+        viewNode->append(viewNode, viewList);
 
         sdfAppendPacketChainNode((SdfPacketChain *)D_00325860,
             (SdfLinkedPacketList *)(D_003270F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
@@ -366,17 +366,17 @@ s32 func_00101E40(void) {
     {
         SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(0);
         SdfPoolNode *const state0 = &kwlnDrawSurfaces[81];
-        state0->append((SdfListHead *)state0, stateList);
+        state0->append(state0, stateList);
     }
     {
         SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(1);
         SdfPoolNode *const state1 = &kwlnDrawSurfaces[93];
-        state1->append((SdfListHead *)state1, stateList);
+        state1->append(state1, stateList);
     }
     {
         SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(2);
         SdfPoolNode *const state2 = &kwlnDrawSurfaces[95];
-        state2->append((SdfListHead *)state2, stateList);
+        state2->append(state2, stateList);
     }
 
     evtSetDrawSurfaceIndex(0x2C);
@@ -500,7 +500,7 @@ s32 kwlnRenderFrame(void) {
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
         sdfAppendPacket((SdfListHead *)packetList, (u32)spritePacket);
-        D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packetList);
+        D_00325708.append(&D_00325708, (SdfListHead *)packetList);
     }
     poolHead = sdfFlushPoolNodes(kwlnDrawSurfaces);
     D_003BA844 = poolHead;

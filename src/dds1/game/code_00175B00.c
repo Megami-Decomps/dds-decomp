@@ -133,7 +133,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
         }
     }
     surface = D_00354BF0[object->packetQueueIndex];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Give this object its own reference to a newly created scatter resource. */

@@ -189,7 +189,7 @@ s32 func_0022AB90(void) {
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
-    D_00325708.append((SdfListHead *)&D_00325708, list);
+    D_00325708.append(&D_00325708, list);
 
     if ((s8)D_00324510[1][0][1] < 0) {
         func_003014F0(path, "/event/e%03d/e%03d/scr/e%03d.bf",

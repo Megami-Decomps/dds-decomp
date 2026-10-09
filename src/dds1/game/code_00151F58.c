@@ -652,7 +652,7 @@ void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDe
 
     sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
+    surface->append(surface, (SdfListHead *)packetAddress);
 }
 
 /* Caller-built composite draw description; 0x68 bytes. */
@@ -829,7 +829,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
     sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawCompositeTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
+    surface->append(surface, (SdfListHead *)packetAddress);
 }
 
 void func_00153680(void) {

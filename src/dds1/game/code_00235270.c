@@ -327,7 +327,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, func_002357B8);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 8) {
         return 0;
     }
@@ -395,7 +395,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 7) {
         return 0;
     }
@@ -469,7 +469,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, (u8 *)ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 6) {
         return 0;
     }
@@ -574,7 +574,7 @@ extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, (u8 *)work, 0, evtDrawProjectCommandRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 1) {
         return 0;
     }
@@ -621,7 +621,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
         }
     }
     evtDrawMenuFrame(packets, x, y, width, work->itemCount + 3, 0, work->itemCount, (u8 *)work, evtDrawStringEntry, evtDrawSelectableTextRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 2) {
         return 0;
     }
@@ -668,7 +668,7 @@ s32 func_00236828(s32 x, s32 y, EvtRuntime *ctx) {
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, (u8 *)ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                     (SdfListHead *)list);
     if (ctx->actionMode != 3) {
         return 0;
@@ -761,7 +761,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x12, 0xB, 0, 8, (u8 *)ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 9) {
         return 0;
     }
@@ -929,7 +929,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     s32 shown;
 
     evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 4) {
         return 0;
     }
@@ -1012,7 +1012,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
                  group->childCount + 1, (u8 *)ctx, func_00237428, evtDrawFrameListRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 5) {
         return 0;
     }
@@ -1101,7 +1101,7 @@ s32 func_00238A88(s32 x, s32 y, EvtRuntime *ctx) {
     count++;
     evtDrawMenuFrame(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
                      NULL, evtViewerDrawWorldNodeRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                     (SdfListHead *)list);
     if (ctx->actionMode != 10) {
         return 0;
@@ -1156,7 +1156,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
         return -1;
     }
     evtDrawMenuFrame(packets, x, y, 0x1C, rows, 0, rows, (u8 *)work, 0, evtViewerDrawPendingNodeRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 0xC) {
         return 0;
     }
@@ -1262,7 +1262,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0xD) {
         return 0;
     }
@@ -1364,7 +1364,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0xE) {
         return 0;
     }
@@ -1760,7 +1760,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     list = (s32)sdfCreateResetPacketList();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, func_00239E30);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0x10) {
         return 0;
     }
@@ -1894,7 +1894,7 @@ s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
     count += 3;
     packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtDrawGroupListRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (ctx->actionMode != 17) {
         return 0;
     }
@@ -1987,7 +1987,7 @@ s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
     list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame((u32)list, x + runtime->horizontalOffset + 0x60, y,
                      0xF, 6, 0, 1, (u8 *)runtime, NULL, func_0023B1F8);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      (SdfListHead *)list);
 
     sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
@@ -2186,7 +2186,7 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = (u32)sdfCreateResetPacketList();
     s32 count;
     evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, (u8 *)work, 0, evtDrawOptionalPromptText);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 0x14) {
         return 0;
     }
@@ -2257,7 +2257,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
     count += 2;
     packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtViewerDrawGroupRow);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (ctx->actionMode != 21) {
         return 0;
     }
@@ -2305,7 +2305,7 @@ s32 func_0023BE40(s32 x, s32 y, EvtRuntime *ctx) {
     s32 lastMode = 0;
 
     evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, func_0023BC30);
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0x16) {
         return 0;
     }
@@ -2550,7 +2550,7 @@ s32 func_0023C248(EvtRuntime *runtime) {
     sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x85C0, 0xFEFFFF, style, D_003AEC30,
         key->p18.f));
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      (SdfListHead *)packetList);
 
     step = 0;
@@ -2804,7 +2804,7 @@ s32 func_0023CA60(EvtRuntime *runtime) {
             "          %d", key->parameters.z[bank]));
     }
 
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface,
                                      (SdfListHead *)packetList);
     fldApplyCameraColorKeyWords(runtime, &key->parameters);
 

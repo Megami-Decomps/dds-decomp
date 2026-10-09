@@ -571,7 +571,7 @@ void func_0018DA70(EffTextureOverlay *overlay) {
         vertex->corner[1].mask = 0xFF0000;
         sdfConsCreateDrawPacket(list, texture, 0);
         sdfAppendPacket(list, sprite);
-        D_003255A8.append((SdfListHead *)&D_003255A8, list);
+        D_003255A8.append(&D_003255A8, list);
     }
 }
 

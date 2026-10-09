@@ -226,7 +226,7 @@ GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 ki
     itfCreateGridPacketWithDefaultFlags(object->packetHandle, object->width,
                   object->height, cursor, context);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
     return object;
 }
 
@@ -684,7 +684,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     sdfInitPacketList(context);
     sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
 }
 
 void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
@@ -709,7 +709,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     sdfInitPacketList(context);
     sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
 }
 
 void sdfSubmitGsTestOneRegisterPacket(data, kind)
@@ -737,7 +737,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     sdfInitPacketList(context);
     sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
 }
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
@@ -758,7 +758,7 @@ void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     sdfInitPacketList(context);
     sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
 }
 
 void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
@@ -775,7 +775,7 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     sdfInitPacketList(context);
     sdfAppendPacket(context, (u32)packet);
     entry = &kwlnDrawSurfaces[kind];
-    entry->append((SdfListHead *)entry, context);
+    entry->append(entry, context);
 }
 
 /* Fill all four words with value without assigning a corner or channel order. */
@@ -823,7 +823,7 @@ void func_00308650(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 s
     sdfInitPacketList(list);
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 extern void func_00308828(u32, u32, u32, u32, u32, const u32 *, u32, u32);
@@ -875,7 +875,7 @@ void func_00308828(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors
     sdfInitPacketList(list);
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
@@ -926,7 +926,7 @@ void func_00308AF0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     sdfInitPacketList(list);
     sdfAppendPacket(list, packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append((SdfListHead *)surface, list);
+    surface->append(surface, list);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
@@ -940,7 +940,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
-        surface->append((SdfListHead *)surface, list);
+        surface->append(surface, list);
     }
 }
 
@@ -957,7 +957,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     sdfAppendDmaTagToList(list, (u32)texture);
     {
         SdfPoolNode *surface = &kwlnDrawSurfaces[surfaceIndex];
-        surface->append((SdfListHead *)surface, list);
+        surface->append(surface, list);
     }
 }
 

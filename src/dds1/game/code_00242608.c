@@ -650,7 +650,7 @@ void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display) {
         }
         itfQueueTextureBoundQuadPacket(D_00368BA8, D_00368BB8, D_00368BC8,
                                       0xFF, texture, 0, packetList);
-        D_003255A8.append((SdfListHead *)&D_003255A8, packetList);
+        D_003255A8.append(&D_003255A8, packetList);
     }
 }
 
@@ -815,7 +815,7 @@ void func_00243BF0(EvtRuntime *scene) {
     sdfCreatePatchableResourcePacket((SdfListHead *)surface, context, 0, 0, 0x200, 0xE0,
                                     scene->pendingWork, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)surface);
+    D_00325708.append(&D_00325708, (SdfListHead *)surface);
 }
 
 void mnuShopSubmitDescriptor(EvtRuntime *scene) {
@@ -827,7 +827,7 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
                                   kwlnHeldTextureReference->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   scene->pendingWork, 0);
-        D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)drawPacket);
+        D_00325708.append(&D_00325708, (SdfListHead *)drawPacket);
     }
 }
 
