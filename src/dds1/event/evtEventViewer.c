@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -25,7 +26,6 @@ typedef struct EvtGroupRec {
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void sdfReleaseChipBlock(void *ptr);
 void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
@@ -41,7 +41,6 @@ EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void func_0022BF00(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
-void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
 void *dds3GetWorldObject(void);
 s32 strcmp(const char *a, const char *b);
@@ -422,8 +421,8 @@ extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
 extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
-    ObjData *owner;
+void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
+    EffWorldNode *owner;
     struct PolyMovieObject *movie;
     s32 frame;
 
@@ -434,13 +433,13 @@ void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtRuntime 
     if (value < 0) {
         return;
     }
-    owner = (ObjData *)dds3FindObjectChainNodeByName(
+    owner = dds3FindObjectChainNodeByName(
         (EffWorldNode *)dds3GetWorldObject(),
         (const u8 *)viewer->entryName[value]);
     if (owner == NULL) {
         return;
     }
-    switch (owner->kind) {
+    switch (owner->kindTag >> 24) {
     case 5:
         if (type >= 0) {
             effObjBindOwnerBillEntry((struct EffectObj *)obj,
@@ -536,9 +535,9 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
             effObjDispatchReadyState(handle);
         }
         if (cmd->plain == 0) {
-            evtViewerBindNamedOwner(handle, params->u.a.value, params->u.a.type, params->word, viewer);
+            evtViewerBindNamedOwner((EffWorldNode *)handle, params->u.a.value, params->u.a.type, params->word, viewer);
         } else {
-            evtViewerBindNamedOwner(handle, params->u.a.value, params->u.a.type, 0, viewer);
+            evtViewerBindNamedOwner((EffWorldNode *)handle, params->u.a.value, params->u.a.type, 0, viewer);
         }
         break;
     case 0x14:
@@ -592,7 +591,7 @@ void *func_0022CA88(void *resource, u32 entryId, s32 value, s32 type, u32 word,
     effect = func_00115298(resource, position, scale);
     effObjSetFlags((s32)effect, 1);
     effObjReplaceActiveEventNode(effect, entryId);
-    evtViewerBindNamedOwner((s32)effect, value, type, word, viewer);
+    evtViewerBindNamedOwner((EffWorldNode *)effect, value, type, word, viewer);
     return effect;
 }
 

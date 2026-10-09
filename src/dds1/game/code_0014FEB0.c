@@ -1,17 +1,13 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
-
-typedef struct EffectSource {
-    u32 type;
-    u32 field4;
-    u32 argument;
-} EffectSource;
 
 typedef struct EffectHandler {
     u32 (*handler)(u32);
@@ -19,7 +15,6 @@ typedef struct EffectHandler {
 } EffectHandler;
 
 extern EffectHandler D_0034DE40[];
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
@@ -33,13 +28,13 @@ typedef struct EffBillResourceInit {
 
 extern EffBillResourceInit effBillResourceInitTable[];
 
-void *effCloneSourceWithTypeHandler(EffectSource *source) {
-    EffectSource *copy = (EffectSource *)sdfAllocSizeClassBlock(0x10);
-    u32 argument = source->argument;
+EffNode *effCloneSourceWithTypeHandler(EffNode *source) {
+    EffNode *copy = (EffNode *)sdfAllocSizeClassBlock(0x10);
+    u32 argument = (u32)source->instance;
 
     copy->type = source->type;
-    copy->field4 = source->field4;
-    copy->argument = D_0034DE40[source->type].handler(argument);
+    copy->arg = source->arg;
+    copy->instance = D_0034DE40[source->type].handler(argument);
     return copy;
 }
 

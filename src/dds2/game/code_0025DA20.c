@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dat_command.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
@@ -120,7 +121,6 @@ extern s8 mnuPanelTaskCompletionState;
 
 extern void mnuShopReleaseWindowSprites();
 
-extern void sdfReleaseChipBlock();
 
 
 extern void mnuShopReleaseWindowAndEffectResources();
@@ -153,7 +153,6 @@ extern u8 D_003CD8DD[];
 
 extern void evtFormatTaskName(s32 taskId, void *name);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *memset(void *dst, s32 c, u32 n);
 

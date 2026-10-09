@@ -49,7 +49,6 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
-void *sdfAllocSizeClassBlock(s32 size);
 void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
 void sdfPacFinalizeRelocatedPayload(PacState *state);

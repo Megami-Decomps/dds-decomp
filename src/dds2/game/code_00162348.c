@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "bill_object_api.h"
@@ -135,7 +136,6 @@ struct SdfListHead;
 
 
 extern void *memcpy(void *dst, void *src, u32 n);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void func_00165600(void *);
 
 /* The serialized cell-state block is copied after the variable emitter header. */

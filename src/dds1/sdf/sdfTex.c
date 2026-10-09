@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_texture_file.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -13,11 +14,9 @@ extern SdfPendingRequest sdfTextureReleaseQueue;
 void *sdfAllocateBlockBySizeThreshold(s32 arg0);
 void *memcpy(void *arg0, void *arg1, u32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
-void sdfReleaseChipBlock(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
-void *sdfAllocSizeClassBlock(s32 arg0);
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,

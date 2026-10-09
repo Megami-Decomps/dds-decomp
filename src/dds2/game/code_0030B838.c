@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
@@ -157,7 +158,6 @@ extern SdfCameraVector D_00400A50[];
 extern u32 func_0030B678(void);
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);
@@ -167,7 +167,6 @@ extern void func_0030C250(s32, s32);
 extern void func_0030CC68();
 extern u8 D_00400AF0[];
 
-extern void sdfReleaseChipBlock();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
 extern void sdfDrawCounterChannelInfoLabel(s32, s32);

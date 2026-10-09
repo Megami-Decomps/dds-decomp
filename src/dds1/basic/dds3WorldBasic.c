@@ -1,12 +1,11 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 
 extern EffWorldNode *dds3ActiveWorld;
 
-void sdfReleaseChipBlock(void *arg);
 void effObjNodeDestroy(EffWorldNode *node);
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
-void *sdfAllocSizeClassBlock(s32 arg);
 void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
 void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *arg);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -12,7 +13,6 @@
 extern u32 D_003E274C[];
 
 extern void *func_002FF538(u32 size);
-extern void sdfReleaseChipBlock(void *memory);
 
 void func_002D00F8(u32 heapSize) {
     u32 recordBytes;
@@ -112,7 +112,6 @@ void sdfGetChipHeapStats(SdfChipHeapStats *stats) {
 }
 
 extern void *func_002FF538(u32 size);
-extern void *sdfAllocSizeClassBlock(u32 size);
 extern s32 D_003BD2DC;
 extern SdfPendingRequest D_003BD9C8;
 

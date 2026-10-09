@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -43,8 +44,6 @@
 
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
-extern void sdfReleaseChipBlock(void *ptr);
 
 extern void sdfQueueAssetRelease(u32 res);
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);

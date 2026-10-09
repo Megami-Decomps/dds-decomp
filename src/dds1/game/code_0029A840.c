@@ -510,7 +510,6 @@ typedef struct {
     u32 last;
 } EffectModelHeaderCopy;
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 u8 *func_0029B368(void *source) {
     EffResourceOwner *owner = sdfAllocSizeClassBlock(sizeof(EffResourceOwner));

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 
@@ -12,7 +13,6 @@ extern s32 dds3InvokeAreaCallback(void *arg);
 
 void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 
-void sdfReleaseChipBlock(void *arg);
 
 const s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;
@@ -142,7 +142,6 @@ void dds3DestroyObjectPointerChains(EffWorldNode *object) {
     sdfReleaseChipBlock(p);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 

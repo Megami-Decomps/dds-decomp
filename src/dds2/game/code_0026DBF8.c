@@ -57,7 +57,6 @@ extern MantraBurstPool *mnuAllocateMantraPanelBurstPool(void);
 
 extern MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16);
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite);
@@ -1151,7 +1150,7 @@ void mnuSetMantraBackgroundSelection(MantraDrawPool *pool, u32 value) {
 
 
 u32 mnuInitMantraBackgroundDraw(void) {
-    u32 data = sdfAllocSizeClassBlock(0x1c);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x1c);
     memset((void *)data, 0, 0x1c);
     ((MantraBackgroundState *)data)->state = 1;
     ((MantraBackgroundState *)data)->transitionWord &= ~0xf;
@@ -1345,7 +1344,7 @@ void mnuKeepMantraBackgroundMaskVisible(MantraDrawPool *pool) {
 }
 
 u32 mnuInitMantraBackgroundMaskDraw(void) {
-    u32 data = sdfAllocSizeClassBlock(0xc);
+    u32 data = (u32)sdfAllocSizeClassBlock(0xc);
     memset((void *)data, 0, 0xc);
     ((MantraPulseFade *)data)->state = 1;
     evtPrintDeveloperConsoleMessage("BGMask Draw Init\n");
@@ -1896,7 +1895,7 @@ void mnuToggleMantraTitleVariant(MantraDrawPool *pool) {
 }
 
 u32 mnuInitMantraTitleDraw(void) {
-    u32 data = sdfAllocSizeClassBlock(0x10);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x10);
     memset((void *)data, 0, 0x10);
     ((MantraBlinkState *)data)->unk2 = 0;
     ((MantraBlinkState *)data)->timer = 0;
@@ -2016,7 +2015,7 @@ void mnuSetMantraInfoDrawPosition(MantraDrawPool *pool, s16 x, u16 y) {
 }
 
 u32 mnuInitMantraInfoDraw(void) {
-    u32 data = sdfAllocSizeClassBlock(0x10);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x10);
     memset((void *)data, 0, 0x10);
     *(u16 *)data = 1;
     evtPrintDeveloperConsoleMessage("Info Draw Init\n");
@@ -2175,7 +2174,7 @@ void mnuSetMantraScrollCursorSegmentFlags(MantraDrawPool *ctx, u16 flags) {
 }
 
 u32 mnuInitMantraGaugeData(void) {
-    u32 data = sdfAllocSizeClassBlock(0x18);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x18);
     memset((void *)data, 0, 0x18);
     ((MantraGaugeState *)data)->state = 4;
     evtPrintDeveloperConsoleMessage("ScrollCursor Draw Init\n");
@@ -3001,7 +3000,7 @@ void func_00279148(MantraDrawPool *pool) {
 
 /* Seed the fade list with the current selection and its saved node position. */
 u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
-    u32 data = sdfAllocSizeClassBlock(0x10);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x10);
     MantraMenuWork *slot;
     MantraNodePos *first;
     MantraNodePos *second;
@@ -3072,7 +3071,7 @@ u32 mnuDrawMantraIconList(u32 unused, u32 obj) {
 
 /* Seed the alternate-scale list from the same current and saved positions. */
 u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
-    u32 data = sdfAllocSizeClassBlock(0x10);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x10);
     MantraMenuWork *slot;
     MantraNodePos *first;
     MantraNodePos *second;
@@ -3096,7 +3095,7 @@ MantraDrawItem *mnuRegisterMantraIconListBDraw(MantraDrawPool *pool, u32 resourc
 
 /* Use the saved node's panel-table index for the first icon. */
 u32 mnuCreateMantraIconListC(s32 unused, u8 *menu) {
-    u32 data = sdfAllocSizeClassBlock(0x10);
+    u32 data = (u32)sdfAllocSizeClassBlock(0x10);
     MantraMenuWork *slot = &((MantraMenu *)menu)->work;
     MantraNodePos *first;
     MantraNodePos *second;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 
@@ -13,7 +14,6 @@ typedef struct {
     ModelRangeData *rangeData;
 } ModelRangeObj;
 
-void sdfReleaseChipBlock(void *arg);
 
 /* Queue the backing allocation, if present, then free the range-data block.
  * A nonzero resourceAddress must match a used general-heap block.

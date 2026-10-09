@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -112,7 +113,6 @@ extern F9B00Entry sdfPadPorts[];
 extern u32 D_00398660[];
 extern u128 D_003F9890;
 extern f32 D_003BDA30;
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern u8 D_003F98A0[];
 extern u8 D_003F9860[];
 extern u128 *D_003EB860[][3];

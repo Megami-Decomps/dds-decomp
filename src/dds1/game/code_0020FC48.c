@@ -1362,7 +1362,6 @@ extern f32 func_002F9F60(f32);
 
 extern f32 func_002FA060(f32);
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 void btlInitVisibilityGrid(void) {
     f32 angle = 3.1415927f / 6.0f; /* 30 degrees */
@@ -2293,7 +2292,6 @@ s32 btlGroupContainsId(s32 groupIndex, s32 wantedId) {
     return 0;
 }
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 /* Prepend id to this group's ID list; duplicate IDs are allowed. */

@@ -1,8 +1,10 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 
 
@@ -53,13 +55,6 @@ typedef struct EffTypeOps {
     void (*fn28)();          /* 0x28 */
     void (*fn2C)(s32);       /* 0x2C */
 } EffTypeOps;
-
-typedef struct EffNode {
-    u32 type;
-    s32 arg;
-    s32 instance;
-    f32 unkC;
-} EffNode;
 
 extern EffTypeOps effNodeTypeOperations[];
 
@@ -163,14 +158,14 @@ void func_0014FE28(u32 parameter) {
     effCreateNode(5, 0, parameter);
 }
 
-void *effLoadResourceNode(void *resource) {
+struct EffNode *effLoadResourceNode(const char *resource) {
     u32 resolvedId;
-    void *resourceHandle;
-    void *node;
+    struct SdfMemBlock *resourceHandle;
+    struct EffNode *node;
 
     func_003003F0("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    node = effCreateNodeFromDescriptor(resolvedId);
+    node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);
     return node;
 }

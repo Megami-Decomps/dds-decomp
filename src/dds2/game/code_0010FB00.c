@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
@@ -9,7 +10,6 @@ extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 
 extern void dds3DestroyWorldNode(EffWorldNode *node);
 extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
-extern void sdfReleaseChipBlock(void *block);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
 void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
@@ -95,7 +95,6 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
     return value;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
    callback stores the payload on the node before initializing its fields. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"

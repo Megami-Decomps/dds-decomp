@@ -1,10 +1,10 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "dds3_path.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 
-extern void *dds3GetSlot(void *obj, s32 index);
 struct EvtScaledValue;
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *slot);
 extern u32 sdfGetFloatCounterDirection(u32 *handle);

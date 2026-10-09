@@ -25,7 +25,6 @@ extern void dspStartEntry(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);

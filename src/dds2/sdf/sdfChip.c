@@ -13,7 +13,6 @@ SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned
 
 SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *sdfClearQuadwords(void *memory, s32 quadwordCount);
 
 

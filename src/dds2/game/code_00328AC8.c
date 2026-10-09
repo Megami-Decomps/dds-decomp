@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "sdf.h"
 

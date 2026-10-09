@@ -77,7 +77,6 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
     D_003253C8.append((SdfListHead *)&D_003253C8, list);
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {

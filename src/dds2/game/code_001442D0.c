@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -13,6 +14,7 @@
 #include "mdl.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 #include "dds3obj.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
@@ -54,7 +56,6 @@ extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 typedef struct EffNode EffNode;
-typedef struct EffNodeDescriptor EffNodeDescriptor;
 
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
@@ -135,7 +136,6 @@ extern s32 fldRoomEffectEntryCount;
 
 extern u32 D_00436330[];
 
-extern EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *);
 
 extern s32 fldObjectSlotCount;
 
@@ -262,7 +262,6 @@ extern s32 fldFindEffectByName(char *str);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern s32 fldFieldTaskUpdate(void);
@@ -2824,7 +2823,7 @@ typedef struct FieldResourceIds {
 void fldLoadResourceByIndex(s32 index) {
     FieldResourceIds ids = *(FieldResourceIds *)D_00436330;
     fldIndexedResourceHandle = (u32)sdfReadNamedResource((const char *)(u32)ids.entries[index], &fldIndexedResourceData, 0);
-    fldIndexedResourceEffect = effCreateNodeFromDescriptor(fldIndexedResourceData);
+    fldIndexedResourceEffect = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)fldIndexedResourceData);
 }
 
 void fldReleaseIndexedResourceEffect(void) {
@@ -3016,13 +3015,13 @@ extern s32 fldAreaDamageEffectPlaced;
  * from the four retained d2_fild TMX blocks. */
 void fldInitializeMenuResources(void) {
     if (fldAreaState.area < 200) {
-        D_004362DC = effCreateNodeFromDescriptor(D_004362D8);
+        D_004362DC = effCreateNodeFromDescriptor((EffNodeDescriptor *)D_004362D8);
         if (fldAreaState.area == 26) {
-            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EE0);
+            fldAreaDamageEffect = (u32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_00438EE0);
         } else if (fldAreaState.area == 29) {
-            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EE8);
+            fldAreaDamageEffect = (u32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_00438EE8);
         } else if (fldAreaState.area == 30) {
-            fldAreaDamageEffect = effCreateNodeFromDescriptor(D_00438EF0);
+            fldAreaDamageEffect = (u32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_00438EF0);
         } else {
             fldAreaDamageEffect = 0;
         }

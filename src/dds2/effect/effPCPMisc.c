@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
@@ -7,6 +8,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
 #include "eff_param.h"
@@ -57,8 +59,6 @@ typedef struct {
     EffParamWork *secondaryHandle; /* 0x18 parameter block 1 */
 } EffPCPSpawnOnceWork;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
-extern void sdfReleaseChipBlock();
 
 
 
@@ -76,10 +76,8 @@ extern u8 D_003B1A38[];
 extern u8 D_003B1A88[];
 
 extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
-extern struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
 extern void effDestroyNode(struct EffNode *node);
 
-extern u32 effCloneSourceWithTypeHandler(u32 handle);
 
 extern void sdfComposeVuMatrixFromRegisters(void);
 
@@ -3160,7 +3158,7 @@ EffPCPSpanWork *effPcpCloneWithOptionalHandle(EffPCPSpanWork *work) {
 
     child = effPcpSpanCreate(&work->params, NULL);
     if (work->optionalHandle != NULL) {
-        child->optionalHandle = (struct EffNode *)effCloneSourceWithTypeHandler((u32)work->optionalHandle);
+        child->optionalHandle = effCloneSourceWithTypeHandler(work->optionalHandle);
     }
     return child;
 }
@@ -3276,8 +3274,8 @@ EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDe
     handle = work->handles;
     for (i = 0; i < 7; i++) {
         handle[0] = effCreateNodeFromDescriptor(descriptors[i]);
-        handle[7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
-        handle[14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
+        handle[7] = effCloneSourceWithTypeHandler(handle[0]);
+        handle[14] = effCloneSourceWithTypeHandler(handle[0]);
         handle++;
     }
     return work;
@@ -3313,9 +3311,9 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     sourceHandleCursor = (src->handles + 14);
     destinationHandleCursor = (work->handles + 14);
     for (slotIndex = 0; slotIndex < 7; slotIndex++) {
-        destinationHandleCursor[-14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-14]);
-        destinationHandleCursor[-7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-7]);
-        destinationHandleCursor[0] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[0]);
+        destinationHandleCursor[-14] = effCloneSourceWithTypeHandler(sourceHandleCursor[-14]);
+        destinationHandleCursor[-7] = effCloneSourceWithTypeHandler(sourceHandleCursor[-7]);
+        destinationHandleCursor[0] = effCloneSourceWithTypeHandler(sourceHandleCursor[0]);
         sourceHandleCursor++;
         destinationHandleCursor++;
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "mnu_title_effect.h"

@@ -4,6 +4,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "fr_font.h"
 #include "sdf_dev_state.h"
 #include "dds3obj.h"
@@ -138,7 +139,6 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
-extern s32 sdfAllocSizeClassBlock(u32);
 
 extern s32 func_002877A8(void);
 
@@ -153,7 +153,6 @@ extern void mnuFreePanelItemWork(MenuPanelItem *);
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
 extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
-extern void sdfReleaseChipBlock();
 
 extern char D_003B2608[]; /* "battle stage test" */
 

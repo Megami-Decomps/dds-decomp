@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -7,7 +8,6 @@ extern s32 (*D_003982D0[])(void *a0, s32 a1);
 extern s32 (*D_00398360[])(void *a0, s32 a1);
 extern u8 D_00398368[];
 
-extern s32 sdfAllocSizeClassBlock(s32);
 
 void func_002DD038(void) {
 }
@@ -51,7 +51,7 @@ typedef struct MotionKeySample {
 extern void sdfFindMotionKeyInterval(void *, void *, f32);
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = sdfAllocSizeClassBlock(0x20);
+    s32 entry = (s32)sdfAllocSizeClassBlock(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_00398368, entryIndex);
     return entry;

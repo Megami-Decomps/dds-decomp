@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln_sprite.h"
@@ -30,7 +31,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern EffHandler32 D_003B2060[];
 
@@ -52,7 +52,6 @@ extern void func_0035C860();
 
 extern s32 sceDopen(void *path);
 
-extern void sdfReleaseChipBlock(void *allocation);
 
 extern char D_00436450[];
 

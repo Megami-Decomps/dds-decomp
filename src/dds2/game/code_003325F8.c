@@ -112,7 +112,6 @@ void sdfResourceListReleaseAssets(DevRequest *);
 
 extern SdfSubParam *sdfSubParamCreate(void);
 
-void *sdfAllocSizeClassBlock(s32 size);
 
 
 void sdfDestroyDevRequest(DevRequest *);

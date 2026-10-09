@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "file_request_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"

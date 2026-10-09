@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -135,7 +136,6 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 kwlnPadMotorLevels[2];
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 extern void dds3AdminReleaseTaskWork(KwlnTask *task);
 extern char dds3AdminTaskName[];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_transform.h"
 #include "gs_packet.h"
 #include "sdf.h"
@@ -65,7 +66,6 @@ typedef struct SdfCounterRuntime {
     SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
 
-extern void sdfReleaseChipBlock(void *);
 
 
 extern s32 sdfActiveCounterRuntime;
@@ -308,7 +308,6 @@ s32 func_002C4160(void) {
 }
 
 extern s32 mnuCreateListState(s32, s32, s32);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s32 mdlCollectFlagBitsIntoMask(void);
 extern u8 *sdfResolveSceneCounterInfo(s32);

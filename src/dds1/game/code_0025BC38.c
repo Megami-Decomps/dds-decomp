@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -21,7 +22,6 @@
 #define MNU_MANTRA_COST_ICON_X_OFFSET 0x19
 #define MNU_MANTRA_COST_ICON_Y_OFFSET 0x5C
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 
 typedef struct MovieCueNode MovieCueNode;
