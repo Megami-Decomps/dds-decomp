@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fld_resource_resolver.h"
 #include "fld.h"
+#include "sdf_resource.h"
 #include "dds3obj.h"
 
 
@@ -292,7 +293,6 @@ extern s32 sdfAllocPacketAligned(s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
-extern void *sdfAllocateBlockBySizeThreshold(s32);
 
 extern u32 fldDisplayRow;
 
@@ -2477,7 +2477,7 @@ void fldAllocateBackgroundBuffer(void) {
 
 void fldReleaseBackgroundBuffer(void) {
     if (fldBackgroundBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(fldBackgroundBuffer);
+        sdfReleaseChipOrRetainedResource((void *)(u32)fldBackgroundBuffer);
         fldBackgroundBuffer = 0;
     }
 }

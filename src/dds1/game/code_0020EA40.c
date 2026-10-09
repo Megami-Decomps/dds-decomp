@@ -4,6 +4,7 @@
 #include "btl_command.h"
 #include "dat_state.h"
 #include "ee_mmi.h"
+#include "sdf_resource.h"
 
 
 extern void btlBossDebugPrintf(const char *format, ...);

@@ -75,7 +75,6 @@ extern void ptyMergeStockSkills(DatPartyRecord *);
 
 extern void (*sdfTickCallback)(void);
 
-extern void *sdfAllocateBlockBySizeThreshold(s32 stackBytes);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 extern u32 D_003BD2C8;

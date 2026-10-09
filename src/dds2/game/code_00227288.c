@@ -11,6 +11,7 @@
 #include "mdl.h"
 #include "eff_transform.h"
 #include "dat_state.h"
+#include "sdf_resource.h"
 
 extern void btlInterpolateVectorStep();
 
