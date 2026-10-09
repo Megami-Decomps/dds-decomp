@@ -118,7 +118,6 @@ extern SdfPacketSlot D_0040B308[];
 extern SdfResource *sdfResourceListHead;
 
 
-void sdfConnectPacketLists();
 
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 
@@ -601,7 +600,7 @@ void sdfAppendPacketList(SdfPoolNode *list, SdfListHead *item) {
         }
         else {
             last->nextList = item;
-            sdfConnectPacketLists(last);
+            sdfConnectPacketLists(last, item);
         }
         list->last = item;
     }
@@ -645,10 +644,7 @@ SdfDmaTag *sdfLinkReferenceDmaNode(SdfDmaTag *previousTag, SdfDmaTag *sourceTag)
 
 /* Insert differing nonzero reference sources before linking the incoming DMA chain.
  * Zero incoming sources inherit prior state; the locals cover both source slots. */
-void sdfConnectPacketLists(previousList, incomingList)
-    SdfListHead *previousList;
-    SdfListHead *incomingList;
-{
+void sdfConnectPacketLists(SdfListHead *previousList, SdfListHead *incomingList) {
     SdfDmaTag *tailTag = (SdfDmaTag *)previousList->last;
     u32 previousSource;
     u32 incomingSource;
