@@ -2941,7 +2941,7 @@ void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record,
     record->word04 = secondWord;
 }
 
-u32 func_001FC730(struct BtlResourceNameRecord *record) {
+u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record) {
     return record->selectionStatus;
 }
 
@@ -2959,8 +2959,8 @@ void btlFormatResourceNameWithoutPrefix(struct BtlResourceNameRecord *record, ch
     func_003014F0(output, D_003BB820, record->resourceName);
 }
 
-void func_001FC7D0(struct BtlResourceNameRecord *record, u32 value) {
-    record->word14 = value;
+void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength) {
+    record->word14 = maximumNameLength;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);

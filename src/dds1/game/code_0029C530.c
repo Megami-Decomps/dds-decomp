@@ -8404,7 +8404,7 @@ void effInitializeResourceQueue(void) {
     }
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_003BCF30);
     btlSetResourceNameHeaderPairAlternate(effFileQueueNameRecord, 0xC2, 0xC8);
-    func_001FC7D0(effFileQueueNameRecord, 9);
+    btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
     record = fileQueueGetAt(effFileQueue, func_002B5990());
     btlResourceRecordSetName(effFileQueueNameRecord, record->name);
 }
@@ -8414,7 +8414,7 @@ u32 effPollResourceQueue(void) {
 
     func_001FC300(effFileQueueNameRecord);
     btlFormatResourceNameWithoutPrefix(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002B5990())->name);
-    state = func_001FC730(effFileQueueNameRecord);
+    state = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(state - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
         func_001FC2E8(effFileQueueNameRecord);
         effFileQueueNameRecord = 0;
@@ -8449,7 +8449,7 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
     func_001FC300(effQueuedResourceNameRecord);
     btlFormatResourceNameWithPrefix(effQueuedResourceNameRecord, record->nameWithPrefix);
     btlFormatResourceNameWithoutPrefix(effQueuedResourceNameRecord, record->name);
-    state = func_001FC730(effQueuedResourceNameRecord);
+    state = btlGetResourceNameSelectionStatus(effQueuedResourceNameRecord);
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {

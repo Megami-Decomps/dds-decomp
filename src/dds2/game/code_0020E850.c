@@ -166,9 +166,9 @@ extern s32 btlAdvanceActorEffectLabelTask(void *args);
 extern s32 func_0020F5E0(BtlLinkedEffectArgs *args);
 
 
-/* Store the supplied name-record word without interpreting its bits. */
-void func_0020E850(BtlResourceNameRecord *record, u32 value) {
-    record->unk14 = value;
+/* Set the native editor's name-length limit. */
+void btlSetResourceNameLengthLimit(BtlResourceNameRecord *record, u32 maximumNameLength) {
+    record->unk14 = maximumNameLength;
 }
 
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
