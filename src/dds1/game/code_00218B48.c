@@ -203,8 +203,6 @@ void mdlCleanupViewerTasksAndResources(void);
 void func_00218768(s32, s32, s32, s32);
 
 
-s32 mdlCountRecords(s32);
-
 extern u32 D_003BA8EC;
 
 extern void kwlnDebugGraphSetEnabled(s8 mode);
@@ -363,6 +361,8 @@ typedef struct MdlRecord {
     } tail;
 } MdlRecord;
 
+s32 mdlCountRecords(MdlRecord *listHeader);
+
 
 
 
@@ -399,8 +399,8 @@ MdlRecord *mdlFindViewerRecord(MdlCtx *resource, s32 recordId) {
 }
 
 /* The first eight bytes belong to the enclosing list, not its first record. */
-MdlRecord *mdlGetFirstRecord(s32 listAddress) {
-    MdlRecord *firstRecord = (MdlRecord *)(listAddress + MDL_RECORD_LIST_HEADER_BYTES);
+MdlRecord *mdlGetFirstRecord(MdlRecord *listHeader) {
+    MdlRecord *firstRecord = (MdlRecord *)((u8 *)listHeader + MDL_RECORD_LIST_HEADER_BYTES);
 
     if (firstRecord->kind == MDL_RECORD_END_KIND) {
         firstRecord = NULL;
@@ -419,14 +419,14 @@ MdlRecord *mdlGetNextRecord(MdlRecord *currentRecord) {
 }
 
 /* Count relative-offset records until the 0xffff sentinel. */
-s32 mdlCountRecords(s32 listAddress) {
+s32 mdlCountRecords(MdlRecord *listHeader) {
     s32 recordCount;
     MdlRecord *recordCursor;
 
-    if (listAddress == 0) {
+    if (listHeader == NULL) {
         return 0;
     }
-    recordCursor = mdlGetFirstRecord(listAddress);
+    recordCursor = mdlGetFirstRecord(listHeader);
     recordCount = 0;
     while (recordCursor != NULL) {
         recordCount++;
@@ -904,7 +904,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
 void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
     MdlRecord *recordList = mdlFindViewerRecord(owner, recordId);
     if (recordList != NULL) {
-        MdlRecord *recordCursor = mdlGetFirstRecord((s32)recordList);
+        MdlRecord *recordCursor = mdlGetFirstRecord(recordList);
         while (recordCursor != NULL) {
             mdlDispatchResourceEntry(owner, recordCursor, subtype);
             recordCursor = mdlGetNextRecord(recordCursor);
@@ -2252,8 +2252,8 @@ u32 mdlRunViewerSettingsTask(void) {
 /* Sum list -1 and active-entry counts, retaining both independent lookups. */
 s32 mdlCountActiveRecords(void) {
     MdlCtx *resource = mdlViewerState.resources[0];
-    s32 firstListCount = mdlCountRecords((s32)mdlFindViewerRecord(resource, -1));
-    s32 activeListCount = mdlCountRecords((s32)mdlFindViewerRecord(resource, mdlViewerState.activeEntryId));
+    s32 firstListCount = mdlCountRecords(mdlFindViewerRecord(resource, -1));
+    s32 activeListCount = mdlCountRecords(mdlFindViewerRecord(resource, mdlViewerState.activeEntryId));
 
     return firstListCount + activeListCount;
 }
@@ -2267,7 +2267,7 @@ MdlRecord *func_0021CF00(void) {
     MdlRecord *record;
 
     if (firstList != NULL) {
-        record = mdlGetFirstRecord((s32)firstList);
+        record = mdlGetFirstRecord(firstList);
         while (record != NULL) {
             if (index == 0) {
                 return record;
@@ -2279,7 +2279,7 @@ MdlRecord *func_0021CF00(void) {
     if (secondList == NULL) {
         return NULL;
     }
-    record = mdlGetFirstRecord((s32)secondList);
+    record = mdlGetFirstRecord(secondList);
     while (record != NULL) {
         if (index == 0) {
             return record;
@@ -2365,9 +2365,9 @@ void func_0021D198(void) {
     resource = state->resources[0];
     packetList = state->packetList;
     firstList = mdlFindViewerRecord(resource, -1);
-    firstCount = mdlCountRecords((s32)firstList);
+    firstCount = mdlCountRecords(firstList);
     secondList = mdlFindViewerRecord(resource, state->activeEntryId);
-    secondCount = mdlCountRecords((s32)secondList);
+    secondCount = mdlCountRecords(secondList);
     totalCount = firstCount + secondCount;
 
     if (totalCount == 0) {
@@ -2388,9 +2388,9 @@ void func_0021D198(void) {
 
         firstRemaining = firstCount;
         if (firstCount != 0) {
-            record = mdlGetFirstRecord((s32)firstList);
+            record = mdlGetFirstRecord(firstList);
         } else {
-            record = mdlGetFirstRecord((s32)secondList);
+            record = mdlGetFirstRecord(secondList);
         }
 
         selected = mdlViewerState.unk42;
@@ -2445,7 +2445,7 @@ void func_0021D198(void) {
                 }
 
                 if (firstRemaining > 0 && --firstRemaining == 0) {
-                    record = secondList != NULL ? mdlGetFirstRecord((s32)secondList) : NULL;
+                    record = secondList != NULL ? mdlGetFirstRecord(secondList) : NULL;
                 } else {
                     record = mdlGetNextRecord(record);
                 }
