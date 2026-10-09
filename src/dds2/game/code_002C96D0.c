@@ -4634,19 +4634,19 @@ void *fileJobCreateFromCommandState(entry)
 {
     DevState *command;
     s32 size;
-    s32 handle;
-    s32 address;
+    struct SdfMemBlock *allocation;
+    void *buffer;
     void *job;
 
     command = sdfDevCreateCommandState((const char *)entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = (u32)sdfAllocGeneralBlock(size);
-        address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-        sdfDevQueueReadAndWait(command, (void *)address, size);
+        allocation = sdfAllocGeneralBlock(size);
+        buffer = (void *)sdfResourceRetainAddress(allocation);
+        sdfDevQueueReadAndWait(command, buffer, size);
         sdfDevWaitThenReleaseCommandState(command);
-        job = fileDuplicateJob((void *)address);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
+        job = fileDuplicateJob(buffer);
+        sdfReleaseResourceAllocation(allocation);
         return job;
     }
 }
