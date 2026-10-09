@@ -134,6 +134,28 @@ def main():
             d.emit(dict(scope="camera_probe_parity", target_bytes_equal=True,
                         target_relocations_equal=True, target_bytes=len(ordinary),
                         relocations=len(ordinary_relocs), source_snapshot_equal=True))
+            import ee_gcc_role_lineage as roles_module
+            role_manifest, role_source, role_stages = roles_module.load_probe(probe, d.TARGET)
+            origin = role_stages["00.rtl"]
+            spec = json.loads(Path(__file__).with_name("roles.json").read_text())
+            spans = roles_module.role_spans(role_source, spec)
+            source_name = role_manifest.get("as_unit") or role_manifest["source"]
+            parsed_notes = [row for row in origin.values() if row.get("source_note")]
+            executable = [row for row in origin.values() if row["kind"] in roles_module.EXECUTABLE]
+            linked = [row for row in executable if row.get("source")]
+            matching = [row for row in linked if roles_module.same_source(row["source"]["file"], source_name)]
+            lines = [row["source"]["line"] for row in linked]
+            d.emit(dict(scope="source_note_metadata",
+                        notes=sum(row["kind"] == "note" for row in origin.values()),
+                        parsed_source_notes=len(parsed_notes),
+                        executable_source_rows=len(linked), canonical_source_rows=len(matching),
+                        min_line=min(lines) if lines else None,
+                        max_line=max(lines) if lines else None,
+                        roles=[dict(name=span["name"], first_line=span["first_line"],
+                                    end_line=span["end_line_exclusive"],
+                                    selected=sum(span["first_line"] <= row["source"]["line"]
+                                                 < span["end_line_exclusive"] for row in matching))
+                               for span in spans]))
             role_report, watch = Path(temp) / "roles.json", Path(temp) / "watch.json"
             role_result = d.run("source_role_lineage", [sys.executable, "tools/ee_gcc_role_lineage.py",
                   str(probe), "--roles", str(Path(__file__).with_name("roles.json")),
