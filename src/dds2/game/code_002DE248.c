@@ -6230,7 +6230,7 @@ u32 effGetScalyTextureHandle(void) {
 typedef struct EffSpanEntry {
     f32 first;
     f32 second;
-    u32 pad_08;
+    u32 referenceAge;
 } EffSpanEntry;
 
 typedef struct EffSpanRecord {
@@ -6298,7 +6298,7 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
                     span++;
                     entry->first = effMiscRandUnitFloat(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
                     entry->second = config->secondBase * (effMiscRandUnitFloat(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
-                    entry->pad_08 = 0;
+                    entry->referenceAge = 0;
                     entry++;
                 } while (span < spans);
             }
