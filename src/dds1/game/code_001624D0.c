@@ -43,7 +43,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
 

@@ -405,7 +405,6 @@ extern void btlUpdateRuntimeFadeState(void);
 
 extern void mdlSetNodeFrameStep(MdlCtx *, s32, f32);
 
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
 extern f32 fldSwayPhase;
 
@@ -431,9 +430,6 @@ extern void mdlSuspendAllContextMotions(MdlCtx *object);
 
 extern void mdlResumeAllContextMotions(MdlCtx *object);
 
-extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
-extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 
 extern u32 D_0043612C;
 

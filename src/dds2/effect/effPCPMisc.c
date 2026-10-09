@@ -437,7 +437,6 @@ typedef struct EffPCPTwinWork {
 extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
-extern void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 
 typedef struct EffPCPCrossWork {
     u32 unk00;

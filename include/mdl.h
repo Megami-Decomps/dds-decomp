@@ -163,6 +163,15 @@ u32 mdlGetBroadcastValue(MdlCtx *ctx);
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
 void mdlBroadcastMasked(MdlCtx *ctx, u32 value);
 
+/* Motion-record selection and lookup. */
+void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                       f32 blendDurationFrames);
+void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                          f32 blendDurationFrames);
+u8 mdlHasNode(MdlCtx *ctx, s32 searchId);
+
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
 

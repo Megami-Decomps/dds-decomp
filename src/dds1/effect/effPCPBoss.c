@@ -124,7 +124,6 @@ typedef struct {
 } EffBossColorSlot;
 
 
-extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);

@@ -60,8 +60,6 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 typedef struct EffNode EffNode;
 
-extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
-extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern u8 fldTestSceneControlFlags(u32);
 
 extern f32 fldAngleDifference(f32, f32);
@@ -4814,8 +4812,6 @@ extern const f32 D_00413F68[4];
 extern f32 D_00451D4C[];
 extern void effObjSetNodeFlags(ObjectTransform *inner, u32 flags);
 extern void effObjClearNodeFlags(ObjectTransform *inner, u32 flags);
-extern void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex,
-                                 f32 blendLeadFrames, f32 blendDurationFrames);
 
 void func_00152C88(void) {
     f32 position[4] __attribute__((aligned(16)));
