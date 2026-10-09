@@ -7555,7 +7555,7 @@ u32 effPollAttachedFile(void) {
         if (effFileQueue != 0) {
             strcpy((char *)D_003DF8D0, record.name);
             func_003014F0(path, D_003BD080, D_003B39E0, record.nameWithPrefix);
-            func_002954F0(effFileQueue, path);
+            fileQueueSaveVersionedImage(effFileQueue, path);
             result = 0x400002;
         }
     }

@@ -5326,6 +5326,7 @@
 0x00294E50	fileQueueRemoveAndDestroyJob	inferred	Removes job, recursively removes flagged children, rechains dependents then frees child and job. [names_reviewed7.tsv]
 0x00294F50	fileJobCopyHeader	inferred	copies the first 0x90 bytes of a FileJob
 0x00295018	fileQueueSaveImage	inferred	Saves the queue header, relocated job records and aligned owned payloads to a borrowed path.
+0x002954F0	fileQueueSaveVersionedImage	inferred	Writes a 16-byte versioned preamble followed by the serialized queue image to a borrowed path.
 0x002959E8	fileQueueCreateFromCommandState	inferred	Creates a runtime queue from a command-loaded serialized image, duplicates its jobs and releases the temporary image.
 0x00295B70	fileQueueFindById	inferred	traverses job links matching id field
 0x00295BB0	fileQueueFindFlaggedById	inferred	traverses matching id only when flags bit zero is set

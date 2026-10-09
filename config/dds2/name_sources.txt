@@ -4985,6 +4985,7 @@
 0x002D4E60	fileQueueDetachSectorFollower	inferred	Clears follower flag and sector, rechaining former dependents when present. [names_reviewed7.tsv]
 0x002D4F10	fileQueueRemoveAndDestroyJob	inferred	Removes job, recursively removes flagged children, rechains dependents then frees child and job. [names_reviewed7.tsv]
 0x002D50D8	fileQueueSaveImage	inferred	Saves the queue header, relocated job records and aligned owned payloads to a borrowed path.
+0x002D55B0	fileQueueSaveVersionedImage	inferred	Writes a 16-byte versioned preamble followed by the serialized queue image to a borrowed path.
 0x002D5AA8	fileQueueCreateFromCommandState	inferred	Creates a runtime queue from a command-loaded serialized image, duplicates its jobs and releases the temporary image.
 0x002D5D90	fileQueueCountLinkedJobs	inferred	Traverses FileQueue.first and next links to count queued jobs.
 0x002D5DC8	camFollowOffsetVec	inferred	DDS1 twin 0x00295D08 [names_M58_VuSweep.tsv]
