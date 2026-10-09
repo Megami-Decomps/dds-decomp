@@ -482,6 +482,20 @@ typedef struct EffResourceOps {
     u32 payloadSize;           /* 0x18 */
 } EffResourceOps;
 
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    void * (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    void * (*cloneResource)(); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
+
+
 
 /* Native class operations: callbacks followed by the copied payload size.
  * Callback arity varies between creation and frame-notification paths. */
@@ -554,7 +568,7 @@ extern u8 D_0043875A;
 
 extern FileJobPayload *effQueuedFileHandle;
 
-extern EffResourceOps effActiveInstanceOperations[];
+extern EffActiveInstanceOps effActiveInstanceOperations[];
 
 
 extern EffClassOps effClassWorkOperations[];
@@ -2529,19 +2543,19 @@ EffClassWork *effCreateActiveResource(EffClassWork *obj) {
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].initialize();
+    effActiveInstanceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
 void effAdvanceActiveInstanceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        effActiveInstanceOperations[work->kind].update();
+        effActiveInstanceOperations[work->kind].update(work);
         work->frame++;
     }
 }
 
 void effDispatchActiveInstanceDraw(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].draw((void *)work);
+    effActiveInstanceOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawActiveInstance(EffClassWork *work) {
