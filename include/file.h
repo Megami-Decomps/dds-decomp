@@ -64,6 +64,10 @@ void fileJobDestroy(FileJobPayload *job);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
 
+/* Queue flags describe payload sharing and secondary-buffer links. */
+#define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1
+#define FILE_JOB_FLAG_SECTOR_FOLLOWER 0x2
+
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
     u32 unk0;
