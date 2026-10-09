@@ -123,8 +123,6 @@ extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg
 
 extern s32 func_0035B6E0(const char *fmt, ...);
 
-extern u8 D_004219F0[];
-
 extern u8 D_00421AC0[];
 
 extern s32 scrReadStringParameter(s32 idx);
@@ -1016,7 +1014,8 @@ u32 evtCmdPrepareUnitMotionAndLogState(void) {
         return 1;
     }
     evtPrepareUnitMotionState(unit, scrReadIntParameter(1), 5, 7, 1);
-    func_0035B6E0(D_004219F0);
+    func_0035B6E0("\xA2\xA8\xC3\xED\xB0\xD5:MODEL_MOVE_MOT()\xA4\xB3\xA4\xCE\xA5\xB3\xA5\xDE\xA5\xF3\xA5\xC9"
+                  "\xA4\xCF\xBA\xA3\xB8\xE5\xBB\xC8\xCD\xD1\xB6\xD8\xBB\xDF\xA4\xCB\xA4\xCA\xA4\xEA\xA4\xDE\xA4\xB9\xA1\xA3\n");
     return 1;
 }
 
@@ -1277,8 +1276,6 @@ u32 evtOpSetUnitGradientColors(void) {
     evtInitializeUnitColorTransition(unit, scrReadIntParameter(1), packed1, packed2);
     return 1;
 }
-
-INCLUDE_RODATA(const s32, "game/code_0023D658", D_004219F0);
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FF90);
 
