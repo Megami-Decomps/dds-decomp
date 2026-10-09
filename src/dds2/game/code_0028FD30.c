@@ -671,8 +671,53 @@ void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291A20);
+void func_00291A20(MnuStatusResource *object, s32 selector, u16 id, s32 panelX) {
+    MantraMenuWork *state = &object->menu;
+    MantraNodePos *position;
+    MenuPanelPositionRecord *record;
+    MantraPanelAnimation *animation;
+    u16 visibleIds[7];
+    s32 i;
+    s32 recordIndex;
 
+    position = mnuGetMantraPanelPositionRecord((s16)id);
+    func_00291400(selector, id);
+    visibleIds[6] = id;
+    for (recordIndex = 0; recordIndex < 6; recordIndex++) {
+        visibleIds[recordIndex] = position->neighbors[recordIndex]->id;
+    }
+    animation = mnuSpawnPanelSlotB(object->menu.resource, id, 6, (s16)panelX, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    for (i = 0; i < 6; i++) {
+        mnuGetMantraPanelPositionRecord((s16)visibleIds[i]);
+        animation = mnuSpawnPanelSlotB(object->menu.resource, visibleIds[i], 2, (s16)panelX, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+    }
+    position = mnuGetMantraPanelPositionRecord(0);
+    recordIndex = 175;
+    do {
+        if (position->id != 0) {
+            if (position->modelFlagState <= (s32)((state->flags >> 28) & 1)) {
+                s32 hidden = 1;
+
+                for (i = 0; i < 7; i++) {
+                    if (position->id == visibleIds[i]) {
+                        hidden = 0;
+                        break;
+                    }
+                }
+                if (hidden) {
+                    record = func_00291400(selector, id);
+                    if ((record->stateFlags & 15) != 3) {
+                        animation = mnuSpawnPanelSlotB(object->menu.resource, position->id, 13, (s16)panelX, 0, 0);
+                        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
+                    }
+                }
+            }
+        }
+        position++;
+    } while (--recordIndex >= 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291C68);
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
@@ -693,7 +738,6 @@ extern void func_00279080(struct MantraDrawPool *pool);
 extern void func_002790B8(struct MantraDrawPool *pool);
 extern void func_002790F0(s32, s32, struct MantraDrawPool *pool);
 extern void func_00291C68(MnuStatusResource *, s32, u16);
-extern void func_00291A20(MnuStatusResource *, s32, u16, s32);
 extern void func_00291DD0(MnuStatusResource *, s32);
 extern void mnuHideMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
