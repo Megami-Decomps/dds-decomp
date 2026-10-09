@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Qualify unchanged camera compiler dumps and expose a bounded peer slice."""
+import argparse
 import json
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
 from collections import Counter
+from functools import partial
 from pathlib import Path
 import diagnose as d
 sys.path.insert(0, str(d.ROOT / "tools"))
@@ -104,7 +108,116 @@ def summarize_dump(path):
     result["peer_slice"] = rows
     return result
 
-def main():
+
+def run_native_control(stage, command, case, stem):
+    """Run exact frozen native argv/environment, keeping compiler output private."""
+    d.STAGE = stage
+    case.verify()
+    with case.logs[stem + "_stdout"].open("wb") as stdout, case.logs[stem + "_stderr"].open("wb") as stderr:
+        result = subprocess.run(command, cwd=case.cwd, env=case.env,
+                                stdout=stdout, stderr=stderr, check=False,
+                                timeout=case.timeout)
+    d.require(result.returncode == 0, stage)
+    case.verify()
+
+
+def live_cse_observation(temp, watch_path, ordinary_identity, qemu):
+    """Observe the current unchanged candidate only after all target parity gates."""
+    import ee_gcc_cse_case as case_builder
+    import ee_gcc_cse_role_tracer as cse
+    import ee_gcc_observe as observer
+    temp, qemu = Path(temp), qemu.resolve()
+    d.require(qemu.is_file(), "cse_qemu_missing")
+    case_dir, output = temp / "case", temp / "case" / "observed"
+    source_path = d.ROOT / case_builder.SOURCE_REL
+    assembly_path = d.ROOT / case_builder.ASSEMBLY_REL
+    d.require(not source_path.exists() and not assembly_path.exists(),
+              "cse_fixed_paths_not_fresh")
+    expected_source_hash = d.digest(d.UNIT)
+    try:
+        d.STAGE = "cse_case_prepare"
+        # Preparation checks the selected QEMU interface; it never builds QEMU.
+        case_builder.make_case(d.ROOT, d.UNIT, case_dir, qemu, watch_path)
+        case = observer.load_case(case_dir / "case.json")
+        control = json.loads((case_dir / "native-control.json").read_text())
+        d.require(control["cwd"] == str(case.cwd) and control["environment"] == case.env
+                  and control["compiler_command"] == case.command[1:]
+                  and control["assembler_command"] == case.assembler[1:],
+                  "cse_native_control_contract")
+        run_native_control("cse_native_cc1", control["compiler_command"], case, "cc1")
+        run_native_control("cse_native_assembler", control["assembler_command"], case, "as")
+        case.inventory()
+        native_object = case_dir / "candidate.o"
+        native_identity = target_identity(native_object)
+        d.require(native_identity == ordinary_identity, "cse_ordinary_native_codegen_changed")
+        native_archive = temp / "native-control"
+        native_archive.mkdir()
+        shutil.copy2(native_object, native_archive / "candidate.o")
+        shutil.copy2(assembly_path, native_archive / "candidate.s")
+        d.emit(dict(scope="camera_native_control_parity", target_bytes_equal=True,
+                    target_relocations_equal=True, target_bytes=len(native_identity[0]),
+                    relocations=len(native_identity[1]), exact_frozen_environment=True))
+
+        # This existing CLI also checks actual source argv against the watch,
+        # hashes every executed observer module, and rejects incomplete plans.
+        d.run("cse_observer_dry_run", [
+            sys.executable, "tools/ee_gcc_cse_role_tracer.py",
+            "--config", str(case_dir / "case.json"), "--watch", str(watch_path),
+            "--output", str(output), "--dry-run"])
+        watch = json.loads(watch_path.read_text())
+        case.verify()
+        d.STAGE = "cse_paired_observation"
+        original_tracer = observer.OperandTracer
+        observer.OperandTracer = partial(cse.CseRoleTracer, watch=watch)
+        try:
+            # In-process invocation keeps the existing runner's owned-QEMU
+            # cleanup active if tracing raises. No protocol/transport changes.
+            receipt = observer.run(case, output, "cse_roles")
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+            categories = (
+                ("live CSE UID does not match frozen input identity", "input_identity"),
+                ("watched UIDs were not visited", "watch_coverage"),
+                ("hook opcode mismatch", "hook_guard"),
+                ("unsupported RTX format field", "decoder_format"),
+                ("RTL decode bound exceeded", "decoder_bound"),
+                ("RTL vector bound exceeded", "decoder_bound"),
+                ("bounded trace event limit exceeded", "event_bound"),
+                ("Observed artifacts differ", "artifact_equality"),
+                ("Artifact inventories differ", "artifact_inventory"),
+                ("Input hash changed", "input_changed"),
+                ("Missing target", "target_gate"),
+            )
+            category = next((label for prefix, label in categories
+                             if str(error).startswith(prefix)), type(error).__name__)
+            d.emit(dict(scope="camera_live_observer_failure", category=category))
+            raise d.Failure("cse_paired_observation") from None
+        finally:
+            observer.OperandTracer = original_tracer
+        d.require(receipt.get("all_equal") is True, "cse_observer_not_equal")
+        d.STAGE = "cse_native_qemu_parity"
+        baseline_identity = target_identity(output / "baseline/candidate.o")
+        observed_identity = target_identity(output / "observed/candidate.o")
+        d.require(baseline_identity == native_identity == observed_identity,
+                  "cse_native_qemu_codegen_changed")
+        case.verify()
+        d.emit(dict(scope="camera_live_observer_parity", all_declared_artifacts_equal=True,
+                    declared_artifacts=len(receipt["artifacts_equal"]),
+                    native_qemu_baseline_target_equal=True, native_qemu_observed_target_equal=True,
+                    target_bytes=len(native_identity[0]), relocations=len(native_identity[1])))
+        d.STAGE = "cse_bounded_decisions"
+        summary = cse.summarize_decisions(output, limit_per_uid=12)
+        d.emit(dict(scope="camera_cse_decisions", **summary))
+        d.require(summary["coverage_complete"], "cse_summary_incomplete")
+    finally:
+        # Only these initially absent, task-owned scratch files are removed.
+        # Never remove a changed source which could belong to another writer.
+        if source_path.is_file() and d.digest(source_path) == expected_source_hash:
+            source_path.unlink()
+        if assembly_path.is_file():
+            assembly_path.unlink()
+
+
+def main(qemu=None):
     original = d.UNIT.read_bytes()
     try:
         d.run("configure", [sys.executable, "configure.py", "dds2"])
@@ -186,14 +299,19 @@ def main():
             d.require(bool(paths), "probe_dumps_missing")
             for path in paths:
                 d.emit(dict(scope="camera_pass_lineage", **summarize_dump(path)))
+            if qemu is not None:
+                live_cse_observation(temp, watch, (ordinary, ordinary_relocs), qemu)
     finally:
         d.UNIT.write_bytes(original)
     d.require(d.UNIT.read_bytes() == original, "restore_failed")
     d.emit(dict(source_restored=True, full_retail_build_verified=False))
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--qemu", type=Path, help="use an already prepared Unix-capable QEMU for paired live observation")
+    args = parser.parse_args()
     try:
-        main()
+        main(args.qemu)
     except d.Failure as exc:
         d.emit(dict(status="diagnostic_failed", stage=exc.stage, returncode=exc.returncode))
         raise SystemExit(2)

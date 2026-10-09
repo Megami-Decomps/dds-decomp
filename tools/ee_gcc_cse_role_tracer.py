@@ -384,6 +384,7 @@ def expression_summary(node):
     return {"class": expression_class(node), "root_opcode": node["code"],
             "root_mode": node.get("mode", "VOID"),
             "opcode_classes": sorted(set(data["codes"])),
+            "opcode_mode_classes": [list(pair) for pair in sorted(set(tuple(pair) for pair in data["expression_modes"]))],
             "mode_classes": sorted({mode for _, mode in data["expression_modes"]}),
             "register_occurrences": len(data["registers"]),
             "symbol_occurrences": len(data["symbols"])}
