@@ -44,6 +44,7 @@
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
+#include "sdf_primitive.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
@@ -8296,7 +8297,192 @@ void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
 void func_002F8640(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8648);
+typedef struct EffRadialCylinderConfig {
+    u8 pad00[8];
+    f32 scale[3];
+    u8 alpha;
+    u8 pad15[3];
+    f32 travelPerFrame;
+    u32 frameLimit;
+    u8 pad20[0x2C];
+} EffRadialCylinderConfig;
+
+typedef char EffRadialCylinderConfig_size[(sizeof(EffRadialCylinderConfig) == 0x4C) ? 1 : -1];
+
+extern u32 D_003E9FB0[];
+extern s32 D_00437EB4;
+extern SdfPoolNode D_0037FF48;
+extern u32 func_001003F8(void);
+extern void func_00108D80(void);
+extern void func_00108E20(void);
+extern void evtSetDrawSurfaceIndex(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
+                                         s32, s32, s32, s32);
+extern void *func_0033B050(SdfPrimitiveRequest *);
+
+void func_002F8648(EffActiveResource *work) {
+    EffDrawableAssetWork *state = (EffDrawableAssetWork *)work->resource;
+    EffRadialCylinderConfig *config = (EffRadialCylinderConfig *)work->payload;
+    SdfPrimitiveRequest request;
+    SdfPrimitiveRequest *description;
+    f32 scale[4] __attribute__((aligned(16)));
+    f32 circle[32][2];
+    f32 side[18][4] __attribute__((aligned(16)));
+    f32 cap[48][4] __attribute__((aligned(16)));
+    SdfPoolNode *drawNode;
+    SdfListHead *list;
+    EffGsPacket *gs;
+    u32 surface;
+    u32 vertexCount;
+    u32 i;
+    f32 angle;
+    f32 travel;
+
+    scale[0] = config->scale[0];
+    scale[1] = config->scale[1];
+    scale[2] = config->scale[2];
+    scale[3] = 0.0f;
+    surface = func_001003F8();
+    if ((s32)D_00437EB4 != (s32)surface) {
+        evtSetDrawSurfaceIndex(0x20);
+        func_00108D80();
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+        evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0,
+            0x80808080, 0x80808080,
+            0x80808080, 0x80808080);
+        func_00108E20();
+    }
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    gs = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+    gs->dmaTag = 2;
+    gs->vifTag = ((u64)0x50000002 << 16 | 0x1000) << 16;
+    gs->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+    gs->registerList = 0xE;
+    gs->registerValue = 0x72803;
+    gs->registerAddress = 0x47;
+    sdfAppendPacket(list, (u32)gs);
+
+    VU0_LOAD_VF(vf10, work->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf11, D_003E9140);
+    VU0_ROTATE_VEC(vf11, vf11);
+    travel = config->travelPerFrame * (f32)(s32)state->unk00;
+    VU0_SCALE_VF(vf11, travel);
+    VU0_LOAD_VF_MEMORY(vf10, scale);
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    if (config->frameLimit > state->unk00) {
+        state->unk00++;
+    }
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, (SdfAsset *)state->asset, 0);
+
+    description = &request;
+    memset(description, 0, sizeof(request));
+    request.color = 0x00808080 | ((u32)config->alpha << 24);
+    request.stripWordCount = 0x10;
+    request.vertexCount = 0x12;
+    request.strip = D_003E9FB0;
+    request.positions = side;
+    angle = 0.0f;
+    for (i = 0; i < 32; i++) {
+        circle[i][0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        circle[i][1] = sdfSinPoly(angle);
+        angle += 6.2831852f / 31.0f;
+    }
+    vertexCount = 0;
+    i = 0;
+    do {
+        side[vertexCount][0] = circle[i][0];
+        side[vertexCount][1] = 0.0f;
+        side[vertexCount][2] = circle[i][1];
+        side[vertexCount + 1][0] = circle[i][0];
+        side[vertexCount + 1][1] = -1.0f;
+        side[vertexCount + 1][2] = circle[i][1];
+        vertexCount += 2;
+        if (vertexCount >= 0x12) {
+            sdfAppendPacket(list, (u32)func_0033B050(description));
+            vertexCount = 0;
+        } else {
+            i++;
+        }
+    } while (i < 32);
+    if (vertexCount >= 4) {
+        request.stripWordCount = (s16)(vertexCount - 2);
+        request.vertexCount = (s16)vertexCount;
+        sdfAppendPacket(list, (u32)func_0033B050(description));
+    }
+
+    request.stripWordCount = 0x10;
+    request.vertexCount = 0x30;
+    request.strip = NULL;
+    request.positions = cap;
+    vertexCount = 0;
+    for (i = 0; i < 31; i++) {
+        cap[vertexCount][0] = 0.0f;
+        cap[vertexCount][1] = 0.0f;
+        cap[vertexCount][2] = 0.0f;
+        cap[vertexCount + 2][0] = circle[i][0];
+        cap[vertexCount + 2][1] = 0.0f;
+        cap[vertexCount + 2][2] = circle[i][1];
+        cap[vertexCount + 1][0] = circle[i + 1][0];
+        cap[vertexCount + 1][1] = 0.0f;
+        cap[vertexCount + 1][2] = circle[i + 1][1];
+        vertexCount += 3;
+        if (vertexCount >= 48) {
+            sdfAppendPacket(list, (u32)func_0033B050(description));
+            vertexCount = 0;
+        }
+    }
+    for (i = 0; i < 31; i++) {
+        cap[vertexCount][0] = 0.0f;
+        cap[vertexCount][1] = -1.0f;
+        cap[vertexCount][2] = 0.0f;
+        cap[vertexCount + 1][0] = circle[i][0];
+        cap[vertexCount + 1][1] = -1.0f;
+        cap[vertexCount + 1][2] = circle[i][1];
+        cap[vertexCount + 2][0] = circle[i + 1][0];
+        cap[vertexCount + 2][1] = -1.0f;
+        cap[vertexCount + 2][2] = circle[i + 1][1];
+        vertexCount += 3;
+        if (vertexCount >= 48) {
+            sdfAppendPacket(list, (u32)func_0033B050(description));
+            vertexCount = 0;
+        }
+    }
+    if (vertexCount >= 3) {
+        request.stripWordCount = (s16)(vertexCount / 3);
+        request.vertexCount = (s16)vertexCount;
+        sdfAppendPacket(list, (u32)func_0033B050(description));
+    }
+
+    drawNode = &D_0037FF48;
+    drawNode->append(drawNode, list);
+    gs = (EffGsPacket *)sdfAllocPacketAligned(0x30);
+    gs->dmaTag = 2;
+    gs->vifTag = ((u64)0x50000002 << 16 | 0x1000) << 16;
+    gs->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+    gs->registerList = 0xE;
+    gs->registerValue = 0x717FB;
+    gs->registerAddress = 0x47;
+    sdfAppendPacket(list, (u32)gs);
+    drawNode->append(drawNode, list);
+
+    if ((s32)D_00437EB4 != (s32)surface) {
+        evtSetDrawSurfaceIndex(0x2C);
+        evtSubmitPrimaryGsTest(1, 1, 0x80, 1, 1, 0, 1, 1);
+        evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0x100,
+            0, 0, 0, 0);
+        evtSubmitPrimaryGsTest(1, 5, 0x7F, 1, 0, 0, 1, 3);
+    }
+    D_00437EB4 = (s32)surface;
+}
 
 void effSyncFadeColorToTargets(void) {
     s32 owner = btlGetRuntime();

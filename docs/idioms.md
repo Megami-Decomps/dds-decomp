@@ -1733,6 +1733,32 @@ constants, as in its DDS2 counterpart. Compare the actual `savings`, movement
 and `not worth while` records in `09.loop`. Do not pad the loop with unused
 work to cross a threshold, or infer a per-file option from one missed hoist.
 
+### Geometry vertex counts define the reduced pointer loops
+
+DDS2 `func_002F8648` builds a cylinder from 32 XZ samples and 31 intervals.
+Its real scratch buffers hold 18 wall vertices and 48 cap vertices, each a
+16-byte row whose XYZ components are serialized. Index the wall rows by
+`vertexCount` and `vertexCount + 1`, then advance once by two. Index each fan
+triangle by that count and its next two rows, then advance once by three.
+The wall's full-buffer path keeps the sample index unchanged to repeat a
+seam; the top fan's remaining 45 vertices carry into the bottom fan.
+
+These count transactions determine the address induction variables in
+`09.loop`. Indexed cap construction recovers the independent top-cap origin
+and the native `0x5D0` frame. In the measured pointer-wall control, the circle
+origin has five references over 202 instructions, giving allocator priority
+495; the top-cap origin has three over 62, giving 483. Indexed wall generation
+extends the circle lifetime to 208, reducing its priority to 480 and restoring
+the native top-cap/circle register ordering. Trace the actual index units and
+reduced addresses before proposing another owner or lifetime.
+
+The angular step is also a real `.lit4` literal. The same-unit radial
+constructor supplies the full-turn expression: `6.2831852f / 31.0f` emits
+`0x3E4F8C3B` under EE GCC 2.96. Use it directly in the loop update. Loop
+invariant extraction places its load as retail does; pre-caching the constant
+leaves two setup instructions swapped. Check the target compiler's pool bits
+and earliest changed pass when applying this lesson to another function.
+
 ### Tail call kept as `jal` + epilogue: loop notes
 
 Any loop construct around the last call leaves NOTE_INSN_LOOP notes and the call
