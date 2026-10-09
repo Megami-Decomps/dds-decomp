@@ -31,6 +31,8 @@ typedef struct FileSlotTable {
 
 FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *configuration);
 void fileReleaseGridRecordHandle(FileSlotTable *record);
+void fileClearRecordReferences(FileSlotTable *record);
+void fileAcquireRecord(FileSlotTable *record);
 
 /* The track's +0x0C word is a real emitter random multiplier; the ordinary
  * curve sampler treats it as reserved. Both are members of the serialized

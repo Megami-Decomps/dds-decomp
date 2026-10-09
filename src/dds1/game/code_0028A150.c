@@ -358,7 +358,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 
-extern void fileClearRecordReferences(FileSlotTable *record);
 
 extern void mnuRecordSetVector(void *record, const u128 *vector);
 
