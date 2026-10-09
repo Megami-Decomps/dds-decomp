@@ -932,7 +932,37 @@ void frFontSetContextCursorSpacing(u32 spacing) {
     frFontContextCursorSpacing = spacing;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00195E60);
+/* Count the y-band rows of the glyph chain. DDS1 scans the band but advances
+ * only one next node, as func_00195FA8 does. */
+s32 func_00195E60(FrFontGlyph *glyph) {
+    s32 count = 0;
+    FrFontGlyph *currentNode;
+    FrFontGlyph *scanNode;
+    s32 bandLimit;
+    s32 currentY;
+
+    if (glyph == NULL) {
+        return 0;
+    }
+    currentNode = glyph->chainHead;
+    if (currentNode != NULL) {
+        do {
+            scanNode = currentNode;
+            currentY = currentNode->y;
+            if (currentNode != NULL) {
+                bandLimit = currentY + FR_FONT_POSITION_BAND_HEIGHT;
+                if (currentY < bandLimit) {
+                    do {
+                        scanNode = scanNode->next;
+                    } while (scanNode != NULL && scanNode->y < bandLimit);
+                }
+            }
+            currentNode = currentNode->next;
+            count++;
+        } while (currentNode != NULL);
+    }
+    return count;
+}
 
 s32 func_00195ED8(s32 requestedLine, FrFontGlyph *glyph) {
     FrFontGlyph *node;

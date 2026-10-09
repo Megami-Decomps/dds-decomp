@@ -12,6 +12,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_flash.h"
+#include "eff_pcp_thunder_group.h"
 #include "pcp_vu0.h"
 
 /* Packed effect parameter-set accessor shared with the effect constructors. */
@@ -2213,52 +2214,6 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     }
 }
 
-/* Point history and its resource/allocation ownership share one header. */
-typedef struct EffFragmentResources {
-    u32 color;
-    s32 surfaceIndex;
-    s32 count;
-    s32 activePointCount;
-    s32 position;
-    s32 subdivisionCount; /* 0x14: retained subdivision factor */
-    u128 *points;
-    u32 *colors;
-    SdfAsset *resourceHandle;
-    SdfMemBlock *allocation;
-    u128 *endPoints;
-    u32 *endColors;
-} EffFragmentResources;
-
-/* Two joined cubic segments followed by their stepping state. */
-typedef struct EffGroupSlot {
-    f32 position[4];
-    s32 age;
-    f32 scale;
-    EffFragmentResources *resources;
-    EffSegmentedBezierSlot curve;
-    void *node;
-} EffGroupSlot;
-
-typedef struct EffGroupParams {
-    f32 origin[4];
-    u32 mode;
-    f32 spreadX, spreadZ, height;
-    u32 count;
-    s32 curveFrames;
-    s32 unk28;
-    u32 unk2C;
-    s32 fadeFrames;
-    f32 width;
-    s32 unk38;
-    s32 unk3C;
-    u32 palette[4];
-} EffGroupParams;
-
-/* Kind-two placement is 0x30 bytes; its four palette colors are separate. */
-typedef char EffBezierSlotSizeCheck[sizeof(EffSegmentedBezierSlot) == 0x60 ? 1 : -1];
-typedef char EffGroupSlotSizeCheck[sizeof(EffGroupSlot) == 0x80 ? 1 : -1];
-typedef char EffGroupParamsSizeCheck[sizeof(EffGroupParams) == 0x50 ? 1 : -1];
-
 typedef struct EffPCPEventPlace {
     f32 unk00[7];
     f32 unk1C;
@@ -2268,51 +2223,38 @@ typedef struct EffPCPEventPlace {
     u32 color;
 } EffPCPEventPlace;
 
+extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
+extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
 
-typedef struct EffGroup {
-    EffGroupParams params;
-    EffGroupSlot *slots;
-    u32 color;
-    SoundMixer *owner;
-    u8 hasHandle58;
-    u8 pad5D[3];
-    SdfMemBlock *allocation;
-} EffGroup;
-
-extern EffFragmentResources *effCreateFragmentResources(s32, s32);
-extern void effInitializeFragmentHistoryColors(EffFragmentResources *, u32 *);
-
-EffGroup *func_0016F850(src, eventParams)
-EffGroup *src;
-void *eventParams;
+EffPcpThunderGroup *func_0016F850(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
 {
-    u32 count = src->params.count;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
-    EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
-    EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
+    u32 count = src->groupCount;
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
+    EffPcpThunderGroup *work = (EffPcpThunderGroup *)sdfResourceRetainAddress(allocation);
+    EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
     s32 a, b;
     u32 i;
 
-    work->params = src->params;
+    work->params = *src;
     work->allocation = allocation;
-    work->hasHandle58 = 1;
+    work->ownsMixerVoices = 1;
     work->slots = slot;
-    work->color = 0x80808080;
-    work->owner = effEventCloneSoundMixer(eventParams);
-    a = work->params.unk38;
+    work->tintColor = 0x80808080;
+    work->soundMixer = effEventCloneSoundMixer(eventParams);
+    a = work->params.historyLength;
     if (a == 0) {
-        work->params.unk38 = 1;
+        work->params.historyLength = 1;
         a = 1;
     }
-    b = work->params.unk3C;
+    b = work->params.subdivisions;
     if (b <= 0) {
-        work->params.unk3C = 1;
+        work->params.subdivisions = 1;
         b = 1;
     }
-    if (work->params.unk28 <= 0) {
-        work->params.unk28 = 1;
+    if (work->params.startDelayRange <= 0) {
+        work->params.startDelayRange = 1;
     }
     palette[0] = work->params.palette[0];
     palette[1] = work->params.palette[1];
@@ -2331,14 +2273,14 @@ void *eventParams;
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = effCreateFragmentResources(a, b);
-        effInitializeFragmentHistoryColors(slot->resources, palette);
+        slot->fragment = effCreateFragmentResources(a, b);
+        effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
-        slot->scale = 1.0f;
+        slot->fadeScale = 1.0f;
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->node = effEventCreate(work->owner, 2, &place);
+        slot->eventNode = effEventCreate(work->soundMixer, 2, &place);
     }
     return work;
 }
@@ -2353,34 +2295,34 @@ void effApplyParamBlockPair(void *table) {
     func_0016F850(firstBlock, secondBlock);
 }
 
-EffGroup *func_0016FB18(EffGroup *src) {
-    u32 count = src->params.count;
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffGroupSlot) + sizeof(EffGroup));
-    EffGroup *work = (EffGroup *)sdfResourceRetainAddress(allocation);
-    EffGroupSlot *slot = (EffGroupSlot *)(work + 1);
+EffPcpThunderGroup *func_0016FB18(EffPcpThunderGroup *src) {
+    u32 count = src->params.groupCount;
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
+    EffPcpThunderGroup *work = (EffPcpThunderGroup *)sdfResourceRetainAddress(allocation);
+    EffPcpThunderGroupSlot *slot = (EffPcpThunderGroupSlot *)(work + 1);
     EffPCPEventPlace place;
     u32 palette[4];
     s32 a, b;
     u32 i;
 
     work->params = src->params;
-    work->hasHandle58 = 0;
+    work->ownsMixerVoices = 0;
     work->allocation = allocation;
-    work->owner = src->owner;
+    work->soundMixer = src->soundMixer;
     work->slots = slot;
-    work->color = 0x80808080;
-    a = work->params.unk38;
+    work->tintColor = 0x80808080;
+    a = work->params.historyLength;
     if (a == 0) {
-        work->params.unk38 = 1;
+        work->params.historyLength = 1;
         a = 1;
     }
-    b = work->params.unk3C;
+    b = work->params.subdivisions;
     if (b <= 0) {
-        work->params.unk3C = 1;
+        work->params.subdivisions = 1;
         b = 1;
     }
-    if (work->params.unk28 <= 0) {
-        work->params.unk28 = 1;
+    if (work->params.startDelayRange <= 0) {
+        work->params.startDelayRange = 1;
     }
     palette[0] = work->params.palette[0];
     palette[1] = work->params.palette[1];
@@ -2399,37 +2341,37 @@ EffGroup *func_0016FB18(EffGroup *src) {
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = effCreateFragmentResources(a, b);
-        effInitializeFragmentHistoryColors(slot->resources, palette);
+        slot->fragment = effCreateFragmentResources(a, b);
+        effInitializeFragmentHistoryColors(slot->fragment, palette);
         slot->age = 0;
-        slot->scale = 1.0f;
+        slot->fadeScale = 1.0f;
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->node = effEventCreate(work->owner, 2, &place);
+        slot->eventNode = effEventCreate(work->soundMixer, 2, &place);
     }
     return work;
 }
 
 
-extern void effReleaseEffectResources(EffFragmentResources *work);
+extern void effReleaseEffectResources(EffPcpThunderFragmentResources *work);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
-void effReleaseGroupSlotsAndResources(EffGroup *group) {
+void effReleaseGroupSlotsAndResources(EffPcpThunderGroup *group) {
     u32 i = 0;
-    u32 count = group->params.count;
-    EffGroupSlot *slot = group->slots;
+    u32 count = group->params.groupCount;
+    EffPcpThunderGroupSlot *slot = group->slots;
 
     if (count != 0) {
         do {
             i++;
-            effReleaseEffectResources(slot->resources);
-            effEventReleaseNode(slot->node);
+            effReleaseEffectResources(slot->fragment);
+            effEventReleaseNode(slot->eventNode);
             slot++;
         } while (i < count);
     }
-    if (group->hasHandle58 != 0) {
-        effEventReleaseSoundMixerVoices(group->owner);
+    if (group->ownsMixerVoices != 0) {
+        effEventReleaseSoundMixerVoices(group->soundMixer);
     }
     sdfReleaseResourceAllocation(group->allocation);
 }
@@ -2449,11 +2391,11 @@ extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void effInitializeColorState(struct EffectColorState *);
-extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
+extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
-void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
+void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
  * VU helpers use the SDF vf10/vf11/vf12 register convention; callees returning
@@ -2462,7 +2404,7 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
  */
 typedef f32 EffThunderVector[4] __attribute__((aligned(16)));
 
-void func_0016FE18(EffGroup *group) {
+void func_0016FE18(EffPcpThunderGroup *group) {
     EffPCPEventPlace place __attribute__((aligned(16)));
     EffThunderVector start;
     EffThunderVector direction;
@@ -2490,16 +2432,16 @@ void func_0016FE18(EffGroup *group) {
     f32 fadeStep;
     u32 mode;
     u32 color;
-    EffGroupSlot *slot;
+    EffPcpThunderGroupSlot *slot;
     f32 (*cap)[4];
 
-    count = group->params.count;
+    count = group->params.groupCount;
     curveFrames = group->params.curveFrames;
-    subdivisions = group->params.unk3C - 1;
+    subdivisions = group->params.subdivisions - 1;
     fadeStep = 1.0f / group->params.fadeFrames;
-    delayRange = group->params.unk28;
+    delayRange = group->params.startDelayRange;
     mode = group->params.mode;
-    color = group->color;
+    color = group->tintColor;
     slot = group->slots;
     PCP_COPY_VECTOR(origin, group->params.origin);
     place.unk00[4] = 0.0f;
@@ -2757,15 +2699,15 @@ void func_0016FE18(EffGroup *group) {
             slot->position[1] = point[1];
             slot->position[2] = point[2];
             slot->age = -(effMiscRand(effDefaultRandomState) % delayRange);
-            effInitializeColorState((struct EffectColorState *)slot->resources);
+            effInitializeColorState((struct EffectColorState *)slot->fragment);
         } else if (slot->age++ >= 0) {
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
-                if (slot->scale > fadeStep) {
-                    slot->scale -= fadeStep;
-                    slot->resources->color = ((u32)(slot->scale * 128.0f) << 24) | 0x808080;
-                    slot->resources->color = effMultiplyPackedColors(color, slot->resources->color);
+                if (slot->fadeScale > fadeStep) {
+                    slot->fadeScale -= fadeStep;
+                    slot->fragment->color = ((u32)(slot->fadeScale * 128.0f) << 24) | 0x808080;
+                    slot->fragment->color = effMultiplyPackedColors(color, slot->fragment->color);
                 } else {
-                    effInitializeColorState((struct EffectColorState *)slot->resources);
+                    effInitializeColorState((struct EffectColorState *)slot->fragment);
                 }
             } else {
                 previous[0] = slot->position[0];
@@ -2793,7 +2735,7 @@ void func_0016FE18(EffGroup *group) {
                     VU0_SUB_EXTENDED(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
                     PCP_COPY_VECTOR(previous, point);
-                    effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
+                    effAppendFragmentHistoryPoints(slot->fragment, (u128 *)ribbon);
                 }
                 effStepBezierSlotSegment(&slot->curve, point);
                 VU0_LOAD_VF(vf10, point);
@@ -2818,8 +2760,8 @@ void func_0016FE18(EffGroup *group) {
                 VU0_MOVE_VF_EXTENDED(vf10, vf12);
                 VU0_SUB_EXTENDED(vf11, vf11, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
-                effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
-                cap = (f32 (*)[4])slot->resources->endPoints;
+                effAppendFragmentHistoryPoints(slot->fragment, (u128 *)ribbon);
+                cap = (f32 (*)[4])slot->fragment->endPoints;
                 slot->position[0] = point[0];
                 slot->position[1] = point[1];
                 slot->position[2] = point[2];
@@ -2878,10 +2820,10 @@ void func_0016FE18(EffGroup *group) {
                 delta[2] = start[2] - place.unk00[2];
                 sdfConvertEulerAnglesToQuaternionVU(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
-                effEventCopyFileRecordHeader((FileRecordHeader *)slot->node, (const FileRecordHeader *)&place);
-                effEventUpdateEffectParameters(slot->node);
+                effEventCopyFileRecordHeader((FileRecordHeader *)slot->eventNode, (const FileRecordHeader *)&place);
+                effEventUpdateEffectParameters(slot->eventNode);
             }
-            effThunderDrawHistoryAndEndCap(slot->resources);
+            effThunderDrawHistoryAndEndCap(slot->fragment);
         }
     }
 }
@@ -2920,13 +2862,13 @@ extern void *memcpy(void *, const void *, u32);
 /* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
  * The two global draw descriptors are reset through their native 0x2C prefix.
  */
-EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions) {
+EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions) {
     s32 count = historyLength * subdivisions * 3 + 6;
     u32 colorBytes = count * sizeof(u32);
     u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));
-    SdfMemBlock *allocation = sdfAllocGeneralBlock(bufferBytes + sizeof(EffFragmentResources));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(bufferBytes + sizeof(EffPcpThunderFragmentResources));
     u8 *storage = (u8 *)sdfResourceRetainAddress(allocation);
-    EffFragmentResources *history = (EffFragmentResources *)(storage + bufferBytes);
+    EffPcpThunderFragmentResources *history = (EffPcpThunderFragmentResources *)(storage + bufferBytes);
     SdfAsset *asset;
 
     history->points = (u128 *)storage;
@@ -2939,7 +2881,7 @@ EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivis
     history->surfaceIndex = 2;
     history->count = count;
     history->position = 3;
-    history->subdivisionCount = subdivisions;
+    history->subdivisions = subdivisions;
     history->color = 0x80808080;
     history->allocation = allocation;
     history->activePointCount = 0;
@@ -2958,7 +2900,7 @@ EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivis
     return history;
 }
 
-void effReleaseEffectResources(EffFragmentResources *work) {
+void effReleaseEffectResources(EffPcpThunderFragmentResources *work) {
     sdfQueueAssetRelease(work->resourceHandle);
     sdfReleaseResourceAllocation(work->allocation);
 }
@@ -2973,7 +2915,7 @@ void effInitializeColorState(EffectColorState *state) {
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-void effInitializeFragmentHistoryColors(EffFragmentResources *history, u32 *gradientColors) {
+void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = history->count / 3;
     u32 alphaCount = count >> 1;
@@ -3004,7 +2946,7 @@ void effInitializeFragmentHistoryColors(EffFragmentResources *history, u32 *grad
     }
 }
 
-void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source) {
+void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u128 *source) {
     s32 position = history->position;
     u128 *points = history->points;
     s32 count;
@@ -3033,7 +2975,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern s32 func_00167A10(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
-void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
+void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
     s32 start[4];
     s32 length[4];
     SdfListHead *list;

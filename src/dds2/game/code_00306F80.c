@@ -121,10 +121,10 @@ void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x,
     EffectSlotDescription *entry = &object->descriptions[index];
     void *record = effGetSlotWorkOrOverride(object, index);
 
-    entry->xOffset = x >> 4;
-    entry->yOffset = y >> 3;
-    entry->width = width >> 4;
-    entry->height = height >> 3;
+    entry->bounds[0] = x >> 4;
+    entry->bounds[1] = y >> 3;
+    entry->bounds[2] = width >> 4;
+    entry->bounds[3] = height >> 3;
     effInitializeSlotWorkFromDescription(object, index, record);
 }
 
@@ -135,11 +135,11 @@ void itfGridSetQuantizedBounds(EffectSlotSet *object, s32 index, s32 x, s32 y,
     u32 *destination = (u32 *)object->workEntries[index].bounds.grid.quantizedBounds;
     u32 *source;
     s32 remaining = 3;
-    entry->xOffset = x >> 4;
-    entry->yOffset = y >> 3;
-    entry->width = width >> 4;
-    entry->height = height >> 3;
-    source = (u32 *)&entry->xOffset;
+    entry->bounds[0] = x >> 4;
+    entry->bounds[1] = y >> 3;
+    entry->bounds[2] = width >> 4;
+    entry->bounds[3] = height >> 3;
+    source = (u32 *)entry->bounds;
     do {
         *destination++ = *source++;
     } while (--remaining >= 0);

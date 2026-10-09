@@ -1613,7 +1613,23 @@ void func_0011D0D8(void) {
 
 /* Save occupied active entries to stock; clear the absent special-character slots. */
 extern void func_0011D130(void);
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011D130);
+void func_0011D130(void) {
+    s32 slotIndex;
+
+    for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
+        DatPartyRecord *entry = &datGameState->party[slotIndex];
+
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
+            memcpy(&datGameState->templates[entry->unitId], entry, sizeof(*entry));
+        }
+    }
+    if (dds3FindEntryIndex(3) < 0) {
+        memset(&datGameState->templates[3], 0, sizeof(DatPartyRecord));
+    }
+    if (dds3FindEntryIndex(7) < 0) {
+        memset(&datGameState->templates[7], 0, sizeof(DatPartyRecord));
+    }
+}
 
 
 void evtRandomizeEntryValue(DatPartyRecord *unit) {
@@ -2200,7 +2216,22 @@ s32 evtSelectFineStatGrade(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011E3A0);
+s32 func_0011E3A0(void) {
+    DatPartyRecord *unit = (DatPartyRecord *)D_0043E5C0.first;
+    u16 level = unit->level;
+    s32 grade = datGetStatWithStatusOverride(unit, 4);
+
+    grade -= (s32)datBattleParameters->levelValuesC[level - 1];
+    grade /= 2;
+
+    if (grade < -5) {
+        grade = -5;
+    } else if (grade >= 6) {
+        grade = 5;
+    }
+    scrSetFloatReturnValue(datBattleParameters->gradeScale[grade + 5]);
+    return 1;
+}
 
 s32 evtPushRosterOrGlobalCounterValue(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;

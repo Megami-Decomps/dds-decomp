@@ -13,6 +13,7 @@ typedef struct MdlCtx MdlCtx;
 
 struct MdlPartEntry;
 struct MdlObj;
+struct SdfMapPositionRecord;
 struct SdfTex;
 struct EffTrackPolyWork;
 
@@ -46,8 +47,8 @@ typedef struct MdlResourceItem {
                 struct EffTrackPolyWork *track;
             };
             struct MdlPartEntry *slot;
-            void *record;
-            f32 value;
+            struct SdfMapPositionRecord *mapPositionRecord;
+            f32 anchorScale;
             u8 pad18[8];
         } part;
         MdlObjectAttachment object;

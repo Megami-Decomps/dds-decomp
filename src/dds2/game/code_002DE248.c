@@ -8942,7 +8942,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     for (; i < 0xFF; i++, amount++) {
         record = sdfChunkFindRecordById(work->resource->model->inner, i);
         for (item = work->resource->model->resourceItems; item != NULL; item = item->next) {
-            if (item->payload.part.record == record) {
+            if (item->payload.part.mapPositionRecord == record) {
                 mdlSetResourceAmount(work->resource->model, item, *amount * scale);
                 break;
             }
@@ -11775,7 +11775,53 @@ void effInitializeSlotPhase(EffTimedState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", effInitializeSlotWorkFromDescription);
+extern s8 D_004002F0[];
+
+/* Rebuild a slot's live work from its source description, then prime the timed states. */
+void effInitializeSlotWorkFromDescription(EffectSlotSet *owner, s32 slotIndex, void *payload) {
+    BdWork *entry = (BdWork *)payload;
+    EffectSlotDescription *description = &owner->descriptions[slotIndex];
+    BdWork *work = &owner->workEntries[slotIndex];
+    EffectSlotGeometry *geometry = &entry->geometry;
+    s32 i;
+
+    entry->geometry.bounds[1] = 0;
+    geometry->bounds[0] = 0;
+    for (i = 0; i < 4; i++) {
+        work->bounds.grid.quantizedBounds[i] = description->bounds[i];
+    }
+    for (i = 0; i < 4; i++) {
+        s32 color = description->cornerColors[D_004002F0[i]];
+        geometry->cornerColors[i] = color;
+        work->savedColors[i] = color;
+    }
+    for (i = 0; i < 4; i++) {
+        entry->bounds.grid.pad68[i] = 0x80;
+    }
+    if (description->widthOverride != 0) {
+        work->sourceWidth = description->widthOverride;
+    } else {
+        work->sourceWidth = description->colors[2] - description->colors[0];
+    }
+    if (description->heightOverride != 0) {
+        work->sourceHeight = description->heightOverride;
+    } else {
+        work->sourceHeight = description->colors[3] - description->colors[1];
+    }
+    entry->geometry.angleDegrees = 0;
+    entry->geometry.bounds[2] = work->sourceWidth << 4;
+    entry->geometry.bounds[3] = work->sourceHeight << 3;
+    work->remainingDescriptionUpdates = description->descriptionUpdateDelay;
+    work->slotOffset = 0;
+    for (i = 0; i < sizeof(entry->states) / sizeof(entry->states[0]); i++) {
+        EffTimedState *state = &entry->states[i];
+
+        state->delay = description->initialDelay;
+        effInitializeSlotPhase(state);
+        state->delay += 1;
+    }
+    effUpdateTimedStates(owner, slotIndex, payload);
+}
 
 /* Initialize the normal slot entry at the unchanged 0xA0-byte stride. */
 void effInitializeSlotWork(EffectSlotSet *owner, s32 slotIndex) {

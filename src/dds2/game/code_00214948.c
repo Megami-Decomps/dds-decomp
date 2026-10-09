@@ -3591,7 +3591,37 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021CF18);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021E778);
+s32 func_0021E778(BtlLinkedCommand *command) {
+    u32 flags = datActionAnimationRecords[command->actionCode].flags;
+
+    if (flags & 0x1000) {
+        btlFlagAllUnitDefeatCandidatesTask();
+        /* Both arms are identical in retail; kept as written. */
+        if ((flags & BTL_ANIMATION_FIXED_DEFEAT_CAMERA) == 0) {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        } else {
+            btlPrepareDefeatEffectCamera((u8 *)command);
+        }
+        return 1;
+    }
+    if (flags & 0x2000) {
+        if (btlGetIndexListCount(command->link->indexWork.indices) == 1) {
+            btlFlagAllUnitDefeatCandidatesTask();
+            func_00217650(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+            command->frontCamera.distance += 150.0f;
+            command->backCamera.distance += 300.0f;
+            command->motionParameter = 30.0f;
+            command->flags |= 0x41;
+            btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+            btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            return 1;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlPrepareDefeatEffectCamera((u8 *)command);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021E8C0);
 
