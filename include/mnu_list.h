@@ -112,6 +112,14 @@ struct MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(struct MenuWindowCo
                                                              const void *value, s32 mode,
                                                              u32 options);
 
+/* Walk the indexed entry and return its node, or NULL when it is absent. */
+#ifdef VERSION_DDS1
+/* DDS1 callers use a separate progress-owner view whose first node is at +0x10. */
+struct MenuListNode *mnuWalkNodeList(s32 targetIndex, void *listOwner);
+#else
+struct MenuListNode *mnuWalkNodeList(s32 index, struct MenuList *list);
+#endif
+
 struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);
 struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
 #ifdef VERSION_DDS2
