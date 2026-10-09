@@ -1280,7 +1280,7 @@ u32 evtOpSetUnitGradientColors(void) {
 
 const char D_00421A30[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
-u32 func_0023FF90(void) {
+u32 evtOpSetModelLightDirection(void) {
     f32 direction[4];
     EvtUnit *unit;
 

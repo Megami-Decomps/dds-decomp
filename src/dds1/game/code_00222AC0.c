@@ -1236,7 +1236,7 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC480);
 
 const char D_003AC4C0[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
-u32 func_00225330(void) {
+u32 evtOpSetModelLightDirection(void) {
     f32 direction[4];
     EvtUnit *unit;
 
