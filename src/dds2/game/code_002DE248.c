@@ -2332,7 +2332,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
 void billResetQuadIndices(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     EffTrackSet *descriptor = ((EffBillFrameState *)source)->asset;
-    u8 *entry = ((EffBillFrameState *)source)->entries;
+    EffBillQuadEntry *entry = (EffBillQuadEntry *)((EffBillFrameState *)source)->entries;
     s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(descriptor->buffer, 0, descriptor->rows * 0x10);
@@ -2340,15 +2340,15 @@ void billResetQuadIndices(u8 *owner) {
         s32 remaining = count;
         do {
             --remaining;
-            *(s32 *)entry = -1;
-            entry += 0x20;
+            entry->timer = -1;
+            entry++;
         } while (remaining);
     }
 }
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
