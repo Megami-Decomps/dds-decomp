@@ -148,7 +148,7 @@ typedef struct BrsSkillIconRow {
 
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     u32 overlayFlags;
     BrsResultTransition transition;
     s32 fadeTarget;
