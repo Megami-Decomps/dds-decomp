@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_node.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
 #include "evt_world.h"
@@ -82,7 +83,6 @@ typedef struct EvtNodeOwner {
     EvtNodeInner *inner; /* 0x18 */
 } EvtNodeOwner;
 
-extern void effDispatchOptionalNodeFlag();
 
 void evtDispatchSupportedNodeOnClear(EvtNodeOwner *owner, s32 flag) {
     EvtNodeInner *inner = owner->inner;

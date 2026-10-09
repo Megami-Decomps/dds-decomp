@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_resource.h"
 
 #include "sdf_texture_file.h"
 #include "sdf.h"
@@ -14,12 +15,10 @@ extern SdfTex *sdfResourceListHead;
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 
-void sdfFreeMemoryFromEitherHeap(void *arg0);
 
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 
 
-void *sdfAllocateBlockBySizeThreshold(s32 size);
 
 u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 

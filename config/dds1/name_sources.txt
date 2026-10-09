@@ -3325,13 +3325,22 @@
 0x001FB320	btlReadBattleResourceDirectoryEntry	inferred	reads pfs0 directory or built-in resource-name list into reader [names_R_FuncNames8.tsv]
 0x001FB870	btlDestroyEntryList	inferred	Walks and frees every BtlEntry in the list, frees the list's owned extra allocation, and frees the list itself.
 0x001FB8C8	btlAppendEntry	inferred	allocs 0x44-byte entry, copies name, appends to doubly linked list
+0x001FBA38	btlUpdateAndDrawResourceBrowser	inferred	Handles browser navigation, updates the selected entry preview and submits the visible browser rows; returns the selection status.
 0x001FBEE8	btlDestroyResourceDescriptor	inferred	Releases the owned resource handle when enabled and then frees the descriptor.
 0x001FBF50	btlFormatSelectedResourceName	inferred	Formats the path name with optional selector index and returns the path's resource ID.
 0x001FBFC8	btlTrimResourceName	inferred	copies name then cuts at the first dot
 0x001FC078	btlGetResourcePathVariant	inferred	Returns the second word of the descriptor's path record, the path variant at +0x04.
 0x001FC088	btlLoadAndReplaceResourceHandle	inferred	Loads a named temporary resource, replaces the descriptor's handle, then releases the temporary file buffer.
 0x001FC100	btlReplaceResourceHandle	inferred	Conditionally releases the old owned handle and replaces it with the handle loaded from the supplied resource name.
+0x001FC160	btlDrawResourcePreview	inferred	Paired native function builds and submits the resource preview panel from the descriptor texture.
+0x001FC300	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
+0x001FC720	btlSetResourceNamePosition	inferred	Sets the name-editor and overwrite-prompt origin at record offsets zero and four.
+0x001FC730	btlGetResourceNameSelectionStatus	inferred	Returns the current name-entry selection result without modifying the record.
 0x001FC738	btlResourceRecordSetName	inferred	Copies name into resource record and stores strlen as nameLength. [names_R_FuncNames3.tsv]
+0x001FC778	btlFormatResourceNameWithExtension	inferred	Formats resource name followed by its extension using the record's two name fields.
+0x001FC7A8	btlFormatResourceNameWithoutExtension	inferred	Formats the resource name without its extension.
+0x001FC7D0	btlSetResourceNameLengthLimit	inferred	Sets the maximum name length tested by the native character editor before appending.
+0x001FC7D8	btlPollResourceNameOverwrite	inferred	Formats the target path from directory, editable name and extension; returns permission after a file-existence check and optional overwrite prompt.
 0x001FD3C0	btlGetCommandEffectId	inferred	U0
 0x001FD5B0	effOffsetIfOwnerFlagClear	inferred	Adds one to the requested offset if bit nine of the owner's status word is clear.
 0x001FD990	effDecrementFirstCountdown	inferred	Decrements the first nonzero effect-child countdown at offset 0x318.
@@ -7308,4 +7317,3 @@
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
 0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
-0x001FC7D8	btlPollResourceNameOverwrite	inferred	Formats the target path from directory, editable name and extension; returns permission after a file-existence check and optional overwrite prompt.

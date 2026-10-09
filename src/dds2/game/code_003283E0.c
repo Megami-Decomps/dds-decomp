@@ -3,8 +3,6 @@
 #include "sdf_chip.h"
 
 
-extern void *sdfAllocateBlockBySizeThreshold(s32);
-
 typedef struct SdfHandlerNode {
     struct SdfHandlerNode *next;
     s32 kind;

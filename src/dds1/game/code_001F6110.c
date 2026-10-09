@@ -2490,7 +2490,7 @@ INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5750);
 
 INCLUDE_RODATA(const s32, "game/code_001F6110", D_003A5760);
 
-s32 btlOpenPfsDebugDirectory(s32 directoryName) {
+s32 btlOpenPfsDebugDirectory(const char *directoryName) {
     char pathBuffer[BTL_DIRECTORY_PATH_BYTES];
 
     /* Debug mode opens a formatted pfs0 path; built-in mode resets name iteration. */
@@ -2607,12 +2607,12 @@ typedef struct BtlResourceDescriptor {
     BtlResourceEntry *selectedEntry; /* 0x34 */
     BtlResourceEntry *cachedEntry; /* 0x38: last entry whose preview was updated */
     SdfTex *texture;        /* 0x3C: owned or borrowed preview texture */
-    s32 ownsHandle;         /* 0x40 */
+    s32 textureCategory;    /* 0x40: TMX is owned; GENERAL is borrowed. */
     BtlResourceEntryList *entryList; /* 0x44 */
 } BtlResourceDescriptor;
 
 /* Initialize a browser descriptor at the first entry of the borrowed list.
- * The native constructor leaves ownsHandle untouched. */
+ * The native constructor leaves textureCategory untouched. */
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
 
@@ -2641,13 +2641,12 @@ extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern SdfTex *effGetBillResourceTexture(s32);
-extern void func_001FC160(BtlResourceDescriptor *);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
 
 /* Update list selection and submit the visible browser rows to its surface. */
-s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
+s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     BtlResourceEntry *visibleEntry;
     SdfListHead *packetList;
     SdfPoolNode *surface;
@@ -2739,7 +2738,7 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
                 s32 category;
                 category = selectedEntry->category;
                 switch (category) {
-                case 1:
+                case BTL_RESOURCE_ENTRY_CATEGORY_TMX:
                     if (selectedEntry->id == 0) {
                         char resourceName[0x70];
                         btlFormatSelectedResourceName(descriptor, resourceName);
@@ -2748,17 +2747,17 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
                         btlReplaceResourceHandle(descriptor, (void *)(u32)selectedEntry->id);
                     }
                     selectedEntry = descriptor->selectedEntry;
-                    descriptor->previewActive = descriptor->ownsHandle = 1;
+                    descriptor->previewActive = descriptor->textureCategory = 1;
                     break;
-                case 8: {
+                case BTL_RESOURCE_ENTRY_CATEGORY_GENERAL: {
                     SdfTex *texture = effGetBillResourceTexture(selectedEntry->value);
-                    descriptor->ownsHandle = category;
+                    descriptor->textureCategory = category;
                     descriptor->texture = texture;
                     descriptor->previewActive = 1;
                     selectedEntry = descriptor->selectedEntry;
                     break;
                 }
-                case 2:
+                case BTL_RESOURCE_ENTRY_CATEGORY_P2A:
                 default:
                     descriptor->previewActive = 0;
                     break;
@@ -2766,7 +2765,7 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
                 descriptor->cachedEntry = selectedEntry;
             }
             if (descriptor->previewActive != 0) {
-                func_001FC160(descriptor);
+                btlDrawResourcePreview(descriptor);
             }
         }
     }
@@ -2818,24 +2817,11 @@ s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
 /* Release an owned texture handle and the descriptor, but not its entry list. */
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     SdfTex *texture = descriptor->texture;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
     }
     sdfReleaseChipBlock(descriptor);
 }
-
-/* Header of the 0x38-byte resource-name record; trailing bytes hold the name. */
-typedef struct BtlResourceNameRecord {
-    s32 word00;     /* 0x00: initialized to 8 */
-    s32 word04;     /* 0x04: initialized to 8 */
-    u32 selectionStatus; /* 0x08: pending, accepted, or canceled */
-    s32 word0C;     /* 0x0C */
-    s32 nameLength; /* 0x10: length of text written at 0x21 */
-    u32 word14;     /* 0x14: initialized to 9 */
-    s32 word18;     /* 0x18 */
-    char extension[5];       /* 0x1C: four-character extension plus terminator */
-    char resourceName[0x17]; /* 0x21: remaining bytes in the 0x38-byte allocation */
-} BtlResourceNameRecord;
 
 void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
     s32 *headerWords = owner;
@@ -2844,7 +2830,8 @@ void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
 }
 
 u32 func_001FBF40(s32 recordAddress) {
-    return ((BtlResourceNameRecord *)recordAddress)->word14;
+    const u32 *recordWords = (const u32 *)recordAddress;
+    return recordWords[5];
 }
 
 u32 func_001FBF48(const void *owner) {
@@ -2891,7 +2878,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
     u32 loadedResource;
     SdfTex *texture = descriptor->texture;
     struct SdfMemBlock *allocation;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }
@@ -2905,27 +2892,27 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
     SdfTex *texture = descriptor->texture;
-    if (texture != NULL && descriptor->ownsHandle == 1) {
+    if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
         sdfTexReleaseReferenceViaHandler(texture);
         descriptor->texture = 0;
     }
     descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlDrawResourcePreview);
 
 /* Allocate the native name record and initialize its header and extension. */
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
     struct BtlResourceNameRecord *record;
 
     record = (struct BtlResourceNameRecord *)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
-    record->word14 = 9;
-    record->word00 = 8;
-    record->word04 = 8;
+    record->maximumNameLength = 9;
+    record->x = 8;
+    record->y = 8;
     record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
     record->nameLength = 0;
-    record->word0C = 0;
-    record->word18 = 0;
+    record->selection = 0;
+    record->overwritePromptActive = 0;
     strcpy(record->extension, extension);
     return record;
 }
@@ -2934,14 +2921,14 @@ void func_001FC2E8(void *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
+INCLUDE_ASM(const s32, "game/code_001F6110", btlUpdateResourceNameEditor);
 
-void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord) {
-    record->word00 = firstWord;
-    record->word04 = secondWord;
+void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y) {
+    record->x = x;
+    record->y = y;
 }
 
-u32 func_001FC730(struct BtlResourceNameRecord *record) {
+u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record) {
     return record->selectionStatus;
 }
 
@@ -2951,16 +2938,16 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
     record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithPrefix(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
     func_003014F0(output, D_003BB818, record->resourceName, record->extension);
 }
 
-void btlFormatResourceNameWithoutPrefix(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
     func_003014F0(output, D_003BB820, record->resourceName);
 }
 
-void func_001FC7D0(struct BtlResourceNameRecord *record, u32 value) {
-    record->word14 = value;
+void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength) {
+    record->maximumNameLength = maximumNameLength;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);

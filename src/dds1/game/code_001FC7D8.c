@@ -46,19 +46,6 @@ extern void btlSelectTargetsExcludingActorUnit();
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
 extern void btlSelectTargetsBlockingElement();
 
-/* Resource-name record consumed by the overwrite prompt, not an effect task.
- * The adjacent name-record allocator reserves 0x38 bytes in both games. */
-typedef struct BtlResourceNameRecord {
-    s32 x;
-    s32 y;
-    u32 unk8;
-    s32 selection;
-    s32 nameLength;
-    u32 unk14;
-    s32 promptState;
-    char name[0x1C]; /* Suffix at 0x1C; editable name starts at 0x21. */
-} BtlResourceNameRecord;
-
 /* Linked-effect arguments share an owner and carry task-specific timing data.
  * The linked-number task allocates 0x34 bytes; the counter task uses 0x2C. */
 /* The ASM transfers two qwords, but the argument type retains natural alignment:

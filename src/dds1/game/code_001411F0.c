@@ -15,6 +15,7 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
@@ -109,7 +110,6 @@ extern void func_002E96D8(s32 arg0);
 
 extern s32 dds3GetWorldObject(void);
 
-extern void effUpdateNode(u32 arg0);
 
 typedef struct FldTransferChunk {
     u32 unk0;
@@ -2463,7 +2463,7 @@ void fldReleaseTextureSlots(void) {
 
     for (i = 0; i < 4; i++) {
         if (fldEffectTextureNodes[i] != 0) {
-            effDestroyNode(fldEffectTextureNodes[i]);
+            effDestroyNode((EffNode *)(u32)fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
             sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
@@ -2498,11 +2498,11 @@ void func_00147638(void) {
             if (i == 3) {
                 vec[1] = fldAreaState.y - 100.0f;
             }
-            effCopyVectorToNodeInstance((struct EffNode *)fldEffectTextureNodes[i], vec);
+            effCopyVectorToNodeInstance((EffNode *)(u32)fldEffectTextureNodes[i], vec);
             func_002DD688(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(mat);
-            effApplyNodeTransformMatrix((struct EffNode *)fldEffectTextureNodes[i], mat);
-            effUpdateNode(fldEffectTextureNodes[i]);
+            effApplyNodeTransformMatrix((EffNode *)(u32)fldEffectTextureNodes[i], mat);
+            effUpdateNode((EffNode *)(u32)fldEffectTextureNodes[i]);
         }
     }
 }
@@ -2521,7 +2521,6 @@ void mnuInitializeResourceEntries(void) {
     }
 }
 
-extern void effRestartNodeInstance(s32 handle);
 
 
 extern s32 mnuPositionedResourceCursor;
@@ -2535,8 +2534,8 @@ void mnuSpawnResourceAtPosition(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(handle);
-        effCopyVectorToNodeInstance((struct EffNode *)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
+        effRestartNodeInstance((EffNode *)(u32)handle);
+        effCopyVectorToNodeInstance((EffNode *)(u32)mnuPositionedResourceNodes[mnuPositionedResourceCursor], pos);
         mnuPositionedResourceActive[mnuPositionedResourceCursor] = 1;
         mnuPositionedResourceCursor = (mnuPositionedResourceCursor + 1) % 4;
     }
@@ -2562,7 +2561,7 @@ void mnuReleaseResourceEntries(void) {
     fldSecondaryEffectPositionPending = 0;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0) {
-            effDestroyNode(mnuPositionedResourceNodes[i]);
+            effDestroyNode((EffNode *)(u32)mnuPositionedResourceNodes[i]);
             mnuPositionedResourceNodes[i] = 0;
         }
     }
@@ -2572,7 +2571,7 @@ void fldUpdateMenuResourceEffects(void) {
     s32 index;
     for (index = 0; index < 4; index++) {
         if (mnuPositionedResourceNodes[index] != 0 && mnuPositionedResourceActive[index] != 0) {
-            effUpdateNode(mnuPositionedResourceNodes[index]);
+            effUpdateNode((EffNode *)(u32)mnuPositionedResourceNodes[index]);
         }
     }
 }
@@ -2738,19 +2737,19 @@ void fldReleaseResourceHandles(void) {
         D_003BAF38 = 0;
     }
     if (D_003BAF4C != 0) {
-        effDestroyNode(D_003BAF4C);
+        effDestroyNode((EffNode *)(u32)D_003BAF4C);
         D_003BAF4C = 0;
     }
     if (D_003BAF58 != 0) {
-        effDestroyNode(D_003BAF58);
+        effDestroyNode((EffNode *)(u32)D_003BAF58);
         D_003BAF58 = 0;
     }
     if (D_003BAF64 != 0) {
-        effDestroyNode(D_003BAF64);
+        effDestroyNode((EffNode *)(u32)D_003BAF64);
         D_003BAF64 = 0;
     }
     if (D_003BAF3C != 0) {
-        effDestroyNode(D_003BAF3C);
+        effDestroyNode((EffNode *)(u32)D_003BAF3C);
         D_003BAF3C = 0;
     }
 }
@@ -2820,7 +2819,7 @@ void fldResetObjectSlots(void) {
         fldObjectSlots[i].unk8 = 0;
         fldObjectSlots[i].activationRequested = 0;
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode(fldObjectSlots[i].effectNode);
+            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
         }
         fldObjectSlots[i].effectNode = 0;
     }
@@ -2857,7 +2856,7 @@ void fldReleaseObjectSlots(void) {
 
     for (i = 0; i < 32; i++) {
         if (fldObjectSlots[i].effectNode != 0) {
-            effDestroyNode(fldObjectSlots[i].effectNode);
+            effDestroyNode((EffNode *)(u32)fldObjectSlots[i].effectNode);
             fldObjectSlots[i].effectNode = 0;
         }
     }
@@ -2900,19 +2899,19 @@ void fldUpdateObjectActivation(void) {
                 case 0:
                 case 3:
                     if (D_003BAF58 != 0) {
-                        effDestroyNode(D_003BAF58);
+                        effDestroyNode((EffNode *)(u32)D_003BAF58);
                         D_003BAF58 = 0;
                     }
                     D_003BAF58 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF54);
-                    effRestartNodeInstance(D_003BAF4C);
+                    effRestartNodeInstance((EffNode *)(u32)D_003BAF4C);
                     break;
                 case 1:
                     if (D_003BAF64 != 0) {
-                        effDestroyNode(D_003BAF64);
+                        effDestroyNode((EffNode *)(u32)D_003BAF64);
                         D_003BAF64 = 0;
                     }
                     D_003BAF64 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF60);
-                    effRestartNodeInstance(D_003BAF4C);
+                    effRestartNodeInstance((EffNode *)(u32)D_003BAF4C);
                     break;
                 }
             } else {
@@ -2937,11 +2936,11 @@ void fldUpdateObjectActivation(void) {
                 fldObjectSlots[i].activationRequested = 3;
                 fldObjectSlots[i].unk8 = 3;
                 if (D_003BAF58 != 0) {
-                    effDestroyNode(D_003BAF58);
+                    effDestroyNode((EffNode *)(u32)D_003BAF58);
                     D_003BAF58 = 0;
                 }
                 if (D_003BAF64 != 0) {
-                    effDestroyNode(D_003BAF64);
+                    effDestroyNode((EffNode *)(u32)D_003BAF64);
                     D_003BAF64 = 0;
                 }
             }
@@ -3382,13 +3381,13 @@ void fldReleaseWeatherEffects(void) {
         sdfTexReleaseReferenceViaHandler(fldWeatherLimitTexture);
         fldWeatherLimitTexture = 0;
     }
-    effDestroyNode(fldDamEffectNode);
+    effDestroyNode((EffNode *)(u32)fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldDamEffectResource);
     fldDamEffectResource = 0;
     fldDamEffectData = 0;
-    effDestroyNode(fldYukEffectNode);
+    effDestroyNode((EffNode *)(u32)fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldYukEffectResource);
@@ -3405,26 +3404,26 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(fldDamEffectNode);
-        effCopyVectorToNodeInstance((struct EffNode *)fldDamEffectNode, pos);
+        effRestartNodeInstance((EffNode *)(u32)fldDamEffectNode);
+        effCopyVectorToNodeInstance((EffNode *)(u32)fldDamEffectNode, pos);
         fldDamEffectPositioned = 1;
     }
     if (fldYukEffectNode != 0) {
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        effRestartNodeInstance(fldYukEffectNode);
-        effCopyVectorToNodeInstance((struct EffNode *)fldYukEffectNode, pos);
+        effRestartNodeInstance((EffNode *)(u32)fldYukEffectNode);
+        effCopyVectorToNodeInstance((EffNode *)(u32)fldYukEffectNode, pos);
         fldYukEffectPositioned = 1;
     }
 }
 
 void fldUpdateWeatherEffectNodes(void) {
     if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        effUpdateNode(fldDamEffectNode);
+        effUpdateNode((EffNode *)(u32)fldDamEffectNode);
     }
     if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        effUpdateNode(fldYukEffectNode);
+        effUpdateNode((EffNode *)(u32)fldYukEffectNode);
     }
 }
 

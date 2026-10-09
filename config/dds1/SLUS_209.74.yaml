@@ -171,7 +171,7 @@ segments:
       - [0x10FA40, c, game/code_0020EA40]
       - [0x1108E0, c, game/code_0020F8E0]
       - [0x110C48, c, game/code_0020FC48]
-      - [0x117B78, c, model/mdlManager]  # Nocturne __FILE__
+      - [0x1176A8, c, model/mdlManager]  # Nocturne __FILE__
       - [0x119B48, c, game/code_00218B48]
       - [0x120E38, c, event/evtStage]  # Nocturne __FILE__
       - [0x1213B0, c, game/code_002203B0]

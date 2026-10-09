@@ -466,7 +466,6 @@ typedef struct SoundCursor {
 
 extern char D_00418C58[];
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 sndHasActiveFileLoad(void);
 
@@ -4619,7 +4618,6 @@ extern void sndFreeResourceLink(struct SoundResourceLink *);
 
 extern void sndFreeLink(struct SoundLink *);
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern void btlReleaseActorModelResources(BtlUnit *);
 

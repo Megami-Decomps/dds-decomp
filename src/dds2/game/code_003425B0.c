@@ -946,7 +946,6 @@ void sdfSoundRemoveNode(SdfStreamFrameNode *node) {
 }
 
 
-extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void FlushCache(s32);
 
 /* Allocate two width-by-height frames, using four bytes per pixel for mode zero, two otherwise. */
@@ -1006,7 +1005,6 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     sdfDispatchNextStreamNode(0);
 }
 
-extern void *sdfAllocateBlockBySizeThreshold(s32);
 /* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
 void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, u32 source) {
     sdfSoundInitNodeFromFormat(node, format);
@@ -1069,7 +1067,6 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     }
 }
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 

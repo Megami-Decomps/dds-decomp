@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -83,7 +84,6 @@ void effObjReleaseObjectData(u32 object) {
 }
 
 extern s32 billGetKindOneParameter(struct EffNode *bill);
-extern s32 effInvokeNodeConditionOrAcceptDefault(struct EffNode *node);
 extern void effEventCopyFileRecordHeader(void *destination, const void *source);
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
@@ -231,7 +231,6 @@ struct BillObj;
 struct EffNode;
 
 extern u8 dds3TestObjectFlags(u32 unused, u32 flags);
-extern void effUpdateNode(struct EffNode *node);
 extern void billInvokeCallback(struct BillObj *bill);
 
 s32 func_00114BF0(EffectObj *obj) {
