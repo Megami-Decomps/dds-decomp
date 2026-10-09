@@ -37,11 +37,8 @@ extern u16 D_003BB044;
 
 
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
