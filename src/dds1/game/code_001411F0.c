@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "evt_world.h"
 #include "common.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -1854,7 +1855,6 @@ extern FldVec4 D_003A05D8[]; /* default camera up vectors (3 copies), the first 
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 
-extern void dds3SetWorldObjectDataValue(s32, s32);
 
 /* Enters the field camera state for a fresh scene: releases the title slots and
  * centers the camera on the scene's entry point. */
@@ -1879,7 +1879,7 @@ void fldEnterSceneCamera(void) {
     fldApplySkyLightSetToPlayerVU();
     cam->sceneMode = 4;
     frFontSetSharedRenderFlags(0x54);
-    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 1);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
     D_003BAEB8 = cam->unkC0;

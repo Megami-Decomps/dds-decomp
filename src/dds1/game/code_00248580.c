@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "evt_world.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
@@ -775,19 +776,19 @@ s32 func_00249A60(s8 closing) {
 
 /* Only the exact signed-byte value one enables the world/menu flags; all others disable. */
 void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
-    s64 worldObject;
+    EffWorldNode *worldObject;
 
     if (enabled == '\x01') {
-        worldObject = dds3GetWorldObject();
+        worldObject = (EffWorldNode *)(u32)dds3GetWorldObject();
         if (worldObject != 0) {
-            dds3SetWorldObjectDataValue(worldObject, 1);
+            dds3SetWorldObjectDrawEnabled(worldObject, 1);
         }
         D_003BC3E1 = 1;
     }
     else {
-        worldObject = dds3GetWorldObject();
+        worldObject = (EffWorldNode *)(u32)dds3GetWorldObject();
         if (worldObject != 0) {
-            dds3SetWorldObjectDataValue(worldObject, 0);
+            dds3SetWorldObjectDrawEnabled(worldObject, 0);
         }
         D_003BC3E1 = 0;
     }

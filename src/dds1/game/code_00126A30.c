@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "evt_world.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -143,7 +144,6 @@ extern f32 D_00330660[];
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
-extern void dds3SetWorldObjectDataValue(u64, s8);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
@@ -2724,7 +2724,7 @@ s32 fldSetEncounterMode(s32 mode) {
             if (fldEncounterRuntimeState >= 0) {
                 btlActivateRuntime(fldEncounterRuntimeState);
                 if (dds3GetWorldObject() != 0) {
-                    dds3SetWorldObjectDataValue((s32)dds3GetWorldObject(), 1);
+                    dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 1);
                 }
             }
         }
