@@ -734,7 +734,14 @@ s32 func_002629A8(void) {
     return work->opacityReady;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00262A30);
+void func_00262A30(BrsSkillPackageWork *work, s32 index, s32 level, u32 totalExp, s32 profileExp, s32 levelRemaining, s32 profileRemaining) {
+    work->levelAnimation[index].currentProgress = totalExp;
+    work->levelAnimation[index].level = level;
+    work->profileAnimation[index].currentProgress = profileExp;
+    work->profileAnimation[index].level = level;
+    work->levelAnimation[index].remaining = levelRemaining;
+    work->profileAnimation[index].remaining = profileRemaining;
+}
 
 s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
