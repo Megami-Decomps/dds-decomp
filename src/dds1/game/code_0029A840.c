@@ -81,11 +81,8 @@ extern SdfTex *D_003BC958;
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 /* Initialize the VU transforms and the first node's float slot, if present. */
 void effInitModelVUState(MdlCtx *model) {
     VU0_MOVE_VF(vf10, vf0);

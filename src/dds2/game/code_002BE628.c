@@ -2869,7 +2869,6 @@ void func_002C6E20(s32 initialMotionIndex) {
 
 
 extern s32 D_00435DF0;
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
 f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
@@ -2910,7 +2909,6 @@ void mnuResetWorkPair(void) {
     ((MenuWorkPosition *)D_003E7940)->z = 0;
 }
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
