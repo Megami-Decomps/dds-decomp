@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "kwln.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -683,7 +684,6 @@ void mdlObjInit(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
     }
 }
 
-extern void sdfDestroyDevRequest(DevRequest *request);
 
 DevRequest *mdlCreateBufferedPartRequest(u32 request) {
     return sdfDevCreateBufferedRequest(request, 0x10, 4);

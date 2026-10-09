@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
@@ -77,7 +78,6 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
-void sdfDestroyDevRequest(DevRequest *request);
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 void sdfDevBufferedRequestGrow(DevRequest *request);
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);

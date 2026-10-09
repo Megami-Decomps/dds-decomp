@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
@@ -78,7 +79,6 @@ extern SdfSubParam *sdfSubParamCreate(void);
 
 
 
-void sdfDestroyDevRequest(DevRequest *);
 
 extern s32 sdfLiveAssetCount;
 
