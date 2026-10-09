@@ -5282,6 +5282,7 @@
 0x00290E60	fileToggleSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TogglePartySlotBit: file/memory-card manager in game/code_0028A0E0
 0x00290F40	fileTestSlotFlagsBit	inferred	legacy ShadowRowSlotFlags_TestPartySlotBit: file/memory-card manager in game/code_0028A0E0
 0x00290FC0	fileTestSavedSlotFlags	inferred	DDS2 002D1038 twin; queries fileTestSlotFlagsBit on global save buffer [names_R_FuncNames2.tsv]
+0x00290FE0	fileCreateConfigTask	inferred	Allocates and retains the file-config task, creates its five-row menu list, and requests mode-specific effect resources before returning the task address.
 0x002911B8	fileConfigTaskDestroy	inferred	Releases config list, slot resources and task memory, matching the named DDS2 twin. [names_reviewed7.tsv]
 0x002912C8	mnuCreateConfigTasks	inferred	Byte-identical dds2 twin 0x002D1300; DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior. [names_conflicts.tsv]
 0x00291378	mnuConfigTasksDestroy	inferred	mnu menu, title, shop, or movie UI in game/code_0028A0E0.c

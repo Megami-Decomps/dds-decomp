@@ -330,8 +330,6 @@ extern void fldSetSceneLifecycleFlags(u32);
 
 extern void func_0023ACE8(void);
 
-extern void evtStartSceneResourceTask(u64, void *);
-
 extern void func_00150800(void);
 
 extern s32 D_00435F84;
@@ -1657,7 +1655,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                evtStartSceneResourceTask((u64)dds3GetWorldObject(), D_00412F58);
+                evtStartSceneResourceTask(dds3GetWorldObject(), D_00412F58);
             }
         }
     } else {

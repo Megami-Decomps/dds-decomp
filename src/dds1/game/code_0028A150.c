@@ -3064,11 +3064,11 @@ typedef struct FileConfigList {
 
 /* Save/config task context: its four resource slots start at +0x10. */
 typedef struct FileConfigTask {
-    void *memory;   /* 0x00 */
+    struct SdfMemBlock *backingAllocation; /* 0x00: descriptor owning this task */
     s32 state;      /* 0x04 */
     s32 ticks;
-    u32 frame;      /* 0x0C: FileConfigList, passed to menu window drawing */
-    u32 slots[4];   /* 0x10 */
+    struct MenuList *frame; /* 0x0C: owned save/config list */
+    struct EffectSlotSet *slots[4]; /* 0x10 */
     u8 pad20[4];
     s32 result;     /* 0x24: negative when the queued load failed */
     s16 previousIndex;
@@ -3076,7 +3076,7 @@ typedef struct FileConfigTask {
     f32 choiceFade;
     f32 labelFade;
     u32 pending;    /* 0x34: zero when no load can start */
-    u32 effect;     /* 0x38: effect resource requested for the save scene */
+    MenuResourceWork *effect; /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
@@ -3090,7 +3090,7 @@ extern void func_002918F8();
 extern char D_003BC8E0[];
 
 /* Allocate the save/config task, its five-row list and its effect resource slots. */
-s32 func_00290FE0(s32 mode) {
+s32 fileCreateConfigTask(s32 mode) {
     char *names[4] = {
         "/camp/spr/n_con/n_con01.spr",
         "/camp/spr/n_con/n_con02.spr",
@@ -3106,25 +3106,25 @@ s32 func_00290FE0(s32 mode) {
     block = sdfAllocGeneralBlock(0x3C);
     task = (FileConfigTask *)sdfResourceRetainAddress(block);
     memset(task, 0, 0x3C);
-    task->memory = block;
+    task->backingAllocation = block;
     task->state = mode;
     task->ticks = 0;
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
-    task->frame = (u32)list;
+    task->frame = list;
     list->drawCallback = func_002918F8;
     for (i = 0; i < 5; i++) {
-        node = (FileConfigListNode *)mnuListAppendNode((struct MenuList *)task->frame, NULL);
+        node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
         node->resource = sdfAllocSizeClassBlock(4);
         memset(node->resource, 0, 4);
     }
     switch (mode) {
     case 1:
-        task->effect = (u32)mnuRequestEffectResource(D_003BC8E0, "/facility/spr/mantra/mantr_bg.spr");
-        while (mnuHasEffectResourceHandle((MenuResourceWork *)task->effect)) {
+        task->effect = mnuRequestEffectResource(D_003BC8E0, "/facility/spr/mantra/mantr_bg.spr");
+        while (mnuHasEffectResourceHandle(task->effect)) {
         }
         for (i = 0; i < 4; i++) {
-            effRequestResourceByMode(D_003BC8E0, names[i], 0, &task->slots[i]);
+            effRequestResourceByMode(D_003BC8E0, names[i], 0, (u32 *)&task->slots[i]);
         }
         mnuResetTitleStreamLocked();
         func_0026A5F0(0x14);
@@ -3133,7 +3133,7 @@ s32 func_00290FE0(s32 mode) {
         break;
     default:
         for (i = 0; i < 4; i++) {
-            effRequestResourceByMode(D_003BC8E0, names[i], 0, &task->slots[i]);
+            effRequestResourceByMode(D_003BC8E0, names[i], 0, (u32 *)&task->slots[i]);
         }
         break;
     }
@@ -3152,7 +3152,7 @@ void fileConfigTaskDestroy(void) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
-            mnuReleaseEffectResource((MenuResourceWork *)((FileConfigTask *)fileConfigTaskWork)->effect);
+            mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
@@ -3160,21 +3160,21 @@ void fileConfigTaskDestroy(void) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
-        mnuDestroyListState((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame);
+        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 4; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
-                effDestroyResourceSlotSet((struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[i]);
+                effDestroyResourceSlotSet(((FileConfigTask *)fileConfigTaskWork)->slots[i]);
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
-        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->memory);
+        sdfReleaseResourceAllocation(((FileConfigTask *)fileConfigTaskWork)->backingAllocation);
         fileConfigTaskWork = 0;
         fileConfigTaskState = 0;
     }
 }
 
-extern s32 func_00290FE0(s32 mode);
+extern s32 fileCreateConfigTask(s32 mode);
 extern s32 func_00291418(void);
 
 extern s32 fileStartQueuedLoad(void);
@@ -3183,7 +3183,7 @@ extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, 
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
-        fileConfigTaskWork = func_00290FE0(mode);
+        fileConfigTaskWork = fileCreateConfigTask(mode);
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, fileConfigTaskWork);
         kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, fileConfigTaskWork);
@@ -3215,7 +3215,7 @@ s32 fileConsumeConfigTaskReady(void) {
 
 u32 fileGetConfigTaskSlot(s32 slot) {
     if (slot < 4) {
-        return ((FileConfigTask *)fileConfigTaskWork)->slots[slot];
+        return (u32)((FileConfigTask *)fileConfigTaskWork)->slots[slot];
     }
     return 0;
 }
@@ -3297,14 +3297,14 @@ s32 func_00291418(void) {
 
     oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
     if ((u8)D_00324510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault((struct MenuList *)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
         }
     }
     if ((u8)D_00324510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault((struct MenuList *)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
@@ -3352,7 +3352,7 @@ s32 fileStartQueuedLoad(void) {
         return -1;
     }
     func_00292720((void *)fileConfigTaskWork);
-    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
+    mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
 
@@ -3504,35 +3504,35 @@ void func_002918F8(s32 x, s32 y, s32 depth, FileConfigList *list,
     if (list->cursor->index == node->index) {
         func_002BF4E0(0x80, (index * 35 + 129) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[1], 18, 0x53);
+                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 18, 0x53);
         func_002BF4E0(0x1830, (index * 35 + 129) << 3, 0,
                      (u32)((pulse * 204.79998779296875f + 102.399993896484375f) * labelFade),
-                     0, (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[1], 19, 0x53);
+                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[1], 19, 0x53);
         func_002BF4E0(0x8B0, 0x9B0, 0, (u32)(labelFade * 256.0f),
-                     0, (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[3], labelFrames[index], 0x53);
+                     0, ((FileConfigTask *)fileConfigTaskWork)->slots[3], labelFrames[index], 0x53);
         entryIndex = index * 2;
         func_002BF4E0(D_0037E008[entryIndex][FILE_CONFIG_X] << 4, D_0037E008[entryIndex][FILE_CONFIG_Y] << 3, 0,
                      (u32)(choiceFade * 256.0f), 0,
-                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
+                     ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
                      D_0037E008[entryIndex][FILE_CONFIG_FRAME], 0x53);
         if (((FileConfigTask *)fileConfigTaskWork)->transitionTicks != 0) {
             ++entryIndex;
             func_002BF4E0(D_0037E008[entryIndex][FILE_CONFIG_X] << 4, D_0037E008[entryIndex][FILE_CONFIG_Y] << 3, 0,
                          (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
                          D_0037E008[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     } else {
         entryIndex = index + 18;
         func_002BF4E0(D_0037E008[entryIndex][FILE_CONFIG_X] << 4, D_0037E008[entryIndex][FILE_CONFIG_Y] << 3, 0,
                      (u32)(labelFade * 256.0f), 0,
-                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
+                     ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
                      D_0037E008[entryIndex][FILE_CONFIG_FRAME], 0x53);
         entryIndex = index * 2;
         if (((FileConfigTask *)fileConfigTaskWork)->previousIndex == node->index) {
             func_002BF4E0(D_0037E008[entryIndex][FILE_CONFIG_X] << 4, D_0037E008[entryIndex][FILE_CONFIG_Y] << 3, 0,
                          (u32)((f32)((FileConfigTask *)fileConfigTaskWork)->transitionTicks * 0.125f * 128.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[entryIndex][FILE_CONFIG_SET]],
                          D_0037E008[entryIndex][FILE_CONFIG_FRAME], 0x53);
         }
     }
@@ -3540,43 +3540,43 @@ void func_002918F8(s32 x, s32 y, s32 depth, FileConfigList *list,
         if (fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) != 0) {
             func_002BF4E0(D_0037E008[10][FILE_CONFIG_X] << 4, (D_0037E008[10][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[10][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[10][FILE_CONFIG_SET]],
                          D_0037E008[10][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[11][FILE_CONFIG_X] << 4, (D_0037E008[11][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[11][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[11][FILE_CONFIG_SET]],
                              D_0037E008[11][FILE_CONFIG_FRAME], 0x53);
             }
             func_002BF4E0(D_0037E008[25][FILE_CONFIG_X] << 4, (D_0037E008[25][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[25][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[25][FILE_CONFIG_SET]],
                          D_0037E008[25][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[14][FILE_CONFIG_X] << 4, (D_0037E008[14][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[14][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[14][FILE_CONFIG_SET]],
                              D_0037E008[14][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             func_002BF4E0(D_0037E008[23][FILE_CONFIG_X] << 4, (D_0037E008[23][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[23][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[23][FILE_CONFIG_SET]],
                          D_0037E008[23][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[10][FILE_CONFIG_X] << 4, (D_0037E008[10][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[10][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[10][FILE_CONFIG_SET]],
                              D_0037E008[10][FILE_CONFIG_FRAME], 0x53);
             }
             func_002BF4E0(D_0037E008[14][FILE_CONFIG_X] << 4, (D_0037E008[14][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[14][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[14][FILE_CONFIG_SET]],
                          D_0037E008[14][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[15][FILE_CONFIG_X] << 4, (D_0037E008[15][FILE_CONFIG_Y] + index * 35) << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[15][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[15][FILE_CONFIG_SET]],
                              D_0037E008[15][FILE_CONFIG_FRAME], 0x53);
             }
         }
@@ -3584,43 +3584,43 @@ void func_002918F8(s32 x, s32 y, s32 depth, FileConfigList *list,
         if (fileTestSlotFlagsBit(3, (s32 *)&datGameState->world.slotFlags) != 0) {
             func_002BF4E0(D_0037E008[12][FILE_CONFIG_X] << 4, D_0037E008[12][FILE_CONFIG_Y] << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[12][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[12][FILE_CONFIG_SET]],
                          D_0037E008[12][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[13][FILE_CONFIG_X] << 4, D_0037E008[13][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[13][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[13][FILE_CONFIG_SET]],
                              D_0037E008[13][FILE_CONFIG_FRAME], 0x53);
             }
             func_002BF4E0(D_0037E008[26][FILE_CONFIG_X] << 4, D_0037E008[26][FILE_CONFIG_Y] << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[26][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[26][FILE_CONFIG_SET]],
                          D_0037E008[26][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[16][FILE_CONFIG_X] << 4, D_0037E008[16][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[16][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[16][FILE_CONFIG_SET]],
                              D_0037E008[16][FILE_CONFIG_FRAME], 0x53);
             }
         } else {
             func_002BF4E0(D_0037E008[24][FILE_CONFIG_X] << 4, D_0037E008[24][FILE_CONFIG_Y] << 3, 0,
                          (u32)(labelFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[24][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[24][FILE_CONFIG_SET]],
                          D_0037E008[24][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[12][FILE_CONFIG_X] << 4, D_0037E008[12][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 128.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[12][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[12][FILE_CONFIG_SET]],
                              D_0037E008[12][FILE_CONFIG_FRAME], 0x53);
             }
             func_002BF4E0(D_0037E008[16][FILE_CONFIG_X] << 4, D_0037E008[16][FILE_CONFIG_Y] << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
-                         (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[16][FILE_CONFIG_SET]],
+                         ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[16][FILE_CONFIG_SET]],
                          D_0037E008[16][FILE_CONFIG_FRAME], 0x53);
             if (countdown->ticks != 0) {
                 func_002BF4E0(D_0037E008[17][FILE_CONFIG_X] << 4, D_0037E008[17][FILE_CONFIG_Y] << 3, 0,
                              (u32)((f32)countdown->ticks * 0.125f * 256.0f), 0,
-                             (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[17][FILE_CONFIG_SET]],
+                             ((FileConfigTask *)fileConfigTaskWork)->slots[D_0037E008[17][FILE_CONFIG_SET]],
                              D_0037E008[17][FILE_CONFIG_FRAME], 0x53);
             }
         }
@@ -3646,13 +3646,13 @@ void func_00292720(void *unused) {
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     if (((FileConfigTask *)fileConfigTaskWork)->state == 1) {
         func_0025C0D8((void *)((FileConfigTask *)fileConfigTaskWork)->effect, 0x80, 0x52);
@@ -3661,28 +3661,28 @@ void func_00292720(void *unused) {
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(choiceFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     entry++;
     func_002BF4E0(sprites[entry][FILE_CONFIG_X] * 16,
                  sprites[entry][FILE_CONFIG_Y] * 8,
                  0, (u32)(labelFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[sprites[entry][FILE_CONFIG_SET]],
                  sprites[entry][FILE_CONFIG_FRAME], 0x53);
     for (row = 0; row < 5; row++) {
         func_002BF4E0(0, (131 + row * 35) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 9, 0x53);
+                     ((FileConfigTask *)fileConfigTaskWork)->slots[2], 9, 0x53);
         func_002BF4E0(461 * 16, (131 + row * 35) * 8, 0, (u32)(labelFade * 256.0f), 0,
-                     (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 10, 0x53);
+                     ((FileConfigTask *)fileConfigTaskWork)->slots[2], 10, 0x53);
     }
     func_002BF4E0(73 * 16, 326 * 8, 0, (u32)(labelFade * 256.0f), 0,
-                 (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[2], 11, 0x53);
+                 ((FileConfigTask *)fileConfigTaskWork)->slots[2], 11, 0x53);
 }
 
 
