@@ -2144,7 +2144,414 @@ void fldCopyActorWaypointTable(FldWaypointBlock *src) {
     fldActorWaypointRows = *src;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00142B70);
+void func_00142B70(void) {
+    f32 rotation[4];
+    f32 angle;
+    EffWorldNode *world;
+    s32 firstDirection = 0;
+    s32 secondDirection = 0;
+    s32 actorIndex;
+    s32 slotIndex;
+    s32 primaryMotion;
+    FldActorEntry *actor;
+    FldActorRow *row;
+    EffWorldNode *node;
+
+    memset(rotation, 0, sizeof(rotation));
+    rotation[3] = 1.0f;
+    world = (EffWorldNode *)dds3GetWorldSecondaryObject();
+    for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
+        actor = &fldActorEntries[actorIndex];
+        row = &fldActorSlots[actorIndex];
+        if (actor->kind == 2) {
+            if (actor->floor == D_00389784[0] + 1) {
+                for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                    if (D_0038BC50[slotIndex]->name != NULL &&
+                        strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
+                        FldFileResource *resource = D_0038BC50[slotIndex];
+                        f32 *transform = resource->transform;
+                        row->actorId = resource->id;
+                        rotation[0] = transform[4];
+                        rotation[1] = transform[5];
+                        rotation[2] = transform[6];
+                        rotation[3] = transform[7];
+                        VU0_LOAD_VF(vf10, rotation);
+                        angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                        while (angle < 0.0f) {
+                            angle += 360.0f;
+                        }
+                        while (angle > 360.0f) {
+                            angle -= 360.0f;
+                        }
+                        row->firstValues[0] = angle;
+                    }
+                }
+                row->kind = 0;
+                row->firstFrame = 0;
+                row->secondFrame = 0;
+                row->firstValues[1] = 0.0f;
+                row->firstValues[2] = 0.0f;
+                row->secondValues[0] = 0.0f;
+                row->secondValues[1] = 0.0f;
+                row->secondValues[2] = 0.0f;
+            }
+        } else if (actor->kind == 1) {
+            if (actor->floor != D_00389784[0] + 1) {
+                continue;
+            }
+            row->firstKey = -1;
+            if (actor->motion != 0) {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->motionName);
+                if (node != NULL) {
+                    row->firstKey = node->key;
+                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                        if (D_0038BC50[slotIndex]->name != NULL &&
+                            strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = D_0038BC50[slotIndex];
+                            f32 *transform = resource->transform;
+                            row->actorId = resource->id;
+                            rotation[0] = transform[4];
+                            rotation[1] = transform[5];
+                            rotation[2] = transform[6];
+                            rotation[3] = transform[7];
+                            VU0_LOAD_VF(vf10, rotation);
+                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            while (angle < 0.0f) {
+                                angle += 360.0f;
+                            }
+                            while (angle > 360.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (45.0f <= angle && angle <= 135.0f) {
+                                firstDirection = 1;
+                            } else if (135.0f <= angle && angle <= 225.0f) {
+                                firstDirection = 0;
+                            } else if (225.0f <= angle && angle <= 315.0f) {
+                                firstDirection = 3;
+                            } else {
+                                firstDirection = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            row->secondKey = -1;
+            if (actor->secondaryMotion != 0) {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->otherName);
+                if (node != NULL) {
+                    row->secondKey = node->key;
+                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                        if (D_0038BC50[slotIndex]->name != NULL &&
+                            strcmp(D_0038BC50[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = D_0038BC50[slotIndex];
+                            f32 *transform = resource->transform;
+                            row->actorId = resource->id;
+                            rotation[0] = transform[4];
+                            rotation[1] = transform[5];
+                            rotation[2] = transform[6];
+                            rotation[3] = transform[7];
+                            VU0_LOAD_VF(vf10, rotation);
+                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            while (angle < 0.0f) {
+                                angle += 360.0f;
+                            }
+                            while (angle > 360.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (45.0f <= angle && angle <= 135.0f) {
+                                secondDirection = 1;
+                            } else if (135.0f <= angle && angle <= 225.0f) {
+                                secondDirection = 0;
+                            } else if (225.0f <= angle && angle <= 315.0f) {
+                                secondDirection = 3;
+                            } else {
+                                secondDirection = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            row->transitionKey = -1;
+            if ((actor->flags54 & 2) == 0 && actor->taskName[0] != '\0') {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->taskName);
+                if (node != NULL) {
+                    row->transitionKey = node->key;
+                }
+            }
+            primaryMotion = actor->motion;
+            row->kind = 1;
+            row->unk10 = actor->secondaryMotion;
+            row->unk08 = primaryMotion;
+            row->firstFrame = 0;
+            row->secondFrame = 0;
+            row->transitionFrame = 0;
+            row->firstValues[0] = 0.0f;
+            row->firstValues[1] = 0.0f;
+            row->firstValues[2] = 0.0f;
+            row->secondValues[0] = 0.0f;
+            row->secondValues[1] = 0.0f;
+            row->secondValues[2] = 0.0f;
+            if (row->firstKey != (u32)-1) {
+                switch (primaryMotion) {
+                case 1:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = -7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 7.50f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = 7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -7.50f;
+                        break;
+                    }
+                    break;
+                case 2:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = 7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -7.50f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = -7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 7.50f;
+                        break;
+                    }
+                    break;
+                case 3:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = -7.50f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 4:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = 7.50f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 5:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = -3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 3.75f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = 3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -3.75f;
+                        break;
+                    }
+                    break;
+                case 6:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = 3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -3.75f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = -3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 3.75f;
+                        break;
+                    }
+                    break;
+                case 7:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = -3.75f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 8:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = 3.75f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                default:
+                    row->firstStep[0] = 0.0f;
+                    row->firstStep[1] = 0.0f;
+                    row->firstStep[2] = 0.0f;
+                    break;
+                }
+            } else {
+                row->firstStep[0] = 0.0f;
+                row->firstStep[1] = 0.0f;
+                row->firstStep[2] = 0.0f;
+            }
+            if (row->secondKey != (u32)-1) {
+                switch (row->unk10) {
+                case 1:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = -7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 7.50f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = 7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -7.50f;
+                        break;
+                    }
+                    break;
+                case 2:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = 7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -7.50f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = -7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 7.50f;
+                        break;
+                    }
+                    break;
+                case 3:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = -7.50f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 4:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = 7.50f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 5:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = -3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 3.75f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = 3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -3.75f;
+                        break;
+                    }
+                    break;
+                case 6:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = 3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -3.75f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = -3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 3.75f;
+                        break;
+                    }
+                    break;
+                case 7:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = -3.75f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 8:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = 3.75f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                default:
+                    row->secondStep[0] = 0.0f;
+                    row->secondStep[1] = 0.0f;
+                    row->secondStep[2] = 0.0f;
+                    break;
+                }
+            } else {
+                row->secondStep[0] = 0.0f;
+                row->secondStep[1] = 0.0f;
+                row->secondStep[2] = 0.0f;
+            }
+        }
+    }
+}
 
 void fldBeginNpcInteractionById(s32 id) {
     s32 i;
