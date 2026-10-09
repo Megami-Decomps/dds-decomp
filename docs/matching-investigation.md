@@ -29,6 +29,14 @@ a discovery filter, not proof of identical behavior. Translate real layout
 differences using the target title's existing owners. A same-sized payload in
 both games need not have the same origin or field offsets.
 
+Also inspect matched siblings in the same title and translation unit. An exact
+opcode-twin filter misses related algorithms with different state transitions.
+DDS1 `func_00267FF0` became exact by adapting the matched level-animation
+`func_00267850` to the established `profileAnimation` rows. The target retains
+its own initialization coordinates, completion ramp and fade; the donor supplies
+the natural direct-array accesses, signed clamps and shared first state machine.
+Compare every changed path against retail before transferring a source shape.
+
 ## Classify the uncertainty before changing source
 
 | Question | Evidence that can resolve it |
