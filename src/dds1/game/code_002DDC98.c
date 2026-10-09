@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -122,7 +123,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
 extern s32 sdfGetPacketCursor(void);
 extern u16 D_003BDA24;
@@ -1049,7 +1049,6 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 
 }
 
 extern u8 D_00324350[];
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 /* Append the second fixed program block as a DMA reference packet. */
 void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet) {
@@ -1107,7 +1106,6 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
 
 
 extern u8 D_00398580[];
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 /* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
 void sdfConsAppendClearPacket(SdfListHead *packetList,
@@ -1155,7 +1153,6 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfAssetApplyEntryChanges(void *, s32);
 extern void sdfInitNodeHeaderFromWords(void *, void *, s32);
-extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
 void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,

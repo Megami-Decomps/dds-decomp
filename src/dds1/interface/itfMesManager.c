@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "kwln.h"
@@ -963,7 +964,6 @@ extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
