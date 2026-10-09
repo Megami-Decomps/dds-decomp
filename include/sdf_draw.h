@@ -134,7 +134,12 @@ typedef struct SdfModel {
     f32 unk88;
     f32 unk8C;
     u32 chunkTable;
-    u32 unk94;
+    /* Float scalar (DDS2 0x232074 / Nocturne 0x2B07D4), forwarded
+     * as raw packet bits by DDS1 0x2D9530. */
+    union {
+        u32 word;
+        f32 scalar;
+    } unk94;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
 } SdfModel;

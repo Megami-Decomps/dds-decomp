@@ -105,7 +105,8 @@ typedef struct MdlLoadRequest {
 
 typedef struct MdlDevSlot {
     struct MdlDevSlot *next;
-    void *slot;
+    SdfModel *model;
+    s32 remaining;
 } MdlDevSlot;
 
 /* This owner has inline color interpolation data, not a request buffer at +0xC. */
@@ -143,6 +144,11 @@ struct MdlCtx {
 
 typedef char BattleGroupSlot_size_must_be_0x10[(sizeof(BattleGroupSlot) == 0x10) ? 1 : -1];
 typedef char BattleGroupNode_size_must_be_0xB4[(sizeof(BattleGroupNode) == 0xB4) ? 1 : -1];
+typedef char MdlDevSlot_size_must_be_0xC[(sizeof(MdlDevSlot) == 0xC) ? 1 : -1];
+typedef char MdlDevSlot_model_offset_must_be_4[
+    ((u32)&((MdlDevSlot *)0)->model == 4) ? 1 : -1];
+typedef char MdlDevSlot_remaining_offset_must_be_8[
+    ((u32)&((MdlDevSlot *)0)->remaining == 8) ? 1 : -1];
 typedef char MdlDevList_size_must_be_0x30[(sizeof(MdlDevList) == 0x30) ? 1 : -1];
 typedef char MdlCtx_size_must_be_0x38[(sizeof(MdlCtx) == 0x38) ? 1 : -1];
 typedef char MdlLoadPayload_size_must_be_0x20[(sizeof(MdlLoadPayload) == 0x20) ? 1 : -1];

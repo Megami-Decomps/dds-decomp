@@ -2046,3 +2046,4 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
+
