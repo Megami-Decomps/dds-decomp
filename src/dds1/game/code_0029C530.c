@@ -2920,8 +2920,10 @@ u32 *effSegmentPointerSet(u8 *work) {
     return pointSetRef;
 }
 
+extern void effAssetQueueRelease(EffPointSet *);
+
 void effReleaseRingResourceHandle(u32 handle) {
-    effAssetQueueRelease(*(u32 *)handle);
+    effAssetQueueRelease((EffPointSet *)(u32)*(u32 *)handle);
     sdfReleaseChipBlock((void *)handle);
 }
 
@@ -3024,7 +3026,7 @@ void func_002A4478(EffClassWork *work) {
     }
 }
 
-extern void effDrawFourPointGroups(u8 *, void *);
+extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3066,7 +3068,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups(out, mtx);
+        effDrawFourPointGroups((EffPointSet *)out, (Matrix4 *)mtx);
     }
 }
 
@@ -3305,7 +3307,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 }
 
 void effReleaseRingHandle(EffRingResource *handle) {
-    effAssetQueueRelease((u32)handle->pointSet);
+    effAssetQueueRelease(handle->pointSet);
     sdfReleaseChipBlock(handle);
 }
 
@@ -3423,7 +3425,7 @@ void billDrawCellBlendB(EffClassWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups((u8 *)out, mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
 
@@ -3525,14 +3527,13 @@ EffPointSet *effCreatePointSet4(u32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effAssetQueueRelease(EffPointSet *set) {
+    sdfQueueAssetRelease(set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void effDrawFourPointGroups(u8 *work, void *matrix) {
-    EffPointSet *set = (EffPointSet *)work;
+void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
     void *list;
     void *setup;
     EffGsPacket *packet;
