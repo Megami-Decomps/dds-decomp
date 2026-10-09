@@ -10,6 +10,9 @@
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
+#include "sdf_draw.h"
+#include "sdf_projection.h"
+#include "pcp_vu0.h"
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -605,7 +608,62 @@ void itfGridUnpackColorChannels(u64 *channels, u32 color) {
     channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308058);
+typedef struct DmaPacketHeader {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 reservedWord;
+    u32 command;
+    u8 pad10[0x10];
+} DmaPacketHeader;
+
+typedef struct ConsMatrixPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 reservedWord;
+    u32 command;
+    u8 matrixA[0x40];
+    u8 matrixB[0x40];
+    u8 vecC[0x10];
+    u8 vecD[0x10];
+    u8 vecE[0x10];
+    u32 stmodCommand;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+} ConsMatrixPacket;
+
+extern SdfListHead D_0045C380[2];
+extern DmaPacketHeader D_0045C3C0[2];
+extern SdfListHead D_0045C400[2];
+extern SdfLightingPacketStorage D_0045C440[2];
+extern ConsMatrixPacket D_0045C600[2];
+extern SdfLightSources D_0037F770;
+extern f32 kwlnDefaultColorVector[4];
+extern u8 sdfViewMatrix[0x40];
+extern u8 sdfViewEyeVector[];
+extern u8 sdfViewTargetVector[];
+extern u8 sdfViewUpVector[];
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
+
+/* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
+void func_00308058(void) {
+    s32 i;
+
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
+    sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
+    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    for (i = 0; i < 2; i++) {
+        sdfInitPacketList(&D_0045C380[i]);
+        sdfConsAppendProgramReferencePacket((s32)&D_0045C380[i], &D_0045C3C0[i]);
+        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)&D_0045C600[i], &sdfSceneProjectionParameters, sdfViewMatrix);
+        sdfAppendPacket(&D_0045C380[i], (u32)&D_0045C600[i]);
+        sdfInitPacketList(&D_0045C400[i]);
+        sdfBuildLightingPacket(&D_0045C440[i], D_0037F770, kwlnDefaultColorVector);
+        sdfAppendPacket(&D_0045C400[i], (u32)&D_0045C440[i]);
+    }
+}
 
 void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     u32 normalized = value != 0;
