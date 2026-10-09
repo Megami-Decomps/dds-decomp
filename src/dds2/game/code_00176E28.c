@@ -63,7 +63,7 @@ extern SdfPoolNode *D_003B1378[];
 extern u32 D_003B1330[];
 extern SdfPoolNode D_00380248;
 extern s32 sdfAllocPacketAligned(s32);
-extern s32 func_00167A10(EffPacketParams *);
+extern void *func_00167A10(EffPacketParams *);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void func_001781F8(EffRecordPool *pool);
 extern u32 *effGetExtendedGroupAuxEntry(EffRecordPool *pool, s32 index);
@@ -450,7 +450,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     D_00451FF0->parameters = D_003B12C0;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        sdfAppendPacket(list, (u32)func_00167A10(D_00451FF0));
         D_00451FF0->positions += EFF_FAN_BATCH_VERTICES;
         D_00451FF0->colors += EFF_FAN_BATCH_VERTICES;
     }
@@ -458,7 +458,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         D_00451FF0->vertexCount = remaining;
         D_00451FF0->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        sdfAppendPacket(list, (u32)func_00167A10(D_00451FF0));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_003B1308[work->drawMode]->append(D_003B1308[work->drawMode], list);
@@ -581,14 +581,14 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     D_00451FF0->parameters = NULL;
     while (remainingVertices >= EFF_TRIANGLE_BATCH_VERTICES) {
         remainingVertices -= EFF_TRIANGLE_BATCH_VERTICES;
-        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00451FF0));
         D_00451FF0->positions += EFF_TRIANGLE_BATCH_VERTICES;
         D_00451FF0->colors += EFF_TRIANGLE_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_TRIANGLE_VERTEX_COUNT) {
         D_00451FF0->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
         D_00451FF0->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00451FF0));
     }
     surface = D_003B1318[pool->drawMode];
     surface->append(surface, packet);
@@ -669,14 +669,14 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     D_00451FF0->parameters = D_003B1330;
     while (remainingVertices >= EFF_QUAD_BATCH_VERTICES) {
         remainingVertices -= EFF_QUAD_BATCH_VERTICES;
-        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00451FF0));
         D_00451FF0->positions += EFF_QUAD_BATCH_VERTICES;
         D_00451FF0->colors += EFF_QUAD_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_QUAD_VERTEX_COUNT) {
         D_00451FF0->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
         D_00451FF0->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, func_00167A10(D_00451FF0));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00451FF0));
     }
     surface = D_003B1378[pool->drawMode];
     surface->append(surface, packet);
@@ -734,7 +734,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     D_00451FF0->parameters = D_003B12C0;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
-        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        sdfAppendPacket(list, (u32)func_00167A10(D_00451FF0));
         D_00451FF0->positions += EFF_FAN_BATCH_VERTICES;
         D_00451FF0->colors += EFF_FAN_BATCH_VERTICES;
     }
@@ -742,7 +742,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
         D_00451FF0->vertexCount = remaining;
         D_00451FF0->parameterCount = fanCount * 3;
-        sdfAppendPacket(list, func_00167A10(D_00451FF0));
+        sdfAppendPacket(list, (u32)func_00167A10(D_00451FF0));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
         D_003B1388[work->drawMode]->append(D_003B1388[work->drawMode], list);

@@ -4031,7 +4031,7 @@ extern u8 D_00355640[];
 extern SdfPoolNode *D_00355688[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern s32 func_0015FE20(EffPCPBeamDrawParams *params);
+extern void *func_0015FE20(EffPCPBeamDrawParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
@@ -4064,14 +4064,14 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     D_003D6610.format = D_00355640;
     while (count >= 12) {
         count -= 8;
-        sdfAppendPacket(list, func_0015FE20(&D_003D6610));
+        sdfAppendPacket(list, (u32)func_0015FE20(&D_003D6610));
         D_003D6610.points += 32;
         D_003D6610.colors += 8;
     }
     if (count >= 8) {
         D_003D6610.unk00 = 6;
         D_003D6610.unk02 = 8;
-        sdfAppendPacket(list, func_0015FE20(&D_003D6610));
+        sdfAppendPacket(list, (u32)func_0015FE20(&D_003D6610));
     }
     entry = D_00355688[node->drawKind];
     entry->append(entry, list);

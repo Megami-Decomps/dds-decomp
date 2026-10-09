@@ -122,7 +122,7 @@ extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern s32 func_00167A10(EffPacketParams *);
+extern void *func_00167A10(EffPacketParams *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
@@ -1130,14 +1130,14 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     D_00452020->parameters = D_003B13A0;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfAppendPacket(packet, func_00167A10(D_00452020));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00452020));
         D_00452020->positions += 24;
         D_00452020->colors += 24;
     }
     if (remainingVertices >= 6) {
         D_00452020->parameterCount = remainingVertices / 6 * 4;
         D_00452020->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, func_00167A10(D_00452020));
+        sdfAppendPacket(packet, (u32)func_00167A10(D_00452020));
     }
     surface = D_003B14B0[pool->unk10];
     surface->append(surface, packet);

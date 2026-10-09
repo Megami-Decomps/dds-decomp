@@ -44,7 +44,7 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern s32 func_0015FE20(EffResourceRenderState *);
+extern void *func_0015FE20(EffResourceRenderState *);
 extern f32 D_00354C10[][4];
 extern u32 D_00354CD0[];
 
@@ -132,7 +132,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         D_003D65E0.parameterCount = 16;
         D_003D65E0.vertexCount = 48;
         while (remaining >= 48) {
-            sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
+            sdfAppendPacket(packet, (u32)func_0015FE20(&D_003D65E0));
             if (work->streamAllocation == NULL) {
                 D_003D65E0.colors += 48;
                 D_003D65E0.positions += 48;
@@ -146,7 +146,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
         if (remaining >= 3) {
             D_003D65E0.parameterCount = remaining / triangleSize;
             D_003D65E0.vertexCount = remaining;
-            sdfAppendPacket(packet, func_0015FE20(&D_003D65E0));
+            sdfAppendPacket(packet, (u32)func_0015FE20(&D_003D65E0));
         }
     }
     D_00354D00[work->mode]->append(D_00354D00[work->mode], packet);

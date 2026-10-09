@@ -6185,6 +6185,14 @@ take an `EffectDispatchState *` or shuttle a software pointer through
 This does not change the SDK allocator's address-word return or the
 `u32` packet-address argument to `sdfAppendPacket`.
 
+The existing draw builders `func_0015FE20` / `func_00167A10` also return
+the allocated `void *` packet. Their effect/particle caller declarations
+must agree; an integer return is not the SDK allocation API. Where a
+caller immediately submits that packet to `sdfAppendPacket`, the explicit
+`u32` conversion belongs only at its physical-address second argument.
+The builders, descriptor layouts and genuine allocator word ABI stay
+unchanged.
+
 
 ## CPU list wrappers preserve the list owner, not its DMA address words
 
