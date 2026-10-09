@@ -527,7 +527,6 @@ extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 
 extern void evtStoreUnitMotionShortParameters(EvtUnit *, s32, s32);
 
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 

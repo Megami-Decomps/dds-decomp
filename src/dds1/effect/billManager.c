@@ -434,7 +434,21 @@ void billFlushPendingRenderPairs(void) {
     D_003BD7F8 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
+void billInitializeCommonDrawState(BillObj *billboard) {
+    f32 zero = 0.0f;
+    f32 one = 1.0f;
+    billboard->requestedPacketListIndex = 0;
+    billboard->position[3] = zero;
+    billboard->position[2] = zero;
+    billboard->position[1] = zero;
+    billboard->position[0] = zero;
+    billboard->unk18 = one;
+    billboard->childScaleY = one;
+    billboard->unk1C = zero;
+    billboard->childScaleX = one;
+    billboard->childParam = 0x80808080;
+    billboard->rotationAngle = zero;
+}
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;

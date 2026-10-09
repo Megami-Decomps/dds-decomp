@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -301,7 +302,7 @@ extern void func_002DD968(f32 angle);
 extern void func_002DD8E8(f32 angle);
 extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
 
-extern void mdlStorePrimaryVectorVU(void *obj);
+extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
 extern u32 func_001619E8(void);
@@ -399,7 +400,7 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
-extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
+extern void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 
 typedef struct EffPCPTwinWork {
     u32 unk00;
@@ -4134,7 +4135,6 @@ typedef struct EffPCPBeamDrawParams {
 extern EffPCPBeamDrawParams D_003D6610;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 struct SdfTextParam;
-extern void func_002DA420(struct SdfTextParam *asset, f32 scale);
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
@@ -4152,7 +4152,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfCreateAssetWithDrawEntries();
-    func_002DA420((struct SdfTextParam *)node->assetHandle, 1.0f);
+    sdfSetPrimaryStateFloat((struct SdfAsset *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_003D6610, 0, sizeof(D_003D6610));
@@ -5002,8 +5002,8 @@ typedef struct EffPCPPulseBattle {
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
 extern void func_002E7F20(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
-extern void mdlStoreTertiaryVectorVU(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_002D9238(void *table, void *model);
 

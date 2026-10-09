@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
@@ -6,13 +7,9 @@
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
-extern void func_00333288(void *, u32);
-extern void func_00333270(void *, u32);
-extern void func_003332A0(void *, u32);
 #include "ee_mmi.h"
 
 extern void *sdfCreateAssetWithDrawEntries();
-extern void func_003332D0(void *, f32);
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
@@ -491,7 +488,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 
     instance->billboard = billCreateIndexed(1, entryIndex);
     instance->renderState = sdfCreateAssetWithDrawEntries();
-    func_003332D0(instance->renderState, 1.0f);
+    sdfSetPrimaryStateFloat(instance->renderState, 1.0f);
     EE_MMI_UNIT_MATRIX(instance->transform);
     return (u8 *)instance;
 }
@@ -502,10 +499,10 @@ u8 *billCloneUnitObject(EffInstance *source) {
 
     instance->billboard = billCloneObjectRetainingSharedData(source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
-    func_003332D0(instance->renderState, 1.0f);
-    func_00333288(instance->renderState, 0x80808080);
-    func_00333270(instance->renderState, 0x80808080);
-    func_003332A0(instance->renderState, 0x80808080);
+    sdfSetPrimaryStateFloat(instance->renderState, 1.0f);
+    sdfSetPrimaryStateWordSecond(instance->renderState, 0x80808080);
+    sdfSetPrimaryStateWordFirst(instance->renderState, 0x80808080);
+    sdfSetPrimaryStateWordThird(instance->renderState, 0x80808080);
     EE_MMI_UNIT_MATRIX(instance->transform);
     EE_MMI_UNIT_MATRIX(instance->localMatrix);
     return (u8 *)instance;

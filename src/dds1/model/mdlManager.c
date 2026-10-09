@@ -220,13 +220,11 @@ void btlReleaseAllEntities(void) {
     } while (groupIndex < BTL_GROUP_COUNT);
 }
 
-extern Motion *func_002DB230(SdfModel *, MotionTable *);
-
 /* Create and attach the motion for the selected resource record. */
 Motion *motionOwnerCreateObjectForRecord(MdlCtx *owner, s32 index) {
     MotionTable *resource = owner->sub->slots[index].data;
     s16 slot = owner->sub->slots[index].slot;
-    Motion *object = func_002DB230(owner->inner, resource);
+    Motion *object = sdfCreateMotion(owner->inner, resource);
 
     object->searchId = index;
     owner->slots[slot] = object;
@@ -273,7 +271,6 @@ typedef struct Hdr8 {
 
 extern u32 D_00367904[][2];
 extern u8 D_003BBB60[];
-extern void sdfDestroyMotion(Motion *arg);
 extern char *strcat(char *dst, const char *src);
 
 
@@ -737,7 +734,6 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 }
 
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
-extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
 extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 

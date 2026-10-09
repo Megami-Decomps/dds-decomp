@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -39,8 +40,7 @@ typedef struct {
 } EffResourceRenderState;
 
 extern EffResourceRenderState D_003D65E0;
-extern u32 sdfCreateAssetWithDrawEntries(void);
-extern void func_002DA420(u32 resource, f32 scale);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
@@ -71,8 +71,8 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
     work->scale[2] = 1.0f;
     work->streamAllocation = NULL;
     EE_MMI_UNIT_MATRIX(work->matrix);
-    work->graphics6C = sdfCreateAssetWithDrawEntries();
-    func_002DA420(work->graphics6C, 1.0f);
+    work->drawAsset = sdfCreateAssetWithDrawEntries();
+    sdfSetPrimaryStateFloat(work->drawAsset, 1.0f);
     entry = work->entries;
     for (i = 0; i < count; i++, entry++) {
         entry->value = 0x80808080;
@@ -83,7 +83,7 @@ EffResourceWork *effCreateResourceEntryWork(u32 count)
 }
 
 void effReleaseAttachedResources(EffResourceWork *work) {
-    sdfQueueAssetRelease(work->graphics6C);
+    sdfQueueAssetRelease(work->drawAsset);
     effReleaseOptionalResource(work);
     sdfReleaseResourceAllocation(work->backingAllocation);
 }
@@ -99,7 +99,7 @@ void effDrawInstancedResourceTrianglesVU(EffResourceWork *work) {
 
     packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
-    sdfConsAppendAssetPacket(packet, (void *)work->graphics6C, 0);
+    sdfConsAppendAssetPacket(packet, work->drawAsset, 0);
     EE_MMI_UNIT_MATRIX(matrix);
     matrix[0] = work->scale[0];
     matrix[5] = work->scale[1];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -161,7 +162,6 @@ extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
-extern void func_002DA420(s32, f32);
 
 
 
@@ -624,7 +624,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         parCellInit(system, i);
     }
     system->asset = sdfCreateAssetWithDrawEntries();
-    func_002DA420((s32)system->asset, 1.0f);
+    sdfSetPrimaryStateFloat(system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
@@ -1691,7 +1691,7 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->allocation = allocation;
     block->positions = (u128 *)base;
     block->asset = sdfCreateAssetWithDrawEntries();
-    func_002DA420((s32)block->asset, 1.0f);
+    sdfSetPrimaryStateFloat(block->asset, 1.0f);
     return block;
 }
 
