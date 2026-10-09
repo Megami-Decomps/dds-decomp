@@ -6779,7 +6779,7 @@ void func_002F5EF0(u32 unusedResource) {
 /* Header common to the resource-instance constructors and callback dispatchers. */
 typedef struct EffActiveResource {
     f32 position[4];
-    u8 pad_10[0x10];
+    f32 orientation[4];  // 0x10: quaternion consumed by model callbacks
     f32 scale;           // 0x20
     u32 color;           // 0x24
     u32 frame;           // 0x28
@@ -7628,7 +7628,78 @@ void effReleaseOwnedModelContextWork(MdlCtx **handle) {
     sdfReleaseChipBlock(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8040);
+/* Native 0x40-byte payload copied for the model-resource callback table. */
+typedef struct EffModelCallbackConfig {
+    s32 duration;          /* 0x00: signed update-count threshold */
+    f32 frameStep;         /* 0x04 */
+    u8 selector;           /* 0x08 */
+    u8 pad09[0x37];
+} EffModelCallbackConfig;
+typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0x40 ? 1 : -1];
+
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+
+void func_002F8040(EffActiveResource *resource)
+{
+    MdlCtx **modelHandle = (MdlCtx **)resource->resource;
+    EffModelCallbackConfig *config = (EffModelCallbackConfig *)resource->payload;
+    MdlCtx *model;
+    SdfModel *inner;
+    BtlUnit *unit;
+    s32 elapsedFrame;
+    s32 duration;
+    f32 matrix[4][4];
+    u128 quaternion;
+
+    VU0_LOAD_VF(vf10, resource->position);
+    mdlStorePrimaryVectorVU(*modelHandle);
+    VU0_LOAD_VF(vf10, resource->orientation);
+    mdlUpdateContextRotationBasisFromQuaternion(*modelHandle);
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_SCALAR_OP(resource->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    mdlStoreTertiaryVectorVU(*modelHandle);
+
+    model = *modelHandle;
+    model->first->frameStep = config->frameStep;
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    elapsedFrame = (s32)resource->frame;
+    duration = config->duration;
+    inner = (*modelHandle)->inner;
+
+    if (elapsedFrame < duration || duration == 0) {
+        unit = NULL;
+        switch (config->selector) {
+        case 0:
+        case 1:
+        case 3:
+        case 5:
+            unit = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+            break;
+        case 2:
+        case 4:
+            unit = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+            break;
+        case 6:
+            unit = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+            break;
+        case 7:
+            unit = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+            break;
+        }
+
+        sdfLoadMapRecordLookAtBasis(inner, 0);
+        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+        sdfVuMatrixToQuaternion(matrix);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
+        effObjSetInnerFirstVec(unit->effectObject, (u128 *)matrix[3]);
+        effObjSetInnerSecondVec(unit->effectObject, &quaternion);
+        unit->stateFlags |= 0x200000;
+    }
+}
 
 EffModelBindings *func_002F81A8(s32 *owner) {
     EffModelBindings *work = sdfAllocSizeClassBlock(sizeof(*work));
