@@ -3700,7 +3700,7 @@
 0x00219350	mdlGetFirstRecord	inferred	Returns the first model record at header plus eight or NULL when its kind is the terminator.
 0x00219368	mdlGetNextRecord	inferred	Advances by the current record's nextOffset and returns NULL on the terminator.
 0x00219388	mdlCountRecords	inferred	mdl model resources and viewer in game/code_00218B48.c
-0x002193D8	mdlRecordMatchesId	inferred	Compares the first record word against a requested identifier.
+0x002193D8	mdlRecordHasKind	inferred	Checks whether a viewer record carries the requested record kind; all current callers test the track-poly kind.
 0x00219590	mdlDrawMarkParamsPanel	inferred	debug panel: MARK/START/END/ITRVL/FACE/BLEND text plus 4x4 colour byte grid
 0x002198D8	mdlEditMarkParametersWithPad	inferred	confidence=high; src/dds1/game/code_00218B48.c:func_002198D8; Navigates a viewer mark-parameter cursor and edits mark indices, timing, blending, and color channels from pad input. [names_qp9.tsv]
 0x00219AF8	mdlAddBillboardPart	inferred	Appends a kind-zero model part and creates its indexed billboard resource.
@@ -3754,6 +3754,7 @@
 0x0021C920	mdlUpdateViewerSettingsInput	inferred	confidence=high; src/dds1/game/code_00218B48.c:func_0021C920; Handles viewer option navigation, debug-graph toggles, background-color editing, numeric settings, and camera reset input. [names_qp9.tsv]
 0x0021CE70	mdlRunViewerSettingsTask	inferred	confidence=high; matched-C; src/dds1/game/code_00218B48.c:1668:func_0021CE70; Updates settings input, draws associated viewer settings UI and returns zero.; twin=0x002379E0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0021CE98	mdlCountActiveRecords	inferred	mdl model resources and viewer in game/code_00218B48.c
+0x0021CF00	mdlGetSelectedRecord	inferred	Returns the record at the viewer's selected index across the shared and active-entry lists.
 0x0021CFC0	mdlUpdateViewerMarkEditorInput	inferred	U1
 0x0021D568	mdlRunViewerEffectEditorTask	inferred	confidence=high; matched-C; src/dds1/game/code_00218B48.c:1688:func_0021D568; Runs effect-list input/editor and renderer; retail callee displays NO EFFECT fallback and selected effect parameters.; twin=0x002380D8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0021D590	mdlRequestViewerExitOnce	inferred	Sets viewer exit guard and releases viewer state only on first call. [names_reviewed7.tsv]
