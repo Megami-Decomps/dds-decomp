@@ -63,6 +63,8 @@ FileJobPayload *fileCreateJob(u16 type);
 void fileJobDestroy(FileJobPayload *job);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
+void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandPath, u16 option);
+void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *commandPath, u16 selector);
 
 /* Queue flags describe payload sharing and secondary-buffer links. */
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1
