@@ -17,7 +17,6 @@ extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectPara
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern void sdfReleaseChipBlock(void *work);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);

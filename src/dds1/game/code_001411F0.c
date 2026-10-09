@@ -236,7 +236,6 @@ typedef struct {
 
 extern FldClear18 fldPendingSounds[];
 
-extern void sdfReleaseChipBlock(void *allocation);
 
 extern void fldSelectDisplayBuffer(u32);
 

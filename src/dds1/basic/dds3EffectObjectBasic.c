@@ -37,7 +37,6 @@ typedef EffWorldNode EffectObj;
 
 void effObjFreeInner(void *arg);
 void dds3DestroyObjectBase(void *arg);
-void sdfReleaseChipBlock(void *arg);
 /* Dispatchers take (bill handle, 16-byte vector, extra); the vector is
    loaded with lqc2 and the extra is forwarded to effObjCreateWithVectors. */
 EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra);

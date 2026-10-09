@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "scr.h"
@@ -87,7 +88,6 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 }
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
 extern void evtUnlinkWorkNode(ScrData *process);
 

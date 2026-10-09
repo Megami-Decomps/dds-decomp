@@ -1,10 +1,10 @@
 #include "eff_light.h"
+#include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
 void effObjFreeInner(EffWorldNode *object);
 void dds3DestroyObjectBase(ObjBase *object);
-void sdfReleaseChipBlock(void *arg);
 void *memset(void *s, s32 c, u32 n);
 extern void *D_00324770[];
 extern void *kwlnDefaultColorVector[];

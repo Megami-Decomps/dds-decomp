@@ -29,7 +29,6 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
     return sdfAllocSizeClassBlock(size);
 }
 
-extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
 void sdfFreeMemoryFromEitherHeap(void *data) {

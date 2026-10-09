@@ -24,7 +24,6 @@ u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-void sdfReleaseChipBlock(void *arg);
 
 void dds3ReleaseWorldValueEntries(WorldValueIndices *arg);
 

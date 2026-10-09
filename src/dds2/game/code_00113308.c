@@ -46,7 +46,6 @@ extern s32 effObjInnerCreate(EffWorldNode *node);
 extern void effObjFreeInner(EffWorldNode *node);
 extern void evtEndObjectValueTransition(EffWorldNode *object);
 
-extern void sdfReleaseChipBlock(void *memory);
 
 extern void dds3SetObjectFlags(void *object, u32 mask);
 

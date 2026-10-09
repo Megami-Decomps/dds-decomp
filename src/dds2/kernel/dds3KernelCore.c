@@ -52,7 +52,6 @@ extern void kwlnTaskRunScheduledUpdates(void);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 
-extern void sdfReleaseChipBlock(void* ptr);
 
 
 void kwlnTaskActivate(KwlnTask* task)

@@ -2,7 +2,6 @@
 #include "sdf_chip.h"
 #include "mnu_sprite_resource.h"
 
-extern void sdfReleaseChipBlock(void *);
 
 extern void mnuRequestIndexedMovieResource(s32);
 

@@ -82,7 +82,6 @@ s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32)) 
     return 1;
 }
 
-extern void sdfReleaseChipBlock(void *block);
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
 u32 dds3CreateWorldObjectData(EffWorldNode *object) {

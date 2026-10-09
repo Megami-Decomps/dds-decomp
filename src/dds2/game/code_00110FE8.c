@@ -131,7 +131,6 @@ s32 dds3ExchangeAreaSlot(void *arg);
 
 void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 
-void sdfReleaseChipBlock(void *arg);
 
 void dds3DestroyObjectPointerChains(EffWorldNode *object) {
     u32 *p;
