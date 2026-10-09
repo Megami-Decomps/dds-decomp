@@ -2711,17 +2711,6 @@ s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00208860);
-
-void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
-    if (((BtlUnit *)unit)->partyRecord.unitId != 0x10d) {
-        return;
-    }
-    btlGetRuntime();
-    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
-    func_00208860(unit, 0);
-}
-
 /* Battle setup allocates exactly eight bytes for this callback's state. */
 typedef struct BtlScaleTransitionState {
     f32 targetScale; /* 0x00 */
@@ -2731,6 +2720,77 @@ typedef struct BtlScaleTransitionState {
 
 typedef char BtlScaleTransitionStateSizeCheck[
     sizeof(BtlScaleTransitionState) == 8 ? 1 : -1];
+
+typedef struct BtlScaleStageSource {
+    u8 pad00[0x26];
+    u16 flags; /* 0x26: bit 0x20 lets a source advance the stage */
+} BtlScaleStageSource;
+
+extern f32 D_00360F00[];
+extern f32 D_00360F18[];
+extern DatEnemyRecord *datEnemyRecords;
+
+/* Step the special unit's scale transition: advance (or reset) the stage, retarget the
+ * scale from its two model records and rescale its base stats from the enemy record. */
+void func_00208860(s32 unit, BtlScaleStageSource *source) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlScaleTransitionState *transition = (BtlScaleTransitionState *)battle->effect;
+    BtlUnit *selected;
+    BtlUnit *candidate;
+    BtlActorStatusRecord *modelA;
+    BtlActorStatusRecord *modelB;
+    f32 statScale;
+    u32 flags;
+    u32 i;
+
+    if (source != 0 && (source->flags & 0x20) == 0) {
+        return;
+    }
+    if (transition->stage >= 4) {
+        return;
+    }
+    if (source == 0) {
+        transition->stage = 0;
+    } else {
+        transition->stage = transition->stage + 1;
+    }
+    selected = 0;
+    for (candidate = battle->units; candidate != 0; candidate = candidate->next) {
+        flags = candidate->status.flags;
+        if ((flags & 1) != 0) {
+            if ((flags & 0x400) != 0) {
+                if (candidate->partyRecord.unitId == 0x10D) {
+                    selected = candidate;
+                    break;
+                }
+            }
+        }
+    }
+    if (selected == 0) {
+        return;
+    }
+    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
+    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
+    transition->targetScale = (modelA->scale - modelB->scale) * D_00360F00[transition->stage];
+    transition->targetScale += modelB->scale;
+    statScale = D_00360F18[transition->stage];
+    for (i = 0; i < 5; i++) {
+        if (i != 3) {
+            selected->partyRecord.baseStats[i] = (s32)((f32)(s8)datEnemyRecords[0x10D].baseStats[i] * statScale);
+        } else {
+            selected->partyRecord.baseStats[i] = datEnemyRecords[0x10D].baseStats[i];
+        }
+    }
+}
+
+void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
+    if (((BtlUnit *)unit)->partyRecord.unitId != 0x10d) {
+        return;
+    }
+    btlGetRuntime();
+    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
+    func_00208860(unit, 0);
+}
 
 void func_00208A50(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
