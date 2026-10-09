@@ -711,12 +711,12 @@ void func_002DC7C8(SdfMotionIndexedValueBinding *a0) {
     a0->capturedWord = a0->target->unk20;
 }
 
-void *func_002DC7D8(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(r, a0, D_003982B8, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_003982B8, options);
+    return binding;
 }
 
 void sdfMotionApplyPrimaryWordFourthKey(SdfMotionIndexedValueBinding *a0, f32 t) {
