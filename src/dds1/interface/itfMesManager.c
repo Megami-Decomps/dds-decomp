@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mes_window.h"
 #include "kwln.h"
 
 

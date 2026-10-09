@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "kwln.h"
@@ -816,7 +817,6 @@ void func_00249C40(s32 position, EvtRuntime *viewer) {
 }
 
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *, s32 *, s32 *);
-extern u32 itfMesGetWindowEntryItems(s32, s32);
 void evtViewerMarkWindowActive(EvtRuntime *);
 
 /* Activates the message window thirty frames before a kind-4 key when its
@@ -1291,8 +1291,6 @@ u16 evtViewerPopHistory(EvtRuntime *viewer) {
     return id;
 }
 
-extern u32 itfMesGetWindowFlags(s32);
-extern s16 itfMesGetWindowClearBitCount(s32);
 extern s16 itfPanelGetPairFirst(s32);
 extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
