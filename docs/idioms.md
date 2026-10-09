@@ -5481,3 +5481,5 @@ the model manager and viewer now share their types. The separate selection
 and path tables use the existing generic pointer/count descriptor.
 DDS2's slot setter takes three filename pointers: its battle callers pass
 the `.data` strings `human/pc001_00.PB` and `human/pc001_01.PB`.
+DDS1's `func_00218BE8`, like DDS2's `func_00233700`, receives the allocated
+chip-cell pointer directly and forwards it to `sdfReleaseChipBlock`.

@@ -249,8 +249,8 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
     sdfPacReleasePacketQueueNodes(&request);
 }
 
-void func_00218BE8(s32 resource) {
-    sdfReleaseChipBlock((void *)resource);
+void func_00218BE8(void *memory) {
+    sdfReleaseChipBlock(memory);
 }
 
 /* Release the three copied filename paths, then their tables and backing allocations. */
