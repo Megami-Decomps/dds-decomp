@@ -213,16 +213,16 @@ extern s32 SignalSema(s32);
 extern u32 func_003287E0(void);
 extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
-extern void func_00329ED0(void);
+extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_0032DEC8(void);
-extern s32 func_00329F30(s32);
+extern s32 sdfGraphWakeDisplayThread(s32);
 extern void sceGsResetPath(void);
 
 void func_0032A230(void) {
     u32 startTicks;
 
     D_004389E1 = 0;
-    sdfAddHandler(1, 1, func_00329F30, -1, 0);
+    sdfAddHandler(1, 1, sdfGraphWakeDisplayThread, -1, 0);
     func_003668B8(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
@@ -236,7 +236,7 @@ void func_0032A230(void) {
         }
         if (D_0043913D != 0) {
             D_0043913D = 0;
-            func_00329ED0();
+            sdfGraphResetDeviceForCurrentMode();
         }
         D_00438A1D = 1;
         func_0032DEC8();
@@ -314,7 +314,7 @@ void func_0032A440(s32 size) {
 
     sceGsResetPath();
     D_004389D8 = 1;
-    func_00329CE0(graph, 1, 1);
+    sdfGraphApplyModeDefaults(graph, 1, 1);
     sdfGraphRecreateBuffers(graph);
     D_004389D9 = 0;
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;

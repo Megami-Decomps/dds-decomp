@@ -947,8 +947,8 @@ void sdfCopyAssetListParameterState(DevRequest *destination, DevRequest *source)
 extern s32 (*D_003981A8[])(u32, u32);
 
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
-s32 sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
-    D_003981A8[commandWord >> 16](context, commandWord);
+void *sdfDispatchAssetCommandWord(u32 context, u32 commandWord) {
+    return (void *)D_003981A8[commandWord >> 16](context, commandWord);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfLiveAssetCount);

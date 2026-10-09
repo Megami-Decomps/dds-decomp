@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_motion_bindings.h"
 
 extern s32 (*D_0040B480[])(void *a0, s32 a1);
 
@@ -36,8 +37,6 @@ typedef struct MotionKeySample {
     f32 weight;
 } MotionKeySample;
 
-extern void sdfFindMotionKeyInterval(void *, void *, f32);
-
 void func_00335EE8(void) {
 }
 
@@ -69,7 +68,8 @@ void sdfBlendMotionKeys(MotionKeyWork *motion, f32 frame) {
     f32 weight;
     f32 inverse;
 
-    sdfFindMotionKeyInterval(motion, &sample, frame);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion,
+                             (SdfMotionKeyInterval *)&sample, frame);
     firstId = sample.first->id;
     secondId = sample.second->id;
     firstValue = sample.first->value;

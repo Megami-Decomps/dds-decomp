@@ -6008,10 +6008,13 @@
 0x00329A00	sdfGetGeneralHeapStats	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:136:func_00329A00; Peer-matched C proposal; M141; source=names_pending_main.tsv:131 [names_qp12_apply.tsv]
 0x00329AA8	sdfFindGeneralBlockContaining	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:138:func_00329AA8; Returns the used general-heap block containing the supplied address in its half-open range, or NULL when the end marker is reached.; source=names_pending_main.tsv:130 [names_qp11.tsv]
 0x00329B18	sdfSendNamedResourceRequest	inferred	Allocates a request containing name length, name and payload for transfer. [names_reviewed21.tsv]
+0x00329CE0	sdfGraphApplyModeDefaults	inferred	Selects the display-mode row, initializes its dimensions and formats, and optionally clears the buffer pointers.
 0x00329D38	sdfGraphSetDisplayMode	inferred	Sets the global display mode and marks graphics state for refresh.
 0x00329D70	sdfGraphReleaseBuffers	inferred	Byte-identical dds1 twin 0x002D0EC0; Releases and clears three graph buffer pointers. [names_conflicts.tsv]
 0x00329DB8	sdfGraphRecreateBuffers	inferred	Byte-identical dds1 twin 0x002D0F08; Releases existing graph buffers and allocates three using dimensions and modes from the graph. [names_conflicts.tsv]
 0x00329E40	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x002D0F90, input-family pairing. [names_qp10.tsv]
+0x00329ED0	sdfGraphResetDeviceForCurrentMode	inferred	Resets the GS using interlace settings from the current display mode and marks graph state for reset.
+0x00329F30	sdfGraphWakeDisplayThread	inferred	Wakes the graph worker for channel 1, enables interrupts, and returns zero.
 0x00329F60	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
 0x00329F78	sdfCaptureDeferredGsImage	inferred	U0
 0x0032A378	sdfServiceGraphicsBuffers	inferred	R_Names32
@@ -6207,6 +6210,7 @@
 0x00334510	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap; paired with DDS1 0x002DB660.
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
+0x00334658	sdfMotionReleaseBindingStorage	inferred	Releases storage for a motion-owned binding through its common callback slot.
 0x00334670	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x00334678	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS1 0x002DB7C8.
 0x00334788	sdfInterpolateMotionKeys	inferred	Interpolates two float key values according to the supplied weight.

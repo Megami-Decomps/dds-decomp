@@ -229,25 +229,25 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
-    u32 *cursor;
-    u32 commandAddress;
+    u32 **cursor;
+    u32 *commandList;
 
     sdfDrawNodeSetFromItem(node, item);
     switch (item->commandSetupMode) {
     case 0:
         for (pass = 0; pass != 2; pass++) {
             for (slot = 0; slot != 3; slot++) {
-                sdfDrawNodeBuildCommandList(node, (u32 *)item->commandData.inlineCommandAddresses[slot],
+                sdfDrawNodeBuildCommandList(node, item->commandData.inlineCommandLists[slot],
                               slot, 0, pass);
             }
         }
         break;
     case 1:
-        if (item->commandData.commandList.commandAddresses != NULL) {
+        if (item->commandData.commandList.commandLists != NULL) {
             for (pass = 0; pass != 2; pass++) {
-                cursor = item->commandData.commandList.commandAddresses;
-                while ((commandAddress = *cursor++) != 0) {
-                    sdfDrawNodeBuildCommandList(node, (u32 *)commandAddress, 0, 1, pass);
+                cursor = item->commandData.commandList.commandLists;
+                while ((commandList = *cursor++) != NULL) {
+                    sdfDrawNodeBuildCommandList(node, commandList, 0, 1, pass);
                 }
             }
         }

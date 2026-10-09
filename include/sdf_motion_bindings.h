@@ -31,6 +31,9 @@ typedef struct SdfMotionKeyBinding {
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
+void sdfFindMotionKeyInterval(SdfMotionKeyBinding *binding,
+                              SdfMotionKeyInterval *interval, f32 frame);
+
 void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
 
 /* Indexed asset bindings share the key prefix and retain the selected asset. */
