@@ -94,17 +94,10 @@ struct ParListNode {
     ParListNode *next;
 };
 
-typedef struct ParDrawCmd {
-    s32 count;      /* 0x00 */
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    void (*finish)(void *, s32); /* 0x10 */
-} ParDrawCmd;
 
 extern s32 sdfAllocPacketAligned(s32);
 struct SdfListHead;
-extern s32 func_0015FE20(ParDrawState *);
+extern void *func_0015FE20(ParDrawState *);
 
 
 extern ParDispatch parKindConstructorEntries[];
@@ -1510,15 +1503,15 @@ extern const u32 D_0034E3E0[];
 extern const u32 D_0034E520[];
 extern const u32 D_0034E450[];
 extern const u32 D_0034E4D0[];
-extern ParDrawCmd *D_0034E620[];
-extern ParDrawCmd D_00325248;
+extern SdfPoolNode *D_0034E620[];
+extern SdfPoolNode D_00325248;
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
 void parDrawPendingCellSystems(void) {
-    s32 lists[5];
-    s32 *slot;
-    s32 list;
-    s32 specialList;
+    SdfListHead *lists[5];
+    SdfListHead **slot;
+    SdfListHead *list;
+    SdfListHead *specialList;
     s32 count;
     s32 i;
     s32 remaining;
@@ -1534,12 +1527,12 @@ void parDrawPendingCellSystems(void) {
         slot = &lists[system->bucket];
         list = *slot;
         if (list == 0) {
-            *slot = sdfAllocPacketAligned(0x20);
-            sdfInitPacketList((struct SdfListHead *)*slot);
-            sdfConsAppendClearPacket((SdfListHead *)*slot, NULL);
+            *slot = (SdfListHead *)sdfAllocPacketAligned(0x20);
+            sdfInitPacketList(*slot);
+            sdfConsAppendClearPacket(*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket((SdfListHead *)list, (SdfAsset *)system->asset, NULL);
+        sdfConsAppendAssetPacket(list, (SdfAsset *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.indices = D_0034E360;
@@ -1553,14 +1546,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                     parDrawControl.positions += 16;
                     parDrawControl.colors += 16;
                 }
                 if (remaining >= 4) {
                     parDrawControl.width = remaining - 2;
                     parDrawControl.height = remaining;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
@@ -1575,14 +1568,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
                 if (remaining >= 6) {
                     parDrawControl.width = (remaining / 3) * 4 - 4;
                     parDrawControl.height = remaining;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
@@ -1597,7 +1590,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                     parDrawControl.positions += 5;
                     parDrawControl.colors += 5;
                 }
@@ -1614,7 +1607,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                     parDrawControl.positions += 6;
                     parDrawControl.colors += 6;
                 }
@@ -1631,7 +1624,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
-                    sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
@@ -1640,12 +1633,12 @@ void parDrawPendingCellSystems(void) {
     }
     for (i = 0; i < 4; i++) {
         if (lists[i] != 0) {
-            D_0034E620[i]->finish(D_0034E620[i], lists[i]);
+            D_0034E620[i]->append(D_0034E620[i], lists[i]);
         }
     }
     if (lists[4] != 0) {
-        specialList = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList((struct SdfListHead *)specialList);
+        specialList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(specialList);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -1653,8 +1646,8 @@ void parDrawPendingCellSystems(void) {
         packet[3] = 0xE;
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
-        sdfAppendPacket((struct SdfListHead *)specialList, (u32)packet);
-        D_00325248.finish(&D_00325248, specialList);
+        sdfAppendPacket(specialList, (u32)packet);
+        D_00325248.append(&D_00325248, specialList);
         packet = (u64 *)sdfAllocPacketAligned(0x30);
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -1662,8 +1655,8 @@ void parDrawPendingCellSystems(void) {
         packet[3] = 0xE;
         packet[4] = 0x42;
         packet[5] = 0x42;
-        sdfAppendPacket((struct SdfListHead *)lists[4], (u32)packet);
-        D_00325248.finish(&D_00325248, lists[4]);
+        sdfAppendPacket(lists[4], (u32)packet);
+        D_00325248.append(&D_00325248, lists[4]);
     }
     D_003BB014 = NULL;
 }
@@ -1694,12 +1687,12 @@ void parReleaseDrawBlock(ParBlock *block) {
 
 
 
-void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParBlock *cmd) {
-    s32 list = sdfAllocPacketAligned(0x20);
+void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
+    SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     ParDrawState state;
     s32 remaining;
-    sdfInitPacketList((SdfListHead *)list);
-    sdfConsAppendClearPacket((SdfListHead *)list, 0);
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
     state.width = 0x10;
@@ -1710,15 +1703,15 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParBlock *cmd) {
     state.color = cmd->color;
     while (remaining >= 0x30) {
         remaining -= 0x30;
-        sdfAppendPacket(list, func_0015FE20(&state));
+        sdfAppendPacket(list, (u32)func_0015FE20(&state));
     }
     if (remaining > 0) {
         u16 *counts = (u16 *)&parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
-        sdfAppendPacket(list, func_0015FE20(&state));
+        sdfAppendPacket(list, (u32)func_0015FE20(&state));
     }
-    emitter->finish(emitter, list);
+    emitter->append(emitter, list);
 }
 
 ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {

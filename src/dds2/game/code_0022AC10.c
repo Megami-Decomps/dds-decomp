@@ -1410,7 +1410,7 @@ s32 func_0022CD60(s32 kind, s32 id) {
     return 0;
 }
 
-void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
+void func_0022CE30(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1422,7 +1422,7 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 horizontal[4];
     s32 vertical[4];
 
-    sdfConsCreateDrawPacket((SdfListHead *)list, kwlnHeldTextureReference, (primitive >> 9) & 1);
+    sdfConsCreateDrawPacket(list, kwlnHeldTextureReference, (primitive >> 9) & 1);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1435,7 +1435,7 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
+    sdfQueueTexturedQuad(list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
