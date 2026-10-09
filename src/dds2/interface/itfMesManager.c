@@ -1352,7 +1352,7 @@ FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node) {
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
 void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
     FrFontGlyph *shade = glyph->link20.linkedGlyph;
-    u8 encodedIntensity = glyph->u0.b.b0;
+    u8 encodedIntensity = glyph->glyphCodeOrContext.byteRoles.encodedContextByte;
 
     entryBlock->color[3] = encodedIntensity >> 1;
     entryBlock->color[0] = shade->renderValueOrSetupOrShade.shadeColor.red;
