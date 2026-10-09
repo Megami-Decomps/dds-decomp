@@ -19,6 +19,7 @@
 #include "btl_resource_name.h"
 #include "dat_command.h"
 #include "sce_io.h"
+#include "fpu.h"
 
 extern s32 func_0036B420(s32 directory);
 extern s32 func_0036B588(s32 directory, SceDirent *entry);
@@ -826,7 +827,30 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlAimHorizontalDirectionClampedVU);
+s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angle) {
+    f32 delta[4];
+    f32 sine;
+    f32 tangent;
+    f32 x;
+
+    delta[0] = targetPosition[0] - origin[0];
+    delta[2] = targetPosition[2] - origin[2];
+    if (delta[0] != 0.0f || delta[2] != 0.0f) {
+        sine = sdfSinPoly(angle);
+        tangent = sine / sdfEvaluateCosineViaSinePhaseShift(angle);
+        x = tangent * delta[2];
+        if (ffabsf(delta[0]) < ffabsf(x)) {
+            x = delta[0];
+        } else if (0.0f <= delta[0]) {
+            x = ffabsf(x);
+        } else {
+            x = -ffabsf(x);
+        }
+        func_00340DC8(0.0f, func_003532E8(x, delta[2]), 0.0f);
+        return 1;
+    }
+    return 0;
+}
 
 /* vu0 routine: vf10.xyz = normalize(e x (e x f)),
  * e = vertexB - vertexA, f = vertexC - vertexA.

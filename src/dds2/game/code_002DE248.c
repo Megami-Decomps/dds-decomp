@@ -42,7 +42,7 @@
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
-
+#include "fpu.h"
 
 extern void func_00200930(f32 *, f32 *, s32);
 
@@ -3089,7 +3089,104 @@ void effReleaseRingResourceHandle(u32 handle) {
     sdfReleaseChipBlock((void *)handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E64F0);
+/* Class 1 ring parameters have a distinct 0x6C-byte copied layout. */
+typedef struct EffExpandingRingParams {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
+    u32 segments;
+    u8 flag;
+    u8 pad3D[3];
+    f32 baseRadius;
+    u32 colors[3];
+    f32 widths[3];
+    u32 unk5C;
+    f32 speed;
+    f32 acceleration;
+    u8 reverseTime;
+    u8 pad69[3];
+} EffExpandingRingParams;
+
+typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C) ? 1 : -1];
+
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern f32 sdfSinPoly(f32 angle);
+
+void func_002E64F0(EffClassWork *work) {
+    EffExpandingRingParams *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if (config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, bands[0]);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_STORE_VF(vf10, bands[1]);
+    VU0_STORE_VF(vf11, bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, direction);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_SCALAR_OP_CLOBBER(radius, "vmulx.xyzw vf10, vf10, vf2x");
+        VU0_STORE_VF(vf10, out[0]);
+        VU0_LOAD_VF(vf10, bands[0]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[1]);
+        VU0_LOAD_VF(vf10, bands[1]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[2]);
+        VU0_LOAD_VF(vf10, bands[2]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3373,7 +3470,98 @@ void effReleaseRingHandle(EffRingResource *handle) {
     sdfReleaseChipBlock(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E6F48);
+/* Class 0 ring parameters: the 0x68-byte layout without the extra word. */
+typedef struct EffExpandingRingParams0 {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
+    u32 segments;
+    u8 flag;
+    u8 pad3D[3];
+    f32 baseRadius;
+    u32 colors[3];
+    f32 widths[3];
+    f32 speed;
+    f32 acceleration;
+    u8 reverseTime;
+    u8 pad65[3];
+} EffExpandingRingParams0;
+
+typedef char EffExpandingRingParams0_size[(sizeof(EffExpandingRingParams0) == 0x68) ? 1 : -1];
+
+void func_002E6F48(EffClassWork *work) {
+    EffExpandingRingParams0 *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if (config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALAR_OP_CLOBBER(firstBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_STORE_VF(vf10, bands[0]);
+    VU0_MOVE_VF(vf10, vf11);
+    VU0_SCALAR_OP_CLOBBER(secondBand, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALAR_OP_CLOBBER(thirdBand, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_STORE_VF(vf10, bands[1]);
+    VU0_STORE_VF(vf11, bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        direction[2] = sdfSinPoly(angle);
+        VU0_STORE_VF(vf0, out[0]);
+        VU0_LOAD_VF(vf11, direction);
+        VU0_LOAD_VF(vf10, bands[0]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[1]);
+        VU0_LOAD_VF(vf10, bands[1]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[2]);
+        VU0_LOAD_VF(vf10, bands[2]);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_STORE_VF(vf10, out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
 
 void billDrawCellBlendB(EffClassWork *work) {
     EffRadialRingParams *config = work->payload;
