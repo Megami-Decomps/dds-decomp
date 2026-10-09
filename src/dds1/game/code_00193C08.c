@@ -163,7 +163,56 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_00194228);
+extern void func_00193920(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+extern void func_001946C8(void);
+extern u32 D_003D6E20[];
+extern s32 D_003BD814;
+
+void func_00194228(s32 rowBudget, s32 poolCount) {
+    s32 i;
+    s32 rowCount;
+    s32 glyphsPerRow;
+    s32 rowTotal;
+    s32 glyphRingCount;
+    SdfTexResource *atlasHead;
+
+    frFontWork.cachedItemCount = 0;
+    frFontWork.itemCount = 0;
+    frFontWork.glyphCount = 0;
+    for (i = 0; i < 9; i++) {
+        frFontWork.entries[i].resource = NULL;
+    }
+    glyphsPerRow = 21;
+    rowCount = rowBudget / glyphsPerRow;
+    rowTotal = rowCount;
+    glyphRingCount = poolCount;
+    poolCount = glyphRingCount * 4;
+    frFontWork.atlas.width = 0x200;
+    frFontWork.atlas.widthExponent = frFontHighestSetBitIndex(0x200);
+    frFontWork.atlas.height = 1 << (frFontHighestSetBitIndex(rowTotal * 0x18) + 1);
+    frFontWork.atlas.heightExponent = frFontHighestSetBitIndex(frFontWork.atlas.height);
+    frFontWork.textureHead1 = sdfTexAllocHeadHigh(0x180, 3);
+    for (i = 0; i < 6; i++) {
+        frFontWork.imageBuffers[i] = (frFontWork.textureHead1->word >> 6) + i;
+    }
+    atlasHead = sdfTexAllocHeadHigh((u32)(frFontWork.atlas.width * frFontWork.atlas.height) >> 3, 2);
+    frFontWork.textureHead0 = atlasHead;
+    frFontWork.atlas.bufferBase = atlasHead->word >> 6;
+    frFontWork.atlas.bufferWidth = (u32)frFontWork.atlas.width >> 6;
+    for (i = 0; i < 2; i++) {
+        frFontWork.glyphSlots[i] = NULL;
+    }
+    func_00193920(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
+    frFontWork.itemPool = itfCreateMemNodeRing(0x2C, poolCount);
+    frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
+    frFontLoadDefaultFonts();
+    func_001946C8();
+    for (i = 0; i < 32; i++) {
+        D_003D6E20[i] = 0;
+    }
+    frFontUploadClearedTexture();
+    D_003BD814 = glyphsPerRow * rowTotal;
+}
 
 /* Release slot allocations, both glyph chains/rings, and the shared GS resource buffers. */
 void frFontReleaseAll(void) {

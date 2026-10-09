@@ -276,7 +276,43 @@ void btlAdvancePendingSceneSlotStates(u8 *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3DB0);
+typedef struct UiSlotMatchRow {
+    u8 pad00[0x18];
+    u8 state;
+    u8 pad19;
+    u8 groupIndex; /* index of the matching primary group */
+} UiSlotMatchRow;
+
+void func_001C3DB0(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    UiSlotMatchRow *row;
+    s32 group;
+    s32 offset;
+    u8 slot;
+
+    for (; node != NULL; node = node->nextActor) {
+        if (btlHasRequiredActorStatusBits(node) == 0) {
+            continue;
+        }
+        group = 0;
+        slot = node->lookupId;
+        if (battle->groupPrimary[0] != NULL) {
+            while (group < 20 && battle->groupPrimary[group] != NULL) {
+                if (battle->groupPrimary[group]->unit->owner == node->owner) {
+                    offset = slot * 0x290 + 0xE0;
+                    row = (UiSlotMatchRow *)((u8 *)work + offset);
+                    row->groupIndex = group;
+                    if (keepActive == 0 || (u32)(row->state - 1) >= 2) {
+                        row->state = 3;
+                    }
+                    break;
+                }
+                group++;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C3EC0);
 
@@ -376,7 +412,73 @@ INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C4900);
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C4C58);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C50A0);
+extern const BattlePanelColors D_00416898;
+
+void func_001C50A0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    BattlePanelColors colors = D_00416898;
+    s32 x;
+    s32 y;
+    s32 offsetX = 0;
+    s32 offsetY = 0;
+    s16 alpha = 0;
+    u32 baseColor;
+    u32 color;
+    s32 n;
+
+    switch (work->activeEntries[slot].presentation.presentationValue) {
+    case 0:
+        baseColor = 0x80808000;
+        break;
+    case 1:
+        baseColor = 0x50FF4000;
+        break;
+    case 2:
+    default:
+        baseColor = 0x60111B00;
+        break;
+    }
+    if (work->activeEntries[slot].presentation.presentationState < 4) {
+        if (work->activeEntries[slot].presentation.presentationState > 0) {
+            x = work->activeEntries[slot].position[0];
+            y = work->activeEntries[slot].position[1];
+            for (n = 0; n < 3; n++) {
+                if (n > 0) {
+                    alpha = work->activeEntries[slot].presentation.pulseLevel[n - 1];
+                    offsetX = work->activeEntries[slot].presentation.pulseOffsets[n - 1][0];
+                    offsetY = work->activeEntries[slot].presentation.pulseOffsets[n - 1][1];
+                    alpha = alpha <= 0 ? 0 :
+                        alpha >= work->activeEntries[slot].presentation.transitionFade[0] ?
+                        work->activeEntries[slot].presentation.transitionFade[0] : alpha;
+                    color = baseColor | alpha;
+                } else {
+                    color = baseColor | work->activeEntries[slot].presentation.transitionFade[0];
+                }
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_00306C28((x + work->activeEntries[slot].presentation.transitionGeometry[0] + offsetX) << 4,
+                              (y + work->activeEntries[slot].presentation.transitionGeometry[1] - offsetY) << 3, 0,
+                              colors.values, 0, btlResourceBlock->resA, 9, 0x53);
+                if (n > 0) {
+                    alpha = alpha <= 0 ? 0 :
+                        alpha >= work->activeEntries[slot].presentation.transitionFade[1] ?
+                        work->activeEntries[slot].presentation.transitionFade[1] : alpha;
+                    color = baseColor | alpha;
+                } else {
+                    color = baseColor | work->activeEntries[slot].presentation.transitionFade[1];
+                }
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_00306C28((x + work->activeEntries[slot].presentation.transitionGeometry[2] - offsetX) << 4,
+                              (y + work->activeEntries[slot].presentation.transitionGeometry[3] + offsetY) << 3, 0,
+                              colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416898);
 
@@ -521,9 +623,125 @@ void func_001C5868(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C5D10);
+extern const BattlePanelColors D_004168C8;
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6010);
+void func_001C5D10(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    BattlePanelColors colors = D_004168C8;
+    s32 x;
+    s32 y;
+    s32 offsetX = 0;
+    s32 offsetY = 0;
+    s16 alpha = 0;
+    u32 baseColor;
+    u32 color;
+    s32 n;
+
+    switch (work->activeEntries[slot].presentation.secondaryPresentationValue) {
+    case 0:
+        baseColor = 0x80808000;
+        break;
+    case 1:
+        baseColor = 0x50FF4000;
+        break;
+    case 2:
+    default:
+        baseColor = 0x60111B00;
+        break;
+    }
+    if (work->activeEntries[slot].presentation.transitionState < 4) {
+        if (work->activeEntries[slot].presentation.transitionState > 0) {
+            x = work->activeEntries[slot].position[0];
+            y = work->activeEntries[slot].position[1];
+            for (n = 0; n < 3; n++) {
+                if (n > 0) {
+                    alpha = work->activeEntries[slot].presentation.secondaryPulseLevel[n - 1];
+                    offsetX = work->activeEntries[slot].presentation.secondaryPulseOffsets[n - 1][0];
+                    offsetY = work->activeEntries[slot].presentation.secondaryPulseOffsets[n - 1][1];
+                    alpha = alpha <= 0 ? 0 :
+                        alpha >= work->activeEntries[slot].presentation.secondaryFade[0] ?
+                        work->activeEntries[slot].presentation.secondaryFade[0] : alpha;
+                    color = baseColor | alpha;
+                } else {
+                    color = baseColor | work->activeEntries[slot].presentation.secondaryFade[0];
+                }
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_00306C28((x + work->activeEntries[slot].presentation.secondaryGeometry[0] + offsetX) << 4,
+                              (y + work->activeEntries[slot].presentation.secondaryGeometry[1] - offsetY) << 3, 0,
+                              colors.values, 0, btlResourceBlock->resA, 9, 0x53);
+                if (n > 0) {
+                    alpha = alpha <= 0 ? 0 :
+                        alpha >= work->activeEntries[slot].presentation.secondaryFade[1] ?
+                        work->activeEntries[slot].presentation.secondaryFade[1] : alpha;
+                    color = baseColor | alpha;
+                } else {
+                    color = baseColor | work->activeEntries[slot].presentation.secondaryFade[1];
+                }
+                colors.values[0] = color;
+                colors.values[1] = color;
+                colors.values[2] = color;
+                colors.values[3] = color;
+                func_00306C28((x + work->activeEntries[slot].presentation.secondaryGeometry[2] - offsetX) << 4,
+                              (y + work->activeEntries[slot].presentation.secondaryGeometry[3] + offsetY) << 3, 0,
+                              colors.values, 0, btlResourceBlock->resA, 0xC, 0x53);
+            }
+        }
+    }
+}
+
+extern void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat);
+
+void func_001C6010(BtlUnit *unit, BattleActorPanelWork *work, s16 alpha, s32 slot, s8 stat) {
+    s8 *frame;
+    s32 count;
+    s32 n;
+
+    switch (stat) {
+    case 0:
+        frame = &work->activeEntries[slot].presentation.hpPulseFrame;
+        break;
+    case 1:
+        frame = &work->activeEntries[slot].presentation.mpPulseFrame;
+        break;
+    case 2:
+        frame = &work->reserveEntries[slot].presentation.hpPulseFrame;
+        break;
+    default:
+        frame = &work->reserveEntries[slot].presentation.mpPulseFrame;
+        break;
+    }
+    *frame += 1;
+    *frame = *frame <= 0 ? 0 : *frame >= 13 ? 12 : *frame;
+    count = *frame / 4;
+    if (count > 0) {
+        for (n = 0; n < count && n < 3; n++) {
+            switch (stat) {
+            case 0:
+                func_001C6320(unit, &work->activeEntries[slot].presentation.hpBarPulses[n],
+                              work->activeEntries[slot].position[0], work->activeEntries[slot].position[1],
+                              alpha - (n + 1) * 0x20, slot, 0);
+                break;
+            case 1:
+                func_001C6320(unit, &work->activeEntries[slot].presentation.mpBarPulses[n],
+                              work->activeEntries[slot].position[0], work->activeEntries[slot].position[1],
+                              alpha - (n + 1) * 0x20, slot, 1);
+                break;
+            case 2:
+                func_001C6320(unit, &work->reserveEntries[slot].presentation.hpBarPulses[n],
+                              work->reserveEntries[slot].position[0], work->reserveEntries[slot].position[1],
+                              alpha - (n + 1) * 0x20, slot, 2);
+                break;
+            default:
+                func_001C6320(unit, &work->reserveEntries[slot].presentation.mpBarPulses[n],
+                              work->reserveEntries[slot].position[0], work->reserveEntries[slot].position[1],
+                              alpha - (n + 1) * 0x20, slot, stat);
+                break;
+            }
+        }
+    }
+}
 
 
 
@@ -587,11 +805,65 @@ void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6648);
 
+typedef struct BattleStatEffectOffsets {
+    s32 hp[2]; /* x, y */
+    s32 mp[2]; /* x, y */
+} BattleStatEffectOffsets;
+
+extern void func_001C7760(BtlUnit *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_004168C8);
 
 INCLUDE_RODATA(const s32, "game/code_001C35F0", D_004168D8);
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C68D0);
+const BattleStatEffectOffsets D_004168E8 = {{0x36, 0x31}, {0x1A, 0x40}};
+
+void func_001C68D0(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+    BattleStatEffectOffsets offsets = D_004168E8;
+    s32 alpha;
+    s32 type;
+
+    if (work->activeEntries[slot].presentation.hpEffectState == 0x11 ||
+        work->activeEntries[slot].presentation.hpEffectState == 0x21) {
+        type = work->activeEntries[slot].presentation.hpEffectState == 0x11 ? 1 : 2;
+        alpha = work->activeEntries[slot].presentation.fade < 0x80 ?
+            work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.hpEffectFade;
+        func_001C7760(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
+                      unit->partyRecord.maxHp, 10,
+                      work->activeEntries[slot].position[0] + offsets.hp[0],
+                      work->activeEntries[slot].position[1] + offsets.hp[1], alpha, type, 0);
+        work->activeEntries[slot].presentation.hpEffectFade -= 8;
+        work->activeEntries[slot].presentation.hpEffectFade =
+            work->activeEntries[slot].presentation.hpEffectFade <= 0 ? 0 :
+            work->activeEntries[slot].presentation.hpEffectFade > 0xFF ? 0xFF :
+            work->activeEntries[slot].presentation.hpEffectFade;
+        if (work->activeEntries[slot].presentation.hpEffectFade <= 0) {
+            if (work->activeEntries[slot].presentation.hpEffectState == 0x21) {
+                btlUpdateActorSlotStates((u8 *)work, 0);
+            }
+            work->activeEntries[slot].presentation.hpEffectState = 0;
+        }
+    }
+    if (work->activeEntries[slot].presentation.mpEffectState == 0x11 ||
+        work->activeEntries[slot].presentation.mpEffectState == 0x21) {
+        type = work->activeEntries[slot].presentation.mpEffectState == 0x11 ? 1 : 2;
+        alpha = work->activeEntries[slot].presentation.fade < 0x80 ?
+            work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.mpEffectFade;
+        func_001C7760(unit, unit->partyRecord.mp, work->activeEntries[slot].presentation.mpTarget,
+                      unit->partyRecord.maxMp, 11,
+                      work->activeEntries[slot].position[0] + offsets.mp[0],
+                      work->activeEntries[slot].position[1] + offsets.mp[1], alpha, type, 1);
+        work->activeEntries[slot].presentation.mpEffectFade -= 8;
+        work->activeEntries[slot].presentation.mpEffectFade =
+            work->activeEntries[slot].presentation.mpEffectFade <= 0 ? 0 :
+            work->activeEntries[slot].presentation.mpEffectFade > 0xFF ? 0xFF :
+            work->activeEntries[slot].presentation.mpEffectFade;
+        if (work->activeEntries[slot].presentation.mpEffectFade <= 0) {
+            work->activeEntries[slot].presentation.mpEffectState = 0;
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C6B98);
 
