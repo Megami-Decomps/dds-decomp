@@ -88,7 +88,6 @@ typedef struct EffectSurfaceNode {
 } EffectSurfaceNode;
 
 extern u32 fileSaveReadBuffer;
-extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
 typedef struct MdlFlagPair {
     s32 flag;
     s32 unk4;
@@ -5732,7 +5731,7 @@ void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resou
     if (node->active != 0) {
         fileReleaseGridRecordHandle((FileSlotTable *)node->active);
     }
-    node->active = fileAllocateGridRecordSlots((u16)entryId, node->capacity, resource);
+    node->active = (u32)fileAllocateGridRecordSlots((u16)entryId, node->capacity, resource);
 }
 
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
@@ -7744,8 +7743,8 @@ void effScaleParameterSetBase(ScaleOwner *owner, f32 scale) {
     }
 }
 
-u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
-    FileKeyBlock *src = data;
+FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data) {
+    const FileKeyBlock *src = data;
     u32 slotCount = count * src->columns * src->rows + count;
     u32 slotBytes = slotCount << 5;
     s32 dataBytes = D_003E95C0[type].dataBytes;
@@ -7784,7 +7783,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     if (vec[0xBC] != 0) {
         rec->flags |= 1;
     }
-    return (u32)rec;
+    return rec;
 }
 
 void fileReleaseGridRecordHandle(FileSlotTable *record) {

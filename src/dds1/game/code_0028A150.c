@@ -423,7 +423,6 @@ extern u32 fileSlotDisplayStates[16];
 
 
 
-extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
 
 
@@ -500,7 +499,6 @@ extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 
 extern FileJob *fileJobCreate(void);
 
-extern void fileReleaseGridRecordHandle(s32 record);
 
 typedef struct FileQueue {
     f32 offset[4];
@@ -5115,7 +5113,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         effReleaseReferenceHolder(obj->referenceHolder);
     }
     if (obj->recordWork != NULL) {
-        fileReleaseGridRecordHandle((s32)obj->recordWork);
+        fileReleaseGridRecordHandle(obj->recordWork);
     }
     sdfReleaseChipBlock(obj);
 }
@@ -5184,7 +5182,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
 
 void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
     if (obj->recordWork != NULL) {
-        fileReleaseGridRecordHandle((s32)obj->recordWork);
+        fileReleaseGridRecordHandle(obj->recordWork);
     }
     obj->recordWork = fileAllocateGridRecordSlots(type, (u32)obj->owner, data);
 }
@@ -6619,8 +6617,8 @@ void effLoadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
     dst->unkE4 = src->unkE4 * scale;
 }
 
-void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
-    FileKeyBlock *src = data;
+FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *data) {
+    const FileKeyBlock *src = data;
     u32 slotCount = count * src->columns * src->rows + count;
     u32 slotBytes = slotCount << 5;
     s32 dataBytes = D_0037E550[type].dataBytes;
@@ -6662,8 +6660,8 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     return rec;
 }
 
-void fileReleaseGridRecordHandle(s32 record) {
-    sdfReleaseResourceAllocation(((FileSlotTable *)record)->allocation);
+void fileReleaseGridRecordHandle(FileSlotTable *record) {
+    sdfReleaseResourceAllocation(record->allocation);
 }
 
 void fileClearRecordReferences(FileSlotTable *record) {

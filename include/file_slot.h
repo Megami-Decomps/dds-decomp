@@ -29,6 +29,9 @@ typedef struct FileSlotTable {
     struct SdfMemBlock *allocation; /* 0x28: owns the retained table storage */
 } FileSlotTable;
 
+FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *configuration);
+void fileReleaseGridRecordHandle(FileSlotTable *record);
+
 /* The track's +0x0C word is a real emitter random multiplier; the ordinary
  * curve sampler treats it as reserved. Both are members of the serialized
  * parameter format, not a second runtime-record view. */
