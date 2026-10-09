@@ -17,6 +17,7 @@ typedef struct BattleEffect BattleEffect;
 struct EffBattleEntryList;
 struct EffParamWork;
 struct SdfMemBlock;
+struct BtlUnit;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
@@ -128,5 +129,8 @@ void sndUnlinkVoice(BattleEffect *effect);
 void effReleaseBattleVoiceOwner(BattleEffect *effect);
 u32 effBattleGetCurrentFrame(BattleEffect *effect);
 void effBattleUpdateSelectedValue(BattleEffect *effect, u32 endFrame);
+
+void sndFormatResourceNameFromIndex(s32 index, char *output);
+void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
 
 #endif /* BTL_SOUND_H */

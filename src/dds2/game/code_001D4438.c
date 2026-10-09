@@ -487,7 +487,6 @@ typedef struct SoundResourceNode {
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 
 extern s32 datActionAnimationRecords;
