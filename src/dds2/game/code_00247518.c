@@ -41,10 +41,6 @@ extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
-typedef struct EvtCampEntry {
-    u8 pad00[0x24];
-    s32 value; /* 0x24 */
-} EvtCampEntry;
 
 extern s32 evtViewerTestIndexedCondition(u32 encodedId);
 extern void effInitCh71Id(void);
@@ -140,7 +136,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
         if (to != NULL) {
             s32 start = *from;
             f32 span = *to - start;
-            f32 elapsed = viewer->curFrame - (start + node->metadataValue);
+            f32 elapsed = viewer->curFrame - (start + node->metadata.value);
 
             if (span != 0.0f) {
                 ratio = elapsed / span;
@@ -148,7 +144,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
         }
         func_0025E460((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
         *(s32 *)(out + 4) -= 35;
-        mnuDrawCampScaledTexture((SdfTex *)node->entryValue, (CampDisplayDefaults *)out);
+        mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
     }
 }
 
@@ -167,7 +163,7 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
                 EvtRuntimeChild *glyph = node->children;
                 EvtRuntimeChild *from;
 
-                while (glyph != NULL && position >= glyph->frame + node->metadataValue) {
+                while (glyph != NULL && position >= glyph->frame + node->metadata.value) {
                     glyph = glyph->next;
                 }
                 if (glyph != NULL) {
@@ -331,12 +327,12 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
                     if (node->type == 9) {
                         key = node->children;
                         while (key != NULL) {
-                            if (time >= key->frame + node->metadataValue && key->p08.sh[0] >= 0 &&
+                            if (time >= key->frame + node->metadata.value && key->p08.sh[0] >= 0 &&
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
-                                if (selectedTime < key->frame + node->metadataValue) {
+                                if (selectedTime < key->frame + node->metadata.value) {
                                     selectedValue = (s32)node->info;
-                                    selectedTime = key->frame + node->metadataValue;
+                                    selectedTime = key->frame + node->metadata.value;
                                     selected = key;
                                 }
                             }
@@ -551,7 +547,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                         extra = glyph->p0C.sh[1];
                                     }
                                 } else {
-                                    time = node->metadataValue;
+                                    time = node->metadata.value;
                                     extra = 0;
                                 }
                                 evtSetMovieClipPositionClampedToDuration(object, 0, time, endTime, extra);
@@ -942,14 +938,14 @@ void func_0024A158(s32 frame, EvtRuntime *viewer) {
 
             while (key != NULL) {
                 if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
-                    if (frame < key->frame + track->metadataValue) {
+                    if (frame < key->frame + track->metadata.value) {
                         break;
                     }
                     if (key->p10.sh[0] != 0) {
                         value = 0;
                         if (key->p10.sh[0] != 1) {
-                            value = ((EvtCampEntry *)mnuCampFindEntryByName(
-                                         viewer, (char *)viewer->entryName[key->p10.sh[0] - 2]))->value;
+                            value = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(
+                                         viewer, (char *)viewer->entryName[key->p10.sh[0] - 2]))->texture;
                         }
                     }
                 }
@@ -1140,7 +1136,7 @@ void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
             while (key != NULL) {
                 switch (track->type) {
                 case 3: case 26:
-                    useTrackTime = track->metadataByte1;
+                    useTrackTime = track->metadata.extra1;
                     /* These track kinds use the same indexed movie lookup. */
                 case 20: case 21:
                     if (key->p08.sb[0] < 0) {
@@ -1150,7 +1146,7 @@ void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
                     goto updateMovie;
                 case 18:
                     object = key->payload;
-                    useTrackTime = track->metadataByte1;
+                    useTrackTime = track->metadata.extra1;
 updateMovie:
                     if (object != NULL) {
                         movie = dds3GetObjectOwnedHandle(object)->slots[1];
@@ -1494,7 +1490,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
         category = D_003C953A[viewer->frameColumn + kind * 10];
         switch (category) {
         case 0:
-            key->frame = viewer->value - track->metadataValue;
+            key->frame = viewer->value - track->metadata.value;
             evtReorderListNodes(track);
             func_00249088(viewer->curFrame, viewer);
             break;
