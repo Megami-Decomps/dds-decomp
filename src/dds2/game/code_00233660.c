@@ -798,17 +798,17 @@ void mdlAdvanceEffectPart(MdlPartEntry *entry) {
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
-s32 mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
+void *mdlFindViewerPartSlot(MdlCtx *resource, s32 slotIndex) {
     DevRequest *slotTable;
 
     slotTable = resource->sub->partList;
     if (slotTable == NULL) {
-        return 0;
+        return NULL;
     }
     if (slotIndex >= slotTable->usedCount) {
-        return 0;
+        return NULL;
     }
-    return (s32)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
+    return (u8 *)slotTable->buffer + slotIndex * MDL_PART_SLOT_BYTES;
 }
 
 typedef struct MdlPartRec {
@@ -823,7 +823,7 @@ typedef struct MdlPartRec {
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
-    MdlPartEntry *partSlot = (MdlPartEntry *)mdlFindViewerPartSlot(owner, partRecord->partIndex);
+    MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
         SdfModel *model = owner->inner;
@@ -924,7 +924,7 @@ extern void *sdfFindResourceById(s32 id);
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 s32 mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
-    MdlSlotRec *partSlot = (MdlSlotRec *)mdlFindViewerPartSlot(owner, entryRecord->index);
+    MdlSlotRec *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
         MdlObj *object = partSlot->obj;
