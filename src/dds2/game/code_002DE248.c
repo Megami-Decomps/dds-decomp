@@ -241,7 +241,8 @@ extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
 extern EffectBlock128 D_0045C1F0;
 
 typedef struct EffModelResource {
-    u8 transform[0x20];
+    f32 position[4];
+    f32 orientation[4]; /* Quaternion. */
     f32 scale;
     u32 color;
     s32 updateCount;
@@ -6413,8 +6414,8 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     effect->scale = 1.0f;
     effect->updateCount = 0;
     effect->kind = kind;
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, &effect->transform[0x10]);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->position);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->orientation);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
         effect->model = func_002DC1D0(secondary, param);
@@ -6472,20 +6473,20 @@ void effStepModelResourceCallbacks(s32 *work) {
     effDispatchModelResourceCallback((s32)work);
 }
 
-void effSetModelResourcePrimaryTransformVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
+    PCP_COPY_VECTOR(effect->position, position);
 }
 
-void effSetModelResourceSecondaryTransformVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+void effSetModelResourceSecondaryTransformVector(EffModelResource *effect, const f32 *orientation) {
+    PCP_COPY_VECTOR(effect->orientation, orientation);
 }
 
-void effSetModelResourceColor(s32 work, u32 value) {
-    ((EffModelResource *)work)->color = value;
+void effSetModelResourceColor(EffModelResource *effect, u32 color) {
+    effect->color = color;
 }
 
-void effSetModelResourceScale(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
+    effect->scale = scale;
 }
 
 EffPointSet *effCreatePointSet3(s32 count) {
