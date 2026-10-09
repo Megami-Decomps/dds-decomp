@@ -1050,7 +1050,6 @@ extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern s32 func_0015FE20(EffPacketParams *);
 
 /* Return the trailing control block after zeroing two record arrays.
@@ -1112,7 +1111,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
         D_003D6580->texcoords = D_00354AC0;
     } else {
         D_003D6580->texcoords = NULL;

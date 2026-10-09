@@ -509,8 +509,8 @@ void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, u32 textureAddress) {
-    param->texture = (SdfTex *)textureAddress;
+void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, SdfTex *texture) {
+    param->texture = texture;
     param->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
@@ -571,8 +571,8 @@ void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, u32 textureAddress) {
-    param->secondaryTexture = (SdfTex *)textureAddress;
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, SdfTex *texture) {
+    param->secondaryTexture = texture;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
@@ -662,7 +662,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
-        sdfSetAssetPrimaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
+        sdfSetAssetPrimaryTextureAddress(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_SCALARS_PRESENT) {
@@ -676,7 +676,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        sdfSetAssetSecondaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfSetAssetSecondaryTextureAddress(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
         sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
