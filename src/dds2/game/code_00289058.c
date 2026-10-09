@@ -276,7 +276,66 @@ void mnuUpdateSelectedMantraResourceId(s32 object) {
     func_0028D070((MnuStatusResource *)object, 5, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_00289BA0);
+extern struct MantraDrawPool *mnuCreateMantraDrawPool(u32);
+extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32);
+extern s32 mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
+extern u16 scrGetEntryLowFlags(DatPartyRecord *, u16);
+extern void func_0026D988(MantraFlagResource **);
+extern void func_00315A50(void);
+extern void func_0028EF50(MnuStatusResource *);
+extern s32 func_0028F9A0(MnuStatusResource *);
+extern s32 func_00290A78(MnuStatusResource *);
+extern MantraPanelPool *func_002799D8(s32, MnuStatusResource *);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+
+const char D_00426300[] = "******************** Debug Error!!!! ********************\n";
+const char D_00426340[] = "mtrMantraPlayerDataCreate!!!! \n";
+
+void func_00289BA0(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
+    struct MenuListNode *node;
+    DatPartyRecord *record;
+    s32 i;
+
+    object->menu.selectionController = mnuCreateMantraDrawPool(0xB);
+    object->currency = datGameState->header.currency;
+    state->drawFlags = 4;
+    state->drawBits.unk10 = mnuGetActiveMantraModelFlagState();
+    i = 0;
+    for (node = object->list->first; node != NULL; node = node->next, i++) {
+        record = node->partyRecord;
+        if (scrGetEntryLowFlags(record, 1) == 0) {
+            state->slots[i] = evtAllocateMantraSelectionWork(record, 0);
+            evtPrintDeveloperConsoleMessage(D_00426300);
+        } else {
+            state->slots[i] = evtAllocateMantraSelectionWork(NULL, 0);
+            evtPrintDeveloperConsoleMessage(D_00426340);
+        }
+        state->unitEntries[i].nodeId = mnuValidateProfileEntry(state->slots[i], record);
+        if (state->unitEntries[i].nodeId != 0) {
+            state->drawBits.hasQueuedMastery = 1;
+            state->unitEntries[i].marked = 1;
+            state->unitEntries[i].kind = 1;
+        } else if (func_0028A018(record) != 0) {
+            state->drawBits.hasQueuedMastery = 1;
+            state->unitEntries[i].nodeId = scrGetSelectedScriptEntryId(record);
+            state->unitEntries[i].marked = 1;
+            state->unitEntries[i].kind = 2;
+        }
+    }
+    state->slots[5] = evtAllocateMantraSelectionWork(NULL, 0);
+    func_0026D988(state->slots);
+    func_00315A50();
+    func_0028EF50(object);
+    state->drawBits.hasSource = func_0028F9A0(object);
+    if (state->src == NULL) {
+        mnuBindMantraMenuSourceRecord(object, NULL);
+    }
+    if (!(state->drawFlags & 0x10002)) {
+        func_00290A78(object);
+    }
+    state->resource = func_002799D8(0x3CE, object);
+}
 
 extern void func_0028E858(s32 object);
 
