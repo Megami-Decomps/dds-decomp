@@ -959,9 +959,9 @@ void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlot
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
-void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth) {
+void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, EffectSlotSet *spriteResource, u32 third, u32 fourth) {
     menu->field1C = first;
-    menu->sprite20 = second;
+    menu->spriteResource = spriteResource;
     menu->param24 = third;
     menu->param28 = fourth;
 }
@@ -1123,16 +1123,16 @@ void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContaine
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
     s32 i;
-    s32 sprite = window->sprite20;
+    EffectSlotSet *sprite = window->spriteResource;
     s32 state = window->fadeScale;
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
-            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, (EffectSlotSet *)(u32)sprite, window->param28, option);
+            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
             func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
-                          (EffectSlotSet *)(u32)window->sprite20, window->param24, option);
+                          window->spriteResource, window->param24, option);
         }
     }
 }

@@ -349,7 +349,6 @@ extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom);
@@ -629,7 +628,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
         placement = 6;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xC, placement);
+    mnuSetWindowEntryParameters(0, window, (struct EffectSlotSet *)(u32)context->resourceHandle, 0xC, placement);
     party->primaryWindow = window;
 }
 
@@ -1493,7 +1492,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     mnuSetWindowFadeScale(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, (struct EffectSlotSet *)context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
+    mnuSetWindowEntryParameters(0, window, (struct EffectSlotSet *)(u32)context->resourceHandle, 0xD, placement);
     window->list->context = context;
     window->list->drawCallback = func_002B3CA0;
     for (i = 0; i < skillCount; i++) {
