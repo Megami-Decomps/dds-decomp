@@ -2797,7 +2797,7 @@ typedef struct EffClassDrawState {
         f32 *scales;
     };
     EffClassWork *effect;
-    u32 references;
+    EffTrackSet *trackSet;
     struct SdfMemBlock *allocation;
 } EffClassDrawState;
 
@@ -2895,7 +2895,7 @@ void effResetClassFrameAndFlags(s32 work) {
     EffClassWork *effect;
 
     effect = ((EffClassDrawState *)((EffClassWork *)work)->resource)->effect;
-    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->references)->frame = 0;
+    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->trackSet)->frame = 0;
     effInitializeClassFrame(effect);
 }
 
@@ -2938,7 +2938,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     state->effect = effCreateClassWork(1, source->classConfig);
     tracks = effCreateTrackSetWithSharedReferences(count, 2, 0);
     first = source->ring.firstColor;
-    state->references = (u32)tracks;
+    state->trackSet = tracks;
     colors = (u32 *)tracks->tail;
     second = source->ring.middleColor;
     for (i = 0; i < count; i++) {
@@ -2953,7 +2953,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
 }
 
 void effReleaseClassDrawResources(s32 work) {
-    effReleaseResourceRefs(((EffClassDrawState *)work)->references);
+    effReleaseResourceRefs((u8 *)((EffClassDrawState *)work)->trackSet);
     effDestroyClassWork(((EffClassDrawState *)work)->effect);
     sdfReleaseResourceAllocation(((EffClassDrawState *)work)->allocation);
 }
