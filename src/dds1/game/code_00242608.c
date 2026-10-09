@@ -1621,7 +1621,7 @@ extern void func_0025E108(ShopScene *, s32);
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 extern void func_00260570(struct MenuList *, u32);
-extern void func_00260AB0(s32);
+extern s32 func_00260AB0(ShopScene *);
 extern void func_0025F138();
 extern void evtClearActiveFlag(s32);
 extern s32 evtSetBoundedDisplayValue(s32, s32);
@@ -1848,7 +1848,7 @@ s32 func_00246220(KwlnTask *task) {
 s32 evtStageDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0(stateAddress);
+    func_00260AB0((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -1968,7 +1968,7 @@ s32 func_002465F8(KwlnTask *task) {
 s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0(stateAddress);
+    func_00260AB0((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2077,7 +2077,7 @@ s32 func_002469F0(KwlnTask *task) {
 s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260AB0(stateAddress);
+    func_00260AB0((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 

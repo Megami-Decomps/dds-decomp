@@ -29,12 +29,17 @@
 
 extern s32 func_001ABB10(BtlUnit *, s32);
 
-typedef struct UiQuadColor {
-    s32 red;
-    s32 green;
-    s32 blue;
-    s32 alpha;
+/* Named and indexed views of the same four signed 32-bit color channels. */
+typedef union UiQuadColor {
+    struct {
+        s32 red;
+        s32 green;
+        s32 blue;
+        s32 alpha;
+    };
+    s32 channels[4];
 } UiQuadColor;
+typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 extern const UiQuadColor D_00414D50;
 
@@ -1462,7 +1467,146 @@ s32 func_001A8BD0(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9130);
+
+typedef struct ItfColorPanelWork {
+    s16 editing;
+    s16 selection;
+    u32 blink;
+    u8 pad08[8];
+} ItfColorPanelWork;
+
+typedef struct ItfColorPanelRow {
+    const char *title;
+    s32 highlight;
+} ItfColorPanelRow;
+typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
+typedef char ItfColorPanelRowSizeCheck[sizeof(ItfColorPanelRow) == 8 ? 1 : -1];
+
+extern ItfColorPanelWork D_00452E90;
+extern ItfColorPanelRow D_003B4D50[6];
+extern s32 D_00438F3C;
+extern UiQuadColor D_003B4D80;
+extern s32 D_00438F40;
+extern u8 D_004366B4;
+extern char D_004366B8[]; /* "FILTER:" */
+extern char D_004366C0[]; /* ">" */
+extern char D_004366C8[]; /* " %s" */
+extern char D_004366D0[]; /* "%3d" */
+extern char D_004366D8[]; /* "%4d" */
+void itfDrawPulsingTestOverlay(s32 surfaceIndex);
+
+/* Draw the four color channels and handle selection and value editing. */
+/* Retail 0x001A92F0 keeps the row < 4 select inside the four-row loop. */
+s32 func_001A9130(void) {
+    SifCommand packet;
+    SdfListHead *list;
+    s32 row;
+    s32 y = 0x7A20;
+    s16 previousSelection;
+    s32 previousRate;
+    s32 highlight;
+
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list,
+        (u32)func_0011F250(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+    sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
+    sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_004366B8));
+    if (D_00452E90.editing == 0) {
+        sdfPktInit(&packet, 0x8980, D_00452E90.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        D_00452E90.blink++;
+        if (D_00452E90.blink < 32 || (D_00452E90.blink & 31) < 18) {
+            sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_004366C0));
+        }
+    }
+    for (row = 0; row != 4; row++) {
+        sdfPktInit(&packet, 0x8980, y, 0xFF0000, D_003B4D50[row].highlight);
+        sdfAppendPacket(list,
+            (u32)sdfFormatSifPacket(&packet, D_004366C8, D_003B4D50[row].title));
+        highlight = 0;
+        if (D_00452E90.editing != 0 && row == D_00452E90.selection) {
+            highlight = 6;
+        }
+        sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
+        if (row < 4) {
+            sdfAppendPacket(list,
+                (u32)sdfFormatSifPacket(&packet, D_004366D0, D_003B4D80.channels[row]));
+        } else {
+            sdfAppendPacket(list,
+                (u32)sdfFormatSifPacket(&packet, D_004366D8, D_00438F40));
+        }
+        y += 0x60;
+    }
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, list);
+    D_00438F3C += D_00438F40;
+    itfDrawPulsingTestOverlay(0x52);
+    if ((s8)D_0037F510.unk32 < 0) {
+        D_004366B4 ^= 1;
+    }
+    if (D_00452E90.editing == 0) {
+        previousSelection = D_00452E90.selection;
+        if ((u8)D_0037F510.unk36 & 2) {
+            D_00452E90.selection--;
+            if (D_00452E90.selection < 0) {
+                D_00452E90.selection = 3;
+            }
+        }
+        if ((u8)D_0037F510.unk37 & 2) {
+            D_00452E90.selection++;
+            if (D_00452E90.selection >= 4) {
+                D_00452E90.selection = 0;
+            }
+        }
+        if (previousSelection != D_00452E90.selection) {
+            D_00452E90.blink = 0;
+        }
+        if (D_0037F510.unk31 < 0) {
+            D_00452E90.editing ^= 1;
+            D_00452E90.blink = 0;
+        }
+        if ((u8)D_0037F510.cancel & 2) {
+            return -1;
+        }
+    } else {
+        if (D_00452E90.selection < 4) {
+            if ((u8)D_0037F510.coarseDown & 2) {
+                D_003B4D80.channels[D_00452E90.selection] -= 10;
+                if (D_003B4D80.channels[D_00452E90.selection] < 0) {
+                    D_003B4D80.channels[D_00452E90.selection] = 0;
+                }
+            }
+            if ((u8)D_0037F510.coarseUp & 2) {
+                D_003B4D80.channels[D_00452E90.selection] += 10;
+                if (D_003B4D80.channels[D_00452E90.selection] > 255) {
+                    D_003B4D80.channels[D_00452E90.selection] = 255;
+                }
+            }
+        } else {
+            previousRate = D_00438F40;
+            if ((u8)D_0037F510.coarseDown & 2) {
+                D_00438F40 -= 0x100;
+                if (D_00438F40 < 0) {
+                    D_00438F40 = 0;
+                }
+            }
+            if ((u8)D_0037F510.coarseUp & 2) {
+                D_00438F40 += 0x100;
+                if (D_00438F40 > 0x800) {
+                    D_00438F40 = 0x800;
+                }
+            }
+            if (previousRate != D_00438F40) {
+                D_00438F3C = 0;
+            }
+        }
+        if (D_0037F510.cancel < 0) {
+            D_00452E90.editing ^= 1;
+            D_00452E90.blink = 0;
+        }
+    }
+    return 0;
+}
+
+
 
 u64 *func_001A9580(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
@@ -1497,10 +1641,6 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
     entry[5] = alternative ? 0x43 : 0x42;
     return entry;
 }
-
-extern s32 D_00438F3C;
-
-extern UiQuadColor D_003B4D80;
 
 extern f32 sdfSinPoly(f32);
 
