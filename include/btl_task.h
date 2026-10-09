@@ -43,7 +43,7 @@ typedef struct SceneAiWork {
     s8 animationPhase;       /* 0x1C */
     u8 pad1D[3];
     s32 panelFade[4];        /* 0x20: signed panel fades. */
-    u8 pad30[0x10];
+    f32 panelAngleDegrees[4]; /* 0x30: copied to each sprite's angle while drawing. */
     s32 animationCounter;   /* 0x40 */
     u8 pad44[0xC];
     f32 panelScale[4];      /* 0x50: sprite size percentages, not XY positions. */
