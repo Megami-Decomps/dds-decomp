@@ -424,7 +424,36 @@ void mnuDestroyThresholdNodePanels(MenuSlotState *host) {
 
 extern void mnuBuildTerminalNodeList(MenuSlotState *);
 
-INCLUDE_ASM(const s32, "game/code_002665B0", mnuBuildTerminalNodeList);
+extern s32 mnuTerminalScoreBox(DatPartyRecord *unit);
+
+/* Build recovery-cost nodes for active party slots with a nonzero computed cost. */
+void mnuBuildTerminalNodeList(MenuSlotState *host) {
+    MenuList *list;
+    s32 partyIndex;
+
+    list = mnuCreateListState(0, MNU_PARTY_SLOT_COUNT, 0x24);
+    list->context = host;
+    host->progressList = list;
+    list->scale = 0;
+    list->drawCallback = func_00266C08;
+    for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
+        DatPartyRecord *unit = &datGameState->party[partyIndex];
+
+        if ((u16)(unit->flags & 1)) {
+            s32 recoveryCost = mnuTerminalScoreBox(unit);
+
+            if (recoveryCost != 0) {
+                MenuListNode *node = mnuListAppendNode(host->progressList, D_00437870);
+                MenuThresholdEntry *entry = &node->terminal;
+
+                node->childPanel = 0;
+                entry->requiredAmount = recoveryCost;
+                entry->entryId = partyIndex;
+            }
+        }
+    }
+    mnuRefreshThresholdNodeFlags(host->progressList);
+}
 
 /* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuSlotState *host) {
@@ -1720,7 +1749,11 @@ extern void func_00269478(u32, s32);
 
 
 
-extern void func_00269978(void);
+extern void func_00269978(s32, MenuSlotState *);
+typedef struct MenuGridPositions {
+    EffectPair entries[2];
+} MenuGridPositions;
+extern const MenuGridPositions D_00424FF8;
 
 
 
@@ -1729,7 +1762,45 @@ extern void func_00269978(void);
 extern u8 D_003CE97C[];
 
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00269978);
+/* Slide the threshold list out while closing, or in after its grid entry completes. */
+void func_00269978(s32 close, MenuSlotState *host) {
+    MenuGridPositions positions = D_00424FF8;
+    s32 offset = 0;
+    s32 direction = 0;
+    s32 scale;
+
+    itfDrawGridWithResolvedSlot(positions.entries[0].firstValue,
+        positions.entries[0].secondValue, 0, 0x80, host->resourceBank[0], 0x1A,
+        MNU_TEXT_DRAW_PRIORITY);
+    mnuQueueTerminalCurrencyLabel(1, (s32)host);
+    scale = ((u32)(*(u8 *)&host->resourceBank[0]->workEntries[0x1A].geometry.cornerColors[0]) << 8) /
+        (*(u8 *)&host->resourceBank[0]->workEntries[0x1A].savedColors[0]);
+    if (close != 0) {
+        if (host->progressList->scale > 0) {
+            host->progressList->scale -= 0x40;
+        }
+        if (host->progressList->scale < 0) {
+            host->progressList->scale = 0;
+        }
+        direction = -1;
+    } else if (scale == 0x100) {
+        if (host->progressList->scale < 0x100) {
+            host->progressList->scale += 0x40;
+        }
+        if (host->progressList->scale > 0x100) {
+            host->progressList->scale = 0x100;
+        }
+        direction = 1;
+    }
+    scale = host->progressList->scale;
+    if (direction < 0) {
+        offset = (0x100 - scale) / 2;
+    }
+    if (direction > 0) {
+        offset = -((0x100 - scale) / 2);
+    }
+    mnuCallInitWide(0, offset + 0x4F0, 0, (s32)host->progressList, MNU_TEXT_DRAW_PRIORITY);
+}
 
 /* Install the new transition callback while retaining the previous callback address. */
 void evtRememberDispatchCallback(u32 callback, s32 address) {
