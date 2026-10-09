@@ -292,8 +292,8 @@ typedef struct EffPCPRotateWork {
 } EffPCPRotateWork;
 
 extern void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
-extern void effPcpCopyVector60(void *dst, void *src);
-extern void effPcpCopyBlockMatrix(void *dst, void *src);
+extern void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src);
+extern void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src);
 extern void sdfComposeVuMatrixFromRegisters(void);
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
@@ -3119,27 +3119,17 @@ void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 val) {
 }
 
 
-typedef struct EffPCPBlockModelInfo {
-    u8 pad00[0x2E];
-    u16 unk2E;
-} EffPCPBlockModelInfo;
-
-typedef struct EffPCPBlockModel {
-    u8 pad00[0x1C];
-    EffPCPBlockModelInfo *info;
-} EffPCPBlockModel;
-
 /* Build a block-set work: copy the parameter block, then create one parameter handle per input block. */
-EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
+EffPCPBlockSetWork *effPcpCreateBlockSetWork(const EffPCPBlockSetParams *params, void **blocks) {
     EffPCPBlockSetWork *work;
-    EffPCPBlockModel *model;
+    MdlCtx *model;
     u32 i;
     u32 j;
     u32 n;
 
     work = sdfAllocSizeClassBlock(0x10C);
     memset(work, 0, 0x10C);
-    work->params = *(EffPCPBlockSetParams *)first;
+    work->params = *params;
     work->frame = 0;
     work->color = 0x80808080;
     work->mode = 0;
@@ -3151,7 +3141,7 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     work->handleA[3] = effParamWorkCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[4]);
     work->handleA[4] = effParamWorkCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[5]);
     model = effParamWorkGetData(work->headHandle);
-    work->count = model->info->unk2E;
+    work->count = model->first->frameCount;
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
@@ -3189,7 +3179,7 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
     void *args;
 {
     EffPCPBlockSet set;
-    void *first;
+    EffPCPBlockSetParams *first;
     u32 i;
 
     first = effParamTableGetBlock(args, 0);
@@ -3209,7 +3199,7 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
 void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
-    EffPCPBlockModel *headModel;
+    MdlCtx *headModel;
     u32 handleIndex;
     u32 groupIndex;
     u32 groupHandleCount;
@@ -3219,7 +3209,7 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
         work->handleA[handleIndex] = effParamWorkDuplicate(src->handleA[handleIndex]);
     }
     headModel = effParamWorkGetData(work->headHandle);
-    work->count = headModel->info->unk2E;
+    work->count = headModel->first->frameCount;
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
         if (work->params.groupSize[groupIndex] > 0) {
             groupHandleCount = work->count * work->params.groupSize[groupIndex];
@@ -3291,8 +3281,8 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", func_0017DCF8);
 
-void effPcpCopyVector60(void *work, void *src) {
-    PCP_COPY_VECTOR(((EffPCPBlockSetWork *)work)->params.position, src);
+void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src) {
+    PCP_COPY_VECTOR(work->params.position, src);
 }
 
 void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 val) {
@@ -3300,8 +3290,8 @@ void effPcpBlockSetSetColor(EffPCPBlockSetWork *work, u32 val) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPcpCopyBlockMatrix(void *dst, void *src) {
-    VU0_COPY_MATRIX(dst, src);
+void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src) {
+    VU0_COPY_MATRIX(work->matrix, src);
 }
 
 void func_0017E4F0(void) {
@@ -3349,18 +3339,18 @@ EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *src) {
 
 EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     EffPCPRotateWork *work;
-    u8 *sub;
+    EffPCPBlockSetParams *sub;
     u32 *p;
     u32 i;
 
     work = sdfAllocSizeClassBlock(0x10C);
     work->params = *src;
-    sub = (u8 *)src->group;
+    sub = src->group;
     work->frame = 0;
     for (i = 0; i < 3; i++) {
         blocks[3] = blocks[i];
         work->blockSets[i] = effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
-        sub += 0x50;
+        sub++;
     }
     return work;
 }
@@ -3465,7 +3455,7 @@ void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
 
     blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyVector60((void *)blockSets[i], src);
+        effPcpCopyVector60(blockSets[i], src);
     }
 }
 
@@ -3485,7 +3475,7 @@ void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
 
     blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyBlockMatrix((void *)blockSets[i], src);
+        effPcpCopyBlockMatrix(blockSets[i], src);
     }
 }
 
