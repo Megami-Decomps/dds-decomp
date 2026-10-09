@@ -169,7 +169,7 @@ typedef struct {
     u32 secondVifCode;
 } SdfIndexedPayload;
 
-SdfIndexedPayload *func_002D7F40(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
+SdfIndexedPayload *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
     u16 quadwordCount = packed;
