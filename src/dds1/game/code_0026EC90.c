@@ -42,7 +42,32 @@ extern void func_002ECCF8(void *, SdfPoolNode *);
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F118);
+extern void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set, s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture);
+
+/* Draw an active roll entry with its sprite-specific slot index; alpha follows the staff movie's scroll fade. */
+void func_0026F118(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
+    s32 x;
+    s32 y;
+    s32 alpha;
+
+    if (entry->active != 0) {
+        x = entry->x;
+        y = entry->y;
+        alpha = (s32)mnuMovieWork->unk10 * 0.17f;
+        alpha = alpha * 0.6f;
+        switch (entry->sprite) {
+        case 0:
+            func_0026E798(x, y, 0x64, alpha, set, 0xD, 8.0f, 8.0f, 0x60, texture);
+            return;
+        case 1:
+            func_0026E798(x, y, 0x64, alpha, set, 0xE, 8.0f, 8.0f, 0x60, texture);
+            return;
+        case 2:
+            func_0026E798(x, y, 0x64, alpha, set, 0xF, 8.0f, 8.0f, 0x60, texture);
+            break;
+        }
+    }
+}
 
 typedef struct StaffImage {
     u8 pad00[8];
