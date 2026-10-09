@@ -3754,10 +3754,6 @@ void mnuRebuildListFirstFromCursor(MenuList *list);
 /* Rebuild the last-node pointer by walking forward from the cursor. */
 void mnuRebuildListLastFromCursor(MenuList *list);
 
-/* Reset the viewport/cursor to the first node; exactly one requests replay
- * toward the saved cursor, rather than treating every nonzero value as true. */
-void mnuResetNodeLinks(s32 *menu, s32 restoreCursor);
-
 /* Relink and reindex the pointer array. Native endpoint writes require at
  * least two entries; zero/one-entry calls are not guarded here. */
 void mnuLinkItemList(MenuListNode **items, s32 count);
