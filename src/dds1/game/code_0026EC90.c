@@ -206,7 +206,7 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
+    sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }

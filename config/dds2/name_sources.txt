@@ -6439,7 +6439,7 @@
 0x00346468	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
 0x00346608	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
 0x00346778	sdfMovieInitializeStreamWork	inferred	Selects and initializes the movie linear or PAC stream work.
-0x00346988	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
+0x00346988	sdfCancelAndReleaseMovieStreamWork	inferred	Releases a movie linear or PAC stream and its embedded sound node after device shutdown.
 0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346778.c:111:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
 0x00346AD8	sdfPacUsePacketPayloadMemory	inferred	Native byte flags OR 1; decoder retains the packet payload instead of allocating a resource.
