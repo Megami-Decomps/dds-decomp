@@ -78,7 +78,8 @@ typedef struct FldAreaWork {
     u32 pendingSceneRequest;
     s32 deferredExit;
     s32 unk118;
-    u8 pad11C[0xC];
+    s32 unk11C;
+    u8 pad120[8];
     s16 sceneCommand;
     s16 colorEffectSuppressed;
     s32 commandEnabled;
@@ -145,6 +146,7 @@ typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 :
 typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
 typedef char FldAreaWork_transitionMode_offset_check[(FLD_AREA_OFFSET(transitionMode) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
+typedef char FldAreaWork_unk11C_offset_check[(FLD_AREA_OFFSET(unk11C) == 0x11C) ? 1 : -1];
 typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(colorEffectSuppressed) == 0x12A) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x1BC) ? 1 : -1];
