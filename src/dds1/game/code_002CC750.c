@@ -671,7 +671,29 @@ s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyRemoveProfileSkills);
+void ptyRemoveProfileSkills(DatPartyRecord *unit, u16 profileId) {
+    u32 wordIndex, bitShift;
+    u32 index = 0;
+    s32 skill;
+    u32 state;
+    u32 flagId;
+
+    do {
+        skill = prfGetSkillAtIndex(profileId, index);
+        flagId = skill & 0xFFFF;
+        state = ptyGetSkillNibbleState(unit, flagId);
+        if (state == 1) {
+            scrDecodePackedFlagIndex(unit, flagId, &wordIndex, &bitShift);
+            if (skill != 0) {
+                unit->skillFlags[wordIndex] &= ~(state << bitShift);
+                if (scrFindSlot(unit, flagId) >= 0) {
+                    scrRemoveSlot(unit, flagId);
+                }
+            }
+        }
+        index++;
+    } while (skill != 0);
+}
 
 /* Return the first exact-ID slot, including zero IDs, or -1 when absent. */
 s32 scrFindSlot(DatPartyRecord *unit, u16 skillId) {
