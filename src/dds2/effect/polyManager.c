@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -129,7 +130,6 @@ typedef struct {
     struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
-void sdfReleaseChipBlock(void *arg);
 void polyUpdateBasicRingCells(PolyNode *obj);
 void func_00165860(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);

@@ -38,7 +38,6 @@ void scrSetIntegerReturnValue(s32 value);
 
 extern char D_00422050[];
 
-void sdfReleaseChipBlock(void *memory);
 
 
 

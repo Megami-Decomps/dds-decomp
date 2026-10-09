@@ -66,7 +66,6 @@ typedef struct SdfCounterRuntime {
     SdfCounterTimer *timer;            /* 0x30 */
 } SdfCounterRuntime;
 
-extern void sdfReleaseChipBlock(void *);
 
 
 extern s32 sdfActiveCounterRuntime;

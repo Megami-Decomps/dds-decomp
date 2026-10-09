@@ -13,7 +13,6 @@ extern s8 ptyReadSignedRosterStatByte(s32);
 extern void scrSetIntegerReturnValue(s32);
 extern void func_0011A328(s32);
 
-extern void sdfReleaseChipBlock(void *p);
 
 
 extern void effMiscNormalizeVU(void);

@@ -163,7 +163,6 @@ typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0
 
 
 
-extern void sdfReleaseChipBlock(void *ptr);
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 

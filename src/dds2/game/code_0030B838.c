@@ -167,7 +167,6 @@ extern void func_0030C250(s32, s32);
 extern void func_0030CC68();
 extern u8 D_00400AF0[];
 
-extern void sdfReleaseChipBlock();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
 extern void sdfDrawCounterChannelInfoLabel(s32, s32);

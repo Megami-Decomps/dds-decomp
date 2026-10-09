@@ -59,7 +59,6 @@ typedef struct {
     EffParamWork *secondaryHandle; /* 0x18 parameter block 1 */
 } EffPCPSpawnOnceWork;
 
-extern void sdfReleaseChipBlock();
 
 
 

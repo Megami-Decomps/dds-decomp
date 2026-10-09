@@ -162,7 +162,6 @@ extern char D_00437CB0[];
 
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 
-extern void sdfReleaseChipBlock(void *);
 
 struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *state);

@@ -131,7 +131,6 @@ extern void fileWaitIdle(void);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void func_003003F0(const char *fmt, ...);
-extern void sdfReleaseChipBlock(void *ptr);
 
 s32 evtPolygonMovieTestFlag(KwlnTask *task)
 {

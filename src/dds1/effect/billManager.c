@@ -11,7 +11,6 @@
 extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
-void sdfReleaseChipBlock(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *arg);
 

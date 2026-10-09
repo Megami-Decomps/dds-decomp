@@ -771,7 +771,6 @@ EvtUnit *evtUnitGetNestedValue(EffWorldNode *obj) {
     return (EvtUnit *)*(s32 *)((u8 *)obj->data + 8);
 }
 
-extern void sdfReleaseChipBlock(void *block);
 extern const s32 D_003AC060[];
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {

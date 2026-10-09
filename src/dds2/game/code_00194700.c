@@ -52,7 +52,6 @@ extern void func_0035C860();
 
 extern s32 sceDopen(void *path);
 
-extern void sdfReleaseChipBlock(void *allocation);
 
 extern char D_00436450[];
 

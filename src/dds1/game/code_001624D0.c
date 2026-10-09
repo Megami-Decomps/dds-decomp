@@ -33,7 +33,6 @@ extern struct SdfPoolNode *D_00325828[4];
 extern u16 D_003BB044;
 
 
-extern void sdfReleaseChipBlock(void *p);
 
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 
