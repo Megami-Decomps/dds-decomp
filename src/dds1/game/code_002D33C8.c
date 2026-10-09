@@ -57,11 +57,6 @@
 #define SDF_VIF_DIRECT_THREE_WORD 0x50000003
 #define SDF_VIF_FLUSHE_HALFWORD 0x1000
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
-#define SDF_GS_BOUNDS_TEST 0x30003
-#define SDF_GS_PRIM_SPRITE 6
-#define SDF_GS_PRIM 0
-#define SDF_GS_RGBAQ 1
-#define SDF_GS_XYZ2 5
 
 /* Native DMAC tag: QWC/ID/ADDR followed by the two packed VIF command words. */
 typedef struct SdfDmaTag {
@@ -792,9 +787,9 @@ void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 width, s32 height, s32 un
 
     packet[3] = SDF_GS_PRIM;
     packet[7] = SDF_GS_XYZ2;
-    packet[0] = SDF_GS_BOUNDS_TEST;
+    packet[0] = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
     packet[1] = SDF_GS_TEST_1;
-    packet[2] = SDF_GS_PRIM_SPRITE;
+    packet[2] = SDF_GS_PRIMITIVE_SPRITE;
     packet[4] = (u64)0xFE00 << 46;
     packet[5] = SDF_GS_RGBAQ;
     packet[6] = lowerBounds;
