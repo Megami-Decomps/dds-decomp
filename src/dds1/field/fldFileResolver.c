@@ -1865,45 +1865,45 @@ void fldSelectDisplayBuffer(u32 displayRow) {
 
 
 void fldSubmitGsCommandWord(s32 lower, s32 bits, u64 upper) {
-    s32 command = sdfAllocPacketAligned(0x20);
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *entry;
     SdfPoolNode *descriptor;
 
-    sdfInitPacketList((SdfListHead *)command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     entry = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
     entry[5] = 0x3B;
     entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitFrameQuad(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17) {
-    s32 command = sdfAllocPacketAligned(0x20);
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
-    sdfInitPacketList((SdfListHead *)command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     data = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
     data[4] = (bit17 << 17) | 0x10000 | (bit15 << 15) | (bit14 << 14) | (bit12 << 12) | (bit4 << 4) | (bit1 << 1) | bit0;
     data[5] = 0x47;
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 /* Write the selected blend equation to GS ALPHA_1. */
 void func_00129900(s32 mode) {
-    s32 command = sdfAllocPacketAligned(0x20);
+    SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *data;
     SdfPoolNode *descriptor;
 
-    sdfInitPacketList((SdfListHead *)command);
+    sdfInitPacketList(command);
     packet = sdfAllocPacketAligned(0x30);
     data = (u64 *)sdfConsFinalizePacketHeader(packet, 0x30);
     switch (mode) {
@@ -1936,9 +1936,9 @@ void func_00129900(s32 mode) {
         break;
     }
     data[5] = 0x42;
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
@@ -2391,7 +2391,7 @@ extern u32 D_0032F500[];
 extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
-    s32 resource;
+    SdfListHead *list;
     s32 record;
     SdfPoolNode *descriptor;
     D_0032F4E0[0][0] = x;
@@ -2402,12 +2402,12 @@ void fldSubmitVectorColorPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 
     D_0032F4E0[1][2] = w;
     D_0032F500[1] = second;
     D_0032F500[0] = first;
-    resource = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)resource);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
     record = (s32)func_002EF2B0(D_0032F4E0, D_0032F500, 2, 0x80);
-    sdfAppendPacket((SdfListHead *)resource, record);
+    sdfAppendPacket(list, record);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)resource);
+    descriptor->append(descriptor, list);
 }
 
 extern void *func_002E21A0(SdfPrimitiveRequest *);

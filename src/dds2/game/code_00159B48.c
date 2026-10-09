@@ -681,11 +681,11 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
 
 /* Allocate/init a packet list, generate its texture payload, then append it to the draw surface. */
 void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDescriptor *source) {
-    s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList((SdfListHead *)packetAddress);
-    effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append(surface, (SdfListHead *)packetAddress);
+    sdfInitPacketList(packetList);
+    effDrawGeneratedTextureQuad(packetList, source);
+    surface->append(surface, packetList);
 }
 
 /* Caller-built composite draw description; 0x68 bytes. */
@@ -858,11 +858,11 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
 
 /* Allocate/init a packet list, generate its composite GS payload, then append it to the draw surface. */
 void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *source) {
-    s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
+    SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList((SdfListHead *)packetAddress);
-    effDrawCompositeTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append(surface, (SdfListHead *)packetAddress);
+    sdfInitPacketList(packetList);
+    effDrawCompositeTextureQuad(packetList, source);
+    surface->append(surface, packetList);
 }
 
 void func_0015B270(void) {
