@@ -2647,7 +2647,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
 
 /* Update list selection and submit the visible browser rows to its surface. */
-s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
+s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     BtlResourceEntry *visibleEntry;
     SdfListHead *packetList;
     SdfPoolNode *surface;

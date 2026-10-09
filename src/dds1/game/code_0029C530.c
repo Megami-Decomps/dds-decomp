@@ -8378,7 +8378,7 @@ void effPollResourceBankSlot(char *path, u32 flags, void *record) {
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
         return;
     }
-    func_001FBA38(effResourceBankDescriptor);
+    btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
     selection->state = func_001FBF48(effResourceBankDescriptor);
     selection->label = btlFormatSelectedResourceName(effResourceBankDescriptor, selection->fullName);
     selection->variant = btlGetResourcePathVariant(effResourceBankDescriptor);
@@ -8499,7 +8499,7 @@ void effPollResourceBank(s32 flags, void *out) {
         effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
         btlSetResourceNameHeaderPair(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
-        func_001FBA38(effResourceBankDescriptor);
+        btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         record->state = func_001FBF48(effResourceBankDescriptor);
         record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
         record->value = btlGetResourcePathVariant(effResourceBankDescriptor);
