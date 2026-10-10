@@ -5470,7 +5470,52 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00153FA0);
+typedef struct FieldGuideObjectPreset {
+    FieldGridCoordPair coordinate;
+    f32 phase;
+} FieldGuideObjectPreset;
+extern FieldGuideObjectPreset D_003AA458[];
+extern FieldGuideObjectPreset D_003AA460[];
+extern FieldGuideObjectPreset D_003AA4B8[];
+
+void func_00153FA0(void) {
+    FieldGuideObjectPreset *presets = NULL;
+    s32 slot;
+    s32 packedCoordinates;
+
+    for (slot = 0; slot < 15; slot++) {
+        D_00451DB0[slot].active = 0;
+    }
+    if (fldAreaState.area == 23 && fldAreaState.floor == 13 && mdlFlagTest(0x4C9) == 0) {
+        return;
+    }
+    if (fldAreaState.area == 23) {
+        if (fldAreaState.floor == 10) {
+            presets = D_003AA458;
+        }
+        if (fldAreaState.floor == 13) {
+            presets = D_003AA460;
+        }
+        if (fldAreaState.floor == 15) {
+            presets = D_003AA4B8;
+        }
+    }
+    if (presets != NULL) {
+        for (slot = 0; slot < 15; slot++) {
+            /* The terminal record encodes both coordinates as 0xFFFF. */
+            memcpy(&packedCoordinates, &presets[slot].coordinate, sizeof(packedCoordinates));
+            if (packedCoordinates == -1) {
+                return;
+            }
+            D_00451DB0[slot].active = 1;
+            D_00451DB0[slot].gridX = presets[slot].coordinate.x;
+            D_00451DB0[slot].gridY = presets[slot].coordinate.y;
+            fldCreateGrippedUnitMarker(D_00451DB0[slot].gridX, D_00451DB0[slot].gridY, slot);
+            D_00451DB0[slot].progress = presets[slot].phase;
+        }
+    }
+}
+
 
 void fldCreateChaseCameraObject(void) {
     f32 position[4] __attribute__((aligned(16))) = {0, 0, 0, 1.0f};
