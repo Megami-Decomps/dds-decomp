@@ -119,7 +119,24 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E41B8);
+/* Close the ordered register-list tag in the console's uncached DMA buffer.
+ * Five eight-byte register values form one sprite; pad an odd value count. */
+void func_002E41B8(ConsBuf *buffers) {
+    u8 *cursor = buffers->writeCursor;
+    vu64 *tag = (vu64 *)buffers->currentTag;
+    s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
+
+    if (registerCount != 0) {
+        if (registerCount & 1) {
+            cursor += 8;
+        }
+        registerCount /= 5;
+        buffers->currentTag = cursor;
+        buffers->writeCursor = buffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+        tag[0] = (s64)registerCount | 0x5400000000008000ULL;
+        tag[1] = 0x53531;
+    }
+}
 
 /* Finalize the current GIF tag and submit completed packets, then rotate buffers.
  * Keep the eight-byte pending-data test distinct from the quadword DMA count.
