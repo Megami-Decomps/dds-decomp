@@ -105,7 +105,7 @@ typedef struct BrsProgressAnimation {
     u8 pad1A[2];
     s32 remaining;
     s32 applied;
-    u8 pad24[4];
+    s32 appliedStep; /* 0x24: increment consumed by the level-progress update. */
     s32 frames; /* 0x28: progress ramp counter, clamped to 0..120. */
     s8 skipRamp; /* 0x2C: use the fixed fast step instead of the ramp. */
     s8 unk2D;
@@ -302,6 +302,8 @@ typedef char BrsProgressAnimation_drawPhase_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->drawPhase == 0x00) ? 1 : -1];
 typedef char BrsProgressAnimation_alpha_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->alpha == 0x08) ? 1 : -1];
+typedef char BrsProgressAnimation_appliedStep_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->appliedStep == 0x24) ? 1 : -1];
 typedef char BrsProgressAnimation_frames_offset_check[
     ((u32)&((BrsProgressAnimation *)0)->frames == 0x28) ? 1 : -1];
 typedef char BrsProgressAnimation_skipRamp_offset_check[
