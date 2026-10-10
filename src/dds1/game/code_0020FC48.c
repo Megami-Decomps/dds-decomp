@@ -1485,7 +1485,60 @@ s32 btlUpdateFadeIn(void) {
 void func_00213368(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00213370);
+extern u8 D_00360F68[21][21];
+extern u8 D_00361128[21][21];
+
+s32 btlUpdateFadeOut(void) {
+    u8 (*order)[21];
+    s32 finished;
+    s32 pass;
+    s32 changed;
+    s32 x, y, row, column;
+    u8 *cell;
+    SdfListHead *packets;
+    s8 mode;
+
+    mode = btlRuntimeState.fadeMode;
+    if (mode != 1) {
+        order = D_00360F68;
+    } else {
+        order = D_00361128;
+    }
+    finished = 1;
+    pass = 0;
+    changed = 0;
+    for (; pass < 2; pass++) {
+        for (y = 0; y < btlRuntimeState.gridHeight; y++) {
+            for (x = 0; x < btlRuntimeState.gridWidth; x++) {
+                column = x - (btlRuntimeState.gridWidth >> 1);
+                row = y - (btlRuntimeState.gridHeight >> 1) + 10;
+                column = (y & 1) ? column + 11 : column + 10;
+                if (order[row][column] == btlRuntimeState.unk_3C[0]) {
+                    cell = &btlRuntimeState.ownedData[y * btlRuntimeState.gridWidth + x];
+                    if (*cell != 0) {
+                        *cell += 0xC0;
+                        finished = 0;
+                        changed++;
+                    }
+                }
+            }
+        }
+        if (changed != 0) {
+            break;
+        }
+        btlRuntimeState.unk_3C[0]++;
+    }
+    packets = sdfCreateResetPacketList();
+    func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C,
+                 btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
+    D_00325708.append(&D_00325708, packets);
+    if ((btlRuntimeState.color10 & 0xFF000000) > 0x0C000000) {
+        btlRuntimeState.color10 -= 0x0C000000;
+    } else {
+        btlRuntimeState.color10 &= 0xFFFFFF;
+    }
+    return finished;
+}
 
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
@@ -1568,7 +1621,7 @@ extern u32 kwlnDrawControlFlags;
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-extern s32 func_00213370(void);
+extern s32 btlUpdateFadeOut(void);
 
 void btlResetRuntimeState(void);
 
@@ -1630,7 +1683,7 @@ s32 func_00213808(void) {
         }
         break;
     case 3:
-        if (func_00213370() != 0) {
+        if (btlUpdateFadeOut() != 0) {
             btlRuntimeState.state = 4;
         }
         break;
