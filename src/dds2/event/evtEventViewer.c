@@ -582,7 +582,7 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
 
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
-extern s32 evtViewerHasUpdateFlag(s32);
+extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
 extern void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
@@ -829,7 +829,7 @@ void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s
         }
         break;
     case 5:
-        if (evtViewerHasUpdateFlag((s32)viewer) == 1 ||
+        if (evtViewerHasUpdateFlag(viewer) == 1 ||
             evtViewerTestIndexedCondition((u32)(s32)key->p08.sh[1]) == 0) {
             break;
         }
@@ -837,7 +837,7 @@ void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s
         fldRegisterCampSceneId(viewer, key->p08.sh[0]);
         break;
     case 19:
-        if (evtViewerHasUpdateFlag((s32)viewer) == 1 ||
+        if (evtViewerHasUpdateFlag(viewer) == 1 ||
             evtViewerTestIndexedCondition((u32)(s32)key->p0C.sh[0]) == 0) {
             break;
         }
@@ -879,7 +879,7 @@ void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s
     case 4: {
         s32 selectedText;
 
-        if (viewer->windowContext->handle == -1 || evtViewerHasUpdateFlag((s32)viewer) != 0) {
+        if (viewer->windowContext->handle == -1 || evtViewerHasUpdateFlag(viewer) != 0) {
             break;
         }
         mnuUnpackNibbleFields(key, &nibbles[0], &nibbles[1]);
@@ -916,7 +916,7 @@ void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s
         }
         break;
     case 29:
-        if (evtViewerHasUpdateFlag((s32)viewer) == 1 || position != key->frame) {
+        if (evtViewerHasUpdateFlag(viewer) == 1 || position != key->frame) {
             break;
         }
         func_002A7F98(key->p08.sh[0]);
