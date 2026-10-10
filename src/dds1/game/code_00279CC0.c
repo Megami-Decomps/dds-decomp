@@ -93,7 +93,97 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
     mnuResetListNodeFadeCounters(((MenuWindowContainer *)window)->list);
 }
 
-INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
+extern char D_0037CC58[];
+extern char D_0037CC3C[];
+extern s32 ptySkillMenuHandlePageSwitch(KwlnTask *);
+extern void func_0027C788(MenuWindowContainer *);
+extern void mnuClearListFlagsOneAndTwo(u32 *flags);
+
+/* The camp initializer allocates and clears this complete 0x38-byte child. */
+typedef struct SkillBrowseRuntime {
+    struct SdfMemBlock *allocation;
+    u8 pad04[4];
+    s32 active;
+    struct MenuList *categoryList;
+    MenuWindowContainer *windows[4];
+    void *panel;
+    MenuWindowContainer *selectedWindow;
+    s32 activeMark;
+    s32 motionSelection;
+    u32 selectionFlags;
+    u32 selectedIndex;
+} SkillBrowseRuntime;
+
+typedef char SkillBrowseRuntimeSizeCheck[(sizeof(SkillBrowseRuntime) == 0x38) ? 1 : -1];
+
+/* Browse the candidate pages: pad direction moves the window selection and the confirm/cancel buttons open popups. */
+s32 ptySkillMenuBrowseCandidatePages(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
+    SkillBrowseRuntime *menu = *(SkillBrowseRuntime **)(context + 0x90C);
+    s32 *popup = (s32 *)(context + 0x54);
+    u32 buttons = mnuMapPadMaskToFlags(0x37);
+    u32 moves = mnuMapPadMaskToFlags(0xC0);
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    s32 windowOffset;
+    s32 state;
+    MenuWindowContainer **windows;
+    s32 index;
+
+    state = menuRunPanel((void *)context, 0, (void *)task);
+    if (state == 0) {
+        if (ptySkillMenuHandlePageSwitch(task) != 0) {
+            return 0;
+        }
+        windows = menu->windows;
+        index = menu->categoryList->cursor->index;
+        window = *(MenuWindowContainer **)((s32)windows + (index << 2));
+        if ((buttons & 0x300000) == 0) {
+            func_0027C788(window);
+        }
+        if (buttons & 0x10) {
+            mnuRetreatWindowListSelection(window);
+        }
+        if (buttons & 0x20) {
+            mnuAdvanceWindowListSelection(window);
+        }
+        mnuClearWindowPanelTransitionFlag(window);
+        if ((moves & 0xC00000) == 0) {
+            mnuClearListFlagsOneAndTwo(&menu->categoryList->stateFlags);
+        }
+        windowOffset = window->list->windowOffset;
+        if (moves & 0x40) {
+            mnuRetreatListCursorDefault(menu->categoryList);
+            mnuSeekSelectedWindowRow((s32)menu + 8, windowOffset);
+        }
+        if (moves & 0x80) {
+            mnuAdvanceListCursorDefault(menu->categoryList);
+            mnuSeekSelectedWindowRow((s32)menu + 8, windowOffset);
+        }
+        mnuPlayInputSound(0, moves, &menu->categoryList->stateFlags);
+        index = menu->categoryList->cursor->index;
+        window = *(MenuWindowContainer **)((s32)windows + (index << 2));
+        if (buttons & 1) {
+            node = window->list->cursor;
+            if (node->camp.value != 0xFFFF && (node->flags48 & 1) == 0) {
+                mnuSetPopupEntry(popup, D_0037CC58);
+            } else {
+                buttons = 0x8000;
+            }
+        }
+        if (buttons & 4) {
+            menu->selectionFlags = 1;
+            buttons = 1;
+            mnuSetPopupEntry(popup, D_0037CC58);
+        }
+        if (buttons & 2) {
+            mnuSetPopupEntryFlagged(popup, D_0037CC3C);
+        }
+        mnuPlayInputSound(0, buttons, &window->list->stateFlags);
+        return 0;
+    }
+    return state;
+}
 
 s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
