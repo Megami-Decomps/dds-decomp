@@ -39,9 +39,6 @@ typedef union UiQuadColor {
     };
     s32 channels[4];
 } UiQuadColor;
-typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
-
-extern const UiQuadColor D_00414D50;
 
 extern s32 dds3FindEntryIndex();
 
@@ -172,10 +169,6 @@ extern void mdlFlagClear(s32);
 
 extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
 
-extern ItfMesGlobals itfMesWork;
-
-extern void itfMesDestroyWindow(s32 arg0);
-
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern s32 sndUpdateTestMsgTask(KwlnTask *task);
@@ -193,19 +186,6 @@ extern s32 sdfAllocPacketAligned(s32 size);
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
-
-extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
-
-extern UiSprite *func_001A1858(s32, u32);
-
-
-extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
-
-extern void itfMesSetRowItemFlag();
-
-extern void sndSetSequenceVolumePan();
-
-extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct SndPad {
@@ -236,19 +216,7 @@ typedef struct SndPad {
 
 extern SndPad D_0037F510;
 
-extern s32 func_001A6AB8(ItfMesBlk40 *);
-
-extern void itfResetBattleFadeState(BtlFade *, s32);
-
-typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
-
 extern SdfPoolNode kwlnDrawSurfaces[];
-
-extern UiOwnerRef *D_003B4778[];
-
-extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
-
-extern void func_001A7798(UiSprite *sprite);
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
@@ -256,862 +224,9 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
-/* Enable context rendering for every font object in the linked chain. */
-void frFontEnableNodeContextModes(FrFontGlyph *fontObject) {
-    for (; fontObject != NULL; fontObject = fontObject->previous) {
-        frFontEnableContextMode(fontObject);
-    }
-}
-
-void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
-    ItfMesEntryBlock *pos = &panel->entryBlock;
-    ItfMesBlkA4 *place = &panel->blkA4;
-    s32 top;
-    if (place->sprite == 0) {
-        place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
-        if (place->frame != 0) {
-            place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureLineWidth(0, panel->blk14.glyphChain);
-        }
-    }
-    top = pos->y + place->bounds[1];
-    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], top, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->renderValue);
-    place->sprite->screenY = top;
-    itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
-    panel->flags = (panel->flags & ~0x300) | 0x100;
-}
-
-void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
-    ItfMesBlk14 *origin = &panel->blk14;
-    ItfMesBlkA4 *place = &panel->blkA4;
-    if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
-        if (place->frame == NULL) {
-            s32 width = origin->glyphChain->advance * 16;
-            place->frame = func_001A1858(7, (u32)itfMesWork.windowTexture);
-            itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->renderValue);
-            itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
-        }
-        panel->flags = (panel->flags & ~0x3000) | 0x1000;
-    } else if (place->frame != 0) {
-        panel->flags |= 0x3000;
-    }
-}
-
-void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition) {
-    if (resetPosition != 0) {
-        cursor->x = 0x280;
-        cursor->y = 0xa10;
-    }
-    cursor->glyphChain = NULL;
-    cursor->selectedIndex = 0xffff;
-}
-
-void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
-    if (resetPos != 0) {
-        cur->x = 0x4B0;
-        cur->y = 0xAF8;
-    }
-    cur->glyphChain = NULL;
-    cur->textState = 0;
-    cur->unk11 = 0;
-    cur->unk16 = 0;
-    cur->itemIndex = 0;
-    cur->tableCount = 0;
-    cur->color[0] = 0;
-    cur->color[1] = 0;
-    cur->color[2] = 0;
-    cur->color[3] = 0x80;
-    cur->table = NULL;
-}
-
-void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
-    cursor->x = 0x560;
-    cursor->y = 0xC88;
-    cursor->glyphChain = NULL;
-    cursor->panelValue = 0;
-    cursor->unk10 = 0;
-    cursor->selectedIndex = -1;
-    cursor->savedIndex = -1;
-    cursor->rowCount = 0;
-    cursor->unk18 = 0;
-    cursor->unk1C = 0;
-    cursor->unk20 = 0;
-    cursor->optionCount = 0;
-}
-
-extern void func_001A6078(ItfMesBlkA4 *, s32, s32);
-
-void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
-    block->frame = NULL;
-    block->sprite = NULL;
-    block->overlay = NULL;
-    func_001A6078(block, 0, 0);
-}
-
-/* Clear 32 words, from the end back toward the beginning of the buffer. */
-void itfClearDrawStateWords(ItfMesTextSlots *slots) {
-    s32 remaining;
-    u32 *word;
-
-    word = &slots->addresses[31];
-    remaining = 0x1f;
-    do {
-        remaining = remaining - 1;
-        *word = 0;
-        word = word + -1;
-    } while (-1 < remaining);
-}
-
-void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
-    if (preserveKind == 0) {
-        fade->kind = 0;
-    }
-    fade->phase = 0;
-    fade->timer = 0;
-    fade->alpha = 0x40;
-    fade->unk08 = 0;
-}
-
-void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
-    fade->phase = phase;
-    fade->alpha = alpha;
-    fade->timer = timer;
-}
-
-void btlReleaseEffectResourceHandles(ItfMesState *effect) {
-    ItfMesBlkA4 *place = &effect->blkA4;
-    if (place->frame != NULL) {
-        itfPanelReleasePrimitiveResources(place->frame);
-        place->frame = NULL;
-    }
-    if (place->sprite != NULL) {
-        itfPanelReleasePrimitiveResources(place->sprite);
-        place->sprite = NULL;
-    }
-    if (place->overlay != NULL) {
-        itfPanelReleasePrimitiveResources(place->overlay);
-        place->overlay = NULL;
-    }
-    effect->flags &= ~0xF00;
-}
-
-/* Release the handles in the second half for occupied entries in the first. */
-void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
-    s32 remaining;
-    u32 *entries = slots->addresses;
-
-    remaining = 0x1f;
-    do {
-        if (*entries != 0) {
-            sdfReleaseResourceAllocation(slots->handles[entries - slots->addresses]);
-            *entries = 0;
-        }
-        remaining = remaining - 1;
-        entries = entries + 1;
-    } while (-1 < remaining);
-}
-
-u16 *txtFormatNumberU16(s32 value, u16 *out) {
-    s32 digits[10];
-    s32 count = 0;
-    s32 i;
-    do {
-        digits[count] = value % 10;
-        value = value / 10;
-        count++;
-    } while (value > 0 && count < 10);
-    for (i = count - 1; i >= 0; i--) {
-        *out++ = (digits[i] << 8) - 0x6F80;
-    }
-    *out = 0;
-    return out;
-}
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
-
-void itfMesUpdatePanelFades(ItfMesState *panel);
-
-void btlUpdateFadeIndicator(ItfMesState *panel);
-
-void func_001A6528(ItfMesState *panel);
-
-void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
-    itfMesUpdatePanelFades(panel);
-    func_001A6350(panel);
-    func_001A6528(panel);
-    btlUpdateFadeIndicator(panel);
-}
-
-void itfMesUpdatePanelFades(ItfMesState *panel) {
-    ItfMesBlkA4 *place = &panel->blkA4;
-    UiSprite *sprite;
-    s32 transition;
-
-    sprite = place->sprite;
-    transition = panel->flags & 0x300;
-    switch (transition) {
-    case 0x100:
-        sprite->unk38 += 24;
-        if (sprite->unk38 >= place->fadeLimit || panel->unk12 == 3) {
-            sprite->unk38 = place->fadeLimit;
-            panel->flags = (panel->flags & ~0x307) | 0x203;
-        }
-        break;
-    case 0x300:
-        sprite->unk38 -= 8;
-        if (sprite->unk38 <= 0 || panel->unk12 == 3) {
-            sprite->unk38 = 0;
-            panel->flags &= ~0x300;
-        }
-        break;
-    }
-
-    sprite = place->frame;
-    transition = panel->flags & 0x3000;
-    switch (transition) {
-    case 0x1000:
-        sprite->unk38 += 32;
-        if (sprite->unk38 >= 200) {
-            sprite->unk38 = 200;
-            panel->flags = (panel->flags & ~0x3000) | 0x2000;
-        }
-        break;
-    case 0x3000:
-        sprite->unk38 -= 32;
-        if (sprite->unk38 <= 0) {
-            sprite->unk38 = 0;
-            panel->flags &= ~0x3000;
-            itfPanelReleasePrimitiveResources(sprite);
-            place->frame = NULL;
-        }
-        break;
-    }
-
-    sprite = place->overlay;
-    transition = panel->flags & 0xC00;
-    switch (transition) {
-    case 0x400:
-        sprite->unk38 += 24;
-        if (sprite->unk38 >= place->fadeLimit) {
-            sprite->unk38 = place->fadeLimit;
-            panel->flags = (panel->flags & ~0xC07) | 0x803;
-        }
-        break;
-    case 0xC00:
-        sprite->unk38 -= 8;
-        if (sprite->unk38 <= 0) {
-            sprite->unk38 = 0;
-            panel->flags &= ~0xC00;
-            itfPanelReleasePrimitiveResources(sprite);
-            place->overlay = NULL;
-        }
-        break;
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
-
-extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
-
-extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
-
-extern s32 sndSeqSelectPoll(ItfMesState *panel);
-
-extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
-
-void func_001A6528(ItfMesState *panel) {
-    ItfMesBlk40 *selection = &panel->blk40;
-    ItfMesEntryBlock *entry = &panel->entryBlock;
-    u32 flags = panel->flags;
-    s32 top;
-    s32 bottom;
-    s32 entryY;
-
-    switch (selection->unk10) {
-    case 1:
-        if (panel->unk12 == 3) {
-            selection->unk10 = 2;
-            panel->flags = (flags & ~0x38) | 0x18;
-            break;
-        }
-        entryY = entry->y;
-        bottom = entryY + entry->unk16 * (25 << 3);
-        top = selection->y - ((selection->rowCount * 25 - 25) << 3);
-        if (entryY == 0xAF8 && panel->blkA4.sprite != NULL) {
-            panel->blkA4.sprite->scrollSpan = ((bottom - top) / 64) * 64 + 64;
-        }
-        if (entry->glyphChain != NULL && top < bottom) {
-            itfMesShiftPanelVertically(panel, -64);
-            return;
-        }
-        if ((flags & 0xC00) != 0x400) {
-            if (entry->glyphChain != NULL) {
-                itfMesSetChildChainFlags(entry->glyphChain, 3);
-            }
-            selection->unk10 = 2;
-            panel->flags = (panel->flags & ~0x38) | 0x18;
-        }
-        break;
-    case 2:
-        if ((flags & 0x38) == 0x20 && sndSeqSelectPoll(panel) == 1) {
-            selection->glyphChain = itfMesTrimGlyphChainToRow(selection->glyphChain,
-                selection->selectedIndex, selection->rowCount);
-            if ((flags & 0xC00) == 0x800) {
-                panel->flags |= 0xC00;
-            }
-            selection->selectedIndex = itfMesNthClearBit(selection->selectedIndex, selection->panelValue);
-            selection->optionCount = 0;
-            btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
-            panel->flags = (panel->flags & ~0x38) | 0x28;
-            selection->unk20 = 0x80;
-            selection->unk10 = 3;
-        }
-        break;
-    case 3:
-        selection->unk20 -= 16;
-        if (selection->unk20 <= 0) {
-            selection->unk20 = 0;
-            selection->unk10 = 4;
-            itfResetBattleFadeState(&panel->fade, 0);
-        }
-        itfMesRecolorNodeChildren(selection->glyphChain, selection->unk20);
-        return;
-    case 4:
-        if (entry->glyphChain != NULL && entry->y < 0xAF8) {
-            itfMesShiftPanelVertically(panel, 64);
-            return;
-        }
-        selection->unk10 = -1;
-        break;
-    }
-}
-
-void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
-    ItfMesBlk14 *origin = &panel->blk14;
-    ItfMesEntryBlock *pos = &panel->entryBlock;
-    ItfMesBlkA4 *place = &panel->blkA4;
-    pos->y += dy;
-    itfMesOffsetNodeChain(pos->glyphChain, 0, dy);
-    if (place->sprite != 0) {
-        itfAdvancePanelLayoutAndNotify(place->sprite, 0, dy, 0, 0, 0);
-    }
-    if (place->frame != 0) {
-        itfAdvancePanelLayoutAndNotify(place->frame, 0, dy, 0, dy, 0);
-    }
-    if (origin->glyphChain != NULL) {
-        origin->y += dy;
-        itfMesOffsetNodeChain(origin->glyphChain, 0, dy);
-    }
-}
-
-s32 sndSeqSelectPoll(ItfMesState *panel) {
-    ItfMesBlk40 *sel = &panel->blk40;
-    s32 dir = 0;
-    s32 index;
-    if (D_0037F510.prev & 2) {
-        if (sel->selectedIndex != 0) {
-            dir = -1;
-        } else if (D_0037F510.prev < 0) {
-            dir = -1;
-        }
-    } else if (D_0037F510.next & 2) {
-        if (sel->selectedIndex != sel->rowCount - 1 || D_0037F510.next < 0) {
-            dir = 1;
-        }
-    }
-    if (dir != 0) {
-        sndStepSequenceIndex(sel, dir);
-        itfResetBattleFadeState(&panel->fade, 1);
-    }
-    if (D_0037F510.confirm < 0) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-        return 1;
-    }
-    if (sel->optionCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
-        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-        if (index != sel->selectedIndex) {
-            itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
-            itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 1);
-            sel->selectedIndex = index;
-            sel->savedIndex = index;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir) {
-    s32 index = sel->selectedIndex;
-    itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 0);
-    if (dir < 0) {
-        index--;
-        if (index < 0) {
-            index = sel->rowCount - 1;
-        }
-    } else {
-        index++;
-        if (index >= sel->rowCount) {
-            index = 0;
-        }
-    }
-    itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 1);
-    sel->selectedIndex = index;
-    sel->savedIndex = index;
-    sndSetSequenceVolumePan(1, 0x7F, 0x3F);
-}
-
-s32 func_001A6AB8(ItfMesBlk40 *selection) {
-    s32 i;
-
-    for (i = 0; i < selection->optionCount; i++) {
-        ItfMesOption *option = &selection->options[i];
-
-        if (D_0037F510.buttons[option->id] < 0) {
-            s32 prefixLength = option->value;
-            s32 rank = 0;
-            u32 mask = selection->panelValue;
-
-            if (prefixLength > 0) {
-                s32 remaining = prefixLength;
-                do {
-                    if ((mask & 1) == 0) {
-                        rank++;
-                    }
-                    mask >>= 1;
-                } while (--remaining != 0);
-            }
-            if ((mask & 1) == 0) {
-                return rank;
-            }
-        }
-    }
-    return -1;
-}
-
-void btlUpdateFadeIndicator(ItfMesState *panel) {
-    BtlFade *fade = &panel->fade;
-    s32 minimumAlpha;
-    if (fade->kind != 0) {
-        if (fade->timer > 0) {
-            fade->timer -= 8;
-        }
-        switch (fade->phase) {
-        case 0:
-            fade->alpha += 8;
-            if (fade->alpha >= 0xFF) {
-                fade->phase = 1;
-                fade->alpha = 0xFF;
-                fade->timer = 0x80;
-            }
-            break;
-        case 1:
-            fade->alpha -= 8;
-            minimumAlpha = (fade->kind & 1) ? 0x20 : 0x40;
-            if (fade->alpha <= minimumAlpha) {
-                fade->alpha = minimumAlpha;
-                fade->phase = 0;
-            }
-            break;
-        }
-    }
-}
-
-extern void itfMesRenderActivePanelSprites(ItfMesState *);
-
-extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
-
-extern void func_001A7120(ItfMesState *);
-
-extern void func_001A6E88(ItfMesState *);
-
-void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
-    u32 flags = panel->flags;
-    ItfMesBlk40 *selection;
-    FrFontGlyph *glyph;
-
-    itfMesWork.flags &= ~2;
-    itfMesRenderActivePanelSprites(panel);
-    glyph = panel->blk14.glyphChain;
-    if (!(flags & 0x10000) && glyph != 0) {
-        frFontDrawGlyphInDefaultMode(glyph);
-    }
-    glyph = panel->entryBlock.glyphChain;
-    if (!(flags & 0x20000) && (flags & 7) >= 3) {
-        if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
-            if ((panel->flags & 7) != 4) {
-                panel->fade.unk08 = 0;
-                panel->flags = (panel->flags & ~7) | 4;
-            }
-        }
-    }
-    glyph = panel->blk40.glyphChain;
-    if (!(flags & 0x40000)) {
-        flags &= 0x38;
-        if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
-            if (flags == 0x18) {
-                selection = &panel->blk40;
-                if (selection->selectedIndex == -1) {
-                    selection->selectedIndex = 0;
-                    selection->savedIndex = 0;
-                }
-                itfMesSetRowItemFlag(selection->glyphChain, selection->selectedIndex, selection->rowCount, 1);
-                panel->flags = (panel->flags & ~0x38) | 0x20;
-                panel->fade.kind = 2;
-            }
-        }
-    }
-    if (panel->fade.kind & 1) {
-        itfDrawSoundSelectorFadeLayers(panel);
-    }
-    if (panel->fade.kind & 2) {
-        if (panel->unk12 == 3) {
-            func_001A7120(panel);
-        } else {
-            func_001A6E88(panel);
-        }
-    }
-}
-
-void itfMesRenderActivePanelSprites(ItfMesState *panel) {
-    ItfMesBlkA4 *place;
-    if (panel->flags & 0x80000) {
-        return;
-    }
-    place = &panel->blkA4;
-    if ((panel->flags & 0x300) >= 0x100) {
-        if (panel->unk12 != 3) {
-            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->unk10]);
-        }
-        itfMesWork.flags |= 2;
-        if (place->overlay != 0) {
-            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->unk10]);
-        }
-    }
-    if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
-        func_001A7798(place->sprite);
-    }
-}
-
-extern DrawColorRec D_003B49B8[];
-
-extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
-
-extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
-
-/* Draw the selected sound row and its expanding fade outline. */
-void func_001A6E88(ItfMesState *panel) {
-    DrawColorRec uv;
-    DrawColorRec color;
-    DrawVertex bounds[2];
-    ItfMesBlk40 *selection = &panel->blk40;
-    BtlFade *fade = &panel->fade;
-    s32 selected = selection->savedIndex;
-    SdfListHead *list;
-    s32 x;
-    s32 y;
-    s32 bottom;
-    s32 expansion;
-    s32 rightExpansion;
-    s32 verticalExpansion;
-    SdfPoolNode *surface;
-
-    if (selected == -1) {
-        return;
-    }
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    x = selection->x;
-    y = (s32)selection->y - ((selection->rowCount * 25 - 23) << 3) + selected * 0xA0;
-    bottom = y + 0x88;
-    bounds[0].x = x - 0x1D0;
-    bounds[0].y = y + 0x20;
-    bounds[1].x = x + frFontMeasureLineWidth(selected, selection->glyphChain) + 0x1D0;
-    bounds[1].y = bounds[0].y + 0x90;
-    func_001A09C0(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
-
-    bounds[0].x = x;
-    bounds[0].y = y + 8;
-    bounds[1].x = x + 0x60;
-    bounds[1].y = bottom;
-    uv.components[0] = 0x150;
-    uv.components[1] = 0x2F0;
-    uv.components[2] = 0x1B0;
-    uv.components[3] = 0x3F0;
-    color.components[0] = 0x80;
-    color.components[1] = 0x80;
-    color.components[2] = 0x80;
-    color.components[3] = 0x26;
-    itfQueueTextureBoundQuadPacket(bounds, &uv, &color, panel->renderValue,
-                                  itfMesWork.windowTexture, 0, list);
-
-    bounds[0].x = x - 0xF0;
-    bounds[0].y = y + 0x30;
-    bounds[1].x = x - 0x30;
-    bounds[1].y = bottom;
-    uv.components[0] = 0x290;
-    uv.components[1] = 0x10;
-    uv.components[2] = 0x350;
-    uv.components[3] = 0xC0;
-    color.components[3] = fade->alpha;
-    itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
-    if (fade->timer > 0) {
-        expansion = 0x80 - fade->timer;
-        rightExpansion = expansion << 1;
-        verticalExpansion = expansion >> 1;
-        bounds[0].x -= expansion;
-        bounds[0].y -= verticalExpansion;
-        bounds[1].x += rightExpansion;
-        bounds[1].y += verticalExpansion;
-        color.components[3] = fade->timer;
-        itfSendTablePacket(list, 1, 0);
-        itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
-        itfSendTablePacket(list, 0, 0);
-    }
-    surface = &kwlnDrawSurfaces[panel->unk10];
-    surface->append(surface, list);
-}
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7120);
-
-extern u8 D_003B49F8[];
-
-extern u8 D_003B49E8[];
-
-extern s32 D_003B4A08[];
-
-/* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
-    s32 bounds[4];
-    BtlFade *fade = &object->fade;
-    SdfListHead *packet;
-    s32 expansion;
-    SdfPoolNode *surface;
-
-    bounds[0] = 0x1AA0;
-    bounds[1] = 0xC60;
-    bounds[2] = 0x1BD0;
-    bounds[3] = 0xD58;
-    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(packet);
-    D_003B4A08[3] = 0xFF;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->renderValue,
-                                  itfMesWork.windowTexture, 0, packet);
-    D_003B4A08[3] = fade->alpha;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
-                                  itfMesWork.windowTexture, 0, packet);
-    if (fade->timer > 0) {
-        expansion = 0x80 - fade->timer;
-        bounds[0] -= expansion * 2;
-        bounds[1] -= expansion;
-        bounds[2] += expansion * 2;
-        bounds[3] += expansion;
-        D_003B4A08[3] = fade->timer;
-        itfSendTablePacket(packet, 1, 0);
-        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
-                                      itfMesWork.windowTexture, 0, packet);
-        itfSendTablePacket(packet, 0, 0);
-    }
-    surface = &kwlnDrawSurfaces[object->unk10];
-    surface->append(surface, packet);
-}
-
-s32 sndVisitQueuedResources(void) {
-    ItfMesPoolNode *node;
-    for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
-        itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
-    }
-    return 0;
-}
-
-extern s32 func_001200E0(void);
-
-s32 func_001A76C8(void) {
-    ItfMesPoolNode *node;
-
-    if (func_001200E0() != 0) {
-        return 0;
-    }
-    for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
-        itfUpdateSoundSelectorPanel((ItfMesState *)node->stateAddress);
-    }
-    itfMesWork.unk8++;
-    return 0;
-}
-
-void sndFlushMessageQueue(void) {
-    ItfMesPoolNode *node = itfMesWork.pool.activeHead;
-    s32 message;
-    while (node != 0) {
-        message = node->index;
-        node = node->next;
-        itfMesDestroyWindow(message);
-    }
-    sdfTexReleaseReferenceViaHandler(itfMesWork.windowTexture);
-    itfMesWork.windowTexture = NULL;
-}
-
 extern SdfPoolNode D_00380708;
 
-extern s32 D_003B4A18[];
-
-extern u8 D_00436630[5];
-
-extern u8 D_00436638[5];
-
-extern void itfEmitQuadListA(void *, void *, u8 *, u8 *, s32, u32, SdfListHead *);
-
-void func_001A7798(UiSprite *sprite) {
-    s32 vertices[4][2] = {
-        {sprite->left, sprite->top},
-        {sprite->right, sprite->top},
-        {sprite->right, sprite->bottom},
-        {sprite->left, sprite->bottom}
-    };
-    SdfListHead *list;
-
-    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    itfEmitQuadListA(vertices, D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, list);
-    D_00380708.append(&D_00380708, list);
-}
-
-void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
-    UiSprite *sprite = object->sprite;
-    s32 *bounds;
-    s32 dx;
-    s32 dy;
-
-    if (sprite != NULL) {
-        bounds = object->bounds;
-        if (D_0037F510.coarseDown & 2) {
-            dx = -16;
-        } else {
-            dx = ((u8)D_0037F510.coarseUp << 3) & 0x10;
-        }
-        if (D_0037F510.unk36 & 2) {
-            dy = -8;
-        } else {
-            dy = ((u8)D_0037F510.unk37 << 2) & 8;
-        }
-        if (D_0037F510.unk31 != 0) {
-            dx *= 8;
-            dy *= 8;
-        }
-        if (dx != 0 || dy != 0) {
-            switch (mode) {
-            case 0:
-                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, 0, 0, 0);
-                bounds[0] += dx;
-                bounds[1] += dy;
-                break;
-            case 1:
-                itfAdvancePanelLayoutAndNotify(sprite, 0, 0, dx, dy, 0);
-                bounds[2] += dx;
-                bounds[3] += dy;
-                break;
-            case 2:
-                itfAdvancePanelLayoutAndNotify(sprite, dx, dy, dx, dy, 0);
-                bounds[0] += dx;
-                bounds[1] += dy;
-                bounds[2] += dx;
-                bounds[3] += dy;
-                break;
-            }
-        }
-    }
-}
-
-typedef struct SndPadStepTarget {
-    u8 pad00[0x38];
-    s32 value; /* 0x38 */
-} SndPadStepTarget;
-
-typedef struct SndPadStepper {
-    u8 pad00[4];
-    SndPadStepTarget *target; /* 0x04 */
-    u8 pad08[0x20];
-    s32 index; /* 0x28 */
-} SndPadStepper;
-
-/* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
-void sndStepIndexByPad(SndPadStepper *stepper) {
-    s32 step;
-
-    if (D_0037F510.coarseDown & 2) {
-        step = -1;
-    } else {
-        step = (D_0037F510.coarseUp & 2) > 0;
-    }
-    if (D_0037F510.unk36 & 2) {
-        step = -1;
-    } else if (D_0037F510.unk37 & 2) {
-        step = 1;
-    }
-    if (D_0037F510.unk31 != 0) {
-        step *= 10;
-    }
-    if (step != 0) {
-        s32 index = (stepper->index + step) & 0xFF;
-
-        stepper->index = index;
-        if (stepper->target != NULL) {
-            stepper->target->value = index;
-        }
-    }
-}
-
-ItfMesPoolNode *func_001A7A98(ItfMesPoolNode *node) {
-    s32 index = 0;
-    s32 count = itfMesWork.activeWindowCount;
-
-    if (count <= 0) {
-        return NULL;
-    }
-    for (;;) {
-        if (node != NULL) {
-            node = node->previous;
-        }
-        if (node == NULL) {
-            node = itfMesWork.pool.activeTail;
-        }
-        if (((ItfMesState *)node->stateAddress)->blkA4.sprite != NULL) {
-            break;
-        }
-        index++;
-        if (count < index) {
-            node = NULL;
-            break;
-        }
-    }
-    return node;
-}
-
-void itfQueueOffsetTexturedRect(s32 *bounds, s32 *region, s32 x, s32 y,
-                   s32 alpha, SdfTex *texture, SdfListHead *command) {
-    s32 positions[4];
-    s32 uv[4];
-    UiQuadColor color = D_00414D50;
-
-    positions[0] = (bounds[0] + x) << 4;
-    positions[1] = (bounds[1] + y) << 3;
-    positions[2] = (bounds[2] + x) << 4;
-    positions[3] = (bounds[3] + y) << 3;
-    uv[0] = region[0] << 4;
-    uv[1] = region[1] << 4;
-    uv[2] = (region[0] + region[2]) << 4;
-    uv[3] = (region[1] + region[3]) << 4;
-    color.alpha = alpha;
-    itfQueueTextureBoundQuadPacket(positions, uv, &color, 0, texture, 0, command);
-}
-
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414D50);
-
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414D60);
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7C08);
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A81F0);
-
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A85E0);
+extern void *memset(void *destination, s32 value, u32 bytes);
 
 extern s32 D_00435CBC;
 
@@ -1124,7 +239,6 @@ extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
 extern u8 D_003B4A28[];
 
 extern s32 scrCreateTaskForProcessId();
-
 
 void sndCreateTestMsgTasks(void) {
     D_00435CBC = 0x80FFFFFF;
@@ -1167,11 +281,11 @@ s32 sndUpdateTestMsgTask(KwlnTask *task) {
 
 extern s32 func_0035B6E0(const char *, ...);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EB0);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EB0);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EC8);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EC8);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EE0);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414EE0);
 
 void itfPrintTestMessageCallback(void) {
     func_0035B6E0("********* AAAA ********\n");
@@ -1467,7 +581,6 @@ s32 func_001A8BD0(void) {
     return 0;
 }
 
-
 typedef struct ItfColorPanelWork {
     s16 editing;
     s16 selection;
@@ -1479,20 +592,33 @@ typedef struct ItfColorPanelRow {
     const char *title;
     s32 highlight;
 } ItfColorPanelRow;
+
 typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : -1];
+
 typedef char ItfColorPanelRowSizeCheck[sizeof(ItfColorPanelRow) == 8 ? 1 : -1];
 
 extern ItfColorPanelWork D_00452E90;
+
 extern ItfColorPanelRow D_003B4D50[6];
+
 extern s32 D_00438F3C;
+
 extern UiQuadColor D_003B4D80;
+
 extern s32 D_00438F40;
+
 extern u8 D_004366B4;
+
 extern char D_004366B8[]; /* "FILTER:" */
+
 extern char D_004366C0[]; /* ">" */
+
 extern char D_004366C8[]; /* " %s" */
+
 extern char D_004366D0[]; /* "%3d" */
+
 extern char D_004366D8[]; /* "%4d" */
+
 void itfDrawPulsingTestOverlay(s32 surfaceIndex);
 
 /* Draw the four color channels and handle selection and value editing. */
@@ -1605,8 +731,6 @@ s32 itfEditOverlayColor(void) {
     }
     return 0;
 }
-
-
 
 u64 *sdfCreateGradientQuadPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
     u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
@@ -1854,7 +978,6 @@ extern s32 itfMesCreateWindow(ItfMesSub *);
 
 extern void btlResetActorEntryState(void);
 
-
 extern char D_004366F8[];
 
 extern char D_003B4D90[];
@@ -2023,23 +1146,28 @@ typedef struct BattleAdjustmentRecord {
 extern BattleAdjustmentRecord *D_00435E0C;
 
 typedef char BattleAdjustmentRecord_size_check[sizeof(BattleAdjustmentRecord) == 0x190 ? 1 : -1];
+
 typedef char BattleAdjustmentRecord_parameter_a_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamA == 0) ? 1 : -1];
+
 typedef char BattleAdjustmentRecord_parameter_b_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamB == 2) ? 1 : -1];
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
 extern void btlSetScene(s32);
+
 extern void itfMesSetFlags(u32);
+
 extern s32 btlResolveQueuedSceneRequestParameters(s32 *, s32 *);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F48);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F48);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F68);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F68);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F80);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F80);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F98);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414F98);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414FB0);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00414FB0);
 
 void func_001A9F30(s32 mode, s32 pack, s32 encounter) {
     struct { s32 code; s32 parameter; } req;
@@ -2123,7 +1251,6 @@ void func_001A9F30(s32 mode, s32 pack, s32 encounter) {
     ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
     btlBossDebugPrintf("** btlStart **************\n");
 }
-
 
 void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();
@@ -2373,7 +1500,7 @@ DatPartyRecord *btlGetIndexedPartyEntryRecord(s32 index) {
     return &datGameState->party[index];
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004150B0);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 
 void btlSyncPlayerWork(BtlUnit *actor) {
     DatPartyRecord *src = &actor->partyRecord;
@@ -2759,13 +1886,13 @@ u16 btlGetActorBedAssetIdFromIndex(s32 arg0) {
     return datItemSkillRecords[arg0].commandIndex;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415130);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415158);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC0F8);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC0F8);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC360);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC360);
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
 
@@ -2864,9 +1991,9 @@ next_actor:
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC750);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC750);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ACD10);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001ACD10);
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     u32 mask;
@@ -3179,7 +2306,6 @@ s32 btlAllActiveUnitsReady(void) {
     return 1;
 }
 
-
 f32 func_001AD978(void) {
     BattleController *runtime = (BattleController *)btlGetRuntime();
     s32 adjustment = D_00435E0C[runtime->adjustmentRecordIndex]
@@ -3371,15 +2497,15 @@ s16 btlGetActorEntryCode(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].code;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004151E8);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_004151E8);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415208);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415208);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415220);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415220);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415238);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415238);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415250);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415250);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     f32 factor;
@@ -3511,7 +2637,7 @@ void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", btlLowestSetPairIndex);
+INCLUDE_ASM(const s32, "game/code_001A8748", btlLowestSetPairIndex);
 
 void btlTickActorEntryCountdowns(BtlUnit *unit) {
     s16 *entry = &unit->entrySlots[0].countdown;
@@ -3810,11 +2936,11 @@ typedef char BattleSavedActorStateSize[(sizeof(BattleSavedActorState) == 0x38) ?
 
 extern BattleSavedActorState D_00452EA0[3];
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004152F8);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_004152F8);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415308);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415308);
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415318);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415318);
 
 void btlPushSavedPartyUnitStates(void) {
     s32 count = 0;
@@ -3886,8 +3012,10 @@ void btlSyncModelFlagFromEventThresholds(void) {
 }
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415340);
+
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 
 s32 func_001AF0B0(BtlUnit *attacker, BtlUnit *defender, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -4000,9 +3128,9 @@ s32 func_001AF0B0(BtlUnit *attacker, BtlUnit *defender, u32 command) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AF4A0);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001AF4A0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AFF38);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001AFF38);
 
 typedef struct BtlHitResult {
     s32 amount;
@@ -4105,7 +3233,7 @@ extern s32 btlGetActionRecordLookupValue(s32);
 extern s32 fldCountSceneSlots(void);
 
 /* Combine both contributions; groups of three or more suppress the 30% case. */
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415440);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415440);
 
 s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags,
                   s32 unusedFlags, u8 useSelectedAction) {
@@ -4153,7 +3281,6 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags,
 f32 func_001B0B20(void) {
     return 1.5f;
 }
-
 
 extern s32 datRosterDetails;
 
@@ -4328,7 +3455,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1090);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001B1090);
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
                    BtlTargetResult *results, s32 command) {
@@ -4383,7 +3510,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     btlFreeIndexList(copy);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1350);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001B1350);
 
 s32 btlQueryUnitChannelFlags(BtlUnit *first, BtlUnit *second, s32 other, s32 variant, s32 mode) {
     s32 flags;
@@ -4433,7 +3560,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B17E8);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001B17E8);
 
 void func_001B1F78(void) {
 }
@@ -4625,9 +3752,9 @@ s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
+INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415638);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
+INCLUDE_ASM(const s32, "game/code_001A8748", func_001B2630);
 
 s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorIndex) {
     u32 indexedSelectorValue;

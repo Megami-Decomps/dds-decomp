@@ -59,3 +59,16 @@ Ranges widened beyond the projection, using the Persona 4 transfer
 | `interface/itfMesManager` | to 0x19DB88 | to 0x1A5BB8 | P4 `itfMesManager.c` functions after the Nocturne run |
 
 DDS2 ends were found through the identical DDS1 functions (constant offset).
+
+### DDS2 message protocol extension
+
+The DDS2 `interface/itfMesManager` reconstruction now extends through
+`0x001A8748`. The former `0x001A5BB8` endpoint was only the end of the last P4
+transfer above. Native formatter users at `0x001A45C0` and `0x001A81F0` share
+`D_004365F0`, independently bridging that split. The immediately following
+poller at `0x001A85E0` initializes/completes the same tightly shared state
+protocol as the latter function. This supports the conservative extension
+through the poller, without claiming the next function is a proven original
+file boundary. The remaining code is `game/code_001A8748`; its `.rodata` begins
+at `0x00414E90`, and its `.lit4` remains at `0x00434568`. See the controlled
+compiler-context and provenance discussion in `idioms.md`.

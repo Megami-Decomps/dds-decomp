@@ -7300,3 +7300,42 @@ not merging unrelated values or forcing lifetimes. Verify a control really
 changes the target definition before accepting identical output as evidence;
 an earlier purported direct-field control had accidentally left this target
 unchanged and was invalid as a negative experiment.
+
+### Restore the DDS2 message polling callback's compilation context
+
+`func_001A85E0` is the start/poll/finish half of the message protocol updated by
+`func_001A81F0`. Capture the window before the parameter callback, then read its
+signed entry status. Read the completion flag after the updater, and read it
+again after the sound callback; publishing one before the sound call is not a
+license to assume it remains one. The VM result setter has its actual void
+contract. Preserve the common zero-return path rather than collapsing the
+start-entry result into an isolated Boolean return.
+
+A natural reconstruction under the old `game/code_001A5BB8` split differed in
+one word: `bnel` instead of `bne` at `+0xFC`. Ordinary/probe output parity and a
+controlled authentic-provider test isolated the cause. Making the existing
+`itfMesClearWindowHighFlags` definition visible before this callback adds only
+`REG_EH_REGION 0` notes to its two calls in pass 28; instructions, registers and
+CFG remain unchanged. Pass 29 retains the same branch and zero-return donor,
+but permits the donor on both paths. This is the opposite-thread liveness scan
+mechanism documented above, not a reason to invent a nothrow annotation.
+
+Independent ownership evidence supports extending `interface/itfMesManager`:
+its native `0x001A45C0` and the later updater at `0x001A81F0` both reference the
+same `"%d"` literal at `D_004365F0`, bridging the old provisional split. The
+adjacent poller and updater are the only code users of `D_00438F2C`,
+`D_00438F36` and `D_00452E60`; the other three protocol fields are used only by
+these two functions and `0x001A7C08`. The poller initializes and completes this
+same protocol. Thus the reconstructed extent includes it, through `0x001A8748`.
+The literal-sharing premise is supported by the existing compiler/TU tests;
+externally shared literals/state remain a theoretical counterexample, so this
+is a supported reconstructed extent, not a recovered source-file endpoint.
+There is no corresponding evidence to absorb the subsequent test/battle code.
+
+Keep the actual providers in address order. Reconcile their declarations rather
+than retaining conflicting private views: the pool node is `ItfMesPoolNode`,
+the pad stepper has its existing concrete type, and `scrGetWindow` returns
+`u32`. The manager owns `.rodata` through `0x00414E90`; the new residual owner
+`game/code_001A8748` starts its data there and retains the original `.lit4` run.
+No compiler flag, barrier, forced register, duplicate provider or attributed
+extern is required.
