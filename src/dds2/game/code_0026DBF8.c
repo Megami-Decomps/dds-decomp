@@ -3230,7 +3230,7 @@ extern s32 func_0027B678(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelATransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, MantraPanelPool *, u8 *, s32);
 typedef struct MantraSparkle {
     s16 age;
     s16 life;
@@ -4083,16 +4083,17 @@ void func_0027DE30(void) {
 void func_0027DE38(void) {
 }
 
-extern u16 mnuGetPanelValueAt(MenuPanelObject *, s32);
+typedef struct MnuStatusResource MnuStatusResource;
+extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
 
-s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, s32 menuAddress,
+s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *pool,
                   u8 *object, s32 packet) {
     s8 offsets[6][2] = {
         {49, 22}, {69, 32}, {69, 62},
         {49, 72}, {29, 62}, {29, 32}
     };
     MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
-    MenuPanelObject *panelObject = ((MantraMenu *)menuAddress)->work.panelObject;
+    MnuStatusResource *panelObject = (MnuStatusResource *)pool->unk2DB4;
     MantraNodePos **neighbor;
     s32 mask;
     s32 i;
@@ -4135,37 +4136,37 @@ s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, s32 menuAddress
 }
 
 
-s32 mnuDrawMantraPanelSpriteTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+s32 mnuDrawMantraPanelSpriteTransition(s32 x, s32 y, s32 z, s32 amount, MantraPanelPool *pool, u8 *object, s32 packet) {
     f32 scale;
 
     switch ((((MantraPanelAnimation *)object)->flags >> 19) & 0xF) {
     case 6:
         scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         amount = amount * scale;
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     case 8:
         scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         amount = amount * scale;
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     case 7:
         scale = ((MantraPanelAnimation *)object)->frame * 0.25f;
         scale = 1.0f - scale;
         amount = amount * scale;
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     case 9:
         scale = ((MantraPanelAnimation *)object)->frame / 10.0f;
         scale = 1.0f - scale;
         amount = amount * scale;
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     case 0:
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     case 1:
-        mnuDrawMantraNeighborMarkers(x, y, z, amount, unused, object, packet);
+        mnuDrawMantraNeighborMarkers(x, y, z, amount, pool, object, packet);
         break;
     }
     return 0;
