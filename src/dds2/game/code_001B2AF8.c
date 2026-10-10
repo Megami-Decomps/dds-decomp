@@ -863,7 +863,48 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004156F8);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B3DD8);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B4040);
+s32 func_001B4040(void) {
+    BtlState *battle;
+    u16 sceneFlags;
+    u32 rate;
+    u32 threshold;
+    u32 i;
+
+    if (mdlFlagTest(0x819) != 0 || mdlFlagTest(0x820) != 0) {
+        return 0;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    sceneFlags = datBattleSceneRecords[battle->battleMode].flags;
+    if (sceneFlags & 0x800) {
+        return 0;
+    }
+    if (sceneFlags & 1) {
+        return 0;
+    }
+    if (battle->specialEncounterBlocked != 0) {
+        return 0;
+    }
+    if (sceneFlags & 0x200) {
+        return 0;
+    }
+    rate = datBattleParameters->specialEncounterChance[evtGetMirroredSolarPhase()];
+    threshold = rate;
+    if (datGameState->world.unkA48 != 0) {
+        threshold = rate * datBattleParameters->specialEncounterScale;
+        btlBossDebugPrintf("btl:majin=%d%%[%f]\n", threshold,
+                           datBattleParameters->specialEncounterScale);
+    } else {
+        btlBossDebugPrintf("btl:majin=%d%%\n", threshold);
+    }
+    for (i = 0; i < 5; i++) {
+        if ((datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED) != 0 &&
+            btlDoesEnabledStatusMatchCurrentId(&datGameState->party[i], 0xF8) != 0) {
+            return 1;
+        }
+    }
+    datGameState->world.unkA48++;
+    return btlRollAiBucket() < threshold;
+}
 
 extern const f32 D_004157A0[9];
 extern const char D_004157C8[];
