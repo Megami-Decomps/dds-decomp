@@ -6782,3 +6782,99 @@ and drawing, not the separate model-sampling updater that reads the
 prefix. Preserve the original partial initialization; fabricated prefix
 stores would change both the work and the native stack contents.
 
+
+## Diagnose the first divergent compiler pass, not just the final register
+
+The bounded `near_sweep2` investigation used the configured `cc.sh` wrapper
+with `-da -fsched-verbose=5`, keeping source snapshots, objects and dumps
+outside the checkout. Diagnostic flags were not added to production builds.
+The following cases distinguish three different causes of small residuals.
+
+### A fade-out phase must live across its interval tests
+
+DDS2 `func_001542D8` initially differed only at `+0x13C/+0x140`: the
+fade-out subtraction wrote `$f0`, and the next subtraction read `$f0`,
+where retail uses `$f1` for both. Pass 19 assigned the old `elapsed`
+pseudo `r87` locally to `$f0` (four references, live length three).
+The common opacity factor `r88` was a separate global pseudo assigned
+to `$f0`; this was not an arbitrary swap of two global allocation scores.
+
+The matching source caches the fade-out phase for both bounds and then
+updates that same meaningful value:
+
+```c
+} else if ((elapsed = markers[i].progress) > 75.0f &&
+           elapsed < 90.5f) {
+    elapsed -= 75.0f;
+    factor = 15.0f - elapsed;
+    /* The existing opacity calculation follows. */
+}
+```
+
+Now `r87` spans the conditional blocks and participates in global
+allocation: twelve references, live length ten, priority `36000`,
+allocation order one, selected `$f1`. The factor remains `$f0` at order
+zero with priority `73846`. Caching only this interval preserves retail's
+other phase reloads. Caching the entire cycle fixes these two arithmetic
+homes but removes other retail reloads and is not a match. Branch-local
+arithmetic workspaces alone leave the original two-word residual.
+The complete live `code_001442D0` unit gates `170 match, 0 differ`.
+
+### An opaque provider can manufacture a branch-likely residual
+
+DDS1 `evtViewCmdResolveSlot` differs at `+0x94` as `BNEL` versus retail
+`BNE`. In pass 29, branch UID 89 takes target-thread donor UID 110,
+the ordinal increment in `$s1`; the opaque-provider version marks the
+branch `/u`, so that donor executes only on the taken edge.
+
+Its successful-selection continuation calls `func_0022E5A0`, which is
+still `INCLUDE_ASM` and has no `REG_EH_REGION 0` call note. A private
+control compiling the authentic, still nonmatching provider candidate
+before the caller establishes that note. All 45 real instruction patterns
+in pass 28 remain identical, including the CFG and register assignments.
+Pass 29 then retains the same donor but removes `/u`, and the caller
+alone gates `1 match, 0 differ` at 212 bytes.
+
+This is the concrete `fill_slots_from_thread`/opposite-thread-liveness
+case described above: a possibly throwing opaque call stops the
+fall-through scan, whereas a known-nothrow same-TU call lets it continue.
+It is a compiler-mechanism proof, not independent TU-boundary evidence.
+The provider control still differs at 182 of 271 compared words and is
+not publishable; therefore the caller remains ASM pending a genuine
+provider closure. Do not publish a stub, add a nothrow annotation, or
+change a real callee's ownership merely to select `BNE`.
+
+### Fixed argument copies can lose in sched2 after allocation is correct
+
+Both DDS2 numeric room-mode setters have their only two residual words
+at `+0x70/+0x7C`, exchanging `a0 = sp` and `a2 = v0`. These destinations
+are fixed ABI argument registers, not competing saved-register allocnos.
+In their pass-25 block 5, both copies are ready at clock three with
+priority ten. UID 103 (`a0 = sp`) has five printed forward dependents;
+UID 107 (`a2 = v0`) has four, and the scheduler selects UID 103.
+These observed fields are consistent with the fanout heuristic, but the
+printed table does not expose every comparator criterion and is not a
+complete comparator replay. The present residual is two of 110 words
+in each function; moving the numeric value between ordinary real locals
+did not change it.
+
+The paired queued-file providers, DDS1 `002B6778` and DDS2 `002FD900`,
+instead exchange a metadata `LHU` and `a0 = v1` at `+0x228/+0x22C`.
+In their pass-25 block 14, all competing instructions are ready at
+clock nine. The halfword load's printed priority exceeds the argument
+copy's: `12` versus `9` in DDS1, `14` versus `11` in DDS2. It is not a
+source-order tie or an unidentified saved-register allocation. Publishing
+the retained output pointer after its metadata leaves the same two-word
+residual. Caching one transfer length for both metadata and copying
+extends its real lifetime across a call and substantially worsens the
+match; no register-pinning or extra copies are justified.
+
+DDS2 `002CBA90` is different again. Its loop index's literal-zero
+initializer is already present in pass 0 and survives CSE, regmove and
+reload; pass 20 correctly assigns it to `$s0`, while the found flag is
+`$s1`. Retail's `s0 = s1` at `+0x54` is not explained by swapping those
+allocation homes. Initializing the real counter at function entry
+changes its lifetime but worsens the residual from one to sixteen of
+78 words. The original initializer/value-availability shape remains
+unproved; do not invent `i = found` solely to copy a known zero.
+
