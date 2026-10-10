@@ -3040,6 +3040,20 @@ combined serial gate with zero differences or diagnostics; the independently
 resolved inventory and current source/header fingerprints agree with it.
 
 
+The scene-light propagation callbacks (`001F0430` / `00200FB8`, 332 bytes
+per title) consume a 0x34-byte request: direction, light color and ambient
+color as complete four-float vectors, then the transition value. Keep the
+SDK vector-copy boundary and the two separate unit-status guards. Combining
+the flag predicates lets EE GCC replace the guarded word reads with a joint
+64-bit mask test.
+
+After the unit callbacks, capture the transition count before publishing the
+three output direction components, then store the captured count plus one.
+Retail reads the count before those float stores; an increment expression
+after them delays the load and changes scheduling. This is the observed
+memory-read epoch, not an extra use or a synthetic dependency.
+
+
 ## Camp option availability uses signed halfword flags
 
 DDS2 `func_00260020` (`0x00260020`, 280 bytes) copies a seven-entry,
