@@ -72,8 +72,10 @@ extern struct MantraDrawItem *mnuRegisterMantraDrawItem(struct MantraDrawPool *,
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
 typedef struct MantraNodePos {
-    u8 pad00[2];
-    s16 panelIndex; /* Used to look up the corresponding panel-position record. */
+    s32 kind : 4;
+    s32 modelFlagState : 4;
+    u32 reserved : 8;
+    s16 panelIndex;
     s16 x;
     s16 y;
     struct MantraNodePos *neighbors[6];
@@ -159,13 +161,7 @@ extern u32 mnuMantraSpriteSlots[12];
 typedef struct MantraPanelAnimation {
     /* Packed control word: mnuSpawnPanelSlotA uses LW/SW at 0x279CAC/0x279CE8
      * and SB at 0x279CF0; mnuStepAndDrawTimedMantraPanels dispatches the kind with LBU at 0x27A254. */
-    union {
-        u32 flags;
-        struct {
-            u8 kind;
-            u8 control[3];
-        } tag;
-    };
+    u32 flags;
     s16 startDelay;
     s16 endDelay;
     s32 animationTicks;
@@ -3226,7 +3222,7 @@ extern void func_00283FA0(void);
 extern void func_0027FDC0(void);
 
 extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_0027B678(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027B678(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelATransition(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
@@ -3349,7 +3345,7 @@ MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *pool, s32 id, s8 kind,
         return 0;
     }
     panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
-    panel->tag.kind = kind;
+    (*(u8 *)&panel->flags) = kind;
     panel->startDelay = x;
     panel->endDelay = y;
     panel->animationTicks = w;
@@ -3374,7 +3370,7 @@ MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *pool, s32 id, s8 kind,
         return 0;
     }
     panel->flags = ((panel->flags | 0x08000100) & 0xFF87FFFF) | 0x300000;
-    panel->tag.kind = kind;
+    (*(u8 *)&panel->flags) = kind;
     panel->startDelay = x;
     panel->endDelay = y;
     panel->animationTicks = w;
@@ -3490,7 +3486,7 @@ s32 mnuStepAndDrawTimedMantraPanels(s16 x, s16 y, u32 flags, s32 alpha, MantraPa
                     panel->startDelay--;
                 }
                 if (panel->startDelay == 0) {
-                    pool->init[panel->tag.kind](pool, panel);
+                    pool->init[(*(u8 *)&panel->flags)](pool, panel);
                     panel->flags = ((panel->flags & 0xFFFC03FF) | 0x1800) & 0xF7FFFFFF;
                 }
                 break;
@@ -3498,7 +3494,7 @@ s32 mnuStepAndDrawTimedMantraPanels(s16 x, s16 y, u32 flags, s32 alpha, MantraPa
                 if (panel->endDelay > 0) {
                     panel->endDelay--;
                 } else if (panel->endDelay == 0) {
-                    pool->release[panel->tag.kind](panel);
+                    pool->release[(*(u8 *)&panel->flags)](panel);
                     panel->flags &= ~0x100;
                 }
                 break;
@@ -3528,7 +3524,7 @@ s32 mnuStepAndDrawTimedMantraPanels(s16 x, s16 y, u32 flags, s32 alpha, MantraPa
                     /* Stored positions wrap as u16; rendering applies signed screen offsets. */
                     drawX = panel->x;
                     drawY = panel->y;
-                    if (pool->draw[panel->tag.kind](drawX + x, drawY + y, flags,
+                    if (pool->draw[(*(u8 *)&panel->flags)](drawX + x, drawY + y, flags,
                         panel->visualParameters[1] * opacity, pool, panel, packet) != 0) {
                         panel->flags = (panel->flags & 0xFFFC03FF) | 0x800;
                     }
@@ -3807,13 +3803,207 @@ s32 func_0027AFE0(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *unused, Mantr
     return 0;
 }
 
+
+
+
+
+/* The full status resource is owned by the menu module. */
+typedef struct MnuStatusResource MnuStatusResource;
+
+typedef struct MenuPanelPositionRecord {
+    s16 id;
+    union {
+        u16 stateFlags;
+        struct {
+            u8 state;
+            s8 flags;
+        };
+    };
+} MenuPanelPositionRecord;
+extern MenuPanelPositionRecord *func_00291400(s32, u16);
+extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
+
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425AB8);
+s32 func_0027B678(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *pool,
+                 MantraPanelAnimation *panel, u32 packet) {
+    s8 shardOffsets[6][2] = {
+        {0, -13}, {0, 10}, {-10, -8}, {-10, 7}, {10, -8}, {10, 7}
+    };
+    s8 markerOffsets[6][2] = {
+        {14, -24}, {27, 0}, {14, 24}, {-14, 24}, {-27, 0}, {-14, -24}
+    };
+    MnuStatusResource *resource = (MnuStatusResource *)pool->unk2DB4;
+    f32 panelFade;
+    f32 shardFade;
+    f32 shardSpread;
+    f32 flashFade;
+    f32 revealFade;
+    f32 glowFade;
+    f32 neighborFade;
+    s32 drawAlpha;
+    MantraNodePos **neighbor;
+    s16 mask;
+    s32 i;
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425AC8);
+    switch ((panel->flags >> 19) & 0xF) {
+    case 6:
+        panelFade = panel->frame * 0.25f;
+        func_0027AFE0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        break;
+    case 8:
+        panelFade = panel->frame / 10.0f;
+        func_0027AFE0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        break;
+    case 7:
+        panelFade = panel->frame * 0.25f;
+        panelFade = 1.0f - panelFade;
+        func_0027AFE0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        break;
+    case 9:
+        panelFade = panel->frame / 10.0f;
+        panelFade = 1.0f - panelFade;
+        func_0027AFE0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        break;
+    case 0:
+        func_0027AFE0(x, y, z, alpha, pool, panel, packet);
+        break;
+    case 1:
+        /* Each layer has its own timed opacity envelope. */
+        panel->frame++;
+        panelFade = 1.0f;
+        if (panel->frame >= 20) {
+            if (panel->frame < 30) {
+                panelFade = (30 - panel->frame) / 10.0f;
+            } else {
+                panelFade = 0.0f;
+            }
+        }
+        shardFade = 0.0f;
+        if (panel->frame >= 10) {
+            if (panel->frame < 15) {
+                shardFade = (panel->frame - 10) / 5.0f;
+            } else {
+                shardFade = 1.0f;
+                if (panel->frame >= 30) {
+                    if (panel->frame < 40) {
+                        shardFade = (40 - panel->frame) / 10.0f;
+                    } else {
+                        shardFade = 0.0f;
+                    }
+                }
+            }
+        }
+        shardFade = 1.0f - sdfEvaluateCosineViaSinePhaseShift(shardFade * (3.14159265f / 2.0f));
+        shardSpread = 0.0f;
+        if (panel->frame >= 9) {
+            if (panel->frame < 14) {
+                shardSpread = (panel->frame - 9) / 5.0f;
+            } else {
+                shardSpread = 1.0f;
+            }
+        }
+        if (panel->frame < 15) {
+            flashFade = 0.0f;
+        } else if (panel->frame < 30) {
+            flashFade = (sdfSinPoly(((panel->frame - 10) / 20.0f) * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+        } else {
+            flashFade = 0.0f;
+        }
+        revealFade = 0.0f;
+        if (panel->frame >= 20) {
+            if (panel->frame < 30) {
+                revealFade = sdfSinPoly((panel->frame - 20) * (3.14159265f / 2.0f) / 10.0f);
+            } else {
+                revealFade = 1.0f;
+            }
+        }
+        if (panel->frame < 10) {
+            glowFade = 0.0f;
+        } else if (panel->frame < 30) {
+            glowFade = (panel->frame - 10) / 20.0f;
+        } else if (panel->frame < 50) {
+            glowFade = (50 - panel->frame) / 20.0f;
+        } else {
+            glowFade = 0.0f;
+        }
+        if (panel->frame < 18) {
+            neighborFade = 0.0f;
+        } else if (panel->frame < 28) {
+            neighborFade = (panel->frame - 18) / 10.0f;
+        } else if (panel->frame < 58) {
+            neighborFade = (58 - panel->frame) / 35.0f;
+        } else {
+            neighborFade = 0.0f;
+        }
+        neighborFade = sdfSinPoly(neighborFade * (3.14159265f / 2.0f));
+        mask = 0;
+        mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+        func_0027AFE0(x, y, z, (s32)(alpha * panelFade), pool, panel, packet);
+        drawAlpha = alpha * shardFade;
+        mnuDrawMantraSprite(x + shardOffsets[0][0] * shardSpread,
+                            y + shardOffsets[0][1] * shardSpread,
+                            0, drawAlpha, 0x80, 0, packet);
+        mnuDrawMantraSprite(x + shardOffsets[1][0] * shardSpread,
+                            y + shardOffsets[1][1] * shardSpread,
+                            0, drawAlpha, 0x81, 0, packet);
+        mnuDrawMantraSprite(x + shardOffsets[2][0] * shardSpread,
+                            y + shardOffsets[2][1] * shardSpread,
+                            0, drawAlpha, 0x82, 0, packet);
+        mnuDrawMantraSprite(x + shardOffsets[3][0] * shardSpread,
+                            y + shardOffsets[3][1] * shardSpread,
+                            0, drawAlpha, 0x83, 0, packet);
+        mnuDrawMantraSprite(x + shardOffsets[4][0] * shardSpread,
+                            y + shardOffsets[4][1] * shardSpread,
+                            0, drawAlpha, 0x84, 0, packet);
+        mnuDrawMantraSprite(x + shardOffsets[5][0] * shardSpread,
+                            y + shardOffsets[5][1] * shardSpread,
+                            0, drawAlpha, 0x85, 0, packet);
+        mnuDrawMantraSprite(x, y, 0, (s32)(alpha * flashFade), 0x86, 0, packet);
+        mnuDrawMantraSprite(x, y, z, (s32)(alpha * revealFade), 0x93, 0, packet);
+        mnuDrawMantraSprite(x, y, z, (s32)(alpha * glowFade * 0.3f), 0x94, 0, packet);
+        if ((panel->flags >> 28) & 1) {
+            neighbor = mnuGetMantraPanelPositionRecord(panel->id)->neighbors;
+        } else {
+            neighbor = mnuGetMantraNodePositionRecord(panel->id)->neighbors;
+        }
+        i = 0;
+        do {
+            MantraNodePos *node = *neighbor;
+            if (node != NULL && node->kind != 4) {
+                s16 nodeIndex = node->panelIndex;
+                if ((panel->flags >> 28) & 1) {
+                    /* menu.flagBytes[3] selects the current character. */
+                    if ((func_00291400(((u8 *)resource)[0xBF3] & 0xF, (u16)nodeIndex)->stateFlags & 0xF) != 3) {
+                        mask |= 1 << i;
+                    }
+                } else {
+                    if ((mnuGetPanelValueAt(resource, nodeIndex) & 0xF) != 3) {
+                        mask |= 1 << i;
+                    }
+                }
+            }
+            i++;
+            neighbor++;
+        } while (i < 6);
+        if (mask & 0x40) {
+            mask |= 1;
+        }
+        for (i = 0; i < 6; i++) {
+            if ((mask >> i) & 1) {
+                s32 markerAlpha = alpha * neighborFade * 0.5f;
+                mnuDrawMantraSprite(x + markerOffsets[i][0], y + markerOffsets[i][1], z, markerAlpha, 0x97, 0, 0x53);
+                mnuDrawMantraSprite(x + markerOffsets[i][0], y + markerOffsets[i][1], z, markerAlpha, 0x98, 0, 0x53);
+            }
+        }
+        if (panel->frame >= 60) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027B678);
 
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378D8);
 
@@ -4083,7 +4273,6 @@ void func_0027DE30(void) {
 void func_0027DE38(void) {
 }
 
-typedef struct MnuStatusResource MnuStatusResource;
 extern u16 mnuGetPanelValueAt(MnuStatusResource *, s32);
 
 s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *pool,
