@@ -4137,7 +4137,126 @@ s32 btlDestroyTaskC(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0240);
+/* Shared with the battle message task creator, which clears 24 bytes. */
+typedef struct BtlTutorialDialogWork {
+    s8 phase;
+    u8 pad01[3];
+    s32 counter;
+    u16 alpha;
+    u8 pad0A[0xA];
+    s32 itemIndex;
+} BtlTutorialDialogWork;
+typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
+
+extern const BattlePanelColors D_00416650;
+extern u8 *D_00435E64;
+extern u32 btlGetActiveUnitId(void);
+extern s32 dspStartEntry(s32);
+extern s32 evtGetMessageWindowControlState(void);
+extern void func_0026C900(void);
+extern void func_001C7DB8(s8, s32);
+extern void sndSetStationedSeVolume(u32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern s32 func_001B7A38(s32, s32);
+
+s32 func_001C0240(KwlnTask *task) {
+    BattlePanelColors colors = D_00416650;
+    BtlTutorialDialogWork *work;
+    BattleRosterTable *list;
+    u16 count;
+    u16 scanIndex;
+    u16 id;
+
+    if (btlGetActiveUnitId() != 9 && btlGetActiveUnitId() != 10) {
+        return 0;
+    }
+    work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
+    switch (work->phase) {
+    case 0:
+        work->alpha += 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        if (work->alpha >= 0x80) {
+            work->counter = 0;
+            work->phase = 1;
+        }
+        break;
+    case 1:
+    case 3:
+    case 6:
+        work->counter++;
+        work->counter = work->counter <= 0 ? 0 : work->counter > 0x40 ? 0x40 : work->counter;
+        if (work->counter >= 0x30) {
+            work->counter = 0;
+        }
+        break;
+    case 2: {
+        KwlnTask *panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+        if (panelTask == NULL) {
+            work->phase = 6;
+            break;
+        }
+        list = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(panelTask), &count);
+        scanIndex = (u16)work->itemIndex;
+        while (scanIndex < count) {
+            id = list->entries[work->itemIndex].skill;
+            if (func_001B7940(id, 2) == 0 && func_001B7A38(id, 2) == 0) {
+                func_001B7A38(id, 0);
+                evtCopyEntryStringToActiveWindow(0, D_00435E64 + id * 17);
+                dspStartEntry(0);
+                work->itemIndex++;
+                sndSetStationedSeVolume(7);
+                break;
+            }
+            work->itemIndex++;
+            scanIndex++;
+        }
+        if (scanIndex >= count) {
+            work->phase = 4;
+        } else {
+            work->phase++;
+        }
+        break;
+    }
+    case 5:
+        if (func_001C0008() != 0) {
+            dspStartEntry(1);
+            work->phase++;
+        }
+        break;
+    case 4:
+    default:
+        work->alpha -= 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        break;
+    }
+
+    if (work->phase < 7) {
+        if (work->phase >= 0) {
+            u32 color = work->alpha | 0x80808000;
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            if (evtGetMessageWindowControlState() == 1) {
+                func_0026C900();
+                goto dialog_active;
+            }
+            if (work->phase == 3) {
+                work->phase--;
+            } else {
+                work->phase++;
+            }
+            goto dialog_active;
+        }
+    }
+    dspCloseChannel();
+    btlClearFlagEntries();
+    func_001C7DB8(1, 8);
+    return -1;
+
+dialog_active:
+    return 0;
+}
 
 extern s32 evtFinishMessageWindowAndNotify();
 
@@ -4153,16 +4272,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-/* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
-typedef struct BtlTutorialDialogWork {
-    s8 phase;
-    u8 pad01[3];
-    s32 counter;
-    u16 alpha;
-    u8 pad0A[0xA];
-    s32 itemIndex;
-} BtlTutorialDialogWork;
-typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
 extern s32 evtGetMessageWindowControlState(void);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern void func_0026C900(void);
