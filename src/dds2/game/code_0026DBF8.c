@@ -692,8 +692,7 @@ void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
 }
 
-void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 rotation) {
+void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, f32 rotation, s32 placementIndex, s32 flags, s32 context) {
     ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
         ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
     func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
@@ -1240,7 +1239,7 @@ void mnuDrawMantraPulseFrame(s32 amount, s32 packet, f32 pulse) {
     mnuDrawMantraSprite(0, 0, 0, amount, 0x58, 0x60, packet);
     amount = amount * pulse * 0.5f;
     mnuDrawMantraSprite(0, 0, 0, amount, 0x5A, 0, packet);
-    mnuDrawMantraRotatedSprite(0, 0x140, 0, amount, 0x5A, 0, packet, 180.0f);
+    mnuDrawMantraRotatedSprite(0, 0x140, 0, amount, 180.0f, 0x5A, 0, packet);
 }
 
 void mnuDrawMantraBackgroundSelectionIcons(MantraDrawItem *item) {
@@ -4867,8 +4866,8 @@ s32 func_002803A8(s32 x, s32 y, u32 z, s32 amount, MantraPanelPool *unused, Mant
     spinB = state->stateB / 200.0f;
     mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, amount, 0xC1, 0, packet);
-    mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC2, 0, packet, spinA * 360.0f);
-    mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC3, 0, packet, spinB * 360.0f);
+    mnuDrawMantraRotatedSprite(x, y, z, amount, spinA * 360.0f, 0xC2, 0, packet);
+    mnuDrawMantraRotatedSprite(x, y, z, amount, spinB * 360.0f, 0xC3, 0, packet);
     for (i = 0; i < 14; i++) {
         if (state->id == slots[i]) {
             mnuDrawMantraSprite(x, y, z, amount, 0xCA + i, 0, packet);
