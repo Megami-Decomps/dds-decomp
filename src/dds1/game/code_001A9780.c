@@ -1686,9 +1686,17 @@ typedef struct BattlePhasePanelWork {
     s32 frames;
     s32 mode;
     s8 phase;
-    u8 pad09[0xF];
+    s8 secondaryPhase;
+    u8 pad0A[2];
+    s32 echoCount;
+    u8 pad10[5];
+    s8 flags[2];
+    u8 pad17;
     s32 waitCounter; /* 0x18: delay before the first slide */
-    u8 pad1C[0x1C];
+    u8 pad1C[8];
+    s32 counter;
+    s32 angle;
+    u8 pad2C[0xC];
     BattleSelectionPosition current[8]; /* 0x38 */
     BattleSelectionPosition saved[8];   /* 0x78 */
     s32 fade[8][4];                    /* 0xB8 */
