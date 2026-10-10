@@ -2124,6 +2124,13 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     the packed coordinates as unsigned words before their zero-extended writes,
     and retain signed dimensions and the post-finalization capacity check.
     This extends the retained Vesper/Tidal/Sable/F2/Amber/Brass reconstruction.
+    The same completed-packet phase closes the 232-byte console initializer
+    `func_002E45D0`: write all twelve ordered setup values, reserve the glyph
+    tag at buffer + 0x60, derive its write cursor, then acquire the DMA channel.
+    Retaining the actual `u64` texture-state result and pointer-valued buffer
+    starts is required for the owner contract. Moving reservation after the
+    complete setup closes the observed 15-word register-allocation residual;
+    mimicking the native interleaved stores had left 18 words different.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
