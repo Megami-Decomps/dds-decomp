@@ -4135,8 +4135,6 @@ s32 btlDestroyTaskC(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
-
 /* Shared with the battle message task creator, which clears 24 bytes. */
 typedef struct BtlTutorialDialogWork {
     s8 phase;
@@ -4158,6 +4156,8 @@ extern void func_001C7DB8(s8, s32);
 extern void sndSetStationedSeVolume(u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_001B7A38(s32, s32);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
 
 s32 func_001C0240(KwlnTask *task) {
     BattlePanelColors colors = D_00416650;
