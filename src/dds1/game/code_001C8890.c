@@ -974,12 +974,6 @@ void func_001CA1F0(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
-typedef struct BtlAttackRosterDetail {
-    u8 pad00[0x11];
-    u8 count;
-    u8 spacing;
-    u8 pad13;
-} BtlAttackRosterDetail;
 extern s32 datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
@@ -1136,8 +1130,8 @@ void func_001CA1F8(BtlTask *action) {
         if (((btlUnitStatusPair(action->unit) & 0x1200) == 0x1200 && action->indexWork.slot == 3) ||
                 (action->unit->status.flags & 0x400) != 0) {
             if ((action->unit->status.flags & 0x200) != 0) {
-                repeatCount = ((BtlAttackRosterDetail *)datRosterDetails)[action->unit->partyRecord.unitId].count;
-                spacing = ((BtlAttackRosterDetail *)datRosterDetails)[action->unit->partyRecord.unitId].spacing;
+                repeatCount = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackCount;
+                spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->species].tickCount;
                 spacing = datEnemyRecords[action->unit->species].unk48;
