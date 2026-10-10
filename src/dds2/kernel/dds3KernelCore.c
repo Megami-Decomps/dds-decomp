@@ -329,10 +329,31 @@ void kwlnPrintTaskQueueDiagnostics(void)
     func_0035B6E0(D_00435BF8);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101250);
-
 extern u8 D_004393C8[];
-extern void func_00101250(KwlnTask* task, s32 arg1);
+extern u8 D_00435C00[];
+
+void func_00101250(KwlnTask *task, s32 depth)
+{
+    func_0035B6E0(D_00435C00, D_004393C8, task);
+    if (task->childList != NULL) {
+        if (task->parent == NULL) {
+            D_004393C8[0] = ' ';
+        } else {
+            if (task->next == NULL) {
+                D_004393C8[depth * 4] = ' ';
+            } else {
+                D_004393C8[depth * 4] = '|';
+            }
+        }
+        D_004393C8[depth * 4 + 4] = 0;
+        func_00101250(task->childList, depth + 1);
+        D_004393C8[depth * 4] = 0;
+    }
+    if (task->next != NULL) {
+        func_00101250(task->next, depth);
+    }
+}
+
 
 
 
