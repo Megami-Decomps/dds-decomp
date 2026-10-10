@@ -68,7 +68,86 @@ void sdfBlendMotionKeys(SdfMotionSlotPairBinding *motion, f32 frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
+/* Blend sampled and retained weights, keeping at most two model slots. */
+void sdfBlendMotionSlotPairWeights(SdfMotionSlotPairBinding *motion, f32 frame, f32 amount) {
+    SdfMotionKeyInterval sample;
+    SdfSlotEntry *current;
+    SdfSlotPair *previous;
+    u32 count;
+    s32 i;
+    s32 firstId;
+    s32 secondId;
+    f32 firstValue;
+    f32 secondValue;
+    f32 contributionWeight;
+    f32 secondWeight;
+
+    sdfFindMotionKeyInterval(&motion->keys, &sample, frame);
+    firstId = ((SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((SdfSlotPair *)sample.secondKey)->weight;
+    secondWeight = sample.weight;
+    {
+        const f32 sampleComplement = 1.0f - secondWeight;
+        contributionWeight = sampleComplement * amount;
+    }
+    secondWeight *= amount;
+    current = motion->current;
+
+    if (firstId == secondId) {
+        current->pair[0].index = secondId;
+        current->pair[0].weight = firstValue * contributionWeight + secondValue * secondWeight;
+        count = 1;
+    } else {
+        current->pair[0].index = firstId;
+        current->pair[0].weight = firstValue * contributionWeight;
+        current->pair[1].index = secondId;
+        current->pair[1].weight = secondValue * secondWeight;
+        count = 2;
+    }
+
+    contributionWeight = 1.0f - amount;
+    for (previous = motion->previous.pair, i = 0;
+         i < 2; i++, previous++) {
+        f32 value = previous->weight * contributionWeight;
+
+        if (!(value <= 1.0e-6f)) {
+            s32 id = previous->index;
+
+            if (count == 1) {
+                if (current->pair[0].index == id) {
+                    current->pair[0].weight += value;
+                } else {
+                    current->pair[1].index = id;
+                    current->pair[1].weight = value;
+                    count = 2;
+                }
+            } else if (current->pair[0].index == id) {
+                current->pair[0].weight += value;
+            } else if (current->pair[1].index == id) {
+                current->pair[1].weight += value;
+            } else if (current->pair[0].weight < current->pair[1].weight) {
+                if (current->pair[0].weight < value) {
+                    current->pair[0].index = id;
+                    current->pair[0].weight = value;
+                }
+            } else {
+                if (current->pair[1].weight < value) {
+                    current->pair[1].index = id;
+                    current->pair[1].weight = value;
+                }
+            }
+        }
+
+    }
+
+    if (count == 1) {
+        current->pair[1].index = 0;
+        current->pair[1].weight = 0.0f;
+    }
+
+}
 
 /* Preserve the complete current pair for the next weighted transition. */
 void sdfCopyPoseRecord(SdfMotionSlotPairBinding *motion) {
