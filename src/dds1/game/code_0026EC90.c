@@ -104,7 +104,7 @@ void func_0026F518(void) {
 }
 
 extern FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
-s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
+s32 func_0026F530(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
     FrFontGlyph *glyph;
 
     if (alternate == 0) {
@@ -119,7 +119,83 @@ s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
     return frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F5E8);
+extern char D_003BC628[];
+extern void func_003014F0(char *, const char *, ...);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern void mnuAdvanceTitleStateUnderSemaphore(void);
+extern void mnuInitializeMovieRollViewport(void);
+extern void mnuReleaseMovieResourceAfterPendingWork(void);
+extern s32 mnuStaffImageProc(void);
+extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
+
+s32 func_0026F5E8(KwlnTask *task) {
+    char text[128];
+    s32 request;
+    s32 i;
+    s32 y;
+    MnuStaffTextRow *entry;
+
+    (void)task;
+    switch (mnuMovieWork->phase) {
+    case 0:
+        if (mnuPollTitleStreamStateLocked() == 2) {
+            if (sdfCheckPendingWorkWithInterrupts() == 0) {
+                mnuMovieWork->phase = 1;
+                mnuMovieWork->scrollTicks = 0;
+            }
+        }
+        break;
+    case 1:
+        func_0026F500();
+        mnuInitializeMovieRollViewport();
+        kwlnTaskCreate(D_003B1140, 0x2B19, 0, 0, mnuStaffImageProc,
+                       mnuReleaseMovieResourceAfterPendingWork, 0);
+        mnuTitleStreamUpdateAndLogBgm();
+        kwlnFadeOutStart(0, 0, 0, 0x1E);
+        mnuMovieWork->phase = 3;
+        mnuMovieWork->scrollTicks = 0;
+        break;
+    case 2:
+    case 3:
+        for (i = 0; i < 0x100; i++) {
+            y = D_00379F70[i].offsetY - mnuMovieWork->scrollTicks + 0x1C0;
+            if (i == 0xFF) {
+                y = y < 0xE0 ? 0xE0 : y;
+            }
+            if ((u32)(y + 0x1E) < 0x1DF) {
+                entry = &D_00379F70[i];
+                if (entry->leftText != 0 && D_00379F70[i].rightText == 0) {
+                    func_003014F0(text, D_003BC628, entry->leftText);
+                    func_0026F530(20.0f, (f32)y, entry->leftFont, 0x80808080, text);
+                } else if (D_00379F70[i].rightText != 0) {
+                    func_003014F0(text, D_003BC628, D_00379F70[i].rightText);
+                    func_0026F530(30.0f, (f32)y, D_00379F70[i].rightFont, 0x80808080, text);
+                }
+            }
+        }
+        mnuMovieWork->scrollTicks++;
+        if (mnuMovieWork->scrollTicks == (D_00379F70[0xFF].offsetY + 0xE0) / 60 * 60 + 0x12C) {
+            kwlnFadeInStart(0, 0, 0, 0x28);
+        }
+        if (mnuMovieWork->scrollTicks / 60 > (D_00379F70[0xFF].offsetY + 0xE0) / 60 + 5) {
+            mnuAdvanceTitleStateUnderSemaphore();
+        }
+        if (mnuMovieWork->scrollTicks / 60 > (D_00379F70[0xFF].offsetY + 0xE0) / 60 + 6) {
+            if (D_003BC618 != 4 && D_003BC618 != 5) {
+                return 0;
+            }
+            request = 0x293;
+            dds3AdminSubmitModeRequest(6, &request, 4, 0);
+        }
+        break;
+    default:
+        return 0;
+    }
+    return 0;
+}
 
 extern s32 mnuCheckMovieDecoderStatus(void);
 extern void mnuStopMovieDrawTask(void);
@@ -275,7 +351,7 @@ extern char D_003B1168[];
 
 extern void func_0026A5F0(s32);
 
-extern s32 func_0026F5E8(void);
+extern s32 func_0026F5E8(KwlnTask *task);
 
 extern void mnuFinishStaffMovieAndFreeState(void);
 
