@@ -3527,7 +3527,67 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7880);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7C90);
+extern const BattlePanelColors D_003A2CB0;
+
+void func_001B7C90(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
+    BattlePanelColors colors = D_003A2CB0;
+    u32 baseColor;
+    s32 level = 0;
+    s32 xOffset = 0;
+    s32 yOffset = 0;
+    s32 layer;
+    s32 x;
+    s32 y;
+    s8 presentationState;
+    u32 color;
+
+    baseColor = 0x80808000;
+    presentationState = work->reserveEntries[index].presentation.presentationState;
+    if (presentationState >= 4) return;
+    if (presentationState <= 0) return;
+    x = work->reserveEntries[index].position[0];
+    y = work->reserveEntries[index].position[1];
+    for (layer = 0; layer < 3; layer++) {
+        if (layer > 0) {
+            level = work->reserveEntries[index].presentation.pulseLevel[layer - 1];
+            xOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][0];
+            yOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][1];
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[0] ?
+                level : work->reserveEntries[index].presentation.transitionFade[0];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[0];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_002BF438(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[0] + xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[1] - yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 9, 0x53);
+
+        if (layer > 0) {
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[1] ?
+                level : work->reserveEntries[index].presentation.transitionFade[1];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[1];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_002BF438(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[2] - xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[3] + yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
+    }
+}
 
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 extern void func_001BAE08(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
