@@ -35,7 +35,7 @@ extern void sdfSetViewFieldOfView(f32);
 
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
-extern s32 evtViewerHasUpdateFlag(s32);
+extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
 extern void func_002476B8(EvtRuntime *viewer);
 extern void evtViewerApplySelectedEntry(EvtRuntime *viewer);
 extern u8 D_004372C0[3];
@@ -377,7 +377,7 @@ extern void func_0024A400(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
 extern void func_00247858(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void func_00247EE0(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
-extern void func_00248000(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s16);
+extern void func_00248000(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
 extern void evtResetUnitVectorSlots();
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
@@ -903,7 +903,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer) {
 void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
     s64 active;
 
-    active = evtViewerHasUpdateFlag((s32)viewer);
+    active = evtViewerHasUpdateFlag(viewer);
     if (active != 0) {
         viewer->updateCount = viewer->updateCount + 1;
     }
@@ -953,8 +953,9 @@ void func_00249EE8(EvtRuntime *viewer) {
     evtViewerCleanupMessageWindow(viewer);
 }
 
-s32 evtViewerHasUpdateFlag(s32 viewer) {
-    return (*(s32 *)(viewer + 4) & 0x10) > 0;
+s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
+    s32 flags = viewer->flags;
+    return (flags & 0x10) > 0;
 }
 
 
@@ -970,7 +971,7 @@ void func_0024A020(EvtRuntime *viewer) {
     if (fade < 0) {
         fade = 0;
     }
-    if (fade < 0x80 && evtViewerHasUpdateFlag((s32)viewer) != 0) {
+    if (fade < 0x80 && evtViewerHasUpdateFlag(viewer) != 0) {
         s32 option = (s32)mnuCampGetSecondaryOption(viewer);
 
         switch (option) {
@@ -1883,11 +1884,11 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             evtViewerDispatchFlagMode(viewer);
         }
         if (D_0037F510[0x22] >= 0 && D_0037F510[0x2C] < 0 &&
-            evtViewerHasUpdateFlag((s32)viewer) == 0) {
+            evtViewerHasUpdateFlag(viewer) == 0) {
             func_00249EE8(viewer);
         }
     }
-    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag((s32)viewer) == 0 &&
+    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
         mnuQueryTitleSoundBusy() == 0) {
         itfMesStartEntry(viewer->windowContext->handle,
             viewer->voiceMessage, 0);
@@ -1909,7 +1910,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         if (viewer->curFrame >= viewer->frameRange.word) {
             return -1;
         }
-        if (evtViewerHasUpdateFlag((s32)viewer) == 1 && viewer->updateCount >= 25) {
+        if (evtViewerHasUpdateFlag(viewer) == 1 && viewer->updateCount >= 25) {
             return -1;
         }
     }
@@ -2045,7 +2046,7 @@ void evtViewerRelease(viewer)
     kwlnCancelConfiguredFadeFrames();
     D_0037F590[0] = D_0037F590[1] = D_0037F590[2] = D_0037F590[3] = 0.0f;
     if (viewer->timedActive == 1) {
-        if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag((s32)viewer) == 1) {
+        if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag(viewer) == 1) {
             mnuStopMovieDrawTask();
         }
         viewer->timedActive = 0;

@@ -301,7 +301,7 @@ extern void func_0022F7F8(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
 extern void func_0022CED0(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void func_0022D420(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
-extern void func_0022D528(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s16);
+extern void func_0022D528(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
 extern void evtResetUnitVectorSlots();
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
