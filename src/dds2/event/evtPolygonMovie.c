@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff.h"
+#include "eff_event_draw.h"
 #include "sdf_chip.h"
 #include "file_request_api.h"
 #include "kwln.h"
@@ -37,63 +39,11 @@ typedef struct PolyMovieObject {
 } PolyMovieObject;
 
 /* Polygon-movie event parameter blocks blended by the functions below. */
-typedef struct EvtBlendA {
-    u32 color;    /* 0x00 */
-    u32 flagWord; /* 0x04 */
-    f32 lerp0;    /* 0x08 */
-    f32 lerp1;    /* 0x0C */
-    s32 v[2];     /* 0x10 */
-    s32 m[2][2];  /* 0x18 */
-} EvtBlendA;
 
-typedef struct EvtBlendB {
-    u32 value0;   /* 0x00 */
-    u32 color;    /* 0x04 */
-    u32 flagWord; /* 0x08 */
-    f32 lerp0;    /* 0x0C */
-    f32 lerp1;    /* 0x10 */
-    s32 v[2];     /* 0x14 */
-    s32 m[2][2];  /* 0x1C */
-} EvtBlendB;
 
-typedef struct EvtBlendD {
-    u32 value0;   /* 0x00 */
-    s32 v[2];     /* 0x04 */
-    u32 color;    /* 0x0C */
-    u32 flagWord; /* 0x10 */
-} EvtBlendD;
 
-typedef struct EvtBlendE {
-    u32 value0;   /* 0x00 */
-    u32 value1;   /* 0x04 */
-    f32 lerp0;    /* 0x08 */
-    u32 color;    /* 0x0C */
-    u32 flagWord; /* 0x10 */
-    f32 lerp1;    /* 0x14 */
-    f32 lerp2;    /* 0x18 */
-    s32 v[2];     /* 0x1C */
-    u32 value2;   /* 0x24 */
-    u32 value3;   /* 0x28 */
-} EvtBlendE;
 
-typedef struct EvtBlendF {
-    u32 value0;   /* 0x00 */
-    f32 lerp0;    /* 0x04 */
-    f32 lerp1;    /* 0x08 */
-    u32 color;    /* 0x0C */
-    u32 flagWord; /* 0x10 */
-    f32 lerp2;    /* 0x14 */
-    f32 lerp3;    /* 0x18 */
-    f32 lerp4;    /* 0x1C */
-    s32 v[2];     /* 0x20 */
-    u32 value1;   /* 0x28 */
-} EvtBlendF;
 
-typedef struct EvtBlendG {
-    u32 color;    /* 0x00 */
-    u32 flagWord; /* 0x04 */
-    s32 m[2][2];  /* 0x08 */
-} EvtBlendG;
 
 
 
@@ -107,13 +57,13 @@ extern void dds3ClearObjectFlags(PolyMovieObject *obj, s32 flags);
 extern f32 D_003C9310[4];
 extern f32 D_003C9320[4];
 extern f32 D_003C9330[4];
-extern EvtBlendA D_003C9360;
-extern EvtBlendB D_003C9390;
-extern EvtBlendG D_003C93C0;
-extern EvtBlendD D_003C93E0;
-extern EvtBlendE D_003C9410;
-extern EvtBlendF D_003C9440;
-extern EvtBlendA D_003C9470;
+extern EffBlurQuad D_003C9360;
+extern EffBlurTemplateBody D_003C9390;
+extern EffSolidRectParams D_003C93C0;
+extern EffResourceRectParams D_003C93E0;
+extern EffBlurScatterParams D_003C9410;
+extern EffBlurScaleParams D_003C9440;
+extern EffBlurQuad D_003C9470;
 
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
  * offsets are relative to the start of the block. */
@@ -240,7 +190,7 @@ void evtBlendVectorRows(s32 enable, f32 t, f32 *a, f32 *b, f32 *out) {
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024E0A0);
 
-void evtBlendParamsA(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out) {
+void evtBlendParamsA(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out) {
     s32 i;
     s32 j;
 
@@ -254,20 +204,20 @@ void evtBlendParamsA(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
         b = &D_003C9360;
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
-    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
+    out->blendControl = a->blendControl;
+    out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
+    out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
+            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
         }
     }
 }
 
-void evtBlendParamsB(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *out) {
+void evtBlendParamsB(s32 enable, f32 t, EffBlurTemplateBody *a, EffBlurTemplateBody *b, EffBlurTemplateBody *out) {
     s32 i;
     s32 j;
 
@@ -280,22 +230,22 @@ void evtBlendParamsB(s32 enable, f32 t, EvtBlendB *a, EvtBlendB *b, EvtBlendB *o
     if (b == NULL) {
         b = &D_003C9390;
     }
-    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
-    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
+    out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
+    out->source.color = evtPolygonMovieBlendColor(enable, t, a->source.color, b->source.color);
+    out->source.blendControl = a->source.blendControl;
+    out->source.angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.angle, b->source.angle);
+    out->source.displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->source.displacement, b->source.displacement);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->source.position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.position[i], b->source.position[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
+            out->source.corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->source.corners[i][j], b->source.corners[i][j]);
         }
     }
 }
 
-void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EvtBlendG *a, EvtBlendG *b, EvtBlendG *out) {
+void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EffSolidRectParams *a, EffSolidRectParams *b, EffSolidRectParams *out) {
     s32 i;
     s32 j;
 
@@ -310,14 +260,14 @@ void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, EvtBlendG *a, EvtBlendG 
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
+            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
         }
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
+    out->blendControl = a->blendControl;
 }
 
-void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *out) {
+void evtBlendParamsD(s32 enable, f32 t, EffResourceRectParams *a, EffResourceRectParams *b, EffResourceRectParams *out) {
     s32 i;
 
     if (enable == 0) {
@@ -329,15 +279,15 @@ void evtBlendParamsD(s32 enable, f32 t, EvtBlendD *a, EvtBlendD *b, EvtBlendD *o
     if (b == NULL) {
         b = &D_003C93E0;
     }
-    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
+    out->extent = evtMovieInterpolateUintIfEnabled(enable, t, a->extent, b->extent);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->center[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->center[i], b->center[i]);
     }
-    out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
+    out->draw.rgba = evtPolygonMovieBlendColor(enable, t, a->draw.rgba, b->draw.rgba);
+    out->draw.blendControl = a->draw.blendControl;
 }
 
-void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *out) {
+void evtBlendParamsE(s32 enable, f32 t, EffBlurScatterParams *a, EffBlurScatterParams *b, EffBlurScatterParams *out) {
     s32 i;
 
     if (enable == 0) {
@@ -349,21 +299,21 @@ void evtBlendParamsE(s32 enable, f32 t, EvtBlendE *a, EvtBlendE *b, EvtBlendE *o
     if (b == NULL) {
         b = &D_003C9410;
     }
-    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
-    out->value1 = evtMovieInterpolateUintIfEnabled(enable, t, a->value1, b->value1);
-    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
+    out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
+    out->delaySpread = evtMovieInterpolateUintIfEnabled(enable, t, a->delaySpread, b->delaySpread);
+    out->angleStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->angleStep, b->angleStep);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
-    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
-    out->lerp2 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp2, b->lerp2);
-    out->value2 = evtMovieInterpolateUintIfEnabled(enable, t, a->value2, b->value2);
+    out->blendControl = a->blendControl;
+    out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
+    out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
+    out->positionSpread = evtMovieInterpolateUintIfEnabled(enable, t, a->positionSpread, b->positionSpread);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
     }
-    out->value3 = evtMovieInterpolateUintIfEnabled(enable, t, a->value3, b->value3);
+    out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
 }
 
-void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *out) {
+void evtBlendParamsF(s32 enable, f32 t, EffBlurScaleParams *a, EffBlurScaleParams *b, EffBlurScaleParams *out) {
     s32 i;
 
     if (enable == 0) {
@@ -375,21 +325,21 @@ void evtBlendParamsF(s32 enable, f32 t, EvtBlendF *a, EvtBlendF *b, EvtBlendF *o
     if (b == NULL) {
         b = &D_003C9440;
     }
-    out->value0 = evtMovieInterpolateUintIfEnabled(enable, t, a->value0, b->value0);
-    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
+    out->count = evtMovieInterpolateUintIfEnabled(enable, t, a->count, b->count);
+    out->phaseStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->phaseStep, b->phaseStep);
+    out->spacing = evtMovieInterpolateFloatIfEnabled(enable, t, a->spacing, b->spacing);
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
-    out->lerp2 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp2, b->lerp2);
-    out->lerp3 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp3, b->lerp3);
-    out->lerp4 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp4, b->lerp4);
+    out->blendControl = a->blendControl;
+    out->uvDisplacementAngleDegrees = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
+    out->uvDisplacementAmplitude = evtMovieInterpolateFloatIfEnabled(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
+    out->angleStep = evtMovieInterpolateFloatIfEnabled(enable, t, a->angleStep, b->angleStep);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
     }
-    out->value1 = evtMovieInterpolateUintIfEnabled(enable, t, a->value1, b->value1);
+    out->size = evtMovieInterpolateUintIfEnabled(enable, t, a->size, b->size);
 }
 
-void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *out) {
+void evtBlendParamsG(s32 enable, f32 t, EffBlurQuad *a, EffBlurQuad *b, EffBlurQuad *out) {
     s32 i;
     s32 j;
 
@@ -403,15 +353,15 @@ void evtBlendParamsG(s32 enable, f32 t, EvtBlendA *a, EvtBlendA *b, EvtBlendA *o
         b = &D_003C9470;
     }
     out->color = evtPolygonMovieBlendColor(enable, t, a->color, b->color);
-    out->flagWord = a->flagWord;
-    out->lerp0 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp0, b->lerp0);
-    out->lerp1 = evtMovieInterpolateFloatIfEnabled(enable, t, a->lerp1, b->lerp1);
+    out->blendControl = a->blendControl;
+    out->angle = evtMovieInterpolateFloatIfEnabled(enable, t, a->angle, b->angle);
+    out->displacement = evtMovieInterpolateFloatIfEnabled(enable, t, a->displacement, b->displacement);
     for (i = 0; i < 2; i++) {
-        out->v[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->v[i], b->v[i]);
+        out->position[i] = evtMovieInterpolateIntIfEnabled(enable, t, a->position[i], b->position[i]);
     }
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            out->m[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->m[i][j], b->m[i][j]);
+            out->corners[i][j] = evtMovieInterpolateIntIfEnabled(enable, t, a->corners[i][j], b->corners[i][j]);
         }
     }
 }

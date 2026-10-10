@@ -6965,3 +6965,33 @@ into one truthful `EvtRuntime *` declaration gates 128 match, 0 differ.
 Both games' nearest-key helpers read and write only word zero of the incoming
 distance pointer, so `bestDistance` is a scalar, not a second parameter view.
 
+
+## Movie parameter blends use the renderer's primary records
+
+Both polygon-movie units now use `EffBlurQuad`, `EffBlurTemplateBody`,
+`EffResourceRectParams`, `EffBlurScatterParams`, `EffBlurScaleParams` and
+`EffSolidRectParams` directly; the local `EvtBlendA..G` projections are gone.
+The native two-coordinate loops establish `position[2]` / `center[2]`, and
+the nested two-by-two loops establish `corners[2][2]`. Named renderer accesses
+migrate to those same arrays, with sizes and offsets unchanged.
+
+`evtBlendParamsD` writes only the resource rectangle's 0x14-byte prefix,
+leaving its existing bounds untouched. Its packed RGBA word and the
+renderer's four channel reads justify the documented color union in
+`EffResourceRectDrawParams`. Other packed colors remain plain `u32`.
+The blender units are exact at 32/0 each; the private owner proof also gates
+all 147 existing header consumers with no changed retail words.
+
+## Kernel parameter snapshots retain their legacy views
+
+The local `Kwln*Params` records in both `dds3KernelDraw.c` units remain
+recorded owner debt, not newly introduced views. Replacing them with the
+canonical Eff records privately regresses six already-matched functions
+per game. Five fade-setup helpers move the counter `SH` before the alpha
+`LBU` (four words each); the per-frame updater overruns its native boundary.
+The legacy `KwlnScaleBlurParams` also has `aligned(8)` and size 0x30,
+whereas `EffBlurScaleParams` is 0x2C. Do not force the primary record's
+size/alignment or change statement order to conceal those snapshot/alias
+differences. The kernel sources remain unchanged while the independent
+movie-blender owner fold lands.
+

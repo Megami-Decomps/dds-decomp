@@ -23,13 +23,13 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 x, y, w;
 
     if (func_001200E0() == 0) {
-        x = rect->body.source.x + 0x100;
-        y = rect->body.source.y + 0xE0;
+        x = rect->body.source.position[0] + 0x100;
+        y = rect->body.source.position[1] + 0xE0;
         w = rect->body.extent;
-        rect->body.source.left = x - w;
-        rect->body.source.top = y - w;
-        rect->body.source.right = x + w;
-        rect->body.source.bottom = y + w;
+        rect->body.source.corners[0][0] = x - w;
+        rect->body.source.corners[0][1] = y - w;
+        rect->body.source.corners[1][0] = x + w;
+        rect->body.source.corners[1][1] = y + w;
         effDrawBlurSource(&rect->body.source, rect->texture, 0);
     }
 }
@@ -39,14 +39,14 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 x, y, w;
 
     if (func_001200E0() == 0) {
-        x = owner->body.source.x + 0x1000;
-        y = (owner->body.source.y + 0xE00) >> 1;
+        x = owner->body.source.position[0] + 0x1000;
+        y = (owner->body.source.position[1] + 0xE00) >> 1;
         w = owner->body.extent;
-        owner->body.source.left = x - w;
-        owner->body.source.right = x + w;
+        owner->body.source.corners[0][0] = x - w;
+        owner->body.source.corners[1][0] = x + w;
         w >>= 1;
-        owner->body.source.top = y - w;
-        owner->body.source.bottom = y + w;
+        owner->body.source.corners[0][1] = y - w;
+        owner->body.source.corners[1][1] = y + w;
         effDrawBlurSource(&owner->body.source, owner->texture, 1);
     }
 }
@@ -79,17 +79,17 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     quad->blendControl = work->params.blendControl;
     spread = work->params.positionSpread;
     halfSize = work->params.size;
-    quad->x = work->params.x +
+    quad->position[0] = work->params.position[0] +
         (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
     halfSize >>= 1;
-    quad->y = work->params.y +
+    quad->position[1] = work->params.position[1] +
         (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
-    centerX = quad->x + 256;
-    quad->left = centerX - halfSize;
-    quad->right = centerX + halfSize;
-    centerY = quad->y + 224;
-    quad->top = centerY - halfSize;
-    quad->bottom = centerY + halfSize;
+    centerX = quad->position[0] + 256;
+    quad->corners[0][0] = centerX - halfSize;
+    quad->corners[1][0] = centerX + halfSize;
+    centerY = quad->position[1] + 224;
+    quad->corners[0][1] = centerY - halfSize;
+    quad->corners[1][1] = centerY + halfSize;
 }
 
 EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
@@ -186,15 +186,15 @@ void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
  * Truncate size before the existing signed half-height shift. */
 void effBlurSecondUpdateSlotRect(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     f32 size = (f32)work->params.size * slot->phase * 16.0f;
-    s32 cx = (work->params.x + 0x100) << 4;
-    s32 cy = (work->params.y + 0xE0) << 3;
+    s32 cx = (work->params.position[0] + 0x100) << 4;
+    s32 cy = (work->params.position[1] + 0xE0) << 3;
     s32 s = (s32)size;
 
-    slot->quad.left = cx - s;
-    slot->quad.right = cx + s;
+    slot->quad.corners[0][0] = cx - s;
+    slot->quad.corners[1][0] = cx + s;
     s >>= 1;
-    slot->quad.top = cy - s;
-    slot->quad.bottom = cy + s;
+    slot->quad.corners[0][1] = cy - s;
+    slot->quad.corners[1][1] = cy + s;
 }
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
@@ -206,8 +206,8 @@ void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     quad->color = work->params.color;
     quad->blendControl = work->params.blendControl;
     quad->angle = work->params.uvDisplacementAngleDegrees;
-    quad->x = work->params.x;
-    quad->y = work->params.y;
+    quad->position[0] = work->params.position[0];
+    quad->position[1] = work->params.position[1];
 }
 
 

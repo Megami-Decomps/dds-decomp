@@ -11,12 +11,10 @@ typedef struct EffBlurQuad {
     s32 blendControl;
     f32 angle;
     f32 displacement;
-    s32 x;
-    s32 y;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
+    /* Native movie blends interpolate these four corners with a 2x2 loop. */
+    s32 corners[2][2];
 } EffBlurQuad;
 
 /* The textured blur allocation stores this copied body followed by a
@@ -32,8 +30,8 @@ typedef struct EffBlurTemplate {
 } EffBlurTemplate;
 
 typedef char EffBlurQuadSizeCheck[sizeof(EffBlurQuad) == 0x28 ? 1 : -1];
-typedef char EffBlurQuadCenterOffsetCheck[((u32)&((EffBlurQuad *)0)->x == 0x10) ? 1 : -1];
-typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->left == 0x18) ? 1 : -1];
+typedef char EffBlurQuadCenterOffsetCheck[((u32)&((EffBlurQuad *)0)->position == 0x10) ? 1 : -1];
+typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->corners == 0x18) ? 1 : -1];
 typedef char EffBlurTemplateBodySizeCheck[sizeof(EffBlurTemplateBody) == 0x2C ? 1 : -1];
 typedef char EffBlurTemplateSourceOffsetCheck[((u32)&((EffBlurTemplateBody *)0)->source == 0x04) ? 1 : -1];
 typedef char EffBlurTemplateSizeCheck[sizeof(EffBlurTemplate) == 0x30 ? 1 : -1];
@@ -63,8 +61,8 @@ typedef struct EffBlurScatterParams {
     s32 blendControl;
     f32 uvDisplacementAngleDegrees;
     f32 uvDisplacementAmplitude;
-    s32 x;
-    s32 y;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
     s32 positionSpread;
     s32 size;
 } EffBlurScatterParams;
@@ -99,8 +97,8 @@ typedef struct EffBlurScaleParams {
     f32 uvDisplacementAngleDegrees; /* Copied to the slot quad angle. */
     f32 uvDisplacementAmplitude; /* Displacement amplitude used by the native update. */
     f32 angleStep;
-    s32 x;
-    s32 y;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
     s32 size;
 } EffBlurScaleParams;
 

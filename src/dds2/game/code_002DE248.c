@@ -90,7 +90,7 @@ extern SdfPoolNode *D_003E9C28[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 typedef struct EffectStateSnapshot {
-    s128 vectors[8];
+ s128 vectors[8];
 } EffectStateSnapshot;
 
 extern void effResetFileResourceManager(void);
@@ -959,12 +959,12 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->x = 0;
-    out->y = 0;
-    out->left = 0;
-    out->top = 0;
-    out->right = 0x200;
-    out->bottom = 0x1C0;
+    out->position[0] = 0;
+    out->position[1] = 0;
+    out->corners[0][0] = 0;
+    out->corners[0][1] = 0;
+    out->corners[1][0] = 0x200;
+    out->corners[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -1014,8 +1014,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->body.source.x = 0;
-        out->body.source.y = 0;
+        out->body.source.position[0] = 0;
+        out->body.source.position[1] = 0;
         out->body.extent = (s32)(rate * 16.0f);
     } else {
         s32 mode;
@@ -1032,8 +1032,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->body.source.x = px;
-        out->body.source.y = py << 1;
+        out->body.source.position[0] = px;
+        out->body.source.position[1] = py << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -1089,8 +1089,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.positionSpread = (s32)rate;
-        out->params.x = 0;
-        out->params.y = 0;
+        out->params.position[0] = 0;
+        out->params.position[1] = 0;
     } else {
         s32 mode;
 
@@ -1102,8 +1102,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
             return;
         }
         VU0_STORE_VF(vf10, pos);
-        out->params.x = (s32)pos[0] - 0x800;
-        out->params.y = ((s32)pos[1] - 0x800) << 1;
+        out->params.position[0] = (s32)pos[0] - 0x800;
+        out->params.position[1] = ((s32)pos[1] - 0x800) << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -1159,8 +1159,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.size = (s32)rate;
-        out->params.x = 0;
-        out->params.y = 0;
+        out->params.position[0] = 0;
+        out->params.position[1] = 0;
     } else {
         s32 mode;
 
@@ -1172,8 +1172,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
             return;
         }
         VU0_STORE_VF(vf10, pos);
-        out->params.x = (s32)pos[0] - 0x800;
-        out->params.y = ((s32)pos[1] - 0x800) << 1;
+        out->params.position[0] = (s32)pos[0] - 0x800;
+        out->params.position[1] = ((s32)pos[1] - 0x800) << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
@@ -1216,12 +1216,12 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->x = 0;
-    out->y = 0;
-    out->left = 0;
-    out->top = 0;
-    out->right = 0x200;
-    out->bottom = 0x1C0;
+    out->position[0] = 0;
+    out->position[1] = 0;
+    out->corners[0][0] = 0;
+    out->corners[0][1] = 0;
+    out->corners[1][0] = 0x200;
+    out->corners[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -1261,10 +1261,10 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     if (duration < frame) {
         return;
     }
-    out->left = 0;
-    out->top = 0;
-    out->right = 0x200;
-    out->bottom = 0x1C0;
+    out->corners[0][0] = 0;
+    out->corners[0][1] = 0;
+    out->corners[1][0] = 0x200;
+    out->corners[1][1] = 0x1C0;
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -1315,8 +1315,8 @@ void func_002DFAB0(EffKindWork *work) {
     }
     rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
-        out->params.centerX = 0;
-        out->params.centerY = 0;
+        out->params.center[0] = 0;
+        out->params.center[1] = 0;
         out->params.extent = (s32)(rate * 16.0f);
     } else {
         s32 mode;
@@ -1333,8 +1333,8 @@ void func_002DFAB0(EffKindWork *work) {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->params.centerX = px;
-        out->params.centerY = py << 1;
+        out->params.center[0] = px;
+        out->params.center[1] = py << 1;
     }
     second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;

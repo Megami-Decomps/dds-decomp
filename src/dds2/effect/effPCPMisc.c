@@ -2124,8 +2124,8 @@ void effPcpUpdateSharedTrail(ref)
         VU0_LOAD_VF($vf10, work);
         obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
         VU0_STORE_VF($vf10, pos);
-        obj->body.source.x = (s32)pos[0] - 0x800;
-        obj->body.source.y = ((s32)pos[1] - 0x800) << 1;
+        obj->body.source.position[0] = (s32)pos[0] - 0x800;
+        obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
         if (obj->body.extent < EFF_SHARED_TRAIL->minSize) {
             obj->body.extent = EFF_SHARED_TRAIL->minSize;
         }
@@ -2182,8 +2182,8 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
     VU0_LOAD_VF($vf10, work->pos);
     obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
     VU0_STORE_VF($vf10, pos);
-    obj->body.source.x = (s32)pos[0] - 0x800;
-    obj->body.source.y = ((s32)pos[1] - 0x800) << 1;
+    obj->body.source.position[0] = (s32)pos[0] - 0x800;
+    obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
     if (obj->body.extent < work->minSize) {
         obj->body.extent = work->minSize;
     }
@@ -2280,11 +2280,11 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
             VU0_LOAD_VF(vf10, work->position);
             sdfProjectVuVectorToScreen();
             VU0_STORE_VF(vf10, projected);
-            rect->params.centerX = (s32)projected[0] - 2048;
-            rect->params.centerY = ((s32)projected[1] - 2048) << 1;
+            rect->params.center[0] = (s32)projected[0] - 2048;
+            rect->params.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->params.centerX = 0;
-            rect->params.centerY = 0;
+            rect->params.center[0] = 0;
+            rect->params.center[1] = 0;
         }
         rect->params.extent = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
@@ -2375,11 +2375,11 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
             VU0_LOAD_VF(vf10, work->position);
             sdfProjectVuVectorToScreen();
             VU0_STORE_VF(vf10, projected);
-            rect->body.source.x = (s32)projected[0] - 2048;
-            rect->body.source.y = ((s32)projected[1] - 2048) << 1;
+            rect->body.source.position[0] = (s32)projected[0] - 2048;
+            rect->body.source.position[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->body.source.x = 0;
-            rect->body.source.y = 0;
+            rect->body.source.position[0] = 0;
+            rect->body.source.position[1] = 0;
         }
         rect->body.extent = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
@@ -2516,12 +2516,12 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         return;
     }
     fadeIn = work->params.fadeIn;
-    work->params.source.x = 0;
-    work->params.source.y = 0;
-    work->params.source.left = 0;
-    work->params.source.top = 0;
-    work->params.source.right = 0x200;
-    work->params.source.bottom = 0x1C0;
+    work->params.source.position[0] = 0;
+    work->params.source.position[1] = 0;
+    work->params.source.corners[0][0] = 0;
+    work->params.source.corners[0][1] = 0;
+    work->params.source.corners[1][0] = 0x200;
+    work->params.source.corners[1][1] = 0x1C0;
     fadeOut = work->params.fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2610,11 +2610,11 @@ void effPcpUpdateCompactScatterWork(EffPCPCompactWork *work) {
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
         resource = work->resource.scatter;
-        resource->params.x = (s32)projected[0] - 2048;
-        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.position[0] = (s32)projected[0] - 2048;
+        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.x = 0;
-        resource->params.y = 0;
+        resource->params.position[0] = 0;
+        resource->params.position[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2716,11 +2716,11 @@ void effPcpUpdateCompactScaleWork(EffPCPCompactWork *work) {
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
         resource = work->resource.scale;
-        resource->params.x = (s32)projected[0] - 2048;
-        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource->params.position[0] = (s32)projected[0] - 2048;
+        resource->params.position[1] = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        resource->params.x = 0;
-        resource->params.y = 0;
+        resource->params.position[0] = 0;
+        resource->params.position[1] = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;

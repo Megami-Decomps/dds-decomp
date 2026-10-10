@@ -1733,8 +1733,8 @@ s32 fldProcSequence(void) {
             blur.blendControl = 0x44;
             blur.uvDisplacementAngleDegrees = 0.005f;
             blur.uvDisplacementAmplitude = 0.13f;
-            blur.x = 0;
-            blur.y = 0;
+            blur.position[0] = 0;
+            blur.position[1] = 0;
             blur.positionSpread = 0x100;
             blur.size = 200;
             D_003BABE4 = effBlurCreateScatterWork(&blur);
@@ -1746,8 +1746,8 @@ s32 fldProcSequence(void) {
             blur.blendControl = 0x44;
             blur.uvDisplacementAngleDegrees = 0.005f;
             blur.uvDisplacementAmplitude = 0.13f;
-            blur.x = 0;
-            blur.y = 0;
+            blur.position[0] = 0;
+            blur.position[1] = 0;
             blur.positionSpread = 0x100;
             blur.size = 136;
             D_003BABE4 = effBlurCreateScatterWork(&blur);

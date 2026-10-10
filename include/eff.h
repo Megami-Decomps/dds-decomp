@@ -177,7 +177,8 @@ typedef struct {
 
 /* Passed directly to the quad renderer, independently of the extent/center. */
 typedef struct {
-    u8 color[4];
+    /* The movie blender stores packed RGBA; the renderer samples channels. */
+    union { u8 color[4]; u32 rgba; };
     s32 blendControl;
     EffResourceRectBounds bounds;
 } EffResourceRectDrawParams;
@@ -185,8 +186,8 @@ typedef struct {
 /* Nine copied words; the selected source texture belongs to the owner. */
 typedef struct {
     s32 extent;
-    s32 centerX;
-    s32 centerY;
+    /* The native movie blender interpolates both center coordinates in one loop. */
+    s32 center[2];
     EffResourceRectDrawParams draw;
 } EffResourceRectParams; /* 0x24 */
 
