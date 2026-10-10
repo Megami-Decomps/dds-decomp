@@ -177,8 +177,8 @@ typedef struct MantraMenuWork {
         u8 flagBytes[4];
     };
     u8 unk9B4;
-    u8 unk9B5;
-    u16 unk9B6;
+    s8 unk9B5;
+    s16 unk9B6;
     MtrEquipState equip;
     struct MantraDrawPool *selectionController;
 } MantraMenuWork;
