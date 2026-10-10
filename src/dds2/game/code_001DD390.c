@@ -1371,9 +1371,9 @@ void btlReleaseObjectBuffers(BattleIndexWork *object) {
     }
 }
 
-extern void btlAdjustUnitHp(DatPartyRecord *, s32);
+extern s32 btlAdjustUnitHp(DatPartyRecord *, s32);
 
-extern void btlAdjustUnitMp(DatPartyRecord *, s32);
+extern s32 btlAdjustUnitMp(DatPartyRecord *, s32);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001DF860);
 

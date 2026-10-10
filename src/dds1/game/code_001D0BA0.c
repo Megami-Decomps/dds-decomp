@@ -214,9 +214,9 @@ extern s8 effSharedRandomState[];
 
 extern void btlResetDeferredTaskQueue(void);
 
-void btlAdjustUnitHp(DatPartyRecord *object, s32 value);
+s32 btlAdjustUnitHp(DatPartyRecord *object, s32 value);
 
-void btlAdjustUnitMp(DatPartyRecord *object, s32 value);
+s32 btlAdjustUnitMp(DatPartyRecord *object, s32 value);
 
 u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *object);
 
