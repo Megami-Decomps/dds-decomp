@@ -7730,7 +7730,7 @@ typedef struct EffFileJobRequest {
     u8 padA[2];
     void *output;
     u32 size;
-    u8 pad14[4];
+    SdfMemBlock *allocation;
     u16 resourceMode;
     u8 pad1A[2];
     const char *secondaryCommandPath;
