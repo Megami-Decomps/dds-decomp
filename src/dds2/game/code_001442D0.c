@@ -40,7 +40,7 @@ extern void func_00153FA0(void);
 extern EffWorldNode *D_00435F1C;
 extern MdlCtx *D_00435F20;
 
-extern void func_001542D8(void);
+extern void fldUpdateGuideMarkerPulse(void);
 extern void func_001523F0(void);
 extern void func_001525F0(void);
 extern void fldUpdateTargetGuideEffects(void);
@@ -5120,7 +5120,7 @@ void fldUpdateTargetGuideController(void) {
                 return;
             }
         } else {
-            func_001542D8();
+            fldUpdateGuideMarkerPulse();
             func_001523F0();
             func_001525F0();
             fldUpdateTargetGuideEffects();
@@ -5511,7 +5511,57 @@ void fldCreateChaseCameraObject(void) {
     func_00153FA0();
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001542D8);
+extern s32 D_004363DC;
+extern f32 D_004363E0, D_004363E4;
+
+void fldUpdateGuideMarkerPulse(void) {
+    FieldGuideObjectSlot *marker;
+    s32 i;
+    s32 visible = 0;
+    f32 elapsed;
+    f32 factor;
+
+    for (i = 0; i < 15; i++) {
+        if (D_00451DB0[i].active) {
+            D_00451DB0[i].progress += 1.0f;
+            if (D_00451DB0[i].progress > 150.0f) {
+                D_00451DB0[i].progress = 0.0f;
+            }
+            if (D_00451DB0[i].progress > 0.0f && D_00451DB0[i].progress < 15.5f) {
+                factor = D_00451DB0[i].progress - 0.0f;
+                factor *= 80.0f;
+                factor /= 15.0f;
+                mdlBroadcastMasked(D_00451DB0[i].model,
+                    ((s32)factor << 24) | 0x808080);
+            } else if (D_00451DB0[i].progress > 15.0f &&
+                       D_00451DB0[i].progress < 75.5f) {
+                mdlBroadcastMasked(D_00451DB0[i].model, 0x80808080);
+            } else if ((elapsed = D_00451DB0[i].progress) > 75.0f &&
+                       elapsed < 90.5f) {
+                elapsed -= 75.0f;
+                factor = 15.0f - elapsed;
+                factor *= 80.0f;
+                factor /= 15.0f;
+                mdlBroadcastMasked(D_00451DB0[i].model,
+                    ((s32)factor << 24) | 0x808080);
+            } else {
+                mdlBroadcastMasked(D_00451DB0[i].model, 0x808080);
+            }
+        }
+    }
+    for (i = 0; i < 15; i++) {
+        marker = &D_00451DB0[i];
+        if (marker->active && marker->gridX == D_00438EF8.x &&
+            marker->gridY == D_00438EF8.y && marker->progress > 15.0f &&
+            marker->progress < 75.0f) {
+            visible = 1;
+            fldMapGridToScreenPosition(marker->gridX, marker->gridY,
+                                      &D_004363E0, &D_004363E4);
+            break;
+        }
+    }
+    D_004363DC = visible;
+}
 
 extern s32 D_003898AC[];
 
