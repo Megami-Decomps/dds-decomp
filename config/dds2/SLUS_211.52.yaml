@@ -190,8 +190,6 @@ segments:
       - [0x151010, c, game/code_00250010]
       - [0x15E230, c, event/evtEventPack]  # Nocturne __FILE__
       - [0x15EA20, c, game/code_0025DA20]
-      - [0x166178, c, game/code_00265178]
-      - [0x1661C0, c, game/code_002651C0]
       - [0x166AB8, c, game/code_00265AB8]
       - [0x166AD8, c, game/code_00265AD8]
       - [0x1675B0, c, game/code_002665B0]

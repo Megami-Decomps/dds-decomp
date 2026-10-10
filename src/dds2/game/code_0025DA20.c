@@ -1674,7 +1674,7 @@ typedef struct EffItemSlot44 {
 } EffItemSlot44;
 
 extern EffItemSlot44 D_003CD8F0[];
-extern void mdlFlagSet(u32);
+extern void mdlFlagSet(s32);
 
 s32 itmClaimFreeSlot(s32 row) {
     s32 first = row * 2;
@@ -2325,7 +2325,6 @@ extern u8 D_003CE620[];
 extern u8 D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
 extern s32 mdlFlagTest();
-extern void mdlFlagSet();
 extern s32 dspStartEntry(s32);
 
 
@@ -3828,6 +3827,250 @@ s32 evtIsLastSlot(s32 slotIndex) {
         }
     }
     return slotIndex + 1 == activeSlots;
+}
+
+/* Set the model flag owned by the given slot. */
+void mnuSetFlagForMenuEntry(s32 index) {
+    s32 flag;
+
+    flag = D_003CE1A8[index].flag;
+    if (flag != 0) {
+        mdlFlagSet(flag);
+    }
+}
+
+
+#include "kwln.h"
+#include "mnu.h"
+#include "dat_state.h"
+#include "mnu_list.h"
+
+extern s32 mdlFlagTest(u32);
+
+
+extern void func_0026C900(void);
+
+
+
+extern s32 evtGetMessageWindowControlState(void);
+
+
+extern char D_003CE63C[];
+extern char D_00437850[];
+extern s32 func_00265038();
+extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
+extern void mnuBuildEnabledCampEntryWindow();
+extern s32 mnuCampHasEligibleOwnedItems();
+extern void mnuShopLoadMessageResource(MenuTerminalContext *);
+extern s32 mnuFirstPresentMainCharacterIndex();
+extern void evtCreateEventScriptProcess();
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void evtClearActiveFlag();
+extern void evtSetBoundedDisplayValue();
+extern u32 D_003CE460[];
+extern char D_00437840[];
+extern void mdlFlagClear();
+extern void func_0026C7F8();
+extern s32 mnuCampResolveProgressTierValue();
+extern void dspSetActive();
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern s32 dspStartEntry(s32);
+extern void ptyAdjustItemQuantity();
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 evtIsLastSlot(s32);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
+extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
+struct KwlnTask;
+
+
+s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    s32 slotIndex = func_00265038();
+    s32 i;
+    MnuProgressReward *reward;
+    char text[0x40];
+
+    if (context->unkCD != 0) {
+        if (slotIndex >= 0) {
+            i = 0;
+            reward = D_003CE1A8[slotIndex].rewards;
+            do {
+                s32 value = reward->value;
+                if ((reward++)->kind == 0) {
+                    evtCopyEntryStringToActiveWindow(i, D_00435E5C + value * 0x19);
+                } else {
+                    func_0035C860(text, D_00437850, value);
+                    evtCopyEntryStringToActiveWindow(i, text);
+                }
+                i++;
+            } while (i < 3);
+            if (evtIsLastSlot(slotIndex) == 0) {
+                dspStartEntry(0x26);
+            } else {
+                dspStartEntry(0x2A);
+            }
+            evtSetMessageWindowOptionWhenOpen(0);
+            evtStoreValueAndCaptureWindowPanelValue(0x27);
+        }
+    }
+    return 1;
+}
+
+u32 func_002652D8(void) {
+    return 1;
+}
+
+/* Poll the event window; when it closes, install the default window if needed. */
+s32 evtMenuPollWindow(KwlnTask *callback) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
+    s32 *window = &context->popupState;
+    s32 state = func_002C4038(&context->transitionWork, window, 0, (void *)callback);
+    if (state == 0) {
+        if (*window == 0) {
+            if (evtGetMessageWindowControlState() == 0) {
+                mnuSetPopupEntryFlagged(window, D_003CE63C);
+            }
+        }
+        return 0;
+    }
+    return state;
+}
+
+s32 func_00265360(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
+    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)context);
+    return evtMenuSetHandler((void *)context, 1, (void *)callback);
+}
+
+s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
+    func_0026C7F8(1, 0);
+    return evtMenuSetHandler((void *)context, 2, (void *)callback);
+}
+
+/* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
+s32 func_00265408(KwlnTask *task) {
+    char text[0x40];
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    s32 slotIndex = func_00265038();
+    s32 choice;
+    s32 rewardValue;
+
+    context->rewardGranted = 0;
+    if (context->unkCD != 0 && slotIndex >= 0) {
+        choice = evtGetCapturedWindowPanelValue();
+        rewardValue = D_003CE1A8[slotIndex].rewards[choice].value;
+        if (D_003CE1A8[slotIndex].rewards[choice].kind == 0) {
+            evtCopyEntryStringToActiveWindow(0, D_00435E5C + rewardValue * 0x19);
+            ptyAdjustItemQuantity(rewardValue, 1);
+        } else {
+            func_0035C860(text, D_00437850, rewardValue);
+            evtCopyEntryStringToActiveWindow(0, text);
+            datAddCurrencyClamped(rewardValue);
+        }
+        context->rewardGranted = 1;
+        dspStartEntry(0x28);
+    }
+    return 1;
+}
+
+/* Walk the list until its selected id is found, then persist the slot choice. */
+s32 evtMenuPersistSelectedSlot(KwlnTask *task) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    s32 selectedId = context->ownedWindows[0]->list->cursor->camp.value;
+    struct MenuListNode *node;
+    MenuTerminalWindowState *record;
+    s32 slot;
+    mnuShopReleaseWindowSprites(1, context);
+    mnuBuildEnabledCampEntryWindow(context);
+    for (node = context->ownedWindows[0]->list->first;
+         node != 0 && node->camp.value != selectedId; node = node->next) {
+        mnuAdvanceListCursorDefault(context->ownedWindows[0]->list);
+    }
+    record = context->ownedWindows[0]->list->context;
+    slot = mnuCampHasEligibleOwnedItems(context);
+    record->selectedSlot = slot;
+    context->selectedSlot = slot;
+    return 1;
+}
+
+extern void mnuSetFlagForMenuEntry(s32);
+extern s32 func_00261670(MenuTerminalContext *);
+extern s32 func_002619A8(MenuTerminalContext *, s32);
+extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
+
+INCLUDE_ASM(const s32, "game/code_0025DA20", func_002655C0);
+
+s32 func_002657F8(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
+    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)context);
+    return evtMenuSetHandler((void *)context, 1, (void *)callback);
+}
+
+s32 func_00265850(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
+    func_0026C900();
+    return evtMenuSetHandler((void *)context, 2, (void *)callback);
+}
+
+/* Fade out according to the event mode, with a separate flag-dependent case 2. */
+s32 evtStartFadeByState(KwlnTask *task) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    mnuShopLoadMessageResource(context);
+    switch (context->type) {
+    case 2:
+        if (mdlFlagTest(0x42a) == 0 && mnuFirstPresentMainCharacterIndex() == 0) {
+            evtCreateEventScriptProcess(0x323);
+        } else {
+            kwlnFadeOutStart(0, 0, 0, 0xf);
+        }
+        break;
+    case 0:
+    case 1:
+    case 3:
+        kwlnFadeOutStart(0, 0, 0, 0xf);
+        break;
+    }
+    evtClearActiveFlag(0);
+    evtSetBoundedDisplayValue(0, 0);
+    evtSetBoundedDisplayValue(1, 1);
+    return 1;
+}
+
+u32 func_00265980(void) {
+    return 1;
+}
+
+u32 evtMenuSetProgressFlag(MenuTerminalContext *context) {
+    u32 changed;
+    s64 flagSet;
+
+    if (((context->type == 2) && (flagSet = mdlFlagTest(4), flagSet != 0)) &&
+          (flagSet = mdlFlagTest(0x290), flagSet == 0)) {
+        mdlFlagSet(0x290);
+        changed = 1;
+    }
+    else {
+        changed = 0;
+    }
+    return changed;
+}
+
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuAwardCampProgressCurrency);
+
+/* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
+s32 func_00265A60(MenuTerminalContext *object) {
+    u32 flag = D_003CE460[object->type];
+    if (flag == 0) {
+        return 0;
+    }
+    if (mdlFlagTest(flag) == 0) {
+        mdlFlagSet(flag);
+        return 1;
+    }
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0025DA20", D_00424D08);
