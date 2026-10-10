@@ -995,8 +995,6 @@ typedef struct BtlSceneLightParams {
     f32 secondaryColor[3]; f32 unk2C;
 } BtlSceneLightParams;
 extern char D_003A36A8[];
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
-
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *func_001F0920(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
@@ -1051,6 +1049,8 @@ extern void *func_001D3510(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
 /* Schedule the LINKAGE action task chain (inferred role). */
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
+
 void func_001CCD18(BtlTask *action) {
     BtlUnit *actors[3];
     BtlSceneLightParams light;
