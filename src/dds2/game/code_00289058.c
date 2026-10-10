@@ -17,7 +17,7 @@ extern void mnuReleaseMiddleMantraSpriteSlots(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
-extern void mdlFlagSet(u16);
+extern void mdlFlagSet(s32);
 
 typedef struct MantraPanelPool MantraPanelPool;
 extern void mnuQueueNextUnitPanelSelection(struct MantraDrawPool *pool);
@@ -634,7 +634,392 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028BB80);
+struct MenuSearchObject;
+struct MenuSearchState;
+typedef struct DspUnitName { u8 encodedText[17]; } DspUnitName;
+extern DspUnitName *D_00435E48;
+extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
+extern s32 dspStartEntry(s32);
+extern void evtFinishMessageWindowAndNotify(void);
+extern s32 dspCloseChannel(void);
+extern s32 evtGetMessageWindowControlState(void);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void mnuActivateMantraNode(struct MenuSearchObject *, u16);
+extern s32 func_0028F380(struct MenuSearchObject *, struct MenuSearchState *);
+extern s32 mnuSelectPreferredMantraNode(struct MenuSearchObject *, struct MenuSearchState *);
+extern s32 mnuSelectMatchingNode(struct MenuSearchObject *, struct MenuSearchState *);
+extern void mnuSelectMantraLimitLine(struct MenuSearchObject *, u16);
+extern void mnuApplyMantraUnlockToPartyList(MnuStatusResource *, u16);
+extern s32 func_00290A78(MnuStatusResource *);
+extern s32 mnuGetActiveMantraModelFlagState(void);
+extern void mnuSetMantraBackgroundVariant(struct MantraDrawPool *, s8);
+extern void mnuEnableMantraBackground(struct MantraDrawPool *);
+extern void mnuBeginMantraBackgroundMaskFadeIn(struct MantraDrawPool *);
+extern void mnuBeginMantraBackgroundMaskFadeOut(struct MantraDrawPool *);
+extern void mnuShowMantraLimitLine(struct MantraDrawPool *);
+extern void mnuHideMantraInfo(struct MantraDrawPool *);
+extern void mnuShowMantraInfo(struct MantraDrawPool *);
+extern void mnuHideMantraScrollCursor(struct MantraDrawPool *);
+extern void mnuShowMantraScrollCursor(struct MantraDrawPool *);
+extern void mnuHideMantraUnitPanel(struct MantraDrawPool *);
+extern void mnuShowMantraUnitPanel(struct MantraDrawPool *);
+extern void func_00278F60(struct MantraDrawPool *);
+extern void func_00278FA8(struct MantraDrawPool *);
+extern void func_00278FF0(struct MantraDrawPool *);
+extern void func_002790F0(u32, u32, struct MantraDrawPool *);
+extern void func_00279148(struct MantraDrawPool *);
+extern void mtrDrawRankPass(s32, u16);
+extern void func_0028E0E8(MnuStatusResource *, u16, u16);
+/* The following three declarations remain inferred from native callers. */
+extern s32 func_0028EB38(MnuStatusResource *, s32);
+extern void func_0028E638(MnuStatusResource *, u16);
+extern s32 func_0028FEF0(MantraMenuSrc *, MnuStatusResource *);
+
+const char D_00426B90[0x48] = "MTR_MSL_MASTER_COMPLETE_CHECK  ...->MTR_MSL_MASTER_COMPLETE_WAIT\n";
+const char D_00426BD8[0x38] = "MTR_MSL_MASTER_COMPLETE_CHECK  ... ->CHANGE_OUT\n";
+const char D_00426C10[0x48] = "MTR_MSL_MASTER_COMPLETE_WAIT  ... ->MTR_MSL_MASTER_COMPLETE_CHECK\n";
+const char D_00426C58[0x18] = "MTR_MSL_EFFECT_INIT\n";
+const char D_00426C70[0x20] = "DrawRankUp[%d] Type[%d]\n";
+const char D_00426C90[0x10] = "NOT DATA!!!!\n";
+const char D_00426CA0[0x28] = "MTR_MSL_EFFECT_INIT  ... ->CHANGE_IN\n";
+const char D_00426CC8[0x38] = "MTR_MSL_EFFECT_INIT  ... ->MASTER_COMPLETE_CHECK\n";
+const char D_00426D00[0x28] = "MTR_MSL_EFFECT_INIT  ... ->CHANGE_OUT\n";
+const char D_00426D28[0x20] = "MTR_MSL_EFFECT_CHANGE_IN\n";
+const char D_00426D48[0x30] = "MTR_MSL_EFFECT_CHANGE_IN  ... ->CHANGE_IN_WAIT\n";
+const char D_00426D78[0x38] = "MTR_MSL_EFFECT_CHANGE_IN_WAIT  ... -> MTR_MSL_EVENT\n";
+const char D_00426DB0[0x20] = "MTR_MSL_EFFECT_CHANGE_OUT\n";
+const char D_00426DD0[0x30] = "mtrMantraPlayerRestor!!!!!!!!!!!!!!!!!!!!\n";
+const char D_00426E00[0x30] = "MTR_MSL_EFFECT_CHANGE_OUT  ... ->EXIT(ROOT)\n";
+const char D_00426E30[0x18] = "MTR_MSL_EFFECT_IN\n";
+const char D_00426E48[0x38] = "MTR_MSL_EFFECT_IN  ... -> MTR_MSL_EFFECT_IN_WAIT\n";
+const char D_00426E80[0x30] = "MTR_MSL_EFFECT_IN_WAIT  ... -> MTR_MSL_EFFECT\n";
+const char D_00426EB0[0x18] = "MTR_MSL_EFFECT_OUT\n";
+const char D_00426EC8[0x38] = "MTR_MSL_EFFECT_OUT  ... -> MTR_MSL_EFFECT_OUT_WAIT\n";
+const char D_00426F00[0x38] = "MTR_MSL_EFFECT_OUT_WAIT  ... -> MTR_MSL_EFFECT_INIT\n";
+const char D_00426F38[0x10] = "MTR_MSL_EFFECT\n";
+const char D_00426F48[0x38] = "MTR_MSL_EFFECT         ... -> MTR_MSL_EFFECT_WAIT\n";
+const char D_00426F80[0x30] = "MTR_MSL_EFFECT_WAIT     ... -> MTR_MSL_EVENT\n";
+const char D_00426FB0[0x18] = "MTR_MSL_EVENT[%d]!!!\n";
+const char D_00426FC8[0x30] = "MTR_MSL_EVENT       ... -> MTR_MSL_EVENT_WAIT\n";
+const char D_00426FF8[0x30] = "MTR_MSL_EVENT_WAIT ... -> MTR_MSL_EVENT_EXIT\n";
+const char D_00427028[0x18] = "MTR_MSL_EVENT_EXIT\n";
+const char D_00427040[0x30] = "MTR_MSL_EVENT_EXIT ... -> MTR_MSL_EFFECT_IN\n";
+const char D_00427070[0x30] = "MTR_MSL_EVENT_EXIT ... -> MTR_MSL_EFFECT_OUT\n";
+
+/* Advance source selection, entry/exit effects and their message handoff.
+ * Source search APIs use another complete view of this same menu allocation. */
+s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
+    MantraMenuWork *work = &object->menu;
+    s32 result = 0;
+    MantraNodePos *position;
+    DatPartyRecord *party;
+    s32 index;
+    s32 dialogResult;
+
+    switch (work->drawBits.sourceKind) {
+    case 1:
+        index = work->sourcePartyIndex;
+        if (index != -1) {
+            party = mnuGetNodeValueByIndex(object, index);
+            mnuSetSelectedMantraOptionFlag(party);
+            dspCloseChannel();
+            evtCreateMessageWindowIfMissing(object->messageDefinition);
+            evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
+            evtCopyEntryStringToActiveWindow(1, D_00435E48[party->unitId + 16].encodedText);
+            dspStartEntry(3);
+            func_00289550(object, (s8)index);
+            work->sourceNextState = 3;
+            work->sourceWaitFrames = 10;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426B90);
+        } else {
+            work->sourceNextState = 7;
+            work->sourceWaitFrames = 20;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426BD8);
+        }
+        break;
+    case 3:
+        if (evtGetMessageWindowControlState() == 0) {
+            work->sourceNextState = 1;
+            work->drawBits.sourceKind = 18;
+            work->sourceWaitFrames = 30;
+            evtPrintDeveloperConsoleMessage(D_00426C10);
+            evtFinishMessageWindowAndNotify();
+            work->sourcePartyIndex = mnuFindFirstMatchingListItemIndex(object);
+        }
+        break;
+    case 4:
+        evtPrintDeveloperConsoleMessage(D_00426C58);
+        if (!work->drawBits.hasQueuedMastery && work->src == NULL) {
+            mnuBindMantraMenuSourceRecord(object, NULL);
+        }
+        if (work->src != NULL) {
+            evtPrintDeveloperConsoleMessage(D_00426C70, work->src->bits >> 15,
+                                           (work->src->bits >> 8) & 0xF);
+            if (work->src->bits & 0x8000) {
+                func_0028F380((struct MenuSearchObject *)object,
+                             (struct MenuSearchState *)work->src);
+            } else if ((work->src->bits & 0xF00) == 0x200) {
+                mnuSelectPreferredMantraNode((struct MenuSearchObject *)object,
+                                            (struct MenuSearchState *)work->src);
+            } else if ((work->src->bits & 0xF00) == 0x300) {
+                mnuSelectMatchingNode((struct MenuSearchObject *)object,
+                                     (struct MenuSearchState *)work->src);
+            } else if ((work->src->bits & 0xF00) == 0x400) {
+                work->src->selectedIndex = func_002890A8(object);
+            } else {
+                evtPrintDeveloperConsoleMessage(D_00426C90);
+            }
+            work->drawBits.sourceKind = 5;
+            evtPrintDeveloperConsoleMessage(D_00426CA0);
+        } else {
+            work->sourcePartyIndex = mnuFindFirstMatchingListItemIndex(object);
+            if (work->sourcePartyIndex != -1) {
+                work->sourceNextState = 1;
+                work->sourceWaitFrames = 0;
+                work->drawBits.sourceKind = 18;
+                evtPrintDeveloperConsoleMessage(D_00426CC8);
+            } else {
+                work->sourceNextState = 7;
+                work->sourceWaitFrames = 20;
+                work->drawBits.sourceKind = 18;
+                evtPrintDeveloperConsoleMessage(D_00426D00);
+            }
+        }
+        break;
+    case 5:
+        evtPrintDeveloperConsoleMessage(D_00426D28);
+        mnuHideMantraScrollCursor(object->menu.selectionController);
+        func_00289550(object, work->src->selectedIndex);
+        work->sourceNextState = 6;
+        work->sourceWaitFrames = 0;
+        work->drawBits.sourceKind = 18;
+        evtPrintDeveloperConsoleMessage(D_00426D48);
+        break;
+    case 6:
+        if (func_0028EB38(object, 1) == 0) {
+            work->sourceNextState = 15;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426D78);
+        }
+        break;
+    case 7: {
+        MantraNodePos *restoredPosition;
+        evtPrintDeveloperConsoleMessage(D_00426DB0);
+        if (!work->drawBits.hasQueuedMastery) {
+            evtPrintDeveloperConsoleMessage(D_00426DD0);
+            func_00290A78(object);
+            if (mnuGetActiveMantraModelFlagState() >= 2 ||
+                mdlFlagTest(0x977) || mdlFlagTest(0x978) ||
+                mdlFlagTest(0x979) || mdlFlagTest(0x97A)) {
+                mnuShowMantraScrollCursor(object->menu.selectionController);
+            }
+            if ((u16)(work->sourceMode - 3) >= 2 && work->sourceFlag != 0) {
+                restoredPosition = mnuGetMantraNodePositionRecord(
+                    (s16)scrGetSelectedScriptEntryId(object->list->cursor->partyRecord));
+                work->defaultSelector = restoredPosition;
+                mnuSpawnMantraIconAtPosition(
+                    (s32)((f32)restoredPosition->x / 10.0f * 40.0f),
+                    (s32)((f32)restoredPosition->y / 10.0f * 39.0f),
+                    object->menu.selectionController);
+            }
+        }
+        work->sourceFlag = work->sourceMode = 0;
+        result = 1;
+        evtPrintDeveloperConsoleMessage(D_00426E00);
+        break;
+    }
+    case 8:
+        evtPrintDeveloperConsoleMessage(D_00426E30);
+        mnuHideMantraInfo(object->menu.selectionController);
+        mnuHideMantraUnitPanel(object->menu.selectionController);
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 2);
+        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
+        if (work->src->bits & 0x8000) {
+            position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
+            func_00278FF0(object->menu.selectionController);
+            func_00279148(object->menu.selectionController);
+            mdlFlagSet(work->src->unk02);
+            work->alternateSelector = work->defaultSelector;
+            work->defaultSelector = position;
+        } else if ((work->src->bits & 0xF00) == 0x200) {
+            position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
+            mnuTransitionActivePanelAnimations(work->resource, 1);
+            func_0028E0E8(object, work->src->fields.unitIndex, 2);
+            mnuSpawnMantraIconAtPosition(
+                (s32)((f32)position->x / 10.0f * 40.0f),
+                (s32)((f32)position->y / 10.0f * 39.0f),
+                object->menu.selectionController);
+            func_00278FA8(object->menu.selectionController);
+            func_00279148(object->menu.selectionController);
+            work->alternateSelector = work->defaultSelector;
+            work->defaultSelector = position;
+        } else {
+            position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
+            mnuSpawnMantraIconAtPosition(
+                (s32)((f32)position->x / 10.0f * 40.0f),
+                (s32)((f32)position->y / 10.0f * 39.0f),
+                object->menu.selectionController);
+            func_00278FA8(object->menu.selectionController);
+            func_00279148(object->menu.selectionController);
+            work->alternateSelector = work->defaultSelector;
+            work->defaultSelector = position;
+        }
+        work->drawBits.sourceKind = 9;
+        evtPrintDeveloperConsoleMessage(D_00426E48);
+        break;
+    case 9:
+        if (func_0028EB38(object, 1) == 0) {
+            work->sourceNextState = 12;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426E80);
+        }
+        break;
+    case 10:
+        evtPrintDeveloperConsoleMessage(D_00426EB0);
+        work->alternateSelector = NULL;
+        mnuShowMantraInfo(object->menu.selectionController);
+        mnuShowMantraUnitPanel(object->menu.selectionController);
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
+        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
+        work->defaultSelector = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
+        if (work->src->bits & 0x8000) {
+            if ((work->src->bits & 0xF00) == 0x300) {
+                mnuShowMantraLimitLine(object->menu.selectionController);
+                mnuEnableMantraBackground(object->menu.selectionController);
+                object->menu.drawBits.showOverlay = 1;
+            }
+            work->defaultSelector = mnuGetMantraNodePositionRecord(
+                (s16)scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
+        } else if ((work->src->bits & 0xF00) == 0x200) {
+            mnuTransitionActivePanelAnimations(work->resource, 1);
+            func_0028D070(object, 10, 1);
+            if (work->src->bits & 0x1000) {
+                MantraNodePos *cursorPosition;
+                cursorPosition = mnuGetMantraNodePositionRecord(
+                    (s16)scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
+                work->defaultSelector = cursorPosition;
+                mnuSpawnMantraIconAtPosition(
+                    (s32)((f32)cursorPosition->x / 10.0f * 40.0f),
+                    (s32)((f32)cursorPosition->y / 10.0f * 39.0f),
+                    object->menu.selectionController);
+            }
+        } else if ((work->src->bits & 0xF00) == 0x300 ||
+                   (work->src->bits & 0xF00) == 0x400) {
+            mnuSelectMantraLimitLine((struct MenuSearchObject *)object, work->src->fields.unitIndex);
+        }
+        func_00278F60(object->menu.selectionController);
+        position = mnuGetMantraNodePositionRecord(
+            (s16)scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
+        func_002790F0((s32)((f32)position->x / 10.0f * 40.0f),
+                      (s32)((f32)position->y / 10.0f * 39.0f),
+                      object->menu.selectionController);
+        work->drawBits.sourceKind = 11;
+        evtPrintDeveloperConsoleMessage(D_00426EC8);
+        break;
+    case 11:
+        work->frame++;
+        if (func_0028EB38(object, 1) == 0) {
+            mdlFlagSet(work->src->unk02);
+            work->frame = 0;
+            work->drawBits.hasSource = 0;
+            work->src = NULL;
+            work->sourceNextState = 4;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426F00);
+        }
+        break;
+    case 12:
+        evtPrintDeveloperConsoleMessage(D_00426F38);
+        if (work->src->bits & 0x8000) {
+            mtrDrawRankPass((s32)object, work->src->fields.unitIndex);
+            work->delayFrames = 60;
+        } else if ((work->src->bits & 0xF00) == 0x200) {
+            mnuApplyMantraUnlockToPartyList(object, work->src->fields.unitIndex);
+            work->delayFrames = 120;
+        } else if ((work->src->bits & 0xF00) == 0x300) {
+            mnuActivateMantraNode((struct MenuSearchObject *)object, work->src->fields.unitIndex);
+            work->delayFrames = 60;
+        } else {
+            func_0028E638(object, work->src->fields.unitIndex);
+            index = func_002890A8(object);
+            if ((object->menu.slots[index]->flags[work->src->fields.unitIndex] & 0xF) == 2) {
+                work->delayFrames = 60;
+            } else {
+                work->delayFrames = 100;
+            }
+        }
+        work->sourceNextState = 13;
+        work->sourceWaitFrames = 20;
+        work->drawBits.sourceKind = 18;
+        evtPrintDeveloperConsoleMessage(D_00426F48);
+        break;
+    case 13:
+        if (work->delayFrames == 0) {
+            work->sourceNextState = 15;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00426F80);
+        }
+        break;
+    case 14:
+        work->drawBits.sourceKind = 15;
+        break;
+    case 15:
+        dspCloseChannel();
+        evtCreateMessageWindowIfMissing(object->messageDefinition);
+        evtPrintDeveloperConsoleMessage(D_00426FB0, work->drawBits.unk15);
+        dialogResult = func_0028FEF0(work->src, object);
+        if (dialogResult == 0) {
+            dspCloseChannel();
+            work->drawBits.sourceKind = 17;
+        } else {
+            if (dialogResult > 0) {
+                mnuGetMantraNodePositionRecord((s16)dialogResult);
+            }
+            work->drawBits.sourceKind = 16;
+            evtPrintDeveloperConsoleMessage(D_00426FC8);
+        }
+        break;
+    case 16:
+        if (evtGetMessageWindowControlState() == 0) {
+            work->drawBits.sourceKind = 17;
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage(D_00426FF8);
+        }
+        break;
+    case 17:
+        evtPrintDeveloperConsoleMessage(D_00427028);
+        if (work->drawBits.unk15 == 0) {
+            work->sourceNextState = 8;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00427040);
+        } else if (work->drawBits.unk15 == 1) {
+            work->sourceNextState = 10;
+            work->sourceWaitFrames = 0;
+            work->drawBits.sourceKind = 18;
+            evtPrintDeveloperConsoleMessage(D_00427070);
+        }
+        work->drawBits.unk15 ^= 1;
+        work->frame = 0;
+        break;
+    case 18:
+        if (work->sourceWaitFrames > 0) {
+            work->sourceWaitFrames--;
+        }
+        if (work->sourceWaitFrames == 0) {
+            work->drawBits.sourceKind = work->sourceNextState;
+        }
+        break;
+    }
+    return result;
+}
+
 
 extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *);
 
