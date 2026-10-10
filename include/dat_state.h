@@ -137,7 +137,13 @@ typedef struct DatFieldMapSlot {
         };
     };
     u8 values[16];
-    u16 trailingFlagBanks[2];
+    union {
+        u16 trailingFlagBanks[2];
+        struct {
+            u16 auxiliaryFlags;
+            u16 valueFlags;
+        };
+    };
 } DatFieldMapSlot;
 
 typedef struct DatFieldMapBank {
