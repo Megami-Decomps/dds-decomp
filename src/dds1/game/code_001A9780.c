@@ -3384,7 +3384,7 @@ void func_001B7238(void) {
 extern const BattleReservePositions D_003A2C90;
 
 /* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
-s32 func_001B74C8(KwlnTask *task) {
+s32 func_001B74C8(KwlnTask *task, BtlState *battle) {
     BattleReservePositions positions = D_003A2C90;
     BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     s32 count = work->reserveCount;
