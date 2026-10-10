@@ -2115,6 +2115,15 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     This ordered access model applies to the console packet pipeline; DMA
     consumption alone does not make every packet or CPU descriptor volatile.
     Preserve the earlier Vesper/Claude trials and Amber's console owner review.
+    The 304-byte console background builder `func_002E42F8` closes under the
+    same ordered access model. Emit the completed seven-doubleword packet,
+    reserve `currentTag = packet + 0x40`, then derive `writeCursor` from that
+    tag plus 16 bytes. Publishing both independent cursors before the payload
+    leaves 26 words different; reserving after the completed packet leaves four;
+    the actual tag-to-write-cursor relation closes those final four. Preserve
+    the packed coordinates as unsigned words before their zero-extended writes,
+    and retain signed dimensions and the post-finalization capacity check.
+    This extends the retained Vesper/Tidal/Sable/F2/Amber/Brass reconstruction.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
