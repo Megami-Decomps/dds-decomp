@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff.h"
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
@@ -87,12 +88,12 @@ extern void ptyRebuildAllProfiles(void);
 
 extern void mnuDrawCampIconBackdrop(u8 *, s32);
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 extern void func_002BB510(s32, s32, s32, s32, s32);
 
 
-extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, s32, u8 *, s32);
+extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, struct EffectSlotSet *, u8 *, s32);
 
 extern s32 mdlFlagTest(s32);
 
@@ -401,33 +402,11 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
     }
 }
 
-/* Camp work's drawing parameters; the intervening regions belong to the
- * resource lists and party-panel state initialized elsewhere in this unit. */
-typedef struct CampVisualWork {
-    struct SdfMemBlock *allocationHandle;  /* 0x0000 */
-    u8 pad04[0x58];
-    struct EffectList *menuResource;      /* 0x005C */
-    s32 drawContext;        /* 0x0060 */
-    s32 titleContext;       /* 0x0064 */
-    u8 pad68[0x98];
-    EffMappedResource *motionResource; /* 0x0100 */
-    u8 pad104[0xC];
-    EffMappedResource *motion[2]; /* 0x0110 and 0x0114 */
-    MenuScrollPanel *scrollPanel; /* 0x0118: retained scroll-panel allocation */
-    u8 pad11C[0x16C];
-    s32 backgroundOpacity;  /* 0x0288 */
-    u8 pad28C[0xA7C0];
-    s32 categoryKind;      /* 0xAA4C */
-    u8 padAA50[0x780];
-    s32 titleFadingOut;     /* 0xB1D0 */
-    s32 titleOpacity;       /* 0xB1D4, range 0..0x100 */
-    s32 titleSlide;         /* 0xB1D8, approaches zero from below */
-    s32 highlightOpacity;   /* 0xB1DC, range 0..0x100 */
-} CampVisualWork;
+
 
 /* On a category change, release old textures and resolve the new model entries. */
 void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes) {
-    s32 previousCategory = ((CampVisualWork *)menuBytes)->categoryKind;
+    s32 previousCategory = ((MenuStaffContext *)menuBytes)->categoryKind;
     if (nextCategory == previousCategory) {
         return;
     }
@@ -437,7 +416,7 @@ void mnuSwitchCampVisualCategory(s32 nextCategory, u8 *menuBytes) {
     if (nextCategory != 0) {
         movReleaseCategoryModels(nextCategory, menuBytes);
     }
-    ((CampVisualWork *)menuBytes)->categoryKind = nextCategory;
+    ((MenuStaffContext *)menuBytes)->categoryKind = nextCategory;
 }
 
 extern u32 D_003E6970[];
@@ -445,7 +424,7 @@ extern u32 D_003E6970[];
 /* Load the mapped motion resource and initialize both status batches' words.
  * Batch categories and the initial 0xF word remain opaque. */
 void movLoadTitleEffects(u8 *menuBytes) {
-    CampVisualWork *work = (CampVisualWork *)menuBytes;
+    MenuStaffContext *work = (MenuStaffContext *)menuBytes;
     EffMappedResource *batch;
     EffMappedRecord *records;
     s32 *statusWords;
@@ -470,7 +449,7 @@ void movLoadTitleEffects(u8 *menuBytes) {
 
 /* Destroy the mapped motion resource followed by both status batches. */
 void movReleaseTitleEffects(u32 *resourceSlots) {
-    CampVisualWork *work = (CampVisualWork *)resourceSlots;
+    MenuStaffContext *work = (MenuStaffContext *)resourceSlots;
     EffMappedResource **batchCursor = work->motion;
     u32 batchIndex;
     effDestroyPackedBatch(work->motionResource);
@@ -574,29 +553,21 @@ s32 movAreTitleEffectsReady(struct EffectList *resourceList, StaffSlots *resourc
 
 INCLUDE_ASM(const s32, "game/code_002A9068", mnuBuildCampTitleEffectResourceList);
 
-/* Title-effect work: sprite handle list at 0x60, then the resource slot sets. */
-typedef struct TitleEffectHandles {
-    u8 pad00[0x60];
-    u32 sprites[25]; /* 0x60: released through mnuReleaseTitleEffectSprites */
-    u32 groupA;      /* 0xC4 */
-    u32 groupB;      /* 0xC8 */
-    u32 additional[9]; /* 0xCC */
-    u32 finalGroup;  /* 0xF0 */
-} TitleEffectHandles;
+
 
 /* Release the title-effect sprites, then the A/B groups, the nine additional groups and the final group. */
-s64 mnuReleaseTitleEffectResourceGroups(TitleEffectHandles *work) {
+s64 mnuReleaseTitleEffectResourceGroups(MenuStaffContext *work) {
     s32 groupCountdown;
-    u32 *groupCursor;
+    struct EffectSlotSet **groupCursor;
 
-    mnuReleaseTitleEffectSprites((StaffSlots *)work->sprites);
-    effDestroyResourceSlotSet((struct EffectSlotSet *)work->groupA);
-    effDestroyResourceSlotSet((struct EffectSlotSet *)work->groupB);
-    groupCursor = work->additional;
+    mnuReleaseTitleEffectSprites(&work->resources);
+    effDestroyResourceSlotSet(work->titleFrames[0]);
+    effDestroyResourceSlotSet(work->titleFrames[1]);
+    groupCursor = work->partyTitles;
     for (groupCountdown = 8; groupCountdown >= 0; groupCountdown--) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)*groupCursor++);
+        effDestroyResourceSlotSet(*groupCursor++);
     }
-    return (s32)effDestroyResourceSlotSet((struct EffectSlotSet *)work->finalGroup);
+    return (s32)effDestroyResourceSlotSet(work->contextTitle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A9068", mnuInitializeCampMenuWhenResourcesReady);
@@ -674,7 +645,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
         style = 7;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->spriteArg0, 0xC, style);
+    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->resources.baseResources[1], 0xC, style);
 
     index = 0;
     if (count > 0) {
@@ -818,14 +789,14 @@ u8 *mnuCreateStaffMenuWork(void) {
     allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
     menuBytes = (u8 *)sdfResourceRetainAddress(allocation);
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
-    ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
+    ((MenuStaffContext *)menuBytes)->allocation = allocation;
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
-        ((CampVisualWork *)menuBytes)->menuResource =
+        ((MenuStaffContext *)menuBytes)->menuResource =
             mnuAllocateValueRecord(1);
     } else {
-        ((CampVisualWork *)menuBytes)->menuResource =
+        ((MenuStaffContext *)menuBytes)->menuResource =
             mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
@@ -851,14 +822,14 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     }
     mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
-    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->scrollPanel);
+    mnuDestroyScrollPanel(((MenuStaffContext *)menuBytes)->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
     dspCloseChannel();
     mnuDestroyEffectResources(menuBytes + 0x11c);
-    mnuReleaseTitleEffectResourceGroups(menuBytes);
+    mnuReleaseTitleEffectResourceGroups((MenuStaffContext *)menuBytes);
     movReleaseTitleEffects(menuBytes);
-    effDestroyEffectList(((CampVisualWork *)menuBytes)->menuResource);
-    sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
+    effDestroyEffectList(((MenuStaffContext *)menuBytes)->menuResource);
+    sdfReleaseResourceAllocation(((MenuStaffContext *)menuBytes)->allocation);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();
 }
@@ -959,17 +930,17 @@ u8 mnuIsFadeIdle(void) {
 
 /* Draw the camp title using the task's draw context and layer, then ease its
  * horizontal slide toward zero and its opacity toward the fade target. */
-void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s32 drawContext, u8 *work, s32 layer) {
+void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, struct EffectSlotSet *drawResource, u8 *work, s32 layer) {
     char buffer[16];
     s32 object;
     s32 offset;
     s32 magnitude;
-    CampVisualWork *visual = (CampVisualWork *)work;
+    MenuStaffContext *visual = (MenuStaffContext *)work;
 
     if (mdlFlagTest(0x290) == 0) {
         return;
     }
-    func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawContext, 0x3F, layer);
+    func_00306CD0((visual->titleSlide + 0x1A) << 4, 0xCB8, 0, visual->titleOpacity, 1, drawResource, 0x3F, layer);
     func_0035C860(buffer, D_00437B80, datGameState->header.currency);
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
@@ -1065,7 +1036,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
     StaffFramePiece alternate[4];
     s32 textPosition[2];
     StaffFramePiece *pieces;
-    CampVisualWork *menu = (CampVisualWork *)context;
+    MenuStaffContext *menu = (MenuStaffContext *)context;
     s32 i;
     s32 glyph;
     memcpy(primary, D_0042AC40, sizeof(primary));
@@ -1094,7 +1065,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
     }
     for (i = 0; i < 4; i++) {
         itfDrawGridWithResolvedSlot(pieces[i].x, pieces[i].y + 0x918, 0,
-                                   drawOption, (struct EffectSlotSet *)(u32)menu->titleContext, pieces[i].gridId, layer);
+                                   drawOption, menu->resources.baseResources[1], pieces[i].gridId, layer);
     }
     if (textTable != 0) {
         if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {
@@ -1118,34 +1089,24 @@ void func_002AAC98(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 dra
     func_002AAC70(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
-typedef struct CampDrawPosition {
-    u8 pad00[0xE6C];
-    s32 fixedPointOffset; /* 0xE6C: source shifted left by four */
-    u8 padE70[0x6C];
-    s32 sourceOffset;     /* 0xEDC */
-} CampDrawPosition;
 
-typedef struct CampDrawContext {
-    u8 pad00[0x18];
-    CampDrawPosition *position;
-} CampDrawContext;
 
 /* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
  * displays the background, and all other kinds reset the highlight alpha. */
 void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     u8 *work = (u8 *)kwlnTaskGetUserValue(task);
-    CampVisualWork *visual = (CampVisualWork *)work;
-    s32 ctx;
-    CampDrawPosition *sub;
+    MenuStaffContext *visual = (MenuStaffContext *)work;
+    struct EffectSlotSet *resources;
+    BdWork *slots;
 
     mnuDrawCampIconBackdrop(work + 0x11C, 0x20);
     switch (kind) {
     case 2:
-        func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->drawContext, 0x19, 0x53);
-        ctx = visual->drawContext;
-        sub = ((CampDrawContext *)ctx)->position;
-        sub->fixedPointOffset = (sub->sourceOffset + 0x40) << 4;
-        func_00306CD0(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, ctx, 0x17, 0x53);
+        func_00306CD0(0, 0, 0, visual->highlightOpacity, 0, visual->resources.baseResources[0], 0x19, 0x53);
+        resources = visual->resources.baseResources[0];
+        slots = resources->workEntries;
+        slots[0x17].geometry.bounds[2] = (slots[0x17].sourceWidth + 0x40) << 4;
+        func_00306CD0(0xD40, 0x2E0, 0, visual->highlightOpacity, 0, resources, 0x17, 0x53);
         if (visual->highlightOpacity < 0x100) {
             visual->highlightOpacity += 0x10;
         }
@@ -1154,18 +1115,18 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         }
         break;
     case 1:
-        ctx = visual->drawContext;
-        sub = ((CampDrawContext *)ctx)->position;
-        sub->fixedPointOffset = sub->sourceOffset << 4;
-        func_00306CD0(0x1140, 0x2E0, 0, visual->backgroundOpacity, 0, ctx, 0x17, 0x53);
+        resources = visual->resources.baseResources[0];
+        slots = resources->workEntries;
+        slots[0x17].geometry.bounds[2] = slots[0x17].sourceWidth << 4;
+        func_00306CD0(0x1140, 0x2E0, 0, visual->partyWindow.transitionValue, 0, resources, 0x17, 0x53);
     default:
         visual->highlightOpacity = 0;
         break;
     }
     if (mnuInitializeCampMenuWhenResourcesReady(task) != 0) {
         func_002BB510(-0x10, -8, 0, visual->scrollPanel, 0x53);
-        mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)(work + 0x284), 0x53);
-        mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);
+        mnuDrawPanelListDefault(0, 0, 0, &visual->partyWindow, 0x53);
+        mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->resources.baseResources[1], work, 0x53);
     }
 }
 

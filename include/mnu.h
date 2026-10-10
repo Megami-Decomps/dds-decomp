@@ -905,25 +905,24 @@ struct MenuIconState;
 
 
 typedef struct MenuStaffContext {
-    u8 pad00[8];
+    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for the full camp work. */
+    u8 pad04[4];
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
-    u8 pad58[8];
-    struct EffectSlotSet *group; /* 0x60: first base resource */
-    struct EffectSlotSet *spriteArg0; /* 0x64: second base resource */
-    struct EffectSlotSet *spriteArg1; /* 0x68: first paired resource */
-    struct EffectSlotSet *windowResource; /* 0x6C: second paired resource */
-    u8 pad70[0x54];
-    struct EffectSlotSet *spriteArg2; /* 0xC4: category sprite resource */
-    u8 padC8[0x2C];
+    u8 pad58[4];
+    struct EffectList *menuResource; /* 0x5C: request list for all title resources. */
+    StaffSlots resources; /* 0x60..0xC3: two base resources and the staff sprite banks. */
+    struct EffectSlotSet *titleFrames[2]; /* 0xC4 and 0xC8 */
+    struct EffectSlotSet *partyTitles[9]; /* 0xCC..0xEC */
+    struct EffectSlotSet *contextTitle; /* 0xF0 */
     struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
     struct MenuIconState *unkF8; /* 0xF8: second panel layout */
     struct MenuIconState *unkFC; /* 0xFC: third panel layout */
-    u8 pad100[4];
+    struct EffMappedResource *motionResource; /* 0x100 */
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */
     MenuWindowContainer *activeWindow; /* 0x108 */
     MenuWindowContainer *resourceListWindow; /* 0x10C: third window made by mnuStaffInitResourceLists. */
-    u8 pad110[8];
+    struct EffMappedResource *motion[2]; /* 0x110 and 0x114 */
     struct MenuScrollPanel *scrollPanel; /* 0x118: owned camp scroll panel */
     u8 pad11C[0x168];
     /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
@@ -933,14 +932,20 @@ typedef struct MenuStaffContext {
     MenuSpriteState *spriteHandle; /* 0xAA38 */
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
-    u8 padAA4C[4];
+    s32 categoryKind; /* 0xAA4C: currently resolved staff texture category. */
     u32 unkAA50;
     u8 padAA54[0x3CC];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */
     u8 padB020[0xEC];
     MenuFadeFields fade; /* 0xB10C: initialized by 002A9068; used by 002BAF50/002BB0E8. */
-    u8 tail[0x10];        /* 0xB1D0: remaining opaque bytes of the 0xB1E0 allocation. */
+    s32 titleFadingOut; /* 0xB1D0 */
+    s32 titleOpacity; /* 0xB1D4 */
+    s32 titleSlide; /* 0xB1D8 */
+    s32 highlightOpacity; /* 0xB1DC */
 } MenuStaffContext;
+
+typedef char MenuStaffContext_size_must_be_0xB1E0[
+    sizeof(MenuStaffContext) == 0xB1E0 ? 1 : -1];
 
 typedef char MenuStaffContext_resourceListWindow_offset[
     ((u32)&((MenuStaffContext *)0)->resourceListWindow == 0x10C) ? 1 : -1];

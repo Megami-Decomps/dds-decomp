@@ -6664,6 +6664,26 @@ annulment with a branch, flag, assembly or ordering lever; keep retail
 ASM enabled and the reviewed C candidate parked.
 
 
+
+## Camp title resources share the complete staff context
+
+DDS2's camp constructor allocates `0xB1E0` bytes. `MenuStaffContext` owns
+the retained allocation, request list at `+0x5C`, `StaffSlots` at `+0x60`,
+two title frames at `+0xC4`, nine party titles at `+0xCC`, and the context
+title at `+0xF0`. The former `CampVisualWork` and `TitleEffectHandles`
+prefix views are unnecessary. The background value at `+0x288` is the
+existing page window's `transitionValue`, not a second scalar copy.
+
+The backdrop's apparent `+0xE6C`/`+0xEDC` position view is slot `0x17`
+of the canonical `BdWork` array: `geometry.bounds[2]` and `sourceWidth`.
+Access through the array base preserves retail's immediate displacements;
+an interior slot pointer introduced an extra address calculation.
+
+The resource-list builder remains ASM: three honest cursor/index forms
+still sibling-call the final append, whereas retail calls and restores
+its frame. Owner recovery alone does not justify an ABI or flag change.
+
+
 ## Particle templates embed their actual emitter prefix
 
 DDS2's `EffTemplatePacketList` owns an `EffEmitterHead` at offset zero;
@@ -6676,3 +6696,21 @@ at `+0x100`. Lifetime is signed: `0015C3C8 +0x6C4` and
 `ParKindState +0x0C/+0x10` hold dispatch arguments/drawing-system pointers
 for cell kinds but gradient endpoint words for kind four; select the
 documented union member by kind rather than reinterpreting the owner.
+
+## Field color vectors and packed words share one record
+
+`EffFieldColorRecord` is the `0x14`-byte primary table element in both
+games: four floats followed by the packed color at `+0x10`. The base-color
+lookup reads scale lanes one through three, and the entry-word getter
+reads that same record's packed word. The old `Entry20B` views started at
+the interior word (`D_0034E740`/`D_003AB070`); use the primary records at
+`D_0034E730`/`D_003AB060` instead. The lookup and narrow-selector entry
+return the record pointer and write through an actual `f32 *`.
+
+The lookup's retail LQC2/VMUL/SQC2 pipeline supports the existing VU0
+macros. Its unused stack-vector lane is not an invented initialization.
+Three honest DDS1 forms still differ in the default-vector register and
+record/FPU scheduling; independent primary-record accesses reduce the
+checker residual to 20 of 66 words, first at `+0x5C`. Keep the retail body
+enabled rather than adding pointer copies or a one-off inline helper.
+

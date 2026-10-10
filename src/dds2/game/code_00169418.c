@@ -12,16 +12,9 @@ extern u32 effFieldColorFinalSelector;
 
 extern u32 effFieldColorFlags;
 
-extern s32 effBTLFieldColorGetBaseColor(s32, s16, s16, s32);
+extern EffFieldColorRecord D_003AB060[];
 
 /* Keep the original selector and optional overrides separately for field-color lookups. */
-typedef struct Entry20B {
-    u32 value;
-    u8 pad_0x04[0x10];
-} Entry20B;
-
-extern Entry20B D_003AB070[];
-
 void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId) {
     effFieldColorOverrideSelector = (u32)baseId;
     effFieldColorOriginalSelector = effFieldColorOverrideSelector;
@@ -61,12 +54,12 @@ void effBTLFieldColorGetFixedVector(u32 unused, f32 *color) {
 INCLUDE_ASM(const s32, "game/code_00169418", effBTLFieldColorGetBaseColor);
 
 /* Variant and kind are narrowed to their stored widths before the lookup. */
-s32 effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, s32 arg3) {
-    return effBTLFieldColorGetBaseColor(colorId, variant, kind, arg3);
+EffFieldColorRecord *effBTLFieldColorLookupNarrowSelectors(s32 colorId, s16 variant, s16 kind, f32 *output) {
+    return effBTLFieldColorGetBaseColor(colorId, variant, kind, output);
 }
 
 u32 effBTLFieldColorGetEntryWord(s32 index) {
-    return D_003AB070[index].value;
+    return D_003AB060[index].packedColor;
 }
 
 u32 func_001695C8(void) {
