@@ -2102,6 +2102,19 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     Both forms produce the same exact assembly. If a controlled source-order
     or temporary-local test converges by pass 17, stop permuting those forms;
     only a real dependency can constrain the schedule.
+    The DDS1 console closer is now exact (112 bytes). Its packet cursors use
+    the console's uncached DMA buffer, whose native writers issue ordered
+    qword payload stores. Use the existing `vu64` output access model for the
+    two tag words; this preserves their order without claiming an atomic
+    128-bit write. Reserve `currentTag = cursor`, then derive `writeCursor`
+    from that actual tag plus 16 bytes. Keep the count in eight-byte register
+    values until padding is decided, then divide it by five for the GIF loop
+    count. A scheduler trace of ordinary `u64` accesses proves the two tag
+    stores independent: the register-list store fills division latency and
+    its shorter live range also reverses the cursor/constant register homes.
+    This ordered access model applies to the console packet pipeline; DMA
+    consumption alone does not make every packet or CPU descriptor volatile.
+    Preserve the earlier Vesper/Claude trials and Amber's console owner review.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
