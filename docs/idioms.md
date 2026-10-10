@@ -6714,3 +6714,17 @@ record/FPU scheduling; independent primary-record accesses reduce the
 checker residual to 20 of 66 words, first at `+0x5C`. Keep the retail body
 enabled rather than adding pointer copies or a one-off inline helper.
 
+
+## Terminal dispatch uses its complete scene allocation
+
+The terminal constructors allocate `MenuTerminalWork` (`0x164`, DDS1)
+and `MenuSlotState` (`0x3F8`, DDS2). Their event dispatch, callback slots,
+fade/BGM work and menu lists belong to those owners, not overlapping
+event/transition/progress views. The callback pairs are at `+0xC4/+0xC8`
+and `+0xCC/+0xD0`, respectively. Other units need only opaque pointers
+and the providers' real void-return contracts.
+
+The entry updater candidates remain ASM after three honest forms each:
+both differ at four of 49 words, exchanging the mode/list-count loads
+and the associated store/delay-slot scheduling. Capturing a native
+input snapshot or committing the mirrored state first does not fix it.

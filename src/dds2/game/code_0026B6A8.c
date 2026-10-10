@@ -7,6 +7,10 @@
 #include "eff_transform.h"
 #include "dds3obj.h"
 
+struct MenuSlotState;
+extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
+extern void mnuApplyFadeTrackMode(s32, struct MenuSlotState *);
+
 extern void *dds3GetWorldSecondaryObject(void);
 
 extern void mnuDrawTerminalBackdrop(s32);
@@ -97,7 +101,7 @@ s32 dspStartFlagEvent(s32 context) {
 
 
 s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue(task);
+    struct MenuSlotState *state = (struct MenuSlotState *)kwlnTaskGetUserValue(task);
 
     mnuTerminalSelectResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
@@ -154,7 +158,7 @@ u32 mnuStartTaskFadeIn(KwlnTask *task) {
 }
 
 s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
-    s32 state = kwlnTaskGetUserValue(task);
+    struct MenuSlotState *state = (struct MenuSlotState *)kwlnTaskGetUserValue(task);
 
     mnuApplyFadeTrackMode(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
