@@ -3326,7 +3326,7 @@ s32 btlDestroyTaskC(void) {
 
 /* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
 typedef struct BtlTutorialDialogWork {
-    u8 phase;
+    s8 phase;
     u8 pad01[3];
     s32 counter;
     u16 alpha;

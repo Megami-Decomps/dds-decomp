@@ -4153,7 +4153,7 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
 /* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
 typedef struct BtlTutorialDialogWork {
-    u8 phase;
+    s8 phase;
     u8 pad01[3];
     s32 counter;
     u16 alpha;
@@ -4184,7 +4184,7 @@ s32 func_001C0828(KwlnTask *task) {
     s32 handled;
     ActionStateLink *group;
 
-    switch ((s8)work->phase) {
+    switch (work->phase) {
     case 0:
         if (windowState != 1) {
             dspStartEntry(5);
