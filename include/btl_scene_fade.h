@@ -44,7 +44,8 @@ typedef struct ActorSlotOrder {
     s8 state[8];
 #endif
     s32 entries[8];
-    u8 unk2C[0x40];
+    s32 slotFade[8]; /* Per-slot fade, decremented and clamped to 0..128. */
+    u8 unk4C[0x20];
     f32 unk6C[8]; /* Scene-slot reset initializes these per-slot values to 30.0f. */
     s32 unk8C[8]; /* Corresponding per-slot values initially set to 130. */
     s8 secondaryState[8]; /* Independent color cycle, states 0 through 8. */
@@ -57,6 +58,7 @@ typedef char ActorSlotOrder_size[(sizeof(ActorSlotOrder) == 0x274) ? 1 : -1];
 #ifdef VERSION_DDS2
 typedef char ActorSlotOrder_flags_offset[((unsigned long)&((ActorSlotOrder *)0)->flags == 0x02) ? 1 : -1];
 #endif
+typedef char ActorSlotOrder_slotFade_offset[((unsigned long)&((ActorSlotOrder *)0)->slotFade == 0x2C) ? 1 : -1];
 typedef char ActorSlotOrder_slotValues_offset[((unsigned long)&((ActorSlotOrder *)0)->slotValues == 0x1F4) ? 1 : -1];
 typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrder *)0)->scalePercent == 0x234) ? 1 : -1];
 
