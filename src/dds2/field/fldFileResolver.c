@@ -98,7 +98,251 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_001289A8);
+#include "eff_light.h"
+#include "fld_area_work.h"
+
+struct EffNodeDescriptor;
+struct EffectObj;
+
+typedef struct FldSpawnBatch {
+    u32 kind;
+    u32 count;
+    FldFileResource *entries;
+} FldSpawnBatch;
+
+/* Complete serialized descriptors shared with their existing consumers. */
+typedef struct BillConfig {
+    u32 flags;
+    u32 kind;
+    u32 resourceIndex;
+    f32 width;
+    f32 height;
+    f32 depth;
+    u32 projectionDistance;
+    s32 mapSelector;
+    union { u32 entry; u32 fadeStart; };
+    u32 fadeEnd;
+    u32 parameters28[2];
+} BillConfig;
+
+typedef struct FldSpawnCollision {
+    u32 kind;
+    u32 word04;
+    u32 *header;
+    u32 word0C;
+    u32 geometry[8];
+} FldSpawnCollision;
+
+typedef char FldSpawnBatchSize[(sizeof(FldSpawnBatch) == 12) ? 1 : -1];
+typedef char BillConfigSize[(sizeof(BillConfig) == 0x30) ? 1 : -1];
+typedef char FldSpawnCollisionSize[(sizeof(FldSpawnCollision) == 0x30) ? 1 : -1];
+
+extern FldFileResource *D_00438EB8;
+extern u32 D_00438EBC;
+extern u32 D_00444920[];
+extern u32 D_00444940[];
+extern char D_00435FD0[];
+extern void *memset(void *, int, unsigned int);
+extern void fldFormatAreaDirectory(char *, s32, s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern struct EffectObj *effObjCreateResourceKindZero(const char *, void *, s32);
+extern struct EffectObj *effObjCreateResourceKindOne(const char *, void *, s32);
+extern struct EffectObj *effObjSpawnSharedBillNodeClone(struct EffectObj *, void *, s32);
+extern struct EffectObj *effObjSpawnSharedBillClone(struct EffectObj *, void *, s32);
+extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
+extern struct EffectObj *func_001156C8(const char *, void *, void *, f32);
+extern void effObjSetFlags(struct EffectObj *, u32);
+extern void effObjClearFlags(struct EffectObj *, u32);
+extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
+extern EffWorldNode *evtSpawnActionObj9(s32);
+extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
+extern void effObjSetInnerFloat(EffWorldNode *, f32);
+extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
+extern void func_00137F10(void *, f32 *, u32, s32, s32);
+extern s32 fldParseRoomNumberFromName(char *);
+extern void dds3SetPathStateValue(EffWorldNode *, u32);
+
+void func_001289A8(FldSpawnBatch *batch, u32 batchCount) {
+    f32 position[4];
+    f32 rotation[4];
+    char path[64];
+    char directory[32];
+    s8 loaded[4];
+    void *cached[4];
+    u32 cacheCount = sizeof(loaded);
+    u32 batchIndex;
+    u32 count;
+    u32 i;
+    FldFileResource *resource;
+    void *object;
+    u32 pathIndex;
+
+    memset(loaded, 0, cacheCount);
+    memset(cached, 0, cacheCount * sizeof(*cached));
+    D_00438EB8 = NULL;
+    D_00438EBC = 0;
+    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
+        resource = batch->entries;
+        count = batch->count;
+        switch (batch->kind) {
+        case 0:
+        case 1:
+            break;
+        case 2:
+            D_00438EB8 = resource;
+            D_00438EBC = count;
+            break;
+        case 11:
+            for (i = 0; i < count; i++, resource++) {
+                BillConfig *config;
+                u32 *resourceKeys;
+                u32 cacheByteOffset;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                config = resource->data;
+                switch (config->kind) {
+                case 0:
+                case 3:
+                    resourceKeys = D_00444920;
+                    cacheByteOffset = config->resourceIndex * sizeof(*cached);
+                    if (loaded[config->resourceIndex] == 0) {
+                        fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
+                        func_0035C860(path, D_00435FD0, directory,
+                                     resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
+                        object = effObjCreateResourceKindZero(path, position, (s32)rotation);
+                        effObjSetFlags(object, 1);
+                        billCopySourceVectorAndSetConfig(object, resource->data);
+                        loaded[((BillConfig *)resource->data)->resourceIndex] = 1;
+                        cached[((BillConfig *)resource->data)->resourceIndex] = object;
+                    } else {
+                        object = effObjSpawnSharedBillNodeClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        effObjSetFlags(object, 1);
+                        billCopySourceVectorAndSetConfig(object, resource->data);
+                    }
+                    break;
+                case 1:
+                    resourceKeys = D_00444920;
+                    cacheByteOffset = config->resourceIndex * sizeof(*cached);
+                    if (loaded[config->resourceIndex] == 0) {
+                        fldFormatAreaDirectory(directory, fldAreaState.area, fldAreaState.floor);
+                        func_0035C860(path, D_00435FD0, directory,
+                                     resourceKeys[((BillConfig *)resource->data)->resourceIndex]);
+                        object = effObjCreateResourceKindOne(path, position, (s32)rotation);
+                        effObjSetFlags(object, 1);
+                        loaded[((BillConfig *)resource->data)->resourceIndex] = 1;
+                        cached[((BillConfig *)resource->data)->resourceIndex] = object;
+                        billCopySourceVectorAndSetConfig(object, resource->data);
+                    } else {
+                        object = effObjSpawnSharedBillClone(*(void **)((u8 *)&cached + cacheByteOffset), position, (s32)rotation);
+                        effObjSetFlags(object, 1);
+                        billCopySourceVectorAndSetConfig(object, resource->data);
+                    }
+                    break;
+                case 2:
+                    if (D_00444940[config->resourceIndex] != NULL) {
+                        object = effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)D_00444940[config->resourceIndex], position, rotation);
+                        effObjSetFlags(object, 1);
+                        billCopySourceVectorAndSetConfig(object, resource->data);
+                    }
+                    break;
+                case 100:
+                    object = func_001156C8(resource->name, position, rotation, config->width * 0.5f);
+                    effObjClearFlags(object, 1);
+                    break;
+                }
+            }
+            break;
+        case 12:
+            for (i = 0; i < count; i++, resource++) {
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                object = evtSpawnActionObj9(resource->id);
+                dds3SetWorldNodeValue(object, (u32)resource->name);
+                effObjSetInnerPosition(object, (u128 *)position);
+                /* Type-12 serialization uses this shared slot for outer radius. */
+                effObjSetInnerFloat(object, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
+                dds3LoadWorldTransformSetup(object, resource->data);
+                if ((u32)fldAreaState.area - 200U < 300U) {
+                    ((EffLightData *)((EffWorldNode *)object)->data)->flags |= 8;
+                    dds3SetWorldNodeValue(object, (u32)"BTL_DEF_LIGHT");
+                }
+            }
+            break;
+        case 9:
+            for (i = 0; i < count; i++, resource++) {
+                evtSpawnActionObj10(resource->id, resource->data, (s32)resource->name);
+            }
+            break;
+        case 3:
+            for (i = 0, pathIndex = 1; i < count; i++, resource++, pathIndex++) {
+                resource->id |= 0x20000;
+                if (resource->transform != NULL) {
+                    position[0] = resource->transform[0];
+                    position[1] = resource->transform[1];
+                    position[2] = resource->transform[2];
+                    position[3] = 0.0f;
+                    rotation[0] = resource->transform[4];
+                    rotation[1] = resource->transform[5];
+                    rotation[2] = resource->transform[6];
+                    rotation[3] = resource->transform[7];
+                } else {
+                    position[0] = 0.0f;
+                    position[1] = 0.0f;
+                    position[2] = 0.0f;
+                    position[3] = 0.0f;
+                    rotation[0] = 0.0f;
+                    rotation[1] = 0.0f;
+                    rotation[2] = 0.0f;
+                    rotation[3] = 0.0f;
+                }
+                if (((FldSpawnCollision *)resource->data)->kind == 0) {
+                    s32 room = fldParseRoomNumberFromName((char *)resource->name);
+                    func_00137F10(((FldSpawnCollision *)resource->data)->header, position,
+                                  resource->id, room, -1);
+                    object = evtSpawnActionObjB(resource->id, (s32)resource->data, (s32)position, (s32)resource->name);
+                    dds3SetPathStateValue(object, pathIndex);
+                }
+            }
+            break;
+        }
+    }
+}
+
 
 #include "fld_area_work.h"
 #include "evt_world.h"
@@ -306,7 +550,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern void func_001289A8(u32, u32);
+extern void func_001289A8(FldSpawnBatch *, u32);
 
 extern f32 D_003897DC[];
 
@@ -527,13 +771,6 @@ extern void fldToggleWorldNodeState(s32);
 extern void func_0012EDB0(void);
 
 /* Relocated collision headers contain their eight-word geometry header. */
-typedef struct FldSpawnCollision {
-    u32 kind;
-    u32 word04;
-    u32 *header;
-    u32 word0C;
-    u32 geometry[8];
-} FldSpawnCollision;
 
 typedef struct FldSpawnEvent {
     u32 flags;
@@ -555,11 +792,6 @@ typedef struct FldSpecialPoint {
 } FldSpecialPoint;
 
 /* A relocated batch consists of a kind, count, and complete resource rows. */
-typedef struct FldSpawnBatch {
-    u32 kind;
-    u32 count;
-    FldFileResource *entries;
-} FldSpawnBatch;
 
 extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
@@ -1015,7 +1247,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    func_001289A8(request->unk_4, request->unk_0);
+    func_001289A8((FldSpawnBatch *)request->unk_4, request->unk_0);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */

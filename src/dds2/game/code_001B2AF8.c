@@ -2256,10 +2256,12 @@ void btlRequestMahenPanelClose(void) {
 typedef struct BtlAnalysisPanelWork {
     s8 state;
     u8 pad01[3];
-    s32 unk04;
+    BtlUnit *unit;
     s32 duration;
     s32 frame;
-    u8 pad10[0x18];
+    u8 pad10[4];
+    s16 fade;
+    u8 pad16[0x12];
     s32 x;
     s32 y;
     s8 page;
@@ -2306,7 +2308,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->x = -20;
     data->y = 133;
     data->duration = duration;
-    data->unk04 = entry;
+    data->unit = (BtlUnit *)entry;
     data->frame = 0;
     task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001B9158,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
@@ -2597,7 +2599,7 @@ extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
@@ -2885,7 +2887,213 @@ void func_001B8E68(s32 section, s32 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B9158);
+extern void func_001B9C70(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void func_001BA1E8(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void func_001BB1E8(void *, s32, s32, u32);
+extern void func_001BAB90(BtlAnalysisPanelWork *, s32, s32, s32, s32);
+extern u16 *func_001C8768(BtlUnit *, s16 *);
+extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
+extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *);
+extern s32 func_0035C860(char *, const char *, ...);
+extern const s32 D_00415F38[8];
+extern const u8 *D_00435E60;
+extern const u8 *D_00435E4C;
+extern const u8 *D_00435E58;
+extern u8 D_003B6828[0x100];
+extern const char D_00436818[];
+extern const char D_00436820[];
+extern char D_00436828[];
+extern DatEnemyRecord *datEnemyRecords;
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F38);
+
+s32 func_001B9158(KwlnTask *task) {
+    u8 text[0x80];
+    s32 rowOffsets[8];
+    s16 skillCount;
+    BtlAnalysisPanelWork *work;
+    BtlState *battle;
+    FrFontGlyph *glyph;
+    u16 *skills;
+    s32 row;
+    s32 xOffset;
+    s32 yOffset;
+    s32 item;
+    s32 position;
+    s32 length;
+    s32 character;
+    s32 clampedFrame;
+    s32 state;
+
+    memcpy(rowOffsets, D_00415F38, sizeof(rowOffsets));
+    battle = (BtlState *)btlGetRuntime();
+    work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
+    work->frame++;
+    if (work->frame > 0) {
+        clampedFrame = work->frame;
+        if (clampedFrame > 0x1000) clampedFrame = 0x1000;
+    } else clampedFrame = 0;
+    work->frame = clampedFrame;
+    if (work->frame >= work->duration && work->duration != 0) {
+        work->state = 2;
+    }
+    switch (work->state) {
+    case 0:
+        func_001B9C70(&battle->cameraCommand, work);
+        func_001BA1E8(&battle->cameraCommand, work);
+        if (work->page == 7) {
+            work->state = 1;
+        }
+        break;
+    case 1:
+        func_001B9C70(&battle->cameraCommand, work);
+        func_001BA1E8(&battle->cameraCommand, work);
+        work->fade += 0x20;
+        work->fade = work->fade > 0 ? (work->fade < 0x81 ? work->fade : 0x80) : 0;
+        break;
+    case 2:
+        work->fade -= 0x20;
+        work->fade = work->fade > 0 ? (work->fade < 0x81 ? work->fade : 0x80) : 0;
+        if (work->fade <= 0) {
+            return -1;
+        }
+        break;
+    }
+    state = work->state;
+    if (state < 3) {
+        if (state > 0) {
+            for (row = 0; row < 7; row++) {
+                xOffset = rowOffsets[row];
+                switch (row) {
+                case 0:
+                    func_001BB1E8(work, work->x, work->y, work->fade);
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
+                        (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
+                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        func_001B8E68(0, work->fade);
+                    } else {
+                        func_0035C860((char *)text, D_00436818, work->unit->partyRecord.level);
+                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y - 2) << 3,
+                                             0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
+                        frFontDrawGlyphChain(glyph, 1, 0x53);
+                        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    }
+                    break;
+                case 1:
+                    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                        (work->x + xOffset) << 4, (work->y - 8) << 3,
+                        0xFF0000, 0x80808000 | work->fade, D_00435E60 + datEnemyRecords[work->unit->partyRecord.unitId].pad04 * 7, 0);
+                    frFontDrawGlyphWithSharedFlags(glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    break;
+                case 2:
+                    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                        (work->x + xOffset) << 4, (work->y - 7) << 3,
+                        0xFF0000, 0x80808000 | work->fade,
+                        D_00435E4C + work->unit->partyRecord.unitId * 17, 0);
+                    frFontDrawGlyphWithSharedFlags(glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    break;
+                case 3:
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
+                        (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
+                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        func_001B8E68(1, work->fade);
+                    } else {
+                        func_0035C860((char *)text, D_00436820,
+                                      work->unit->partyRecord.hp, work->unit->partyRecord.maxHp);
+                        func_001BAB90(work, 0, work->x, work->y, work->fade);
+                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y + 17) << 3,
+                                             0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
+                        frFontDrawGlyphChain(glyph, 1, 0x53);
+                        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    }
+                    break;
+                case 4:
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
+                        (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
+                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        func_001B8E68(2, work->fade);
+                    } else {
+                        func_0035C860((char *)text, D_00436820,
+                                      work->unit->partyRecord.mp, work->unit->partyRecord.maxMp);
+                        func_001BAB90(work, 1, work->x, work->y, work->fade);
+                        glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y + 41) << 3,
+                                             0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
+                        frFontDrawGlyphChain(glyph, 1, 0x53);
+                        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                    }
+                    break;
+                case 5:
+                    yOffset = 93;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
+                        (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
+                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        func_001B8E68(3, work->fade);
+                    } else {
+                        skills = func_001C8768(work->unit, &skillCount);
+                        for (item = 0; item < skillCount; item++) {
+                            btlDrawThreePanelSpriteStrips((s32)work, work->x + xOffset,
+                                                        work->y + yOffset, work->fade);
+                            btlDrawIndexedBattleEntryGlyphs(work->x + xOffset, work->y + yOffset,
+                                0xFF0010, 0x80808000 | work->fade, *skills++);
+                            if (item == 3) {
+                                yOffset = 93;
+                                xOffset += 120;
+                            } else {
+                                yOffset += 22;
+                            }
+                        }
+                    }
+                    break;
+                case 6:
+                    yOffset = 206;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
+                        (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
+                        datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
+                        func_001B8E68(4, work->fade);
+                    } else {
+                        position = 0;
+                        memset(D_003B6828, 0, sizeof(D_003B6828));
+                        func_0035C860((char *)D_003B6828, D_00436828,
+                                      D_00435E58 + work->unit->partyRecord.unitId * 189);
+                        while ((character = D_003B6828[position]) != 0) {
+                            length = 0;
+                            if (character != '_' && character != 0) {
+                                const u8 *cursor = D_003B6828 + position;
+                                s32 nextCharacter;
+                                do {
+                                    text[length++] = *cursor++;
+                                    position++;
+                                    nextCharacter = *cursor;
+                                } while (nextCharacter != '_' && nextCharacter != 0);
+                            }
+                            text[length] = '\0';
+                            position++;
+                            {
+                                s32 lineX = work->x + xOffset;
+                                s32 lineY = work->y + yOffset;
+                                yOffset += 24;
+                                glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                                    lineX << 4, lineY << 3,
+                                    0xFF0000, 0x80808000 | (s32)work->fade, text, 0);
+                            }
+                            frFontDrawGlyphWithSharedFlags(glyph, 1);
+                            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 
 extern s32 btlInitCursorAndApplyAction(BtlLinkedCommand *, BtlCamState *);
 
@@ -3499,7 +3707,55 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BE9E8);
+typedef struct BattleSelectionTrailWork {
+    s32 direction;
+    s32 positions[4];
+    s32 fadeCountdowns[4];
+    s32 targetRow;
+} BattleSelectionTrailWork;
+
+extern const char *D_004367D4;
+extern s32 func_001BEBD0(KwlnTask *);
+extern void btlReleaseCmsleffPanelWork(KwlnTask *);
+
+void func_001BE9E8(s32 unused, s32 previousRow, s32 targetRow) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(5);
+    BattleSelectionTrailWork *work;
+    s32 distance;
+
+    if (task != NULL) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    if (previousRow < targetRow) {
+        distance = (targetRow - previousRow) * 23;
+        work->direction = 1;
+        work->targetRow = targetRow;
+    } else {
+        distance = (previousRow - targetRow) * 23;
+        work->targetRow = targetRow;
+    }
+    if (work->direction == 1) {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] + distance / 4;
+        work->positions[1] = work->positions[3] + distance / 2;
+        work->positions[0] = work->positions[3] + (distance * 3) / 4;
+    } else {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] - distance / 4;
+        work->positions[1] = work->positions[3] - distance / 2;
+        work->positions[0] = work->positions[3] - (distance * 3) / 4;
+    }
+    work->fadeCountdowns[0] = 32;
+    work->fadeCountdowns[1] = 24;
+    work->fadeCountdowns[2] = 16;
+    work->fadeCountdowns[3] = 8;
+    task = kwlnTaskCreate(D_004367D4, 0x2B0E, 1, 1, func_001BEBD0,
+                          btlReleaseCmsleffPanelWork, (u32)work);
+    func_00101968(battle->scriptOwner, task);
+    btlSetTrackedTaskHandle(5, (s32)task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BEBD0);
 
@@ -3854,7 +4110,195 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0828);
+/* The creator allocates and clears the complete 24-byte phase work. */
+typedef struct BtlTutorialDialogWork {
+    u8 phase;
+    u8 reserved[0x17];
+} BtlTutorialDialogWork;
+typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
+extern s32 evtGetMessageWindowControlState(void);
+extern s32 fldGetActiveSceneGroupValue(void);
+extern void func_0026C900(void);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern u64 btlStartTask(void *);
+extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
+extern void func_001C7DB8(s8, s32);
+extern s32 dspStartEntry(s32);
+extern s32 dspCloseChannel(void);
+extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+
+s32 func_001C0828(KwlnTask *task) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
+    s32 windowState = evtGetMessageWindowControlState();
+    BtlUnit *unit;
+    s32 count;
+    BtlUnit *eligible[3];
+    s32 handled;
+    ActionStateLink *group;
+
+    switch ((s8)work->phase) {
+    case 0:
+        if (windowState != 1) {
+            dspStartEntry(5);
+            work->phase++;
+        }
+        break;
+    case 1:
+        count = 0;
+        for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+            if (unit->status.flags & 1) {
+                if (unit->status.flags & 0x200) {
+                    count++;
+                }
+            }
+        }
+        if (count != 2) {
+            if (count == 3) {
+                btlStartTask(btlCreateFloatTask29(0,
+                    0x1.594cccp+8f /* 345.3 */, -0x1.266666p+6f /* -73.6 */,
+                    -0x1.4a9998p+7f /* -165.3 */, 0x1.604188p-5f /* 0.043 */,
+                    -0x1.c51eb8p-1f /* -0.885 */, 0x1.d70a3cp-4f /* 0.115 */,
+                    -0x1.b74bc6p-2f /* -0.429 */, 0x1.b41998p+8f /* 436.1 */,
+                    -0x1.d33332p+4f /* -29.2 */, -0x1.beccccp+6f /* -111.7 */,
+                    0x1.db22dp-6f /* 0.029 */, -0x1.c49ba4p-1f /* -0.8839999 */,
+                    0x1.5c28f4p-4f /* 0.08499999 */, -0x1.c18936p-2f /* -0.439 */,
+                    40.0f, 40.0f));
+            }
+        } else {
+            btlStartTask(btlCreateFloatTask29(0,
+                0x1.d0ccccp+7f /* 232.4 */, -0x1.0d6666p+7f /* -134.7 */,
+                -0x1.cc6666p+7f /* -230.2 */, 0x1.89374ap-8f /* 0.006 */,
+                0x1.d0e56p-1f /* 0.908 */, -0x1.cac082p-8f /* -0.007 */,
+                0x1.958106p-2f /* 0.396 */, 0x1.319998p+8f /* 305.6 */,
+                -0x1.3b9998p+6f /* -78.89999 */, -158.0f,
+                -0x1.0624dcp-8f /* -0.004 */, 0x1.cf5c28p-1f /* 0.905 */,
+                -0x1.ba5e34p-6f /* -0.027 */, 0x1.9db22cp-2f /* 0.404 */,
+                40.0f, 40.0f));
+        }
+        work->phase++;
+        break;
+    case 2:
+        if (windowState != 1) {
+            dspStartEntry(6);
+            work->phase++;
+        }
+        break;
+    case 3:
+        work->phase++;
+        unit = battle->units;
+        count = 0;
+        memset(eligible, 0, sizeof(eligible));
+        for (; unit != 0; unit = unit->nextActor) {
+            if (unit->status.flags & 1) {
+                if (unit->status.flags & 0x200) {
+                    if (count < 3) {
+                        eligible[count] = unit;
+                        count++;
+                    }
+                }
+            }
+        }
+        if (count != 0) {
+            unit = eligible[effMiscRandMod(0, count)];
+            if (unit != 0) {
+                handled = 0;
+                switch (unit->partyRecord.unitId) {
+                case 1:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.7f3332p+5f /* 47.9 */, -0x1.bcccccp+5f /* -55.6 */,
+                        0x1.143332p+7f /* 138.1 */, 0x1.26e978p-6f /* 0.018 */,
+                        -0x1.ed0e56p-1f /* -0.963 */, 0x1.3f7cecp-3f /* 0.156 */,
+                        -0x1.645a1cp-3f /* -0.174 */, 0x1.d4ccccp+5f /* 58.6 */,
+                        -0x1.7a6666p+5f /* -47.3 */, 0x1.0f9998p+7f /* 135.8 */,
+                        0x1.ba5e34p-6f /* 0.027 */, -0x1.e872bp-1f /* -0.954 */,
+                        0x1.7ced9p-3f /* 0.186 */, -0x1.89374ap-3f /* -0.192 */,
+                        40.0f, 30.0f));
+                    handled = 1;
+                    break;
+                case 4:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.2a6666p+6f /* 74.6 */, -0x1.833332p+6f /* -96.8 */,
+                        86.5f, 0x1.16872ap-5f /* 0.034 */,
+                        -0x1.d99998p-1f /* -0.925 */, 0x1.20c49ap-3f /* 0.141 */,
+                        -0x1.4ac082p-2f /* -0.323 */, 0x1.ccccccp+6f /* 115.2 */,
+                        -0x1.34ccccp+5f /* -38.6 */, 0x1.513332p+6f /* 84.3 */,
+                        0x1.645a1cp-4f /* 0.087 */, -0x1.bb645ap-1f /* -0.866 */,
+                        0x1.a5e352p-3f /* 0.206 */, -0x1.b53f7cp-2f /* -0.427 */,
+                        40.0f, 40.0f));
+                    handled = 1;
+                    break;
+                case 5:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.36ccccp+6f /* 77.7 */, -0x1.bd9998p+6f /* -111.4 */,
+                        0x1.d8ccccp+6f /* 118.2 */, 0x1.0e5604p-5f /* 0.033 */,
+                        -0x1.dcac08p-1f /* -0.931 */, 0x1.26e978p-3f /* 0.144 */,
+                        -0x1.322d0ep-2f /* -0.299 */, 0x1.21p+7f /* 144.5 */,
+                        -16.5f, 0x1.8d6666p+7f /* 198.7 */,
+                        0x1.581062p-5f /* 0.042 */, -0x1.d89374p-1f /* -0.923 */,
+                        0x1.4dd2fp-3f /* 0.163 */, -0x1.3f7cecp-2f /* -0.312 */,
+                        40.0f, 60.0f));
+                    handled = 1;
+                    break;
+                case 6:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        -0x1.c86666p+6f /* -114.1 */, -160.0f,
+                        0x1.a73332p+6f /* 105.8 */, 0x1.0624dcp-9f /* 0.002 */,
+                        -0x1.c28f5cp-1f /* -0.88 */, -0x1.0624dcp-5f /* -0.032 */,
+                        0x1.ccccccp-2f /* 0.45 */, -0x1.8cccccp+6f /* -99.2 */,
+                        -0x1.c59998p+6f /* -113.4 */, 0x1.206666p+7f /* 144.2 */,
+                        -0x1.6872bp-5f /* -0.044 */, -0x1.dd2f1ap-1f /* -0.932 */,
+                        0x1.4fdf3ap-4f /* 0.08199999 */, 0x1.449ba4p-2f /* 0.317 */,
+                        40.0f, 50.0f));
+                    handled = 1;
+                    break;
+                case 2:
+                case 3:
+                case 7:
+                case 8:
+                    break;
+                }
+                if (handled) {
+                    func_001E3108(unit, battle->cameraCommand.translation);
+                    btlCopyUnitRotationQuaternion(unit, battle->cameraCommand.rotation);
+                }
+            }
+        }
+        break;
+    case 4:
+        if (windowState != 1) {
+            dspStartEntry(7);
+            work->phase++;
+        }
+        break;
+    case 5:
+        btlStartTask(btlCreateCommandSoundTask(0, 3));
+        work->phase++;
+        break;
+    case 6:
+        if (windowState != 1) {
+            work->phase++;
+        }
+        break;
+    default:
+        group = (ActionStateLink *)fldGetActiveSceneGroupValue();
+        if (group != 0 && (group->pendingFlags & 8)) {
+            if (group->unit->status.flags & 0x200) {
+                btlStartTask(btlCreateCommandSoundTask((s32)group, 9));
+            }
+        }
+        dspCloseChannel();
+        func_001C7DB8(1, 8);
+        return -1;
+    }
+    if (windowState == 1) {
+        func_0026C900();
+    }
+    return 0;
+}
+
 
 extern const char *D_004367F0;
 
@@ -4185,7 +4629,7 @@ extern void func_001C35F0(ActionStateLink *, s8, s8);
 extern void sndSetStationedSeVolume(u32);
 
 /* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
-s32 func_001C26E0(KwlnTask *task) {
+s32 func_001C26E0(KwlnTask *task, BtlState *battle) {
     BattleReservePositions positions = D_00416800;
     BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     s32 count = work->reserveCount;
@@ -4281,9 +4725,155 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2A98);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2EA8);
+extern const BattlePanelColors D_00416820;
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C3168);
+void func_001C2EA8(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
+    BattlePanelColors colors = D_00416820;
+    u32 baseColor;
+    s32 level = 0;
+    s32 xOffset = 0;
+    s32 yOffset = 0;
+    s32 layer;
+    s32 x;
+    s32 y;
+    s8 presentationState;
+    u32 color;
+
+    baseColor = 0x80808000;
+    presentationState = work->reserveEntries[index].presentation.presentationState;
+    if (presentationState >= 4) return;
+    if (presentationState <= 0) return;
+    x = work->reserveEntries[index].position[0];
+    y = work->reserveEntries[index].position[1];
+    for (layer = 0; layer < 3; layer++) {
+        if (layer > 0) {
+            level = work->reserveEntries[index].presentation.pulseLevel[layer - 1];
+            xOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][0];
+            yOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][1];
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[0] ?
+                level : work->reserveEntries[index].presentation.transitionFade[0];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[0];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_00306C28(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[0] + xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[1] - yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 9, 0x53);
+
+        if (layer > 0) {
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[1] ?
+                level : work->reserveEntries[index].presentation.transitionFade[1];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[1];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_00306C28(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[2] - xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[3] + yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
+    }
+}
+
+extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void func_001C6010(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void func_001C6320(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern void func_001C2EA8(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001B6CA8(s32, s32, u32, const char *, s32);
+extern const BattlePanelColors D_00416830;
+extern const char D_00436818[];
+
+s32 func_001C3168(KwlnTask *task) {
+    BtlUnit *unit;
+    KwlnTask *panelTask;
+    BattleActorPanelWork *work;
+    char text[32];
+    BattlePanelColors colors = D_00416830;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 reserveCount;
+    s32 i;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    unit = (BtlUnit *)kwlnTaskGetUserValue(task);
+    panelTask = kwlnTaskGetTaskByName(D_004367CC);
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
+    reserveCount = work->reserveCount;
+    if (func_001C26E0(panelTask, battle) == 0) {
+        return -1;
+    }
+    i = 0;
+    if (reserveCount > 0) {
+        do {
+            DatGameState *game = datGameState;
+            s32 partyIndex = game->partyOrder[i + work->activeCount];
+            s16 baseFade;
+            u32 color;
+
+            memcpy(&unit->partyRecord, &game->party[partyIndex],
+                   sizeof(unit->partyRecord));
+            btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
+            btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
+            btlUpdateActorPanelHighlights(unit, work, i, 1);
+            func_001C4900(unit, work, i, 1);
+            func_001C7020(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+                          work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
+
+            if (work->reserveEntries[i].presentation.fade >= 0x80) {
+                func_001C6320(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 2);
+                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
+                func_001C6320(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 3);
+                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
+            }
+
+            func_001C2A98(unit, work, i);
+            func_001C2EA8(unit, work, i);
+
+            if ((unit->partyRecord.flags & 0x1010) == 0) {
+                u32 tint = 0x80808000 | (u32)(s32)work->reserveEntries[i].presentation.fade;
+                colors.values[0] = tint;
+                colors.values[1] = tint;
+                colors.values[2] = tint;
+                colors.values[3] = tint;
+                func_00306C28((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
+                              0, colors.values, 0, btlResourceBlock->resA, 0xE, 0x53);
+            }
+
+            baseFade = work->reserveEntries[i].presentation.fade;
+            func_0035C860(text, D_00436818, unit->partyRecord.hp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001B6CA8(work->reserveEntries[i].position[0] + 0x50,
+                          work->reserveEntries[i].position[1] + 0x26, color, text, 0x100);
+
+            func_0035C860(text, D_00436818, unit->partyRecord.mp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.mpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001B6CA8(work->reserveEntries[i].position[0] + 0x48,
+                          work->reserveEntries[i].position[1] + 0x3D, color, text, 0x100);
+            i++;
+        } while (i < reserveCount);
+    }
+    return 0;
+}
 
 void btlReleaseTrackedTaskResource(void) {
     sdfReleaseResourceAllocation(*(struct SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
@@ -5447,7 +6037,7 @@ extern ActorSlotOrder *D_00438F58[2];
 extern s32 btlGetRuntime(void);
 
 
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 

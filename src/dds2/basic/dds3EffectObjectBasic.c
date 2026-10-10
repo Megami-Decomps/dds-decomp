@@ -328,25 +328,25 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
 }
 
 /* Clone the shared bill and return the newly constructed effect object. */
-EffectObj *effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
+EffectObj *effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    return effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
-void effObjCreateIndexedKindOne(u32 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
+void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCreateIndexed(1, billId);
-    effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
+    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 /* Create a kind-one resource bill and return its effect object. */
-EffectObj *effObjCreateResourceKindOne(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 secondVectorAddress) {
     BillObj *bill;
 
     bill = billCreateFromResource(1, path);
-    return effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
@@ -393,27 +393,27 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
 }
 
 /* Clone the shared bill and return its state-three effect object. */
-EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
+EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    return effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
-void effObjCreateIndexedKindZero(u32 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
+void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCreateIndexed(0, billId);
-    effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
+    effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-EffectObj *effObjCreateResourceKindZero(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+EffectObj *effObjCreateResourceKindZero(const char *path, void *firstVector, s32 secondVectorAddress) {
     BillObj *bill;
 
     bill = billCreateFromResource(0, path);
-    return effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.

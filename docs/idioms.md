@@ -346,6 +346,10 @@ functions use trampolines and are a different case.
   single `1.0f` store.
 - Declare every prototype before its first caller. A later `extern void`
   leaves earlier calls implicitly `int` and moves values between `$2`/`$3`.
+  Confirmed reserve-panel examples: DDS1 `func_001B7F50` and DDS2
+  `func_001C3168` become exact with their presentation/text helpers declared
+  `void` before use. Recover that contract from the provider and its callers;
+  a preferred register alone does not establish a return type.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
 - **Same-TU callee visibility can change branch annulment.** Test this only
@@ -1695,6 +1699,23 @@ for the real data flow (which value is reloaded, cached or recomputed) and not
 for a declaration or prototype switch. Some "mirrored" parks are caller-saved
 `$v0`/`$v1` problems instead (`func_00244658`, `btlSelectLowestRankTarget`).
 
+Two exact cross-title examples recover the meaningful data flow rather than
+choosing register homes. The selection-trail constructors `func_001B3DC8`
+(DDS1) and `func_001BE9E8` (DDS2) initialize their real `positions[3]` origin
+endpoint and derive the other three positions directly from that member.
+Computing a separate scalar origin and copying it into the fourth lane later
+leaves different temporary allocation. The producer, four-lane updater and
+40-byte allocation establish the actual array; no storage view is invented.
+
+The reserve pulse renderers `func_001B7C90` (DDS1) and `func_001C2EA8` (DDS2)
+follow the existing active-panel renderer's initialization phases: initialize
+level/geometry defaults, then select the neutral `baseColor` before the signed
+state guards. In this pair, an early declaration initializer leaves 19 words
+different; explicit color selection after the default initializers restores
+the native constant and branch-delay scheduling. Moving color selection past
+the guards exceeds the native extent. These are bounded source examples, not
+permission for declaration-order enumeration or artificial lifetimes.
+
 ### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
 
 `expand_end_loop` "rolls" the loop-top test to the bottom. It scans from the top
@@ -2465,6 +2486,27 @@ invented wide return, compiler-flag change, or artificial dependency was
 used to turn this unresolved case green.
 
 ## Branch-likely
+
+### Result helpers and controllers share compilation ownership
+
+DDS1 `func_00268AB8` (644 bytes) and DDS2 `func_002A05C0` (788 bytes)
+each had a sole BEQL/BEQ difference. Their real preceding increment helpers,
+`func_002687C0` and `func_002A0278`, supply the same-unit nothrow information
+when retained with their controllers in `code_002665E0` and `code_0029DF18`.
+Restoring that contiguous ownership matches both complete controllers.
+
+The earlier no-sibling-call boundary inference was refuted independently.
+All four detected DDS2 late-call tails pass live local palette buffers to the
+draw provider. Those escaped stack addresses themselves prevent a sibling
+jump; a sequence of JAL tails does not establish a compiler option. The eight
+previous DDS2 result bodies remain exact with sibling optimization enabled.
+Complete merged source/data checks are DDS1 73/0 and DDS2 82/0, and both
+retail images remain byte-identical after removing the unnecessary flags.
+
+Use the actual helper definition and audit every affected body and section.
+A visibility stub or isolated exact flag probe cannot establish ownership.
+Verify the effective compiler options, too: `tools/cc.sh` appends unit options
+after extra options, so an extra option can be overridden by the unit's flag.
 
 The `L` bit describes delay-slot execution, not the source comparison:
 `beq`/`bne`/`bc1f` execute their slot on both paths, whereas their likely

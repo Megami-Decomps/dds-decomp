@@ -290,7 +290,30 @@ void* kwlnTaskGetStateList(u32 state)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101218);
+KwlnTask *func_00101218(u32 state, s32 index)
+{
+    KwlnTask *node = kwlnDelayedStartTaskHead;
+    s32 i;
+
+    switch (state & KWLN_TASK_STATE_MASK) {
+    case KWLN_TASK_DELAYED_START:
+        break;
+    case KWLN_TASK_ACTIVE:
+        node = kwlnActiveTaskHead;
+        break;
+    case KWLN_TASK_DESTROY_PENDING:
+        node = kwlnDelayedDestroyTaskHead;
+        break;
+    case KWLN_TASK_DETACHED:
+    default:
+        return NULL;
+    }
+    for (i = 0; i < index && node != NULL; i++) {
+        node = node->listNext;
+    }
+    return node;
+}
+
 
 void kwlnTraverseDiagnosticTaskQueue(KwlnTask* task, void* unused)
 {

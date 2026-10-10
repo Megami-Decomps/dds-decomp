@@ -1444,7 +1444,9 @@ typedef struct BtlAnalysisPanelWork {
     s32 entry;
     s32 duration;
     s32 frame;
-    u8 pad10[0x18];
+    u8 pad10[4];
+    s16 alpha;
+    u8 pad16[0x12];
     s32 x;
     s32 y;
     s8 page;
@@ -2070,7 +2072,226 @@ void btlDrawPanelIconGroup(s32 section, s32 delta) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AE540);
+extern void func_001AF058(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void func_001AF5D0(BtlLinkedCommand *, BtlAnalysisPanelWork *);
+extern void func_001B05D0(void *, s32, s32, u32);
+extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s16);
+extern u16 *func_001BD4F0(BtlUnit *, s16 *);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
+extern const char D_003BB400[], D_003BB408[], D_003BB410[];
+extern u8 D_00359978[];
+extern s32 func_003014F0(char *, const char *, ...);
+extern DatBattleSceneRecord *datBattleSceneRecords;
+extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
+extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
+
+/* Advance and draw the seven analysis rows while the panel fades. */
+s32 func_001AE540(KwlnTask *task) {
+    char text[128];
+    s32 offsets[8] = {52, 95, 157, 132, 132, 53, 53, 48};
+    BtlState *battle;
+    BtlAnalysisPanelWork *work;
+    s32 row;
+    u32 glyph;
+
+    battle = (BtlState *)btlGetRuntime();
+    work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
+    work->frame++;
+    work->frame = work->frame > 0 ?
+        (work->frame < 0x1001 ? work->frame : 0x1000) : 0;
+    if (work->frame >= work->duration && work->duration != 0) work->state = 2;
+
+    switch (work->state) {
+    case 0:
+        func_001AF058(&battle->cameraCommand, work);
+        func_001AF5D0(&battle->cameraCommand, work);
+        if (work->page == 7) work->state = 1;
+        break;
+    case 1:
+        func_001AF058(&battle->cameraCommand, work);
+        func_001AF5D0(&battle->cameraCommand, work);
+        work->alpha += 32;
+        work->alpha = work->alpha > 0 ?
+            (work->alpha < 129 ? work->alpha : 128) : 0;
+        break;
+    case 2:
+        work->alpha -= 32;
+        work->alpha = work->alpha > 0 ?
+            (work->alpha < 129 ? work->alpha : 128) : 0;
+        if (work->alpha <= 0) return -1;
+        break;
+    }
+    if (work->state < 3) {
+        if (work->state > 0) {
+            for (row = 0; row < 7; row++) {
+                s32 xOffset = offsets[row];
+                switch (row) {
+                case 0: {
+                    BtlUnit *actor;
+                    func_001B05D0(work, work->x, work->y, work->alpha);
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0) {
+                        btlDrawPanelIconGroup(0, work->alpha);
+                        break;
+                    }
+                    actor = (BtlUnit *)work->entry;
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                        btlDrawPanelIconGroup(0, work->alpha);
+                        break;
+                    }
+                    func_003014F0(text, D_003BB400, actor->partyRecord.level);
+                    glyph = func_001978E8((work->x + xOffset) << 4,
+                                          (work->y - 2) << 3, 0xFF0000,
+                                          0x80808000 | (s32)work->alpha, text, 0);
+                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    break;
+                }
+                case 1: {
+                    BtlUnit *actor;
+                    actor = (BtlUnit *)work->entry;
+                    glyph = itfCreateConvertedTextGlyph(
+                        (work->x + xOffset - 6) << 4, (work->y - 8) << 3,
+                        0xFF0000, 0x80808000 | (s32)work->alpha,
+                        D_003BAA88 + datEnemyRecords[actor->partyRecord.unitId].pad04 * 7, 0);
+                    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    break;
+                }
+                case 2: {
+                    BtlUnit *actor;
+                    actor = (BtlUnit *)work->entry;
+                    glyph = itfCreateConvertedTextGlyph(
+                        (work->x + xOffset + 2) << 4, (work->y - 7) << 3,
+                        0xFF0000, 0x80808000 | (s32)work->alpha,
+                        D_003BAA74 + actor->partyRecord.unitId * 17, 0);
+                    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
+                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    break;
+                }
+                case 3: {
+                    BtlUnit *actor;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0) {
+                        btlDrawPanelIconGroup(1, work->alpha);
+                        break;
+                    }
+                    actor = (BtlUnit *)work->entry;
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                        btlDrawPanelIconGroup(1, work->alpha);
+                        break;
+                    }
+                    func_003014F0(text, D_003BB408, actor->partyRecord.hp,
+                                  actor->partyRecord.maxHp);
+                    func_001AFF78(work, 0, work->x, work->y, work->alpha);
+                    glyph = func_001978E8((work->x + xOffset) << 4,
+                                          (work->y + 17) << 3, 0xFF0000,
+                                          0x80808000 | (s32)work->alpha, text, 0);
+                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    break;
+                }
+                case 4: {
+                    BtlUnit *actor;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0) {
+                        btlDrawPanelIconGroup(2, work->alpha);
+                        break;
+                    }
+                    actor = (BtlUnit *)work->entry;
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                        btlDrawPanelIconGroup(2, work->alpha);
+                        break;
+                    }
+                    func_003014F0(text, D_003BB408, actor->partyRecord.mp,
+                                  actor->partyRecord.maxMp);
+                    func_001AFF78(work, 1, work->x, work->y, work->alpha);
+                    glyph = func_001978E8((work->x + xOffset) << 4,
+                                          (work->y + 41) << 3, 0xFF0000,
+                                          0x80808000 | (s32)work->alpha, text, 0);
+                    frFontDrawGlyphChain((struct FrFontGlyph *)glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    break;
+                }
+                case 5: {
+                    BtlUnit *actor;
+                    s32 yOffset = 93;
+                    s16 count;
+                    s32 i;
+                    u16 *entries;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0) {
+                        btlDrawPanelIconGroup(3, work->alpha);
+                        break;
+                    }
+                    actor = (BtlUnit *)work->entry;
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                        btlDrawPanelIconGroup(3, work->alpha);
+                        break;
+                    }
+                    entries = func_001BD4F0(actor, &count);
+                    for (i = 0; i < count; i++) {
+                        btlDrawThreePanelSpriteStrips((s32)work, work->x + xOffset,
+                                                       work->y + yOffset, work->alpha);
+                        btlDrawIndexedBattleEntryGlyphs(work->x + xOffset,
+                            work->y + yOffset, 0xFF0010,
+                            0x80808000 | (s32)work->alpha, *entries++);
+                        if (i == 3) {
+                            yOffset = 93;
+                            xOffset += 120;
+                        } else yOffset += 22;
+                    }
+                    break;
+                }
+                case 6: {
+                    BtlUnit *actor;
+                    s32 yOffset = 206;
+                    s32 position;
+                    s32 character;
+                    if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0) {
+                        btlDrawPanelIconGroup(4, work->alpha);
+                        break;
+                    }
+                    actor = (BtlUnit *)work->entry;
+                    if ((datEnemyRecords[actor->partyRecord.unitId].flags & 0x800) != 0 || datEnemyRecords[actor->partyRecord.unitId].pad16[0] != 0) {
+                        btlDrawPanelIconGroup(4, work->alpha);
+                        break;
+                    }
+                    position = 0;
+                    memset(D_00359978, 0, 256);
+                    func_003014F0((char *)D_00359978, D_003BB410,
+                        D_003BAA80 + ((BtlUnit *)work->entry)->partyRecord.unitId * 189);
+                    while ((character = D_00359978[position]) != 0) {
+                        s32 length = 0;
+                        if (character != '_' && character != 0) {
+                            const u8 *cursor = D_00359978 + position;
+                            s32 nextCharacter;
+                            do {
+                                text[length++] = *cursor++;
+                                position++;
+                                nextCharacter = *cursor;
+                            } while (nextCharacter != '_' && nextCharacter != 0);
+                        }
+                        text[length] = '\0';
+                        position++;
+                        {
+                            /* Capture this line before advancing the next line origin. */
+                            s32 lineX = work->x + xOffset;
+                            s32 lineY = work->y + yOffset;
+                            yOffset += 24;
+                            glyph = itfCreateConvertedTextGlyph(
+                                lineX << 4, lineY << 3,
+                                0xFF0000, 0x80808000 | (s32)work->alpha, (const u8 *)text, 0);
+                        }
+                        frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
+                        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+                    }
+                    break;
+                }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 extern void btlInitCursorAndApplyAction(BtlLinkedCommand *, BtlCamState *);
 
@@ -2696,7 +2917,55 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A30);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3300);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3DC8);
+typedef struct BattleSelectionTrailWork {
+    s32 direction;
+    s32 positions[4];
+    s32 fadeCountdowns[4];
+    s32 targetRow;
+} BattleSelectionTrailWork;
+
+extern const char *D_003BB3B8;
+extern s32 func_001B3FB0(KwlnTask *);
+extern void btlReleaseCmsleffPanelWork(KwlnTask *);
+
+void func_001B3DC8(s32 unused, s32 previousRow, s32 targetRow) {
+    BattleController *battle = (BattleController *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(5);
+    BattleSelectionTrailWork *work;
+    s32 distance;
+
+    if (task != NULL) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    if (previousRow < targetRow) {
+        distance = (targetRow - previousRow) * 23;
+        work->direction = 1;
+        work->targetRow = targetRow;
+    } else {
+        distance = (previousRow - targetRow) * 23;
+        work->targetRow = targetRow;
+    }
+    if (work->direction == 1) {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] + distance / 4;
+        work->positions[1] = work->positions[3] + distance / 2;
+        work->positions[0] = work->positions[3] + (distance * 3) / 4;
+    } else {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] - distance / 4;
+        work->positions[1] = work->positions[3] - distance / 2;
+        work->positions[0] = work->positions[3] - (distance * 3) / 4;
+    }
+    work->fadeCountdowns[0] = 32;
+    work->fadeCountdowns[1] = 24;
+    work->fadeCountdowns[2] = 16;
+    work->fadeCountdowns[3] = 8;
+    task = kwlnTaskCreate(D_003BB3B8, 0x2B0E, 1, 1, func_001B3FB0,
+                          btlReleaseCmsleffPanelWork, (u32)work);
+    func_00101A80(battle->taskParent, task);
+    btlSetTrackedTaskHandle(5, (s32)task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3FB0);
 
@@ -3384,7 +3653,7 @@ void func_001B7238(void) {
 extern const BattleReservePositions D_003A2C90;
 
 /* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
-s32 func_001B74C8(KwlnTask *task) {
+s32 func_001B74C8(KwlnTask *task, BtlState *battle) {
     BattleReservePositions positions = D_003A2C90;
     BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     s32 count = work->reserveCount;
@@ -3479,9 +3748,155 @@ void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7880);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7C90);
+extern const BattlePanelColors D_003A2CB0;
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7F50);
+void func_001B7C90(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
+    BattlePanelColors colors = D_003A2CB0;
+    u32 baseColor;
+    s32 level = 0;
+    s32 xOffset = 0;
+    s32 yOffset = 0;
+    s32 layer;
+    s32 x;
+    s32 y;
+    s8 presentationState;
+    u32 color;
+
+    baseColor = 0x80808000;
+    presentationState = work->reserveEntries[index].presentation.presentationState;
+    if (presentationState >= 4) return;
+    if (presentationState <= 0) return;
+    x = work->reserveEntries[index].position[0];
+    y = work->reserveEntries[index].position[1];
+    for (layer = 0; layer < 3; layer++) {
+        if (layer > 0) {
+            level = work->reserveEntries[index].presentation.pulseLevel[layer - 1];
+            xOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][0];
+            yOffset = work->reserveEntries[index].presentation.pulseOffsets[layer - 1][1];
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[0] ?
+                level : work->reserveEntries[index].presentation.transitionFade[0];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[0];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_002BF438(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[0] + xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[1] - yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 9, 0x53);
+
+        if (layer > 0) {
+            level = level <= 0 ? 0 :
+                level < work->reserveEntries[index].presentation.transitionFade[1] ?
+                level : work->reserveEntries[index].presentation.transitionFade[1];
+            color = baseColor | level;
+        } else {
+            color = baseColor |
+                work->reserveEntries[index].presentation.transitionFade[1];
+        }
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_002BF438(
+            (x + work->reserveEntries[index].presentation.transitionGeometry[2] - xOffset) << 4,
+            (y + work->reserveEntries[index].presentation.transitionGeometry[3] + yOffset) << 3,
+            0, colors.values, 0, btlResourceBlock->resA, 12, 0x53);
+    }
+}
+
+extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void func_001BAE08(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void func_001BB118(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern void func_001B7C90(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001AC080(s32, s32, u32, const char *, s32);
+extern const BattlePanelColors D_003A2CC0;
+extern const char D_003BB400[];
+
+s32 func_001B7F50(KwlnTask *task) {
+    BtlUnit *unit;
+    KwlnTask *panelTask;
+    BattleActorPanelWork *work;
+    char text[32];
+    BattlePanelColors colors = D_003A2CC0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 reserveCount;
+    s32 i;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    unit = (BtlUnit *)kwlnTaskGetUserValue(task);
+    panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
+    reserveCount = work->reserveCount;
+    if (func_001B74C8(panelTask, battle) == 0) {
+        return -1;
+    }
+    i = 0;
+    if (reserveCount > 0) {
+        do {
+            DatGameState *game = datGameState;
+            s32 partyIndex = game->partyOrder[i + work->activeCount];
+            s16 baseFade;
+            u32 color;
+
+            memcpy(&unit->partyRecord, &game->party[partyIndex],
+                   sizeof(unit->partyRecord));
+            btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
+            btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
+            btlUpdateActorPanelHighlights(unit, work, i, 1);
+            func_001B96F8(unit, work, i, 1);
+            func_001BBE18(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+                          work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
+
+            if (work->reserveEntries[i].presentation.fade >= 0x80) {
+                func_001BB118(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 2);
+                func_001BAE08(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
+                func_001BB118(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 3);
+                func_001BAE08(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
+            }
+
+            func_001B7880(unit, work, i);
+            func_001B7C90(unit, work, i);
+
+            if ((unit->partyRecord.flags & 0x1000) == 0) {
+                u32 tint = 0x80808000 | (u32)(s32)work->reserveEntries[i].presentation.fade;
+                colors.values[0] = tint;
+                colors.values[1] = tint;
+                colors.values[2] = tint;
+                colors.values[3] = tint;
+                func_002BF438((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
+                              0, colors.values, 0, btlResourceBlock->resA, 0xE, 0x53);
+            }
+
+            baseFade = work->reserveEntries[i].presentation.fade;
+            func_003014F0(text, D_003BB400, unit->partyRecord.hp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001AC080(work->reserveEntries[i].position[0] + 0x50,
+                          work->reserveEntries[i].position[1] + 0x26, color, text, 0x100);
+
+            func_003014F0(text, D_003BB400, unit->partyRecord.mp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.mpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001AC080(work->reserveEntries[i].position[0] + 0x48,
+                          work->reserveEntries[i].position[1] + 0x3D, color, text, 0x100);
+            i++;
+        } while (i < reserveCount);
+    }
+    return 0;
+}
 
 void btlReleaseTrackedTaskResource(void) {
     KwlnTask *temp_v0;

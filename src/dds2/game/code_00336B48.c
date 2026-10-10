@@ -1118,7 +1118,42 @@ void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeade
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033AC10);
+extern void sdfInitializeTmxImageHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
+typedef struct SdfGeneratedLookupTexture {
+    SdfTextureFileHeader header;
+    u32 palette[256];
+    u8 indices[64][128];
+} SdfGeneratedLookupTexture;
+
+typedef char SdfGeneratedLookupTextureSize[(sizeof(SdfGeneratedLookupTexture) == 0x2440) ? 1 : -1];
+
+void func_0033AC10(void) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x2440);
+    SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfResourceRetainAddress(allocation);
+    s32 i;
+    s32 j;
+
+    sdfInitializeTmxImageHeader(&texture->header, 0x80, 0x40, 0x13, 1, 0);
+    texture->header.byteCount = 0x2440;
+    texture->header.clampMode = 5;
+    /* The physical CLUT slot j decodes to the logical intensity i. */
+    for (j = 0; j != 0x100; j++) {
+        i = ((j & 8) << 1) | ((j & 0x10) >> 1) | (j & ~0x18);
+        texture->palette[j] = i | (i << 16) | (i << 8) | 0x80000000;
+    }
+    memset(&texture->indices[0][1], 0xFF, 0x7F);
+    texture->indices[0][0] = 0;
+    for (i = 0; i != 0x80; i++) {
+        f32 power = i * (1.0f / 127.0f);
+        f32 value = power;
+        for (j = 1; j != 0x40; j++) {
+            texture->indices[j][i] = (u8)(s32)(value * 255.0f + 0.5f);
+            value *= power;
+        }
+    }
+    D_00438A70 = sdfTexAcquireResourceTexture(&texture->header);
+    sdfReleaseResourceAllocation(allocation);
+}
 /* Acquire texture resources, split their TEX0 words, and initialize queues. */
 void sdfInitializeResourceQueuesAndTextureWords(void) {
     u64 textureWord;
