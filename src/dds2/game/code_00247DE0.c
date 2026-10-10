@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "dds3obj.h"
@@ -68,7 +69,7 @@ void func_00101968(s32 arg0, s32 arg1);
 
 s32 evtCreateFrameVariableTask(void);
 
-void *evtViewerScheduleFrameVariableTask(KwlnTask *task);
+s32 evtViewerScheduleFrameVariableTask(KwlnTask *task);
 
 extern u32 mnuCampGetPrimaryOption(void *scene);
 extern const char *D_003C91C0[];
@@ -1932,25 +1933,25 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 }
 
 /* Update the active viewer, then switch to its frame-variable task. */
-void *evtViewerScheduleFrameVariableTask(KwlnTask *task) {
+s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     void *viewer;
 
     viewer = (void *)kwlnTaskGetUserValue(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
     func_00101968(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
-    return (void *)evtViewerUpdateFrame;
+    return (s32)(u32)evtViewerUpdateFrame;
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
+s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
     struct EvtRuntime *viewer;
 
     viewer = (struct EvtRuntime *)kwlnTaskGetUserValue(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
-    return (void *)evtViewerScheduleFrameVariableTask;
+    return (s32)(u32)evtViewerScheduleFrameVariableTask;
 }
 
 s32 func_0024D760(PolyMovieWork *ctx) {
@@ -1963,7 +1964,7 @@ s32 func_0024D760(PolyMovieWork *ctx) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *evtViewerAdvanceUpdate(KwlnTask *task) {
+s32 evtViewerAdvanceUpdate(KwlnTask *task) {
     EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *window;
     s32 windowFlags;
@@ -1991,7 +1992,7 @@ void *evtViewerAdvanceUpdate(KwlnTask *task) {
         }
         func_0025A280(viewer->windowContext, viewer);
         kwlnDrawControlFlags |= 0x2000000;
-        return (void *)evtViewerScheduleFrameVariableTask;
+        return (s32)(u32)evtViewerScheduleFrameVariableTask;
     }
 }
 
@@ -2100,7 +2101,6 @@ void func_0024DAE0(EvtRuntime *viewer) {
 
 extern u32 D_00435CBC;
 extern void *memset(void *dst, s32 value, u32 size);
-extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 void evtViewerCreateTaskWithSky(void) {
     EvtRuntime *viewer;
     SdfMemBlock *viewerHandle;
@@ -2111,7 +2111,7 @@ void evtViewerCreateTaskWithSky(void) {
     viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
-    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, viewer);
+    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_0024DAA0, (u32)viewer);
     func_00101968((s32)viewerTask, evtCreateSkyTask());
     func_0024DAE0(viewer);
 }
