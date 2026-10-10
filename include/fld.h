@@ -161,6 +161,13 @@ typedef struct FldFileResource {
     void *data;
 } FldFileResource;
 
+/* Counted resource group consumed by field spawning and copied payloads. */
+typedef struct FldSpawnBatch {
+    u32 kind;
+    u32 count;
+    FldFileResource *entries;
+} FldSpawnBatch;
+
 typedef char FldFileNameEntrySizeCheck[(sizeof(FldFileNameEntry) == 0x0C) ? 1 : -1];
 typedef char FldFileResourceSizeCheck[(sizeof(FldFileResource) == 0x24) ? 1 : -1];
 

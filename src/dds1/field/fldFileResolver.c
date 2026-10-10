@@ -102,11 +102,6 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
 struct EffNodeDescriptor;
 
-typedef struct FldSpawnBatch {
-    u32 kind;
-    u32 count;
-    FldFileResource *entries;
-} FldSpawnBatch;
 
 /* Complete serialized descriptors shared with their existing consumers. */
 typedef struct BillConfig {
@@ -153,7 +148,7 @@ extern void effObjSetFlags(EffWorldNode *, s32);
 extern void effObjClearFlags(EffWorldNode *, s32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
 extern EffWorldNode *evtSpawnActionObj9(s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
 extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
@@ -305,7 +300,7 @@ void func_001263F0(FldSpawnBatch *batch, u32 batchCount) {
             break;
         case 9:
             for (i = 0; i < count; i++, resource++) {
-                evtSpawnActionObj10(resource->id, resource->data, (s32)resource->name);
+                evtSpawnActionObj10(resource->id, resource->data, resource->name);
             }
             break;
         case 3:
@@ -731,7 +726,7 @@ extern void func_00135360(void *, f32 *, u32, s32, s32);
 extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
-extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
 extern u32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_00138ED0(FldFileResource *, EffWorldNode *);
 extern void func_00148FF0(s32, u32, f32 *, f32, f32, f32);
@@ -833,7 +828,7 @@ void func_00126A30(u32 batchAddress, u32 batchCount, s32 appended) {
                 if (appended != 0) {
                     resource->id |= 0x800000;
                 }
-                evtSpawnActionObj10(resource->id, resource->data, (s32)resource->name);
+                evtSpawnActionObj10(resource->id, resource->data, resource->name);
             }
             break;
         case 10:
