@@ -67,7 +67,9 @@ typedef struct MantraMenuSrc {
         } fields;
     };
     u16 unk02;
-    u32 unk04;
+    u8 pad04;
+    s8 selectedIndex; /* party-list row selected by the source search */
+    s16 targetId;
 } MantraMenuSrc;
 
 typedef struct MantraFlagResource {
@@ -123,7 +125,8 @@ typedef struct MantraMenuWork {
     s16 frame;
     s8 waitFrames;
     u8 nextMode;
-    u8 pad004[2];
+    s8 sourceWaitFrames; /* source-transition pending state, separate from +2/+3 */
+    u8 sourceNextState;
     s8 tutorialWaitFrames;
     u8 tutorialNextState;
     DatPartyRecord tutorialParty[3];
@@ -161,7 +164,7 @@ typedef struct MantraMenuWork {
     MantraMenuSrc *src;
     u16 sourceMode;
     u16 sourceFlag;
-    u8 pad96C[4];
+    s32 sourcePartyIndex;
     MtrUnitMenuEntry unitEntries[5];
     MtrUnitMenuEntry *currentSlot;
     s32 masteryFrames;
@@ -214,5 +217,12 @@ typedef char MnuStatusResourceResourceAllocationBOffsetCheck[((u32)&((MnuStatusR
 typedef char MnuStatusResourceUnitEntriesOffsetCheck[((u32)&((MnuStatusResource *)0)->menu.unitEntries == 0xBB0) ? 1 : -1];
 
 typedef char MantraTutorialPartyOffsetCheck[((u32)&((MantraMenuWork *)0)->tutorialParty == 8) ? 1 : -1];
+
+typedef char MantraMenuSrc_size[(sizeof(MantraMenuSrc) == 8) ? 1 : -1];
+typedef char MantraMenuSrcSelectedIndexOffsetCheck[((u32)&((MantraMenuSrc *)0)->selectedIndex == 5) ? 1 : -1];
+typedef char MantraMenuSrcTargetIdOffsetCheck[((u32)&((MantraMenuSrc *)0)->targetId == 6) ? 1 : -1];
+typedef char MantraSourceWaitOffsetCheck[((u32)&((MantraMenuWork *)0)->sourceWaitFrames == 4) ? 1 : -1];
+typedef char MantraSourceNextStateOffsetCheck[((u32)&((MantraMenuWork *)0)->sourceNextState == 5) ? 1 : -1];
+typedef char MantraSourcePartyIndexOffsetCheck[((u32)&((MantraMenuWork *)0)->sourcePartyIndex == 0x96C) ? 1 : -1];
 
 #endif

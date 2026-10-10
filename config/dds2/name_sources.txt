@@ -4214,6 +4214,7 @@
 0x0028A0F8	mnuSetSelectedMantraOptionFlag	inferred	Maps selected menu option to one of six model flags before calling mdlFlagSet. [names_reviewed18.tsv]
 0x0028A178	mnuFindFirstMatchingListItemIndex	inferred	Returns the first list node whose predicate succeeds, or -1 when none matches. [names_reviewed17.tsv]
 0x0028BAF0	mnuBindMantraMenuSourceRecord	inferred	Stores provided or default mantra source record, decodes packed fields and signals whether present. [names_reviewed18.tsv]
+0x0028BB80	mnuAdvanceMantraSourceTransition	inferred	Native MTR_MSL state diagnostics and source-record consumers: advances party/source selection, node effects, entry/exit animations, timed waits and message handoff.
 0x0028CCA8	mnuStartMantraPanelEntryTransition	inferred	Resets menu transition timer and selects state one, which advances to state three after six frames. [names_reviewed18.tsv]
 0x0028CCB8	mnuStartMantraPanelExitTransition	inferred	Resets menu transition timer and selects state two, which returns to idle after six frames. [names_reviewed18.tsv]
 0x0028CCC8	mnuAdvanceMantraPanelTransitionTimer	inferred	Ticks entry or exit panel transition for six frames and changes menu transition state. [names_reviewed18.tsv]
