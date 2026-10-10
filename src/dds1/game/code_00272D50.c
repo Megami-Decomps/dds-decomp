@@ -69,7 +69,6 @@ extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void mnuDrawStaffBulletItemQuantity(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;
@@ -89,7 +88,7 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
     window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
-    mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
+    mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->unk74, 10, 0x10);
     window->list->context = context;
     window->list->drawCallback = mnuDrawStaffBulletItemQuantity;
 
@@ -128,7 +127,7 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
     window = mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
-    mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
+    mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->unk74, 10, 0x10);
 
     secondTextOffset = 0x19;
     do {
@@ -184,7 +183,7 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
-    mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 16);
+    mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->unk74, 10, 16);
     window->list->context = context;
     window->list->drawCallback = mnuDrawStaffBulletItemQuantity;
     do {

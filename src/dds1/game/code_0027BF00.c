@@ -329,9 +329,9 @@ void mnuForwardDupArg(MenuWindowContainer *window, EffectSlotSet *frameResources
                                     spriteSlot, spriteSlot);
 }
 
-void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, s32 x, s32 y, s32 option) {
+void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *entry, EffectSlotSet *resources, s32 y, s32 option) {
     entry->entryValue = value;
-    entry->entryX = x;
+    entry->entryResources = resources;
     entry->alternateEntryY = y + 3;
     entry->entryY = y;
     entry->entryOption = option;
