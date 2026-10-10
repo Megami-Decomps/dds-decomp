@@ -3854,7 +3854,195 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0828);
+/* The creator allocates and clears the complete 24-byte phase work. */
+typedef struct BtlTutorialDialogWork {
+    u8 phase;
+    u8 reserved[0x17];
+} BtlTutorialDialogWork;
+typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
+extern s32 evtGetMessageWindowControlState(void);
+extern s32 fldGetActiveSceneGroupValue(void);
+extern void func_0026C900(void);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
+extern u64 btlStartTask(void *);
+extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
+extern void func_001C7DB8(s8, s32);
+extern s32 dspStartEntry(s32);
+extern s32 dspCloseChannel(void);
+extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+
+s32 func_001C0828(KwlnTask *task) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
+    s32 windowState = evtGetMessageWindowControlState();
+    BtlUnit *unit;
+    s32 count;
+    BtlUnit *eligible[3];
+    s32 handled;
+    ActionStateLink *group;
+
+    switch ((s8)work->phase) {
+    case 0:
+        if (windowState != 1) {
+            dspStartEntry(5);
+            work->phase++;
+        }
+        break;
+    case 1:
+        count = 0;
+        for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+            if (unit->status.flags & 1) {
+                if (unit->status.flags & 0x200) {
+                    count++;
+                }
+            }
+        }
+        if (count != 2) {
+            if (count == 3) {
+                btlStartTask(btlCreateFloatTask29(0,
+                    0x1.594cccp+8f /* 345.3 */, -0x1.266666p+6f /* -73.6 */,
+                    -0x1.4a9998p+7f /* -165.3 */, 0x1.604188p-5f /* 0.043 */,
+                    -0x1.c51eb8p-1f /* -0.885 */, 0x1.d70a3cp-4f /* 0.115 */,
+                    -0x1.b74bc6p-2f /* -0.429 */, 0x1.b41998p+8f /* 436.1 */,
+                    -0x1.d33332p+4f /* -29.2 */, -0x1.beccccp+6f /* -111.7 */,
+                    0x1.db22dp-6f /* 0.029 */, -0x1.c49ba4p-1f /* -0.8839999 */,
+                    0x1.5c28f4p-4f /* 0.08499999 */, -0x1.c18936p-2f /* -0.439 */,
+                    40.0f, 40.0f));
+            }
+        } else {
+            btlStartTask(btlCreateFloatTask29(0,
+                0x1.d0ccccp+7f /* 232.4 */, -0x1.0d6666p+7f /* -134.7 */,
+                -0x1.cc6666p+7f /* -230.2 */, 0x1.89374ap-8f /* 0.006 */,
+                0x1.d0e56p-1f /* 0.908 */, -0x1.cac082p-8f /* -0.007 */,
+                0x1.958106p-2f /* 0.396 */, 0x1.319998p+8f /* 305.6 */,
+                -0x1.3b9998p+6f /* -78.89999 */, -158.0f,
+                -0x1.0624dcp-8f /* -0.004 */, 0x1.cf5c28p-1f /* 0.905 */,
+                -0x1.ba5e34p-6f /* -0.027 */, 0x1.9db22cp-2f /* 0.404 */,
+                40.0f, 40.0f));
+        }
+        work->phase++;
+        break;
+    case 2:
+        if (windowState != 1) {
+            dspStartEntry(6);
+            work->phase++;
+        }
+        break;
+    case 3:
+        work->phase++;
+        unit = battle->units;
+        count = 0;
+        memset(eligible, 0, sizeof(eligible));
+        for (; unit != 0; unit = unit->nextActor) {
+            if (unit->status.flags & 1) {
+                if (unit->status.flags & 0x200) {
+                    if (count < 3) {
+                        eligible[count] = unit;
+                        count++;
+                    }
+                }
+            }
+        }
+        if (count != 0) {
+            unit = eligible[effMiscRandMod(0, count)];
+            if (unit != 0) {
+                handled = 0;
+                switch (unit->partyRecord.unitId) {
+                case 1:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.7f3332p+5f /* 47.9 */, -0x1.bcccccp+5f /* -55.6 */,
+                        0x1.143332p+7f /* 138.1 */, 0x1.26e978p-6f /* 0.018 */,
+                        -0x1.ed0e56p-1f /* -0.963 */, 0x1.3f7cecp-3f /* 0.156 */,
+                        -0x1.645a1cp-3f /* -0.174 */, 0x1.d4ccccp+5f /* 58.6 */,
+                        -0x1.7a6666p+5f /* -47.3 */, 0x1.0f9998p+7f /* 135.8 */,
+                        0x1.ba5e34p-6f /* 0.027 */, -0x1.e872bp-1f /* -0.954 */,
+                        0x1.7ced9p-3f /* 0.186 */, -0x1.89374ap-3f /* -0.192 */,
+                        40.0f, 30.0f));
+                    handled = 1;
+                    break;
+                case 4:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.2a6666p+6f /* 74.6 */, -0x1.833332p+6f /* -96.8 */,
+                        86.5f, 0x1.16872ap-5f /* 0.034 */,
+                        -0x1.d99998p-1f /* -0.925 */, 0x1.20c49ap-3f /* 0.141 */,
+                        -0x1.4ac082p-2f /* -0.323 */, 0x1.ccccccp+6f /* 115.2 */,
+                        -0x1.34ccccp+5f /* -38.6 */, 0x1.513332p+6f /* 84.3 */,
+                        0x1.645a1cp-4f /* 0.087 */, -0x1.bb645ap-1f /* -0.866 */,
+                        0x1.a5e352p-3f /* 0.206 */, -0x1.b53f7cp-2f /* -0.427 */,
+                        40.0f, 40.0f));
+                    handled = 1;
+                    break;
+                case 5:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        0x1.36ccccp+6f /* 77.7 */, -0x1.bd9998p+6f /* -111.4 */,
+                        0x1.d8ccccp+6f /* 118.2 */, 0x1.0e5604p-5f /* 0.033 */,
+                        -0x1.dcac08p-1f /* -0.931 */, 0x1.26e978p-3f /* 0.144 */,
+                        -0x1.322d0ep-2f /* -0.299 */, 0x1.21p+7f /* 144.5 */,
+                        -16.5f, 0x1.8d6666p+7f /* 198.7 */,
+                        0x1.581062p-5f /* 0.042 */, -0x1.d89374p-1f /* -0.923 */,
+                        0x1.4dd2fp-3f /* 0.163 */, -0x1.3f7cecp-2f /* -0.312 */,
+                        40.0f, 60.0f));
+                    handled = 1;
+                    break;
+                case 6:
+                    btlStartTask(btlCreateNotifyingCameraKeyframeTask(0,
+                        -0x1.c86666p+6f /* -114.1 */, -160.0f,
+                        0x1.a73332p+6f /* 105.8 */, 0x1.0624dcp-9f /* 0.002 */,
+                        -0x1.c28f5cp-1f /* -0.88 */, -0x1.0624dcp-5f /* -0.032 */,
+                        0x1.ccccccp-2f /* 0.45 */, -0x1.8cccccp+6f /* -99.2 */,
+                        -0x1.c59998p+6f /* -113.4 */, 0x1.206666p+7f /* 144.2 */,
+                        -0x1.6872bp-5f /* -0.044 */, -0x1.dd2f1ap-1f /* -0.932 */,
+                        0x1.4fdf3ap-4f /* 0.08199999 */, 0x1.449ba4p-2f /* 0.317 */,
+                        40.0f, 50.0f));
+                    handled = 1;
+                    break;
+                case 2:
+                case 3:
+                case 7:
+                case 8:
+                    break;
+                }
+                if (handled) {
+                    func_001E3108(unit, battle->cameraCommand.translation);
+                    btlCopyUnitRotationQuaternion(unit, battle->cameraCommand.rotation);
+                }
+            }
+        }
+        break;
+    case 4:
+        if (windowState != 1) {
+            dspStartEntry(7);
+            work->phase++;
+        }
+        break;
+    case 5:
+        btlStartTask(btlCreateCommandSoundTask(0, 3));
+        work->phase++;
+        break;
+    case 6:
+        if (windowState != 1) {
+            work->phase++;
+        }
+        break;
+    default:
+        group = (ActionStateLink *)fldGetActiveSceneGroupValue();
+        if (group != 0 && (group->pendingFlags & 8)) {
+            if (group->unit->status.flags & 0x200) {
+                btlStartTask(btlCreateCommandSoundTask((s32)group, 9));
+            }
+        }
+        dspCloseChannel();
+        func_001C7DB8(1, 8);
+        return -1;
+    }
+    if (windowState == 1) {
+        func_0026C900();
+    }
+    return 0;
+}
+
 
 extern const char *D_004367F0;
 
