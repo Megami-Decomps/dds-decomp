@@ -865,4 +865,52 @@ typedef struct {
     "vmaddq.xyz " #second ", " #second ", Q\n\t" \
     "vftoi4.xyzw " #second ", " #second "\n\t.set reorder")
 
+/* Expand three RGBA words, blend the reference rows at +0x40/+0x80,
+ * clamp to 255, and write base/delta vectors at +0x10/+0x20. Plain C cannot
+ * express the MMI unpack and VU0 accumulator operations. The float 1/128
+ * operand crosses through a GPR; 0x437F0000 is the VU bit pattern for 255.0f.
+ * The SDK-style unpack uses scratch GPRs $2-$4; all inputs are C operands.
+ */
+#define VU0_BUILD_PACKED_COLOR_TRANSFORM(dst, reference, packedColor, firstColor, secondColor, blend) \
+__asm__ volatile ( \
+        ".set noreorder\n\t" \
+        "pextlb $2, $0, %3\n\t" \
+        "pextlb $3, $0, %4\n\t" \
+        "pextlb $4, $0, %2\n\t" \
+        "pextlh $2, $0, $2\n\t" \
+        "pextlh $3, $0, $3\n\t" \
+        "pextlh $4, $0, $4\n\t" \
+        "qmtc2.ni $2, vf2\n\t" \
+        "qmtc2.ni $3, vf3\n\t" \
+        "qmtc2.ni $4, vf4\n\t" \
+        "qmtc2.ni %5, vf5\n\t" \
+        "qmtc2.ni %6, vf6\n\t" \
+        "qmtc2.ni %7, vf7\n\t" \
+        "vitof0.xyzw vf2, vf2\n\t" \
+        "vitof0.xyzw vf3, vf3\n\t" \
+        "vitof0.xyzw vf4, vf4\n\t" \
+        "lqc2 vf8, 0x40(%1)\n\t" \
+        "lqc2 vf9, 0x80(%1)\n\t" \
+        "vmulx.xyzw vf2, vf2, vf6x\n\t" \
+        "vmulx.xyzw vf3, vf3, vf6x\n\t" \
+        "vmove.w vf9, vf0\n\t" \
+        "vmulx.w vf8, vf8, vf0x\n\t" \
+        "vmulw.w vf4, vf4, vf2w\n\t" \
+        "vmul.xyz vf9, vf3, vf9\n\t" \
+        "vmul.xyz vf8, vf2, vf8\n\t" \
+        "vmulaw.xyz ACC, vf9, vf0w\n\t" \
+        "vmaddax.xyz ACC, vf8, vf5x\n\t" \
+        "vmsubx.xyz vf9, vf9, vf5x\n\t" \
+        "vmul.xyzw vf8, vf8, vf4\n\t" \
+        "vmul.xyzw vf9, vf9, vf4\n\t" \
+        "vminix.xyzw vf8, vf8, vf7x\n\t" \
+        "vsub.xyz vf8, vf8, vf9\n\t" \
+        "sqc2 vf9, 0x10(%0)\n\t" \
+        "sqc2 vf8, 0x20(%0)\n\t" \
+        ".set reorder" \
+        : : "r"(dst), "r"(reference), "r"(packedColor), \
+            "r"(firstColor), "r"(secondColor), "r"(blend), \
+            "r"(0.0078125f), "r"(0x437F0000) \
+        : "$2", "$3", "$4", "memory")
+
 #endif
