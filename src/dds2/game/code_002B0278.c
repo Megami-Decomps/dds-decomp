@@ -1220,7 +1220,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
     menuContext->profilePanel = profile;
     mnuSetGroupProperties(profile, (EffectSlotSet *)menuContext->displayHandle,
                           (EffectSlotSet *)menuContext->alternateResource, 1, 2);
-    party->iconPanel = mnuCreatePanelIconState(4, menuContext->displayHandle, menuContext->skillPanelResource);
+    party->iconPanel = mnuCreatePanelIconState(4, (s32)menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
         party->motionSelection = -1;
     } else {
