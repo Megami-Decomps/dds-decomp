@@ -872,6 +872,66 @@ distinct labels). A case identical to `default` but written out explicitly
 also leaves that stray comparison. Verified on ee-gcc 2.96 (from the
 [Decompedia GCC page](https://decomp.wiki/compilers/GCC)).
 
+### Constructor choice versus scalar-argument choice (measured mechanism)
+
+A shared final constructor call does not prove the source chose only its
+argument. Require native edges routing accepted selectors directly to separate
+argument-setup paths and a behaviorally equivalent, mutually exclusive call
+choice. Conceptually, under the existing guard, a scalar choice
+`task = createCounterTask(owner, kind == 2 ? 1 : 2);` can instead be:
+
+```c
+if (kind == 2 || kind == 4) {
+    if (kind == 2)
+        task = createCounterTask(owner, 1);
+    else
+        task = createCounterTask(owner, 2);
+    /* Existing common task setup and start remain after the choice. */
+}
+```
+
+This example illustrates the source distinction; it is not a matching fixture.
+On the measured scalar diamonds, pinned ee-gcc 2.96 runs an early
+`if_convert(0)` within `02.jump`, before `03.cse` or computed liveness.
+Each arm has one predecessor/successor and one pure, nontrapping `SET` to the
+same SI pseudo; `noce_try_cmove` succeeds. The constructor is outside the
+diamond, so its side effect cannot protect that scalar choice. An if/else
+assigning only a local presents the same input. Branch probability and final
+register allocation do not decide this observed path.
+
+The exact 636-byte same-TU `btlStartCommandSoundAndEffectTasks` discriminates:
+real argument copies and a call in each arm make `last_active_insn_p` fail,
+rejecting early noce conversion. Qualified final read-only traces of that
+case and the scalar scheduler input each preserved all 28 declared artifacts
+byte-for-byte. Subsequent source trials establish this chain through pass
+captures:
+
+1. Real constructor arms survive `02.jump` without scalar if-conversion.
+2. `03.cse` routes accepted outer equality edges directly into those arms.
+3. In the two-selector trials, four static constructor sites survive through
+   `25.sched2`; `27.jump2` commons them to two calls after the last
+   if-conversion pass. The late-exposed argument choice retains branches.
+
+This transferred from DDS1 `func_001CB410` to DDS2 LINKAGE `func_001D8C80`.
+The latter used pass captures, not another live noce trace. Each trial's
+ordinary and diagnostic whole-TU objects agreed in all compared meaningful
+sections, relocation sections and NOBITS extents. Both complete bodies remain
+nonexact. The scheduler's regions still differ; LINKAGE's aligned 57-word
+region has six stack-displacement differences. Only LINKAGE's two ten-word
+common task-setup blocks are byte-exact after actual call-relocation resolution.
+This proves a compiler mechanism, not original source identity or whole-body
+matching credit.
+
+Before transfer, verify every accepted/rejected selector value, the provider's
+consumed arguments, owner/result types, and one constructor/start per accepted
+selector. Preserve captured selectors, fresh flags, post-constructor handle
+reads and ordering between independent selectors. Keep common task writes
+after the join. Correct value-map errors separately before comparing equivalent
+forms. This does not justify duplicate effect stores, added runtime calls,
+fake barriers, `volatile`, or register/lifetime manipulation. If the supported
+form fails to change the predicted early input and later edges, stop rather
+than manufacture effects. Whole-unit and complete-build acceptance still apply.
+
 ## Other GCC patterns (Decompedia; check each on ee-gcc 2.96)
 
 These are documented for GCC 2.8–2.9x projects (Paper Mario, Twisted Metal
