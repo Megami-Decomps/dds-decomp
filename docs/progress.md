@@ -11,9 +11,11 @@ even when their assembly is byte-identical. Function-count badges use the same
 ownership rule; a short and a large function each count once there.
 
 The primary reports cover **Atlus game/engine EE code**, the C reconstruction
-target. SDK/runtime libraries and binary VU1 microcode are excluded from this
-denominator. They remain in the full-binary audit reports and local objdiff
-projects, under separate categories.
+target. SDK/runtime libraries, handwritten assembly (`hand/` `asm` segments: crt0,
+VU0 loops) and binary VU1 microcode are excluded from this denominator. They
+remain in the full-binary audit reports and local objdiff projects, under
+separate categories (`sdk`, `handwritten`, `vu1`); like the SDK they are counted
+as unmatched there, since no C source can replace them.
 
 ## Why the old numbers disagreed
 
@@ -83,7 +85,7 @@ work without production-proof publication.
 
 - `build/<v>/report.json`: primary game-code report, published to decomp.dev as
   `dds1_report` or `dds2_report`.
-- `build/<v>/report.all.json`: game, SDK/runtime and VU1 audit report.
+- `build/<v>/report.all.json`: game, SDK/runtime, handwritten-assembly and VU1 audit report.
 - `report.json`: combined full-binary report for the configured games.
 - Each report's `.raw` file: untouched SKIP_ASM objdiff comparison output.
 - Each report's `.proof.json` file: per-function C/assembly ownership,

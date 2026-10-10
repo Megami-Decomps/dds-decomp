@@ -387,6 +387,10 @@ def objdiff_progress_category(version: str, name: str) -> str:
     # splat exposes the binary VU1 program as a text unit, not EE code.
     if name == f"asm/{version}/data/vutext":
         return "vu1"
+    # Whole functions Atlus wrote in assembly (crt0, VU0 loops) are `asm` segments
+    # under hand/, not C targets; like the SDK they never enter the game-code totals.
+    if name.startswith(f"asm/{version}/hand/"):
+        return "handwritten"
     return "sdk" if "/sdk/" in name else "game"
 
 
@@ -1213,6 +1217,7 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
         {"id": "game", "name": "Atlus game/engine"},
         {"id": "sdk", "name": "Sony SDK / C runtime"},
         {"id": "vu1", "name": "VU1 microcode (binary)"},
+        {"id": "handwritten", "name": "Handwritten assembly (not C)"},
     ]
     config = {
         "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",

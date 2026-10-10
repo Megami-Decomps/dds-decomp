@@ -27,14 +27,6 @@ extern KwlnTask *kwlnActiveTaskHead;
 extern KwlnTask *D_003BA81C;
 extern s32 kwlnActiveTaskCount;
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_00100000);
-
-INCLUDE_ASM(const s32, "game/code_00100000", _start);
-
-INCLUDE_ASM(const s32, "game/code_00100000", func_001001C8);
-
-INCLUDE_ASM(const s32, "game/code_00100000", func_001001D0);
-
 extern char D_003BA738[]; /* "1\n" */
 extern char D_003BA740[]; /* "2\n" */
 extern char D_003BA748[]; /* "3\n" */

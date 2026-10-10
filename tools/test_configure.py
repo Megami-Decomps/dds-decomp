@@ -302,6 +302,11 @@ class ObjdiffProgressTests(unittest.TestCase):
                     "target": f"build/{version}/game/unmatched.o",
                     "base": None,
                 },
+                {
+                    "name": f"asm/{version}/hand/vu/example",
+                    "target": f"build/{version}/hand/vu/example.o",
+                    "base": None,
+                },
             ]
         with tempfile.TemporaryDirectory() as tmp, patch.object(configure, "ROOT", Path(tmp)):
             configure.write_objdiff(self.units)
@@ -325,25 +330,25 @@ class ObjdiffProgressTests(unittest.TestCase):
             self.assertNotIn("complete", actual)
             self.assertNotIn("complete", actual["metadata"])
 
-    def test_categories_separate_vu1_and_preserve_sdk_and_ee_game_code(self) -> None:
+    def test_categories_separate_vu1_and_preserve_sdk_handwritten_and_ee_game_code(self) -> None:
         self.assertEqual(
             [category["id"] for category in self.combined["progress_categories"]],
-            ["dds1", "dds2", "game", "sdk", "vu1"],
+            ["dds1", "dds2", "game", "sdk", "vu1", "handwritten"],
         )
-        expected = ["game", "sdk", "vu1", "game", "game"]
+        expected = ["game", "sdk", "vu1", "game", "game", "handwritten"]
         for index, version in enumerate(self.units):
-            for unit, category in zip(self.combined["units"][index * 5:(index + 1) * 5], expected):
+            for unit, category in zip(self.combined["units"][index * 6:(index + 1) * 6], expected):
                 self.assertEqual(unit["metadata"]["progress_categories"], [version, category])
 
     def test_per_version_configs_rebase_paths_and_keep_all_categories(self) -> None:
         for version, config in self.versions.items():
             self.assertEqual(
                 [category["id"] for category in config["progress_categories"]],
-                ["game", "sdk", "vu1"],
+                ["game", "sdk", "vu1", "handwritten"],
             )
             self.assertEqual(len(config["units"]), len(self.units[version]))
             for actual, row, category in zip(
-                config["units"], self.units[version], ["game", "sdk", "vu1", "game", "game"]
+                config["units"], self.units[version], ["game", "sdk", "vu1", "game", "game", "handwritten"]
             ):
                 self.assertEqual(actual["name"], row["name"].split("/", 2)[2])
                 self.assertEqual(actual["target_path"], "../../" + row["target"])
@@ -367,7 +372,7 @@ class ObjdiffProgressTests(unittest.TestCase):
                 )
                 self.assertEqual(actual["metadata"], {"progress_categories": ["game"]})
                 self.assertNotIn("complete", actual)
-            self.assertEqual(len(self.versions[version]["units"]), 5)
+            self.assertEqual(len(self.versions[version]["units"]), 6)
 
     def test_report_targets_use_matching_projects_and_object_dependencies(self) -> None:
         writer = Mock()

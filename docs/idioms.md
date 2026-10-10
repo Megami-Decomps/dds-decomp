@@ -1184,9 +1184,42 @@ allowed on the same terms as COP2:
 
    check_unit prints `ASMBODY` for any other function that is mostly inline
    asm; those stay INCLUDE_ASM.
-4. **Handwritten functions stay asm.** Whole functions with `addi`, delay slots
+4. **Handwritten functions are `asm` segments.** Whole functions with `addi`, delay slots
    no compiler fills that way, or `.set noreorder` bodies with branches were
-   `.s` files originally. Leave them as INCLUDE_ASM; they are not C matches.
+   `.s` files originally. They are not C matches: carve them into a `hand/` `asm`
+   segment (see [Handwritten assembly segments](#handwritten-assembly-segments)),
+   not `INCLUDE_ASM`.
+
+### Handwritten assembly segments
+
+Whole functions that were `.s` files in Atlus's source are `asm` segments in
+`config/<v>/*.yaml` under `hand/`, like the SDK libraries under `sdk/`. No C
+unit contains them and no `INCLUDE_ASM` names them; the surrounding C units are
+split at the segment, so each C unit starts and ends where the original object
+did. `configure.py` assembles the segment as-is (`objdiff` category
+`handwritten`), keeps it out of the game-code totals and out of `check_unit`,
+and `tools/progress.py` and the `ninja report` game report never see it.
+
+Move a function here only when its `.s` shows what gcc 2.96 never writes: trapping
+`addi`/`add`/`neg` pointer and count updates, `bne $0, $reg` operand order, a
+computed `jr` into the instruction stream, interleaved VU0 pipelines, crt0 code.
+Spimdisasm's `Handwritten function` flag alone is not enough: the `plzcw` +
+`addi $r,$0,0x1F` log2 idiom also appears inside otherwise ordinary compiled
+functions (prologue, scheduling, `movz`/`movn`, `jalr` callbacks).
+
+Functions of that shape (DDS1 `func_0029C048`, `func_002ECA80`, `func_002ECCF8`,
+`sdfBuildTextureStatePacket`; DDS2 `func_002A7B28`, `func_002DDD60`,
+`func_00345928`, `func_00345BA0`, `sdfBuildTextureStatePacket`) stay `INCLUDE_ASM`
+C targets.
+
+| Segment | DDS1 | DDS2 | Contents |
+|---|---|---|---|
+| `hand/crt0` | `func_00100000` .. `func_001001D0` (4) | `func_00100000` .. `func_001001D0` (4) | program entry `_start` (register/FPU clear, `.bss` clear, `SetupThread`/`SetupHeap` syscalls, `Exit`), the `Exit(0)` stub and the syscall 0x23 stub |
+| `hand/vu/sdfVuScratchpadVertexUnpack` | `func_002E06F0` | `func_003395A0` | DMA/VIF-polled unpack of scratchpad vertex records through VU0 `vlqi` loads |
+| `hand/vu/sdfVuNodeVertexLighting` | `func_002E03C0` | `func_00339270` | node vertex lighting loop, then `sdfVuBlendNodeVectors` and a `j sdfBuildChunkedVuNodeTransfer` tail |
+| `hand/vu/sdfVuVertexAlphaClamp` | `func_002DE980` | `func_00337830` | per-vertex alpha clamp loop plus a linked-list copy |
+| `hand/vu/sdfVuVertexKernels` | `func_002DE118` .. `func_002DE868` (15) | `func_00336FC8` .. `func_00337718` (15) | VU0 macro-mode loops over 0x60-byte vertex records (transform, offset, scale, normalise, clip flags) |
+| `hand/mem/sdfMemClearBlocks` | `func_002E73F0` | `func_00340298` | 128-byte `sq` block clear entered by a computed `jr` (Duff's device), `memset` fallback |
 
 ### Macro list
 

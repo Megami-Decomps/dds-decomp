@@ -143,22 +143,29 @@ def split_source(text, names, start, end, unit, refs=None):
             if any((inc := INCLUDE.search(b)) and inc.group(1) == "ASM" for b in pieces[i][1]):
                 used |= refs.get(pieces[i][3], set())
         defined = {m.group(1) for b in body if "{" in b and (m := DEF.search(b))}
-        chosen, changed = set(), True
-        while changed:
-            changed = False
-            for i, d in enumerate(pool):
-                if i not in chosen and (declared_name(d) in used or d in orphan_types):
-                    chosen.add(i)
-                    used |= set(TOKENS.findall(d))
-                    changed = True
-        decls = [pool[i] for i in sorted(chosen)]
-        declared = {declared_name(d) for d in decls} | {declared_name(b) for b in body if "{" not in b}
         protos = {}
         for i in range(first):
             for b in pieces[i][1]:
                 if "{" in b and not INCLUDE.search(b) and (m := DEF.search(b)):
                     protos[m.group(1)] = prototype(b)
-        decls += [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
+        # A prototype added for a called function may name types the part also needs.
+        while True:
+            chosen, changed = set(), True
+            while changed:
+                changed = False
+                for i, d in enumerate(pool):
+                    if i not in chosen and (declared_name(d) in used or d in orphan_types):
+                        chosen.add(i)
+                        used |= set(TOKENS.findall(d))
+                        changed = True
+            decls = [pool[i] for i in sorted(chosen)]
+            declared = {declared_name(d) for d in decls} | {declared_name(b) for b in body if "{" not in b}
+            extra = [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
+            grown = set().union(*(set(TOKENS.findall(p)) for p in extra)) - used if extra else set()
+            if not grown:
+                break
+            used |= grown
+        decls += extra
         return "\n".join(includes or ['#include "common.h"']) + "\n\n" + "\n\n".join(decls + body) + "\n"
 
     parts = {key: write(key) for key in groups if key != "tail" or new["tail"]}

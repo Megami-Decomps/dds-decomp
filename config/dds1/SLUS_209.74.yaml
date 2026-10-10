@@ -62,7 +62,8 @@ segments:
       # Atlus game/engine code. Named units: real Nocturne (Dec 26 2002 debug build) __FILE__
       # names projected through byte-identical functions (tools/nocturne_tus.py, docs/tu-names.md).
       # Their ranges are lower bounds; code_<vram> gaps are unowned until evidence places them.
-      - [0x1000, c, game/code_00100000]
+      - [0x1000, asm, hand/crt0]
+      - [0x11D8, c, game/code_00100000]
       - [0x1A98, c, kernel/dds3KernelCore]  # Nocturne __FILE__
       - [0x2B08, c, game/code_00101B08]
       - [0x38A0, c, kernel/dds3AdminiProcess]  # Nocturne __FILE__; starts at dds3GetAdminTaskWork (same-TU provider evidence)
@@ -275,8 +276,18 @@ segments:
       - [0x1DE038, c, game/code_002DD038]
       - [0x1DE8B8, c, game/code_002DD8B8]  # P4 transfer (P4 effMiscVu; sits among sdf*, name unconfirmed)
       - [0x1DEC98, c, game/code_002DDC98]
+      - [0x1DF118, asm, hand/vu/sdfVuVertexKernels]
+      - [0x1DF8C8, c, game/code_002DE8C8]
+      - [0x1DF980, asm, hand/vu/sdfVuVertexAlphaClamp]
+      - [0x1DFA18, c, game/code_002DEA18]
+      - [0x1E13C0, asm, hand/vu/sdfVuNodeVertexLighting]
+      - [0x1E14E0, c, game/code_002E04E0]
+      - [0x1E16F0, asm, hand/vu/sdfVuScratchpadVertexUnpack]
+      - [0x1E1820, c, game/code_002E0820]
       - [0x1E4EC8, c, sdf/sdfDevCons]  # Nocturne __FILE__
       - [0x1E5720, c, game/code_002E4720]
+      - [0x1E83F0, asm, hand/mem/sdfMemClearBlocks]
+      - [0x1E8480, c, game/code_002E7480]
       - [0x1E8C20, c, game/code_002E7C20]  # P4 transfer (P4 effMisc; sits among sdf*, name unconfirmed)
       - [0x1E9398, c, game/code_002E8398]
       - [0x1E97A8, c, game/code_002E87A8]
@@ -423,7 +434,7 @@ segments:
       - [0x2B5470, .rodata, sdf/sdfTex]
       - [0x2B54D0, .rodata, sdf/sdfModel]
       - [0x2B5510, .rodata, sdf/sdfMotion]
-      - [0x2B5530, .rodata, game/code_002DDC98]
+      - [0x2B5530, .rodata, game/code_002E0820]
       - [0x2B5560, .rodata, game/code_002E4720]
       - [0x2B56C0, .rodata, game/code_002E87A8]
       - [0x2B57A0, .rodata, game/code_002E9140]
@@ -522,8 +533,8 @@ segments:
       - [0x2BB608, .lit4, game/code_002D33C8]
       - [0x2BB60C, .lit4, sdf/sdfModel]
       - [0x2BB610, .lit4, game/code_002DD038]
-      - [0x2BB614, .lit4, game/code_002DDC98]
-      - [0x2BB620, .lit4, game/code_002E4720]
+      - [0x2BB614, .lit4, game/code_002E0820]
+      - [0x2BB620, .lit4, game/code_002E7480]
       - [0x2BB670, .lit4, game/code_002E7C20]
       - [0x2BB67C, .lit4, game/code_002E8E00]
       - [0x2BB694, .lit4, game/code_002E9140]
@@ -627,7 +638,7 @@ segments:
       - [0x2BE2F0, .sdata, game/code_002D10B0]
       - [0x2BE30C, .sdata, game/code_002D33C8]
       - [0x2BE348, .sdata, game/code_002D9748]
-      - [0x2BE350, .sdata, game/code_002DDC98]
+      - [0x2BE350, .sdata, game/code_002E0820]
       - [0x2BE3C8, .sdata, game/code_002E4720]
       - [0x2BE488, .sdata, game/code_002E8398]
       - [0x2BE490, .sdata, game/code_002E9140]
