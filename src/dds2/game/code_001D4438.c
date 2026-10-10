@@ -1523,8 +1523,6 @@ typedef struct BtlSceneLightParams {
     f32 secondaryColor[3]; f32 unk2C;
 } BtlSceneLightParams;
 extern char D_00417398[];
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417398);
-
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *func_002014A8(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
@@ -1591,6 +1589,8 @@ BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit,
         BtlOperandEntry *block);
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, BtlUnit *target,
         s32 index, s32 value, f32 scale);
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417398);
 
 void func_001D8C80(ActionStateLink *action) {
     BtlUnit *actors[3];
