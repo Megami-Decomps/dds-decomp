@@ -130,7 +130,20 @@ extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
-extern u32 D_003BB3DC;
+/* The command hint window is a 0x40-byte allocation in btlCreateMessageWindow. */
+typedef struct BtlCommandHintWork {
+    u8 pad00[0x10];
+    s32 unk10;
+    s16 fade;
+    u8 pad16[2];
+    u32 colors[4];
+    u8 pad28[0x10];
+    s32 x;
+    s32 y;
+} BtlCommandHintWork;
+typedef char BtlCommandHintWorkSize[sizeof(BtlCommandHintWork) == 0x40 ? 1 : -1];
+
+extern BtlCommandHintWork *D_003BB3DC;
 
 extern SceneKindTable *D_003BD834;
 
@@ -3194,17 +3207,17 @@ void btlReleaseDialogTaskData(KwlnTask *task) {
 }
 
 void btlCreateMessageWindow(void) {
-    u8 *window;
+    BtlCommandHintWork *window;
     btlGetRuntime();
-    window = (u8 *)sdfAllocAndClearQuadwords(0x40);
-    D_003BB3DC = (u32)window;
-    *(s32 *)(window + 0x10) = 0x14;
-    *(s32 *)(window + 0x18) = 0x1800080;
-    *(s32 *)(window + 0x1C) = 0x40800080;
-    *(s32 *)(window + 0x20) = 0x40800080;
-    *(s32 *)(window + 0x24) = 0x60808080;
-    *(s32 *)(window + 0x38) = 0xBB;
-    *(s32 *)(window + 0x3C) = 0x196;
+    window = sdfAllocAndClearQuadwords(0x40);
+    D_003BB3DC = window;
+    window->unk10 = 0x14;
+    window->colors[0] = 0x1800080;
+    window->colors[1] = 0x40800080;
+    window->colors[2] = 0x40800080;
+    window->colors[3] = 0x60808080;
+    window->x = 0xBB;
+    window->y = 0x196;
     btlSetTrackedTaskHandle(4, 1);
 }
 
@@ -3230,9 +3243,9 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2AF0);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B4F10);
 
-void btlReleaseRegisteredTaskBuffer(s64 unused) {
+void btlReleaseRegisteredTaskBuffer(KwlnTask *unused) {
     btlGetRuntime();
-    sdfReleaseChipBlock((void *)D_003BB3DC);
+    sdfReleaseChipBlock(D_003BB3DC);
     D_003BB3DC = 0;
     btlSetTrackedTaskHandle(4, 0);
 }
