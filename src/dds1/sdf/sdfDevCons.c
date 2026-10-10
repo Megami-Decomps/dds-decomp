@@ -163,7 +163,37 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E42F8);
+/* Append the console background sprite, then reserve the next glyph tag.
+ * Packed coordinates wrap as words before their zero-extended packet writes. */
+void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
+    vu64 *packet;
+    u32 origin;
+    u32 extent;
+
+    func_002E41B8(packetBuffers);
+    if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
+        sdfDevConsKickPacketDma(packetBuffers);
+    }
+    packet = (vu64 *)packetBuffers->currentTag;
+    origin = (u16)(console->unk8 - 0x30) | ((u32)console->unkA << 16);
+    extent = (u16)(console->columns * 3 * 0x40 + 0x70) | ((u32)(console->rows * packetBuffers->rowStep) << 16);
+    if (console->controlByte & 4) {
+        origin += 0xFFD00000;
+        extent += 0x700000;
+    } else {
+        origin += 0xFFE80000;
+        extent += 0x380000;
+    }
+    packet[0] = 0x5400000000008001ULL;
+    packet[1] = 0x5510;
+    packet[2] = 0x146;
+    packet[3] = 0x30000000;
+    packet[4] = origin;
+    packet[5] = origin + extent;
+    packet[6] = 0x156;
+    packetBuffers->currentTag = (u8 *)packet + 0x40;
+    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E4428);
 
