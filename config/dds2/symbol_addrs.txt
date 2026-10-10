@@ -6999,6 +6999,7 @@ evtSetWorldUnitScale = 0x0023ED68; // type:func
 evtCommandSetEffectUnitPosition = 0x00241CF0; // type:func
 evtCommandSetEffectUnitQuaternionRotation = 0x00241E70; // type:func
 
+mnuDrawMantraPanelBTransition = 0x0027E360; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -10412,7 +10413,6 @@ func_0027CDD0 = 0x0027CDD0; // type:func
 func_0027D3D8 = 0x0027D3D8; // type:func
 func_0027DE30 = 0x0027DE30; // type:func
 func_0027DE38 = 0x0027DE38; // type:func
-func_0027E360 = 0x0027E360; // type:func
 func_0027FB68 = 0x0027FB68; // type:func
 func_0027FDB8 = 0x0027FDB8; // type:func
 func_0027FDC0 = 0x0027FDC0; // type:func
