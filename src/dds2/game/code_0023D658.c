@@ -14,6 +14,7 @@
 #include "sdf_draw.h"
 #include "eff_object.h"
 #include "eff_event.h"
+#include "eff_node_descriptor.h"
 #include "scr.h"
 
 extern u32 evtWindowMotionUnit;
@@ -112,6 +113,12 @@ extern u8 D_00421AC0[];
 extern s32 scrReadStringParameter(s32 idx);
 
 extern void effObjSetFlags(void *object, s32 flags);
+
+extern void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
+extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
+extern void *func_00115500(void *resource, void *position, void *scale);
+extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
+extern char D_00421A78[];
 
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 
@@ -1343,7 +1350,37 @@ u32 evtOpEndUnitValueTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240280);
+const char D_00421A58[] = "EFFECT_BE not fount RID = %d\n";
+
+u32 func_00240280(void) {
+    u8 firstVector[16];
+    u8 secondVector[16];
+    s32 taskId;
+    s32 key;
+    struct EffNodeDescriptor *descriptor;
+    EffWorldNode *object;
+
+    memset(firstVector, 0, sizeof(firstVector));
+    memset(secondVector, 0, sizeof(secondVector));
+    taskId = scrReadIntParameter(0);
+    key = scrReadIntParameter(1);
+    descriptor = evtFindTaskResourceEntryByKey(taskId, key);
+    if (descriptor == NULL) {
+        key = scrReadIntParameter(1);
+        evtPrintDeveloperConsoleMessage(D_00421A58, key);
+        scrSetIntegerReturnValue(0);
+        return 1;
+    }
+    object = effObjSpawnDescriptorBoundEffect(descriptor, firstVector, secondVector);
+    if (object == NULL) {
+        func_0035B6E0(D_00421A78, 1);
+        scrSetIntegerReturnValue(0);
+    } else {
+        effObjSetFlags(object, 1);
+        scrSetIntegerReturnValue(object->key);
+    }
+    return 1;
+}
 
 u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
@@ -1394,7 +1431,36 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421A90);
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421AC0);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_002404E0);
+const char D_00421AD8[] = "EFFBED_BE not fount RID = %d\n";
+
+u32 func_002404E0(void) {
+    u8 position[16];
+    u8 scale[16];
+    s32 taskId;
+    s32 key;
+    struct EffNodeDescriptor *descriptor;
+    EffWorldNode *object;
+
+    memset(position, 0, sizeof(position));
+    memset(scale, 0, sizeof(scale));
+    taskId = scrReadIntParameter(0);
+    key = scrReadIntParameter(1);
+    descriptor = evtFindTaskResourceEntryByKey(taskId, key);
+    if (descriptor == NULL) {
+        key = scrReadIntParameter(1);
+        evtPrintDeveloperConsoleMessage(D_00421AD8, key);
+        scrSetIntegerReturnValue(0);
+        return 1;
+    }
+    object = (EffWorldNode *)func_00115500(descriptor, position, scale);
+    if (object == NULL) {
+        scrSetIntegerReturnValue(0);
+    } else {
+        effObjSetFlags(object, 1);
+        scrSetIntegerReturnValue(object->key);
+    }
+    return 1;
+}
 
 u32 func_002405B8(void) {
     return 1;
@@ -1475,7 +1541,32 @@ INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421AF8);
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421B20);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240800);
+const char D_00421B50[] = "EFFMG1_BE not fount RID = %d\n";
+
+u32 func_00240800(void) {
+    s32 taskId;
+    s32 key;
+    struct EffNodeDescriptor *descriptor;
+    EffWorldNode *object;
+
+    taskId = scrReadIntParameter(0);
+    key = scrReadIntParameter(1);
+    descriptor = evtFindTaskResourceEntryByKey(taskId, key);
+    if (descriptor == NULL) {
+        key = scrReadIntParameter(1);
+        evtPrintDeveloperConsoleMessage(D_00421B50, key);
+        scrSetIntegerReturnValue(0);
+        return 1;
+    }
+    object = effForwardMagatuhiDescriptor(1, descriptor);
+    if (object == NULL) {
+        scrSetIntegerReturnValue(0);
+    } else {
+        effObjSetFlags(object, 1);
+        scrSetIntegerReturnValue(object->key);
+    }
+    return 1;
+}
 
 u32 evtScriptCreateEffectObjectFromResource(void) {
     s32 param0;
@@ -1496,7 +1587,32 @@ u32 evtScriptCreateEffectObjectFromResource(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0023D658", D_00421B70);
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_00240938);
+const char D_00421BA0[] = "EFFMG2_BE not fount RID = %d\n";
+
+u32 func_00240938(void) {
+    s32 taskId;
+    s32 key;
+    struct EffNodeDescriptor *descriptor;
+    EffWorldNode *object;
+
+    taskId = scrReadIntParameter(0);
+    key = scrReadIntParameter(1);
+    descriptor = evtFindTaskResourceEntryByKey(taskId, key);
+    if (descriptor == NULL) {
+        key = scrReadIntParameter(1);
+        evtPrintDeveloperConsoleMessage(D_00421BA0, key);
+        scrSetIntegerReturnValue(0);
+        return 1;
+    }
+    object = effForwardMagatuhiDescriptor(2, descriptor);
+    if (object == NULL) {
+        scrSetIntegerReturnValue(0);
+    } else {
+        effObjSetFlags(object, 1);
+        scrSetIntegerReturnValue(object->key);
+    }
+    return 1;
+}
 
 u32 func_002409E0(void) {
     s32 id;

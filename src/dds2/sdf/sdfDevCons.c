@@ -98,20 +98,39 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);
-
 typedef struct ConsBuf {
     u8 *writeCursor; /* 0x0: next glyph-data write */
     u8 *packetStart; /* 0x4: beginning of the DMA range */
     u8 *currentTag; /* 0x8: reserved, not-yet-finalized GIF tag */
     void *dmaChannel; /* 0xC */
-    s32 bufferAddresses[2]; /* 0x10: CPU-side addresses, kept as signed words */
+    u8 *bufferAddresses[2]; /* 0x10: start of each alternating packet buffer */
     s32 bufferBytes; /* 0x18: byte capacity of each buffer */
     u16 activeBufferIndex; /* 0x1C */
     u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
 } ConsBuf;
 
-void func_0033D068(ConsBuf *arg0);
+struct SdfTex;
+u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
+extern u32 D_00439194;
+
+/* Close the ordered register-list tag in the console's uncached DMA buffer.
+ * Five eight-byte register values form one sprite; pad an odd value count. */
+void func_0033D068(ConsBuf *buffers) {
+    u8 *cursor = buffers->writeCursor;
+    vu64 *tag = (vu64 *)buffers->currentTag;
+    s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
+
+    if (registerCount != 0) {
+        if (registerCount & 1) {
+            cursor += 8;
+        }
+        registerCount /= 5;
+        buffers->currentTag = cursor;
+        buffers->writeCursor = buffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+        tag[0] = (s64)registerCount | 0x5400000000008000ULL;
+        tag[1] = 0x53531;
+    }
+}
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
@@ -141,11 +160,135 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
     }
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D1A8);
+/* Append the console background sprite, then reserve the next glyph tag.
+ * Packed coordinates wrap as words before their zero-extended packet writes. */
+void func_0033D1A8(DevConsState *console, ConsBuf *packetBuffers) {
+    vu64 *packet;
+    u32 origin;
+    u32 extent;
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D2D8);
+    func_0033D068(packetBuffers);
+    if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
+        sdfDevConsKickPacketDma(packetBuffers);
+    }
+    packet = (vu64 *)packetBuffers->currentTag;
+    origin = (u16)(console->unk8 - 0x30) | ((u32)console->unkA << 16);
+    extent = (u16)(console->columns * 3 * 0x40 + 0x70) | ((u32)(console->rows * packetBuffers->rowStep) << 16);
+    if (console->controlByte & 4) {
+        origin += 0xFFD00000;
+        extent += 0x700000;
+    } else {
+        origin += 0xFFE80000;
+        extent += 0x380000;
+    }
+    packet[0] = 0x5400000000008001ULL;
+    packet[1] = 0x5510;
+    packet[2] = 0x146;
+    packet[3] = 0x30000000;
+    packet[4] = origin;
+    packet[5] = origin + extent;
+    packet[6] = 0x156;
+    packetBuffers->currentTag = (u8 *)packet + 0x40;
+    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+}
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D480);
+extern u32 D_0040B810[];
+extern u32 D_0040B990[];
+
+/* Emit five ordered register values per glyph into the console DMA buffer. */
+void func_0033D2D8(DevConsState *console, ConsBuf *buffers) {
+    u8 *cells;
+    vu64 *writeCursor;
+    u8 *packetStart;
+    s32 row;
+    s32 column;
+    s32 y;
+    s32 cellStep;
+    u64 top;
+    s32 character;
+    s32 attribute;
+    u64 glyph;
+    u64 color;
+
+    if ((u8)(console->controlByte & 1)) {
+        return;
+    }
+    buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
+    if (console->controlByte & 2) {
+        func_0033D1A8(console, buffers);
+    }
+    cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
+    row = 0;
+    writeCursor = (vu64 *)buffers->writeCursor;
+    packetStart = buffers->packetStart;
+    cells = console->cells;
+    y = console->unkA;
+    do {
+        top = (u32)console->unk8 | ((u32)y << 16);
+        column = 0;
+        do {
+            character = cells[0];
+            attribute = cells[1];
+            cells += 2;
+            if (character >= 0x20) {
+                if (buffers->bufferBytes < (u8 *)writeCursor - packetStart + 0x50) {
+                    buffers->writeCursor = (u8 *)writeCursor;
+                    sdfDevConsKickPacketDma(buffers);
+                    writeCursor = (vu64 *)buffers->writeCursor;
+                    packetStart = buffers->packetStart;
+                }
+                glyph = D_0040B810[character - 0x20];
+                color = D_0040B990[attribute];
+                writeCursor[0] = color;
+                writeCursor[1] = glyph;
+                writeCursor[2] = top;
+                writeCursor[3] = glyph + 0xC000C0;
+                writeCursor[4] = top + cellStep;
+                writeCursor += 5;
+            }
+            column++;
+            top += 0xC0;
+        } while (column != console->columns);
+        row++;
+        y += buffers->rowStep;
+    } while (row != console->rows);
+    buffers->writeCursor = (u8 *)writeCursor;
+}
+
+/* Initialize both uncached packet buffers and complete the GS setup packet.
+ * Reserve the first glyph tag only after the setup values have been written. */
+void func_0033D480(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
+    u32 ringAddress;
+    u8 *ring;
+    vu64 *packet;
+    u64 textureState;
+    s32 halfBufferBytes = bufferBytes >> 1;
+
+    ringAddress = ((u32)buffer & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    ring = (u8 *)ringAddress;
+    packetBuffers->bufferBytes = halfBufferBytes;
+    packetBuffers->bufferAddresses[0] = ring;
+    packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
+    packetBuffers->packetStart = ring;
+    packetBuffers->activeBufferIndex = 0;
+    textureState = sdfTexGetPrimaryTextureState((struct SdfTex *)D_00439194);
+    packet = (vu64 *)ring;
+    packet[0] = 0x10AB400000008005ULL;
+    packet[1] = 0xE;
+    packet[2] = 0x44;
+    packet[3] = 0x42;
+    packet[4] = 0x3000D;
+    packet[5] = 0x47;
+    packet[6] = 0;
+    packet[7] = 8;
+    packet[8] = 1;
+    packet[9] = 0x14;
+    packet[10] = textureState;
+    packet[11] = 6;
+    packetBuffers->currentTag = ring + 0x60;
+    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+    packetBuffers->dmaChannel = sceDmaGetChan(2);
+}
 
 typedef struct DevConsStackPackets {
     u8 header[0x30];
