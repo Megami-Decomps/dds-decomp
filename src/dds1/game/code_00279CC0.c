@@ -576,8 +576,10 @@ void mnuDrawCursorIcons(MenuAssets *assets, s32 arg) {
     itfGridLookupValueOrDefault((s32)assets->sprites[3], 0);
 }
 
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
+
 void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
-    sdfSubmitGsTestOneRegisterPacket(0x30000);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, option);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, option);
     itfDrawGridWithResolvedSlot(0, 0, 0, 0, assets->sprites[0], 0, option);
     mnuDrawCursorIcons(assets, option);

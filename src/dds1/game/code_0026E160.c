@@ -116,7 +116,7 @@ void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *resources) {
 extern MovieMenuState *mnuMovieMenuState;
 extern void func_0026E240(MnuSpriteResourceGroup *);
 extern void func_0026E388(s32, s32, s32, s32, MnuSpriteResourceGroup *, s32);
-extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);

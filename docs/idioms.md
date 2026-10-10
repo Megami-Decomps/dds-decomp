@@ -1626,24 +1626,27 @@ The diagnostic draw leaves similarly decode each 20-byte
 transport conversions, not permission to reinterpret a game-owned record.
 
 
-## Calls with fewer arguments than the callee reads
+## Call arguments already live in registers
 
-When retail calls a function with fewer registers set than its body reads
-(a sibling `j` with `$5` never written), the original source had no
-prototype in scope. Declare it unprototyped (`void f();`) and write the
-definition K&R; a full prototype turns the call into an error
-(`fileSetRecordSecondVector`, DDS2).
+A call need not write every argument register immediately before the jump.
+Check incoming arguments and earlier producers before inferring an absent
+argument or an old-style declaration. DDS1 `mnuDrawBackdrop` already has its
+surface selector in `$a1`; explicitly passing `option` to
+`sdfSubmitGsTestOneRegisterPacket` preserves the native instructions and
+expresses the complete interface. The legacy `fileSetRecordSecondVector`
+call boundary needs its own producer/callee analysis; an unprototyped call
+alone does not establish the original declaration.
 
-An old-style declaration can also preserve an argument's width when the
-argument count is correct. With `void f();`, an `L`-suffixed integer argument
-keeps its `long` type and reaches pass 00 as `DImode`; a fixed `f(s32, s32)`
-prototype converts it to `SImode`. For the GS TEST packet calls this is the
-difference between retail's `dli $a0,0x5100d` with the other argument in the
-call delay slot and `li $a0,0x50000` followed by `ori $a0,$a0,0x100d` in that
-slot (`evtPrepareSolarOverlayTestState` in both games, `func_0026C350`). Use
-this only when the callee really has a K&R definition and retail supports the
-wide literal; if the argument mode is unchanged in `.00.rtl`, the call
-contract is not the cause.
+GS TEST packets have a genuine 64-bit payload. In both titles, the forwarding
+wrapper preserves that value, the constructor retains it with a 64-bit move,
+and the GIF A+D descriptor receives it with `SD`. Use
+`sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind)` and a matching `u64`
+constructor input. Ordinary integer literals then reach argument expansion
+as `DImode` through the actual prototype. A false 32-bit declaration converts
+them to `SImode` and can change constant setup and call-delay scheduling.
+An `L` suffix or a K&R declaration may hide that mismatch; neither replaces
+recovering the real input contract. This width belongs to the TEST payload,
+not automatically to every GS writer's source input.
 
 ## Assembler version and `-g`
 
