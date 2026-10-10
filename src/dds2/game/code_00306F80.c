@@ -692,7 +692,7 @@ void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
     itfGridDrawBooleanDescriptor(value, 0, kind);
 }
 
-void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
+void itfSubmitToggledGridWord(u64 data, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(1, 1));
     u64 *descriptor;
     SdfListHead *context;
@@ -713,10 +713,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     entry->append(entry, context);
 }
 
-void sdfSubmitGsTestOneRegisterPacket(data, kind)
-    u32 data;
-    u32 kind;
-{
+void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind) {
     itfSubmitToggledGridWord(data, 0, kind);
 }
 
