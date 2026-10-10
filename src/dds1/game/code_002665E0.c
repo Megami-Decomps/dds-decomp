@@ -41,7 +41,103 @@ void func_00266B10(s32 a0, s32 a1, s32 a2, BrsSkillPackageWork *work, s32 a4, s3
 INCLUDE_ASM(const s32, "game/code_002665E0", func_00266BC0);
 
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_00266E28);
+extern void mnuSetTitleSequenceVolumePan(u32);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern s32 func_002687C0(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
+
+void func_00266E28(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *entry, s32 context, s32 index) {
+    s32 level = work->levelAnimation[index].level;
+    s32 fade = 0x100 - work->fadeProgress;
+    s32 nextLevel = level + 1;
+    s32 currentExp;
+    s32 finished;
+
+    nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
+    switch (work->levelAnimation[index].state) {
+    case 0:
+        work->levelAnimation[index].alpha = uiBlendColors(0x80808080, 0x80808000, fade) & 0xFF;
+        if (work->levelAnimation[index].alpha >= 0x80) {
+            work->levelAnimation[index].state = 1;
+        }
+        break;
+    case 1:
+        work->levelAnimation[index].state++;
+        if (work->levelAnimation[index].remaining > 0 && work->resultPhase == 0) {
+            mnuSetTitleSequenceVolumePan(0x14);
+            work->resultPhase = 1;
+        }
+        break;
+    case 2:
+    case 3:
+    case 4:
+        if (level < 99 && entry->unit->hp != 0 && (entry->unit->status & 0x4000) == 0) {
+            if (work->levelAnimation[index].state == 3) {
+                goto flash;
+            }
+            work->levelAnimation[index].applied = func_002687C0(work, entry, index, 0);
+            currentExp = work->levelAnimation[index].currentProgress + work->levelAnimation[index].applied;
+            work->levelAnimation[index].currentProgress = currentExp;
+            if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[index].state == 2) {
+                work->levelAnimation[index].level++;
+                work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
+                if (work->unkD4D != 0) {
+                    finished = 0;
+                    while (work->levelAnimation[index].level < 99) {
+                        nextLevel = work->levelAnimation[index].level + 1;
+                        nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
+                        if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level)) {
+                            work->levelAnimation[index].level++;
+                            work->levelAnimation[index].level = work->levelAnimation[index].level < 2 ? 1 : (work->levelAnimation[index].level > 99 ? 99 : work->levelAnimation[index].level);
+                        } else {
+                            finished = 1;
+                        }
+                        if (work->levelAnimation[index].level >= 99) {
+                            finished = 1;
+                        }
+                        if (finished != 0) {
+                            break;
+                        }
+                    }
+                }
+                work->levelAnimation[index].iconState = 1;
+                work->levelAnimation[index].completionState = 1;
+                work->levelAnimation[index].unk2D = 1;
+                work->levelAnimation[index].iconOpacity = 0x80;
+                work->levelAnimation[index].iconFrame = 0;
+                work->levelAnimation[index].alpha = 0;
+                work->levelAnimation[index].state++;
+                mnuSetTitleSequenceVolumePan(0x12);
+            }
+        } else {
+            work->levelAnimation[index].remaining = 0;
+        }
+        if (work->levelAnimation[index].state == 3) {
+flash:
+            work->levelAnimation[index].iconFrame++;
+            work->levelAnimation[index].iconFrame = work->levelAnimation[index].iconFrame <= 0 ? 0 : (work->levelAnimation[index].iconFrame > 15 ? 15 : work->levelAnimation[index].iconFrame);
+            if (work->levelAnimation[index].iconFrame >= 15) {
+                work->levelAnimation[index].state++;
+            }
+        } else if (work->levelAnimation[index].state == 4) {
+            work->levelAnimation[index].iconOpacity -= 16;
+            work->levelAnimation[index].iconOpacity = work->levelAnimation[index].iconOpacity <= 0 ? 0 : (work->levelAnimation[index].iconOpacity > 128 ? 128 : work->levelAnimation[index].iconOpacity);
+            if (work->levelAnimation[index].iconOpacity <= 0) {
+                work->levelAnimation[index].unk2D = 0;
+            }
+            work->levelAnimation[index].alpha += 8;
+            work->levelAnimation[index].alpha = work->levelAnimation[index].alpha <= 0 ? 0 : (work->levelAnimation[index].alpha > 128 ? 128 : work->levelAnimation[index].alpha);
+            if (work->levelAnimation[index].alpha >= 128) {
+                work->levelAnimation[index].state = 2;
+                if (work->levelAnimation[index].remaining > 0 && work->resultPhase == 0) {
+                    mnuSetTitleSequenceVolumePan(0x14);
+                    work->resultPhase = 1;
+                }
+            }
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002665E0", func_002673C8);
 
