@@ -131,7 +131,6 @@ typedef char MantraIconEntry_size_must_be_0x0C[(sizeof(MantraIconEntry) == 0x0C)
 typedef char MantraIconPool_size_must_be_0x14[(sizeof(MantraIconPool) == 0x14) ? 1 : -1];
 MantraIconEntry *mnuSpawnMantraIcon(s32, s32, MantraIconPool *, u32);
 extern s32 mnuUpdateMantraBackgroundFade();
-extern void func_00270848();
 extern u32 mnuInitMantraBackgroundDraw();
 extern void mnuReleaseMantraBackgroundDraw();
 extern s32 mnuUpdateMantraBackgroundMaskFade();
@@ -226,6 +225,8 @@ typedef struct MantraDrawItem {
     u32 createArg;     /* 0x1C: constructor argument */
     void *data;       /* 0x20: constructor result */
 } MantraDrawItem;
+
+s32 func_00270848(s32 unused, MantraDrawItem *drawItem);
 s32 mnuUpdateMantraGaugeFade(s32 unused, MantraDrawItem *item);
 
 typedef struct MantraDrawPool {
@@ -1305,7 +1306,66 @@ void mnuDrawMantraBackgroundSelectionIcons(MantraDrawItem *item) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270848);
+/* Draw the base pulse, transition variant, then freshly sampled fade icons. */
+s32 func_00270848(s32 unused, MantraDrawItem *drawItem) {
+    MantraBackgroundState *state = (MantraBackgroundState *)drawItem->data;
+    f32 pulse;
+    f32 value;
+    s32 alpha;
+
+    value = state->value;
+    pulse = (f32)(s16)state->clock / 120.0f;
+    alpha = (s32)(value * 128.0f);
+    pulse = (sdfSinPoly(pulse * 6.2831852f + (-1.5707963f)) + 1.0f) * 0.5f;
+
+    mnuDrawMantraSprite(0, 0, 0, alpha, 0x58, 0, 0x4A);
+    mnuDrawMantraSprite(0, 0, 0, (s32)((f32)alpha * pulse * 0.5f), 0x5A, 0, 0x4A);
+    mnuDrawMantraRotatedSprite(0, 0x140, 0, (s32)((f32)alpha * pulse * 0.5f),
+                               180.0f, 0x5A, 0, 0x4A);
+    func_00285148(0x100, 0xBF, 0, alpha, state->burstPool, 0, 0x4A);
+
+    if (state->variants.currentVariant != state->variants.nextVariant) {
+        alpha = (s32)((f32)state->timing.transitionDelay / 5.0f * 128.0f * state->value);
+    } else {
+        alpha = (s32)((5.0f - (f32)state->timing.transitionDelay) / 5.0f * 128.0f * state->value);
+    }
+
+    switch (state->variants.currentVariant) {
+    case 0:
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x6A, 0, 0x53);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x6B, 0, 0x53);
+        break;
+    case 1:
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x6C, 0, 0x53);
+        break;
+    case 2:
+        break;
+    case 3:
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x104, 0, 0x4A);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x102, 0, 0x4A);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x103, 0, 0x4A);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0xFF, 0, 0x4A);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x100, 0, 0x4A);
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0xFE, 0, 0x4A);
+        if (state->enabled != 0) {
+            mnuDrawMantraSprite(0, 0, 0, alpha, 0x10D, 0, 0x4A);
+            mnuDrawMantraSprite(0, 0, 0, alpha, 0x10E, 0, 0x4A);
+            mnuDrawMantraSprite(0, 0, 0, alpha, 0x10F, 0, 0x4A);
+            mnuDrawMantraSprite(0, 0, 0, alpha, 0x110, 0, 0x4A);
+            mnuDrawMantraBackgroundSelectionIcons(drawItem);
+        }
+        mnuDrawMantraSprite(0, 0, 0, alpha, 0x101, 0, 0x53);
+        break;
+    default:
+        break;
+    }
+
+    value = state->value;
+    alpha = (s32)(value * 128.0f);
+    mnuDrawMantraSprite(0, 0, 0, alpha, 0x5D, 0, 0x52);
+    mnuDrawMantraSprite(0, 0, 0, alpha, 0x5E, 0, 0x52);
+    return 0;
+}
 
 MantraDrawItem *mnuRegisterMantraBackgroundMaskDraw(MantraDrawPool *pool) {
     return mnuRegisterMantraDrawItem(pool, 4, mnuUpdateMantraBackgroundMaskFade, mnuDrawMantraBackgroundMaskPulse,
