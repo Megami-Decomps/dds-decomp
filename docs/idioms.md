@@ -6901,3 +6901,19 @@ slot while preparing a zero-length span. The retained C initializes that
 start and emits an additional store, so it is not a matching landing. Do not
 remove the initialization merely to reproduce an undefined local read.
 
+## Actor triangle bands snapshot unsigned alpha values
+
+DDS2 `func_001C5610` reads the canonical actor-panel work, rather than a
+second row projection. Position comes from `activeEntries[index].position`
+after GS setup; all eight `presentation.triangleAlpha` bytes are cached
+before the first triangle callback. The two four-corner bands share their
+literal triangle coordinates, then unconditionally restore alpha mode zero.
+
+The cached alpha values are `u32`: packing them with `alpha << 24` is unsigned
+RGBA arithmetic, not a signed overflowing shift. This real type correction,
+the current position-array owner, and the provider's actual nine `s32`
+arguments produce exact 600-byte retail text. Whole-unit private and live
+checks are 228 match, 0 differ. The retained R1 owner draft and Opal/Obsidian
+reconstruction/review supplied the baseline; no ABI or scheduling controls
+were added.
+
