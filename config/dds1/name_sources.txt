@@ -7594,3 +7594,4 @@
 0x002BF4E0	effDrawSpriteWithCornerFade	inferred	Inferred from the current C implementation in game/code_002BEDC8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00239A90	evtHandleGroupPropertyMenu	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0022E5A0	evtApplyViewerTimelineFrame	inferred	matched-C; src/dds1/game/code_0022D420.c; applies the viewer timeline frame: forward key search to first future frame, per-kind condition calls, feature resets (R2/Purist6c)
+0x00213370	btlUpdateFadeOut	inferred	matched-C; src/dds1/game/code_0020FC48.c; paired with btlUpdateFadeIn: advances table-ordered visibility cells by 0xC0, skips at most two empty wave scans, submits the grid and reduces backdrop alpha; same-TU signed mode snapshot pattern and primary BattleRuntimeState owner (P3/PurC).
