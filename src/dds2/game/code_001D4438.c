@@ -3192,7 +3192,136 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
     btlStartTask(value);
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DBE70);
+extern void btlResetUnitLinks(BtlUnit *unit);
+extern void btlSyncPlayerWork(BtlUnit *unit);
+extern void btlSynchronizePartyActorRecords(BtlUnit *unit, u8 index);
+extern void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta);
+
+void func_001DBE70(ActionStateLink *task) {
+    BtlUnit *unit = task->indexWork.linkedUnit;
+    DatPartyRecord *record;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *spawned;
+    BtlRuntimeTask *delayed;
+    ActionStateLink *linkedCommand;
+    u32 *pendingFlags;
+    u32 linkedFlags;
+    u32 species;
+    u32 flags;
+    u32 unitId;
+    u32 modelVariant;
+    u32 modelId;
+    s32 hasAbility;
+    f32 rate;
+
+    if (!(unit->status.flags & 0x40)) {
+        return;
+    }
+    if (fldReleaseIdleSceneActorResources(unit) == 0) {
+        return;
+    }
+    unit->status.flags &= ~0xC0;
+    record = &unit->partyRecord;
+    func_001AA868(record, 8);
+    if (unit->status.flags & 0x200) {
+        btlSyncPlayerWork(unit);
+    }
+    hasAbility = btlCheckSpecialAbility(&task->unit->partyRecord, 0x280) != 0;
+    btlReleaseUnitResources(unit);
+    btlResetUnitLinks(unit);
+    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.unk18);
+    flags = unit->status.flags;
+    unit->status.flags = flags | 0x301;
+    if (record->flags & 0x1000) {
+        unit->status.flags = flags | 0x1301;
+    }
+    if (record->flags & 0x4000) {
+        unit->status.stateFlags |= 0x2000;
+    }
+    if (unit->partyRecord.status & 0x4000) {
+        unit->status.flags |= 0x20;
+    }
+    if (btlDoesEnabledStatusMatchCurrentId(record, 0xE8)) {
+        func_001ADFE0(unit, 0x100, 2);
+        func_001ADFE0(unit, 0x10, 2);
+        func_001ADFE0(unit, 2, 2);
+        func_001ADFE0(unit, 8, 2);
+    }
+    if (btlDoesEnabledStatusMatchCurrentId(record, 0xE9)) {
+        func_001ADFE0(unit, 1, 2);
+        func_001ADFE0(unit, 0x80, 2);
+    }
+    unit->modelId = 0;
+    if (!(record->flags & 0x10)) {
+        unitId = unit->partyRecord.unitId;
+        modelVariant = unitId;
+    } else {
+        unitId = unit->partyRecord.unitId;
+        modelVariant = unitId + 0x20;
+    }
+    unit->modelVariant = modelVariant;
+    unit->unkDC = 0;
+    unit->combatantKind = unitId + 0x10;
+    if (unit->status.flags & 0x1000) {
+        species = unit->combatantKind;
+        modelId = 0;
+    } else {
+        modelId = unit->modelId;
+        species = unit->modelVariant;
+    }
+    linkedCommand = btlFindUnitByActor(unit);
+    linkedFlags = linkedCommand->pendingFlags;
+    pendingFlags = &linkedCommand->pendingFlags;
+    *pendingFlags = linkedFlags | 0x100;
+    unit->baseColor = 0x80808080;
+    unit->overlayColor = 0x80808080;
+    if (!(unit->partyRecord.status & 0x1000)) {
+        load = btlCreateModelLoadPollTask(unit, modelId, species, 0);
+    } else {
+        load = btlCreateModelLoadPollTask(unit, 0, 0x1F, 0);
+    }
+    rate = 1.0f;
+    load->ownerId = task->unit->owner;
+    btlStartTask(load);
+    spawned = btlCreateGunLoadPollTask(unit);
+    spawned->ownerId = task->unit->owner;
+    btlStartTask(spawned);
+    spawned = btlCreateUnitPositionLerpTowardTargetTask(unit, unit->currentPosition, rate);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = load->handle;
+    btlStartTask(spawned);
+    if (!(unit->status.flags & 0xE0)) {
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->orientation, 0, rate);
+    } else {
+        spawned = btlCreateUnitRotationInterpolationTask(unit, unit->rotation, 0, rate);
+    }
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = load->handle;
+    btlStartTask(spawned);
+    delayed = func_001E5FF8(unit, 0x12);
+    delayed->ownerId = task->unit->owner;
+    delayed->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    delayed->startDelay = 2;
+    delayed->startCondition.value.handle = load->handle;
+    btlStartTask(delayed);
+    spawned = btlCreateUnitBaseLightTask(unit);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = delayed->handle;
+    btlStartTask(spawned);
+    if (!hasAbility) {
+        spawned = fldCreateSceneGroupAction(task, 0x64, 1);
+    } else {
+        spawned = fldCreateSceneGroupAction(task, 0x32, 1);
+    }
+    spawned->ownerId = task->unit->owner;
+    btlStartTask(spawned);
+    if ((task->unit->partyRecord.status & 0x480) && task->indexWork.linkedUnit != task->unit) {
+        btlDispatchStateHandler(task, 0x19);
+    } else {
+        btlDispatchStateHandler(task, 0x1B);
+    }
+}
+
 
 void btlRecordLinkedActorOutcome(ActionStateLink *unit) {
     BtlState *work = (BtlState *)btlGetRuntime();
