@@ -2696,7 +2696,55 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2A30);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3300);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3DC8);
+typedef struct BattleSelectionTrailWork {
+    s32 direction;
+    s32 positions[4];
+    s32 fadeCountdowns[4];
+    s32 targetRow;
+} BattleSelectionTrailWork;
+
+extern const char *D_003BB3B8;
+extern s32 func_001B3FB0(KwlnTask *);
+extern void btlReleaseCmsleffPanelWork(KwlnTask *);
+
+void func_001B3DC8(s32 unused, s32 previousRow, s32 targetRow) {
+    BattleController *battle = (BattleController *)btlGetRuntime();
+    KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(5);
+    BattleSelectionTrailWork *work;
+    s32 distance;
+
+    if (task != NULL) {
+        kwlnTaskDestroyWithHierarchy(task, 0);
+    }
+    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    if (previousRow < targetRow) {
+        distance = (targetRow - previousRow) * 23;
+        work->direction = 1;
+        work->targetRow = targetRow;
+    } else {
+        distance = (previousRow - targetRow) * 23;
+        work->targetRow = targetRow;
+    }
+    if (work->direction == 1) {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] + distance / 4;
+        work->positions[1] = work->positions[3] + distance / 2;
+        work->positions[0] = work->positions[3] + (distance * 3) / 4;
+    } else {
+        work->positions[3] = previousRow * 23;
+        work->positions[2] = work->positions[3] - distance / 4;
+        work->positions[1] = work->positions[3] - distance / 2;
+        work->positions[0] = work->positions[3] - (distance * 3) / 4;
+    }
+    work->fadeCountdowns[0] = 32;
+    work->fadeCountdowns[1] = 24;
+    work->fadeCountdowns[2] = 16;
+    work->fadeCountdowns[3] = 8;
+    task = kwlnTaskCreate(D_003BB3B8, 0x2B0E, 1, 1, func_001B3FB0,
+                          btlReleaseCmsleffPanelWork, (u32)work);
+    func_00101A80(battle->taskParent, task);
+    btlSetTrackedTaskHandle(5, (s32)task);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B3FB0);
 
