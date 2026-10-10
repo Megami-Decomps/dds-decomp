@@ -62,6 +62,23 @@ typedef enum DatPartyFlags {
     DAT_PARTY_FLAG_FRONTLINE = 2
 } DatPartyFlags;
 
+/* Native 0x14-byte roster stat rows; ATTACK also reads count/spacing at +0x11/+0x12. */
+typedef struct EventRosterStat {
+    s16 base;
+    u8 alternateA;
+    u8 alternateB;
+    f32 multiplier;
+    u8 pad08[6];
+    u8 rangeMin;
+    u8 rangeMax;
+    u8 pad10;
+    u8 attackCount;
+    u8 attackSpacing;
+    u8 pad13;
+} EventRosterStat;
+
+typedef char EventRosterStatSizeCheck[sizeof(EventRosterStat) == 0x14 ? 1 : -1];
+
 /* The active roster and saved template bank share this complete record type. */
 typedef struct DatPartyRecord {
     u16 flags;

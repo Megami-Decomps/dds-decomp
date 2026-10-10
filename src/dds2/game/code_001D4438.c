@@ -1503,12 +1503,6 @@ void func_001D5FA8(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
-typedef struct BtlAttackRosterDetail {
-    u8 pad00[0x11];
-    u8 count;
-    u8 spacing;
-    u8 pad13;
-} BtlAttackRosterDetail;
 extern s32 datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
 struct SoundMixer;
@@ -1684,8 +1678,8 @@ void func_001D5FB0(ActionStateLink *action) {
         if (((btlUnitStatusPair(action->unit) & 0x1200) == 0x1200 && action->indexWork.slot == 3) ||
                 (action->unit->status.flags & 0x400) != 0) {
             if ((action->unit->status.flags & 0x200) != 0) {
-                repeatCount = ((BtlAttackRosterDetail *)datRosterDetails)[action->unit->partyRecord.unitId].count;
-                spacing = ((BtlAttackRosterDetail *)datRosterDetails)[action->unit->partyRecord.unitId].spacing;
+                repeatCount = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackCount;
+                spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->resourceIndex].tickCount;
                 spacing = datEnemyRecords[action->unit->resourceIndex].unk48;

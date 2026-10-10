@@ -456,13 +456,6 @@ typedef struct Entry4 {
 
 extern Entry4 D_003862C8[];
 
-typedef struct EventRosterStat {
-    s16 base;             /* 0x00 */
-    u8 alternateA;        /* 0x02 */
-    u8 alternateB;        /* 0x03 */
-    f32 multiplier;       /* 0x04 */
-    u8 pad08[0x0C];
-} EventRosterStat; /* stride 0x14 */
 
 
 /* This separate script context is cleared as one native 24-byte allocation. */

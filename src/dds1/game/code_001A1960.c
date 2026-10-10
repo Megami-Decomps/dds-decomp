@@ -1579,16 +1579,6 @@ typedef struct BattleCommandRangeContext {
     s32 (*commandRangeOverride)(BtlUnit *, s32);
 } BattleCommandRangeContext;
 
-typedef struct EventRosterStat {
-    s16 base;
-    u8 alternateA;
-    u8 alternateB;
-    f32 multiplier;
-    u8 pad08[6];
-    u8 rangeMin;
-    u8 rangeMax;
-    u8 pad10[4];
-} EventRosterStat;
 
 u8 func_001A6968(BtlUnit *unit, s32 command) {
     BattleCommandRangeContext *context = (BattleCommandRangeContext *)btlGetRuntime();

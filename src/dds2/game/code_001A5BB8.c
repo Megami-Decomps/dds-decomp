@@ -4043,16 +4043,6 @@ f32 func_001B0B20(void) {
     return 1.5f;
 }
 
-typedef struct EventRosterStat {
-    s16 base;
-    u8 alternateA;
-    u8 alternateB;
-    f32 multiplier;
-    u8 pad08[6];
-    u8 rangeMin;
-    u8 rangeMax;
-    u8 pad10[4];
-} EventRosterStat;
 
 extern s32 datRosterDetails;
 

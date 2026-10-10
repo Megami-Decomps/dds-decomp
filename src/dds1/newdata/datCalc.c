@@ -412,14 +412,6 @@ typedef struct Entry4 {
 } Entry4;
 
 
-/* Script-visible data tables indexed by roster number or event parameter. */
-typedef struct RosterDetail {
-    s16 baseValue;     /* 0x00 */
-    u8 lowValue;       /* 0x02 */
-    u8 highValue;      /* 0x03 */
-    f32 scale;         /* 0x04 */
-    u8 pad8[0xC];
-} RosterDetail; /* 0x14 */
 
 
 
@@ -1493,7 +1485,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 commandIndex = scriptContext->third;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].lowValue;
+        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].alternateA;
     } else {
         statValue = datCommandRecords[commandIndex].stat11;
     }
@@ -1507,7 +1499,7 @@ s32 evtPushSelectedScaledStat(void) {
     s32 commandIndex = scriptContext->third;
     s32 statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        f32 rosterScale = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].scale;
+        f32 rosterScale = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].multiplier;
         statValue = (s32)((f32)statValue * rosterScale);
     }
     scrSetIntegerReturnValue(statValue);
@@ -1566,7 +1558,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 commandIndex = scriptContext->third;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].highValue;
+        statValue = ((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].alternateB;
     } else {
         statValue = datCommandRecords[commandIndex].stat34;
     }
@@ -1762,7 +1754,7 @@ void evtScriptSelectRandomValue(void) {
 }
 
 void evtPushRosterBaseValue(void) {
-    scrSetIntegerReturnValue(((RosterDetail *)datRosterDetails)[((DatPartyRecord *)D_003C2E78[0])->unitId].baseValue);
+    scrSetIntegerReturnValue(((EventRosterStat *)datRosterDetails)[((DatPartyRecord *)D_003C2E78[0])->unitId].base);
 }
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
