@@ -4154,6 +4154,7 @@
 0x0027E208	btlInitPanelBSprites	inferred	Creates kind 0 emitter and burst pool for btlDrawPanelB. [names_R_FuncNames5.tsv]
 0x0027E240	btlReleasePanelBSprites	inferred	Releases emitter and burst pool paired with btlDrawPanelB. [names_R_FuncNames5.tsv]
 0x0027E270	btlDrawPanelB	inferred	same template as func_0027C468 with id 0x87
+0x0027E360	mnuDrawMantraPanelBTransition	inferred	Panel B draw callback paired with btlInitPanelBSprites and btlReleasePanelBSprites; handles animated panel transitions.
 0x0027FB60	mnuDrawMantraBackdropWithGsTest	inferred	Brackets mantra screen sprites with two GS TEST register values. [names_reviewed22.tsv]
 0x0027FB70	btlDrawPanelC	inferred	same draw template family
 0x0027FC90	mnuDrawMantraPanelBackdropTransition	inferred	Scales backdrop panel draw amount according to fade transition phase and elapsed animation step. [names_reviewed18.tsv]
@@ -4214,6 +4215,7 @@
 0x0028A0F8	mnuSetSelectedMantraOptionFlag	inferred	Maps selected menu option to one of six model flags before calling mdlFlagSet. [names_reviewed18.tsv]
 0x0028A178	mnuFindFirstMatchingListItemIndex	inferred	Returns the first list node whose predicate succeeds, or -1 when none matches. [names_reviewed17.tsv]
 0x0028BAF0	mnuBindMantraMenuSourceRecord	inferred	Stores provided or default mantra source record, decodes packed fields and signals whether present. [names_reviewed18.tsv]
+0x0028BB80	mnuAdvanceMantraSourceTransition	inferred	Native MTR_MSL state diagnostics and source-record consumers: advances party/source selection, node effects, entry/exit animations, timed waits and message handoff.
 0x0028CCA8	mnuStartMantraPanelEntryTransition	inferred	Resets menu transition timer and selects state one, which advances to state three after six frames. [names_reviewed18.tsv]
 0x0028CCB8	mnuStartMantraPanelExitTransition	inferred	Resets menu transition timer and selects state two, which returns to idle after six frames. [names_reviewed18.tsv]
 0x0028CCC8	mnuAdvanceMantraPanelTransitionTimer	inferred	Ticks entry or exit panel transition for six frames and changes menu transition state. [names_reviewed18.tsv]
@@ -4553,6 +4555,7 @@
 0x002B40F8	mnuSeekFirstAvailableStaffListNode	inferred	DDS2 assembly likewise skips disabled or zero-key list nodes before seeking. [names_reviewed13.tsv]
 0x002B4180	mnuSeekSelectedWindowCursor	inferred	seeks selected window list to the cursor's index, resets scale50/54, returns party->selectedWindow [names_M76_MenuLarge.tsv]
 0x002B4730	mnuBuildOwnedSkillBits	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002B4848	ptySkillMenuInitPages	inferred	Paired DDS1 ptySkillMenuInitPages: initializes the selected party member's skill panel, category list and four skill windows; DDS2 native geometry and tertiary sort keys.
 0x002B4C48	mnuDestroySkillMenuWindows	inferred	Destroys panel state, list state and four child windows when menu has active contents. [names_reviewed5.tsv]
 0x002B4CC8	mnuCreateItemState	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B4DE8	mnuCloseItemSelectionState	inferred	Closes selected window if present and releases menu state resource handle. [names_reviewed5.tsv]
@@ -7270,3 +7273,4 @@
 0x001D18D8	btlFinalizeBattleRewards	inferred	Inferred from the current C implementation in game/code_001CFEF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00297970	mnuDrawCampCommandTransition	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A9130	itfEditOverlayColor	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028D7C8	mnuActivateMantraNeighborEdges	inferred	Activates eligible neighboring mantra nodes and their panel transitions; mode 3 recursively visits activated edges, marks nodes visited, and returns the unvisited mode-2 frontier.
