@@ -202,7 +202,7 @@ void func_0026C1F8(s32 parameter) {
 }
 
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
-extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);

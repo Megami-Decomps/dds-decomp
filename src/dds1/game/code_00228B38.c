@@ -53,8 +53,7 @@ extern SolarOverlayShape D_00368310[];
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 object);
 void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
-/* The definition uses legacy K&R parameters. */
-void sdfSubmitGsTestOneRegisterPacket();
+void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 void uiDrawActiveSurfaceRegion(s32 object);
 f32 effMiscRandUnitFloat(s32 seed);

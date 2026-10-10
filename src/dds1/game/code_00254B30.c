@@ -353,7 +353,7 @@ void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 sur
 }
 
 /* Preserve the provider's legacy K&R GS-register argument boundary. */
-extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
