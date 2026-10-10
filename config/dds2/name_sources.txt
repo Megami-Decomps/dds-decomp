@@ -7273,3 +7273,4 @@
 0x001D18D8	btlFinalizeBattleRewards	inferred	Inferred from the current C implementation in game/code_001CFEF8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00297970	mnuDrawCampCommandTransition	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A9130	itfEditOverlayColor	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0028D7C8	mnuActivateMantraNeighborEdges	inferred	Activates eligible neighboring mantra nodes and their panel transitions; mode 3 recursively visits activated edges, marks nodes visited, and returns the unvisited mode-2 frontier.
