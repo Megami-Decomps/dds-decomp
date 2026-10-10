@@ -2293,6 +2293,28 @@ dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
 payloads.
 
+DDS2 `game/code_001442D0::func_00153FA0` provides a packed-record example.
+Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
+halfwords, followed by a float phase. The terminal record encodes both
+coordinates as `0xFFFF`. Read its four-byte representation with fixed-size
+`memcpy` for the sentinel test, then use the actual coordinate members:
+
+```c
+s32 packedCoordinates;
+memcpy(&packedCoordinates, &presets[slot].coordinate, sizeof(packedCoordinates));
+if (packedCoordinates == -1) {
+    return;
+}
+```
+
+A word/coordinate union in the draft added a dependency between the active
+word store and the first coordinate load. The actual pair plus the packed
+snapshot allows the native `lhu` to precede that store; all 82 instruction
+words and all 171 C functions in the owner match. This establishes this
+record's access contract, not a rule to remove genuine heterogeneous unions.
+The preset data remains mutable external data; the sentinel read does not
+justify `const` or a second overlapping record view.
+
 Alias set zero does not force dependencies between all accesses: known
 disjoint locations can still be separated by address analysis. Conversely,
 an integer placeholder for a real pointer can manufacture a dependency even
@@ -4264,12 +4286,18 @@ are owned solely by each function's assembly split; the label-pointer
 array remains a separate shared object.
 
 The retail table's terminal zero words are alignment, not extra cases.
-The natural C switch leaves an eight-byte alignment frontier in the unit
-comparator. Main's clean-clone full DDS1 build rejected it with 52 differing
-bytes, so the text-exact candidate is parked and production remains assembly.
-Do not manufacture cases, data objects, or padding to supply the bytes.
-A future landing needs corrected jump-table/rodata ownership and a passing
-full retail SHA-1, not instruction equality alone.
+Compiling the following blur-diagnostic strings as literals leaves an
+eight-byte alignment gap after the natural 45-entry switch table. Preserve
+those existing format objects as external symbols with `INCLUDE_RODATA`:
+DDS1 `D_0039E170`/`D_0039E188`, DDS2 `D_004112F0`/`D_00411308`.
+The first object starts on a 16-byte boundary after native zero padding;
+`eeas_compat.py` preserves its alignment under the existing data-owner rule.
+The second retains its ordinary eight-byte alignment. No new data object,
+extra switch case, explicit padding or alignment control is needed.
+
+Both 408-byte C bodies and both complete owning units are exact with these
+native format owners, and both full retail SHA-1s pass. Instruction equality
+alone did not establish the earlier candidate's data ownership.
 
 
 
