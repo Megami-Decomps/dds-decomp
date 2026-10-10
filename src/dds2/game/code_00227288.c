@@ -1242,7 +1242,7 @@ extern s32 func_0021C7F8(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 func_0021CF18(BtlLinkedCommand *, s32, s32);
 extern s32 func_0021E8C0(BtlLinkedCommand *);
 extern void func_0021F848(ActionStateLink *, BtlUnit *, u64, u64);
-extern void func_002218C8(void);
+extern void btlSetSpecialEnemyGeometry(void);
 extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
 extern s32 func_00225778(BtlLinkedCommand *, BtlCamState *, s32);
@@ -1542,7 +1542,7 @@ void func_00229728(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetActionScale);
         BTL_INSTALL_CALLBACK(battle->pad610, 0x0, btlRestoreLinkedActorSceneColor);
         BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlMarkSpecialActionUnit);
-        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, func_002218C8);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlSetSpecialEnemyGeometry);
         BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlAdvanceBrahmaRatioOnAction);
         BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, btlGetBrahmaActionScale);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPrepareSpecialActionSelection);

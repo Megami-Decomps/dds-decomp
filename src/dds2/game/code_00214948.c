@@ -3800,7 +3800,7 @@ extern void func_001ADFE0(u32, u32, u32);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
-extern void func_002218C8(void);
+extern void btlSetSpecialEnemyGeometry(void);
 
 extern s32 func_00222450(BtlLinkedCommand *, BtlCamState *, s32);
 
@@ -4933,7 +4933,36 @@ void btlMarkSpecialActionUnit(BtlUnit *actor) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_002218C8);
+void btlSetSpecialEnemyGeometry(void) {
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
+    s32 species;
+
+    while (unit != NULL) {
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x400) {
+                species = unit->partyRecord.unitId;
+                if (species < 0x122) {
+                    if (species >= 0x11D) {
+                        unit->muzzleOffset[0] = 0.0f;
+                        unit->muzzleOffset[1] = -1330.0f;
+                        unit->muzzleOffset[2] = -780.0f;
+                        unit->muzzleOffset[3] = 0.0f;
+                        unit->unkBC = 600.0f;
+                        unit->unkB8 = 1000.0f;
+                        /* Both geometry records share the offset and extents. */
+                        unit->bodyOffset[0] = unit->muzzleOffset[0];
+                        unit->bodyOffset[1] = unit->muzzleOffset[1];
+                        unit->bodyOffset[2] = unit->muzzleOffset[2];
+                        unit->bodyOffset[3] = unit->muzzleOffset[3];
+                        unit->reach = unit->unkBC;
+                        unit->height = unit->unkB8;
+                    }
+                }
+            }
+        }
+        unit = unit->nextActor;
+    }
+}
 
 /* Brahma's action 0x19F updates the second state word, independently of Hekato. */
 s32 btlAdvanceBrahmaRatioOnAction(ActionStateLink *unit) {
@@ -5257,7 +5286,7 @@ void btlRefreshSpecialActionUnits(void) {
         }
         unit = unit->nextActor;
     }
-    func_002218C8();
+    btlSetSpecialEnemyGeometry();
 }
 
 u32 btlOffsetSpecialActionValue(BtlUnit *unit, u32 base) {
