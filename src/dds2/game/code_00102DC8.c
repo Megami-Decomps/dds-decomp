@@ -1503,6 +1503,10 @@ void sdfSetViewFieldOfView(f32 value) {
     D_0037F5EC[0] = value;
 }
 
+INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004112F0);
+
+INCLUDE_RODATA(const s32, "game/code_00102DC8", D_00411308);
+
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C20);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435C24);
@@ -1620,8 +1624,4 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDistanceBlurErrorCount);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnRippleBlurErrorCount);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
-
-INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004112F0);
-
-INCLUDE_RODATA(const s32, "game/code_00102DC8", D_00411308);
 
