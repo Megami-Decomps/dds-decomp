@@ -58,6 +58,24 @@ typedef char MnuMantraGridEntryLayoutAssert[
      (u32)&((MnuMantraGridEntry *)0)->profileFlag == 0x54)
         ? 1 : -1];
 
+typedef struct MantraPrerequisiteRecord {
+    s32 kind;
+    s16 x;
+    s16 y;
+    s8 ids[4];
+    u8 flags[4];
+} MantraPrerequisiteRecord;
+
+extern MantraPrerequisiteRecord D_0036AE80[89];
+
+typedef char MantraPrerequisiteRecordLayoutAssert[
+    (sizeof(MantraPrerequisiteRecord) == 0x10 &&
+     (u32)&((MantraPrerequisiteRecord *)0)->x == 0x04 &&
+     (u32)&((MantraPrerequisiteRecord *)0)->y == 0x06 &&
+     (u32)&((MantraPrerequisiteRecord *)0)->ids == 0x08 &&
+     (u32)&((MantraPrerequisiteRecord *)0)->flags == 0x0C)
+        ? 1 : -1];
+
 #endif
 
 #endif

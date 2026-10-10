@@ -5,15 +5,6 @@
 #include "mnu_scene_work.h"
 #include "sdf_grid.h"
 
-typedef struct MantraNeighborRecord {
-    s32 kind;
-    u8 pad04[4];
-    s8 neighbors[4];
-    u8 edgeFlags[4];
-} MantraNeighborRecord;
-
-
-extern MantraNeighborRecord D_0036AE80[89];
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 
@@ -23,22 +14,22 @@ extern u32 D_003E274C[];
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
 
 u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
-    MantraNeighborRecord *record = &D_0036AE80[scene->sceneId];
+    MantraPrerequisiteRecord *record = &D_0036AE80[scene->sceneId];
     u32 flags = 0x100;
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
         flags = 0x101;
     }
-    if (states[record->neighbors[direction]].state == 1) {
+    if (states[record->ids[direction]].state == 1) {
         flags |= 0x12;
     }
-    if (states[record->neighbors[direction]].state == 2) {
+    if (states[record->ids[direction]].state == 2) {
         flags |= 0x10;
     }
-    if (prfGetCapValue((u16)record->neighbors[direction]) ==
-        ptyGetProfileRecordValue(target->partyRecord, (u16)record->neighbors[direction])) {
+    if (prfGetCapValue((u16)record->ids[direction]) ==
+        ptyGetProfileRecordValue(target->partyRecord, (u16)record->ids[direction])) {
         flags |= 4;
     }
-    if (record->edgeFlags[direction] & 1) {
+    if (record->flags[direction] & 1) {
         flags |= 8;
     }
     return flags;
@@ -61,7 +52,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
     MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;
     MnuMantraNodeState *states;
-    MantraNeighborRecord *record;
+    MantraPrerequisiteRecord *record;
     s32 cellWidth;
     s32 cellHeight;
     s8 i;
@@ -80,8 +71,8 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
     if (record->kind == 0) {
         cellWidth = grid->cellWidth;
         cellHeight = grid->cellHeight;
-        for (i = 0; i < 4 && record->neighbors[i] != 0; i++) {
-            if (states[record->neighbors[i]].state != 0) {
+        for (i = 0; i < 4 && record->ids[i] != 0; i++) {
+            if (states[record->ids[i]].state != 0) {
                 prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
             }
         }
