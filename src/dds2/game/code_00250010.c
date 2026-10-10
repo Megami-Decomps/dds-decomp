@@ -488,7 +488,7 @@ void evtViewerDrawFrameChangeRow(SdfListHead *list, s32 x, s32 y, u32 index, Evt
     }
 }
 
-extern void func_00249088();
+extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern void evtViewerDrawFrameChangeRow(SdfListHead *list, s32 x, s32 y, u32 index, EvtRuntime *ctx);
 
 s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
@@ -538,7 +538,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
             evtViewerDispatchFlagMode(ctx);
-            func_00249088(ctx->curFrame, ctx);
+            evtApplyViewerTimelineFrame(ctx->curFrame, ctx);
         }
     }
     return 0;
@@ -2006,13 +2006,13 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->value = runtime->frameGroup->metadata.value;
             runtime->valueMin = 0;
             runtime->valueMax = runtime->headerThird - 1;
-            func_00249088(runtime->curFrame, runtime);
+            evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
             evtViewerPushCommandHistory(7, 180, 120, runtime);
             break;
         case 1:
             runtime->groupFirst = 0;
             runtime->groupCursor = 0;
-            func_00249088(runtime->curFrame, runtime);
+            evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
             evtViewerPushCommandHistory(17, 180, 120, runtime);
             break;
         case 2:
@@ -4522,7 +4522,6 @@ extern void dds3SetCameraFieldOfView(EffWorldNode *, f32);
 extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
 extern s32 evtPreloadBgm(s32);
 extern s32 evtIsBgmLoaded(s32);
-extern void func_00249088(s32, void *);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32, s32, s32);
 extern void kwlnFadeBackgroundStartIn(s32);
@@ -5208,7 +5207,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
         kwlnFadeBackgroundStartOut(0);
     }
     evtViewerDispatchFlagMode(runtime);
-    func_00249088(runtime->curFrame, runtime);
+    evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
     evtViewerDispatchFlagMode(runtime);
     func_0035B6E0("SetGameData PM2 Version = %d Stageno = %d\n",
         work->sub->kind, ((EvtPmdWorldResource *)work->mainEntry2Data)->area);

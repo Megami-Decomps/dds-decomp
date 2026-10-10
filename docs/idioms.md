@@ -6942,3 +6942,12 @@ together: the unit gates 59 match, 0 differ. The truthful `EvtRuntime *`
 declaration closure gates the event-viewer unit 31/0 and `code_00235270`
 128/0. Credit Purist6c's corrected reconstruction and RTL lifetime analysis.
 
+DDS2 `func_00249088` additionally calls `func_00247DE0` for each active
+interval, after `func_00247858`; this real second call keeps the interval
+length live. Porting the same cursor loop with that native extra work matches
+the 1168-byte provider and the 212-byte resolver on the first form: 63 match,
+0 differ. Consolidating the two provider declarations in `code_00250010`
+into one truthful `EvtRuntime *` declaration gates 128 match, 0 differ.
+Both games' nearest-key helpers read and write only word zero of the incoming
+distance pointer, so `bestDistance` is a scalar, not a second parameter view.
+

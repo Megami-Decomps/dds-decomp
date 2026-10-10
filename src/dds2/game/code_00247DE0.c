@@ -56,7 +56,7 @@ extern void effSetCh76Id(SdfTex *sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
 
-void func_00249088(s32 arg0, void *arg1);
+void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
 
@@ -365,7 +365,179 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
     evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_00247DE0", func_00249088);
+extern void evtViewerClampMovieTimes(s32, EvtRuntime *);
+extern void evtViewerSyncWorldGroups(u32, EvtRuntime *);
+extern void evtViewerApplyGlyphLodChannel(s32, EvtRuntime *);
+extern void func_00249C40(s32, EvtRuntime *);
+extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
+extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
+extern void func_0024A158(s32, EvtRuntime *);
+extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
+extern void func_0024A400(EvtRuntime *);
+extern s32 evtViewerTestIndexedCondition(u32);
+extern void func_00247858(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void func_00247EE0(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void func_00248000(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s16);
+extern void evtResetUnitVectorSlots();
+extern void kwlnCancelConfiguredFadeFrames(void);
+extern u8 kwlnDrawOverlayEnabled;
+extern EvtRuntimeGroup *D_004372B8;
+
+void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    EvtRuntimeChild *other;
+    EvtRuntimeChild *selected;
+    s32 difference;
+    s32 bestDistance;
+    s32 conditionIndex;
+    s16 duration;
+    s16 offset;
+
+    viewer->blurRectangleEnabled = 0;
+    viewer->texturedBlurEnabled = 0;
+    viewer->flags &= ~2;
+    viewer->colorRectangleEnabled = 0;
+    viewer->flags &= ~4;
+    conditionIndex = 0;
+    viewer->texturedSquareEnabled = 0;
+    viewer->filterBlurEnabled = 0;
+    viewer->staggeredBlurEnabled = 0;
+    viewer->framebufferQuadEnabled = 0;
+    evtResetUnitVectorSlots();
+    evtViewerClampMovieTimes(time, viewer);
+    evtViewerSyncWorldGroups(time, viewer);
+    evtViewerApplyGlyphLodChannel(time, viewer);
+    func_00249C40(time, viewer);
+    evtViewerActivateWindowForGlyphEntry(time, viewer);
+    evtViewerCountFlaggedUpdates(viewer);
+    func_0024A158(time, viewer);
+    evtViewerUpdateTimedAction(viewer);
+    func_0024A400(viewer);
+
+    for (group = viewer->groups; group != NULL; group = group->next) {
+        if (group->type == 1) {
+            evtStepPolygonMovieConditionalKeys(group, time);
+            continue;
+        }
+        for (child = group->children; child != NULL; child = child->next) {
+            switch (group->type) {
+            case 3:
+            case 20:
+            case 21:
+            case 26:
+                duration = child->p08.sh[1];
+                if (duration == 0) {
+                    difference = viewer->headerThird - child->frame;
+                } else {
+                    difference = duration - child->frame;
+                    if (difference < 0) {
+                        difference = 0;
+                    }
+                }
+                break;
+            case 18:
+                duration = child->p08.sh[0];
+                if (duration == 0) {
+                    difference = viewer->headerThird - child->frame;
+                } else {
+                    difference = duration - child->frame;
+                    if (difference < 0) {
+                        difference = 0;
+                    }
+                }
+                break;
+            case 9:
+                other = child->next;
+                while (other != NULL && other->p08.sh[0] != child->p08.sh[0]) {
+                    other = other->next;
+                }
+                if (other != NULL) {
+                    difference = other->frame - child->frame;
+                } else {
+                    difference = viewer->headerThird - child->frame;
+                }
+                break;
+            default:
+                difference = child->duration;
+                break;
+            }
+
+            if ((difference == 0 && time == child->frame) ||
+                (difference > 0 && time >= child->frame &&
+                 time < child->frame + difference)) {
+                func_00247858(group, child, time, difference, viewer);
+                func_00247DE0(group, child, time, difference, viewer);
+            } else {
+                func_00247EE0(group, child, time, difference, viewer);
+            }
+        }
+    }
+
+    bestDistance = 10000;
+    D_004372B8 = NULL;
+    for (group = viewer->groups; group != NULL; group = group->next) {
+        offset = group->metadata.value;
+        child = group->children;
+        for (; child != NULL; child = child->next) {
+            if (group->type == 2) {
+                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) == 0) {
+                    continue;
+                }
+            } else {
+                if (group->type == 16 || group->type == 17 || group->type == 12) {
+                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) == 0) {
+                        continue;
+                    }
+                }
+            }
+            if (time < child->frame + offset) {
+                break;
+            }
+        }
+
+        selected = child != NULL ? child->prev : group->lastChild;
+        if (group->type == 2 || group->type == 16 ||
+            group->type == 17 || group->type == 12) {
+            switch (group->type) {
+            case 2:
+                conditionIndex = 1;
+                break;
+            case 12:
+            case 16:
+            case 17:
+                conditionIndex = 3;
+                break;
+            }
+            while (selected != NULL) {
+                s16 condition;
+
+                condition = (s16)selected->body.words[conditionIndex];
+                if (evtViewerTestIndexedCondition(condition) == 1) {
+                    break;
+                }
+                selected = selected->prev;
+            }
+        }
+        func_00248000(group, child, selected, time, &bestDistance, viewer, offset);
+    }
+
+    if (D_004372B8 != NULL) {
+        viewer->fallbackEntry = (s32)D_004372B8->info;
+        evtViewerApplySelectedEntry(viewer);
+    }
+    func_00248B80(time, viewer);
+    if (viewer->flags & 1) {
+        if (!(viewer->flags & 2)) {
+            kwlnCancelConfiguredFadeFrames();
+        }
+        if (!(viewer->flags & 4)) {
+            kwlnDrawOverlayEnabled = 0;
+        }
+    }
+}
+
+
 
 /* Returns the address word of the nearest kind-2 key at/before the current
  * frame, or zero. Equal-distance ties retain the first key visited. */
@@ -1380,7 +1552,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
         case 0:
             key->frame = viewer->value - track->metadata.value;
             evtReorderListNodes(track);
-            func_00249088(viewer->curFrame, viewer);
+            evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
             break;
         case 9:
             switch (kind) {
@@ -1418,7 +1590,7 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     if (((u32)(value << 16) >> 28) != 0) {
         entry->p08.h[1] = 0;
     }
-    func_00249088(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1456,7 +1628,7 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EvtRuntime *v
                 break;
             }
         }
-        func_00249088(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1473,7 +1645,7 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
     entry = evtEventViewerGetPendingNode(viewer);
     if (entry != 0) {
         entry->p0C.i = viewer->value;
-        func_00249088(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1495,7 +1667,7 @@ u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EvtRuntime *viewer) {
             src++;
             dst++;
         } while (index >= 0);
-        func_00249088(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1514,7 +1686,7 @@ s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     }
     entry->p08.f = viewer->floatEditX;
     entry->p0C.f = viewer->floatEditY;
-    func_00249088(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1524,7 +1696,39 @@ u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00247DE0", evtViewCmdResolveSlot);
+s32 evtViewCmdResolveSlot(s32 operation, void *argument, EvtRuntime *viewer) {
+    s32 count = 0;
+    EvtRuntimeChild *key;
+    EvtRuntimeGroup *group;
+    s32 selection;
+
+    key = evtEventViewerGetPendingNode(viewer);
+    selection = viewer->groupFirst + viewer->groupCursor;
+    if (selection == 0) {
+        key->p10.h[0] = 0;
+    } else if (selection == 1) {
+        key->p10.h[0] = 1;
+    } else {
+        s32 ordinal = selection - 2;
+
+        group = viewer->groups;
+        while (group != NULL) {
+            if (group->type == 0x18) {
+                if (count == ordinal) {
+                    u16 entry = group->entryHeader;
+                    key->p10.h[0] = entry + 2;
+                    break;
+                }
+                count++;
+            }
+            group = group->next;
+        }
+    }
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
+
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
@@ -1533,7 +1737,7 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     entry->p0C.b[0] = viewer->shadowMode;
     entry->p0C.b[1] = viewer->shadowAlpha;
     entry->p14.f = viewer->shadowY;
-    func_00249088(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1627,7 +1831,7 @@ s32 func_0024D148(s32 unused0, s32 unused1, EvtRuntime *viewer) {
         memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
         break;
     }
-    func_00249088(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1692,7 +1896,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->voiceMessage);
     }
     if (viewer->curFrame != viewer->previousGlyphPosition) {
-        func_00249088(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     }
     viewer->previousGlyphPosition = viewer->curFrame;
     if (viewer->flags & 8) {
@@ -1731,7 +1935,7 @@ void *evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     void *viewer;
 
     viewer = (void *)kwlnTaskGetUserValue(task);
-    func_00249088(((EvtRuntime *)viewer)->curFrame, viewer);
+    evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
     func_00101968(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerUpdateFrame;
