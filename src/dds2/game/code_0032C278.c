@@ -1076,7 +1076,28 @@ void sdfAppendDmaSecondary(SdfListHead *list, u32 source, SdfDmaNode *node) {
     sdfAppendReferencePacket(list, (u32)node);
 }
 
-INCLUDE_ASM(const s32, "game/code_0032C278", sdfPrepareFrameDepthPacket);
+void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex) {
+    SdfGraphObj *view = packet->source;
+    u64 frameRegister;
+    u64 depthRegister;
+    s16 widthPages;
+
+    if (packet->mode == 0) {
+        frameRegister = 0x4C;
+        depthRegister = 0x4E;
+    } else {
+        frameRegister = 0x4D;
+        depthRegister = 0x4F;
+    }
+    widthPages = (view->width + 63) >> 6;
+    packet->frame.value = ((u64)packet->frameMask << 32) |
+        (u64)(view->buffers[bufferIndex]->word >> 11) |
+        ((s64)(view->bufferFormat << 24) | ((s64)widthPages << 16));
+    packet->frame.registerId = frameRegister;
+    packet->zbuf.value = (s64)(view->auxiliaryFormat << 24) |
+        (u64)(view->buffers[2]->word >> 11);
+    packet->zbuf.registerId = depthRegister;
+}
 
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
     sdfInitializeDmaReferenceTag(&packet->packetHeader, 2);
