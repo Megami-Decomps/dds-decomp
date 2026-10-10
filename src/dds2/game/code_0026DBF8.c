@@ -2748,7 +2748,7 @@ MantraIconEntry *mnuClaimMantraIconEntry(MantraIconPool *pool, u32 flags) {
 }
 
 extern u32 func_00275CE8();
-extern u32 func_00277F38();
+extern s32 func_00277F38(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 s32 mnuDrawMantraFadeIcon(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 s32 mnuDrawMantraFadeIcon2(s32, s32, s32, s32, MantraIconPool *, MantraIconEntry *);
 
@@ -2945,7 +2945,136 @@ INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425828);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275CE8);
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00277F38);
+s32 func_00277F38(s32 x, s32 y, s32 z, s32 amount, MantraIconPool *pool, MantraIconEntry *icon) {
+    s8 offsets[3][2] = {{0, -5}, {-4, 3}, {4, 3}};
+    s32 drawX;
+    s32 drawY;
+    s32 accentAlpha;
+    s32 drawAlpha;
+    f32 ratio;
+    f32 fade;
+    f32 pulseAlpha;
+
+    switch (icon->state) {
+    case 1:
+    case 5:
+        ratio = icon->timer / 10.0f;
+        drawY = y + icon->y;
+        drawX = x + icon->x;
+        drawAlpha = amount * ratio;
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAF, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA6, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA7, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA8, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA9, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAA, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAB, 0, 0x53);
+        accentAlpha = drawAlpha * 0.6f;
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAC, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAD, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAE, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
+        break;
+    case 2:
+        drawAlpha = amount;
+        pulseAlpha = amount;
+        drawX = x + icon->x;
+        drawY = y + icon->y;
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAF, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA6, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA7, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA8, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA9, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAA, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAB, 0, 0x53);
+        accentAlpha = pulseAlpha * 0.6f;
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAC, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAD, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAE, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
+        ratio = icon->timer / 50.0f;
+        ratio = (sdfSinPoly(ratio * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+        pulseAlpha *= ratio;
+        mnuDrawMantraSprite(drawX, drawY, z, pulseAlpha, 0xB0, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, amount * (1.0f - ratio), 0xB1, 0, 0x53);
+        break;
+    case 3:
+    case 6:
+        ratio = icon->timer / 10.0f;
+        drawY = y + icon->y;
+        drawX = x + icon->x;
+        drawAlpha = amount * (1.0f - ratio);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAF, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA6, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA7, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA8, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xA9, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAA, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAB, 0, 0x53);
+        accentAlpha = drawAlpha * 0.6f;
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAC, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAD, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xAE, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
+        break;
+    case 4:
+    case 9:
+        break;
+    case 8:
+        drawX = x + icon->x;
+        drawY = y + icon->y;
+        ratio = icon->timer / 30.0f;
+        if (icon->timer < 13) {
+            fade = icon->timer / 13.0f;
+        } else {
+            fade = 1.0f;
+        }
+        drawAlpha = amount * ratio;
+        ratio = (1.0f - fade) * 3.0f;
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAF, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, drawAlpha, 0xA6, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, drawAlpha, 0xA7, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, drawAlpha, 0xA8, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, drawAlpha, 0xA9, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, drawAlpha, 0xAA, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, drawAlpha, 0xAB, 0, 0x53);
+        accentAlpha = drawAlpha * 0.6f;
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, accentAlpha, 0xAC, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, accentAlpha, 0xAD, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, accentAlpha, 0xAE, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
+        accentAlpha = drawAlpha * 0.2f;
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xB0, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, accentAlpha, 0xB1, 0, 0x53);
+        break;
+    case 7:
+        drawX = x + icon->x;
+        drawY = y + icon->y;
+        if (icon->timer < 10) {
+            ratio = icon->timer / 10.0f;
+        } else {
+            ratio = 1.0f;
+        }
+        ratio = 1.0f - ratio;
+        drawAlpha = amount * ratio;
+        ratio = (1.0f - ratio) * 3.0f;
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xAF, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, drawAlpha, 0xA6, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, drawAlpha, 0xA7, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, drawAlpha, 0xA8, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, drawAlpha, 0xA9, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, drawAlpha, 0xAA, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, drawAlpha, 0xAB, 0, 0x53);
+        accentAlpha = drawAlpha * 0.6f;
+        mnuDrawMantraSprite(drawX + offsets[0][0] * ratio, drawY + offsets[0][1] * ratio, z, accentAlpha, 0xAC, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[1][0] * ratio, drawY + offsets[1][1] * ratio, z, accentAlpha, 0xAD, 0, 0x53);
+        mnuDrawMantraSprite(drawX + offsets[2][0] * ratio, drawY + offsets[2][1] * ratio, z, accentAlpha, 0xAE, 0, 0x53);
+        mnuDrawMantraSprite(drawX, drawY, z, drawAlpha, 0xB2, 0, 0x53);
+        break;
+    }
+    return 0;
+}
+
 
 MantraDrawItem *mnuRegisterMantraIconListADraw(MantraDrawPool *pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 2, mnuUpdateMantraFadeA, mnuDrawMantraIconList,
@@ -3766,7 +3895,7 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
 
 extern f32 effMiscRandUnitFloat(void *state);
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378C8);
+
 
 void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
     u8 table[4] = {0, 20, 40, 60};
