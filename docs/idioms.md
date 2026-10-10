@@ -2466,6 +2466,27 @@ used to turn this unresolved case green.
 
 ## Branch-likely
 
+### Result helpers and controllers share compilation ownership
+
+DDS1 `func_00268AB8` (644 bytes) and DDS2 `func_002A05C0` (788 bytes)
+each had a sole BEQL/BEQ difference. Their real preceding increment helpers,
+`func_002687C0` and `func_002A0278`, supply the same-unit nothrow information
+when retained with their controllers in `code_002665E0` and `code_0029DF18`.
+Restoring that contiguous ownership matches both complete controllers.
+
+The earlier no-sibling-call boundary inference was refuted independently.
+All four detected DDS2 late-call tails pass live local palette buffers to the
+draw provider. Those escaped stack addresses themselves prevent a sibling
+jump; a sequence of JAL tails does not establish a compiler option. The eight
+previous DDS2 result bodies remain exact with sibling optimization enabled.
+Complete merged source/data checks are DDS1 73/0 and DDS2 82/0, and both
+retail images remain byte-identical after removing the unnecessary flags.
+
+Use the actual helper definition and audit every affected body and section.
+A visibility stub or isolated exact flag probe cannot establish ownership.
+Verify the effective compiler options, too: `tools/cc.sh` appends unit options
+after extra options, so an extra option can be overridden by the unit's flag.
+
 The `L` bit describes delay-slot execution, not the source comparison:
 `beq`/`bne`/`bc1f` execute their slot on both paths, whereas their likely
 forms annul it when the branch is not taken. Do not infer `==` versus `!=`,
