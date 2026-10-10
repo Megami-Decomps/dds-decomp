@@ -4000,7 +4000,71 @@ extern s32 func_00261670(MenuTerminalContext *);
 extern s32 func_002619A8(MenuTerminalContext *, s32);
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_002655C0);
+s32 func_002655C0(KwlnTask *callback) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
+    s32 slotIndex = func_00265038();
+    s32 *popup = &context->popupState;
+    s32 dispatch = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
+    s32 choice;
+
+    if (dispatch != 0) {
+        return dispatch;
+    }
+    if (*popup == 0 && evtGetMessageWindowControlState() == 0) {
+        s32 rewardState = context->rewardGranted;
+        if (rewardState == 1) {
+            if (evtIsLastSlot(slotIndex) == 0) {
+                dspStartEntry(0x29);
+            } else {
+                dspStartEntry(0x2B);
+            }
+            context->rewardGranted = 2;
+            mnuSetFlagForMenuEntry(slotIndex);
+            return 0;
+        }
+
+        choice = context->ownedWindows[0]->list->cursor->camp.value + 1;
+        if (context->advancedSlots != 0) {
+            switch (choice) {
+            case 1:
+                func_00261670(context);
+                mnuSetPopupEntryFlagged(popup, D_003CE4B4);
+                break;
+            case 2:
+                func_002619A8(context, 1);
+                mnuSetPopupEntryFlagged(popup, D_003CE4D0);
+                break;
+            case 3:
+                func_002619A8(context, 3);
+                mnuSetPopupEntryFlagged(popup, D_003CE4EC);
+                break;
+            case 4:
+                mnuRebuildCampSaleItemWindow(context);
+                mnuSetPopupEntryFlagged(popup, D_003CE508);
+                break;
+            }
+        } else {
+            switch (choice) {
+            case 2:
+                mnuSetPopupEntryFlagged(popup, D_003CE4D0);
+                break;
+            case 3:
+                mnuSetPopupEntryFlagged(popup, D_003CE4EC);
+                break;
+            case 1:
+                mnuSetPopupEntryFlagged(popup, D_003CE4B4);
+                break;
+            case 4:
+                if (rewardState == 2) {
+                    mnuRebuildCampSaleItemWindow(context);
+                }
+                mnuSetPopupEntryFlagged(popup, D_003CE508);
+                break;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 func_002657F8(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
