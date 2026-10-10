@@ -1365,11 +1365,17 @@ typedef struct MesWindowList {
     s8 state;
     u8 pad01[3];
     s32 window[9];
-    u8 pad28[0x18];
+    u8 pad28[4];
+    s16 alpha; /* 001ADECC..001ADF54: signed halfword opacity and clamps. */
+    u8 pad2E[2];
+    BattlePanelColors colors; /* 001AE064..001AE14C: four corner colors. */
     s32 x;
     s32 y;
     MesWindowConfig config;
 } MesWindowList;
+typedef char MesWindowListSizeCheck[sizeof(MesWindowList) == 0x6C ? 1 : -1];
+typedef char MesWindowListAlphaOffsetCheck[((u32)&((MesWindowList *)0)->alpha == 0x2C) ? 1 : -1];
+typedef char MesWindowListColorsOffsetCheck[((u32)&((MesWindowList *)0)->colors == 0x30) ? 1 : -1];
 
 typedef struct ItfMesSub ItfMesSub;
 
