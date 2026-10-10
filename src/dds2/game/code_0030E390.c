@@ -288,10 +288,98 @@ void fldSetMapRequestInterval(MapRequestState *queue, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EF90);
+void func_0030EF90(MapRequestState *ring) {
+    s32 remaining;
+    s32 pending;
+    u16 limit;
+    MapRequestNode *first;
+    MapRequestNode *node;
+
+    remaining = ring->count;
+    first = ring->third;
+    if (--remaining == -1) {
+        goto done;
+    }
+    if (first->active == 0) {
+        goto done;
+    }
+    first->active++;
+    pending = first->active < ring->arg;
+    limit = ring->arg;
+    if (!pending) {
+        node = first->next;
+        first->active = 0;
+        ring->third = node;
+        goto loop;
+    }
+    node = first->next;
+    goto loop;
+
+advance:
+    node = node->next;
+loop:
+    if (--remaining == -1) {
+        goto done;
+    }
+    if (node->active == 0) {
+        goto done;
+    }
+    node->active++;
+    if (node->active < (s16)limit) {
+        goto advance;
+    }
+    {
+        MapRequestNode *nextHead = ring->third->next;
+        node->active = 0;
+        node = node->next;
+        ring->third = nextHead;
+    }
+    goto loop;
+
+done:
+    return;
+}
 
 /* Report normalized progress for each active request in the ring. */
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030F038);
+void func_0030F038(MapRequestState *ring) {
+    MapRequestNode *node;
+    s32 remaining;
+    s32 end;
+    f32 one;
+
+    node = ring->third;
+    remaining = ring->count;
+    end = -1;
+    one = 1.0f;
+    goto loop;
+
+advance:
+    node = node->next;
+loop:
+    remaining--;
+    if (remaining == end) {
+        goto done;
+    }
+    if (node->active == 0) {
+        goto done;
+    }
+    {
+        f32 progress;
+        void (*callback)(s32, s32, s32, MapRequestState *, MapRequestNode *, f32) = ring->callback;
+
+        progress = (f32)node->active / (f32)ring->arg;
+        progress = one - progress;
+        if (callback == NULL) {
+            goto advance;
+        }
+        callback(node->value, node->argument1, node->argument2, ring, node, progress);
+    }
+    node = node->next;
+    goto loop;
+
+done:
+    return;
+}
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
     struct SdfMemBlock *allocation = sdfReadNamedResource(name, &record->resourceAddress, 0);
