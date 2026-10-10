@@ -6965,3 +6965,32 @@ into one truthful `EvtRuntime *` declaration gates 128 match, 0 differ.
 Both games' nearest-key helpers read and write only word zero of the incoming
 distance pointer, so `bestDistance` is a scalar, not a second parameter view.
 
+
+## Explicit fixed-step and ramped-step assignments preserve local allocation
+
+DDS1 `game/code_002665E0::func_002687C0` advances either the level or
+profile reward row. A positive pending amount selects a fixed increment of
+10000 when `skipRamp` is set; otherwise it increments/clamps the frame
+counter and computes the ramped increment. Keep these two assignments in
+their actual `if/else` arms, followed by the shared fast-completion override
+and pending subtraction/clamp.
+
+Preinitializing `step = 10000` before the ramp test is behaviorally equivalent,
+but leaves six differing instruction words: two mirrored address/byte
+register swaps. Before local allocation, its constant assignment falls
+between the row-address addition and signed `skipRamp` load. The address
+quantity has two references and a live interval of four allocation positions
+(priority 5000); the byte quantity has two references over two positions
+(priority 10000). The byte therefore takes `$2` and the address takes `$3`.
+
+With the explicit fixed-step `else` assignment, both intervals have length
+two and priority 10000. Local allocation selects the address first: `$2` for
+the address and `$3` for the byte, matching both native paths. Native compiler
+entry/return observation reproduces the uninstrumented assembly exactly;
+the complete 756-byte body and all five C functions in its owner match.
+
+This is a control-flow reconstruction backed by the actual fixed/ramped
+calculation, not a reason to reorder statements or extend unrelated values.
+Inspect the pre-allocation stream and real quantity priorities before applying
+it elsewhere. Preserve Opal's full reconstruction and Azure's owner/compiler
+admission credit.
