@@ -31,7 +31,7 @@ typedef struct ConsBuf {
     u8 *packetStart; /* 0x4: beginning of the DMA range */
     u8 *currentTag; /* 0x8: reserved, not-yet-finalized GIF tag */
     void *dmaChannel; /* 0xC */
-    s32 bufferAddresses[2]; /* 0x10: CPU-side addresses, kept as signed words */
+    u8 *bufferAddresses[2]; /* 0x10: start of each alternating packet buffer */
     s32 bufferBytes; /* 0x18: byte capacity of each buffer */
     u16 activeBufferIndex; /* 0x1C */
     u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
@@ -48,7 +48,9 @@ s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
 void *sceDmaGetChan(s32 id);
-extern s32 D_003BDA34;
+struct SdfTex;
+u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
+extern struct SdfTex *D_003BDA34;
 extern DevConsState *D_003BD3C0;
 extern u32 D_00398660[];
 extern u32 D_003987E0[];
@@ -197,7 +199,40 @@ void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E4428);
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E45D0);
+/* Initialize both uncached packet buffers and complete the GS setup packet.
+ * Reserve the first glyph tag only after the setup values have been written. */
+void func_002E45D0(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
+    u32 ringAddress;
+    u8 *ring;
+    vu64 *packet;
+    u64 textureState;
+    s32 halfBufferBytes = bufferBytes >> 1;
+
+    ringAddress = ((u32)buffer & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    ring = (u8 *)ringAddress;
+    packetBuffers->bufferBytes = halfBufferBytes;
+    packetBuffers->bufferAddresses[0] = ring;
+    packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
+    packetBuffers->packetStart = ring;
+    packetBuffers->activeBufferIndex = 0;
+    textureState = sdfTexGetPrimaryTextureState(D_003BDA34);
+    packet = (vu64 *)ring;
+    packet[0] = 0x10AB400000008005ULL;
+    packet[1] = 0xE;
+    packet[2] = 0x44;
+    packet[3] = 0x42;
+    packet[4] = 0x3000D;
+    packet[5] = 0x47;
+    packet[6] = 0;
+    packet[7] = 8;
+    packet[8] = 1;
+    packet[9] = 0x14;
+    packet[10] = textureState;
+    packet[11] = 6;
+    packetBuffers->currentTag = ring + 0x60;
+    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+    packetBuffers->dmaChannel = sceDmaGetChan(2);
+}
 
 typedef struct DevConsStackPackets {
     u8 header[0x30];
