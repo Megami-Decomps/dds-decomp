@@ -61,7 +61,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
-void func_0022E5A0(s32 arg0, void *arg1);
+void func_0022E5A0(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);

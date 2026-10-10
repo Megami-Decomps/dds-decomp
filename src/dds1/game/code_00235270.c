@@ -53,7 +53,7 @@ extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern void func_0022E5A0();
+extern void func_0022E5A0(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
