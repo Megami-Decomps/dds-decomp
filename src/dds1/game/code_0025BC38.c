@@ -434,7 +434,7 @@ extern const MnuPanelRegions D_003AFA18;
 extern u32 mnuGetSelectedNodeValue(void);
 extern s32 prfReqCheckWithFallback(void *, u16);
 extern s32 mdlFlagTest(s32);
-extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
