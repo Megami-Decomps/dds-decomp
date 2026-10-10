@@ -1746,6 +1746,29 @@ first ~30 insns of the loop. Example (DDS2 `func_0025FE70`): a `continue` chain
 followed by two separate `{ result = 1; break; }` exits; one merged
 `if (a || b) continue; result = 1; break;` rotates differently.
 
+### Sibling tail recursion can become a loop after invariant motion
+
+A native backedge can come from tail recursion rather than a source loop.
+The task-hierarchy diagnostics (`func_00101368` in DDS1 and `func_00101250`
+in DDS2) print one task, recurse through its children, restore the indentation
+buffer, and then visit its sibling with a conditional tail call:
+
+```c
+if (task->next != NULL) {
+    func_00101250(task->next, depth);
+}
+```
+
+This complete recursive traversal matches both 216-byte bodies. An equivalent
+written `do` loop hoists the indentation address, a space constant and the
+scaled depth, increasing register pressure and overrunning the native body.
+Restoring the recursive traversal retains the native per-visit calculations.
+Explicit stores in the two branch-character cases also preserve the native
+branches; a ternary value assignment lowers differently.
+
+Use recursion when the hierarchy and native value lifetimes support it; a
+backedge alone does not establish the original source construct.
+
 ### Loops that loop.c never optimises: a branch from outside into the test
 
 A loop that retail enters by a branch from outside straight into its bottom test,
