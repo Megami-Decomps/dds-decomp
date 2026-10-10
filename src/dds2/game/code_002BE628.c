@@ -426,6 +426,15 @@ void func_002BF478(s32 unusedX, s32 unusedY, s32 unusedDepth,
 }
 
 
+typedef struct MenuQueuedRenderContext {
+    s32 panelIndex;
+    MenuPageWindow *menu;
+    MenuPoint origin;
+    MenuPoint extent;
+} MenuQueuedRenderContext;
+typedef char MenuQueuedRenderContext_size_check[
+    sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF660);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
@@ -439,7 +448,7 @@ extern char D_00437C68[]; /* "%2d", shared with func_002BF830. */
 extern u32 uiBlendColors(u32, u32, u32);
 struct MenuPageSpriteSlot;
 extern void func_002BE438(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
-extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, s32 *, s32);
+extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
 extern void func_002BD710(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
@@ -458,7 +467,7 @@ void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u3
 void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
                   s32 panelIndex, s32 surface) {
     char text[16];
-    s32 commandArgs[6];
+    MenuQueuedRenderContext commandArgs;
     s32 positions[4];
     s32 framePositions[4];
     s32 barPosition[2];
@@ -493,13 +502,13 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     func_00306CD0(x + framePositions[0], y + framePositions[1],
                   0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
-    commandArgs[0] = panelIndex;
-    commandArgs[1] = (s32)menu;
-    commandArgs[2] = 0;
-    commandArgs[3] = 0;
-    commandArgs[4] = framePositions[2];
-    commandArgs[5] = framePositions[3];
-    func_002BF660(x, y, z, panel->commands, commandArgs, surface);
+    commandArgs.panelIndex = panelIndex;
+    commandArgs.menu = menu;
+    commandArgs.origin.x = 0;
+    commandArgs.origin.y = 0;
+    commandArgs.extent.x = framePositions[2];
+    commandArgs.extent.y = framePositions[3];
+    func_002BF660(x, y, z, panel->commands, &commandArgs, surface);
     uiDrawSurfaceAtNearDepth(surface);
     uiDrawActiveSurfaceRegion(surface);
     func_00306CD0(x + framePositions[0], y + framePositions[1],

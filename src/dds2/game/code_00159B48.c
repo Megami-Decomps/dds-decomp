@@ -30,39 +30,6 @@ extern void effMiscSeedRandomFromClock();
 /* Header shared by the effect emitters that spawn a ring or spray of packets:
  * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
  * buffer. The kind-specific parameters follow at +0x150. */
-typedef struct EffEmitterHead {
-    f32 origin[4];         /* 0x00 */
-    f32 scale[3];
-    u8 pad1C[4];
-    u32 particleCount;
-    s32 lifetimeFrames; /* Native signed SLT: C3C8 +6C4 and F918 +654. */
-    s32 billboardResource;
-    s16 drawKind;
-    u8 pad2E[2];
-    ParKindState sub;      /* 0x30: kind-tagged shared drawing owner */
-    u8 fade[0x4C];         /* 0x48 */
-    f32 speedJitter;       /* 0x94 */
-    f32 spinJitter;        /* 0x98 */
-    u8 pad9C[4];
-    s32 templateSize;
-    u32 restartStepCount;
-    u8 padA8[8];
-    f32 matrix[16];        /* 0xB0 */
-    u32 colorMask;         /* 0xF0 */
-    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
-    EffectBufferTail *buffer; /* 0xF8 */
-    u32 pendingRestartSteps;
-    f32 backupMatrix[16];
-    u8 pad140[2];
-    u16 active;            /* 0x142 */
-    u8 pad144[0xC];
-} EffEmitterHead;
-typedef char EffEmitterHeadSizeCheck[sizeof(EffEmitterHead) == 0x150 ? 1 : -1];
-typedef char EffEmitterHeadSubOffsetCheck[(u32)&((EffEmitterHead *)0)->sub == 0x30 ? 1 : -1];
-typedef char EffEmitterHeadBackupOffsetCheck[(u32)&((EffEmitterHead *)0)->backupMatrix == 0x100 ? 1 : -1];
-
-
-
 extern void effDestroyResources(EffEmitterHead *owner);
 
 /* Particle-style effect object and its per-record buffer entry. */
@@ -102,35 +69,6 @@ typedef struct EffParticleRecord {
 } EffParticleRecord;
 
 extern u32 effParModulateColors(u32, u32);
-
-typedef struct EffTemplatePacketList {
-    EffEmitterHead head; /* Common runtime prefix, 0x150 bytes. */
-    u8 randomSphere; /* 0x150 */
-    u8 restart; /* 0x151 */
-    u8 pad152[2];
-    union {
-        s32 decayStep; /* 0x154: subtraction from each later packet tag */
-        u32 delayRange; /* 0x154: bounded-radius spawn delay */
-    };
-    f32 recordScale; /* 0x158 */
-    union {
-        f32 tailValues[4]; /* 0x15C-0x168: variant-specific scaled values */
-        u32 tailWords[4];
-        struct {
-            f32 targetRadius; /* 0x15C */
-            f32 motionMagnitude; /* 0x160 */
-            f32 accelerationPct; /* 0x164 */
-            f32 unk168;
-        };
-    };
-    s32 recordList; /* 0x16C: start of the three-word packet records */
-    s32 recordsPerPacket; /* 0x170 */
-    s32 listAllocation; /* 0x174 */
-    void *auxiliaryData; /* 0x178: optional 16 bytes per packet */
-    s32 auxiliaryAllocation; /* 0x17C */
-} EffTemplatePacketList;
-
-typedef char EffTemplatePacketList_layout_preserved[(sizeof(EffTemplatePacketList) == 0x180) ? 1 : -1];
 
 typedef struct EffInstance {
     u8 localMatrix[0x40]; /* 0x00 */
