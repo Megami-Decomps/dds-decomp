@@ -1186,13 +1186,6 @@ void effEventBindEffect(EffEventLight *work, u32 color) {
 }
 
 
-typedef struct EffAimParams {
-    u8 pad0;
-    u8 aimMode;           /* 0x01 */
-    u8 directionMode;     /* 0x02 */
-    u8 pad3;
-    s32 rangeOverride;    /* 0x04: zero uses the source range */
-} EffAimParams;
 
 extern f32 D_003B2CD0[];
 extern f32 D_003B2CE8[];

@@ -19,20 +19,6 @@ extern void func_003003F0(char *, u16, void *, s32);
 extern f32 D_00352870[4];
 extern f32 D_00352860[4];
 
-typedef struct EffBattleEntry {
-    u8 pad00[0x14];
-    u8 kind;     /* 0x14 */
-    u8 pad15[3];
-} EffBattleEntry; /* 0x18 */
-
-typedef struct EffBattleEntryList {
-    u8 pad00[0x48];
-    s32 callbackFrame; /* 0x48 */
-    u8 pad4C[0x20];
-    u16 count;            /* 0x6C */
-    u8 pad6E[0xA];
-    EffBattleEntry entries[1]; /* 0x78 */
-} EffBattleEntryList;
 
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
