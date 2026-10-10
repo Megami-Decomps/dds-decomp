@@ -64,6 +64,38 @@ Retail example: `func_0018CC98`.
   return v;`. A `return X;` per arm gives `j` instead of `b`
   (`func_002C2F40`, `func_0030AAB0`).
 
+### State-field continuation after dispatch
+
+When each state transition is published to a signed-byte work field and the
+common continuation reads that field, express those operations directly:
+
+```c
+switch (work->phase) {
+case 0:
+    /* ... */
+    work->phase = 1;
+    break;
+/* ... */
+}
+if (work->phase < 7) {
+    if (work->phase >= 0) {
+        /* active continuation */
+    }
+}
+```
+
+Confirmed by DDS1 `func_001B55A8` and DDS2 `func_001C0240`. GCC can retain a
+short signed-SI dispatch value and a separate QI continuation value. In the
+DDS1 controller, a duplicate mutable `s32` phase stays live through dispatch
+and conflicts with the range-test output in `$v0` and jump-table destination
+in `$v1`; global allocation assigns it `$a0`. Direct field continuation lets
+the dispatch value die before the table destination, reproducing the native
+`lb $v1` and delay-slot copy to `$a0`.
+
+Use the actual native state stores and callback capture/reload boundaries to
+establish this shape. A deliberate snapshot across a callback is a different
+value contract and must retain its own lifetime.
+
 ## `slt; sltiu 1` vs `slt; xori 1`
 
 A negated comparison written as an expression (`return !(x < 2);`,
