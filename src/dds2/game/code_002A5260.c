@@ -1,3 +1,4 @@
+#include "mnu_movie.h"
 #include "common.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -74,8 +75,7 @@ typedef struct {
 } StaffTaskState;
 
 extern StaffTaskState *mnuMovieWork;
-/* Retail 0x003E4A7C is a scalar in non-small .data. */
-extern s32 D_003E4A7C __attribute__((section(".data")));
+extern MnuStaffTextRow D_003E3970[273];
 extern u32 D_00437AB8;
 extern void mnuDrawScrollingStaffBackdrop(StaffSparkleState *);
 
@@ -838,7 +838,7 @@ struct FrFontGlyph;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
 extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
-void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
+s32 func_002A6030(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;
     f32 opacity = 1.0f;
@@ -860,7 +860,7 @@ void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    return frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
@@ -872,7 +872,7 @@ extern void func_002A2200(s32);
 
 void func_002A6480(void)
 {
-    if (mnuMovieWork->frame / 60 > D_003E4A7C / 60 - 4) {
+    if (mnuMovieWork->frame / 60 > D_003E3970[272].offsetY / 60 - 4) {
         return;
     }
     if (mnuMovieWork->streamPhase == 3) {
@@ -899,7 +899,7 @@ void func_002A6480(void)
     }
 }
 
-extern s32 func_002A6580(void);
+extern s32 func_002A6580(KwlnTask *);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
 
@@ -977,7 +977,7 @@ void func_002A6858(void) {
         if (mnuMovieWork->frame < D_003E4A80[D_00437AB4].startFrame) {
             break;
         }
-        if (mnuMovieWork->frame / 60 > D_003E4A7C / 60 - 4) {
+        if (mnuMovieWork->frame / 60 > D_003E3970[272].offsetY / 60 - 4) {
             break;
         }
         if (mnuMovieWork->streamPhase == 1 || mnuMovieWork->streamPhase == 2) {
@@ -1294,7 +1294,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
         mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 2);
     }
     seconds = mnuMovieWork->frame / 60;
-    endSeconds = D_003E4A7C / 60;
+    endSeconds = D_003E3970[272].offsetY / 60;
     if (endSeconds + 5 < seconds) {
         mnuFadeSetState(&mnuMovieWork->slideBar, 0);
         mnuFadeSetStateOff(&mnuMovieWork->backdropState, 0);
