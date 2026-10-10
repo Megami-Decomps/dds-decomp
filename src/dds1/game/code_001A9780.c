@@ -2104,7 +2104,7 @@ extern void func_001AF058(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001AF5D0(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001B05D0(void *, s32, s32, u32);
 extern void func_001AFF78(BtlAnalysisPanelWork *, s32, s32, s32, s16);
-extern u16 *func_001BD4F0(BtlUnit *, s16 *);
+extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 extern const u8 *D_003BAA74, *D_003BAA80, *D_003BAA88;
@@ -2255,7 +2255,7 @@ s32 func_001AE540(KwlnTask *task) {
                         btlDrawPanelIconGroup(3, work->alpha);
                         break;
                     }
-                    entries = func_001BD4F0(actor, &count);
+                    entries = btlGatherEnemyCommands(actor, &count);
                     for (i = 0; i < count; i++) {
                         btlDrawThreePanelSpriteStrips((s32)work, work->x + xOffset,
                                                        work->y + yOffset, work->alpha);
@@ -5263,7 +5263,7 @@ extern u16 D_00359960[];
 
 extern u16 D_00358B20[];
 
-u16 *func_001BD4F0(BtlUnit *actor, s16 *outCount) {
+u16 *btlGatherEnemyCommands(BtlUnit *actor, s16 *outCount) {
     DatEnemyRecord *enemy;
     DatCommandRecord *records;
     u16 *out = D_00359960;
