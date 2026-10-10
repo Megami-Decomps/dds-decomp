@@ -1199,7 +1199,55 @@ INCLUDE_ASM(const s32, "interface/frFont", func_00196088);
 
 INCLUDE_ASM(const s32, "interface/frFont", func_001961B0);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_00196220);
+extern u32 D_003D6E20[];
+extern s8 D_003BB160;
+
+void func_00196220(u8 fontIndex, FrFontCtx *ctx) {
+    char glyphText[3];
+    const char *textData;
+    s32 index;
+    s32 textLength;
+    s8 previousMode;
+    s8 mode;
+    FrFontGlyph *context;
+    FrFontGlyph *existingGlyph;
+
+    textData = (const char *)D_003D6E20[fontIndex & 0xFF];
+    memset(glyphText, 0, sizeof(glyphText));
+    if (textData == NULL) {
+        return;
+    }
+
+    textLength = strlen(textData);
+    previousMode = ctx->fontIndex;
+    for (index = 0; index < textLength; ) {
+        glyphText[0] = textData[index++];
+        glyphText[1] = textData[index++];
+        mode = ctx->fontIndex;
+
+        if (mode != previousMode) {
+            context = ctx->glyphChain;
+            if (context != NULL) {
+                if (context->firstChild != NULL) {
+                    ctx->glyphChain = frFontAppendTextToGlyphChain(
+                        (const char *)D_003BB180, 0, ctx->firstOption,
+                        ctx->secondOption, context);
+                }
+            } else {
+                ctx->glyphChain = frFontAppendTextToGlyphChain(
+                    (const char *)D_003BB180, 0, ctx->firstOption,
+                    ctx->secondOption, NULL);
+            }
+            frFontSetContextEncodedByte(ctx->glyphChain, ctx->contextEncodedByte);
+            previousMode = mode;
+        }
+
+        existingGlyph = func_001951C8(glyphText, mode, ctx->firstOption,
+                                       ctx->secondOption, ctx->glyphChain);
+        ctx->glyphChain = existingGlyph;
+        frFontSetSpacingAndMeasureGlyphs(existingGlyph, D_003BB160);
+    }
+}
 
 /* Append the shared-text child context, apply its cached encoded byte and clear
  * the pending-create flag. Preserve the old-style implicit-argument interface. */
