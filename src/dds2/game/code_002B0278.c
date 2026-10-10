@@ -219,7 +219,7 @@ typedef struct MenuContext {
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState[3];     /* 0x54: passed to the popup state handlers */
     struct EffectSlotSet *displayHandle;     /* 0x60 */
-    s32 resourceHandle;    /* 0x64 */
+    struct EffectSlotSet *resourceHandle; /* 0x64: second base resource owner. */
     void *displayResource; /* 0x68 */
     s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
     u8 pad70[0x40];
@@ -1803,7 +1803,114 @@ s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits) {
     return (bits[wordIndex >> 5] & (1 << skillCode)) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4848);
+/* DDS2 page setup uses the same full owners as the surrounding menu code. */
+extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
+extern void func_002C07D8(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
+extern void func_002C08E0(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
+extern void func_002C0908(struct MenuPanelState *, u32, u32, EffectSlotSet *, const s32 *);
+extern void mnuSetPanelCornerGeometry(struct MenuPanelState *, s32, s32, EffectSlotSet *, s32, s32);
+extern void mnuInitializePanelResource(struct MenuPanelState *, s32, s32);
+extern MenuList *mnuCreateListState(u32, u32, s32);
+extern void mnuSortItems(MenuList *, s32, s32);
+extern s32 mnuGetIndexedNonzeroEffect(s32);
+extern u16 mnuLookupPartyTableValue(u32, s32, s32);
+extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
+extern const s32 D_003E7808[];
+
+void ptySkillMenuInitPages(MenuContext *context) {
+    SkillMenuRuntime *menu = (SkillMenuRuntime *)context->party;
+    DatPartyRecord *owner;
+    s32 hasEntries;
+    s32 firstFilled = -1;
+    u32 *skillBits;
+    MenuWindowContainer **windows;
+    s32 category;
+
+    if (menu->skillMenuActive == 0) {
+        owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+        skillBits = (u32 *)mnuBuildOwnedSkillBits();
+        menu->skillPanel = mnuCreatePanelState(4, 0x2C0);
+        func_002C07D8(menu->skillPanel, 0, 0, (EffectSlotSet *)context->labelHandle, 0x1B);
+        func_002C08E0(menu->skillPanel, 0x420, 0x128, (EffectSlotSet *)context->labelHandle, 0x11);
+        func_002C0908(menu->skillPanel, 0x3A0, 0x10, (EffectSlotSet *)context->labelHandle, D_003E7808);
+        mnuSetPanelCornerGeometry(menu->skillPanel, 0x3E0, 0x108, (EffectSlotSet *)context->labelHandle, 9, 0xF);
+        mnuInitializePanelResource(menu->skillPanel, context->labelHandle, context->skillPanelResource);
+        menu->categoryList = mnuCreateListState(0, 1, 1);
+        for (category = 0; category < 4; category++) {
+            mnuListAppendNode(menu->categoryList, D_00437C00);
+        }
+        windows = menu->skillWindows;
+        category = 0;
+        do {
+            MenuWindowContainer *window;
+            struct MenuListNode *node;
+            struct MenuList *list;
+            MenuWindowContainer **slot;
+            s32 skillGroup;
+
+            hasEntries = 0;
+            window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
+            mnuSetWindowFadeScale(window, 0x100);
+            mnuInitializeBasicWindowLayout(window, (EffectSlotSet *)context->labelHandle, 0x1E);
+            mnuSetWindowPanelBounds(window, context->skillCategoryLayout, 0, 0, 0, 0);
+            mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, 7);
+            list = window->list;
+            list->drawCallback = mnuDrawSkillCategoryEntry;
+            list->context = context;
+            list->categoryIndex = category;
+            mnuCreateListWithDefaults(window, 0, 0, 0, context->resourceHandle);
+            node = mnuAppendWindowListNode(window, D_00437C00);
+            node->sortKeyPrimary = 0;
+            node->sortKeySecondary = 0;
+            node->sortKeyTertiary = 0;
+            for (skillGroup = 0; skillGroup < mnuGetIndexedNonzeroEffect(category); skillGroup++) {
+                s32 first = mnuLookupPartyTableValue(category, skillGroup, 0);
+                s32 end = mnuLookupPartyTableValue(category, skillGroup, 1);
+                s32 skill = first;
+
+                if (first < end) {
+                    do {
+                        if (ptyGetSkillNibbleState(owner, (u16)skill) != 0) {
+                            hasEntries = 1;
+                            node = mnuAppendWindowListNode(window, D_00435E64[skill]);
+                            {
+                                u32 sortRank = context->slotOfA[skill];
+                                node->sortKeyPrimary = skill;
+                                node->sortKeySecondary = category;
+                                node->sortKeyTertiary = sortRank;
+                            }
+                        } else if (mnuIsSkillCodeInBitset(skill, skillBits) != 0) {
+                            node = mnuAppendWindowListNode(window, D_00437C00);
+                            node->sortKeyPrimary = 0xFFFF;
+                            node->sortKeySecondary = 0;
+                            node->sortKeyTertiary = -1;
+                        }
+                        skill++;
+                    } while (skill < end);
+                }
+            }
+            mnuSortItems(window->list, 2, 1);
+            mnuAdvanceWindowListSelection(window);
+            mnuSetWindowFadeScale(window, 0x100);
+            mnuResetListNodeFadeCounters(window->list);
+            slot = windows + category;
+            *slot = window;
+            if (hasEntries != 0) {
+                if (firstFilled < 0) {
+                    firstFilled = category;
+                }
+            }
+            category++;
+        } while (category < 4);
+        if (firstFilled > 0) {
+            mnuSeekListNode(firstFilled, menu->categoryList);
+        }
+        mnuRefreshSkillWindowOwnershipFlags(context);
+        func_002B47F8(skillBits);
+        menu->skillMenuActive = 1;
+    }
+}
+
 
 void mnuDestroySkillMenuWindows(s32 context) {
     SkillMenuRuntime *menu = (SkillMenuRuntime *)((MenuContext *)context)->party;
@@ -2372,7 +2479,7 @@ s32 ptySkillMenuOpenPartyPage(KwlnTask *callback) {
     mnuSelectPage(&((MenuContext *)context)->partyWindow, ((MenuContext *)context)->partyWindow.lists[0]->cursor->index);
     ((MenuContext *)context)->partyWindow.flags |= 0x200;
     ptySkillMenuBuildEquippedSlots(0, callback);
-    func_002B4848(context);
+    ptySkillMenuInitPages((MenuContext *)context);
     window = ((SkillMenuRuntime *)party)->selectedWindow;
     window->list->stateFlags |= 8;
     mnuBeginWindowFadeTransition(window, &((MenuContext *)context)->transition);
@@ -2774,7 +2881,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     if (label != 0 && label != 0xffff) {
         label = (u16)label;
         mnuDrawSelectionLabel(label);
-        func_002B6898(label, ((MenuContext *)context)->resourceHandle, ((MenuContext *)context)->labelHandle);
+        func_002B6898(label, (s32)((MenuContext *)context)->resourceHandle, ((MenuContext *)context)->labelHandle);
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
