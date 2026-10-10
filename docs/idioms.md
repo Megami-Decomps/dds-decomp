@@ -2102,6 +2102,48 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     Both forms produce the same exact assembly. If a controlled source-order
     or temporary-local test converges by pass 17, stop permuting those forms;
     only a real dependency can constrain the schedule.
+    The DDS1 console closer is now exact (112 bytes). Its packet cursors use
+    the console's uncached DMA buffer, whose native writers issue ordered
+    qword payload stores. Use the existing `vu64` output access model for the
+    two tag words; this preserves their order without claiming an atomic
+    128-bit write. Reserve `currentTag = cursor`, then derive `writeCursor`
+    from that actual tag plus 16 bytes. Keep the count in eight-byte register
+    values until padding is decided, then divide it by five for the GIF loop
+    count. A scheduler trace of ordinary `u64` accesses proves the two tag
+    stores independent: the register-list store fills division latency and
+    its shorter live range also reverses the cursor/constant register homes.
+    This ordered access model applies to the console packet pipeline; DMA
+    consumption alone does not make every packet or CPU descriptor volatile.
+    Preserve the earlier Vesper/Claude trials and Amber's console owner review.
+    The 304-byte console background builder `func_002E42F8` closes under the
+    same ordered access model. Emit the completed seven-doubleword packet,
+    reserve `currentTag = packet + 0x40`, then derive `writeCursor` from that
+    tag plus 16 bytes. Publishing both independent cursors before the payload
+    leaves 26 words different; reserving after the completed packet leaves four;
+    the actual tag-to-write-cursor relation closes those final four. Preserve
+    the packed coordinates as unsigned words before their zero-extended writes,
+    and retain signed dimensions and the post-finalization capacity check.
+    This extends the retained Vesper/Tidal/Sable/F2/Amber/Brass reconstruction.
+    The same completed-packet phase closes the 232-byte console initializer
+    `func_002E45D0`: write all twelve ordered setup values, reserve the glyph
+    tag at buffer + 0x60, derive its write cursor, then acquire the DMA channel.
+    Retaining the actual `u64` texture-state result and pointer-valued buffer
+    starts is required for the owner contract. Moving reservation after the
+    complete setup closes the observed 15-word register-allocation residual;
+    mimicking the native interleaved stores had left 18 words different.
+    The 424-byte glyph renderers DDS2 `func_0033D2D8` and DDS1
+    `func_002E4428` keep their packed row
+    step as a signed word. A separately maintained bottom coordinate, initialized
+    at each row, lets GCSE partial redundancy elimination hoist the step's
+    signed 64-bit conversion before the outer loop; it then spills with SD/LD
+    instead of native SW/LW. Compute the fifth ordered packet value as
+    `top + cellStep`, and advance only `top` in source. The compiler derives
+    the native second coordinate induction without prematurely widening the
+    saved step. Preserve full 64-bit coordinate arithmetic and reload the row
+    advance after calls; narrowing the coordinate sum changes behavior.
+    This closes the three-word residual in both titles. Credit Sable for the
+    causal closure and Vesper/Tidal/Amber for the retained reconstruction;
+    the DDS1 transfer was independently checked in its complete current unit.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
@@ -3502,6 +3544,13 @@ not the packed eight-byte flags/reference state or its reference count.
 leaf incidentally leaves `scrCurrentContext` in `$2`; that is not a public
 return contract. Keep its declarations void and ordinary opcode callers
 as `scrSetIntegerReturnValue(value); return 1;` where native returns one.
+
+The paired resource-backed effect commands return immediately after a missing
+resource's diagnostic reread and zero-result publication. Keep object-null and
+success publication after that failure branch. This natural early failure
+shape matches DDS1 `func_00225880`, `func_00225BA0`, `func_00225CD8` and their
+DDS2 counterparts; nesting allocation in an `else` merges the return block
+and changes diagnostic argument scheduling and the epilogue.
 
 The existing non-void `evtOpBindMotionSoundToModel` is an original-source
 exception: its success path ends with `scrSetIntegerReturnValue(model);`
