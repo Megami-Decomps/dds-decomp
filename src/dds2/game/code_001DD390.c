@@ -645,7 +645,7 @@ extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 extern s32 btlGetActionRecordLookupValue(s32);
 extern s32 func_001B17E8(BtlUnit *, BtlUnit *, s32);
 extern u8 func_001B0B30(BtlUnit *, s32);
-extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, s32);
+extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
 extern u32 func_001B1350(BtlUnit *, BtlUnit *, s32, s32, u32);
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 extern s32 btlSelectActorAction(s32);

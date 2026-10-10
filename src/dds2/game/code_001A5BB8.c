@@ -3885,9 +3885,120 @@ void btlSyncModelFlagFromEventThresholds(void) {
     }
 }
 
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415340);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AF0B0);
+s32 func_001AF0B0(BtlUnit *attacker, BtlUnit *defender, u32 command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 element;
+    s32 mask;
+    s32 damage;
+    s32 criticalAbility = -1;
+    s32 automaticAbility = -1;
+    s32 critical;
+    s32 fixed;
+    s32 automatic;
+    f32 scale;
+    s32 condition;
+
+    element = btlGetActorIndexedSignedValue(attacker, command);
+    mask = btlEncodeActorIndexAsSelectionMask(element);
+    if (mask & 0xE0001) {
+        return 1;
+    }
+    damage = btlGetAdjustedSlotAffinity(defender, command, element);
+    if (!(mask & 4) && damage < 0) {
+        return 4;
+    }
+    if (!(mask & 0x10006)) {
+        if (!(mask & 0x100) || datCommandRecords[command].effectType != 0) {
+            return 1;
+        }
+    }
+    critical = 0;
+    fixed = 0;
+    scale = 1.0f;
+    automatic = 0;
+    switch (command) {
+    case 0:
+    case 0x94:
+    case 0x95:
+    case 0x96:
+        if (btlCheckSpecialAbility(&attacker->partyRecord, 0x226)) {
+            criticalAbility = 0x226;
+            scale = datAbilityParameters[0x226 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+        }
+        if (btlCheckSpecialAbility(&attacker->partyRecord, 0x227)) {
+            automaticAbility = 0x227;
+            automatic = (s32)(datAbilityParameters[0x227 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
+        }
+        if (btlCheckSpecialAbility(&attacker->partyRecord, 0x228)) {
+            automaticAbility = 0x228;
+            automatic = (s32)(datAbilityParameters[0x228 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * 100.0f);
+        }
+        break;
+    }
+    condition = defender->partyRecord.status & 0x7FFF;
+    switch (condition) {
+    case 8:
+    case 0x2000:
+        fixed = 60;
+        break;
+    case 2:
+    case 4:
+        fixed = 100;
+        break;
+    }
+    if (btlCheckSpecialAbility(&defender->partyRecord, 0x24F)) {
+        scale *= datAbilityParameters[0x24F - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    if (datCommandRecords[command].stat34 == 100) {
+        critical = 100;
+        fixed = 100;
+    }
+    if (datCommandRecords[command].effectType == 0) {
+        if (battle->unk220 & 0x1000) {
+            return 2;
+        }
+        if (critical == 0) {
+            critical = evtRunContext(4, (s32)&attacker->partyRecord, (s32)&defender->partyRecord, command, 0);
+        }
+        if (mdlFlagTest(0x80E) && (attacker->status.flags & 0x400) && (defender->status.flags & 0x200)) {
+            scale *= datBattleParameters->criticalScale;
+        }
+        critical = (s32)((f32)critical * scale);
+        if (critical >= 36) {
+            critical = 35;
+        }
+        if ((attacker->partyRecord.flags & 0x10) && (attacker->status.flags & 0x200)) {
+            critical += datBattleParameters->criticalPartyAttackerBias;
+        }
+        if ((defender->partyRecord.flags & 0x10) && (defender->status.flags & 0x200)) {
+            critical += datBattleParameters->criticalPartyDefenderBias;
+        }
+        btlBossDebugPrintf("btl:critical=%d%%[raito=%.3f,fix=%d,auto=%d]\n", critical, scale, fixed, automatic);
+        if (btlRollAiBucket() < fixed) {
+            return 2;
+        }
+        if (btlRollAiBucket() < automatic) {
+            if (automaticAbility != -1) {
+                attacker->unk314 = automaticAbility;
+            }
+            return 2;
+        }
+        if (btlRollAiBucket() < critical) {
+            if (criticalAbility != -1) {
+                attacker->unk314 = criticalAbility;
+            }
+            return 2;
+        }
+    }
+    if ((mask & 4) && damage < 0) {
+        return 4;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AF4A0);
 
