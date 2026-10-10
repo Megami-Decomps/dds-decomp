@@ -7023,3 +7023,17 @@ calculation, not a reason to reorder statements or extend unrelated values.
 Inspect the pre-allocation stream and real quantity priorities before applying
 it elsewhere. Preserve Opal's full reconstruction and Azure's owner/compiler
 admission credit.
+
+## Viewer contracts preserve the native word inputs
+
+The nearest-key dispatchers receive a full `s32` offset: retail uses `$10`
+directly in its frame addition, without a callee halfword truncation. Their
+existing caller carries a signed halfword, so correcting the two declarations
+does not change the already-matched caller bytes.
+
+DDS2 `evtViewerHasUpdateFlag` takes the canonical `EvtRuntime *`; all its C
+callers now pass that owner directly. The query snapshots the native loaded
+flag word as `s32`, then tests bit 0x10. This retains retail's `ANDI`/`SLTU`;
+testing the unsigned owner field directly instead emits `SRA`/`ANDI`. The
+16-byte query and both complete consumer units remain exact (63/0, 31/0).
+
