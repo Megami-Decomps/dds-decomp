@@ -119,7 +119,7 @@ void func_002BEEA0(s32 x, s32 y, s32 depth, s32 width, s32 height,
 
 
 
-extern void sdfSubmitGsTestOneRegisterPacket();
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
