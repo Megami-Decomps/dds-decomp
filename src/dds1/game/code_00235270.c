@@ -53,7 +53,7 @@ extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern void func_0022E5A0(s32 time, EvtRuntime *viewer);
+extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
@@ -513,7 +513,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
             evtViewerDispatchFlagMode(ctx);
-            func_0022E5A0(ctx->curFrame, ctx);
+            evtApplyViewerTimelineFrame(ctx->curFrame, ctx);
         }
     }
     return 0;
@@ -1896,13 +1896,13 @@ s32 evtHandleGroupPropertyMenu(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->value = runtime->frameGroup->metadata.value;
             runtime->valueMin = 0;
             runtime->valueMax = runtime->headerThird - 1;
-            func_0022E5A0(runtime->curFrame, runtime);
+            evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
             evtViewerPushCommandHistory(7, 180, 120, runtime);
             break;
         case 1:
             runtime->groupFirst = 0;
             runtime->groupCursor = 0;
-            func_0022E5A0(runtime->curFrame, runtime);
+            evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
             evtViewerPushCommandHistory(17, 180, 120, runtime);
             break;
         case 2:
@@ -5231,7 +5231,7 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
         kwlnFadeBackgroundStartOut(0);
     }
     evtViewerDispatchFlagMode(runtime);
-    func_0022E5A0(runtime->curFrame, runtime);
+    evtApplyViewerTimelineFrame(runtime->curFrame, runtime);
     evtViewerDispatchFlagMode(runtime);
     func_003003F0("SetGameData PM2 Version = %d Stageno = %d\n",
         work->sub->kind, ((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);

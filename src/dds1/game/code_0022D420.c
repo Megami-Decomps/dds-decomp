@@ -61,7 +61,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
-void func_0022E5A0(s32 time, EvtRuntime *viewer);
+void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
@@ -307,7 +307,7 @@ extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
 extern EvtRuntimeGroup *D_003BBE80;
 
-void func_0022E5A0(s32 time, EvtRuntime *viewer) {
+void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     EvtRuntimeGroup *group;
     EvtRuntimeChild *child;
     EvtRuntimeChild *other;
@@ -1415,7 +1415,7 @@ s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *view
         case 0:
             key->frame = viewer->value - track->metadata.value;
             evtReorderListNodes(track);
-            func_0022E5A0(viewer->curFrame, viewer);
+            evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
             break;
         case 9:
             switch (kind) {
@@ -1453,7 +1453,7 @@ s32 evtViewCmdSetValue(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     if (((u32)(value << 16) >> 28) != 0) {
         entry->p08.h[1] = 0;
     }
-    func_0022E5A0(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1486,7 +1486,7 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, EvtRuntime *v
                 break;
             }
         }
-        func_0022E5A0(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1503,7 +1503,7 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
     entry = evtEventViewerGetPendingNode(viewer);
     if (entry != 0) {
         entry->p0C.i = viewer->value;
-        func_0022E5A0(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1525,7 +1525,7 @@ u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EvtRuntime *viewer) {
             src++;
             dst++;
         } while (index >= 0);
-        func_0022E5A0(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
         evtViewerPopHistory(viewer);
         return 0;
     }
@@ -1544,7 +1544,7 @@ s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     }
     entry->p08.f = viewer->floatEditX;
     entry->p0C.f = viewer->floatEditY;
-    func_0022E5A0(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1581,7 +1581,7 @@ s32 evtViewCmdResolveSlot(s32 operation, void *argument, EvtRuntime *viewer) {
             group = group->next;
         }
     }
-    func_0022E5A0(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1594,7 +1594,7 @@ s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     entry->p0C.b[0] = viewer->shadowMode;
     entry->p0C.b[1] = viewer->shadowAlpha;
     entry->p14.f = viewer->shadowY;
-    func_0022E5A0(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1694,7 +1694,7 @@ s32 func_00232438(s32 unused0, s32 unused1, EvtRuntime *viewer) {
         memcpy(entry->payload, effEventGetResourceTemplateSetupParams(), 0x24);
         break;
     }
-    func_0022E5A0(viewer->curFrame, viewer);
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     evtViewerPopHistory(viewer);
     return 0;
 }
@@ -1758,7 +1758,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             viewer->voiceMessage);
     }
     if (viewer->curFrame != viewer->previousGlyphPosition) {
-        func_0022E5A0(viewer->curFrame, viewer);
+        evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
     }
     viewer->previousGlyphPosition = viewer->curFrame;
     if (viewer->flags & 8) {
@@ -1797,7 +1797,7 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
     void *viewer;
 
     viewer = (void *)kwlnTaskGetUserValue((KwlnTask *)task);
-    func_0022E5A0(((EvtRuntime *)viewer)->curFrame, viewer);
+    evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
     func_00101A80(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (void *)evtViewerUpdateFrame;
