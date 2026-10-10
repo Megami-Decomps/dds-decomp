@@ -4118,7 +4118,7 @@
 0x00235C68	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
 0x00235DB0	mnuDrawFrameChangeLabel	inferred	mnu menu, title, shop, or movie UI in game/code_00235270.c
 0x00235E00	evtViewerDrawFrameChangeRow	evidence	DDS2 twin func_00250BA0 (strings " L,R = FRMAE-+", "FRAME-+10", "FRAME-+100", "NOW FRAME", "CAMERA FOCUS") [names_M74_BattleLarge.tsv]
-0x00235FC8	evtViewerFrameChangeUpdate	inferred	DDS2 twin func_00250D68; frame-change window, steps +-1/10/100, dispatches func_0022E5A0 on apply [names_M74_BattleLarge.tsv]
+0x00235FC8	evtViewerFrameChangeUpdate	inferred	DDS2 twin func_00250D68; frame-change window, steps +-1/10/100, dispatches evtApplyViewerTimelineFrame on apply [names_M74_BattleLarge.tsv]
 0x00236180	evtDrawProjectCommandRow	inferred	TaskPurist
 0x002363E0	mnuDrawInfoWindowA	inferred	Builds a window packet (rows 0xB) and reports when its work state is 1
 0x002364B0	evtDrawStringEntry	inferred	draws "%s" text via unk22C4 pointer when set, returns 2/0
@@ -7593,3 +7593,4 @@
 0x002B3178	effInitializeFieldLightColors	inferred	Inferred from the current C implementation in game/code_0029C530.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002BF4E0	effDrawSpriteWithCornerFade	inferred	Inferred from the current C implementation in game/code_002BEDC8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00239A90	evtHandleGroupPropertyMenu	inferred	Inferred from the current C implementation in game/code_00235270.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0022E5A0	evtApplyViewerTimelineFrame	inferred	matched-C; src/dds1/game/code_0022D420.c; applies the viewer timeline frame: forward key search to first future frame, per-kind condition calls, feature resets (R2/Purist6c)
