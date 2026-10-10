@@ -2262,16 +2262,16 @@ s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxMp(stats);
 }
 
-extern void datAdjustCurrentHp(DatPartyRecord *, s32);
+extern s32 datAdjustCurrentHp(DatPartyRecord *, s32);
 
-extern void datAdjustCurrentMp(DatPartyRecord *, s32);
+extern s32 datAdjustCurrentMp(DatPartyRecord *, s32);
 
-void btlAdjustUnitHp(DatPartyRecord *object, s32 value) {
-    datAdjustCurrentHp(object, value);
+s32 btlAdjustUnitHp(DatPartyRecord *object, s32 value) {
+    return datAdjustCurrentHp(object, value);
 }
 
-void btlAdjustUnitMp(DatPartyRecord *object, s32 value) {
-    datAdjustCurrentMp(object, value);
+s32 btlAdjustUnitMp(DatPartyRecord *object, s32 value) {
+    return datAdjustCurrentMp(object, value);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
