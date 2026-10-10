@@ -4553,6 +4553,7 @@
 0x002B40F8	mnuSeekFirstAvailableStaffListNode	inferred	DDS2 assembly likewise skips disabled or zero-key list nodes before seeking. [names_reviewed13.tsv]
 0x002B4180	mnuSeekSelectedWindowCursor	inferred	seeks selected window list to the cursor's index, resets scale50/54, returns party->selectedWindow [names_M76_MenuLarge.tsv]
 0x002B4730	mnuBuildOwnedSkillBits	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002B4848	ptySkillMenuInitPages	inferred	Paired DDS1 ptySkillMenuInitPages: initializes the selected party member's skill panel, category list and four skill windows; DDS2 native geometry and tertiary sort keys.
 0x002B4C48	mnuDestroySkillMenuWindows	inferred	Destroys panel state, list state and four child windows when menu has active contents. [names_reviewed5.tsv]
 0x002B4CC8	mnuCreateItemState	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B4DE8	mnuCloseItemSelectionState	inferred	Closes selected window if present and releases menu state resource handle. [names_reviewed5.tsv]
