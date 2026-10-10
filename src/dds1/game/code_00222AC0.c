@@ -121,6 +121,10 @@ extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
+extern void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
+extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
+extern const char D_003AC508[];
+
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
@@ -1301,7 +1305,37 @@ u32 evtOpEndUnitValueTransition(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00225620);
+const char D_003AC4E8[] = "EFFECT_BE not fount RID = %d\n";
+
+u32 func_00225620(void) {
+    u8 firstVector[16];
+    u8 secondVector[16];
+    s32 taskId;
+    s32 key;
+    struct EffNodeDescriptor *descriptor;
+    EffWorldNode *object;
+
+    memset(firstVector, 0, sizeof(firstVector));
+    memset(secondVector, 0, sizeof(secondVector));
+    taskId = scrReadIntParameter(0);
+    key = scrReadIntParameter(1);
+    descriptor = evtFindTaskResourceEntryByKey(taskId, key);
+    if (descriptor == NULL) {
+        key = scrReadIntParameter(1);
+        evtPrintDeveloperConsoleMessage(D_003AC4E8, key);
+        scrSetIntegerReturnValue(0);
+        return 1;
+    }
+    object = effObjSpawnDescriptorBoundEffect(descriptor, firstVector, secondVector);
+    if (object == NULL) {
+        func_003003F0(D_003AC508, 1);
+        scrSetIntegerReturnValue(0);
+    } else {
+        effObjSetFlags(object, 1);
+        scrSetIntegerReturnValue(object->key);
+    }
+    return 1;
+}
 
 u32 evtOpResolveAndFlagObjectFromName(void) {
     u8 buf1[16];
