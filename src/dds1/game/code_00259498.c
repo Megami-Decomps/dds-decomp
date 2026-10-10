@@ -98,14 +98,6 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
 INCLUDE_ASM(const s32, "game/code_00259498", func_00259B40);
 
 
-typedef struct MantraPrerequisiteRecord {
-    u32 unk00;
-    u32 unk04;
-    s8 ids[4];
-    u8 flags[4];
-} MantraPrerequisiteRecord;
-
-extern MantraPrerequisiteRecord D_0036AE80[];
 extern char D_003BC458[];
 extern char D_003BC488[];
 extern char D_003BC490[];
@@ -140,7 +132,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     record = &D_0036AE80[scene->sceneId];
     alpha = display->displayAlpha;
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
-    if (record->unk00 == 0) {
+    if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
             if (states[record->ids[i]].state != 0) {
                 prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
@@ -380,7 +372,7 @@ void func_0025B350(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 su
     sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
-    if (record->unk00 == 0) {
+    if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
             if (states[record->ids[i]].state != 0) {
                 prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
