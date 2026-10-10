@@ -222,7 +222,73 @@ void func_002A0148(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_002A0278);
+extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern u32 ptyGetProfileRecordCap(u16);
+
+s32 func_002A0278(BrsSkillPackageWork *work, BrsProgressRow *entry, s32 index, s8 mode) {
+    s32 result = 0;
+    s32 levelDelta = work->levelAnimation[index].level - entry->unit->level;
+    s32 nextLevelExp = ptyComputeTotalExp(entry->unit, levelDelta + 1);
+    s32 range = nextLevelExp - ptyComputeTotalExp(entry->unit, levelDelta);
+    s32 step;
+    s32 denominator;
+
+    if (range == 0) {
+        range = ptyComputeTotalExp(entry->unit, levelDelta + 1);
+    }
+    if (mode == 0) {
+        if (work->levelAnimation[index].applied > 0) {
+            if (work->levelAnimation[index].skipRamp == 0) {
+                work->levelAnimation[index].frames++;
+                work->levelAnimation[index].frames = work->levelAnimation[index].frames <= 0 ? 0 : (work->levelAnimation[index].frames > 120 ? 120 : work->levelAnimation[index].frames);
+                denominator = 150 - work->levelAnimation[index].frames;
+                step = 1;
+                if (range >= denominator) {
+                    step = range / denominator;
+                }
+            } else {
+                step = 10000;
+            }
+            if (work->unkAEB9 != 0) {
+                step = work->levelAnimation[index].applied;
+            }
+            work->levelAnimation[index].applied -= step;
+            if (work->levelAnimation[index].applied < 0) {
+                step += work->levelAnimation[index].applied;
+                work->levelAnimation[index].applied = 0;
+            }
+            work->levelAnimation[index].applied = work->levelAnimation[index].applied <= 0 ? 0 : (work->levelAnimation[index].applied > 0x1000000 ? 0x1000000 : work->levelAnimation[index].applied);
+            result = step;
+        }
+    } else {
+        range = ptyGetProfileRecordCap(ptyGetCurrentProfileId(entry->unit));
+        if (work->profileAnimation[index].applied > 0) {
+            if (work->profileAnimation[index].skipRamp == 0) {
+                work->profileAnimation[index].frames++;
+                work->profileAnimation[index].frames = work->profileAnimation[index].frames <= 0 ? 0 : (work->profileAnimation[index].frames > 120 ? 120 : work->profileAnimation[index].frames);
+                denominator = 150 - work->profileAnimation[index].frames;
+                step = 1;
+                if (range >= denominator) {
+                    step = range / denominator;
+                }
+            } else {
+                step = 10000;
+            }
+            if (work->unkAEB9 != 0) {
+                step = work->profileAnimation[index].applied;
+            }
+            work->profileAnimation[index].applied -= step;
+            if (work->profileAnimation[index].applied < 0) {
+                step += work->profileAnimation[index].applied;
+                work->profileAnimation[index].applied = 0;
+            }
+            work->profileAnimation[index].applied = work->profileAnimation[index].applied <= 0 ? 0 : (work->profileAnimation[index].applied > 0x1000000 ? 0x1000000 : work->profileAnimation[index].applied);
+            result = step;
+        }
+    }
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428590);
 
