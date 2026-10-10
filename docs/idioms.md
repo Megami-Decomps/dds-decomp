@@ -6728,3 +6728,19 @@ The entry updater candidates remain ASM after three honest forms each:
 both differ at four of 49 words, exchanging the mode/list-count loads
 and the associated store/delay-slot scheduling. Capturing a native
 input snapshot or committing the mirrored state first does not fix it.
+
+## Actor-slot bit-mask signedness remains an open contract
+
+DDS2 `001CCEB8 +0x2E4/+0x2F4` uses `LH` for the bank's mask at
+`ActorSlotOrder +0x02`, then `SRAV` and a low-bit test. The independent
+`001CF800` accesses the same bank member with `LHU` at `+0xC4/+0x120`
+when setting `0x1000` or masking with `0x0FFF`. Those masked operations
+do not distinguish the original signedness. There is no independent
+sign-sensitive consumer in the remaining native bank-access census;
+do not change the canonical `u16` to force the updater's two loads.
+
+The primary-owner candidate uses the evidenced signed timer and word
+arrays without byte-padding casts. Its best measurement is 14/522
+different words: the two mask loads plus the known twelve-word phase-three
+register/scheduling residual beginning at `+0x460`. Three honest forms
+were measured; the public owner and retail updater remain unchanged.
