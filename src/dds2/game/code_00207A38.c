@@ -2650,7 +2650,7 @@ void func_0020D1E8(f32 *position) {
 void func_0020D1F0(void) {
 }
 
-void func_0020D1F8(f32 *position, u32 color, s32 flags, f32 radius) {
+void func_0020D1F8(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 void func_0020D200(void) {
@@ -2696,7 +2696,7 @@ u32 func_0020D260(u32 value) {
 void func_0020D268(void) {
 }
 
-void func_0020D270(void) {
+void func_0020D270(u32 value) {
 }
 
 /* Packed command entries have a 0x18-byte stride. */
