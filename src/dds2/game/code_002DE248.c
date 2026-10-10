@@ -4224,15 +4224,15 @@ extern u8 D_003E9C90[];
 typedef struct EffSurfaceGridNode {
     u8 pad_00[0x20];
     s32 rows;           // 0x20
-    u32 field_24;       // 0x24
-    u32 field_28;       // 0x28
-    u32 columns;        // 0x2C
+    s32 field_24;       // 0x24
+    s32 field_28;       // 0x28
+    s32 columns;        // 0x2C
     u32 type;           // 0x30
-    u8 *buffer;         // 0x34
-    u8 *tail;           // 0x38
+    u128 *buffer;         // 0x34
+    u32 *tail;           // 0x38
     SdfAsset *handle;     // 0x3C
-    u8 *queueA;         // 0x40
-    u8 *queueB;         // 0x44
+    u128 *queueA;         // 0x40
+    u32 *queueB;         // 0x44
     struct SdfMemBlock *allocation; // 0x48
 } EffSurfaceGridNode;
 
@@ -4248,17 +4248,17 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     node = (EffSurfaceGridNode *)(data + size);
     node->type = 2;
-    node->buffer = data;
+    node->buffer = (u128 *)data;
     data += rows * 16;
-    node->queueA = data;
+    node->queueA = (u128 *)data;
     data += 0x80;
-    node->queueB = data;
+    node->queueB = (u32 *)data;
     data += 0x20;
     node->field_28 = 3;
     node->rows = rows;
     node->columns = columns;
     node->allocation = base;
-    node->tail = data;
+    node->tail = (u32 *)data;
     node->field_24 = 0;
     node->handle = sdfCreateAssetWithDrawEntries();
     sdfSetPrimaryStateFloat(node->handle, 1.0f);
@@ -4276,7 +4276,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
 void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
     EffSurfaceGridNode *node = (EffSurfaceGridNode *)nodeAddr;
     u32 count = node->rows / 3;
-    u32 *out = (u32 *)node->tail;
+    u32 *out = node->tail;
     f32 step = 1.0f / count;
     f32 t = 0.0f;
     f32 corner0[4];
@@ -4337,26 +4337,16 @@ void effResetSurfaceGridFrame(s32 work) {
     ((EffSurfaceGridNode *)work)->field_28 = 3;
 }
 
-/* Three-vector ring sampler; DDS2 stores its counters at 0x20-0x2C. */
-typedef struct EffRingFrameState {
-    u8 pad_00[0x20];
-    s32 vectorCapacity; // 0x20, used when wrapping a frame
-    u32 pad_24;         // 0x24, initialized to zero
-    s32 vectorCount;    // 0x28
-    s32 frameStride;    // 0x2C
-    u8 pad_30[4];
-    s128 *vectors;      // 0x34
-} EffRingFrameState;
-
+/* Three-vector sampler reads the primary surface ring counters. */
 void effCopyRingFrameVectors(u8 *work, s128 *dst, s32 frame) {
-    s32 index = ((EffRingFrameState *)work)->vectorCount - (((EffRingFrameState *)work)->frameStride * (frame - 1) + frame) * 3;
-    s128 *src;
+    s32 index = ((EffSurfaceGridNode *)work)->field_28 - (((EffSurfaceGridNode *)work)->columns * (frame - 1) + frame) * 3;
+    u128 *src;
     s32 i;
 
     if (index < 3) {
-        index += ((EffRingFrameState *)work)->vectorCapacity - 3;
+        index += ((EffSurfaceGridNode *)work)->rows - 3;
     }
-    src = ((EffRingFrameState *)work)->vectors + index;
+    src = ((EffSurfaceGridNode *)work)->buffer + index;
     for (i = 0; i < 3; i++) {
         PCP_COPY_VECTOR(dst + i, src + i);
     }

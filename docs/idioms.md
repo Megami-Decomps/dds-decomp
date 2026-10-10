@@ -6878,3 +6878,26 @@ changes its lifetime but worsens the residual from one to sixteen of
 78 words. The original initializer/value-availability shape remains
 unproved; do not invent `i = found` solely to copy a known zero.
 
+
+## Surface ring buffers have one typed owner
+
+`EffSurfaceGridNode` owns the ring counters and vertex/color regions in both
+games (DDS1 `code_0029C530`, DDS2 `code_002DE248`). The partial
+`EffRingFrameState` view is retired. Signed comparisons and wrap calculations
+in DDS1 `002A78E0` and its sampler establish the signed counters; the DDS2
+counter group has the corresponding 0x10-byte prefix shift.
+
+The producer allocates consecutive main vertices, eight cap vertices, eight
+cap colors, and main colors. The canonical fields therefore use `u128 *` for
+vertex regions and `u32 *` for RGBA regions, with conversions only at the
+byte-allocation cursor. Samplers and the color-gradient writer read the
+primary owner directly. The 0x3C/0x4C allocations and existing layout stay
+unchanged. Both owner-only whole-unit gates are exact: DDS1 533/0, DDS2 677/0.
+
+The DDS1 renderer remains ASM. Its best defined candidate differs in 30 of
+147 aligned words. One explicit difference is the empty second span's start:
+retail omits its initialization on the non-wrapping path but still loads the
+slot while preparing a zero-length span. The retained C initializes that
+start and emits an additional store, so it is not a matching landing. Do not
+remove the initialization merely to reproduce an undefined local read.
+
