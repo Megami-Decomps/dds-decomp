@@ -34,23 +34,23 @@ typedef char SceneSlotFadeWork_fade_offset[((unsigned long)&((SceneSlotFadeWork 
  * consumers index eight state bytes and the final integer slot-value
  * and float percentage pairs. */
 typedef struct ActorSlotOrder {
+    s16 timer;
 #ifdef VERSION_DDS1
-    u8 unk00[2];
     s8 state[8];
     u8 unk0A[2];
 #else
-    u8 unk00[2];
     u16 flags; /* DDS2 scene-slot bits and the special-mode bit 0x1000. */
     s8 state[8];
 #endif
     s32 entries[8];
     s32 slotFade[8]; /* Per-slot fade, decremented and clamped to 0..128. */
-    u8 unk4C[0x20];
+    s32 phaseFrames[8]; /* Per-slot phase-4 counter, clamped to 0..10. */
     f32 unk6C[8]; /* Scene-slot reset initializes these per-slot values to 30.0f. */
     s32 unk8C[8]; /* Corresponding per-slot values initially set to 130. */
     s8 secondaryState[8]; /* Independent color cycle, states 0 through 8. */
     s32 colorAdjustments[8][4]; /* Signed values clamped to 0..127. */
-    u8 unk134[0xC0];
+    u8 unk134[0x80];
+    s32 unk1B4[8][2]; /* Both channel words reset on scene-slot phase changes. */
     s32 slotValues[8][2];
     f32 scalePercent[8][2];
 } ActorSlotOrder;
