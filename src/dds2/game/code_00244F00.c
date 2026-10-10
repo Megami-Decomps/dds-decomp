@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_solar.h"
@@ -273,10 +274,6 @@ typedef struct CampDisplayDefaults {
 } CampDisplayDefaults;
 
 
-typedef struct EvtViewerDrawVector {
-    f32 x, y, z, w;
-    s32 mode;
-} EvtViewerDrawVector;
 
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void func_0025E048(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
@@ -286,7 +283,7 @@ extern EffBlurTemplate *effGetCh71Work(void);
 extern EffBlurScatterWork *effGetCh72Work(void);
 extern EffBlurScaleWork *effGetCh76Work(void);
 extern EffResourceRectWork *effGetCh75Work(void);
-extern EvtViewerDrawVector kwlnDrawVector;
+extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
@@ -373,12 +370,12 @@ EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, E
         break;
     case 11: {
         EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(sizeof(*draw));
-        draw->x = kwlnDrawVector.y;
-        draw->mode = kwlnDrawVector.mode;
+        draw->x = kwlnDrawVector.fogFar;
+        draw->mode = kwlnDrawVector.fogColor;
         key->payload = draw;
-        draw->y = kwlnDrawVector.x;
-        draw->z = kwlnDrawVector.z;
-        draw->w = kwlnDrawVector.w;
+        draw->y = kwlnDrawVector.fogNear;
+        draw->z = kwlnDrawVector.depthNear;
+        draw->w = kwlnDrawVector.depthFar;
         key->p08.h[0] = 1;
         break;
     }

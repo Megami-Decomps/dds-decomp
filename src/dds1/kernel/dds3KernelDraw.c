@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"
 
@@ -36,9 +37,6 @@ typedef struct {
     u32 bottom;
 } KwlnRectBounds;
 
-typedef struct {
-    u32 words[5];
-} KwlnDrawVectorParams;
 
 typedef struct {
     KwlnColor color;

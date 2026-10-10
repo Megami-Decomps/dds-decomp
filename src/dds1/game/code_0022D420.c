@@ -93,12 +93,8 @@ extern void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDispla
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 
-/* Native five-word draw-vector parameters; the timeline swaps x and y. */
-typedef struct EvtViewerDrawVector {
-    f32 x, y, z, w;
-    s32 mode;
-} EvtViewerDrawVector;
-extern EvtViewerDrawVector kwlnDrawVector;
+/* Timeline payloads store fogFar before fogNear. */
+extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_00324770[];
 extern u128 kwlnDefaultColorVector[];
 extern f32 D_003BD358;
@@ -1666,11 +1662,11 @@ s32 func_00232438(s32 unused0, s32 unused1, EvtRuntime *viewer) {
         break;
     case 11:
         draw = entry->payload;
-        draw->x = kwlnDrawVector.y;
-        draw->mode = kwlnDrawVector.mode;
-        draw->y = kwlnDrawVector.x;
-        draw->z = kwlnDrawVector.z;
-        draw->w = kwlnDrawVector.w;
+        draw->x = kwlnDrawVector.fogFar;
+        draw->mode = kwlnDrawVector.fogColor;
+        draw->y = kwlnDrawVector.fogNear;
+        draw->z = kwlnDrawVector.depthNear;
+        draw->w = kwlnDrawVector.depthFar;
         break;
     case 13:
         memcpy(entry->payload, effGetLoadDescA(), 0x28);

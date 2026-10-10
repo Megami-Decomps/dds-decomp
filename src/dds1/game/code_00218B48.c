@@ -2548,20 +2548,13 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", mdlViewerEnd);
 
-typedef struct MdlFogParams {
-    f32 near;  /* 0x00 */
-    f32 farA;  /* 0x04 */
-    f32 value; /* 0x08 */
-    f32 farB;  /* 0x0C */
-    u32 color; /* 0x10 */
-} MdlFogParams;
 
 extern char D_00367AF8[];
 extern char D_003BBCC0[]; /* "%x" */
 extern char D_003BBCC8[]; /* "fovy=" */
 extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
-extern MdlFogParams kwlnDrawVector;
+extern KwlnDrawVectorParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
 extern s32 func_00301588();
@@ -2628,11 +2621,11 @@ void mdlLoadViewerPresentationConfig(void) {
             }
         } else if (memcmp(lineStart, D_003BBCD8, 4) == 0) {
             if (func_00301588(lineStart + 4, "%d,%f,%d,%f,%x", &fogNear, &fogValue, &fogFar, &fogFarB, &color) == 5) {
-                kwlnDrawVector.near = fogNear;
-                kwlnDrawVector.value = fogValue;
-                kwlnDrawVector.farA = fogFar;
-                kwlnDrawVector.farB = fogFarB;
-                kwlnDrawVector.color = color;
+                kwlnDrawVector.fogNear = fogNear;
+                kwlnDrawVector.depthNear = fogValue;
+                kwlnDrawVector.fogFar = fogFar;
+                kwlnDrawVector.depthFar = fogFarB;
+                kwlnDrawVector.fogColor = color;
             }
         }
         lineOffset = nextLineOffset;
@@ -2650,9 +2643,9 @@ void mdlSaveViewerPresentationConfig(void) {
     size = func_003014F0(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
                         D_003D7B30.x, D_003D7B30.y, D_003D7B30.z,
-                        sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.near,
-                        kwlnDrawVector.value, (s32)kwlnDrawVector.farA,
-                        kwlnDrawVector.farB, kwlnDrawVector.color);
+                        sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.fogNear,
+                        kwlnDrawVector.depthNear, (s32)kwlnDrawVector.fogFar,
+                        kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
     request = fileQueueWindowSlotRequest(D_00367AF8, buffer, size);
     fileWaitReady(request);
     filePollEntryCleanup((struct FileRequest *)request);
