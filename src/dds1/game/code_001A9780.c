@@ -3343,9 +3343,104 @@ typedef struct BtlTutorialDialogWork {
 } BtlTutorialDialogWork;
 typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
 
+extern const BattlePanelColors D_003A2B20;
+extern u8 *D_003BAA8C;
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B20);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B55A8);
+s32 func_001B55A8(KwlnTask *task) {
+    BattlePanelColors colors = D_003A2B20;
+    BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
+    BattleRosterTable *list;
+    u16 count;
+    u16 scanIndex;
+    u16 id;
+
+    switch (work->phase) {
+    case 0:
+        work->alpha += 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        if (work->alpha >= 0x80) {
+            work->counter = 0;
+            work->phase = 1;
+        }
+        break;
+    case 1:
+    case 3:
+    case 6:
+        work->counter++;
+        work->counter = work->counter <= 0 ? 0 : work->counter > 0x40 ? 0x40 : work->counter;
+        if (work->counter >= 0x30) {
+            work->counter = 0;
+        }
+        break;
+    case 2: {
+        KwlnTask *panelTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+        if (panelTask == NULL) {
+            work->phase = 6;
+            break;
+        }
+        list = func_001BD708((BattleSceneObject *)kwlnTaskGetUserValue(panelTask), &count);
+        scanIndex = (u16)work->itemIndex;
+        while (scanIndex < count) {
+            id = list->entries[work->itemIndex].skill;
+            if (func_001ACD30(id, 2) == 0 && func_001ACE28(id, 2) == 0) {
+                func_001ACE28(id, 0);
+                evtCopyEntryStringToActiveWindow(0, D_003BAA8C + id * 17);
+                dspStartEntry(0);
+                work->itemIndex++;
+                sndSetStationedSeVolume(7);
+                break;
+            }
+            work->itemIndex++;
+            scanIndex++;
+        }
+        if (scanIndex >= count) {
+            work->phase = 4;
+        } else {
+            work->phase++;
+        }
+        break;
+    }
+    case 5:
+        if (sndAreSlotsEmpty()) {
+            dspStartEntry(1);
+            work->phase++;
+        }
+        break;
+    case 4:
+    default:
+        work->alpha -= 0x20;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 0x80 ? 0x80 : work->alpha;
+        break;
+    }
+
+    if (work->phase < 7) {
+        if (work->phase >= 0) {
+            u32 color = work->alpha | 0x80808000;
+            colors.values[0] = color;
+            colors.values[1] = color;
+            colors.values[2] = color;
+            colors.values[3] = color;
+            if (evtGetMessageWindowControlState() == 1) {
+                func_0024DD78();
+                goto return_zero;
+            }
+            if (work->phase == 3) {
+                work->phase--;
+            } else {
+                work->phase++;
+            }
+            goto return_zero;
+        }
+    }
+    dspCloseChannel();
+    btlClearFlagEntries();
+    btlSetCommandPanelFadeMode(1, 8);
+    return -1;
+return_zero:
+    return 0;
+}
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
     s32 context = btlGetRuntime();

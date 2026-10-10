@@ -184,7 +184,54 @@ void func_002ABEB0(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
+s32 func_002ABED8(s32 itemId, s32 previousItemId, MenuStaffContext *owner) {
+    s32 previousCursorId = -1;
+    s32 needsInsertion = 0;
+    s32 insertBefore = 0;
+    MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    u8 quantity;
+
+    if (itemId == 0 && previousItemId == 0) {
+        return 1;
+    }
+    if (datGameState->inventory.counts[previousItemId] == 0) {
+        window = resources->windows[2];
+        previousCursorId = window->list->cursor->index;
+        if (window->list->cursor == window->list->last) {
+            previousCursorId = -2;
+        }
+        mnuRemoveWindowListCursorNode(resources->windows[2]);
+        window = resources->windows[2];
+    } else {
+        window = resources->windows[2];
+        node = window->list->cursor;
+        quantity = datGameState->inventory.counts[previousItemId];
+        node->sortKeyPrimary = quantity;
+    }
+
+    for (node = window->list->first; node != NULL; node = node->next) {
+        if ((u32)itemId == node->sortKeySecondary) {
+            break;
+        }
+        if ((u32)itemId < node->sortKeySecondary) {
+            insertBefore = 1;
+            needsInsertion = 1;
+            break;
+        }
+    }
+    if (node == NULL || needsInsertion != 0) {
+        node = mnuInsertWindowListNodeRelativeToAnchor(window, node, D_00435E5C[itemId], previousCursorId, insertBefore);
+        window = resources->windows[2];
+        quantity = datGameState->inventory.counts[itemId];
+        node->sortKeySecondary = itemId;
+    } else {
+        quantity = datGameState->inventory.counts[itemId];
+    }
+    node->sortKeyPrimary = quantity;
+    return window->list->count != 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 

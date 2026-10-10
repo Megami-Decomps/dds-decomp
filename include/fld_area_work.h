@@ -42,7 +42,11 @@ typedef struct FldAreaWork {
     f32 unk5C;
     f32 unk60;
     f32 negatedAngle;
+#ifdef VERSION_DDS2
+    f32 cameraTargetAngle;       /* 0x68 */
+#else
     u8 pad68[4];
+#endif
     f32 dist;
     s32 sceneMode;
     s32 sceneState;
@@ -60,7 +64,13 @@ typedef struct FldAreaWork {
     s32 unkA4;
     s32 overrideSupportRecordIndex; /* -1 selects the default support record. */
     s32 unkAC;
+#ifdef VERSION_DDS2
+    s32 cameraTiltActive;        /* 0xB0 */
+    u8 padB4[4];
+    f32 cameraTilt;              /* 0xB8 */
+#else
     u8 padB0[0xC];
+#endif
     s32 flagNumber;
     s32 unkC0;
     s32 unkC4;                  /* -1 means no primary label selection. */
@@ -85,7 +95,12 @@ typedef struct FldAreaWork {
     s32 deferredExit;
     s32 unk118;
     s32 unk11C;
+#ifdef VERSION_DDS2
+    u8 pad120[6];
+    s16 movementSoundActive;    /* 0x126 */
+#else
     u8 pad120[8];
+#endif
     s16 sceneCommand;
     s16 colorEffectSuppressed;
     s32 commandEnabled;

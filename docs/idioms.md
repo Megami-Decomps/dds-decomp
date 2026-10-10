@@ -64,6 +64,38 @@ Retail example: `func_0018CC98`.
   return v;`. A `return X;` per arm gives `j` instead of `b`
   (`func_002C2F40`, `func_0030AAB0`).
 
+### State-field continuation after dispatch
+
+When each state transition is published to a signed-byte work field and the
+common continuation reads that field, express those operations directly:
+
+```c
+switch (work->phase) {
+case 0:
+    /* ... */
+    work->phase = 1;
+    break;
+/* ... */
+}
+if (work->phase < 7) {
+    if (work->phase >= 0) {
+        /* active continuation */
+    }
+}
+```
+
+Confirmed by DDS1 `func_001B55A8` and DDS2 `func_001C0240`. GCC can retain a
+short signed-SI dispatch value and a separate QI continuation value. In the
+DDS1 controller, a duplicate mutable `s32` phase stays live through dispatch
+and conflicts with the range-test output in `$v0` and jump-table destination
+in `$v1`; global allocation assigns it `$a0`. Direct field continuation lets
+the dispatch value die before the table destination, reproducing the native
+`lb $v1` and delay-slot copy to `$a0`.
+
+Use the actual native state stores and callback capture/reload boundaries to
+establish this shape. A deliberate snapshot across a callback is a different
+value contract and must retain its own lifetime.
+
 ## `slt; sltiu 1` vs `slt; xori 1`
 
 A negated comparison written as an expression (`return !(x < 2);`,
@@ -2298,6 +2330,21 @@ loads or stores even when every instruction is right:
   before the callback-table load (DDS2 `func_00317FE0`); a scalar `u32 flags`
   lets the load move up.
 
+For automatic lookup tables, preserve the typed initializer when native data
+and exact neighboring source establish it. DDS2 `func_002805E0` and
+`func_00283090` match with numeric sprite-ID and signed-offset array
+initializers. An explicit `memcpy` draft emitted alias-set-zero BLK copies;
+postreload dependency construction ordered the flags load before the first
+copy. The initialized array carries its actual nonzero alias set, removing
+that conservative anti-dependence and restoring retail order. Capturing the
+switch selector earlier did not change the generic-copy output.
+
+Those initializers own their literal data: remove the duplicate assembly
+literal includes and preserve the remaining assembly data in retail order.
+Here four-byte arrays emit in `.sdata`, larger arrays in `.rodata`; alignment
+zeros do not establish extra array elements. Check the whole unit and final
+retail image, since focused checks can mask local-literal relocations.
+
 Only fix types the data really has (rodata placement, a bitfield the code
 tests bit-by-bit). Adding views to steer alias sets is the lever above.
 
@@ -3420,10 +3467,19 @@ with `sltiu`; restoring the unsigned owner member leaves `code_0020E850`
 at `60 match, 0 differ`.
 
 The HP/MP forwarding entry points take a `DatPartyRecord *` and a signed
-delta in both games. DDS2's retained operand callback passes the actor's
-complete party record and its HP/MP deltas in the two argument registers;
-zero-parameter forwarding declarations obscure that native contract.
-The providers and their battle callers use the same record owner.
+delta in both games, and return the signed clamped value. The primary
+`datAdjustCurrentHp` and `datAdjustCurrentMp` providers compute that value,
+store its low halfword and return it in `$v0`; `btlAdjustUnitHp` and
+`btlAdjustUnitMp` tail-forward the result. Their definitions and caller
+declarations therefore use `s32` even when a caller discards the result.
+The providers and their battle callers use the same complete record owner.
+
+A discarded return still affects GCC's call RTL and register lifetimes.
+In the retained actor-update candidates (`001D2C78` / `001DF860`), the
+correct return declarations recover `$v1` for the fresh signed HP/MP tests.
+The independent record-move/mask-load ordering before the status-clear
+call remains unresolved. Correct contracts close that register discrepancy;
+they do not establish complete matching of those candidates.
 
 The retained-operand hook is a primary `BtlState` member at DDS1 `+0x5AC`
 and DDS2 `+0x5E0`. Both native callbacks pass the unit and the copied
@@ -5489,12 +5545,12 @@ query/apply/raise helpers and DDS2's HP-bracket helper. HP/max-HP at `+6/+8`, MP
 and status at `+E` belong to one record, not separate short party views.
 The affinity and skill providers already accept that same owner.
 
-The HP/MP mutators in `datCalc.c` really return `void`, but these caller TUs
-keep them unprototyped rather than publishing false `s32` declarations.
-Native DDS2 `sdfApplyCommandResults` reloads HP into `v1` and branches on it at
-`+E0/+E4`; exposing the void prototype changes those two register operands.
-The inferred original implicit-int call boundary preserves the observed
-caller without inventing a provider result; neither call consumes a result.
+`datAdjustCurrentHp` and `datAdjustCurrentMp` return their actual clamped
+signed-word results. These command callers retain legacy unprototyped
+imports and discard the results. Native DDS2 `sdfApplyCommandResults`
+reloads HP into `v1` and branches on it at `+E0/+E4`; a void declaration
+changes those register operands because it omits the real return-register
+lifetime. An unused result is valid and does not make the provider void.
 
 
 ## Camera preset outputs are embedded pose records

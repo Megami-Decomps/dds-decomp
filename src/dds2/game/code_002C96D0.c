@@ -97,8 +97,16 @@ typedef struct MdlFlagPair {
     s32 flag;
     s32 unk4;
 } MdlFlagPair;
+
+/* Eight-byte story-flag rows select a unit and a six-byte bonus record. */
+typedef struct FileStatBonus {
+    s32 flag;
+    u16 unitId;
+    u8 bonusIndex;
+    u8 pad07;
+} FileStatBonus;
 extern MdlFlagPair D_003E8CE8[];
-extern MdlFlagPair D_003E8D10[];
+extern FileStatBonus D_003E8D10[24];
 extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
@@ -3392,11 +3400,68 @@ void fileSaveAndDisplayCurrentMoney(void) {
     func_0035B6E0(D_0042B938, money);
 }
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B920);
+typedef struct FileMultiFlagBonus {
+    s32 flags[4];
+    u8 bonusIndex;
+    u8 pad11[3];
+} FileMultiFlagBonus;
 
-INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
+extern FileMultiFlagBonus D_003E8DD0[6];
+extern s8 (*D_00435E3C)[6];
+extern s32 dds3FindEntryIndex(s32);
+extern s32 func_0035B6E0(const char *, ...);
+extern char D_0042B950[];
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0B08);
+/* Apply each unlocked story bonus once to the active party record. */
+s32 func_002D0B08(s32 unitId) {
+    s32 partyIndex;
+    DatPartyRecord *party;
+    s32 changed;
+    u32 row;
+    s32 index;
+    s32 stat;
+    s8 *bonus;
+
+    partyIndex = dds3FindEntryIndex(unitId);
+    if (partyIndex < 0) {
+        return 0;
+    }
+    party = &datGameState->party[partyIndex];
+    if (party->flags & 0x8000) {
+        return 0;
+    }
+    func_0035B6E0(D_0042B950, unitId);
+    changed = 0;
+    party->flags |= 0x8000;
+    if (unitId != 7) {
+        for (row = 0; row < 24; row++) {
+            if (D_003E8D10[row].unitId == unitId) {
+                if (mdlFlagTest(D_003E8D10[row].flag)) {
+                    bonus = D_00435E3C[58 + D_003E8D10[row].bonusIndex];
+                    for (index = 0; index < DAT_BASE_STAT_COUNT; index++) {
+                        party->baseStats[index] += bonus[index];
+                    }
+                    changed = 1;
+                }
+            }
+        }
+    } else {
+        for (row = 0; row < 6; row++) {
+            for (index = 0; index < 4; index++) {
+                if (mdlFlagTest(D_003E8DD0[row].flags[index])) {
+                    bonus = D_00435E3C[58 + D_003E8DD0[row].bonusIndex];
+                    for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
+                        party->baseStats[stat] += bonus[stat];
+                    }
+                    changed = 1;
+                    break;
+                }
+            }
+        }
+    }
+    return changed;
+}
+
 
 void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
@@ -3477,6 +3542,12 @@ s32 fileToggleSlotFlagsBit(u32 kind, s32 *flags) {
         return 0;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B920);
+
+INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
+
+INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B950);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B970);
 
