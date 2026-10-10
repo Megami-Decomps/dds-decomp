@@ -3324,6 +3324,17 @@ s32 btlDestroyTaskC(void) {
     return 0;
 }
 
+/* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
+typedef struct BtlTutorialDialogWork {
+    u8 phase;
+    u8 pad01[3];
+    s32 counter;
+    u16 alpha;
+    u8 pad0A[0xA];
+    s32 itemIndex;
+} BtlTutorialDialogWork;
+typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B20);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B55A8);

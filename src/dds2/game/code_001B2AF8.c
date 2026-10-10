@@ -4151,10 +4151,14 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-/* The creator allocates and clears the complete 24-byte phase work. */
+/* The shared dialog creator clears 24 bytes; native counter/alpha/cursor are +4/+8/+14. */
 typedef struct BtlTutorialDialogWork {
     u8 phase;
-    u8 reserved[0x17];
+    u8 pad01[3];
+    s32 counter;
+    u16 alpha;
+    u8 pad0A[0xA];
+    s32 itemIndex;
 } BtlTutorialDialogWork;
 typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ? 1 : -1];
 extern s32 evtGetMessageWindowControlState(void);
