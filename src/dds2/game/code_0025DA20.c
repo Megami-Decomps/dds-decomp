@@ -1696,7 +1696,14 @@ s32 itmClaimFreeSlot(s32 row) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260C28);
+/* Convert a camp reward row and its three-way option to a flat index. */
+s32 func_00260C28(s32 row, s32 option) {
+    s32 index = 3;
+
+    index = row * index;
+    index += option;
+    return index;
+}
 
 s32 func_00260C38(s32 slot, s32 row) {
     return row * 2 + slot;
