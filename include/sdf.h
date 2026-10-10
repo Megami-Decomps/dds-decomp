@@ -44,7 +44,8 @@ typedef struct SdfBattleParameters {
     u8 padB68[4];
     f32 specialAffinityScale; /* 0xB6C */
     f32 criticalScale; /* 0xB70: special-mode multiplier for the critical roll. */
-    u8 padB74[8];
+    u8 padB74[4];
+    f32 specialEncounterScale; /* 0xB78: scales the solar-phase chance after an attempted special encounter. */
     f32 preemptiveModeScale; /* 0xB7C: encounter-kind-3 preemptive chance scale. */
     f32 majinRewardScale; /* 0xB80: DDS2 battle-mode-3 experience multiplier. */
     f32 unkB84; /* 0xB84: source-conditioned factor, DDS2 001B1B64. */
@@ -56,7 +57,8 @@ typedef struct SdfBattleParameters {
     f32 unkB94; /* 0xB94: corresponding target-conditioned command factor. */
     s8 criticalPartyAttackerBias; /* 0xB98: signed critical chance adjustments. */
     s8 criticalPartyDefenderBias; /* 0xB99 */
-    u8 padB9A[0xA];
+    u8 specialEncounterChance[9]; /* 0xB9A: unsigned chance by mirrored solar phase, DDS2 001B40E8. */
+    u8 padBA3;
     f32 partyHpScale[10]; /* 0xBA4 */
     f32 enemyHpScale[10]; /* 0xBCC */
     f32 hekatoRatioScale; /* 0xBF4 */
@@ -75,6 +77,10 @@ typedef char SdfBattleParameters_size_must_be_0xA6C[(sizeof(SdfBattleParameters)
 #endif
 #ifdef VERSION_DDS2
 typedef char SdfBattleParameters_size_must_be_0xC14[(sizeof(SdfBattleParameters) == 0xC14) ? 1 : -1];
+typedef char SdfBattleParameters_special_scale_offset_must_be_0xB78[
+    ((u32)&((SdfBattleParameters *)0)->specialEncounterScale == 0xB78) ? 1 : -1];
+typedef char SdfBattleParameters_special_chance_offset_must_be_0xB9A[
+    ((u32)&((SdfBattleParameters *)0)->specialEncounterChance == 0xB9A) ? 1 : -1];
 #endif
 
 extern SdfBattleParameters *datBattleParameters;
