@@ -346,6 +346,10 @@ functions use trampolines and are a different case.
   single `1.0f` store.
 - Declare every prototype before its first caller. A later `extern void`
   leaves earlier calls implicitly `int` and moves values between `$2`/`$3`.
+  Confirmed reserve-panel examples: DDS1 `func_001B7F50` and DDS2
+  `func_001C3168` become exact with their presentation/text helpers declared
+  `void` before use. Recover that contract from the provider and its callers;
+  a preferred register alone does not establish a return type.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
 - **Same-TU callee visibility can change branch annulment.** Test this only
