@@ -60,7 +60,7 @@ void mnuClearNodeBroadcastFlag(u8 *node);
 void dds3ReleaseSoundSlotPool(void);
 void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
-void mnuDeactivateModelNode(s32 nodeAddress);
+void mnuDeactivateModelNode(MnuModelNode *node);
 
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
@@ -547,15 +547,15 @@ void mnuInitializeNodeTransforms(u32 *group, f32 x, f32 y, f32 z, f32 w) {
     }
 }
 
-void mnuDeactivateAllModelNodes(s32 *list) {
-    u8 *node = (u8 *)list[0];
+void mnuDeactivateAllModelNodes(MnuNodeList *list) {
+    MnuModelNode *node = list->nodes;
     s32 index = 0;
-    if (list[1] > 0) {
+    if (list->count > 0) {
         do {
-            mnuDeactivateModelNode((s32)node);
-            node += 0x50;
+            mnuDeactivateModelNode(node);
+            node++;
             index++;
-        } while (index < list[1]);
+        } while (index < list->count);
     }
 }
 
@@ -667,8 +667,7 @@ void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resource
 }
 
 /* Release the node's active state and suspend its model's transform updates. */
-void mnuDeactivateModelNode(s32 nodeAddress) {
-    MnuModelNode *node = (MnuModelNode *)nodeAddress;
+void mnuDeactivateModelNode(MnuModelNode *node) {
     node->flags = 0;
     node->model->flags |= MDL_SKIP_TRANSFORMS;
 }
@@ -699,15 +698,13 @@ void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
 }
 
 /* Translate the primary (0x00) vector and load it into the model. */
-void mnuTranslateNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z) {
-    MnuModelNode *modelNode = (MnuModelNode *)node;
-
-    modelNode->primary[3] = 0;
-    modelNode->primary[0] += x;
-    modelNode->primary[1] += y;
-    modelNode->primary[2] += z;
-    VU0_LOAD_VF(vf10, modelNode->primary);
-    mdlStorePrimaryVectorVU(modelNode->model);
+void mnuTranslateNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z) {
+    node->primary[3] = 0;
+    node->primary[0] += x;
+    node->primary[1] += y;
+    node->primary[2] += z;
+    VU0_LOAD_VF(vf10, node->primary);
+    mdlStorePrimaryVectorVU(node->model);
 }
 
 /* Build a quaternion from the incoming Euler angles and refresh the model basis. */
@@ -779,10 +776,10 @@ void mnuSetModelNodeBroadcastAlpha(void) {
 }
 
 /* Replace only the high byte of the model's broadcast word. */
-void mnuSetNodeModelBroadcastByte(u8 *node, u8 highByte) {
-    u32 broadcastLowBytes = mdlGetBroadcastValue(((MnuModelNode *)node)->model) & 0xFFFFFF;
+void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
+    u32 broadcastLowBytes = mdlGetBroadcastValue(node->model) & 0xFFFFFF;
 
-    mdlBroadcastMasked(((MnuModelNode *)node)->model, broadcastLowBytes | ((u32)highByte << 24));
+    mdlBroadcastMasked(node->model, broadcastLowBytes | ((u32)highByte << 24));
 }
 
 void mnuSetModelNodeVisibility(u8 *node, s8 selector) {

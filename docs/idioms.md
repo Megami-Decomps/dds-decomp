@@ -6587,4 +6587,21 @@ their allocation word goes directly through the SDK's scalar finalize
 operation and physical append, with a real `u64 *` or state-tail write
 cursor returned by that operation. Keep this genuine SDK word transport.
 
+## Menu model helpers share their complete producer owners
+
+The DDS2 `0x50` model-node pool is not the `0x34` image-instance pool.
+Its allocator publishes `MnuSectionModelWork`, `MnuNodeList` descriptors
+and `MnuModelNode` records from `mnu_shooting.h`. Deactivation, translation
+and high-byte broadcast helpers take those actual nodes; the all-node
+deactivation walker takes the actual list descriptor rather than a word
+array. Preserve the broadcast provider's true `u8` result boundary.
+
+The `0031CBC8` current-owner candidate still differs only at `+0xD8`:
+the compiler emits `BC1F` where retail has `BC1FL`, with the same byte-mask
+delay instruction. Three genuine result-width/counter-lifetime forms
+preserve that residual. Shared-owner recovery does not justify forcing
+annulment with a branch, flag, assembly or ordering lever; keep retail
+ASM enabled and the reviewed C candidate parked.
+
+
 
