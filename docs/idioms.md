@@ -3545,6 +3545,13 @@ leaf incidentally leaves `scrCurrentContext` in `$2`; that is not a public
 return contract. Keep its declarations void and ordinary opcode callers
 as `scrSetIntegerReturnValue(value); return 1;` where native returns one.
 
+The paired resource-backed effect commands return immediately after a missing
+resource's diagnostic reread and zero-result publication. Keep object-null and
+success publication after that failure branch. This natural early failure
+shape matches DDS1 `func_00225880`, `func_00225BA0`, `func_00225CD8` and their
+DDS2 counterparts; nesting allocation in an `else` merges the return block
+and changes diagnostic argument scheduling and the epilogue.
+
 The existing non-void `evtOpBindMotionSoundToModel` is an original-source
 exception: its success path ends with `scrSetIntegerReturnValue(model);`
 and no return statement, while its early exits return one. DDS1's retail
