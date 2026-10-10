@@ -700,9 +700,81 @@ void mnuAdvanceMantraPanelTransitionTimer(MnuStatusResource *object) {
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028CD50);
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
+typedef struct MantraPanelAnimation MantraPanelAnimation;
+extern MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
+extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+extern u32 mnuQueuePanelAnimationTransition(MantraPanelAnimation *, u32, s16);
 
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028D070);
+/* Spawn the available node panels from the currently selected unit's flags. */
+void func_0028D070(MnuStatusResource *object, s32 startDelay, s32 transitionMode) {
+    MantraPanelPool *pool = object->menu.resource;
+    MantraNodePos *position;
+    MantraPanelAnimation *panel;
+    s32 recordIndex;
+
+    mnuGetActiveMantraModelFlagState();
+    position = mnuGetMantraNodePositionRecord(0);
+    recordIndex = 175;
+    do {
+        if (position->id != 0) {
+            u32 selectedIndex = func_002890A8(object);
+            MantraFlagResource *resource = (MantraFlagResource *)object->menu.slots[selectedIndex];
+            u16 flags = resource->flags[position->id];
+            s32 panelKind = -1;
+
+            if ((flags & 0xF) != 3) {
+                if (position->kind == 2) {
+                    if (position->selector.packed & 0x100) {
+                        panelKind = ((flags >> 8) & 8) ? 7 : 6;
+                    } else if ((flags >> 8) & 1) {
+                        panelKind = 5;
+                    } else if ((flags & 0xF) == 1) {
+                        panelKind = 4;
+                    } else if ((flags >> 8) & 8) {
+                        panelKind = 3;
+                    } else if ((flags & 0xF) == 2) {
+                        panelKind = 6;
+                    }
+                } else if (position->kind == 3) {
+                    if ((flags >> 8) & 1) {
+                        panelKind = 9;
+                    } else if ((flags & 0xF) == 1) {
+                        panelKind = 8;
+                    }
+                } else if (position->kind == 4) {
+                    if ((flags >> 8) & 1) {
+                        panelKind = 12;
+                    } else if ((flags & 0xF) == 1) {
+                        panelKind = 11;
+                    } else if ((flags & 0xF) == 2) {
+                        panelKind = 10;
+                    }
+                } else {
+                    if ((flags >> 8) & 1) {
+                        panelKind = 2;
+                    } else if ((flags & 0xF) == 1) {
+                        panelKind = 1;
+                    } else if ((flags & 0xF) == 2) {
+                        panelKind = 0;
+                    }
+                }
+                if (panelKind != -1) {
+                    panel = mnuSpawnPanelSlotA(pool, position->id, (s8)panelKind, (s16)startDelay, 0, 0);
+                    if (panel != NULL) {
+                        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                        if (transitionMode == 1) {
+                            mnuQueuePanelAnimationTransition(panel, 8, 0);
+                        } else if (transitionMode == 2) {
+                            mnuQueuePanelAnimationTransition(panel, 0, 0);
+                        }
+                    }
+                }
+            }
+        }
+        position++;
+    } while (--recordIndex >= 0);
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
 
@@ -850,9 +922,6 @@ void func_0028DFA0(s32 object) {
     }
 }
 
-typedef struct MantraPanelAnimation MantraPanelAnimation;
-extern MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
-extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
 
 const char D_004271E0[] = "Mantra Hiding[%x]!!!\n";
 const char D_004271F8[] = "Mantra !!!\n";
