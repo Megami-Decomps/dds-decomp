@@ -39,8 +39,9 @@ struct MenuIconState {
     s32 fade;
 };
 
-/* Mode 5 callers pass only kind and resource; native mode 4 consumes material. */
-struct MenuIconState *mnuCreatePanelIconState();
+/* The native constructor receives both resource words for every kind. */
+struct MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource,
+                                               s32 material);
 void mnuReleaseResourceList(struct MenuIconState *list);
 
 typedef struct MenuWindowContainer {
