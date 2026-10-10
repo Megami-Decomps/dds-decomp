@@ -137,36 +137,36 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
     quad->color[2] = ((u8 *)&source->color)[2];
     quad->color[3] = ((u8 *)&source->color)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->left << 4) + 0x7000;
-        quad->vertices[0].y = (source->top << 3) + 0x7900;
+        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
+        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
         quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->bottom << 3) + 0x7900;
-        quad->vertices[2].x = (source->right << 4) + 0x7000;
+        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
+        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
         quad->vertices[2].y = quad->vertices[0].y;
         quad->vertices[3].x = quad->vertices[2].x;
         quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->left * (1.0f / 512.0f);
-        quad->vertices[0].t = source->top * (1.0f / 512.0f);
+        quad->vertices[0].s = source->corners[0][0] * (1.0f / 512.0f);
+        quad->vertices[0].t = source->corners[0][1] * (1.0f / 512.0f);
         quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->bottom * (1.0f / 512.0f);
-        quad->vertices[2].s = source->right * (1.0f / 512.0f);
+        quad->vertices[1].t = source->corners[1][1] * (1.0f / 512.0f);
+        quad->vertices[2].s = source->corners[1][0] * (1.0f / 512.0f);
         quad->vertices[2].t = quad->vertices[0].t;
         quad->vertices[3].s = quad->vertices[2].s;
         quad->vertices[3].t = quad->vertices[1].t;
     } else {
-        quad->vertices[0].x = source->left + 0x7000;
-        quad->vertices[0].y = source->top + 0x7900;
+        quad->vertices[0].x = source->corners[0][0] + 0x7000;
+        quad->vertices[0].y = source->corners[0][1] + 0x7900;
         quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->bottom + 0x7900;
-        quad->vertices[2].x = source->right + 0x7000;
+        quad->vertices[1].y = source->corners[1][1] + 0x7900;
+        quad->vertices[2].x = source->corners[1][0] + 0x7000;
         quad->vertices[2].y = quad->vertices[0].y;
         quad->vertices[3].x = quad->vertices[2].x;
         quad->vertices[3].y = quad->vertices[1].y;
-        quad->vertices[0].s = source->left * (1.0f / 8192.0f);
-        quad->vertices[0].t = source->top * (1.0f / 4096.0f);
+        quad->vertices[0].s = source->corners[0][0] * (1.0f / 8192.0f);
+        quad->vertices[0].t = source->corners[0][1] * (1.0f / 4096.0f);
         quad->vertices[1].s = quad->vertices[0].s;
-        quad->vertices[1].t = source->bottom * (1.0f / 4096.0f);
-        quad->vertices[2].s = source->right * (1.0f / 8192.0f);
+        quad->vertices[1].t = source->corners[1][1] * (1.0f / 4096.0f);
+        quad->vertices[2].s = source->corners[1][0] * (1.0f / 8192.0f);
         quad->vertices[2].t = quad->vertices[0].t;
         quad->vertices[3].s = quad->vertices[2].s;
         quad->vertices[3].t = quad->vertices[1].t;
@@ -180,13 +180,13 @@ void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
     quad->vertices[3].depth = 0;
     quad->vertices[3].xyzControl = 0;
     if (fixedPointCoordinates == 0) {
-        u = source->x + 256.0f;
-        v = source->y + 224.0f;
+        u = source->position[0] + 256.0f;
+        v = source->position[1] + 224.0f;
         centerX = u * (1.0f / 512.0f);
         centerY = v * (1.0f / 448.0f);
     } else {
-        u = source->x + 4096.0f;
-        v = source->y + 1792.0f;
+        u = source->position[0] + 4096.0f;
+        v = source->position[1] + 1792.0f;
         centerX = u * (1.0f / 8192.0f);
         centerY = v * (1.0f / 3584.0f);
     }
@@ -227,20 +227,20 @@ void effBuildBlurUnitTextureQuad(BlurSource *source, BlurPacketQuad *quad, u8 fi
     quad->color[2] = 0x80;
     quad->color[3] = ((u8 *)&source->color)[3];
     if (fixedPointCoordinates == 0) {
-        quad->vertices[0].x = (source->left << 4) + 0x7000;
-        quad->vertices[0].y = (source->top << 3) + 0x7900;
+        quad->vertices[0].x = (source->corners[0][0] << 4) + 0x7000;
+        quad->vertices[0].y = (source->corners[0][1] << 3) + 0x7900;
         quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = (source->bottom << 3) + 0x7900;
-        quad->vertices[2].x = (source->right << 4) + 0x7000;
+        quad->vertices[1].y = (source->corners[1][1] << 3) + 0x7900;
+        quad->vertices[2].x = (source->corners[1][0] << 4) + 0x7000;
         quad->vertices[2].y = quad->vertices[0].y;
         quad->vertices[3].x = quad->vertices[2].x;
         quad->vertices[3].y = quad->vertices[1].y;
     } else {
-        quad->vertices[0].x = source->left + 0x7000;
-        quad->vertices[0].y = source->top + 0x7900;
+        quad->vertices[0].x = source->corners[0][0] + 0x7000;
+        quad->vertices[0].y = source->corners[0][1] + 0x7900;
         quad->vertices[1].x = quad->vertices[0].x;
-        quad->vertices[1].y = source->bottom + 0x7900;
-        quad->vertices[2].x = source->right + 0x7000;
+        quad->vertices[1].y = source->corners[1][1] + 0x7900;
+        quad->vertices[2].x = source->corners[1][0] + 0x7000;
         quad->vertices[2].y = quad->vertices[0].y;
         quad->vertices[3].x = quad->vertices[2].x;
         quad->vertices[3].y = quad->vertices[1].y;
@@ -437,14 +437,14 @@ void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordi
 }
 
 void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
-    s32 x = work->source.x + 0x100;
-    s32 y = work->source.y + 0xE0;
+    s32 x = work->source.position[0] + 0x100;
+    s32 y = work->source.position[1] + 0xE0;
     s32 extent = work->extent;
 
-    work->source.left = x - extent;
-    work->source.top = y - extent;
-    work->source.right = x + extent;
-    work->source.bottom = y + extent;
+    work->source.corners[0][0] = x - extent;
+    work->source.corners[0][1] = y - extent;
+    work->source.corners[1][0] = x + extent;
+    work->source.corners[1][1] = y + extent;
     effDrawBlurRectangle(&work->source);
 }
 
@@ -467,13 +467,13 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(rect) == 0) {
-        centerX = rect->body.source.x + 0x100;
-        centerY = rect->body.source.y + 0xE0;
+        centerX = rect->body.source.position[0] + 0x100;
+        centerY = rect->body.source.position[1] + 0xE0;
         halfExtent = rect->body.extent;
-        rect->body.source.left = centerX - halfExtent;
-        rect->body.source.top = centerY - halfExtent;
-        rect->body.source.right = centerX + halfExtent;
-        rect->body.source.bottom = centerY + halfExtent;
+        rect->body.source.corners[0][0] = centerX - halfExtent;
+        rect->body.source.corners[0][1] = centerY - halfExtent;
+        rect->body.source.corners[1][0] = centerX + halfExtent;
+        rect->body.source.corners[1][1] = centerY + halfExtent;
         effDrawBlurSource(&rect->body.source, rect->texture, 0);
     }
 }
@@ -483,14 +483,14 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(owner) == 0) {
-        centerX = owner->body.source.x + 0x1000;
-        centerY = (owner->body.source.y + 0xE00) >> 1;
+        centerX = owner->body.source.position[0] + 0x1000;
+        centerY = (owner->body.source.position[1] + 0xE00) >> 1;
         halfExtent = owner->body.extent;
-        owner->body.source.left = centerX - halfExtent;
-        owner->body.source.right = centerX + halfExtent;
+        owner->body.source.corners[0][0] = centerX - halfExtent;
+        owner->body.source.corners[1][0] = centerX + halfExtent;
         halfExtent >>= 1;
-        owner->body.source.top = centerY - halfExtent;
-        owner->body.source.bottom = centerY + halfExtent;
+        owner->body.source.corners[0][1] = centerY - halfExtent;
+        owner->body.source.corners[1][1] = centerY + halfExtent;
         effDrawBlurSource(&owner->body.source, owner->texture, 1);
     }
 }

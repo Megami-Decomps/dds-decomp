@@ -93,8 +93,8 @@ void effReleaseResourceTemplate(EffResourceRectWork *work) {
 /* Generate pixel-coordinate bounds; the renderer applies GS coordinate scale. */
 void effResourceRectDrawPixels(EffResourceRectWork *work) {
     s32 extent = (s32)((f32)work->params.extent * 1.4f);
-    s32 x = work->params.centerX + 0x100;
-    s32 y = work->params.centerY + 0xE0;
+    s32 x = work->params.center[0] + 0x100;
+    s32 y = work->params.center[1] + 0xE0;
 
     work->params.draw.bounds.left = x - extent;
     work->params.draw.bounds.top = y - extent;
@@ -106,8 +106,8 @@ void effResourceRectDrawPixels(EffResourceRectWork *work) {
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
 void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
     f32 scaledExtent = (f32)work->params.extent * 1.4f;
-    s32 x = work->params.centerX + 0x1000;
-    s32 y = (work->params.centerY + 0xE00) >> 1;
+    s32 x = work->params.center[0] + 0x1000;
+    s32 y = (work->params.center[1] + 0xE00) >> 1;
     s32 extent = (s32)scaledExtent;
     s32 right = x + extent;
     s32 bottom;
