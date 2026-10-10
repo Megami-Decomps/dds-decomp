@@ -61,7 +61,7 @@ extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
-void func_0022E5A0(s32 arg0, void *arg1);
+void func_0022E5A0(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
 void *dds3GetWorldObject(void);
 f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
@@ -289,7 +289,178 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
     evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_0022D420", func_0022E5A0);
+extern void evtViewerClampMovieTimes(s32, EvtRuntime *);
+extern void evtViewerSyncWorldGroups(s32, EvtRuntime *);
+extern void evtViewerApplyGlyphLodChannel(s32, EvtRuntime *);
+extern void func_0022F038(s32, EvtRuntime *);
+extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
+extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
+extern void func_0022F550(s32, EvtRuntime *);
+extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
+extern void func_0022F7F8(EvtRuntime *);
+extern s32 evtViewerTestIndexedCondition(u32);
+extern void func_0022CED0(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void func_0022D420(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void func_0022D528(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s16);
+extern void evtResetUnitVectorSlots();
+extern void kwlnCancelConfiguredFadeFrames(void);
+extern u8 kwlnDrawOverlayEnabled;
+extern EvtRuntimeGroup *D_003BBE80;
+
+void func_0022E5A0(s32 time, EvtRuntime *viewer) {
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    EvtRuntimeChild *other;
+    EvtRuntimeChild *selected;
+    s32 difference;
+    s32 bestDistance;
+    s32 conditionIndex;
+    s16 duration;
+    s16 offset;
+
+    viewer->blurRectangleEnabled = 0;
+    viewer->texturedBlurEnabled = 0;
+    viewer->flags &= ~2;
+    viewer->colorRectangleEnabled = 0;
+    viewer->flags &= ~4;
+    conditionIndex = 0;
+    viewer->texturedSquareEnabled = 0;
+    viewer->filterBlurEnabled = 0;
+    viewer->staggeredBlurEnabled = 0;
+    viewer->framebufferQuadEnabled = 0;
+    evtResetUnitVectorSlots();
+    evtViewerClampMovieTimes(time, viewer);
+    evtViewerSyncWorldGroups(time, viewer);
+    evtViewerApplyGlyphLodChannel(time, viewer);
+    func_0022F038(time, viewer);
+    evtViewerActivateWindowForGlyphEntry(time, viewer);
+    evtViewerCountFlaggedUpdates(viewer);
+    func_0022F550(time, viewer);
+    evtViewerUpdateTimedAction(viewer);
+    func_0022F7F8(viewer);
+
+    for (group = viewer->groups; group != NULL; group = group->next) {
+        if (group->type == 1) {
+            evtViewApplyMovieModeKeys(group, time);
+            continue;
+        }
+        for (child = group->children; child != NULL; child = child->next) {
+            switch (group->type) {
+            case 3:
+            case 20:
+            case 21:
+            case 26:
+                duration = child->p08.sh[1];
+                if (duration == 0) {
+                    difference = viewer->headerThird - child->frame;
+                } else {
+                    difference = duration - child->frame;
+                    if (difference < 0) {
+                        difference = 0;
+                    }
+                }
+                break;
+            case 18:
+                duration = child->p08.sh[0];
+                if (duration == 0) {
+                    difference = viewer->headerThird - child->frame;
+                } else {
+                    difference = duration - child->frame;
+                    if (difference < 0) {
+                        difference = 0;
+                    }
+                }
+                break;
+            case 9:
+                other = child->next;
+                while (other != NULL && other->p08.sh[0] != child->p08.sh[0]) {
+                    other = other->next;
+                }
+                if (other != NULL) {
+                    difference = other->frame - child->frame;
+                } else {
+                    difference = viewer->headerThird - child->frame;
+                }
+                break;
+            default:
+                difference = child->duration;
+                break;
+            }
+
+            if ((difference == 0 && time == child->frame) ||
+                (difference > 0 && time >= child->frame &&
+                 time < child->frame + difference)) {
+                func_0022CED0(group, child, time, difference, viewer);
+            } else {
+                func_0022D420(group, child, time, difference, viewer);
+            }
+        }
+    }
+
+    bestDistance = 10000;
+    D_003BBE80 = NULL;
+    for (group = viewer->groups; group != NULL; group = group->next) {
+        offset = group->metadata.value;
+        child = group->children;
+        for (; child != NULL; child = child->next) {
+            if (group->type == 2) {
+                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) == 0) {
+                    continue;
+                }
+            } else {
+                if (group->type == 16 || group->type == 17 || group->type == 12) {
+                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) == 0) {
+                        continue;
+                    }
+                }
+            }
+            if (time < child->frame + offset) {
+                break;
+            }
+        }
+
+        selected = child != NULL ? child->prev : group->lastChild;
+        if (group->type == 2 || group->type == 16 ||
+            group->type == 17 || group->type == 12) {
+            switch (group->type) {
+            case 2:
+                conditionIndex = 1;
+                break;
+            case 12:
+            case 16:
+            case 17:
+                conditionIndex = 3;
+                break;
+            }
+            while (selected != NULL) {
+                s16 condition;
+
+                condition = (s16)selected->body.words[conditionIndex];
+                if (evtViewerTestIndexedCondition(condition) == 1) {
+                    break;
+                }
+                selected = selected->prev;
+            }
+        }
+        func_0022D528(group, child, selected, time, &bestDistance, viewer, offset);
+    }
+
+    if (D_003BBE80 != NULL) {
+        viewer->fallbackEntry = (s32)D_003BBE80->info;
+        evtViewerApplySelectedEntry(viewer);
+    }
+    func_0022E098(time, viewer);
+    if (viewer->flags & 1) {
+        if (!(viewer->flags & 2)) {
+            kwlnCancelConfiguredFadeFrames();
+        }
+        if (!(viewer->flags & 4)) {
+            kwlnDrawOverlayEnabled = 0;
+        }
+    }
+}
+
+
 
 extern void evtPolygonMovieClampTime(s32 object, s32 arg1, s32 start, s32 end);
 
@@ -1382,7 +1553,39 @@ u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
     evtViewerPopHistory((EvtRuntime *)viewerAddr);
     return 0;
 }
-INCLUDE_ASM(const s32, "game/code_0022D420", evtViewCmdResolveSlot);
+s32 evtViewCmdResolveSlot(s32 operation, void *argument, EvtRuntime *viewer) {
+    s32 count = 0;
+    EvtRuntimeChild *key;
+    EvtRuntimeGroup *group;
+    s32 selection;
+
+    key = evtEventViewerGetPendingNode(viewer);
+    selection = viewer->groupFirst + viewer->groupCursor;
+    if (selection == 0) {
+        key->p10.h[0] = 0;
+    } else if (selection == 1) {
+        key->p10.h[0] = 1;
+    } else {
+        s32 ordinal = selection - 2;
+
+        group = viewer->groups;
+        while (group != NULL) {
+            if (group->type == 0x18) {
+                if (count == ordinal) {
+                    u16 entry = group->entryHeader;
+                    key->p10.h[0] = entry + 2;
+                    break;
+                }
+                count++;
+            }
+            group = group->next;
+        }
+    }
+    func_0022E5A0(viewer->curFrame, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
+
 
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, EvtRuntime *viewer) {

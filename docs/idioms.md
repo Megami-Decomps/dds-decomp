@@ -6922,3 +6922,23 @@ The retained R1 owner draft and Opal/Obsidian
 reconstruction/review supplied the baseline; no ABI or scheduling controls
 were added.
 
+## Viewer timeline filters share a forward frame boundary
+
+DDS1 `func_0022E5A0` walks the canonical runtime's tracks and keys. The default
+interval is the key's `duration` at +2, not a parameter halfword. The second
+pass skips condition-disabled keys, stopping at the first enabled future
+frame; the predecessor is then searched backward for an enabled selection.
+Kind 2 reads condition word 1; kinds 12/16/17 read word 3, using the signed
+low half of the existing parameter-word union.
+
+Use the natural `for` cursor increment for the forward pass, with `continue`
+in the two condition-filter branches and one shared frame comparison. The
+nested other-kind guard preserves retail's two forward predicate call sites
+without duplicating the frame comparison. This also reproduces the native
+frame lifetime; no variable ordering or allocation controls are needed.
+
+The 1144-byte provider and its 212-byte `evtViewCmdResolveSlot` consumer land
+together: the unit gates 59 match, 0 differ. The truthful `EvtRuntime *`
+declaration closure gates the event-viewer unit 31/0 and `code_00235270`
+128/0. Credit Purist6c's corrected reconstruction and RTL lifetime analysis.
+
