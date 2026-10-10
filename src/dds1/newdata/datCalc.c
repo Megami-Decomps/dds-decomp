@@ -438,7 +438,7 @@ extern s32 D_003C2E7C[];
 extern s32 D_003C2E80[];
 
 extern s32 scrReadIntParameter(s32 idx);
-extern s32 scrSetIntegerReturnValue();
+extern void scrSetIntegerReturnValue();
 extern void scrSetFloatReturnValue(f32 value);
 extern DatPartyRecord *dds3FindEntry(s32 rosterIndex);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);

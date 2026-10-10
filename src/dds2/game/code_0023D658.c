@@ -64,7 +64,7 @@ extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, 
 extern void *dds3GetWorldObject(void);
 
 
-extern s32 scrSetIntegerReturnValue(s32 arg0);
+extern void scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 scrReadIntParameter(s32 idx);
 
@@ -489,7 +489,8 @@ u32 evtOpBindMotionSoundToModel(void) {
     if (task != 0) {
         func_00101968(evtFindTaskById(scrReadIntParameter(0)), task);
     }
-    return scrSetIntegerReturnValue(model);
+    /* The original success path ends in this void call, without a return. */
+    scrSetIntegerReturnValue(model);
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {

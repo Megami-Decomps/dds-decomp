@@ -21,7 +21,7 @@ extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *work);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 index);
 
 
-extern s32 scrSetIntegerReturnValue(s32 arg0);
+extern void scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
 
