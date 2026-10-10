@@ -485,8 +485,17 @@ typedef struct ParKindState {
         struct ParTable *table;
         f32 scale;
     } value;
-    u8 pad0C[4];
-    struct ParSystem *primaryDrawSystem; /* kind 2 */
+    /* 15B330 +DC/+128 use dispatchParameter in kinds 2/3;
+     * +F0/+16C use firstGradientColor in kind 4. */
+    union {
+        void *dispatchParameter;
+        u32 firstGradientColor;
+    };
+    /* 15B330 +E0 stores the kind-2 system; +14C reads kind-4 color. */
+    union {
+        struct ParSystem *primaryDrawSystem;
+        u32 secondGradientColor;
+    };
     union {
         struct ParSystem *system;       /* kind 3 */
         struct EffTrackPolyList *modelList; /* kind 4 */
