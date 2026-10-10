@@ -2293,6 +2293,28 @@ dependency graph. Check the active mode, allocation and other field users
 before taking such a pointer; the union remains the owner of heterogeneous
 payloads.
 
+DDS2 `game/code_001442D0::func_00153FA0` provides a packed-record example.
+Each eight-byte preset contains a real `FieldGridCoordPair` of two signed
+halfwords, followed by a float phase. The terminal record encodes both
+coordinates as `0xFFFF`. Read its four-byte representation with fixed-size
+`memcpy` for the sentinel test, then use the actual coordinate members:
+
+```c
+s32 packedCoordinates;
+memcpy(&packedCoordinates, &presets[slot].coordinate, sizeof(packedCoordinates));
+if (packedCoordinates == -1) {
+    return;
+}
+```
+
+A word/coordinate union in the draft added a dependency between the active
+word store and the first coordinate load. The actual pair plus the packed
+snapshot allows the native `lhu` to precede that store; all 82 instruction
+words and all 171 C functions in the owner match. This establishes this
+record's access contract, not a rule to remove genuine heterogeneous unions.
+The preset data remains mutable external data; the sentinel read does not
+justify `const` or a second overlapping record view.
+
 Alias set zero does not force dependencies between all accesses: known
 disjoint locations can still be separated by address analysis. Conversely,
 an integer placeholder for a real pointer can manufacture a dependency even
