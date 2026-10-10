@@ -749,7 +749,35 @@ void fldLoadFieldTables(void) {
     sdfDevWaitThenReleaseCommandState(command);
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120AE8);
+extern void fldClearAllAreaFloorFlags(void);
+
+void func_00120AE8(void) {
+    s32 bankIndex;
+    s32 slotIndex;
+    s32 valueIndex;
+
+    for (bankIndex = 0; bankIndex < 32; bankIndex++) {
+        datGameState->activationFlags[bankIndex] = 0;
+    }
+
+    for (bankIndex = 0; bankIndex < 40; bankIndex++) {
+        for (slotIndex = 0; slotIndex < 64; slotIndex++) {
+            datGameState->maps[bankIndex].slots[slotIndex].roomModeFlags = 0;
+            datGameState->maps[bankIndex].slots[slotIndex].roomObjectModeFlags = 0;
+            datGameState->maps[bankIndex].slots[slotIndex].roomSceneFlags = 0;
+            datGameState->maps[bankIndex].slots[slotIndex].mapTargetFlags = 0;
+            datGameState->maps[bankIndex].slots[slotIndex].alternateMapTargetFlags = 0;
+            for (valueIndex = 0; valueIndex < 16; valueIndex++) {
+                datGameState->maps[bankIndex].slots[slotIndex].values[valueIndex] = 0xFF;
+            }
+            datGameState->maps[bankIndex].slots[slotIndex].auxiliaryFlags = 0;
+            datGameState->maps[bankIndex].slots[slotIndex].valueFlags = 0;
+        }
+    }
+
+    fldClearAllAreaFloorFlags();
+    memset(datGameState->pad159D0, 0, sizeof(datGameState->pad159D0));
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120C08);
 
