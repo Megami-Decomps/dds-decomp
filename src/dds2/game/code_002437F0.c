@@ -42,8 +42,7 @@ extern void func_00243AD8(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 extern char D_00437210[];
 
 
-/* The definition uses legacy K&R parameters. */
-void sdfSubmitGsTestOneRegisterPacket();
+void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
 void uiDrawUniformColorRect(s32 x, s32 y, s32 z, s32 width, s32 height, s32 angle, s32 object);
 

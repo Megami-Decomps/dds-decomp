@@ -18,6 +18,8 @@ struct StaffMenuRuntime;
 #include "sdf.h"
 #include "itf.h"
 
+extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
+
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
