@@ -171,15 +171,15 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
 
 /* Blend the flag-selected packed color with the caller's previous color.
  * DDS1 has two color choices; DDS2 additionally checks flag four. */
-s32 mnuDispatchByFlag(s32 previousColor, s32 entry) {
-    return uiBlendColors((((MenuListNode *)entry)->flags48 & 1) ? MNU_ENTRY_MARKED_COLOR : MNU_ENTRY_DEFAULT_COLOR,
-                         previousColor, ((MenuListNode *)entry)->animationTimer);
+s32 mnuDispatchByFlag(s32 previousColor, MenuListNode *entry) {
+    return uiBlendColors((entry->flags48 & 1) ? MNU_ENTRY_MARKED_COLOR : MNU_ENTRY_DEFAULT_COLOR,
+                         previousColor, entry->animationTimer);
 }
 
 
 
 /* Apply the same entry-state blend to all four packed colors in one slot. */
-void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, s32 entry) {
+void mnuDispatchEntryWords(EffectSlotSet *menu, s32 index, MenuListNode *entry) {
     s32 colorIndex;
 
     for (colorIndex = 0; colorIndex < MNU_ENTRY_COLOR_COUNT; colorIndex++) {
@@ -209,7 +209,7 @@ void func_0027C140(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         FrFontGlyph *glyph = NULL;
         s32 chainFlag = 0;
 
-        color = mnuDispatchByFlag((s32)color, (s32)node);
+        color = mnuDispatchByFlag(color, node);
         color = uiBlendColors(color, color & 0xFFFFFF00, fadeScale);
         if ((node == list->cursor && (list->stateFlags & 8) == 0) ||
             (node->flags48 & 2) != 0) {

@@ -350,7 +350,37 @@ void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
     mnuRemoveListCursorNode((struct MenuList *)work->list);
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_00248E68);
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
+extern s32 mnuDispatchByFlag(s32, struct MenuListNode *);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
+
+void func_00248E68(s32 x, s32 y, s32 unused, struct MenuList *list,
+                   struct MenuListNode *node, s32 priority) {
+    s32 width = list->scale;
+    MenuTerminalWork *host = (MenuTerminalWork *)list->context;
+    s32 isCurrent = node == list->cursor;
+    u32 chainFlags = 0;
+    u32 color;
+    struct FrFontGlyph *glyph;
+
+    if (node->flags48 & 1) {
+        width /= 2;
+    }
+    if (isCurrent) {
+        s32 base = (list->windowOffset * 21 + 0x76) << 3;
+        effDrawSpriteWithCornerFade(x - 0xE0, base, 0, width, 0, host->batch, 0x18, priority);
+        effDrawSpriteWithCornerFade(x + 0x600, base, 0, width, 0, host->batch, 0x19, priority);
+        effDrawSpriteWithCornerFade(x + 0xB0, base + 0x18, 0, width, 0, host->batch, 0x15, priority);
+        chainFlags = 4;
+    }
+    color = (node->flags48 & 1) ? 0xA09DC340 : 0xA09DC380;
+    color = mnuDispatchByFlag(color, node);
+    color = uiBlendColors(color, color & ~0xFF, list->scale);
+    glyph = itfCreateConvertedTextGlyph(x + 0x1C0, y + 0xD0, 0, color, node->title, 0);
+    frFontSetChildChainFirstOption(glyph, chainFlags);
+    frFontDrawGlyphChain(glyph, 1, priority);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 typedef struct MenuSlotKind {
     s16 kind;
