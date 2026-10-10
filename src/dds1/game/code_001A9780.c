@@ -5263,7 +5263,46 @@ extern u16 D_00359960[];
 
 extern u16 D_00358B20[];
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BD4F0);
+u16 *func_001BD4F0(BtlUnit *actor, s16 *outCount) {
+    DatEnemyRecord *enemy;
+    DatCommandRecord *records;
+    u16 *out = D_00359960;
+    s32 gathered;
+    s32 count;
+    s32 i;
+
+    btlGetRuntime();
+    enemy = datEnemyRecords;
+    enemy += actor->partyRecord.unitId;
+    memset(out, 0, 0x18);
+    records = datCommandRecords;
+    gathered = 0;
+    for (i = 0; i < 8; i++) {
+        u16 id = enemy->skills[i];
+        if ((records[id].unk_01 & 2) != 0 && id != 0) {
+            *out++ = id;
+            gathered++;
+        }
+    }
+    count = gathered;
+    out = D_00358B20;
+    memcpy(out, D_00359960, count * 2);
+    i = 0;
+    while (i < count) {
+        if (out[i] >= 0x200) {
+            s32 j;
+            /* Retail 0x001BD5EC..0x001BD610 also copies the unused trailing slot. */
+            for (j = i; j < count; j++) {
+                out[j] = out[j + 1];
+            }
+            count--;
+        } else {
+            i++;
+        }
+    }
+    *outCount = count;
+    return out;
+}
 
 extern u8 D_00358FE0[];
 
