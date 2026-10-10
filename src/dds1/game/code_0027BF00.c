@@ -410,10 +410,61 @@ void func_0027C7A0(MenuWindowContainer *window) {
     mnuTestListFlagTwo(&window->list->stateFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027C7B8);
+/* Draw the row separators and the three cursor decorations of a window. */
+void func_0027C7B8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
+    MenuListNode *neighbors[3];
+    s32 slotOffsets[3] = {1, 0, 1};
+    s32 fadeScale = window->fadeScale;
+    s32 entryValue = window->entryValue;
+    s32 row;
+    s32 rowY;
+
+    if (window->entryResources != 0) {
+        if (entryValue == 0) {
+            effDrawSpriteWithCornerFade(x, y, depth, fadeScale, 1,
+                window->entryResources, window->entryOption, drawArg);
+        }
+        for (row = 0; row < window->list->visibleCount; row++) {
+            rowY = row * window->list->rowStep;
+            effDrawSpriteWithCornerFade(x, y + rowY, depth, fadeScale, 1,
+                window->entryResources, window->entryY + 2, drawArg);
+            rowY += 0xA0;
+            if (row < window->list->visibleCount) {
+                effDrawSpriteWithCornerFade(x, y + rowY, depth, fadeScale, 1,
+                    window->entryResources, window->alternateEntryY, drawArg);
+            }
+        }
+        if (window->list->head != 0) {
+            if (window->entryResources != 0 && !(window->list->stateFlags & 8)) {
+                neighbors[0] = window->list->cursor->prev;
+                neighbors[1] = window->list->cursor;
+                neighbors[2] = window->list->cursor->next;
+                for (row = 0; row < 3; row++) {
+                    if (neighbors[row] != 0) {
+                        effDrawSpriteWithCornerFade(x,
+                            y + (window->list->windowOffset + row - 1) * window->list->rowStep,
+                            depth, fadeScale, 1, window->entryResources,
+                            window->entryY + slotOffsets[row], drawArg);
+                    }
+                }
+            }
+        } else {
+            for (row = 0; row < 3; row++) {
+                effDrawSpriteWithCornerFade(x,
+                    y + (window->list->windowOffset + row + 2) * window->list->rowStep,
+                    depth, fadeScale, 1, window->entryResources,
+                    window->entryY + slotOffsets[row], drawArg);
+            }
+        }
+        if (entryValue == 0) {
+            effDrawSpriteWithCornerFade(x, y + window->unk10, depth, fadeScale, 1,
+                window->entryResources, window->entryOption + 1, drawArg);
+        }
+    }
+}
 
 void func_0027CA78(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
-    func_0027C7B8();
+    func_0027C7B8(x, y, depth, (MenuWindowContainer *)menu, param);
 }
 
 void func_0027CA90(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
@@ -994,7 +1045,6 @@ s32 mnuCompareTertiaryKeyAscending(MenuListNode **left, MenuListNode **right) {
 /* Sort the walked node pointers and rebuild the list from the cursor.
  * Nonzero ascending selects the last three comparators, not descending order.
  * Allocation uses the stored count; key bounds and the relinker's minimum count remain unchecked. */
-INCLUDE_RODATA(const s32, "game/code_0027BF00", D_003B2358);
 
 INCLUDE_RODATA(const s32, "game/code_0027BF00", D_003B2368);
 
