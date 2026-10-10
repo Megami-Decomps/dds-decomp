@@ -612,9 +612,36 @@ void kwlnTextureDrawPageCounter(SdfListHead *packetList) {
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x79C0, KWLN_DIAG_DEPTH, 0, pageText));
 }
 
+extern const char *D_0037F560[];
+extern char D_004112F0[];
+extern char D_00411308[];
+
 INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004111F8);
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104700);
+void func_00104700(SdfListHead *packetList, SdfTex *texture) {
+    char text[0x70];
+    s32 formatIndex = 0;
+    s32 formatMode = 0;
+
+    func_0035C860(text, "W:%4d H:%4d", texture->width, texture->height);
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x82A0, 0x0FFFFF80, 0, text));
+    switch (texture->pixelFormat) {
+    case 0: formatIndex = 0; formatMode = 6; break;
+    case 1: formatIndex = 1; formatMode = 6; break;
+    case 2: formatIndex = 2; formatMode = 6; break;
+    case 10: formatIndex = 3; formatMode = 6; break;
+    case 19: formatIndex = 4; formatMode = 4; break;
+    case 20: formatIndex = 5; formatMode = 5; break;
+    case 27: formatIndex = 6; formatMode = 4; break;
+    case 36: formatIndex = 7; formatMode = 5; break;
+    case 44: formatIndex = 8; formatMode = 5; break;
+    default: break;
+    }
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7180, 0x8300, 0x0FFFFF80,
+                                                                formatMode, D_0037F560[formatIndex]));
+    func_0035C860(text, "ID[%2d,%2d]", texture->resourceKey, texture->battleTextureSlot);
+    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
+}
 
 #define KWLN_DIAG_PACKET_LIST_BYTES 0x20
 #define KWLN_VIEWER_FAST_PAGE_STEP 10
@@ -1326,10 +1353,10 @@ void kwlnDrawBlurErrorCounters(void) {
             packetList = (SdfListHead *)sdfAllocPacketAligned(KWLN_DIAG_PACKET_LIST_BYTES);
             sdfInitPacketList(packetList);
             if (kwlnDistanceBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", kwlnDistanceBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_004112F0, kwlnDistanceBlurErrorCount));
             }
             if (kwlnRippleBlurErrorCount > 0) {
-                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", kwlnRippleBlurErrorCount));
+                sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x73C0, 0x7B40, 0xFEFFFF, 4, D_00411308, kwlnRippleBlurErrorCount));
             }
             D_00380708.append(&D_00380708, packetList);
         }
@@ -1593,4 +1620,8 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnDistanceBlurErrorCount);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", kwlnRippleBlurErrorCount);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
+
+INCLUDE_RODATA(const s32, "game/code_00102DC8", D_004112F0);
+
+INCLUDE_RODATA(const s32, "game/code_00102DC8", D_00411308);
 
