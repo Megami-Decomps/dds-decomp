@@ -2365,7 +2365,7 @@ void func_001FB168(f32 *position) {
 void func_001FB170(void) {
 }
 
-void func_001FB178(f32 *position, u32 color, s32 flags, f32 radius) {
+void func_001FB178(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
 void func_001FB180(void) {

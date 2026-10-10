@@ -339,7 +339,27 @@ void kwlnPrintTaskQueueDiagnostics(void)
     func_003003F0(D_003BA828);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101368);
+void func_00101368(KwlnTask *task, s32 depth)
+{
+    func_003003F0(D_003BA830, D_003BDC48, task);
+    if (task->childList != NULL) {
+        if (task->parent == NULL) {
+            D_003BDC48[0] = ' ';
+        } else {
+            if (task->next == NULL) {
+                D_003BDC48[depth * 4] = ' ';
+            } else {
+                D_003BDC48[depth * 4] = '|';
+            }
+        }
+        D_003BDC48[depth * 4 + 4] = 0;
+        func_00101368(task->childList, depth + 1);
+        D_003BDC48[depth * 4] = 0;
+    }
+    if (task->next != NULL) {
+        func_00101368(task->next, depth);
+    }
+}
 
 /* Blank the task-name scratch buffer, then run func_00101368 on every parentless task of the three scheduler lists. */
 void kwlnVisitTaskForestRoots(void)

@@ -54,7 +54,8 @@ typedef struct FldAreaWork {
     s32 unk8C;
     s32 unk90;
     s32 unk94;
-    u8 pad98[8];
+    s32 unk98;
+    f32 unk9C;
     s32 unkA0;
     s32 unkA4;
     s32 overrideSupportRecordIndex; /* -1 selects the default support record. */
@@ -67,7 +68,8 @@ typedef struct FldAreaWork {
     s32 overlayMode;
     s32 overlayCounter;
     s32 unkD4;
-    u8 padD8[0xC];
+    u8 padD8[8];
+    s32 unkE0;
     s32 encounterMode;
     s32 unkE8;
     u32 transitionCount;

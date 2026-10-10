@@ -8684,7 +8684,91 @@ typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) 
 
 extern s32 func_002B7E60(EffectStateSnapshot *, s8);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B7E60);
+extern u8 D_0038F4F0[];
+extern s8 D_0039862B[];
+extern void func_001FB168(f32 *position);
+extern void func_001FB178(f32 *center, f32 radius, u32 color, s32 flags);
+extern void func_001FB198(f32 *from, f32 *to, u32 color);
+extern void func_001FB1A8(void);
+extern void func_001FB1B0(void);
+extern void func_001FB1E0(void *camera);
+extern void func_001FB1F0(void *camera);
+extern void camFollowOffsetVec(u8 *camera, void *destination);
+extern void effComputeBattleCameraPositionVU(u8 *snapshot);
+
+s32 func_002B7E60(EffectStateSnapshot *snapshot, s8 mode) {
+    u8 *camera = D_0038F4F0;
+    f32 vectors[6][4] __attribute__((aligned(16)));
+    f32 length;
+    f32 deltaY;
+    s32 result = 1;
+
+    if ((*(u32 *)(camera + 0x10) & 2) == 0) {
+        if (D_0039862B[0] < 0) {
+            result = 0;
+        }
+    }
+
+    PCP_COPY_VECTOR(D_003DFA20, snapshot->position);
+    func_001FB1E0(camera);
+    func_001FB1A8();
+    func_001FB1F0(camera);
+    func_001FB1B0();
+    PCP_COPY_VECTOR(snapshot->position, D_003DFA20);
+
+    if ((*(u32 *)(camera + 0x10) & 8) != 0) {
+        result |= 2;
+    }
+    if ((result & 2) != 0 && (snapshot->flags & 0x18) != 0) {
+        camFollowOffsetVec((u8 *)snapshot, vectors[0]);
+        PCP_COPY_VECTOR(snapshot->position, vectors[0]);
+    }
+
+    if (mode != 0) {
+        effComputeBattleCameraPositionVU((u8 *)snapshot);
+        VU0_LOAD_VF(vf11, &D_003DF920);
+        VU0_SUB(vf10, vf10, vf11);
+    } else {
+        VU0_LOAD_VF(vf10, snapshot->position);
+    }
+    VU0_STORE_VF(vf10, vectors[1]);
+    VU0_SET_VF10_COMPONENT(y, 0.0f);
+    VU0_LENGTH_VF10(length);
+    VU0_LOAD_VF(vf10, D_003DF910);
+    if (mode != 0) {
+        VU0_LOAD_VF(vf11, &D_003DF920);
+        VU0_ADD(vf10, vf10, vf11);
+    }
+    VU0_STORE_VF(vf10, vectors[5]);
+    VU0_STORE_VF(vf10, vectors[3]);
+    deltaY = vectors[1][1];
+    vectors[3][1] += deltaY;
+    if (vectors[3][1] == 0.0f) {
+        vectors[3][1] = vectors[5][1] + (-2.0f);
+    }
+    if (length > 0.0f) {
+        func_001FB178(vectors[3], length, 0x80006060, 0);
+        deltaY = vectors[1][1];
+    }
+
+    PCP_COPY_VECTOR_F32(vectors[2], vectors[3]);
+    vectors[2][1] = vectors[5][1] + (-2.0f);
+    if (deltaY != vectors[5][1]) {
+        func_001FB178(vectors[2], length, 0x80404040, 0);
+        func_001FB198(vectors[2], vectors[3], 0x80006060);
+    }
+
+    VU0_LOAD_VF(vf10, vectors[1]);
+    VU0_LOAD_VF(vf11, vectors[5]);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, vectors[4]);
+    func_001FB198(vectors[3], vectors[4], 0x80006060);
+    func_001FB198(vectors[2], vectors[4], 0x80006060);
+    func_001FB168(vectors[4]);
+    return result;
+}
+
+
 
 void effCopyCameraSnapshotSelection(void) {
     D_003BD108 = D_003DF840[0x88];
