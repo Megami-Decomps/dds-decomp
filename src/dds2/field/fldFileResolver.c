@@ -96,8 +96,6 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
-
 #include "eff_light.h"
 #include "fld_area_work.h"
 
@@ -162,6 +160,8 @@ extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
 extern void func_00137F10(void *, f32 *, u32, s32, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
 
 void func_001289A8(FldSpawnBatch *batch, u32 batchCount) {
     f32 position[4];
