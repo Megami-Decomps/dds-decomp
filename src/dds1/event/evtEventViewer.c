@@ -124,7 +124,7 @@ void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
 void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
 
-void func_0022B7A0(void);
+EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 void effInitCh71Id(void);
 void effInitCh72Id(void);
 void effInitCh76Id(void);
@@ -141,9 +141,9 @@ void *dds3GetWorldObject(void);
 s32 strcmp(const char *a, const char *b);
 char *strcpy(char *dst, const char *src);
 
-void func_0022BE28(void)
+EvtRuntimeChild *func_0022BE28(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer)
 {
-    func_0022B7A0();
+    return func_0022B7A0(group, frame, viewer);
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */
