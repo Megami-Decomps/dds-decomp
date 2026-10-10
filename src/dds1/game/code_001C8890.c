@@ -989,7 +989,552 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001CB410);
 void func_001CCD10(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CCD18);
+typedef struct BtlSceneLightParams {
+    f32 position[3]; f32 unk0C;
+    f32 color[3]; f32 unk1C;
+    f32 secondaryColor[3]; f32 unk2C;
+} BtlSceneLightParams;
+extern char D_003A36A8[];
+extern BtlRuntimeTask *sndCreateReleaseTask(u32);
+extern BtlRuntimeTask *func_001F0920(u32);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+extern s32 btlGetSlotRateKind(u8 *, s32);
+extern s32 func_001A6AA0(BtlUnit *, s32);
+extern s32 btlResolveSkillCategory(s32, u32);
+extern s32 func_001D6050(BtlUnit *, s32);
+extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
+extern void *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
+extern u8 *btlCreateActorSoundOptionTask(BtlUnit *, s32);
+extern u8 *btlScheduleEpPacketTask(u8 *, s32);
+extern void *btlScheduleMoneyPacketTask(u8 *, u32);
+extern void *btlCreateRefreshEligibleActorsTask(void);
+extern void *btlCreateImmediateCompletionTask(void);
+extern SoundTask *btlCreateUpdateUnitEffectsTask(void);
+extern void *btlCreateWaitUnitListIdleTask(u32);
+extern void *btlCreateApplyToActiveActorsTask(u32);
+extern SoundTask *btlCreateFadeStateResetTask(void);
+extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
+extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
+extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
+    SoundResourceNode *, BtlUnit *, u16, s32, u32);
+extern SoundTask *sndCreateSetStateTask(void);
+extern SoundTask *sndCreateClearStateTask(void);
+extern void *btlScheduleActorUpdate(u8 *);
+extern void *func_001D3618(BtlUnit *);
+extern u8 *func_001D9E48(u8 *);
+extern const char D_003A3670[];
+
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
+void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
+extern void *btlCreateEffectTaskWithSourceParams(u8 *, u32);
+s32 btlGetActionDefaultOrOverride(s32 index);
+extern u8 *btlCreateSoundPlaybackTask(u8 *, u32, u32, u32, u32);
+extern void *btlCreateCommandSoundWithArguments(s32, s32, u32, u32, u32);
+s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
+BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
+        BtlUnit *owner, u32 duration);
+s32 sndMapResourceType(s32 category, s32 id);
+extern void *btlCreateCategoryStatDamageTask(u8 *, u32, u32);
+extern u8 *btlCreatePermittedBattleVoiceTask(s32, s32);
+s32 btlFormatActionEventFilename(s32 source, char *output);
+extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
+struct ActiveSoundNode *sndAllocListNode(void);
+extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
+extern SoundTask *sndCreateSkillSeTask(s32, u16);
+extern void *func_001D3400(BtlUnit *, BtlOperandEntry *);
+extern void *func_001D3510(BtlUnit *, BtlOperandEntry *);
+
+extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
+
+/* Schedule the LINKAGE action task chain (inferred role). */
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
+
+void func_001CCD18(BtlTask *action) {
+    BtlUnit *actors[3];
+    BtlSceneLightParams light;
+    s32 actorFrames[3];
+    char resourceName[0x70];
+    BtlState *state;
+    BtlUnit *unit = action->unit;
+    BtlUnit *companionA = action->indexWork.companionA;
+    BtlUnit *companionB = action->indexWork.companionB;
+    BtlUnit *indexedTarget;
+    BtlUnit *currentTarget;
+    BtlOperandGroup *groups;
+    BtlUnit *effectTarget = unit;
+    BtlUnit *resultTarget = NULL;
+    BtlIndexList *indices;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *groupTask;
+    u64 masterOwner, actionOwner, operandOwner, commandOwner, soundHandle, latestOperandHandle;
+    s32 slot, maxFrames;
+    s32 reflectedStarted, blendStarted;
+    u32 groupIndex, operandIndex, targetCount, operandCount;
+    s32 operandDelay, commandMap, skill, groupDelay, actionFrames;
+    s32 categoryKind, extraKind, effectFrameOffset, mode;
+    actors[0] = unit;
+    actors[1] = companionA;
+    actors[2] = companionB;
+    if ((unit->status.flags & 0x1000) != 0) {
+        if (companionA != NULL && (companionA->status.flags & 0x1000) == 0) {
+            actors[0] = companionA;
+            actors[1] = unit;
+        } else if (companionB != NULL && (companionB->status.flags & 0x1000) == 0) {
+            actors[0] = companionB;
+            actors[1] = unit;
+            actors[2] = companionA;
+        }
+    }
+    state = (BtlState *)btlGetRuntime();
+    indices = action->indexWork.indices;
+    targetCount = btlGetIndexListCount(indices);
+    maxFrames = 0;
+    mode = -1;
+    groups = action->indexWork.groups;
+    slot = action->indexWork.slot;
+    skill = action->indexWork.skillId;
+    masterOwner = btlAdvanceRuntimeSequenceCounter();
+    actionOwner = btlAdvanceRuntimeSequenceCounter();
+    commandOwner = btlAdvanceRuntimeSequenceCounter();
+    operandOwner = btlAdvanceRuntimeSequenceCounter();
+    soundHandle = btlAdvanceRuntimeSequenceCounter();
+    latestOperandHandle = btlAdvanceRuntimeSequenceCounter();
+    btlStartTask(sndCreateSetStateTask());
+    for (groupIndex = 0; groupIndex < 3; groupIndex++) {
+        if (actors[groupIndex] != NULL) {
+            actorFrames[groupIndex] = func_001D6050(actors[groupIndex], slot);
+            if (actorFrames[groupIndex] < 20) actorFrames[groupIndex] = 20;
+            if (maxFrames < actorFrames[groupIndex]) maxFrames = actorFrames[groupIndex];
+        }
+    }
+    btlBossDebugPrintf(D_003A36A8, maxFrames);
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
+    btlBuildActionLightParameters(skill, &light);
+    btlStartTask(btlCreateEffectTaskWithSourceParams((u8 *)&light, 12));
+    btlStartTask(sndCreateAcquireTask(btlGetActionDefaultOrOverride(skill), 12));
+    if ((unit->status.flags & 0x400) != 0) {
+        btlStartTask(btlCreateEffObjB(unit, 0xC9));
+        task = btlCreateEffObjD(unit, skill);
+        task->startDelay = action->indexWork.unk2D == 0 ? 24 : 12;
+        task->ownerId = actionOwner;
+        btlStartTask(task);
+    } else {
+        task = btlCreateEffObjD(unit, skill);
+        task->ownerId = actionOwner;
+        btlStartTask(task);
+    }
+    btlStartTask(btlCreateSoundPlaybackTask((u8 *)action, (u32)companionA, (u32)companionB, skill, 0));
+    btlStartTask(btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 7, skill));
+    for (groupIndex = 0; groupIndex < 3; groupIndex++) {
+        if (actors[groupIndex] != NULL) {
+            s32 resourceIndex;
+            if (action->indexWork.unk2D == 0) {
+                BtlRuntimeTask *soundTask = btlCreateMoveOtherUnitsTask((u8 *)actors[groupIndex], slot);
+                soundTask->startDelay = maxFrames - actorFrames[groupIndex];
+                btlStartTask(soundTask);
+                soundHandle = soundTask->handle;
+            }
+            task = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)actors[groupIndex], slot,
+                btlGetSlotRateKind((u8 *)actors[groupIndex], slot), 1.0f);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = soundHandle;
+            btlStartTask(task);
+            resourceIndex = sndLookupResourceType((s32)actors[groupIndex], skill);
+            if (resourceIndex != 0) {
+                btlStartTask(sndCreateActorEffectTask(state->resources[resourceIndex], actors[groupIndex], maxFrames + 6));
+                if (groupIndex == 0) {
+                    s32 sound = sndMapResourceType((s32)actors[0], skill);
+                    if (sound != -1) btlStartTask(sndCreateStationedSeTask(sound));
+                }
+            }
+            btlStartTask(btlCreateCategoryStatDamageTask((u8 *)actors[groupIndex], skill, action->indexWork.stageValue));
+            if (action->indexWork.phase == 4) {
+                btlStartTask(btlCreatePermittedBattleVoiceTask((s32)actors[groupIndex], action->indexWork.reference));
+            }
+        }
+    }
+    btlFormatActionEventFilename(skill, resourceName);
+    unit->resourceNode = sndAllocResourceNode();
+    task = sndCreateEffectLoadTask(unit->resourceNode, resourceName);
+    task->startCondition.kind = 4;
+    task->startDelay = maxFrames > 0 ? maxFrames - 1 : 0;
+    task->startCondition.value.handle = soundHandle;
+    task->ownerId = masterOwner;
+    btlStartTask(task);
+    sndFormatResourceNameFromIndex(skill, resourceName);
+    unit->listNode = sndAllocListNode();
+    task = sndCreateFileLoadTask((struct SoundLoadNode *)unit->listNode, skill, resourceName);
+    task->startCondition.kind = 4;
+    task->startCondition.value.handle = soundHandle;
+    task->ownerId = masterOwner;
+    btlStartTask(task);
+    if (action->indexWork.stage == 3) {
+        task = btlCreateEffObjB(unit, action->indexWork.parameter);
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = masterOwner;
+        if (action->indexWork.unk2D == 0) task->ownerId = actionOwner;
+        btlStartTask(task);
+    }
+    if (action->indexWork.unk2D == 0) {
+        task = btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 8, skill);
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = masterOwner;
+        task->flags |= 2;
+        if (state->commandSoundDelay != NULL) task->startDelay = state->commandSoundDelay(skill);
+        btlStartTask(task);
+        if (state->preActionHook != NULL) state->preActionHook(action, skill, actionOwner, soundHandle, masterOwner);
+        actionFrames = func_001A6AA0(unit, skill);
+        commandMap = btlResolveSkillCategory((s32)unit, skill);
+        blendStarted = 0;
+        reflectedStarted = 0;
+        groupDelay = 0;
+        for (groupIndex = 0; groupIndex < targetCount; groupIndex++, groups++) {
+            BtlOperandGroup *group = groups;
+            currentTarget = unit;
+            operandCount = group->count;
+            indexedTarget = (BtlUnit *)btlGetIndexListEntry(indices, groupIndex);
+            if (group->reflected == 0) currentTarget = indexedTarget;
+            if (group->reflected != 0 || group->kind == 0x40000)
+                mode = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skill].effectKind;
+            effectTarget = mode == 3 ? indexedTarget : currentTarget;
+            if (group->inactiveOrStatusChanged != 0 && (state->battleFlags & 0x80) != 0) {
+                btlBossDebugPrintf(D_003A3670, currentTarget);
+                commandOwner = unit->identity;
+            } else commandOwner = btlAdvanceRuntimeSequenceCounter();
+            if (group->targetSpecialHit != 0) {
+                task = func_001D3618(indexedTarget);
+                task->startCondition.kind = 7;
+                task->startCondition.value.handle = commandOwner;
+                btlStartTask(task);
+            }
+            if (group->sourceSpecialHit != 0) {
+                task = func_001D3618(currentTarget);
+                task->startCondition.kind = 7;
+                task->startCondition.value.handle = commandOwner;
+                btlStartTask(task);
+            }
+            if ((group->reflected == 0 || reflectedStarted == 0) && mode != 1) {
+                groupTask = sndCreateEffectWithTargets(unit->resourceNode, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 2);
+                groupTask->startCondition.kind = 7;
+                groupTask->startCondition.value.handle = masterOwner;
+                groupTask->startDelay = groupDelay;
+                groupTask->ownerId = actionOwner;
+                btlStartTask(groupTask);
+                task = (BtlRuntimeTask *)sndCreateSkillSeTask((s32)unit->listNode, 2);
+                task->startCondition.kind = 7;
+                task->startCondition.value.handle = masterOwner;
+                task->startDelay = groupDelay;
+                task->ownerId = actionOwner;
+                btlStartTask(task);
+                if (group->reflected != 0 && mode != 3) reflectedStarted = 1;
+            } else {
+                groupTask = btlCreateImmediateCompletionTask();
+                groupTask->startCondition.kind = 7;
+                groupTask->startCondition.value.handle = masterOwner;
+                groupTask->startDelay = groupDelay;
+                groupTask->ownerId = actionOwner;
+                btlStartTask(groupTask);
+            }
+            for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
+                s32 selection;
+                BtlRuntimeTask *operandTask;
+                if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != 0) {
+                    selection = -1;
+                    categoryKind = 4;
+                    extraKind = 1;
+                } else {
+                    selection = group->reactionCode;
+                    categoryKind = group->kind;
+                    extraKind = group->parameter;
+                }
+                operandTask = sndCreateTimedUnitEffectTask(unit->resourceNode, currentTarget, 2, (u32)(mode - 3) < 2 ? -1 : selection, 0);
+                operandTask->startCondition.kind = 5;
+                operandTask->startDelay = operandDelay;
+                operandTask->startCondition.value.handle = groupTask->handle;
+                btlStartTask(operandTask);
+                if (group->reflected != 0 && (u32)(mode - 3) < 2 && operandIndex == operandCount - 1 && ((u32)actionFrames >= 2 || blendStarted == 0)) {
+                    if (targetCount == 1) {
+                        task = btlCreateActorModelBlendTask(currentTarget, indexedTarget, selection, 0, 1.0f);
+                    } else {
+                        task = btlCreateActorModelBlendTask(currentTarget, 0, selection, 0, 1.0f);
+                    }
+                    task->startCondition.kind = 4;
+                    blendStarted = 1;
+                    task->startCondition.value.handle = operandTask->handle;
+                    btlStartTask(task);
+                }
+                latestOperandHandle = operandTask->handle;
+                if (group->kind == 2 && operandIndex == 0) {
+                    task = (BtlRuntimeTask *)func_001D9E48((u8 *)currentTarget);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    btlStartTask(task);
+                }
+                if (action->indexWork.stage == 1 && groupIndex == 0 && operandIndex == 0) {
+                    BtlRuntimeTask *stageTask;
+                    effectFrameOffset += 0xC;
+                    stageTask = btlCreateEffObjB(unit, action->indexWork.parameter);
+                    stageTask->startCondition.kind = 4;
+                    stageTask->startCondition.value.handle = operandTask->handle;
+                    btlStartTask(stageTask);
+                }
+                if (action->indexWork.unk50 != 0 && groupIndex == 0 && operandIndex == operandCount - 1) {
+                    task = btlCreateEffectTask3E(unit, (u16)action->indexWork.unk50);
+                    task->startCondition.kind = 4;
+                    task->startDelay = effectFrameOffset + 0xC;
+                    task->startCondition.value.handle = operandTask->handle;
+                    btlStartTask(task);
+                }
+                if ((indexedTarget->status.flags & 0x10) != 0 && operandIndex == 0) {
+                    task = btlScheduleActorUpdate((u8 *)indexedTarget);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    btlStartTask(task);
+                }
+                if (groupIndex == targetCount - 1 && operandIndex == 0) {
+                    task = btlCreateImmediateCompletionTask();
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->startDelay = action->indexWork.unk2E == 0 ? 10 : 18;
+                    task->ownerId = unit->identity;
+                    btlStartTask(task);
+                }
+                task = (BtlRuntimeTask *)btlCreateActorParameterDeltaTask(currentTarget, &group->entries[operandIndex]);
+                task->startCondition.kind = 4;
+                task->startCondition.value.handle = operandTask->handle;
+                task->ownerId = commandOwner;
+                btlStartTask(task);
+                task = btlCreateDeferredActorStatsTask(unit, &group->entries[operandIndex]);
+                task->startCondition.kind = 4;
+                task->startDelay = commandMap;
+                task->startCondition.value.handle = operandTask->handle;
+                task->ownerId = commandOwner;
+                btlStartTask(task);
+
+                task = func_001D3400(currentTarget, &group->entries[operandIndex]);
+                task->startCondition.kind = 4;
+                task->startCondition.value.handle = operandTask->handle;
+                task->ownerId = commandOwner;
+                btlStartTask(task);
+                task = func_001D3510(currentTarget, &group->entries[operandIndex]);
+                task->startCondition.kind = 4;
+                task->startCondition.value.handle = operandTask->handle;
+                task->ownerId = commandOwner;
+                btlStartTask(task);
+                if (groupIndex == targetCount - 1 && operandIndex == 0) {
+                    task = (BtlRuntimeTask *)btlCreateActorSoundOptionTask(unit, action->indexWork.unk50);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = commandOwner;
+                    btlStartTask(task);
+                }
+                if (groupIndex == 0 && operandIndex == operandCount - 1) {
+                    task = (BtlRuntimeTask *)btlScheduleEpPacketTask((u8 *)unit, action->indexWork.unk54);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = commandOwner;
+                    btlStartTask(task);
+                    task = btlScheduleMoneyPacketTask((u8 *)unit, action->indexWork.unk58);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = commandOwner;
+                    btlStartTask(task);
+                }
+
+                if (group->entries[operandIndex].hpDelta != 0) {
+                    task = btlCreateLinkedEffectTask(currentTarget, group->entries[operandIndex].hpDelta, 0);
+                    task->startCondition.kind = 4;
+                    task->startDelay = 1;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = operandOwner;
+                    btlStartTask(task);
+                }
+                if (group->entries[operandIndex].mpDelta != 0) {
+                    task = btlCreateLinkedEffectTask(currentTarget, group->entries[operandIndex].mpDelta, 1);
+                    task->startCondition.kind = 4;
+                    task->startDelay = 1;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = operandOwner;
+                    btlStartTask(task);
+                }
+                if (group->entries[operandIndex].hpRecovery != 0) {
+                    task = btlCreateLinkedEffectTask(unit, group->entries[operandIndex].hpRecovery, 0);
+                    task->startCondition.kind = 4;
+                    task->startDelay = commandMap;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = operandOwner;
+                    btlStartTask(task);
+                }
+                if (group->entries[operandIndex].mpRecovery != 0) {
+                    task = btlCreateLinkedEffectTask(unit, group->entries[operandIndex].mpRecovery, 1);
+                    task->startCondition.kind = 4;
+                    task->startDelay = commandMap;
+                    task->startCondition.value.handle = operandTask->handle;
+                    task->ownerId = operandOwner;
+                    btlStartTask(task);
+                }
+
+                if ((group->entries[operandIndex].flags & 0x1000) == 0) {
+                    if (categoryKind == 0x10000 || categoryKind == 4) {
+                        if (categoryKind == 0x10000) task = btlCreateEffectCounterTask(currentTarget, 4);
+                        else task = btlCreateEffectCounterTask(currentTarget, 3);
+                        task->startCondition.kind = 4;
+                        task->startDelay = 1;
+                        task->startCondition.value.handle = operandTask->handle;
+                        task->ownerId = operandOwner;
+                        btlStartTask(task);
+                    }
+                    if (extraKind == 2 || extraKind == 4) {
+                        if (extraKind == 2) task = btlCreateEffectCounterTask(currentTarget, 1);
+                        else task = btlCreateEffectCounterTask(currentTarget, 2);
+                        task->startCondition.kind = 4;
+                        task->startDelay = 1;
+                        task->startCondition.value.handle = operandTask->handle;
+                        task->ownerId = operandOwner;
+                        btlStartTask(task);
+                    }
+                }
+                if ((group->entries[operandIndex].addedStatus & 1) != 0 && currentTarget->partyRecord.status == 0) {
+                    resultTarget = currentTarget;
+                }
+                operandDelay += group->interval;
+            }
+            if (state->postTargetHook != NULL) state->postTargetHook(action, skill, indexedTarget, masterOwner, latestOperandHandle, mode);
+            if (group->kind == 0x40000) {
+                BtlRuntimeTask *effect = sndCreateEffectWithTargets(state->resources[30], actors[0], (s32)actors[1], (s32)actors[2], currentTarget, 2);
+                switch (mode) {
+                case 1:
+                    effect->startCondition.kind = 5;
+                    effect->startCondition.value.handle = groupTask->handle;
+                    break;
+                case 2: case 3: case 4:
+                    effect->startCondition.kind = 4;
+                    effect->startCondition.value.handle = latestOperandHandle;
+                    break;
+                case 0: default:
+                    effect->startCondition.kind = 5;
+                    effect->startCondition.value.handle = groupTask->handle;
+                    break;
+                }
+                effect->ownerId = actionOwner;
+                btlStartTask(effect);
+                task = sndCreateStationedSeTask(0x1000D);
+                task->startCondition.kind = 5;
+                task->startCondition.value.handle = effect->handle;
+                task->ownerId = actionOwner;
+                btlStartTask(task);
+            }
+            if (group->reflected != 0) {
+                BtlRuntimeTask *effect = sndCreateEffectWithTargets(state->resources[29], actors[0], (s32)actors[1], (s32)actors[2], indexedTarget, 2);
+                switch (mode) {
+                case 1:
+                    effect->startCondition.kind = 5;
+                    effect->startCondition.value.handle = groupTask->handle;
+                    break;
+                case 2: case 3: case 4:
+                    effect->startCondition.kind = 4;
+                    effect->startCondition.value.handle = latestOperandHandle;
+                    break;
+                case 0: default:
+                    effect->startCondition.kind = 5;
+                    effect->startCondition.value.handle = groupTask->handle;
+                    break;
+                }
+                effect->ownerId = actionOwner;
+                btlStartTask(effect);
+                task = sndCreateStationedSeTask(0x1000C);
+                task->startCondition.kind = 5;
+                task->startCondition.value.handle = effect->handle;
+                task->ownerId = actionOwner;
+                btlStartTask(task);
+            }
+            groupDelay += actionFrames;
+        }
+        if (mode != 1) {
+            groupTask = sndCreateEffectWithTargets(unit->resourceNode, actors[0], (s32)actors[1], (s32)actors[2], effectTarget, 1);
+            groupTask->startCondition.kind = 7;
+            groupTask->startCondition.value.handle = masterOwner;
+            groupTask->endCondition.kind = 7;
+            groupTask->endCondition.value.handle = actionOwner;
+            groupTask->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(groupTask);
+            task = (BtlRuntimeTask *)sndCreateSkillSeTask((s32)unit->listNode, 1);
+            task->startCondition.kind = 7;
+            task->startCondition.value.handle = masterOwner;
+            task->endCondition.kind = 7;
+            task->endCondition.value.handle = actionOwner;
+            task->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(task);
+        }
+        if (action->indexWork.unk5E != 0) {
+            task = btlCreateRefreshEligibleActorsTask();
+            task->startCondition.kind = 7;
+            task->startCondition.value.handle = commandOwner;
+            btlStartTask(task);
+        }
+    }
+    task = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)action, action->indexWork.adjustedValue, (u8)action->indexWork.resultKind);
+    switch (mode) {
+    case 1:
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = masterOwner;
+        break;
+    case -1: case 2: case 3: case 4:
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = latestOperandHandle;
+        break;
+    case 0: default:
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = masterOwner;
+        break;
+    }
+    task->ownerId = unit->identity;
+    btlStartTask(task);
+    if (resultTarget != NULL && action->indexWork.wait >= 0 && (action->flags & 0x20) == 0) {
+        currentTarget = resultTarget;
+        task = btlCreateEffObjC(currentTarget, action->indexWork.wait);
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = actionOwner;
+        btlStartTask(task);
+    }
+    task = (BtlRuntimeTask *)btlCreateUpdateUnitEffectsTask();
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = commandOwner;
+    task->startDelay = 30;
+    btlStartTask(task);
+    task = sndCreateReleaseTask(12);
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    task = func_001F0920(12);
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    task = btlCreateWaitUnitListIdleTask(12);
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    task = btlCreateApplyToActiveActorsTask(12);
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    task = (BtlRuntimeTask *)sndCreateClearStateTask();
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    task = (BtlRuntimeTask *)btlCreateFadeStateResetTask();
+    task->startCondition.kind = 7;
+    task->startCondition.value.handle = actionOwner;
+    btlStartTask(task);
+    if ((action->unit->partyRecord.status & 0x480) != 0) {
+        btlDispatchStateHandler(action, 0x18);
+        return;
+    }
+    btlDispatchStateHandler(action, 0x1A);
+}
 
 void btlMarkLinkedActorStatusFlag(s32 arg0) {
     ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
