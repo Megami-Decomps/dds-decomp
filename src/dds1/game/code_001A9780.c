@@ -3481,7 +3481,93 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7880);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7C90);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7F50);
+extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void func_001BAE08(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void func_001BB118(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern void func_001B7C90(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001AC080(s32, s32, u32, const char *, s32);
+extern const BattlePanelColors D_003A2CC0;
+extern const char D_003BB400[];
+
+s32 func_001B7F50(KwlnTask *task) {
+    BtlUnit *unit;
+    KwlnTask *panelTask;
+    BattleActorPanelWork *work;
+    char text[32];
+    BattlePanelColors colors = D_003A2CC0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 reserveCount;
+    s32 i;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    unit = (BtlUnit *)kwlnTaskGetUserValue(task);
+    panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
+    reserveCount = work->reserveCount;
+    if (func_001B74C8(panelTask, battle) == 0) {
+        return -1;
+    }
+    i = 0;
+    if (reserveCount > 0) {
+        do {
+            DatGameState *game = datGameState;
+            s32 partyIndex = game->partyOrder[i + work->activeCount];
+            s16 baseFade;
+            u32 color;
+
+            memcpy(&unit->partyRecord, &game->party[partyIndex],
+                   sizeof(unit->partyRecord));
+            btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
+            btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
+            btlUpdateActorPanelHighlights(unit, work, i, 1);
+            func_001B96F8(unit, work, i, 1);
+            func_001BBE18(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+                          work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
+
+            if (work->reserveEntries[i].presentation.fade >= 0x80) {
+                func_001BB118(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 2);
+                func_001BAE08(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
+                func_001BB118(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 3);
+                func_001BAE08(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
+            }
+
+            func_001B7880(unit, work, i);
+            func_001B7C90(unit, work, i);
+
+            if ((unit->partyRecord.flags & 0x1000) == 0) {
+                u32 tint = 0x80808000 | (u32)(s32)work->reserveEntries[i].presentation.fade;
+                colors.values[0] = tint;
+                colors.values[1] = tint;
+                colors.values[2] = tint;
+                colors.values[3] = tint;
+                func_002BF438((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
+                              0, colors.values, 0, btlResourceBlock->resA, 0xE, 0x53);
+            }
+
+            baseFade = work->reserveEntries[i].presentation.fade;
+            func_003014F0(text, D_003BB400, unit->partyRecord.hp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001AC080(work->reserveEntries[i].position[0] + 0x50,
+                          work->reserveEntries[i].position[1] + 0x26, color, text, 0x100);
+
+            func_003014F0(text, D_003BB400, unit->partyRecord.mp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.mpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001AC080(work->reserveEntries[i].position[0] + 0x48,
+                          work->reserveEntries[i].position[1] + 0x3D, color, text, 0x100);
+            i++;
+        } while (i < reserveCount);
+    }
+    return 0;
+}
 
 void btlReleaseTrackedTaskResource(void) {
     KwlnTask *temp_v0;
