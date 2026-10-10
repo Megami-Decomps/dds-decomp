@@ -477,7 +477,7 @@ extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyRefreshEntryFromSavedTemplate(DatPartyRecord *entry);
 
 
-extern s32 scrSetIntegerReturnValue();
+extern void scrSetIntegerReturnValue();
 
 
 extern s32 scrReadIntParameter(s32 idx);

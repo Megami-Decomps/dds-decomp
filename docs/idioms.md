@@ -3496,21 +3496,23 @@ and `0xA` when it is set. These are reads of `BtlUnit.effectLink.flags`,
 not the packed eight-byte flags/reference state or its reference count.
 
 
-## Integer VM setter return contract remains prototype debt
+## Integer VM setter is void; preserve the original fall-off callback
 
-`scrSetIntegerReturnValue` has a void C provider in both games. The retail
-leaf happens to leave `scrCurrentContext` in `$2`, and the already-matched
-model-return commands (`00225620`/`00225880` in DDS1 and
-`00240280`/`002404E0` in DDS2) retain a local `s32` declaration that propagates
-that word. This is an unresolved wrong-prototype dependency, not evidence
-that the setter's public API returns a context pointer.
+`scrSetIntegerReturnValue` has a void C provider in both games. Its retail
+leaf incidentally leaves `scrCurrentContext` in `$2`; that is not a public
+return contract. Keep its declarations void and ordinary opcode callers
+as `scrSetIntegerReturnValue(value); return 1;` where native returns one.
 
-An explicit `ScrData *` return preserves the setter's own instructions, but
-changes unchanged flag-query consumers from `$2` to `$3` for their load,
-mask and store sequence. Without independent evidence for a return value,
-the typed-return closure is parked; its provider and existing consumers
-remain as they were. Do not promote the incidental register value into a
-new public return contract merely to make those commands match.
+The existing non-void `evtOpBindMotionSoundToModel` is an original-source
+exception: its success path ends with `scrSetIntegerReturnValue(model);`
+and no return statement, while its early exits return one. DDS1's retail
+tail `j` at `0x00223C3C` (entry `0x00223B68`) is falls-off-the-end evidence.
+With the true void declaration, this direct final call still becomes the
+native sibling call in both games; both complete event units pass 72/0.
+Appending `return 1;` changes the native tail, while returning the setter's
+value requires an incorrect non-void declaration. Preserve the missing
+return as this specific source quirk; do not infer a defined C result or
+promote the incidental context-pointer register value into an API.
 
 ## Result animation level arguments are promoted integers
 

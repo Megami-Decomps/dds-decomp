@@ -114,7 +114,7 @@ extern void effObjSetFlags(void *object, s32 flags);
 extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 extern u8 D_003AC520[];
 extern void *effObjCreateFromResolvedResource(s32 arg0, void *arg1, void *arg2);
-extern s32 scrSetIntegerReturnValue(s32 arg0);
+extern void scrSetIntegerReturnValue(s32 arg0);
 extern void mdlAttachWorldObjectToSourceVector(s32 arg0, s32 arg1);
 
 extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
@@ -442,7 +442,8 @@ u32 evtOpBindMotionSoundToModel(void) {
     if (task != 0) {
         func_00101A80(evtFindTaskById(scrReadIntParameter(0)), task);
     }
-    return scrSetIntegerReturnValue(model);
+    /* The original success path ends in this void call, without a return. */
+    scrSetIntegerReturnValue(model);
 }
 
 u32 evtOpUseSourceVectorForWorldObject(void) {
