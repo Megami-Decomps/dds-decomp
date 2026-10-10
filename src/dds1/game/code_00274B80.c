@@ -259,7 +259,6 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void func_00274BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *);
 extern char D_003BC6E8[];
 void mnuCreatePartySelectionWindow(CampMenuContext *context) {
@@ -302,7 +301,7 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
         placement = 0x12;
         break;
     }
-    mnuInitializeWindowEntryPlacement(0, window, context->option, 0xA, placement);
+    mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->option, 0xA, placement);
     party->primaryWindow = window;
 }
 
@@ -1366,7 +1365,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *task) {
                      (struct EffectSlotSet *)context->unkE4, 0x14);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout,
                             0x130, 0x630, -0x90, 0xC20);
-    mnuInitializeWindowEntryPlacement(0, window, context->option, 0x14, placement);
+    mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->option, 0x14, placement);
 
     list = window->list;
     list->context = context;
@@ -1555,7 +1554,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
             mnuConfigureWindowSpriteAndGrid(window, (struct EffectSlotSet *)context->option, 0,
                                             (struct EffectSlotSet *)context->unkE4, 0x15, 0x15);
             mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x130, 0x630, -0x90, 0xC20);
-            mnuInitializeWindowEntryPlacement(0, window, context->option, 0x14, 0x18);
+            mnuInitializeWindowEntryPlacement(0, window, (struct EffectSlotSet *)context->option, 0x14, 0x18);
             list = window->list;
             list->drawCallback = ptySkillMenuDrawEntry;
             list->context = context;

@@ -124,7 +124,7 @@ typedef struct MenuWindowContainer {
     u32 unk10; /* Set by staff-panel setup; meaning unknown. */
     struct MenuList *list;
     s32 entryValue;
-    s32 entryX;
+    struct EffectSlotSet *entryResources;
     s32 entryY;
     s32 alternateEntryY;
     s32 entryOption;
@@ -140,6 +140,10 @@ typedef struct MenuWindowContainer {
     struct MenuWindowSpriteGroup *textures;
     s32 fadeScale; /* 0x88: window/list opacity scale; full fade is 0x100 */
 } MenuWindowContainer;
+
+void mnuInitializeWindowEntryPlacement(s32 value, MenuWindowContainer *window,
+                                      struct EffectSlotSet *resources,
+                                      s32 rowSlot, s32 capSlot);
 
 void mnuSetWindowOverlaySprite(MenuWindowContainer *window,
                                 struct EffectSlotSet *resources);
