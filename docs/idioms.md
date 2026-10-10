@@ -6744,3 +6744,41 @@ arrays without byte-padding casts. Its best measurement is 14/522
 different words: the two mask loads plus the known twelve-word phase-three
 register/scheduling residual beginning at `+0x460`. Three honest forms
 were measured; the public owner and retail updater remain unchanged.
+
+## Queued menu draws own a typed six-word context
+
+DDS2 `002BE628` produces six words for `002BF660` and its kind-0/1
+renderers: the panel index, a true `MenuPageWindow *`, two origin
+coordinates and two extent coordinates. The unit-local
+`MenuQueuedRenderContext` owns those fields and asserts size `0x18`;
+the producer no longer encodes the page pointer in an integer array.
+The independent context/formal migration is byte-exact at 180/0.
+
+The dispatcher remains ASM. Three own structured switch/equality/phase
+forms exceed its next-function bound; the native body is 460 bytes.
+Its clear guard reads the original first command's marker, not the
+moving command, and drawing callbacks precede the live fade-field reads.
+
+## Emitter templates embed one canonical runtime prefix
+
+`EffEmitterHead` (`0x150`) and `EffTemplatePacketList` (`0x180`) now live
+in `eff.h`; both games retire their local definitions. DDS1's former
+flat template members migrate to the same `head` embedding used by
+DDS2. All 161 typed prefix access sites preserve the native offsets,
+and both affected units gate 118/0. Initializer call boundaries use
+true pointers; existing stored-address return contracts remain separate
+debt rather than being changed as a matching lever.
+
+The DDS1 initializer `00153740` remains ASM at 118/120 equal instruction
+words after three own forms. Its capacity `LHU` and particle-count `LW`
+exchange at `+0x154/+0x15C`. The single signed `drawKind` naturally
+supplies the billboard's `LH`; the track's unsigned 16-bit bucket
+interpretation is widened explicitly before its 32-bit parameter store.
+Existing SDK matrix macros cover the native `vf28`–`vf31` copy.
+
+Kind 4 initializes only `EffTrackPolyParams +0x14..+0x30`. Its manual
+history lifecycle dispatches reset, cross-endpoint insertion, coloring
+and drawing, not the separate model-sampling updater that reads the
+prefix. Preserve the original partial initialization; fabricated prefix
+stores would change both the work and the native stack contents.
+
