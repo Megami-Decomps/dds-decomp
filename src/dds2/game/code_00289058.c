@@ -718,7 +718,37 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028CBF8);
+extern void mnuSetMantraUnitPanelValue(struct MantraDrawPool *pool, s16 value);
+
+s32 func_0028CBF8(s32 unused0, s32 unused1, s32 unused2, s32 unused3, MnuStatusResource *object, s32 unused5) {
+    MantraFlagResource *table = object->menu.slots[5];
+    MantraMenuWork *work = &object->menu;
+    MantraNodePos *position;
+    u64 tableByte;
+    u16 *selectedFlags;
+    u16 *tableFlags;
+    u16 high;
+    s16 value;
+    s16 id;
+
+    selectedFlags = object->menu.slots[func_002890A8(object)]->flags;
+    position = work->defaultSelector;
+    id = position->id;
+    tableFlags = table->flags + id;
+    selectedFlags += id;
+    mnuGetMantraNodePositionRecord(id);
+    high = *selectedFlags >> 8;
+    value = 4;
+    if ((high & 4) == 0) {
+        value = 3;
+        if ((high & 1) == 0) {
+            tableByte = *(u8 *)tableFlags;
+            value = ((tableByte >> 4) == 1) ? 5 : 0;
+        }
+    }
+    mnuSetMantraUnitPanelValue(object->menu.selectionController, value);
+    return 0;
+}
 
 
 void mnuStartMantraPanelEntryTransition(MnuStatusResource *object) {
