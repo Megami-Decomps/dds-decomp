@@ -1261,12 +1261,94 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028D070);
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028D7C8);
+struct MantraPanelAnimation;
+extern struct MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
+extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
+
+/* Activate eligible neighboring nodes and return their six-bit edge mask. */
+s32 mnuActivateMantraNeighborEdges(MnuStatusResource *object, u16 nodeId, s16 modelFlagState, s16 panelX) {
+    MantraNodePos *position;
+    MantraNodePos **neighbors;
+    MantraFlagResource *resource;
+    struct MantraPanelAnimation *panel;
+    u16 *flags;
+    s32 i = 0;
+    u8 edges = 0;
+    s32 kind;
+    s32 resultKind;
+
+    position = mnuGetMantraNodePositionRecord((s16)nodeId);
+    resource = object->menu.slots[func_002890A8(object)];
+    neighbors = position->neighbors;
+    for (; i < 6; i++) {
+        if (neighbors[i] != NULL && neighbors[i]->modelFlagState == modelFlagState) {
+            kind = neighbors[i]->selector.packed & 0xF;
+            if (kind != 3) {
+                flags = resource->flags + neighbors[i]->id;
+                if ((*flags & 0xF) == 3) {
+                    resultKind = 0;
+                    edges |= 1 << i;
+                    if (kind == 1) {
+                        if (prfReqEvaluateRules(1, 2, mnuGetSelectedNodeValue(object), (u16)neighbors[i]->id, 0)) {
+                            *flags = (*flags & 0xFFF0) | 1;
+                            resultKind = 1;
+                        } else {
+                            *flags = (*flags & 0xFFF0) | 2;
+                        }
+                    } else if (kind == 2) {
+                        *flags = (*flags & 0xFFF0) | 2;
+                        resultKind = 2;
+                    }
+                    panel = mnuSpawnPanelSlotA(object->menu.resource, neighbors[i]->id, 13, panelX, 0, 0);
+                    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                    mnuQueuePanelAnimationTransition(panel, 1, 0);
+                    panel = mnuSpawnPanelSlotA(object->menu.resource, neighbors[i]->id, 13, (s16)(panelX * 5.0f / 3.0f + 20.0f), 0, 0);
+                    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                    mnuQueuePanelAnimationTransition(panel, 3, 0);
+                    if (resultKind == 0) {
+                        panel = mnuSpawnPanelSlotA(object->menu.resource, neighbors[i]->id, 0, 80, 0, 0);
+                        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                        mnuQueuePanelAnimationTransition(panel, 8, 0);
+                    } else if (resultKind == 1) {
+                        panel = mnuSpawnPanelSlotA(object->menu.resource, neighbors[i]->id, 1, 80, 0, 0);
+                        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                        mnuQueuePanelAnimationTransition(panel, 8, 0);
+                    } else if (resultKind == 2) {
+                        panel = mnuSpawnPanelSlotA(object->menu.resource, neighbors[i]->id, 6, 80, 0, 0);
+                        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                        mnuQueuePanelAnimationTransition(panel, 8, 0);
+                    }
+                }
+            }
+        }
+    }
+    if (modelFlagState == 3) {
+        for (i = 0; i < 6; i++) {
+            if ((edges >> i) & 1) {
+                mnuActivateMantraNeighborEdges(object, neighbors[i]->id, modelFlagState, panelX + 2);
+            }
+        }
+        flags = resource->flags + position->id;
+        *flags |= 0x1000;
+        edges = 0;
+        for (i = 0; i < 6; i++) {
+            if (neighbors[i] != NULL) {
+                flags = resource->flags + neighbors[i]->id;
+                if (neighbors[i]->modelFlagState == 2 && ((*flags >> 8) & 0x10) == 0) {
+                    edges |= 1 << i;
+                }
+            }
+        }
+    }
+    return edges;
+}
+
 
 /* Retail sign-extends mode and selection to halfwords at this call (+0x38/+0x4C sll/sra pairs). */
-extern s32 func_0028D7C8(MnuStatusResource *, u16, s16, s16);
+extern s32 mnuActivateMantraNeighborEdges(MnuStatusResource *, u16, s16, s16);
 
-/* Pick the neighbouring mantra node to move to. The edge mask from func_0028D7C8 is filtered against the
+/* Pick the neighbouring mantra node to move to. The edge mask from mnuActivateMantraNeighborEdges is filtered against the
  * neighbours whose model flag state is compatible with the mode (mode 3 also accepts empty slots); edges 0 and 5
  * use paired masks, the side edges test the two adjacent neighbours. */
 MantraNodePos *func_0028DC08(MnuStatusResource *object, u16 nodeId, s32 mode, s32 selection) {
@@ -1278,7 +1360,7 @@ MantraNodePos *func_0028DC08(MnuStatusResource *object, u16 nodeId, s32 mode, s3
     s32 i;
 
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(nodeId);
-    edges = func_0028D7C8(object, nodeId, mode, selection);
+    edges = mnuActivateMantraNeighborEdges(object, nodeId, mode, selection);
     compatible = 0;
     if (mode != 3) {
         neighbors = record->neighbors;
@@ -1338,7 +1420,7 @@ void mtrDrawRankPass(s32 object, u16 index) {
 
     evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
     memset(nodes, 0, sizeof(nodes));
-    selected = func_0028D7C8((MnuStatusResource *)object, index, modelFlagState, 0);
+    selected = mnuActivateMantraNeighborEdges((MnuStatusResource *)object, index, modelFlagState, 0);
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(index);
     neighbors = record->neighbors;
     nextNode = nodes;
