@@ -4373,7 +4373,7 @@ extern void func_001C35F0(ActionStateLink *, s8, s8);
 extern void sndSetStationedSeVolume(u32);
 
 /* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
-s32 func_001C26E0(KwlnTask *task) {
+s32 func_001C26E0(KwlnTask *task, BtlState *battle) {
     BattleReservePositions positions = D_00416800;
     BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     s32 count = work->reserveCount;
@@ -4471,7 +4471,93 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2A98);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2EA8);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C3168);
+extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void func_001C6010(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void func_001C6320(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern void func_001C2EA8(BtlUnit *, BattleActorPanelWork *, s32);
+extern void func_001B6CA8(s32, s32, u32, const char *, s32);
+extern const BattlePanelColors D_00416830;
+extern const char D_00436818[];
+
+s32 func_001C3168(KwlnTask *task) {
+    BtlUnit *unit;
+    KwlnTask *panelTask;
+    BattleActorPanelWork *work;
+    char text[32];
+    BattlePanelColors colors = D_00416830;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 reserveCount;
+    s32 i;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    unit = (BtlUnit *)kwlnTaskGetUserValue(task);
+    panelTask = kwlnTaskGetTaskByName(D_004367CC);
+    work = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
+    reserveCount = work->reserveCount;
+    if (func_001C26E0(panelTask, battle) == 0) {
+        return -1;
+    }
+    i = 0;
+    if (reserveCount > 0) {
+        do {
+            DatGameState *game = datGameState;
+            s32 partyIndex = game->partyOrder[i + work->activeCount];
+            s16 baseFade;
+            u32 color;
+
+            memcpy(&unit->partyRecord, &game->party[partyIndex],
+                   sizeof(unit->partyRecord));
+            btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
+            btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
+            btlUpdateActorPanelHighlights(unit, work, i, 1);
+            func_001C4900(unit, work, i, 1);
+            func_001C7020(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
+                          work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
+
+            if (work->reserveEntries[i].presentation.fade >= 0x80) {
+                func_001C6320(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 2);
+                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
+                func_001C6320(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                              work->reserveEntries[i].presentation.fade, i, 3);
+                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
+            }
+
+            func_001C2A98(unit, work, i);
+            func_001C2EA8(unit, work, i);
+
+            if ((unit->partyRecord.flags & 0x1010) == 0) {
+                u32 tint = 0x80808000 | (u32)(s32)work->reserveEntries[i].presentation.fade;
+                colors.values[0] = tint;
+                colors.values[1] = tint;
+                colors.values[2] = tint;
+                colors.values[3] = tint;
+                func_00306C28((work->reserveEntries[i].position[0] + 0x22) << 4, (work->reserveEntries[i].position[1] + 0x46) << 3,
+                              0, colors.values, 0, btlResourceBlock->resA, 0xE, 0x53);
+            }
+
+            baseFade = work->reserveEntries[i].presentation.fade;
+            func_0035C860(text, D_00436818, unit->partyRecord.hp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001B6CA8(work->reserveEntries[i].position[0] + 0x50,
+                          work->reserveEntries[i].position[1] + 0x26, color, text, 0x100);
+
+            func_0035C860(text, D_00436818, unit->partyRecord.mp);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.mp, unit->partyRecord.maxMp, 1);
+            color = ((u32)(baseFade + work->reserveEntries[i].presentation.mpHighlightLevel) << 24) |
+                    (color & 0x00FFFFFF);
+            func_001B6CA8(work->reserveEntries[i].position[0] + 0x48,
+                          work->reserveEntries[i].position[1] + 0x3D, color, text, 0x100);
+            i++;
+        } while (i < reserveCount);
+    }
+    return 0;
+}
 
 void btlReleaseTrackedTaskResource(void) {
     sdfReleaseResourceAllocation(*(struct SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
