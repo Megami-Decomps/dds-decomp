@@ -452,6 +452,7 @@ extern char D_0041B710[]; /* "btl:BSE free\n" */
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 
 extern s32 sndFindPackedTrackLoadStatus(s32);
+extern void sndEnsureMidiBankResident(s32);
 
 extern void sndReleaseMidiTrack(s32);
 
@@ -512,7 +513,30 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B6F8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B710);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022B108);
+s32 btlIsEventSequenceTaskReady(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    if (battle->eventTaskId == -1) {
+        return 1;
+    }
+    if (battle->eventFlags & 4) {
+        if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == 0) {
+            sndEnsureMidiBankResident(battle->sequenceHandle);
+            battle->eventFlags &= ~4;
+            btlBossDebugPrintf("btl:event SMG load[%X]\n", battle->sequenceHandle);
+        }
+        return 0;
+    }
+    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == 0) {
+        sndEnsureMidiBankResident(battle->sequenceHandle);
+        btlBossDebugPrintf("btl:SMG load wait\n");
+        return 0;
+    }
+    if (evtGetEventPackLoadedState(battle->eventTaskId) == 2) {
+        return 1;
+    }
+    btlBossDebugPrintf("btl:BE load wait\n");
+    return 0;
+}
 
 /* Release both optional voice resources once and reset the action state.
  * The shared temporary holds either resource; other event flag bits survive. */

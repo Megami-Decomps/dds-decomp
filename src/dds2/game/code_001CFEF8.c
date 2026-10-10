@@ -209,7 +209,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
 
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
-        func_0022B108() != 0 &&
+        btlIsEventSequenceTaskReady() != 0 &&
         func_0022E460() != 0) {
         sndLoadBattleBank();
         func_0022B288();
