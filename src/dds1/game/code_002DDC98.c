@@ -126,7 +126,16 @@ extern SdfTex *D_003BD380;
 extern SdfTex *D_003BD390;
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 extern s32 sdfAllocPacketAligned(s32);
-extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
+typedef struct SdfVuColorTransform {
+    u8 pad00[4];
+    f32 scaledY;
+    u8 pad08[4];
+    f32 scale;
+    f32 colorBase[4];
+    f32 colorDelta[4];
+} SdfVuColorTransform;
+
+extern void func_002DE010(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 extern s32 sdfGetPacketCursor(void);
 extern u16 D_003BDA24;
 extern s32 D_003BDA20;
@@ -150,7 +159,7 @@ typedef struct {
     s16 nodeCount;         /* 0x50 */
     u8 pad52[2];
     SdfAssetEntry *node;   /* 0x54 */
-    void *reference;       /* 0x58 */
+    u32 packedColor;       /* 0x58: packed RGBA word */
     f32 offsetX;           /* 0x5C */
     f32 offsetY;           /* 0x60 */
     u32 dmaBase;           /* 0x64 */
@@ -303,10 +312,25 @@ void sdfVuRotateObjectBasis(void *vectors) {
     VU0_ROTATE_BASIS_AND_CACHE(vectors, m, D_003F98A0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
+/* vu0 routine: modulate and clamp packed colors against the reference rows. */
+void func_002DE010(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+                   u32 firstColor, u32 secondColor,
+                   f32 blend, f32 scale, f32 y) {
+    f32 scaledY;
 
-void sdfVuTransformWorkAtOffset(void *out, SdfAssetEntry *work, void *reference, f32 deltaX, f32 deltaY) {
-    func_002DE010(out, D_003BDA28, reference,
+    if (scale < 1.0f) {
+        scale = 1.0f;
+    }
+    scaledY = y * scale;
+    result->scale = scale;
+    result->scaledY = scaledY;
+    VU0_BUILD_PACKED_COLOR_TRANSFORM(result, reference, packedColor,
+                                     firstColor, secondColor, blend);
+}
+
+
+void sdfVuTransformWorkAtOffset(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+    func_002DE010(out, D_003BDA28, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
                   work->x + deltaX,
@@ -591,7 +615,7 @@ void func_002E02D8(u32 workAddress) {
             if (param8 != paramC) {
                 u128 parameters[3];
 
-                func_002DE010(parameters, D_003BDA28, work->reference,
+                func_002DE010((SdfVuColorTransform *)parameters, D_003BDA28, work->packedColor,
                               paramC, node->unk04, node->unk1C,
                               node->x + work->offsetX, node->y + work->offsetY);
                 func_002DE980(work, parameters);
