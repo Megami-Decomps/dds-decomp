@@ -90,8 +90,15 @@ extern SdfPoolNode *D_003E9C28[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 typedef struct EffectStateSnapshot {
- s128 vectors[8];
+    s128 vectors[4];
+    f32 position[4]; /* 0x40: copied to the debug camera position and follow offset. */
+    s128 unused50;
+    u8 pad60[8];
+    u32 flags; /* 0x68: transform flags tested by the camera diagnostic. */
+    u8 pad6C[0x14];
 } EffectStateSnapshot;
+
+typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) ? 1 : -1];
 
 extern void effResetFileResourceManager(void);
 
@@ -264,7 +271,7 @@ typedef struct EffModelCreateRequest {
 extern float effMiscRandUnitFloat(void *);
 
 
-extern s32 func_002FF0B8(EffectStateSnapshot *, s32);
+extern s32 func_002FF0B8(EffectStateSnapshot *, s8);
 
 typedef struct EffKindAssetHolder {
     s32 kind;
@@ -10591,7 +10598,7 @@ u32 effLoadFileSlotAndPoll(void) {
     u32 result;
 
     memcpy(D_0045C110, file, 0x90);
-    result = func_002FF0B8(D_0045C110, 1);
+    result = func_002FF0B8((EffectStateSnapshot *)D_0045C110, 1);
     memcpy(file, D_0045C110, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -10601,7 +10608,7 @@ u32 effLoadFileSlotAndPoll(void) {
 
 s32 effRunWithStateBackup(void) {
     EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&D_0045C1F0;
-    s128 *backup = &snapshot.vectors[4];
+    f32 *backup = snapshot.position;
     s32 result;
 
     PCP_COPY_VECTOR(backup, &D_0045C1F0);

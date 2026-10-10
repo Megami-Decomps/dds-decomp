@@ -8612,6 +8612,19 @@ s32 effResetStaticState(void) {
     return 0;
 }
 
+typedef struct EffectStateSnapshot {
+    s128 vectors[4];
+    f32 position[4]; /* 0x40: copied to the debug camera position and follow offset. */
+    s128 unused50;
+    u8 pad60[8];
+    u32 flags; /* 0x68: transform flags tested by the camera diagnostic. */
+    u8 pad6C[0x14];
+} EffectStateSnapshot;
+
+typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) ? 1 : -1];
+
+extern s32 func_002B7E60(EffectStateSnapshot *, s8);
+
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B7E60);
 
 void effCopyCameraSnapshotSelection(void) {
@@ -8637,7 +8650,7 @@ u32 effLoadFileSlotAndPoll(void) {
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
-    result = func_002B7E60(D_003DF840, 1);
+    result = func_002B7E60((EffectStateSnapshot *)D_003DF840, 1);
     memcpy(file, D_003DF840, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -8645,15 +8658,10 @@ u32 effLoadFileSlotAndPoll(void) {
     return result;
 }
 
-typedef struct EffectStateSnapshot {
-    s128 vectors[8];
-} EffectStateSnapshot;
-
-extern s32 func_002B7E60(EffectStateSnapshot *, s32);
 
 s32 effRunWithStateBackup(void) {
     EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&D_003DF920;
-    s128 *backup = &snapshot.vectors[4];
+    f32 *backup = snapshot.position;
     s32 result;
 
     PCP_COPY_VECTOR(backup, &D_003DF920);
