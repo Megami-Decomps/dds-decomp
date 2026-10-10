@@ -230,7 +230,34 @@ void func_0029F440(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *wor
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029FA98);
+extern u32 D_004285D0[4];
+
+void func_0029FA98(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                   BrsProgressRow *row, s32 depth, s32 index) {
+    u32 color[4];
+    s32 packed;
+
+    memcpy(color, D_004285D0, sizeof(color));
+    if (work->teardownResource != NULL) {
+        if (work->levelAnimation[index].progressIconEnabled != 0) {
+            packed = work->levelAnimation[index].progressIconOpacity | 0x80808000;
+            color[0] = packed;
+            color[1] = packed;
+            color[2] = packed;
+            color[3] = packed;
+            func_00306C28(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
+                         y + (work->levelAnimation[index].progressIconPosition[1] << 3) + 0x40,
+                         z, color, 0, work->teardownResource, 0x12, depth);
+        }
+        if (work->levelAnimation[index].iconState != 0) {
+            packed = work->levelAnimation[index].unk54 | 0x80808000;
+            color[0] = packed;
+            color[1] = packed;
+            color[2] = packed;
+            color[3] = packed;
+        }
+    }
+}
 
 void func_0029FBE0(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
     s32 y;
