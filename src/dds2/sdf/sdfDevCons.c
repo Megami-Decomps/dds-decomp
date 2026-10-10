@@ -98,8 +98,6 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D068);
-
 typedef struct ConsBuf {
     u8 *writeCursor; /* 0x0: next glyph-data write */
     u8 *packetStart; /* 0x4: beginning of the DMA range */
@@ -111,7 +109,24 @@ typedef struct ConsBuf {
     u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
 } ConsBuf;
 
-void func_0033D068(ConsBuf *arg0);
+/* Close the ordered register-list tag in the console's uncached DMA buffer.
+ * Five eight-byte register values form one sprite; pad an odd value count. */
+void func_0033D068(ConsBuf *buffers) {
+    u8 *cursor = buffers->writeCursor;
+    vu64 *tag = (vu64 *)buffers->currentTag;
+    s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
+
+    if (registerCount != 0) {
+        if (registerCount & 1) {
+            cursor += 8;
+        }
+        registerCount /= 5;
+        buffers->currentTag = cursor;
+        buffers->writeCursor = buffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+        tag[0] = (s64)registerCount | 0x5400000000008000ULL;
+        tag[1] = 0x53531;
+    }
+}
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
