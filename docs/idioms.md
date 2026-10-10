@@ -6916,7 +6916,9 @@ The cached alpha values are `u32`: packing them with `alpha << 24` is unsigned
 RGBA arithmetic, not a signed overflowing shift. This real type correction,
 the current position-array owner, and the provider's actual nine `s32`
 arguments produce exact 600-byte retail text. Whole-unit private and live
-checks are 228 match, 0 differ. The retained R1 owner draft and Opal/Obsidian
+checks are DDS2 228 match, 0 differ; the identical honest body ports to DDS1
+`func_001BA408` in `code_001A9780`, which gates 189 match, 0 differ.
+The retained R1 owner draft and Opal/Obsidian
 reconstruction/review supplied the baseline; no ABI or scheduling controls
 were added.
 
