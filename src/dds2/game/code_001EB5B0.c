@@ -4331,9 +4331,54 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001EB5B0", func_00200FB8);
+typedef struct SceneLightTransitionArgs {
+    f32 direction[4];
+    f32 lightColor[4];
+    f32 ambientColor[4];
+    u32 value;
+} SceneLightTransitionArgs;
 
-extern u32 func_00200FB8(u32 *);
+extern u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor);
+
+u32 func_00200FB8(SceneLightTransitionArgs *args) {
+    f32 *first = args->lightColor;
+    f32 *second = args->ambientColor;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    f32 *lightColor;
+    f32 *ambientColor;
+    u32 firstColor;
+    u32 secondColor;
+    u32 transitionCount;
+
+    func_00200930(first, second, args->value);
+    lightColor = work->lightColor;
+    PCP_COPY_VECTOR_F32(lightColor, first);
+    ambientColor = work->ambientColor;
+    PCP_COPY_VECTOR_F32(ambientColor, second);
+    PCP_COPY_VECTOR_F32(work->lightDirection, args->direction);
+    for (unit = work->units; unit != NULL; unit = unit->nextActor) {
+        if (!(unit->status.flags & 2)) {
+            continue;
+        }
+        if (!(unit->status.stateFlags & 0x10)) {
+            continue;
+        }
+        if (unit->ext != NULL) {
+            evtSetUnitStatusFlags(unit->ext);
+            firstColor = btlBlendColorVec(lightColor, unit->colorStart, 0.3f);
+            secondColor = btlBlendColorVec(ambientColor, unit->colorEnd, 0.3f);
+            evtInitializeUnitColorTransition(unit->ext, args->value, firstColor, secondColor);
+        }
+    }
+    transitionCount = D_00436AD4;
+    D_0037F770[0][4] = args->direction[0];
+    D_0037F770[0][5] = args->direction[1];
+    D_0037F770[0][6] = args->direction[2];
+    D_00436AD4 = transitionCount + 1;
+    return 1;
+}
+
 
 BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
