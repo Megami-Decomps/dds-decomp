@@ -146,7 +146,7 @@ typedef struct EvtDrawState {
     f32 value1C;
 } EvtDrawState;
 
-extern DrawVec4 kwlnDrawVector;
+extern KwlnDrawVectorParams kwlnDrawVector;
 
 extern DrawVec4 D_003C2C20;
 
@@ -311,15 +311,15 @@ void kwlnSetDrawColorTarget(s32 blendFrames, f32 *color) {
 void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     if (blendFrames == 0) {
         kwlnDrawControlFlags &= ~EVT_DRAW_VECTOR_BLEND_FLAG;
-        kwlnDrawVector.x = x;
-        kwlnDrawVector.y = y;
-        kwlnDrawVector.z = z;
-        kwlnDrawVector.w = w;
+        kwlnDrawVector.fogNear = x;
+        kwlnDrawVector.fogFar = y;
+        kwlnDrawVector.depthNear = z;
+        kwlnDrawVector.depthFar = w;
     } else {
-        f32 previousX = kwlnDrawVector.x;
-        f32 previousY = kwlnDrawVector.y;
-        f32 previousZ = kwlnDrawVector.z;
-        f32 previousW = kwlnDrawVector.w;
+        f32 previousX = kwlnDrawVector.fogNear;
+        f32 previousY = kwlnDrawVector.fogFar;
+        f32 previousZ = kwlnDrawVector.depthNear;
+        f32 previousW = kwlnDrawVector.depthFar;
         kwlnDrawControlFlags |= EVT_DRAW_VECTOR_BLEND_FLAG;
         D_003BD6FA = blendFrames;
         D_003C2C20.x = previousX;

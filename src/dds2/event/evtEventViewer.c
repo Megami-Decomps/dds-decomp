@@ -641,12 +641,7 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 }
 
 
-/* Native five-word draw-vector parameters; the timeline swaps x and y. */
-typedef struct EvtViewerDrawVector {
-    f32 x, y, z, w;
-    s32 mode;
-} EvtViewerDrawVector;
-extern EvtViewerDrawVector kwlnDrawVector;
+extern KwlnDrawVectorParams kwlnDrawVector;
 extern u128 *D_0037F770[];
 extern u128 kwlnDefaultColorVector[];
 extern f32 D_00438A48;

@@ -186,11 +186,6 @@ s32 kwlnPrepareFrameDrawPackets(void) {
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
 
-/* Complete five-word input consumed by sdfConsBuildFrustumPacket. */
-typedef struct ConsFrustumParams {
-    f32 left, right, nearZ, farZ;
-    s32 mask;
-} ConsFrustumParams;
 struct ConsFrustumPacket;
 extern u32 kwlnTextureReferenceFlag;
 extern u32 D_00435CD0;
@@ -208,7 +203,7 @@ extern f32 D_0037FB20[4];
 extern f32 kwlnDefaultColorVector[4];
 extern f32 D_0037F850[4], D_0037F860[4], D_0037F870[4];
 extern f32 D_0037FA20[4], D_0037FA30[4], D_0037FA40[4];
-extern ConsFrustumParams D_0037F960, D_0037FB30, kwlnDrawVector;
+extern KwlnDrawVectorParams D_0037F960, D_0037FB30, kwlnDrawVector;
 extern u8 D_00384750[0x40];
 extern u8 D_00384790[];
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
@@ -222,7 +217,7 @@ extern void func_00126B70(void);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
+extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
 typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;
 } SdfMsg;

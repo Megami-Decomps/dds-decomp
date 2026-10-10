@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "kwln.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
 #include "sdf_vu_lighting.h"
@@ -975,13 +976,6 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", sdfBuildLightingPacket);
 
-typedef struct ConsFrustumParams {
-    f32 left;
-    f32 right;
-    f32 nearZ;
-    f32 farZ;
-    s32 mask;
-} ConsFrustumParams;
 
 /* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
  * and the VU execution command. */
@@ -1003,13 +997,13 @@ typedef struct ConsFrustumPacket {
 } ConsFrustumPacket;
 
 /* Emit projection depth coefficients and a GS FOGCOL A+D write. */
-void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, ConsFrustumParams *projectionParams) {
-    f32 rangeMax = projectionParams->right;
-    f32 rangeMin = projectionParams->left;
-    f32 nearZ = projectionParams->nearZ;
-    f32 farZ = projectionParams->farZ;
+void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams) {
+    f32 rangeMax = projectionParams->fogFar;
+    f32 rangeMin = projectionParams->fogNear;
+    f32 nearZ = projectionParams->depthNear;
+    f32 farZ = projectionParams->depthFar;
     f32 depthRange = farZ - nearZ;
-    s32 fogColor = projectionParams->mask;
+    s32 fogColor = projectionParams->fogColor;
     packet->dmaTag = 0x20000004;
     packet->vifUnpackCode = 0x6C03C00013000000ULL;
     packet->gifTag = 0x1000000000008001ULL;
