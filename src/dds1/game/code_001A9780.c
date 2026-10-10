@@ -11,6 +11,7 @@
 #include "btl_resource.h"
 #include "pcp_vu0.h"
 #include "btl_ui.h"
+#include "btl_roster_pair.h"
 #include "sdf.h"
 #include "btl.h"
 #include "btl_state.h"
@@ -736,7 +737,7 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-extern u8 D_00359160[];
+extern s32 func_001A3740(BtlUnit *, BattleRosterTable *);
 
 extern void func_001B83D8(BtlTask *, s8, s8);
 
@@ -3261,17 +3262,16 @@ s32 sndAreSlotsEmpty(void) {
     return 1;
 }
 
-extern u8 D_00359160[];
 
-s32 func_001B53E8(s32 arg0) {
+s32 func_001B53E8(BtlUnit *unit) {
     s32 count;
     s32 i;
 
     func_001ACDF0();
-    count = func_001A3740(arg0, D_00359160);
+    count = func_001A3740(unit, &D_00359160);
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (func_001ACD30(*(u16 *)(D_00359160 + 4 + i * 12), 2) == 0) {
+            if (func_001ACD30(D_00359160.entries[i].skill, 2) == 0) {
                 return 1;
             }
         }
@@ -3284,23 +3284,18 @@ extern s32 btlGetTaskState6(void);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", btlGetTaskState6);
 
-typedef struct FlagEntry {
-    u32 unk0;
-    u16 id;
-    u8 pad6[6];
-} FlagEntry;
 
-extern u8 *func_001BD708(u8 *, u16 *);
+extern BattleRosterTable *func_001BD708(BattleSceneObject *, u16 *);
 
 s32 btlClearFlagEntries(void) {
     u16 count;
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    FlagEntry *entries;
+    BattleRosterTable *table;
     s32 i;
     if (task != 0) {
-        entries = (FlagEntry *)func_001BD708((u8 *)kwlnTaskGetUserValue(task), &count);
+        table = func_001BD708((BattleSceneObject *)kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
-            func_001ACD30(entries[i].id, 0);
+            func_001ACD30(table->entries[i].skill, 0);
         }
         return 1;
     }
@@ -5121,7 +5116,7 @@ extern u16 *func_001BD2C0(s32, s16 *, u16, u16, u16);
 
 extern void btlBuildEligibleActorList(s32, s16 *);
 
-extern u8 *func_001BD708(u8 *, u16 *);
+extern BattleRosterTable *func_001BD708(BattleSceneObject *, u16 *);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2DB0);
 
@@ -5139,7 +5134,7 @@ u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
         D_003BD834->value[0] = count + 1;
         break;
     case 4:
-        func_001BD708((u8 *)object, (u16 *)&count);
+        func_001BD708((BattleSceneObject *)object, (u16 *)&count);
         D_003BD834->value[4] = count;
         break;
     case 2:
@@ -5268,12 +5263,11 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
     *count = total;
 }
 
-extern u8 D_00359160[];
 
-u8 *func_001BD708(u8 *object, u16 *value) {
-    s32 result = func_001A3740(*(s32 *)(*(u8 **)(object + 0x2C) + 0x18), D_00359160);
+BattleRosterTable *func_001BD708(BattleSceneObject *object, u16 *value) {
+    s32 result = func_001A3740(object->owner->unit, &D_00359160);
     *value = result;
-    return D_00359160;
+    return &D_00359160;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BD750);
