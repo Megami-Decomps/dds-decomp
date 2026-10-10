@@ -2008,7 +2008,121 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414F98);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414FB0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9F30);
+typedef struct BattleAdjustmentEntry {
+    u16 sceneIndex;
+    u16 weight;
+    s8 value;
+    u8 unk05;
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    s32 interval;
+    BattleAdjustmentEntry entries[20];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    u16 encounterParamA; /* +0x00: serialized background major ID. */
+    u16 encounterParamB; /* +0x02: serialized background minor ID. */
+    u8 pad04[4];
+    u32 conditions[3];
+    u8 variantCodes[8];
+    BattleAdjustmentGroup groups[3];
+} BattleAdjustmentRecord;
+
+extern BattleAdjustmentRecord *D_00435E0C;
+
+typedef char BattleAdjustmentRecord_size_check[sizeof(BattleAdjustmentRecord) == 0x190 ? 1 : -1];
+typedef char BattleAdjustmentRecord_parameter_a_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamA == 0) ? 1 : -1];
+typedef char BattleAdjustmentRecord_parameter_b_offset_check[((u32)&((BattleAdjustmentRecord *)0)->encounterParamB == 2) ? 1 : -1];
+
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void btlSetScene(s32);
+extern void itfMesSetFlags(u32);
+extern s32 btlResolveQueuedSceneRequestParameters(s32 *, s32 *);
+
+void func_001A9F30(s32 mode, s32 pack, s32 encounter) {
+    struct { s32 code; s32 parameter; } req;
+    u16 paramA;
+    u16 paramB;
+
+    func_001A9B80();
+    btlCreateDrawTasks();
+    switch (mode) {
+    case 0:
+        ((BtlState *)btlRuntime)->effectLayer = pack;
+        ((BtlState *)btlRuntime)->adjustmentGroupIndex = (u8)(encounter >> 24);
+        ((BtlState *)btlRuntime)->adjustmentEntryIndex = (u8)(encounter >> 16);
+        ((BtlState *)btlRuntime)->battleMode = (u16)encounter;
+        btlBossDebugPrintf("enc[pack:%X,no:%X,index:%X,encNo:%X]\n", pack, (u8)(encounter >> 24), (u8)(encounter >> 16), (u16)encounter);
+        if (pack > 0) {
+            ((BtlState *)btlRuntime)->background.ids.major = D_00435E0C[pack].encounterParamA;
+            ((BtlState *)btlRuntime)->background.ids.minor = D_00435E0C[pack].encounterParamB;
+            if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && mdlFlagTest(0x80D) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
+                ((BtlState *)btlRuntime)->background.ids.minor = 5;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x3A1 && mdlFlagTest(0x80D) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE0;
+                ((BtlState *)btlRuntime)->background.ids.minor = 6;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x33B && mdlFlagTest(0x818) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE2;
+                ((BtlState *)btlRuntime)->background.ids.minor = 1;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x340 && mdlFlagTest(0x818) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE4;
+                ((BtlState *)btlRuntime)->background.ids.minor = 2;
+            }
+            evtPrintDeveloperConsoleMessage("Pack:0x%X Maj:%d Min:%d\n", pack, ((BtlState *)btlRuntime)->background.ids.major, ((BtlState *)btlRuntime)->background.ids.minor);
+            if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
+                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
+                    evtPrintDeveloperConsoleMessage("GetFldBG Maj:%d Min:%d\n", req.code, req.parameter);
+                    paramA = req.code;
+                    paramB = req.parameter;
+                    ((BtlState *)btlRuntime)->background.ids.major = paramA;
+                    ((BtlState *)btlRuntime)->background.ids.minor = paramB;
+                }
+            }
+        } else {
+            ((BtlState *)btlRuntime)->background.ids.major = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1C;
+            ((BtlState *)btlRuntime)->background.ids.minor = datBattleSceneRecords[((BtlState *)btlRuntime)->battleMode].unk1E;
+            if (((BtlState *)btlRuntime)->battleMode == 0x3A0 && mdlFlagTest(0x80D) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xDF;
+                ((BtlState *)btlRuntime)->background.ids.minor = 5;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x3A1 && mdlFlagTest(0x80D) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE0;
+                ((BtlState *)btlRuntime)->background.ids.minor = 6;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x33B && mdlFlagTest(0x818) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE2;
+                ((BtlState *)btlRuntime)->background.ids.minor = 1;
+            } else if (((BtlState *)btlRuntime)->battleMode == 0x340 && mdlFlagTest(0x818) != 0) {
+                ((BtlState *)btlRuntime)->background.ids.major = 0xE4;
+                ((BtlState *)btlRuntime)->background.ids.minor = 2;
+            }
+            if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
+                if (btlResolveQueuedSceneRequestParameters(&req.code, &req.parameter) != 0) {
+                    ((BtlState *)btlRuntime)->background.ids.major = req.code;
+                    ((BtlState *)btlRuntime)->background.ids.minor = req.parameter;
+                } else {
+                    ((BtlState *)btlRuntime)->background.ids.major = 0xC9;
+                    ((BtlState *)btlRuntime)->background.ids.minor = 1;
+                }
+            }
+        }
+        btlSetScene(2);
+        break;
+    case 1:
+        btlSetScene(0xC);
+        break;
+    }
+    if (((BtlState *)btlRuntime)->background.ids.major == 0 && ((BtlState *)btlRuntime)->background.ids.minor == 0) {
+        ((BtlState *)btlRuntime)->background.ids.major = 0xC9;
+        ((BtlState *)btlRuntime)->background.ids.minor = 1;
+    }
+    itfMesSetFlags(1);
+    mdlFlagSet(0xC0F);
+    ((BtlState *)btlRuntime)->battleFlags |= 0x701C1;
+    ((BtlState *)btlRuntime)->commandRestrictFlags |= 2;
+    btlBossDebugPrintf("** btlStart **************\n");
+}
+
 
 void btlLoadInputIconsAndSystemSounds(void) {
     btlOpenButtonIconResource();
@@ -3064,26 +3178,6 @@ s32 btlAllActiveUnitsReady(void) {
     return 1;
 }
 
-typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
-    u16 weight;
-    s8 value;
-    u8 unk05;
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    s32 interval;
-    BattleAdjustmentEntry entries[20];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    u8 pad00[8];
-    u32 conditions[3];
-    u8 variantCodes[8];
-    BattleAdjustmentGroup groups[3];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_00435E0C;
 
 f32 func_001AD978(void) {
     BattleController *runtime = (BattleController *)btlGetRuntime();

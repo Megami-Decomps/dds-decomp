@@ -343,15 +343,18 @@ typedef char BtlSceneLightDds1Alignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 struct ActionStateLink;
 struct BtlLinkedCommand;
 
-/* DDS2 0x1A9F30 loads the whole +0x2AC word; 0x1D0020 loads its two
- * signed halfword IDs separately for the field/background resource tasks. */
-typedef union BtlBackgroundId {
-    u32 packed;
+/* The background is a pair of signed halfword IDs, written independently by
+ * scene setup and consumed by field-resource tasks. Joint zero comparisons
+ * may compile to one word load; no separate packed representation is stored. */
+typedef struct BtlBackgroundId {
     struct {
         s16 major;
         s16 minor;
     } ids;
 } BtlBackgroundId;
+typedef char BtlBackgroundIdSizeCheck[sizeof(BtlBackgroundId) == 4 ? 1 : -1];
+typedef char BtlBackgroundIdMajorOffsetCheck[((u32)&((BtlBackgroundId *)0)->ids.major == 0) ? 1 : -1];
+typedef char BtlBackgroundIdMinorOffsetCheck[((u32)&((BtlBackgroundId *)0)->ids.minor == 2) ? 1 : -1];
 
 
 /* The 0xFD4-byte singleton allocated by DDS2 0x1A9B80 and returned by
