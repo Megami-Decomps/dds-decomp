@@ -1,3 +1,4 @@
+#include "btl_command.h"
 #include "btl_motion_transform.h"
 #include "sdf_asset_state.h"
 #include "btl_resource_browser.h"
@@ -395,35 +396,35 @@ extern void func_002A6440(s32);
 
 extern void func_002AB290(s32);
 
-extern s32 func_002B7388(s32, void *, u32);
+extern u32 func_002B7388(const char *, const void *, u32);
 
-extern u8 D_003B3968[];
+extern char D_003B3968[];
 
-extern u8 D_003B3958[];
+extern char D_003B3958[];
 
-extern u8 D_003BCA40[];
+extern char D_003BCA40[];
 
-extern u8 D_003BD050[];
+extern char D_003BD050[];
 
-extern u8 D_003B38C8[];
+extern char D_003B38C8[];
 
-extern u8 D_003B3938[];
+extern char D_003B3938[];
 
-extern u8 D_003B3928[];
+extern char D_003B3928[];
 
-extern u8 D_003B3918[];
+extern char D_003B3918[];
 
-extern u8 D_003B3908[];
+extern char D_003B3908[];
 
-extern u8 D_003B38F8[];
+extern char D_003B38F8[];
 
-extern u8 D_003B38E8[];
+extern char D_003B38E8[];
 
-extern u8 D_003B38D8[];
+extern char D_003B38D8[];
 
-extern u8 D_003B3888[];
+extern char D_003B3888[];
 
-extern u8 D_003BD000[];
+extern char D_003BD000[];
 
 extern u8 D_0038DE70[];
 
@@ -8207,9 +8208,13 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002B59A8);
 
 /* Asset object slot linked to the shared effect-file state. */
 typedef struct EffQueuedFileObject {
-    u8 pad00[0x34];
+    u8 pad00[4];
+    s32 originX; /* 0x04: copied to the preset selector at 002B74AC. */
+    s32 originY; /* 0x08 */
+    u8 pad0C[0x28];
     u8 *linkedState; /* 0x34 */
 } EffQueuedFileObject;
+typedef char EffQueuedFileObjectSizeCheck[(sizeof(EffQueuedFileObject) == 0x38) ? 1 : -1];
 
 
 typedef struct EffCameraCreateRequest {
@@ -8226,7 +8231,7 @@ extern FileJob *effCurrentFileQueueEntry;
 extern u32 D_003BD064;
 extern u32 D_0038F2F0[];
 
-u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
+u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     FileJob *entry;
     u32 count;
 
@@ -8336,19 +8341,12 @@ typedef struct EffectAlignedBlock128 {
     u64 word[16];
 } EffectAlignedBlock128;
 
-typedef struct EffectPlayState {
-    u8 pad_00[0x0C];
-    s32 cursor;       // 0x0C
-    u8 pad_10[4];
-    void *table;      // 0x14
-    s32 tableCount;   // 0x18
-} EffectPlayState;
 
-extern EffectPlayState effBattleCameraSnapshotSelection;
+extern BtlCommandEntryList effBattleCameraSnapshotSelection;
 
-extern u8 D_0038EC38[];
+extern BtlCommandEntry D_0038EC38[];
 
-extern u8 D_0038EC80[];
+extern BtlCommandEntry D_0038EC80[];
 
 extern u8 D_003BD954;
 
@@ -8358,14 +8356,14 @@ u32 effLoadBattleCameraSnapshot(u32 value) {
     *(EffectBlock90 *)D_003DF840 = *(EffectBlock90 *)record;
     *(EffectAlignedBlock128 *)D_003DF840 = *(EffectAlignedBlock128 *)D_003DF9A0;
     if (((EffectBlock90 *)D_003DF840)->word[26] & 2) {
-        effBattleCameraSnapshotSelection.table = D_0038EC38;
-        effBattleCameraSnapshotSelection.tableCount = 3;
-        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.tableCount) {
+        effBattleCameraSnapshotSelection.entries = D_0038EC38;
+        effBattleCameraSnapshotSelection.count = 3;
+        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.count) {
             effBattleCameraSnapshotSelection.cursor = 0;
         }
     } else {
-        effBattleCameraSnapshotSelection.table = D_0038EC80;
-        effBattleCameraSnapshotSelection.tableCount = 9;
+        effBattleCameraSnapshotSelection.entries = D_0038EC80;
+        effBattleCameraSnapshotSelection.count = 9;
         if (effBattleCameraSnapshotSelection.cursor == 0) {
             effBattleCameraSnapshotSelection.cursor = 1;
         }
@@ -8380,14 +8378,14 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
     *(EffectAlignedBlock128 *)D_003DF9A0 = *(EffectAlignedBlock128 *)D_003DF840;
     D_003BD954 = 1;
     if (((EffectBlock90 *)D_003DF840)->word[26] & 2) {
-        effBattleCameraSnapshotSelection.table = D_0038EC38;
-        effBattleCameraSnapshotSelection.tableCount = 3;
-        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.tableCount) {
+        effBattleCameraSnapshotSelection.entries = D_0038EC38;
+        effBattleCameraSnapshotSelection.count = 3;
+        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.count) {
             effBattleCameraSnapshotSelection.cursor = 0;
         }
     } else {
-        effBattleCameraSnapshotSelection.table = D_0038EC80;
-        effBattleCameraSnapshotSelection.tableCount = 9;
+        effBattleCameraSnapshotSelection.entries = D_0038EC80;
+        effBattleCameraSnapshotSelection.count = 9;
         if (effBattleCameraSnapshotSelection.cursor == 0) {
             effBattleCameraSnapshotSelection.cursor = 1;
         }
@@ -8398,67 +8396,67 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B7388);
 
 s32 effCreateParticleTask(void) {
-    return func_002B7388((s32)D_003B3968, D_0038DE70, 8);
+    return func_002B7388(D_003B3968, D_0038DE70, 8);
 }
 
 s32 effCreatePolyTrackControlTask(void) {
-    return func_002B7388((s32)D_003B3958, D_0038DF50, 6);
+    return func_002B7388(D_003B3958, D_0038DF50, 6);
 }
 
 s32 effCreatePolyTrackTask(void) {
-    return func_002B7388((s32)"POLY TRACK S", D_0038E000, 6);
+    return func_002B7388("POLY TRACK S", D_0038E000, 6);
 }
 
 s32 effCreateBlurTask(void) {
-    return func_002B7388((s32)D_003BCA40, D_0038E0F0, 6);
+    return func_002B7388(D_003BCA40, D_0038E0F0, 6);
 }
 
 s32 effCreateFilterTask(void) {
-    return func_002B7388((s32)D_003BD050, D_0038E1A0, 3);
+    return func_002B7388(D_003BD050, D_0038E1A0, 3);
 }
 
 s32 effCreateEnvironmentTask(void) {
-    return func_002B7388((s32)D_003B38C8, D_0038E280, 5);
+    return func_002B7388(D_003B38C8, D_0038E280, 5);
 }
 
 s32 effCreatePolyTextureTask(void) {
-    return func_002B7388((s32)D_003B3938, D_0038E240, 2);
+    return func_002B7388(D_003B3938, D_0038E240, 2);
 }
 
 s32 effCreatePolyFlashTask(void) {
-    return func_002B7388((s32)D_003B3928, D_0038E310, 0xB);
+    return func_002B7388(D_003B3928, D_0038E310, 0xB);
 }
 
 s32 effCreatePolyRingTask(void) {
-    return func_002B7388((s32)D_003B3918, D_0038E450, 6);
+    return func_002B7388(D_003B3918, D_0038E450, 6);
 }
 
 s32 effCreatePolyThunderTask(void) {
-    return func_002B7388((s32)D_003B3908, D_0038E500, 4);
+    return func_002B7388(D_003B3908, D_0038E500, 4);
 }
 
 s32 effCreatePolyTwinkleTask(void) {
-    return func_002B7388((s32)"POLY TWINKLE", D_0038E570, 6);
+    return func_002B7388("POLY TWINKLE", D_0038E570, 6);
 }
 
 s32 effCreatePolyWindTask(void) {
-    return func_002B7388((s32)D_003B38F8, D_0038E620, 7);
+    return func_002B7388(D_003B38F8, D_0038E620, 7);
 }
 
 s32 effCreatePolyScalyTask(void) {
-    return func_002B7388((s32)D_003B38E8, D_0038E6F0, 5);
+    return func_002B7388(D_003B38E8, D_0038E6F0, 5);
 }
 
 s32 effCreatePolyCrackTask(void) {
-    return func_002B7388((s32)D_003B38D8, D_0038E7C0, 2);
+    return func_002B7388(D_003B38D8, D_0038E7C0, 2);
 }
 
 s32 effCreateBattleOnlyTask(void) {
-    return func_002B7388((s32)D_003B3888, D_0038E800, 0xA);
+    return func_002B7388(D_003B3888, D_0038E800, 0xA);
 }
 
 s32 effCreateTwoDimensionalTask(void) {
-    return func_002B7388((s32)D_003BD000, D_0038E9A0, 2);
+    return func_002B7388(D_003BD000, D_0038E9A0, 2);
 }
 
 /* Resource-bank request shared with the DDS2 effect loader. */

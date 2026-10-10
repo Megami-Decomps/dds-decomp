@@ -3,6 +3,30 @@
 
 #include "btl.h"
 
+/* Packed command entries have a 0x18-byte stride. */
+typedef struct BtlCommandEntry {
+    const char *label; /* 0x00: formatted preset name at DDS1 002B742C. */
+    u8 opcode; /* 0x04 */
+    u8 pad05[3];
+    s32 command; /* 0x08 */
+    u32 unk0C;
+    u32 unk10;
+    f32 value; /* 0x14: unsigned preset index converted to float at 002B7458. */
+} BtlCommandEntry;
+
+typedef struct BtlCommandEntryList {
+    const char *title;
+    s32 x;
+    s32 y;
+    s32 cursor; /* 0x0C */
+    u8 pad10[4];
+    BtlCommandEntry *entries; /* 0x14 */
+    s32 count;   /* 0x18 */
+} BtlCommandEntryList;
+
+typedef char BtlCommandEntrySizeCheck[(sizeof(BtlCommandEntry) == 0x18) ? 1 : -1];
+typedef char BtlCommandEntryListSizeCheck[(sizeof(BtlCommandEntryList) == 0x1C) ? 1 : -1];
+
 /* Camera pose payload (0x28); command members occupy SDK-aligned storage. */
 typedef struct BtlCamState {
     f32 position[4];  /* 0x00 */
