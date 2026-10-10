@@ -4921,7 +4921,67 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002ECD10);
+/* Tint active point sets and draw them under the class quaternion transform. */
+void effDrawRetainedPointSetRows(EffClassWork *work) {
+    EffBillRangeConfig *config = work->payload;
+    s32 frame = work->frame;
+    s32 duration = config->point.timed.time.duration;
+    EffScaleRangeEntry *row = ((EffScaleRange *)work->resource)->entries;
+    s32 count;
+    f32 colorFactor[4];
+    Matrix4 matrix;
+    s32 classColor[4];
+    s32 fadeColor[4];
+    s32 entryColor[4];
+    s32 blended[4];
+    u32 fade;
+    u32 packed;
+    u32 unit;
+
+    if (duration < frame && duration != 0) {
+        return;
+    }
+    count = config->point.timed.count;
+    fade = effSampleColorAlphaTracks(&config->point.timed.colorTrack,
+        &config->point.timed.alphaTrack, frame, duration);
+    classColor[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(classColor, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    fadeColor[0] = fade;
+    EE_MMI_RGBA_UNPACK(fadeColor, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, colorFactor);
+    VU0_LOAD_VF(vf10, work->vectors.orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work->vectors.position);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(&matrix);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            if (row->negativeSeed > 0) {
+                EffPointSet *set = row->set;
+                entryColor[0] = row->color;
+                EE_MMI_RGBA_UNPACK(entryColor, 1.0f / 128.0f);
+                VU0_LOAD_VF(vf11, colorFactor);
+                VU0_MUL(vf10, vf10, vf11);
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                blended[0] = packed;
+                set->color = blended[0];
+                set->type = config->point.timed.alphaTrack.surfaceIndex;
+                set->flag = config->point.drawFlag;
+                effDrawFivePointGroups(set, &matrix);
+            }
+            remaining--;
+            row++;
+        } while (remaining != 0);
+    }
+}
 
 typedef struct EffAlternatingPointSetRow {
     EffPointSet *set;
