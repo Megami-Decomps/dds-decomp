@@ -11,6 +11,9 @@
 #include "sdf_texture_file.h"
 
 struct SdfTex;
+struct MenuTerminalWork;
+extern void mnuTerminalSelectResourceBank(struct MenuTerminalWork *);
+extern void mnuApplyFadeTrackMode(s32, struct MenuTerminalWork *);
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0xC0
 #define EVT_DISPLAY_VALUE_COUNT 0x10
@@ -160,7 +163,7 @@ s32 dspStartFlagEvent(s32 context) {
 
 /* Initialize the current terminal task's resource bank and mode-zero fade track. */
 s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
-    s32 *work = (s32 *)kwlnTaskGetUserValue(task);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)kwlnTaskGetUserValue(task);
 
     mnuTerminalSelectResourceBank(work);
     mnuApplyFadeTrackMode(0, work);
@@ -223,9 +226,9 @@ u32 mnuApplyTerminalExitFadeOrReset(KwlnTask *task) {
 
 /* Select the terminal's mode-one fade track before starting the black fade-out. */
 s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
-    s32 workAddress = kwlnTaskGetUserValue(task);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)kwlnTaskGetUserValue(task);
 
-    mnuApplyFadeTrackMode(1, workAddress);
+    mnuApplyFadeTrackMode(1, work);
     kwlnFadeOutStart(0, 0, 0, 0);
     return 1;
 }
