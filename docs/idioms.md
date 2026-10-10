@@ -2330,6 +2330,21 @@ loads or stores even when every instruction is right:
   before the callback-table load (DDS2 `func_00317FE0`); a scalar `u32 flags`
   lets the load move up.
 
+For automatic lookup tables, preserve the typed initializer when native data
+and exact neighboring source establish it. DDS2 `func_002805E0` and
+`func_00283090` match with numeric sprite-ID and signed-offset array
+initializers. An explicit `memcpy` draft emitted alias-set-zero BLK copies;
+postreload dependency construction ordered the flags load before the first
+copy. The initialized array carries its actual nonzero alias set, removing
+that conservative anti-dependence and restoring retail order. Capturing the
+switch selector earlier did not change the generic-copy output.
+
+Those initializers own their literal data: remove the duplicate assembly
+literal includes and preserve the remaining assembly data in retail order.
+Here four-byte arrays emit in `.sdata`, larger arrays in `.rodata`; alignment
+zeros do not establish extra array elements. Check the whole unit and final
+retail image, since focused checks can mask local-literal relocations.
+
 Only fix types the data really has (rodata placement, a bitfield the code
 tests bit-by-bit). Adding views to steer alias sets is the lever above.
 
