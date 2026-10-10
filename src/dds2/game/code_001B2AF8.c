@@ -6816,13 +6816,134 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D88);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CCEB8);
 
+typedef s32 SceneSlotCoordinate[3];
+
+extern const u32 D_00416DE0[4];
+extern const SceneSlotCoordinate D_00416DF0[8];
+extern const SceneSlotCoordinate D_00416E50[8];
+extern void func_001CDD38(EffectSlotSet *resource, s32 slot, s32 x, s32 y,
+                          s32 bank, s32 index, s32 mode);
+extern void fldScaleSceneCoordinateRecord(EffectSlotSet *resource, s32 slot);
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DE0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DF0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416E50);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CD6E0);
+void func_001CD6E0(void) {
+    u32 colors[4];
+    SceneSlotCoordinate bankOneCoordinates[8];
+    SceneSlotCoordinate bankZeroCoordinates[8];
+    s32 slotCount;
+    const SceneSlotCoordinate *coordinates;
+    s32 bank;
+    s32 index;
+    s32 channel;
+    s32 xOffset;
+    s32 yOffset;
+
+    memcpy(colors, D_00416DE0, sizeof(colors));
+    memcpy(bankOneCoordinates, D_00416DF0, sizeof(bankOneCoordinates));
+    memcpy(bankZeroCoordinates, D_00416E50, sizeof(bankZeroCoordinates));
+
+    xOffset = 0;
+    yOffset = 0;
+    bank = D_00438F54->bank;
+    if (D_00438F54->enabled[bank] == 0) {
+        return;
+    }
+    coordinates = bank == 0 ? bankZeroCoordinates : bankOneCoordinates;
+    slotCount = D_00438F54->currentIndex;
+
+    for (index = 0; index < slotCount; index++) {
+        switch (D_00438F58[bank]->state[index]) {
+        case 1:
+        case 2:
+        case 3:
+        case 7: {
+            for (channel = 0; channel < 4; channel++) {
+                s32 adjustment;
+                u32 replicated;
+
+                colors[channel] = btlSetSlotLowByteClamped(
+                    btlResourceBlock->resC, coordinates[index][2], channel,
+                    D_00438F58[bank]->slotFade[index] +
+                    D_00438F58[bank]->colorAdjustments[index][channel]);
+                adjustment = D_00438F58[bank]->colorAdjustments[index][channel];
+                replicated = (u32)adjustment;
+
+                {
+                    u32 red = (replicated << 24) | 0x80000000;
+                    u32 green = (replicated << 16) | 0x00800000;
+                    u32 blue = (replicated << 8) | 0x00008000;
+
+                    colors[channel] |= (red | green) | blue;
+                }
+            }
+
+            btlResourceBlock->resC->workEntries[coordinates[index][2]]
+                .geometry.angleDegrees = D_00438F58[bank]->unk6C[index];
+            func_001CE418(btlResourceBlock->resC, coordinates[index][2],
+                          &xOffset, &yOffset,
+                          (f32)D_00438F58[bank]->unk8C[index]);
+            func_00306C28((coordinates[index][0] + xOffset) << 4,
+                          (coordinates[index][1] + yOffset) << 3,
+                          0, colors, 0, btlResourceBlock->resC,
+                          coordinates[index][2], 0x53);
+            btlResourceBlock->resC->workEntries[coordinates[index][2]]
+                .geometry.angleDegrees = 0.0f;
+            fldScaleSceneCoordinateRecord(btlResourceBlock->resC,
+                                         coordinates[index][2]);
+
+            if (D_00438F58[bank]->unk6C[index] > 0.0f) {
+                for (channel = 0; channel < 4; channel++) {
+                    colors[channel] = btlSetSlotLowByteClamped(
+                        btlResourceBlock->resC, coordinates[index][2],
+                        channel,
+                        D_00438F58[bank]->slotFade[index] >> 1);
+                }
+                func_00306C28(coordinates[index][0] << 4,
+                              coordinates[index][1] << 3,
+                              0, colors, 0, btlResourceBlock->resC,
+                              D_00438F58[bank]->entries[index], 0x53);
+            }
+            break;
+        }
+        case 4:
+        case 5:
+            func_001CDD38(btlResourceBlock->resC,
+                          coordinates[index][2] + 0x32,
+                          coordinates[index][0], coordinates[index][1],
+                          bank, index, 0);
+            func_001CDD38(btlResourceBlock->resC,
+                          coordinates[index][2] + 0x32,
+                          coordinates[index][0], coordinates[index][1],
+                          bank, index, 1);
+            break;
+        case 6:
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(
+                    btlResourceBlock->resC, coordinates[index][2],
+                    channel, D_00438F58[bank]->slotFade[index]);
+            }
+            func_00306C28(coordinates[index][0] << 4,
+                          coordinates[index][1] << 3,
+                          0, colors, 0, btlResourceBlock->resC,
+                          coordinates[index][2], 0x53);
+            func_001CDD38(btlResourceBlock->resC,
+                          coordinates[index][2] + 0x32,
+                          coordinates[index][0], coordinates[index][1],
+                          bank, index, 0);
+            func_001CDD38(btlResourceBlock->resC,
+                          coordinates[index][2] + 0x32,
+                          coordinates[index][0], coordinates[index][1],
+                          bank, index, 1);
+            break;
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CDD38);
 
