@@ -1699,6 +1699,23 @@ for the real data flow (which value is reloaded, cached or recomputed) and not
 for a declaration or prototype switch. Some "mirrored" parks are caller-saved
 `$v0`/`$v1` problems instead (`func_00244658`, `btlSelectLowestRankTarget`).
 
+Two exact cross-title examples recover the meaningful data flow rather than
+choosing register homes. The selection-trail constructors `func_001B3DC8`
+(DDS1) and `func_001BE9E8` (DDS2) initialize their real `positions[3]` origin
+endpoint and derive the other three positions directly from that member.
+Computing a separate scalar origin and copying it into the fourth lane later
+leaves different temporary allocation. The producer, four-lane updater and
+40-byte allocation establish the actual array; no storage view is invented.
+
+The reserve pulse renderers `func_001B7C90` (DDS1) and `func_001C2EA8` (DDS2)
+follow the existing active-panel renderer's initialization phases: initialize
+level/geometry defaults, then select the neutral `baseColor` before the signed
+state guards. In this pair, an early declaration initializer leaves 19 words
+different; explicit color selection after the default initializers restores
+the native constant and branch-delay scheduling. Moving color selection past
+the guards exceeds the native extent. These are bounded source examples, not
+permission for declaration-order enumeration or artificial lifetimes.
+
 ### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
 
 `expand_end_loop` "rolls" the loop-top test to the bottom. It scans from the top
