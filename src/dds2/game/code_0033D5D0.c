@@ -9,45 +9,58 @@
 #include "sdf_dev_state.h"
 
 #define SDF_DEV_WORKER_COUNT 4
+
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
+
 #define SDF_DEV_OVERRIDE_PRIORITY 0x78
+
 #define SDF_DEV_PRIORITY_OVERRIDE_TICKS 3
 
 #define SDF_DEV_FILE_OPEN_READ 1
+
 #define SDF_DEV_FILE_OPEN_WRITE 0x202
+
 #define SDF_DEV_SEEK_START 0
+
 #define SDF_DEV_SEEK_CURRENT 1
+
 #define SDF_DEV_SEEK_END 2
+
 #define SDF_DEV_STATE_BYTES 0x40
+
 #define SDF_DEV_INVALID_FILE_HANDLE -1
+
 #define SDF_DEV_CACHE_EVICTION_THRESHOLD 9
 
 #define SDF_DEV_RPC_QUEUE_BYTES 0x20
+
 #define SDF_DEV_RPC_SERVER_BYTES 0x50
+
 #define SDF_DEV_RPC_SERVER_ID 0x32647270
+
 #define SDF_DEV_RPC_CLIENT_ID 0x646E7270
+
 #define SDF_DEV_RPC_THREAD_STACK_BYTES 0x1000
+
 #define SDF_DEV_RPC_THREAD_PRIORITY 0x4C
+
 #define SDF_DEV_RPC_BIND_POLL_TICKS 4
+
 #define SDF_DEV_DISC_FILE_WORDS 12
+
 #define SDF_DEV_DISC_SECTOR_BYTES 0x800
+
 #define SDF_DEV_DISC_SECTOR_SHIFT 11
+
 #define SDF_DEV_DISC_ALIGNMENT_MASK 15
+
 #define SDF_DEV_IOP_BUFFER_BYTES 0x28010
+
 #define SDF_DEV_IOP_ALIGNMENT_BIAS 15
+
 #define SDF_DEV_IOP_ALIGNMENT_MASK -16
+
 #define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
-
-#define SDF_BCD_DIGIT_BITS 4
-#define SDF_DECIMAL_RADIX 10
-
-/* Keep the retail single-precision values; do not round or recompute them. */
-#define SDF_TRIG_INVERSE_TAU 0.15915494f
-#define SDF_TRIG_HALF_PI 1.5707963f
-#define SDF_TRIG_PI 3.1415926f
-#define SDF_TRIG_TAU 6.2831852f
-#define SDF_SINE_POLYNOMIAL_SCALE 3.9999996f
-#define SDF_ASIN_SAMPLE_COUNT 128
 
 extern u8 sdfDevicePriorityOverrideTicks;
 
@@ -99,11 +112,7 @@ extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-
 extern u32 strlen(const char *s);
-extern f32 sdfNormalizedAsinSamples[];
-
-
 
 extern s32 GetThreadId(void);
 
@@ -147,7 +156,6 @@ extern void func_0034D038(u32 arg0);
 
 extern s32 sdfDevReplySemaphore;
 
-
 extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
 
 extern u8 sdfDevModuleLoaded;
@@ -157,8 +165,6 @@ extern u8 D_00438B68;
 extern s32 func_0036D880(const char *, s32, void *, s32 *);
 
 extern void func_0035B6E0(const char *fmt, ...);
-
-extern f32 sdfSinPoly(f32 arg0);
 
 extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
 
@@ -188,13 +194,21 @@ extern char *strcat(char *, char *);
  * source/end as x/y storage, argument as depth bits, and command as RGBA.
  * Its RPC source/end interpretation remains unchanged. */
 extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *args);
+
 extern void sdfDevConsInit(void);
+
 extern s32 func_00360E78(char *destination, const char *format, void *args);
+
 extern s32 sdfGetPacketCursor(void);
+
 extern void sdfSetPacketCursorAligned(s32 cursorAddress);
+
 struct SdfTex;
+
 extern u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
+
 extern u32 D_0040B810[96];
+
 /* Cached texture keeps the provider's opaque pointer/address boundary. */
 extern u32 D_00439194;
 
@@ -227,11 +241,6 @@ typedef struct SdfConsoleGlyph {
     u64 secondUv;
     u64 secondPosition;
 } SdfConsoleGlyph;
-
-typedef char SdfConsolePacketHeader_size_must_be_0x60[
-    sizeof(SdfConsolePacketHeader) == 0x60 ? 1 : -1];
-typedef char SdfConsoleGlyph_size_must_be_0x28[
-    sizeof(SdfConsoleGlyph) == 0x28 ? 1 : -1];
 
 void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void *arguments) {
     char text[0x200];
@@ -301,7 +310,6 @@ void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void
     return start;
 }
 
-
 void *sdfFormatSifPacket(void *packet, const char *fmt, ...) {
     __builtin_va_list args;
 
@@ -356,14 +364,23 @@ typedef struct SifClient {
 } SifClient;
 
 extern SifClient D_004764D0;
+
 extern s8 D_00438AB8;
+
 extern char D_00438AC0[];
+
 extern s32 func_0034DE68(SifClient *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
+
 extern s32 func_00367B60(const char *, ...);
+
 extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
+
 extern s32 func_003287E0(void);
+
 extern s32 sdfGetElapsedTimerTicks(s32);
+
 extern s32 sceSifMBindRpc(void *, s32, s32);
+
 extern void _StartThread(s32, s32);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
@@ -437,8 +454,11 @@ void sdfDevWaitForDisc(void) {
 }
 
 extern u8 sdfDiscReadMode;
+
 extern s32 sdfDiscReadPosition;
+
 extern s32 func_0034D430(s32 arg, u8 *options);
+
 extern s32 sceCdStatus(void);
 
 void sdfDevSeekDiscRequest(s32 request) {
@@ -537,9 +557,13 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033DE60);
 INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033E008);
 
 extern s32 D_004391AC;
+
 extern s32 D_004391B4;
+
 extern u8 *D_004391B0;
+
 extern u8 D_00476980[SDF_DEV_DISC_SECTOR_BYTES];
+
 extern void sdfServicePendingOperationUnderSemaphore(void);
 
 s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
@@ -667,9 +691,13 @@ s32 sdfDevGetFileSize(void) {
 }
 
 extern s32 func_00369B70();
+
 extern s32 func_00369F78(s32, s32, s32);
+
 extern s32 func_0035A828(s32);
+
 extern s32 func_0036A1B0(s32, s32, s32);
+
 extern s32 func_00369DF8(s32);
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
@@ -770,8 +798,11 @@ u32 func_0033E810(char *path) {
 }
 
 extern char D_00438B00[]; /* cdrom */
+
 extern u8 D_00438AE0;
+
 extern char *strchr(const char *, s32);
+
 extern s32 strncmp(const char *, const char *, u32);
 
 char *func_0033E818(char *path) {
@@ -842,7 +873,6 @@ extern s32 func_00369B70();
 
 extern s32 func_00369DF8(s32);
 
-
 s32 sdfPathExists(char *path) {
     char *resolved = func_0033E818(path);
     s32 fd;
@@ -902,7 +932,6 @@ void func_0033EB80(char *path) {
     }
 }
 
-
 char *sdfDevGetPathBuffer(void) {
     return D_0040B9D0;
 }
@@ -919,9 +948,13 @@ void func_0033EC40(s8 value) {
 }
 
 extern s64 func_0036DE70();
+
 extern void sdfEnsureDeviceWorkerThreadStarted(s32 index);
+
 extern DevState *D_00438B08;
+
 extern DevState *D_00438B0C;
+
 extern s16 D_00438B1C;
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
@@ -960,9 +993,13 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
         SignalSema(worker->semaphore);
     }
 }
+
 extern void EIntr(void);
+
 extern DevState *D_00438B14;
+
 extern DevState *D_00438B18;
+
 extern s16 D_00438B10;
 
 void sdfDevUnlinkAndFreeState(DevState *state) {
@@ -1301,6 +1338,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
         SignalSema(worker->semaphore);
     }
 }
+
 /* Worker slot 3 services disc-backed requests through serialized disc operations. */
 void D_0033F3E0(DevWorkerEntry *worker) {
     DevState *state;
@@ -1421,7 +1459,9 @@ void D_0033F3E0(DevWorkerEntry *worker) {
 }
 
 extern char D_00438B28[]; /* cdrom0: */
+
 extern char D_00438B30[]; /* host0: */
+
 extern char D_00438B38[]; /* pfs0: */
 
 char *func_0033F650(char *path, s32 worker) {
@@ -1727,16 +1767,27 @@ void sdfPowerOffInterruptCallback(void) {
 }
 
 extern u8 sdfPfsDebugMode;
+
 extern char D_0040BA70[];
+
 extern char D_0040BA80[];
+
 extern char D_00477180[];
+
 extern char D_00438B60[];
+
 extern void sdfLoadDevModule(void);
+
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+
 typedef void (*SdfPowerOffCallback)(void);
+
 extern SdfPowerOffCallback func_0034C270(SdfPowerOffCallback, void *);
+
 extern s32 func_003698D8(void);
+
 extern s32 func_0035C860(char *, const char *, ...);
+
 extern s32 func_0036BE68(const char *, const char *, s32, const void *, s32);
 
 void func_003400D0(char *path) {
@@ -1788,269 +1839,6 @@ void sdfLoadDevModule(void) {
         D_00438B68 = 1;
         sdfDevModuleLoaded = 1;
     }
-}
-
-INCLUDE_ASM(const s32, "game/code_0033D5D0", func_00340298);
-
-INCLUDE_ASM(const s32, "game/code_0033D5D0", sdfClearQuadwords);
-
-char *sdfStrDup(const char *text) {
-    u32 length;
-    char *copy;
-
-    if (text == NULL) {
-        return NULL;
-    }
-    length = strlen(text);
-    copy = sdfAllocSizeClassBlock(length + 1);
-    memcpy(copy, text, length);
-    copy[length] = 0;
-    return copy;
-}
-
-s32 sdfBcdStrToInt(s32 packedDigits) {
-    s32 place = 1;
-    s32 acc = 0;
-
-    while (packedDigits > 0) {
-        acc += (packedDigits & 0xf) * place;
-        packedDigits >>= 4;
-        place *= 10;
-    }
-    return acc;
-}
-
-/* Pack positive decimal digits into nibbles; non-positive input returns zero.
- * The original signed shifts and lack of an overflow check are retained.
- */
-s32 sdfDecimalToPackedDigits(s32 number) {
-    s32 digitShift = 0;
-    s32 packedDigits = 0;
-
-    while (number > 0) {
-        s32 quotient = number / SDF_DECIMAL_RADIX;
-        packedDigits |= (number - quotient * SDF_DECIMAL_RADIX) << digitShift;
-        number = quotient;
-        digitShift += SDF_BCD_DIGIT_BITS;
-    }
-    return packedDigits;
-}
-
-/* Allocate element storage with a fixed element stride and growth increment. */
-DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32 growthStep) {
-    DevRequest *request = sdfAllocSizeClassBlock(sizeof(*request));
-
-    request->growStep = growthStep;
-    request->usedCount = 0;
-    request->capacity = elementCount;
-    request->stride = elementStride;
-    if (elementCount != 0) {
-        request->backingAllocation = sdfAllocGeneralBlock(elementStride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
-    } else {
-        request->backingAllocation = 0;
-        request->buffer = 0;
-    }
-    return request;
-}
-
-/* Release the backing allocation and the request object. */
-void sdfDestroyDevRequest(DevRequest *request) {
-    sdfReleaseResourceAllocation(request->backingAllocation);
-    sdfReleaseChipBlock(request);
-}
-
-extern void func_00329600(struct SdfMemBlock *allocation, s32 size);
-
-/* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
-void sdfDevBufferedRequestGrow(DevRequest *request) {
-    if (request->backingAllocation == 0) {
-        sdfDevResizeBufferedRequest(request, request->growStep);
-        return;
-    }
-    sdfDecrementAllocationReferenceCount(request->backingAllocation);
-    request->capacity = request->capacity + request->growStep;
-    func_00329600(request->backingAllocation, (s16)request->capacity * request->stride);
-    request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
-}
-
-/* Resize storage and clamp the live entry count to the new capacity. */
-void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
-    if (request->backingAllocation == 0) {
-        if (elementCount > 0) {
-            request->capacity = elementCount;
-            request->backingAllocation = sdfAllocGeneralBlock(request->stride * elementCount);
-            request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
-        }
-    } else if (elementCount <= 0) {
-        sdfReleaseResourceAllocation(request->backingAllocation);
-        request->backingAllocation = 0;
-        request->usedCount = 0;
-        request->capacity = 0;
-        request->buffer = 0;
-    } else {
-        sdfDecrementAllocationReferenceCount(request->backingAllocation);
-        request->capacity = elementCount;
-        func_00329600(request->backingAllocation, request->stride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
-        if (elementCount < request->usedCount) {
-            request->usedCount = elementCount;
-        }
-    }
-}
-
-/* Mirror the phase into a quarter turn, then evaluate an odd ninth-degree polynomial. */
-f32 sdfSinPoly(f32 angle) {
-    f32 phase = angle * SDF_TRIG_INVERSE_TAU;
-    f32 polynomialInput;
-    f32 inputSquared;
-    f32 inputCubed;
-    f32 inputFifthPower;
-    f32 inputSeventhPower;
-    f32 inputNinthPower;
-
-    phase -= (s32)phase;
-    if (phase > 0.5f) {
-        phase -= 1.0f;
-    } else if (phase < -0.5f) {
-        phase += 1.0f;
-    }
-    if (phase > 0.25f) {
-        phase = 0.5f - phase;
-    } else if (phase < -0.25f) {
-        phase = -0.5f - phase;
-    }
-    polynomialInput = phase * SDF_SINE_POLYNOMIAL_SCALE;
-    inputSquared = polynomialInput * polynomialInput;
-    inputCubed = inputSquared * polynomialInput;
-    inputFifthPower = inputCubed * inputSquared;
-    inputSeventhPower = inputFifthPower * inputSquared;
-    inputNinthPower = inputSeventhPower * inputSquared;
-    return polynomialInput * SDF_TRIG_HALF_PI + inputCubed * -0.64596367f + inputFifthPower * 0.07968968f + inputSeventhPower * -0.0046737656f + inputNinthPower * 0.00015148419f;
-}
-
-/* Apply a quarter-turn phase shift to the existing sine approximation. */
-f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle) {
-    return sdfSinPoly(angle + SDF_TRIG_HALF_PI);
-}
-
-/* Binary-search samples, using zero as the implicit lower endpoint.
- * The step is integer 1/sampleCount converted to f32, not a float reciprocal.
- * The caller must provide valid table bounds for the final sample index.
- */
-f32 sdfTableInterpolate(f32 value, f32 *table, s32 sampleCount) {
-    f32 positionStep = 1 / sampleCount;
-    s32 lowerIndex = 0;
-    s32 upperIndex = sampleCount;
-    s32 sampleIndex;
-    f32 lowerValue;
-    f32 upperValue;
-
-    do {
-        sampleIndex = lowerIndex + upperIndex;
-        sampleIndex >>= 1;
-        upperValue = table[sampleIndex];
-        if (value < upperValue) {
-            upperIndex = sampleIndex;
-        } else {
-            sampleIndex++;
-            lowerIndex = sampleIndex;
-        }
-    } while (lowerIndex < upperIndex);
-    upperValue = table[sampleIndex];
-    lowerValue = 0.0f;
-    if (sampleIndex != 0) {
-        lowerValue = table[sampleIndex - 1];
-    }
-    return sampleIndex * positionStep + (value - lowerValue) * positionStep / (upperValue - lowerValue);
-}
-
-/* Odd fifth-degree atan approximation; the ratio is not range-checked here. */
-f32 sdfAtan2Poly(f32 ratio) {
-    f32 ratioSquared = ratio * ratio;
-    f32 ratioCubed = ratioSquared * ratio;
-    f32 ratioFifthPower = ratioSquared * ratioCubed;
-
-    return ratio * 0.99999977f + ratioCubed * -0.33325735f + ratioFifthPower * 0.19388643f;
-}
-
-f32 sdfAtan2(f32 y, f32 x) {
-    s32 sx = 0;
-    s32 sy;
-    f32 r;
-
-    if (x < 0.0f) {
-        x = -x;
-        sx = 1;
-    }
-    sy = 0;
-    if (y < 0.0f) {
-        y = -y;
-        sy = 1;
-    }
-    if (y < x) {
-        r = sdfAtan2Poly(y / x);
-    } else {
-        r = 1.5707963f - sdfAtan2Poly(x / y);
-    }
-    if (sx != 0) {
-        r = 3.1415926f - r;
-    }
-    if (sy != 0) {
-        r = -r;
-    }
-    return r;
-}
-
-/* Restore the input sign after sampling; magnitudes at or above one use half pi. */
-f32 sdfAsinTable(f32 x) {
-    f32 inputSign;
-    f32 angleMagnitude;
-
-    if (x < 0.0f) {
-        x = -x;
-        inputSign = -1.0f;
-    } else {
-        inputSign = 1.0f;
-    }
-    angleMagnitude = x >= 1.0f ? SDF_TRIG_HALF_PI : sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT) * SDF_TRIG_HALF_PI;
-    return angleMagnitude * inputSign;
-}
-
-/* Return the input-signed complement of the sampled angle, not standard acos(x).
- * Magnitudes at or above one leave the angle magnitude at zero.
- */
-f32 sdfAcosTable(f32 x) {
-    f32 inputSign;
-    f32 angleMagnitude;
-
-    if (x < 0.0f) {
-        x = -x;
-        inputSign = -1.0f;
-    } else {
-        inputSign = 1.0f;
-    }
-    angleMagnitude = 0.0f;
-    if (!(x >= 1.0f)) {
-        angleMagnitude = (1.0f - sdfTableInterpolate(x, sdfNormalizedAsinSamples, SDF_ASIN_SAMPLE_COUNT)) * SDF_TRIG_HALF_PI;
-    }
-    return angleMagnitude * inputSign;
-}
-
-/* Keep the cast-plus/minus-one turn adjustment; this is not general modulo.
- * Inputs already within the pi thresholds are returned unchanged.
- */
-f32 sdfWrapAngle(f32 angle) {
-    s32 adjustedTurns;
-    if (angle > SDF_TRIG_PI) {
-        adjustedTurns = (s32)(angle / SDF_TRIG_TAU) + 1;
-        return angle - (f32)adjustedTurns * SDF_TRIG_TAU;
-    }
-    if (angle < -SDF_TRIG_PI) {
-        adjustedTurns = (s32)(angle / SDF_TRIG_TAU) - 1;
-        return angle - (f32)adjustedTurns * SDF_TRIG_TAU;
-    }
-    return angle;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0033D5D0", D_0042E3A0);

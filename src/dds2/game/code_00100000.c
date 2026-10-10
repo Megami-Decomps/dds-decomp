@@ -41,14 +41,6 @@ extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
 extern void frFontReleaseAll(void);
 extern s32 func_001A1810(void);
 
-INCLUDE_ASM(const s32, "game/code_00100000", func_00100000);
-
-INCLUDE_ASM(const s32, "game/code_00100000", _start);
-
-INCLUDE_ASM(const s32, "game/code_00100000", func_001001C8);
-
-INCLUDE_ASM(const s32, "game/code_00100000", func_001001D0);
-
 s32 func_001001D8(void) {
     evtResetDisplayProjectionAndVectorState();
     kwlnResetPadInputAndMotorState();
