@@ -3615,7 +3615,7 @@ void fldSetCameraMoveMode(u32 value) {
 }
 
 
-extern void effObjSetNodeFlags(void *, s32);
+extern void effObjSetNodeFlags(ObjectTransform *node, u32 flags);
 
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
