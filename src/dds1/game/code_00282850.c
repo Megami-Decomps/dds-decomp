@@ -113,7 +113,7 @@ extern u8 D_0037CE80[];
 extern u8 sdfViewMatrix[];
 extern u8 D_003270F0[];
 extern void evtStageTestAdvanceMotionQueue(void);
-extern void func_00281780(s32, s32, s32, s32);
+extern void func_00281780(MenuPageWindow *, s32, u32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 fldIsFlagActive(void);
 extern u8 fldTestSecondarySceneFlag(void);
@@ -1672,7 +1672,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
             return 0;
         }
         func_002866B0(ability, (s32)target, entry);
-        func_00281780((s32)context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
+        func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 partyIndex;
         s32 queueArgument;
@@ -1697,7 +1697,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
             entry = &datGameState->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                func_00281780((s32)context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
+                func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
             }
             queueArgument += 3;
         }
@@ -1914,7 +1914,7 @@ s32 btlItemApplyPermanentBonus(u16 itemId, DatPartyRecord *unit) {
     return 1;
 }
 
-s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
+s32 btlItemApplyDirectEffect(MenuPageWindow *context, u16 item, s32 mode,
                              DatPartyRecord *unit) {
     s32 result = btlItemApplyPermanentBonus(item, unit);
     switch (result) {

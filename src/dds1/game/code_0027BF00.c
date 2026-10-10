@@ -2254,7 +2254,45 @@ void func_00281688(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, E
                   flag == 0 ? alpha : 0x100, 1, resource, 0, surface);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00281780);
+void func_00281780(MenuPageWindow *menu, s32 window, u32 kind, s32 delay) {
+    MenuPageSlot *panel = &menu->slots[window];
+    s32 best = 0x200;
+    s32 bestIndex = 0;
+    s32 i;
+    u32 flags;
+
+    for (i = 0; i < 2; i++) {
+        if (panel->work[i].blend < best) {
+            best = panel->work[i].blend;
+            bestIndex = i;
+        }
+    }
+    flags = datGameState->party[window].flags;
+    panel->work[bestIndex].kind = kind;
+    panel->work[bestIndex].blend = 0x200;
+    panel->work[bestIndex].delay = delay;
+    if ((flags & 2) != 0) {
+        panel->work[bestIndex].compact = 0;
+    } else {
+        panel->work[bestIndex].compact = 1;
+    }
+    /* Kinds 0 and 1 keep separate identical arms in retail (li 0x30 at
+     * 0x00281854 and 0x00281874); the DDS2 twin initializes them differently. */
+    switch (kind) {
+    case 0:
+        panel->work[bestIndex].highBlendStep = 0x30;
+        panel->work[bestIndex].lowBlendStep = 0x10;
+        break;
+    case 1:
+        panel->work[bestIndex].highBlendStep = 0x30;
+        panel->work[bestIndex].lowBlendStep = 0x10;
+        break;
+    case 2:
+        panel->work[bestIndex].highBlendStep = 0x20;
+        panel->work[bestIndex].lowBlendStep = 0x10;
+        break;
+    }
+}
 
 void mnuClearPanelWorkState(u32 panel) {
     memset(panel, 0, 0x20);

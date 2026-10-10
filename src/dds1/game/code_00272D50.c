@@ -338,7 +338,7 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
     return menuRunPanel((void *)state, 2, request);
 }
 
-extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
+extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern void func_00280048(s32);
@@ -349,7 +349,8 @@ extern void func_00280048(s32);
 s32 mnuUseStaffItem(s32 itemId, s32 context) {
     s32 partyPanel = context + 0x15C;
     s32 targetUnit = (s32)&datGameState->party[((StaffDisplayContext *)context)->selectionList->cursor->index];
-    s32 result = btlItemApplyDirectEffect(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
+    s32 result = btlItemApplyDirectEffect((MenuPageWindow *)partyPanel, itemId & 0xFFFF,
+                                         targetUnit, (DatPartyRecord *)targetUnit);
 
     if (result != 1) {
         if (result == 2) {
