@@ -2131,7 +2131,8 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     starts is required for the owner contract. Moving reservation after the
     complete setup closes the observed 15-word register-allocation residual;
     mimicking the native interleaved stores had left 18 words different.
-    The 424-byte DDS2 glyph renderer `func_0033D2D8` keeps its packed row
+    The 424-byte glyph renderers DDS2 `func_0033D2D8` and DDS1
+    `func_002E4428` keep their packed row
     step as a signed word. A separately maintained bottom coordinate, initialized
     at each row, lets GCSE partial redundancy elimination hoist the step's
     signed 64-bit conversion before the outer loop; it then spills with SD/LD
@@ -2140,6 +2141,9 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     the native second coordinate induction without prematurely widening the
     saved step. Preserve full 64-bit coordinate arithmetic and reload the row
     advance after calls; narrowing the coordinate sum changes behavior.
+    This closes the three-word residual in both titles. Credit Sable for the
+    causal closure and Vesper/Tidal/Amber for the retained reconstruction;
+    the DDS1 transfer was independently checked in its complete current unit.
 12. **`bne` with a filled slot vs annulled `bnel`: the callee must be C-defined
     earlier in the same unit.** `if (a >= 200) return; if (b == 1) f();` (jal
     tail, `ld $31` slot) compiles to `bnel`/`ld ra` when `f` is only declared
