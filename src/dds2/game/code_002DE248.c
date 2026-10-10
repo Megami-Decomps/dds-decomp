@@ -4502,7 +4502,8 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 }
 
 
-extern s32 effMiscRand(s32 *);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *);
 
 typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
@@ -4520,7 +4521,7 @@ void effRandomizeParticleFields(EffClassWork *work) {
     EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (effMiscRand(effSharedRandomState) & 3);
+        entry->key = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 3);
     }
 }
 
@@ -4838,7 +4839,7 @@ void effSeedBillScaleRange(EffClassWork *work) {
     if (count != 0) {
         do {
             index++;
-            entry->negativeSeed = -1 - (effMiscRand(effSharedRandomState) & 7);
+            entry->negativeSeed = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 7);
             entry++;
         } while (index < count);
     }
@@ -4999,7 +5000,7 @@ void effSeedBillboardFrameCounters(EffClassWork *work) {
     EffAlternatingPointSetRow *entry = ((EffAlternatingPointSetTable *)work->resource)->rows;
     u32 i;
     for (i = 0; i < count; i++, entry++) {
-        entry->key = -1 - (effMiscRand(effSharedRandomState) & 3);
+        entry->key = -1 - (s32)(effMiscRand((struct EffRandState *)effSharedRandomState) & 3);
     }
 }
 
@@ -9127,7 +9128,8 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[4] = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
 }
 
-extern void sdfBuildVuRotationFromAxisAngle(f32 *, f32);
+struct RwV3d;
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
     f32 axis[4];
@@ -9142,7 +9144,7 @@ void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
     axis[1] = params[1];
     axis[2] = params[2];
     axis[3] = 0.0f;
-    sdfBuildVuRotationFromAxisAngle(axis, angle + params[4]);
+    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle + params[4]);
 }
 
 EffectSlotNode80 *effAllocateActiveEffectSlotNode(u32 count) {
