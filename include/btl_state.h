@@ -541,7 +541,7 @@ typedef struct BtlState {
     s32 (*unk650)(BtlUnit *);
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
     s32 (*unk658)(BtlUnit *);
-    u8 pad65C[4];
+    s32 (*unk65C)(s32); /* 0x65C: LINKAGE skill-to-start-delay call-site contract. */
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
@@ -600,6 +600,8 @@ typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbie
 typedef char BtlSceneLightOffset3[((unsigned int)&((BtlState *)0)->lightDirection == 0x40) ? 1 : -1];
 typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
+typedef char BtlLinkageDelayHookOffset[((unsigned int)&((BtlState *)0)->unk65C == 0x65C) ? 1 : -1];
+typedef char BtlLinkageNextHookOffset[((unsigned int)&((BtlState *)0)->cameraPoseBlendHook == 0x660) ? 1 : -1];
 typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
