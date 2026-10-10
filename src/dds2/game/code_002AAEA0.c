@@ -23,38 +23,20 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003E6F38[];
 
 
-/* A focused view of the staff menu's CampVisualWork (code_002A9068). */
-typedef struct CampVisualWork {
-    u8 pad00[8];
-    u8 dispatchState[0x4C];
-    s32 popup;
-    u8 pad58[8];
-    u32 drawContext;        /* 0x60 */
-    u8 pad64[0x8C];
-    u32 panelResource;      /* 0xF0 */
-    u8 padF4[0x10];
-    MenuWindowContainer *skillFlagRoot; /* 0x104 */
-    u8 pad108[0x10];
-    MenuScrollPanel *scrollPanel; /* 0x118: retained scroll-panel allocation */
-    u8 pad11C[0xAFF0];
-    MenuFadeFields transition; /* 0xB10C */
-    u32 titleFadingOut;    /* 0xB1D0 */
-    u32 titleOpacity;      /* 0xB1D4 */
-    u32 titleSlide;        /* 0xB1D8 */
-} CampVisualWork;
+
 
 u32 mnuPrepareCampFieldSkillDisplay(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
     if (mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 0) == 0) {
-        ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 |= 1;
+        ((MenuStaffContext *)context)->skillWindow->list->last->flags48 |= 1;
     } else {
-        ((CampVisualWork *)context)->skillFlagRoot->list->last->flags48 &= ~1;
+        ((MenuStaffContext *)context)->skillWindow->list->last->flags48 &= ~1;
     }
-    ((CampVisualWork *)context)->titleOpacity = 0;
-    ((CampVisualWork *)context)->titleFadingOut = 0;
-    ((CampVisualWork *)context)->titleSlide = -0x32;
+    ((MenuStaffContext *)context)->titleOpacity = 0;
+    ((MenuStaffContext *)context)->titleFadingOut = 0;
+    ((MenuStaffContext *)context)->titleSlide = -0x32;
     return 1;
 }
 
@@ -62,21 +44,21 @@ u32 mnuStartCampTitleFadeOut(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
-    ((CampVisualWork *)context)->titleFadingOut = 1;
+    ((MenuStaffContext *)context)->titleFadingOut = 1;
     return 1;
 }
 
 /* Handle the selected field skill after both dispatch and resource readiness. */
 s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
-    CampVisualWork *context;
+    MenuStaffContext *context;
     s32 *popup;
     u32 input;
     s32 state;
 
-    context = (CampVisualWork *)kwlnTaskGetUserValue(callback);
+    context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
     input = mnuMapPadMaskToFlags(0x33);
-    popup = &context->popup;
-    state = func_002C4038(context->dispatchState, popup, 0, (void *)callback);
+    popup = &context->popupState;
+    state = func_002C4038(&context->transitionWork, popup, 0, (void *)callback);
     if (state != 0) {
         return state;
     }
@@ -86,7 +68,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     }
     if (*popup == 0) {
         if (input & 1) {
-            struct MenuListNode *entry = context->skillFlagRoot->list->cursor;
+            struct MenuListNode *entry = context->skillWindow->list->cursor;
 
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
@@ -102,16 +84,16 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
         }
     }
     if ((input & 0x300000) == 0) {
-        func_002B9808(context->skillFlagRoot);
+        func_002B9808(context->skillWindow);
     }
     if (input & 0x10) {
-        mnuRetreatWindowListSelection(context->skillFlagRoot);
+        mnuRetreatWindowListSelection(context->skillWindow);
     }
     if (input & 0x20) {
-        mnuAdvanceWindowListSelection(context->skillFlagRoot);
+        mnuAdvanceWindowListSelection(context->skillWindow);
     }
-    mnuClearWindowPanelTransitionFlag(context->skillFlagRoot);
-    mnuPlayInputSound(0, input, &context->skillFlagRoot->list->stateFlags);
+    mnuClearWindowPanelTransitionFlag(context->skillWindow);
+    mnuPlayInputSound(0, input, &context->skillWindow->list->stateFlags);
     return 0;
 }
 
@@ -121,7 +103,7 @@ extern char D_003E69B0[];
 extern char D_003E6F18[];
 
 s32 func_002AB0E0(KwlnTask *task) {
-    CampVisualWork *context = (CampVisualWork *)kwlnTaskGetUserValue(task);
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     s32 state;
     s32 layer = 0x53;
 
@@ -131,10 +113,10 @@ s32 func_002AB0E0(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_002AA9D8(0, context->skillFlagRoot->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    func_002AA9D8(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
-    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, layer);
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)context->drawContext);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
+    mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -150,8 +132,8 @@ u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
 
     context = kwlnTaskGetUserValue(task);
     mnuSwitchCampVisualCategory(5, context);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel,
-                              (struct EffectSlotSet *)(u32)((CampVisualWork *)context)->panelResource, 0, 0);
+    mnuConfigurePanelResource(((MenuStaffContext *)context)->scrollPanel,
+                              ((MenuStaffContext *)context)->contextTitle, 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -161,16 +143,16 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel,
-                              (struct EffectSlotSet *)(u32)((CampVisualWork *)context)->drawContext, 0, 1);
+    mnuConfigurePanelResource(((MenuStaffContext *)context)->scrollPanel,
+                              ((MenuStaffContext *)context)->resources.baseResources[0], 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
 s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    s32 *dispatchEntry = (s32 *)(context + 0x54);
-    s32 state = func_002C4038(((CampVisualWork *)context)->dispatchState, dispatchEntry, 0, (void *)callback);
+    s32 *dispatchEntry = &((MenuStaffContext *)context)->popupState;
+    s32 state = func_002C4038(&((MenuStaffContext *)context)->transitionWork, dispatchEntry, 0, (void *)callback);
     if (state == 0) {
         if (fileConsumeConfigTaskReady() == 0) {
             mnuSetPopupEntryFlagged(dispatchEntry, D_003E7034);
@@ -185,9 +167,9 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
 
     context = kwlnTaskGetUserValue(callback);
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
-    func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->scrollPanel, 0x54);
+    func_002BB510(-0x10, -8, 0, ((MenuStaffContext *)context)->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x18);
-    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((CampVisualWork *)context)->drawContext));
+    mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -217,12 +199,12 @@ s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
         return state;
     }
     mnuUseFieldSkillOnParty(&((MenuStaffContext *)context)->partyPanel, &((MenuStaffContext *)context)->partyWindow, 1);
-    mnuSetPopupEntry(&((CampVisualWork *)context)->popup, D_003E7034);
+    mnuSetPopupEntry(&((MenuStaffContext *)context)->popupState, D_003E7034);
     return 0;
 }
 
 s32 func_002AB448(KwlnTask *task) {
-    CampVisualWork *context = (CampVisualWork *)kwlnTaskGetUserValue(task);
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     s32 state;
     s32 layer = 0x53;
 
@@ -232,10 +214,10 @@ s32 func_002AB448(KwlnTask *task) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_002AA9D8(0, context->skillFlagRoot->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+    func_002AA9D8(0, context->skillWindow->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
                   1, 0, (u32)D_003E6F18, 8, layer);
-    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, layer);
-    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)context->drawContext);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->fade, layer);
+    mnuDrawStaffGridLabelsForKind(0, context->resources.baseResources[0]);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
