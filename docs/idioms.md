@@ -7193,3 +7193,59 @@ flag word as `s32`, then tests bit 0x10. This retains retail's `ANDI`/`SLTU`;
 testing the unsigned owner field directly instead emits `SRA`/`ANDI`. The
 16-byte query and both complete consumer units remain exact (63/0, 31/0).
 
+
+## Mantra background phases and branch-local delay reads
+
+DDS2 `game/code_0026DBF8::func_00270848` draws a base pulse, dispatches a
+transition variant, then samples the base fade again for its final icons.
+The native definitions support one working pulse value for the clock quotient
+and normalized sine result, and one working alpha value for the base,
+transition and final fade phases. Keep the fresh `state->value` reads at their
+actual callback boundaries. Every variant-specific sprite consumes transition
+alpha, including icons `0x10D` through `0x110` and `0x101`.
+
+Use the existing owner's `currentVariant` and `nextVariant` bitfields for both
+the comparison and the switch. These canonical accesses let the compiler
+retain one packed-word load and repeat the low-nibble extraction from it.
+An unrelated scalar mask expression can give the same C result while changing
+that memory-expression identity and dispatch lowering.
+
+The last fifteen differing words came from an early local delay snapshot:
+
+```c
+/* Premature snapshot: lives across the variant comparison. */
+delay = state->timing.transitionDelay;
+if (state->variants.currentVariant != state->variants.nextVariant) {
+    alpha = (s32)((f32)delay / 5.0f * 128.0f * state->value);
+} else {
+    alpha = (s32)((5.0f - (f32)delay) / 5.0f * 128.0f * state->value);
+}
+```
+
+The original expansion creates that signed delay quantity before the packed
+comparison. Its allocation conflicts with hard registers `$2` and `$3`, so it
+takes `$4` and the retained packed word takes `$5`. Native instead reads the
+signed byte in the comparison's delay slot, after the comparison consumes `$2`.
+Read the real owner field within each actual transition arm:
+
+```c
+if (state->variants.currentVariant != state->variants.nextVariant) {
+    alpha = (s32)((f32)state->timing.transitionDelay / 5.0f
+                  * 128.0f * state->value);
+} else {
+    alpha = (s32)((5.0f - (f32)state->timing.transitionDelay) / 5.0f
+                  * 128.0f * state->value);
+}
+```
+
+This removes the premature quantity and naturally recovers native delay `$2`,
+packed word `$4`, float-constant setup and call-argument order. The complete
+1,068-byte original body matches all 267 words; the owning unit passes 242/0
+and both retail binaries retain their original hashes. Preserve Brass Osprey,
+Tidal Quill and Field Native reconstruction credit.
+
+This example supports investigating actual quantity birth and read phases,
+not merging unrelated values or forcing lifetimes. Verify a control really
+changes the target definition before accepting identical output as evidence;
+an earlier purported direct-field control had accidentally left this target
+unchanged and was invalid as a negative experiment.
