@@ -6664,4 +6664,15 @@ annulment with a branch, flag, assembly or ordering lever; keep retail
 ASM enabled and the reviewed C candidate parked.
 
 
+## Particle templates embed their actual emitter prefix
 
+DDS2's `EffTemplatePacketList` owns an `EffEmitterHead` at offset zero;
+the common runtime prefix is `0x150` bytes and the complete template is
+`0x180`. Pass its embedded head to initialization and resource release,
+not a competing prefix view. The native scale vector starts at `+0x10`,
+restart-step counts occupy `+0xA4/+0xFC`, and the backup matrix starts
+at `+0x100`. Lifetime is signed: `0015C3C8 +0x6C4` and
+`0015F918 +0x654` use `SLT`, and the spawn routines convert it to float.
+`ParKindState +0x0C/+0x10` hold dispatch arguments/drawing-system pointers
+for cell kinds but gradient endpoint words for kind four; select the
+documented union member by kind rather than reinterpreting the owner.

@@ -32,24 +32,34 @@ extern void effMiscSeedRandomFromClock();
  * buffer. The kind-specific parameters follow at +0x150. */
 typedef struct EffEmitterHead {
     f32 origin[4];         /* 0x00 */
-    f32 speed;             /* 0x10: base packet speed */
-    u8 pad14[0xC];
-    s32 packetCount;       /* 0x20 */
-    s32 frameCount;        /* 0x24 */
-    u8 pad28[8];
+    f32 scale[3];
+    u8 pad1C[4];
+    u32 particleCount;
+    s32 lifetimeFrames; /* Native signed SLT: C3C8 +6C4 and F918 +654. */
+    s32 billboardResource;
+    s16 drawKind;
+    u8 pad2E[2];
     ParKindState sub;      /* 0x30: kind-tagged shared drawing owner */
     u8 fade[0x4C];         /* 0x48 */
     f32 speedJitter;       /* 0x94 */
     f32 spinJitter;        /* 0x98 */
-    u8 pad9C[0x14];
+    u8 pad9C[4];
+    s32 templateSize;
+    u32 restartStepCount;
+    u8 padA8[8];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
     BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
-    u8 padFC[0x46];
+    u32 pendingRestartSteps;
+    f32 backupMatrix[16];
+    u8 pad140[2];
     u16 active;            /* 0x142 */
     u8 pad144[0xC];
 } EffEmitterHead;
+typedef char EffEmitterHeadSizeCheck[sizeof(EffEmitterHead) == 0x150 ? 1 : -1];
+typedef char EffEmitterHeadSubOffsetCheck[(u32)&((EffEmitterHead *)0)->sub == 0x30 ? 1 : -1];
+typedef char EffEmitterHeadBackupOffsetCheck[(u32)&((EffEmitterHead *)0)->backupMatrix == 0x100 ? 1 : -1];
 
 
 
@@ -94,28 +104,7 @@ typedef struct EffParticleRecord {
 extern u32 effParModulateColors(u32, u32);
 
 typedef struct EffTemplatePacketList {
-    f32 origin[4];
-    f32 x; /* 0x10 */
-    f32 y; /* 0x14 */
-    f32 z; /* 0x18 */
-    u8 pad1C[4];
-    u32 packetCount; /* 0x20 */
-    u32 packetTag; /* 0x24: cleared when cloning a template */
-    u8 pad28[8];
-    ParKindState sub; /* 0x30: common kind owner and template entry count */
-    u8 fade[0x4C]; /* 0x48 */
-    f32 speedJitter; /* 0x94 */
-    f32 spinJitter; /* 0x98 */
-    u8 pad9C[4];
-    s32 templateSize; /* 0xA0: prefix copied before appending tail bytes */
-    u8 padA4[0xC];
-    f32 matrix[16]; /* 0xB0 */
-    u32 colorMask; /* 0xF0 */
-    u8 padF4[4];
-    EffectBufferTail *buffer; /* 0xF8 */
-    u8 padFC[0x46];
-    u16 active; /* 0x142 */
-    u8 pad144[0xC];
+    EffEmitterHead head; /* Common runtime prefix, 0x150 bytes. */
     u8 randomSphere; /* 0x150 */
     u8 restart; /* 0x151 */
     u8 pad152[2];
@@ -170,7 +159,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescrip
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
-void func_0015B330(s32 effect);
+void func_0015B330(EffEmitterHead *effect);
 
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect);
 
@@ -929,8 +918,8 @@ void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
 
     packetTag = EFF_PACKET_INITIAL_TAG;
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
@@ -939,14 +928,14 @@ void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
                 packetTag = packetTag - effect->decayStep;
             }
             packetIndex = nextPacketIndex;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleTemplateTail13(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[1] = effect->tailValues[1] * scale;
     effect->tailValues[3] = effect->tailValues[3] * scale;
@@ -958,9 +947,9 @@ s32 effCloneRingTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effSetTemplateTagPeriod(clone);
     return clone;
 }
@@ -1039,7 +1028,7 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     packet->pos[1] += effect->head.origin[1];
     packet->pos[2] += effect->head.origin[2];
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -1071,8 +1060,8 @@ void effEmitterRingUpdate(EffRingEmitter *effect) {
     phaseStep = effect->f164 * (3.14159265f / 180.0f);
     verticalScale = effect->f16C / 100.0f + 1.0f;
     completedCount = 0;
-    packetCount = effect->head.packetCount;
-    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->flag151;
     PCP_COPY_VECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -1136,20 +1125,20 @@ void effResetDiscPacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleDiscTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
@@ -1161,9 +1150,9 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetDiscPacketAges(clone);
     return clone;
 }
@@ -1226,7 +1215,7 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -1254,8 +1243,8 @@ void effEmitterDiscUpdate(EffDiscEmitter *effect) {
     VU0_LOAD_MATRIX(effect->head.matrix);
     phaseStep = effect->f160 * (3.14159265f / 180.0f);
     verticalScale = effect->f16C / 100.0f + 1.0f;
-    lifetimeFrames = effect->head.frameCount;
-    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
+    packetCount = effect->head.particleCount;
     repeatEnabled = effect->flag150;
     waveRate = effect->f168;
     completedCount = 0;
@@ -1320,20 +1309,20 @@ void effResetBallisticPacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleBallisticTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
     effect->tailValues[3] = effect->tailValues[3] * scale;
@@ -1345,9 +1334,9 @@ s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetBallisticPacketAges(clone);
     return clone;
 }
@@ -1423,7 +1412,7 @@ void func_0015C3C8(EffBallisticEmitter *effect, s32 index) {
             packet->vel[2] = direction[2] * speed * jitter;
             packet->f38 = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
         } else {
-            angle = (3.14159265f * 2.0f) / (u32)effect->head.packetCount * index;
+            angle = (3.14159265f * 2.0f) / (u32)effect->head.particleCount * index;
             cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
             sine = sdfSinPoly(angle);
             packet->pos[0] = cosine * radius;
@@ -1500,7 +1489,7 @@ void func_0015C3C8(EffBallisticEmitter *effect, s32 index) {
                 direction[2] *= decay;
                 direction[1] += gravity;
                 frame++;
-            } while (frame < effect->head.frameCount);
+            } while (frame < effect->head.lifetimeFrames);
             packet->pos[0] = position[0];
             packet->pos[1] = position[1];
             packet->pos[2] = position[2];
@@ -1511,7 +1500,7 @@ void func_0015C3C8(EffBallisticEmitter *effect, s32 index) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -1550,8 +1539,8 @@ void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
     }
     velocityScale = effect->decayPct / 100.0f + 1.0f;
     completedCount = 0;
-    lifetimeFrames = effect->head.frameCount;
-    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
+    packetCount = effect->head.particleCount;
     repeatEnabled = effect->loop;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
@@ -1611,8 +1600,8 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
 
     packetTag = 0;
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
             packetCursor->age = packetTag;
@@ -1622,14 +1611,14 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
                 packetTag = packetTag - effect->decayStep;
             }
             packetIndex = nextPacketIndex;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleLookAtRingTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
 }
 
@@ -1639,9 +1628,9 @@ s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effInitLookAtRingPacketSchedule(clone);
     return clone;
 }
@@ -1692,7 +1681,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         packet->age = 0;
         packet->color = 0;
     } else {
-        f32 lifetimeFrames = effect->head.frameCount;
+        f32 lifetimeFrames = effect->head.lifetimeFrames;
 
         scale = effect->f164;
         /* Native quirk: period was assigned only in mode zero and is still zero here. */
@@ -1710,7 +1699,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 packetIndex) {
         packet->color = 0;
     }
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -1735,9 +1724,9 @@ void effEmitterLookAtRingUpdate(EffLookAtRingEmitter *effect) {
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     sdfVuBuildLookAtBasis(sdfViewEyeVector, sdfViewTargetVector, sdfViewUpVector);
     sdfInvertRigidVuTransform();
-    lifetimeFrames = effect->head.frameCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     phaseStep = effect->f160 * (3.14159265f / 180.0f);
-    packetCount = effect->head.packetCount;
+    packetCount = effect->head.particleCount;
     repeatEnabled = effect->loop;
     stepScale = effect->f164;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -1789,20 +1778,20 @@ void effResetBurstPacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleBurstTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
@@ -1813,9 +1802,9 @@ s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetBurstPacketAges(clone);
     return clone;
 }
@@ -1885,9 +1874,9 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
         packet->f38 = 0;
     }
     jitter = effect->jitterB;
-    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.frameCount;
+    packet->f3C = (effect->f160 * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) - velocityLength) / effect->head.lifetimeFrames;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -1916,8 +1905,8 @@ void effEmitterBurstUpdate(EffBurstEmitter *effect) {
 
     parUpdateSharedScaleAndDelta(&effect->head.sub);
     VU0_LOAD_MATRIX_B(effect->head.matrix);
-    packetCount = effect->head.packetCount;
-    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     completedCount = 0;
     rotationStep = effect->spinRate * (3.14159265f / 180.0f);
     repeatEnabled = effect->loop;
@@ -1990,20 +1979,20 @@ void effResetSpherePacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleSphereTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
@@ -2015,9 +2004,9 @@ s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetSpherePacketAges(clone);
     return clone;
 }
@@ -2083,7 +2072,7 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -2111,8 +2100,8 @@ void effEmitterSphereUpdate(EffSphereEmitter *effect) {
     VU0_LOAD_MATRIX(effect->head.matrix);
     phaseStep = effect->f160 * (3.14159265f / 180.0f);
     verticalScale = effect->f16C / 100.0f + 1.0f;
-    lifetimeFrames = effect->head.frameCount;
-    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
+    packetCount = effect->head.particleCount;
     repeatEnabled = effect->flag150;
     waveRate = effect->f168;
     completedCount = 0;
@@ -2180,8 +2169,8 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect) {
 
     packetTag = EFF_PACKET_INITIAL_TAG;
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
@@ -2190,14 +2179,14 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect) {
                 packetTag = packetTag - effect->decayStep;
             }
             packetIndex = nextPacketIndex;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleExpandRingTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
 }
 
@@ -2207,9 +2196,9 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effInitExpandRingPacketSchedule(clone);
     return clone;
 }
@@ -2258,7 +2247,7 @@ void effEmitterExpandRingSpawn(EffExpandingRingEmitter *effect, u32 packetIndex)
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, packet);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -2288,8 +2277,8 @@ void effEmitterExpandRingUpdate(EffExpandingRingEmitter *effect) {
     VU0_LOAD_MATRIX(effect->head.matrix);
     rotationStep = effect->spinRate * (3.14159265f / 180.0f);
     completedCount = 0;
-    packetCount = effect->head.packetCount;
-    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->loop;
     rotationCos = sdfEvaluateCosineViaSinePhaseShift(rotationStep);
     rotationSin = sdfSinPoly(rotationStep);
@@ -2355,20 +2344,20 @@ void effResetConePacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleConeTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
     effect->tailValues[3] = effect->tailValues[3] * scale;
@@ -2380,9 +2369,9 @@ s32 effCloneConeTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x30;
 
     memset((void *)clone, 0, 0x180);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetConePacketAges(clone);
     return clone;
 }
@@ -2428,7 +2417,7 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
     cone = effect->cone;
     speed = effect->speed;
     if (effect->mode == 0) {
-        angle = sweepRadians / (u32)effect->head.packetCount * packetIndex;
+        angle = sweepRadians / (u32)effect->head.particleCount * packetIndex;
         angleCos = sdfEvaluateCosineViaSinePhaseShift(angle);
         angleSin = sdfSinPoly(angle);
         packet->pos[0] = angleCos * radius;
@@ -2449,7 +2438,7 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -2475,8 +2464,8 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
     VU0_LOAD_MATRIX(effect->head.matrix);
     velocityScale = effect->decayPct / 100.0f + 1.0f;
     completedCount = 0;
-    lifetimeFrames = effect->head.frameCount;
-    packetCount = effect->head.packetCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
+    packetCount = effect->head.particleCount;
     repeatEnabled = effect->loop;
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
         s32 age = packet->age;
@@ -2524,21 +2513,21 @@ void effEmitterConeUpdate(EffConeEmitter *effect) {
 /* Initialize each packet's native tag and its template-selected uniform scale. */
 void effApplyTemplateScaleToRecords(EffTemplatePacketList *effect) {
     s32 packetIndex = 0;
-    EffScaledRecord *packetCursor = (EffScaledRecord *)effect->buffer->records;
-    if (effect->packetCount != 0) {
+    EffScaledRecord *packetCursor = (EffScaledRecord *)effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->flags = EFF_PACKET_INITIAL_TAG;
             packetCursor->scale = effect->recordScale;
             packetIndex++;
             packetCursor++;
-        } while ((u32)packetIndex < effect->packetCount);
+        } while ((u32)packetIndex < effect->head.particleCount);
     }
 }
 
 void effScalePacketRecordTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[1] = effect->tailValues[1] * scale;
@@ -2550,9 +2539,9 @@ s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x20;
 
     memset((void *)clone, 0, 0x170);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effApplyTemplateScaleToRecords(clone);
     return clone;
 }
@@ -2579,8 +2568,8 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
     f32 boundaryScale[4];
     s32 completedCount = 0;
     s32 repeatEnabled;
-    EffPacket *packet = (EffPacket *)effect->buffer->records;
-    u32 subeffectKind = effect->sub.kind;
+    EffPacket *packet = (EffPacket *)effect->head.buffer->records;
+    u32 subeffectKind = effect->head.sub.kind;
     s32 lifetimeFrames;
     s32 packetCount;
     s32 index;
@@ -2589,12 +2578,12 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
     f32 radius;
     f32 velocityScale;
 
-    parUpdateSharedScaleAndDelta(&effect->sub);
-    lifetimeFrames = (s32)effect->packetTag;
+    parUpdateSharedScaleAndDelta(&effect->head.sub);
+    lifetimeFrames = (s32)effect->head.lifetimeFrames;
     targetRadius = effect->targetRadius;
     radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
     velocityScale = effect->accelerationPct / 100.0f + 1.0f;
-    packetCount = (s32)effect->packetCount;
+    packetCount = (s32)effect->head.particleCount;
     repeatEnabled = effect->restart;
     radius = packet->f34;
     if (radiusStep >= 0.0f) {
@@ -2612,7 +2601,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             }
         }
     }
-    PCP_COPY_VECTOR(origin, effect->origin);
+    PCP_COPY_VECTOR(origin, effect->head.origin);
     for (index = 0; index < packetCount; index++, packet++) {
         s32 age = packet->age;
         f32 distance;
@@ -2625,8 +2614,8 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             age = packet->age;
         }
         if (age >= 0) {
-            packet->color = func_001616A8(effect->fade, packet->color, age);
-            packet->color = effParModulateColors(packet->color, effect->colorMask);
+            packet->color = func_001616A8(effect->head.fade, packet->color, age);
+            packet->color = effParModulateColors(packet->color, effect->head.colorMask);
             if (subeffectKind != 0) {
                 PCP_COPY_VECTOR(previousPosition, packet->pos);
             }
@@ -2682,7 +2671,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, previousPosition);
                 VU0_LOAD_VF(vf10, packet->pos);
-                parDispatchKindUpdate(&effect->sub, index, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->head.sub, index, packet->color, packet->speed);
             }
         }
         age++;
@@ -2690,10 +2679,10 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (repeatEnabled) {
                 age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->sub, index);
+                parDispatchKindInit(&effect->head.sub, index);
                 completedCount++;
                 if (completedCount >= packetCount) {
-                    effect->active = 0;
+                    effect->head.active = 0;
                 }
             }
         }
@@ -2706,9 +2695,9 @@ void func_0015F560(void) {
 }
 
 void effScaleSingleParticleTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
 }
 
 /* Clone a single-particle template: the fixed prefix plus an empty appended tail. */
@@ -2717,11 +2706,11 @@ void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0;
 
     memset(clone, 0, 0x150);
-    memcpy(clone, source, source->templateSize);
-    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
-    clone->packetCount = 1;
-    clone->packetTag = 0;
-    func_0015B330((s32)clone);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
+    clone->head.particleCount = 1;
+    clone->head.lifetimeFrames = 0;
+    func_0015B330(&clone->head);
     return clone;
 }
 
@@ -2784,20 +2773,20 @@ void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleOffsetGravityTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
     effect->tailValues[3] = effect->tailValues[3] * scale;
@@ -2809,9 +2798,9 @@ s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0x40;
 
     memset((void *)clone, 0, 0x190);
-    memcpy((void *)clone, source, source->templateSize);
-    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->templateSize, tailBytes);
-    func_0015B330(clone);
+    memcpy((void *)clone, source, source->head.templateSize);
+    memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
+    func_0015B330((EffEmitterHead *)clone);
     effResetOffsetGravityPacketAges(clone);
     return clone;
 }
@@ -2886,7 +2875,7 @@ void func_0015F918(EffOffsetGravityEmitter *effect, s32 index) {
             packet->f3C = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
         } else {
             /* This native branch initializes position, leaving the stored offset intact. */
-            angle = (3.14159265f * 2.0f) / (u32)effect->head.packetCount * index;
+            angle = (3.14159265f * 2.0f) / (u32)effect->head.particleCount * index;
             cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
             sine = sdfSinPoly(angle);
             packet->pos[0] = cosine * radius;
@@ -2962,7 +2951,7 @@ void func_0015F918(EffOffsetGravityEmitter *effect, s32 index) {
                 direction[2] *= decay;
                 direction[1] += gravity;
                 frame++;
-            } while (frame < effect->head.frameCount);
+            } while (frame < effect->head.lifetimeFrames);
             packet->pos[0] = position[0];
             packet->pos[1] = position[1];
             packet->pos[2] = position[2];
@@ -2973,7 +2962,7 @@ void func_0015F918(EffOffsetGravityEmitter *effect, s32 index) {
     packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -3005,8 +2994,8 @@ void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
     }
     velocityScale = effect->decayPct / 100.0f + 1.0f;
     completedCount = 0;
-    packetCount = effect->head.packetCount;
-    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->loop;
     PCP_COPY_VECTOR(origin, effect->head.origin);
     for (packetIndex = 0; packetIndex < packetCount; packetIndex++, packet++) {
@@ -3064,20 +3053,20 @@ void effResetDiscAuxPacketAges(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleDiscAuxTemplate(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[0] = effect->tailValues[0] * scale;
     effect->tailValues[2] = effect->tailValues[2] * scale;
@@ -3090,19 +3079,19 @@ EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     s32 tailBytes = 0xB0;
 
     memset(clone, 0, 0x200);
-    memcpy(clone, source, source->templateSize);
-    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
-    auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->packetCount * 0x10);
+    memcpy(clone, source, source->head.templateSize);
+    memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
+    auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->head.particleCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
     clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
-    func_0015B330((s32)clone);
+    func_0015B330(&clone->head);
     effResetDiscAuxPacketAges(clone);
     return clone;
 }
 
 void effFreeDiscAuxTemplate(EffTemplatePacketList *effect) {
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->auxiliaryAllocation));
-    effDestroyResources((EffEmitterHead *)effect);
+    effDestroyResources(&effect->head);
     sdfReleaseChipBlock(effect);
 }
 
@@ -3161,7 +3150,7 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;
-    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
     jitter = effect->head.spinJitter;
     if (jitter != 0) {
         packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
@@ -3193,8 +3182,8 @@ void effEmitterDiscAuxUpdate(EffDiscAuxEmitter *effect) {
     phaseStep = effect->f160 * (3.14159265f / 180.0f);
     verticalScale = effect->f16C / 100.0f + 1.0f;
     completedCount = 0;
-    packetCount = effect->head.packetCount;
-    lifetimeFrames = effect->head.frameCount;
+    packetCount = effect->head.particleCount;
+    lifetimeFrames = effect->head.lifetimeFrames;
     repeatEnabled = effect->flag150;
     waveRate = effect->f168;
     PCP_COPY_VECTOR(origin, effect->head.origin);
@@ -3259,20 +3248,20 @@ void effMarkAllTemplateBufferRecords(EffTemplatePacketList *effect) {
     u32 packetIndex;
 
     packetIndex = 0;
-    packetCursor = effect->buffer->records;
-    if (effect->packetCount != 0) {
+    packetCursor = effect->head.buffer->records;
+    if (effect->head.particleCount != 0) {
         do {
             packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
-        } while (packetIndex < effect->packetCount);
+        } while (packetIndex < effect->head.particleCount);
     }
 }
 
 void effScaleTemplatePacketPositions(float scale, EffTemplatePacketList *effect) {
-    effect->x = effect->x * scale;
-    effect->y = effect->y * scale;
-    effect->z = effect->z * scale;
+    effect->head.scale[0] = effect->head.scale[0] * scale;
+    effect->head.scale[1] = effect->head.scale[1] * scale;
+    effect->head.scale[2] = effect->head.scale[2] * scale;
     effect->recordScale = effect->recordScale * scale;
     effect->tailValues[1] = effect->tailValues[1] * scale;
 }
@@ -3291,25 +3280,25 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
     s32 i;
 
     memset((void *)copy, 0, 0x190);
-    memcpy((void *)copy, source, source->templateSize);
-    memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
-    func_0015B330(copy);
+    memcpy((void *)copy, source, source->head.templateSize);
+    memcpy((void *)(copy + 0x150), (u8 *)source + source->head.templateSize, tailLen);
+    func_0015B330((EffEmitterHead *)copy);
     perRecord = 0;
-    if (((EffTemplatePacketList *)copy)->sub.kind != 0) {
-        count = ((EffTemplatePacketList *)copy)->packetCount;
+    if (((EffTemplatePacketList *)copy)->head.sub.kind != 0) {
+        count = ((EffTemplatePacketList *)copy)->head.particleCount;
         /* All four supported resource kinds use the same subrecord count. */
-        switch (((EffTemplatePacketList *)copy)->sub.kind) {
+        switch (((EffTemplatePacketList *)copy)->head.sub.kind) {
         case 1:
-            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
+            perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
         case 2:
-            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
+            perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
         case 3:
-            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
+            perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
         case 4:
-            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
+            perRecord = ((EffTemplatePacketList *)copy)->head.sub.templateEntryCount;
             break;
         }
         listBytes = count * 12;
