@@ -500,7 +500,7 @@ void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entr
 }
 
 /* Draw both layers of a display entry and queue its formatted value. */
-void func_002562E8(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+void func_002562E8(s32 x, s32 y, s32 layer, DatPartyRecord *entry, s32 scale, s32 context) {
     DspEntrySpriteLookup lookup = D_003BC480[0];
     char text[0x10];
     u32 tag = scale | 0xA09DC300;
