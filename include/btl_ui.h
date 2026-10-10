@@ -233,8 +233,7 @@ typedef struct BattleActorPanelPresentation {
 } BattleActorPanelPresentation;
 
 typedef struct BattleActorPanelEntry {
-    s32 x;
-    s32 y;
+    s32 position[2]; /* Displayed x, y coordinate pair. */
     s32 baseX;
     s32 baseY;
     BattleActorPanelPresentation presentation;
