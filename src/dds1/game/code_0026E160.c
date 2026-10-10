@@ -85,7 +85,47 @@ void func_0026E240(MnuSpriteResourceGroup *resources) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E388);
+extern f32 sdfSinPoly(f32);
+
+void func_0026E388(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGroup *group, s32 a5) {
+    s32 i;
+    SdfList *list;
+    SdfListNode *node;
+    SpriteSpawnNode *elem;
+    f32 wave;
+    f32 scale;
+    s32 scaled;
+
+    for (i = 0; i < 10; i++) {
+        list = group->tasks[i];
+        if (list == NULL) {
+            continue;
+        }
+        node = list->head;
+        if (node == NULL) {
+            continue;
+        }
+        scale = 3.1415926f;
+        do {
+            elem = node->value;
+            wave = (f32)elem->framesLeft / (f32)elem->duration;
+            wave = sdfSinPoly(wave * scale);
+            switch (elem->variant) {
+            case 0:
+                /* retail arm 0x0026E448 */
+                scaled = (s32)((f32)a3 * wave);
+                func_0026E160(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                break;
+            case 1:
+                /* retail arm 0x0026E478 */
+                scaled = (s32)((f32)a3 * wave);
+                func_0026E160(a0 + elem->x, a1 + elem->y, a2, scaled, a5);
+                break;
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+}
 
 MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 cueDuration,
                                                      u8 initialGenerations,
@@ -115,7 +155,6 @@ void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *resources) {
 
 extern MovieMenuState *mnuMovieMenuState;
 extern void func_0026E240(MnuSpriteResourceGroup *);
-extern void func_0026E388(s32, s32, s32, s32, MnuSpriteResourceGroup *, s32);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
