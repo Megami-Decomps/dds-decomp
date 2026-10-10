@@ -197,7 +197,65 @@ void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
     packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E4428);
+/* Emit five register values per visible cell, advancing packed coordinates. */
+void func_002E4428(DevConsState *console, ConsBuf *buffers) {
+    u8 *cells;
+    vu64 *writeCursor;
+    u8 *packetStart;
+    s32 row;
+    s32 column;
+    s32 y;
+    s32 cellStep;
+    u64 top;
+    s32 character;
+    s32 attribute;
+    u64 glyph;
+    u64 color;
+
+    if ((u8)(console->controlByte & 1)) {
+        return;
+    }
+    buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
+    if (console->controlByte & 2) {
+        func_002E42F8(console, buffers);
+    }
+    cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
+    row = 0;
+    writeCursor = (vu64 *)buffers->writeCursor;
+    packetStart = buffers->packetStart;
+    cells = console->cells;
+    y = console->unkA;
+    do {
+        top = (u32)console->unk8 | ((u32)y << 16);
+        column = 0;
+        do {
+            character = cells[0];
+            attribute = cells[1];
+            cells += 2;
+            if (character >= 0x20) {
+                if (buffers->bufferBytes < (u8 *)writeCursor - packetStart + 0x50) {
+                    buffers->writeCursor = (u8 *)writeCursor;
+                    sdfDevConsKickPacketDma(buffers);
+                    writeCursor = (vu64 *)buffers->writeCursor;
+                    packetStart = buffers->packetStart;
+                }
+                glyph = D_00398660[character - 0x20];
+                color = D_003987E0[attribute];
+                writeCursor[0] = color;
+                writeCursor[1] = glyph;
+                writeCursor[2] = top;
+                writeCursor[3] = glyph + 0xC000C0;
+                writeCursor[4] = top + cellStep;
+                writeCursor += 5;
+            }
+            column++;
+            top += 0xC0;
+        } while (column != console->columns);
+        row++;
+        y += buffers->rowStep;
+    } while (row != console->rows);
+    buffers->writeCursor = (u8 *)writeCursor;
+}
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
