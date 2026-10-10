@@ -5495,18 +5495,18 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30D8);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001C1988);
 
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3130);
-
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3140);
-
-INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A31A0);
-
 typedef s32 SceneSlotCoordinate[3];
 
 extern const BattlePanelColors D_003A3130;
 extern const SceneSlotCoordinate D_003A3140[8];
 extern const SceneSlotCoordinate D_003A31A0[8];
 extern void func_001C27B0(EffectSlotSet *, s32, s32, s32, s32, s32, s32);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3130);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3140);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A31A0);
 
 void func_001C2158(void) {
     u32 colors[4];
