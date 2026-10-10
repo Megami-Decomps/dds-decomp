@@ -3969,7 +3969,54 @@ void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *w
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001BA408);
+extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_001BA408(void *task, BattleActorPanelWork *work, s32 index) {
+    s32 x;
+    s32 y;
+    u32 alpha[8];
+    s32 top;
+    s32 middle;
+    s32 bottom;
+    s32 baseColor = 0x40FF50;
+
+    if (work->activeEntries[index].presentation.transitionState != 0) {
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        x = work->activeEntries[index].position[0];
+        y = work->activeEntries[index].position[1];
+        alpha[0] = work->activeEntries[index].presentation.triangleAlpha[0];
+        alpha[1] = work->activeEntries[index].presentation.triangleAlpha[1];
+        alpha[2] = work->activeEntries[index].presentation.triangleAlpha[2];
+        alpha[3] = work->activeEntries[index].presentation.triangleAlpha[3];
+        alpha[4] = work->activeEntries[index].presentation.triangleAlpha[4];
+        alpha[5] = work->activeEntries[index].presentation.triangleAlpha[5];
+        alpha[6] = work->activeEntries[index].presentation.triangleAlpha[6];
+        alpha[7] = work->activeEntries[index].presentation.triangleAlpha[7];
+        top = y + 49;
+        middle = y + 63;
+        bottom = y + 77;
+        evtSubmitGradientTriangle(x + 54, top, x + 106, top, x + 93, middle,
+                      (alpha[0] << 24) | baseColor,
+                      (alpha[1] << 24) | baseColor,
+                      (alpha[3] << 24) | baseColor);
+        evtSubmitGradientTriangle(x + 54, top, x + 93, middle, x + 40, middle,
+                      (alpha[0] << 24) | baseColor,
+                      (alpha[3] << 24) | baseColor,
+                      (alpha[2] << 24) | baseColor);
+        evtSubmitGradientTriangle(x + 40, middle, x + 93, middle, x + 80, bottom,
+                      (alpha[4] << 24) | baseColor,
+                      (alpha[5] << 24) | baseColor,
+                      (alpha[7] << 24) | baseColor);
+        evtSubmitGradientTriangle(x + 40, middle, x + 80, bottom, x + 26, bottom,
+                      (alpha[4] << 24) | baseColor,
+                      (alpha[7] << 24) | baseColor,
+                      (alpha[6] << 24) | baseColor);
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
+
 
 void btlUpdateActorPanelSecondaryPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
