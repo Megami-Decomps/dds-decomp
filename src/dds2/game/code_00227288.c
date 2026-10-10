@@ -1038,7 +1038,736 @@ s32 btlIsSceneUnitModeListed(BtlUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00229728);
+#include "sdf_projection.h"
+
+typedef struct ActionUnit ActionUnit;
+extern const char D_0041B4F8[];
+extern void *memset(void *, s32, u32);
+extern u32 btlAcceptLinkedActorCommand(BtlUnit *unit, u32 command);
+extern s32 btlAccumulateBossRatioScale(ActionStateLink *task);
+extern s32 btlActionResourceTypeToMotionId(BtlUnit *unit, s32 action);
+extern u32 btlActivateMarkedActionFromCommand(u32 unused1, u32 unused2, u32 action);
+extern s32 btlAdvanceBrahmaRatioOnAction(ActionStateLink *unit);
+extern s32 btlAdvanceTimedActionState(BtlLinkedCommand *command);
+extern s32 btlAimAtLinkedTargetOrGroupCamera(BtlLinkedCommand *object);
+extern s32 btlAimLinkedTargetOrSetCameraTransform(BtlLinkedCommand *object);
+extern u32 btlApplySingleTargetCameraOffset(BtlLinkedCommand *unit);
+extern void btlApplySpecialActionRenderGroup(BtlUnit *unit, u32 group, f32 opacity);
+extern void btlCancelCurrentSubtask(void);
+extern void btlCenterMarkedFormationAroundLead(void);
+extern s32 btlCheckActionRecordUnit(ActionStateLink *record);
+extern s32 btlCheckActionUnitResourceEligibility(BtlUnit *unit, s32 type);
+extern s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits);
+extern void btlClaimCommandSlot(BtlUnit *unit, BtlOperandEntry *entry);
+extern void btlClaimCommandSlotAndTarget(BtlUnit *unit, BtlOperandEntry *entry);
+extern void btlClearActionPhaseOnNegativeState(BtlUnit *unit, u32 state);
+extern void btlClearSubtaskHandle(void);
+extern s32 btlClearUnitRestrictionFlag(void);
+extern u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle);
+extern void btlDestroyActionActor(void);
+extern s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit);
+extern s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle);
+extern s32 btlFilterActionByUnitFlags(BtlUnit *unit, s32 action);
+extern s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command);
+extern BtlUnit *btlFindUnitByMode(void);
+extern s32 btlFlagAbadonHpMpTrigger(s32 unit, s32 unused, s32 action);
+extern u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action);
+extern void btlFormatSpecialMotionDisplayCode(s32 unit, u32 action, char *buffer);
+extern f32 btlGetActionScaleFactor(BtlUnit *unit, BtlUnit *other);
+extern s32 btlGetBossEntryKind(BtlUnit *unit, s32 index);
+extern f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target);
+extern f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag);
+extern f32 btlGetBrahmaActionScale(BtlUnit *unit, u32 actor, u32 action, u32 mode);
+extern s32 btlGetHealthyAllyActionStatus(BtlUnit *unit);
+extern u32 btlGetMarkedActionMotionCode(u32 unit, u32 action);
+extern u32 btlGetMarkedUnitActionResponse(BtlUnit *unit, BtlUnit *actor, u32 action);
+extern s32 btlGetMarkedUnitActionStatus(BtlUnit *unit);
+extern BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species);
+extern u32 btlGetSelectedActorAction(void);
+extern u32 btlGetSelectionEmptyValue(void);
+extern s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit);
+extern s32 btlGetSpecialEnemySubtaskGuardResponse(BtlUnit *unit);
+extern s32 btlGetSubtaskActorMotionClass(void);
+extern s32 btlHandleTargetDirectionOrAction(BtlLinkedCommand *unit);
+extern s32 btlInitializeEffectVectors(BtlLinkedCommand *command);
+extern u32 btlInitializeMarkedActionTimer(BtlLinkedCommand *unit);
+extern u8 btlIsCommandCodeF(u32 unusedUnit, s32 command);
+extern s32 btlIsSpecialEnemyActionCode(s32 battler, s32 action);
+extern s32 btlIsSpecialMotion(BtlUnit *actor);
+extern s32 btlIsSupportedActorAction(BtlUnit *actor, s32 action);
+extern s32 btlIsUnitListReady(void);
+extern s32 btlLiftLinkedTargetAndUpdateMotion(BtlLinkedCommand *object);
+extern s32 btlLiftTowardLinkedTarget(BtlLinkedCommand *object);
+extern s32 btlLiftUnitForLinkedTarget(BtlLinkedCommand *object);
+extern s32 btlMapActorMotionId(u32 id);
+extern s32 btlMapBossEntryKindToIndex(BtlUnit *unit, s32 index);
+extern void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit);
+extern void btlMarkSpecialActionUnit(BtlUnit *actor);
+extern void btlMarkUnitActionAndStatusForMode(BtlUnit *unit);
+extern u64 btlMaskValueWhenSubtaskInactive(u64 value);
+extern s32 btlMotionOffsetForActor(s32 actor, s32 base);
+extern u32 btlOffsetSpecialActionValue(BtlUnit *unit, u32 base);
+extern s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command);
+extern s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValue);
+extern s32 btlOverrideSpecialModeCheckResult(BtlUnit *unit, s32 kind, s32 fallback);
+extern s32 btlPlayStationedSoundForActiveBossAction(BtlUnit *unit);
+extern void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep);
+extern void btlPrepareSpecialActionSelection(BtlUnit *unit, BtlOperandEntry *entry);
+extern void btlPrepareUnitMotionWithSavedOverride(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep);
+extern s32 btlQueryLinkedGroupResponse(ActionStateLink *link);
+extern void btlQueueLoneFreeTeamHandle(void);
+extern s32 btlQueueMarkedSpecialActorSceneGroup(void);
+extern void btlQueueSelectedActorResourceAndSound(ActionUnit *unit);
+extern u32 btlRaiseSingleTargetCameraPoints(BtlLinkedCommand *unit);
+extern s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command);
+extern void btlRecenterActorsAroundLead(void);
+extern void btlRefreshSpecialActionUnits(void);
+extern s32 btlRemapBossResponseForActionPhase(BtlUnit *unit, s32 value);
+extern s32 btlRemapCommandKind(BtlUnit *unit, s32 kind);
+extern s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action);
+extern void btlResetActionEffectOnUnit(void);
+extern void btlResetActionScale(void);
+extern void btlResetBossRatioScale(void);
+extern u32 btlResetDelayedActionTimer(BtlLinkedCommand *unit);
+extern void btlResetEffectState(void);
+extern void btlResetSpecialActionActorPresentation(void);
+extern void btlResetUnitPlacement(void);
+extern void btlResetUnitSelectionStateAndSetMode(void);
+extern s32 btlResolveBoundActionCode(s32 battler, s32 action);
+extern s64 btlRestoreEnemyUnitWhenModelFlagSet(BtlUnit *battler, BtlOperandEntry *resource);
+extern void btlRestoreLinkedActorSceneColor(void);
+extern void btlRestoreMarkedUnitMotionOnStateChange(void);
+extern void btlReturnUnitToGroup(ActionStateLink *task);
+extern s32 btlSelectActionCameraByTableFlags(BtlLinkedCommand *unit);
+extern s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB);
+extern s32 btlSelectDisabledCommand(BtlUnit *battler);
+extern s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 modeB);
+extern s32 btlSelectLowestStatTarget(ActionStateLink *actor);
+extern s32 btlSelectMarkedActorAndClearEntryFlags(BtlUnit *unit, BtlOperandEntry *entry);
+extern s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit);
+extern s32 btlSelectSoleEligibleActor(void);
+extern u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action);
+extern s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
+extern s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
+extern s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command);
+extern s32 btlSetSubtaskControlEnabled(s32 unused, s32 ignored, s32 action);
+extern void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value);
+extern void btlSetUnitResourceHalvesByMode(BtlUnit *unit, s32 first, s32 second);
+extern s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400);
+extern s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command);
+extern void btlSpawnBrahmaActionEffectTasks(ActionStateLink *unit, u32 action, u32 unused, u64 prerequisiteHandle);
+extern s32 btlSpawnLinkedActionEffect(u8 *task);
+extern u32 btlStartAction19A(BtlLinkedCommand *unit);
+extern void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHandle, s32 delayBase);
+extern s32 btlStartActionRecordTasks(ActionStateLink *record);
+extern s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command);
+extern u32 btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *unit);
+extern u32 btlStartMarkedActionRuntimeUpdate(BtlLinkedCommand *unit);
+extern s32 btlStartOtherMarkedUnitTasks(void);
+extern void btlStartPrevUnitScriptAction(ActionStateLink *handle);
+extern void btlStartReadyUnitAction(void);
+extern void btlStartReadyUnitActionCopy(void);
+extern u64 btlStartSubtaskWithInput(u64 prerequisiteHandle);
+extern void btlStartUnitActionIfPairedSelected(void);
+extern u32 btlTickAction19A(BtlLinkedCommand *unit);
+extern u32 btlTickAction6B(BtlLinkedCommand *unit);
+extern u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit);
+extern u32 btlTickLinkedDefeatCandidateAction(BtlLinkedCommand *unit);
+extern void btlToggleActionByteForFlaggedActor(u32 unused, u32 actor);
+extern void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta);
+extern s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command);
+extern s32 btlTriggerLinkedActionMotionAlternate(BtlLinkedCommand *command);
+extern u32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit);
+extern void btlUpdateLinkedEffectUnitTransforms(void);
+extern void btlUpdateSpecialActorChunkFade(void);
+extern void effBTLFieldColorSetFlags(u32 bits);
+extern void func_00217EB8(ActionStateLink *action);
+extern s32 func_00218150(void);
+extern void func_00218250(void);
+extern s32 func_00218690(void);
+extern s32 func_002186C0(BtlUnit *unit, s32 action);
+extern s32 func_00218798(BtlLinkedCommand *command);
+extern void func_00218968(void);
+extern void func_00218BA8(BtlUnit *unit, u8 *arg1);
+extern void func_00219278(void);
+extern void func_002195E0(ActionStateLink *record);
+extern void func_00219760(void);
+extern s32 func_002198D8(u8 *unit);
+extern s32 func_00219950(u8 *unit);
+extern s32 func_00219F28(s32 battler, s32 action);
+extern s32 func_0021A098(void);
+extern void func_0021B4A8(void);
+extern void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite);
+extern s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide);
+extern s32 func_0021E778(BtlLinkedCommand *command);
+extern u8 func_0021F3A0(s32 arg0);
+extern void func_00220368(void);
+extern void func_00220998(void);
+extern s32 func_00220DD8(BtlUnit *unit, s32 command);
+extern s32 func_00220F68(BtlUnit *unit);
+extern u32 func_00221828(u32 unit);
+extern u32 func_00221858(u32 unit);
+extern u32 func_00221F40(u32 unit, u32 actor, u32 action);
+extern void func_00222100(ActionStateLink *link);
+extern s32 func_00222450(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
+extern s32 func_00223BD8(BtlLinkedCommand *unit);
+extern s32 func_00223DD8(BtlLinkedCommand *unit);
+extern u32 func_00223FB0(BtlLinkedCommand *unit);
+extern u32 func_00223FE0(BtlLinkedCommand *unit);
+extern u32 func_00224010(u32 unused, s32 motion);
+extern s32 func_00224500(s32 object);
+extern s32 func_00224DF0(BtlLinkedCommand *unit);
+extern s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB);
+extern s32 func_00225B48(BtlLinkedCommand *unit);
+extern s32 func_002261A8(BtlLinkedCommand *unit);
+extern f32 func_00226308(BtlUnit *unit, s32 actor, s32 command, s32 mode);
+extern s32 func_00226540(u32 unused1, u32 unused2, s32 action);
+extern s32 func_00226598(BtlLinkedCommand *command);
+extern u32 func_00226670(void);
+extern s64 func_00226820(ActionStateLink *unit);
+extern u32 func_00226850(BtlLinkedCommand *unit);
+extern u32 func_00226868(BtlLinkedCommand *unit);
+extern void func_00226C98(BtlUnit *unit, BtlOperandEntry *entry);
+extern void mdlFlagClear(s32 flag);
+
+/* Audit artifact only; no repository edits. Consumer-complete DDS2 ABI. */
+extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEntry *);
+extern s32 btlUnitWrapA(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 btlUnitWrapB(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 func_002181E8(void);
+extern void func_0021A978(BtlUnit *, s32, s32, s32, s32, f32);
+extern void func_0021B828(ActionStateLink *);
+extern s32 func_0021C7F8(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 func_0021CF18(BtlLinkedCommand *, s32, s32);
+extern s32 func_0021E8C0(BtlLinkedCommand *);
+extern void func_0021F848(ActionStateLink *, BtlUnit *, u64, u64);
+extern void func_002218C8(void);
+extern s32 func_00223350(BtlLinkedCommand *, s32, s32);
+extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
+extern s32 func_00225778(BtlLinkedCommand *, BtlCamState *, s32);
+extern s32 func_00225BF8(BtlLinkedCommand *, s32, s32);
+extern s32 func_00227528(BtlUnit *);
+extern void func_002279F0(void);
+extern void func_00227DA8(ActionStateLink *, s32, u64, u64, u64);
+extern s32 func_00228B08(BtlLinkedCommand *, s32, s32);
+
+/* Copy the verified four-byte EE callback representation into its actual slot.
+ * Some callback slots remain byte storage or carry older shared prototypes. */
+#define BTL_INSTALL_CALLBACK(storage, byteOffset, provider) { \
+    __typeof__(&(provider)) callback = &(provider); \
+    typedef char CallbackWidthIsFour[(sizeof(callback) == 4) ? 1 : -1]; \
+    typedef char CallbackFitsSlot[((byteOffset) + sizeof(callback) <= sizeof(storage)) ? 1 : -1]; \
+    memcpy((u8 *)&(storage) + (byteOffset), &callback, sizeof(callback)); \
+}
+
+void func_00229728(s32 mode) {
+    BtlState *battle;
+    void *allocation;
+    void (*setup)(void);
+
+    battle = (BtlState *)btlGetRuntime();
+    battle->effect = NULL;
+    switch (mode) {
+    case 0x300: {
+        BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartUnitActionIfPairedSelected);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, func_00217EB8);
+        BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectionEmptyValue);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlShiftUnitUpForScriptAction);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        allocation = sdfAllocateBlockBySizeThreshold(0x1);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x1);
+        break;
+    }
+    case 0x302:
+    case 0x31E:
+    case 0x32A:
+    case 0x32B: {
+        if (mode == 0x302) {
+            mdlFlagClear(0x804);
+            battle->commandRestrictFlags |= 0x84000;
+            BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, func_002181E8);
+            BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_00218150);
+        }
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlRestoreEnemyUnitWhenModelFlagSet);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        break;
+    }
+    case 0x303:
+    case 0x304: {
+        u32 commandFlags;
+        u32 preparedFlags;
+        commandFlags = battle->commandRestrictFlags;
+        preparedFlags = commandFlags | 0x800;
+        battle->commandRestrictFlags = preparedFlags;
+        if (mode == 0x303) {
+            battle->commandRestrictFlags = preparedFlags | 0x100000;
+        } else {
+            battle->commandRestrictFlags = commandFlags | 0x804;
+        }
+        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, btlPrepareUnitMotionWithSavedOverride);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002186C0);
+        BTL_INSTALL_CALLBACK(battle->unk6FC, 0x0, btlOverrideSpecialModeCheckResult);
+        BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, func_00218690);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, func_00218250);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClaimCommandSlot);
+        BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartReadyUnitAction);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlStartPrevUnitScriptAction);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00218798);
+        allocation = sdfAllocateBlockBySizeThreshold(0x8);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x8);
+        break;
+    }
+    case 0x305: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x100800;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00218968);
+        BTL_INSTALL_CALLBACK(battle->unk6FC, 0x0, btlOverrideActionResultForEnemyMode);
+        BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlIsUnitListReady);
+        break;
+    }
+    case 0x306: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x100004;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetUnitSelectionStateAndSetMode);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00218BA8);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlFlagAbadonHpMpTrigger);
+        BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlCheckActionRecordUnit);
+        BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlStartActionRecordTasks);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetSpecialEnemySubtaskGuardResponse);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsSpecialEnemyActionCode);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlSelectSoleEligibleActor);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlRaiseUnitForCommandSlot);
+        BTL_INSTALL_CALLBACK(battle->pad674, 0x0, btlSpawnLinkedActionEffect);
+        BTL_INSTALL_CALLBACK(battle->modelChangeSoundHook, 0x0, btlStartActionRecordSoundTask);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlResetActionEffectOnUnit);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00219278);
+        allocation = sdfAllocateBlockBySizeThreshold(0xC);
+        battle->effect = allocation;
+        memset(allocation, 0, 0xC);
+        break;
+    }
+    case 0x307:
+    case 0x308:
+    case 0x309: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x100000;
+        battle->cameraCommand.cameraDistanceOffset = 150.0f;
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClaimCommandSlotAndTarget);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlSetSubtaskControlEnabled);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlClearSubtaskHandle);
+        BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlStartReadyUnitActionCopy);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, func_002195E0);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00219760);
+        BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSubtaskActorMotionClass);
+        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, func_002198D8);
+        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, func_00219950);
+        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlTriggerLinkedActionMotionAlternate);
+        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlTriggerLinkedActionMotion);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedActionMotionPrimary);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSetupHariActionCameraPair);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceTimedActionState);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetSpecialEnemyActionStatus);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapCommandKind);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, func_00219F28);
+        allocation = sdfAllocateBlockBySizeThreshold(0x10);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x10);
+        break;
+    }
+    case 0x30A:
+    case 0x320: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlRecenterActorsAroundLead);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_0021A098);
+        break;
+    }
+    case 0x30B: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x400200;
+        battle->commandRestrictFlags = commandFlags | 0x100000;
+        effBTLFieldColorSetFlags(1);
+        BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlMotionOffsetForActor);
+        BTL_INSTALL_CALLBACK(battle->unitReturnHook, 0x0, btlReturnUnitToGroup);
+        BTL_INSTALL_CALLBACK(battle->pad610, 0x0, btlUpdateSpecialActorChunkFade);
+        BTL_INSTALL_CALLBACK(battle->findModelActor, 0x0, btlGetReadyUnitForSpecies);
+        BTL_INSTALL_CALLBACK(battle->beginBattleEntryTasks, 0x0, btlEnsureHeroUnitTask);
+        BTL_INSTALL_CALLBACK(battle->pad604, 0x0, btlCancelCurrentSubtask);
+        BTL_INSTALL_CALLBACK(battle->finishEnemyEntryTasks, 0x0, btlStartSubtaskWithInput);
+        BTL_INSTALL_CALLBACK(battle->afterActorModelReady, 0x0, btlMarkActiveBossUnitExtensionFlags);
+        BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetBossPresenceActionScale);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlResetSpecialActionActorPresentation);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_0021B4A8);
+        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, func_0021A978);
+        BTL_INSTALL_CALLBACK(battle->unk6F4, 0x0, btlSetUnitResourceFloatByMode);
+        BTL_INSTALL_CALLBACK(battle->unk6F8, 0x0, btlSetUnitResourceHalvesByMode);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlResolveBoundActionCode);
+        BTL_INSTALL_CALLBACK(battle->unk670, 0x0, btlInitializeEffectVectors);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, func_0021B828);
+        BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, func_0021C0C8);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_0021C818);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_0021CF18);
+        BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetA);
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, func_0021C7F8);
+        BTL_INSTALL_CALLBACK(battle->unk684, 0x0, btlMapBossEntryKindToIndex);
+        BTL_INSTALL_CALLBACK(battle->unk688, 0x0, btlGetBossEntryKind);
+        BTL_INSTALL_CALLBACK(battle->unk710, 0x0, btlRemapBossResponseForActionPhase);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPlayStationedSoundForActiveBossAction);
+        BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, func_0021E778);
+        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, func_0021E8C0);
+        allocation = sdfAllocateBlockBySizeThreshold(0xC);
+        battle->effect = allocation;
+        memset(allocation, 0, 0xC);
+        break;
+    }
+    case 0x301: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 4;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetBossRatioScale);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlAccumulateBossRatioScale);
+        BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, btlGetBossRatioScale);
+        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x4);
+        break;
+    }
+    case 0x30E: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 4;
+        BTL_INSTALL_CALLBACK(battle->selectSoundEffectTarget, 0x0, btlFindUnitByMode);
+        BTL_INSTALL_CALLBACK(battle->unk6E4, 0x0, btlMaskValueWhenSubtaskInactive);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRestoreMarkedUnitMotionOnStateChange);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlToggleActionByteForFlaggedActor);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlGetMarkedUnitActionResponse);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetMarkedUnitActionStatus);
+        BTL_INSTALL_CALLBACK(battle->actionResourceNameHook, 0x0, btlFormatSpecialMotionDisplayCode);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlCenterMarkedFormationAroundLead);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlStartOtherMarkedUnitTasks);
+        BTL_INSTALL_CALLBACK(battle->pad674, 0x4, func_0021F3A0);
+        BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
+        BTL_INSTALL_CALLBACK(battle->pad694, 0x0, func_0021F848);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        allocation = sdfAllocateBlockBySizeThreshold(0x8);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x8);
+        break;
+    }
+    case 0x314: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00220368);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlToggleMarkedTaskActionState);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapMarkedUnitCommand);
+        commandFlags = commandFlags | 0x100000;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->hitResultOverride, 0x0, btlSetBattleActionFlag);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlGetHealthyAllyActionStatus);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlOffsetSpecialEnemyForCommand);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsSupportedActorAction);
+        allocation = sdfAllocateBlockBySizeThreshold(0x3);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x3);
+        break;
+    }
+    case 0x30C: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00220998);
+        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlMarkUnitActionAndStatusForMode);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlTickAction19A);
+        battle->commandRestrictFlags = (commandFlags & ~2) | 0x100000;
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartAction19A);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlSelectMarkedActorAndClearEntryFlags);
+        BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, btlQueueLoneFreeTeamHandle);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueSelectedActorResourceAndSound);
+        BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectedActorAction);
+        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x4);
+        break;
+    }
+    case 0x30F: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 4;
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedDefeatCandidateAction);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlTickLinkedDefeatCandidateAction);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlClearActionPhaseOnNegativeState);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlActivateMarkedActionFromCommand);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_00220DD8);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, func_00220F68);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlAcceptLinkedActorCommand);
+        BTL_INSTALL_CALLBACK(battle->hitChanceScale, 0x0, btlGetActionScaleFactor);
+        BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlQueryLinkedGroupResponse);
+        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x4);
+        break;
+    }
+    case 0x316:
+    case 0x327: {
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlInitializeMarkedActionTimer);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlStartMarkedActionRuntimeUpdate);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickAction6B);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    case 0x317:
+    case 0x326: {
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetDelayedActionTimer);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickDelayedMarkedAction);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    case 0x315: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x18200;
+        battle->commandRestrictFlags = commandFlags | 0x800000;
+        sdfSceneProjectionParameters.camera.farZ = 200000.0f;
+        effBTLFieldColorSetFlags(2);
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetActionScale);
+        BTL_INSTALL_CALLBACK(battle->pad610, 0x0, btlRestoreLinkedActorSceneColor);
+        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlMarkSpecialActionUnit);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, func_002218C8);
+        BTL_INSTALL_CALLBACK(battle->pad634, 0x0, btlAdvanceBrahmaRatioOnAction);
+        BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, btlGetBrahmaActionScale);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPrepareSpecialActionSelection);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, func_00221F40);
+        BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlQueueMarkedSpecialActorSceneGroup);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, func_00222100);
+        BTL_INSTALL_CALLBACK(battle->unk6F0, 0x0, btlPrepareLinkedSpecialActionMotion);
+        BTL_INSTALL_CALLBACK(battle->unk6F4, 0x0, btlApplySpecialActionRenderGroup);
+        BTL_INSTALL_CALLBACK(battle->unk684, 0x0, btlActionResourceTypeToMotionId);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlRefreshSpecialActionUnits);
+        BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlOffsetSpecialActionValue);
+        BTL_INSTALL_CALLBACK(battle->beginBattleEntryTasks, 0x0, btlCreateLinkedActorTransformTasks);
+        BTL_INSTALL_CALLBACK(battle->pad604, 0x0, btlDestroyActionActor);
+        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, func_00221828);
+        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, func_00221858);
+        BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, func_00222450);
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUnitWrapA);
+        BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlApplySingleTargetCameraOffset);
+        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlAimAtLinkedTargetOrGroupCamera);
+        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftTowardLinkedTarget);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectActionTransitionCamera);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlSetSpecialLinkedActionCamera);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00223350);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, func_00223BD8);
+        BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSelectActionCameraByTableFlags);
+        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, func_00223DD8);
+        BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlGetMarkedActionMotionCode);
+        BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlSpawnBrahmaActionEffectTasks);
+        allocation = sdfAllocateBlockBySizeThreshold(0x10);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x10);
+        break;
+    }
+    case 0x31D: {
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00223FB0);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, func_00223FE0);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    case 0x31A: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x100000;
+        BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetLinkedDefeatCameraPresetB);
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUnitWrapB);
+        BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlRaiseSingleTargetCameraPoints);
+        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlAimLinkedTargetOrSetCameraTransform);
+        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftLinkedTargetAndUpdateMotion);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectLinkedActionCameraPose);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, func_00224500);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_002247D0);
+        BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSelectRaisedCameraFromActionFlags);
+        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, func_00224DF0);
+        BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, func_00224010);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    case 0x31B: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x100000;
+        commandFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetSpecialDefeatCameraPreset);
+        battle->commandRestrictFlags = commandFlags;
+        BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, func_00225778);
+        BTL_INSTALL_CALLBACK(battle->unk650, 0x0, btlTryTransitionSingleTargetAction);
+        BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlHandleTargetDirectionOrAction);
+        BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlLiftUnitForLinkedTarget);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_002259A0);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, func_00225B48);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00225BF8);
+        BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlDispatchActionByResourceFlags);
+        BTL_INSTALL_CALLBACK(battle->unk658, 0x0, func_002261A8);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlFlagBattleForSpecialAction);
+        BTL_INSTALL_CALLBACK(battle->selectSingleTargetOverride, 0x0, btlSelectLowestStatTarget);
+        BTL_INSTALL_CALLBACK(battle->unk684, 0x0, btlCheckActionUnitResourceEligibility);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterActionByUnitFlags);
+        BTL_INSTALL_CALLBACK(battle->commandAmountScaleHook, 0x0, func_00226308);
+        BTL_INSTALL_CALLBACK(battle->actionPointsOverride, 0x0, func_00226540);
+        allocation = sdfAllocateBlockBySizeThreshold(0x1);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x1);
+        break;
+    }
+    case 0x310: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x100001;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->selectScriptArg, 0x0, func_00226670);
+        break;
+    }
+    case 0x311: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x100001;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterRestrictedCommand);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsCommandCodeF);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, btlSelectDisabledCommand);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlTrackSpecialEnemyCommandRestrictionByTurn);
+        BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, btlClearUnitRestrictionFlag);
+        BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, func_00226820);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetUnitPlacement);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00226850);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, func_00226868);
+        allocation = sdfAllocateBlockBySizeThreshold(0x4);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x4);
+        break;
+    }
+    case 0x312: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x100001;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlResetEffectState);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002272A0);
+        BTL_INSTALL_CALLBACK(battle->unk5DC, 0x0, btlIsEffectPhaseInRange);
+        BTL_INSTALL_CALLBACK(battle->unk5D8, 0x0, func_00227528);
+        BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, func_00226C98);
+        BTL_INSTALL_CALLBACK(battle->actionHitOverride, 0x0, btlCheckActiveEffectForSpecialTarget);
+        BTL_INSTALL_CALLBACK(battle->postPlacementCallback, 0x0, btlUpdateLinkedEffectUnitTransforms);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00227288);
+        BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlRemapEffectActiveCombatantAction);
+        BTL_INSTALL_CALLBACK(battle->findModelActor, 0x0, btlFindFlaggedSpecialSpeciesUnit);
+        BTL_INSTALL_CALLBACK(battle->selectEntryModelVariant, 0x0, btlGetCanonicalCombatantKind);
+        BTL_INSTALL_CALLBACK(battle->pad610, 0x0, btlUpdateLinkedActorGroundHeight);
+        BTL_INSTALL_CALLBACK(battle->completionHook, 0x0, func_002279F0);
+        BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlGetEffectTaskActorMatchCode);
+        BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlEffectTaskStartFinale);
+        BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, func_00227DA8);
+        BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, btlGetSoleTargetKind);
+        BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
+        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlSetLinkFlagOff);
+        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
+        BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueLinkedActorModelStateTasks);
+        BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00228B08);
+        BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00228F20);
+        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, func_00228F48);
+        allocation = sdfAllocateBlockBySizeThreshold(0x18);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x18);
+        break;
+    }
+    case 0x313: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        commandFlags = commandFlags | 0x100001;
+        battle->commandRestrictFlags = commandFlags | 0x200000;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, btlArmEventResourceTrigger);
+        BTL_INSTALL_CALLBACK(battle->sceneCallback, 0x0, func_00229278);
+        BTL_INSTALL_CALLBACK(battle->selectScriptState, 0x0, btlConsumeReadyEventScriptResource);
+        allocation = sdfAllocateBlockBySizeThreshold(0x2);
+        battle->effect = allocation;
+        memset(allocation, 0, 0x2);
+        break;
+    }
+    case 0x30D: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 4;
+        battle->cameraCommand.cameraDistanceOffset = 100.0f;
+        BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00226598);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    case 0x345: {
+        u32 commandFlags;
+        commandFlags = battle->commandRestrictFlags;
+        battle->commandRestrictFlags = commandFlags | 0x4000;
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_002292D8);
+        BTL_INSTALL_CALLBACK(battle->actionStateSelectionHook, 0x0, btlClearEffectNodeRuntimeFlagForActiveUnits);
+        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlMarkBattleUnitEntryForActiveKind);
+        break;
+    }
+    case 0x336: {
+        if (mdlFlagTest(0x841) == 0) {
+            battle->commandRestrictFlags |= 0x40000;
+        }
+        battle->commandRestrictFlags |= 0x82800;
+        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlSetAlternateKindForEnabledSpecialUnit);
+        BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_00229470);
+        break;
+    }
+    case 0x32D: {
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00229478);
+        break;
+    }
+    case 0x321: {
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_00229490);
+        break;
+    }
+    case 0x344: {
+        BTL_INSTALL_CALLBACK(battle->pad5C4, 0x0, func_002294B8);
+        break;
+    }
+    case 0x318:
+    case 0x319:
+    case 0x31C:
+    case 0x31F:
+    case 0x328: {
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
+        BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSceneUnitModeListed);
+        break;
+    }
+    default:
+        return;
+    }
+
+    memcpy(&setup, battle->pad5C4, sizeof(setup));
+    if (setup != NULL) {
+        setup();
+    }
+    battle->battleFlags |= 0x80000;
+    btlBossDebugPrintf(D_0041B4F8);
+}
+
+#undef BTL_INSTALL_CALLBACK
 
 void btlRunCleanupAndLog(void) {
     u8 *battle = (u8 *)btlGetRuntime();

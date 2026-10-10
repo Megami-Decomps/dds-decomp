@@ -2823,7 +2823,60 @@ s32 func_00208668(s32 unit) {
     return (((s32)((BtlUnit *)unit)->status.flags & 0x200) < 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00208678);
+extern s32 datRosterDetails;
+
+extern char D_003A5D78[];
+
+/* Return the Cerber hit allocation, with zero falling back to the normal range. */
+s32 func_00208678(BtlUnit *unit, s32 command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 result;
+    s32 eligible;
+    BtlUnit *entry;
+    s32 activeCount;
+
+    if ((unit->status.flags & 0x200) == 0) {
+        return 0;
+    }
+    result = 0;
+    eligible = 0;
+    if (datCommandSelectors[command].kind == 5) {
+        u32 unitId = unit->partyRecord.unitId;
+        const u8 *detail = (const u8 *)datRosterDetails;
+        if (detail[unitId * 0x14 + 0x0B] == 1) {
+            eligible = 1;
+        }
+    } else {
+        eligible = datCommandRecords[command].unk_0A[1] == 1;
+    }
+    if (eligible) {
+        s32 hitBudget = datCommandRecords[command].rangeMax;
+
+        activeCount = 0;
+        for (entry = battle->units; entry != NULL; entry = entry->next) {
+            u32 flags = entry->status.flags;
+            if ((flags & 1) != 0) {
+                if ((flags & 0x400) != 0) {
+                    if ((flags & 0xE0) == 0) {
+                        activeCount++;
+                    }
+                }
+            }
+        }
+        if (activeCount <= 0) {
+            return 0;
+        }
+        result = hitBudget / activeCount;
+        if (result > activeCount + 1) {
+            result = activeCount + 1;
+        }
+        if (result <= 0) {
+            result = 1;
+        }
+        btlBossDebugPrintf(D_003A5D78, result);
+    }
+    return (u8)result;
+}
 
 s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
     u32 flags = ((BtlUnit *)unit)->status.flags;
@@ -3671,6 +3724,8 @@ s32 btlRemapBossAction(BtlUnit *unit, s32 action, u8 option) {
     }
     return action;
 }
+
+INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D78);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D98);
 

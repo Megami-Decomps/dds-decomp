@@ -208,4 +208,33 @@ void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
     effDrawTextureSlot(x, y, depth, (s32)colors, (u32)flags, set, slotIndex, work, layer);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BF5D8);
+void func_002BF5D8(s32 x, s32 y, s32 z, s32 length, u32 weight, u32 flags,
+                  EffectSlotSet *set, s32 slot, s32 layer) {
+    u32 colors[4];
+    void *draw;
+    s32 tileWidth;
+    s32 i;
+
+    draw = effGetSlotWorkOrOverride(set, slot);
+    for (i = 0; i < 4; i++) {
+        u32 color = ((EffectSlotGeometry *)((u8 *)draw + 4))->cornerColors[i];
+        colors[i] = uiBlendColors(color, color & ~0xFF, weight);
+    }
+    {
+        /* Start with the complete tile; draw callbacks may replace the work array. */
+        set->workEntries[slot].parameters[2] = 0;
+        tileWidth = set->workEntries[slot].sourceWidth * 16;
+        set->workEntries[slot].geometry.bounds[2] = tileWidth;
+    }
+    for (i = 0; i < length / tileWidth; i++) {
+        effDrawTextureSlot(x, y, z, (s32)colors, flags, set, slot, draw, layer);
+        x += tileWidth;
+    }
+    {
+        /* Publish the crop offset, then the visible width, before the final draw. */
+        length = tileWidth - length % tileWidth;
+        set->workEntries[slot].parameters[2] = -(length >> 4);
+        set->workEntries[slot].geometry.bounds[2] = tileWidth - length;
+    }
+    effDrawTextureSlot(x, y, z, (s32)colors, flags, set, slot, draw, layer);
+}
