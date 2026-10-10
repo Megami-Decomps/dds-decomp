@@ -1,3 +1,4 @@
+#include "btl_command.h"
 #include "kwln_sprite.h"
 #include "common.h"
 #include "dds3obj.h"
@@ -2414,20 +2415,6 @@ void func_001FB1F0(void *context) {
     (void)context;
 }
 
-/* Packed command entries have a 0x18-byte stride. */
-typedef struct BtlCommandEntry {
-    u8 pad00[4];
-    u8 opcode; /* 0x04 */
-    u8 pad05[3];
-    s32 command; /* 0x08 */
-    u8 pad0C[0xC];
-} BtlCommandEntry;
-
-typedef struct BtlCommandEntryList {
-    u8 pad00[0x14];
-    BtlCommandEntry *entries; /* 0x14 */
-    s32 count;   /* 0x18 */
-} BtlCommandEntryList;
 
 /* Return the matching entry, or the one-past-end address when none matches. */
 u8 *btlFindEntryByCommand(BtlCommandEntryList *list, s32 command) {

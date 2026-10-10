@@ -1,3 +1,4 @@
+#include "btl_command.h"
 #include "btl_motion_transform.h"
 #include "sdf_asset_state.h"
 #include "btl_resource_browser.h"
@@ -9724,9 +9725,13 @@ s32 effPollAttachedFile(void) {
 
 
 typedef struct EffQueuedFileObject {
-    u8 pad00[0x34];
+    u8 pad00[4];
+    s32 originX; /* 0x04: copied to the preset selector at 002B74AC. */
+    s32 originY; /* 0x08 */
+    u8 pad0C[0x28];
     u8 *linkedState;
 } EffQueuedFileObject;
+typedef char EffQueuedFileObjectSizeCheck[(sizeof(EffQueuedFileObject) == 0x38) ? 1 : -1];
 
 /* Runtime option (+0x0C) selects the descriptor transfer mode (+0x08). */
 u8 *effFindAssetData(FileJob *entry) {
@@ -10145,7 +10150,8 @@ extern FileJob *fileAppendJob(FileQueue *, u32);
 extern s32 fileQueueCountLinkedJobs(FileQueue *);
 extern FileJob *effCurrentFileQueueEntry;
 
-u32 effAppendPositionedCameraFileJob(EffCameraCreateRequest *request) {
+/* Preset requests are read-only; queue linkage updates their referenced object. */
+u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     FileJob *entry;
     u32 count;
 
@@ -10242,17 +10248,15 @@ u32 effSelectLinkedFileState(void) {
 }
 
 typedef struct EffectFileSelection {
-    u8 reserved[0xC];
-    s32 selected;
-    u32 reserved_10;
-    const void *table;
-    s32 count;
+    BtlCommandEntryList menu;
     u8 tail[0x1C];
 } EffectFileSelection;
+typedef char EffectFileSelectionSizeCheck[(sizeof(EffectFileSelection) == 0x38) ? 1 : -1];
 
 extern EffectFileSelection effBattleCameraSnapshotSelection;
 
-extern u8 D_003FF390[], D_003FF3D8[], D_0045C270[], D_00439074;
+extern BtlCommandEntry D_003FF390[], D_003FF3D8[];
+extern u8 D_0045C270[], D_00439074;
 
 typedef struct EffectBlock90 {
     u32 word[36];
@@ -10268,16 +10272,16 @@ u32 effLoadBattleCameraSnapshot(u32 arg0) {
     *(EffectBlock90 *)D_0045C110 = *(EffectBlock90 *)record;
     *(EffectAlignedBlock128 *)D_0045C110 = *(EffectAlignedBlock128 *)D_0045C270;
     if (((EffectBlock90 *)D_0045C110)->word[26] & 2) {
-        effBattleCameraSnapshotSelection.table = D_003FF390;
-        effBattleCameraSnapshotSelection.count = 3;
-        if (effBattleCameraSnapshotSelection.selected > effBattleCameraSnapshotSelection.count) {
-            effBattleCameraSnapshotSelection.selected = 0;
+        effBattleCameraSnapshotSelection.menu.entries = D_003FF390;
+        effBattleCameraSnapshotSelection.menu.count = 3;
+        if (effBattleCameraSnapshotSelection.menu.cursor > effBattleCameraSnapshotSelection.menu.count) {
+            effBattleCameraSnapshotSelection.menu.cursor = 0;
         }
     } else {
-        effBattleCameraSnapshotSelection.table = D_003FF3D8;
-        effBattleCameraSnapshotSelection.count = 9;
-        if (effBattleCameraSnapshotSelection.selected == 0) {
-            effBattleCameraSnapshotSelection.selected = 1;
+        effBattleCameraSnapshotSelection.menu.entries = D_003FF3D8;
+        effBattleCameraSnapshotSelection.menu.count = 9;
+        if (effBattleCameraSnapshotSelection.menu.cursor == 0) {
+            effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
     return arg0;
@@ -10290,16 +10294,16 @@ u32 effStoreBattleCameraSnapshot(u32 arg0) {
     *(EffectAlignedBlock128 *)D_0045C270 = *(EffectAlignedBlock128 *)D_0045C110;
     D_00439074 = 1;
     if (((EffectBlock90 *)D_0045C110)->word[26] & 2) {
-        effBattleCameraSnapshotSelection.table = D_003FF390;
-        effBattleCameraSnapshotSelection.count = 3;
-        if (effBattleCameraSnapshotSelection.selected > effBattleCameraSnapshotSelection.count) {
-            effBattleCameraSnapshotSelection.selected = 0;
+        effBattleCameraSnapshotSelection.menu.entries = D_003FF390;
+        effBattleCameraSnapshotSelection.menu.count = 3;
+        if (effBattleCameraSnapshotSelection.menu.cursor > effBattleCameraSnapshotSelection.menu.count) {
+            effBattleCameraSnapshotSelection.menu.cursor = 0;
         }
     } else {
-        effBattleCameraSnapshotSelection.table = D_003FF3D8;
-        effBattleCameraSnapshotSelection.count = 9;
-        if (effBattleCameraSnapshotSelection.selected == 0) {
-            effBattleCameraSnapshotSelection.selected = 1;
+        effBattleCameraSnapshotSelection.menu.entries = D_003FF3D8;
+        effBattleCameraSnapshotSelection.menu.count = 9;
+        if (effBattleCameraSnapshotSelection.menu.cursor == 0) {
+            effBattleCameraSnapshotSelection.menu.cursor = 1;
         }
     }
     return arg0;
