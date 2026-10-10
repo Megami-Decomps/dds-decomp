@@ -144,9 +144,19 @@ typedef struct EffBillFrameHeader {
 
 /* DDS2 003E9950 / DDS1 0037E8A0 resource kinds 1..8 copy the following
  * record lengths. Unrecovered bytes remain serialized data. */
+/* DDS2 billAdvanceFrameInstances (002E0900) consumes the kind-1 geometry tail. */
 typedef struct EffBillFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x28];
+    u32 innerColor;
+    u32 outerColor;
+    f32 innerWidth;
+    f32 outerWidth;
+    f32 widthJitter;
+    f32 radius;
+    f32 radiusJitter;
+    f32 spin;
+    f32 spinJitter;
+    f32 spinAccel;
 } EffBillFrameConfig; /* kind 1, 0x80 */
 
 typedef struct EffBillCellConfig {
