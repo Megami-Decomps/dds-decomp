@@ -2934,7 +2934,7 @@ extern void func_001B9C70(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001BA1E8(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001BB1E8(void *, s32, s32, u32);
 extern void func_001BAB90(BtlAnalysisPanelWork *, s32, s32, s32, s32);
-extern u16 *func_001C8768(BtlUnit *, s16 *);
+extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
 extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
@@ -3078,7 +3078,7 @@ s32 func_001B9158(KwlnTask *task) {
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
                         func_001B8E68(3, work->fade);
                     } else {
-                        skills = func_001C8768(work->unit, &skillCount);
+                        skills = btlGatherEnemyCommands(work->unit, &skillCount);
                         for (item = 0; item < skillCount; item++) {
                             btlDrawThreePanelSpriteStrips((s32)work, work->x + xOffset,
                                                         work->y + yOffset, work->fade);
@@ -6402,7 +6402,7 @@ u16 *func_001C8518(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u1
     return out;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C8768);
+INCLUDE_ASM(const s32, "game/code_001B2AF8", btlGatherEnemyCommands);
 
 /* Pack available roster IDs and their values into consecutive byte pairs. */
 void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
