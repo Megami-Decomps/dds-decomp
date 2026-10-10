@@ -734,8 +734,8 @@ void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSe
     panel->corners[4].y = y + 0xF0;
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
-    panel->resourceHandle = mnuCreatePanelIconState(5, resource);
+void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 material) {
+    panel->resourceHandle = mnuCreatePanelIconState(5, resource, material);
 }
 
 void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,

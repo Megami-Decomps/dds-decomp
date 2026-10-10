@@ -156,8 +156,6 @@ void func_00271B48(void) {
 
 extern s32 mdlFlagTest(s32);
 
-extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
-
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 
 /* Filter staff entries, size the window and preserve each entry's original ordinal. */
@@ -207,7 +205,7 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
         style = 0xE;
         break;
     }
-    mnuInitializeWindowEntryPlacement(0, window, (s32)work->staffSlots.baseResources[5], 0xA, style);
+    mnuInitializeWindowEntryPlacement(0, window, work->staffSlots.baseResources[5], 0xA, style);
 
     index = 0;
     if (count > 0) {

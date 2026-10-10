@@ -26,6 +26,10 @@ void mnuSetPanelFourthGridSlot(struct MenuPanelState *panel, u32 valueA,
 void mnuInitializePanelResource(struct MenuPanelState *panel,
                                 struct EffectSlotSet *resource,
                                 struct EffMappedResource *target);
+#else
+/* DDS2 forwards both resource words to its panel constructor. */
+void mnuInitializePanelResource(struct MenuPanelState *panel,
+                                s32 resource, s32 material);
 #endif
 
 #endif
