@@ -277,6 +277,16 @@ resolver and fresh post-resolver size-read boundaries. Onyx/Obsidian supplied
 the retained reconstruction; Peregrine Forge closed the compiler gap, with
 independent Luna review.
 
+The related queue-duplication coordinator `func_002B6C00` had the same two
+argument/option-load differences after its own complete native audit. Its
+allocation/retain path also captures the queued payload before publishing the
+output pointer. Applying the same real publication and final-input boundary
+closes its original 980-byte body. The function retains its own header copy,
+sector-leader linking, resource-name copy, linked-job count and cleanup paths;
+this is not a counterpart port. Luna Field supplied this closure, with Luna
+Event's independent provider/epoch review and Peregrine Forge integration.
+Preserve Ember, Quartz, Azure, Tidal and Sable's retained source lineage.
+
 ### Grid placement: compute each selected coordinate pair in its own arm
 
 DDS2 `game/code_00285CE8::func_00285E98` merged its selected Y-direction byte

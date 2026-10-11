@@ -8743,7 +8743,85 @@ u32 effFinalizeQueuedFile(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6C00);
+extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
+extern FileJob *fileQueueFindById(FileQueue *, u32);
+
+u32 func_002B6C00(void) {
+    FileJob *source;
+    FileJob *entry;
+    FileJob *leader;
+    EffFileJobRequest *resource;
+    void *fileData;
+    s32 linkedCount;
+
+    source = fileQueueGetAt(effFileQueue, func_002B5990());
+    entry = fileDuplicateAndAppendJob(effFileQueue,
+                                      (FileJobPayload *)source->id);
+    effCurrentFileQueueEntry = entry;
+    fileJobCopyHeader(entry, source);
+
+    if ((source->flags & 2) != 0) {
+        leader = fileQueueFindById(effFileQueue, source->sector);
+    } else {
+        leader = source;
+    }
+    fileQueueLinkJobToSectorLeader(effFileQueue, entry, leader);
+
+    memcpy(D_003DF840, entry, 0x90);
+    memcpy(D_003DF9A0, entry, 0x80);
+
+    effQueuedFileHandle = (FileJobPayload *)entry->id;
+    resource = (EffFileJobRequest *)effFindAssetData(entry);
+    strcpy(entry->name, resource->name);
+
+    if (resource->fileKind != 6) {
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->output, fileData, resource->size);
+    } else {
+        if (resource->allocation != 0) {
+            sdfReleaseResourceAllocation(resource->allocation);
+        }
+        resource->allocation = sdfAllocGeneralBlock(
+            effQueuedFileHandle->primary.size);
+        {
+            void *buffer = sdfResourceRetainAddress(resource->allocation);
+            FileJobPayload *payload = effQueuedFileHandle;
+            s32 option;
+            u32 primarySize;
+            /* Publish the retained pointer through its object representation. */
+            memcpy(&resource->output, &buffer, sizeof(resource->output));
+            primarySize = payload->primary.size;
+            option = payload->option;
+            resource->transferMode = option;
+            resource->size = primarySize;
+            fileData = fileResolvePrimaryBuffer(payload);
+        }
+        memcpy(resource->output, fileData,
+               effQueuedFileHandle->primary.size);
+        memcpy(D_003DE148, fileData, 0x3C);
+    }
+
+    D_003BD064 = effCreateBattleCameraJob((u8 *)resource);
+    effQueuedFileObject = effFindAssetObject(entry);
+    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
+
+    linkedCount = fileQueueCountLinkedJobs(effFileQueue);
+    if ((u32)linkedCount >= 22) {
+        D_0038F2F0[3] = 20;
+        D_003BD058 = linkedCount - 21;
+    } else {
+        D_003BD058 = 0;
+        D_0038F2F0[3] = linkedCount - 1;
+    }
+
+    effResetFileResourceManager();
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    return 0x800000;
+}
+
 
 u32 effFlagFileQueueActive(void) {
     D_003BD955 = 1;
