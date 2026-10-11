@@ -791,11 +791,11 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
     return obj;
 }
 
-void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
+void effSampleAnimSet(EffExpandedList *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
     s32 segment = -1;
-    EffAnimSegment *seg;
+    EffExpandedEntry *seg;
     u32 acc;
     u32 i;
 
@@ -803,17 +803,17 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
         segment = 0;
     } else {
         if (set->flags & EFF_ANIM_SET_LOOP) {
-            local = frame % set->length;
-        } else if (frame >= set->length) {
+            local = frame % set->totalEntryCount;
+        } else if (frame >= set->totalEntryCount) {
             segment = count - 1;
         } else {
             local = frame;
         }
         if (segment == -1) {
-            seg = set->segments;
+            seg = set->entries;
             acc = 0;
             for (i = 0; i < count; i++) {
-                acc += seg->length;
+                acc += seg->additionalCount;
                 if (acc >= local) {
                     segment = i;
                     break;
@@ -836,7 +836,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     out->angle = 0.0f;
 }
 
-SdfTex *effAssignSampledSegmentReference(EffAnimSet *set, void *target, const EffAnimSample *sample) {
+SdfTex *effAssignSampledSegmentReference(EffExpandedList *set, void *target, const EffAnimSample *sample) {
     return func_0029C048(target, set->handles[sample->segment]);
 }
 
