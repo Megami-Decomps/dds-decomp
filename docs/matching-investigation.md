@@ -212,6 +212,21 @@ manufacturing one.
 
 ## Keep experiments useful and bounded
 
+For VU/MMI operands, check which scalar transfers belong to GCC and which
+belong inside the SDK block. DDS2 `sdfVuMultiplyNodeColors` initially differed
+by three prologue words: a candidate with an explicit `mfc1` inside the block
+gave the work-pointer copy scheduler priority 5 and the scale constant 4.
+The SDK-style `"r"` input for the binary32 scale, consumed by `qmtc2`, lets
+GCC generate the transfer. After reload its visible dependency raises the
+constant's priority to 6, reproducing the native constant-before-pointer order.
+The natural C loops and the shared `EE_MMI_RGBA_MULTIPLY_VECTOR` macro then
+match all 168 bytes; the full unit and both retail builds are exact.
+
+This applies when the assembly consumes binary32 bits as a GPR operand.
+Keep `"f"` and an explicit transfer for a macro that actually owns that
+instruction. Do not insert a dependency or move scalar setup into assembly
+solely to force a schedule.
+
 Preserve a compact receipt: public base, complete preferred source/patch,
 source hashes, exact commands, native/emitted sizes, first changed pass,
 residual, previous contributor credit, successful gates and negative controls.
