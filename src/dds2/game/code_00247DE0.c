@@ -184,7 +184,52 @@ void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s3
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00247DE0", func_00247EE0);
+extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
+extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
+
+void func_00247EE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
+                   s32 interval, EvtRuntime *viewer) {
+    u8 slot;
+    s32 active;
+    s32 start;
+    s32 current;
+    s32 duration;
+    s32 end;
+    s32 alpha;
+
+    switch (group->type) {
+    case 3:
+    case 20:
+    case 21:
+    case 26:
+        active = key->p08.sb[0] >= 0;
+        slot = key->p08.b[0];
+        if (active) {
+            duration = key->p10.sb[0] != 0 ? 0 : key->duration;
+            start = key->frame;
+            current = viewer->curFrame;
+            if (current < start) {
+                evtEventViewerFreeSlot((s8)slot, viewer);
+                key->p08.sb[0] = -1;
+                break;
+            }
+            end = start + interval + duration;
+            if (current >= end) {
+                evtEventViewerFreeSlot((s8)slot, viewer);
+                key->p08.sb[0] = -1;
+                break;
+            }
+            alpha = (s32)((128.0f / (f32)duration) * (f32)(end - current));
+            return effSetNodeParameterValue(
+                ((EvtViewerObjectData *)viewer->objects[(s8)slot]->data)->parameterNode,
+                ((u32)alpha << 24) | 0x00808080);
+        }
+        break;
+    case 18:
+        evtEventViewerFreeBuffer(key);
+        break;
+    }
+}
 INCLUDE_ASM(const s32, "game/code_00247DE0", func_00248000);
 
 

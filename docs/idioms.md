@@ -7649,3 +7649,43 @@ installation loop becomes a countdown. The owned byte-row extent and actual
 index lifetime recover both loops without casts, declaration-order changes,
 alternate table views or compiler flags.
 
+### Separate timeline expiry checks can preserve a shared cleanup block
+
+DDS1 `func_0022D420` (264 bytes) releases an effect slot when the current
+frame precedes its key or reaches its end. Express those as two early cleanup
+paths, each calling `evtEventViewerFreeSlot`, clearing the signed slot byte,
+and breaking from the switch. The remaining active path forwards the void
+`effSetNodeParameterValue` call with `return`; the buffer-release case ends
+with `break` and retains its shared epilogue.
+
+A combined cleanup path has the same behavior, but sibling-call preparation
+moves the active successor ahead of it through
+`merge_blocks_move_successor_nojumps`. Separate expiry paths avoid that move;
+the final jump pass merges their identical cleanup calls into the native
+shared block. Read-only compiler observations reproduce the complete ordinary
+assembly and all 22 RTL dumps for both forms. Neither a compiler flag nor an
+artificial use is required. Whole-owner validation is 60 match, 0 differ,
+including all 24 jump-table targets.
+
+Preserve Deep Quasar's earlier quantity-reuse and cleanup-call findings, and
+Silver Helix, Tidal and Sable's viewer/dependency reconstruction and controls.
+Peregrine Forge closes the source, with independent Luna Field native/API
+review and Luna Scout object/table validation.
+
+
+The DDS2 counterpart `func_00247EE0` (288 bytes) additionally snapshots the
+signed slot-validity predicate before independently reading the unsigned slot
+byte, then branches on that predicate. Both signed consumers explicitly
+convert the snapshot. The native unsigned load executes in the validity
+branch's delay slot even on the invalid-slot exit; putting the snapshot
+inside the active arm swaps it with duration-zero initialization across two
+delay slots. Reading the unsigned snapshot before computing validity instead
+lets GCC fuse the signed and unsigned observations and remains nonexact.
+Keep the real read phases rather than adding a dummy use or qualifier.
+
+DDS2 also sets effective duration to zero when the signed key byte at `+0x10`
+is nonzero. Preserve this behavior, including the unguarded floating-point
+division when the interval keeps a zero-duration key active. Whole-owner
+validation is 64 match, 0 differ, including its 24-entry switch table. KiB
+adapted the donor and checked the additional DDS2 read phases; preserve
+Brass's earlier DDS2 investigation and the donor lineage above.
