@@ -346,9 +346,34 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00252CE8);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00252E38);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00252F88);
-
 extern u8 D_0036B410[17][15];
+
+extern s32 func_00252CE8(SdfGrid *, s32, s32, u32);
+extern SdfGridCell *func_002CC0D0(SdfGrid *);
+
+/* Select the connected left neighbor, or fall back to the previous filled cell. */
+s32 func_00252F88(SdfGrid *grid) {
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
+    MnuMantraNodeState *coordinates = (MnuMantraNodeState *)(u32)grid->userData;
+    s32 x = coordinates[entry->sceneId].x;
+    s32 y = coordinates[entry->sceneId].y;
+
+    if (x == 0) {
+        if (func_002CC0D0(grid) != NULL) {
+            return 1;
+        }
+    } else if ((D_0036B410[y][x - 1] & 0x1C) != 0) {
+        if (func_00252CE8(grid, x - 1, y, 1) != 0) {
+            return 1;
+        }
+    } else {
+        if (func_002CC0D0(grid) != NULL) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 extern s32 func_00252E38(SdfGrid *, s32, s32, u32);
 extern SdfGridCell *func_002CC238(SdfGrid *);
 
