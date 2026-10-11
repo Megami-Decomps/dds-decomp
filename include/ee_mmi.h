@@ -94,6 +94,33 @@
     ".set reorder" \
     : : "r" (rgba) : "$2")
 
+/* Multiply two RGBA8888 words as four float lanes, scaled by binary32 unit.
+ * DDS2 sdfVuMultiplyNodeColors uses the SDK unpack style twice ($2/vf2 and
+ * $3/vf3), then vmul/vmulx and returns vf2 through a 128-bit C operand.
+ * Tried: four C byte masks, float conversions and multiplications; gcc emits
+ * scalar andi/srl/cvt.s.w/mul.s, not pextlb/pextlh or the VU operations.
+ * unit is f32 or its explicit binary32 bits. The r constraint lets gcc emit
+ * any required mfc1; it is not an integer-to-float numeric conversion.
+ * Inputs are consumed before out is written. vf2/vf3/vf4 are scratch under
+ * the same implicit VU-register convention as EE_MMI_RGBA_TO_VF.
+ */
+#define EE_MMI_RGBA_MULTIPLY_VECTOR(out, a, b, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlb $3, $0, %2\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "pextlh $3, $0, $3\n\t" \
+    "qmtc2.ni $2, vf2\n\t" \
+    "qmtc2.ni $3, vf3\n\t" \
+    "qmtc2.ni %3, vf4\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "vmul.xyzw vf2, vf2, vf3\n\t" \
+    "vmulx.xyzw vf2, vf2, vf4x\n\t" \
+    "qmfc2.ni %0, vf2\n\t" \
+    ".set reorder" \
+    : "=r" (out) : "r" (a), "r" (b), "r" (unit) : "$2", "$3")
+
 /*
  * vf10 (floats, 0..1) -> RGBA8888 word: scale by 128.0 through vf2x, then
  *     vftoi0 vf10,vf10; qmfc2.ni out,vf10; ppach out,$0,out; ppacb out,$0,out

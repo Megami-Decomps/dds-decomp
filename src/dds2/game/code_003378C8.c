@@ -33,8 +33,9 @@ extern u32 D_00439188;
 
 typedef struct VuBlendNode {
     f32 position[4];
-    u8 pad10[0x20];
-    u8 result[0x10];
+    u8 pad10[0x10];
+    f32 color[4];       /* 0x20: unpacked color */
+    f32 transformed[4]; /* 0x30: transformed position */
     struct VuBlendNode *next;
     void *sourceA;
     void *sourceB;
@@ -103,7 +104,31 @@ extern void sdfVuEmitSelectedNodePacket(s32 workAddress);
 
 void sdfVuBlendNodeXY(VuBlendNode *node);
 
-INCLUDE_ASM(const s32, "game/code_003378C8", func_003378C8);
+void sdfVuMultiplyNodeColors(VuWork *work, u32 color) {
+    f32 colorScale = 1.0f / 128.0f;
+    VuBlendNode *node;
+    s32 remaining;
+    u128 scaledColor;
+
+    EE_MMI_RGBA_MULTIPLY_VECTOR(scaledColor, work->packedColor, color, colorScale);
+
+    remaining = work->param1;
+    node = (VuBlendNode *)work->ringSrc;
+    if (remaining != 0) {
+        do {
+            remaining--;
+            *(u128 *)node->color = scaledColor;
+            node++;
+        } while (remaining != 0);
+    }
+
+    node = work->blend;
+    while (node != NULL) {
+        VuBlendNode *source = (VuBlendNode *)node->sourceA;
+        PCP_COPY_VECTOR_F32(node->color, source->color);
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003378C8", func_00337970);
 
@@ -342,7 +367,7 @@ void func_00339188(u32 workAddress) {
             }
             break;
         case 3:
-            func_003378C8(work, paramC);
+            sdfVuMultiplyNodeColors(work, paramC);
             break;
     }
     sdfBuildChunkedVuNodeTransfer(work, asset->secondaryTextureState.sampling,
