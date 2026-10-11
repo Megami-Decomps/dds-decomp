@@ -8633,7 +8633,62 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     return 0x800000;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B6778);
+extern void effResetFileResourceManager(void);
+
+u32 func_002B6778(void) {
+    FileJob *entry = fileQueueGetAt(effFileQueue, func_002B5990());
+    EffFileJobRequest *request;
+    u8 *fileData;
+    u32 job;
+
+    effCurrentFileQueueEntry = entry;
+
+    /* These independent snapshots cover the queue header and camera transform. */
+    memcpy(D_003DF840, entry, 0x90);
+    memcpy(D_003DF9A0, entry, 0x80);
+
+    effQueuedFileHandle = (FileJobPayload *)entry->id;
+    request = (EffFileJobRequest *)effFindAssetData(entry);
+    if (request->fileKind != 6) {
+        fileData = (u8 *)fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(request->output, fileData, request->size);
+    } else {
+        FileJobPayload *payload;
+        u32 transferMode;
+        u32 payloadSize;
+
+        if (request->allocation != NULL) {
+            sdfReleaseResourceAllocation(request->allocation);
+        }
+        request->allocation = sdfAllocGeneralBlock(
+            effQueuedFileHandle->primary.size);
+        {
+            void *output = sdfResourceRetainAddress(request->allocation);
+            payload = effQueuedFileHandle;
+            /* Publish the retained pointer through its object representation. */
+            memcpy(&request->output, &output, sizeof(request->output));
+        }
+        payloadSize = payload->primary.size;
+        transferMode = payload->option;
+        request->transferMode = transferMode;
+        request->size = payloadSize;
+        fileData = (u8 *)fileResolvePrimaryBuffer(payload);
+        memcpy(request->output, fileData,
+               effQueuedFileHandle->primary.size);
+        memcpy(D_003DE148, fileData, 0x3C);
+    }
+
+    job = effCreateBattleCameraJob((u8 *)request);
+    D_003BD064 = job;
+    effQueuedFileObject = effFindAssetObject(entry);
+    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_0038F2F0;
+    effResetFileResourceManager();
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    return 0x800000;
+}
 
 
 
