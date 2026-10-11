@@ -208,7 +208,56 @@ void mnuReleaseStaffExtraWindow(StaffDisplayContext *context) {
     mnuDestroyWindowContainer(context->resources->windows[2]);
 }
 
-INCLUDE_ASM(const s32, "game/code_00272D50", func_00273220);
+/* Refresh the sorted bullet-item list after equipment changes. */
+s32 func_00273220(s32 itemId, s32 previousItemId, void *owner) {
+    s32 previousCursorId = -1;
+    s32 needsInsertion = 0;
+    s32 insertBefore = 0;
+    StaffWindowResources *resources = ((StaffDisplayContext *)owner)->resources;
+    MenuWindowContainer *window;
+    struct MenuListNode *node;
+    u8 quantity;
+
+    if (itemId == 0 && previousItemId == 0) {
+        return 1;
+    }
+    if (datGameState->inventory.counts[previousItemId] == 0) {
+        window = resources->windows[2];
+        previousCursorId = window->list->cursor->index;
+        if (window->list->cursor == window->list->last) {
+            previousCursorId = -2;
+        }
+        mnuRemoveWindowListCursorNode(resources->windows[2]);
+        window = resources->windows[2];
+    } else {
+        window = resources->windows[2];
+        node = window->list->cursor;
+        quantity = datGameState->inventory.counts[previousItemId];
+        node->sortKeyPrimary = quantity;
+    }
+
+    for (node = window->list->first; node != NULL; node = node->next) {
+        if ((u32)itemId == node->sortKeySecondary) {
+            break;
+        }
+        if ((u32)itemId < node->sortKeySecondary) {
+            insertBefore = 1;
+            needsInsertion = 1;
+            break;
+        }
+    }
+    if (node == NULL || needsInsertion != 0) {
+        node = mnuInsertWindowListNodeRelativeToAnchor(
+            window, node, D_003BAA84 + itemId * 25, previousCursorId, insertBefore);
+        window = resources->windows[2];
+        quantity = datGameState->inventory.counts[itemId];
+        node->sortKeySecondary = itemId;
+    } else {
+        quantity = datGameState->inventory.counts[itemId];
+    }
+    node->sortKeyPrimary = quantity;
+    return window->list->count != 0;
+}
 
 void func_00273390(u32 context) {
     mnuSetStaffDisplayMode(2, context);

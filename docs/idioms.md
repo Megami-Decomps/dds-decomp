@@ -3370,6 +3370,19 @@ The item-use callback and its complete unit are text/data exact
 field-effect provider's pre-existing sound arms and development hooks,
 remains unchanged by the pointer-contract cutover.
 
+The sorted bullet-list updater also ports between DDS2 `func_002ABED8`
+(`0x002ABED8`, 376 bytes) and DDS1 `func_00273220` (`0x00273220`,
+368 bytes). Preserve each game's actual label representation: DDS2
+indexes a label-pointer table, while DDS1 indexes inline 25-byte labels.
+Both recover the old cursor index before removal, distinguish the last
+cursor with `-2`, and reload the window after insertion. Capture the
+new inventory quantity before publishing the inserted node's item key;
+the same real byte-valued quantity serves both inventory update phases.
+This transfers Peregrine's matched DDS2 source without changing owners
+or compiler flags. DDS1 retains its pre-existing private display/input
+owners behind an opaque borrowed-work argument rather than introducing
+another layout or an incompatible cross-unit record-pointer prototype.
+
 
 ## Motion-sound callbacks retain the pack's native format records
 
