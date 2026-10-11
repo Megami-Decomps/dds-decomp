@@ -145,7 +145,7 @@ extern void func_0012EA40(u32, u32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 evtGetMessageWindowControlState(void);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void *func_00115298(void *, f32 *, f32 *);

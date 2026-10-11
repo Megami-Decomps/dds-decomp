@@ -394,12 +394,12 @@ MenuListNode *mnuReverseListSelection(MenuWindowContainer *window, s32 direction
     return selected;
 }
 
-void mnuAdvanceWindowListSelection(MenuWindowContainer *window) {
-    mnuAdvanceListSelection(window, 0);
+MenuListNode *mnuAdvanceWindowListSelection(MenuWindowContainer *window) {
+    return mnuAdvanceListSelection(window, 0);
 }
 
-void mnuRetreatWindowListSelection(MenuWindowContainer *window) {
-    mnuReverseListSelection(window, 0);
+MenuListNode *mnuRetreatWindowListSelection(MenuWindowContainer *window) {
+    return mnuReverseListSelection(window, 0);
 }
 
 void func_0027C788(MenuWindowContainer *window) {

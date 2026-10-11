@@ -25,6 +25,8 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 
+extern u32 evtFinishMessageWindowAndNotify(void);
+
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
 extern u32 dds3AdvanceWorldCounter(void);
@@ -1319,6 +1321,7 @@ s32 fldGetMaxItemValue(void) {
 }
 
 #include "field_stage.h"
+
 extern s32 D_00436240, D_0043624C, D_00436250, D_00436254;
 extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
 extern f32 D_00436290, D_00436294, D_004362A4, D_004362A8, D_004362AC;

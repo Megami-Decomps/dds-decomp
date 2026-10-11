@@ -19,6 +19,14 @@ extern FldInfTable D_0038E2D0;
 #include "sdf.h"
 #include "sdf_texture_file.h"
 
+/* Field command providers: declarations agree with their owning definitions. */
+extern void fldLoadActorWaypointTable(s32 field);
+extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
+extern void fldReleaseCurrentBgm(void);
+extern void fldSetFloorFlag(s32 area, s32 floor, s32 bit);
+extern void fldInitializeFieldSequenceRecord(FieldSequenceRecord *record,
+    s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);
+
 /* Fixed allocation sizes and native room/actor table dimensions. */
 enum {
     FIELD_VALUE_RECORD_STORAGE_SIZE = 0x72000,
@@ -1923,7 +1931,80 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141CF0);
+s32 func_00141CF0(s32 command, u32 parameter) {
+    FieldSequenceRecord record;
+    s32 warp;
+    s32 stage;
+    s32 room;
+    u32 floorFlags;
+    u32 flags;
+    s32 i;
+    FldActorEntry *entry;
+    char *taskName;
+
+    fldLoadActorWaypointTable(command);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorEntries[i];
+        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+            continue;
+        }
+        if (entry->kind != 8 || entry->motion != parameter) {
+            continue;
+        }
+        if (entry->variantMode == 3) {
+            warp = entry->variant;
+            fldSetDeferredFieldCommand(command, warp);
+            fldReleaseCurrentBgm();
+            if (entry->warpEntry == 0 && entry->warpEntry2 != 0) {
+                fldSetDeferredFieldCommand(entry->warpEntry2, warp);
+            }
+            dds3AdminSubmitModeRequest(6, &warp, 4, 0);
+            return 1;
+        }
+        if (entry->variantMode != 0) {
+            continue;
+        }
+        floorFlags = entry->flags64;
+        if (floorFlags & 1) {
+            stage = entry->unk65 != 0 ? entry->unk65 : fldAreaState.area;
+            room = floorFlags >> 2;
+            if (room == 0) {
+                room = fldAreaState.floor + 1;
+            }
+            fldSetFloorFlag(stage, room, entry->value67);
+        }
+        flags = entry->flags64;
+        if (flags & 2) {
+            func_00123DE8(entry->unk65, entry->unk66, entry->unk68, entry->unk69, entry->unk6A, entry->unk6B);
+        }
+        if (entry->variant == 1) {
+            fldReleaseCurrentBgm();
+            stage = fldAreaState.area;
+            dds3AdminSubmitModeRequest(0x1C, &stage, 4, 0);
+            return 0;
+        }
+        stage = command;
+        if (entry->variant != 0) {
+            stage = entry->variant;
+        }
+        room = entry->warpEntry;
+        if (fldAreaState.area != stage) {
+            fldReleaseCurrentBgm();
+        }
+        fldApplySceneRoomSelection(entry);
+        if (entry->flags54 != 0) {
+            D_00435F24 = entry->flags54;
+            taskName = entry->taskName;
+            strcpy((char *)D_00387D60, taskName);
+            D_00435F28 = i + 1;
+        }
+        fldInitializeFieldSequenceRecord(&record, stage, room, entry->warpName, entry->unk52, entry->linkKind, entry->linkName);
+        record.mode = 6;
+        dds3AdminSubmitModeRequest(5, &record, 0xA0, 0);
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 

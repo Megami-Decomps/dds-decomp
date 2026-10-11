@@ -65,7 +65,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
 extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);

@@ -684,7 +684,7 @@ typedef struct MenuPanelState {
     u32 firstValueA; /* 0x18 */
     u32 firstValueB; /* 0x1C */
     MenuGridSlot backgroundSlot; /* 0x20 */
-    MenuPoint corners[5]; /* 0x28 */
+    s32 corners[5][2]; /* 0x28 */
     MenuGridSlot selectedCenterSlot; /* 0x50 */
     MenuGridSlot selectedCornerSlot; /* 0x58 */
     MenuGridSlot rowSlot; /* 0x60 */
@@ -731,16 +731,16 @@ void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet 
 void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSet *resource, s32 centerIndex, s32 cornerIndex) {
     itfGridStorePosition(&panel->selectedCenterSlot, resource, centerIndex);
     itfGridStorePosition(&panel->selectedCornerSlot, resource, cornerIndex);
-    panel->corners[0].x = x;
-    panel->corners[0].y = y;
-    panel->corners[1].x = x + 0xC0;
-    panel->corners[1].y = y - 0x20;
-    panel->corners[2].x = x - 0x50;
-    panel->corners[2].y = y + 0x68;
-    panel->corners[3].x = x + 0x1D0;
-    panel->corners[3].y = y + 0x68;
-    panel->corners[4].x = x + 0xC0;
-    panel->corners[4].y = y + 0xF0;
+    panel->corners[0][0] = x;
+    panel->corners[0][1] = y;
+    panel->corners[1][0] = x + 0xC0;
+    panel->corners[1][1] = y - 0x20;
+    panel->corners[2][0] = x - 0x50;
+    panel->corners[2][1] = y + 0x68;
+    panel->corners[3][0] = x + 0x1D0;
+    panel->corners[3][1] = y + 0x68;
+    panel->corners[4][0] = x + 0xC0;
+    panel->corners[4][1] = y + 0xF0;
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 material) {
@@ -766,7 +766,54 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
     panel->state = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C0958);
+extern void func_002BA7A8(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
+extern void mnuUpdateWindowPanelHandleStatesKindFourFive(struct MenuIconState *);
+
+void func_002C0958(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
+    s32 corner;
+    s32 rowX;
+    s32 rowY;
+    EffectSlotSet *rowSet;
+    s32 rowIndex;
+
+    rowSet = panel->backgroundSlot.set;
+    rowIndex = panel->backgroundSlot.index;
+    if (rowSet != NULL) {
+        itfDrawGridWithResolvedSlot(x, y, depth, 1, rowSet, rowIndex, drawArg);
+    }
+    rowX = panel->thirdValueA;
+    rowY = panel->thirdValueB;
+    itfDrawGridWithResolvedSlot(x + rowX, y + rowY,
+                                depth, 1, panel->headingSlot.set,
+                                panel->headingIndices[panel->state], drawArg);
+    rowX = panel->secondValueA;
+    rowY = panel->secondValueB;
+    rowSet = panel->rowSlot.set;
+    rowIndex = panel->rowSlot.index;
+    {
+        s32 index;
+        for (index = 0; index < panel->width; index++) {
+            if (panel->state == index) {
+                for (corner = 1; corner < 5; corner++) {
+                    itfDrawGridWithResolvedSlot(x + panel->corners[corner][0] + index * 0x2C0,
+                                                y + panel->corners[corner][1], depth, 1,
+                                                panel->selectedCornerSlot.set,
+                                                panel->selectedCornerSlot.index, drawArg);
+                }
+                itfDrawGridWithResolvedSlot(x + panel->corners[0][0] + index * 0x2C0,
+                                            y + panel->corners[0][1], depth, 1,
+                                            panel->selectedCenterSlot.set,
+                                            panel->selectedCenterSlot.index, drawArg);
+                itfDrawGridWithResolvedSlot(x + rowX, y + rowY, depth, 1,
+                                            rowSet, rowIndex + index, drawArg);
+            }
+            rowX += panel->height;
+        }
+    }
+    func_002BA7A8(x, y, depth, 0x100, panel->resourceHandle, 0, drawArg);
+    mnuUpdateWindowPanelHandleStatesKindFourFive(panel->resourceHandle);
+}
+
 
 extern MenuPanelItem *mnuCreatePanelItem(void);
 

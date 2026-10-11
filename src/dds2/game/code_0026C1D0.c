@@ -304,9 +304,9 @@ u32 evtCleanupMessageWindow(s32 notify) {
     return cleaned;
 }
 
-/* Finish/reset the singleton window with notification; ignore the existence result. */
-void evtFinishMessageWindowAndNotify(void) {
-    evtCleanupMessageWindow(1);
+/* Finish/reset the singleton window with notification and return whether it existed. */
+u32 evtFinishMessageWindowAndNotify(void) {
+    return evtCleanupMessageWindow(1);
 }
 
 extern void itfMesDestroyWindowIfPresent(s32);

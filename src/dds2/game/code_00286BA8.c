@@ -394,7 +394,7 @@ extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void func_0026DBB0();
 extern void func_00267C48(MenuProgressHost *);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern void func_00278EA8(struct MantraDrawPool *);
 extern void func_00279080(struct MantraDrawPool *);
 extern void func_002790F0(u32, u32, struct MantraDrawPool *);
@@ -448,7 +448,7 @@ extern s32 dspStartEntry(s32);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
 extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
