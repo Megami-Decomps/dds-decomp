@@ -1117,7 +1117,7 @@ void btlSelectLinkedTargets(s32 task, s32 unused, s8 linked) {
     btlFreeIndexList(list);
 }
 
-extern s32 btlCanUseLinkedActor();
+extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 
 /* Pick the acting unit for a linked command: a usable linked unit without flag 0x1000, else the link's own unit. */
 BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {

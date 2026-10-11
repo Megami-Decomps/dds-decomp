@@ -7372,3 +7372,19 @@ the pad stepper has its existing concrete type, and `scrGetWindow` returns
 `game/code_001A8748` starts its data there and retains the original `.lit4` run.
 No compiler flag, barrier, forced register, duplicate provider or attributed
 extern is required.
+
+### Linked-command eligibility and category inputs are pointers
+
+`btlCanUseLinkedActor` and `btlMapActorCategory` consume the canonical
+`BtlLinkedCommand *`, not an integer actor identifier. DDS2 retail
+`0x001EA210` reads the command's status, link and action code; `0x001EA950`
+dispatches on its action code. DDS1's eligibility provider already uses this
+pointer contract.
+
+Keep declarations and callers consistent with those providers. Remove the
+integer-address casts at typed command callers, and retain explicit boundary
+conversion only where an existing selector still transports an address as
+`s32`. The link local itself is `ActionStateLink *`; no alternate command or
+link view is needed. This closure preserves every existing body in the three
+touched DDS2 units (288/0, 237/0 and 259/0 under `check_unit.py`); it does not
+constitute a match for the still-assembly camera dispatcher.
