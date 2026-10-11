@@ -2616,7 +2616,7 @@ void evtAccumulateStateScore(s32 stateAddress) {
     }
 }
 
-extern s32 datAddCurrencyClamped(s32);
+extern void datAddCurrencyClamped(s32);
 extern u32 func_002CD800(u32);
 extern void mdlFlagSet(s32);
 

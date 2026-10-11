@@ -2396,7 +2396,7 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 kwlnFadeIsActive(void);
 
-extern s32 datAddCurrencyClamped(s32);
+extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mdlFlagClear(s32);
 extern void func_00297320(s32);
@@ -4221,7 +4221,18 @@ u32 evtMenuSetProgressFlag(MenuTerminalContext *context) {
     return changed;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", mnuAwardCampProgressCurrency);
+void mnuAwardCampProgressCurrency(void) {
+    char formattedText[0x40];
+    s32 amount = mnuCampResolveProgressTierValue();
+
+    dspSetActive(1);
+    func_0035C860(formattedText, D_00437840, amount);
+    evtCopyEntryStringToActiveWindow(0, formattedText);
+    dspStartEntry(0x19);
+    datAddCurrencyClamped(amount);
+    ptyAdjustItemQuantity(0x81, -datGameState->inventory.counts[0x81]);
+    mdlFlagClear(0xA01);
+}
 
 /* One-shot menu flag: set the object's flag the first time it is not yet set, returning 1 only then. */
 s32 func_00265A60(MenuTerminalContext *object) {

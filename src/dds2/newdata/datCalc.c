@@ -371,7 +371,7 @@ s32 datIsValueBelowQuarterMax(DatPartyRecord *object) {
 
 /* Add delta using the existing s32 addition, then clamp the currency balance
  * to 0..9,999,999. No overflow validation is performed before the clamp. */
-s32 datAddCurrencyClamped(s32 delta) {
+void datAddCurrencyClamped(s32 delta) {
     s32 balance = datGameState->header.currency + delta;
     if (balance < 0) {
         balance = 0;
@@ -380,7 +380,6 @@ s32 datAddCurrencyClamped(s32 delta) {
         balance = DAT_CURRENCY_MAX;
     }
     datGameState->header.currency = balance;
-    return balance;
 }
 
 /* Compare the signed balance against the requested amount; no debit or
