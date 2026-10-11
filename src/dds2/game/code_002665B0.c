@@ -1915,7 +1915,7 @@ s32 evtBSetupDispatchSync(KwlnTask *request) {
 }
 
 
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 
 s32 evtClearDispatchVisualFlag(KwlnTask *task) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);

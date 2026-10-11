@@ -4,6 +4,9 @@
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
 
+extern u32 evtFinishMessageWindowAndNotify(void);
+
+
 
 
 extern void func_0026C900(void);

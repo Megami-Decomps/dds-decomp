@@ -3,6 +3,9 @@
 #include "mnu.h"
 #include "mnu_result.h"
 
+extern u32 evtFinishMessageWindowAndNotify(void);
+
+
 
 extern void func_0026C900(void);
 

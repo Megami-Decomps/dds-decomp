@@ -1593,7 +1593,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
 
 
 
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void func_0024DD78(void);
 

@@ -4272,7 +4272,7 @@ dialog_active:
     return 0;
 }
 
-extern s32 evtFinishMessageWindowAndNotify();
+extern u32 evtFinishMessageWindowAndNotify(void);
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *handle) {
     u8 *work = (u8 *)btlGetRuntime();
