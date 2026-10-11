@@ -30,7 +30,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_003BD250[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0024DD78(void);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern void func_002E96D8(u32);
 extern s32 fldReleaseLocalMapResources(void);
 extern s64 sdfDestroyActiveCounterRuntime(void);

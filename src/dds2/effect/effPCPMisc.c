@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "btl.h"
 #include "eff_pcp_beam.h"
 #include "sdf_asset_state.h"
@@ -4733,7 +4734,116 @@ void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
     entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00189500);
+void func_00189500(EffPCPGroupSet *work) {
+    f32 point[3];
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    EffParamWork **followers = NULL;
+    u32 repeat;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 count;
+    u32 color;
+    f32 angularDamping;
+    f32 startRadialBlend;
+    f32 endRadialBlend;
+    EffPCPGroupEntry *entry;
+    f32 length;
+    u32 i;
+    s32 frame;
+
+    count = work->head.count;
+    repeat = work->head.unk50;
+    duration = work->head.framesPerEntry;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    angularDamping = work->head.unk7C;
+    startRadialBlend = work->head.unk84;
+    endRadialBlend = work->head.unk88;
+    entry = work->entries;
+    color = work->color;
+    length = work->unk16C;
+    PCP_COPY_VECTOR(origin, work->head.origin);
+    if (duration == 0) {
+        return;
+    }
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+        if (frame <= duration) {
+            if (work->duplicates != NULL) {
+                followers = work->duplicates + i;
+            }
+            if (frame == 0) {
+                effPcpGroupSetInitEntry(work, i);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                s32 elapsedFrames = entry->frame;
+                f32 angle = entry->angle;
+                f32 radius = entry->position;
+                f32 cosine;
+                f32 sine;
+                f32 blend;
+                f32 fade;
+                u32 fadedColor;
+                EffThunderFragmentParams *fragment;
+                cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+                sine = sdfSinPoly(angle);
+                point[0] = origin[0] + cosine * radius;
+                point[1] = origin[1];
+                point[2] = origin[2] + sine * radius;
+                entry->position += entry->positionStep;
+                entry->angle += entry->unk14;
+                entry->unk14 *= angularDamping;
+                fragment = effThunderGetFragmentParameters(entry->handle);
+                blend = startRadialBlend + (endRadialBlend - startRadialBlend) * ((f32)frame / (f32)duration);
+                direction[0] = cosine * blend;
+                direction[1] = 1.0f - ffabsf(blend);
+                direction[2] = sine * blend;
+                VU0_LOAD_VF(vf10, direction);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF(vf10, direction);
+                fragment->start[0] = point[0] + direction[0] * length;
+                fragment->start[1] = point[1] + direction[1] * length;
+                fragment->start[2] = point[2] + direction[2] * length;
+                fragment->end[0] = point[0];
+                fragment->end[1] = point[1];
+                fragment->end[2] = point[2];
+                if (elapsedFrames < fadeIn && fadeIn != 0) {
+                    fade = (f32)elapsedFrames / (f32)fadeIn;
+                } else {
+                    s32 remainingFrames = duration - frame;
+                    if (remainingFrames <= fadeOut && fadeOut != 0) {
+                        fade = (f32)remainingFrames / (f32)fadeOut;
+                    } else {
+                        fade = 1.0f;
+                    }
+                }
+                fadedColor = effBlendColor(color & 0xFFFFFF, color, fade);
+                effThunderSetFragmentColor(entry->handle, fadedColor);
+                effThunderUpdateFragments(entry->handle);
+                if (work->duplicates != NULL) {
+                    u32 followerIndex;
+                    for (followerIndex = 0; followerIndex < ARRAY_COUNT(work->head.activeGroups); followerIndex++) {
+                        if (*followers != 0) {
+                            effParamWorkCallback0(*followers, fragment->end);
+                            effParamWorkCallback3(*followers, fadedColor);
+                            effParamWorkInvokeCallback(*followers);
+                        }
+                        followers += count;
+                    }
+                }
+                frame = entry->frame;
+            }
+            if (repeat != 0 && frame >= duration) {
+                entry->frame = 0;
+            } else {
+                entry->frame = frame + 1;
+            }
+        }
+    }
+}
 
 void effPcpCopyGroupSetVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);

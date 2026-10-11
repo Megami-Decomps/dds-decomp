@@ -22,6 +22,9 @@
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 
+extern u32 evtFinishMessageWindowAndNotify(void);
+
+
 extern void func_001C2E90(EffectSlotSet *, s32, s32 *, s32 *, f32);
 
 extern SceneSlotFadeWork *D_003BD83C;

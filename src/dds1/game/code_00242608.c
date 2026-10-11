@@ -1518,11 +1518,131 @@ s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245208);
+extern char (*D_003BAA74)[17];
+extern char (*D_003BAA84)[25];
+extern u32 D_00369FA0[];
+extern void mnuSelectFirstListNode(struct MenuList *list);
+extern u32 func_002CD7F8(u32 itemId);
+extern void func_0027C788(MenuWindowContainer *window);
+
+s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
+    s32 rowIndex;
+    ShopRankPriceRow *row;
+    u32 i;
+
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    row = (ShopRankPriceRow *)(D_00369A88 + rowIndex * sizeof(ShopRankPriceRow));
+    for (i = 0; i < 0x20; i++) {
+        u32 id = row->entries[i].itemId;
+        u32 mode = row->entries[i].mode;
+        struct MenuListNode *node;
+        CampWindowParams *params;
+        u32 price;
+
+        if (mode != 1) {
+            if ((u32)(id - 0xA0) < 0x20) {
+                continue;
+            }
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA84[id]);
+            func_0027C788(scene->window);
+            mnuAdvanceListCursorDefault(scene->window->list);
+            params = &node->camp;
+            price = func_00244D10(i, 0);
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0) {
+                node->flags48 = 1;
+            }
+        } else {
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
+            mnuAdvanceWindowListSelection(scene->window);
+            params = &node->camp;
+            price = D_00369FA0[id];
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuSelectFirstListNode(scene->window->list);
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245628);
+extern char (*D_003BAA74)[17];
+extern char (*D_003BAA84)[25];
+extern u32 D_00369FA0[];
+extern void mnuSelectFirstListNode(struct MenuList *list);
+extern u32 func_002CD7F8(u32 itemId);
+extern void func_0027C788(MenuWindowContainer *window);
+
+s32 mnuBuildShopCatalogList(ShopScene *scene) {
+    u8 *entryCursor;
+    s32 rowIndex;
+    u32 i;
+
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    entryCursor = D_00369A88 + rowIndex * sizeof(ShopRankPriceRow);
+    for (i = 0; i < 0x20; i++, entryCursor += sizeof(ShopRankPriceEntry)) {
+        u16 itemId = *(u16 *)(entryCursor + 4);
+        u8 mode = entryCursor[6];
+        struct MenuListNode *node;
+        CampWindowParams *parameters;
+        s32 price;
+        u32 *priceEntry;
+
+        if (mode != 1) {
+            if ((u32)(itemId - 0xA0) < 0x20) {
+                node = mnuAppendWindowListNode(scene->window, D_003BAA84[itemId]);
+                func_0027C788(scene->window);
+                mnuAdvanceListCursorDefault(scene->window->list);
+                parameters = &node->camp;
+                price = func_00244D10(i, 0);
+                parameters->value = price;
+                parameters->id = itemId;
+                parameters->price = price;
+                parameters->mode = mode;
+                if (mnuShopGetTransactionLimit(scene) == 0) {
+                    node->flags48 = 1;
+                }
+            }
+        } else if (itemId != 0) {
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[itemId]);
+            mnuAdvanceWindowListSelection(scene->window);
+            parameters = &node->camp;
+            priceEntry = &D_00369FA0[itemId];
+            price = *priceEntry;
+            parameters->value = price;
+            parameters->id = itemId;
+            parameters->price = price;
+            parameters->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(itemId) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuSelectFirstListNode(scene->window->list);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
 extern char (*D_003BAA84)[25];
@@ -2363,7 +2483,36 @@ s32 func_00247190(KwlnTask *task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002472D8);
+extern s32 D_003BC3C0[];
+
+/* Remove a sold-out sell row, handle an empty list, and resume the shop command. */
+s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
+    MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3C0;
+    MenuWindowContainer *window = scene->window;
+    CampWindowParams *values = &window->list->cursor->camp;
+    s32 operation;
+    s32 itemId;
+
+    if (scene->extraOption != 0) {
+        operation = scene->sprite->list->cursor->index + 1;
+    } else {
+        operation = options.values[scene->sprite->list->cursor->index];
+    }
+    itemId = values->id;
+    if (operation == 3) {
+        if (datGameState->inventory.counts[itemId] == 0) {
+            mnuRemoveListCursorNode(scene->window->list);
+        }
+        if (scene->window->list->count == 0) {
+            scene->menuMode = 2;
+        }
+    }
+    mnuSetCommandPhase(scene, 8);
+    func_00260590(scene->window->list, 10);
+    scene->counter = 1;
+    return 1;
+}
 
 void evtAccumulateStateScore(s32 stateAddress) {
     CampWindowParams *values = &((ShopScene *)stateAddress)->window->list->cursor->camp;
@@ -2510,7 +2659,7 @@ s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void dspStartEntry();
+extern s32 dspStartEntry(s32);
 
 s32 evtPlayDispatchModeCue(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
@@ -2625,9 +2774,143 @@ u32 func_00247D50(void) {
     return 1;
 }
 
+extern const char D_003AF528[];
+extern s32 evtIsActiveFlagSet(s32);
+extern u32 evtFinishMessageWindowAndNotify(void);
+extern void dspSetActive(s32);
+extern void sndEnsureMidiBankResident(s32);
+extern void sndStartTrackExtended(s32);
+
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF528);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00247D58);
+s32 mnuTickShopMessageSequence(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
+    s32 *dispatchSlot = &state->dispatchState;
+    s32 allowed;
+    s32 result;
+
+    result = func_00285670(&state->transitionWork, dispatchSlot,
+                          EVT_DISPATCH_OPERATION_POLL, task);
+    if (result == 0) {
+        if (*dispatchSlot == 0) {
+            allowed = 0;
+            if (kwlnTaskGetTaskByName(D_003AF528) == NULL) {
+                allowed = 1;
+            }
+            if (evtIsActiveFlagSet(0) != 0) {
+                allowed = 1;
+            }
+            if (allowed) {
+                switch (state->action) {
+                case 0:
+                    sndEnsureMidiBankResident(0x300000);
+                    sndStartTrackExtended(0x300000);
+                    state->action = 1;
+                    break;
+
+                case 1:
+                    if (state->count98 != 0) {
+                        dspSetActive(1);
+                        dspStartEntry(state->count98 + 0xD);
+                        {
+                            s32 flagIds[5] = {0x970, 0x971, 0x972, 0x973, 0x974};
+
+                            mdlFlagSet(flagIds[state->count98 - 1]);
+                        }
+                        state->action = 2;
+                    } else {
+                        state->action = 5;
+                    }
+                    break;
+
+                case 2:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->count98 = func_00244848();
+                        state->action = 3;
+                        state->scanIndex = 0;
+                    }
+                    break;
+
+                case 3: {
+                    s32 activeSlot = mnuCampFindActiveSlot();
+                    u32 index;
+
+                    if (activeSlot == -1) {
+                        state->action = 5;
+                    }
+                    index = state->scanIndex;
+                    if (index < 32) {
+                        u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
+                                          activeSlot * (s32)sizeof(ShopRankPriceRow);
+                        u32 flagsAddress = (u32)&D_00369A88[8] + stockOffset;
+
+                        do {
+                            ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
+                            u16 itemId = entry->itemId;
+
+                            if ((*(u32 *)flagsAddress & 1) != 0) {
+                                state->scanIndex = index + 1;
+                                dspSetActive(1);
+                                evtCopyEntryStringToActiveWindow(0, D_003BAA84[itemId]);
+                                dspStartEntry(13);
+                                break;
+                            }
+                            index++;
+                            flagsAddress += sizeof(ShopRankPriceEntry);
+                        } while (index < 32);
+                    }
+                    if (index == 32) {
+                        state->scanIndex = -1;
+                    }
+                    state->action = 4;
+                    break;
+                }
+
+                case 4:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        if (state->scanIndex == -1) {
+                            if (state->count98 == 2) {
+                                state->action = 6;
+                            } else {
+                                state->action = 1;
+                            }
+                        } else {
+                            state->action = 3;
+                        }
+                    }
+                    break;
+
+                case 6:
+                    dspSetActive(1);
+                    dspStartEntry(0x16);
+                    state->action = 7;
+                    break;
+
+                case 7:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->action = 1;
+                    }
+                    break;
+
+                case 5:
+                    if (state->progressTicks < 20) {
+                        state->progressTicks++;
+                    } else {
+                        state->action = 0;
+                        mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+                    }
+                    break;
+                }
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
+
 
 s32 evtRefreshDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
