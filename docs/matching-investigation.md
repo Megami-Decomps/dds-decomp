@@ -112,6 +112,60 @@ localize a nothrow effect but cannot prove a file boundary. A spelling change
 can diagnose hashing but cannot justify a name. A flag-disable probe can
 identify an optimization without justifying a production flag.
 
+### Battle selection: distinguish membership, completion and commit
+
+DDS1 `game/code_001A9780::func_001C0650` initially had a matching scan prefix
+but a different success tail. Returning directly from the matching iteration
+exposes the old-ID/target-ID XOR inside the loop. The actual loop-motion
+comparison accepts that invariant: threshold 64 × savings 1 × lifetime 1 = 64
+against an instruction count of 16. Spelling a conditional return instead does
+not avoid it; the jump pass synthesizes the XOR before loop optimization.
+
+Breaking out of the scan and returning afterward keeps the XOR outside the
+loop, but an unconditional `missing = 1` in each iteration creates a different
+hoist. The failure flag becomes live across callbacks, adds a spill and enlarges
+the frame. A guarded diagnostic rejecting only that movable restores the
+native frame, establishing a question for the ordinary source rather than a
+production compiler change.
+
+The scan's actual membership predicate provides the supported correction:
+
+```c
+missing = unit->partyRecord.unitId != targetId;
+if (missing == 0) {
+    break;
+}
+```
+
+The flag now records meaningful changing state and controls the successful
+exit. Exhaustion reaches the retry path; successful completion computes its
+result and then commits the selected entry outside the inner scan:
+
+```c
+s32 changed = oldId != targetId;
+work->entry = index;
+return changed;
+```
+
+This closes the 616-byte body. Read-only traces confirm neither inner-loop
+hoist remains. Computing the result before committing also changes the actual
+target/index allocator comparison from keys 17307/16000 to 16071/17142,
+restoring the native register assignment. No callback lies between those
+completion operations. The correction follows their genuine value roles;
+these numbers are evidence for this input, not a register-placement recipe.
+
+The real earlier selector definition also supplies `REG_EH_REGION 0` to the
+later `func_001C08B8` call. With short-circuit OR pairs for adjacent same-action
+inputs, the input handler is 1340 bytes exact. Those pairs preserve the native
+mode 4/5 key priorities and suppressed later reads. The complete owner passes
+198 match/0 differ, including data, and both retail hashes pass under the
+unchanged compiler. The signed cursor row/column contract was qualified
+separately in both actual consumer units.
+
+Inspect interacting transformations together: fixing one success join can
+expose another hoist. A diagnostic can identify the missing obligation; native
+membership and completion phases must supply the ordinary C that satisfies it.
+
 ### Console indexing: inspect the target recognizer
 
 DDS2 `sdf/sdfDevCons::func_0033CE08` retained four differing words after its
@@ -197,6 +251,57 @@ The useful source question is which real access ends the pointer lifetime.
 Check its death note and scheduler weight before changing the capture order;
 the intervened compiler output is a causal test, while the unchanged compiler
 and complete-unit check establish the source match.
+
+### File transfer: distinguish publication from later metadata reads
+
+DDS1 `game/code_0029C530::func_002B6778` retained two adjacent instruction
+differences: retail prepares the resolver argument before loading the transfer
+mode. The resolver has one argument; the mode belongs to the request's
+halfword field. Read-only priority and ready-clock hooks established that the
+argument move was ready alongside the metadata loads but had lower priority.
+A guarded compiler intervention proved that this choice explained the gap,
+without qualifying as a source match.
+
+Publishing the retained output pointer by copying its representation into the
+actual pointer field gives the compiler conservative memory dependencies.
+Capturing the real payload after retain and before that publication follows
+the native read epoch. Reading its size and then its mode makes the mode the
+last actual pointer input, retaining the native register homes and scheduler
+choice. Together these changes reproduce all 828 bytes. Copying the mode field
+instead changes other dependencies and register homes and remains nonexact.
+
+This is a valid C encoding of pointer publication, not evidence that the
+original spelling literally used `memcpy`, nor evidence that the separately
+allocated payload and request alias. Preserve the real allocation, retain,
+resolver and fresh post-resolver size-read boundaries. Onyx/Obsidian supplied
+the retained reconstruction; Peregrine Forge closed the compiler gap, with
+independent Luna review.
+
+The related queue-duplication coordinator `func_002B6C00` had the same two
+argument/option-load differences after its own complete native audit. Its
+allocation/retain path also captures the queued payload before publishing the
+output pointer. Applying the same real publication and final-input boundary
+closes its original 980-byte body. The function retains its own header copy,
+sector-leader linking, resource-name copy, linked-job count and cleanup paths;
+this is not a counterpart port. Luna Field supplied this closure, with Luna
+Event's independent provider/epoch review and Peregrine Forge integration.
+Preserve Ember, Quartz, Azure, Tidal and Sable's retained source lineage.
+
+### Grid placement: compute each selected coordinate pair in its own arm
+
+DDS2 `game/code_00285CE8::func_00285E98` merged its selected Y-direction byte
+across the axis-selection branch. Read-only allocation observation traced a
+`$v1` preference from the byte's sign-extension result to that merged quantity;
+retail uses `$v0` in each arm. Computing the real X and Y coordinates together
+inside each axis arm removes that merge and reproduces all 576 bytes. The
+12-byte direction table, signed component arithmetic, depth/countdown fields
+and two separate random-call epochs remain those of the native function.
+
+The complete owners and both retail builds pass for these two corrections.
+This observation supports the branch-specific coordinate computation; it does
+not justify adding uses to change register preferences. Preserve PiM, Silver
+and Sable's reconstruction lineage; Luna Field supplied the source closure,
+with independent Luna Event review and Peregrine Forge integration.
 
 ## Investigate a mechanism that is not documented yet
 
