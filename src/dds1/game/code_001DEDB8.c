@@ -65,7 +65,8 @@ typedef struct BtlCameraCursor {
     s8 phase;               /* 0x12 */
     s8 counter;             /* 0x13 */
     s8 busy;                /* 0x14: nonzero suspends the path step */
-    u8 pad15[0xB];
+    s8 restoreAlternate;   /* 0x15: snapshot restore selector */
+    u8 pad16[0xA];
     f32 pathEnd[4];         /* 0x20 */
     f32 pathStart[4];       /* 0x30 */
     f32 eyeFrom[4];         /* 0x40 */
@@ -80,13 +81,23 @@ typedef struct BtlCameraCursor {
     f32 startFrame;         /* 0xB0 */
     u8 padB4[0xC];
     f32 duration;           /* 0xC0 */
-    u8 padC4[0x2C];
+    u8 padC4[0xC];
+    u8 parameterD0;         /* 0xD0: unsigned serialized flag */
+    u8 padD1[0xF];
+    f32 parameterE0;        /* 0xE0 */
+    u8 padE4[0xC];
     f32 blendRate;          /* 0xF0 */
     u8 padF4[0xC];
     f32 rangeStart;         /* 0x100 */
     u8 pad104[0xC];
     f32 rangeEnd;           /* 0x110 */
-    u8 pad114[0x1C];
+    s32 parameterIndex114;
+    s32 parameterIndex118;
+    s32 parameterIndex11C;
+    s32 parameterIndex120;
+    s32 parameterIndex124;
+    s32 parameterIndex128;
+    s32 parameterIndex12C;
 } BtlCameraCursor;
 
 extern BtlCameraCursor D_0035F100;
@@ -357,7 +368,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(void *, void *);
+extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
@@ -444,7 +455,7 @@ void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */ s32 btlFindTaskByHandle(s64 handle);
 
-void btlFlagLinkedGroupDefeatCandidatesTask(s32 arg0);
+void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command);
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
@@ -1176,7 +1187,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
         VU0_STORE_VF(vf10, &vec[0]);
         btlUnitGetBodyPosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU(&vec[1], &vec[0]) != 0) {
+        if (btlAimHorizontalDirectionVU((f32 *)&vec[1], (f32 *)&vec[0]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
             btlSetUnitRotation(unit, &vec[2]);
         }
@@ -3871,6 +3882,23 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     /* 001E9DA0..001E9DDC: restore saved registers, return void. */
 }
 
+typedef struct BtlCameraParameterRecord {
+    u8 flags00;
+    u8 pad01[0xF];
+    f32 value[4];
+    u8 flags20;
+    u8 pad21[0xF];
+    f32 fadeInDuration;
+    u8 pad34[0xC];
+    f32 fadeOutDuration;
+    u8 pad44[0x18];
+    f32 curveScale5C;
+    f32 curveScale60;
+    u8 pad64[0xC];
+    s8 stop;
+    u8 pad71[0xF];
+} BtlCameraParameterRecord;
+
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E9DE0);
 
 /* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
@@ -3933,22 +3961,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
-typedef struct BtlCameraParameterRecord {
-    u8 flags00;
-    u8 pad01[0xF];
-    f32 value[4];
-    u8 flags20;
-    u8 pad21[0xF];
-    f32 fadeInDuration;
-    u8 pad34[0xC];
-    f32 fadeOutDuration;
-    u8 pad44[0x18];
-    f32 curveScale5C;
-    f32 curveScale60;
-    u8 pad64[0xC];
-    s8 stop;
-    u8 pad71[0xF];
-} BtlCameraParameterRecord;
 
 typedef char BtlCameraTimedInstruction_size[(sizeof(BtlCameraTimedInstruction) == 0x10) ? 1 : -1];
 
@@ -4447,7 +4459,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
             func_001F66D8(0x200, 0, 0);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        btlAimHorizontalDirectionVU((s128 *)aimPosition, (s128 *)position);
+        btlAimHorizontalDirectionVU(aimPosition, position);
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(unit, (s128 *)rotation);
     }
@@ -7634,7 +7646,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - radius;
     btlSetUnitPosition(slot[1], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[1], (s128 *)rotation);
     }
@@ -7643,7 +7655,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[0], (s128 *)rotation);
     }
@@ -7651,7 +7663,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[2], (s128 *)rotation);
     }
@@ -7814,7 +7826,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
         VU0_STORE_VF(vf10, &vec[0]);
         func_001F66D8(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU(&vec[0], &vec[1]) != 0) {
+        if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
             btlSetUnitRotation(front, &vec[2]);
         }
