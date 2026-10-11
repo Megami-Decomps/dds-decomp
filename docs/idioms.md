@@ -7636,3 +7636,16 @@ context, not invented storage. The provider consumes only three packed color
 words. Its position rows use the existing `PCP_COPY_VECTOR` SDK macro, evidenced
 by the adjacent native `LQ`/`SQ` pairs in both games; no new assembly is needed.
 
+
+### Bound a byte-row scan by its owned extent
+
+`ptyApplyProfilePreset` (DDS1 `0x002CC9C0`, 444 bytes) uses one ordinary
+signed index for the five-party scan and the later profile installation scan.
+The former lowers to a signed decrement/`BGEZ` trip counter; the latter
+indexes the selected `PtyPresetRecord.profileIds` byte row and compares against
+its unsigned `sizeof` extent, producing the native ascending `SLTIU 12` loop.
+An unsigned party index adds an explicit bound test; a signed literal-bound
+installation loop becomes a countdown. The owned byte-row extent and actual
+index lifetime recover both loops without casts, declaration-order changes,
+alternate table views or compiler flags.
+
