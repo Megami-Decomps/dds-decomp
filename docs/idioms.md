@@ -382,6 +382,11 @@ functions use trampolines and are a different case.
   `func_001C3168` become exact with their presentation/text helpers declared
   `void` before use. Recover that contract from the provider and its callers;
   a preferred register alone does not establish a return type.
+  DDS2 `func_00141CF0` provides another example: six remaining words were
+  temporary `$2`/`$3` swaps after calls. Initial RTL gave the implicitly
+  declared field providers unused `$v0` results. Their actual definitions
+  return `void`; truthful declarations before use remove those results and
+  close the 616-byte actor transition without changing a provider ABI.
   Keep new externs in the declaration block at the top of the unit; externs
   added mid-file can flip other functions to CONTEXT.
 - **Same-TU callee visibility can change branch annulment.** Test this only
