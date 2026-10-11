@@ -7835,3 +7835,21 @@ integer-address callback converts at its existing owner boundary. All three
 provider bodies and the exact selector remain unchanged, and the other
 DDS2 caller unit `game/code_00214948` gates **259 match, 0 differ**.
 
+## Indexed icons separate screen size from atlas size
+
+DDS2 `btlDrawIconAtSize` (`0x002097E8`, 400 bytes) is a variable-size
+counterpart of the matched DDS1 `func_001F7DF8` (`0x001F7DF8`, 372 bytes).
+The direct native-adjusted donor port matches on its first form; the complete
+DDS2 `game/code_00207A38` unit gates **248 match, 0 differ**, including the
+existing fixed-64 caller and button renderer.
+
+DDS2 adds width and height to the four corner colors and indexed atlas
+selection. Its existing ten-argument caller and the native `LHU` at
+`0x0020984C` (frame `0xE0`, selector at `sp + 0xE8`) establish the `u16`
+selector formal. Screen X/width use a factor of 16, Y/height a factor of 8;
+the texture footprint remains 64 texels in each axis (`+0x400` in UV units),
+independent of the requested screen size. Keep the adjacent-word UV indexing,
+canonical `BtlState` texture handle, `SdfListHead` packet lifecycle and
+`SdfPoolNode.append` callback. No table-view cast, argument-position tuning,
+extra geometry buffers or assembly is needed.
+

@@ -1038,9 +1038,45 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
     return accumulatedValue;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawIconAtSize);
+struct RefObj;
+extern SdfTex *func_002DDD60(void *, struct RefObj *);
+extern s32 sdfAllocPacketAligned(s32);
+extern s32 D_003BE0E0[];
 
-extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
+/* Draw an indexed glyph with independently sized geometry and fixed atlas UVs. */
+void btlDrawIconAtSize(SdfPoolNode *surface, s32 x, s32 y,
+                      s32 width, s32 height, s32 topLeftColor, s32 topRightColor,
+                      s32 bottomLeftColor, s32 bottomRightColor,
+                      u16 buttonIndex) {
+    BtlState *battle;
+    SdfTex *texture;
+    SdfListHead *packet;
+    s32 uvIndex;
+    s32 xFixed;
+    s32 yFixed;
+
+    battle = (BtlState *)btlGetRuntime();
+    texture = func_002DDD60(surface, (struct RefObj *)battle->buttonTextureHandle);
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    sdfConsCreateDrawPacket(packet, texture, 0);
+
+    xFixed = x * 16;
+    yFixed = y * 8;
+    uvIndex = buttonIndex * 2;
+    sdfQueueGouraudTexturedQuad(packet, 0x40,
+        xFixed + 0x7000, yFixed + 0x7900,
+        D_003BE0E0[uvIndex] * 16, D_003BE0E0[uvIndex + 1] * 16, topLeftColor,
+        xFixed + width * 16 + 0x7000, yFixed + 0x7900,
+        D_003BE0E0[uvIndex] * 16 + 0x400, D_003BE0E0[uvIndex + 1] * 16, topRightColor,
+        xFixed + 0x7000, yFixed + height * 8 + 0x7900,
+        D_003BE0E0[uvIndex] * 16, D_003BE0E0[uvIndex + 1] * 16 + 0x400, bottomLeftColor,
+        xFixed + width * 16 + 0x7000, yFixed + height * 8 + 0x7900,
+        D_003BE0E0[uvIndex] * 16 + 0x400, D_003BE0E0[uvIndex + 1] * 16 + 0x400, bottomRightColor,
+        0xFF0000, 0);
+    surface->append(surface, packet);
+}
+
 
 /* Draw a button glyph at the fixed 64-pixel size using the four supplied corner colors. */
 void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
@@ -1062,9 +1098,6 @@ extern BtnUv D_003BE188[];
 extern BtnUv D_003BE190[];
 extern BtnUv D_003BE198[];
 extern BtnUv D_003BE1A0[];
-struct RefObj;
-extern SdfTex *func_002DDD60(void *, struct RefObj *);
-extern s32 sdfAllocPacketAligned(s32);
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
 void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
