@@ -153,6 +153,31 @@ conflict. Sharing only the success return changes the reset branch topology.
 Inspect the actual exit graph before introducing a computed return dependency.
 Equal return values alone do not establish identical control flow or lifetimes.
 
+### World-pool initialization: keep the published array owner
+
+DDS2 `game/code_0010FB00::func_0010FE50` initializes the free entry chain.
+The retained source unconditionally wrote adjacent indices and repaired the
+last next link after traversal. Retail instead branches for the first previous
+sentinel and last next sentinel inside the loop. Recovering those two boundaries
+restores the native 264-byte extent, leaving five differing words around the
+retained-address publication and loop entry.
+
+A cached entry-array cursor uses the same quantity for publication and traversal.
+Direct `info->entries[index]` accesses through the canonical `WorldInfo` field
+introduce a separate pointer quantity in PRE GCSE. Later CSE forwards the stored
+address, but the return value and loop pointer keep distinct allocation intervals:
+retail publishes `$v0` directly and captures the loop base in `$a1` after its
+guard. This closes all 66 words. Both complete source forms use the actual
+8-byte `WorldValueEntry`; neither requires a new view or artificial dependency.
+Read-only allocator observation preserves the complete ordinary output;
+the full unit and both retail builds pass.
+
+An explicit positive guard around a post-tested cached-cursor loop keeps the
+five-word residual. Direct owner access in neighboring
+`dds3RemoveCurrentWorldValueEntry` is byte-neutral and leaves seven differing
+words. The rule is to inspect the actual PRE and pointer quantities, rather
+than replace cached cursors indiscriminately.
+
 ## Investigate a mechanism that is not documented yet
 
 1. **Reduce the question, preserving the cause.** Identify the smallest
