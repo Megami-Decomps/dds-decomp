@@ -205,7 +205,39 @@ void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001104F0", dds3AppendWorldObjectNode);
+extern void *dds3GetWorldSecondaryObject(void);
+extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
+
+/* Create a member in the current secondary world's list for this kind. */
+EffWorldNode *dds3AppendWorldObjectNode(s32 kind) {
+    EffWorldNode *world;
+    EffWorldNode *node;
+    EvtWorldSlot *list;
+
+    if ((u32)(kind - 2) >= 16) {
+        return NULL;
+    }
+    world = dds3GetWorldSecondaryObject();
+    if (world == NULL) {
+        return NULL;
+    }
+    list = &((EvtWorldTable *)world->data)->slots[kind];
+    node = dds3CreateWorldNodeForKind(kind);
+    if (node == NULL) {
+        return NULL;
+    }
+    node->owner = world;
+    if (list->tail == NULL) {
+        list->head = node;
+        list->tail = node;
+    } else {
+        list->tail->next = node;
+        node->previous = list->tail;
+        list->tail = node;
+    }
+    list->count++;
+    return node;
+}
 
 extern void effObjNodeDestroy(EffWorldNode *node);
 

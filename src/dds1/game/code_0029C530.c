@@ -241,6 +241,8 @@ typedef struct Matrix4 {
     } u; // 0x00
 } Matrix4; // 0x40
 
+void effDrawThreePointGroups(EffPointSet *, Matrix4 *);
+
 extern u32 D_003BD058;
 
 extern u32 D_0038F2FC[];
@@ -6424,7 +6426,63 @@ void effReleaseParticleList(EffSpanTable *list) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", effUpdateParticleSpanGeometry);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", effDrawParticleSpanPointsAndReferences);
+/* vu0 routine: quaternion matrix and SDK RGBA modulation. */
+void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
+    Matrix4 matrix;
+    u32 color1[4];
+    u32 color2[4];
+    u32 blended[4];
+    EffSpanConfig *config = work->source;
+    EffSpanTable *table = work->childResource;
+    f32 scale = work->scale * config->drawScale;
+    u32 count;
+    u32 i;
+    u32 color;
+    EffSpanRecord *record;
+
+    VU0_LOAD_VF(vf10, work->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_0037E0E0);
+    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work->position);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX_M(matrix.u.rows[0], matrix.u.rows[1], matrix.u.rows[2], matrix.u.rows[3]);
+    count = table->count;
+
+    if (config->drawPoints != 0 && work->updateCount < config->progress) {
+        color = effSampleColorAlphaTracks(&config->pointColorTrack, &config->pointAlphaTrack, work->updateCount, config->progress);
+        color1[0] = work->color;
+        EE_MMI_RGBA_UNPACK(color1, 0.0078125f);
+        VU0_MOVE_VF(vf11, vf10);
+        color2[0] = color;
+        EE_MMI_RGBA_UNPACK(color2, 0.0078125f);
+        VU0_MUL(vf10, vf10, vf11);
+        EE_MMI_RGBA_PACK_F128(blended[0]);
+        color = blended[0];
+
+        record = table->records;
+        for (i = 0; i < count; i++, record++) {
+            if (record->pointCount != 0) {
+                record->pointSet->rows = record->pointCount;
+                record->pointSet->color = color;
+                effDrawThreePointGroups(record->pointSet, &matrix);
+            }
+        }
+    }
+
+    if (config->drawReferences != 0) {
+        color = work->color;
+        record = table->records;
+        for (i = 0; i < count; i++, record++) {
+            EffTrackSet *references = record->references;
+
+            references->color = color;
+            func_002A3E10(references, &matrix);
+        }
+    }
+}
 
 
 EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
