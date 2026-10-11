@@ -7865,3 +7865,32 @@ indexed by `pad * 16 + button`, as its producer and most native users already
 do; bit seven marks a new press. Length, normalization and dot operations use
 the existing SDK VU0 macros, not game-code assembly.
 
+
+## Shooting creation initializes the kind on each dispatch route
+
+DDS2 `func_003191B0` (468 bytes) dispatches movement, registry and default
+records into a shared object-creation stage. Movement sets kind 3; registry
+loads its parameter row and kind; the default route sets kind 0. Each route
+also defines the parameter index before use. The parameter pointer is used
+only by registry kind 1. Keep these real route assignments without a
+redundant declaration-time kind initializer: GCC can otherwise reuse the
+unrelated known-NULL parameter quantity for the default kind, changing one
+register-copy instruction. Removing the redundant initializer preserves
+defined behavior on every path and matches retail.
+
+## Typed countdown ownership and complete transition setup
+
+`MenuWorkEntry.inputCountdown` is a signed halfword at `0x44`, followed by two
+padding bytes; the record remains `0x48` bytes. Native stores and the updater's
+signed load/decrement establish this field. An unused overlapping char-array
+view made GCC assign universal alias class 0 to the countdown store, adding
+false dependencies against model flags and position fields. Remove obsolete
+raw overlays only when the actual field is established and no consumers need
+the view; verify all affected owners.
+
+DDS2 `func_0031A0B8` (460 bytes) completes its state-2 model and position
+updates before arming that countdown. Keeping the countdown as the final
+entry use gives the coordinate stores their correct register-death weights.
+Retail stores X before the branch and Y in its delay slot. Preserve the
+natural setup phase rather than introducing extra temporaries or reversing
+coordinate assignments to steer the final slot.
