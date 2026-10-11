@@ -6,7 +6,30 @@
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
+#include "sdf_packet_list.h"
 
+/* The field draw dispatchers accept a packet list through the callback at
+ * offset 0x10 of each 0x20-byte record. */
+typedef struct EffFieldDrawDispatcher {
+    u8 reserved00[0x10];
+    void (*submit)(struct EffFieldDrawDispatcher *, struct SdfListHead *);
+    u8 reserved14[0xC];
+} EffFieldDrawDispatcher;
+
+typedef struct EffFieldStatePacket {
+    u64 dmaTag;
+    u64 vifCommands;
+    u64 gifTag;
+    u64 gifRegisters;
+    u64 test;
+    u64 testRegister;
+    u64 alpha;
+    u64 alphaRegister;
+} EffFieldStatePacket;
+
+extern EffFieldDrawDispatcher D_003251A8[];
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void effObjectListCountersReset(void);
 
 void effManagerInitializeSubsystems(void) {
     func_001536A0();
@@ -14,7 +37,45 @@ void effManagerInitializeSubsystems(void) {
     effBillDispatchAll();
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014F860);
+/* Submit the test and alpha state packets to both field draw buffers. */
+u32 func_0014F860(void) {
+    struct SdfListHead *list;
+    EffFieldStatePacket *state;
+    EffFieldDrawDispatcher *dispatcher;
+
+    list = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    state = (EffFieldStatePacket *)sdfAllocPacketAligned(0x40);
+    state->dmaTag = 3;
+    state->vifCommands = 0x5000000310000000ULL;
+    state->gifTag = 0x1000000000008002ULL;
+    state->gifRegisters = 0xE;
+    state->test = 0x51801;
+    state->testRegister = 0x47;
+    state->alpha = 0x44;
+    state->alphaRegister = 0x42;
+    sdfAppendPacket(list, (u32)state);
+    dispatcher = D_003251A8;
+    dispatcher->submit(dispatcher, list);
+    dispatcher++;
+
+    list = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    state = (EffFieldStatePacket *)sdfAllocPacketAligned(0x40);
+    state->dmaTag = 3;
+    state->vifCommands = 0x5000000310000000ULL;
+    state->gifTag = 0x1000000000008002ULL;
+    state->gifRegisters = 0xE;
+    state->test = 0x71801;
+    state->testRegister = 0x47;
+    state->alpha = 0x42;
+    state->alphaRegister = 0x42;
+    sdfAppendPacket(list, (u32)state);
+    dispatcher->submit(dispatcher, list);
+
+    effObjectListCountersReset();
+    return 0;
+}
 
 u32 effManagerUpdateAndDispatch(void) {
     func_0015B420();
