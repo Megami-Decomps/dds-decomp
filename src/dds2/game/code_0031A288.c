@@ -3,9 +3,7 @@
 #include "mnu_shooting.h"
 #include "mdl.h"
 
-struct WideSlot;
 struct CompactSlot;
-extern struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32, u32, u32, s8, struct WideSlotPool *);
 extern struct CompactSlot *itfClaimCompactSlotWithPayload(u32, u32, struct CompactSlotPool *);
 extern s32 func_003242D0(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);

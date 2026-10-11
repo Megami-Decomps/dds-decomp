@@ -10,6 +10,7 @@ struct MdlCtx;
 struct FileQueue;
 struct FileRequest;
 struct WideSlotPool;
+struct WideSlot;
 struct CompactSlotPool;
 
 /* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
@@ -130,6 +131,8 @@ typedef char MnuEffectLayoutsAssert[
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *, f32, f32, f32,
     MnuEffectPositionStep *, f32, s32);
 MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *, s32, f32, f32, f32);
+struct WideSlot *itfClaimWideSlotWithTaggedPayload(u32 x, u32 y, u32 value, s8 tag,
+    struct WideSlotPool *pool);
 
 /* DDS2 shooting task allocation, cleared as 0x1E0 bytes by its constructor. */
 typedef struct MnuShootingWork {
