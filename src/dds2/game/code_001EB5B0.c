@@ -466,7 +466,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor);
 
 s32 btlCanUseActorCategoryFlag4(s32 actor);
 
-s32 btlCanUseLinkedActor(s32 actor);
+s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 
 void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
@@ -510,7 +510,7 @@ void btlInterpolateVectorStep(f32 *src);
 
 s32 btlIsSpecialActorCategory(s32 actor);
 
-s32 btlMapActorCategory(s32 actor);
+s32 btlMapActorCategory(BtlLinkedCommand *actor);
 
 void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
@@ -548,7 +548,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     if (work->unk66C != 0 && work->unk66C((BtlUnit *)action) != 0) {
         return;
     }
-    category = btlMapActorCategory((s32)action);
+    category = btlMapActorCategory(action);
     if (category > 0 && category == action->stageCount++) {
         btlClearRuntimeFlag2000();
         if (work->unk658 != 0 && work->unk658((BtlUnit *)action) != 0) {
@@ -2628,7 +2628,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1D4:
         CURSOR->unk_0A = 1;
         CURSOR->unk_0E = 0;
-        if (btlCanUseLinkedActor((s32)command) == 0) {
+        if (btlCanUseLinkedActor(command) == 0) {
             CURSOR->unk_0C = 0x1E;
         } else {
             CURSOR->unk_0C = 0x21;
@@ -2685,7 +2685,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->unk_0A = 2;
         CURSOR->unk_0E = 0;
         func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
-        if (btlCanUseLinkedActor((s32)command) == 0) {
+        if (btlCanUseLinkedActor(command) == 0) {
             CURSOR->unk_0C = 0x1E;
         } else {
             CURSOR->unk_0C = 0xB;

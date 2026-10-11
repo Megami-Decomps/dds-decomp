@@ -6292,9 +6292,9 @@ s32 btlHasMarkedEntry14(s32 actor) {
     return 0;
 }
 
-s32 btlCanUseLinkedActor(s32 actor) {
-    u32 status = ((BtlLinkedCommand *)actor)->status;
-    s32 linked;
+s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
+    u32 status = actor->status;
+    ActionStateLink *linked;
     s32 category;
 
     switch (status) {
@@ -6306,17 +6306,17 @@ s32 btlCanUseLinkedActor(s32 actor) {
     default:
         return 1;
     }
-    linked = (s32)((BtlLinkedCommand *)actor)->link;
+    linked = actor->link;
     if (linked == 0) {
         return 1;
     }
-    if (btlHasMarkedEntry14(actor)) {
+    if (btlHasMarkedEntry14((s32)actor)) {
         return 0;
     }
-    if (((ActionStateLink *)linked)->unit->partyRecord.status & 0x480) {
+    if (linked->unit->partyRecord.status & 0x480) {
         return 0;
     }
-    category = ((BtlLinkedCommand *)actor)->actionCode;
+    category = actor->actionCode;
     if (category != 0 && (((BtlActionTableEntry *)datActionAnimationRecords)[category].flags & 1)) {
         return 0;
     }
@@ -6462,7 +6462,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor) {
     if (btlIsActorCategoryMarked(actor)) {
         return 1;
     }
-    if (!btlCanUseLinkedActor(actor)) {
+    if (!btlCanUseLinkedActor((BtlLinkedCommand *)actor)) {
         return 0;
     }
     category = ((BtlLinkedCommand *)actor)->actionCode;
@@ -6488,7 +6488,7 @@ s32 btlCanUseActorCategoryFlag4(s32 actor) {
         return 0;
     }
     if ((datCommandRecords[category].options & 1) == 0) {
-        if (!btlCanUseLinkedActor(actor)) {
+        if (!btlCanUseLinkedActor((BtlLinkedCommand *)actor)) {
             return 0;
         }
     }
@@ -6562,8 +6562,8 @@ u8 func_001EA940(BtlLinkedCommand *action) {
     return action->actionCode == 0x5f;
 }
 
-s32 btlMapActorCategory(s32 actor) {
-    switch ((u32)((BtlLinkedCommand *)actor)->actionCode) {
+s32 btlMapActorCategory(BtlLinkedCommand *actor) {
+    switch (actor->actionCode) {
     case 0x09:
         return 0x29;
     case 0x12:
