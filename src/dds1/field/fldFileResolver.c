@@ -450,6 +450,7 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern s32 fldGetSceneReadyFlag(void);
 extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
+extern void fldSetCameraObjectHighlightFlag(void);
 extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
 extern void func_0012EEA0(s32, s32);
