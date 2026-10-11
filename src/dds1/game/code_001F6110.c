@@ -2579,8 +2579,6 @@ s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) 
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001F6110", btlScanDirectory);
-
 /* Resource-browser entries are linked in scan order and occupy 0x44 bytes. */
 typedef struct BtlResourceEntry {
     s32 category;
@@ -2596,6 +2594,119 @@ typedef struct BtlResourceEntryList {
     char *pathPrefix; /* Owned copy of the directory-scan path, or NULL. */
     BtlResourceEntry *head;
 } BtlResourceEntryList;
+
+/* Build a scan-order list of built-in names and enabled resource-file categories. */
+BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
+    SceDirent reader;
+    BtlResourceEntryList *list;
+    BtlResourceEntry *entry;
+    BtlResourceEntry *tail;
+    s32 directoryHandle;
+    s32 generalCount;
+    s32 index;
+    s32 length;
+    s32 category;
+
+    directoryHandle = btlOpenPfsDebugDirectory(path);
+    list = sdfAllocSizeClassBlock(sizeof(BtlResourceEntryList));
+    if (path != NULL) {
+        list->pathPrefix = sdfAllocSizeClassBlock(strlen(path) + 1);
+        strcpy(list->pathPrefix, path);
+    } else {
+        list->pathPrefix = NULL;
+    }
+    list->head = NULL;
+    tail = NULL;
+    list->count = 0;
+    if (path == NULL) {
+        return list;
+    }
+    if (flags & 8) {
+        index = 0;
+        generalCount = func_00151FC0();
+        for (; index < generalCount; index++) {
+            entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
+            entry->category = 8;
+            entry->value = index;
+            entry->id = 0;
+            func_003014F0(entry->name, "GENERAL %d", index);
+            if (tail != NULL) {
+                tail->next = entry;
+            } else {
+                list->head = entry;
+            }
+            entry->prev = tail;
+            entry->next = NULL;
+            tail = entry;
+            list->count++;
+        }
+    }
+    while ((length = btlReadBattleResourceDirectoryEntry(directoryHandle, &reader)) > 0) {
+        if ((reader.stat.mode & 0xF000) == 0x1000) {
+            continue;
+        }
+        if (length < 4) {
+            continue;
+        }
+        if (length >= 0x2F) {
+            continue;
+        }
+        if ((flags & 1)
+            && (reader.name[length - 3] == 't' || reader.name[length - 3] == 'T')
+            && (reader.name[length - 2] == 'm' || reader.name[length - 2] == 'M')
+            && (reader.name[length - 1] == 'x' || reader.name[length - 1] == 'X')) {
+            category = 1;
+        } else if ((flags & 2)
+            && (reader.name[length - 3] == 'p' || reader.name[length - 3] == 'P')
+            && reader.name[length - 2] == '2'
+            && (reader.name[length - 1] == 'a' || reader.name[length - 1] == 'A')) {
+            category = 2;
+        } else if ((flags & 4)
+            && (reader.name[length - 2] == 'p' || reader.name[length - 2] == 'P')
+            && (reader.name[length - 1] == 'b' || reader.name[length - 1] == 'B')) {
+            category = 4;
+        } else if ((flags & 0x20)
+            && (reader.name[length - 2] == 'e' || reader.name[length - 2] == 'E')
+            && (reader.name[length - 1] == 'p' || reader.name[length - 1] == 'P')) {
+            category = 0x20;
+        } else if ((flags & 0x10)
+            && (reader.name[length - 3] == 'e' || reader.name[length - 3] == 'E')
+            && (reader.name[length - 2] == 'p' || reader.name[length - 2] == 'P')
+            && (reader.name[length - 1] == 'l' || reader.name[length - 1] == 'L')) {
+            category = 0x10;
+        } else if ((flags & 0x40)
+            && (reader.name[length - 3] == 't' || reader.name[length - 3] == 'T')
+            && (reader.name[length - 2] == 'l' || reader.name[length - 2] == 'L')
+            && (reader.name[length - 1] == 'p' || reader.name[length - 1] == 'P')) {
+            category = 0x40;
+        } else if ((flags & 0x80)
+            && (reader.name[length - 2] == 'f' || reader.name[length - 2] == 'F')
+            && reader.name[length - 1] == '2') {
+            category = 0x80;
+        } else {
+            continue;
+        }
+        if (category != 0) {
+            entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
+            entry->category = category;
+            entry->value = 0;
+            entry->id = 0;
+            strcpy(entry->name, reader.name);
+            if (tail != NULL) {
+                tail->next = entry;
+            } else {
+                list->head = entry;
+            }
+            entry->next = NULL;
+            entry->prev = tail;
+            list->count++;
+            tail = entry;
+        }
+    }
+    btlClosePfsDebugDirectory(directoryHandle);
+    return list;
+}
+
 
 /* Release all scanned entries, the owned path prefix, and the list header. */
 void btlDestroyEntryList(BtlResourceEntryList *list) {
