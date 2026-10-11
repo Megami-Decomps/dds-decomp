@@ -51,6 +51,7 @@ extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 
 extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
 
 extern void func_001F3C30(BtlLinkedCommand *action);
 
@@ -3664,7 +3665,6 @@ void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-extern void btlClearAllUnitDefeatCandidatesTask(void);
 
 void btlInitLinkedUnitActionCursor(ActionStateLink *linkState) {
     BtlLinkedCommand *scene = &((BtlState *)btlGetRuntime())->cameraCommand;
