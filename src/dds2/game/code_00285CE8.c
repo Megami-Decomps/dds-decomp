@@ -38,14 +38,19 @@ typedef struct MtrGrid {
     u8 pad00[4];
     MtrCell *cells;
     s32 count;
-    u8 pad0C[8];
+    s16 originX;
+    s16 originY;
+    s16 width;
+    s16 height;
     s16 unk14;
     s16 unk16;
     s16 remainingDelay;
     s16 delayRange;
     s16 unk1C;
     s16 unk1E;
-    u8 pad20[4];
+    s16 depthStep;
+    u8 initialDepth;
+    s8 axisSwap;
     void (*draw)(s32, s32, s32, s32, struct MtrGrid *, s32, s32);
 } MtrGrid;
 
@@ -78,7 +83,60 @@ void func_00285D78(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00285E98);
+MtrCell *func_00285E98(MtrGrid *grid, MtrCell *source, s8 mode) {
+    typedef struct MtrDirections { u8 offsets[6][2]; } MtrDirections;
+    extern const MtrDirections D_00425DD8;
+    MtrDirections directionTable = D_00425DD8;
+    MtrCell *cell = NULL;
+    s32 count;
+    s32 i;
+
+    count = grid->count;
+    for (i = 0; i < count; i++) {
+        if (grid->cells[i].state == 0) {
+            cell = &grid->cells[i];
+            break;
+        }
+    }
+    if (cell == NULL) {
+        return NULL;
+    }
+    {
+        if (source != NULL) {
+            s8 direction = source->direction + mode;
+            s32 countdown;
+
+            if (direction < 0) {
+                direction += 6;
+            }
+            if (direction >= 6) {
+                direction -= 6;
+            }
+            if (grid->axisSwap == 0) {
+                cell->x = source->x + (s8)directionTable.offsets[direction][0] * grid->unk1C;
+                cell->y = source->y + (s8)directionTable.offsets[direction][1] * grid->unk1E;
+            } else {
+                cell->x = source->x + (s8)directionTable.offsets[direction][1] * grid->unk1C;
+                cell->y = source->y + (s8)directionTable.offsets[direction][0] * grid->unk1E;
+            }
+            cell->remainingDepth = source->remainingDepth - 1;
+            cell->direction = direction;
+            countdown = (u16)grid->delayRange - (u16)grid->depthStep;
+            cell->unk04 = cell->unk06 = countdown;
+        } else {
+            s32 countdown;
+            f32 random = effMiscRandUnitFloat(NULL);
+            cell->x = grid->originX + (s32)((f32)(grid->width / grid->unk1C) * random) * grid->unk1C;
+            random = effMiscRandUnitFloat(NULL);
+            cell->y = grid->originY + (s32)((f32)(grid->height / grid->unk1E) * random) * grid->unk1E;
+            cell->remainingDepth = grid->initialDepth;
+            cell->direction = 0;
+            countdown = (u16)grid->delayRange;
+            cell->unk04 = cell->unk06 = countdown;
+        }
+    }
+    return cell;
+}
 
 extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
 extern f32 effMiscRandUnitFloat(void *);
