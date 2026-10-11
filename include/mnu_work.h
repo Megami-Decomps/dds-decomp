@@ -308,7 +308,10 @@ typedef char MenuProgressStateLayoutAssert[
 
 typedef struct MenuRegistryParameters {
     s32 kind;
-    u8 pad04[8];
+    u8 pad04[2];
+    s16 unk06; /* 0x06: per-record count copied for kind 1 and kind 3 records */
+    s16 unk08; /* 0x08: printed as Major by func_003180B8 */
+    s16 unk0A; /* 0x0A: printed as Minor by func_003180B8 */
     s16 xOffset, yOffset;
     u8 pad10[4];
     s32 rotationX, rotationY, rotationZ, scale;
@@ -395,6 +398,9 @@ typedef char MenuResourceLayoutsAssert[
      sizeof(((MenuRegistry*)0)->initialRemainingCount)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
      (unsigned long)&((MenuRegistryParameters*)0)->kind==0 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->unk06==0x06 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->unk08==0x08 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->unk0A==0x0A &&
      (unsigned long)&((MenuRegistryParameters*)0)->xOffset==0x0C &&
      (unsigned long)&((MenuRegistryParameters*)0)->yOffset==0x0E &&
      (unsigned long)&((MenuRegistryParameters*)0)->rotationX==0x14 &&

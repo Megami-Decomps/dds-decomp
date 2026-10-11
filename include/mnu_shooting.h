@@ -183,7 +183,8 @@ typedef struct MnuShootingWork {
     s16 phase;
     s16 result;
     s32 phaseTicks;
-    u8 padA0[8];
+    s32 unkA0; /* 0xA0: cleared by the section initializer (func_003180B8). */
+    s32 unkA4; /* 0xA4: cleared by the section initializer (func_003180B8). */
     s32 unkA8; /* 0xA8: func_0031A0B8 switch state. */
     s32 unkAC; /* 0xAC: func_0031A0B8 per-state tick. */
     s32 unkB0;
@@ -216,7 +217,9 @@ typedef char ShootingInputOffsetsAssert[
      (unsigned long)&((MnuShootingWork *)0)->unk90 == 0x90 &&
      (unsigned long)&((MnuShootingWork *)0)->unk94 == 0x94) ? 1 : -1];
 typedef char ShootingCallbackOffsetsAssert[
-    ((unsigned long)&((MnuShootingWork *)0)->unkA8 == 0xA8 &&
+    ((unsigned long)&((MnuShootingWork *)0)->unkA0 == 0xA0 &&
+     (unsigned long)&((MnuShootingWork *)0)->unkA4 == 0xA4 &&
+     (unsigned long)&((MnuShootingWork *)0)->unkA8 == 0xA8 &&
      (unsigned long)&((MnuShootingWork *)0)->unkAC == 0xAC) ? 1 : -1];
 
 typedef char ShootingPoolOffsetsAssert[
