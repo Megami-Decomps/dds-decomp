@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff_dependency.h"
+#include "eff_node.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
@@ -105,7 +107,50 @@ extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-INCLUDE_ASM(const s32, "game/code_0022D420", func_0022D420);
+extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
+extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
+
+void func_0022D420(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
+                   s32 interval, EvtRuntime *viewer) {
+    s32 slot;
+    s32 start;
+    s32 current;
+    s32 duration;
+    s32 end;
+    s32 alpha;
+
+    switch (group->type) {
+    case 3:
+    case 20:
+    case 21:
+    case 26:
+        slot = key->p08.sb[0];
+        if (slot >= 0) {
+            start = key->frame;
+            current = viewer->curFrame;
+            duration = key->duration;
+            if (current < start) {
+                evtEventViewerFreeSlot(slot, viewer);
+                key->p08.sb[0] = -1;
+                break;
+            }
+            end = start + interval + duration;
+            if (current >= end) {
+                evtEventViewerFreeSlot(slot, viewer);
+                key->p08.sb[0] = -1;
+                break;
+            }
+            alpha = (s32)((128.0f / (f32)duration) * (f32)(end - current));
+            return effSetNodeParameterValue(
+                ((EffectDependencyState *)viewer->objects[slot]->data)->handle,
+                ((u32)alpha << 24) | 0x00808080);
+        }
+        break;
+    case 18:
+        evtEventViewerFreeBuffer(key);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0022D420", func_0022D528);
 

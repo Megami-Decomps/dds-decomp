@@ -7636,3 +7636,26 @@ context, not invented storage. The provider consumes only three packed color
 words. Its position rows use the existing `PCP_COPY_VECTOR` SDK macro, evidenced
 by the adjacent native `LQ`/`SQ` pairs in both games; no new assembly is needed.
 
+### Separate timeline expiry checks can preserve a shared cleanup block
+
+DDS1 `func_0022D420` (264 bytes) releases an effect slot when the current
+frame precedes its key or reaches its end. Express those as two early cleanup
+paths, each calling `evtEventViewerFreeSlot`, clearing the signed slot byte,
+and breaking from the switch. The remaining active path forwards the void
+`effSetNodeParameterValue` call with `return`; the buffer-release case ends
+with `break` and retains its shared epilogue.
+
+A combined cleanup path has the same behavior, but sibling-call preparation
+moves the active successor ahead of it through
+`merge_blocks_move_successor_nojumps`. Separate expiry paths avoid that move;
+the final jump pass merges their identical cleanup calls into the native
+shared block. Read-only compiler observations reproduce the complete ordinary
+assembly and all 22 RTL dumps for both forms. Neither a compiler flag nor an
+artificial use is required. Whole-owner validation is 60 match, 0 differ,
+including all 24 jump-table targets.
+
+Preserve Deep Quasar's earlier quantity-reuse and cleanup-call findings, and
+Silver Helix, Tidal and Sable's viewer/dependency reconstruction and controls.
+Peregrine Forge closes the source, with independent Luna Field native/API
+review and Luna Scout object/table validation.
+
