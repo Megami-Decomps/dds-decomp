@@ -7599,3 +7599,22 @@ both the other phases and an unreached deadline. Preserve that shared waiting
 outcome rather than returning an isolated Boolean comparison, which changes
 the native branch and default-result joins.
 
+
+### Observe camera permission before snapshotting preserved mode flags
+
+`btlSetCameraCommandMode` (DDS1 `0x001DB048`, DDS2 `0x001E8258`, 460
+bytes each) first reads the command flags for the mode-six permission guard,
+then snapshots them for mode-ten state preservation and the modes-nine/ten
+carry bit. These are separate source-level decisions, although GCC shares
+the actual flag load. Caching the preservation value before the permission
+guard collapses an early CFG edge and removes four native words, including
+subsequent block-alignment padding. A direct permission observation followed
+by the preservation snapshot matches with the ordinary TU flags.
+
+The mode table owns 16-byte entries: initializer, updater, repeat byte and a
+final opaque pointer. DDS1's initializer permission callback is at battle
+work `+0x664`, not its unrelated `+0x610` camera-state predicate. Keep the
+20-byte camera-mode packet typed, and use the existing kind-tagged argument
+owner in DDS2: kind `0x2A` stores linked unit pointers in the slots that kind
+9 uses for an effect index and value. No alternate struct view is needed.
+
