@@ -3,8 +3,8 @@
 #include "mnu_scene_work.h"
 
 extern void mnuDrawMantraPanelSprite(s32, s32, s32, s32, u16, s32);
-extern void mnuDrawMantraCostCounter(s32, s32, s32, s32, u16, s32);
-extern void func_00255368(s32, s32, s32, s32, u16, s32);
+extern void mnuDrawMantraCostCounter(s32, s32, s32, s32, s32, s32);
+extern void func_00255368(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
     MnuMantraGridEntry *entry =
