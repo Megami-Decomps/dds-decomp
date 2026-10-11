@@ -143,7 +143,7 @@ WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object) {
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
-    return dds3GetObjectOwnedHandle(object)->resourceHandle;
+    return (u32)dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
@@ -165,7 +165,7 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
                 }
             }
         } else {
-            sdfReleaseDevSlot(base->resourceHandle, 1, 1);
+            sdfReleaseDevSlot((s32)base->resourceHandle, 1, 1);
             sdfDestroyMotion(base->motion);
         }
         base->resourceHandle = 0;
@@ -315,7 +315,7 @@ void func_00112168(void *object) {
     sdfModelUpdateRootTransforms(model, 0);
     sdfModelUpdateRootTransforms(model, 1);
     base->resourceState = 1;
-    base->resourceHandle = (u32)model;
+    base->resourceHandle = model;
     base->motion = motion;
     base->weight = 1.0f;
     base->mode = 0;
