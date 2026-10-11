@@ -7414,3 +7414,21 @@ distinct from earlier action-one tails. A void declaration instead lets that
 value take `$2` and enables unwanted tail sharing. Native allocation and delay
 traces identified these decisions; the reconciled ordinary C matches all 204
 instructions. No use of the discarded status or extra dependency is added.
+
+## Preserve the window selection wrapper's actual node result
+
+Both advance and retreat window-selection wrappers forward the selected-node
+result of their list provider. The providers retain that pointer across panel
+cleanup, or return NULL when selection fails. Declare and implement the window
+wrappers consistently as returning `struct MenuListNode *`; callers may discard
+the result when they need only cursor movement.
+
+DDS1 `mnuBuildShopCatalogList` retains the appended node while moving selection,
+then initializes its price parameters before querying transaction limits. The
+call's delay slot saves the preceding append result before entering the selection
+wrapper; it does not capture the selection return. With the genuine pointer
+contract, the return register is occupied during local allocation and the price
+address takes `$3`, matching all 111 instructions. A void view instead puts the
+address in `$2` and changes three instructions. Readonly allocator observation
+confirmed this decision with complete ordinary-output parity; production needs
+no artificial result use, register binding or compiler intervention.
