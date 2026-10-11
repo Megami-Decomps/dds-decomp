@@ -7242,7 +7242,147 @@ u32 func_001CC018(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D00);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CC020);
+extern s16 D_004368BC;
+extern s16 D_004368BE;
+extern s16 D_004368C0;
+
+void func_001CC020(BtlState *scene, SceneAiWork *state, s32 mode) {
+    BattleSceneObject *object;
+    u32 oldIndex;
+    u32 count;
+    u32 direction = 0;
+    KwlnTask *task;
+    s32 flags;
+    BattleActorPanelWork *panel;
+
+    (void)scene;
+    if (D_0037F510.confirm < 0) {
+        task = (KwlnTask *)kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+        object = (BattleSceneObject *)kwlnTaskGetUserValue((s32)task);
+        if (object->state == 8) {
+            state->state = 5;
+            object->state = 9;
+            object->commandData->linkedUnit =
+                (BtlUnit *)btlGetIndexListEntry(state->listA, state->entry);
+            func_001BB988(object, 0, 0, 0);
+            sndSetStationedSeVolume(9);
+            return;
+        }
+
+        state->state = 3;
+        if (func_001C82D8((s32)object, btlCommandPanelWork->classIndex) != 0) {
+            return;
+        }
+        func_001BB988(object, D_004368BC, D_004368BE, D_004368C0);
+        return;
+    }
+
+    if (D_0037F510.unk23 < 0) {
+        state->state = 4;
+        sndSetStationedSeVolume(10);
+        if (fldGetSceneObjectState() == 8) {
+            return;
+        }
+        flags = ((BtlUnit *)state->listA->entries[0])->status.flags;
+        if ((flags & 0x200) != 0) {
+            task = (KwlnTask *)kwlnTaskGetTaskByName(D_004367CC);
+            if (task != 0) {
+                panel = (BattleActorPanelWork *)kwlnTaskGetUserValue((s32)task);
+                btlUpdateActorSlotStates((u8 *)panel, 0);
+            }
+        }
+        if (btlHasRegisteredAphNamePanelTask() == 0) {
+            return;
+        }
+        task = (KwlnTask *)btlGetTrackedTaskHandle(0);
+        kwlnTaskDestroyWithHierarchy(task, 0);
+        return;
+    }
+
+    if (state->result != 0) {
+        return;
+    }
+    oldIndex = state->entry;
+    count = btlGetIndexListCount(state->listA);
+
+    switch (mode) {
+    case 0:
+        if ((D_0037F510.unk25 & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.unk24 & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    case 1:
+        if ((D_0037F510.unk24 & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.unk25 & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    case 2:
+        if ((D_0037F510.prev & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.next & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    case 3:
+        if ((D_0037F510.next & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.prev & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    case 4:
+        if ((D_0037F510.prev & 2) != 0 || (D_0037F510.unk25 & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.next & 2) != 0 || (D_0037F510.unk24 & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    case 5:
+        if ((D_0037F510.next & 2) != 0 || (D_0037F510.unk24 & 2) != 0) {
+            direction = 1;
+        } else if ((D_0037F510.prev & 2) != 0 || (D_0037F510.unk25 & 2) != 0) {
+            direction = 2;
+        }
+        break;
+    }
+
+    if (direction == 1) {
+        if (state->entry != 0) {
+            state->entry--;
+        } else {
+            state->entry = count - 1;
+        }
+        if (count >= 2) {
+            sndSetStationedSeVolume(1);
+        }
+    }
+    if (direction == 2) {
+        if ((u32)state->entry < count - 1) {
+            state->entry++;
+        } else {
+            state->entry = 0;
+        }
+        if (count >= 2) {
+            sndSetStationedSeVolume(1);
+        }
+    }
+    if (state->entry == oldIndex) {
+        return;
+    }
+
+    if (btlHasRegisteredAphNamePanelTask() != 0) {
+        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+    }
+    btlClearIndexList(state->listB);
+    {
+        void *entry = btlGetIndexListEntry(state->listA, state->entry);
+        btlAppendIndexListEntry(state->listB, entry);
+    }
+}
 
 extern const u8 *D_00435E48;
 extern const u8 *D_00435E4C;
@@ -7342,21 +7482,20 @@ void btlDrawCenteredPanelSegments(s32 width) {
 
 extern s32 btlGetEffectActive();
 
-extern void func_001CC020();
 
 extern void func_001CC438();
 
 s32 fldStepSceneStateMachine(KwlnTask *handle) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    s32 *state;
+    SceneAiWork *state;
     s32 mode;
     if (work->battleFlags & 0x04000000) {
         return 0;
     }
-    state = (s32 *)kwlnTaskGetUserValue(handle);
-    switch (*state) {
+    state = (SceneAiWork *)kwlnTaskGetUserValue(handle);
+    switch (state->state) {
     case 1:
-        *state = 2;
+        state->state = 2;
         break;
     case 2:
         mode = 1;
