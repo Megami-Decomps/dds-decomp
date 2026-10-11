@@ -1574,14 +1574,10 @@ f32 func_001A6958(void) {
     return 1.5f;
 }
 
-typedef struct BattleCommandRangeContext {
-    u8 pad_000[0x690];
-    s32 (*commandRangeOverride)(BtlUnit *, s32);
-} BattleCommandRangeContext;
 
 
 u8 func_001A6968(BtlUnit *unit, s32 command) {
-    BattleCommandRangeContext *context = (BattleCommandRangeContext *)btlGetRuntime();
+    BtlState *context = (BtlState *)btlGetRuntime();
     s32 result;
     s32 minimum;
     s32 maximum;
