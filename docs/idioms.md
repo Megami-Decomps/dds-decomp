@@ -7702,6 +7702,15 @@ installation loop becomes a countdown. The owned byte-row extent and actual
 index lifetime recover both loops without casts, declaration-order changes,
 alternate table views or compiler flags.
 
+DDS2 `ptyApplyProfilePreset` (`0x00313D80`, 520 bytes) uses the same source
+form with its title-specific completion calls. Its existing 0xA0-byte
+`PtyPresetRecord` owns four 12-byte profile-ID rows at +0x10. The party scan
+resolves `&datGameState->party[i]` each iteration, preserving the native fresh
+game-state read after the profile-flag callback; a captured party pointer
+incremented across those calls misses this read epoch. The `u16` occupied
+mask and selected profile ID retain their actual flag and callback widths.
+The complete private owning unit gates `97 match, 0 differ` with this body.
+
 ### Separate timeline expiry checks can preserve a shared cleanup block
 
 DDS1 `func_0022D420` (264 bytes) releases an effect slot when the current
