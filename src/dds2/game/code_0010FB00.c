@@ -188,7 +188,7 @@ EffWorldNode *func_0010FE50(s32 capacity) {
     if (dds3ActiveWorld != NULL) {
         return NULL;
     }
-    if ((u32)(capacity - 0x20) >= 0x7FE0) {
+    if ((u32)capacity - 0x20u >= 0x7FE0u) {
         return NULL;
     }
 
