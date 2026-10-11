@@ -6881,6 +6881,165 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
         break;
     }
 }
+extern void func_003364B8(f32);
+
+extern void func_001EC5F0(BtlLinkedCommand *);
+
+extern void func_001EF030(void *, void *);
+
+extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+
+extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
+
+extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
+
+INCLUDE_ASM(const s32, "game/code_001DD390", func_001EB5B0);
+
+void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
+    BtlState *work;
+    s32 category;
+    u8 *out;
+    if (func_001EAA00(action) != 0) {
+        func_001EC5F0(action);
+        return;
+    }
+    work = (BtlState *)btlGetRuntime();
+    if (work->unk66C != 0 && work->unk66C((BtlUnit *)action) != 0) {
+        return;
+    }
+    category = btlMapActorCategory(action);
+    if (category > 0 && category == action->stageCount++) {
+        btlClearRuntimeFlag2000();
+        if (work->unk658 != 0 && work->unk658((BtlUnit *)action) != 0) {
+            return;
+        }
+        if (btlIsSpecialActorCategory((s32)action) != 0) {
+            func_001EC868(action, &action->camera, 0.0f);
+            func_003364B8(-(10.0f * 0.017453293f));
+            VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, action->camera.direction);
+            action->camera.distance += 150.0f;
+            out = (u8 *)&action->backCamera;
+        } else {
+            u8 *pose = (u8 *)&action->frontCamera;
+            out = (u8 *)&action->backCamera;
+            func_001EF030(action, pose);
+            btlCopyMotionTransform((BtlCamState *)out, (BtlCamState *)pose);
+            action->backCamera.distance += 100.0f;
+            action->flags |= 0x41;
+            action->state = 0;
+            action->motionParameter = 30.0f;
+        }
+        btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)out);
+        return;
+    }
+    if (action->stepKind == 0xD) {
+        btlAdvanceTargetCursorAnimation(action, &action->camera);
+    }
+}
+
+extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+
+void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
+    BtlUnit *target;
+    if (((BtlState *)btlGetRuntime())->unk220 & 1) {
+        target = action->link->unit;
+        if (target->status.flags & 0x400) {
+            func_001ECBF8(action, &action->camera, target);
+            return;
+        }
+    }
+    if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        btlApplyMarkedUnitActionCamera(action, &action->backCamera, action->link->unit, 0);
+        action->motionParameter = 7.0f;
+        action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
+    } else {
+        btlApplyMarkedUnitActionCamera(action, &action->camera, action->link->unit, 0);
+    }
+}
+
+void func_001EBE28(void) {
+}
+
+INCLUDE_ASM(const s32, "game/code_001DD390", func_001EBE30);
+
+void func_001EC190(void) {
+}
+
+extern void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
+
+void func_001EC198(BtlLinkedCommand *action) {
+    BtlUnit *target;
+    s32 kind;
+    f32 pos[4];
+    if (btlGetIndexListCount(action->targetList) != 1) {
+        return;
+    }
+    target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    if (action->link->unit->status.flags & 0x200) {
+        btlApplyMarkedUnitActionCamera(action, &action->camera, target, 0);
+        return;
+    }
+    if (btlHasActorCategoryFlag100(action) != 0) {
+        return;
+    }
+    btlUnitGetBodyPosVU(target);
+    VU0_STORE_VF(vf10, pos);
+    if (pos[0] > 0.0f) {
+        kind = 2;
+    } else {
+        kind = 3;
+    }
+    btlFrameTargetExtremesCameraPose(action, &action->frontCamera, kind, 45.0f, 0.25f);
+    btlFrameTargetExtremesCameraPose(action, &action->backCamera, kind, 1.0f, 0.5f);
+    action->motionParameter = 30.0f;
+    action->flags |= 0x41;
+}
+
+void func_001EC2A0(void) {
+}
+
+extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);
+
+void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    if (action->link->unit->status.flags & 0x400) {
+        if (work->cameraPoseBlendHook != 0) {
+            s32 hasFlag200 = 0;
+            s32 hasFlag400 = 0;
+            u32 i;
+            u32 count = btlGetIndexListCount(action->link->indexWork.indices);
+            for (i = 0; i < count; i++) {
+                BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(action->link->indexWork.indices, i);
+                if (entry->status.flags & 0x200) {
+                    hasFlag200 = 1;
+                }
+                if (entry->status.flags & 0x400) {
+                    hasFlag400 = 1;
+                }
+            }
+            if (work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
+                action->flags |= 0x10000;
+                return;
+            }
+        }
+        btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+        action->motionParameter = 200.0f;
+        action->flags |= 0x10041;
+    } else {
+        btlInitSkillCommandCursor(action, &action->camera);
+    }
+}
+
+void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *unit) {
+    if (!(unit->flags & 0x10000)) {
+        btlAdvancePlayerCursorAnimation(unit, &unit->camera);
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_001DD390", func_001EC418);
 INCLUDE_SDATA(const s32, "game/code_001DD390", btlDeferredTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A28);
