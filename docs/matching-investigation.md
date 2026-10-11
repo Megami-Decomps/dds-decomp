@@ -287,6 +287,17 @@ this is not a counterpart port. Luna Field supplied this closure, with Luna
 Event's independent provider/epoch review and Peregrine Forge integration.
 Preserve Ember, Quartz, Azure, Tidal and Sable's retained source lineage.
 
+The DDS2 counterparts `func_002FD900` (912 bytes) and `func_002FDDD8`
+(1068 bytes) close with the same publication and final metadata-input boundary.
+The retained duplication draft reproduced the two swapped words at offsets
+`+0x288` and `+0x28C`; applying this correction leaves all 683 functions in
+its owner exact. Preserve DDS2's `0x74`-byte defaults copy rather than DDS1's
+`0x3C`, its `effQueueEffectFileJob` provider, and the fresh global payload-size
+read after the resolver. A qualified ordinary/probe comparison preserves the
+complete assembly. This transfer credits Brass's retained DDS2 draft and
+Peregrine's investigation alongside the donor reconstruction lineage above;
+KiB integrated and independently checked the native read epochs.
+
 ### Grid placement: compute each selected coordinate pair in its own arm
 
 DDS2 `game/code_00285CE8::func_00285E98` merged its selected Y-direction byte
