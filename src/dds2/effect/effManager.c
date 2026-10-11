@@ -7,27 +7,10 @@
 #include "eff_node_descriptor.h"
 #include "eff_node.h"
 #include "sdf_packet_list.h"
+#include "sdf_gs_packet.h"
+#include "kwln.h"
 
-/* The field draw dispatchers accept a packet list through the callback at
- * offset 0x10 of each 0x20-byte record. */
-typedef struct EffFieldDrawDispatcher {
-    u8 reserved00[0x10];
-    void (*submit)(struct EffFieldDrawDispatcher *, struct SdfListHead *);
-    u8 reserved14[0xC];
-} EffFieldDrawDispatcher;
-
-typedef struct EffFieldStatePacket {
-    u64 dmaTag;
-    u64 vifCommands;
-    u64 gifTag;
-    u64 gifRegisters;
-    u64 test;
-    u64 testRegister;
-    u64 alpha;
-    u64 alphaRegister;
-} EffFieldStatePacket;
-
-extern EffFieldDrawDispatcher D_003801A8[];
+extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void effObjectListCountersReset(void);
 
@@ -39,40 +22,41 @@ void effManagerInitializeSubsystems(void) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-u32 func_00157400(void) {
-    struct SdfListHead *list;
-    EffFieldStatePacket *state;
-    EffFieldDrawDispatcher *dispatcher;
+s32 func_00157400(KwlnTask *task) {
+    SdfListHead *list;
+    SdfGsBlendPacket *state;
+    SdfPoolNode *surface;
 
-    list = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    (void)task;
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    state = (EffFieldStatePacket *)sdfAllocPacketAligned(0x40);
-    state->dmaTag = 3;
-    state->vifCommands = 0x5000000310000000ULL;
-    state->gifTag = 0x1000000000008002ULL;
-    state->gifRegisters = 0xE;
-    state->test = 0x51801;
-    state->testRegister = 0x47;
-    state->alpha = 0x44;
-    state->alphaRegister = 0x42;
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = 0xE;
+    state->registers.test.value = 0x51801;
+    state->registers.test.registerId = 0x47;
+    state->registers.alpha.value = 0x44;
+    state->registers.alpha.registerId = 0x42;
     sdfAppendPacket(list, (u32)state);
-    dispatcher = D_003801A8;
-    dispatcher->submit(dispatcher, list);
-    dispatcher++;
+    surface = &kwlnDrawSurfaces[51];
+    surface->append(surface, list);
 
-    list = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    state = (EffFieldStatePacket *)sdfAllocPacketAligned(0x40);
-    state->dmaTag = 3;
-    state->vifCommands = 0x5000000310000000ULL;
-    state->gifTag = 0x1000000000008002ULL;
-    state->gifRegisters = 0xE;
-    state->test = 0x71801;
-    state->testRegister = 0x47;
-    state->alpha = 0x42;
-    state->alphaRegister = 0x42;
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = 0xE;
+    state->registers.test.value = 0x71801;
+    state->registers.test.registerId = 0x47;
+    state->registers.alpha.value = 0x42;
+    state->registers.alpha.registerId = 0x42;
     sdfAppendPacket(list, (u32)state);
-    dispatcher->submit(dispatcher, list);
+    surface++;
+    surface->append(surface, list);
 
     effObjectListCountersReset();
     return 0;
