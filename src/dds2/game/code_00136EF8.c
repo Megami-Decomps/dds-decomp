@@ -507,7 +507,623 @@ void fldResetRecordState(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00137F10);
+/* Complete runtime collision descriptor. Serialized resources have two
+ * additional reserved words, but generated geometry embeds these six words. */
+typedef struct FldCollisionDescriptor {
+    s32 vertexCount;
+    s32 faceCount;
+    s32 triangleCount;
+    f32 (*vertices)[4];
+    FldCollisionFace *faces;
+    void *stopData;
+} FldCollisionDescriptor;
+typedef char FldCollisionDescriptorSize[(sizeof(FldCollisionDescriptor) == 0x18) ? 1 : -1];
+
+void func_00137F10(void *geometry, f32 *translation,
+                   u32 id, s32 sceneFlag, s32 ownerIndex) {
+    f32 vertices[4][4];
+    f32 copiedVertices[4][4];
+    /* Inferred four-point capacity from related native workspace maps;
+     * this operation populates only its three defining points. */
+    f32 edgeTriangle[4][4];
+    f32 center[3];
+    f32 capturedPlane[4];
+    f32 minimum[2];
+    f32 maximum[2];
+    FldValueRecord *record;
+    s32 pass;
+    s32 remaining;
+    f32 (*sourceVertices)[4];
+    void *stopData;
+    s32 trianglesRemaining;
+    FldCollisionFace *face;
+    f32 *planeX;
+    f32 *planeY;
+    f32 *planeZ;
+    f32 *limit0;
+    f32 *limit1;
+    f32 *limit2;
+    f32 *limit3;
+    f32 absX;
+    f32 absY;
+    f32 absZ;
+    f32 runningMinimum;
+    s32 i;
+    s32 component;
+    FldCollisionDescriptor *source = geometry;
+
+    if (fldValueRecords == 0) {
+        fldAllocateRecordStorage();
+    }
+    for (pass = 0; pass < 5; pass++) {
+        s32 faceCount;
+        FldCollisionFace *firstFace;
+        sourceVertices = source->vertices;
+        faceCount = source->faceCount;
+        firstFace = source->faces;
+        stopData = source->stopData;
+        trianglesRemaining = source->triangleCount;
+        if (faceCount > 0) {
+            face = firstFace;
+            remaining = faceCount;
+            do {
+                u32 vertexIndex;
+                record = &((FldValueRecord *)fldValueRecords)[fldValueRecordCount];
+                record->count = trianglesRemaining > 0 ? 3 : 4;
+                vertexIndex = face->vertexIndices[0];
+                vertices[0][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[0][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[0][2] = sourceVertices[vertexIndex][2] + translation[2];
+                vertexIndex = face->vertexIndices[1];
+                vertices[1][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[1][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[1][2] = sourceVertices[vertexIndex][2] + translation[2];
+                vertexIndex = face->vertexIndices[2];
+                vertices[2][0] = sourceVertices[vertexIndex][0] + translation[0];
+                vertices[2][1] = sourceVertices[vertexIndex][1] + translation[1];
+                vertices[2][2] = sourceVertices[vertexIndex][2] + translation[2];
+                if (record->count == 3) {
+                    for (i = 0; i < 3; i++) {
+                        copiedVertices[i][0] = vertices[i][0];
+                        copiedVertices[i][1] = vertices[i][1];
+                        copiedVertices[i][2] = vertices[i][2];
+                    }
+                } else {
+                    vertexIndex = face->vertexIndices[3];
+                    vertices[3][0] = sourceVertices[vertexIndex][0] + translation[0];
+                    vertices[3][1] = sourceVertices[vertexIndex][1] + translation[1];
+                    vertices[3][2] = sourceVertices[vertexIndex][2] + translation[2];
+                    for (i = 0; i < 4; i++) {
+                        copiedVertices[i][0] = vertices[i][0];
+                        copiedVertices[i][1] = vertices[i][1];
+                        copiedVertices[i][2] = vertices[i][2];
+                    }
+                }
+                fldCalcTrianglePlane(copiedVertices[0], &capturedPlane[0],
+                                     &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                for (i = 0; i < 3; i++) {
+                    record->normal[i] = capturedPlane[i];
+                }
+                record->normal[3] = 0.0f;
+                for (i = 0; i < record->count; i++) {
+                    for (component = 0; component < 3; component++) {
+                        record->vertices[i][component] = copiedVertices[i][component];
+                    }
+                    record->vertices[i][3] = 1.0f;
+                }
+                record->planeConstant = fldDotVector(record->normal, record->vertices[0]);
+                absX = record->normal[0];
+                absX = ffabsf(absX);
+                absY = ffabsf(record->normal[1]);
+                absZ = ffabsf(record->normal[2]);
+                if (pass == 0) {
+                    if (!(absX < absY) || !(absZ < absY)) goto next_face;
+                    if (record->normal[1] > 0.0f) goto next_face;
+                    if (record->normal[1] > -0.98f) goto next_face;
+                } else if (pass == 1) {
+                    if (!(absX < absY) || !(absZ < absY)) goto next_face;
+                    if (record->normal[1] > 0.0f) goto next_face;
+                    if (record->normal[1] <= -0.98f) goto next_face;
+                } else if (pass == 2) {
+                    if (!(absY <= absX) || !(absZ <= absX)) goto next_face;
+                } else if (pass == 3) {
+                    if (!(absX < absZ) || !(absY <= absZ)) goto next_face;
+                } else if (pass == 4) {
+                    if (!(absX <= absY) || !(absZ <= absY)) goto next_face;
+                    if (record->normal[1] <= 0.0f) goto next_face;
+                }
+                if (absY <= absX && absZ <= absX) {
+                    record->mode = 0;
+                    runningMinimum = vertices[0][1];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][2];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->count; i++) {
+                        if (vertices[i][1] < runningMinimum) {
+                            runningMinimum = vertices[i][1];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][2] < minimum[1]) minimum[1] = vertices[i][2];
+                        if (vertices[i][1] > maximum[0]) maximum[0] = vertices[i][1];
+                        if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
+                    }
+                    record->bound[0] = runningMinimum;
+                    record->bound[1] = minimum[1];
+                    record->bound[2] = maximum[0];
+                    record->bound[3] = maximum[1];
+                    if (record->count == 3) {
+                        center[0] = 0.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3.0f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3.0f;
+                    } else {
+                        center[0] = 0.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = 0.0f;
+                    edgeTriangle[0][1] = vertices[0][1];
+                    edgeTriangle[0][2] = vertices[0][2];
+                    edgeTriangle[1][0] = 0.0f;
+                    edgeTriangle[1][1] = vertices[1][1];
+                    edgeTriangle[1][2] = vertices[1][2];
+                    edgeTriangle[2][0] = 10.0f;
+                    edgeTriangle[2][1] = vertices[1][1];
+                    edgeTriangle[2][2] = vertices[1][2];
+                    planeX = &record->plane[0][0];
+                    planeY = &record->plane[0][1];
+                    planeZ = &record->plane[0][2];
+                    limit0 = &record->limit[0];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = 0.0f;
+                    edgeTriangle[0][1] = vertices[1][1];
+                    edgeTriangle[0][2] = vertices[1][2];
+                    edgeTriangle[1][0] = 0.0f;
+                    edgeTriangle[1][1] = vertices[2][1];
+                    edgeTriangle[1][2] = vertices[2][2];
+                    edgeTriangle[2][0] = 10.0f;
+                    edgeTriangle[2][1] = vertices[2][1];
+                    edgeTriangle[2][2] = vertices[2][2];
+                    planeX = &record->plane[1][0];
+                    planeY = &record->plane[1][1];
+                    planeZ = &record->plane[1][2];
+                    limit1 = &record->limit[1];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    }
+                    if (record->count == 3) {
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[3][1];
+                        edgeTriangle[1][2] = vertices[3][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[3][1];
+                        edgeTriangle[2][2] = vertices[3][2];
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = 0.0f;
+                        edgeTriangle[0][1] = vertices[3][1];
+                        edgeTriangle[0][2] = vertices[3][2];
+                        edgeTriangle[1][0] = 0.0f;
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = 10.0f;
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->plane[3][0];
+                        planeY = &record->plane[3][1];
+                        planeZ = &record->plane[3][2];
+                        limit3 = &record->limit[3];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                else if (absX <= absY && absZ <= absY) {
+                    record->mode = 1;
+                    runningMinimum = vertices[0][0];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][2];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->count; i++) {
+                        if (vertices[i][0] < runningMinimum) {
+                            runningMinimum = vertices[i][0];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][2] < minimum[1]) minimum[1] = vertices[i][2];
+                        if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
+                        if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
+                    }
+                    record->bound[0] = runningMinimum;
+                    record->bound[1] = minimum[1];
+                    record->bound[2] = maximum[0];
+                    record->bound[3] = maximum[1];
+                    if (record->count == 3) {
+                        center[1] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2]) / 3.0f;
+                    } else {
+                        center[1] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0]) * 0.25f;
+                        center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = vertices[0][0];
+                    edgeTriangle[0][1] = 0.0f;
+                    edgeTriangle[0][2] = vertices[0][2];
+                    edgeTriangle[1][0] = vertices[1][0];
+                    edgeTriangle[1][1] = 0.0f;
+                    edgeTriangle[1][2] = vertices[1][2];
+                    edgeTriangle[2][0] = vertices[1][0];
+                    edgeTriangle[2][1] = 10.0f;
+                    edgeTriangle[2][2] = vertices[1][2];
+                    planeX = &record->plane[0][0];
+                    planeY = &record->plane[0][1];
+                    planeZ = &record->plane[0][2];
+                    limit0 = &record->limit[0];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = vertices[1][0];
+                    edgeTriangle[0][1] = 0.0f;
+                    edgeTriangle[0][2] = vertices[1][2];
+                    edgeTriangle[1][0] = vertices[2][0];
+                    edgeTriangle[1][1] = 0.0f;
+                    edgeTriangle[1][2] = vertices[2][2];
+                    edgeTriangle[2][0] = vertices[2][0];
+                    edgeTriangle[2][1] = 10.0f;
+                    edgeTriangle[2][2] = vertices[2][2];
+                    planeX = &record->plane[1][0];
+                    planeY = &record->plane[1][1];
+                    planeZ = &record->plane[1][2];
+                    limit1 = &record->limit[1];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    }
+                    if (record->count == 3) {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[2][2];
+                        edgeTriangle[1][0] = vertices[3][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[3][2];
+                        edgeTriangle[2][0] = vertices[3][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[3][2];
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = vertices[3][0];
+                        edgeTriangle[0][1] = 0.0f;
+                        edgeTriangle[0][2] = vertices[3][2];
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = 0.0f;
+                        edgeTriangle[1][2] = vertices[0][2];
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = 10.0f;
+                        edgeTriangle[2][2] = vertices[0][2];
+                        planeX = &record->plane[3][0];
+                        planeY = &record->plane[3][1];
+                        planeZ = &record->plane[3][2];
+                        limit3 = &record->limit[3];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                else {
+                    record->mode = 2;
+                    runningMinimum = vertices[0][0];
+                    minimum[0] = runningMinimum;
+                    minimum[1] = vertices[0][1];
+                    maximum[0] = minimum[0];
+                    maximum[1] = minimum[1];
+                    for (i = 1; i < record->count; i++) {
+                        if (vertices[i][0] < runningMinimum) {
+                            runningMinimum = vertices[i][0];
+                            minimum[0] = runningMinimum;
+                        }
+                        if (vertices[i][1] < minimum[1]) minimum[1] = vertices[i][1];
+                        if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
+                        if (vertices[i][1] > maximum[1]) maximum[1] = vertices[i][1];
+                    }
+                    record->bound[0] = runningMinimum;
+                    record->bound[1] = minimum[1];
+                    record->bound[2] = maximum[0];
+                    record->bound[3] = maximum[1];
+                    if (record->count == 3) {
+                        center[2] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3.0f;
+                    } else {
+                        center[2] = 0.0f;
+                        center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0]) * 0.25f;
+                        center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+                    }
+                    edgeTriangle[0][0] = vertices[0][0];
+                    edgeTriangle[0][1] = vertices[0][1];
+                    edgeTriangle[0][2] = 0.0f;
+                    edgeTriangle[1][0] = vertices[1][0];
+                    edgeTriangle[1][1] = vertices[1][1];
+                    edgeTriangle[1][2] = 0.0f;
+                    edgeTriangle[2][0] = vertices[1][0];
+                    edgeTriangle[2][1] = vertices[1][1];
+                    edgeTriangle[2][2] = 10.0f;
+                    planeX = &record->plane[0][0];
+                    planeY = &record->plane[0][1];
+                    planeZ = &record->plane[0][2];
+                    limit0 = &record->limit[0];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    if (fldDotVector(center, planeX) - *limit0 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit0 = fldDotVector(planeX, edgeTriangle[0]);
+                    }
+                    edgeTriangle[0][0] = vertices[1][0];
+                    edgeTriangle[0][1] = vertices[1][1];
+                    edgeTriangle[0][2] = 0.0f;
+                    edgeTriangle[1][0] = vertices[2][0];
+                    edgeTriangle[1][1] = vertices[2][1];
+                    edgeTriangle[1][2] = 0.0f;
+                    edgeTriangle[2][0] = vertices[2][0];
+                    edgeTriangle[2][1] = vertices[2][1];
+                    edgeTriangle[2][2] = 10.0f;
+                    planeX = &record->plane[1][0];
+                    planeY = &record->plane[1][1];
+                    planeZ = &record->plane[1][2];
+                    limit1 = &record->limit[1];
+                    fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                         &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                    *planeX = capturedPlane[0];
+                    *planeY = capturedPlane[1];
+                    *planeZ = capturedPlane[2];
+                    *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    if (fldDotVector(center, planeX) - *limit1 < 0.0f) {
+                        *planeX = -capturedPlane[0];
+                        *planeY = -capturedPlane[1];
+                        *planeZ = -capturedPlane[2];
+                        *limit1 = fldDotVector(planeX, edgeTriangle[1]);
+                    }
+                    if (record->count == 3) {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    } else {
+                        edgeTriangle[0][0] = vertices[2][0];
+                        edgeTriangle[0][1] = vertices[2][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[3][0];
+                        edgeTriangle[1][1] = vertices[3][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[3][0];
+                        edgeTriangle[2][1] = vertices[3][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->plane[2][0];
+                        planeY = &record->plane[2][1];
+                        planeZ = &record->plane[2][2];
+                        limit2 = &record->limit[2];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit2 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit2 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                        edgeTriangle[0][0] = vertices[3][0];
+                        edgeTriangle[0][1] = vertices[3][1];
+                        edgeTriangle[0][2] = 0.0f;
+                        edgeTriangle[1][0] = vertices[0][0];
+                        edgeTriangle[1][1] = vertices[0][1];
+                        edgeTriangle[1][2] = 0.0f;
+                        edgeTriangle[2][0] = vertices[0][0];
+                        edgeTriangle[2][1] = vertices[0][1];
+                        edgeTriangle[2][2] = 10.0f;
+                        planeX = &record->plane[3][0];
+                        planeY = &record->plane[3][1];
+                        planeZ = &record->plane[3][2];
+                        limit3 = &record->limit[3];
+                        fldCalcTrianglePlane(edgeTriangle[0], &capturedPlane[0],
+                                             &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
+                        *planeX = capturedPlane[0];
+                        *planeY = capturedPlane[1];
+                        *planeZ = capturedPlane[2];
+                        *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        if (fldDotVector(center, planeX) - *limit3 < 0.0f) {
+                            *planeX = -capturedPlane[0];
+                            *planeY = -capturedPlane[1];
+                            *planeZ = -capturedPlane[2];
+                            *limit3 = fldDotVector(planeX, edgeTriangle[2]);
+                        }
+                    }
+                }
+                record->unkC8 = D_00436188;
+                record->id = id;
+                record->value = 0;
+                record->face = face;
+                record->stopData = stopData;
+                record->sceneFlag = sceneFlag;
+                record->unkE0 = ownerIndex;
+                record->unkCA = 0;
+                fldValueRecordCount++;
+next_face:
+                remaining--;
+                face++;
+                trianglesRemaining--;
+            } while (remaining != 0);
+        }
+    }
+    D_00436188++;
+}
 
 s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, FldValueRecord *zone) {
     f32 probe[3];
