@@ -2511,7 +2511,585 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AB0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AC0);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024B6A8);
+/* Viewer command menus and the existing timeline/control providers. */
+extern char *D_003C91E8[];
+extern char *D_003C91F8[];
+extern char *D_003C9200[];
+extern char *D_003C9210[];
+extern char *D_003C9230[];
+extern char *D_003C9250[];
+extern char *D_003C9270[];
+extern char *D_003C9278[];
+extern char *D_003C9280[];
+extern char *D_003C9288[];
+extern char *D_003C9290[];
+extern char *D_003C9298[];
+extern char *D_003C92A0[];
+extern char *D_003C92A8[];
+extern const char D_004373A0[];
+extern const char D_004373A8[];
+extern const char D_004373B0[];
+extern u8 D_00438A34;
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+extern void func_001975F8(void *parameters);
+extern void func_00197980(void *parameters);
+extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
+extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
+extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
+extern void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters);
+extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
+extern s32 func_00239860(KwlnTask *task);
+extern s32 evtPollRuntimeControlReady(KwlnTask *task);
+extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
+extern EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+
+s32 func_0024B6A8(s32 command, s32 unused, EvtRuntime *viewer) {
+    EvtRuntimeChild *key;
+
+    if (command == -4) {
+        if (viewer->frameColumn == 0) {
+            viewer->tableColumn = 0;
+        } else {
+            viewer->tableColumn = 1;
+        }
+        evtViewerPushCommandHistory(15, 144, 336, viewer);
+        return 0;
+    }
+    {
+        EvtRuntimeGroup *group = viewer->frameGroup;
+        if (viewer->frameCursor + viewer->frameFirst < group->childCount) {
+            if (command == -2) {
+                viewer->commandCategory = -1;
+                viewer->itemCount = 3;
+                viewer->title = "DELETE FRAME.OK? ";
+                viewer->itemNames = D_003C91E8;
+                viewer->cursor = 0;
+                evtViewerPushCommandHistory(2, 216, 132, viewer);
+                return 0;
+            }
+            if (command != -3) {
+                viewer->commandCategory = D_003C953A[viewer->frameColumn + group->type * 10];
+                key = evtEventViewerGetPendingNode(viewer);
+                switch ((u32)viewer->commandCategory) {
+                case 0:
+                    viewer->value = key->frame + viewer->frameGroup->metadata.value;
+                    viewer->valueMin = viewer->frameGroup->metadata.value;
+                    viewer->valueMax = viewer->headerThird - 1;
+                    evtViewerPushCommandHistory(6, 180, 120, viewer);
+                    break;
+                case 9:
+                    viewer->valueMin = 0;
+                    viewer->valueMax = 10000;
+                    switch (viewer->frameGroup->type) {
+                    case 3:
+                    case 20:
+                    case 21:
+                    case 26:
+                        viewer->value = key->p08.sh[1];
+                        evtViewerPushCommandHistory(6, 180, 120, viewer);
+                        break;
+                    case 18:
+                        viewer->value = key->p08.sh[0];
+                        evtViewerPushCommandHistory(6, 180, 120, viewer);
+                        break;
+                    }
+                    break;
+                case 15:
+                    viewer->value = key->duration;
+                    viewer->valueMin = 0;
+                    viewer->valueMax = 10000;
+                    evtViewerPushCommandHistory(6, 180, 120, viewer);
+                    break;
+                case 1:
+                    viewer->value = key->duration;
+                    viewer->valueMin = 0;
+                    viewer->valueMax = 10000;
+                    if (viewer->frameGroup->type == 10 && viewer->frameGroup->metadata.extra1 != 3) {
+                        break;
+                    }
+                    evtViewerPushCommandHistory(7, 180, 120, viewer);
+                    break;
+                case 2:
+                    if (viewer->frameGroup->type == 7) {
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 3000;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                    }
+                    break;
+                case 3: {
+                    switch (viewer->frameGroup->type) {
+                    case 8:
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 255;
+                        break;
+                    case 12:
+                        viewer->value = key->p08.sh[1];
+                        viewer->valueMin = -255;
+                        viewer->valueMax = 255;
+                        break;
+                    case 31:
+                        viewer->value = key->p08.sh[1];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 255;
+                        break;
+                    }
+                    if (viewer->frameGroup->type == 31 && key->p08.sh[0] == 0) {
+                        break;
+                    }
+                    evtViewerPushCommandHistory(7, 180, 120, viewer);
+                    break;
+                }
+                case 4:
+                    viewer->value = key->p08.sh[1];
+                    viewer->valueMin = -255;
+                    viewer->valueMax = 255;
+                    evtViewerPushCommandHistory(7, 180, 120, viewer);
+                    break;
+                case 5:
+                    switch (viewer->frameGroup->type) {
+                    case 10: viewer->cursor = key->serializedValue; break;
+                    case 11: case 13: case 14: case 15: case 16: case 17: case 23:
+                        viewer->cursor = key->p08.sh[0]; break;
+                    case 24: viewer->cursor = key->p08.sb[0]; break;
+                    case 8: case 25: viewer->cursor = key->p0C.sh[0]; break;
+                    }
+                    viewer->title = "HOKAN MODE   ";
+                    viewer->itemCount = 2;
+                    viewer->itemNames = D_003C91F8;
+                    evtViewerPushCommandHistory(2, 216, 120, viewer);
+                    break;
+                case 11:
+                    switch (viewer->frameGroup->type) {
+                    case 9:
+                        viewer->cursor = key->p08.sh[1];
+                        viewer->itemCount = 2;
+                        viewer->title = "ON/OFF MODE ";
+                        viewer->itemNames = D_003C91F8;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 22:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "ON/OFF MODE ";
+                        viewer->itemNames = D_003C91F8;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 25:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "ON/OFF MODE ";
+                        viewer->itemNames = D_003C91F8;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    }
+                    break;
+                case 16:
+                    switch (viewer->frameGroup->type) {
+                    case 20: case 21: viewer->cursor = key->p08.sb[1]; break;
+                    case 3: case 26: viewer->cursor = key->p0C.sb[0]; break;
+                    }
+                    viewer->title = "ON/OFF MODE ";
+                    viewer->itemCount = 2;
+                    viewer->itemNames = D_003C91F8;
+                    evtViewerPushCommandHistory(2, 216, 120, viewer);
+                    break;
+                case 12:
+                    switch (viewer->frameGroup->type) {
+                    case 12:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 3;
+                        viewer->title = "TRANS MODE ";
+                        viewer->itemNames = D_003C9200;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 6:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 8;
+                        viewer->title = "FADE TYPE  ";
+                        viewer->itemNames = D_003C9210;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 19:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 7;
+                        viewer->title = "CONTROL TYPE ";
+                        viewer->itemNames = D_003C9230;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 1:
+                        viewer->cursor = key->p08.sb[0];
+                        viewer->itemCount = 8;
+                        viewer->title = "UNIT CONTROL TYPE ";
+                        viewer->itemNames = D_003C9250;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 28:
+                        viewer->cursor = key->p08.sb[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "PADACT TYPE";
+                        viewer->itemNames = D_003C9270;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 10:
+                        viewer->cursor = key->p14.sh[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "CONFIG DRAW STOP";
+                        viewer->itemNames = D_003C9278;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 30:
+                        viewer->cursor = key->p08.sh[1];
+                        viewer->itemCount = 2;
+                        viewer->title = "TIMEI FADE DOWN/UP";
+                        viewer->itemNames = D_003C9280;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 31:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "SELECT MODE";
+                        viewer->itemNames = D_003C9288;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 32:
+                        viewer->cursor = key->p08.sh[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "BISTA MODE";
+                        viewer->itemNames = D_003C9290;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 24:
+                        viewer->cursor = key->p1C.sb[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "PRIORITY";
+                        viewer->itemNames = D_003C9298;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 3:
+                    case 20:
+                    case 21:
+                    case 26:
+                        viewer->cursor = key->p10.sb[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "FADE MODE";
+                        viewer->itemNames = D_003C92A0;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    case 29:
+                        viewer->cursor = key->p0C.sb[0];
+                        viewer->itemCount = 2;
+                        viewer->title = "END STOP MODE";
+                        viewer->itemNames = D_003C92A8;
+                        evtViewerPushCommandHistory(2, 216, 120, viewer);
+                        break;
+                    }
+                    break;
+                case 6:
+                    viewer->floatValue = key->p08.f * 57.2957763671875f;
+                    viewer->floatMin = 1.0f;
+                    viewer->floatMax = 180.0f;
+                    evtViewerPushCommandHistory(8, 180, 120, viewer);
+                    break;
+                case 8:
+                    switch (viewer->frameGroup->type) {
+                    case 5:
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 255;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 19:
+                        viewer->value = key->p08.sh[1];
+                        if (key->p08.sh[0] == 3) {
+                            viewer->valueMin = -1;
+                        } else {
+                            viewer->valueMin = 0;
+                        }
+                        viewer->valueMax = 255;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 3:
+                    case 26:
+                        viewer->value = key->p0C.sb[1];
+                        viewer->valueMin = -1;
+                        viewer->valueMax = 127;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 12:
+                        viewer->value = key->p0C.i;
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 255;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 18:
+                        viewer->value = key->p0C.sb[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 2;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 4:
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 500;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 28:
+                        viewer->value = key->p08.sh[1];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 300;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 29:
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 180;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 30:
+                        viewer->value = key->p08.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 60;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 1:
+                        viewer->value = key->p18.sh[0];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 999;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    case 2:
+                        viewer->value = key->p0C.sh[1];
+                        viewer->valueMin = 0;
+                        viewer->valueMax = 999;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    }
+                    break;
+                case 7:
+                    viewer->value = key->p08.sh[1];
+                    viewer->valueMin = 0;
+                    viewer->valueMax = 127;
+                    evtViewerPushCommandHistory(7, 180, 120, viewer);
+                    break;
+                case 13: {
+                    EvtRuntimeGroup *group = viewer->frameGroup;
+                    switch (group->type) {
+                    case 20:
+                    case 21:
+                        viewer->inputB = 0;
+                        evtViewerPushCommandHistory(12, 120, 84, viewer);
+                        break;
+                    case 10: {
+                        f32 *parameters = key->payload;
+                        s32 i;
+                        viewer->unk2328 = 0;
+                        viewer->unk232C = 0;
+                        for (i = 0; i < 4; i++) {
+                            viewer->commandMatrix[i] = parameters[i];
+                            viewer->commandMatrix[i + 4] = parameters[i + 4];
+                            viewer->commandMatrix[i + 8] = parameters[i + 8];
+                        }
+                        for (i = 0; i < 4; i++) {
+                            viewer->savedCommandMatrix[i] = parameters[i];
+                            viewer->savedCommandMatrix[i + 4] = parameters[i + 4];
+                            viewer->savedCommandMatrix[i + 8] = parameters[i + 8];
+                        }
+                        evtViewerPushCommandHistory(18, 348, 0, viewer);
+                        break;
+                    }
+                    case 11: {
+                        EvtViewerDrawPayload *parameters = key->payload;
+                        evtSetDrawVectorTarget(0, parameters->y, parameters->x, parameters->z, parameters->w);
+                        kwlnDrawVector.fogColor = parameters->mode;
+                        viewer->controlState = kwlnTaskCreate(D_004373A0, 0x2AF9, 1, 1, func_00239860, NULL, 1);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    }
+                    case 13:
+                        func_001975F8(key->payload);
+                        viewer->blurRectangleEnabled = 0;
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 14:
+                        effEventSetBlurTemplateParameters(key->payload);
+                        viewer->texturedBlurEnabled = 0;
+                        campResolvePendingValue(viewer, key);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 15:
+                        effEventSetScatterBlurParameters(key->payload);
+                        viewer->filterBlurEnabled = 0;
+                        campResolvePendingValue(viewer, key);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 23:
+                        effEventSetScaleBlurParameters(key->payload);
+                        viewer->staggeredBlurEnabled = 0;
+                        campResolvePendingValue(viewer, key);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 27:
+                        func_00197980(key->payload);
+                        viewer->framebufferQuadEnabled = 0;
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 16:
+                        effEventSetSolidRectangleParameters(key->payload);
+                        viewer->colorRectangleEnabled = 0;
+                        viewer->controlState = kwlnTaskCreate(D_004373A8, 0x2AF9, 1, 1, evtPollRuntimeControlReady, NULL, (u32)viewer);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 17:
+                        effEventSetResourceTemplateParameters(key->payload);
+                        viewer->texturedSquareEnabled = 0;
+                        campResolvePendingValue(viewer, key);
+                        viewer->controlState = kwlnTaskCreate(D_004373B0, 0x2AF9, 1, 1, evtSynchronizeSelectedEntry, NULL, (u32)viewer);
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 24:
+                        viewer->editField = 0;
+                        group->unk28 = 1;
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 25:
+                        viewer->unk2404 = 0;
+                        viewer->colorEditorActive = 1;
+                        viewer->colorSelection = 0;
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    case 6:
+                        if (key->p08.sh[0] >= 8) {
+                            break;
+                        }
+                        if (key->p08.sh[0] < 4) {
+                            break;
+                        }
+                        group->unk28 = 1;
+                        evtViewerPushCommandHistory(11, 0, 0, viewer);
+                        break;
+                    }
+                    break;
+                }
+                case 14:
+                    viewer->floatSelection = 0;
+                    viewer->floatEditMode = 0;
+                    viewer->floatEditX = key->p08.f;
+                    viewer->floatEditY = key->p0C.f;
+                    viewer->savedFloatEditX = key->p08.f;
+                    viewer->savedFloatEditY = key->p0C.f;
+                    viewer->savedOverlayFlag = D_00438A34;
+                    evtViewerPushCommandHistory(19, 336, -12, viewer);
+                    break;
+                case 17: {
+                    s32 value = key->p08.sh[0];
+                    viewer->messageField = 0;
+                    viewer->value = value;
+                    viewer->valueMin = 0;
+                    viewer->valueMax = itfMesGetEntryCount(viewer->windowContext->handle) - 1;
+                    evtViewerPushCommandHistory(13, 180, 120, viewer);
+                    break;
+                }
+                case 18: {
+                    s32 unavailable = 0;
+                    switch (viewer->frameGroup->type) {
+                    case 4:
+                        viewer->value = key->p08.sh[1];
+                        if ((key->p08.h[0] >> 12) != 0) {
+                            unavailable = 1;
+                        }
+                        break;
+                    case 1:
+                        if (key->p08.sb[0] >= 6) {
+                            unavailable = 1;
+                        } else if (key->p08.sb[0] < 0) {
+                            unavailable = 1;
+                        } else {
+                            viewer->value = key->p10.sh[0];
+                        }
+                        break;
+                    case 12: case 16: case 17:
+                        viewer->value = key->p14.sh[0];
+                        break;
+                    case 5:
+                        viewer->value = key->p08.sh[1];
+                        break;
+                    case 2: case 19:
+                        viewer->value = key->p0C.sh[0];
+                        break;
+                    default:
+                        unavailable = 1;
+                        break;
+                    }
+                    if (!unavailable) {
+                        viewer->compareField = 0;
+                        viewer->valueMax = 15;
+                        viewer->valueMin = 0;
+                        evtViewerPushCommandHistory(14, 180, 120, viewer);
+                    }
+                    break;
+                }
+                case 10:
+                    viewer->groupFirst = 0;
+                    viewer->groupCursor = 0;
+                    evtViewerPushCommandHistory(10, 156, 84, viewer);
+                    break;
+                case 19:
+                    switch (key->p08.sb[0]) {
+                    case 5:
+                        viewer->value = key->p0C.i;
+                        viewer->valueMax = 1000;
+                        viewer->fieldIndex = 0;
+                        viewer->valueMin = 0;
+                        evtViewerPushCommandHistory(16, 180, 120, viewer);
+                        break;
+                    case 6: {
+                        u32 maximum = sdfGetLodChunkValue(((MdlCtx *)((EffectObjectData *)viewer->frameGroup->info->data)->modelHolder->resourceHandle)->inner);
+                        s32 value = key->p0C.sb[0];
+                        viewer->valueMax = maximum;
+                        viewer->value = value;
+                        viewer->valueMin = 0;
+                        evtViewerPushCommandHistory(7, 180, 120, viewer);
+                        break;
+                    }
+                    case 7:
+                        viewer->groupFirst = 0;
+                        viewer->groupCursor = 0;
+                        evtViewerPushCommandHistory(10, 156, 84, viewer);
+                        break;
+                    case 3:
+                        viewer->groupFirst = 0;
+                        viewer->groupCursor = 0;
+                        viewer->shadowMode = key->p0C.b[0];
+                        viewer->shadowAlpha = key->p0C.b[1];
+                        viewer->shadowY = key->p14.f;
+                        evtViewerPushCommandHistory(22, 216, 180, viewer);
+                        break;
+                    case 4:
+                        viewer->groupFirst = 0;
+                        viewer->groupCursor = 0;
+                        viewer->shadowMode = key->p0C.b[0];
+                        viewer->shadowAlpha = key->p0C.b[1];
+                        evtViewerPushCommandHistory(22, 216, 180, viewer);
+                        break;
+                    }
+                    break;
+                case 20:
+                    viewer->groupFirst = 0;
+                    viewer->groupCursor = 0;
+                    evtViewerPushCommandHistory(21, 180, 120, viewer);
+                    break;
+                case 21:
+                    break;
+                }
+            }
+        } else if (command == 1) {
+            func_002467A0(group, viewer->curFrame, viewer);
+        }
+    }
+    return 0;
+}
 
 /* Store the edited timing or selector halfword in the pending timeline key. */
 s32 evtViewerStoreKeyTimingOrSelector(s32 unused0, s32 unused1, EvtRuntime *viewer) {
