@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_pcp_flash.h"
@@ -33,7 +34,6 @@ extern f32 sdfSinPoly(f32 angle);
 
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 
-extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 void effFlashTrianglePulseSpawnFromTable(void *table) {
     void *effectParams;
@@ -101,7 +101,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
     VU0_LOAD_VF(vf11, view);
     VU0_CROSS_XYZ(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, base);
-    sdfBuildVuRotationFromAxisAngle(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, (const RwV3d *)view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -111,7 +111,7 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    sdfBuildVuRotationFromAxisAngle(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, (const RwV3d *)view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -393,7 +393,7 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
     position[0] = part->position[0];
     position[1] = part->position[1];
     position[2] = part->position[2];
-    sdfBuildVuRotationFromAxisAngle(part->rotationStep, orientation);
+    sdfBuildVuRotationFromAxisAngle(part->rotationStep, (const RwV3d *)orientation);
     VU0_LOAD_VF(vf10, position);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, position);
@@ -1364,7 +1364,7 @@ void effFlashRotatedQuad(PcpFlashRotatingQuadWork *work, s32 index, void *view)
     VEC3_SPLAT(across, acrossLen);
     upLen = part->upSpan * ratio;
     VEC3_SPLAT(up, upLen);
-    sdfBuildVuRotationFromAxisAngle(part->angle, view);
+    sdfBuildVuRotationFromAxisAngle(part->angle, (const RwV3d *)view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1585,7 +1585,7 @@ void effFlashRotatedTriangle(PcpFlashRadialTriangleWork *work, s32 index, void *
     radius = part->accumulator;
     VEC3_SPLAT(size, radius);
     angle = step * (f32)index;
-    sdfBuildVuRotationFromAxisAngle(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, (const RwV3d *)view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -1602,7 +1602,7 @@ void effFlashRotatedTriangle(PcpFlashRadialTriangleWork *work, s32 index, void *
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    sdfBuildVuRotationFromAxisAngle(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, (const RwV3d *)view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);
@@ -1811,7 +1811,7 @@ void effFlashRotatedStripPair(PcpFlashRadialStripWork *work, s32 index, void *vi
     VEC3_SPLAT(inner, innerEdge);
     span = part->span;
     VEC3_SPLAT(size, span);
-    sdfBuildVuRotationFromAxisAngle(part->angle, view);
+    sdfBuildVuRotationFromAxisAngle(part->angle, (const RwV3d *)view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -2280,7 +2280,7 @@ void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *work, s32 index,
     radius = part->accumulator;
     VEC3_SPLAT(size, radius);
     angle = step * (f32)index;
-    sdfBuildVuRotationFromAxisAngle(angle, view);
+    sdfBuildVuRotationFromAxisAngle(angle, (const RwV3d *)view);
     base[0] = 0;
     base[1] = 1.0f;
     base[2] = 0;
@@ -2297,7 +2297,7 @@ void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *work, s32 index,
     VU0_STORE_VF(vf10, quad + 8);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, quad);
-    sdfBuildVuRotationFromAxisAngle(angle + step, view);
+    sdfBuildVuRotationFromAxisAngle(angle + step, (const RwV3d *)view);
     VU0_LOAD_VF(vf10, base);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_LOAD_VF(vf11, size);

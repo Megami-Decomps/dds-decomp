@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "fpu.h"
 #include "btl.h"
 #include "eff_pcp_beam.h"
@@ -1010,8 +1011,6 @@ extern EffSpawnParams D_00354D40[];
 extern u8 D_00354D50[];
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-struct RwV3d;
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *axis, f32 angle);
 
 /* Spawns 12 particles in a ring: every second particle advances the ring angle
  * (60 degrees). Direction is normalised on the VU, scaled per axis and offset
@@ -1177,7 +1176,7 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         D_00354DA0->vel[1] = 0;
         D_00354DA0->vel[0] = sinv * radius;
         D_00354DA0->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(-(effMiscRandUnitFloat(effDefaultRandomState) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354DA0->pos[0] = 0;
         D_00354DA0->pos[2] = 0;
@@ -1275,7 +1274,7 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(-(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E00->pos[0] = 0;
         D_00354E00->pos[2] = 0;
@@ -1374,7 +1373,7 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         D_00354E60->vel[1] = 0;
         D_00354E60->vel[0] = sinv * radius;
         D_00354E60->vel[2] = cosv * radius;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(-(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00354E60->pos[0] = 0;
         D_00354E60->pos[2] = 0;
@@ -1701,7 +1700,7 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, -(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD));
+        sdfBuildVuRotationFromAxisAngle(-(effMiscRandUnitFloat(effDefaultRandomState) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
         height = (effMiscRandUnitFloat(effDefaultRandomState) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         D_00355060->pos[0] = 0;
         D_00355060->pos[2] = 0;
@@ -5363,7 +5362,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 u32 fadedColor;
 
                 fragment = effThunderGetFragmentParameters(entry->fragment);
-                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)viewAxis, entry->phase);
+                sdfBuildVuRotationFromAxisAngle(entry->phase, (const struct RwV3d *)viewAxis);
                 VU0_LOAD_VF(vf10, D_003556A0);
                 VU0_LOAD_VF(vf11, viewAxis);
                 VU0_CROSS_XYZ(vf10, vf10, vf11);
@@ -5376,7 +5375,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 /* This SDK-produced axis is consumed only by the external builder. */
                 VU0_STORE_VF_UNCLOBBERED(vf10, tiltAxis);
                 radius = entry->radius;
-                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)tiltAxis, entry->tilt);
+                sdfBuildVuRotationFromAxisAngle(entry->tilt, (const struct RwV3d *)tiltAxis);
                 VU0_LOAD_VF(vf10, direction);
                 VU0_ROTATE_VEC(vf10, vf10);
                 VU0_STORE_VF(vf10, direction);

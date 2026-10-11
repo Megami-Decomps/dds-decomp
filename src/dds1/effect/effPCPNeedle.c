@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -12,7 +13,6 @@ extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void sdfVuBuildLookAtBasis(void *origin, void *target, void *up);
 extern void sdfInvertRigidVuTransform(void);
-extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
@@ -139,7 +139,7 @@ void func_00176428(EffPCPNeedleWork *work) {
                 position[0] = slot->direction[0];
                 position[1] = slot->direction[1];
                 position[2] = slot->direction[2];
-                sdfBuildVuRotationFromAxisAngle(axis, slot->angle);
+                sdfBuildVuRotationFromAxisAngle(slot->angle, (const RwV3d *)axis);
                 slot->angle += angleStep;
                 VU0_LOAD_VF(vf10, position);
                 VU0_ROTATE_VEC(vf10, vf10);

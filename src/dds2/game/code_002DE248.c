@@ -1,4 +1,5 @@
 #include "btl_command.h"
+#include "sdf_quaternion.h"
 #include "btl_motion_transform.h"
 #include "sdf_asset_state.h"
 #include "btl_resource_browser.h"
@@ -4923,8 +4924,6 @@ void effReleaseBillPointEntries(EffClassWork *work) {
 /* Actual same-title provider contracts; full four-float VU buffers remain. */
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
-struct RwV3d;
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void func_003364B8(f32);
 extern void func_00336818(f32);
@@ -5134,11 +5133,11 @@ void func_002EC370(EffClassWork *work) {
                     delta = newHeight - waveHeight;
                     segmentLength = fsqrtf(delta * delta + stepSquared);
                     slope = func_003532D0(delta / segmentLength) + tilt;
-                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)radial, oldSlope);
+                    sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)radial);
                     VU0_LOAD_VF(vf10, direction);
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_STORE_VF(vf10, rotated);
-                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)tangent, curve);
+                    sdfBuildVuRotationFromAxisAngle(curve, (const struct RwV3d *)tangent);
                     VU0_LOAD_VF(vf10, direction);
                     VU0_ROTATE_VEC(vf10, vf10);
                     VU0_STORE_VF(vf10, direction);
@@ -9379,8 +9378,6 @@ void effInitializeParticleDirection(u8 *work, float *entry) {
     entry[4] = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
 }
 
-struct RwV3d;
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
     f32 axis[4];
@@ -9395,7 +9392,7 @@ void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
     axis[1] = params[1];
     axis[2] = params[2];
     axis[3] = 0.0f;
-    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle + params[4]);
+    sdfBuildVuRotationFromAxisAngle(angle + params[4], (const struct RwV3d *)axis);
 }
 
 EffectSlotNode80 *effAllocateActiveEffectSlotNode(u32 count) {
