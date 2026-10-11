@@ -173,64 +173,35 @@ s32 effBattleHasActiveKind(BattleEffect *owner) {
     return 0;
 }
 
-typedef union EffBattleParameterValue {
-    u32 sourceOffset;
-    EffParamWork *work;
-} EffBattleParameterValue;
-
-typedef struct EffBattleParameterEntry {
-    u16 kind;
-    u8 pad02[2];
-    EffBattleParameterValue value;
-    u8 pad08[8];
-    u32 zeroKindCount; /* 0x10 */
-    u32 pad14;
-} EffBattleParameterEntry; /* 0x18 */
-
-typedef struct EffBattleParameterBankHeader {
-    u8 pad00[0x74];
-    u16 entryCount; /* 0x74 */
-    u8 pad76[0xA];
-} EffBattleParameterBankHeader;
-
-typedef struct EffBattleParameterMixer {
-    u64 banks[2][0xC3]; /* Two 0x618-byte banks; each entry uses three qwords. */
-} EffBattleParameterMixer;
-
 /* Rebuild each cloned bank's parameter work, resolving shared-entry references
  * and preserving disabled descriptors. */
-void effBattleRebuildClonedParameterBanks(void *destination, void *source) {
-    u8 *destinationBytes = destination;
-    u8 *sourceBytes = source;
-    u16 *entryCount = &((EffBattleParameterBankHeader *)destination)->entryCount;
-    u32 bankOffset = 0;
-    s32 remainingBanks = 1;
+void effBattleRebuildClonedParameterBanks(SoundMixer *destination, SoundMixer *source) {
+    u8 *sourceBytes = (u8 *)source;
+    s32 bankIndex;
 
-    do {
-        EffBattleParameterEntry *entry = (EffBattleParameterEntry *)(destinationBytes + bankOffset + 0x80);
-        u16 entryCountForBank = *entryCount;
+    for (bankIndex = 0; bankIndex < 2; bankIndex++) {
+        EffBattleEntry *entry = destination->banks[bankIndex].list.entries;
+        u16 entryCountForBank = destination->banks[bankIndex].list.count;
 
         if (entryCountForBank != 0) {
             s32 remainingEntries = entryCountForBank;
 
             do {
-                if (entry->kind != 0xFFFE) {
-                    if (entry->kind == 0xFFFF) {
+                if (entry->paramKind != 0xFFFE) {
+                    if (entry->paramKind == 0xFFFF) {
                         u32 index = entry->value.sourceOffset;
-                        u32 bankIndex = index / 0x3C;
-                        u32 entryIndex = index % 0x3C;
-                        EffBattleParameterEntry *sourceEntry = (EffBattleParameterEntry *)
-                            &((EffBattleParameterMixer *)destination)
-                                 ->banks[bankIndex][0x10 + entryIndex * 3];
+                        u32 sourceBank = index / 0x3C;
+                        u32 sourceEntryIndex = index % 0x3C;
+                        EffBattleEntry *sourceEntry = &destination->banks[sourceBank].list.entries[sourceEntryIndex];
                         EffParamWork *duplicatedWork = effParamWorkDuplicate(sourceEntry->value.work);
-                        u16 sourceKind = sourceEntry->kind;
+                        u16 sourceKind = sourceEntry->paramKind;
 
                         entry->value.work = duplicatedWork;
-                        entry->kind = sourceKind;
+                        entry->paramKind = sourceKind;
                     } else {
-                        entry->value.work = effParamWorkCreate(entry->kind, sourceBytes + entry->value.sourceOffset);
+                        entry->value.work = effParamWorkCreate(entry->paramKind, sourceBytes + entry->value.sourceOffset);
                     }
-                    if (entry->kind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
+                    if (entry->paramKind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
                         entry->zeroKindCount++;
                     }
                 }
@@ -238,30 +209,22 @@ void effBattleRebuildClonedParameterBanks(void *destination, void *source) {
                 remainingEntries--;
             } while (remainingEntries != 0);
         }
-        entryCount = (u16 *)((u8 *)entryCount + 0x618);
-        bankOffset += 0x618;
-        remainingBanks--;
-    } while (remainingBanks >= 0);
+    }
 }
 
 /* Release each initialized parameter-work entry in the mixer's two banks. */
-void effBattleReleaseParameterBanks(EffBattleParameterMixer *mixer) {
-    u16 *countAddress = &((EffBattleParameterBankHeader *)mixer)->entryCount;
-    s32 bankCountdown;
-    s32 bankOffset;
+void effBattleReleaseParameterBanks(SoundMixer *mixer) {
+    s32 bankIndex;
 
-    for (bankOffset = 0, bankCountdown = 1; bankCountdown >= 0;
-         bankCountdown--,
-         countAddress = (u16 *)((u8 *)countAddress + sizeof(mixer->banks[0])),
-         bankOffset += sizeof(mixer->banks[0])) {
-        u16 entryCount = *countAddress;
-        EffBattleParameterEntry *entry = (EffBattleParameterEntry *)((u8 *)mixer + bankOffset + 0x80);
+    for (bankIndex = 0; bankIndex < 2; bankIndex++) {
+        u16 entryCount = mixer->banks[bankIndex].list.count;
+        EffBattleEntry *entry = mixer->banks[bankIndex].list.entries;
 
         if (entryCount != 0) {
             s32 remaining = entryCount;
 
             do {
-                if (entry->kind != 0xFFFE) {
+                if (entry->paramKind != 0xFFFE) {
                     effDispatchParameterDataAndFreeWork(entry->value.work);
                 }
                 entry++;
