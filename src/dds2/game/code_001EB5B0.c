@@ -2965,7 +2965,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->unk_0A = 6;
         CURSOR->unk_0E = 0;
         choice = (s16)btlNextScaledRandom(2);
-        if (!btlCanUseLinkedActor((s32)command)) choice = 1;
+        if (!btlCanUseLinkedActor(command)) choice = 1;
         if (skillId == 0x202) {
             CURSOR->unk_0C = choice + 0x28;
         } else if (skillId == 0x208) {
