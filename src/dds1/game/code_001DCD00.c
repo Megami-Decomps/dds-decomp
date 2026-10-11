@@ -617,7 +617,153 @@ void func_001DD7E8(BtlLinkedCommand *actor) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DCD00", btlChooseLinkedActionCameraPose);
+extern u32 effMiscRand(void *);
+extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
+extern void func_001E5700(BtlLinkedCommand *, BtlCamState *);
+extern void func_001E5460(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlConfigureBattleCameraAction(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001DFAE0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001DFE28(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E2578(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    BtlTask *task;
+    s32 hasFlag200;
+    s32 hasFlag400;
+    u32 i;
+    u32 count;
+
+    action->stepKind = 0;
+    task = action->task;
+    if (btlHasActorCategoryFlag40(action) != 0) {
+        func_001DF358(action, &action->camera);
+        action->flags |= 0x800;
+    } else {
+        hasFlag200 = 0;
+        hasFlag400 = 0;
+        count = btlGetIndexListCount(task->indexWork.indices);
+        for (i = 0; i < count; i++) {
+            BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(task->indexWork.indices, i);
+            if (entry->status.flags & 0x200) {
+                hasFlag200 = 1;
+            }
+            if (entry->status.flags & 0x400) {
+                hasFlag400 = 1;
+            }
+        }
+        if (work->cameraPoseBlendHook != 0 && work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
+            return;
+        }
+        if (task->unit->status.flags & 0x200) {
+            if ((hasFlag200 == 1 || hasFlag400 != 1) && func_001DD2C0(action) == 0) {
+                if (btlHasSingleLinkedResource(action) == 0) {
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                    } else {
+                        func_001E0718(action, &action->frontCamera, &action->backCamera);
+                    }
+                    action->flags |= 0x800;
+                } else if (btlMatchFirstLinkedActorFlags(action) != 0) {
+                    func_001E0398(action, &action->frontCamera, &action->backCamera);
+                    action->motionParameter = 30.0f;
+                    action->flags |= 0x841;
+                } else {
+                    func_001E1288(action, &action->frontCamera, 3);
+                    btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
+                    action->backCamera.distance += -100.0f;
+                    action->motionParameter = 50.0f;
+                    action->flags |= 0x841;
+                    btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+                }
+            } else if (btlHasLinkedEffectNodeTrigger(action) != 0) {
+                switch (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].cameraKind) {
+                case 6:
+                    action->stepKind = 7;
+                    func_001E5700(action, &action->camera);
+                    break;
+                case 7:
+                    action->stepKind = 8;
+                    func_001E5460(action, &action->camera);
+                    break;
+                default:
+                    action->stepKind = 9;
+                    btlFlagUserAndTargetDefeat(action, action);
+                    break;
+                }
+                action->flags |= 0x800;
+            } else {
+                if (btlCanUseActorCategoryFlag2(action) != 0 || func_001DD2C0(action) != 0 ||
+                    func_001DD488(action) != 0) {
+                    action->stepKind = 1;
+                } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
+                    action->stepKind = 1;
+                } else {
+                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 1 : 2;
+                }
+                switch (action->stepKind) {
+                case 1:
+                    switch (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].cameraKind) {
+                    case 6:
+                    case 7:
+                        btlSetupCameraPoseAimUnit(action, &action->frontCamera, &action->backCamera);
+                        action->stepKind = 3;
+                        break;
+                    default:
+                        btlConfigureBattleCameraAction(action, &action->frontCamera, &action->backCamera);
+                        break;
+                    }
+                    break;
+                case 2:
+                    func_001DFAE0(action, &action->frontCamera, &action->backCamera);
+                    break;
+                }
+            }
+        } else {
+            if (func_001DD498(action) != 0) {
+                btlChooseActionPoseBlendFromActorCount(action, &action->frontCamera, &action->backCamera);
+                action->flags |= 0x800;
+            } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
+                action->stepKind = 5;
+                func_001DFE28(action, &action->frontCamera, &action->backCamera);
+            } else if (func_001DD2C0(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
+                func_001E2578(action, &action->frontCamera, &action->backCamera);
+                action->flags |= 0x800;
+            } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
+                       (btlCanUseActorCategoryFlag2(action) != 0 ||
+                        ((effMiscRand(effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
+                func_001E0B68(action, &action->frontCamera, &action->backCamera);
+                action->flags |= 0x800;
+            } else {
+                if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
+                    func_001DD2C0(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
+                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 4 : 5;
+                } else {
+                    action->stepKind = 4;
+                }
+                if (btlHasActorCategoryFlag100(action) != 0) {
+                    btlFaceActionParticipantsTowardLinkedTarget(action);
+                }
+                switch (action->stepKind) {
+                case 4:
+                    btlPrepareRandomizedActionCameraPose(action, &action->frontCamera, &action->backCamera);
+                    break;
+                case 5:
+                    func_001DFE28(action, &action->frontCamera, &action->backCamera);
+                    action->motionProgress = 1;
+                    break;
+                }
+            }
+            btlResetCameraMotion(action);
+        }
+    }
+}
 
 extern void btlRefreshActionPoseBlendSnapshot();
 
