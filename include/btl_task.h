@@ -35,8 +35,8 @@ typedef struct SceneAiWork {
     /* 001C0724/001C0760 read the word; movement arms store each half. */
     union {
         struct {
-            u16 row;
-            u16 column;
+            s16 row;
+            s16 column;
         } position;
         u32 packed;
     } cursor;              /* 0x18 */
