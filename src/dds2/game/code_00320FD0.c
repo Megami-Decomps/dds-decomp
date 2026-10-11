@@ -204,7 +204,35 @@ MenuResourceRecord *mnuGetResourceRecordByIndex(s32 recordIndex) {
     return &mnuResourceRecords[recordIndex];
 }
 
-INCLUDE_ASM(const s32, "game/code_00320FD0", func_00321340);
+s32 func_00321340(MenuProgressState *progressState) {
+    s32 i;
+
+    for (i = 0; i < mnuResourceRecordCount; i++) {
+        MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(mnuResourceRecords[i].tag);
+        MenuResourceRecord *record = (MenuResourceRecord *)(u32)((u32)(i * sizeof(MenuResourceRecord)) + (u32)mnuResourceRecords);
+        s32 margin = registry->parameterIndex == 0x22 ? 0x96 : 0;
+
+        if (!(record->flags & 1) &&
+            (s32)progressState->progress + margin + 0x20 >= record->progress) {
+            MenuWorkEntry *entry;
+
+            record->flags |= 1;
+            entry = mnuFindUnusedWorkEntry();
+            if (entry != 0) {
+                mnuInitializeRegistryWorkEntry(
+                    entry, record->tag, i, record->x,
+                    (s32)progressState->progress - record->progress,
+                    (f32)record->angleDegrees * 3.1415926f / 180.0f);
+                entry->flags |= 0x10;
+                if (registry->parameterIndex == 0x22) {
+                    entry->control.word =
+                        ((entry->control.word | 0x100) & 0xFFFE01FF) | 0x19000;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 void func_003214C0(MenuRuntimeRecord *record) {
 }

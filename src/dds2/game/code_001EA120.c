@@ -879,7 +879,201 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-INCLUDE_ASM(const s32, "game/code_001EA120", btlInitializeActionCamera);
+extern void func_003364B8(f32);
+extern void func_001EC5F0(BtlLinkedCommand *);
+extern void func_001EF030(void *, void *);
+extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+
+extern void btlSelectActionCameraPose(BtlLinkedCommand *);
+extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
+extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
+extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+static inline s32 btlChooseLinkedCameraVariant(BtlLinkedCommand *action) {
+    if (btlCanUseLinkedActor(action)) {
+        if (btlCanUseActorCategoryFlag2(action)) {
+            return 0;
+        }
+        return effMiscRandMod(NULL, 2);
+    }
+    return 1;
+}
+
+void btlInitializeActionCamera(BtlLinkedCommand *action) {
+    BtlState *state;
+    ActionStateLink *task;
+    BtlUnit *unit;
+    u32 count;
+    s32 i;
+    s32 hasFlag200;
+    s32 hasFlag400;
+    s32 choice;
+    s32 reduceDistance;
+
+    if (func_001EAA00(action)) {
+        btlSelectActionCameraPose(action);
+        return;
+    }
+    state = (BtlState *)btlGetRuntime();
+    task = action->link;
+    action->stepKind = 0;
+    if (btlMapActorCategory(action) != 0) {
+        action->stageCount = 0;
+    }
+    if (btlHasActorCategoryFlag100(action)) {
+        return;
+    }
+    hasFlag200 = 0;
+    hasFlag400 = 0;
+    count = btlGetIndexListCount(task->indexWork.indices);
+    for (i = 0; i < count; i++) {
+        unit = btlGetIndexListEntry(task->indexWork.indices, i);
+        if (unit->status.flags & 0x200) {
+            hasFlag200 = 1;
+        }
+        if (unit->status.flags & 0x400) {
+            hasFlag400 = 1;
+        }
+    }
+    if (state->handleActorCategoryCamera != NULL &&
+        state->handleActorCategoryCamera(action, hasFlag200, hasFlag400)) {
+        return;
+    }
+
+    if (task->unit->status.flags & 0x200) {
+        if (btlHasSingleLinkedResource(action)) {
+            if (hasFlag200 != 1 && hasFlag400 == 1) {
+                if (btlIsActorCategoryMarked(action)) {
+                    btlInitCommandCursorForFirstActor(action, &action->camera);
+                    action->stepKind = 13;
+                } else if (btlCanUseActorCategoryFlag4(action)) {
+                    func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                } else {
+                    /* Only the random linked variant reduces camera distance. */
+                    choice = btlCanUseLinkedActor(action)
+                        ? (btlCanUseActorCategoryFlag2(action)
+                            ? (reduceDistance = 0, 0)
+                            : (reduceDistance = 1, effMiscRandMod(NULL, 2)))
+                        : (reduceDistance = 0, 1);
+                    if (choice == 0) {
+                        func_001EDC38(action, &action->frontCamera, &action->backCamera);
+                        action->motionParameter = 30.0f;
+                        action->flags |= 0x41;
+                    } else {
+                        f32 distance;
+
+                        func_001EEB78(action, &action->frontCamera, 1);
+                        btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
+                        if (reduceDistance) {
+                            action->frontCamera.distance *= 0.75f;
+                        }
+                        distance = action->backCamera.distance;
+                        action->flags |= 0x41;
+                        action->motionParameter = 35.0f;
+                        action->backCamera.distance = distance + 150.0f;
+                        btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+                    }
+                }
+            } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
+                if (btlCanUseActorCategoryFlag4(action)) {
+                    func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+                } else if (btlMatchFirstLinkedActorFlags(action)) {
+                    func_001EDC38(action, &action->frontCamera, &action->backCamera);
+                    action->motionParameter = 30.0f;
+                    action->flags |= 0x41;
+                } else {
+                    f32 distance;
+
+                    func_001EEB78(action, &action->frontCamera, 3);
+                    btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
+                    distance = action->backCamera.distance;
+                    action->flags |= 0x41;
+                    action->motionParameter = 50.0f;
+                    action->backCamera.distance = distance + (-100.0f);
+                    btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+                }
+            } else {
+                func_001EC868(action, &action->camera, 20.0f);
+            }
+        } else if (hasFlag200 != 1 && hasFlag400 == 1) {
+            if (func_001EA940(action)) {
+                btlInitTargetCursorAndFacing(action, &action->camera);
+            } else if (btlCanUseActorCategoryFlag4(action)) {
+                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+            } else {
+                choice = btlChooseLinkedCameraVariant(action);
+                if (choice != 0) {
+                    f32 distance;
+
+                    func_001EF030(action, &action->frontCamera);
+                    btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
+                    distance = action->backCamera.distance;
+                    action->flags |= 0x41;
+                    action->motionParameter = 30.0f;
+                    action->backCamera.distance = distance + 100.0f;
+                    btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+                } else {
+                    func_001EDFB8(action, &action->frontCamera, &action->backCamera);
+                }
+            }
+        } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
+            if (btlCanUseActorCategoryFlag4(action)) {
+                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+            } else {
+                func_001EDFB8(action, &action->frontCamera, &action->backCamera);
+            }
+        } else {
+            btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+            action->motionParameter = 200.0f;
+            action->flags |= 0x41;
+        }
+    } else if (hasFlag200 == 1 && hasFlag400 != 1) {
+        if (btlHasSingleLinkedResource(action)) {
+            if (btlCanUseActorCategoryFlag4(action)) {
+                func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+            } else if (btlCanUseLinkedActor(action) &&
+                       ((effMiscRand(effSharedRandomState) & 1) ||
+                        btlCanUseActorCategoryFlag2(action))) {
+                func_001EDC38(action, &action->frontCamera, &action->backCamera);
+                action->motionParameter = 30.0f;
+                action->flags |= 0x41;
+            } else {
+                f32 distance;
+
+                func_001EEB78(action, &action->frontCamera, 2);
+                btlCopyMotionTransform(&action->backCamera, &action->frontCamera);
+                distance = action->backCamera.distance;
+                action->flags |= 0x41;
+                action->motionParameter = 35.0f;
+                action->backCamera.distance = distance + 150.0f;
+                btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+            }
+        } else if (btlCanUseActorCategoryFlag4(action)) {
+            func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+        } else if (btlCanUseLinkedActor(action) &&
+                   ((effMiscRand(effSharedRandomState) & 1) ||
+                    btlCanUseActorCategoryFlag2(action))) {
+            func_001EDFB8(action, &action->frontCamera, &action->backCamera);
+        } else {
+            btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+            btlAimLinkedUnitAtMuzzle(action);
+            action->motionParameter = 200.0f;
+            action->flags |= 0x41;
+        }
+    } else if (hasFlag200 != 1 && hasFlag400 == 1) {
+        if (btlCanUseActorCategoryFlag4(action)) {
+            func_001EFEE8(action, &action->frontCamera, &action->backCamera);
+        } else {
+            btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+            action->motionParameter = 200.0f;
+            action->flags |= 0x41;
+        }
+    } else {
+        func_001EC868(action, &action->camera, 20.0f);
+    }
+}
 
 void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     BtlState *work;
@@ -1025,4 +1219,58 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EA120", btlSelectActionCameraPose);
+extern s32 datActionAnimationRecords;
+extern void func_001EE458(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001F4E30();
+
+void btlSelectActionCameraPose(BtlLinkedCommand *action) {
+    s32 index = 0;
+    s32 hasFlag200 = 0;
+    s32 hasFlag400 = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 count = btlGetIndexListCount(action->link->indexWork.indices);
+    BtlUnit *unit;
+    s32 flags;
+    s32 policy;
+
+    if (count != 0) {
+        do {
+            unit = btlGetIndexListEntry(action->link->indexWork.indices, index++);
+            flags = unit->status.flags;
+            if (flags & 0x200) {
+                hasFlag200 = 1;
+            }
+            if (flags & 0x400) {
+                hasFlag400 = 1;
+            }
+        } while (index < count);
+    }
+    policy = ((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].flags & 0xC00;
+    if (policy != 0) {
+        if (policy == 0xC00) {
+            index = effMiscRandMod(NULL, 2);
+        } else {
+            index = ((policy >> 10) ^ 1) & 1;
+        }
+        if ((btlCanUseLinkedActor(action) == 0 || index != 0) && battle->handleActorCategoryCamera == 0) {
+            btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+            action->motionParameter = 200.0f;
+            action->flags |= 0x10041;
+            return;
+        }
+        if ((action->link->unit->status.flags & 0x400) && hasFlag200 == 0 && hasFlag400 == 1) {
+            func_001EE458(action, &action->frontCamera, &action->backCamera);
+            action->flags |= 0x10000;
+            return;
+        }
+        btlInitializeActionCamera(action);
+        action->status = 6;
+        return;
+    } else {
+        if (battle->actionCameraSetupHook != 0 && battle->actionCameraSetupHook(action) != 0) {
+            action->flags |= 0x10000;
+        } else {
+            func_001F4E30(action, action);
+        }
+    }
+}
