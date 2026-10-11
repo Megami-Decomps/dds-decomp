@@ -7,7 +7,7 @@
 
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern s32 evtGetMessageWindowControlState(void);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);
 extern void mnuDisableMantraBackground(struct MantraDrawPool *pool);

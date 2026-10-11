@@ -3,6 +3,8 @@
 #include "mnu.h"
 #include "mnu_result.h"
 
+extern u32 evtFinishMessageWindowAndNotify(void);
+
 
 extern void func_0024DD78(void);
 extern u8 *D_003BAA70;
@@ -355,6 +357,7 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 #include "eff.h"
 #include "mnu_result.h"
 #include "itf.h"
+
 
 
 extern char D_0036D408[];

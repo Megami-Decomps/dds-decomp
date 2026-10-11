@@ -640,7 +640,7 @@ typedef struct DspUnitName { u8 encodedText[17]; } DspUnitName;
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern s32 dspStartEntry(s32);
-extern void evtFinishMessageWindowAndNotify(void);
+extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
