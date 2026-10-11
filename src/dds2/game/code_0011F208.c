@@ -88,9 +88,9 @@ extern void fldSubmitTexturedOverlaySprite(void);
 
 extern u32 D_00389988[];
 
-extern void fldSelectDisplayBuffer(s32);
+extern void fldSelectDisplayBuffer(u32);
 
-extern void fldSelectDisplayBuffer(s32);
+extern void fldSelectDisplayBuffer(u32);
 
 extern u32 D_00389988[];
 
@@ -119,7 +119,7 @@ extern void fldSetCameraMoveMode(s32 mode);
 extern void fldClearCameraMoveMode(void);
 
 
-extern u8 dds3TestObjectFlags(void *object, s32 mask);
+extern u8 dds3TestObjectFlags(void *object, u32 mask);
 
 
 extern void fldSubmitBackgroundResourcePacket(void);
