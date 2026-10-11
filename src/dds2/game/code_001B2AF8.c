@@ -799,7 +799,21 @@ void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B3B28);
+const char D_004156D8[] = "btl:drop money=%d[ratio=%f]\n";
+
+s32 func_001B3B28(BtlUnit *actor) {
+    DatPartyRecord *record = &actor->partyRecord;
+    s32 money;
+    f32 ratio;
+
+    money = evtRunContext(0x1E, (s32)record, (s32)record, 0, 0);
+    ratio = 1.0f;
+    if (btlCheckSpecialAbility(record, 0x27C)) {
+        ratio = datAbilityParameters[0x27C - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    btlBossDebugPrintf(D_004156D8, money *= ratio, ratio);
+    return (record->flags & 0x20) ? money : -money;
+}
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
