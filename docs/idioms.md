@@ -7476,3 +7476,32 @@ scheduling before the final register-allocation correction.
 Both 632-byte functions match in their complete owners. Preserve the games'
 four different horizontal geometry constants when transferring the body.
 Credit Vesper's earlier DDS2 reconstruction and Sable's DDS1 investigation.
+
+### Preserve derived coordinates before diagnosing loop-bound allocation
+
+The five-row resource menu (`func_00237088` in DDS2, `func_0021C518` in
+DDS1) has a fixed row count and a Y coordinate derived as `0x7960 + row *
+0x60`. Reconstructing Y as an independently incremented local instead changes
+more than its eventual register: it changes the intermediate loop program on
+which invariant-motion profitability is decided.
+
+With an independent Y local, a signed `< 5` traversal leaves two incorrect
+exit instructions and swaps Y/state register assignments. Spelling the fixed
+count as `!= 5` alone makes the second loop pass hoist constant five into a
+saved register, displacing a text-style constant. Moving the Y initialization
+to the drawing phase is neutral; the tested initialization timing and
+loop-condition spellings did not recover the complete target.
+
+Deriving Y from `row` recovers native induction and register allocation. With
+the fixed-count traversal, the qualified trace reports that the second loop
+pass declines to hoist the bound (`savings 1 not desirable`). Its intermediate
+loop still contains strength-reduction work that is removed later: 56 real
+instructions at this decision versus 54 in the independent-Y control. The
+bound therefore remains local, while the text-style constants stay hoisted.
+This is not a bound spill or post-allocation rematerialization. The compiler
+then emits every native instruction, including the two exit instructions.
+
+Ordinary/probe full-unit assembly agrees apart from the temporary `.file`
+path. Both 348-byte functions match in their complete owners. Preserve each
+row's fresh viewer-state reads and the separate enabled/selected decisions;
+only the label-table identity differs between these titles.
