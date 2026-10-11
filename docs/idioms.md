@@ -2614,6 +2614,13 @@ does not contain that weight. Its fields alone cannot replay the comparator;
 Also distinguish logical input order from printed table order and account
 for interblock preferences before attributing a choice to a final tie.
 
+In nonmatching DDS1 captures of `func_002DD8E8`/`func_002DD968`/`func_002DD9E8`,
+sched1 hoists the last cosine store: its dying input gives it weight -1,
+versus 0 for the earlier store. `func_001818A8` likewise schedules the
+multiply with two dying inputs before the equal-priority one with only one.
+These captures explain the candidates, not retail's original source;
+neither disabling strict aliasing nor disabling a scheduler recovered it.
+
 Basic-block boundaries matter even when final assembly has no branch there.
 Cross-jumping runs after sched2; genuine duplicated branch tails can be
 scheduled as separate blocks and merged afterwards. The paired
@@ -7447,3 +7454,61 @@ address takes `$3`, matching all 111 instructions. A void view instead puts the
 address in `$2` and changes three instructions. Readonly allocator observation
 confirmed this decision with complete ordinary-output parity; production needs
 no artificial result use, register binding or compiler intervention.
+
+## An earlier same-TU definition makes later calls nothrow (TU-boundary evidence)
+
+cc1 gives every call to a function that is already *defined* earlier in the
+same translation unit a `REG_EH_REGION 0` (nothrow) note; calls to externs, or to
+anything defined later or in another file, have none. reorg's slot filling then
+treats the call's neighbourhood differently, so a branch that is an annulled
+`bnel`/`beql` (slot taken from the target) around an opaque call becomes a plain
+`bne`/`beq` once the callee's body is visible. Minimal repro:
+`if (mark(o) == 0) { ...; aim(c, o, ...); ...; }` gives `bnel` with `aim` extern
+and `bne` with `aim` defined above it.
+
+What does and does not matter (all tested with `tools/cc.sh`): any earlier
+definition flips the caller, whatever its body: a leaf, an extern-calling or
+function-pointer-calling function, a soft-float or `long long` libcall user, a
+loop, `asm volatile`, varargs and a pure tail call all behave the same. A later
+redeclaration (same prototype, `extern f();`, other spelling) does not restore
+opacity, and neither does declaring the function before its definition. So
+visibility is exactly "defined earlier in this unit", and never attribute- or
+annotation-controlled; do not invent a nothrow attribute for it.
+
+Use it as boundary evidence with `check_unit.py --source`, not as a diff
+to patch around. A parked function whose only difference is `bnel` versus `bne`
+(or `beql` versus `beq`, with a slot change) beside a call to a function of an
+earlier unit asks whether those two are one file. To find the boundary:
+
+1. Merge the two adjacent units' source in address order (identical duplicate
+   typedefs dropped, local-only duplicates renamed).
+2. For a candidate `X`, replace the definitions of every function below `X` with
+   extern declarations (K&R definitions become `extern T f();`) and run
+   `check_unit.py <unit> --source <that file>`.
+3. Compare with each unit's own result. A function that regresses for
+   `X <= p` needs the provider at `p` opaque (so the boundary is above `p`); a
+   function that regresses for `X > p` needs it visible (the boundary is at or
+   below `p`). The allowed boundaries are the intersection, a window, not a
+   point.
+
+Examples. DDS2 `func_00224500` and `func_00225B48` match only with
+`func_00217470` defined in their own TU (`bne` becomes `bnel` at `+0x38`
+otherwise), so no boundary can lie between 0x217470 and 0x225B48; this is why
+`code_00224FC0` and a 0x2240F8 split are wrong even though their no-sibling-call
+runs look clean. DDS2 `code_001DD390` / `code_001EB5B0`: `func_001ED9A0` needs
+`btlHasIdleLinkedSlotKindTwo` (0x1EA3F8) opaque and `btlCanUseActorCategoryFlag4`
+(0x1EA748) needs `btlCanUseLinkedActor` (0x1EA210) visible, so the merged unit
+regresses `func_001ED9A0` and `btlStepUnitHeightFramedCamera`, while any
+boundary in `[0x1EA7C8, 0x1EB5B0]` keeps every matched function exact. DDS1's
+0x1DDF20 twin regresses `func_001E0100`, `func_001E3E58` and
+`btlStepUnitHeightFramedCamera` the same way.
+
+Matched-function evidence only brackets a boundary. Cross-check it with hard
+data sharing (`tools/find_tus.py`: a string literal, jump table or `.lit4` value
+used on both sides means one file, and two copies of a literal mean two files).
+A shared rodata literal that spans a boundary placed on opacity evidence alone
+(DDS1 0x20CB38) is an unresolved contradiction, not a reason to keep either
+answer; sdata literals of eight bytes or less are weaker, because they can be a
+shared global. The same check applies to a `-fno-optimize-sibling-calls` unit:
+a shared literal reaching across its boundary means the run is part of a larger
+file that also holds sibcall functions.
