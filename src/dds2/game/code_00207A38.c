@@ -2657,7 +2657,7 @@ void func_0020D1F8(f32 *position, f32 radius, u32 color, s32 flags) {
 void func_0020D200(void) {
 }
 
-void func_0020D208(void) {
+void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
 }
 
 void func_0020D210(void) {
