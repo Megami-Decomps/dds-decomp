@@ -112,6 +112,27 @@ localize a nothrow effect but cannot prove a file boundary. A spelling change
 can diagnose hashing but cannot justify a name. A flag-disable probe can
 identify an optimization without justifying a production flag.
 
+### Console indexing: inspect the target recognizer
+
+DDS2 `sdf/sdfDevCons::func_0033CE08` retained four differing words after its
+control flow and value lifetimes matched. The tab path fused row multiplication
+and column addition into `mul_acc_si_r5900`; its later split used a separate
+multiply scratch register. The default path kept the retail plain multiply.
+
+The target's `r5900_madd_profitable_p` explains that asymmetry: it rejects this
+fusion when the addition's `LOG_LINKS` includes an instruction defining the
+addend. The tab path had already used the column in division, losing that
+direct definition link; the default path had not. Preparing the initial cell
+offset before deriving the tab count preserves the link and produces the exact
+372-byte body. These calculations read console state without an intervening
+store or call. Read-only observation preserved all compiler and assembler
+artifacts, and the complete owner and both retail builds passed.
+The same source also matches DDS1 `sdf/sdfDevCons::func_002E3F58`, with its
+owning unit and both retail builds passing.
+
+This example justifies that independent calculation boundary. It does not
+justify changing arbitrary statement order or disabling multiply/add fusion.
+
 ## Investigate a mechanism that is not documented yet
 
 1. **Reduce the question, preserving the cause.** Identify the smallest
