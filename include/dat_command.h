@@ -64,7 +64,7 @@ typedef struct DatCommandRecord {
     u8 unk_2C;
     u8 stat2D;
     u16 unk2E;
-    s32 unk30;
+    u32 unk30;                    /* 0x30: unsigned selector; DDS2 001B14EC, DDS1 001D1004. */
     s16 stat34;
     s16 stat36;
 } DatCommandRecord;

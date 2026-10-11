@@ -138,7 +138,82 @@ s32 func_001AD090(s32 flag);
 
 s32 func_001AE678(BtlUnit *actor, s32 attr);
 
-INCLUDE_ASM(const s32, "game/code_001B1350", func_001B1350);
+u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
+                  s32 reaction, s32 mode) {
+    u32 guardMask;
+    s32 guardAbility;
+    u32 result;
+
+    if (((BtlState *)btlGetRuntime())->unk220 & 0x80) {
+        return 0;
+    }
+    guardAbility = -1;
+    guardMask = 0;
+    if (datCommandRecords[command].effectType != 2) {
+        if (mode != 1) {
+            return 0;
+        }
+    } else if (mode == 1) {
+        return 0;
+    }
+
+    result = sdfQueryChannelValue(command, &attacker->partyRecord,
+                                 &defender->partyRecord);
+    if ((result & 0x8000) && !(defender->status.flags & 0x1000)) {
+        result &= ~0x8000;
+    }
+    switch (command) {
+    case 0x94:
+        guardMask = 0x20;
+        guardAbility = 0x22A;
+        break;
+    case 0x95:
+        guardMask = 0x100;
+        guardAbility = 0x22B;
+        break;
+    case 0x96:
+        guardMask = 0x800;
+        guardAbility = 0x22C;
+        break;
+    }
+
+    if (guardMask != 0 && result == 0 && reaction == 2) {
+        result = guardMask;
+        if (func_001ABF50(defender, func_001AD090(guardMask)) & 0x170000) {
+            result = 0;
+        }
+        if ((defender->partyRecord.status & 0x7FFF) >= result) {
+            result = 0;
+        }
+    }
+    switch (datCommandRecords[command].unk30) {
+    case 4:
+        if ((defender->partyRecord.status & 0x7FFF) == 8) {
+            return result;
+        }
+    case 0x14:
+        return (defender->partyRecord.status & 0x7FFF) == 0x10 ? result : 0;
+    case 0x17:
+        return result;
+    }
+
+    if (result != 0 && !(datCommandRecords[command].options & 1)) {
+        s32 element = func_001AD090(result);
+        if (btlHasMappedSpecialAbilityForSlot(defender, element) != 0 ||
+            btlHasSpecialAbility274(defender, element) != 0 ||
+            btlHasEnabledSpecialAbilityForSlot(defender, element) != 0) {
+            result = 0;
+            func_0035B6E0("btl:bad auto guard[%X]\n", element);
+        } else if (btlTestSelectedItemCategoryMask(defender, element) != 0) {
+            result = 0;
+            func_0035B6E0("btl:bad counter guard[%X]\n", element);
+        }
+    }
+    if (guardAbility != -1 && (guardMask & result)) {
+        attacker->unk314 = guardAbility;
+    }
+    return result;
+}
 
 s32 btlQueryUnitChannelFlags(BtlUnit *first, BtlUnit *second, s32 other, s32 variant, s32 mode) {
     s32 flags;

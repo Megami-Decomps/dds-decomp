@@ -649,7 +649,7 @@ extern u8 func_001B0B30(BtlUnit *, s32);
 
 extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
 
-extern u32 func_001B1350(BtlUnit *, BtlUnit *, s32, s32, u32);
+extern u32 func_001B1350(BtlUnit *, BtlUnit *, u32, s32, s32);
 
 extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
 
