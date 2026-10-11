@@ -1600,7 +1600,77 @@ void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_0010B3D8);
+/* Copy heap metadata before drawing can allocate more packets. */
+typedef struct HeapOverlayBlock {
+    u32 address;
+    u8 state;
+    u8 padding[3];
+    s32 size;
+} HeapOverlayBlock;
+
+extern s32 sdfGetPacketCursor(void);
+extern void sdfSetPacketCursorAligned(s32);
+extern s32 func_0036DE70(void);
+extern u32 func_00329230(void);
+extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
+extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
+extern void EIntr(void);
+
+void func_0010B3D8(void *list, s32 x, s32 y) {
+    HeapOverlayBlock *snapshot;
+    HeapOverlayBlock *entry;
+    SdfMemBlock *block;
+    u32 count;
+    u32 i;
+    u32 heapBase;
+    u32 offset;
+    s32 restoreInterrupts;
+    s32 markerX;
+    s32 markerY;
+
+    snapshot = (HeapOverlayBlock *)sdfGetPacketCursor();
+    restoreInterrupts = func_0036DE70();
+    block = (SdfMemBlock *)func_00329230();
+    entry = snapshot;
+    heapBase = sdfMemoryGetBlockAddress(block);
+    /* Count only the interrupt-protected snapshot traversal. */
+    count = 0;
+    do {
+        count++;
+        entry->address = sdfMemoryGetBlockAddress(block);
+        entry->state = sdfGetMemoryBlockState(block);
+        entry->size = sdfMemoryGetBlockSize(block);
+        entry++;
+        block = sdfMemoryNextBlock(block);
+    } while (block != NULL);
+    if (restoreInterrupts) {
+        EIntr();
+    }
+    sdfSetPacketCursorAligned((s32)entry);
+
+    entry = snapshot;
+    sdfAppendPacket(list, (u32)func_0011F250(x - 0x20, y - 0x10,
+        0x0FFFFF7F, 0x440, (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x20,
+        0x80000000, 0x80806020));
+    for (i = 0; i < count; i++) {
+        sdfDrawHeapSpanOverlay(list, x, y, heapBase, entry->address,
+            entry->size, entry->state);
+        entry++;
+    }
+    markerY = y;
+    markerX = x + 0x420;
+    sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+        x + 0x4C0, markerY, 0x0FFFFF80, NULL);
+    for (offset = 0x100000; offset < D_00435D4C; offset += 0x100000) {
+        markerY = y + (offset / (D_00435D4C >> 8)) * 8;
+        sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+            x + 0x470, markerY, 0x0FFFFF80, NULL);
+    }
+    markerY = y + (D_00435D4C / (D_00435D4C >> 8)) * 8;
+    sdfAppendFillRectanglePacket(list, 0x80806020, 0, markerX, markerY,
+        markerX + 0xA0, markerY, 0x0FFFFF80, NULL);
+}
+
 
 extern char D_00435D50[];
 extern char D_00435D58[];

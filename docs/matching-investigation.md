@@ -178,6 +178,26 @@ five-word residual. Direct owner access in neighboring
 words. The rule is to inspect the actual PRE and pointer quantities, rather
 than replace cached cursors indiscriminately.
 
+### Camp visual sampling: inspect the last pointer use
+
+`mnuSampleCampPanelVisualTrack` in DDS1 differed by four words because the
+first scheduling pass promoted the selected key's second scalar load. The
+mode, payload and two scalar loads had equal priority and no load-to-load
+edges. The second scalar load carried `REG_DEAD` for the key pointer, giving
+it register weight zero; the other three loads had weight one.
+
+A diagnostic change of that single weight reproduced the entire 504-byte
+native function. The ordinary C correction captures the payload and scalar
+values before the mode, making the mode load the pointer's final use. GCC
+then schedules the mode first and reproduces the native order exactly. All
+four reads still occur before the first output write or interpolation call.
+No extra read, pointer use, dependency, barrier or compiler option is added.
+
+The useful source question is which real access ends the pointer lifetime.
+Check its death note and scheduler weight before changing the capture order;
+the intervened compiler output is a causal test, while the unchanged compiler
+and complete-unit check establish the source match.
+
 ## Investigate a mechanism that is not documented yet
 
 1. **Reduce the question, preserving the cause.** Identify the smallest

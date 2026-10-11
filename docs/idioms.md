@@ -7512,3 +7512,60 @@ answer; sdata literals of eight bytes or less are weaker, because they can be a
 shared global. The same check applies to a `-fno-optimize-sibling-calls` unit:
 a shared literal reaching across its boundary means the run is part of a larger
 file that also holds sibcall functions.
+### Initialize the heap-overlay count in its collection phase
+
+DDS2 `func_0010B3D8` and DDS1 `func_0010B1B0` first copy heap metadata
+into 12-byte records while interrupts are disabled, then draw the snapshot.
+The counter belongs to the collection loop: initialize it after obtaining the
+heap base, immediately before the `do` loop, rather than at function entry.
+This is a real lifetime distinction even though late scheduling puts the zero
+assignment in the prologue in both builds.
+
+In the qualified DDS2 probe, the entry-initialized counter had eight weighted
+references and live length 118, while the packet-list pointer had eight
+references and live length 116. Their allocation priorities were 2033 and
+2068, so the list received `$18` before the counter received `$19`. Moving
+initialization to collection shortened the counter's recorded lifetime to
+110 (priority 2181); the list was 115 (2086). The native assignment, counter
+`$18` and list `$19`, followed without changing declarations, widths, flags or
+register constraints. The final output changed only those register choices.
+The grid's later right-edge coordinate naturally reuses the dead counter's
+register; it must not be conflated with the count in C.
+
+The initial grid tick also uses the same `markerY` quantity as subsequent
+computed ticks, initialized from the requested Y position. Keeping that
+coordinate phase explicit restored the native argument copies and branch
+scheduling before the final register-allocation correction.
+
+Both 632-byte functions match in their complete owners. Preserve the games'
+four different horizontal geometry constants when transferring the body.
+Credit Vesper's earlier DDS2 reconstruction and Sable's DDS1 investigation.
+
+### Preserve derived coordinates before diagnosing loop-bound allocation
+
+The five-row resource menu (`func_00237088` in DDS2, `func_0021C518` in
+DDS1) has a fixed row count and a Y coordinate derived as `0x7960 + row *
+0x60`. Reconstructing Y as an independently incremented local instead changes
+more than its eventual register: it changes the intermediate loop program on
+which invariant-motion profitability is decided.
+
+With an independent Y local, a signed `< 5` traversal leaves two incorrect
+exit instructions and swaps Y/state register assignments. Spelling the fixed
+count as `!= 5` alone makes the second loop pass hoist constant five into a
+saved register, displacing a text-style constant. Moving the Y initialization
+to the drawing phase is neutral; the tested initialization timing and
+loop-condition spellings did not recover the complete target.
+
+Deriving Y from `row` recovers native induction and register allocation. With
+the fixed-count traversal, the qualified trace reports that the second loop
+pass declines to hoist the bound (`savings 1 not desirable`). Its intermediate
+loop still contains strength-reduction work that is removed later: 56 real
+instructions at this decision versus 54 in the independent-Y control. The
+bound therefore remains local, while the text-style constants stay hoisted.
+This is not a bound spill or post-allocation rematerialization. The compiler
+then emits every native instruction, including the two exit instructions.
+
+Ordinary/probe full-unit assembly agrees apart from the temporary `.file`
+path. Both 348-byte functions match in their complete owners. Preserve each
+row's fresh viewer-state reads and the separate enabled/selected decisions;
+only the label-table identity differs between these titles.
