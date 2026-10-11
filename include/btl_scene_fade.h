@@ -39,7 +39,7 @@ typedef struct ActorSlotOrder {
     s8 state[8];
     u8 unk0A[2];
 #else
-    u16 flags; /* DDS2 scene-slot bits and the special-mode bit 0x1000. */
+    s16 flags; /* Signed mask: DDS2 001CD19C/001CD1AC LH, 001CD1B0 SRAV; includes bit 0x1000. */
     s8 state[8];
 #endif
     s32 entries[8];
