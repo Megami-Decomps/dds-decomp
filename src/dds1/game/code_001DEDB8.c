@@ -237,10 +237,7 @@ extern s64 func_001F0B90(const BtlTintReleaseArgs *args);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
-
 extern u32 sndFinishEarringPlayback(void);
-
-
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
@@ -340,8 +337,6 @@ extern void sndFreeListNode(ActiveSoundNode *);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-
-
 extern s32 btlGetRuntime(void);
 
 extern void *btlAllocTask(s32);
@@ -429,8 +424,6 @@ s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
 
 /* Adjust the pose direction using the supplied horizontal height plane. */ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height);
 
-void btlAimLinkedUnitAtMuzzle(u8 *action);
-
 /* Allocate a native header followed by capacity pointer entries. */ BtlIndexList *btlAllocateIndexList(s32 capacity);
 
 /* The caller keeps the live count within the allocated capacity. */ void btlAppendIndexListEntry(BtlIndexList *list, void *entry);
@@ -438,8 +431,6 @@ void btlAimLinkedUnitAtMuzzle(u8 *action);
 void btlApplyCombinedActorFlags(u8 *resource);
 
 void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode);
-
-u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor);
 
 /* Check actor status, linked-group marks, and owner restrictions before use. */ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 
@@ -471,8 +462,6 @@ s32 btlGetUnitModelFrameCount(BtlUnit *unit);
 
 f32 btlGetUnitModelValue1C(BtlUnit *unit);
 
-s32 btlHasActorCategoryFlag100(BtlLinkedCommand *action);
-
 /* Find a type-two linked group whose associated unit is not disabled. */ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor);
 
 s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node);
@@ -497,123 +486,9 @@ void func_001D6300(u8 *object, void *position);
 
 /* vu0 routine: preserve the actor's primary position and rotation quaternion while * evaluating the requested model record; return the sampled vector in vf10. */ s32 func_001D6428(BtlUnit *unit, s32 value);
 
-u32 func_001DD2C0(BtlLinkedCommand *actor);
-
-u8 func_001DD488(BtlLinkedCommand *action);
-
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001DDF20);
-
-void btlAdvanceTargetCursorUnlessHookHandles(BtlLinkedCommand *actor) {
-    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))(btlGetRuntime() + 0x634);
-    if (callback != 0 && callback(actor) != 0) {
-        return;
-    }
-    if (actor->stepKind == 12) {
-        btlAdvanceTargetCursorAnimation(actor, &actor->camera);
-    }
-}
-
 extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
-void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
-    BtlUnit *target;
-
-    if (((BtlState *)btlGetRuntime())->unk_1FC & 1) {
-        target = action->task->unit;
-        if (target->status.flags & 0x400) {
-            func_001DF358(action, &action->camera);
-            return;
-        }
-    }
-    if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
-        btlCopyMotionTransform(&action->frontCamera, &action->camera);
-        func_001E3E58(action, &action->backCamera, action->task->unit, 0);
-        action->motionParameter = 7.0f;
-        action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
-    } else {
-        func_001E3E58(action, &action->camera, action->task->unit, 0);
-    }
-}
-
-void func_001DE5F0(void) {
-}
-
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001DE5F8);
-
-void func_001DE958(void) {
-}
-
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
-
-void func_001DE960(BtlLinkedCommand *action) {
-    BtlUnit *target;
-    s32 kind;
-    f32 pos[4];
-    if (btlGetIndexListCount(action->targetList) != 1) {
-        return;
-    }
-    target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
-    if (action->task->unit->status.flags & 0x200) {
-        func_001E3E58(action, &action->camera, target, 0);
-        return;
-    }
-    if (btlHasActorCategoryFlag100(action) != 0) {
-        return;
-    }
-    btlUnitGetBodyPosVU(target);
-    VU0_STORE_VF(vf10, pos);
-    if (pos[0] > 0.0f) {
-        kind = 2;
-    } else {
-        kind = 3;
-    }
-    btlSetupCameraAimDualUnit(action, &action->frontCamera, kind, 45.0f, 0.25f);
-    btlSetupCameraAimDualUnit(action, &action->backCamera, kind, 1.0f, 0.5f);
-    action->motionParameter = 30.0f;
-    action->flags |= 0x41;
-}
-
-void func_001DEA68(void) {
-}
-
-void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
-    BtlState *work = (BtlState *)btlGetRuntime();
-    if (action->task->unit->status.flags & 0x400) {
-        if (work->cameraPoseBlendHook != 0) {
-            s32 hasFlag200 = 0;
-            s32 hasFlag400 = 0;
-            u32 i;
-            u32 count = btlGetIndexListCount(action->task->indexWork.indices);
-            for (i = 0; i < count; i++) {
-                BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(action->task->indexWork.indices, i);
-                if (entry->status.flags & 0x200) {
-                    hasFlag200 = 1;
-                }
-                if (entry->status.flags & 0x400) {
-                    hasFlag400 = 1;
-                }
-            }
-            if (work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
-                action->flags |= 0x10000;
-                return;
-            }
-        }
-        btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
-        action->motionParameter = 200.0f;
-        action->flags |= 0x10041;
-    } else {
-        func_001E5800(action, action);
-    }
-}
-
-void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
-    if ((action->flags & 0x10000) != 0) {
-        return;
-    }
-    btlAdvancePlayerCursorAnimation(action, &action->camera);
-}
-
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001DEBE0);
 
 void func_001DEDB8(BtlLinkedCommand *action) {
     if ((action->flags & 0x10000) != 0) {
@@ -702,7 +577,7 @@ s32 func_001DEFA0(s32 actor) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001DEFE0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001DEFE0);
 
 void func_001DF358(BtlLinkedCommand *command, BtlCamState *pose) {
     func_001DEFE0(command, pose, 27.5f);
@@ -1117,11 +992,11 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E0398);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0398);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E0718);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0718);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E0B68);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0B68);
 
 extern u32 effMiscRand(void *state);
 
@@ -1279,11 +1154,11 @@ f32 angle, f32 blend) {
     btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E1288);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E1288);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E16C0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E16C0);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E1CF8);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E1CF8);
 
 void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
     s128 vec[3];
@@ -1308,7 +1183,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E20C0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E20C0);
 
 extern void func_001E20C0(BtlLinkedCommand *, BtlCamState *, s32, f32 *, f32, f32);
 
@@ -1598,9 +1473,9 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E2FF8);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E2FF8);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E3310);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E3310);
 
 extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
 
@@ -1791,6 +1666,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
 }
 
 extern void func_001E3310(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+
 extern void btlBuildShoulderActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 void func_001E3E58(BtlLinkedCommand *action, BtlCamState *pose,
@@ -1915,7 +1791,6 @@ static inline void btlDefeatCameraStoreVector(f32 *dst) {
         ".set noreorder\n\tsqc2 vf10, 0(%1)\n\t.set reorder"
         : "=m" (*(PcpVectorCopyF32 *)dst) : "r" (dst));
 }
-
 
 void func_001E4180(BtlLinkedCommand *action, BtlCamState *pose,
                    BtlUnit *startActor, BtlIndexList *indices, s8 mode) {
@@ -2169,7 +2044,7 @@ void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
     func_001DEFE0(command, pose, 0.0f);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E4AC0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E4AC0);
 
 /* vu0 routine: follow the tracked unit until its animation tail, then frame both groups. */
 void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
@@ -2262,7 +2137,7 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E5198);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E5198);
 
 void func_001E5460(BtlLinkedCommand *action, BtlCamState *camera) {
     btlFlagUserAndTargetDefeat(action, action);
@@ -2373,27 +2248,27 @@ void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action, BtlCamStat
 void func_001E57F8(void) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4000);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4180);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4190);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4190);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4310);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4310);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4320);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4320);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A43E0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43E0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A43F0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A43F0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4400);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4400);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4408);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4468);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4468);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E5800);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E5800);
 
 extern const BtlCameraTimedInstruction *D_0035DA28[];
 
@@ -2541,9 +2416,9 @@ s32 btlFindLinkedActorById(s32 owner, s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E6668);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E6668);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E6AC8);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E6AC8);
 
 void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     u8 pos[16];
@@ -2622,7 +2497,7 @@ extern f32 D_003BB690;
 
 /* Select a camera policy, construct its focus and eye, and initialize the
  * optional endpoint used by the camera cursor. */
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4668);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4668);
 
 void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 bank, s16 index) {
     f32 focus[4];
@@ -3996,7 +3871,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     /* 001E9DA0..001E9DDC: restore saved registers, return void. */
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001E9DE0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E9DE0);
 
 /* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
 s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose, s8 bypassUpper, s8 bypassLower) {
@@ -4055,7 +3930,7 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001EB368);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
 typedef struct BtlCameraParameterRecord {
@@ -4095,7 +3970,7 @@ extern f32 D_0035F5B0[4];
 
 extern f32 D_003BB690;
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001EBE88);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EBE88);
 
 void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                   const BtlCameraTimedInstruction *instruction, s32 *currentIndex,
@@ -4340,13 +4215,13 @@ BtlUnit *btlFindActiveActorById(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001ED5C8);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001ED5C8);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001EDB20);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EDB20);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001EE160);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE160);
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001EE658);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EE658);
 
 u32 btlCountUnitsByFlags(u32 mask) {
     s32 context = btlGetRuntime();
@@ -4954,11 +4829,11 @@ void func_001EFD58(f32 *position, f32 *scale, s32 value) {
 
 extern SdfFlagListParams D_0035F5F8;
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4AD8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4AD8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4AF0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4AF0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B08);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B08);
 
 void btlCreateRainEffect(u32 kind, u32 arg) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -5477,27 +5352,27 @@ s32 sndLookupResourceType(s32 sound, s32 index) {
     return *(u8 *)(datActionAnimationRecords + index * 0x20 + 3);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001F0CA0);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001F0CA0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B40);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B40);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B50);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B50);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B60);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B60);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B78);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B78);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4B98);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4B98);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4BB8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4BB8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4BC8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4BC8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4BE8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4BE8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4BF8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4BF8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4C10);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4C10);
 
 void sndCreateSystemEffect(SoundResourceNode *effect) {
     SoundMixer *handle;
@@ -6040,7 +5915,7 @@ SoundTask *sndCreateClearBattleFlagTask(void) {
 
 extern const char D_003BB6A0[];
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4C88);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4C88);
 
 const char D_003A4CA8[16] __attribute__((aligned(8))) = "%s%03X.BED";
 
@@ -6260,7 +6135,7 @@ void sndFreeResourceLink(SoundResourceLink *node) {
     sdfReleaseChipBlock(node);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001F2818);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001F2818);
 
 void btlMarkTaskReady(SoundResourceLink *link) {
     link->refreshRequested = 1;
@@ -6577,75 +6452,75 @@ s32 sndLoadAndPlayStationedSe(u32 soundId) {
     return loaded;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4CD8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4CD8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4CF0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4CF0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D08);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D08);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D20);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D20);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D38);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D38);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D50);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D50);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D68);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D68);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D80);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D80);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4D98);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4D98);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4DB0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4DB0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4DC8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4DC8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4DE0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4DE0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4DF8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4DF8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E10);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E10);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E28);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E28);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E40);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E40);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E58);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E58);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E70);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E70);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4E88);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4E88);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4EA0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4EA0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4EC0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4EC0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4EE0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4EE0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F00);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F00);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F18);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F18);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F30);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F30);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F48);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F48);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F60);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F60);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F78);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F78);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4F90);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4F90);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4FA8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4FA8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4FC0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4FC0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4FD8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4FD8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A4FF0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4FF0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5008);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5008);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5020);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5020);
 
 s32 sndPlayStationedSe(u32 *sound) {
     u32 soundId = *sound;
@@ -6848,15 +6723,15 @@ void sndFormatResourceNameFromIndex(s32 index, char *output) {
     func_003014F0(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A50D8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A50D8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A50F0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A50F0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5110);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5110);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5138);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5138);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5158);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5158);
 
 void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
     func_003014F0(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
@@ -7131,15 +7006,15 @@ extern void func_0026ABA8(u32, u32, s32);
 
 extern s32 func_003003F0(const char *, ...);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5178);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5178);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5188);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5188);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5198);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5198);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A51A8);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A51A8);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A51D0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A51D0);
 
 u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
@@ -8015,7 +7890,7 @@ typedef struct BattleFormationActionTable {
 
 typedef char BattleFormationActionTableSizeCheck[(sizeof(BattleFormationActionTable) == 0x2A8) ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_001DDF20", func_001F5D08);
+INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001F5D08);
 
 typedef struct BattleFormationActionArgs {
     BtlTask *link;
@@ -8027,19 +7902,19 @@ typedef struct BattleFormationActionArgs {
 
 extern BattleFormationActionTable *D_003BAA64;
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5328);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5328);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5340);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5340);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5358);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5358);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5370);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5370);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5390);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5390);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A53B0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A53B0);
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A53D0);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A53D0);
 
 u32 func_001F5ED8(BattleFormationActionArgs *args) {
     BtlTask *link;
@@ -8124,23 +7999,23 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
     return task;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5410);
+INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5410);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB670);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB670);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB678);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB678);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB680);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB680);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB690);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB690);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB694);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB694);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", btlTintTransitionHoldCount);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", btlTintTransitionHoldCount);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB6A0);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB6A0);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB6A8);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB6A8);
 
-INCLUDE_SDATA(const s32, "game/code_001DDF20", D_003BB6B0);
+INCLUDE_SDATA(const s32, "game/code_001DEDB8", D_003BB6B0);
 

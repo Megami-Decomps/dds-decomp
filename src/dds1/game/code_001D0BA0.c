@@ -6674,6 +6674,125 @@ void btlDispatchActionCameraStep(u8 *actor) {
     }
 }
 
+extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
+
+extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
+
+extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+
+INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001DDF20);
+
+void btlAdvanceTargetCursorUnlessHookHandles(BtlLinkedCommand *actor) {
+    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))(btlGetRuntime() + 0x634);
+    if (callback != 0 && callback(actor) != 0) {
+        return;
+    }
+    if (actor->stepKind == 12) {
+        btlAdvanceTargetCursorAnimation(actor, &actor->camera);
+    }
+}
+
+extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+
+void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
+    BtlUnit *target;
+
+    if (((BtlState *)btlGetRuntime())->unk_1FC & 1) {
+        target = action->task->unit;
+        if (target->status.flags & 0x400) {
+            func_001DF358(action, &action->camera);
+            return;
+        }
+    }
+    if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        func_001E3E58(action, &action->backCamera, action->task->unit, 0);
+        action->motionParameter = 7.0f;
+        action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
+    } else {
+        func_001E3E58(action, &action->camera, action->task->unit, 0);
+    }
+}
+
+void func_001DE5F0(void) {
+}
+
+INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001DE5F8);
+
+void func_001DE958(void) {
+}
+
+extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
+
+void func_001DE960(BtlLinkedCommand *action) {
+    BtlUnit *target;
+    s32 kind;
+    f32 pos[4];
+    if (btlGetIndexListCount(action->targetList) != 1) {
+        return;
+    }
+    target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    if (action->task->unit->status.flags & 0x200) {
+        func_001E3E58(action, &action->camera, target, 0);
+        return;
+    }
+    if (btlHasActorCategoryFlag100(action) != 0) {
+        return;
+    }
+    btlUnitGetBodyPosVU(target);
+    VU0_STORE_VF(vf10, pos);
+    if (pos[0] > 0.0f) {
+        kind = 2;
+    } else {
+        kind = 3;
+    }
+    btlSetupCameraAimDualUnit(action, &action->frontCamera, kind, 45.0f, 0.25f);
+    btlSetupCameraAimDualUnit(action, &action->backCamera, kind, 1.0f, 0.5f);
+    action->motionParameter = 30.0f;
+    action->flags |= 0x41;
+}
+
+void func_001DEA68(void) {
+}
+
+void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
+    BtlState *work = (BtlState *)btlGetRuntime();
+    if (action->task->unit->status.flags & 0x400) {
+        if (work->cameraPoseBlendHook != 0) {
+            s32 hasFlag200 = 0;
+            s32 hasFlag400 = 0;
+            u32 i;
+            u32 count = btlGetIndexListCount(action->task->indexWork.indices);
+            for (i = 0; i < count; i++) {
+                BtlUnit *entry = (BtlUnit *)btlGetIndexListEntry(action->task->indexWork.indices, i);
+                if (entry->status.flags & 0x200) {
+                    hasFlag200 = 1;
+                }
+                if (entry->status.flags & 0x400) {
+                    hasFlag400 = 1;
+                }
+            }
+            if (work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
+                action->flags |= 0x10000;
+                return;
+            }
+        }
+        btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+        action->motionParameter = 200.0f;
+        action->flags |= 0x10041;
+    } else {
+        func_001E5800(action, action);
+    }
+}
+
+void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
+    if ((action->flags & 0x10000) != 0) {
+        return;
+    }
+    btlAdvancePlayerCursorAnimation(action, &action->camera);
+}
+
+INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001DEBE0);
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", btlDeferredTaskHead);
 
 INCLUDE_SDATA(const s32, "game/code_001D0BA0", D_003BB5F8);
