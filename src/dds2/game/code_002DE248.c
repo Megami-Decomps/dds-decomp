@@ -4920,7 +4920,258 @@ void effReleaseBillPointEntries(EffClassWork *work) {
     sdfReleaseResourceAllocation(range->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
+/* Actual same-title provider contracts; full four-float VU buffers remain. */
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewEyeVector[4];
+struct RwV3d;
+extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
+extern void sdfMultiplyVuMatrixInPlace(void);
+extern void func_003364B8(f32);
+extern void func_00336818(f32);
+extern f32 func_003532D0(f32);
+extern f32 func_00352DB0(f32);
+
+void func_002EC370(EffClassWork *work) {
+    f32 offsets[5];
+    f32 widths[5];
+    f32 direction[4];
+    f32 radial[4];
+    f32 tangent[4];
+    f32 view[4];
+    f32 position[4];
+    f32 previous[4];
+    f32 rotated[4];
+    EffBillRangeConfig *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
+    u32 progress = config->point.timed.time.progress;
+    s32 count;
+    u8 useHeight;
+    s32 respawnDelay;
+    s32 remaining;
+    f32 step;
+    f32 layers;
+    f32 phase;
+    f32 waveStep;
+    f32 amplitude;
+    f32 bendScale;
+    f32 acceleration;
+    f32 bendStep;
+    f32 radius;
+    if (progress < work->frame && progress != 0) {
+        return;
+    }
+    count = config->point.timed.count;
+    respawnDelay = config->point.respawnDelay;
+    layers = (f32)(u32)config->point.layers;
+    step = config->point.unk84 / layers;
+    waveStep = ((f32)config->point.periods * 3.14159265f) / layers;
+    amplitude = config->point.amplitude;
+    acceleration = config->angularAcceleration;
+    useHeight = config->tilted;
+    if (step <= 0.0f) {
+        return;
+    }
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, view);
+    widths[0] = 0;
+    widths[1] = config->point.edgeWidth;
+    widths[2] = widths[1] + config->point.halfWidth;
+    widths[3] = widths[2] + config->point.halfWidth;
+    widths[4] = widths[3] + config->point.edgeWidth;
+    position[3] = direction[3] = 1.0f;
+    bendStep = -((step / 10.0f) * (5.0f * (3.14159265f / 180.0f)));
+    bendScale = (20.0f * (3.14159265f / 180.0f));
+    radius = range->start;
+    range->start = radius + range->delta;
+    if (count > 0) {
+    remaining = count;
+    for (; remaining != 0; remaining--, entry++) {
+        if (entry->negativeSeed == -1) {
+            f32 r = effMiscRandUnitFloat(effSharedRandomState);
+            f32 jitter = config->angularRand;
+            f32 baseSpeed = config->angularBase;
+            entry->phase = 0;
+            entry->angularRate = baseSpeed * (r * jitter + (1.0f - jitter));
+            if (!useHeight) {
+                entry->yaw = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                entry->height = 0;
+            } else {
+                entry->yaw = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
+                entry->height = -config->heightScale * effMiscRandUnitFloat(effSharedRandomState);
+            }
+            entry->pitch = (effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+            func_003364B8(entry->yaw);
+            func_00336818(entry->pitch);
+            sdfMultiplyVuMatrixInPlace();
+            phase = entry->phase;
+            position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+            position[1] = 0;
+            position[2] = sdfSinPoly(phase) * radius;
+            VU0_LOAD_VF(vf10, position);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF(vf10, position);
+            entry->position[0] = position[0];
+            entry->color = 0xA0808080;
+            entry->position[1] = position[1];
+            entry->position[2] = position[2];
+        } else {
+            if (entry->color & 0xFF000000) {
+                entry->color += 0xE0000000;
+            } else {
+                entry->negativeSeed = -1;
+                if (respawnDelay > 0) {
+                    entry->negativeSeed -= (u32)effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                }
+                continue;
+            }
+            {
+                EffPointSet *set = entry->set;
+                f32 *vertices = (f32 *)set->buffer;
+                s32 rows = set->rows / 5;
+                f32 stepSquared;
+                f32 waveAngle;
+                f32 waveHeight;
+                f32 waveRadius;
+                f32 oldSlope;
+                f32 inner;
+                f32 edgeWidth;
+                f32 width;
+                f32 curve;
+                f32 curveSample;
+                f32 newHeight;
+                f32 delta;
+                f32 segmentLength;
+                s32 j;
+                s32 k;
+                if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    amplitude = -amplitude;
+                }
+                stepSquared = step * step;
+                waveAngle = effMiscRandUnitFloat(effSharedRandomState) * 3.14159265f;
+                waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                waveHeight = sdfSinPoly(waveAngle) * waveRadius;
+                waveAngle += waveStep;
+                newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                delta = newHeight - waveHeight;
+                waveHeight = newHeight;
+                segmentLength = fsqrtf(delta * delta + stepSquared);
+                oldSlope = func_003532D0(delta / segmentLength);
+                inner = config->point.halfWidth;
+                edgeWidth = config->point.edgeWidth;
+                curveSample = effMiscRandUnitFloat(effSharedRandomState);
+                width = inner + edgeWidth;
+                phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
+                phase = phase + entry->phase;
+                curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
+                func_003364B8(entry->yaw);
+                func_00336818(entry->pitch);
+                sdfMultiplyVuMatrixInPlace();
+                position[0] = sdfEvaluateCosineViaSinePhaseShift(phase) * radius;
+                position[1] = 0;
+                position[2] = sdfSinPoly(phase) * radius;
+                VU0_LOAD_VF(vf10, position);
+                VU0_ROTATE_VEC(vf10, vf10);
+                VU0_STORE_VF(vf10, position);
+                VU0_STORE_VF(vf10, previous);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF(vf10, radial);
+                direction[0] = previous[0] - entry->position[0];
+                direction[1] = previous[1] - entry->position[1];
+                direction[2] = previous[2] - entry->position[2];
+                VU0_LOAD_VF(vf10, direction);
+                VU0_NORMALIZE_VF10();
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_LOAD_VF(vf11, radial);
+                VU0_STORE_VF(vf10, direction);
+                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, tangent);
+                VU0_LOAD_VF(vf11, view);
+                VU0_MOVE_VF(vf10, vf12);
+                VU0_CROSS_XYZ(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_MOVE_VF(vf11, vf10);
+                VU0_SCALE_VF(vf10, width);
+                VU0_STORE_VF(vf10, vertices);
+                VU0_NEGATE_XYZ(vf10);
+                VU0_STORE_VF(vf10, vertices + 16);
+                VU0_SCALE_VF(vf11, inner);
+                VU0_STORE_VF(vf11, vertices + 4);
+                VU0_NEGATE_XYZ(vf11);
+                VU0_STORE_VF(vf11, vertices + 12);
+                VU0_STORE_VF(vf0, vertices + 8);
+                position[1] += entry->height;
+                VU0_LOAD_VF(vf11, position);
+                for (j = 0; j < 5; j++) {
+                    VU0_LOAD_VF(vf10, vertices + j * 4);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, vertices + j * 4);
+                    offsets[j] = 0;
+                }
+                entry->position[0] = previous[0];
+                entry->position[1] = previous[1];
+                entry->position[2] = previous[2];
+                vertices += 20;
+                for (k = 1; k < rows; k++) {
+                    f32 tilt = bendScale * (effMiscRandUnitFloat(effSharedRandomState) * 0.75 + 0.25);
+                    f32 slope;
+                    f32 distance;
+                    f32 tangentScale;
+                    if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                        bendScale = -bendScale;
+                    }
+                    waveAngle += waveStep;
+                    if (waveAngle >= 3.14159265f) {
+                        waveAngle -= 3.14159265f;
+                        amplitude = -amplitude;
+                        waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.95f + (1.0f - 0.95f));
+                        curve = bendStep * (effMiscRandUnitFloat(effSharedRandomState) * 0.7f + (1.0f - 0.7f));
+                    }
+                    newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    delta = newHeight - waveHeight;
+                    segmentLength = fsqrtf(delta * delta + stepSquared);
+                    slope = func_003532D0(delta / segmentLength) + tilt;
+                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)radial, oldSlope);
+                    VU0_LOAD_VF(vf10, direction);
+                    VU0_ROTATE_VEC(vf10, vf10);
+                    VU0_STORE_VF(vf10, rotated);
+                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)tangent, curve);
+                    VU0_LOAD_VF(vf10, direction);
+                    VU0_ROTATE_VEC(vf10, vf10);
+                    VU0_STORE_VF(vf10, direction);
+                    VU0_LOAD_VF(vf10, previous);
+                    VU0_MOVE_VF(vf11, vf10);
+                    VU0_ROTATE_VEC(vf10, vf10);
+                    VU0_STORE_VF(vf10, previous);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(distance);
+                    tangentScale = func_00352DB0((slope - oldSlope) * 0.5f);
+                    oldSlope = slope;
+                    waveHeight = newHeight;
+                    VU0_LOAD_VF(vf12, rotated);
+                    for (j = 0; j < 5; j++) {
+                        f32 extra = widths[j] * tangentScale;
+                        f32 length;
+                        offsets[j] += extra;
+                        VU0_MOVE_VF(vf11, vf12);
+                        VU0_LOAD_VF(vf10, vertices + j * 4 - 20);
+                        length = distance + offsets[j];
+                        VU0_SCALE_VF(vf11, length);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices + j * 4);
+                        offsets[j] = extra;
+                    }
+                    vertices += 20;
+                }
+            }
+        }
+        entry->negativeSeed++;
+    }
+    }
+}
 
 /* vu0 routine: Tint active point sets under the class quaternion transform.
  * Retail keeps qword color scratch homes at SP+50/+60/+70/+80. */
