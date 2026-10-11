@@ -1032,7 +1032,42 @@ void mnuCreateTitleStreamThread(void) {
     sdfThreadSleepSelf();
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_002A1E58);
+extern u32 D_00454D58[];
+extern u8 D_00455DB0[];
+extern u32 D_00455D98[];
+extern u8 D_00453D30[];
+extern u8 D_00454D70[];
+
+void func_002A1E58(void) {
+    memset(D_00455DB0, 0, 0x1000);
+
+    mnuTitleStreamStatus.repeatFrame = 0;
+    mnuTitleStreamStatus.control = 2;
+    mnuTitleStreamStatus.compressedData = 0;
+    mnuTitleStreamStatus.allocation = 0;
+    mnuTitleStreamStatus.samples = (s16 *)D_00455DB0;
+    mnuTitleStreamStatus.decoder = D_00454D58;
+    mnuTitleStreamStatus.loadState = 0;
+
+    mnuTitleSoundBufferState.control = 2;
+    mnuTitleSoundBufferState.compressedData = 0;
+    mnuTitleSoundBufferState.repeatFrame = 0;
+    mnuTitleSoundBufferState.allocation = 0;
+    mnuTitleSoundBufferState.samples = (s16 *)D_00455DB0;
+    mnuTitleSoundBufferState.decoder = D_00455D98;
+    mnuTitleSoundBufferState.loadState = 0;
+
+    mnuInitTitleSoundRemoteRequest(0x400);
+
+    D_00454D58[1] = (u32)D_00453D30;
+    D_00454D58[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    D_00454D58[4] = 0;
+    D_00455D98[1] = (u32)D_00454D70;
+    D_00455D98[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    D_00455D98[4] = 2;
+
+    mnuCreateTitleStreamThread();
+}
 
 /* Read state words 0, 1 and 3; the frame-byte word 2 is not in this snapshot. */
 void mnuReadTitleStreamStatusLocked(AtracInfo *statusSnapshot) {
@@ -1072,7 +1107,6 @@ void mnuStoreTaskResult(char *audioPath) {
     mnuTitleStreamStatus.loadState = 1;
 }
 
-extern u32 D_00454D58[];
 
 extern void func_003504A8(u32 *);
 
@@ -1103,7 +1137,6 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
     return ready;
 }
 
-extern u8 D_00455DB0[];
 
 /* Install the fixed title track and queue its compressed frames under the lock. */
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428590);
@@ -1271,7 +1304,6 @@ void mnuResetTitleStreamLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-extern u32 D_00455D98[];
 
 /* Install the default medium-frame buffer and stream under the shared lock. */
 INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428650);
