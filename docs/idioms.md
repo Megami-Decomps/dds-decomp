@@ -1793,6 +1793,20 @@ the native constant and branch-delay scheduling. Moving color selection past
 the guards exceeds the native extent. These are bounded source examples, not
 permission for declaration-order enumeration or artificial lifetimes.
 
+The DDS2 scene-slot updater `func_001CCEB8` (2088 bytes) supplies another
+bounded example. Its phase-3 native address/copy tree at
+`001CD320..001CD340` retains the percentage-row base before deriving the
+integer value/reset addresses, although the scheduler emits the integer
+store first. Initializing `scalePercent[i][0]` before `slotValues[i][0]`,
+as the same function already does for channel 1 and later phases, closes
+the remaining 12 of 522 words. The earlier RTL expansion explains the
+source-order hypothesis; the final store order alone does not. The whole
+DDS2 unit gates at `237 match, 0 differ`. Transferring that source shape to
+DDS1 `func_001C1988` (1996 bytes), with its native unconditional phase
+advance rather than DDS2's flag-dependent callback, also gates exact:
+`196 match, 0 differ` for the whole DDS1 unit. These are evidence for the
+actual initialization phase, not permission to enumerate statement orders.
+
 ### Non-rotated loops: `b` to the top-of-body test (stmt.c `expand_end_loop`)
 
 `expand_end_loop` "rolls" the loop-top test to the bottom. It scans from the top
@@ -7569,3 +7583,19 @@ Ordinary/probe full-unit assembly agrees apart from the temporary `.file`
 path. Both 348-byte functions match in their complete owners. Preserve each
 row's fresh viewer-state reads and the separate enabled/selected decisions;
 only the label-table identity differs between these titles.
+
+### Sample the current event frame before forming its sound deadline
+
+`btlCommandWaitEventSoundDeadline` (DDS1 `0x002103A0`, DDS2 `0x0022B460`,
+172 bytes each) keeps the selected mixer-bank result across the current-frame
+query, then adds the script offset. This real comparison phase explains the
+native saved-result `move` and the addition scheduled into the frame-query
+call's delay slot. Adding the offset before that query instead lets the
+compiler combine away the saved-result copy.
+
+The command has a positive phase-three body: missing resources or a reached
+deadline return complete (`1`); one trailing return supplies waiting (`0`) for
+both the other phases and an unreached deadline. Preserve that shared waiting
+outcome rather than returning an isolated Boolean comparison, which changes
+the native branch and default-result joins.
+

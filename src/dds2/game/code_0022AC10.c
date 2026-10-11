@@ -634,7 +634,32 @@ s32 btlCommandSelectEventAction(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022B460);
+s32 btlCommandWaitEventSoundDeadline(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 value = scrReadIntParameter(0);
+    s32 frameOffset = scrReadIntParameter(1);
+    s32 targetFrame;
+    s32 frame;
+
+    if (battle->eventAction != value) {
+        return 1;
+    }
+    if (battle->eventActive == 3) {
+        if (battle->eventRequest == NULL) {
+            return 1;
+        }
+        if (battle->eventData == NULL) {
+            return 1;
+        }
+        targetFrame = sndReadSelectedMixerBankValue(battle->eventRequest, 1);
+        frame = effBattleGetCurrentFrame(battle->eventData);
+        targetFrame += frameOffset;
+        if (frame >= targetFrame) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 btlOpStartSelectedUnitModelChange(void) {
     s32 choice = scrReadIntParameter(0);
