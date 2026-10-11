@@ -103,8 +103,11 @@ typedef struct PtyPresetScriptChoice {
 
 typedef struct PtyPresetRecord {
     PtyPresetScriptChoice scriptChoices[4];
-    u8 pad10[0x90];
+    u8 profileIds[4][12]; /* 0x10: four preset groups of byte profile IDs. */
+    u8 pad40[0x60];
 } PtyPresetRecord;
+typedef char PtyPresetRecordSizeCheck[(sizeof(PtyPresetRecord) == 0xA0) ? 1 : -1];
+typedef char PtyPresetRecordProfileOffsetCheck[((u32)&((PtyPresetRecord *)0)->profileIds == 0x10) ? 1 : -1];
 
 extern PtyPresetRecord D_004052A8[];
 extern s32 mnuGetActiveMantraModelFlagState(void);
@@ -239,7 +242,68 @@ void func_00313C70(DatPartyRecord *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00313D80);
+extern void func_00314868(DatPartyRecord *, u16);
+extern void func_00286A58(DatPartyRecord *);
+extern void func_00286BA8(DatPartyRecord *);
+
+/* Choose the least-conflicting group, install its nonzero profile IDs,
+ * then complete the native current/preset profile update. */
+void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
+    s32 presetIndex = unit->unitId;
+    s32 bestScore;
+    u32 selectedGroup;
+    u32 groupIndex;
+    u32 profileIndex;
+    s32 score;
+    s32 available;
+    s32 i;
+    s32 profileId;
+    u16 occupied;
+    u16 selectedProfileId;
+    DatPartyRecord *partyUnit;
+
+    if (useCurrentProfile == 0) {
+        func_00313C70(unit);
+    }
+    bestScore = 0;
+    selectedGroup = 0;
+    for (groupIndex = 0; groupIndex < 4; groupIndex++) {
+        score = 0;
+        for (profileIndex = 0; profileIndex < 12; profileIndex++) {
+            profileId = D_004052A8[presetIndex].profileIds[groupIndex][profileIndex];
+            available = 1;
+            for (i = 0; i < 5; i++) {
+                partyUnit = &datGameState->party[i];
+                occupied = partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT;
+                if (occupied != 0 && profileId != 0) {
+                    if (func_00314990(partyUnit, profileId) != 0) {
+                        available = 0;
+                    }
+                }
+            }
+            if (available != 0) {
+                score++;
+            }
+        }
+        if (bestScore < score) {
+            bestScore = score;
+            selectedGroup = groupIndex;
+        }
+    }
+    for (i = 0; i < sizeof(D_004052A8[presetIndex].profileIds[selectedGroup]); i++) {
+        profileId = D_004052A8[presetIndex].profileIds[selectedGroup][i];
+        if (profileId != 0) {
+            selectedProfileId = profileId;
+            func_00314868(unit, selectedProfileId);
+            func_00314A80(unit, selectedProfileId);
+        }
+    }
+    if (useCurrentProfile == 0) {
+        func_00286A58(unit);
+    } else {
+        func_00286BA8(unit);
+    }
+}
 
 /* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
 void ptyLoadPresetSkillSlots(DatPartyRecord *unit) {
@@ -274,9 +338,7 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
     }
 }
 
-extern void func_00313D80(s32, DatPartyRecord *);
 void ptyRecomputeMaxHpMp(DatPartyRecord *);
-extern void func_00314868(DatPartyRecord *, u16);
 s32 func_00315388(u16, PrfSkillList *);
 void scrClearAllSecondaryScriptFlags(DatPartyRecord *);
 void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
@@ -287,7 +349,7 @@ void func_003140C8(s32 mode, DatPartyRecord *unit) {
     u16 profileId;
     u32 i;
 
-    func_00313D80(mode, unit);
+    ptyApplyProfilePreset(mode, unit);
     switch (mode) {
     case 0:
         ptyLoadPresetSkillSlots(unit);
