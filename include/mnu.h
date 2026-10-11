@@ -9,11 +9,12 @@
 #endif
 
 struct MenuWindowContainer;
+struct MenuListNode;
 struct MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width,
                                                     s32 height, s32 visibleCount,
                                                     s32 rowSpacing);
-void mnuRetreatWindowListSelection(struct MenuWindowContainer *window);
-void mnuAdvanceWindowListSelection(struct MenuWindowContainer *window);
+struct MenuListNode *mnuRetreatWindowListSelection(struct MenuWindowContainer *window);
+struct MenuListNode *mnuAdvanceWindowListSelection(struct MenuWindowContainer *window);
 /* Clear only the window's panel-transition bit. */
 void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 

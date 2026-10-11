@@ -1018,12 +1018,12 @@ MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step) {
     return selected;
 }
 
-void mnuAdvanceWindowListSelection(MenuWindowContainer *menu) {
-    mnuAdvanceListSelection(menu, 0);
+MenuListNode *mnuAdvanceWindowListSelection(MenuWindowContainer *menu) {
+    return mnuAdvanceListSelection(menu, 0);
 }
 
-void mnuRetreatWindowListSelection(MenuWindowContainer *menu) {
-    mnuReverseListSelection(menu, 0);
+MenuListNode *mnuRetreatWindowListSelection(MenuWindowContainer *menu) {
+    return mnuReverseListSelection(menu, 0);
 }
 
 void func_002B9808(MenuWindowContainer *menu) {
