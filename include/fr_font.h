@@ -35,9 +35,12 @@ typedef struct FrFontRecord {
 typedef struct FntList {
     struct SdfMemBlock *nodeAllocation;
     struct SdfMemBlock *recordStorageAllocation;
-    u8 unk08[0x10];
-    s32 count;
-    FntNode *head;
+    s32 cellWidth;       /* 0x08 */
+    s32 cellHeight;      /* 0x0C */
+    s32 pixelByteCount;  /* 0x10 */
+    s32 capacity;        /* 0x14 */
+    s32 count;           /* 0x18 */
+    FntNode *head;       /* 0x1C */
 } FntList;
 
 /* Serialized resource header; DDS2 moved the lookup offset by eight bytes. */
@@ -176,7 +179,10 @@ typedef char FntNodeSizeCheck[sizeof(FntNode) == 0x20 ? 1 : -1];
 typedef char FntListSizeCheck[sizeof(FntList) == 0x20 ? 1 : -1];
 typedef char FntListNodeAllocationOffsetCheck[((u32)&((FntList *)0)->nodeAllocation == 0x00) ? 1 : -1];
 typedef char FntListRecordStorageAllocationOffsetCheck[((u32)&((FntList *)0)->recordStorageAllocation == 0x04) ? 1 : -1];
-typedef char FntListUnknownSetupOffsetCheck[((u32)&((FntList *)0)->unk08 == 0x08) ? 1 : -1];
+typedef char FntListCellWidthOffsetCheck[((u32)&((FntList *)0)->cellWidth == 0x08) ? 1 : -1];
+typedef char FntListCellHeightOffsetCheck[((u32)&((FntList *)0)->cellHeight == 0x0C) ? 1 : -1];
+typedef char FntListPixelByteCountOffsetCheck[((u32)&((FntList *)0)->pixelByteCount == 0x10) ? 1 : -1];
+typedef char FntListCapacityOffsetCheck[((u32)&((FntList *)0)->capacity == 0x14) ? 1 : -1];
 typedef char FntListCountOffsetCheck[((u32)&((FntList *)0)->count == 0x18) ? 1 : -1];
 typedef char FntListHeadOffsetCheck[((u32)&((FntList *)0)->head == 0x1C) ? 1 : -1];
 typedef char FrFontRecordSizeCheck[sizeof(FrFontRecord) == 0x0C ? 1 : -1];
