@@ -416,9 +416,12 @@ extern s32 fldEffectTextureData[4];
 extern s32 fldEffectTextureNodes[4];
 
 typedef struct {
-    s32 unk0, unk4, unk8, unkC;
-    u8 pad10[0x10];
-    s32 *object;
+    s32 unk0;
+    f32 x; /* 0x4 */
+    f32 y; /* 0x8 */
+    f32 z; /* 0xC */
+    f32 orientation[4]; /* 0x10 */
+    s32 *object; /* 0x20 */
     s16 kind; /* 0x24 */
     s16 kindId; /* 0x26 */
     f32 size; /* 0x28 */
@@ -3122,9 +3125,9 @@ void fldClearMenuEntries(void) {
 
     for (i = 0; i < 32; i++) {
         fldRoomEffectEntries[i].unk0 = 0;
-        fldRoomEffectEntries[i].unk4 = 0;
-        fldRoomEffectEntries[i].unk8 = 0;
-        fldRoomEffectEntries[i].unkC = 0;
+        fldRoomEffectEntries[i].x = 0.0f;
+        fldRoomEffectEntries[i].y = 0.0f;
+        fldRoomEffectEntries[i].z = 0.0f;
         fldRoomEffectEntries[i].object = 0;
         fldRoomEffectEntries[i].unk2C = 0;
         fldRoomEffectEntries[i].unk30 = 0;
