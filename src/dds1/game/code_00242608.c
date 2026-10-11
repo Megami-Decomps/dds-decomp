@@ -2483,7 +2483,36 @@ s32 func_00247190(KwlnTask *task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002472D8);
+extern s32 D_003BC3C0[];
+
+/* Remove a sold-out sell row, handle an empty list, and resume the shop command. */
+s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
+    MenuSelectionPair options = *(MenuSelectionPair *)D_003BC3C0;
+    MenuWindowContainer *window = scene->window;
+    CampWindowParams *values = &window->list->cursor->camp;
+    s32 operation;
+    s32 itemId;
+
+    if (scene->extraOption != 0) {
+        operation = scene->sprite->list->cursor->index + 1;
+    } else {
+        operation = options.values[scene->sprite->list->cursor->index];
+    }
+    itemId = values->id;
+    if (operation == 3) {
+        if (datGameState->inventory.counts[itemId] == 0) {
+            mnuRemoveListCursorNode(scene->window->list);
+        }
+        if (scene->window->list->count == 0) {
+            scene->menuMode = 2;
+        }
+    }
+    mnuSetCommandPhase(scene, 8);
+    func_00260590(scene->window->list, 10);
+    scene->counter = 1;
+    return 1;
+}
 
 void evtAccumulateStateScore(s32 stateAddress) {
     CampWindowParams *values = &((ShopScene *)stateAddress)->window->list->cursor->camp;
