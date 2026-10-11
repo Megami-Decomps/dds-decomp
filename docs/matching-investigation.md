@@ -227,6 +227,22 @@ Keep `"f"` and an explicit transfer for a macro that actually owns that
 instruction. Do not insert a dependency or move scalar setup into assembly
 solely to force a schedule.
 
+Separate real status and decision phases when their lifetimes differ. DDS1
+`evtUpdateMainTaskPopupEntry` returns a nonzero panel result, otherwise reads
+the dispatch status and, when it is zero, accumulates the missing-task and
+active-flag popup conditions. A qualified conditional-move trace showed GCC
+materializing the `1` input only after the flag call in the earlier boolean
+form. Using the actual dispatch status as the initial decision recovers the
+shared constant before the lookup, but reusing one variable for both phases
+makes it global and gives it the wrong saved-register home. A separate local
+popup decision initialized from the zero dispatch status is allocated first
+(priority 6666 versus the constant's 1428); all 156 native bytes then match.
+Both observed allocator runs preserve the complete ordinary assembly.
+
+This is a control-flow and value-lifetime result for this callback. It does
+not license adding artificial uses or splitting every local. Confirm the
+actual native phases and the changed compiler decision before transferring it.
+
 Preserve a compact receipt: public base, complete preferred source/patch,
 source hashes, exact commands, native/emitted sizes, first changed pass,
 residual, previous contributor credit, successful gates and negative controls.

@@ -2659,7 +2659,33 @@ u32 evtStartFadeOut(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002481A0);
+extern const char D_003AF528[];
+extern s32 D_0036AB80[];
+extern s32 evtIsActiveFlagSet(s32 flagIndex);
+
+s32 evtUpdateMainTaskPopupEntry(KwlnTask *task) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
+    s32 result = menuRunPanel(scene, 0, task);
+    if (result != 0) {
+        return result;
+    }
+    result = scene->dispatchState;
+    if (result == 0) {
+        s32 shouldFlag = result;
+        if (kwlnTaskGetTaskByName(D_003AF528) == NULL) {
+            shouldFlag = 1;
+        }
+        if (evtIsActiveFlagSet(0) != 0) {
+            shouldFlag = 1;
+        }
+        if (shouldFlag != 0) {
+            mnuSetPopupEntryFlagged(&scene->dispatchState, D_0036AB80);
+        }
+    }
+    result = 0;
+    return result;
+}
+
 
 /* Select the primary entry action with opaque callback data, not a callback address. */
 s32 evtDispatchStart(KwlnTask *callbackContext) {
