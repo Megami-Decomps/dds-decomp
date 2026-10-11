@@ -190,7 +190,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     MdlCtx *model;
     if (effComputeLightDirectionVU(work->model, work->ownedBuffer) != 0) {
         model = work->model;
-        model->inner->lighting = work->ownedBuffer;
+        model->inner->lighting = (struct SdfDmaTagHeader *)work->ownedBuffer;
     } else {
         model = work->model;
     }
@@ -322,7 +322,7 @@ void effApplyDefaultPartyTint(EffModelOwner *owner) {
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
-        owner->model->inner->lighting = owner->ownedBuffer;
+        owner->model->inner->lighting = (struct SdfDmaTagHeader *)owner->ownedBuffer;
     }
 
     mdlProcessContextNodesAndTransforms(owner->model, D_00325788[1]);

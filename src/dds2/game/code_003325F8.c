@@ -97,7 +97,58 @@ void func_0032C278(SdfTex *texture, s32 arg, f32 value);
 
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
+extern vu8 sdfCurrentBufferIndex;
+extern void sdfCopyAssetListParameterState(DevRequest *, DevRequest *);
+extern void sdfModelCopyData(DevRequest *, DevRequest *);
+
+void func_003325F8(SdfModel *destination, SdfModel *source) {
+    SdfDrawNode **destinationNodes;
+    SdfDrawNode **sourceNodes;
+    s32 count;
+    s32 buffer;
+    s32 i;
+
+    sdfCopyAssetListParameterState(destination->resources, source->resources);
+    sdfModelCopyData(destination->slotPairs, source->slotPairs);
+    destination->flags = source->flags;
+    destination->unk1A = source->unk1A;
+    destination->color = source->color;
+    VU0_LOAD_MATRIX(source->matrix);
+    VU0_STORE_MATRIX(destination->matrix);
+    PCP_COPY_VECTOR(destination->rotationQuaternion, source->rotationQuaternion);
+    PCP_COPY_VECTOR(destination->scaleVector, source->scaleVector);
+    buffer = (s8)sdfCurrentBufferIndex;
+    destination->lighting = source->lighting;
+    destination->scalarOverrideFirst = source->scalarOverrideFirst;
+    destination->unk84 = source->unk84;
+    destination->scalarOverrideSecond = source->scalarOverrideSecond;
+    count = destination->list->usedCount;
+    destinationNodes = destination->list->buffer;
+    sourceNodes = source->list->buffer;
+    i = 0;
+    if (count > 0) {
+        s32 bufferOffset = buffer * 0x80;
+        for (; i < count; i++) {
+            SdfDrawNode *destinationNode = destinationNodes[i];
+            SdfDrawNode *sourceNode = sourceNodes[i];
+
+            destinationNode->flags = sourceNode->flags;
+            destinationNode->color = sourceNode->color;
+            destinationNode->unk16 = sourceNode->unk16;
+            PCP_COPY_VECTOR(destinationNode->quaternion, sourceNode->quaternion);
+            PCP_COPY_VECTOR(destinationNode->translation, sourceNode->translation);
+            PCP_COPY_VECTOR(destinationNode->scale, sourceNode->scale);
+            VU0_LOAD_MATRIX(sourceNode->localMatrix);
+            VU0_STORE_MATRIX(destinationNode->localMatrix);
+            VU0_LOAD_MATRIX(sourceNode->worldMatrix);
+            VU0_STORE_MATRIX(destinationNode->worldMatrix);
+            if (destinationNode->workspace != 0) {
+                memcpy((u8 *)destinationNode->workspace + bufferOffset,
+                       (u8 *)sourceNode->workspace + bufferOffset, 0x80);
+            }
+        }
+    }
+}
 
 /* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
  * Each blend builder fills the 0x40-byte packet area after the list head. */
