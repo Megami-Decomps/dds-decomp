@@ -1522,7 +1522,64 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00245208);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245628);
+extern char (*D_003BAA74)[17];
+extern char (*D_003BAA84)[25];
+extern u32 D_00369FA0[];
+extern void mnuSelectFirstListNode(struct MenuList *list);
+extern u32 func_002CD7F8(u32 itemId);
+extern void func_0027C788(MenuWindowContainer *window);
+
+s32 mnuBuildShopCatalogList(ShopScene *scene) {
+    u8 *entryCursor;
+    s32 rowIndex;
+    u32 i;
+
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    entryCursor = D_00369A88 + rowIndex * sizeof(ShopRankPriceRow);
+    for (i = 0; i < 0x20; i++, entryCursor += sizeof(ShopRankPriceEntry)) {
+        u16 itemId = *(u16 *)(entryCursor + 4);
+        u8 mode = entryCursor[6];
+        struct MenuListNode *node;
+        CampWindowParams *parameters;
+        s32 price;
+        u32 *priceEntry;
+
+        if (mode != 1) {
+            if ((u32)(itemId - 0xA0) < 0x20) {
+                node = mnuAppendWindowListNode(scene->window, D_003BAA84[itemId]);
+                func_0027C788(scene->window);
+                mnuAdvanceListCursorDefault(scene->window->list);
+                parameters = &node->camp;
+                price = func_00244D10(i, 0);
+                parameters->value = price;
+                parameters->id = itemId;
+                parameters->price = price;
+                parameters->mode = mode;
+                if (mnuShopGetTransactionLimit(scene) == 0) {
+                    node->flags48 = 1;
+                }
+            }
+        } else if (itemId != 0) {
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[itemId]);
+            mnuAdvanceWindowListSelection(scene->window);
+            parameters = &node->camp;
+            priceEntry = &D_00369FA0[itemId];
+            price = *priceEntry;
+            parameters->value = price;
+            parameters->id = itemId;
+            parameters->price = price;
+            parameters->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(itemId) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuSelectFirstListNode(scene->window->list);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
 extern char (*D_003BAA84)[25];
