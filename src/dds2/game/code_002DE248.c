@@ -10806,7 +10806,149 @@ u32 effStoreBattleCameraSnapshot(u32 arg0) {
     return arg0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FE5B8);
+/* The menu state at D_003FFBB0 is distinct from the linked-file object. */
+typedef struct EffCameraMenuEntry {
+    char *name;
+    u8 selected;
+    u8 pad05[3];
+    u32 unk08;
+    u32 unk0C;
+    u32 unk10;
+    f32 requestIndex;
+} EffCameraMenuEntry;
+
+typedef struct EffCameraMenuState {
+    const char *nameKey;
+    s32 originX;
+    s32 originY;
+    u32 selectedIndex;
+    u32 unk10;
+    EffCameraMenuEntry *entries;
+    u32 count;
+    u8 pad1C[0x18];
+    u8 *linkedState;
+} EffCameraMenuState;
+
+typedef char EffCameraMenuEntrySizeCheck[(sizeof(EffCameraMenuEntry) == 0x18) ? 1 : -1];
+typedef char EffCameraMenuStateSizeCheck[(sizeof(EffCameraMenuState) == 0x38) ? 1 : -1];
+
+extern EffCameraMenuState D_003FFBB0;
+extern s8 sdfPadButtonStates[];
+extern char D_00438740[];
+extern u32 func_0020D260(u32);
+extern void func_0020D228(void);
+extern void func_0020D270(u32);
+extern void func_0020D230(void);
+
+typedef struct EffCameraCreateRow {
+    EffCameraCreateRequest request;
+    u32 sourceTail;
+} EffCameraCreateRow;
+
+typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
+
+u32 func_002FE5B8(const char *nameKey, const void *sourceRows, u32 sourceCount) {
+    const EffCameraCreateRow *requests = (const EffCameraCreateRow *)sourceRows;
+    EffQueuedFileObject *menuObject;
+    EffCameraMenuState *state;
+    EffCameraMenuEntry *entries;
+    char *nameBuffer;
+    struct SdfMemBlock *allocation;
+    u32 capacity = sourceCount;
+    u32 i;
+    u32 count = 0;
+    u32 oldIndex;
+    u32 result;
+    u32 requestIndex;
+
+    allocation = sdfAllocGeneralBlock(capacity * (sizeof(EffCameraMenuEntry) + 0x14));
+    entries = (EffCameraMenuEntry *)sdfResourceRetainAddress(allocation);
+    nameBuffer = (char *)(entries + capacity);
+    for (i = 0; i < capacity; i++) {
+        const EffCameraCreateRequest *request = &requests[i].request;
+        if (request->resource != NULL) {
+            func_0035C860(nameBuffer, D_00438740, request->resource->name);
+            entries[count].name = nameBuffer;
+            entries[count].selected = 0;
+            entries[count].unk08 = 0;
+            entries[count].unk10 = 0;
+            entries[count].unk0C = 0;
+            entries[count].requestIndex = (f32)i;
+            nameBuffer += 0x14;
+            count++;
+        }
+    }
+
+    menuObject = (EffQueuedFileObject *)D_004386F0;
+    state = &D_003FFBB0;
+    state->count = count;
+    oldIndex = state->selectedIndex;
+    state->entries = entries;
+    state->originX = menuObject->originX;
+    state->originY = menuObject->originY;
+    if (oldIndex >= count) {
+        state->selectedIndex = count - 1;
+        oldIndex = state->selectedIndex;
+    }
+    state->nameKey = nameKey;
+    func_0020D260((u32)state);
+    func_0020D228();
+    func_0020D270((u32)state);
+    func_0020D230();
+    sdfReleaseResourceAllocation(allocation);
+
+    if (sdfPadButtonStates[1] < 0 && count != 0) {
+        u32 selected = D_003FFBB0.selectedIndex;
+        requestIndex = (u32)entries[selected].requestIndex;
+        effAppendPositionedCameraFileJob(&requests[requestIndex].request);
+        result = 0x800000;
+    } else {
+        result = 0;
+        if (sdfPadButtonStates[3] >= 0) {
+            result = 0x200001;
+        }
+    }
+    if ((result & 1) == 0) {
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        return result;
+    }
+    if (count != 0) {
+        const EffCameraCreateRequest *request;
+        EffFileJobRequest *requestResource;
+        u32 selected = D_003FFBB0.selectedIndex;
+        requestIndex = (u32)entries[selected].requestIndex;
+
+        requestResource = ((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request.resource;
+        if (effTemporaryFileJob == NULL || oldIndex != D_003FFBB0.selectedIndex ||
+            requestResource->fileKind != effTemporaryFileJob->type ||
+            requestResource->transferMode != effTemporaryFileJob->option) {
+            if (effTemporaryFileJob != NULL) {
+                fileJobDestroy(effTemporaryFileJob);
+                effTemporaryFileJob = 0;
+            }
+            request = &((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request;
+            if (request->existingJob != 0) {
+                FileJobPayload *sourceJob;
+                if (effAuxiliaryFileQueue != 0) {
+                    fileQueueDestroy(effAuxiliaryFileQueue);
+                    effAuxiliaryFileQueue = 0;
+                }
+                fileQueueInitTransform(D_0045C270);
+                ((FileJob *)D_0045C270)->offset[0] = request->position[0];
+                ((FileJob *)D_0045C270)->offset[1] = request->position[1];
+                ((FileJob *)D_0045C270)->offset[2] = request->position[2];
+                sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
+                effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
+                fileJobDestroy(sourceJob);
+            }
+        }
+    }
+    return result;
+}
+
 
 extern u32 func_002FE5B8(const char *, const void *, u32);
 
