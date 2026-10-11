@@ -2307,6 +2307,25 @@ Two related mechanisms are known:
   DDS2 `func_00231618` / DDS1 `func_00216B00` (also `btlClearActorEntrySlot`,
   `btlActorEntryIsExpired`).
 
+### Paired coordinates and scoped renderer phases
+
+DDS2 `func_002C0958` walks five signed XY pairs in its opaque panel work.
+The unit-local `s32 corners[5][2]` and the geometry setter describe the same
+40-byte region at `+0x28`; the renderer advances one eight-byte pair cursor.
+An array of two-field records can instead produce separate field bases during
+GCSE and consume another saved register. Establish the actual owner and its
+consumers before changing either representation; retail alone does not prove
+which nominal C type was originally used.
+
+The renderer captures the background slot before its null check, then the
+heading coordinates before the heading draw. Its coordinate and resource-slot
+locals subsequently capture the row values. These are actual consecutive draw
+phases, not artificial uses to retain a register. Restrict the row-loop index
+to the traversal block: after the paired accesses and real capture phases
+agree, a function-wide index leaves 15 differing stack offsets, while the
+traversal-scoped index reproduces all 552 bytes. Inspect the compiler's actual
+allocation and spill decisions; do not search declaration permutations.
+
 ### FP registers: local-alloc before global-alloc
 
 A pseudo born and dying once inside one basic block is a local qty, allocated
