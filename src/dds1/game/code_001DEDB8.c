@@ -65,7 +65,8 @@ typedef struct BtlCameraCursor {
     s8 phase;               /* 0x12 */
     s8 counter;             /* 0x13 */
     s8 busy;                /* 0x14: nonzero suspends the path step */
-    u8 pad15[0xB];
+    s8 restoreAlternate;   /* 0x15: snapshot restore selector */
+    u8 pad16[0xA];
     f32 pathEnd[4];         /* 0x20 */
     f32 pathStart[4];       /* 0x30 */
     f32 eyeFrom[4];         /* 0x40 */
@@ -80,13 +81,23 @@ typedef struct BtlCameraCursor {
     f32 startFrame;         /* 0xB0 */
     u8 padB4[0xC];
     f32 duration;           /* 0xC0 */
-    u8 padC4[0x2C];
+    u8 padC4[0xC];
+    u8 parameterD0;         /* 0xD0: unsigned serialized flag */
+    u8 padD1[0xF];
+    f32 parameterE0;        /* 0xE0 */
+    u8 padE4[0xC];
     f32 blendRate;          /* 0xF0 */
     u8 padF4[0xC];
     f32 rangeStart;         /* 0x100 */
     u8 pad104[0xC];
     f32 rangeEnd;           /* 0x110 */
-    u8 pad114[0x1C];
+    s32 parameterIndex114;
+    s32 parameterIndex118;
+    s32 parameterIndex11C;
+    s32 parameterIndex120;
+    s32 parameterIndex124;
+    s32 parameterIndex128;
+    s32 parameterIndex12C;
 } BtlCameraCursor;
 
 extern BtlCameraCursor D_0035F100;
@@ -3871,6 +3882,23 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
     /* 001E9DA0..001E9DDC: restore saved registers, return void. */
 }
 
+typedef struct BtlCameraParameterRecord {
+    u8 flags00;
+    u8 pad01[0xF];
+    f32 value[4];
+    u8 flags20;
+    u8 pad21[0xF];
+    f32 fadeInDuration;
+    u8 pad34[0xC];
+    f32 fadeOutDuration;
+    u8 pad44[0x18];
+    f32 curveScale5C;
+    f32 curveScale60;
+    u8 pad64[0xC];
+    s8 stop;
+    u8 pad71[0xF];
+} BtlCameraParameterRecord;
+
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E9DE0);
 
 /* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
@@ -3933,22 +3961,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
-typedef struct BtlCameraParameterRecord {
-    u8 flags00;
-    u8 pad01[0xF];
-    f32 value[4];
-    u8 flags20;
-    u8 pad21[0xF];
-    f32 fadeInDuration;
-    u8 pad34[0xC];
-    f32 fadeOutDuration;
-    u8 pad44[0x18];
-    f32 curveScale5C;
-    f32 curveScale60;
-    u8 pad64[0xC];
-    s8 stop;
-    u8 pad71[0xF];
-} BtlCameraParameterRecord;
 
 typedef char BtlCameraTimedInstruction_size[(sizeof(BtlCameraTimedInstruction) == 0x10) ? 1 : -1];
 
