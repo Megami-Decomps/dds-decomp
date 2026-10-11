@@ -1,6 +1,8 @@
 #include "common.h"
 #include "kwln.h"
 
+extern void kwlnUpdatePadInputState(void);
+
 extern s8 D_00435B88;
 extern u32 D_00435B84;
 extern u32 D_00435B9C;
@@ -167,7 +169,7 @@ void func_001004B0(void) {
         }
         if (D_00435B8C == 0) {
             startTick = func_003287E0();
-            func_00103A00();
+            kwlnUpdatePadInputState();
             if (kwlnTaskTickScheduler() == 0) {
                 break;
             }

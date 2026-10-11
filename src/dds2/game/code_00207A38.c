@@ -2959,7 +2959,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     return descriptor;
 }
 
-extern u8 sdfPadButtonStates[0x20];
+extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
@@ -3049,9 +3049,9 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((s8)sdfPadButtonStates[3] < 0) {
+        } else if (sdfPadButtonStates[3] < 0) {
             descriptor->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
-        } else if ((s8)sdfPadButtonStates[1] < 0) {
+        } else if (sdfPadButtonStates[1] < 0) {
             descriptor->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
         } else {
             BtlResourceEntry *cachedEntry = descriptor->cachedEntry;

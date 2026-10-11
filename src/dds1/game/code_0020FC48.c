@@ -1960,7 +1960,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
 }
 
 /* Two logical pads, each with sixteen held/trigger/new-press state bytes. */
-extern u8 sdfPadButtonStates[0x20];
+extern s8 sdfPadButtonStates[0x20];
 
 /* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
  * Returns 1 only for button 1's new-press bit when no direction branch ran. */
@@ -2001,7 +2001,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
             menuList->cursor = 0;
             menuList->top = 0;
         }
-    } else if ((s8)sdfPadButtonStates[1] < 0) {
+    } else if (sdfPadButtonStates[1] < 0) {
         return 1;
     }
     return 0;

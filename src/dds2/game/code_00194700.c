@@ -8,7 +8,7 @@
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 
-extern u8 sdfPadButtonStates[0x20];
+extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32);
@@ -527,9 +527,9 @@ s32 func_001950F0(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((s8)sdfPadButtonStates[3] < 0) {
+        } else if (sdfPadButtonStates[3] < 0) {
             descriptor->result = 2;
-        } else if ((s8)sdfPadButtonStates[1] < 0) {
+        } else if (sdfPadButtonStates[1] < 0) {
             descriptor->result = 1;
         } else {
             EffResourceListNode *cachedEntry = descriptor->cachedEntry;

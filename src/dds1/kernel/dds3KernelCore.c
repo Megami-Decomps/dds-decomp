@@ -55,12 +55,12 @@ extern u8 D_003BA830[];
 
 extern u8 D_003BDC48[];
 
-extern u8 D_003244D0[2][2][16];
+extern s8 D_003244D0[2][2][16];
 
 extern u8 D_00324510[2][2][16];
 
 extern u8 D_003BA860[2][2][2];
-extern u8 D_003BA868[2][2];
+extern s8 D_003BA868[2][2];
 extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 

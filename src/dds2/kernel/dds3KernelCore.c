@@ -82,10 +82,10 @@ void kwlnTaskAdvanceStartDelays(void)
     }
 }
 
-extern u8 D_0037F4D0[2][2][16];
+extern s8 D_0037F4D0[2][2][16];
 extern u8 D_0037F510[2][2][16];
 extern u8 D_00435C30[2][2][2];
-extern u8 D_00435C38[2][2];
+extern s8 D_00435C38[2][2];
 extern u8 D_00435C40[2][2][2];
 extern u8 D_00435C48[2][2];
 extern KwlnTask *kwlnExecutingTask;
