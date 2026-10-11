@@ -27,7 +27,7 @@ extern void mnuTransitionActivePanelAnimations(MantraPanelPool *, s32);
 extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSpawnMantraIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 extern void mnuSetMantraFadeState(struct MantraDrawPool *pool, u16, u16);
-extern void func_0028F8A8(u8 *);
+extern void func_0028F8A8(MnuStatusResource *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 /* Work block at object+0x240; the node IDs fill the eight slots before
@@ -110,7 +110,7 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
         mnuSetMantraFadeState(object->menu.selectionController, 5, 0);
         mnuSetMantraFadeState(object->menu.selectionController, 6, 5);
     }
-    func_0028F8A8((u8 *)object);
+    func_0028F8A8(object);
 }
 
 void func_002891C0(MnuStatusResource *object) {
@@ -208,7 +208,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
             object->menu.selectionController);
-        func_0028F8A8((u8 *)object);
+        func_0028F8A8(object);
     }
 }
 
@@ -265,7 +265,7 @@ void func_00289928(MnuStatusResource *object) {
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
             object->menu.selectionController);
-        func_0028F8A8((u8 *)object);
+        func_0028F8A8(object);
     }
 }
 
@@ -337,7 +337,7 @@ void func_00289BA0(MnuStatusResource *object) {
     state->resource = func_002799D8(0x3CE, object);
 }
 
-extern void func_0028E858(s32 object);
+extern s32 func_0028E858(MnuStatusResource *object);
 
 /* Opens mantra selection, saving party record addresses and starting the AT3 load. */
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
@@ -357,7 +357,7 @@ void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
     work->drawBits.mode = 1;
     work->defaultSelector = mnuGetMantraNodePositionRecord(
         (s16)scrGetSelectedScriptEntryId(selectedValue));
-    func_0028E858((s32)object);
+    func_0028E858(object);
 
     node = object->list->first;
     count = 0;
@@ -634,8 +634,6 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
     return 0;
 }
 
-struct MenuSearchObject;
-struct MenuSearchState;
 typedef struct DspUnitName { u8 encodedText[17]; } DspUnitName;
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
@@ -644,11 +642,11 @@ extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern void mnuActivateMantraNode(struct MenuSearchObject *, u16);
-extern s32 func_0028F380(struct MenuSearchObject *, struct MenuSearchState *);
-extern s32 mnuSelectPreferredMantraNode(struct MenuSearchObject *, struct MenuSearchState *);
-extern s32 mnuSelectMatchingNode(struct MenuSearchObject *, struct MenuSearchState *);
-extern void mnuSelectMantraLimitLine(struct MenuSearchObject *, u16);
+extern void mnuActivateMantraNode(MnuStatusResource *, u16);
+extern s32 func_0028F380(MnuStatusResource *, MantraMenuSrc *);
+extern s32 mnuSelectPreferredMantraNode(MnuStatusResource *, MantraMenuSrc *);
+extern s32 mnuSelectMatchingNode(MnuStatusResource *, MantraMenuSrc *);
+extern void mnuSelectMantraLimitLine(MnuStatusResource *, u16);
 extern void mnuApplyMantraUnlockToPartyList(MnuStatusResource *, u16);
 extern s32 func_00290A78(MnuStatusResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
@@ -758,14 +756,11 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             evtPrintDeveloperConsoleMessage(D_00426C70, work->src->bits >> 15,
                                            (work->src->bits >> 8) & 0xF);
             if (work->src->bits & 0x8000) {
-                func_0028F380((struct MenuSearchObject *)object,
-                             (struct MenuSearchState *)work->src);
+                func_0028F380(object, work->src);
             } else if ((work->src->bits & 0xF00) == 0x200) {
-                mnuSelectPreferredMantraNode((struct MenuSearchObject *)object,
-                                            (struct MenuSearchState *)work->src);
+                mnuSelectPreferredMantraNode(object, work->src);
             } else if ((work->src->bits & 0xF00) == 0x300) {
-                mnuSelectMatchingNode((struct MenuSearchObject *)object,
-                                     (struct MenuSearchState *)work->src);
+                mnuSelectMatchingNode(object, work->src);
             } else if ((work->src->bits & 0xF00) == 0x400) {
                 work->src->selectedIndex = func_002890A8(object);
             } else {
@@ -909,7 +904,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             }
         } else if ((work->src->bits & 0xF00) == 0x300 ||
                    (work->src->bits & 0xF00) == 0x400) {
-            mnuSelectMantraLimitLine((struct MenuSearchObject *)object, work->src->fields.unitIndex);
+            mnuSelectMantraLimitLine(object, work->src->fields.unitIndex);
         }
         func_00278F60(object->menu.selectionController);
         position = mnuGetMantraNodePositionRecord(
@@ -942,7 +937,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             mnuApplyMantraUnlockToPartyList(object, work->src->fields.unitIndex);
             work->delayFrames = 120;
         } else if ((work->src->bits & 0xF00) == 0x300) {
-            mnuActivateMantraNode((struct MenuSearchObject *)object, work->src->fields.unitIndex);
+            mnuActivateMantraNode(object, work->src->fields.unitIndex);
             work->delayFrames = 60;
         } else {
             func_0028E638(object, work->src->fields.unitIndex);

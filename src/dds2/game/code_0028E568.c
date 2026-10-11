@@ -1,72 +1,25 @@
+#include "mnu_mantra.h"
+
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 
-struct MnuStatusResource;
-struct MantraDrawPool;
-struct SdfMemBlock;
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 extern void mnuArmMantraLimitLineFlags(struct MantraDrawPool *pool, u32);
 
-typedef struct MenuSearchState {
-    u8 requestedId;
-    u8 pad1[4];
-    s8 selectedIndex;
-    s16 targetId;
-} MenuSearchState;
 
-typedef struct MantraNodePos {
-    u32 kind : 4;
-    s32 modelFlagState : 4;
-    u32 reserved : 8;
-    s16 id;
-    s16 firstKey;
-    s16 secondKey;
-    struct MantraNodePos *entries[6];
-} MantraNodePos;
 
 typedef struct MantraProfileRequirement {
     u16 id;
     u16 reserved;
 } MantraProfileRequirement;
 
-typedef struct MantraMenuSlot {
-    u8 nodeId;
-    u8 pad01[7];
-} MantraMenuSlot;
 
-/* The same menu work layout is used by the node-value/index getters. */
-typedef struct MantraMenuWork {
-    u8 pad000[0x554];
-    u32 flags;
-    u8 pad558[8];
-    s32 resourceId;
-    u8 pad564[8];
-    u32 spriteHandles[6];
-    u8 pad584[0x30];
-    u32 nodeIds[8];
-    s32 selectedIndex;
-    s32 nodeCount;
-    u8 pad5DC[0x394];
-    MantraMenuSlot slots[5];
-    u8 pad998[0x14];
-    u32 displaySprite;
-    u8 pad9B0[0x10];
-    struct MantraDrawPool *drawPool;
-} MantraMenuWork;
 
-typedef struct MenuSearchObject {
-    u8 pad0[4];
-    struct MenuList *list;
-    u8 pad8[0x238];
-    MantraMenuWork work;
-    u8 paddingC04[4];
-} MenuSearchObject; /* Full 0xC08-byte status-resource allocation. */
 
-struct MantraNodePos;
-extern struct MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
 extern const MantraProfileRequirement D_003D0078[16];
@@ -77,7 +30,7 @@ extern const char D_004273C0[];
 extern const char D_004273E0[];
 extern const char D_004273F0[];
 
-extern DatPartyRecord *mnuGetNodeValueByIndex(struct MnuStatusResource *, s32);
+extern DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
@@ -85,16 +38,6 @@ extern u32 ptyGetProfileRecordCap(u16);
 
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
-/* Full selection work allocated by evtAllocateMantraSelectionWork. */
-typedef struct MantraLimitSlot {
-    struct SdfMemBlock *allocation;
-    u32 capacity;
-    u16 *values;
-    u8 data[0x160];
-} MantraLimitSlot;
-
-typedef char MenuSearchObject_size_must_be_0xC08[(sizeof(MenuSearchObject) == 0xC08) ? 1 : -1];
-typedef char MantraLimitSlot_size_must_be_0x16C[(sizeof(MantraLimitSlot) == 0x16C) ? 1 : -1];
 
 struct MantraPanelPool;
 struct MantraPanelAnimation;
@@ -105,19 +48,18 @@ extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, 
 extern void mnuStorePanelEntry(s32, s32);
 
 /* Mark the selected mantra node and start its panel animation. */
-void mnuActivateMantraNode(MenuSearchObject *menu, u16 nodeId) {
+void mnuActivateMantraNode(MnuStatusResource *menu, u16 nodeId) {
     u32 selected;
-    MantraLimitSlot *slot;
+    MantraFlagResource *slot;
     u16 *entry;
     struct MantraPanelAnimation *panel;
 
     mnuGetMantraNodePositionRecord((s16)nodeId);
-    selected = func_002890A8((struct MnuStatusResource *)menu);
-    slot = (MantraLimitSlot *)menu->work.spriteHandles[selected];
-    entry = slot->values + nodeId;
+    selected = func_002890A8(menu);
+    slot = menu->menu.slots[selected];
+    entry = slot->flags + nodeId;
     *entry = (*entry & 0xFFF0) | 1;
-    panel = mnuSpawnPanelSlotA((struct MantraPanelPool *)menu->work.displaySprite,
-                              nodeId, 8, 0, 0, 0);
+    panel = mnuSpawnPanelSlotA(menu->menu.resource, nodeId, 8, 0, 0, 0);
     mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
     mnuQueuePanelAnimationTransition(panel, 3, 0);
     mnuStorePanelEntry(0x20009, 0x14);
@@ -185,10 +127,10 @@ s32 func_0028F128(u16 nodeId, s8 member) {
 
 /* Select a menu row whose mantra profile cannot advance at the current model
  * state; if none qualifies, search party profiles against the active rank set. */
-s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
+s32 func_0028F380(MnuStatusResource *object, MantraMenuSrc *state) {
     MantraNodePos *record;
     MantraNodePos *entry;
-    MantraMenuSlot *slot;
+    MtrUnitMenuEntry *slot;
     struct MenuListNode *node;
     DatPartyRecord *party;
     const MantraProfileRequirement *requirements;
@@ -200,19 +142,19 @@ s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
     s32 requirementCount;
 
     slotIndex = 0;
-    slot = &object->work.slots[0];
+    slot = &object->menu.unitEntries[0];
     modelFlagState = mnuGetActiveMantraModelFlagState();
     evtPrintDeveloperConsoleMessage(D_00427390, modelFlagState);
 
     for (; slotIndex < 5; slotIndex++, slot++) {
         if (slot->nodeId != 0) {
             entryIndex = 0;
-            record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
+            record = mnuGetMantraNodePositionRecord(slot->nodeId);
             for (; entryIndex < 6; entryIndex++) {
-                entry = record->entries[entryIndex];
+                entry = record->neighbors[entryIndex];
                 if (entry != 0 && modelFlagState < entry->modelFlagState) {
                     evtPrintDeveloperConsoleMessage(D_004273C0, slotIndex);
-                    state->requestedId = record->id;
+                    state->fields.unitIndex = record->id;
                     state->selectedIndex = slotIndex;
                     return 1;
                 }
@@ -245,7 +187,7 @@ s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
                 if (value == cap) {
                     evtPrintDeveloperConsoleMessage(D_004273F0, slotIndex,
                                                     party->unitId, id);
-                    state->requestedId = id;
+                    state->fields.unitIndex = id;
                     state->selectedIndex = slotIndex;
                     return 1;
                 }
@@ -255,9 +197,9 @@ s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
     return 0;
 }
 
-s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *state) {
-    MantraMenuWork *work = &object->work;
-    MantraMenuSlot *slot;
+s32 mnuSelectPreferredMantraNode(MnuStatusResource *object, MantraMenuSrc *state) {
+    MantraMenuWork *work = &object->menu;
+    MtrUnitMenuEntry *slot;
     MantraNodePos *record;
     MantraNodePos *entry;
     MantraNodePos **entries;
@@ -266,14 +208,14 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     s32 i, j;
     s32 cap;
 
-    for (i = 0, slot = work->slots; i < 5; i++, slot++) {
+    for (i = 0, slot = work->unitEntries; i < 5; i++, slot++) {
         if (slot->nodeId != 0) {
-            record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
-            value = mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
+            record = mnuGetMantraNodePositionRecord(slot->nodeId);
+            value = mnuGetNodeValueByIndex(object, i);
             if (ptyAnyActivePartyMemberAtProfileCap(record->id, value->unitId) == 0) {
                 for (j = 0; j < 6; j++) {
-                    entry = record->entries[j];
-                    if (entry != 0 && entry->kind == 2 && entry->id == state->requestedId) {
+                    entry = record->neighbors[j];
+                    if (entry != 0 && entry->kind == 2 && entry->id == state->fields.unitIndex) {
                         state->selectedIndex = i;
                         return 1;
                     }
@@ -281,13 +223,13 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
             }
         }
     }
-    for (i = 0, slot = work->slots; i < 5; i++, slot++) {
+    for (i = 0, slot = work->unitEntries; i < 5; i++, slot++) {
         if (slot->nodeId != 0) {
-            record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
-            mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
+            record = mnuGetMantraNodePositionRecord(slot->nodeId);
+            mnuGetNodeValueByIndex(object, i);
             for (j = 0; j < 6; j++) {
-                entry = record->entries[j];
-                if (entry != 0 && entry->kind == 2 && entry->id == state->requestedId) {
+                entry = record->neighbors[j];
+                if (entry != 0 && entry->kind == 2 && entry->id == state->fields.unitIndex) {
                     state->selectedIndex = i;
                     return 1;
                 }
@@ -297,8 +239,8 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     node = object->list->first;
     for (i = 0; i < 5; i++, node = node->next) {
         value = node->partyRecord;
-        record = (MantraNodePos *)mnuGetMantraNodePositionRecord(state->requestedId);
-        for (j = 0, entries = record->entries; j < 6; j++, entries++) {
+        record = mnuGetMantraNodePositionRecord(state->fields.unitIndex);
+        for (j = 0, entries = record->neighbors; j < 6; j++, entries++) {
             if (*entries != 0) {
                 cap = ptyGetProfileRecordCap((*entries)->id);
                 if (cap == ptyGetProfileRecordValue(value, (*entries)->id)) {
@@ -313,7 +255,7 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
 
 /* Select the first list item whose ID matches the requested ID.
  * If absent, retain the previous selection; the return value is always zero. */
-s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
+s32 mnuSelectMatchingNode(MnuStatusResource *object, MantraMenuSrc *state) {
     struct MenuListNode *current = object->list->first;
     s32 index = 0;
     while (current != 0) {
@@ -345,7 +287,7 @@ INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273E0);
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004273F0);
 
-void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
+void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
     u32 flags = 0;
     u16 limitIds[18] = {
         0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
@@ -363,7 +305,7 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     evtPrintDeveloperConsoleMessage(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
-        mnuArmMantraLimitLineFlags(object->work.drawPool, flags);
+        mnuArmMantraLimitLineFlags(object->menu.selectionController, flags);
     }
 }
 
@@ -375,28 +317,28 @@ extern void mnuQueueMantraLimitLineFlags(struct MantraDrawPool *pool, u32 flags)
 
 extern void mnuSetMantraBackgroundSelection(struct MantraDrawPool *pool, u32 value);
 
-void func_0028F8A8(u8 *object) {
+void func_0028F8A8(MnuStatusResource *object) {
     u16 limitIds[18] = {
         0x61, 0x3B, 0x5B, 0x23, 0x40, 0x62,
         0x53, 0x5E, 0x1C, 0x5A, 0x63, 0x54,
         0x15, 0x44, 0x64, 0x07, 0x5C, 0x0E
     };
-    MenuSearchObject *menu = (MenuSearchObject *)object;
-    u32 selected = func_002890A8((struct MnuStatusResource *)object);
-    MantraLimitSlot *slot = (MantraLimitSlot *)menu->work.spriteHandles[selected];
+    MnuStatusResource *menu = object;
+    u32 selected = func_002890A8(object);
+    MantraFlagResource *slot = menu->menu.slots[selected];
     u32 flags = 0;
     s32 i;
 
     for (i = 0; i < 18; i++) {
-        u16 *value = slot->values + limitIds[i];
+        u16 *value = slot->flags + limitIds[i];
 
         if ((*value & 0xF) != 3) {
             flags |= 1U << i;
         }
     }
 
-    mnuQueueMantraLimitLineFlags(menu->work.drawPool, flags);
-    mnuSetMantraBackgroundSelection(menu->work.drawPool, flags);
+    mnuQueueMantraLimitLineFlags(menu->menu.selectionController, flags);
+    mnuSetMantraBackgroundSelection(menu->menu.selectionController, flags);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);
