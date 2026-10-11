@@ -7732,3 +7732,17 @@ initializer-to-dispatcher sibling transfer: a truthful void dispatcher does
 not fix it. A private scalar-input chooser restores the transfer, but the
 DDS2 bodies are not declared matching or enabled by that diagnostic.
 
+
+### A real getter/helper boundary also restores the large camera selector
+
+`btlChooseLinkedActionCameraPose` (DDS2 `0x001EAE88`, 1544 bytes) matches
+in `game/code_001EA120`, with the index-list getters and shared camera reset
+outside its TU and `btlMatchFirstLinkedActorFlags` defined inside it. The
+previous merged context left a single ordinary `BEQ` where retail has `BEQL`
+at `0x001EB41C`; the genuine committed boundary closes that difference with
+the same natural final mode-four/mode-five switch. Earlier admissions with
+opaque helper assembly differed broadly. Keep actual provider visibility,
+truthful void camera-writer prototypes and primary linked-command owners;
+no nothrow attribute, dummy argument use, per-function flag or copied owner
+is needed. DDS1 `0x001DD890` is the differently sized semantic analogue and
+shares the name, but remains assembly rather than claiming an exact port.
