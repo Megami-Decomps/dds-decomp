@@ -215,6 +215,25 @@ extern char D_003E75A8[];
 
 extern void sndSetSequenceVolumePan();
 
+typedef struct MenuPanelDrawEntry {
+    s32 slotIndex;
+    s32 x;
+    s32 y;
+} MenuPanelDrawEntry;
+
+/* The draw routine copies five entries; the data label has a trailing zero entry. */
+typedef struct MenuPanelDrawLayout {
+    MenuPanelDrawEntry entry[5];
+} MenuPanelDrawLayout;
+
+extern const MenuPanelDrawLayout D_0042AD38;
+extern const u8 D_00437BF0[];
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
+extern void func_00308650(const u32 *, const u32 *, u32, const u32 *, u32);
+extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
+extern u32 scrGetIndexedRecordAddress(u32, s32 *);
+extern void func_002BE080(s32, s32, s32, s32, s32, s32);
+
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
     u8 pad00[8];
@@ -223,12 +242,11 @@ typedef struct MenuContext {
     struct EffectSlotSet *displayHandle;     /* 0x60 */
     struct EffectSlotSet *resourceHandle; /* 0x64: second base resource owner. */
     void *displayResource; /* 0x68 */
-    s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
-    u8 pad70[0x40];
+    struct EffectSlotSet *alternateResources[10]; /* +0x6C: indexed by party unit ID */
+    u8 pad94[0x1C];
     s32 selectionResources[6];
     s32 labelHandle;       /* 0xC8 */
-    struct EffectSlotSet *panelModel;       /* 0xCC: model used by the panel resource slots */
-    u8 padD0[0x24];
+    struct EffectSlotSet *panelModels[10]; /* +0xCC: indexed by party unit ID */
     const void *partySelectionLayout; /* 0xF4: layout copied into the party window panel. */
     const void *skillCategoryLayout; /* 0xF8 */
     const void *equippedSkillLayout; /* 0xFC */
@@ -590,7 +608,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 6, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
-    mnuInitializeBasicWindowLayout(window, (struct EffectSlotSet *)context->panelModel, 0xC);
+    mnuInitializeBasicWindowLayout(window, context->panelModels[0], 0xC);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
     window->list->context = context;
     window->list->drawCallback = func_002B0D90;
@@ -798,13 +816,13 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
 
     mnuLoadPanelSectionResources(
         &context->partyWindow.slots[0],
-        (struct EffectSlotSet *)context->panelModel, 5, 8, 0xB);
+        context->panelModels[0], 5, 8, 0xB);
     mnuLoadPanelSectionResources(
         &context->partyWindow.slots[1],
-        (struct EffectSlotSet *)context->panelModel, 5, 9, 0xB);
+        context->panelModels[0], 5, 9, 0xB);
     mnuLoadPanelSectionResources(
         &context->partyWindow.slots[2],
-        (struct EffectSlotSet *)context->panelModel, 5, 0xA, 0xB);
+        context->panelModels[0], 5, 0xA, 0xB);
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
@@ -816,7 +834,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     }
 
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
-                              (struct EffectSlotSet *)(u32)context->panelModel, 0, 0);
+                              context->panelModels[0], 0, 0);
     mnuBeginWindowFadeTransition(menuWork->primaryWindow, &context->transition);
     menuWork->fadeA = MNU_FULL_FADE;
     menuWork->fadeB = MNU_FULL_FADE;
@@ -905,7 +923,95 @@ s32 func_002B1C68(KwlnTask *callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B1EA8);
+void func_002B1EA8(MenuContext *context, MenuPageBar *hpBar, MenuPageBar *mpBar,
+                   DatPartyRecord *entry, EffectSlotSet *portrait, u32 fade,
+                   u32 frameFade, s32 dimmed)
+{
+    u32 x[3];
+    u32 y[3];
+    u32 colors[3];
+    MenuPanelDrawLayout layout;
+    s32 textAddress;
+    s32 labelId;
+    u32 textColor;
+    s32 i;
+    FrFontGlyph *glyph;
+    EffectSlotSet **panelModels;
+
+    labelId = ptyGetCurrentProfileId(entry);
+    layout = D_0042AD38;
+    textColor = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
+    panelModels = context->panelModels;
+
+    x[0] = 0x840;
+    y[0] = 0xA30;
+    colors[0] = uiBlendColors(0x1A, 0, 0x100);
+    x[1] = 0x840;
+    y[1] = 0xDF8;
+    colors[1] = colors[0];
+    x[2] = 0xB0;
+    y[2] = 0xDF8;
+    colors[2] = colors[0];
+    func_00308650(x, y, 0, colors, 0x53);
+
+    x[0] = 0;
+    y[0] = 0x8C8;
+    colors[0] = uiBlendColors(0x1A, 0, 0x100);
+    x[1] = 0x580;
+    y[1] = 0xB88;
+    colors[1] = colors[0];
+    x[2] = 0;
+    y[2] = 0xE50;
+    colors[2] = colors[0];
+    func_00308650(x, y, 0, colors, 0x53);
+
+    func_00306CD0(0x840, 0xA28, 0, 0x100, 1, panelModels[0], 0x10, 0x53);
+
+    for (i = 0; i < MNU_ENTRY_COLOR_COUNT; i++) {
+        if (dimmed == 0) {
+            panelModels[entry->unitId]->workEntries->geometry.cornerColors[i] =
+                panelModels[entry->unitId]->workEntries->savedColors[i];
+        } else {
+            panelModels[entry->unitId]->workEntries->geometry.cornerColors[i] =
+                uiBlendColors(panelModels[entry->unitId]->workEntries->savedColors[i],
+                              panelModels[entry->unitId]->workEntries->savedColors[i] & 0xFF,
+                              0x80);
+        }
+    }
+    func_00306CD0(0, 0x840, 0, frameFade, 1, panelModels[entry->unitId], 0, 0x53);
+
+    for (i = 0; i < sizeof(layout.entry) / sizeof(layout.entry[0]); i++) {
+        func_00306CD0(layout.entry[i].x, layout.entry[i].y, 0, 0x100, 1, panelModels[0],
+                      layout.entry[i].slotIndex, 0x53);
+    }
+
+    hpBar->fade = fade;
+    mnuDrawAndAdvanceRatioPanel(0x940, 0xA58, 0, textColor, entry->hp, entry->maxHp, hpBar, 0x53);
+    mpBar->fade = fade;
+    mnuDrawAndAdvanceRatioPanel(0x940, 0xAE8, 0, textColor, entry->mp, entry->maxMp, mpBar, 0x53);
+
+    if (labelId != 0) {
+        if (scrGetIndexedRecordAddress(labelId & 0xFFFF, &textAddress) != 0) {
+            func_002BE080(0xE10, 0xBB0, 0, textColor, labelId, 0x53);
+        } else {
+            glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor,
+                                                (const u8 *)(u32)textAddress, 0);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+        }
+    } else {
+        glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor, D_00437BF0, 0);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    }
+
+    if (portrait != NULL) {
+        func_00306CD0(0x1490, 0xA10, 0, fade, 1, portrait, 0, 0x53);
+    } else {
+        func_00306CD0(0x1490, 0xA10, 0, fade, 1,
+                      context->alternateResources[entry->unitId], 1, 0x53);
+    }
+}
 
 /* Two-stage fade: B rises first when opening, A falls first when closing.
  * The second ramp begins strictly past its threshold; clamps follow each step. */
@@ -1013,7 +1119,7 @@ void func_002B2408(MenuContext *context) {
     }
     menu->profileSaved = 1;
     profilePanel->opacity = menu->fadeA;
-    mnuSetGroupProperties(profilePanel, context->displayHandle, context->panelModel, 3, 4);
+    mnuSetGroupProperties(profilePanel, context->displayHandle, context->panelModels[0], 3, 4);
     mnuDrawAndAdvanceProfilePanel(0x720, 0xC78, 0, profilePanel, 0x53);
     menu->profilePhase = profilePanel->phase;
     for (i = 0; i < 5; i++) {
@@ -1207,7 +1313,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
     mnuSetWindowResource(index, window,
                          (EffectSlotSet *)menuContext->displayHandle,
                          (EffectSlotSet *)menuContext->displayResource,
-                         (EffectSlotSet *)menuContext->alternateResource, 0, 0);
+                         menuContext->alternateResources[0], 0, 0);
     mnuAttachPartyIconBundle(index, window, (EffectSlotSet *)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)menuContext->resourceHandle,
                                                    (EffectSlotSet *)menuContext->displayResource, 0);
@@ -1216,12 +1322,12 @@ s32 mnuCreatePanels(KwlnTask *callback) {
                                                     (struct EffectSlotSet *)menuContext->displayHandle);
     menuContext->panelEffects = mnuAllocateSimpleSprite(
         (struct EffectSlotSet *)menuContext->resourceHandle,
-        (struct EffectSlotSet *)menuContext->alternateResource,
+        menuContext->alternateResources[0],
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
     menuContext->profilePanel = profile;
     mnuSetGroupProperties(profile, (EffectSlotSet *)menuContext->displayHandle,
-                          (EffectSlotSet *)menuContext->alternateResource, 1, 2);
+                          menuContext->alternateResources[0], 1, 2);
     party->iconPanel = mnuCreatePanelIconState(4, (s32)menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
         party->motionSelection = -1;
@@ -1329,7 +1435,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
                 menuWork->staffMode = 1;
                 func_002B2C88(&((MenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                          (struct EffectSlotSet *)(u32)((MenuContext *)context)->alternateResource, 0, 0);
+                                          ((MenuContext *)context)->alternateResources[0], 0, 0);
             } else {
                 menuWork->staffMode = 0;
                 func_002B2C88(&((MenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
