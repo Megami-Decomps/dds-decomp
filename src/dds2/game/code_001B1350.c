@@ -1,0 +1,474 @@
+#include "fld_area_work.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "itf_mes_window.h"
+#include "fr_font_measure.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "kwln.h"
+#include "sdf_resource.h"
+#include "pcp_vu0.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "eff.h"
+#include "itf.h"
+#include "itf_panel_draw.h"
+#include "itf_panel_api.h"
+#include "btl_state.h"
+#include "btl_ui.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "btl_action.h"
+#include "scr.h"
+#include "dat_state.h"
+#include "mnu_result.h"
+#include "dat_command.h"
+#include "sdf_sif_command.h"
+#include "mdl_resource_table.h"
+#include "kwln_task_lifecycle.h"
+
+extern s32 btlGetRuntime(void);
+
+typedef struct BattleItemDrop {
+    u16 id;
+    u8 count;
+    u8 pad03;
+} BattleItemDrop;
+
+typedef struct BattleController {
+    u8 pad_000[0x214];
+    s32 frame;
+    u32 flags;
+    u32 flags21C;
+    u8 pad_220[0x28];
+    ActionStateLink *taskHead; /* 0x248 */
+    BtlUnit *actors;
+    u8 pad_250[0x1E];
+    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
+    u8 pad26F;
+    u16 variant; /* 0x270 */
+    u8 pad_272[0x22];
+    s32 adjustmentRecordIndex; /* 0x294 */
+    s32 adjustmentGroupIndex;  /* 0x298 */
+    s32 adjustmentEntryIndex;  /* 0x29C */
+    u8 pad_2A0[0x24];
+    KwlnTask *drawTask;
+    u8 pad2C8[0x14];
+    BattleItemDrop itemDrops[3];
+    s32 moneyEarned; /* 0x2E8 */
+    u32 rewardMacca; /* 0x2EC */
+    s32 experienceEarned; /* 0x2F0 */
+    s32 epEarned; /* 0x2F4 */
+    s32 rewardAp; /* 0x2F8 */
+    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
+    u8 pad2FE[0x3DE];
+    s32 (*commandRangeOverride)(BtlUnit *, s32);
+} BattleController;
+
+extern s32 D_003B4F70[];
+
+extern DatEnemyRecord *datEnemyRecords;
+
+extern void btlBossDebugPrintf(const char *, ...);
+
+extern s32 D_003B4F78[];
+
+extern s32 D_003B4F74[];
+
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+
+extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
+
+extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
+
+extern s32 func_0035B6E0(const char *, ...);
+
+extern s32 evtGetMirroredSolarPhase(void);
+
+extern s32 btlRollAiBucket(void);
+
+extern s32 func_001B39E8(u32);
+
+extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
+
+extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
+
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+
+typedef struct BtlHitResult {
+    s32 amount;
+    u8 pad04[0x28];
+} BtlHitResult;
+
+typedef struct BtlTargetResult {
+    u8 hitCount;
+    u8 pad01[7];
+    u32 kind;
+    u8 pad0C[4];
+    u8 skipped;
+    u8 pad11[3];
+    u8 blocked;
+    u8 pad15[7];
+    BtlHitResult hits[32];
+} BtlTargetResult;
+
+extern s32 btlRollAiBucket();
+
+extern s32 btlGetActionRecordLookupValue(s32);
+
+u32 btlEncodeActorIndexAsSelectionMask(u32 id);
+
+f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
+
+s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
+
+s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record);
+
+s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
+
+s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
+
+s32 btlHasSpecialAbility274(BtlUnit *unit, u32 slot);
+
+s32 func_001ABF50(BtlUnit *battler, s32 element);
+
+s32 func_001AD090(s32 flag);
+
+s32 func_001AE678(BtlUnit *actor, s32 attr);
+
+INCLUDE_ASM(const s32, "game/code_001B1350", func_001B1350);
+
+s32 btlQueryUnitChannelFlags(BtlUnit *first, BtlUnit *second, s32 other, s32 variant, s32 mode) {
+    s32 flags;
+    if (mode != 1) {
+        return 0;
+    }
+    flags = sdfQueryChannelBits(other, (s32)&first->partyRecord, (s32)&second->partyRecord);
+    if ((second->partyRecord.status & 8) != 0 && variant == 2) {
+        flags |= 8;
+    }
+    return flags;
+}
+
+u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
+    s32 selection;
+    u32 value;
+    u32 ratio;
+
+    if (index == -1) {
+        return 0;
+    }
+    selection = btlEncodeActorIndexAsSelectionMask(index);
+    if ((selection & 1) != 0) {
+        return 0;
+    }
+    if ((selection & 0xE0000) != 0) {
+        return 100;
+    }
+    value = func_001ABF50(unit, index);
+    ratio = func_001AE678(unit, index);
+    if (ratio != 100) {
+        ratio = (u16)value * ratio / 100;
+        value = (value & 0xFFFF0000) | ratio;
+        value &= 0x7FFFFFFF;
+    }
+    if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
+        value |= 0x20000;
+    }
+    if (btlHasSpecialAbility274(unit, index) != 0) {
+        value |= 0x40000;
+    }
+    if (btlHasMappedSpecialAbilityForSlot(unit, index) != 0) {
+        value |= 0x10000;
+    }
+    btlBossDebugPrintf("btl:aisyo=%d%%[%X][ratio=%d]\n",
+                      (u16)value, value & 0xFFFF0000, ratio);
+    return value;
+}
+
+INCLUDE_ASM(const s32, "game/code_001B1350", func_001B17E8);
+
+void func_001B1F78(void) {
+}
+
+extern f32 func_001B20C8(BtlUnit *, BtlUnit *, s32);
+
+/* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
+s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
+    s32 result = 0;
+    DatEnemyRecord *entry;
+    f32 ratio;
+    u32 ep;
+
+    if (!(enemy->status.flags & 0x400)) {
+        return result;
+    }
+    if (acquirer != 0 && !(acquirer->status.flags & 0x200)) {
+        return result;
+    }
+    entry = &datEnemyRecords[enemy->partyRecord.unitId];
+    ratio = func_001B20C8(acquirer, enemy, 1);
+    ep = (u32)((f32)entry->experience * ratio);
+    if (entry->flags & 0x2000) {
+        ep *= 100;
+    }
+    if (acquirer != 0) {
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f]\n", ep, entry->experience, ratio);
+    } else {
+        btlBossDebugPrintf("btl:ep=%d[%d,%.3f](acquisition)\n", ep, entry->experience, ratio);
+    }
+    return ep;
+}
+
+f32 func_001B20C8(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKind) {
+    s32 level;
+    s32 difference;
+    f32 factor;
+
+    if (datBattleSceneRecords[((BtlState *)btlGetRuntime())->battleMode].flags & 0x400) {
+        btlBossDebugPrintf("btl:ep hosei off\n");
+        return 1.0f;
+    }
+    if (acquirer == NULL) {
+        level = func_001B39E8(4);
+    } else {
+        level = acquirer->partyRecord.level;
+    }
+    if (level > 60) {
+        level = 60;
+    }
+    difference = level - enemy->partyRecord.level;
+    if (difference > 15) {
+        difference = 15;
+    } else if (difference < -15) {
+        difference = -15;
+    }
+    factor = datBattleParameters->rewardLevelScale[(15 - difference) * 2 + rewardKind];
+    btlBossDebugPrintf("btl:ep[lv=%.3f(%d,%d)]\n",
+                       factor, difference, rewardKind);
+    return factor;
+}
+
+/* Read the money reward with the same eligibility and 100-fold table flag. */
+s32 btlGetEnemyMoney(BtlUnit *acquirer, BtlUnit *enemy) {
+    s32 result = 0;
+    s32 money;
+    DatEnemyRecord *entry;
+    if (!(enemy->status.flags & 0x400)) {
+        return result;
+    }
+    if (acquirer != 0 && !(acquirer->status.flags & 0x200)) {
+        return result;
+    }
+    entry = &datEnemyRecords[enemy->partyRecord.unitId];
+    money = entry->money;
+    if (entry->flags & 0x2000) {
+        money *= 100;
+    }
+    if (acquirer != 0) {
+        btlBossDebugPrintf("btl:money=%d\n", money, acquirer);
+    } else {
+        btlBossDebugPrintf("btl:money=%d(acquisition)\n", money);
+    }
+    return money;
+}
+
+/* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
+s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
+    DatEnemyRecord *entry = &datEnemyRecords[enemy->partyRecord.unitId];
+    f32 ratio = func_001B20C8(acquirer, enemy, 0);
+    u32 ep = (u32)((f32)entry->huntExperience * ratio);
+    if (entry->flags & 0x2000) {
+        ep *= 100;
+    }
+    btlBossDebugPrintf("btl:ep=%d[%d,%.3f](hunt)\n", ep, entry->huntExperience, ratio);
+    return ep;
+}
+
+/* Recovery hooks receive the acting and selected units. This HP hook is
+ * inactive; the MP implementation below does not use the selected unit. */
+u32 func_001B2380(BtlUnit *actor, BtlUnit *target) {
+    return 0;
+}
+
+s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit, BtlUnit *target) {
+    s32 recovery = 0;
+    if (btlCheckSpecialAbility(&unit->partyRecord, 0x26E) != 0) {
+        recovery = (s32)(unit->partyRecord.maxMp * datAbilityParameters[0x26E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    } else if (btlCheckSpecialAbility(&unit->partyRecord, 0x249) != 0) {
+        recovery = (s32)(unit->partyRecord.maxMp * datAbilityParameters[0x249 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    }
+    btlBossDebugPrintf(D_00415638, recovery);
+    return recovery;
+}
+
+extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
+
+s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
+    if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 4) {
+        return 0;
+    }
+    if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
+        return 0;
+    }
+    if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
+        return 1;
+    }
+    if (!(((BtlState *)btlGetRuntime())->battleFlags & 0x80)) {
+        return 0;
+    }
+    return unit->partyRecord.hp + delta < 1;
+}
+
+s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
+    return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 26;
+}
+
+s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
+    s32 value = object->partyRecord.hp + delta;
+    if (value <= 0) {
+        return 1;
+    }
+    return value * 100 / object->partyRecord.maxHp < 26;
+}
+
+s32 btlBothSidesActive(BtlUnit *unit) {
+    BtlUnit *actor;
+    s32 a;
+    s32 b;
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
+        return 0;
+    }
+    if (unit->status.flags & 0x60) {
+        return 0;
+    }
+    a = 0;
+    b = 0;
+    for (actor = ((BattleController *)btlGetRuntime())->actors; actor != 0; actor = actor->nextActor) {
+        if (actor->status.flags & 1) {
+            if (!(actor->status.flags & 0xE0)) {
+                if (actor->status.flags & 0x200) {
+                    a++;
+                }
+                if (actor->status.flags & 0x400) {
+                    b++;
+                }
+            }
+        }
+    }
+    if (a != 0 && b != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+s32 btlIsUiObjectIndexAllowed(BtlUnit *object) {
+    if ((object->status.flags & 0x400) != 0) {
+        if (object->partyRecord.unitId >= 0x100) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
+    if ((object->partyRecord.status & 0x1000) != 0) {
+        return 0;
+    }
+    return 1;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001B1350", D_00415638);
+
+INCLUDE_ASM(const s32, "game/code_001B1350", func_001B2630);
+
+s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorIndex) {
+    u32 indexedSelectorValue;
+    s32 selectionMask;
+    u32 maskTableIndex;
+    if (unit->selectedEntryIndex <= 0) {
+        return 0;
+    }
+    btlGetRuntime();
+    indexedSelectorValue = btlGetActorIndexedSignedValue(source, selectorIndex);
+    selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    if (maskTableIndex == 0) {
+        return 0;
+    }
+    if (indexedSelectorValue >= 0x10 && (indexedSelectorValue < 0x12 || indexedSelectorValue == -1)) {
+        return 0;
+    }
+    if (maskTableIndex >= 0x21) {
+        return 0;
+    }
+    return (D_003B4F78[maskTableIndex * 3] & selectionMask) != 0;
+}
+
+s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+    u16 lookupTableIndex;
+
+    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    return D_003B4F70[lookupTableIndex * 3];
+}
+
+s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
+    u16 maskTableIndex;
+    if (selectedEntryIndex == -1) {
+        return 0;
+    }
+    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    return (D_003B4F78[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
+}
+
+s32 fldGetSelectedUnitStat(BtlUnit *unit) {
+    s32 index = unit->selectedEntryIndex;
+    if (index == -1) {
+        return 0;
+    }
+    return btlGetActionRecordLookupValue(index);
+}
+
+s32 btlGetSelectedUnitProperty(BtlUnit *unit) {
+    s32 index = unit->selectedEntryIndex;
+    u16 property;
+    if (index == -1) {
+        return 0;
+    }
+    property = datCommandRecords[index].unk2E;
+    return D_003B4F74[property * 3];
+}
+
+s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
+    s32 i = 0;
+    u32 sides = 0;
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    u32 count = btlGetIndexListCount(targets);
+    s32 skipped;
+    BtlUnit *actor;
+
+    for (; i < count; i++) {
+        sides |= ((BtlUnit *)btlGetIndexListEntry(targets, i))->status.flags & 0x600;
+    }
+    skipped = 0;
+    for (i = 0; i < count; i++, results++) {
+        if (results->skipped != 0) {
+            skipped++;
+        }
+    }
+    count = 0;
+    for (actor = controller->actors; actor != NULL; actor = actor->nextActor) {
+        if (actor->status.flags & 1) {
+            if (actor->status.flags & 0xE0) {
+                continue;
+            }
+            if (actor->status.flags & sides) {
+                count++;
+            }
+        }
+    }
+    return skipped == count;
+}
