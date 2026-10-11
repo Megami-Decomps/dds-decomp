@@ -5559,7 +5559,270 @@ void effReleaseBillFadeTable(s32 work) {
     sdfReleaseResourceAllocation(state->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002ACA40);
+typedef struct EffBillColumnParticle {
+    s32 age;
+    u32 unk04;
+    f32 radius;
+    f32 radiusStep;
+    f32 drag;
+    f32 verticalOffset;
+    f32 spin;
+    f32 spinPhase;
+    f32 width;
+    f32 extent;
+    f32 flare;
+    f32 height;
+} EffBillColumnParticle;
+
+typedef char EffBillColumnParticleSizeCheck[(sizeof(EffBillColumnParticle) == 0x30) ? 1 : -1];
+
+extern f32 sdfSinPoly(f32);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+
+/* Update the column's particle records and the ribbon vertices for this frame. */
+void func_002ACA40(EffClassWork *work) {
+    EffBillColumnConfig *config = (EffBillColumnConfig *)work->payload;
+    EffBillEmitterCommon *common = &config->common;
+    u32 frameLimit = work->frame;
+    u32 progress = common->header.timed.time.progress;
+    u32 layer;
+    u32 particleCount;
+    s32 vertexStride;
+    s32 spawnAll;
+    u8 respawn;
+    f32 rise;
+    f32 spinAccel;
+    f32 gravity;
+    f32 flareCenter;
+    f32 columnHeight;
+    u32 life;
+    u32 segmentCount;
+    f32 segmentCountAsFloat;
+    u32 spawnRemaining;
+    EffFrameState *frameState;
+    EffBillColumnParticle *particles;
+    EffRibbonWork *asset;
+    u32 *colors;
+    f32 *vertices;
+    f32 *heightRows;
+    f32 one;
+    f32 zero = 0.0f;
+
+    if (progress < frameLimit && progress != 0) {
+        return;
+    }
+    particleCount = common->header.timed.count;
+    life = common->header.life;
+    if (life == 0) {
+        return;
+    }
+
+    if (common->burst != 0 && frameLimit == 0) {
+        spawnAll = 1;
+        spawnRemaining = particleCount;
+    } else {
+        spawnAll = 0;
+        spawnRemaining = common->header.spawnRate;
+    }
+    frameState = (EffFrameState *)work->resource;
+    particles = (EffBillColumnParticle *)frameState->entries;
+    asset = (EffRibbonWork *)frameState->asset;
+    segmentCount = common->header.segments + 1;
+    respawn = common->header.respawn;
+    spinAccel = config->spinAccel;
+    gravity = config->gravity;
+    vertices = (f32 *)asset->positions;
+    heightRows = (f32 *)asset->uvs;
+    colors = asset->colors;
+    vertexStride = asset->rowStride;
+    segmentCountAsFloat = (f32)segmentCount;
+    columnHeight = common->height;
+    layer = 0;
+    flareCenter = config->flareCenter;
+    rise = common->rise;
+    if (particleCount == 0) {
+        return;
+    }
+    one = 1.0f;
+
+    do {
+        EffBillColumnParticle *particle = particles;
+        s32 age = particle->age;
+        f32 ageF;
+
+        if (age == -2) {
+            goto skip_row;
+        }
+
+        if (age == -1) {
+            f32 radius;
+            f32 radiusStep;
+
+            if (spawnRemaining == 0) {
+                goto skip_row;
+            }
+
+            radius = common->radiusStart *
+                (effMiscRandUnitFloat(effSharedRandomState) * common->radiusStartJitter +
+                 (one - common->radiusStartJitter));
+            radiusStep =
+                (common->radiusEnd * (effMiscRandUnitFloat(effSharedRandomState) * common->radiusEndJitter +
+                                      (one - common->radiusEndJitter)) - radius) /
+                (f32)life;
+            particle->radius = radius;
+            particle->radiusStep = radiusStep;
+            particle->drag = config->drag *
+                (effMiscRandUnitFloat(effSharedRandomState) * config->dragJitter +
+                 (one - config->dragJitter));
+            particle->verticalOffset = -config->velocity * effMiscRandUnitFloat(effSharedRandomState);
+            particle->flare = config->flare *
+                (effMiscRandUnitFloat(effSharedRandomState) * config->flareJitter +
+                 (one - config->flareJitter));
+            particle->spinPhase = effMiscRandUnitFloat(effSharedRandomState) * 6.2831853f;
+            particle->spin = config->spin *
+                (effMiscRandUnitFloat(effSharedRandomState) * config->spinJitter +
+                 (one - config->spinJitter));
+            particle->width = common->width *
+                (effMiscRandUnitFloat(effSharedRandomState) * common->widthJitter +
+                 (one - common->widthJitter));
+            particle->extent = common->extent *
+                (effMiscRandUnitFloat(effSharedRandomState) * common->extentJitter +
+                 (one - common->extentJitter)) * 10.0f;
+            {
+                f32 random = effMiscRandUnitFloat(effSharedRandomState);
+                f32 height = common->height *
+                    (random * common->heightJitter + (one - common->heightJitter));
+                colors[0] = 0;
+                particle->height = height;
+            }
+
+            if (spawnAll) {
+                s32 birthAge = effMiscRand(effSharedRandomState) % life;
+                f32 gravityDisplacement;
+                ageF = (f32)birthAge;
+                gravityDisplacement = gravity * ageF * ageF * 0.5f;
+                particle->age = birthAge;
+                particle->radius += particle->radiusStep * ageF;
+                particle->verticalOffset -= particle->drag * ageF;
+                particle->verticalOffset += gravityDisplacement;
+            } else {
+                particle->age = 0;
+            }
+            spawnRemaining--;
+            goto skip_row;
+        }
+
+        if ((u32)age >= life) {
+            colors[0] = 0;
+            particle->age = respawn ? -1 : -2;
+            goto skip_row;
+        }
+
+        ageF = (f32)age;
+        {
+            f32 angularStep = particle->spin + spinAccel * ageF * 0.5f;
+            f32 angle = angularStep * ageF;
+            f32 oldHeight;
+            f32 radius;
+            f32 currentY;
+            f32 flare;
+            f32 phaseOffset;
+            f32 center[4];
+            f32 direction[4];
+            f32 width;
+            f32 extentStep;
+            f32 cosine;
+            f32 sine;
+            u32 segment;
+
+            angle += particle->spinPhase;
+            oldHeight = particle->height;
+            radius = particle->radius;
+            currentY = particle->verticalOffset;
+            flare = particle->flare;
+            phaseOffset = ageF / (f32)life - flareCenter;
+            radius += phaseOffset * phaseOffset * flare;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            sine = sdfSinPoly(angle);
+            center[0] = cosine * radius;
+            center[1] = currentY;
+            center[2] = sine * radius;
+            VU0_LOAD_VF(vf11, center);
+            VU0_MOVE_VF_EXTENDED(vf12, vf11);
+
+            currentY -= particle->drag;
+            currentY += gravity * ageF;
+            radius = particle->radius + particle->radiusStep;
+            {
+                f32 nextPhaseOffset = (ageF + one) / (f32)life - flareCenter;
+                radius += nextPhaseOffset * nextPhaseOffset * flare;
+            }
+
+
+            center[0] = cosine * radius;
+            center[1] = currentY;
+            center[2] = sine * radius;
+            VU0_LOAD_VF(vf10, center);
+            VU0_SUB_EXTENDED(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10_EXTENDED();
+            VU0_STORE_VF(vf10, direction);
+
+            width = particle->width * 0.25f;
+            extentStep = particle->extent / segmentCountAsFloat;
+            particle->verticalOffset = currentY;
+            particle->radius += particle->radiusStep;
+            center[0] = cosine;
+            center[1] = zero;
+            center[2] = sine;
+            VU0_LOAD_VF(vf11, center);
+            VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
+            VU0_SCALE_VF(vf10, width);
+            VU0_MOVE_VF_EXTENDED(vf11, vf10);
+
+            for (segment = 0; segment < segmentCount; segment++) {
+                f32 fraction;
+                f32 pointY;
+                VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, vertices + 4);
+                VU0_ADD_EXTENDED(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, vertices);
+                VU0_MOVE_VF_EXTENDED(vf10, vf12);
+                VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, vertices + 8);
+                VU0_SUB_EXTENDED(vf10, vf10, vf11);
+                VU0_STORE_VF(vf10, vertices + 12);
+                vertices += 16;
+                fraction = (f32)segment / segmentCountAsFloat;
+                pointY = columnHeight * fraction + oldHeight;
+                heightRows[1] = pointY;
+                heightRows[3] = pointY;
+                heightRows[5] = pointY;
+                heightRows[7] = pointY;
+                heightRows += 8;
+
+                VU0_LOAD_VF(vf10, direction);
+                VU0_SCALE_VF(vf10, extentStep);
+                VU0_ADD_EXTENDED(vf12, vf12, vf10);
+            }
+
+            *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
+                                                   &common->header.emitterAlphaTrack, age, life);
+            particle->age++;
+            particle->height += rise;
+        }
+        goto next_particle;
+
+    skip_row:
+        colors++;
+        vertices += vertexStride * 4;
+        heightRows += vertexStride * 2;
+    next_particle:
+        layer++;
+        particles++;
+    } while (layer < particleCount);
+}
+
 
 void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     EffBillColumnConfig *config = (EffBillColumnConfig *)work->config;
