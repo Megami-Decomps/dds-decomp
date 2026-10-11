@@ -1192,7 +1192,7 @@ INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
-extern void func_002B2C88(s32, s32, s32, s32);
+extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
 
 s32 mnuCreatePanels(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -1239,7 +1239,7 @@ s32 mnuDestroyPanels(KwlnTask *callback) {
     StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
-    func_002B2C88((s32)window, 0, menu->staffView, menu->staffMode);
+    func_002B2C88(window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
     mnuClearEntries(window);
     mnuReleasePartyIconBundles(window);
@@ -1327,12 +1327,12 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
-                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, menuWork->staffView, 1);
+                func_002B2C88(&((MenuContext *)context)->partyWindow, 3, menuWork->staffView, 1);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                           (struct EffectSlotSet *)(u32)((MenuContext *)context)->alternateResource, 0, 0);
             } else {
                 menuWork->staffMode = 0;
-                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, menuWork->staffView, 0);
+                func_002B2C88(&((MenuContext *)context)->partyWindow, 2, menuWork->staffView, 0);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                                           ((MenuContext *)context)->displayResource, 0, 0);
             }
