@@ -105,7 +105,7 @@ extern struct SdfTex *D_004363B0;
 
 extern struct SdfTex *D_004363B4;
 
-extern u32 D_00436370;
+extern s32 D_00436370;
 
 extern s32 D_00436374;
 

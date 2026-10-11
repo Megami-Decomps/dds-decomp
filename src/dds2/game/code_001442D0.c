@@ -196,7 +196,7 @@ extern SdfTex *D_004363B0;
 
 extern SdfTex *D_004363B4;
 
-extern u32 D_00436370;
+extern s32 D_00436370;
 
 extern s32 D_00436374;
 
@@ -3684,7 +3684,96 @@ s32 fldTitleMiniIsActive(void) {
     return kwlnTaskGetTaskByName(D_00413C80) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014EDB8);
+s32 func_0014EDB8(KwlnTask *task) {
+    s32 alpha;
+    u32 color;
+    s32 slide;
+    s32 nextFrame;
+
+    if (fldGetCampSceneControlMode() == 1) {
+        return 0;
+    }
+    fldSelectDisplayBuffer(0x53);
+    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
+    func_0012BE18(0);
+    switch (D_00436374) {
+    case 0:
+        nextFrame = D_00436370 + 1;
+        if (nextFrame > 3) {
+            D_00436374 = 1;
+            D_00436370 = 0;
+        } else {
+            D_00436370 = nextFrame;
+        }
+        break;
+    case 1:
+        if (D_00436370 > 0) {
+            if (D_00436370 - 1 < 20) {
+                alpha = (D_00436370 - 1) * 128 / 20;
+            } else {
+                alpha = 128;
+            }
+            fldSubmitSpriteRect(0, 0x170, 0x200, 0x50,
+                                0xD1, 1, 0x2D, 0x3D, ((u32)alpha << 24) | 0x808080, D_0043637C);
+        }
+        if (D_00436370 < 10) {
+            slide = (10 - D_00436370) * 2;
+        } else {
+            slide = 0;
+        }
+        if (D_00436370 < 20) {
+            alpha = D_00436370 * 128 / 20;
+        } else {
+            alpha = 128;
+        }
+        fldSubmitSpriteRect(0x132 + slide, 0x199, 0xCE, 0x16,
+                            1, 0x28, 0xCE, 0x16, ((u32)alpha << 24) | 0x808080, D_0043637C);
+        if (D_00436370 >= 8) {
+            if (D_00436370 - 8 < 30) {
+                alpha = (D_00436370 - 8) * 128 / 30;
+            } else {
+                alpha = 128;
+            }
+            fldSubmitSpriteRect(0x143, 0x18A, 0xBD, 0x24,
+                                1, 2, 0xBD, 0x24, ((u32)alpha << 24) | 0x808080, D_0043637C);
+        }
+        nextFrame = D_00436370 + 1;
+        if (nextFrame > 60) {
+            D_00436370 = 0;
+            D_00436374++;
+        } else {
+            D_00436370 = nextFrame;
+        }
+        break;
+    case 2:
+        if (D_00436370 >= 9 && fldAreaState.unk144 > 0) {
+            fldAreaState.unk144--;
+        }
+        if (D_00436370 < 30) {
+            alpha = (30 - D_00436370) * 128 / 30;
+        } else {
+            alpha = 0;
+        }
+        color = ((u32)alpha << 24) | 0x808080;
+        fldSubmitSpriteRect(0, 0x170, 0x200, 0x50,
+                            0xD1, 1, 0x2D, 0x3D, color, D_0043637C);
+        fldSubmitSpriteRect(0x132, 0x199, 0xCE, 0x16,
+                            1, 0x28, 0xCE, 0x16, color, D_0043637C);
+        fldSubmitSpriteRect(0x143, 0x18A, 0xBD, 0x24,
+                            1, 2, 0xBD, 0x24, color, D_0043637C);
+        nextFrame = D_00436370 + 1;
+        if (nextFrame > 30) {
+            D_00436370 = 0;
+            D_00436374++;
+        } else {
+            D_00436370 = nextFrame;
+        }
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
 
 void fldReleaseTitleMiniTexture(void) {
     if (D_0043637C != 0) {
@@ -3697,7 +3786,7 @@ extern s32 D_003898B4[];
 
 extern s32 D_00436378;
 
-extern s32 func_0014EDB8(void);
+extern s32 func_0014EDB8(KwlnTask *task);
 
 extern void fldReleaseTitleMiniTexture(void);
 
