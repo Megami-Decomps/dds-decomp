@@ -29,7 +29,7 @@ extern char D_003E7202[];
 extern void func_002ABEB0(s32);
 extern void func_002AC660(s32);
 extern void func_002ACA98(s32);
-extern void func_002B2C88(s32, s32, s32, s32);
+extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void func_002C1B68(u32 *, u32);
@@ -435,7 +435,7 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88((s32)window, 1, 0, 0);
+    func_002B2C88(window, 1, 0, 0);
     menu->firstListState = 0;
     mnuBeginWindowFadeTransition(menu->windows[2], &context->fade);
     return 1;
@@ -447,7 +447,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ABEB0(context);
-    func_002B2C88((s32)entryList, 0, 0, 0);
+    func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
@@ -700,7 +700,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88((s32)window, 1, 0, 0);
+    func_002B2C88(window, 1, 0, 0);
     menu->secondListReset = 0;
     mnuBeginWindowFadeTransition(menu->windows[3], &context->fade);
     return 1;
@@ -712,7 +712,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002AC660(context);
-    func_002B2C88((s32)entryList, 0, 0, 0);
+    func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
@@ -989,7 +989,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                                                  context->resources.baseResources[0]);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
-    func_002B2C88((s32)window, 1, 0, 0);
+    func_002B2C88(window, 1, 0, 0);
     menu->thirdListState = 0;
     if (menu->thirdListEnabled != 0) {
         menu->thirdListReset = 0;
@@ -1004,7 +1004,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ACA98(context);
-    func_002B2C88((s32)entryList, 0, 0, 0);
+    func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
