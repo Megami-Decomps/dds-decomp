@@ -1518,7 +1518,70 @@ s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245208);
+extern char (*D_003BAA74)[17];
+extern char (*D_003BAA84)[25];
+extern u32 D_00369FA0[];
+extern void mnuSelectFirstListNode(struct MenuList *list);
+extern u32 func_002CD7F8(u32 itemId);
+extern void func_0027C788(MenuWindowContainer *window);
+
+s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
+    s32 rowIndex;
+    ShopRankPriceRow *row;
+    u32 i;
+
+    rowIndex = mnuCampFindActiveSlot();
+    if (rowIndex == -1) {
+        return 0;
+    }
+    row = (ShopRankPriceRow *)(D_00369A88 + rowIndex * sizeof(ShopRankPriceRow));
+    for (i = 0; i < 0x20; i++) {
+        u32 id = row->entries[i].itemId;
+        u32 mode = row->entries[i].mode;
+        struct MenuListNode *node;
+        CampWindowParams *params;
+        u32 price;
+
+        if (mode != 1) {
+            if ((u32)(id - 0xA0) < 0x20) {
+                continue;
+            }
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA84[id]);
+            func_0027C788(scene->window);
+            mnuAdvanceListCursorDefault(scene->window->list);
+            params = &node->camp;
+            price = func_00244D10(i, 0);
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0) {
+                node->flags48 = 1;
+            }
+        } else {
+            if (id == 0) {
+                continue;
+            }
+            node = mnuAppendWindowListNode(scene->window, D_003BAA74[id]);
+            mnuAdvanceWindowListSelection(scene->window);
+            params = &node->camp;
+            price = D_00369FA0[id];
+            params->value = price;
+            params->id = id;
+            params->price = price;
+            params->mode = mode;
+            if (mnuShopGetTransactionLimit(scene) == 0 || func_002CD7F8(id) != 0) {
+                node->flags48 = mode;
+            }
+        }
+    }
+    mnuSelectFirstListNode(scene->window->list);
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
 

@@ -8056,6 +8056,7 @@ effFileQueueNameRecord = 0x003BD114;   // dds2 0x00438764
 effQueuedResourceNameRecord = 0x003BD118;   // dds2 0x00438768
 parDrawControl = 0x003D64C0;   // dds2 0x00451F60
 // END shared
+mnuBuildShopStandardCatalogList = 0x00245208; // type:func
 mnuBuildShopCatalogList = 0x00245628; // type:func
 mnuTickShopMessageSequence = 0x00247D58; // type:func
 evtUpdateMainTaskPopupEntry = 0x002481A0; // type:func
@@ -9320,7 +9321,6 @@ func_00244C00 = 0x00244C00; // type:func
 func_00244D10 = 0x00244D10; // type:func
 func_00244FA0 = 0x00244FA0; // type:func
 func_00245068 = 0x00245068; // type:func
-func_00245208 = 0x00245208; // type:func
 func_002453C8 = 0x002453C8; // type:func
 func_002457E8 = 0x002457E8; // type:func
 mnuBuildCampItemList = 0x00245A40; // type:func
