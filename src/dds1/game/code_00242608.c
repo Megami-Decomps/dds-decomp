@@ -1114,7 +1114,14 @@ void mnuShopLoadSpriteAssets(ShopScene *scene) {
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources);
+void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
+    struct EffectSlotSet **resource = &scene->spriteResource;
+    s32 i;
+
+    for (i = 0; i < 1; i++) {
+        effDestroyResourceSlotSet(*resource++);
+    }
+}
 
 
 s32 mnuShopHasPendingFlag(ShopScene *unused) {
