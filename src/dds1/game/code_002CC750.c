@@ -211,8 +211,58 @@ void ptySelectProfileStage(DatPartyRecord *unit) {
     }
 }
 
-extern void ptyApplyProfilePreset(s32, DatPartyRecord *);
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfilePreset);
+/* Choose the least-conflicting profile group and install its nonzero IDs. */
+void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
+    s32 presetIndex = unit->unitId;
+    s32 bestScore;
+    u32 selectedGroup;
+    u32 groupIndex;
+    u32 profileIndex;
+    s32 score;
+    s32 available;
+    s32 i;
+    s32 profileId;
+    u16 occupied;
+    u16 selectedProfileId;
+    DatPartyRecord *partyUnit;
+
+    if (useCurrentProfile == 0) {
+        ptySelectProfileStage(unit);
+    }
+    bestScore = 0;
+    selectedGroup = 0;
+    for (groupIndex = 0; groupIndex < 4; groupIndex++) {
+        score = 0;
+        for (profileIndex = 0; profileIndex < 12; profileIndex++) {
+            profileId = D_00393A80[presetIndex].profileIds[groupIndex][profileIndex];
+            available = 1;
+            for (i = 0; i < 5; i++) {
+                partyUnit = &datGameState->party[i];
+                occupied = partyUnit->flags & PTY_PROFILE_UNIT_OCCUPIED_BIT;
+                if (occupied != 0 && profileId != 0) {
+                    if (ptyTestProfileFlag0(partyUnit, profileId) != 0) {
+                        available = 0;
+                    }
+                }
+            }
+            if (available != 0) {
+                score++;
+            }
+        }
+        if (bestScore < score) {
+            bestScore = score;
+            selectedGroup = groupIndex;
+        }
+    }
+    for (i = 0; i < sizeof(D_00393A80[presetIndex].profileIds[selectedGroup]); i++) {
+        profileId = D_00393A80[presetIndex].profileIds[selectedGroup][i];
+        if (profileId != 0) {
+            selectedProfileId = profileId;
+            ptyApplyProfile(unit, selectedProfileId);
+            ptySetProfileFlag1(unit, selectedProfileId);
+        }
+    }
+}
 
 /* Load nonzero preset IDs into their original slots; zero IDs leave slots unchanged. */
 void ptyLoadPresetSkillSlots(DatPartyRecord *unit) {
