@@ -444,9 +444,101 @@ SdfGridCell *func_00313280(SdfGrid *grid) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00312850", func_003133C8);
+extern const SdfGridDirections D_004388F0[];
 
-INCLUDE_ASM(const s32, "game/code_00312850", func_00313538);
+SdfGridCell *func_003133C8(SdfGrid *grid) {
+    SdfGridDirections directions = D_004388F0[0];
+    u32 cursorValue;
+    u32 count = grid->cellCount;
+    u32 width = grid->width;
+    u32 rows;
+    u32 cursorRow;
+    u32 cursorColumn;
+    s32 radius;
+    s32 offset;
+    s32 direction;
+
+    cursorValue = (u32)grid->cursor;
+    cursorValue = ((SdfGridCell *)cursorValue)->index;
+    if (cursorValue >= count - width) {
+        return NULL;
+    }
+    rows = count / width;
+    cursorRow = cursorValue / width;
+    cursorColumn = cursorValue % width;
+    radius = 0;
+    for (;;) {
+        u32 row;
+        radius++;
+        if (radius >= 6) {
+            return NULL;
+        }
+        offset = 1;
+        while (cursorRow + offset < rows) {
+            row = cursorRow + offset;
+            direction = 0;
+            do {
+                s32 column = directions.columns[direction] * radius + cursorColumn;
+                direction++;
+                if ((u32)column >= grid->width) {
+                    continue;
+                }
+                if (column < 0) {
+                    continue;
+                }
+                cursorValue = (u32)sdfGridGetCell(grid, column, row);
+                if (((SdfGridCell *)cursorValue)->value != 0) {
+                    grid->cursor = (SdfGridCell *)cursorValue;
+                    sdfGridFollowCursorWithinMargins(grid);
+                    return grid->cursor;
+                }
+            } while (direction < 3);
+            offset++;
+        }
+    }
+}
+
+extern const SdfGridDirections D_004388F8[];
+
+SdfGridCell *func_00313538(SdfGrid *grid) {
+    SdfGridDirections directions = D_004388F8[0];
+    SdfGridCell *cell;
+    u32 index;
+    u32 column;
+    u32 row;
+    s32 radius;
+    s32 distance;
+    s32 direction;
+    s32 candidateRow;
+
+    cell = grid->cursor;
+    index = cell->index;
+    column = index % grid->width;
+    if (column == 0) {
+        return NULL;
+    }
+    row = index / grid->width;
+    radius = 0;
+    do {
+        radius++;
+        if (radius >= 6) {
+            return NULL;
+        }
+        for (distance = 1; (s32)(column - distance) >= 0; distance++) {
+            for (direction = 0; direction < 3; direction++) {
+                candidateRow = row + directions.columns[direction] * radius;
+                if ((u32)candidateRow < grid->cellCount / grid->width && candidateRow >= 0) {
+                    cell = sdfGridGetCell(grid, column - distance, candidateRow);
+                    if (cell->value != 0) {
+                        grid->cursor = cell;
+                        sdfGridFollowCursorWithinMargins(grid);
+                        return grid->cursor;
+                    }
+                }
+            }
+        }
+    } while (1);
+}
 
 INCLUDE_ASM(const s32, "game/code_00312850", func_003136A0);
 
