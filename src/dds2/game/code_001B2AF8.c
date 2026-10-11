@@ -7240,11 +7240,11 @@ u32 func_001CC018(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D00);
-
 extern s16 D_004368BC;
 extern s16 D_004368BE;
 extern s16 D_004368C0;
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D00);
 
 void func_001CC020(BtlState *scene, SceneAiWork *state, s32 mode) {
     BattleSceneObject *object;
