@@ -38,6 +38,8 @@
 #include "dat_state.h"
 #include "dat_command.h"
 
+extern f32 D_003B6DC0[4];
+
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
     BTL_SOUND_ENTRY_COUNT = 0x31,
@@ -700,8 +702,10 @@ void func_001EC650(BtlLinkedCommand *action) {
     func_001F2758(action, &action->frontCamera, &action->backCamera);
 }
 
-void func_001EC670(void) {
-    func_001F2AE8();
+extern void btlStepUnitHeightFramedCamera(BtlLinkedCommand *);
+
+void func_001EC670(BtlLinkedCommand *action) {
+    btlStepUnitHeightFramedCamera(action);
 }
 
 extern void func_001F2E30(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -2251,7 +2255,96 @@ void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
 
 INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F2758);
 
-INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F2AE8);
+/* vu0 routine: follow the tracked unit until its animation tail, then frame both groups. */
+void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
+    f32 userPos[4];
+    f32 targetPos[4];
+    f32 direction[4];
+    f32 height[2];
+    f32 length;
+    f32 fov;
+    BtlUnit *unit = action->focus;
+    BtlCamState *from;
+    BtlCamState *saved;
+    s32 endFrame;
+
+    if (unit == NULL) {
+        return;
+    }
+    if (action->flags & 0x4000) {
+        return;
+    }
+    from = &action->frontCamera;
+    endFrame = btlGetUnitModelFrameCount(unit) + 30;
+    saved = &action->backCamera;
+    if (action->state < endFrame) {
+        if (btlSetActorEffectParameter(unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, from->position);
+        if (saved->position[1] < from->position[1]) {
+            saved->position[1] = from->position[1];
+        }
+        btlAdjustCameraDirectionForDefaultPlane(from);
+        btlAdjustCameraDirectionForDefaultPlane(saved);
+        return;
+    }
+    if (action->state == endFrame) {
+        func_00208000(0x400, &height[0], 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, targetPos);
+        targetPos[0] = 0.0f;
+        targetPos[1] = -height[0] * 0.5f;
+        length = func_00208000(0x200, &height[1], 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
+        userPos[1] = -height[1] * 0.25f;
+        if (height[0] < 600.0f) {
+            VU0_LOAD_VF(vf10, targetPos);
+            VU0_LOAD_VF(vf11, userPos);
+            VU0_SCALAR_OP(0.7f,
+                          "vsubx.w vf3, vf0, vf2x\n\t"
+                          "vmulax.xyzw ACC, vf11, vf2x\n\t"
+                          "vmaddw.xyzw vf10, vf10, vf3w");
+            VU0_STORE_VF_UNCLOBBERED(vf10, from->position);
+            VU0_LOAD_VF(vf10, targetPos);
+            VU0_LOAD_VF(vf11, userPos);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(length);
+            length *= 0.5f;
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+            VU0_LOAD_VF(vf10, D_003B6DC0);
+            effMiscQuaternionToMatrixVU();
+            VU0_LOAD_VF(vf10, direction);
+            VU0_ROTATE_VEC(vf10, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf10, from->direction);
+            fov = action->camera.fov;
+            from->distance = length / func_00353228(fov * 0.5f);
+            btlCopyMotionTransform(saved, from);
+            saved->distance += 250.0f;
+        } else {
+            VU0_LOAD_VF(vf10, targetPos);
+            VU0_STORE_VF_UNCLOBBERED(vf10, from->position);
+            VU0_LOAD_VF(vf11, userPos);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_LENGTH_VF10(from->distance);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF_UNCLOBBERED(vf10, from->direction);
+            fov = action->camera.fov * 1.3333333f;
+            if (height[0] * 0.5f < length) {
+                from->distance += length / func_00353228(fov * 0.5f);
+            } else {
+                from->distance += height[0] * 0.5f / func_00353228(fov * 0.5f);
+            }
+            btlCopyMotionTransform(saved, from);
+            saved->distance += 250.0f;
+        }
+        btlAdjustCameraDirectionForDefaultPlane(from);
+        btlAdjustCameraDirectionForDefaultPlane(saved);
+        action->motionParameter = 100.0f;
+        action->state = 0;
+        action->flags |= 0x4041;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F2E30);
 
