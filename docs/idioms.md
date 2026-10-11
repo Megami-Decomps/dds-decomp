@@ -7391,3 +7391,21 @@ the pad stepper has its existing concrete type, and `scrGetWindow` returns
 `game/code_001A8748` starts its data there and retains the original `.lit4` run.
 No compiler flag, barrier, forced register, duplicate provider or attributed
 extern is required.
+
+## Preserve a wrapper's meaningful cleanup result
+
+`evtCleanupMessageWindow` returns zero when no window exists and one after
+cleaning an existing window. Both titles' notification wrappers tail-jump to
+this provider without changing its result. Reconstruct the wrapper consistently
+as `u32 evtFinishMessageWindowAndNotify(void)`, returning
+`evtCleanupMessageWindow(1)`, and give callers the same declaration. Existing
+callers discard the status; this does not make the provider's result arbitrary.
+
+DDS1 `mnuTickShopMessageSequence` finishes its three waiting states only when
+the message control state is zero, then joins the common callback result exit.
+The real notification result definition occupies the return register during
+local allocation: the completion action value takes `$3`, keeping its store
+distinct from earlier action-one tails. A void declaration instead lets that
+value take `$2` and enables unwanted tail sharing. Native allocation and delay
+traces identified these decisions; the reconciled ordinary C matches all 204
+instructions. No use of the discarded status or extra dependency is added.

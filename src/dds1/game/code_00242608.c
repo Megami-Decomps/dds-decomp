@@ -2510,7 +2510,7 @@ s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern void dspStartEntry();
+extern s32 dspStartEntry(s32);
 
 s32 evtPlayDispatchModeCue(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
@@ -2625,9 +2625,143 @@ u32 func_00247D50(void) {
     return 1;
 }
 
+extern const char D_003AF528[];
+extern s32 evtIsActiveFlagSet(s32);
+extern u32 evtFinishMessageWindowAndNotify(void);
+extern void dspSetActive(s32);
+extern void sndEnsureMidiBankResident(s32);
+extern void sndStartTrackExtended(s32);
+
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF528);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00247D58);
+s32 mnuTickShopMessageSequence(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
+    s32 *dispatchSlot = &state->dispatchState;
+    s32 allowed;
+    s32 result;
+
+    result = func_00285670(&state->transitionWork, dispatchSlot,
+                          EVT_DISPATCH_OPERATION_POLL, task);
+    if (result == 0) {
+        if (*dispatchSlot == 0) {
+            allowed = 0;
+            if (kwlnTaskGetTaskByName(D_003AF528) == NULL) {
+                allowed = 1;
+            }
+            if (evtIsActiveFlagSet(0) != 0) {
+                allowed = 1;
+            }
+            if (allowed) {
+                switch (state->action) {
+                case 0:
+                    sndEnsureMidiBankResident(0x300000);
+                    sndStartTrackExtended(0x300000);
+                    state->action = 1;
+                    break;
+
+                case 1:
+                    if (state->count98 != 0) {
+                        dspSetActive(1);
+                        dspStartEntry(state->count98 + 0xD);
+                        {
+                            s32 flagIds[5] = {0x970, 0x971, 0x972, 0x973, 0x974};
+
+                            mdlFlagSet(flagIds[state->count98 - 1]);
+                        }
+                        state->action = 2;
+                    } else {
+                        state->action = 5;
+                    }
+                    break;
+
+                case 2:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->count98 = func_00244848();
+                        state->action = 3;
+                        state->scanIndex = 0;
+                    }
+                    break;
+
+                case 3: {
+                    s32 activeSlot = mnuCampFindActiveSlot();
+                    u32 index;
+
+                    if (activeSlot == -1) {
+                        state->action = 5;
+                    }
+                    index = state->scanIndex;
+                    if (index < 32) {
+                        u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
+                                          activeSlot * (s32)sizeof(ShopRankPriceRow);
+                        u32 flagsAddress = (u32)&D_00369A88[8] + stockOffset;
+
+                        do {
+                            ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
+                            u16 itemId = entry->itemId;
+
+                            if ((*(u32 *)flagsAddress & 1) != 0) {
+                                state->scanIndex = index + 1;
+                                dspSetActive(1);
+                                evtCopyEntryStringToActiveWindow(0, D_003BAA84[itemId]);
+                                dspStartEntry(13);
+                                break;
+                            }
+                            index++;
+                            flagsAddress += sizeof(ShopRankPriceEntry);
+                        } while (index < 32);
+                    }
+                    if (index == 32) {
+                        state->scanIndex = -1;
+                    }
+                    state->action = 4;
+                    break;
+                }
+
+                case 4:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        if (state->scanIndex == -1) {
+                            if (state->count98 == 2) {
+                                state->action = 6;
+                            } else {
+                                state->action = 1;
+                            }
+                        } else {
+                            state->action = 3;
+                        }
+                    }
+                    break;
+
+                case 6:
+                    dspSetActive(1);
+                    dspStartEntry(0x16);
+                    state->action = 7;
+                    break;
+
+                case 7:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->action = 1;
+                    }
+                    break;
+
+                case 5:
+                    if (state->progressTicks < 20) {
+                        state->progressTicks++;
+                    } else {
+                        state->action = 0;
+                        mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
+                    }
+                    break;
+                }
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
+
 
 s32 evtRefreshDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
