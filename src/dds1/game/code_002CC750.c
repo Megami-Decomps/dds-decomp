@@ -797,7 +797,7 @@ s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
 }
 
 /* Read a byte parameter from the unchecked profile row. */
-u8 prfGetParamWord7b4(u16 profileId) {
+s32 prfGetParamWord7b4(u16 profileId) {
     return D_003907B0[profileId].value04;
 }
 
