@@ -9,6 +9,7 @@
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
+#include "btl_action.h"
 #include "btl_model_record.h"
 #include "btl_sound.h"
 #include "btl_task_args.h"
@@ -168,9 +169,10 @@ typedef struct PadButtons {
     s8 stick;
     u8 pad02[2];
     u8 pageUp, pageDown, up, down;
+    u8 pad08[8]; /* Remaining states in the actual sixteen-byte controller record. */
 } PadButtons;
 
-extern PadButtons sdfPadButtonStates[];
+extern PadButtons sdfPadButtonStates[2];
 
 extern s32 kwlnFadeIsBackgroundOverlayActive();
 
@@ -274,14 +276,14 @@ extern s32 scrReadIntParameter(s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern s32 btlGetSlotRateKind(BtlUnit *, s32);
+extern s32 btlGetSlotRateKind(u8 *, s32);
 
 
 extern u8 *btlFindUnitByModeClear(s32);
 
 extern u8 *btlFindUnitByModeFlagged(s32);
 
-extern void *btlCreateModelChangeTask(void *, s32, s32, s32, s32, s32);
+extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *, s32, s32, s32, s32, u8);
 
 extern char D_0041B768[];
 
@@ -681,7 +683,7 @@ s32 btlOpStartSelectedUnitModelChange(void) {
     if (unit == NULL) {
         return 1;
     }
-    btlStartTask(btlCreateModelChangeTask(unit, choice != 0, first, second, 0x18, 0));
+    btlStartTask(btlCreateModelChangeTask((BtlUnit *)unit, choice != 0, first, second, 0x18, 0));
     return 1;
 }
 
@@ -711,7 +713,7 @@ s32 btlCommandPlayUnitMotion(void) {
     }
     if (index >= 0) {
         if (index < 0x1D) {
-            btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind(unit, index), 1.0f);
+            btlApplyScaledUnitEffectParameter(unit, index, btlGetSlotRateKind((u8 *)unit, index), 1.0f);
         } else {
             mdlAddEntryPlainEx(unit->ext->owner, 0, index, 0.0f, 0.0f);
         }
@@ -1945,12 +1947,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
     }
 }
 
-typedef struct MenuList {
-    u32 count;
-    u32 cursor;
-    u32 top;
-    u32 rows;
-} MenuList;
+typedef BtlDebugMenuCursor MenuList;
 
 /* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
  * Returns 1 only for a negative stick byte when no direction branch ran. */
