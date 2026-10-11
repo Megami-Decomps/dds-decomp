@@ -3395,7 +3395,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
     }
     func_003325F8(overlay, model->inner);
     if (unit->status.flags & 2) {
-        overlay->lighting = unit->ext->endpointWork;
+        overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {
         overlay->lighting = NULL;
     }
@@ -3453,7 +3453,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                     sdfReleaseDevSlot(unit->unk344, 1, 1);
                     unit->unk344 = 0;
                     if (unit->status.flags & 2) {
-                        info->inner->lighting = unit->ext->endpointWork;
+                        info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
                     } else {
                         info->inner->lighting = 0;
                     }
