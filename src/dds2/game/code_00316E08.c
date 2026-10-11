@@ -823,7 +823,70 @@ s32 func_00318C00(MnuShootingWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_003191B0);
+extern u8 *mnuAcquireUnusedModelNode(u32 *group);
+extern s32 itfClaimFreeModelInstance(ModelInstanceList *list);
+extern MnuModelNode *D_00438928;
+
+void func_003191B0(MenuWorkEntry *entry, MnuShootingWork *work) {
+    u32 tagClass = entry->tag & MNU_WORK_TAG_CLASS_MASK;
+    MnuNodeList *groups = work->modelWork->groups;
+    ModelInstanceList *instances = work->work24->lists;
+    u32 parameterIndex;
+    MenuRegistryParameters *parameters = NULL;
+    s32 kind;
+
+    if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) goto movement;
+    parameterIndex = 0;
+    if (tagClass == MNU_WORK_TAG_REGISTRY_TABLE) goto registry;
+    kind = 0;
+    goto create;
+
+movement:
+    kind = 3;
+    func_002A2628(0x12);
+    mnuClearInactiveSoundBufferState();
+    parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
+    D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(
+        (u32 *)&groups[8]);
+    evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
+    goto create;
+
+registry: {
+    MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
+    parameterIndex = record->parameterIndex;
+    parameters = mnuGetMenuRegistryParametersByIndex(parameterIndex);
+    kind = parameters->kind;
+    work->targets++;
+}
+
+create:
+
+    if (kind != 1) {
+        if (kind == 3) {
+            MnuModelNode *node = (MnuModelNode *)mnuAcquireUnusedModelNode(
+                (u32 *)&groups[parameterIndex]);
+            entry->object.modelNode = node;
+            if (node != NULL) {
+                if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
+                func_00319A58(entry, work);
+            } else {
+                evtPrintDeveloperConsoleMessage("model none\n");
+            }
+        }
+    } else {
+        ModelInstance *instance = (ModelInstance *)itfClaimFreeModelInstance(
+            &instances[parameterIndex]);
+        entry->object.modelInstance = instance;
+        if (instance != NULL) {
+            instance->scale = (f32)parameters->scale / 100.0f;
+            func_00319A58(entry, work);
+        } else {
+            func_0035B6E0("sprite none\n");
+        }
+    }
+    evtPrintDeveloperConsoleMessage("---------------------create!!\n");
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
