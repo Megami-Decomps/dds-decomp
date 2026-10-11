@@ -2404,6 +2404,27 @@ u32 func_00230A38(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     return 0;
 }
 
+/* Menu labels and callbacks used by the command editor. */
+extern char *D_00368438[];
+extern char *D_00368448[];
+extern char *D_00368450[];
+extern char *D_00368460[];
+extern char *D_00368470[];
+extern char *D_00368490[];
+extern char *D_003684B0[];
+extern char *D_003684B8[];
+extern char *D_003684C0[];
+extern char *D_003684C8[];
+extern char *D_003684D0[];
+extern char D_003BBF60[];
+extern char D_003BBF68[];
+extern char D_003BBF70[];
+extern u8 D_003BD344;
+extern s32 func_0021ECF0(KwlnTask *task);
+extern s32 evtPollRuntimeControlReady(KwlnTask *task);
+extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
+extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
+
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4B0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4C0);
@@ -2429,27 +2450,6 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD550);
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD560);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD570);
-
-/* Menu labels and callbacks used by the command editor. */
-extern char *D_00368438[];
-extern char *D_00368448[];
-extern char *D_00368450[];
-extern char *D_00368460[];
-extern char *D_00368470[];
-extern char *D_00368490[];
-extern char *D_003684B0[];
-extern char *D_003684B8[];
-extern char *D_003684C0[];
-extern char *D_003684C8[];
-extern char *D_003684D0[];
-extern char D_003BBF60[];
-extern char D_003BBF68[];
-extern char D_003BBF70[];
-extern u8 D_003BD344;
-extern s32 func_0021ECF0(KwlnTask *task);
-extern s32 evtPollRuntimeControlReady(KwlnTask *task);
-extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
 s32 func_00230A68(s32 command, s32 unused, EvtRuntime *viewer) {
     EvtRuntimeChild *key;

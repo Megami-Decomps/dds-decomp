@@ -2473,6 +2473,38 @@ u32 func_0024B678(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     return 0;
 }
 
+/* Viewer command menus and the existing timeline/control providers. */
+extern char *D_003C91E8[];
+extern char *D_003C91F8[];
+extern char *D_003C9200[];
+extern char *D_003C9210[];
+extern char *D_003C9230[];
+extern char *D_003C9250[];
+extern char *D_003C9270[];
+extern char *D_003C9278[];
+extern char *D_003C9280[];
+extern char *D_003C9288[];
+extern char *D_003C9290[];
+extern char *D_003C9298[];
+extern char *D_003C92A0[];
+extern char *D_003C92A8[];
+extern const char D_004373A0[];
+extern const char D_004373A8[];
+extern const char D_004373B0[];
+extern u8 D_00438A34;
+extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+extern void func_001975F8(void *parameters);
+extern void func_00197980(void *parameters);
+extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
+extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
+extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
+extern void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters);
+extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
+extern s32 func_00239860(KwlnTask *task);
+extern s32 evtPollRuntimeControlReady(KwlnTask *task);
+extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
+extern EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
+
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229A0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229B0);
@@ -2510,38 +2542,6 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AA0);
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AB0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AC0);
-
-/* Viewer command menus and the existing timeline/control providers. */
-extern char *D_003C91E8[];
-extern char *D_003C91F8[];
-extern char *D_003C9200[];
-extern char *D_003C9210[];
-extern char *D_003C9230[];
-extern char *D_003C9250[];
-extern char *D_003C9270[];
-extern char *D_003C9278[];
-extern char *D_003C9280[];
-extern char *D_003C9288[];
-extern char *D_003C9290[];
-extern char *D_003C9298[];
-extern char *D_003C92A0[];
-extern char *D_003C92A8[];
-extern const char D_004373A0[];
-extern const char D_004373A8[];
-extern const char D_004373B0[];
-extern u8 D_00438A34;
-extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
-extern void func_001975F8(void *parameters);
-extern void func_00197980(void *parameters);
-extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
-extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
-extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
-extern void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters);
-extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
-extern s32 func_00239860(KwlnTask *task);
-extern s32 evtPollRuntimeControlReady(KwlnTask *task);
-extern s32 evtSynchronizeSelectedEntry(KwlnTask *task);
-extern EvtRuntimeChild *func_002467A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
 s32 func_0024B6A8(s32 command, s32 unused, EvtRuntime *viewer) {
     EvtRuntimeChild *key;
