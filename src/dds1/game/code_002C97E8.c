@@ -1092,7 +1092,53 @@ SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
     return grid->cursor;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBE18);
+typedef struct SdfGridDirections {
+    s8 columns[3];
+} SdfGridDirections;
+extern const SdfGridDirections D_003BD298[];
+
+SdfGridCell *func_002CBE18(SdfGrid *grid) {
+    SdfGridDirections directions = D_003BD298[0];
+    u32 cursorValue;
+    s32 row;
+    s32 column;
+    s32 radius;
+    s32 depth;
+    s32 direction;
+    s32 candidateColumn;
+
+    cursorValue = (u32)grid->cursor;
+    cursorValue = ((SdfGridCell *)cursorValue)->index;
+    if (cursorValue < grid->width) {
+        return NULL;
+    }
+    row = cursorValue / grid->width;
+    column = cursorValue % grid->width;
+    radius = 0;
+    while (1) {
+        radius++;
+        if (radius >= 6) {
+            return NULL;
+        }
+        if (row - 1 < 0) {
+            continue;
+        }
+        for (depth = 1; row - depth >= 0; depth++) {
+            for (direction = 0; direction < 3; direction++) {
+                candidateColumn = column + directions.columns[direction] * radius;
+                if ((u32)candidateColumn < grid->width && candidateColumn >= 0) {
+                    cursorValue = (u32)sdfGridGetCell(grid, candidateColumn, row - depth);
+                    if (((SdfGridCell *)cursorValue)->value != 0) {
+                        grid->cursor = (SdfGridCell *)cursorValue;
+                        sdfGridFollowCursorWithinMargins(grid);
+                        return grid->cursor;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CBF60);
 
