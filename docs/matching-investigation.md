@@ -133,6 +133,26 @@ owning unit and both retail builds passing.
 This example justifies that independent calculation boundary. It does not
 justify changing arbitrary statement order or disabling multiply/add fusion.
 
+### Camera success: recover both result joins
+
+DDS2 `game/code_00227288::func_00228B08` retained six flag-update/return
+instruction differences. Before local allocation, scheduling placed the literal
+return value in `$v0` between the flag load and OR/store. The flag quantity's
+live interval therefore conflicted with `$v0` and took `$v1`. A boolean return
+of the updated flags removed that conflict but left a normalizing instruction
+where retail loads literal 1.
+
+The native graph has two shared exits: reset/default return 0; camera setup
+and linked-target success return 1. Ordinary `handled` and `unhandled` labels
+recover those joins. The flag update then occupies its own block before the
+handled return constant, freeing `$v0` during the update. This reproduces all
+608 bytes; the complete owner and both retail builds pass. Read-only allocation
+observation preserves all compiler/assembler outputs and confirms the removed
+conflict. Sharing only the success return changes the reset branch topology.
+
+Inspect the actual exit graph before introducing a computed return dependency.
+Equal return values alone do not establish identical control flow or lifetimes.
+
 ## Investigate a mechanism that is not documented yet
 
 1. **Reduce the question, preserving the cause.** Identify the smallest
