@@ -188,7 +188,40 @@ void dds3DestroyWorldIndexNode(WorldIndexNode *indexNode) {
 
 INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3RemoveCurrentWorldValueEntry);
 
-INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3ReleaseWorldValueEntries);
+/* Return this index record's values to the active world's free-entry chain. */
+void dds3ReleaseWorldValueEntries(WorldValueIndices *object) {
+    WorldInfo *world;
+    s32 index;
+
+    if (object == NULL) {
+        return;
+    }
+    if (object->entryCount == 0) {
+        return;
+    }
+    if (dds3ActiveWorld == NULL) {
+        return;
+    }
+    world = dds3ActiveWorld->data;
+    index = object->headIndex;
+    while (index >= 0) {
+        world->entries[index].value = 0;
+        index = world->entries[index].nextIndex;
+    }
+    if (world->freeTailIndex < 0) {
+        world->freeHeadIndex = object->headIndex;
+        world->freeTailIndex = object->tailIndex;
+    } else {
+        world->entries[world->freeTailIndex].nextIndex = object->headIndex;
+        world->entries[object->headIndex].previousIndex = world->freeTailIndex;
+        world->freeTailIndex = object->tailIndex;
+    }
+    world->freeEntryCount += object->entryCount;
+    object->entryCount = 0;
+    object->headIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+    object->tailIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+    object->cursorIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+}
 
 /* Reset the cursor and remove this node's matching address once, or all matches
  * when processAllMatches is nonzero. Return whether any match was processed. */
