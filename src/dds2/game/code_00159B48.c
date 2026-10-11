@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "sdf_quaternion.h"
 #include "common.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -1824,7 +1825,6 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
     parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
-extern void sdfBuildVuRotationFromAxisAngle(f32 angle, f32 *axis);
 
 /* Adjust velocity length, rotate around the packet axis, and rebuild position. */
 void effEmitterBurstUpdate(EffBurstEmitter *effect) {
@@ -1883,7 +1883,7 @@ void effEmitterBurstUpdate(EffBurstEmitter *effect) {
             VU0_LOAD_VF(vf10, rotationAxis);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf10, rotationAxis);
-            sdfBuildVuRotationFromAxisAngle(rotationStep, rotationAxis);
+            sdfBuildVuRotationFromAxisAngle(rotationStep, (const RwV3d *)rotationAxis);
             VU0_LOAD_VF(vf10, packet->vel);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_LOAD_VF(vf11, origin);

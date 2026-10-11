@@ -1,14 +1,9 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "pcp_vu0.h"
 
 typedef float f32;
 
-typedef struct RwV3d
-{
-    f32 x;
-    f32 y;
-    f32 z;
-} RwV3d;
 
 typedef struct RwMatrix
 {
@@ -25,7 +20,7 @@ typedef struct RwMatrix
 extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 
 /* Persona 4 func_004bd380 @ 004BD380 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
-void sdfBuildVuRotationFromAxisAngle(const RwV3d* axis, f32 angle)
+void sdfBuildVuRotationFromAxisAngle(f32 angle, const RwV3d* axis)
 {
     RwMatrix matrix;
     sdfBuildRotationMatrixFromAxisAngle(angle, axis, &matrix);

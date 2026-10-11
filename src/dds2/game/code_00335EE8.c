@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -256,11 +257,6 @@ INCLUDE_ASM(const s32, "game/code_00335EE8", func_003365B8);
 extern f32 func_00353040(f32 angle);
 extern f32 func_00353140(f32 angle);
 
-typedef struct RwV3d {
-    f32 x;
-    f32 y;
-    f32 z;
-} RwV3d;
 
 typedef struct RwMatrix {
     RwV3d right;

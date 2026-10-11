@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
@@ -7525,8 +7526,6 @@ typedef struct FileCurveMotion {
 } FileCurveMotion; /* 0x4C, naturally four-byte aligned */
 
 extern f32 D_003E9140[4];
-struct RwV3d;
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *axis, f32 angle);
 
 /* vu0 routine: advances randomized cubic-curve slots and their axial rotation. */
 void func_002DB3E0(FileSlotTable *record) {
@@ -7642,7 +7641,7 @@ void func_002DB3E0(FileSlotTable *record) {
                             angle = (f32)keys->emitter.curve.spreadDegrees *
                                 ((effMiscRandUnitFloat(&effSharedRandomState) - 0.5f) * 2.0f) *
                                 0.5f * 0.0174532925f;
-                            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+                            sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
                             offset = keys->emitter.curve.firstOffset *
                                 (effMiscRandUnitFloat(&effSharedRandomState) * keys->emitter.curve.firstRandomness +
                                  (1.0f - keys->emitter.curve.firstRandomness));
@@ -7723,7 +7722,7 @@ void func_002DB3E0(FileSlotTable *record) {
                                     motion->secondControl, sampledEndpoint, progress);
                                 if (rotation != 0.0f) {
                                     VU0_STORE_VF(vf10, point);
-                                    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, rotation);
+                                    sdfBuildVuRotationFromAxisAngle(rotation, (const struct RwV3d *)axis);
                                     VU0_LOAD_VF(vf11, axis);
                                     VU0_SCALE_VF(vf11, motion->pathLength * progress);
                                     VU0_LOAD_VF(vf10, point);
@@ -7782,7 +7781,7 @@ void func_002DB3E0(FileSlotTable *record) {
                             VU0_SUB(vf10, vf10, vf11);
                             VU0_NORMALIZE_VF10();
                             VU0_STORE_VF(vf10, axis);
-                            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, rotation);
+                            sdfBuildVuRotationFromAxisAngle(rotation, (const struct RwV3d *)axis);
                             VU0_LOAD_VF(vf11, axis);
                             VU0_SCALE_VF(vf11, motion->pathLength * progress);
                             VU0_LOAD_VF(vf10, point);

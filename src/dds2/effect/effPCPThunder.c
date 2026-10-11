@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -147,10 +148,8 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-struct RwV3d;
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void vu0RotMatrixXYZFromVec3(const struct RwV3d *);
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Sample a width multiplier, then bend the cell's placement vector around
  * a perturbed axis while emitting five-vector rows into its kind-4 history.
@@ -211,8 +210,7 @@ void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
         VU0_LOAD_VF(vf10, axis);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, axis);
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale);
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale, (const struct RwV3d *)axis);
         VU0_LOAD_VF(vf10, placement);
         VU0_MOVE_VF_EXTENDED(vf11, vf10);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
@@ -272,7 +270,7 @@ void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 i
     axis[0] = source->rotationAxis[0];
     axis[1] = source->rotationAxis[1];
     axis[2] = source->rotationAxis[2];
-    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+    sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
     VU0_LOAD_VF(vf10, direction);
     VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
@@ -505,8 +503,7 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
         VU0_STORE_VF_UNCLOBBERED(vf10, axis);
         angleJitter = effMiscRandUnitFloat(effDefaultRandomState);
         rotationScale = -source->rotationScale;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
-            ((angleJitter - 0.5f) * 2.0f * 0.8f) * rotationScale + rotationScale);
+        sdfBuildVuRotationFromAxisAngle(((angleJitter - 0.5f) * 2.0f * 0.8f) * rotationScale + rotationScale, (const struct RwV3d *)axis);
         VU0_LOAD_VF(vf10, placement);
         VU0_MOVE_VF_EXTENDED(vf11, vf10);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
@@ -553,7 +550,7 @@ void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 
     axis[0] = source->rotationAxis[0];
     axis[1] = source->rotationAxis[1];
     axis[2] = source->rotationAxis[2];
-    sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+    sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
     VU0_LOAD_VF(vf10, direction);
     VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
@@ -729,10 +726,8 @@ void effThunderSparkInit(EffThunderSparkWork *work, s32 index) {
     spark->orbitRadius = work->head.orbitRadius * (effMiscRandUnitFloat(effDefaultRandomState) * randomness + (1.0f - randomness));
 }
 
-struct RwV3d;
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern f32 sdfSinPoly(f32);
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Build one spark's kind-0 strip between its lowered and current positions.
  * Every iteration emits two two-vector rows into that spark's own cell.
@@ -869,8 +864,7 @@ void func_0016C800(EffThunderSparkWork *work, s32 index) {
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct RwV3d *)cameraDirection);
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -1074,10 +1068,8 @@ void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
-struct RwV3d;
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern f32 sdfSinPoly(f32);
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
@@ -1242,8 +1234,7 @@ void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct RwV3d *)cameraDirection);
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -1382,10 +1373,8 @@ void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
-struct RwV3d;
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern f32 sdfSinPoly(f32);
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
@@ -1553,8 +1542,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct RwV3d *)cameraDirection);
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -1844,8 +1832,7 @@ void func_0016E870(EffThunderCellWork *work, s32 index) {
         VU0_SUB_EXTENDED(vf11, vf11, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 5);
         vertices += 6;
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct RwV3d *)cameraDirection);
         VU0_LOAD_VF(vf10, direction);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
@@ -1955,10 +1942,8 @@ void effSetResourceBlendColor(s32 work, u32 value) {
     *(u32 *)(work + 0x120) = value;
 }
 
-struct RwV3d;
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern f32 sdfSinPoly(f32);
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Continue a strip from the preceding segment's final five-vector row.
  * Each iteration emits two rows; seed[3] is the connection anchor used by
@@ -2133,8 +2118,7 @@ void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
         VU0_MUL_EXTENDED(vf10, vf10, vf11);
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
-        sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+        sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct RwV3d *)cameraDirection);
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -2368,7 +2352,6 @@ void effReleaseGroupSlotsAndResources(EffPcpThunderGroup *group) {
 }
 
 struct BtlUnit;
-struct RwV3d;
 /* The event holder consumes the same packed 0x30-byte record as effEvent.c. */
 typedef struct {
     u8 bytes[0x30];
@@ -2379,7 +2362,6 @@ extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
@@ -2478,7 +2460,7 @@ void func_0016FE18(EffPcpThunderGroup *group) {
                 VU0_LOAD_VF(vf10, offset);
                 VU0_NORMALIZE_VF10_EXTENDED();
                 VU0_STORE_VF_UNCLOBBERED(vf10, offset);
-                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)direction, ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * 0.5235987f);
+                sdfBuildVuRotationFromAxisAngle(((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * 0.5235987f, (const struct RwV3d *)direction);
                 spread = 50.0f;
                 slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
                 slot->curve.controlPoints[0].y = offset[1] * spread + start[1];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -522,8 +523,6 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
     sprite->dirZ = direction[2];
 }
 
-struct RwV3d;
-extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 
 /* Rotate each particle around its seeded axis and build its six-vertex strip. */
 void func_00171B28(PcpScatterSpinWork *work) {
@@ -609,7 +608,7 @@ void func_00171B28(PcpScatterSpinWork *work) {
             axis[0] = particle->dirX;
             axis[1] = particle->dirY;
             axis[2] = particle->dirZ;
-            sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+            sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
             position[0] = radius;
             position[1] = 0.0f;
             position[2] = 0.0f;
@@ -621,7 +620,7 @@ void func_00171B28(PcpScatterSpinWork *work) {
                 colors[0] = color;
                 colors[3] = color;
                 angle += sdfAtan2Poly(halfWidth[0] / radius);
-                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis, angle);
+                sdfBuildVuRotationFromAxisAngle(angle, (const struct RwV3d *)axis);
                 next[0] = radius;
                 next[1] = 0.0f;
                 next[2] = 0.0f;
