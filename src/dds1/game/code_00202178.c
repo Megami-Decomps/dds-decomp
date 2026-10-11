@@ -142,7 +142,7 @@ extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
-extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
 extern void func_001A30F8(s32, BtlIndexList *, s32, s32, s32);
 
