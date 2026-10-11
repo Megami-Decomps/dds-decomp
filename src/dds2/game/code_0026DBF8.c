@@ -3438,7 +3438,7 @@ extern void func_00284B70(s32, s32, u32, s32, MantraBurstPool *, s32, u32);
 extern s32 mnuDrawMantraPanelBackdropTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_002805E0(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawFadedMantraSingleCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_00281DC0(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_00281DC0(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_00283090(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 func_0027FDC8(s32, s32, s32, s32, s32, u8 *, s32);
@@ -3486,7 +3486,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawMantraPanelBackdropTransition,
         func_002805E0,
         (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
-        (MantraPanelDraw)func_00281DC0,
+        func_00281DC0,
         func_00283090,
         mnuDrawFadedMantraDualCyclePanel,
         (MantraPanelDraw)func_0027FDC8,

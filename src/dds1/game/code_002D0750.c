@@ -19,7 +19,73 @@ extern void EIntr(void);
 extern SdfPendingRequest D_003BD9C8;
 
 
-INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
+extern void *memcpy(void *destination, const void *source, unsigned int bytes);
+
+void func_002D0750(SdfMemBlock *allocation, s32 size) {
+    SdfMemBlock *nextBlock;
+    SdfMemBlock *replacement;
+    s32 temporaryAddress;
+    s32 interruptsDisabled;
+    s32 currentSize;
+    s32 available;
+
+    interruptsDisabled = func_00312C08();
+    nextBlock = allocation->next;
+    temporaryAddress = allocation->address;
+    currentSize = nextBlock->address - temporaryAddress;
+    size = (size + 0x7F) & -0x80;
+    if (size == currentSize) {
+        if (interruptsDisabled != 0) {
+            EIntr();
+        }
+        return;
+    }
+    if (currentSize < size) {
+        available = nextBlock->next->address - nextBlock->address + currentSize;
+        if (nextBlock->state == SDF_HEAP_BLOCK_FREE && available >= size) {
+            if (available == size) {
+                nextBlock->next->prev = allocation;
+                allocation->next = nextBlock->next;
+                sdfReleaseChipBlock(nextBlock);
+            } else {
+                nextBlock->address = temporaryAddress + size;
+            }
+        } else {
+            s32 oldAddress;
+
+            replacement = sdfAllocGeneralBlock(size);
+            memcpy((void *)replacement->address, (void *)allocation->address, currentSize);
+            temporaryAddress = (s32)allocation->prev;
+            oldAddress = allocation->address;
+            allocation->prev = replacement->prev;
+            allocation->address = replacement->address;
+            allocation->next = replacement->next;
+            replacement->prev = (SdfMemBlock *)temporaryAddress;
+            replacement->next = nextBlock;
+            replacement->address = oldAddress;
+            allocation->prev->next = allocation;
+            allocation->next->prev = allocation;
+            replacement->prev->next = replacement;
+            replacement->next->prev = replacement;
+            sdfReleaseResourceAllocation(replacement);
+        }
+    } else if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
+        nextBlock->address = temporaryAddress + size;
+    } else {
+        temporaryAddress = (s32)sdfAllocSizeClassBlock(0x10);
+        ((SdfMemBlock *)temporaryAddress)->prev = allocation;
+        ((SdfMemBlock *)temporaryAddress)->next = nextBlock;
+        nextBlock->prev = (SdfMemBlock *)temporaryAddress;
+        ((SdfMemBlock *)temporaryAddress)->state = SDF_HEAP_BLOCK_FREE;
+        allocation->next = (SdfMemBlock *)temporaryAddress;
+        ((SdfMemBlock *)temporaryAddress)->referenceCount = 0;
+        ((SdfMemBlock *)temporaryAddress)->address = allocation->address + size;
+    }
+    if (interruptsDisabled != 0) {
+        EIntr();
+    }
+}
+
 
 /* Unlink the successor, not node itself, and reconnect both neighboring links. */
 void sdfSkipNextListNode(SdfMemBlock *node) {
