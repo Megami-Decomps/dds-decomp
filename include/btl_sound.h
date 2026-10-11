@@ -4,6 +4,7 @@
 #include "common.h"
 
 typedef struct BattleEffect BattleEffect;
+typedef void (*BattleEffectCallback)(BattleEffect *effect);
 
 typedef struct EffAimParams {
     u8 scaleKind;
@@ -30,7 +31,12 @@ typedef struct EffBattleEntry {
 
 typedef struct EffBattleEntryList {
     s32 triggerFrame;              /* 0x00 */
-    u8 pad04[0x44];
+    u8 pad04[2];
+    u16 shake;                     /* 0x06: screen-shake amount; 31 or more logs and caps at 300 frames */
+    u16 shakeFrame;                /* 0x08: frame at which the shake starts */
+    u16 shakeFade;                 /* 0x0A: fade applied with the shake */
+    u8 colorKeys[0x24];            /* 0x0C: colour keyframes read by the unit colour keyframe routine */
+    u8 rgbKeys[0x18];              /* 0x30: RGB keyframes read by the unit RGB keyframe routine */
     s32 callbackFrame;             /* 0x48 */
     u8 pad4C[0x20];
     u16 count;                     /* 0x6C */
@@ -105,8 +111,8 @@ struct BattleEffect {
     s32 unk20;
     struct EffBattleEntryList *list; /* 0x24 */
     struct EffParamWork *parameterWorks[0x3C]; /* 0x28 */
-    u32 sourceFrameCallbackAddress; /* 0x118 */
-    u32 triggerFrameCallbackAddress; /* 0x11C */
+    BattleEffectCallback sourceFrameCallback; /* 0x118 */
+    BattleEffectCallback triggerFrameCallback; /* 0x11C */
     u32 unk120;
     BattleEffect *next; /* 0x124 */
 };
