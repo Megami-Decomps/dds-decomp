@@ -3487,7 +3487,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         func_002805E0,
         (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
         (MantraPanelDraw)func_00281DC0,
-        (MantraPanelDraw)func_00283090,
+        func_00283090,
         mnuDrawFadedMantraDualCyclePanel,
         (MantraPanelDraw)func_0027FDC8,
     };
@@ -5695,9 +5695,58 @@ void func_002817B8(u32 unused, s32 view) {
 void func_002817C0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002817C8);
+extern const u8 D_00425CF8[];
 
-extern s32 func_002817C8(s32, s32, s32, s32, s32, u8 *, s32);
+s32 func_002817C8(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet) {
+    u8 ids[14];
+    MantraPanelAnimation *panel = (MantraPanelAnimation *)object;
+    f32 phase;
+    f32 originX;
+    f32 originY;
+    s32 drawX;
+    s32 drawY;
+    u32 i;
+
+    memcpy(ids, D_00425CF8, sizeof(ids));
+    panel->stateA++;
+    if (panel->stateA >= 121) panel->stateA = 0;
+    phase = panel->stateA / 120.0f;
+    originX = x;
+    originY = y;
+
+    mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000D, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, amount, 0xEA, 0x20, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+
+    phase *= 6.2831853f;
+    drawX = (s32)(originX + sdfEvaluateCosineViaSinePhaseShift(phase) * 7.0f +
+                  sdfSinPoly(phase) * -14.0f);
+    drawY = (s32)(originY + sdfEvaluateCosineViaSinePhaseShift(phase) * -14.0f -
+                  sdfSinPoly(phase) * 7.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, amount, 0xFB, 0, packet);
+    drawX = (s32)(originX + sdfEvaluateCosineViaSinePhaseShift(phase) * -6.0f +
+                  sdfSinPoly(phase) * 16.0f);
+    drawY = (s32)(originY + sdfEvaluateCosineViaSinePhaseShift(phase) * 16.0f -
+                  sdfSinPoly(phase) * -6.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, amount, 0xFB, 0, packet);
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
+    mnuDrawMantraSprite(x, y, z, amount, 0xC8, 0, packet);
+    for (i = 0; i < 14; i++) {
+        if (panel->id == ids[i]) {
+            mnuDrawMantraSprite(x, y, z, amount, i + 0xD8, 0, packet);
+            i = -1;
+            break;
+        }
+    }
+    if (i != -1) mnuDrawMantraSprite(x, y, z, amount, 0xD8, 0, packet);
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425CF8);
 
