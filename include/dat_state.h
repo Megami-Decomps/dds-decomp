@@ -62,13 +62,18 @@ typedef enum DatPartyFlags {
     DAT_PARTY_FLAG_FRONTLINE = 2
 } DatPartyFlags;
 
-/* Native 0x14-byte roster stat rows; ATTACK also reads count/spacing at +0x11/+0x12. */
+/* Native 0x14-byte roster stat rows. DDS1 001A3424..001A3434 reads the
+ * target-policy prefix; ATTACK also reads count/spacing at +0x11/+0x12. */
 typedef struct EventRosterStat {
     s16 base;
     u8 alternateA;
     u8 alternateB;
     f32 multiplier;
-    u8 pad08[6];
+    u8 targetType;
+    u8 options;
+    u8 targetFlags;
+    u8 pad0B;
+    u16 restriction;
     u8 rangeMin;
     u8 rangeMax;
     u8 pad10;
