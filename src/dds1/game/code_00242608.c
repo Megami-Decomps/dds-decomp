@@ -344,7 +344,101 @@ void mnuInitializeCampPanelVisualDefaults(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e
     *e = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
+extern void evtBlendVectorRows(s32 enable, f32 t, f32 *first, f32 *second, f32 *out);
+extern f32 evtMovieInterpolateFloatIfEnabled(s32 enable, f32 t, f32 first, f32 second);
+void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
+
+/* Sample three panel vectors and two scalar values from neighboring timeline keys. */
+void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+                   f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB) {
+    EvtRuntimeChild *selected;
+    EvtRuntimeChild *future;
+    f32 *selectedRows;
+    f32 *futureRows;
+    s32 selectedFrame;
+    s32 futureFrame;
+    s32 blendMode;
+    f32 selectedValueA;
+    f32 selectedValueB;
+    f32 futureValueA;
+    f32 futureValueB;
+    f32 fraction;
+    f32 *source;
+    f32 *destination;
+    s32 remaining;
+
+    mnuFindCampKeyTrackNeighbors(group, frame, &selected, &future);
+    if (selected != NULL) {
+        selectedFrame = selected->frame;
+    } else {
+        selectedFrame = runtime->headerFirst;
+    }
+    if (future != NULL) {
+        futureFrame = future->frame;
+    } else {
+        futureFrame = runtime->frameRange.word;
+    }
+    if (futureFrame != selectedFrame) {
+        fraction = (f32)(frame - selectedFrame) / (f32)(futureFrame - selectedFrame);
+    } else {
+        fraction = 0.0f;
+    }
+
+    if (selected == NULL) {
+        mnuInitializeCampPanelVisualDefaults(outVectors[0], outVectors[1], outVectors[2],
+                                             outValueA, outValueB);
+        return;
+    }
+
+    selectedRows = (f32 *)selected->payload;
+    selectedValueA = selected->p08.f;
+    selectedValueB = selected->p0C.f;
+    blendMode = selected->serializedValue;
+    if (future != NULL) {
+        futureRows = (f32 *)future->payload;
+        futureValueA = future->p08.f;
+        futureValueB = future->p0C.f;
+    } else {
+        source = selectedRows;
+        destination = outVectors[0];
+        remaining = 3;
+        do {
+            destination[0] = source[0];
+            destination[4] = source[4];
+            destination[8] = source[8];
+            source++;
+            destination++;
+        } while (--remaining >= 0);
+        *outValueA = selectedValueA;
+        *outValueB = selectedValueB;
+        return;
+    }
+
+    if (selectedRows == NULL && futureRows == NULL) {
+        mnuInitializeCampPanelVisualDefaults(outVectors[0], outVectors[1], outVectors[2],
+                                             outValueA, outValueB);
+    } else if (blendMode == 0) {
+        source = selectedRows;
+        destination = outVectors[0];
+        remaining = 3;
+        do {
+            destination[0] = source[0];
+            destination[4] = source[4];
+            destination[8] = source[8];
+            source++;
+            destination++;
+        } while (--remaining >= 0);
+        *outValueA = selectedValueA;
+        *outValueB = selectedValueB;
+    } else {
+        evtBlendVectorRows(blendMode, fraction, selectedRows, futureRows, outVectors[0]);
+        *outValueA = evtMovieInterpolateFloatIfEnabled(blendMode, fraction,
+                                                        selectedValueA, futureValueA);
+        *outValueB = evtMovieInterpolateFloatIfEnabled(blendMode, fraction,
+                                                        selectedValueB, futureValueB);
+    }
+}
+
 
 extern s32 strcmp(const char *a, const char *b);
 
