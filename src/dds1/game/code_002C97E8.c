@@ -1236,7 +1236,45 @@ SdfGridCell *func_002CC0D0(SdfGrid *grid) {
     } while (1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC238);
+extern const SdfGridDirections D_003BD2B0[];
+
+SdfGridCell *func_002CC238(SdfGrid *grid) {
+    SdfGridDirections directions = D_003BD2B0[0];
+    SdfGridCell *cell;
+    u32 cursorValue;
+    u32 cursorColumn;
+    u32 cursorRow;
+    s32 rowDistance;
+
+    cursorValue = (u32)grid->cursor;
+    cursorValue = ((SdfGridCell *)cursorValue)->index;
+    cursorColumn = cursorValue % grid->width;
+    if (cursorColumn == grid->width - 1) {
+        return NULL;
+    }
+    cursorRow = cursorValue / grid->width;
+    rowDistance = 0;
+    for (;;) {
+        s32 columnOffset;
+        if (++rowDistance >= 6) {
+            return NULL;
+        }
+        for (columnOffset = 1; cursorColumn + columnOffset < grid->width; columnOffset++) {
+            s32 directionIndex;
+            for (directionIndex = 0; directionIndex < 3; directionIndex++) {
+                s32 row = (s32)cursorRow + directions.columns[directionIndex] * rowDistance;
+                if ((u32)row < grid->cellCount / grid->width && row >= 0) {
+                    cell = sdfGridGetCell(grid, cursorColumn + columnOffset, row);
+                    if (cell->value != 0) {
+                        grid->cursor = cell;
+                        sdfGridFollowCursorWithinMargins(grid);
+                        return grid->cursor;
+                    }
+                }
+            }
+        }
+    }
+}
 
 SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
     SdfGridCell *result = NULL;
