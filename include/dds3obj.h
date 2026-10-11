@@ -14,7 +14,7 @@ typedef struct ObjBase {
     u32 flags;
     struct WorldIndexNode *worldIndexNode;
     u32 resourceState;
-    void *resourceHandle; /* Model, device or motion handle according to resourceState. */
+    void *resourceHandle; /* MdlCtx or SdfModel pointer according to resourceState. */
     void *slots[8];
     void *extData;
     s32 devSlot;

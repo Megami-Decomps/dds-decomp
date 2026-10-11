@@ -2443,6 +2443,24 @@ loads or stores even when every instruction is right:
   before the callback-table load (DDS2 `func_00317FE0`); a scalar `u32 flags`
   lets the load move up.
 
+The object model-rebuild pair (DDS1 `func_00111E30`, DDS2 `func_00112058`)
+requires the real pointer type of `ObjBase.resourceHandle`. State 0 stores an
+allocated `MdlCtx *`; state 1 stores an allocated `SdfModel *`. The motion
+pointer is a separate field. A `void *` therefore describes the actual common
+owner without inventing an alternate view.
+
+With the same complete DDS2 body, the old `u32` field gives seven differing
+words in the 272-byte function; the pointer field matches. Qualified full-unit
+ordinary/probe output first diverges in `17.sched`, not in earlier executable
+RTL: the pointer declaration gives the handle store and `object->data` load
+the same alias set. A possible-alias dependency keeps publication before the
+payload load and changes the payload's later saved-register home. This is a
+compiler dependence, not evidence that the separately allocated records
+actually overlap. Both complete owners and retail images must remain exact,
+and both development builds must pass after changing this shared field. Retain
+explicit casts at legacy interfaces that still transport pointer bits as
+integer words.
+
 For automatic lookup tables, preserve the typed initializer when native data
 and exact neighboring source establish it. DDS2 `func_002805E0` and
 `func_00283090` match with numeric sprite-ID and signed-offset array
