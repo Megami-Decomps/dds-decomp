@@ -7618,3 +7618,21 @@ work `+0x664`, not its unrelated `+0x610` camera-state predicate. Keep the
 owner in DDS2: kind `0x2A` stores linked unit pointers in the slots that kind
 9 uses for an effect index and value. No alternate struct view is needed.
 
+
+### Initialize primitive colors before publishing their stream pointer
+
+`itfDrawGradientTriangleVectors` (DDS1 `0x002C1228`, DDS2 `0x00308C58`,
+344 bytes each) snapshots three packed input colors, configures the existing
+`SdfPrimitiveRequest`, fills its three-word color buffer, then publishes that
+buffer as `vertexColors`. This coherent descriptor/copy/publication shape
+matches the native pointer and color lifetimes. Publishing an unfilled color
+stream changes the local register overlap and the metadata/store schedule;
+there is no padded color array, artificial pointer alias or compiler flag.
+
+The function also initializes three unused float UV pairs with the coordinate
+stream disabled. These are real retail stores (DDS1 `0x002C1314..0x002C132C`,
+DDS2 `0x00308D44..0x00308D5C`) retained in GCC 2.96's SDK memory-clobber
+context, not invented storage. The provider consumes only three packed color
+words. Its position rows use the existing `PCP_COPY_VECTOR` SDK macro, evidenced
+by the adjacent native `LQ`/`SQ` pairs in both games; no new assembly is needed.
+
