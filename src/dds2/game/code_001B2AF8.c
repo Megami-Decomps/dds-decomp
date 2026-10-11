@@ -799,6 +799,8 @@ void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
 
+extern s32 evtRunContext(s32, s32, s32, s32, u16);
+
 const char D_004156D8[] = "btl:drop money=%d[ratio=%f]\n";
 
 s32 func_001B3B28(BtlUnit *actor) {
@@ -814,8 +816,6 @@ s32 func_001B3B28(BtlUnit *actor) {
     btlBossDebugPrintf(D_004156D8, money *= ratio, ratio);
     return (record->flags & 0x20) ? money : -money;
 }
-
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 /* Preserve the native forwarded chance word; the empty provider ignores it. */
 extern void func_0011EBE8();
