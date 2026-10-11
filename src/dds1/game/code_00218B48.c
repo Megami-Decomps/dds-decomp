@@ -1967,7 +1967,45 @@ void mdlApplyViewerResourceMenuAction(void) {
     mdlViewerState.selectedEntryId = mdlViewerState.activeEntryId = i;
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021C518);
+extern const char *D_00367B20[];
+
+/* Draw resource actions with independent eligibility and selection styles. */
+void func_0021C518(void) {
+    SifCommand packet;
+    s32 row;
+    s32 enabled;
+    s32 style;
+
+    mdlAppendViewerRectToDrawList(0x8590, 0x7948, 0xFF007F, 0x960, 0x210, 0);
+    for (row = 0; row != 5; row++) {
+        enabled = 0;
+        switch (row) {
+        case 0:
+            if (mdlViewerState.resourceCount < MDL_VIEWER_RESOURCE_SLOTS) {
+                enabled = 1;
+            }
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            if (mdlViewerState.resourceCount >= 2) {
+                enabled = 1;
+            }
+            break;
+        }
+        if (mdlViewerState.unk09 < 20 && mdlViewerState.scrollPage == row) {
+            style = enabled ? 4 : 12;
+        } else {
+            style = enabled ? 0 : 8;
+        }
+        sdfPktInit(&packet, 0x85C0, 0x7960 + row * 0x60, 0xFF0080, style);
+        sdfAppendPacket(mdlViewerState.packetList,
+            (u32)sdfFormatSifPacket(&packet, D_00367B20[row]));
+    }
+}
+
+
 
 u32 mdlRunViewerResourceMenuTask(void) {
     mdlApplyViewerResourceMenuAction();
