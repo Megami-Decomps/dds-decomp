@@ -3,42 +3,48 @@
 
 #include "common.h"
 
-typedef struct SoundBank {
-    u8 pad00[8];
-    s32 value08;
-    u8 pad0C[0x44];
-    s32 value50;
-    u8 pad54[0x24];
-    s32 value78;
-    u8 pad7C[0x59C];
-} SoundBank;
-
 typedef struct BattleEffect BattleEffect;
 
 typedef struct EffAimParams {
-    u8 pad0;
+    u8 scaleKind;
     u8 aimMode;           /* 0x01 */
     u8 directionMode;     /* 0x02 */
     u8 pad3;
     s32 rangeOverride;    /* 0x04: zero uses the source range */
 } EffAimParams;
 
+typedef union EffBattleParameterValue {
+    u32 sourceOffset;
+    struct EffParamWork *work;
+} EffBattleParameterValue;
+
 typedef struct EffBattleEntry {
-    u8 pad00[8];
-    EffAimParams aimParams; /* 0x08 */
-    u32 frame;              /* 0x10 */
-    u8 kind;                /* 0x14 */
+    u16 paramKind;                 /* 0x00 */
+    u8 pad02[2];
+    EffBattleParameterValue value; /* 0x04 */
+    EffAimParams aimParams;        /* 0x08 */
+    u32 zeroKindCount;             /* 0x10 */
+    u8 kind;                       /* 0x14 */
     u8 pad15[3];
 } EffBattleEntry; /* 0x18 */
 
 typedef struct EffBattleEntryList {
-    u8 pad00[0x48];
-    s32 callbackFrame; /* 0x48 */
+    s32 triggerFrame;              /* 0x00 */
+    u8 pad04[0x44];
+    s32 callbackFrame;             /* 0x48 */
     u8 pad4C[0x20];
-    u16 count;            /* 0x6C */
-    u8 pad6E[0xA];
-    EffBattleEntry entries[1]; /* 0x78 */
+    u16 count;                     /* 0x6C */
+    u8 pad6E[2];
+    s32 colorRampEndFrame;         /* 0x70 */
+    u8 pad74[4];
+    EffBattleEntry entries[1];     /* 0x78 */
 } EffBattleEntryList;
+
+typedef struct SoundBank {
+    u8 pad00[8];
+    EffBattleEntryList list;       /* 0x08 */
+    u8 pad98[0x580];
+} SoundBank;
 
 typedef char EffAimParams_size_must_be_8[
     (sizeof(EffAimParams) == 8) ? 1 : -1];
@@ -46,8 +52,8 @@ typedef char EffBattleEntry_size_must_be_0x18[
     (sizeof(EffBattleEntry) == 0x18) ? 1 : -1];
 typedef char EffBattleEntry_aimParams_at_0x08[
     ((u32)&((EffBattleEntry *)0)->aimParams == 0x08) ? 1 : -1];
-typedef char EffBattleEntry_frame_at_0x10[
-    ((u32)&((EffBattleEntry *)0)->frame == 0x10) ? 1 : -1];
+typedef char EffBattleEntry_zeroKindCount_at_0x10[
+    ((u32)&((EffBattleEntry *)0)->zeroKindCount == 0x10) ? 1 : -1];
 typedef char EffBattleEntry_kind_at_0x14[
     ((u32)&((EffBattleEntry *)0)->kind == 0x14) ? 1 : -1];
 typedef char EffBattleEntryList_size_must_be_0x90[
@@ -58,6 +64,14 @@ typedef char EffBattleEntryList_count_at_0x6C[
     ((u32)&((EffBattleEntryList *)0)->count == 0x6C) ? 1 : -1];
 typedef char EffBattleEntryList_entries_at_0x78[
     ((u32)&((EffBattleEntryList *)0)->entries == 0x78) ? 1 : -1];
+typedef char SoundBank_size_must_be_0x618[
+    (sizeof(SoundBank) == 0x618) ? 1 : -1];
+typedef char SoundBank_list_at_0x08[
+    ((u32)&((SoundBank *)0)->list == 0x08) ? 1 : -1];
+typedef char EffBattleEntryList_triggerFrame_at_0x00[
+    ((u32)&((EffBattleEntryList *)0)->triggerFrame == 0x00) ? 1 : -1];
+typedef char EffBattleEntryList_colorRampEndFrame_at_0x70[
+    ((u32)&((EffBattleEntryList *)0)->colorRampEndFrame == 0x70) ? 1 : -1];
 
 struct EffParamWork;
 struct SdfMemBlock;

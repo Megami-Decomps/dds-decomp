@@ -26,7 +26,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
 extern void (*D_0034E690[])();
-extern void effBattleReleaseParameterBanks(void *);
+extern void effBattleReleaseParameterBanks(SoundMixer *);
 extern void func_00160690();
 extern const char D_003A0D70[];
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
@@ -564,20 +564,20 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
 
 s32 func_00160858(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
-    return mixer->banks[bank].value50;
+    return mixer->banks[bank].list.callbackFrame;
 }
 
 s32 func_00160888(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
-    return mixer->banks[bank].value08;
+    return mixer->banks[bank].list.triggerFrame;
 }
 
 s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     if (kind == 2) {
-        return mixer->banks[bank].value08;
+        return mixer->banks[bank].list.triggerFrame;
     }
-    return mixer->banks[bank].value78;
+    return mixer->banks[bank].list.colorRampEndFrame;
 }
 
 void sndUnlinkVoice(BattleEffect *voice) {
