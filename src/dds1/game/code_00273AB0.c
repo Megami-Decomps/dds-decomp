@@ -84,7 +84,7 @@ typedef char StaffImageContext_size_check[
     sizeof(StaffImageContext) == 0x924 ? 1 : -1];
 typedef char StaffImageContext_page_list_check[
     (u32)&((StaffImageContext *)0)->pageWindow.lists[0] == 0x7D8 ? 1 : -1];
-extern s32 func_00273220(s32 itemToInsert, s32 inventoryItem, StaffImageContext *context);
+extern s32 func_00273220(s32 itemToInsert, s32 inventoryItem, void *context);
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow();
