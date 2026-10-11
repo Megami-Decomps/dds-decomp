@@ -14,6 +14,11 @@
 #include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
+#include "sdf_primitive.h"
+#include "sdf_packet_append.h"
+
+extern s32 sdfAllocPacketAligned(s32);
+extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -927,7 +932,51 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     surface->append(surface, list);
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", func_00308C58);
+/* vu0 routine: the SDK quadword copies are present at 00308D20..00308D3C. */
+void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f32 *third,
+                   const u32 *colors, s32 unused, SdfAsset *asset, s32 surfaceIndex) {
+    SdfPrimitiveRequest request;
+    u32 vertexColors[3];
+    f32 textureCoordinates[3][2];
+    f32 positions[3][4];
+    SdfListHead *list;
+    SdfPoolNode *surface;
+    u32 firstColor, secondColor, thirdColor;
+
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfConsAppendClearPacket(list, 0);
+    if (asset != NULL) {
+        sdfConsAppendAssetPacket(list, asset, 0);
+    }
+    memset(&request, 0, sizeof(request));
+    firstColor = colors[0];
+    secondColor = colors[1];
+    thirdColor = colors[2];
+    request.stripWordCount = 1;
+    request.vertexCount = 3;
+    request.color = firstColor;
+    request.positions = positions;
+    request.normals = NULL;
+    request.coordinates = NULL;
+    vertexColors[0] = firstColor;
+    vertexColors[1] = secondColor;
+    vertexColors[2] = thirdColor;
+    request.vertexColors = vertexColors;
+    PCP_COPY_VECTOR(positions[0], first);
+    PCP_COPY_VECTOR(positions[1], second);
+    PCP_COPY_VECTOR(positions[2], third);
+    /* Retail00308D44..00308D5C initializes UV pairs with the stream disabled. */
+    textureCoordinates[0][0] = 0.0f;
+    textureCoordinates[0][1] = 0.0f;
+    textureCoordinates[1][0] = 0.0f;
+    textureCoordinates[1][1] = 0.0f;
+    textureCoordinates[2][0] = 0.0f;
+    textureCoordinates[2][1] = 0.0f;
+    sdfAppendPacket(list, (u32)func_0033B050(&request));
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append(surface, list);
+}
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
