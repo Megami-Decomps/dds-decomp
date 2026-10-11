@@ -2388,7 +2388,22 @@ void mnuClearPageSelection(MenuPageWindow *menu) {
     menu->flags &= ~0x200;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCD90);
+void mnuInitPageWindow(MenuPageWindow *window, PartyPanel *records,
+                       EffectSlotSet *resources, s32 slot,
+                       EffectSlotSet *secondaryResource, s32 secondarySlot,
+                       EffectSlotSet *alternateResource, s32 alternateSlot) {
+    memset(window, 0, sizeof(*window));
+    mnuClearPageSelection(window);
+    window->records = records;
+    window->resources = resources;
+    window->slot = slot;
+    window->secondaryResource = secondaryResource;
+    window->resources->descriptions[window->slot].rect[3] = 0x400;
+    window->alternateResource = alternateResource;
+    window->secondarySlot = secondarySlot;
+    window->alternateSlot = alternateSlot;
+    mnuInitScrollLists(window, records);
+}
 
 
 void mnuFreeWindowSprites(MenuPageSlot *win) {

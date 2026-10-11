@@ -461,7 +461,7 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
 void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
                                      u32 unused, PartyPanel *records) {
     /* Base resources are synchronous owners; queued sprite groups use the other arrays. */
-    func_002BCD90(container, records, resources->baseResources[0],
+    mnuInitPageWindow(container, records, resources->baseResources[0],
                  1, resources->baseResources[1], 0x2d,
                  resources->baseResources[1], 0x1d);
     mnuDrawPartyVitalPanelSequences(container, (s32)resources->baseResources[1]);
