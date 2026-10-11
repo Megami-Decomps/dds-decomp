@@ -7525,11 +7525,146 @@ void func_001CCD80(s32 index, s8 operation) {
     }
 }
 
+typedef struct BtlActorSlotLimits { s32 values[12]; } BtlActorSlotLimits;
+extern const BtlActorSlotLimits D_00416D58;
+extern const BtlActorSlotLimits D_00416D88;
+extern void func_001CDEC0(s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D58);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D88);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CCEB8);
+void func_001CCEB8(void) {
+    BtlActorSlotLimits right = D_00416D58;
+    BtlActorSlotLimits left = D_00416D88;
+    s32 *limits;
+    s32 status;
+    s32 side;
+    s32 count;
+    s32 i;
+
+    status = btlGetNamedTaskPairStatusOrUnavailable();
+    side = D_00438F54->bank;
+    if (D_00438F54->enabled[side] == 0) {
+        return;
+    }
+    if (status != 0 && status != 3) {
+        return;
+    }
+    count = D_00438F54->currentIndex;
+    for (i = 0; i < count; i++) {
+        switch (D_00438F58[side]->state[i]) {
+        case 1:
+            D_00438F58[side]->timer++;
+            D_00438F58[side]->timer = D_00438F58[side]->timer <= 0 ? 0 : D_00438F58[side]->timer >= 35 ? 34 : D_00438F58[side]->timer;
+            if (D_00438F58[side]->timer >= 34) {
+                limits = side == 0 ? left.values : right.values;
+                if (--D_00438F58[side]->entries[i] < limits[0]) {
+                    D_00438F58[side]->entries[i] = limits[2];
+                }
+                D_00438F58[side]->slotFade[i] += 0x20;
+                D_00438F58[side]->slotFade[i] = D_00438F58[side]->slotFade[i] <= 0 ? 0 : D_00438F58[side]->slotFade[i] >= 0x81 ? 0x80 : D_00438F58[side]->slotFade[i];
+                D_00438F58[side]->unk6C[i] -= 5.0f;
+                if (D_00438F58[side]->unk6C[i] <= 0.0f) {
+                    D_00438F58[side]->unk6C[i] = 0.0f;
+                }
+                D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
+                if (D_00438F58[side]->unk8C[i] <= 100.0f) {
+                    D_00438F58[side]->unk8C[i] = 100;
+                }
+                if (D_00438F58[side]->slotFade[i] >= 0x80) {
+                    if (D_00438F58[side]->state[i + 1] < 3) {
+                        D_00438F58[side]->state[i + 1] = 1;
+                    }
+                    if ((D_00438F58[side]->flags >> i) & 1) {
+                        func_001CCD80(i, 0);
+                        D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
+                    } else {
+                        D_00438F58[side]->state[i]++;
+                    }
+                    D_00438F58[side]->phaseFrames[i] = 0;
+                    D_00438F58[side]->entries[i] = limits[i];
+                    D_00438F58[side]->secondaryState[i] = 1;
+                    D_00438F58[side]->colorAdjustments[i][0] = 0;
+                    D_00438F58[side]->colorAdjustments[i][1] = 0;
+                    D_00438F58[side]->colorAdjustments[i][2] = 0;
+                    D_00438F58[side]->colorAdjustments[i][3] = 0;
+                }
+            }
+            break;
+        case 2:
+            D_00438F58[side]->unk6C[i] -= 5.0f;
+            if (D_00438F58[side]->unk6C[i] <= 0.0f) {
+                D_00438F58[side]->unk6C[i] = 0.0f;
+            }
+            D_00438F58[side]->unk8C[i] = D_00438F58[side]->unk8C[i] - 5.0f;
+            if (D_00438F58[side]->unk8C[i] <= 100.0f) {
+                D_00438F58[side]->unk8C[i] = 100;
+            }
+            func_001CDEC0(side, i);
+            break;
+        case 3:
+            D_00438F58[side]->scalePercent[i][0] = 120.0f;
+            D_00438F58[side]->slotValues[i][0] = 0xC0;
+            D_00438F58[side]->unk1B4[i][0] = 0;
+            D_00438F58[side]->phaseFrames[i] = 0;
+            D_00438F58[side]->slotFade[i] = 0x80;
+            D_00438F58[side]->state[i]++;
+            D_00438F58[side]->scalePercent[i][1] = 120.0f;
+            D_00438F58[side]->slotValues[i][1] = 0x80;
+            D_00438F58[side]->unk6C[i] = 0.0f;
+            D_00438F58[side]->unk1B4[i][1] = 0;
+            D_00438F58[side]->unk8C[i] = 100;
+            break;
+        case 4:
+            D_00438F58[side]->scalePercent[i][0] -= 1.0f;
+            if (D_00438F58[side]->scalePercent[i][0] <= 90.0f) {
+                D_00438F58[side]->scalePercent[i][0] = 90.0f;
+            }
+            D_00438F58[side]->phaseFrames[i]++;
+            D_00438F58[side]->phaseFrames[i] = D_00438F58[side]->phaseFrames[i] <= 0 ? 0 : D_00438F58[side]->phaseFrames[i] >= 0xB ? 0xA : D_00438F58[side]->phaseFrames[i];
+            if (D_00438F58[side]->phaseFrames[i] >= 9) {
+                D_00438F58[side]->state[i]++;
+                D_00438F58[side]->scalePercent[i][0] = 120.0f;
+                D_00438F58[side]->slotValues[i][0] = 0x10;
+                D_00438F58[side]->unk1B4[i][0] = 0;
+            }
+            break;
+        case 5:
+            D_00438F58[side]->scalePercent[i][1] -= 10.0f;
+            if (D_00438F58[side]->scalePercent[i][1] <= 100.0f) {
+                D_00438F58[side]->scalePercent[i][1] = 45.0f;
+                D_00438F58[side]->slotValues[i][1] = 0x68;
+                D_00438F58[side]->state[i]++;
+            }
+            break;
+        case 6:
+            D_00438F58[side]->scalePercent[i][0] -= 1.0f;
+            if (D_00438F58[side]->scalePercent[i][0] <= 100.0f) {
+                D_00438F58[side]->scalePercent[i][0] = 165.0f;
+                D_00438F58[side]->slotValues[i][0] = 0x10;
+            }
+            D_00438F58[side]->slotValues[i][0] = (s32)(165.0f - D_00438F58[side]->scalePercent[i][0]) / 8 + 0x10;
+            D_00438F58[side]->slotValues[i][0] = D_00438F58[side]->slotValues[i][0] <= 0 ? 0 : D_00438F58[side]->slotValues[i][0] >= 0x19 ? 0x18 : D_00438F58[side]->slotValues[i][0];
+            D_00438F58[side]->scalePercent[i][1] += 10.0f;
+            if (D_00438F58[side]->scalePercent[i][1] >= 100.0f) {
+                D_00438F58[side]->slotValues[i][1] = 0x18;
+            }
+            if (D_00438F58[side]->scalePercent[i][1] >= 130.0f) {
+                D_00438F58[side]->scalePercent[i][1] = 45.0f;
+                D_00438F58[side]->slotValues[i][1] = 0x68;
+            }
+            break;
+        case 7:
+            D_00438F58[side]->slotFade[i] -= 0x10;
+            D_00438F58[side]->slotFade[i] = D_00438F58[side]->slotFade[i] <= 0 ? 0 : D_00438F58[side]->slotFade[i] >= 0x81 ? 0x80 : D_00438F58[side]->slotFade[i];
+            if (D_00438F58[side]->slotFade[i] <= 0) {
+                D_00438F58[side]->state[i] = 0;
+            }
+            break;
+        }
+    }
+}
 
 typedef s32 SceneSlotCoordinate[3];
 
