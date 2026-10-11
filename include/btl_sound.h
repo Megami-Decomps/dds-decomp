@@ -36,7 +36,8 @@ typedef struct EffBattleEntryList {
     u16 count;                     /* 0x6C */
     u8 pad6E[2];
     s32 colorRampEndFrame;         /* 0x70 */
-    u8 pad74[4];
+    u8 actorScaleEnabled;          /* 0x74 */
+    u8 pad75[3];
     EffBattleEntry entries[1];     /* 0x78 */
 } EffBattleEntryList;
 
