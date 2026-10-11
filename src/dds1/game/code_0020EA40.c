@@ -452,8 +452,8 @@ void func_0020ED90(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x0, btlFindSubsequentTurnScript);
         BTL_INSTALL_CALLBACK(battle->unk5B4, 0x0, btlCheckSelectedBossUnitFlag);
         BTL_INSTALL_CALLBACK(battle->updateCallback, 0x0, func_00209528);
-        BTL_INSTALL_CALLBACK(battle->pad65C, 0x8, btlDispatchEligibleBossEvent);
-        BTL_INSTALL_CALLBACK(battle->pad65C, 0xc, btlCheckAttachedMember);
+        battle->cameraModeInitializePredicate = btlDispatchEligibleBossEvent;
+        BTL_INSTALL_CALLBACK(battle->pad668, 0x0, btlCheckAttachedMember);
         BTL_INSTALL_CALLBACK(battle->pad644, 0x0, btlCheckBossOptionAllowed);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapSelectedBossCommand);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlSyncEffectActorToUnit);

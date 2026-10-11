@@ -566,8 +566,6 @@ extern char D_00417B30[];
 
 extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
 
-extern void func_001E8258(s32, s32, s32, s32, s32);
-
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void effMiscQuaternionToMatrixVU(void);

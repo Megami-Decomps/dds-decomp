@@ -124,6 +124,16 @@ typedef struct TaskCondition {
     } value;
 } TaskCondition;
 
+/* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
+typedef struct BtlCameraModeArgs {
+    BtlTask *actor;
+    BtlUnit *unitA;
+    BtlUnit *unitB;
+    u32 mode;
+    s32 category;
+} BtlCameraModeArgs;
+typedef char BtlCameraModeArgsSize[(sizeof(BtlCameraModeArgs) == 20) ? 1 : -1];
+
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
 typedef struct SoundTask {
@@ -144,7 +154,7 @@ typedef struct SoundTask {
         void (*update)(void);
         s32 (*playSound)(u32 *);
         u32 (*process)(void);
-        u32 (*commandSound)(u32 *);
+        u32 (*commandSound)(BtlCameraModeArgs *);
         u32 (*playCustomSound)(u8 *);
         s32 (*releaseSound)(u16 *);
         s32 (*acquireSound)(u32 *);
@@ -5342,7 +5352,74 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001DB048);
+typedef struct BtlCameraModeDefinition {
+    void (*initialize)(BtlLinkedCommand *);
+    void (*update)(BtlLinkedCommand *);
+    u8 allowRepeat;
+    u8 pad09[3];
+    void *unk0C;
+} BtlCameraModeDefinition;
+typedef char BtlCameraModeDefinitionSize[(sizeof(BtlCameraModeDefinition) == 16) ? 1 : -1];
+extern BtlCameraModeDefinition D_00359D40[];
+
+void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
+                             BtlUnit *valueB, s32 category) {
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    BtlCameraModeDefinition *definition;
+    u32 previousKind = scene->cameraCommand.status;
+    u32 flags;
+    s32 accepted;
+    if (previousKind == kind && D_00359D40[kind].allowRepeat == 0) {
+        return;
+    }
+    if (kind == 6 && (scene->cameraCommand.flags & 0x800)) {
+        return;
+    }
+    flags = scene->cameraCommand.flags;
+    scene->cameraCommand.linkedA = valueA;
+    scene->cameraCommand.linkedB = valueB;
+    scene->cameraCommand.actionKind = previousKind;
+    scene->cameraCommand.actionCode = category;
+    scene->cameraCommand.task = link;
+    scene->cameraCommand.selectedUnit = NULL;
+    scene->cameraCommand.status = kind;
+    if (kind != 10 || !(flags & 0x1000)) {
+        scene->cameraCommand.state = 0;
+        scene->cameraCommand.flags = 0;
+    }
+    scene->cameraCommand.camera.fov = 0.6981317f; /* 40 degrees. */
+    if (kind - 9 < 2) {
+        scene->cameraCommand.flags |= flags & 0x40000;
+    }
+    if (link != NULL && link->indexWork.indices != NULL) {
+        btlCopyIndexList(scene->cameraCommand.targetList, link->indexWork.indices);
+    } else {
+        btlClearIndexList(scene->cameraCommand.targetList);
+    }
+    definition = &D_00359D40[kind];
+    if (definition->initialize != NULL) {
+        accepted = 1;
+        if (scene->cameraModeInitializePredicate != NULL) {
+            accepted = scene->cameraModeInitializePredicate(&scene->cameraCommand);
+        }
+        if (accepted != 0) {
+            definition->initialize(&scene->cameraCommand);
+        }
+    }
+    switch (kind) {
+    case 6:
+    case 8:
+    case 11:
+    case 14:
+        break;
+    default:
+        mdlSetListedObjectFlag();
+        mdlPropagateObjectFlag();
+        break;
+    }
+    scene->cameraCommand.flags &= ~0x400;
+    scene->cameraCommand.flags &= ~0x2000;
+}
 
 void btlNormalizeActionCameraKeyScales(s32 action) {
     f32 *key = (f32 *)action;
@@ -5561,50 +5638,50 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     return changed;
 }
 
-u32 btlExecuteCommandSoundTask(u32 *arg0) {
-    func_001DB048(arg0[3], *arg0, arg0[1], arg0[2], arg0[4]);
+u32 btlExecuteCommandSoundTask(BtlCameraModeArgs *arguments) {
+    btlSetCameraCommandMode(arguments->mode, arguments->actor, arguments->unitA, arguments->unitB, arguments->category);
     return 1;
 }
 
 void *btlCreateCommandSoundTask(s32 owner, s32 variant) {
     SoundTask *task = (SoundTask *)btlAllocTask(20);
-    u32 *arguments;
+    BtlCameraModeArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x27;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    if (owner != 0 && *(s32 *)(owner + 0x18) != 0) {
+    if (owner != 0 && ((BtlTask *)owner)->unit != NULL) {
         task->owner = ((BtlTask *)owner)->unit->identity;
     }
     task->callback.commandSound = btlExecuteCommandSoundTask;
     task->onStart = 0;
     arguments = btlGetTaskArguments(task);
-    arguments[0] = owner;
-    arguments[3] = variant;
-    arguments[1] = 0;
-    arguments[2] = 0;
-    arguments[4] = 0;
+    arguments->actor = (BtlTask *)owner;
+    arguments->mode = variant;
+    arguments->unitA = NULL;
+    arguments->unitB = NULL;
+    arguments->category = 0;
     return task;
 }
 
 void *btlCreateTargetedCommandSoundTask(s32 owner, s32 variant, u32 target) {
     void *task = btlCreateCommandSoundTask(owner, variant);
-    u32 *arguments = btlGetTaskArguments(task);
-    arguments[4] = target;
+    BtlCameraModeArgs *arguments = btlGetTaskArguments(task);
+    arguments->category = target;
     return task;
 }
 
 void *btlCreateCommandSoundWithArguments(s32 owner, s32 variant, u32 first, u32 second, u32 third) {
     void *task = btlCreateCommandSoundTask(owner, second);
-    u32 *arguments = btlGetTaskArguments(task);
-    arguments[4] = third;
-    arguments[1] = variant;
-    arguments[2] = first;
+    BtlCameraModeArgs *arguments = btlGetTaskArguments(task);
+    arguments->category = third;
+    arguments->unitA = (BtlUnit *)variant;
+    arguments->unitB = (BtlUnit *)first;
     return task;
 }
 
 u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
     u8 *context = (u8 *)btlGetRuntime();
-    func_001DB048(1, *(u32 *)arguments, 0, 0, 0);
+    btlSetCameraCommandMode(1, *(BtlTask **)arguments, 0, 0, 0);
     btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera, *(f32 *)(arguments + 4), *(f32 *)(arguments + 8),
                     *(f32 *)(arguments + 0xC), *(f32 *)(arguments + 0x10),
                     *(f32 *)(arguments + 0x14), *(f32 *)(arguments + 0x18),
@@ -5636,13 +5713,11 @@ u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f3
     return task;
 }
 
-extern void func_001DB048(s32, s32, s32, s32, s32);
-
 extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 s32 btlApplyEffectCameraKeyframes(f32 *args) {
     s32 context = btlGetRuntime();
-    func_001DB048(1, *(s32 *)args, 0, 0, 0);
+    btlSetCameraCommandMode(1, *(BtlTask **)args, 0, 0, 0);
     btlSetEffectCameraKeys((u8 *)(context + 0x70), args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
                   args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
     return 1;

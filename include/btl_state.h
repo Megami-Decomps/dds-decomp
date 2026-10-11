@@ -320,7 +320,9 @@ typedef struct BtlState {
     u8 pad650[4];
     s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x654 */
     s32 (*unk658)(BtlUnit *);
-    u8 pad65C[0x10];
+    u8 pad65C[8];
+    s32 (*cameraModeInitializePredicate)(BtlLinkedCommand *); /* 0x664: permits the mode initializer in 001DB048. */
+    u8 pad668[4];
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
     u8 pad670[0xC];
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
@@ -352,6 +354,7 @@ typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResu
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
 typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
 typedef char BtlPostTargetHookOffset[((unsigned int)&((BtlState *)0)->postTargetHook == 0x64C) ? 1 : -1];
+typedef char BtlCameraModeInitializePredicateOffset[((unsigned int)&((BtlState *)0)->cameraModeInitializePredicate == 0x664) ? 1 : -1];
 typedef char BtlDebugActionMenuOffset[((unsigned int)&((BtlState *)0)->debug.actionMenu == 0x6A8) ? 1 : -1];
 typedef char BtlDebugModelMenuOffset[((unsigned int)&((BtlState *)0)->debug.modelMenu == 0x6B8) ? 1 : -1];
 typedef char BtlDebugMotionMenuOffset[((unsigned int)&((BtlState *)0)->debug.motionMenu == 0x6D8) ? 1 : -1];
