@@ -1229,7 +1229,26 @@ void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *glyphChain) {
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019DD48);
 
-INCLUDE_ASM(const s32, "interface/frFont", func_0019DE70);
+/* Read the packed table count, then skip the table and its trailing metadata
+ * word to reach the encoded text. The native parser copies that metadata even
+ * though this lookup does not use its value. */
+u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode) {
+    u32 offset;
+    u32 tableCount;
+    u32 textMetadata;
+
+    if (textId >= bank->count) {
+        return NULL;
+    }
+    offset = bank->entries[textId].offset + 0x38;
+    tableCount = 0;
+    memcpy(&tableCount, (u8 *)bank + offset, 2);
+    offset += 4;
+    offset += tableCount * 4;
+    memcpy(&textMetadata, (u8 *)bank + offset, sizeof(textMetadata));
+    offset += sizeof(textMetadata);
+    return (u8 *)bank + offset;
+}
 
 extern u32 D_004528C0[];
 extern s8 D_00436550;
