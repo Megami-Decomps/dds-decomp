@@ -201,7 +201,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
 
 void func_00257BD8(MenuSceneWork *work, MnuProfileProgress *selection) {
     mnuAdvanceMantraPulseGridEntries(selection, work->gridHandle);
-    mnuAdvanceWrappingFrame(&work->gridFrame);
+    mnuAdvanceWrappingFrame(&work->coordinateRing.frame);
 }
 
 /* The grid pass supplies its own depth; the frame preserves the caller's amount. */
@@ -247,7 +247,7 @@ void func_00257DF0(MenuSceneWork *work, s32 layer) {
 void mnuCopySceneCoordinates(MenuSceneWork *work) {
     s32 x = work->entryPosition.x;
     s32 y = work->entryPosition.y;
-    MenuSceneCoordinate *point = work->coordinates;
+    MenuSceneCoordinate *point = work->coordinateRing.coordinates;
     s32 remaining = 9;
 
     do {

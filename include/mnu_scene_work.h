@@ -54,17 +54,30 @@ typedef char MnuMantraNodeStateLayoutAssert[
      (u32)&((MnuMantraNodeState *)0)->state == 8)
         ? 1 : -1];
 
+
+/* Frame, cursor, and sampled positions share one native ring subobject. */
+typedef struct MenuSceneCoordinateRing {
+    s32 frame; /* 0x00: pulse-grid animation frame */
+    u8 pad04[4];
+    s32 cursor; /* 0x08: next position in the ten-entry trail ring */
+    MenuSceneCoordinate coordinates[10]; /* 0x0C: copied grid-entry positions */
+} MenuSceneCoordinateRing;
+
+typedef char MenuSceneCoordinateRingLayoutAssert[
+    (sizeof(MenuSceneCoordinateRing) == 0x5C &&
+     (u32)&((MenuSceneCoordinateRing *)0)->cursor == 0x08 &&
+     (u32)&((MenuSceneCoordinateRing *)0)->coordinates == 0x0C)
+        ? 1 : -1];
+
 typedef struct MenuSceneWork {
     struct SdfMemBlock *allocation; /* 0x000: retained general-heap owner */
     MnuMantraNodeState nodes[96]; /* 0x004: grid userData; 0x480 bytes */
     SdfGrid *gridHandle; /* 0x484 */
     MnuGridFeedbackState gridFeedback; /* 0x488 */
-    s32 gridFrame; /* 0x490: pulse-grid animation frame */
-    u8 pad494[4];
-    s32 coordinateHistoryCursor; /* 0x498: next position in the ten-entry trail ring. */
-    MenuSceneCoordinate coordinates[10]; /* 0x49C: copied grid-entry positions */
+    MenuSceneCoordinateRing coordinateRing; /* 0x490 */
     s32 pendingMantras[8]; /* 0x4EC */
-    u8 pad50C[0x24];
+    u8 pad50C[0x20];
+    s32 unk52C; /* 0x52C: native-accessed scene-task state. */
     u32 pendingGridColumn; /* 0x530: cursor column before pending-entry display */
     u32 pendingGridRow; /* 0x534: cursor row before pending-entry display */
     MenuSceneCoordinate pendingCursorCoordinates; /* 0x538: saved signed cursor position */
@@ -96,11 +109,14 @@ typedef char MenuSceneWorkLayoutAssert[
      sizeof(((MenuSceneWork *)0)->nodes) == 0x480 &&
      (u32)&((MenuSceneWork *)0)->gridHandle == 0x484 &&
      (u32)&((MenuSceneWork *)0)->gridFeedback == 0x488 &&
-     (u32)&((MenuSceneWork *)0)->gridFrame == 0x490 &&
-     (u32)&((MenuSceneWork *)0)->coordinateHistoryCursor == 0x498 &&
-     (u32)&((MenuSceneWork *)0)->coordinates == 0x49C &&
+     (u32)&((MenuSceneWork *)0)->coordinateRing == 0x490 &&
+     sizeof(((MenuSceneWork *)0)->coordinateRing) == 0x5C &&
+     (u32)&((MenuSceneWork *)0)->coordinateRing.frame == 0x490 &&
+     (u32)&((MenuSceneWork *)0)->coordinateRing.cursor == 0x498 &&
+     (u32)&((MenuSceneWork *)0)->coordinateRing.coordinates == 0x49C &&
      (u32)&((MenuSceneWork *)0)->pendingMantras == 0x4EC &&
      sizeof(((MenuSceneWork *)0)->pendingMantras) == 0x20 &&
+     (u32)&((MenuSceneWork *)0)->unk52C == 0x52C &&
      (u32)&((MenuSceneWork *)0)->pendingGridColumn == 0x530 &&
      (u32)&((MenuSceneWork *)0)->pendingGridRow == 0x534 &&
      (u32)&((MenuSceneWork *)0)->pendingCursorCoordinates == 0x538 &&

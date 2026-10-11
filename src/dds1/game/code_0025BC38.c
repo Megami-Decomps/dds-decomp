@@ -413,7 +413,7 @@ extern void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *, MenuSceneWo
 /* Update the owner's grid slots and its independent looping-frame counter. */
 void mnuAdvanceDisplayGridAndLoopingFrame(MenuSceneWork *gridOwner, MnuProfileProgress *animationContext) {
     mnuAdvanceActiveGridSlotAnimations(animationContext, gridOwner);
-    mnuAdvanceLoopingFrame(&gridOwner->gridFrame);
+    mnuAdvanceLoopingFrame(&gridOwner->coordinateRing.frame);
 }
 
 typedef struct MnuRequirementIds {
