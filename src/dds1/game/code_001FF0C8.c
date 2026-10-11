@@ -908,7 +908,7 @@ s32 btlIsReadyWithoutTurns(void) {
     return 0;
 }
 
-extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 

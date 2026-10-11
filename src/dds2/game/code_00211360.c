@@ -182,7 +182,7 @@ extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
 extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
-extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
 extern s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);
 

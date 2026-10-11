@@ -761,8 +761,8 @@ s32 btlReadCurrentUnitHp(DatPartyRecord *entryAddress) {
     return entryAddress->hp;
 }
 
-/* Read current MP from a unit-entry address. */
-u16 btlReadCurrentUnitMp(DatPartyRecord *entryAddress) {
+/* Word-return getter; native callers choose whether to truncate MP to 16 bits. */
+s32 btlReadCurrentUnitMp(DatPartyRecord *entryAddress) {
     return entryAddress->mp;
 }
 
@@ -812,7 +812,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *entryAddress) {
 /* Cache the skill-adjusted maximum and return current MP clamped to it.
  * The comparison uses the full-width result, not the u16 cache. */
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
-    u16 currentMp = btlReadCurrentUnitMp(entryAddress);
+    u32 currentMp = btlReadCurrentUnitMp(entryAddress);
     u32 maxMp = btlComputeSkillAdjustedMaxMp(entryAddress);
     entryAddress->maxMp = maxMp;
     if (maxMp < currentMp) {

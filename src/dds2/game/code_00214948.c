@@ -230,7 +230,7 @@ extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
 extern s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
-extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
+extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
 extern void func_001AC0F8(s32, BtlIndexList *, s32, s32, s32);
 
