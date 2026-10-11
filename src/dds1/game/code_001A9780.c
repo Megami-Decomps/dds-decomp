@@ -6065,11 +6065,141 @@ void func_001C1850(s32 index, s8 operation) {
     }
 }
 
+typedef struct BtlActorSlotLimits { s32 values[12]; } BtlActorSlotLimits;
+extern const BtlActorSlotLimits D_003A30A8;
+extern const BtlActorSlotLimits D_003A30D8;
+extern void func_001C2938(s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30A8);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A30D8);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C1988);
+void func_001C1988(void) {
+    BtlActorSlotLimits right = D_003A30A8;
+    BtlActorSlotLimits left = D_003A30D8;
+    s32 *limits;
+    s32 status;
+    s32 side;
+    s32 count;
+    s32 i;
+
+    status = btlGetNamedTaskPairStatusOrUnavailable();
+    side = D_003BD83C->bank;
+    if (D_003BD83C->enabled[side] == 0) {
+        return;
+    }
+    if (status != 0 && status != 3) {
+        return;
+    }
+    count = D_003BD83C->currentIndex;
+    for (i = 0; i < count; i++) {
+        switch (D_003BD840[side]->state[i]) {
+        case 1:
+            D_003BD840[side]->timer++;
+            D_003BD840[side]->timer = D_003BD840[side]->timer <= 0 ? 0 : D_003BD840[side]->timer >= 35 ? 34 : D_003BD840[side]->timer;
+            if (D_003BD840[side]->timer >= 34) {
+                limits = side == 0 ? left.values : right.values;
+                if (--D_003BD840[side]->entries[i] < limits[0]) {
+                    D_003BD840[side]->entries[i] = limits[2];
+                }
+                D_003BD840[side]->slotFade[i] += 0x20;
+                D_003BD840[side]->slotFade[i] = D_003BD840[side]->slotFade[i] <= 0 ? 0 : D_003BD840[side]->slotFade[i] >= 0x81 ? 0x80 : D_003BD840[side]->slotFade[i];
+                D_003BD840[side]->unk6C[i] -= 5.0f;
+                if (D_003BD840[side]->unk6C[i] <= 0.0f) {
+                    D_003BD840[side]->unk6C[i] = 0.0f;
+                }
+                D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
+                if (D_003BD840[side]->unk8C[i] <= 100.0f) {
+                    D_003BD840[side]->unk8C[i] = 100;
+                }
+                if (D_003BD840[side]->slotFade[i] >= 0x80) {
+                    if (D_003BD840[side]->state[i + 1] < 3) {
+                        D_003BD840[side]->state[i + 1] = 1;
+                    }
+                    D_003BD840[side]->state[i]++;
+                    D_003BD840[side]->phaseFrames[i] = 0;
+                    D_003BD840[side]->entries[i] = limits[i];
+                    D_003BD840[side]->secondaryState[i] = 1;
+                    D_003BD840[side]->colorAdjustments[i][0] = 0;
+                    D_003BD840[side]->colorAdjustments[i][1] = 0;
+                    D_003BD840[side]->colorAdjustments[i][2] = 0;
+                    D_003BD840[side]->colorAdjustments[i][3] = 0;
+                }
+            }
+            break;
+        case 2:
+            D_003BD840[side]->unk6C[i] -= 5.0f;
+            if (D_003BD840[side]->unk6C[i] <= 0.0f) {
+                D_003BD840[side]->unk6C[i] = 0.0f;
+            }
+            D_003BD840[side]->unk8C[i] = D_003BD840[side]->unk8C[i] - 5.0f;
+            if (D_003BD840[side]->unk8C[i] <= 100.0f) {
+                D_003BD840[side]->unk8C[i] = 100;
+            }
+            func_001C2938(side, i);
+            break;
+        case 3:
+            D_003BD840[side]->scalePercent[i][0] = 120.0f;
+            D_003BD840[side]->slotValues[i][0] = 0xC0;
+            D_003BD840[side]->unk1B4[i][0] = 0;
+            D_003BD840[side]->phaseFrames[i] = 0;
+            D_003BD840[side]->slotFade[i] = 0x80;
+            D_003BD840[side]->state[i]++;
+            D_003BD840[side]->scalePercent[i][1] = 120.0f;
+            D_003BD840[side]->slotValues[i][1] = 0x80;
+            D_003BD840[side]->unk6C[i] = 0.0f;
+            D_003BD840[side]->unk1B4[i][1] = 0;
+            D_003BD840[side]->unk8C[i] = 100;
+            break;
+        case 4:
+            D_003BD840[side]->scalePercent[i][0] -= 1.0f;
+            if (D_003BD840[side]->scalePercent[i][0] <= 90.0f) {
+                D_003BD840[side]->scalePercent[i][0] = 90.0f;
+            }
+            D_003BD840[side]->phaseFrames[i]++;
+            D_003BD840[side]->phaseFrames[i] = D_003BD840[side]->phaseFrames[i] <= 0 ? 0 : D_003BD840[side]->phaseFrames[i] >= 0xB ? 0xA : D_003BD840[side]->phaseFrames[i];
+            if (D_003BD840[side]->phaseFrames[i] >= 9) {
+                D_003BD840[side]->state[i]++;
+                D_003BD840[side]->scalePercent[i][0] = 120.0f;
+                D_003BD840[side]->slotValues[i][0] = 0x10;
+                D_003BD840[side]->unk1B4[i][0] = 0;
+            }
+            break;
+        case 5:
+            D_003BD840[side]->scalePercent[i][1] -= 10.0f;
+            if (D_003BD840[side]->scalePercent[i][1] <= 100.0f) {
+                D_003BD840[side]->scalePercent[i][1] = 45.0f;
+                D_003BD840[side]->slotValues[i][1] = 0x68;
+                D_003BD840[side]->state[i]++;
+            }
+            break;
+        case 6:
+            D_003BD840[side]->scalePercent[i][0] -= 1.0f;
+            if (D_003BD840[side]->scalePercent[i][0] <= 100.0f) {
+                D_003BD840[side]->scalePercent[i][0] = 165.0f;
+                D_003BD840[side]->slotValues[i][0] = 0x10;
+            }
+            D_003BD840[side]->slotValues[i][0] = (s32)(165.0f - D_003BD840[side]->scalePercent[i][0]) / 8 + 0x10;
+            D_003BD840[side]->slotValues[i][0] = D_003BD840[side]->slotValues[i][0] <= 0 ? 0 : D_003BD840[side]->slotValues[i][0] >= 0x19 ? 0x18 : D_003BD840[side]->slotValues[i][0];
+            D_003BD840[side]->scalePercent[i][1] += 10.0f;
+            if (D_003BD840[side]->scalePercent[i][1] >= 100.0f) {
+                D_003BD840[side]->slotValues[i][1] = 0x18;
+            }
+            if (D_003BD840[side]->scalePercent[i][1] >= 130.0f) {
+                D_003BD840[side]->scalePercent[i][1] = 45.0f;
+                D_003BD840[side]->slotValues[i][1] = 0x68;
+            }
+            break;
+        case 7:
+            D_003BD840[side]->slotFade[i] -= 0x10;
+            D_003BD840[side]->slotFade[i] = D_003BD840[side]->slotFade[i] <= 0 ? 0 : D_003BD840[side]->slotFade[i] >= 0x81 ? 0x80 : D_003BD840[side]->slotFade[i];
+            if (D_003BD840[side]->slotFade[i] <= 0) {
+                D_003BD840[side]->state[i] = 0;
+            }
+            break;
+        }
+    }
+}
 
 typedef s32 SceneSlotCoordinate[3];
 
