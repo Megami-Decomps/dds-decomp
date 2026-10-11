@@ -7526,6 +7526,24 @@ answer; sdata literals of eight bytes or less are weaker, because they can be a
 shared global. The same check applies to a `-fno-optimize-sibling-calls` unit:
 a shared literal reaching across its boundary means the run is part of a larger
 file that also holds sibcall functions.
+
+The direction of the annul-bit change is not universal. DDS1
+`func_00231D18` and DDS2 `func_0024CA28`, the 244-byte counted movie-group
+callbacks, need the real `evtEventViewerAddName` definition visible earlier.
+With that provider external, their natural nested group/ordinal tests differ
+only at `+0xAC`: ordinary `BNE` instead of retail `BNEL`. Making the preceding
+timeline or history helpers opaque is neutral. Restoring the viewer ownership
+and retaining the actual name-insertion body closes both callers without a
+source-shaping change; the merged viewer units gate 92/0 and 96/0.
+
+The reverse requirement also occurs: `btlMatchFirstLinkedActorFlags`
+(DDS1 `0x001DCD00`, DDS2 `0x001EA120`) needs `btlGetIndexListCount` opaque.
+Removing only that call's `REG_EH_REGION 0` leaves all 28 real pass-28
+instruction patterns unchanged but closes the three-word reorg residual
+(`+0x18`, `+0x28`, `+0x2C`) in both 108-byte callers. Entry-getter opacity
+alone is neutral. Inspect the particular call note and donor; do not infer
+ownership merely from which branch spelling seems more conservative.
+
 ### Initialize the heap-overlay count in its collection phase
 
 DDS2 `func_0010B3D8` and DDS1 `func_0010B1B0` first copy heap metadata
@@ -7689,3 +7707,28 @@ division when the interval keeps a zero-duration key active. Whole-owner
 validation is 64 match, 0 differ, including its 24-entry switch table. KiB
 adapted the donor and checked the additional DDS2 read phases; preserve
 Brass's earlier DDS2 investigation and the donor lineage above.
+
+### Linked camera variants share a real three-way chooser
+
+`btlInitializeActionCamera` (DDS1 `0x001DDF20`, 1412 bytes) and
+`btlSelectActionCameraPose` (`0x001DEBE0`, 472 bytes) match together in
+`game/code_001DCD00`: **38 match, 0 differ** before their paired rename.
+The genuine `btlMatchFirstLinkedActorFlags` C prerequisite is earlier in
+this native-evidenced unit; its index-list providers remain in the preceding
+unit. There is no visibility stub, mismatching provider or flag change.
+
+The local inline chooser distinguishes unavailable actors (variant one),
+category-flag-two actors (variant zero), and an actual `effMiscRandMod(NULL, 2)`
+draw. Only that draw requests the first site's distance shrink. The same
+native policy occurs at DDS1 `001DE048..001DE08C` / `001DE218..001DE248`,
+their DDS2 twins `001EB728..001EB76C` / `001EB8F8..001EB928`, and independent
+DDS2 sites `0021D3E8..0021D418` and `0022487C..002248B0`. Define the helper
+naturally after its providers, not through a mid-file include.
+
+Keep each copied back-camera distance local to its geometry branch before
+publishing motion flags and the signed distance offset. In DDS2, passing a
+local shrink-output address to this inline chooser also prevents the native
+initializer-to-dispatcher sibling transfer: a truthful void dispatcher does
+not fix it. A private scalar-input chooser restores the transfer, but the
+DDS2 bodies are not declared matching or enabled by that diagnostic.
+

@@ -2627,7 +2627,40 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024CA28);
+s32 func_0024CA28(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeGroup *group;
+    s32 selection;
+    s32 target;
+    s32 index;
+    s32 nameIndex;
+
+    selection = viewer->groupFirst + viewer->groupCursor;
+    if (selection == 0) {
+        viewer->frameGroup->metadata.extra1 = 0;
+    } else if (selection == 1) {
+        viewer->frameGroup->metadata.extra1 = 1;
+    } else if (selection == 2) {
+        viewer->frameGroup->metadata.extra1 = 2;
+    } else {
+        viewer->frameGroup->metadata.extra1 = 3;
+        target = viewer->groupFirst + viewer->groupCursor - 3;
+        index = 0;
+        group = viewer->groups;
+        for (; group != NULL; group = group->next) {
+            if (group->type == 1) {
+                if (index == target) {
+                    nameIndex = evtEventViewerAddName(group->info->value, viewer);
+                    viewer->frameGroup->metadata.extra2 = nameIndex;
+                    break;
+                }
+                index++;
+            }
+        }
+    }
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
 
 u32 kwlnBattleCopyMatrix(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *key = evtEventViewerGetPendingNode(viewer);
