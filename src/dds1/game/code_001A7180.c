@@ -580,11 +580,11 @@ s32 btlIsSelectedActorStatusAndRecordClear(s32 object) {
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
-s32 btlAreUnitStatusAndEntryFlagsClear(s32 actor) {
-    if ((((BtlUnit *)actor)->partyRecord.status & 0x40) != 0) {
+s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
+    if ((actor->partyRecord.status & 0x40) != 0) {
         return 0;
     }
-    return (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)actor)->partyRecord) & 0x40) < 1;
+    return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
 
 extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);

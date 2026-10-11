@@ -47,7 +47,7 @@
 
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
 
-extern s32 btlAreUnitStatusAndEntryFlagsClear();
+extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
@@ -947,7 +947,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     func_001A30F8(contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (btlAreUnitStatusAndEntryFlagsClear(btlGetIndexListEntry(indexList, entryIndex)) != 0) {
+        if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {
             btlFreeIndexList(indexList);
             return 1;
         }
@@ -995,11 +995,8 @@ u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     return result == 0;
 }
 
-u8 func_002012E0(void) {
-    s32 result;
-
-    result = btlAreUnitStatusAndEntryFlagsClear();
-    return result != 0;
+u8 func_002012E0(BtlUnit *actor) {
+    return btlAreUnitStatusAndEntryFlagsClear(actor) != 0;
 }
 
 extern const s32 btlElementMasks[20];
