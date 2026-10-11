@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct SdfChunkHeader;
+struct SdfDmaTagHeader;
 
 /* Three optional SDK light sources; each points to color and direction vec4.
  * The callee advances through three pointer words, not scalar slot metadata. */
@@ -141,8 +142,8 @@ typedef struct SdfModel {
     f32 matrix[4][4];
     f32 rotationQuaternion[4];
     f32 scaleVector[4];
-    SdfLightingPacketStorage *lighting;
-    u32 unk84;
+    struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
+    struct SdfDmaTagHeader *unk84; /* Borrowed second DMA reference prefix. */
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
