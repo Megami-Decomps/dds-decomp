@@ -7203,6 +7203,30 @@ changes its lifetime but worsens the residual from one to sixteen of
 78 words. The original initializer/value-availability shape remains
 unproved; do not invent `i = found` solely to copy a known zero.
 
+### Compiler-known zero versus a path-zero comparison
+
+This is a compiler diagnostic, not a matching source recipe. In the actual
+vendor `cse_insn` (`0x08105904`), source preference compares non-register cost
+then approximate register pressure: ordinary integer `const0` costs `(0,0)`,
+whereas an equivalent normal pseudo costs `(0,1)`. Explicit default-value
+copies in DDS2 `002CBA90` and DDS1 `00202F90`/`00203BA8` therefore become
+literal zero in the **first CSE pass**, not combine or regmove. Narrowing the
+ordinal, chained assignments and a nonempty do-loop do not fix that.
+
+A microcase with `found = external() != 0; if (!found) { i = found; ... }`
+does retain a register copy while `found` is zero on that path. Both direct
+zero-tested parameter controls instead fold to `$0`. The binary's comparison
+unwrapping suggests the distinction: the Boolean edge records the underlying
+`GTU`/`LEU` relation, rather than merging the Boolean pseudo with `const0`.
+That explanation is inferred from the implementation and dumps, not a
+runtime hook. The microcase's Boolean `SLTU` producer remains; applying it to
+the games does **not** match. Even the native-sized directory do-loop form
+leaves 12/78 words different, all in its early producer/prologue.
+
+Keep the honest one-word parks. A runtime-zero value is not necessarily a
+compiler-known constant, but no artificial dependence, extra formal or
+Boolean calculation is justified merely to obtain the copy.
+
 
 ## Surface ring buffers have one typed owner
 
