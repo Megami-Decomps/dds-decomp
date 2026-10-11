@@ -1379,10 +1379,6 @@ u32 func_0011C6A0(void) {
     return 1;
 }
 
-typedef struct DatSkillList {
-    s16 skills[24];
-} DatSkillList;
-
 extern DatSkillList *D_00435E28;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */

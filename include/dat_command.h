@@ -96,4 +96,14 @@ typedef char DatCommandSelectorSizeCheck[sizeof(DatCommandSelector) == 2 ? 1 : -
 extern DatCommandRecord *datCommandRecords;
 extern DatCommandSelector *datCommandSelectors;
 
+#if defined(VERSION_DDS1)
+#define DAT_SKILL_LIST_MAX 16
+#elif defined(VERSION_DDS2)
+#define DAT_SKILL_LIST_MAX 24
+#endif
+
+typedef struct DatSkillList {
+    s16 skills[DAT_SKILL_LIST_MAX];
+} DatSkillList;
+
 #endif /* DAT_COMMAND_H */
