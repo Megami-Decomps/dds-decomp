@@ -7603,3 +7603,4 @@
 0x00247D58	mnuTickShopMessageSequence	inferred	Polls the shop dispatch and advances its music, flag, stock-message and popup sequence.
 0x002481A0	evtUpdateMainTaskPopupEntry	inferred	Runs the panel scheduler, then flags the idle dispatch popup when e803_main is absent or event flag0 is active.
 0x00245208	mnuBuildShopStandardCatalogList	inferred	Builds the active shop standard-stock list, excluding special-range ordinary items while retaining mode-one stock and transaction availability checks.
+0x002472D8	mnuPruneSoldOutShopSelection	inferred	Removes the sold-out selected shop row during sell operation, switches an empty list to menu mode two, then resumes command phase eight.
