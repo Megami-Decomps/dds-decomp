@@ -97,9 +97,9 @@ extern f32 func_00152560(u8 *, void *);
 
 
 
-extern void effCopyVector(u32, u8 *);
+extern void effCopyVector(void *, void *);
 
-extern void billInvokeCallback(u32);
+extern void billInvokeCallback(BillObj *);
 
 extern u8 D_003B2B10[];
 
@@ -488,7 +488,8 @@ extern void dds3DispatchIndexedCallback(u16 *, float);
 
 
 typedef struct EffSurfaceParams {
-    u32 word[7];
+    u32 opaque00[6];
+    f32 scale;
 } EffSurfaceParams;
 
 struct EffKindWork;
@@ -1498,8 +1499,8 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         height = work->heightScale * work->scale;
         billSetChildScaleComponents(work->billboard, width, height);
         billSetRotationAngle(work->billboard, angle);
-        effCopyVector((u32)work->billboard, (u8 *)work);
-        billInvokeCallback((u32)work->billboard);
+        effCopyVector(work->billboard, work);
+        billInvokeCallback(work->billboard);
         work->frame++;
     }
 }
