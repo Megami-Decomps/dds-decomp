@@ -1834,7 +1834,22 @@ void mnuClearPageSelection(MenuPageWindow *window) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuInitPageWindow);
+void mnuInitPageWindow(MenuPageWindow *window, PartyPanel *records,
+                       EffectSlotSet *resources, s32 slot,
+                       EffectSlotSet *secondaryResource, s32 secondarySlot,
+                       EffectSlotSet *alternateResource, s32 alternateSlot) {
+    memset(window, 0, sizeof(*window));
+    mnuClearPageSelection(window);
+    window->records = records;
+    window->resources = resources;
+    window->slot = slot;
+    window->secondaryResource = secondaryResource;
+    window->resources->descriptions[window->slot].rect[3] = 0x400;
+    window->alternateResource = alternateResource;
+    window->secondarySlot = secondarySlot;
+    window->alternateSlot = alternateSlot;
+    mnuFillPanelLists(window, records);
+}
 
 
 void mnuReleaseHandles(MenuPageSlot *page) {

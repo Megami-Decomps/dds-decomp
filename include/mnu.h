@@ -612,7 +612,7 @@ typedef char MenuPageWindow_alternateResource_offset_check[
 typedef char MenuPageWindow_alternateSlot_offset_check[
     ((u32)&((MenuPageWindow *)0)->alternateSlot == 0x20) ? 1 : -1];
 
-void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
+void mnuInitPageWindow(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
                    s32, struct EffectSlotSet *, s32, struct EffectSlotSet *, s32);
 void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
