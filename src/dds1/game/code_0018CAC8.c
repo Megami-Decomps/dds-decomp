@@ -34,7 +34,7 @@ typedef struct EffDirEnt {
 } EffDirEnt;
 typedef char EffDirEnt_size_must_be_0x144[(sizeof(EffDirEnt) == 0x144) ? 1 : -1];
 
-extern u8 sdfPadButtonStates[0x20];
+extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32);
@@ -514,9 +514,9 @@ s32 func_0018D4B8(EffResourceDescriptor *descriptor) {
                     }
                 }
             }
-        } else if ((s8)sdfPadButtonStates[3] < 0) {
+        } else if (sdfPadButtonStates[3] < 0) {
             descriptor->result = 2;
-        } else if ((s8)sdfPadButtonStates[1] < 0) {
+        } else if (sdfPadButtonStates[1] < 0) {
             descriptor->result = 1;
         } else {
             EffResourceListNode *cachedEntry = descriptor->cachedEntry;

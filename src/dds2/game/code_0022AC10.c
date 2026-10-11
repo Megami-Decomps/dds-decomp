@@ -164,15 +164,7 @@ typedef struct BattleRuntimeState {
 
 extern BattleRuntimeState btlRuntimeState;
 
-typedef struct PadButtons {
-    s8 unk_0;
-    s8 stick;
-    u8 pad02[2];
-    u8 pageUp, pageDown, up, down;
-    u8 pad08[8]; /* Remaining states in the actual sixteen-byte controller record. */
-} PadButtons;
-
-extern PadButtons sdfPadButtonStates[2];
+extern s8 sdfPadButtonStates[32];
 
 extern s32 kwlnFadeIsBackgroundOverlayActive();
 
@@ -1952,7 +1944,7 @@ typedef BtlDebugMenuCursor MenuList;
 /* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
  * Returns 1 only for a negative stick byte when no direction branch ran. */
 s32 mnuListMoveCursor(MenuList *menuList) {
-    if (sdfPadButtonStates->up & MNU_LIST_INPUT_FLAG) {
+    if (sdfPadButtonStates[6] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor != 0) {
             menuList->cursor--;
             if (menuList->cursor == menuList->top && menuList->cursor != 0) {
@@ -1962,7 +1954,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->down & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[7] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor >= menuList->count - 1) {
             menuList->cursor = 0;
             menuList->top = 0;
@@ -1972,7 +1964,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
                 menuList->top++;
             }
         }
-    } else if (sdfPadButtonStates->pageDown & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[5] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top + menuList->rows * 2 < menuList->count) {
             menuList->top += menuList->rows;
             menuList->cursor += menuList->rows;
@@ -1980,7 +1972,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->pageUp & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[4] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top >= menuList->rows) {
             menuList->top -= menuList->rows;
             menuList->cursor -= menuList->rows;
@@ -1988,7 +1980,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = 0;
             menuList->top = 0;
         }
-    } else if (sdfPadButtonStates->stick < 0) {
+    } else if (sdfPadButtonStates[1] < 0) {
         return 1;
     }
     return 0;

@@ -7853,3 +7853,15 @@ canonical `BtlState` texture handle, `SdfListHead` packet lifecycle and
 `SdfPoolNode.append` callback. No table-view cast, argument-position tuning,
 extra geometry buffers or assembly is needed.
 
+## Controller geometry uses scoped magnitudes and signed angle sectors
+
+`kwlnUpdatePadInputState` (DDS1 `0x00103B10`, DDS2 `0x00103A00`, 1268 bytes)
+uses separate direction-vector length, dot product and angle values, then a
+loop-local stick magnitude. The degree conversion, 22-degree bias, division
+by 45 and remainder modulo eight are genuine signed-integer stages. This
+natural source shape matches both bodies at `-O2 -G8`; no declaration-order
+steering is needed. The primary `sdfPadButtonStates` is a flat `s8[32]`,
+indexed by `pad * 16 + button`, as its producer and most native users already
+do; bit seven marks a new press. Length, normalization and dot operations use
+the existing SDK VU0 macros, not game-code assembly.
+

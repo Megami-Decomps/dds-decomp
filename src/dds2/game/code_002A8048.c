@@ -33,18 +33,7 @@ extern MnuMovieList mnuMovieList;
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
 
-typedef struct MnuViewerPad {
-    u8 pad00[0x11];
-    s8 reset;       /* 0x11 */
-    s8 init;        /* 0x12 */
-    u8 pad13;
-    u8 prev;        /* 0x14 */
-    u8 next;        /* 0x15 */
-    u8 left;        /* 0x16 */
-    u8 right;       /* 0x17 */
-} MnuViewerPad;
-
-extern MnuViewerPad sdfPadButtonStates;
+extern s8 sdfPadButtonStates[32];
 extern s8 D_0037F510[64];
 extern SdfMovieDescriptor D_003E56B8;
 extern u16 D_00438A90[4];
@@ -315,16 +304,16 @@ s32 mnuUpdateIpuRegisterViewer(void) {
         mnuMovieDrawSources.started = 1;
         mnuBindMovieDrawValueSources();
     }
-    if (sdfPadButtonStates.reset != 0) {
+    if (sdfPadButtonStates[0x11] != 0) {
         mnuMarkMovieDrawValuesPending();
-    } else if (sdfPadButtonStates.init != 0) {
+    } else if (sdfPadButtonStates[0x12] != 0) {
         mnuBindMovieDrawValueSources();
-    } else if (sdfPadButtonStates.next & 2) {
+    } else if (sdfPadButtonStates[0x15] & 2) {
         mnuMovieDrawSources.cursor++;
         if (mnuMovieDrawSources.cursor == 0x10) {
             mnuMovieDrawSources.cursor = 0;
         }
-    } else if (sdfPadButtonStates.prev & 2) {
+    } else if (sdfPadButtonStates[0x14] & 2) {
         if (mnuMovieDrawSources.cursor != 0) {
             mnuMovieDrawSources.cursor--;
         } else {
@@ -333,7 +322,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
     } else {
         n = 1 << ((~mnuMovieDrawSources.cursor & 7) * 4);
         i = mnuMovieDrawSources.cursor >> 3;
-        if (sdfPadButtonStates.right & 2) {
+        if (sdfPadButtonStates[0x17] & 2) {
             if (i == 0) {
                 mnuMovieDrawSources.wordPending = 0;
                 mnuMovieDrawSources.wordSource += n;
@@ -342,7 +331,7 @@ s32 mnuUpdateIpuRegisterViewer(void) {
                 mnuMovieDrawSources.blockSource += n;
             }
         }
-        if (sdfPadButtonStates.left & 2) {
+        if (sdfPadButtonStates[0x16] & 2) {
             if (i == 0) {
                 mnuMovieDrawSources.wordPending = 0;
                 mnuMovieDrawSources.wordSource -= n;

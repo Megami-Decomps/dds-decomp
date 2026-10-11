@@ -1284,7 +1284,7 @@ extern u8 sdfPadAnalogSticks[8];
 
 extern u16 sdfPadButtonMasks[16];
 
-extern u8 sdfPadButtonStates[0x20];
+extern s8 sdfPadButtonStates[0x20];
 
 extern u8 sdfPadButtonPressure[0x18];
 

@@ -100,19 +100,7 @@ extern u8 D_003C2620[];
 extern s32 D_003BA724;
 extern s32 kwlnDistanceBlurErrorCount;
 extern s32 kwlnRippleBlurErrorCount;
-typedef struct KwlnPadState {
-    u8 unk0[0x12];
-    s8 unk12;
-    s8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16[2];
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-} KwlnPadState;
-extern KwlnPadState sdfPadButtonStates;
+extern s8 sdfPadButtonStates[32];
 extern s32 func_00104A18(s32);
 extern SdfPoolNode D_00325708;
 
@@ -396,11 +384,11 @@ s32 kwlnDebugPulsePadMotors(KwlnTask *task) {
     return 0;
 }
 
-extern s32 D_003243C0[4][16];
-extern s32 D_003244C0[2][2];
-extern u8 D_003244D0[2][2][16];
+extern u32 D_003243C0[4][16];
+extern u32 D_003244C0[2][2];
+extern s8 D_003244D0[2][2][16];
 extern u8 D_003BA860[2][2][2];
-extern u8 D_003BA868[2][2];
+extern s8 D_003BA868[2][2];
 extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 extern u8 D_003BD698[2];
@@ -409,7 +397,7 @@ void kwlnPadResetInputAndMotorState(void) {
     s32 port;
     s32 bank;
     s32 i;
-    s32 (*inputTimers)[16] = D_003243C0;
+    u32 (*inputTimers)[16] = D_003243C0;
 
     for (port = 0; port < 2; port++) {
         for (bank = 0; bank < 2; bank++) {
@@ -437,7 +425,151 @@ void kwlnPadResetInputAndMotorState(void) {
     D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103B10);
+extern u8 sdfPadAnalogSticks[8];
+extern f32 func_002FA1C0(f32);
+extern void kwlnUpdatePadMotorDurations(void);
+
+/* vu0 routine: native stick length, normalization and forward dot product. */
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
+
+void kwlnUpdatePadInputState(void) {
+    s8 buttons[2][16];
+    u8 sticks[2][2];
+    f32 v[4];
+    f32 forward[4];
+    f32 length;
+    f32 dot;
+    f32 angle;
+    s32 pad;
+    s32 i;
+    s32 j;
+    s32 n;
+
+    memset(forward, 0, sizeof(forward));
+    forward[2] = -1.0f;
+    for (pad = 0; pad < 2; pad++) {
+        for (i = 0; i < 16; i++) {
+            if (sdfPadButtonStates[pad * 16 + i] != 0) {
+                buttons[0][i] = 1;
+                buttons[1][i] = 1;
+            } else {
+                buttons[0][i] = 0;
+                buttons[1][i] = 0;
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            sticks[i][0] = sdfPadAnalogSticks[pad * 4 + i * 2];
+            sticks[i][1] = sdfPadAnalogSticks[pad * 4 + i * 2 + 1];
+        }
+        for (i = 0; i < 2; i++) {
+            D_003BA860[pad][i][0] = sticks[i][0];
+            D_003BA860[pad][i][1] = sticks[i][1];
+        }
+        v[0] = sticks[1][0] - 0x80;
+        v[1] = 0;
+        v[2] = sticks[1][1] - 0x80;
+        v[3] = 0;
+        VU0_LOAD_VF(vf10, v);
+        VU0_LENGTH_VF10(length);
+        if (length >= 64.0f) {
+            VU0_NORMALIZE_VF10();
+            VU0_LOAD_VF(vf11, forward);
+            VU0_DOT_XYZ(dot, vf10, vf11);
+            if (dot < -1.0f) {
+                dot = -1.0f;
+            }
+            if (dot > 1.0f) {
+                dot = 1.0f;
+            }
+            angle = func_002FA1C0(dot);
+            if (v[0] < 0.0f) {
+                angle = 6.283185307179586f - angle;
+            }
+            n = (s32)(angle * 57.29577951308232f);
+            n = (n + 22) / 45;
+            n %= 8;
+            switch (n) {
+            case 0:
+                buttons[1][6] = 1;
+                break;
+            case 1:
+                buttons[1][6] = 1;
+                buttons[1][5] = 1;
+                break;
+            case 2:
+                buttons[1][5] = 1;
+                break;
+            case 3:
+                buttons[1][5] = 1;
+                buttons[1][7] = 1;
+                break;
+            case 4:
+                buttons[1][7] = 1;
+                break;
+            case 5:
+                buttons[1][7] = 1;
+                buttons[1][4] = 1;
+                break;
+            case 6:
+                buttons[1][4] = 1;
+                break;
+            case 7:
+                buttons[1][4] = 1;
+                buttons[1][6] = 1;
+                break;
+            }
+        }
+        for (j = 0; j < 2; j++) {
+            for (i = 0; i < 16; i++) {
+                if (buttons[j][i] != 0) {
+                    D_003244D0[j][pad][i] = 1;
+                    if (++D_003243C0[j * 2 + pad][i] == 1) {
+                        D_003244D0[j][pad][i] = -0x7D;
+                    }
+                } else {
+                    D_003244D0[j][pad][i] = 0;
+                    D_003243C0[j * 2 + pad][i] = 0;
+                }
+                if (D_003243C0[j * 2 + pad][i] >= 8 && !(D_003243C0[j * 2 + pad][i] & 1)) {
+                    D_003244D0[j][pad][i] |= 2;
+                }
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            f32 stickLength;
+
+            v[0] = sticks[i][0] - 0x80;
+            v[1] = 0;
+            v[2] = sticks[i][1] - 0x80;
+            v[3] = 0;
+            VU0_LOAD_VF(vf10, v);
+            VU0_LENGTH_VF10(stickLength);
+            if (stickLength >= 64.0f) {
+                D_003BA868[pad][i] = 1;
+                if (++D_003244C0[pad][i] == 1) {
+                    D_003BA868[pad][i] = -0x7D;
+                }
+            } else {
+                D_003BA868[pad][i] = 0;
+                D_003244C0[pad][i] = 0;
+            }
+            if (D_003244C0[pad][i] >= 8 && !(D_003244C0[pad][i] & 1)) {
+                D_003BA868[pad][i] |= 2;
+            }
+        }
+    }
+    kwlnUpdatePadMotorDurations();
+}
 
 void kwlnPadStepLargeMotorLevel(void) {
     u8 target = kwlnLargeMotorTarget;
@@ -699,20 +831,20 @@ s32 func_00104A18(s32 requestedIndex) {
 /* Exit input returns 0 immediately; otherwise apply one prioritized page step,
  * select its reached index, then optionally toggle the viewer mode and return 1. */
 s32 kwlnTextureViewerHandlePad(void) {
-    if (sdfPadButtonStates.unk13 < 0) {
+    if (sdfPadButtonStates[0x13] < 0) {
         return 0;
     }
-    if (sdfPadButtonStates.unk14 & KWLN_PAD_REPEAT_BIT) {
+    if (sdfPadButtonStates[0x14] & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex -= 1;
-    } else if (sdfPadButtonStates.unk15 & KWLN_PAD_REPEAT_BIT) {
+    } else if (sdfPadButtonStates[0x15] & KWLN_PAD_REPEAT_BIT) {
         kwlnTextureViewerPageIndex += 1;
-    } else if ((sdfPadButtonStates.unk18 & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates.unk19 & KWLN_PAD_REPEAT_BIT)) {
+    } else if ((sdfPadButtonStates[0x18] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x19] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex -= KWLN_VIEWER_FAST_PAGE_STEP;
-    } else if ((sdfPadButtonStates.unk1A & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates.unk1B & KWLN_PAD_REPEAT_BIT)) {
+    } else if ((sdfPadButtonStates[0x1A] & KWLN_PAD_REPEAT_BIT) || (sdfPadButtonStates[0x1B] & KWLN_PAD_REPEAT_BIT)) {
         kwlnTextureViewerPageIndex += KWLN_VIEWER_FAST_PAGE_STEP;
     }
     kwlnTextureViewerPageIndex = func_00104A18(kwlnTextureViewerPageIndex);
-    if (sdfPadButtonStates.unk12 < 0) {
+    if (sdfPadButtonStates[0x12] < 0) {
         D_003BA890 ^= 1;
     }
     return 1;
@@ -1480,20 +1612,6 @@ void sdfSetViewFieldOfView(f32 value) {
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E170);
 
 INCLUDE_RODATA(const s32, "game/code_00102ED8", D_0039E188);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA861);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA868);
 
