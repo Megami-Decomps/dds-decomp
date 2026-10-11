@@ -464,7 +464,7 @@ extern void func_0012D528(void);
 extern void func_0012D3D8(void);
 extern void func_0012DD70(void);
 extern void fldUpdateCameraMoveOscillation(void);
-extern s32 fldTestSceneControlFlags(s32);
+extern u8 fldTestSceneControlFlags(u32);
 extern f32 fldPointDistance(f32, f32, f32, f32, f32, f32);
 extern void fldClearCameraModelColor(void);
 extern void func_00131290(void);
@@ -3538,7 +3538,7 @@ void fldSetCameraMoveMode(u32 value) {
 }
 
 
-extern void effObjSetNodeFlags(void *, s32);
+extern void effObjSetNodeFlags(ObjectTransform *, u32);
 
 void fldUpdateCameraMoveOscillation(void) {
     f32 direction = 0.0f;
