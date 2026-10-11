@@ -80,41 +80,7 @@ extern SceneKindTable *D_00438F4C;
 
 extern u32 D_00438F50;
 
-typedef struct BattleItemDrop {
-    u16 id;
-    u8 count;
-    u8 pad03;
-} BattleItemDrop;
 
-typedef struct BattleController {
-    u8 pad_000[0x214];
-    s32 frame;
-    u32 flags;
-    u32 flags21C;
-    u8 pad_220[0x28];
-    ActionStateLink *taskHead; /* 0x248 */
-    BtlUnit *actors;
-    u8 pad_250[0x1E];
-    u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
-    u8 pad26F;
-    u16 variant; /* 0x270 */
-    u8 pad_272[0x22];
-    s32 adjustmentRecordIndex; /* 0x294 */
-    s32 adjustmentGroupIndex;  /* 0x298 */
-    s32 adjustmentEntryIndex;  /* 0x29C */
-    u8 pad_2A0[0x24];
-    KwlnTask *drawTask;
-    u8 pad2C8[0x14];
-    BattleItemDrop itemDrops[3];
-    s32 moneyEarned; /* 0x2E8 */
-    u32 rewardMacca; /* 0x2EC */
-    s32 experienceEarned; /* 0x2F0 */
-    s32 epEarned; /* 0x2F4 */
-    s32 rewardAp; /* 0x2F8 */
-    u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103. */
-    u8 pad2FE[0x3DE];
-    s32 (*commandRangeOverride)(BtlUnit *, s32);
-} BattleController;
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
@@ -376,7 +342,7 @@ extern s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity);
 s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
     s32 statAddresses[3];
     u32 requiredCount = 0;
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     s32 *requirementCursor;
     BtlUnit *candidate;
     BtlUnit *partner;
@@ -393,7 +359,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     }
 
     statAddresses[0] = (s32)&unit->partyRecord;
-    for (candidate = controller->actors; candidate != NULL; candidate = candidate->nextActor) {
+    for (candidate = controller->units; candidate != NULL; candidate = candidate->nextActor) {
         u32 flags = candidate->status.flags;
 
         if ((flags & 1) == 0) {
@@ -410,7 +376,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
         }
         statAddresses[1] = (s32)&candidate->partyRecord;
         if (requiredCount == 3) {
-            for (partner = controller->actors; partner != NULL; partner = partner->nextActor) {
+            for (partner = controller->units; partner != NULL; partner = partner->nextActor) {
                 u32 partnerFlags = partner->status.flags;
 
                 if ((partnerFlags & 1) == 0) {
@@ -684,7 +650,7 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -714,7 +680,7 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -744,7 +710,7 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     s32 total = 0;
     s32 count = 0;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
@@ -772,7 +738,7 @@ void func_001B3A00(u32 arg0) {
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
     s32 sum = 0;
     s32 count = 0;
-    BtlUnit *unit = ((BattleController *)btlGetRuntime())->actors;
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     for (; unit != 0; unit = unit->nextActor) {
         u32 flags = unit->status.flags;
         if ((flags & 1) != 0) {
@@ -1010,7 +976,7 @@ s32 btlRollSurpriseAttack(void) {
 void btlClearUnitStatusMask(void) {
     BtlUnit *unit;
     u32 flags;
-    for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -1528,10 +1494,10 @@ s32 btlHasHighPriorityState(void) {
 }
 
 s32 btlCountFlaggedSceneActors(void) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 count = 0;
-    for (unit = controller->actors; unit != 0; unit = unit->nextActor) {
+    for (unit = controller->units; unit != 0; unit = unit->nextActor) {
         if ((btlUnitStatusPair(unit) & 0x321) == 0x301) {
             if (!(unit->partyRecord.status & 0x800)) {
                 count++;
@@ -2025,16 +1991,16 @@ s32 btlResetSceneSlotFades(void) {
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
-    BattleController *work = (BattleController *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     ActionStateLink *node;
     BtlUnit *owner;
     BattleActionSlot *slot;
     BattleActionSlot *reverse;
     s32 i;
-    for (node = work->taskHead; node != 0; node = node->next) {
+    for (node = work->tasks; node != 0; node = node->next) {
         owner = node->unit;
         if (owner != 0) {
-            if (work->variant == 1) {
+            if (work->mode == 1) {
                 if (owner->status.flags & 0x200) {
                     for (i = 0, slot = &node->actions[0]; i < 8; i++) {
                         slot->word = 0;
@@ -2083,10 +2049,10 @@ void btlInitializeActorSlotOrder(s32 selector, s32 count) {
 }
 
 s32 btlCountSceneSlots(void) {
-    struct BattleSceneWork *scene;
+    struct BtlState *scene;
     s32 fadeCounts[4];
 
-    scene = (struct BattleSceneWork *)btlGetRuntime();
+    scene = (struct BtlState *)btlGetRuntime();
     return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
@@ -2248,7 +2214,7 @@ extern s32 func_001B8A80(KwlnTask *);
 extern void itfMesCloseAllWindows(KwlnTask *);
 
 s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
-    BattleController *battle = (BattleController *)btlGetRuntime();
+    BtlState *battle = (BtlState *)btlGetRuntime();
     MesWindowSet *work;
     KwlnTask *task;
     s32 i;
@@ -2277,7 +2243,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->y = 0x20;
     task = kwlnTaskCreate(btlMahenPanelTaskNameRef, 0x2B0E, 1, 1,
                           func_001B8A80, itfMesCloseAllWindows, (u32)work);
-    func_00101968(battle->drawTask, task);
+    func_00101968(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(10, (s32)task);
     return 1;
 }
@@ -2338,7 +2304,7 @@ extern s32 func_001B9158(KwlnTask *task);
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *task);
 
 s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
-    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlState *context = (BtlState *)btlGetRuntime();
     BtlAnalysisPanelWork *data;
     KwlnTask *task;
 
@@ -2367,9 +2333,9 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->frame = 0;
     task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001B9158,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
-    func_00101968(context->drawTask, task);
+    func_00101968(context->scriptOwner, task);
     btlSetTrackedTaskHandle(11, (s32)task);
-    context->flags &= ~0x100000;
+    context->battleFlags &= ~0x100000;
     return 1;
 }
 
@@ -2435,7 +2401,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 extern void btlSetTrackedTaskHandle(s32, s32);
 
 s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
-    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlState *context = (BtlState *)btlGetRuntime();
     BtlGuidePanelWork *data;
     KwlnTask *task;
 
@@ -2459,7 +2425,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     data->entryIndex = entryIndex;
     task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, func_001BB5C0,
                           btlReleaseMessageWindowTask, (u32)data);
-    func_00101968(context->drawTask, task);
+    func_00101968(context->scriptOwner, task);
     btlSetTrackedTaskHandle(9, (s32)task);
     return 1;
 }
@@ -2752,7 +2718,7 @@ extern void btlReleaseDialogTaskData(KwlnTask *task);
 extern s32 btlGetTrackedTaskHandle(s32);
 
 s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
-    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlState *context = (BtlState *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
 
@@ -2774,7 +2740,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     data->value = 0x2D;
     task = kwlnTaskCreate(D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
                           btlReleaseDialogTaskData, (u32)data);
-    func_00101968(context->drawTask, task);
+    func_00101968(context->scriptOwner, task);
     data->task = task;
     btlSetTrackedTaskHandle(0, (s32)task);
     return 1;
@@ -3459,9 +3425,9 @@ extern s32 func_001BBA80(KwlnTask *task);
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
 
 void btlStartRegisteredChildTask(void) {
-    BattleController *work = (BattleController *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
-    func_00101968(work->drawTask, task);
+    func_00101968(work->scriptOwner, task);
     btlSetTrackedTaskHandle(7, (s32)task);
 }
 
@@ -4485,10 +4451,10 @@ s32 btlDestroyTaskD(void) {
 }
 
 void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *handle) {
-    BattleController *battle = (BattleController *)btlGetRuntime();
+    BtlState *battle = (BtlState *)btlGetRuntime();
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(0xD, 0);
-    battle->flags |= 0x100000;
+    battle->battleFlags |= 0x100000;
     btlTrackedTaskHandles->status.flags &= ~0x100;
     evtFinishMessageWindowAndNotify();
 }
@@ -6243,64 +6209,6 @@ typedef struct SceneScriptState {
 
 
 
-typedef struct BattleSceneWork {
-    u8 pad00[0x218];
-    u32 flags;
-    u32 subFlags;
-    u32 refreshFlags;
-    u8 pad224[8];
-    s32 currentScene;
-    s32 queuedScene;
-    s32 frame;
-    s32 sceneState;
-    u8 pad23C[4];
-    s32 scriptState;          /* 0x240 */
-    s32 scriptArg;            /* 0x244 */
-    ActionStateLink *linkedNodes;
-    BtlUnit *actors;
-    u8 pad250[0x1E];
-    u8 phaseFlag;
-    u8 pad26F;
-    u16 variant;
-    u8 pad272[2];
-    s32 step;
-    u8 pad278[4];
-    u8 unk27C;
-    u8 pad27D[0x17];
-    s32 effectLayer;
-    u8 pad298[8];
-    s32 mode;
-    u8 pad2A4[8];
-    s16 tileX;
-    s16 tileY;
-    s32 loadStep;             /* 0x2B0 */
-    u8 pad2B4[0x10];
-    KwlnTask *taskParent;
-    u8 pad2C8[4];
-    s32 pendingTask;          /* 0x2CC */
-    KwlnTask *sceneObject;
-    KwlnTask *spriteObject;
-    KwlnTask *sceneStatus;
-    u8 pad2DC[0x1C];
-    s32 unk2F8;
-    u8 pad2FC[2];
-    BtlSceneSlot slots[8];
-    u8 pad316[2];
-    ActionStateLink *groupPrimary[20];    /* 0x318 */
-    ActionStateLink *groupSecondary[45];  /* 0x368 */
-    ActionStateLink *groupTertiary[15];   /* 0x41C */
-    ActionStateLink *groupHandles[8];     /* 0x458 */
-    u16 groupHandleCount;
-    u8 pad47A[2];
-    s32 activeGroupCount;
-    BtlSceneFadingRecord fading[8];
-    ActionStateLink *currentTask;
-    u8 pad4C4[0x10];
-    s32 scriptTarget;         /* 0x4D4 */
-    u8 pad4D8[0xC];
-    u32 values[64];
-    s32 (*sceneCallback)();
-} BattleSceneWork;
 
 extern BattleCmdPanel *btlCommandPanelWork;
 
@@ -6330,10 +6238,10 @@ extern u8 *D_00435E5C;
 
 
 void fldInitializeBattleSceneFlow(void) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     btlNextScaledRandom(7);
-    if ((scene->flags & 0x400) != 0) {
-        if (scene->variant == 1) {
+    if ((scene->battleFlags & 0x400) != 0) {
+        if (scene->mode == 1) {
             btlInvalidateSceneFadeCounts(0);
             btlResetBattleHistoryCounters();
         } else {
@@ -6824,9 +6732,9 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8] = "Retreat";
     s32 color;
     struct FrFontGlyph *handle;
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
 
-    if (datBattleSceneRecords[scene->mode].unk00 != 0) {
+    if (datBattleSceneRecords[scene->battleMode].unk00 != 0) {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x504F6100;
     } else {
         color = btlLinkedSelectionTaskBuffer->rowFade[0] | 0x89FEFF00;
@@ -6978,7 +6886,7 @@ extern void btlReleaseBattleScratchBlocks(void);
 
 void fldClearBattleSceneObject(KwlnTask *task) {
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
-    ((BattleSceneWork *)btlGetRuntime())->sceneObject = 0;
+    ((BtlState *)btlGetRuntime())->sceneObject = 0;
     btlReleaseBattleScratchBlocks();
 }
 
@@ -7006,7 +6914,7 @@ s32 fldGetSceneObjectState(void) {
 }
 
 s32 btlHasSpecialActiveSceneActor(void) {
-    BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401) {
             u16 kind = actor->partyRecord.unitId;
@@ -7021,7 +6929,7 @@ s32 btlHasSpecialActiveSceneActor(void) {
 
 s32 func_001CA8D8(void) {
     u32 requiredFlags = 0x201;
-    BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 i;
 
     if (actor != 0) {
@@ -7040,7 +6948,7 @@ s32 func_001CA8D8(void) {
 }
 
 s32 btlHasSelectedActiveSceneActor(void) {
-    BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
             (actor->partyRecord.status & 1) != 0) {
@@ -7052,7 +6960,7 @@ s32 btlHasSelectedActiveSceneActor(void) {
 }
 
 s32 btlHaveActiveSceneActorEntriesCleared(void) {
-    BtlUnit *actor = ((BattleSceneWork *)btlGetRuntime())->actors;
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     while (actor != 0) {
         if ((btlUnitStatusPair(actor) & 0x421) == 0x401 &&
             btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) != 0) {
@@ -7079,7 +6987,7 @@ extern s32 mdlFlagTest();
 extern s32 btlGetTaskState6();
 
 s32 fldSelectSceneMode(ActionStateLink *task) {
-    s32 flag = ((BattleSceneWork *)btlGetRuntime())->phaseFlag == 3;
+    s32 flag = ((BtlState *)btlGetRuntime())->encounterKind == 3;
     if (mdlFlagTest(0x801) != 0) {
         return 1;
     }
@@ -7139,34 +7047,34 @@ extern char D_00436828[];
 /* Open the battle command panel task and, on the first eligible ally turn, start the matching tutorial dialog. */
 void func_001CAB60(ActionStateLink *task) {
     char text[32];
-    BattleSceneWork *scene;
+    BtlState *scene;
     BattleSceneObject *object;
     KwlnTask *handle;
 
     if (kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef) == 0) {
         D_004367C0 = 0;
-        scene = (BattleSceneWork *)btlGetRuntime();
+        scene = (BtlState *)btlGetRuntime();
         object = sdfAllocAndClearQuadwords(0x30);
         fldInitializeSceneObject(object, task);
         handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateBattleSceneCommands, fldClearBattleSceneObject,
                                 (u32)object);
-        func_00101968(scene->taskParent, handle);
+        func_00101968(scene->scriptOwner, handle);
         scene->sceneObject = handle;
         func_001C35F0(task, 0, 0);
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
         func_001BD6E8(object);
-        if ((task->unit->status.flags & 0x200) && !(scene->flags & 0x1000000)) {
+        if ((task->unit->status.flags & 0x200) && !(scene->battleFlags & 0x1000000)) {
             switch (fldSelectSceneMode(task)) {
             case 1:
                 btlBossDebugPrintf("-----------------First Battle!!-------------------\n");
                 mdlFlagClear(0x801);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
@@ -7177,10 +7085,10 @@ void func_001CAB60(ActionStateLink *task) {
                 btlBossDebugPrintf("-----------------Tutorial Majin!!-------------------\n");
                 mdlFlagSet(0x81A);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0828,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7191,10 +7099,10 @@ void func_001CAB60(ActionStateLink *task) {
                 btlBossDebugPrintf("-----------------Tutorial Weak!!-------------------\n");
                 mdlFlagSet(0x81D);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7205,10 +7113,10 @@ void func_001CAB60(ActionStateLink *task) {
                 btlBossDebugPrintf("-----------------Tutorial Hunt!!-------------------\n");
                 mdlFlagSet(0x805);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7222,10 +7130,10 @@ void func_001CAB60(ActionStateLink *task) {
                 btlBossDebugPrintf("-----------------Tutorial Fear!!-------------------\n");
                 mdlFlagSet(0x806);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x100;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7235,18 +7143,18 @@ void func_001CAB60(ActionStateLink *task) {
             case 5:
                 btlBossDebugPrintf("-----------------New Linkage!!-------------------\n");
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x200;
-                scene->flags &= ~0x100000;
+                scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367EC, 0x2B0E, 1, 1, func_001C0240,
                                         btlFinishTrackedBattleTaskAndCloseWindow,
                                         (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->taskParent, handle);
+                func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xC, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
                 func_001C7DB8(0, 8);
                 break;
             default:
-                scene->flags |= 0x100000;
+                scene->battleFlags |= 0x100000;
                 break;
             }
         }
@@ -7439,10 +7347,10 @@ extern void func_001CC020();
 extern void func_001CC438();
 
 s32 fldStepSceneStateMachine(KwlnTask *handle) {
-    BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     s32 *state;
     s32 mode;
-    if (work->flags & 0x04000000) {
+    if (work->battleFlags & 0x04000000) {
         return 0;
     }
     state = (s32 *)kwlnTaskGetUserValue(handle);
@@ -7452,7 +7360,7 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
         break;
     case 2:
         mode = 1;
-        if (work->mode == 0x312) {
+        if (work->battleMode == 0x312) {
             mode = btlGetEffectActive() == 1 ? 5 : 1;
         }
         func_001CC020(work, state, mode);
@@ -7533,7 +7441,7 @@ void fldReleaseSceneSpriteWork(SceneAiWork *work) {
 
 void fldReleaseSceneSprite(KwlnTask *arg) {
     fldReleaseSceneSpriteWork((SceneAiWork *)kwlnTaskGetUserValue(arg));
-    ((BattleSceneWork *)btlGetRuntime())->spriteObject = 0;
+    ((BtlState *)btlGetRuntime())->spriteObject = 0;
 }
 
 u32 fldGetSceneScriptTaskUserData(void) {
@@ -7559,7 +7467,7 @@ u32 fldGetSceneScriptValue(void) {
 }
 
 void fldCreateSceneSpriteTask(s32 sourceTask) {
-    BattleSceneWork *scene;
+    BtlState *scene;
     KwlnTask *task;
     kwlnTaskGetTaskByName(D_004367B8);
     if (btlIsNamedBattleTaskRegistered() != 0) {
@@ -7574,10 +7482,10 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
-    scene = (BattleSceneWork *)btlGetRuntime();
+    scene = (BtlState *)btlGetRuntime();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, fldStepSceneStateMachine,
                           fldReleaseSceneSprite, btlCreateAiWork(sourceTask));
-    func_00101968(scene->taskParent, task);
+    func_00101968(scene->scriptOwner, task);
     scene->spriteObject = task;
 }
 
@@ -8122,7 +8030,7 @@ void btlDrawSceneSlotFadeTiles(void) {
 
 
 void fldInitSceneFadeRecords(void) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     BtlSceneSlot *slot = scene->slots;
     BtlSceneFadingRecord *rec = scene->fading;
     u32 i = 0;
@@ -8143,7 +8051,7 @@ void fldInitSceneFadeRecords(void) {
 }
 
 s32 btlFindSceneSlotById(BtlSceneSlot *request) {
-    BtlSceneSlot *slot = ((BattleSceneWork *)btlGetRuntime())->slots;
+    BtlSceneSlot *slot = ((BtlState *)btlGetRuntime())->slots;
     u8 id = request->id;
     u32 i;
     for (i = 0; i < 8; i++) {
@@ -8156,7 +8064,7 @@ s32 btlFindSceneSlotById(BtlSceneSlot *request) {
 }
 
 u8 *fldFindSceneSlotRecord(s32 index) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     s32 slot = btlFindSceneSlotById((BtlSceneSlot *)index);
     u8 *entry = 0;
     if (slot != -1) {
@@ -8168,7 +8076,7 @@ u8 *fldFindSceneSlotRecord(s32 index) {
 s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     u32 i = 0;
     s32 changed = 0;
-    BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlSceneFadingRecord *record = work->fading;
     BtlSceneSlot *slot = work->slots;
     for (; i < 8; i++, slot++, record++) {
@@ -8184,7 +8092,7 @@ s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     return changed;
 }
 
-s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
+s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
     SceneGlobalState *global;
     BtlSceneFadingRecord *rec = scene->fading;
     BtlSceneSlot *slot;
@@ -8223,8 +8131,8 @@ s32 fldCountSceneFadeKinds(BattleSceneWork *scene, s32 *outFadeCount) {
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CF800);
 
 s32 fldUpdateConditionalSceneCleanup(KwlnTask *task) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
-    if ((scene->flags & 0x200) == 0) {
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    if ((scene->battleFlags & 0x200) == 0) {
         return 0;
     }
     if (((SceneGlobalState *)btlTrackedTaskHandles)->stage == 1 &&
@@ -8236,16 +8144,16 @@ s32 fldUpdateConditionalSceneCleanup(KwlnTask *task) {
 }
 
 void fldResetSceneStatus(KwlnTask *task) {
-    BattleSceneWork *scene;
+    BtlState *scene;
 
-    scene = (BattleSceneWork *)btlGetRuntime();
+    scene = (BtlState *)btlGetRuntime();
     scene->sceneStatus = 0;
 }
 
 void fldBeginSceneTransition(void) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     func_001C7DB8(1, 8);
-    scene->flags |= 0x200;
+    scene->battleFlags |= 0x200;
 }
 
 void fldClearSceneTransition(void) {
@@ -8258,10 +8166,11 @@ void func_001CFB48(void) {
 }
 
 u32 fldGetSceneIndexedValue(s32 index) {
-    BattleSceneWork *scene;
+    BtlState *scene;
 
-    scene = (BattleSceneWork *)btlGetRuntime();
-    return scene->values[index];
+    scene = (BtlState *)btlGetRuntime();
+    /* Retail 001CFB60 indexes the native uncapped word span starting at 0x4E4. */
+    return (&scene->unk4E4)[index];
 }
 
 void func_001CFB90(void) {
@@ -8277,14 +8186,14 @@ extern void btlInitializeStaffActorPanels(void);
 
 
 void fldCreateSceneCleanupTask(void) {
-    BattleSceneWork *scene;
+    BtlState *scene;
     KwlnTask *task;
     if (kwlnTaskGetTaskByName(D_004368B0) == 0) {
         btlGetRuntime();
     }
-    scene = (BattleSceneWork *)btlGetRuntime();
+    scene = (BtlState *)btlGetRuntime();
     task = kwlnTaskCreate(D_004368B0, 0x2B0E, 1, 1, fldUpdateConditionalSceneCleanup, fldResetSceneStatus, 0);
-    func_00101968(scene->taskParent, task);
+    func_00101968(scene->scriptOwner, task);
     scene->sceneStatus = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();
@@ -8302,7 +8211,7 @@ static inline void btlDestroyTrackedTaskIfPresent(s32 slot) {
 }
 
 void fldDestroySceneTasksAndBuffers(void) {
-    BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
 
     if (scene->sceneObject != 0) {
         kwlnTaskDestroyWithHierarchy(scene->sceneObject, 0);

@@ -71,12 +71,7 @@ void btlInitializeActorSlotOrder(s32 selector, s32 count);
 /* Return occupied scene slots, refreshing cached fade-kind counts as needed. */
 s32 btlCountSceneSlots(void);
 /* The output is the last fading-record index, including -1 for an empty list. */
-#ifdef VERSION_DDS1
-struct BattleController;
-s32 fldCountSceneFadeKinds(struct BattleController *scene, s32 *outLastFadeIndex);
-#else
-struct BattleSceneWork;
-s32 fldCountSceneFadeKinds(struct BattleSceneWork *scene, s32 *outLastFadeIndex);
-#endif
+struct BtlState;
+s32 fldCountSceneFadeKinds(struct BtlState *scene, s32 *outLastFadeIndex);
 
 #endif

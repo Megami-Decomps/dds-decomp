@@ -467,9 +467,9 @@ typedef struct BtlState {
     struct KwlnTask *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2C8: also supplies the task passed to scrSetCurrentActor */
     s32 boundTask; /* 0x2CC */
-    u32 sceneObject; /* 0x2D0 */
-    u32 spriteObject;
-    u32 sceneStatus;
+    struct KwlnTask *sceneObject; /* 0x2D0: command-panel task created at 001CAB60. */
+    struct KwlnTask *spriteObject; /* 0x2D4: scene sprite task; destroyed with its hierarchy. */
+    struct KwlnTask *sceneStatus; /* 0x2D8: cleanup task created by fldCreateSceneCleanupTask. */
     BtlItemDrop itemDrops[3]; /* 0x2DC */
     s32 moneyEarned;
     s32 moneyTotal;
