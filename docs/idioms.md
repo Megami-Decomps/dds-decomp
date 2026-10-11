@@ -7447,3 +7447,32 @@ address takes `$3`, matching all 111 instructions. A void view instead puts the
 address in `$2` and changes three instructions. Readonly allocator observation
 confirmed this decision with complete ordinary-output parity; production needs
 no artificial result use, register binding or compiler intervention.
+
+### Initialize the heap-overlay count in its collection phase
+
+DDS2 `func_0010B3D8` and DDS1 `func_0010B1B0` first copy heap metadata
+into 12-byte records while interrupts are disabled, then draw the snapshot.
+The counter belongs to the collection loop: initialize it after obtaining the
+heap base, immediately before the `do` loop, rather than at function entry.
+This is a real lifetime distinction even though late scheduling puts the zero
+assignment in the prologue in both builds.
+
+In the qualified DDS2 probe, the entry-initialized counter had eight weighted
+references and live length 118, while the packet-list pointer had eight
+references and live length 116. Their allocation priorities were 2033 and
+2068, so the list received `$18` before the counter received `$19`. Moving
+initialization to collection shortened the counter's recorded lifetime to
+110 (priority 2181); the list was 115 (2086). The native assignment, counter
+`$18` and list `$19`, followed without changing declarations, widths, flags or
+register constraints. The final output changed only those register choices.
+The grid's later right-edge coordinate naturally reuses the dead counter's
+register; it must not be conflated with the count in C.
+
+The initial grid tick also uses the same `markerY` quantity as subsequent
+computed ticks, initialized from the requested Y position. Keeping that
+coordinate phase explicit restored the native argument copies and branch
+scheduling before the final register-allocation correction.
+
+Both 632-byte functions match in their complete owners. Preserve the games'
+four different horizontal geometry constants when transferring the body.
+Credit Vesper's earlier DDS2 reconstruction and Sable's DDS1 investigation.
