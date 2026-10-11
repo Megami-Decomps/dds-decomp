@@ -7544,6 +7544,18 @@ instruction patterns unchanged but closes the three-word reorg residual
 alone is neutral. Inspect the particular call note and donor; do not infer
 ownership merely from which branch spelling seems more conservative.
 
+DDS2 `func_001B1350` separates a boundary error from a real type error.
+Making `func_001AD090` opaque removes only its two `REG_EH_REGION 0`
+notes (call UIDs 234 and 398); all 170 real pass-28 instruction patterns
+remain identical. The actual split at `0x001B1350` closes the ordinary/likely
+branch differences at `+0x140` and `+0x21C`. The remaining `+0x19C`
+is `SLTI` versus retail `SLTIU`, from the command record's `unk30` switch.
+Its native readers use unsigned range tests or equality, not signed ordering;
+make that existing four-byte owner field `u32`, rather than steering this
+consumer with a cast or an extra temporary. Retiring the redundant unsigned
+selector casts and using the real party-record pointer arguments preserves
+all 31 command-record user gates and closes the 752-byte body.
+
 ### Initialize the heap-overlay count in its collection phase
 
 DDS2 `func_0010B3D8` and DDS1 `func_0010B1B0` first copy heap metadata

@@ -557,7 +557,7 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 ar
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
     if (commandIndex >= 0) {
-        switch ((u32)datCommandRecords[commandIndex].unk30) {
+        switch (datCommandRecords[commandIndex].unk30) {
         case 1:
         case 2:
         case 9:
@@ -1035,7 +1035,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
             work->flags = btlSelectActorAction((s32)target);
             target->status.flags |= 0x4000000;
         }
-        switch ((u32)datCommandRecords[command].unk30) {
+        switch (datCommandRecords[command].unk30) {
         case 12: operandFlags |= 0x10; break;
         case 13: operandFlags |= 0x20; addedStatus = 0x4000; break;
         case 14: operandFlags |= 0x40; break;

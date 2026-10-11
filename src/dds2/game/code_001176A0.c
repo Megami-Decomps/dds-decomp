@@ -775,7 +775,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
         (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
          datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!((u32)datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
+        if (!(datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
             if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
                 return 0;
             }
@@ -887,7 +887,7 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
             }
         }
     }
-    switch ((u32)datCommandRecords[channel].unk30) {
+    switch (datCommandRecords[channel].unk30) {
     case 5:
         datGameState->world.fieldFlags |= 1;
         break;

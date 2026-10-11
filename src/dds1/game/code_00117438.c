@@ -861,7 +861,7 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
         }
     }
     /* This dispatch compares the full row word as unsigned. */
-    switch ((u32)datCommandRecords[channel].unk30) {
+    switch (datCommandRecords[channel].unk30) {
     case 5:
         datGameState->world.fieldFlags |= 1;
         break;
