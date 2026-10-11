@@ -2334,7 +2334,73 @@ u8 btlSelectConditionalEncounterGroup(s32 index) {
     return code == 8 ? 0 : code;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", btlCheckScenePartyLevelThreshold);
+/* Compare truncated averages: enemy average + party average / 4 >= party average.
+ * Requires a nonzero scene, a nonempty enemy list, and party entries carrying
+ * all three flag masks 1/2/4. No eligible entries returns zero.
+ * count and remaining serve both loops; word holds enemy IDs, then entry flags.
+ * partyLevel is accumulated first and divided in place before comparison. */
+s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
+    s32 result = 0;
+    s32 enemyTotal;
+    u16 *levelCursor;
+    s32 count;
+    s32 remaining;
+    u16 *cursor;
+    u32 sceneOffset;
+    DatEnemyRecord *enemyRecordsBase;
+    DatPartyRecord *entry;
+    s32 partyTotal;
+    s32 average;
+    u16 value;
+
+    if (sceneIndex != 0) {
+        enemyTotal = 0;
+        sceneOffset = sceneIndex * sizeof(DatBattleSceneRecord);
+        cursor = ((DatBattleSceneRecord *)(sceneOffset + (u32)datBattleSceneRecords))->unitModes;
+        enemyRecordsBase = datEnemyRecords;
+        count = 0;
+        remaining = 10;
+        do {
+            value = *cursor;
+            cursor++;
+            if (value != 0) {
+                count++;
+                enemyTotal += enemyRecordsBase[value].level;
+            }
+            remaining--;
+        } while (remaining >= 0);
+        result = 0;
+        if (count != 0) {
+            average = enemyTotal / count;
+            partyTotal = 0;
+            count = 0;
+            remaining = 4;
+            levelCursor = &datGameState->party[0].level;
+            entry = datGameState->party;
+            do {
+                value = entry->flags;
+                entry++;
+                if (value & DAT_PARTY_FLAG_OCCUPIED) {
+                    if (value & 4) {
+                        if (value & DAT_PARTY_FLAG_FRONTLINE) {
+                            count++;
+                            partyTotal += *levelCursor;
+                        }
+                    }
+                }
+                remaining--;
+                levelCursor = (u16 *)((u8 *)levelCursor + sizeof(DatPartyRecord));
+            } while (remaining >= 0);
+            result = 0;
+            if (count != 0) {
+                partyTotal = partyTotal / count;
+                result = average + partyTotal / 4 < partyTotal;
+                result = result == 0;
+            }
+        }
+    }
+    return result;
+}
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
 s32 func_0011E848(s32 index) {

@@ -16,6 +16,14 @@
 
 extern void btlInterpolateVectorStep();
 
+struct EffRandState;
+extern struct EffRandState effSharedRandomState;
+extern u32 effMiscRand(struct EffRandState *);
+extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, f32, f32, f32, s8, s8);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
+extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
+
 
 
 extern s32 mdlFlagTest(s32);
@@ -684,7 +692,49 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_00228B08);
+s32 func_00228B08(BtlLinkedCommand *command) {
+    ActionStateLink *scene;
+
+    switch (command->actionCode) {
+    case 0x188:
+        command->motionProgress = 0;
+        goto unhandled;
+    case 0x189:
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 1.25f, 2.0f, 0.0f, 1, 0);
+        command->motionParameter = 25.0f;
+        command->motionProgress = 0;
+        command->flags |= 0x841;
+        command->frontCamera.distance -= 300.0f;
+        command->backCamera.distance += 150.0f;
+        btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+        goto handled;
+    case 0x171:
+        scene = fldGetSceneGroupEntry(0);
+        if (scene != NULL && (scene->pendingFlags & 8) && (scene->unit->status.flags & 0x200)) {
+            command->link = scene;
+            command->status = 9;
+            btlUpdateActionPoseForLinkedTarget(command);
+        } else {
+            btlClearAllUnitDefeatCandidatesTask();
+            btlFlagLinkedGroupDefeatCandidatesTask(command);
+            if (effMiscRand(&effSharedRandomState) & 1) {
+                btlSetEffectCameraKeys((s32)command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
+                                       -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
+            } else {
+                btlSetEffectCameraKeys((s32)command, 661.7f, -200.6f, -349.7f, -0.011f, 0.269f, -0.02f, 0.953f, 254.2f,
+                                       -445.6f, -431.6f, 0.152f, -0.129f, -0.036f, 0.97f, 40.0f, 30.0f);
+            }
+        }
+        command->flags |= 0x800;
+        goto handled;
+    default:
+        goto unhandled;
+    }
+handled:
+    return 1;
+unhandled:
+    return 0;
+}
 
 /* Initialize the linked command's target aim once in state 0x1E. Action 0x171
  * succeeds without setup; unsupported actions return 0, deferred setup returns 1. */
@@ -1250,7 +1300,6 @@ extern s32 func_00225BF8(BtlLinkedCommand *, s32, s32);
 extern s32 func_00227528(BtlUnit *);
 extern void func_002279F0(void);
 extern void func_00227DA8(ActionStateLink *, s32, u64, u64, u64);
-extern s32 func_00228B08(BtlLinkedCommand *, s32, s32);
 
 /* Copy the verified four-byte EE callback representation into its actual slot.
  * Some callback slots remain byte storage or carry older shared prototypes. */

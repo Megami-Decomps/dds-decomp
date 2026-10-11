@@ -176,7 +176,48 @@ u32 dds3DispatchWorldEntryDrawCallback(EffWorldNode *obj) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010FB00", func_0010FE50);
+extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
+extern EffWorldNode *dds3ActiveWorld;
+
+EffWorldNode *func_0010FE50(s32 capacity) {
+    EffWorldNode *world;
+    WorldInfo *info;
+    struct SdfMemBlock *allocation;
+    s32 index;
+
+    if (dds3ActiveWorld != NULL) {
+        return NULL;
+    }
+    if ((u32)capacity - 0x20u >= 0x7FE0u) {
+        return NULL;
+    }
+
+    world = dds3CreateWorldNodeForKind(0);
+    info = world->data;
+    allocation = sdfAllocGeneralBlock(capacity * 8);
+    info->entryAllocation = allocation;
+    info->entries = (WorldValueEntry *)sdfResourceRetainAddress(allocation);
+    info->entryCapacity = capacity;
+
+    for (index = 0; index < capacity; index++) {
+        if (index == 0) {
+            info->entries[index].previousIndex = -1;
+        } else {
+            info->entries[index].previousIndex = index - 1;
+        }
+        if (index == capacity - 1) {
+            info->entries[index].nextIndex = -1;
+        } else {
+            info->entries[index].nextIndex = index + 1;
+        }
+        info->entries[index].value = 0;
+    }
+    info->freeHeadIndex = 0;
+    info->freeTailIndex = capacity - 1;
+    info->freeEntryCount = capacity;
+    dds3ActiveWorld = world;
+    return world;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0010FB00", dds3WorldCounter);
 
