@@ -1137,7 +1137,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     func_001AC0F8(contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (btlAreUnitStatusAndEntryFlagsClear(btlGetIndexListEntry(indexList, entryIndex)) != 0) {
+        if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {
             btlFreeIndexList(indexList);
             return 1;
         }
@@ -1179,10 +1179,10 @@ u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     return result == 0;
 }
 
-s32 func_00213930(s32 actorAddress, u32 unused) {
+s32 func_00213930(BtlUnit *actor, u32 unused) {
     s64 result;
 
-    result = btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)actorAddress);
+    result = btlAreUnitStatusAndEntryFlagsClear(actor);
     return result != 0;
 }
 
