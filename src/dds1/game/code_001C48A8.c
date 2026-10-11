@@ -77,7 +77,10 @@ typedef struct BattleSceneWork {
     s32 scriptArg;             /* 0x220 */
     BtlTask *linkedNodes; /* 0x224 */
     BtlUnit *actors;
-    u8 pad_22C[0x20];
+    u8 pad_22C[0x1C];
+    u16 baseVariant;           /* 0x248 */
+    u8 statusMode;             /* 0x24A */
+    u8 pad24B;
     u16 variant;
     u8 pad_24E[2];
     s32 step;
@@ -106,10 +109,19 @@ typedef struct BattleSceneWork {
     s32 (*selectScriptArg)(void); /* 0x598 */
     u8 pad59C[0x14];
     s32 (*sceneCallback)();
-    u8 pad_5B4[0x40];
+    u8 pad_5B4[0xC];
+    void (*onUnitCreated)(BtlUnit *); /* 0x5C0 */
+    u8 pad5C4[0x30];
     s32 (*selectScriptState)(void); /* 0x5F4 */
     void (*completionHook)(void);
 } BattleSceneWork;
+typedef char BattleSceneWorkBaseVariantOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->baseVariant == 0x248) ? 1 : -1];
+typedef char BattleSceneWorkStatusModeOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->statusMode == 0x24A) ? 1 : -1];
+typedef char BattleSceneWorkOnUnitCreatedOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->onUnitCreated == 0x5C0) ? 1 : -1];
+typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -1];
 
 extern s32 btlCountTasksForOwner(s64);
 extern u64 btlStartTask(void *);
