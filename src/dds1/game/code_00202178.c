@@ -2819,8 +2819,8 @@ u32 func_00208660(void) {
     return 0xffffffff;
 }
 
-s32 func_00208668(s32 unit) {
-    return (((s32)((BtlUnit *)unit)->status.flags & 0x200) < 1);
+s32 func_00208668(BtlUnit *unit, s32 command) {
+    return (unit->status.flags & 0x200) < 1;
 }
 
 extern s32 datRosterDetails;

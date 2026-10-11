@@ -212,7 +212,6 @@ EffWorldNode *func_0010FC28(s32 capacity) {
     return world;
 }
 
-
 INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3WorldCounter);
 
 INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3ActiveWorld);
