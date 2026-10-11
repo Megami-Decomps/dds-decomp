@@ -988,7 +988,41 @@ void mnuCreateTitleStreamThread(void) {
     sdfThreadSleepSelf();
 }
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_0026A248);
+extern u32 D_003D9168[];
+extern u32 D_003DA1A8[];
+extern u8 D_003D8140[];
+extern u8 D_003D9180[];
+
+void func_0026A248(void) {
+    memset(D_003DA1C0, 0, 0x1000);
+
+    mnuTitleStreamStatus.repeatFrame = 0;
+    mnuTitleStreamStatus.control = 2;
+    mnuTitleStreamStatus.compressedData = 0;
+    mnuTitleStreamStatus.allocation = 0;
+    mnuTitleStreamStatus.samples = (s16 *)D_003DA1C0;
+    mnuTitleStreamStatus.decoder = D_003D9168;
+    mnuTitleStreamStatus.loadState = 0;
+
+    mnuTitleSoundBufferState.control = 2;
+    mnuTitleSoundBufferState.compressedData = 0;
+    mnuTitleSoundBufferState.repeatFrame = 0;
+    mnuTitleSoundBufferState.allocation = 0;
+    mnuTitleSoundBufferState.samples = (s16 *)D_003DA1C0;
+    mnuTitleSoundBufferState.decoder = D_003DA1A8;
+    mnuTitleSoundBufferState.loadState = 0;
+
+    mnuInitTitleSoundRemoteRequest(0x400);
+
+    D_003D9168[1] = (u32)D_003D8140;
+    D_003D9168[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    D_003D9168[4] = 0;
+    D_003DA1A8[1] = (u32)D_003D9180;
+    D_003DA1A8[3] = sdfMemoryGetBlockAddress(sdfAllocGeneralBlock(0x68CA));
+    D_003DA1A8[4] = 2;
+
+    mnuCreateTitleStreamThread();
+}
 
 typedef struct AtracInfo {
     u32 unk0;

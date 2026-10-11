@@ -16,7 +16,7 @@ typedef struct DevConsState {
     u16 unkA; /* 0xA */
     s16 columns; /* 0xC */
     s16 rows; /* 0xE */
-    u16 cursorColumn; /* 0x10 */
+    s16 cursorColumn; /* 0x10: signed coordinate; cursor increments wrap through a halfword */
     s16 cursorRow; /* 0x12 */
     u8 controlByte; /* 0x14 */
     u8 pad15; /* 0x15 */
@@ -72,7 +72,51 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
     console->cursorColumn = 0;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_002E3F58);
+void func_002E3F58(DevConsState *console, s32 character, s32 attribute) {
+    s32 count;
+    s32 remainder;
+    s32 tabWidth;
+    s32 offset;
+
+    switch (character) {
+    case 9:
+        offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
+        tabWidth = console->unk17;
+        remainder = console->cursorColumn % tabWidth;
+        count = remainder ? remainder : tabWidth;
+        do {
+            console->cells[offset] = 0;
+            console->cells[offset + 1] = attribute;
+            offset += SDF_DEVCONS_CELL_BYTES;
+            console->cursorColumn = (u16)console->cursorColumn + 1;
+            if (console->cursorColumn == console->columns) {
+                sdfDevConsAdvanceRow(console);
+                break;
+            }
+        } while (--count != 0);
+        break;
+    case 10:
+        sdfDevConsAdvanceRow(console);
+        return;
+    case 13:
+        console->cursorColumn = 0;
+        break;
+    default:
+        if (character == 0x20) {
+            character = 0;
+        } else if ((u32)character - 0x20U >= 0x60U) {
+            character = 0x7F;
+        }
+        offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
+        console->cells[offset] = character;
+        console->cells[offset + 1] = attribute;
+        console->cursorColumn = (u16)console->cursorColumn + 1;
+        if (console->cursorColumn == console->columns) {
+            sdfDevConsAdvanceRow(console);
+        }
+        break;
+    }
+}
 
 /* Forward a character and explicit attribute to the console renderer. */
 void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {

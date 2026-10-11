@@ -112,6 +112,72 @@ localize a nothrow effect but cannot prove a file boundary. A spelling change
 can diagnose hashing but cannot justify a name. A flag-disable probe can
 identify an optimization without justifying a production flag.
 
+### Console indexing: inspect the target recognizer
+
+DDS2 `sdf/sdfDevCons::func_0033CE08` retained four differing words after its
+control flow and value lifetimes matched. The tab path fused row multiplication
+and column addition into `mul_acc_si_r5900`; its later split used a separate
+multiply scratch register. The default path kept the retail plain multiply.
+
+The target's `r5900_madd_profitable_p` explains that asymmetry: it rejects this
+fusion when the addition's `LOG_LINKS` includes an instruction defining the
+addend. The tab path had already used the column in division, losing that
+direct definition link; the default path had not. Preparing the initial cell
+offset before deriving the tab count preserves the link and produces the exact
+372-byte body. These calculations read console state without an intervening
+store or call. Read-only observation preserved all compiler and assembler
+artifacts, and the complete owner and both retail builds passed.
+The same source also matches DDS1 `sdf/sdfDevCons::func_002E3F58`, with its
+owning unit and both retail builds passing.
+
+This example justifies that independent calculation boundary. It does not
+justify changing arbitrary statement order or disabling multiply/add fusion.
+
+### Camera success: recover both result joins
+
+DDS2 `game/code_00227288::func_00228B08` retained six flag-update/return
+instruction differences. Before local allocation, scheduling placed the literal
+return value in `$v0` between the flag load and OR/store. The flag quantity's
+live interval therefore conflicted with `$v0` and took `$v1`. A boolean return
+of the updated flags removed that conflict but left a normalizing instruction
+where retail loads literal 1.
+
+The native graph has two shared exits: reset/default return 0; camera setup
+and linked-target success return 1. Ordinary `handled` and `unhandled` labels
+recover those joins. The flag update then occupies its own block before the
+handled return constant, freeing `$v0` during the update. This reproduces all
+608 bytes; the complete owner and both retail builds pass. Read-only allocation
+observation preserves all compiler/assembler outputs and confirms the removed
+conflict. Sharing only the success return changes the reset branch topology.
+
+Inspect the actual exit graph before introducing a computed return dependency.
+Equal return values alone do not establish identical control flow or lifetimes.
+
+### World-pool initialization: keep the published array owner
+
+DDS2 `game/code_0010FB00::func_0010FE50` initializes the free entry chain.
+The retained source unconditionally wrote adjacent indices and repaired the
+last next link after traversal. Retail instead branches for the first previous
+sentinel and last next sentinel inside the loop. Recovering those two boundaries
+restores the native 264-byte extent, leaving five differing words around the
+retained-address publication and loop entry.
+
+A cached entry-array cursor uses the same quantity for publication and traversal.
+Direct `info->entries[index]` accesses through the canonical `WorldInfo` field
+introduce a separate pointer quantity in PRE GCSE. Later CSE forwards the stored
+address, but the return value and loop pointer keep distinct allocation intervals:
+retail publishes `$v0` directly and captures the loop base in `$a1` after its
+guard. This closes all 66 words. Both complete source forms use the actual
+8-byte `WorldValueEntry`; neither requires a new view or artificial dependency.
+Read-only allocator observation preserves the complete ordinary output;
+the full unit and both retail builds pass.
+
+An explicit positive guard around a post-tested cached-cursor loop keeps the
+five-word residual. Direct owner access in neighboring
+`dds3RemoveCurrentWorldValueEntry` is byte-neutral and leaves seven differing
+words. The rule is to inspect the actual PRE and pointer quantities, rather
+than replace cached cursors indiscriminately.
+
 ## Investigate a mechanism that is not documented yet
 
 1. **Reduce the question, preserving the cause.** Identify the smallest
