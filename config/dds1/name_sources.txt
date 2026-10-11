@@ -6603,6 +6603,7 @@
 0x002DE0D8	sdfVuTransformWorkAtOffset	inferred	Passes work parameters and supplied XY offsets into the transform. [names_reviewed8.tsv]
 0x002DE8C8	sdfVuBlendNodeXY	inferred	For each linked blend node, interpolates the XY coordinates at source offset 0x30 and writes the blended vector to node offset 0x30.
 0x002DE918	sdfVuBlendNodeVectors	inferred	For each linked blend node, interpolates source vectors at offsets 0x30 and 0x20 into the corresponding node vectors using the VU.
+0x002DEA18	sdfVuMultiplyNodeColors	inferred	Multiply packed RGBA colors into contiguous and linked VU node rows; exact DDS2 counterpart
 0x002DFC80	sdfVuEmitTexturedTriangleBatches	inferred	confidence=high; src/dds1/game/code_002DDC98.c:func_002DFC80; Emits batched VIF/GIF triangle packets with ST, RGBAQ and XYZF2 data and initial texture/clamp state. [names_qp9.tsv]
 0x002DFEC8	sdfBuildChunkedVuNodeTransfer	inferred	Writes VIF and GIF transfer packets for geometry nodes in bounded chunks. [names_reviewed10.tsv]
 0x002E0150	sdfVuEmitColoredTriangleBatches	inferred	confidence=high; src/dds1/game/code_002DDC98.c:func_002E0150; Emits batched VIF/GIF triangle packets carrying RGBAQ and XYZF2 without texture-coordinate data. [names_qp9.tsv]
