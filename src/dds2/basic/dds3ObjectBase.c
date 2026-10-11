@@ -10,6 +10,8 @@
 #include "mdl.h"
 #include "evt_unit.h"
 
+extern void effMiscNormalizeVU(void);
+
 
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 
@@ -141,7 +143,7 @@ WorldIndexNode *dds3GetObjectIndexNode(EffWorldNode *object) {
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
 u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
-    return dds3GetObjectOwnedHandle(object)->resourceHandle;
+    return (u32)dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 
 /* A nonzero handle releases model/context state (0) or device/motion state (1),
@@ -163,7 +165,7 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
                 }
             }
         } else {
-            sdfReleaseDevSlot(base->resourceHandle, 1, 1);
+            sdfReleaseDevSlot((s32)base->resourceHandle, 1, 1);
             sdfDestroyMotion(base->motion);
         }
         base->resourceHandle = 0;
@@ -257,7 +259,41 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112058);
+/* Rebuild the model resource, synchronize object vectors and initialize
+ * transition work only when no transition is already associated with it. */
+void func_00112058(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
+    f32 scale[4];
+    ObjBase *base;
+    MdlCtx *model;
+
+    base = dds3GetObjectOwnedHandle(object);
+    if (base->resourceHandle != 0) {
+        mdlDestroyContext((MdlCtx *)base->resourceHandle);
+    }
+    model = mdlCreateContextFromResourceKey(resourceGroup, resourceId);
+    dds3LoadObjectResourceSlotIds(base, model);
+    base->currentSlot = sdfNamedChunkFindId(model->inner, "Bip01 Head");
+    mdlLoadTertiaryVectorVU(model);
+    VU0_STORE_VF(vf10, scale);
+    effObjSetInnerScale(object, (u128 *)scale);
+    VU0_LOAD_VF(vf10, object->inner->rotation);
+    effMiscNormalizeVU();
+    mdlUpdateContextRotationBasisFromQuaternion(model);
+    VU0_LOAD_VF(vf10, object->inner->position);
+    VU0_SET_W_ONE(vf10);
+    mdlStorePrimaryVectorVU(model);
+    base->resourceHandle = model;
+    object->inner->radius = model->unk34;
+    base->resourceState = DDS3_OBJECT_RESOURCE_MODEL_CONTEXT;
+    base->unk44 = 0;
+    {
+        EffectObjectData *data = object->data;
+
+        if (data->transitionWork == NULL) {
+            data->transitionWork = evtCreateUnitTransitionWork(object, model);
+        }
+    }
+}
 
 extern SdfModel *evtCreateModelFromObject(void *object);
 extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
@@ -279,7 +315,7 @@ void func_00112168(void *object) {
     sdfModelUpdateRootTransforms(model, 0);
     sdfModelUpdateRootTransforms(model, 1);
     base->resourceState = 1;
-    base->resourceHandle = (u32)model;
+    base->resourceHandle = model;
     base->motion = motion;
     base->weight = 1.0f;
     base->mode = 0;
