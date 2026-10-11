@@ -1489,7 +1489,295 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", func_001910C8);
 
-INCLUDE_ASM(const s32, "effect/effEvent", func_001914E0);
+/* Fifteen billboard records are packed into each compact VIF batch. */
+typedef struct EffEventBillBatch {
+    u128 positions[15];
+    u32 colors[15];
+    s16 uv[15][8];
+    f32 corners[15][8];
+    s32 count;
+} EffEventBillBatch;
+typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -1];
+
+extern f32 sdfSinPoly(f32 angle);
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
+extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
+struct DmaPacketHeader;
+extern s32 sdfAllocPacketAligned(s32 size);
+extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);
+extern s32 sdfTexGetPrimaryBufferSize(SdfTex *texture);
+extern void sdfConsInitDmaPacketHeader(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
+extern void sdfInitGeometryDmaPacket(u8 *packet, const f32 *matrix);
+extern u32 sdfBuildCompactVertexVifPacket(const u128 *positions, const void *byteAttributes,
+    const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
+extern f32 sdfViewEyeVector[4];
+extern SdfPoolNode D_003252A8;
+
+/* DDS1 event-bill renderer, reconstructed from the native owner and its
+ * current providers. The VIF position stream consumes XYZ only: native never
+ * initializes the temporary position's W before its full-vector add/copy. */
+void func_001914E0(EffEventBillSet *work) {
+    EffEventBillBatch primary, secondary;
+    f32 matrix[4][4];
+    f32 position[4], origin[4], lateral[4];
+    SdfListHead *primaryList, *secondaryList;
+    SdfTex *primaryTexture, *secondaryTexture;
+    EffEventBillParticle *particle;
+    s32 repeat;
+    u32 index, particleCount;
+    s32 duration, fadeIn, fadeOut, colorStart, colorFrames;
+    u32 color;
+    f32 acceleration, swayPhaseStep, swayAmplitudeStep;
+    struct DmaPacketHeader *texturePacket;
+    SdfTexBuf *textureBuffer;
+    s32 textureBytes;
+    u8 *geometryPacket;
+    SdfListHead *stateList;
+    u64 *statePacket;
+    SdfPoolNode *surface;
+    primary.count = 0;
+    secondary.count = 0;
+    primaryList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(primaryList);
+    secondaryList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(secondaryList);
+    primaryTexture = (SdfTex *)billGetChildValue((BillObj *)D_003BB144);
+    texturePacket = (struct DmaPacketHeader *)sdfAllocPacketAligned(0x20);
+    textureBuffer = sdfTexGetPrimaryBuffer(primaryTexture);
+    textureBytes = sdfTexGetPrimaryBufferSize(primaryTexture);
+    sdfConsInitDmaPacketHeader(texturePacket, (u32)textureBuffer, textureBytes);
+    sdfAppendReferencePacket(primaryList, (u32)texturePacket);
+    secondaryTexture = (SdfTex *)billGetChildValue((BillObj *)D_003BB148);
+    texturePacket = (struct DmaPacketHeader *)sdfAllocPacketAligned(0x20);
+    textureBuffer = sdfTexGetPrimaryBuffer(secondaryTexture);
+    textureBytes = sdfTexGetPrimaryBufferSize(secondaryTexture);
+    sdfConsInitDmaPacketHeader(texturePacket, (u32)textureBuffer, textureBytes);
+    sdfAppendReferencePacket(secondaryList, (u32)texturePacket);
+    EE_MMI_UNIT_MATRIX(matrix);
+    geometryPacket = (u8 *)sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket(geometryPacket, matrix[0]);
+    sdfAppendPacket(primaryList, (u32)geometryPacket);
+    geometryPacket = (u8 *)sdfAllocPacketAligned(0x38);
+    sdfInitGeometryDmaPacket(geometryPacket, matrix[0]);
+    sdfAppendPacket(secondaryList, (u32)geometryPacket);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, sdfViewUpVector);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, lateral);
+    particle = work->particles;
+    particleCount = work->head.particleCount;
+    acceleration = work->head.accelerationPercent / 100.0f + 1.0f;
+    repeat = work->head.repeat;
+    duration = work->head.duration;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    colorStart = work->head.colorStartAge;
+    colorFrames = work->head.colorTransitionFrames;
+    color = work->head.color;
+    swayPhaseStep = work->head.swayPhaseStep;
+    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    PCP_COPY_VECTOR(origin, work->head.position);
+    for (index = 0; index < particleCount; index++, particle++) {
+        s32 age = particle->age;
+        if (age == 0) {
+            effEventRandomizeBillboardParticle(work, index);
+        }
+        if (age > 0 && age <= duration) {
+            f32 swaySine, sway, alpha, transition;
+            f32 modulationX, scaleX, scaleY, phaseCosine;
+            f32 halfWidth, halfHeight;
+            u32 primaryColor, secondaryColor;
+            s32 slot;
+            s16 u, v;
+            if (particle->motionDelay >= 0) {
+                f32 lateralSpeed = particle->lateralSpeed;
+                particle->position[0] += lateral[0] * lateralSpeed;
+                particle->position[1] += lateral[1] * lateralSpeed;
+                particle->position[2] += lateral[2] * lateralSpeed;
+                swaySine = sdfSinPoly(particle->swayPhase);
+                sway = particle->swayAmplitude * swaySine;
+                particle->motion[1] += particle->verticalSpeed;
+                position[0] = particle->position[0] + particle->motion[0] * sway;
+                position[1] = particle->position[1] + particle->motion[1];
+                position[2] = particle->position[2] + particle->motion[2] * sway;
+                particle->verticalSpeed *= acceleration;
+                particle->lateralSpeed *= acceleration;
+                particle->swayAmplitude += swayAmplitudeStep;
+                particle->swayPhase += swayPhaseStep;
+            } else {
+                particle->motionDelay++;
+                position[0] = particle->position[0];
+                position[1] = particle->position[1];
+                position[2] = particle->position[2];
+            }
+            if (age < fadeIn) {
+                alpha = (f32)age / (f32)fadeIn;
+            } else if (duration - age <= fadeOut) {
+                alpha = (f32)(duration - age) / (f32)fadeOut;
+            } else {
+                alpha = 1.0f;
+            }
+            if (age < colorStart) {
+                primaryColor = effBlendColor(0, color & 0xFF000000, alpha);
+            } else if (age < colorStart + colorFrames) {
+                if (colorFrames > 0) {
+                    transition = (f32)(age - colorStart) / (f32)colorFrames;
+                    if (1.0f < transition) transition = 1.0f;
+                } else {
+                    transition = 1.0f;
+                }
+                primaryColor = effBlendColor(color & 0xFF000000, color, transition);
+                primaryColor = effBlendColor(primaryColor & 0xFFFFFF, primaryColor, alpha);
+            } else {
+                primaryColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+            }
+            secondaryColor = effBlendColor(color & 0xFFFFFF, color, alpha);
+            scaleY = particle->baseScale;
+            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseX);
+            modulationX = particle->scaleAmplitudeX * phaseCosine;
+            phaseCosine = sdfEvaluateCosineViaSinePhaseShift(particle->scalePhaseY);
+            scaleX = scaleY + modulationX;
+            scaleY = scaleY + particle->scaleAmplitudeY * phaseCosine;
+            VU0_LOAD_VF(vf10, position);
+            VU0_LOAD_VF(vf11, origin);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+            {
+                f32 cosine, sine, cornerX, cornerY;
+                f32 center = 0.0f;
+            slot = primary.count;
+            PCP_COPY_VECTOR(&primary.positions[slot], position);
+            u = (s16)((u16)primaryTexture->width << 4);
+            v = (s16)((u16)primaryTexture->height << 4);
+            primary.colors[slot] = primaryColor;
+            primary.uv[slot][0] = 0;
+            primary.uv[slot][1] = 0;
+            primary.uv[slot][2] = u;
+            primary.uv[slot][3] = 0;
+            primary.uv[slot][4] = u;
+            primary.uv[slot][5] = v;
+            primary.uv[slot][6] = 0;
+            primary.uv[slot][7] = v;
+            halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
+            halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(particle->rotation);
+            sine = sdfSinPoly(particle->rotation);
+            cornerX = center - halfWidth;
+            cornerY = center - halfHeight;
+            primary.corners[slot][0] = cornerX * cosine - cornerY * sine;
+            primary.corners[slot][1] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = center - halfHeight;
+            primary.corners[slot][2] = cornerX * cosine - cornerY * sine;
+            primary.corners[slot][3] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = halfHeight + center;
+            primary.corners[slot][4] = cornerX * cosine - cornerY * sine;
+            primary.corners[slot][5] = cornerX * sine + cornerY * cosine;
+            cornerX = center - halfWidth;
+            cornerY = halfHeight + center;
+            primary.corners[slot][6] = cornerX * cosine - cornerY * sine;
+            primary.corners[slot][7] = cornerX * sine + cornerY * cosine;
+            primary.count++;
+            }
+            {
+                f32 cosine, sine, cornerX, cornerY;
+                f32 center = 0.0f;
+            slot = secondary.count;
+            PCP_COPY_VECTOR(&secondary.positions[slot], position);
+            u = (s16)((u16)secondaryTexture->width << 4);
+            v = (s16)((u16)secondaryTexture->height << 4);
+            secondary.colors[slot] = secondaryColor;
+            secondary.uv[slot][0] = 0;
+            secondary.uv[slot][1] = 0;
+            secondary.uv[slot][2] = u;
+            secondary.uv[slot][3] = 0;
+            secondary.uv[slot][4] = u;
+            secondary.uv[slot][5] = v;
+            secondary.uv[slot][6] = 0;
+            secondary.uv[slot][7] = v;
+            halfWidth = (f32)(u >> 5) * 0.0625f * scaleX;
+            halfHeight = (f32)(v >> 5) * 0.0625f * scaleY;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(particle->rotation);
+            sine = sdfSinPoly(particle->rotation);
+            cornerX = center - halfWidth;
+            cornerY = center - halfHeight;
+            secondary.corners[slot][0] = cornerX * cosine - cornerY * sine;
+            secondary.corners[slot][1] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = center - halfHeight;
+            secondary.corners[slot][2] = cornerX * cosine - cornerY * sine;
+            secondary.corners[slot][3] = cornerX * sine + cornerY * cosine;
+            cornerX = halfWidth + center;
+            cornerY = halfHeight + center;
+            secondary.corners[slot][4] = cornerX * cosine - cornerY * sine;
+            secondary.corners[slot][5] = cornerX * sine + cornerY * cosine;
+            cornerX = center - halfWidth;
+            cornerY = halfHeight + center;
+            secondary.corners[slot][6] = cornerX * cosine - cornerY * sine;
+            secondary.corners[slot][7] = cornerX * sine + cornerY * cosine;
+            secondary.count++;
+            }
+            if (primary.count == 15) {
+                sdfAppendPacket(primaryList, sdfBuildCompactVertexVifPacket(primary.positions,
+                    primary.colors, primary.uv, primary.corners, 15, 0));
+                primary.count = 0;
+            }
+            if (secondary.count == 15) {
+                sdfAppendPacket(secondaryList, sdfBuildCompactVertexVifPacket(secondary.positions,
+                    secondary.colors, secondary.uv, secondary.corners, 15, 0));
+                secondary.count = 0;
+            }
+            particle->scalePhaseX += particle->scalePhaseStepX;
+            particle->scalePhaseY += particle->scalePhaseStepY;
+            particle->rotation += particle->angularSpeed;
+        }
+        if (duration == age && repeat) particle->age = 0;
+        else particle->age++;
+    }
+    if (primary.count > 0) {
+        sdfAppendPacket(primaryList, sdfBuildCompactVertexVifPacket(primary.positions,
+            primary.colors, primary.uv, primary.corners, primary.count, 0));
+    }
+    if (secondary.count > 0) {
+        sdfAppendPacket(secondaryList, sdfBuildCompactVertexVifPacket(secondary.positions,
+            secondary.colors, secondary.uv, secondary.corners, secondary.count, 0));
+    }
+    stateList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(stateList);
+    statePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    statePacket[0] = 3;
+    statePacket[1] = 0x5000000310000000ULL;
+    statePacket[2] = 0x1000000000008002ULL;
+    statePacket[3] = 0xE;
+    if (work->flag) statePacket[4] = 0x51801;
+    else statePacket[4] = 0x31801;
+    statePacket[5] = 0x47;
+    statePacket[6] = 0x44;
+    statePacket[7] = 0x42;
+    sdfAppendPacket(stateList, (u32)statePacket);
+    D_003252A8.append(&D_003252A8, stateList);
+    stateList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(stateList);
+    statePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    statePacket[0] = 3;
+    statePacket[1] = 0x5000000310000000ULL;
+    statePacket[2] = 0x1000000000008002ULL;
+    statePacket[3] = 0xE;
+    if (work->flag) statePacket[4] = 0x51801;
+    else statePacket[4] = 0x31801;
+    statePacket[5] = 0x47;
+    statePacket[6] = 0x42;
+    statePacket[7] = 0x42;
+    sdfAppendPacket(stateList, (u32)statePacket);
+    surface = &kwlnDrawSurfaces[60];
+    surface->append(surface, stateList);
+    (surface - 1)->append(surface - 1, primaryList);
+    surface->append(surface, secondaryList);
+}
 
 /* Copy one full vector quadword through vf10, including its fourth component. */
 void effEventCopyVector(void *dst, void *src) {
