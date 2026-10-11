@@ -251,7 +251,36 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
 
 INCLUDE_ASM(const s32, "effect/parManager", func_00159AB8);
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00159C08);
+/* Allocate contiguous point slabs, slot records and the trailing table header. */
+ParTable *func_00159C08(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
+    u32 pointBytes = pointCapacity * sizeof(u128);
+    u32 slabBytes = pointBytes + sizeof(ParSlot);
+    u32 totalBytes = slabBytes * slotCount;
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(totalBytes + sizeof(ParTable));
+    u8 *base = (u8 *)sdfResourceRetainAddress(allocation);
+    ParTable *table = (ParTable *)(base + totalBytes);
+    u128 *points = (u128 *)base;
+    ParSlot *slotBase = (ParSlot *)(points + pointCapacity * slotCount);
+    ParSlot *slots;
+    u32 index = 0;
+
+    table->pointCapacity = pointCapacity;
+    table->billboardRef = billboardRef;
+    table->allocation = allocation;
+    table->slotCount = slotCount;
+    table->slots = slotBase;
+    if (slotCount != 0) {
+        slots = table->slots;
+        do {
+            slots[index].points = points;
+            slots[index].pointCount = 0;
+            slots[index].color = 0;
+            points += pointCapacity;
+            index++;
+        } while (index < slotCount);
+    }
+    return table;
+}
 
 /* Release the slot table's allocation handle, not a separate node object. */
 void effParReleaseNodeResource(ParTable *table) {
