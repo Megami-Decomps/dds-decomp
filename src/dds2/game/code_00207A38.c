@@ -2630,13 +2630,13 @@ void func_0020D1B0(s32 x, s32 y, s32 style, const char *text) {
 void func_0020D1B8(s32 x, s32 y, s32 width, s32 height) {
 }
 
-void func_0020D1C0(void) {
+void func_0020D1C0(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1C8(void) {
+void func_0020D1C8(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
 }
 
-void func_0020D1D0(void) {
+void func_0020D1D0(s32 x0, s32 y0, s32 x1, s32 y1, u32 color) {
 }
 
 void func_0020D1D8(void) {
