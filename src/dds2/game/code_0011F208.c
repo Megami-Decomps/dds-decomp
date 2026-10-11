@@ -805,7 +805,7 @@ void func_00122A38(void) {
     }
 
     fldClearAllAreaFloorFlags();
-    memset(datGameState->pad11130, 0, sizeof(datGameState->pad11130));
+    memset(datGameState->stageCellBits, 0, sizeof(datGameState->stageCellBits));
 }
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00122B58);
@@ -1186,7 +1186,7 @@ void func_00123B88(s32 room, s32 stage, f32 x, f32 z, f32 unused) {
         bit = neighborX % 8;
         column = neighborX / 8;
         if (column >= 0 && neighborZ >= 0 && column < record->cols && neighborZ < record->rows) {
-            datGameState->pad11130[(neighborZ + rowOffset) * 10 + column] |= 1 << bit;
+            datGameState->stageCellBits[(neighborZ + rowOffset) * 10 + column] |= 1 << bit;
         }
     }
 }
@@ -1211,7 +1211,7 @@ s32 func_00123EE0(s32 floor, f32 x, f32 z) {
     fldFindStageCoordinateIndex(fldAreaState.area, floor);
     rowOffset = fldFindStageCoordinateRowOffset(fldAreaState.area, floor);
     if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
-        if ((datGameState->pad11130[(row + rowOffset) * 10 + byte] >> bit) & 1) {
+        if ((datGameState->stageCellBits[(row + rowOffset) * 10 + byte] >> bit) & 1) {
             return 1;
         }
     }
