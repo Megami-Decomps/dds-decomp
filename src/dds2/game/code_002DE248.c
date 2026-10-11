@@ -356,9 +356,9 @@ extern f32 func_0015A150(void *, void *);
 
 
 
-extern void effCopyVector(u32, void *);
+extern void effCopyVector(void *, void *);
 
-extern void billInvokeCallback(u32);
+extern void billInvokeCallback(BillObj *);
 
 extern f32 D_0042BC10[4];
 
@@ -666,7 +666,8 @@ struct SdfMemBlock;
 
 /* Surface parameters copied into the node: 0x1C bytes at +0x10. */
 typedef struct EffSurfaceParams {
-    u32 word[7];
+    u32 opaque00[6];
+    f32 scale;
 } EffSurfaceParams;
 
 /* Slot count of an effect record, capped at max. */
@@ -1684,8 +1685,8 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         len *= work->scale;
         billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
         billSetRotationAngle(work->billboard, angle);
-        effCopyVector((u32)work->billboard, work);
-        billInvokeCallback((u32)work->billboard);
+        effCopyVector(work->billboard, work);
+        billInvokeCallback(work->billboard);
         work->frame++;
     }
 }

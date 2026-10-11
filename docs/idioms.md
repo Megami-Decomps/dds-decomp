@@ -4950,8 +4950,31 @@ DDS1 `00253018` reads `MenuSceneWork.boundsFlags` at +0x5AC with
 consumer `00251260` deliberately copies it into a `u8` local for
 the 1/2/4 mask tests; that unsigned interpretation remains unchanged.
 No second scene view or cast solely to select a load instruction is needed.
-The selected-position routine still has an unresolved boolean-tail
-lowering difference and remains ASM.
+The selection callbacks preserve recursive integer success and fallback
+`SdfGridCell *` results in their own checks. Converting both to one integer
+result changes boolean-tail lowering.
+
+DDS1 `func_00252F88` also distinguishes the left boundary (`x == 0`) from
+an absent left connection. Both use the pointer-return fallback. Keeping
+those cases separate lets CSE propagate the incoming grid argument into
+each call arm; the fallback calls merge later. A combined `&&` guard made
+the grid temporary global and introduced an extra argument move. Actual
+allocation/conflict observation explains that six-word residual; the separate
+cases reproduce the complete 144-byte body.
+
+## Mantra label words and encoded style rows
+
+DDS1 `mnuDrawMantraCostCounter` and `func_00255368` retain the incoming
+`s32 sceneId` and narrow `(u16)sceneId` at each ID consumer. Replacing those
+uses with a normalized local changes the raw-word and masked-ID value roles.
+The getter `prfGetParamWord7b4` returns its stored byte as a promoted word;
+both callers explicitly narrow it to `u8`. Keep its definition and declarations
+coherent.
+
+`D_0036C490` contains 24-byte encoded label rows: pass the selected row address,
+not its first byte. The dim scale is the float bit pattern `0x3F199999`,
+represented by `0.599999964237213134765625f`; `0.6f` is the adjacent value.
+Both complete renderer bodies and their owning units match retail.
 
 
 ## Item-command scene pointer boundary
