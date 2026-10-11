@@ -6299,7 +6299,33 @@ s32 btlIsSceneActorCountWithinLimit(BtlUnit *unused, u32 limit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C82D8);
+typedef struct BtlSlotTable {
+    s8 values[6];
+} BtlSlotTable;
+
+extern const BtlSlotTable D_00436880[];
+extern const BtlSlotTable D_00436888[];
+extern const BtlSlotTable D_00436890[];
+extern const BtlSlotTable D_00436898[];
+
+u32 func_001C82D8(s32 address, s8 index) {
+    BattleSceneObject *object = (BattleSceneObject *)address;
+    BtlUnit *unit = object->owner->unit;
+    BtlSlotTable normal = D_00436880[0];
+    s32 flags = unit->status.flags;
+    BtlSlotTable alternate = D_00436888[0];
+    BtlSlotTable retreat = D_00436890[0];
+    BtlSlotTable special = D_00436898[0];
+    BtlSlotTable *table = &retreat;
+
+    if (!(flags & 0x400)) {
+        table = &special;
+        if (!(unit->partyRecord.flags & 0x10)) {
+            table = (flags & 0x1000) ? &alternate : &normal;
+        }
+    }
+    return table->values[index];
+}
 
 
 extern SceneKindTable *D_00438F4C;
