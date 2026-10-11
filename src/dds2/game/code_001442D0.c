@@ -418,7 +418,9 @@ typedef struct {
     s32 unk0, unk4, unk8, unkC;
     u8 pad10[0x10];
     s32 *object;
-    u8 pad24[8];
+    s16 kind; /* 0x24 */
+    s16 kindId; /* 0x26 */
+    f32 size; /* 0x28 */
     s32 unk2C, unk30, unk34, room;
     s16 unk3C, unk3E;
     char name[0x10];
@@ -434,7 +436,8 @@ typedef struct {
     u8 pad10[0x10];
     s32 effectVariant;
     s32 effectNode;
-    u8 pad28[8];
+    s32 effectKindIndex; /* 0x28 */
+    u8 pad2C[4];
 } FldObj30; /* 0x30 bytes */
 
 extern FldObj30 fldObjectSlots[32];
@@ -4107,7 +4110,7 @@ void fldUpdateSparkSlots(void) {
 }
 
 extern s32 D_004363B8;
-extern void fldReleaseCameraModel(s32);
+extern void fldReleaseCameraModel(u32);
 
 void func_0014FD28(void) {
     FldSparkSequence *sequence;
