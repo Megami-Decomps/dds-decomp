@@ -357,18 +357,18 @@ s32 btlIsActorCategoryTypeTwo(BtlLinkedCommand *action) {
     return datCommandRecords[category].unk30 == 2;
 }
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
-s32 btlCanUseActorCategoryFlag2(s32 actor) {
+s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     s32 category;
 
     if (btlIsActorCategoryMarked(actor)) {
         return 1;
     }
-    if (!btlCanUseLinkedActor((BtlLinkedCommand *)actor)) {
+    if (!btlCanUseLinkedActor(actor)) {
         return 0;
     }
-    category = ((BtlLinkedCommand *)actor)->actionCode;
+    category = actor->actionCode;
     if (category == 0) {
         return 0;
     }
@@ -384,22 +384,22 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
     return btlGetIndexListCount(actor->targetList) == 1;
 }
 
-s32 btlCanUseActorCategoryFlag4(s32 actor) {
-    s32 category = ((BtlLinkedCommand *)actor)->actionCode;
+s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
+    s32 category = actor->actionCode;
 
     if (category == 0) {
         return 0;
     }
     if ((datCommandRecords[category].options & 1) == 0) {
-        if (!btlCanUseLinkedActor((BtlLinkedCommand *)actor)) {
+        if (!btlCanUseLinkedActor(actor)) {
             return 0;
         }
     }
-    return btlHasFlag(((BtlActionTableEntry *)datActionAnimationRecords)[((BtlLinkedCommand *)actor)->actionCode].flags, 4);
+    return btlHasFlag(((BtlActionTableEntry *)datActionAnimationRecords)[actor->actionCode].flags, 4);
 }
 
-s32 btlIsActorCategoryMarked(s32 actor) {
-    s32 category = ((BtlLinkedCommand *)actor)->actionCode;
+s32 btlIsActorCategoryMarked(BtlLinkedCommand *actor) {
+    s32 category = actor->actionCode;
 
     if (category == 0) {
         return 0;
@@ -668,6 +668,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
 }
 
 extern u32 effMiscRand(void *state);
+extern void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action);
 extern void func_001EE458(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);

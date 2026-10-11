@@ -117,7 +117,7 @@ extern void btlSelectLinkedTargets(s32, s32, s8);
 
 extern s32 btlSelectTargetsExcludingActorUnit(s32);
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
 extern void btlPrepareRandomizedActionCameraPose(s32, s32, s32);
 
@@ -1779,7 +1779,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 /* Choose one of the special action's three camera paths. */
 s32 func_00218798(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
-    if (btlIsActorCategoryMarked((s32)command) || (link->unit->status.flags & 0x200)) {
+    if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200)) {
         return 0;
     }
     switch (command->actionCode) {
@@ -2455,7 +2455,7 @@ s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command) {
 
 s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
     ActionStateLink *link = command->link;
-    if (btlIsActorCategoryMarked((s32)command) || (link->unit->status.flags & 0x200)) {
+    if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200)) {
         return 0;
     }
     switch (command->actionCode) {
@@ -2473,7 +2473,7 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
 s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400) {
     ActionStateLink *link = command->link;
 
-    if (btlIsActorCategoryMarked((s32)command)) {
+    if (btlIsActorCategoryMarked(command)) {
         goto rejected;
     }
     if (link->unit->status.flags & 0x200) {
@@ -3445,7 +3445,7 @@ extern void btlFlagLinkedGroupDefeatCandidatesTask(s32);
 s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     ActionStateLink *link = command->link;
 
-    if (btlIsActorCategoryMarked((s32)command) || (link->unit->status.flags & 0x200)) {
+    if (btlIsActorCategoryMarked(command) || (link->unit->status.flags & 0x200)) {
         return 0;
     }
     if (side != 1 || targetSide == side) {
@@ -5568,7 +5568,7 @@ s32 btlLiftTowardLinkedTarget(BtlLinkedCommand *object) {
     return 0;
 }
 
-extern s32 btlCanUseActorCategoryFlag4(s32);
+extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -5579,7 +5579,7 @@ extern char D_0041ADA8[];
 s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     s32 cameraKind;
 
-    if (btlIsActorCategoryMarked((s32)command)) {
+    if (btlIsActorCategoryMarked(command)) {
         return 0;
     }
     if (command->link->unit->status.flags & 0x200) {
@@ -5602,7 +5602,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
         return 1;
     }
     if (modeA != 1 || modeB == 1) {
-        if (btlCanUseActorCategoryFlag4((s32)command) == 0) {
+        if (btlCanUseActorCategoryFlag4(command) == 0) {
             command->flags |= 0x800;
             btlChooseBrahmaIndividualCamera((u32)command);
             return 1;
@@ -5653,7 +5653,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ADA8);
 
 s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
-    if (btlIsActorCategoryMarked((s32)command) == 0) {
+    if (btlIsActorCategoryMarked(command) == 0) {
         if (command->link->unit->status.flags & 0x200) {
             if (command->stepKind == 14) {
                 func_00217470(command, &command->camera, -1.4f, 0.67f, 25.0f);
@@ -5924,7 +5924,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
     f32 z;
     f32 adjustedZ;
 
-    if (btlIsActorCategoryMarked((s32)command)) {
+    if (btlIsActorCategoryMarked(command)) {
         return 0;
     }
     battle = btlGetRuntime();
@@ -5981,7 +5981,7 @@ s32 func_00224500(s32 object) {
     s32 state;
     s32 battler;
 
-    if (btlIsActorCategoryMarked(object) == 0) {
+    if (btlIsActorCategoryMarked((BtlLinkedCommand *)object) == 0) {
         state = (s32)((BtlLinkedCommand *)object)->link;
         battler = (s32)((ActionStateLink *)state)->unit;
         if ((((BtlUnit *)battler)->status.flags & 0x200) != 0) {
@@ -6413,7 +6413,7 @@ s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     s32 cameraKind;
     u32 shot;
 
-    if (btlIsActorCategoryMarked((s32)command)) {
+    if (btlIsActorCategoryMarked(command)) {
         return 0;
     }
     btlGetRuntime();
@@ -6459,12 +6459,12 @@ s32 func_002259A0(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     return 1;
 }
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
 extern void btlSetRuntimeFlag2000(void);
 
 s32 func_00225B48(BtlLinkedCommand *unit) {
-    if (btlIsActorCategoryMarked((s32)unit) == 0) {
+    if (btlIsActorCategoryMarked(unit) == 0) {
         if (unit->link->unit->status.flags & 0x200) {
             if (unit->stepKind == 14) {
                 func_00217470((BtlLinkedCommand *)unit, (BtlCamState *)unit, -0.8f, 0.225f, 35.0f);

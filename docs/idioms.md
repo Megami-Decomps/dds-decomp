@@ -7746,3 +7746,11 @@ truthful void camera-writer prototypes and primary linked-command owners;
 no nothrow attribute, dummy argument use, per-function flag or copied owner
 is needed. DDS1 `0x001DD890` is the differently sized semantic analogue and
 shares the name, but remains assembly rather than claiming an exact port.
+
+The DDS2 category-flag-two, category-flag-four and category-mark queries take
+`BtlLinkedCommand *`, as their native action-code loads show and DDS1 already
+does. Remove integer-transport casts at their typed callers; the one legacy
+integer-address callback converts at its existing owner boundary. All three
+provider bodies and the exact selector remain unchanged, and the other
+DDS2 caller unit `game/code_00214948` gates **259 match, 0 differ**.
+
