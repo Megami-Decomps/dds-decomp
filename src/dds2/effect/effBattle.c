@@ -53,14 +53,14 @@ u32 effBattleReadInputWord(u32 *value) {
     return *value;
 }
 
-/* Store a callback address; native code invokes it with this work at the source frame. */
-void effBattleSetSourceFrameCallback(BattleEffect *effect, u32 callbackAddress) {
-    effect->sourceFrameCallbackAddress = callbackAddress;
+/* Store the callback; native code invokes it with this work at the source frame. */
+void effBattleSetSourceFrameCallback(BattleEffect *effect, BattleEffectCallback callback) {
+    effect->sourceFrameCallback = callback;
 }
 
-/* Store the callback address used when the current frame reaches triggerFrame. */
-void effBattleSetTriggerFrameCallback(BattleEffect *effect, u32 callbackAddress) {
-    effect->triggerFrameCallbackAddress = callbackAddress;
+/* Store the callback used when the current frame reaches triggerFrame. */
+void effBattleSetTriggerFrameCallback(BattleEffect *effect, BattleEffectCallback callback) {
+    effect->triggerFrameCallback = callback;
 }
 
 /* Read the frame used by the source-frame callback equality test. */

@@ -15,7 +15,7 @@ enum {
 
 
 extern char D_003A0DB8[];
-extern void func_003003F0(char *, u16, void *, s32);
+extern void func_003003F0(const char *, ...);
 extern f32 D_00352870[4];
 extern f32 D_00352860[4];
 
@@ -53,14 +53,14 @@ u32 effBattleReadInputWord(u32 *value) {
     return *value;
 }
 
-/* Store a callback address; native code invokes it with this work at the source frame. */
-void effBattleSetSourceFrameCallback(BattleEffect *work, u32 callbackAddress) {
-    work->sourceFrameCallbackAddress = callbackAddress;
+/* Store the callback; native code invokes it with this work at the source frame. */
+void effBattleSetSourceFrameCallback(BattleEffect *work, BattleEffectCallback callback) {
+    work->sourceFrameCallback = callback;
 }
 
-/* Store the callback address used when the current frame reaches triggerFrame. */
-void effBattleSetTriggerFrameCallback(BattleEffect *work, u32 callbackAddress) {
-    work->triggerFrameCallbackAddress = callbackAddress;
+/* Store the callback used when the current frame reaches triggerFrame. */
+void effBattleSetTriggerFrameCallback(BattleEffect *work, BattleEffectCallback callback) {
+    work->triggerFrameCallback = callback;
 }
 
 /* Read the callback frame from the linked source. */
