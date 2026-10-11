@@ -368,7 +368,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(void *, void *);
+extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
@@ -455,7 +455,7 @@ void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst);
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */ s32 btlFindTaskByHandle(s64 handle);
 
-void btlFlagLinkedGroupDefeatCandidatesTask(s32 arg0);
+void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command);
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
@@ -1187,7 +1187,7 @@ void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, Btl
         VU0_STORE_VF(vf10, &vec[0]);
         btlUnitGetBodyPosVU(unit);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU(&vec[1], &vec[0]) != 0) {
+        if (btlAimHorizontalDirectionVU((f32 *)&vec[1], (f32 *)&vec[0]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
             btlSetUnitRotation(unit, &vec[2]);
         }
@@ -4459,7 +4459,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
             func_001F66D8(0x200, 0, 0);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        btlAimHorizontalDirectionVU((s128 *)aimPosition, (s128 *)position);
+        btlAimHorizontalDirectionVU(aimPosition, position);
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(unit, (s128 *)rotation);
     }
@@ -7646,7 +7646,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - radius;
     btlSetUnitPosition(slot[1], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[1], (s128 *)rotation);
     }
@@ -7655,7 +7655,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[0], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[0], (s128 *)rotation);
     }
@@ -7663,7 +7663,7 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     pos[1] = 0.0f;
     pos[2] = center[2] - sdfSinPoly(angle) * radius;
     btlSetUnitPosition(slot[2], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
+    if (btlAimHorizontalDirectionVU(pos, center) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
         btlSetUnitRotation(slot[2], (s128 *)rotation);
     }
@@ -7826,7 +7826,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(BtlTask *link, BtlUnit *a, BtlUnit 
         VU0_STORE_VF(vf10, &vec[0]);
         func_001F66D8(target->status.flags & 0x600, 0, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, &vec[1]);
-        if (btlAimHorizontalDirectionVU(&vec[0], &vec[1]) != 0) {
+        if (btlAimHorizontalDirectionVU((f32 *)&vec[0], (f32 *)&vec[1]) != 0) {
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec[2]);
             btlSetUnitRotation(front, &vec[2]);
         }
