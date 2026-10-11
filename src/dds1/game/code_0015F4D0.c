@@ -146,7 +146,38 @@ void func_0015F710(BillEntryOwner *owner, u32 value) {
     owner->value1C = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015F718);
+extern f32 D_0034E580[4];
+
+void func_0015F718(void *buffer, const f32 *position) {
+    u8 *work = buffer;
+    s32 count = *(s32 *)(work + 0xC);
+    f32 point[4] __attribute__((aligned(16)));
+    f32 (*positions)[4];
+    u16 flags;
+
+    PCP_COPY_VECTOR(point, position);
+    positions = (f32 (*)[4])(((u32)count << 4) + (u32)*(f32 (**)[4])(work + 0x44));
+    PCP_COPY_VECTOR(positions[0], point);
+    point[1] += 5.0f;
+    PCP_COPY_VECTOR(positions[1], point);
+    point[2] += 5.0f;
+    PCP_COPY_VECTOR(positions[2], point);
+    flags = *(u16 *)work;
+    if (flags & 2) {
+        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)*(f32 (**)[4])(work + 0x4C));
+        PCP_COPY_VECTOR(normals[0], D_0034E580);
+        PCP_COPY_VECTOR(normals[1], D_0034E580);
+        PCP_COPY_VECTOR(normals[2], D_0034E580);
+    }
+    if (flags & 4) {
+        u32 *colors = (u32 *)(((u32)count << 2) + (u32)*(u32 **)(work + 0x50));
+        colors[0] = 0x80000080;
+        colors[1] = 0x80000080;
+        colors[2] = 0x80000080;
+        count = *(s32 *)(work + 0xC);
+    }
+    *(s32 *)(work + 0xC) = count + 3;
+}
 
 void effBillSetEntryValue(BillEntryOwner *owner, s32 index, u32 value) {
     owner->entries[index].value = value;
