@@ -97,7 +97,7 @@ struct ParListNode {
 
 extern s32 sdfAllocPacketAligned(s32);
 struct SdfListHead;
-extern void *func_0015FE20(ParDrawState *);
+extern void *effCreateVertexDrawPacket(ParDrawState *);
 
 
 extern ParDispatch parKindConstructorEntries[];
@@ -1546,14 +1546,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                     parDrawControl.positions += 16;
                     parDrawControl.colors += 16;
                 }
                 if (remaining >= 4) {
                     parDrawControl.width = remaining - 2;
                     parDrawControl.height = remaining;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
@@ -1568,14 +1568,14 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
                 if (remaining >= 6) {
                     parDrawControl.width = (remaining / 3) * 4 - 4;
                     parDrawControl.height = remaining;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
@@ -1590,7 +1590,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                     parDrawControl.positions += 5;
                     parDrawControl.colors += 5;
                 }
@@ -1607,7 +1607,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                     parDrawControl.positions += 6;
                     parDrawControl.colors += 6;
                 }
@@ -1624,7 +1624,7 @@ void parDrawPendingCellSystems(void) {
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
-                    sdfAppendPacket(list, (u32)func_0015FE20(&parDrawControl));
+                    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&parDrawControl));
                     parDrawControl.positions += 12;
                     parDrawControl.colors += 12;
                 }
@@ -1703,13 +1703,13 @@ void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     state.color = cmd->color;
     while (remaining >= 0x30) {
         remaining -= 0x30;
-        sdfAppendPacket(list, (u32)func_0015FE20(&state));
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
     }
     if (remaining > 0) {
         u16 *counts = (u16 *)&parDrawControl;
         counts[0] = remaining / 3;
         counts[1] = remaining;
-        sdfAppendPacket(list, (u32)func_0015FE20(&state));
+        sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&state));
     }
     emitter->append(emitter, list);
 }

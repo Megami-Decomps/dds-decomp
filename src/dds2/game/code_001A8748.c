@@ -1423,11 +1423,13 @@ u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-void func_001AA850(void) {
+/* Forward the legacy record/value arguments to the packed low-15-bit status update. */
+void btlRaisePartyRecordStatusValue(void) {
     sdfRaisePackedChannelValue();
 }
 
-void func_001AA868(void) {
+/* Forward the legacy record/mask arguments to the party-record status clear. */
+void btlClearPartyRecordStatusBits(void) {
     datClearUnitStatusBits();
 }
 
@@ -1548,7 +1550,8 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
 
 extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
 
-void func_001AAC50(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+/* Insert a complete party record before actors with a larger priority. */
+void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     DatPartyRecord saved;
     s32 insertion = 0;
     s32 i;

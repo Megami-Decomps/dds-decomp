@@ -227,7 +227,7 @@ extern void func_001C16B0(s32);
 extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
 extern void evtBeginSolarOverlayFadeOut();
-extern void func_001AA868();
+extern void btlClearPartyRecordStatusBits();
 extern s32 func_0029D000(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
@@ -818,7 +818,7 @@ void btlEnterStandbyDeadState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xfffffdff;
 }
 
-extern void func_001AA850();
+extern void btlRaisePartyRecordStatusValue();
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
@@ -854,7 +854,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
             return;
         }
         if (unit->resourceIndex == 0x1F) {
-            func_001AA850(&unit->partyRecord, 0x1000);
+            btlRaisePartyRecordStatusValue(&unit->partyRecord, 0x1000);
             flags = unit->status.flags;
         }
         masked = flags & ~0x20;
@@ -3126,7 +3126,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         }
     }
     if (actor->status.flags & 0x200) {
-        func_001AA868(&actor->partyRecord.flags, 8);
+        btlClearPartyRecordStatusBits(&actor->partyRecord.flags, 8);
         btlSyncPlayerWork(actor);
     }
     if (!(actor->status.stateFlags & 0x40000)) {
@@ -3166,7 +3166,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     }
     if (fldReleaseIdleSceneActorResources(task->unit) != 0) {
         if (unit->status.flags & 0x200) {
-            func_001AA868(&unit->partyRecord.flags, 8);
+            btlClearPartyRecordStatusBits(&unit->partyRecord.flags, 8);
             btlMoveActorOutOfActiveParty(unit);
         }
         fldUpdateSceneGroupTask(task);
@@ -3238,7 +3238,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     }
     unit->status.flags &= ~0xC0;
     record = &unit->partyRecord;
-    func_001AA868(record, 8);
+    btlClearPartyRecordStatusBits(record, 8);
     if (unit->status.flags & 0x200) {
         btlSyncPlayerWork(unit);
     }
@@ -3502,7 +3502,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
     s32 result;
 
     actor->selectedEntryIndex = -1;
-    func_001AA850(profile, 0x4000);
+    btlRaisePartyRecordStatusValue(profile, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
     if (!(command->pendingFlags & 0x100)) {
         soundTask = btlCreateHookedUnitSoundTask(actor, 11);

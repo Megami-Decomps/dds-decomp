@@ -72,7 +72,7 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 }
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void *func_0015FE20(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];
 extern SdfPoolNode *D_0037EE68[];
@@ -2785,14 +2785,14 @@ setTexture:
         D_003DC9E0.parameters = D_0037E9A0;
         while (remaining >= 25) {
             remaining -= 25;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
             D_003DC9E0.positions += 25;
             D_003DC9E0.colors += 25;
         }
         if (remaining >= 5) {
             D_003DC9E0.parameterCount = (s16)((remaining / 5) * 3);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
         }
         break;
     case 1:
@@ -2801,7 +2801,7 @@ setTexture:
         D_003DC9E0.parameters = D_0037E9F0;
         while (remaining >= 13) {
             remaining -= 13;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
             D_003DC9E0.positions += 13;
             D_003DC9E0.colors += 13;
         }
@@ -2812,14 +2812,14 @@ setTexture:
         D_003DC9E0.parameters = D_0037EA20;
         while (remaining >= 32) {
             remaining -= 32;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
             D_003DC9E0.positions += 32;
             D_003DC9E0.colors += 32;
         }
         if (remaining >= 4) {
             D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
         }
         break;
     case 3:
@@ -2829,7 +2829,7 @@ setTexture:
         D_003DC9E0.parameters = D_0037EA70;
         while (remaining >= 32) {
             remaining -= 32;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
             D_003DC9E0.positions += 32;
             D_003DC9E0.texcoords += 64;
             D_003DC9E0.colors += 32;
@@ -2837,7 +2837,7 @@ setTexture:
         if (remaining >= 4) {
             D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
             D_003DC9E0.vertexCount = (s16)remaining;
-            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(&D_003DC9E0));
         }
         break;
     default:
@@ -3573,14 +3573,14 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCA10[0].parameters = D_0037EB30;
         while (remaining >= 12) {
             remaining -= 8;
-            sdfAppendPacket(list, func_0015FE20(D_003DCA10));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCA10));
             D_003DCA10[0].positions += 8;
             D_003DCA10[0].colors += 8;
         }
         if (remaining >= 8) {
             D_003DCA10[0].parameterCount = 6;
             D_003DCA10[0].vertexCount = remaining;
-            sdfAppendPacket(list, func_0015FE20(D_003DCA10));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCA10));
         }
         if (set->flag == 0) {
             packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
@@ -5140,14 +5140,14 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCAD0[0].parameters = D_0037ECB0;
         while (remaining >= 0xF) {
             remaining -= 0xA;
-            sdfAppendPacket(list, func_0015FE20(D_003DCAD0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCAD0));
             D_003DCAD0[0].positions += 0xA;
             D_003DCAD0[0].colors += 0xA;
         }
         if (remaining >= 0xA) {
             D_003DCAD0[0].parameterCount = 8;
             D_003DCAD0[0].vertexCount = remaining;
-            sdfAppendPacket(list, func_0015FE20(D_003DCAD0));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCAD0));
         }
         if (set->flag == 0) {
             packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
@@ -7173,14 +7173,14 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         D_003DCB60[0].parameters = (u32 *)D_0037EB90;
         while (remaining >= 0xF) {
             remaining -= 0xC;
-            sdfAppendPacket(list, func_0015FE20(D_003DCB60));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCB60));
             D_003DCB60[0].positions += 0xC;
             D_003DCB60[0].colors += 0xC;
         }
         if (remaining >= 6) {
             D_003DCB60[0].parameterCount = 4;
             D_003DCB60[0].vertexCount = remaining;
-            sdfAppendPacket(list, func_0015FE20(D_003DCB60));
+            sdfAppendPacket(list, effCreateVertexDrawPacket(D_003DCB60));
         }
         if (set->flag == 0) {
             packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);

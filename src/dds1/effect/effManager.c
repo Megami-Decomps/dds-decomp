@@ -67,7 +67,7 @@ u32 effManagerUpdateAndDispatch(void) {
     parDrawPendingCellSystems();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
-    billSubmitTexturedQuadColumns();
+    dds3UpdateCrossfade();
     effDispatchActive();
     return 0;
 }

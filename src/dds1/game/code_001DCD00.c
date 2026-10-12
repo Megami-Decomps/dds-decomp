@@ -597,7 +597,8 @@ extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
 
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-void func_001DD7E8(BtlLinkedCommand *actor) {
+/* Let the battle hook intercept the cursor step, then dispatch approach/target/advance kinds. */
+void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
     s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))(btlGetRuntime() + 0x614);
 
     if (callback != 0 && callback(actor) != 0) {

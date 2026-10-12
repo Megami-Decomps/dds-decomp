@@ -173,7 +173,7 @@ extern s32 btlGetRuntime(void);
 
 extern s32 datActionAnimationRecords;
 
-void func_001A1948();
+void btlRaisePartyRecordStatusValue();
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
@@ -213,7 +213,7 @@ void fldAppendTaskToGroup(BtlTask *task);
 
 void fldCreateSceneSpriteTask(s32 arg0);
 
-void func_001A1960(DatPartyRecord *record, s32 mask);
+void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
 
 void btlActionSeqStateSelect(u8 *task) {
     u8 *work = (u8 *)btlGetRuntime();
@@ -388,7 +388,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
     flags = unit->status.flags;
     if ((flags & 0x400) == 0 && (unit->partyRecord.status & 0x4000) == 0) {
         if (unit->species == 0x1F) {
-            func_001A1948(&unit->partyRecord, 0x1000);
+            btlRaisePartyRecordStatusValue(&unit->partyRecord, 0x1000);
             flags = unit->status.flags;
         }
         masked = flags & ~0x20;
@@ -2439,7 +2439,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
     }
     if (fldReleaseIdleSceneActorResources((BtlUnit *)*(s32 *)(task + 0x18)) != 0) {
         if ((u32)unit->status.flags & 0x200) {
-            func_001A1960(&unit->partyRecord, 8);
+            btlClearPartyRecordStatusBits(&unit->partyRecord, 8);
             btlRemovePartyActorAndShiftEntries(unit);
         }
         fldUpdateSceneGroupTask(task);
@@ -2512,7 +2512,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     }
     unit->status.flags &= ~0xC0;
     record = &unit->partyRecord;
-    func_001A1960(record, 8);
+    btlClearPartyRecordStatusBits(record, 8);
     if (unit->status.flags & 0x200) {
         btlSyncPlayerWork(unit);
     }
@@ -2763,7 +2763,7 @@ void btlStartActorDefeatTransition(s32 command) {
     s32 result;
 
     actor->selectedEntryIndex = -1;
-    func_001A1948(&actor->partyRecord, 0x4000);
+    btlRaisePartyRecordStatusValue(&actor->partyRecord, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (!(commandTask->flags & 0x100)) {
         soundTask = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)actor, 11);
