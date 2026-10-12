@@ -174,7 +174,55 @@ void dds3DestroyWorldIndexNode(WorldIndexNode *indexNode) {
     sdfReleaseChipBlock(indexNode);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3WorldBasic", dds3RemoveCurrentWorldValueEntry);
+/* Preserve native-width tail copies; see docs/idioms.md,
+ * "Trace-justified world free-list tail publication". */
+void dds3RemoveCurrentWorldValueEntry(WorldValueIndices *iterator) {
+    WorldInfo *info;
+    WorldValueEntry *entries;
+    s16 previous;
+    s16 next;
+
+    if (iterator == NULL) {
+        return;
+    }
+    if (iterator->entryCount == 0) {
+        return;
+    }
+    if (iterator->cursorIndex < 0) {
+        return;
+    }
+    if (dds3ActiveWorld == NULL) {
+        return;
+    }
+    info = (WorldInfo *)dds3ActiveWorld->data;
+    entries = info->entries;
+    previous = entries[iterator->cursorIndex].previousIndex;
+    entries[iterator->cursorIndex].value = 0;
+    next = entries[iterator->cursorIndex].nextIndex;
+    if (previous < 0) {
+        iterator->headIndex = next;
+    } else {
+        entries[previous].nextIndex = next;
+    }
+    if (next < 0) {
+        iterator->tailIndex = previous;
+    } else {
+        entries[next].previousIndex = previous;
+    }
+    entries[iterator->cursorIndex].previousIndex = -1;
+    entries[iterator->cursorIndex].nextIndex = -1;
+    if (info->freeTailIndex < 0) {
+        info->freeHeadIndex = iterator->cursorIndex;
+        info->freeTailIndex = iterator->cursorIndex;
+    } else {
+        entries[info->freeTailIndex].nextIndex = iterator->cursorIndex;
+        entries[iterator->cursorIndex].previousIndex = info->freeTailIndex;
+        info->freeTailIndex = iterator->cursorIndex;
+    }
+    info->freeEntryCount++;
+    iterator->cursorIndex = next;
+    iterator->entryCount--;
+}
 
 /* Return this index record's values to the active world's free-entry chain. */
 void dds3ReleaseWorldValueEntries(WorldValueIndices *object) {
