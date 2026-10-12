@@ -29,19 +29,9 @@ typedef struct PacReloc {
     u8 payload[1]; /* 0x10 */
 } PacReloc;
 
-typedef struct PacAlloc {
-    s32 entryCount; /* 0x0 */
-    s32 entryIndex; /* 0x4 */
-    u8 pad8[8]; /* 0x8 */
-    SdfPacStreamPacketHeader entry; /* 0x10: current serialized entry header */
-    PacBuf buffer; /* 0x20: resource-buffer work record */
-} PacAlloc;
-
-
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
-void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
 void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
@@ -53,7 +43,6 @@ void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet)
 void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
-void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 func_002EEAE0(void *decoder, void *input, s32 available);
@@ -436,7 +425,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
-    PacAlloc *allocation = state->slot.list;
+    PacListAllocation *allocation = state->slot.list;
     sdfAppendResourceListItem((s32)state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
