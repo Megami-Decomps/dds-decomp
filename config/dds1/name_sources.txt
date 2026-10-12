@@ -8199,14 +8199,6 @@
 0x0026CD88	mnuUpdateMovieMenuPoseFromInput	inferred	Applies controller-driven translation and quaternion rotation to the supplied pose. [LiteH menu naming batch 10]
 0x0026D108	mnuResetMovieMenuStateAndStartTrack	inferred	Clears menu sequence fields and starts track 0x310000. [LiteH menu naming batch 10]
 0x0026D480	mnuDrawMovieMenuListItem	inferred	Draws a row's base sprite and selection highlight; DDS2 twin 0x002A5A78. [LiteH menu naming batch 10]
-[config/dds2/name_sources.txt#672A]
-0x002A3C78	mnuGetMovieMenuSelectionIndex	inferred	Returns the current selection-list cursor index; DDS1 twin 0x0026BED0. [LiteH menu naming batch 10]
-0x002A3D70	mnuLoadMovieMenuResourceSlots	inferred	Loads both indexed movie-menu resource slots; DDS1 twin 0x0026BFC8. [LiteH menu naming batch 10]
-0x002A3E38	mnuEnsureMovieMenuSpriteHandle	inferred	Loads or requests the movie-menu sprite handle depending on mode; DDS1 twin 0x0026C098. [LiteH menu naming batch 10]
-0x002A44C0	mnuDrawMovieMenuSpritePickList	inferred	Draws and advances the sprite entries in the movie-menu pick list, removing entries after their fade sequence. [LiteH menu naming batch 10]
-0x002A5040	mnuDrawMovieMenuSlideBar	inferred	Draws the movie-menu slide bar using the active fade amount or primary/secondary slide position. [LiteH menu naming batch 10]
-0x002A55B8	mnuDrawMovieChoiceTransition	inferred	Draws the title-menu choice sprites and their selection highlight with frame-driven fades. [LiteH menu naming batch 10]
-0x002A5A78	mnuDrawMovieMenuListItem	inferred	Draws a row's base sprite and selection highlight; DDS1 twin 0x0026D480. [LiteH menu naming batch 10]
 0x0015A9A0	effParUpdateAndDrawInstance	inferred	confidence=high; descriptor update slot 0x0034DE4C advances queued kind updates and particle scale/spin, draws live billboard records and submits kind drawing; DDS2 twin 0x00162590. Namer1 batch 28.
 0x0015AD48	effParGetInstanceRestartFlag	inferred	confidence=high; descriptor query slot 0x0034DE58 returns parGetRestartFlag's full restartFlag word; preserve u16 return and framed jal; DDS2 twin 0x00162938. Namer1 batch 28.
 0x0015ADB0	effParGetInstanceMode	inferred	confidence=high; descriptor query slot 0x0034DE6C selects mode150/mode151 through parObjGetMode according to dispatchIndex; preserve u8 result; DDS2 twin 0x001629A0. Namer1 batch 28.
