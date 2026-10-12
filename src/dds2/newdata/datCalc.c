@@ -500,7 +500,7 @@ extern u32 effMiscRandMod(void *stream, u32 modulus);
 
 extern u8 btlIsRuntimeAllocated(void);
 
-extern f32 func_001AD978(void);
+extern f32 btlGetEncounterAdjustmentScale(void);
 
 extern u32 func_001ADA10(void);
 
@@ -2055,7 +2055,7 @@ s32 evtPushAvailableFloatValue(void) {
     f32 value = 0.0f;
 
     if (battleAvailable != 0) {
-        value = func_001AD978();
+        value = btlGetEncounterAdjustmentScale();
     }
     scrSetFloatReturnValue(value);
     return 1;

@@ -8621,3 +8621,90 @@ Both original whole units gate at 23 matches, zero differences with
 envelope, but is **not** flag-sensitive: it provides no second independent
 site for changing that envelope's compiler flags.
 
+## Native device-path workers and single-target battle helpers
+
+The device units expose two distinct worker selections. The default worker
+chooses the disc/host/PFS path builder in `sdfDevAllocateNormalizedPath`; the
+fallback worker is read by the native file-path classifier only when the
+input lacks a colon. `sdfDevSetDefaultDeviceWorker` sets both, while
+`sdfDevSetFallbackDeviceWorker` changes the latter independently.
+`sdfDevAllocateWorkerPath` builds cdrom0/host0/pfs0 paths or copies worker-three
+input; unsupported workers return NULL. The normalized-path allocation stays
+0x80 bytes. Existing fixed-size buffers, length assumptions and copy forms
+remain untouched.
+
+DDS2's existing default-worker setter has an s8 input and a short-arity
+fallback call. Its native tail jump leaves a0 carrying the worker byte.
+Naming retains that call spelling and the DDS1 s32/DDS2 s8 difference;
+it does not introduce a new staging form or change either interface.
+
+`sdfDevPrintText` selects the bound IOP print RPC or local `%s` printing.
+`sdfDevReadDiscFileBytes` retains partial-sector bytes while consuming the
+current disc file, and `sdfDevInitializeHddPfsDebugMode` preserves the native
+module-loading, power-off setup and mount sequence, including early returns
+and the unchecked mount result.
+
+The battle encounter getter is not an arbitrary float operand: selected
+encounter pack/group/entry indices supply a signed adjustment, clamped to
+[-3, 3], which indexes `datBattleParameters.adjustmentScale`.
+`btlPrepareSingleTargetCameraBlend` requires one target, delegates for a party
+source actor, or selects the paired pose kind from the target's body x before
+setting motion parameter 30 and mask 0x41. The position buffer stays in its
+original declaration order and is still populated through VU0 vf10.
+
+## Trace-justified world free-list tail publication
+
+`dds3RemoveCurrentWorldValueEntry` (DDS1 `00110018`, DDS2 `00110240`,
+264 bytes each) starts from PurA-2's four-word append-arm checkpoint.
+Keep the tail publication in each append arm, before common free-count
+accounting, and copy `iterator->cursorIndex` directly to
+`info->freeTailIndex`. Both primary owner fields remain signed 16-bit.
+
+The deciding mechanism is CSE/quantity formation followed by local allocation:
+direct field copies remain HI quantities. In the exact trace, returned cursor
+q4/reg159 has lifetime 22..24 and selects `$3`; old tail q3/reg158 has lifetime
+14..20 and selects `$4`. An intermediate `s16 returnedIndex` instead produces
+a signed SI carrier, changing its load from LHU to LH and interfering with
+the old-tail allocation. That checkpoint leaves four words different at
+`+C8`, `+D4`, `+D8`, and `+DC`. Removing the unnecessary carrier fixes all four
+without changing the signed owner or adding a cast.
+
+The compiler-side property is native-width owner-to-owner tail copying, not
+an unsigned owner or a register prescription. Canonical cc1probe confirms
+hooked/unhooked assembly and RTL parity. Both default-flag whole units gate
+13 match, 0 differ, with every earlier matched body unchanged.
+
+
+## Trace-justified party experience table progression
+
+`ptyCalcLevelUps` (DDS1 `002658B8`, DDS2 `0029D1C8`, 172 bytes each)
+indexes the experience-cost table by unit and `level + steps`. The table's
+canonical owner is `s32[][100]`: retail uses a 100-element row stride, and
+the DDS2 owner already had that shape. DDS1's declaration and its sole
+existing consumer, `ptyComputeTotalExp`, are migrated together; the latter
+remains exact. No alternate flat view is retained.
+
+The deciding pass is loop general-induction-variable strength reduction.
+Property P is that the actual cost address remains an indexed expression
+of the advancing `steps`, allowing the loop pass to derive its four-byte
+address induction. In the exact canonical trace, loop RTL recognizes the
+memory address at uid93 as a GIV with multiplier 4 and benefit 6, reduces
+it to reg117, and creates its initialization outside the loop. Its
+affine row expression contains the 144-byte and 256-byte terms that
+subsequent simplification turns into retail's `(36 + 64) * unitId`
+calculation. The C does not spell out this arithmetic decomposition.
+
+A manually advanced `nextCost` pointer instead leaves four words
+different from `+40`; factoring out a row pointer leaves nine words.
+Merely widening the nonnegative row identifier to `u32` retains the
+four-word residual. Flat indexed progression in DDS1 leaves five words
+until the truthful row owner and its existing consumer are closed.
+The exact form uses ordinary indexing, with the same `steps` value
+serving the threshold test, level cap, and returned count.
+
+Canonical cc1probe confirms hooked/unhooked assembly and all-RTL parity
+for both the pointer baseline and indexed candidate. Default-flag whole
+units gate DDS1 25 match, 0 differ and DDS2 24 match, 0 differ, preserving
+every earlier matched body. These units are absent from devbuild moves,
+replacements, and additions, so no dev layout update is required.
+
