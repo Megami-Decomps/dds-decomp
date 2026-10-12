@@ -1,3 +1,4 @@
+#include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
 #include "btl_motion_transform.h"
@@ -7773,11 +7774,48 @@ EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, 
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0029C530", effInitializeCopiedPayloadSlots);
+typedef struct EffCopiedSpawnList {
+    u32 count;
+    FldSpawnBatch *groups;
+} EffCopiedSpawnList;
+extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
+
+/* Capture constructor arguments before consuming the entry; see
+ * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */
+void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
+    EffCopiedSpawnList *list = (EffCopiedSpawnList *)(payload->body + 0x14);
+    u32 groupCount = list->count;
+    FldSpawnBatch *group = list->groups;
+    u32 count = 0;
+    u32 i;
+
+    for (i = 0; i < groupCount; i++, group++) {
+        FldFileResource *entry = group->entries;
+        u32 entryCount = group->count;
+        u32 j;
+
+        if (group->kind == 9) {
+            for (j = 0; j < entryCount; j++, count++) {
+                void *data = entry->data;
+                u32 id = entry->id;
+                const char *name = entry->name;
+
+                entry++;
+                payload->effects[count] = evtSpawnActionObj10(id, data, name);
+                payload->targets[count] = dds3CreatePathCurveWork(payload->effects[count]);
+            }
+        }
+    }
+    for (i = count; i < ARRAY_COUNT(payload->effects); i++) {
+        payload->effects[i] = NULL;
+        payload->targets[i] = NULL;
+    }
+    payload->slotCount = count;
+    payload->selectedTargetIndex = effMiscRandMod(0, count);
+}
 
 struct FldTransferChunk;
 extern void fldRelocatePackedTransferChunk(u32, struct FldTransferChunk *);
-extern void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload);
 
 
 
