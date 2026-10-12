@@ -408,6 +408,7 @@
 0x0010F880	dds3BuildVuTransformFromComponents	inferred	Builds a VU transform from quaternion, scale and translation vectors. [names_reviewed10.tsv]
 0x0010F8D8	dds3LoadOrBuildObjectMatrix	inferred	Loads a cached object matrix or builds it and sets its valid flag. [names_reviewed8.tsv]
 0x0010F948	dds3TestObjectSphereOverlap	inferred	src/dds1/game/code_0010F8D8.c func_0010F948: Computes position-vector distance and compares with sum of stored object radii. [names_reviewed24.tsv]
+0x0010F9A8	dds3IsPointWithinObjectRadius	inferred	src/dds1/game/code_0010F8D8.c and src/dds1/game/code_001130E0.c; compares point-to-object distance with the second object radius at +0xC4 for proximity transition selection; paired 0010FBD0.
 0x0010FA00	dds3InvokeWorldCallbackFirst	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FC28, input-family pairing. [names_qp10.tsv]
 0x0010FA40	dds3InvokeWorldCallbackSecond	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FC68, input-family pairing. [names_qp10.tsv]
 0x0010FA98	dds3SetWorldNodeValue	inferred	Stores the kind-selected u32 value at EffWorldNode +0x08; current callers pass object-name words and indexed name lookup consumes that field.
