@@ -588,12 +588,12 @@ void sndReleaseAllVoices(SoundMixer *mixer) {
     sdfReleaseResourceAllocation(mixer->resource);
 }
 
-s32 func_00168448(SoundMixer *mixer, u16 kind) {
+s32 sndGetMixerBankCallbackFrame(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.callbackFrame;
 }
 
-s32 func_00168478(SoundMixer *mixer, u16 kind) {
+s32 sndGetMixerBankTriggerFrame(SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.triggerFrame;
 }

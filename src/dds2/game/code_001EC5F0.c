@@ -5206,7 +5206,7 @@ s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
 }
 
 s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return func_00168448(effect->resourceHandle, option);
+    return sndGetMixerBankCallbackFrame(effect->resourceHandle, option);
 }
 
 s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {

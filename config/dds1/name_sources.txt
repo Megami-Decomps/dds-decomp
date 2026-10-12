@@ -1450,6 +1450,8 @@
 0x00160210	dds3StartCrossfade	inferred	confidence=high; matched-C; src/dds1/game/code_0015F4D0.c:265:func_00160210; Initializes both crossfade buffers, duration, counters and enabled flag; prints dds3CrossfadeStart.; source=revalidated-unapplied-names_R_Names31.tsv:8 [names_qp12_apply.tsv]
 0x001606C0	sndMixerClone	inferred	Copies source mixer state into a new mixer and initializes it. [names_qp9.tsv]
 0x00160800	sndReleaseAllVoices	inferred	quiet3 twin unification
+0x00160858	sndGetMixerBankCallbackFrame	inferred	src/dds1/game/code_0015F4D0.c and code_001DEDB8.c; returns callbackFrame from bank selected by kind >= 2; paired 00168448.
+0x00160888	sndGetMixerBankTriggerFrame	inferred	src/dds1/game/code_0015F4D0.c; returns triggerFrame from bank selected by kind >= 2; paired 00168478.
 0x001608B8	sndReadSelectedMixerBankValue	inferred	Selects one of two mixer banks and reads one of its bank values based on kind. [names_reviewed21.tsv]
 0x00160910	sndUnlinkVoice	inferred	quiet3 twin unification
 0x00160B00	effReleaseBattleVoiceOwner	inferred	confidence=high; src/dds1/effect/effBattle.c:func_00160B00; Releases nonzero voice slots, unlinks the owner, decrements the active count, and frees owner memory. [names_qp9.tsv]
