@@ -1103,7 +1103,7 @@ void frFontSetContextCursorSpacing(u32 spacing) {
     frFontContextCursorSpacing = spacing;
 }
 
-/* Count the y-bands in a glyph chain, using the same band walk as func_0019DC68. */
+/* Count the y-bands in a glyph chain, using the same band walk as frFontGetGlyphPositionAtIndex. */
 s32 func_0019DB30(FrFontGlyph *glyph) {
     s32 bandCount = 0;
     FrFontGlyph *currentNode;
@@ -1177,7 +1177,7 @@ typedef struct FrFontPosition {
 /* Write each visited position and stop at requestedIndex. Missing indices leave
  * the last visited position; empty input leaves output unchanged. DDS2 advances
  * to the first node outside its y-band, unlike DDS1's single-node advance. */
-void func_0019DC68(FrFontPosition *position, s32 requestedIndex, FrFontGlyph *glyph) {
+void frFontGetGlyphPositionAtIndex(FrFontPosition *position, s32 requestedIndex, FrFontGlyph *glyph) {
     s32 positionIndex = 0;
     FrFontGlyph *currentNode;
     FrFontGlyph *scanNode;
