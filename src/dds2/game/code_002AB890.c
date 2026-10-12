@@ -14,7 +14,7 @@
 
 
 
-extern void func_002AAE80(s32);
+extern void mnuDrawCampScreenDefault(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
@@ -542,14 +542,14 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
     return 0;
 }
 
-extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 D_003E7050[];
 
 s32 func_002ACE58(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
-    func_002AAE80(callback);
+    mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
-    func_002AAC98(0,
+    mnuDrawCampGridAndLabelDefault(0,
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
@@ -689,7 +689,7 @@ s32 func_002AD118(KwlnTask *callback) {
 }
 
 extern s32 D_00435E70;
-extern void func_002AAC70(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 
 /* Refresh a staff window's description from the selected item's label. */
 void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex) {
@@ -699,8 +699,8 @@ void mnuRefreshStaffWindowDescription(MenuStaffContext *context, s32 windowIndex
     s32 selectedLabel = node->sortKeySecondary;
 
     if (node->sortKeyPrimary != 0) {
-        func_002AAC70(0, selectedLabel, D_00435E70, (s32)context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(0, selectedLabel, D_00435E70, (s32)context, 1, 1, 0x53);
     } else {
-        func_002AAC98(0, emptyLabel, 0, (s32)context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(0, emptyLabel, 0, (s32)context, 1, 0x53);
     }
 }

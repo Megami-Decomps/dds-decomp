@@ -19,14 +19,14 @@ extern void func_0024DD78(void);
 extern s32 evtGetMessageWindowControlState(void);
 
 
-extern void func_00272778(s32);
+extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
-extern void func_00272668(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00273A30(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
-extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
 extern void mnuSetStateValue(u32 *out, u32 value);
@@ -103,14 +103,14 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(task);
+    mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(5);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);
@@ -174,9 +174,9 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
 
 s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
-    func_00272778(task);
+    mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(7);
-    func_00272668(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffImageContext *)context)->activeWindow, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);
@@ -227,14 +227,14 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(task);
+    mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(9);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->secondaryObject, 0x53);
     if (menu->secondaryObject->list->count != 0) {
         func_00273A30(context, 1);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->secondaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);
@@ -305,14 +305,14 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
-    func_00272778(task);
+    mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(6);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);
@@ -560,14 +560,14 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         s32 selectedLabel = node->sortKeySecondary;
 
         if (node->sortKeyPrimary != 0) {
-            func_00272518(1, selectedLabel, D_003BAA9C, context, 1, 1, 0x53);
+            mnuDrawCampGridAndLabel(1, selectedLabel, D_003BAA9C, context, 1, 1, 0x53);
         } else {
-            func_00272668(1, 0, 0, context, 1, 0x53);
+            mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
         }
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, list->fadeScale, 1,
                       ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(1, (struct EffectSlotSet *)(u32)(((StaffImageContext *)context)->group));
     return menuRunPanel((void *)context, 1, (void *)task);

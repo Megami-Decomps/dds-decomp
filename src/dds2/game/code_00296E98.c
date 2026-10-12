@@ -37,7 +37,7 @@ extern void func_00296298(s32, s32, s32, MenuTerminalContext *, s32);
 extern void func_002967A0(s32, s32, s32, MenuTerminalContext *, s32);
 
 
-extern void func_00297200(struct MenuList *, u32);
+extern void mnuSetValueListTransition(struct MenuList *, u32);
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
@@ -81,7 +81,7 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 amount);
-extern void func_00299988(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
+extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 typedef s16 BrsIconRecord[4];
 
@@ -152,7 +152,7 @@ void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
     }
 }
 
-void func_002971E0(struct MenuList *list, u32 value) {
+void mnuSetSelectionListTransition(struct MenuList *list, u32 value) {
     MenuTerminalWindowState *window;
 
     window = list->context;
@@ -162,7 +162,7 @@ void func_002971E0(struct MenuList *list, u32 value) {
     }
 }
 
-void func_00297200(struct MenuList *list, u32 value) {
+void mnuSetValueListTransition(struct MenuList *list, u32 value) {
     MenuTerminalWindowState *window;
 
     window = list->context;
@@ -172,7 +172,7 @@ void func_00297200(struct MenuList *list, u32 value) {
     }
 }
 
-void func_00297220(struct MenuList *list, u32 value) {
+void mnuSetQuantityListTransition(struct MenuList *list, u32 value) {
     MenuTerminalWindowState *window;
 
     window = list->context;
@@ -187,7 +187,7 @@ void mnuSetCommandPhase(MenuTerminalContext *owner, u32 value) {
     owner->commandFrames = 0;
 }
 
-s32 func_00297250(MenuTerminalContext *owner) {
+s32 mnuTickCommandPhase(MenuTerminalContext *owner) {
     switch (owner->phase) {
     case 0:
     case 14:
@@ -671,7 +671,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
         if ((currentPartyUnit->flags & 1) != 0 &&
             (currentPartyUnit->status & 0x4000) != 0) {
             unit = currentPartyUnit;
-            func_00299988(partyWork, partyIndex, unit->level,
+            brsSetSkillProgressAnimations(partyWork, partyIndex, unit->level,
                           unit->totalExp,
                           ptyGetCurrentProfileRecord(currentPartyUnit)->value, 0, 0);
         }
@@ -686,7 +686,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
             profilePointGain = values->amount;
             experienceGain = values->secondaryValue;
 
-            func_00299988(partyWork, values->partySlot, unit->level,
+            brsSetSkillProgressAnimations(partyWork, values->partySlot, unit->level,
                           unit->totalExp, ptyGetCurrentProfileRecord(unit)->value,
                           experienceGain, profilePointGain);
             unit->totalExp += experienceGain;
@@ -961,7 +961,7 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-s32 func_002998D8(void) {
+s32 brsIsPrimaryPanelUpdateReady(void) {
     KwlnTask *task;
     BrsSkillPackageWork *work;
 
@@ -979,7 +979,7 @@ s32 func_002998D8(void) {
 }
 
 /* Seed one slot's level and profile progress animations. */
-void func_00299988(BrsSkillPackageWork *work, s32 slot, s32 level, u32 totalExp, s32 profileValue, s32 expGain,
+void brsSetSkillProgressAnimations(BrsSkillPackageWork *work, s32 slot, s32 level, u32 totalExp, s32 profileValue, s32 expGain,
                    s32 profileGain) {
     work->levelAnimation[slot].remaining = totalExp;
     work->levelAnimation[slot].level = level;

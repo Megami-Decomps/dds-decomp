@@ -100,7 +100,7 @@ extern char D_003E75C4[];
 extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
 
-extern void func_002AAE80();
+extern void mnuDrawCampScreenDefault();
 
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
@@ -178,7 +178,7 @@ extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord 
 
 extern char D_003E7530[];
 
-extern void func_002AAC70();
+extern void mnuDrawCampGridAndLabel();
 
 extern s32 D_00435E6C;
 
@@ -187,7 +187,7 @@ extern void mnuDrawCampIconBackdropByKind();
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 
-extern void func_002AAC98();
+extern void mnuDrawCampGridAndLabelDefault();
 
 extern char D_003E69B0[];
 

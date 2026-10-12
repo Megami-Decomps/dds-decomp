@@ -2405,7 +2405,7 @@ extern void mnuDrawCampCommandTransition(s32);
 
 extern s32 D_003CE148[];
 extern u8 D_003CE4EC[];
-extern void func_00297220(struct MenuList *, u32);
+extern void mnuSetQuantityListTransition(struct MenuList *, u32);
 extern s32 mnuCampAdvanceCounter(s32, MenuTerminalContext *);
 
 
@@ -2447,7 +2447,7 @@ extern void func_0026C900(void);
 
 extern u8 D_003CE4B4[];
 
-extern void func_00297200(struct MenuList *, u32);
+extern void mnuSetValueListTransition(struct MenuList *, u32);
 
 extern void mnuDrawFadingValueListRow();
 
@@ -2461,7 +2461,7 @@ extern u8 D_003CE690[];
 
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
-extern void func_002971E0(struct MenuList *, u32);
+extern void mnuSetSelectionListTransition(struct MenuList *, u32);
 extern void func_002B9808(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -2516,7 +2516,7 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
     return 1;
 }
 
-extern s32 func_00297250(MenuTerminalContext *);
+extern s32 mnuTickCommandPhase(MenuTerminalContext *);
 extern u8 D_003CE55C[];
 
 s32 func_00261F48(KwlnTask *task) {
@@ -2539,7 +2539,7 @@ s32 func_00261F48(KwlnTask *task) {
         return dispatchResult;
     }
 
-    phase = func_00297250(state);
+    phase = mnuTickCommandPhase(state);
     switch (phase) {
     case -1:
         return 0;
@@ -2580,18 +2580,18 @@ s32 func_00261F48(KwlnTask *task) {
                             (void *)(D_003CE4B4 + node->camp.value * sizeof(MenuPopupEntry)));
                     } else {
                         mnuSetCommandPhase(state, 1);
-                        func_002971E0(list, 4);
+                        mnuSetSelectionListTransition(list, 4);
                     }
                 } else {
                     mnuSetCommandPhase(state, 1);
-                    func_002971E0(list, 4);
+                    mnuSetSelectionListTransition(list, 4);
                 }
             } else {
                 state->dispatchMode = 2;
             }
         } else if ((inputFlags & 2) != 0) {
             mnuSetCommandPhase(state, 2);
-            func_002971E0(list, 4);
+            mnuSetSelectionListTransition(list, 4);
         } else if ((inputFlags & 0x300000) == 0) {
             func_002B9808(state->ownedWindows[0]);
         } else if ((inputFlags & 0x10) != 0) {
@@ -2643,7 +2643,7 @@ s32 evtSelectStateAction(KwlnTask *task) {
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 9);
         linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
-        func_00297200(linkedList, 0xa);
+        mnuSetValueListTransition(linkedList, 0xa);
     }
     ((MenuTerminalContext *)stateAddress)->stateStep = 0;
     return 1;
@@ -2714,7 +2714,7 @@ s32 func_00262330(KwlnTask *task) {
             }
         } else if ((inputFlags & 2) != 0) {
             mnuSetCommandPhase(state, 5);
-            func_002971E0(list, 4);
+            mnuSetSelectionListTransition(list, 4);
         } else if ((inputFlags & 0x300000) == 0) {
             func_002B9808(state->window);
         } else if ((inputFlags & 0x10) != 0) {
@@ -2770,7 +2770,7 @@ s32 evtSelectStateActionB(KwlnTask *task) {
         mnuSetCommandPhase((MenuTerminalContext *)context, 9);
         linkedList = ((MenuTerminalContext *)context)->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
-        func_00297200(linkedList, 0xa);
+        mnuSetValueListTransition(linkedList, 0xa);
     }
     ((MenuTerminalContext *)context)->stateStep = 0;
     return 1;
@@ -2829,7 +2829,7 @@ s32 func_00262740(KwlnTask *task) {
                     }
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase(state, 5);
-                    func_002971E0(linkedList, 4);
+                    mnuSetSelectionListTransition(linkedList, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_002B9808(state->window);
                 } else if (inputFlags & 0x10) {
@@ -2887,7 +2887,7 @@ s32 mnuResetCommandStepAndSelectPhase(KwlnTask *task) {
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 9);
         linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
-        func_00297200(linkedList, 0xa);
+        mnuSetValueListTransition(linkedList, 0xa);
     }
     ((MenuTerminalContext *)stateAddress)->stateStep = 0;
     return 1;
@@ -2954,7 +2954,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
             }
         } else if (input & 2) {
             mnuSetCommandPhase(state, 5);
-            func_002971E0(list, 4);
+            mnuSetSelectionListTransition(list, 4);
         } else if (!(input & 0x300000)) {
             func_002B9808(state->window);
         } else if (input & 0x10) {
@@ -3007,7 +3007,7 @@ s32 evtEnterProgressCommandPhase(KwlnTask *task) {
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 9);
         linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
         linkedList->drawCallback = mnuDrawFadingValueListRow;
-        func_00297200(linkedList, 0xa);
+        mnuSetValueListTransition(linkedList, 0xa);
     }
     ((MenuTerminalContext *)stateAddress)->stateStep = 0;
     return 1;
@@ -3056,7 +3056,7 @@ s32 func_00262F78(KwlnTask *task) {
                     mnuSetCommandPhase(state, 7);
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase(state, 5);
-                    func_002971E0(linkedList, 4);
+                    mnuSetSelectionListTransition(linkedList, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_002B9808(state->window);
                 } else if (inputFlags & 0x10) {
@@ -3289,7 +3289,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
                 mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 12);
             } else if (input & 2) {
                 mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 10);
-                func_00297220(
+                mnuSetQuantityListTransition(
                     ((MenuTerminalContext *)stateAddress)->window->list, 10);
             }
             if (input & 0x300030) {
@@ -3412,7 +3412,7 @@ s32 evtPollStageSelectionAndAdvance(KwlnTask *task) {
 void evtMarkSceneFollowupReadyAndQueueAction(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 8);
-    func_00297220(((MenuTerminalContext *)stateAddress)->window->list, 10);
+    mnuSetQuantityListTransition(((MenuTerminalContext *)stateAddress)->window->list, 10);
     ((MenuTerminalContext *)stateAddress)->sceneReady = 1;
 }
 

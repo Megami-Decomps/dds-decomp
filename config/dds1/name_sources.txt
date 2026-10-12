@@ -4590,7 +4590,7 @@
 0x0025FEB8	mnuDrawIconFixedEntryWithBadge	inferred	confidence=high; src/dds1/game/code_0025DF68.c:func_0025FEB8; Draws the fixed icon sprite plus a formatted value glyph placed at fixed offsets, with chain flag 4 and the given draw option. [names_qp9.tsv]
 0x00260530	mnuStorePendingMenuCommandValue	inferred	When a menu command exists, stores its payload and puts its mode into queued state. [names_reviewed17.tsv]
 0x002605B0	mnuSetCommandPhase	inferred	Stores a phase code in menu command work and resets its elapsed frame counter.
-0x002605C0	mnuStaffTickState	inferred	mnu 4-state counter returning next state
+0x002605C0	mnuTickCommandPhase	inferred	Ticks delayed shop command phases and returns their phase after the ten-frame threshold. twin=0x00297250 (DDS2). LiteH menu naming batch.
 0x002609D8	mnuTickExtendedCommandPhase	inferred	src/dds1/game/code_00260208.c func_002609D8: Ticks timed command phases with ten-frame thresholds and returns immediate phases unchanged. [names_reviewed24.tsv]
 0x00261688	mnuTickCommandWaitPhase	inferred	confidence=high; matched-C; src/dds1/game/code_00260208.c:144:func_00261688; Handles wait phases nine through twelve; advances the frame counter for delayed phases and reports their mode only at the required threshold. Supersedes the earlier phase-nine-only proposal.; source=names_pending_main.tsv:126 [names_qp11.tsv]
 0x00261F58	brsTaskStart	inferred	battle-result staff task entry: calls mnuStaffCreateTasks, clears the update-allowed latch D_003BC52A and sets the blocked latch D_003BC52B
@@ -7957,3 +7957,13 @@
 0x0013C7F8	fldResolveEventSetByNameKindAreaZero	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7321; Resolves an event name for the current floor when the selected set has packed kind-area zero. twin=0x0013F3E0 (DDS2). LiteG batch 4.
 0x0013C9E0	fldResolveEventSetByNameEitherKindArea	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7351; Resolves an event name for the current floor across either packed kind-area value below two. twin=0x0013F5C8 (DDS2). LiteG batch 4.
 0x0013DDF0	fldSelectCameraByActorName	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:7669; Finds a named actor entry on the current floor and selects its linked camera when the entry mode permits it. twin=0x00140A58 (DDS2). LiteG batch 4.
+0x0025E420	mnuDrawPulsingMenuIcon	inferred	Draws the table-selected shop icon with a sine-scaled pulse and advances the pulse frame. twin=0x00294C68 (DDS2). LiteH menu naming batch.
+0x00260550	mnuSetSelectionListTransition	inferred	Sets the list command countdown and transition mode used by selection handlers. twin=0x002971E0 (DDS2). LiteH menu naming batch.
+0x00260570	mnuSetValueListTransition	inferred	Sets the list command countdown and mode while the shop value-row draw callback is active. twin=0x00297200 (DDS2). LiteH menu naming batch.
+0x00260590	mnuSetQuantityListTransition	inferred	Sets the list command countdown and transition mode in quantity selection and sold-out-list handling. twin=0x00297220 (DDS2). LiteH menu naming batch.
+0x002629A8	brsIsPrimaryPanelUpdateReady	inferred	Checks the primary result-panel task, fade progress, UI gate and opacity-ready state before allowing updates. twin=0x002998D8 (DDS2). LiteH menu naming batch.
+0x00262A30	brsSetSkillProgressAnimations	inferred	Seeds level and profile progress-animation records for a party slot. twin=0x00299988 (DDS2). LiteH menu naming batch.
+0x00271FC8	mnuDrawAndStepStaffGradientFade	inferred	Uses the staff task's fade subrecord to draw and advance the gradient fade. twin=0x002AA278 (DDS2). LiteH menu naming batch.
+0x00272518	mnuDrawCampGridAndLabel	inferred	Draws the camp grid pieces and, when supplied, a bank-text label. twin=0x002AAC70 (DDS2). LiteH menu naming batch.
+0x00272668	mnuDrawCampGridAndLabelDefault	inferred	Forwards to camp grid-and-label drawing with text option zero. twin=0x002AAC98 (DDS2). LiteH menu naming batch.
+0x00272778	mnuDrawCampScreenDefault	inferred	Calls the staff camp screen renderer with kind zero. twin=0x002AAE80 (DDS2). LiteH menu naming batch.

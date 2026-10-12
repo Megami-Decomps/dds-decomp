@@ -1103,7 +1103,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 func_002998D8();
+extern s32 brsIsPrimaryPanelUpdateReady();
 
 extern s32 fldLoadAreaResource();
 
@@ -1123,7 +1123,7 @@ extern s32 brsTaskPollDone();
 u32 fldStepAreaLoad(BtlState *work) {
     ActionStateLink *node;
     s32 step;
-    if (func_002998D8() == 1) {
+    if (brsIsPrimaryPanelUpdateReady() == 1) {
         work->commandRestrictFlags |= 0x20;
         if (work->tasks != 0) {
             for (node = work->tasks; node != 0; node = node->next) {

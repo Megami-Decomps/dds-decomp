@@ -12,12 +12,12 @@
 extern void mnuCampMenuHandleInput(s32);
 extern void ptySkillMenuHandleSelection(s32);
 extern void ptySkillMenuHandleSlotReorder(s32);
-extern void func_00272778(s32);
+extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
-extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
-extern void func_00272668(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
@@ -149,9 +149,9 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     }
     label = menu->selected->list->cursor->sortKeyPrimary;
     if (label != 0xFFFF && label != 0) {
-        func_00272518(1, label, D_003BAA98, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(1, label, D_003BAA98, context, 1, 1, 0x53);
     } else {
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(work->actor));
     return menuRunPanel((void *)context, 1, (void *)callback);
@@ -238,9 +238,9 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
 s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
-    func_00272778(callback);
+    mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(3);
-    func_00272518(1, menu->selected->list->cursor->sortKeyPrimary, D_003BAA98, context, 1, 1, 0x53);
+    mnuDrawCampGridAndLabel(1, menu->selected->list->cursor->sortKeyPrimary, D_003BAA98, context, 1, 1, 0x53);
     menu->selected->list->stateFlags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->selected, 0x53);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((SkillMenuContext *)context)->actor));

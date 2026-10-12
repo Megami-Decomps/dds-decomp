@@ -149,7 +149,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     func_002E9730();
 }
 
-u32 func_00271FC8(KwlnTask *task) {
+u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
@@ -204,7 +204,7 @@ void mnuCreateCampTasks(void) {
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
     drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawStaffCampImageScreen, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, menuAddress);
-    func_00101A80(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_00271FC8, 0, menuAddress));
+    func_00101A80(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
     func_00101A80(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
@@ -304,7 +304,7 @@ extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
-void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
+void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 context,
                    s32 drawOption, s32 textOption, s32 layer) {
     StaffMenuWork *menu = (StaffMenuWork *)context;
     s32 glyph;
@@ -323,8 +323,8 @@ void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
     }
 }
 
-void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
-    func_00272518(kind, labelIndex, textTable, context, drawOption, 0, layer);
+void mnuDrawCampGridAndLabelDefault(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 drawOption, s32 layer) {
+    mnuDrawCampGridAndLabel(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
 void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
@@ -343,7 +343,7 @@ void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     }
 }
 
-void func_00272778(u32 task) {
+void mnuDrawCampScreenDefault(u32 task) {
     mnuDrawStaffCampScreen(0, task);
 }
 

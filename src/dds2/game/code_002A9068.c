@@ -834,7 +834,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     func_003425D8();
 }
 
-u32 func_002AA278(KwlnTask *task) {
+u32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     s32 work;
 
     work = kwlnTaskGetUserValue(task);
@@ -891,7 +891,7 @@ void mnuCreateCampTasks(void) {
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
     drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, func_002AB0E0, 0, menuAddress);
     kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
-    func_00101968(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, func_002AA278, 0, menuAddress));
+    func_00101968(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
     func_00101968(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
     mnuCampTaskState = MNU_CAMP_STATE_ACTIVE;
@@ -1081,12 +1081,12 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
 
 extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 
-void func_002AAC70(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
+void mnuDrawCampGridAndLabel(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 textOption, u32 layer) {
     func_002AA9D8(kind, labelIndex, textTable, context, drawOption, textOption, 0, 0, layer);
 }
 
-void func_002AAC98(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 layer) {
-    func_002AAC70(kind, labelIndex, textTable, context, drawOption, 0, layer);
+void mnuDrawCampGridAndLabelDefault(u32 kind, u32 labelIndex, u32 textTable, u32 context, u32 drawOption, u32 layer) {
+    mnuDrawCampGridAndLabel(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
 
@@ -1130,7 +1130,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     }
 }
 
-void func_002AAE80(u32 task) {
+void mnuDrawCampScreenDefault(u32 task) {
     mnuDrawCampIconBackdropByKind(0, task);
 }
 

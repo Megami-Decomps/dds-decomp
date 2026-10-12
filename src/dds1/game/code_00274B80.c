@@ -723,7 +723,7 @@ s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
 
-    func_00272778(callback);
+    mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(0x13);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryWindow, 0x53);
     mnuDrawPartySelectionPreview(context);
@@ -866,7 +866,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
 extern u8 D_0037C3A8[];
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
-extern void func_00272668();
+extern void mnuDrawCampGridAndLabelDefault();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -888,7 +888,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     if (menu->selectedList != 0) {
         s32 *slot = &((MenuWindowContainer *)work->panel)->list->cursor->index;
 
-        func_00272668(1, *slot, D_0037C3A8, context, 1, 0x53, slot);
+        mnuDrawCampGridAndLabelDefault(1, *slot, D_0037C3A8, context, 1, 0x53, slot);
     }
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
@@ -1736,14 +1736,14 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
     s32 context = kwlnTaskGetUserValue(param);
     s32 *slot;
 
-    func_00272778(param);
+    mnuDrawCampScreenDefault(param);
     slot = &((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index;
     if (*slot == 0) {
         mnuCreateStaffImageSprite(1);
     } else {
         mnuCreateStaffImageSprite(0xA);
     }
-    func_00272668(1, ((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index, D_0037C3A8, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(1, ((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index, D_0037C3A8, context, 1, 0x53);
     /* Both arms are identical in retail; kept as written. */
     if (((MenuWindowContainer *)((CampMenuContext *)context)->panel)->list->cursor->index == 0) {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);

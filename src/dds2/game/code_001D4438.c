@@ -231,7 +231,7 @@ extern void func_001AA868();
 extern s32 func_0029D000(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
-extern s32 func_002998D8();
+extern s32 brsIsPrimaryPanelUpdateReady();
 extern s32 fldLoadAreaResource();
 extern void btlReleaseEventAssets();
 extern void btlReleaseBossData();
