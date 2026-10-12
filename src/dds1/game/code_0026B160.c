@@ -21,7 +21,7 @@ extern void mnuDestroyMovieMenuSelectionList(void);
 extern void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *);
 extern void mnuMovieShutdownA(void);
 
-void func_0026B160(void) {
+void mnuReleaseMovieMenuState(void) {
     mnuStopMovieDrawTask();
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
@@ -35,7 +35,7 @@ void func_0026B160(void) {
 
 extern void func_0026CB10(void *, void *);
 
-s32 func_0026B1C0(void) {
+s32 mnuUpdateMovieMenuEffects(void) {
     func_0026CB10(D_003DC1C0, D_003DC1D0);
     return mnuApplyInnerEffectVectorsAndTickObject();
 }
@@ -43,7 +43,7 @@ s32 func_0026B1C0(void) {
 extern void sndEnsureMidiBankResident(s32 trackId);
 extern void mnuDrawMovieMenuBackgroundQuad(s32 alpha);
 extern void func_0026AF78(void);
-extern void func_0026C098(s32 mode);
+extern void mnuEnsureMovieMenuSpriteHandle(s32 mode);
 extern u8 mnuHasSpriteHandle(void);
 extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
@@ -59,11 +59,11 @@ extern s32 mnuCheckMovieDecoderStatus(void);
 extern void sdfSoundSetChannelCount(u32 channelCount);
 extern void func_0026DD10(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
-extern void func_0026C4A8(void);
+extern void mnuResetMovieMenuOpeningAnimation(void);
 extern void mnuSwapStateWords(void);
-extern s32 func_0026C4B8(void);
-extern void func_0026D108(void);
-extern void func_0026C7E0(void);
+extern s32 mnuAdvanceMovieMenuOpeningAnimation(void);
+extern void mnuResetMovieMenuStateAndStartTrack(void);
+extern void mnuAdvanceMovieMenuIdleAnimation(void);
 extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuDrawMovieMenuBackdrop(void);
 extern void mnuSelectMenuListCursorByAdvance(s32 amount);
@@ -73,7 +73,7 @@ extern void func_0026CAB0(void);
 extern s32 func_0026D660(void);
 extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
-extern u32 func_0026BED0(void);
+extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern void dds3AdminSubmitModeRequest(s32 requestedMode, void *requestData,
                                        u32 dataBytes, s32 markHistory);
 extern void mnuRestartRuntimeAfterViewer(s32 unused);
@@ -81,7 +81,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void func_0026C1F8(s32 alpha);
 extern void kwlnFadeClear(void);
 
-s32 func_0026B1F0(KwlnTask *task) {
+s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
     s32 alpha;
     s32 menuAction;
     s32 selectedItem;
@@ -108,7 +108,7 @@ s32 func_0026B1F0(KwlnTask *task) {
         break;
     case 3:
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        func_0026C098(0);
+        mnuEnsureMovieMenuSpriteHandle(0);
         mnuMovieMenuState->state = 4;
         mnuMovieMenuState->cursor = 0;
         break;
@@ -325,7 +325,7 @@ s32 func_0026B1F0(KwlnTask *task) {
     case 22:
         mnuDrawMovieMenuBackgroundQuad(0x80);
         mnuDrawMovieMenuSpriteLayers(0x3E);
-        func_0026C098(0);
+        mnuEnsureMovieMenuSpriteHandle(0);
         mnuMovieMenuState->state = 0x17;
         break;
     case 23:
@@ -334,21 +334,21 @@ s32 func_0026B1F0(KwlnTask *task) {
         if (mnuHasSpriteHandle() != 0) {
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state = mnuMovieMenuState->state + 1;
-            func_0026C4A8();
+            mnuResetMovieMenuOpeningAnimation();
             mnuSwapStateWords();
         }
         break;
     case 24:
-        func_0026B1C0();
-        if (func_0026C4B8() != 0) {
+        mnuUpdateMovieMenuEffects();
+        if (mnuAdvanceMovieMenuOpeningAnimation() != 0) {
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state = mnuMovieMenuState->state + 1;
-            func_0026D108();
+            mnuResetMovieMenuStateAndStartTrack();
         }
         break;
     case 25:
-        func_0026B1C0();
-        func_0026C7E0();
+        mnuUpdateMovieMenuEffects();
+        mnuAdvanceMovieMenuIdleAnimation();
         menuAction = mnuPollMovieMenuInputAndTimeout();
         if (menuAction != -1) {
             if (menuAction != 1) {
@@ -369,9 +369,9 @@ s32 func_0026B1F0(KwlnTask *task) {
         }
         break;
     case 27:
-        func_0026B1C0();
+        mnuUpdateMovieMenuEffects();
         if (mnuMovieMenuState->cursor < 0x78) {
-            func_0026C7E0();
+            mnuAdvanceMovieMenuIdleAnimation();
             mnuDrawMovieMenuBackdrop();
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
         } else {
@@ -383,7 +383,7 @@ s32 func_0026B1F0(KwlnTask *task) {
         }
         break;
     case 29:
-        func_0026B1C0();
+        mnuUpdateMovieMenuEffects();
         func_0026CAB0();
         if (kwlnFadeIsActive() == 0) {
             mnuMovieMenuState->state = 0x1E;
@@ -392,7 +392,7 @@ s32 func_0026B1F0(KwlnTask *task) {
         }
         break;
     case 30:
-        func_0026B1C0();
+        mnuUpdateMovieMenuEffects();
         func_0026CAB0();
         menuAction = func_0026D660();
         switch (menuAction) {
@@ -416,13 +416,13 @@ s32 func_0026B1F0(KwlnTask *task) {
         }
         break;
     case 31:
-        func_0026B1C0();
+        mnuUpdateMovieMenuEffects();
         if (mnuMovieMenuState->cursor < 0xF) {
             mnuMovieMenuState->cursor = mnuMovieMenuState->cursor + 1;
             func_0026CAB0();
         } else {
             mnuDrawMovieMenuBackgroundQuad(0x80);
-            selectedItem = func_0026BED0();
+            selectedItem = mnuGetMovieMenuSelectionIndex();
             switch (selectedItem) {
             case 1:
                 func_002E96D8(0x310000);
@@ -449,7 +449,7 @@ s32 func_0026B1F0(KwlnTask *task) {
         }
         break;
     case 32:
-        func_0026B1C0();
+        mnuUpdateMovieMenuEffects();
         func_0026CAB0();
         mnuClearGlobalMenuStateFields();
         mnuMovieMenuState->state = 0x19;
@@ -508,7 +508,7 @@ u32 func_0026BCE8(void) {
 }
 
 s32 mnuDestroyTitleMenuTask(void) {
-    func_0026B160();
+    mnuReleaseMovieMenuState();
     kwlnTaskDestroyWithHierarchyByName(D_003AFD80, 1);
     return 0;
 }

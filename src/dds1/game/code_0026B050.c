@@ -13,7 +13,7 @@ extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void func_0026AEB0(void);
 extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
-extern s32 func_0026B1F0(KwlnTask *);
+extern s32 mnuUpdateMovieMenuTask(KwlnTask *);
 extern u32 D_003BA8EC;
 extern char D_003AFD80[];
 
@@ -44,7 +44,7 @@ KwlnTask *func_0026B050(s32 mode) {
     func_0026AEB0();
     mnuMovieMenuState->resources = mnuCreateMovieSpriteResource(0x3C, 8, 0);
     D_003BA8EC = 0x80000000;
-    return kwlnTaskCreate(D_003AFD80, 0x2B19, 1, 0, func_0026B1F0, 0, 0);
+    return kwlnTaskCreate(D_003AFD80, 0x2B19, 1, 0, mnuUpdateMovieMenuTask, 0, 0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026B050", D_003AFD80);

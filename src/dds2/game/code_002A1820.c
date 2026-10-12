@@ -711,8 +711,8 @@ void mnuReleaseSoundBufferLocked(void) {
 }
 
 void func_002A2AA0(void) {
-    func_002A3D70();
-    func_002A3E38(1);
+    mnuLoadMovieMenuResourceSlots();
+    mnuEnsureMovieMenuSpriteHandle(1);
 }
 
 extern void kwlnFadeBackgroundStartOut(s32);
@@ -919,7 +919,7 @@ extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuUpdateTitlePageByMode(void);
 extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
-extern u32 func_002A3C78(void);
+extern u32 mnuGetMovieMenuSelectionIndex(void);
 extern s32 func_002A5C58(void);
 extern void func_002A5890(void);
 extern void func_002A5F80(void);
@@ -930,7 +930,7 @@ extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
 extern void mnuRestartRuntimeAfterViewer(s32);
 extern void mnuAdvanceTimedSlideBar(SlideBarTimed *, s32);
 extern void mnuAdvanceMultiSpriteSlideBar(SlideBar *, s32);
-extern void func_002A5040(SlideBarTimed *, SlideBar *, s32);
+extern void mnuDrawMovieMenuSlideBar(SlideBarTimed *, SlideBar *, s32);
 extern void mnuDrawExpandingMovieMenuPulseBar(MovieMenuPulse *, s32);
 extern void mnuAdvancePairedSlideBars(SlideBarPair *, s32);
 extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
@@ -1252,7 +1252,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
         if (mnuMovieMenuState->cursor < 0xF) {
             mnuMovieMenuState->cursor++;
         } else if (mnuHandleTitleMenuEvent(mnuMovieMenuState->state) == 0) {
-            selectedItem = func_002A3C78();
+            selectedItem = mnuGetMovieMenuSelectionIndex();
             switch (selectedItem) {
             case 1:
                 kwlnFadeOutStart(0, 0, 0, 0x14);
@@ -1292,7 +1292,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
 
     mnuAdvanceTimedSlideBar(&mnuMovieMenuState->timedA, 0x52);
     mnuAdvanceMultiSpriteSlideBar((SlideBar *)&mnuMovieMenuState->timedB, 0x52);
-    func_002A5040(&mnuMovieMenuState->timedA, (SlideBar *)&mnuMovieMenuState->timedB, 0x52);
+    mnuDrawMovieMenuSlideBar(&mnuMovieMenuState->timedA, (SlideBar *)&mnuMovieMenuState->timedB, 0x52);
     mnuDrawExpandingMovieMenuPulseBar((MovieMenuPulse *)mnuMovieMenuState->barSmall, 0x52);
     mnuAdvancePairedSlideBars((SlideBarPair *)mnuMovieMenuState->movie, 0x52);
     mnuAdvanceSlideBarValue((SlideBar *)mnuMovieMenuState->barB, 0x52);

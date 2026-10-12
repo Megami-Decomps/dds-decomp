@@ -14,7 +14,7 @@ extern void effRequestResourceByMode(const char *, const char *, u32, u32 *);
 extern char D_003BC5D8[];
 extern char D_00379E50[];
 
-extern void func_0026C7E0();
+extern void mnuAdvanceMovieMenuIdleAnimation();
 
 typedef struct {
     s32 pad00;
@@ -42,7 +42,7 @@ extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern void mnuSelectFirstListNode(struct MenuList *);
 
 
-extern void func_0026D480();
+extern void mnuDrawMovieMenuListItem();
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sndStartTrackExtended(s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -87,7 +87,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
     list = mnuCreateListState(0, 3, 0);
     mnuMovieMenuState->selectionList = list;
-    list->drawCallback = func_0026D480;
+    list->drawCallback = mnuDrawMovieMenuListItem;
     for (i = 0; i < 3; i++) {
         mnuListAppendNode(mnuMovieMenuState->selectionList, 0);
     }
@@ -97,7 +97,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(mnuMovieMenuState->selectionList);
 }
 
-u32 func_0026BED0(void) {
+u32 mnuGetMovieMenuSelectionIndex(void) {
     return mnuMovieMenuState->selectionList->cursor->index;
 }
 
@@ -122,7 +122,7 @@ s32 mnuIsAnyMenuInputPressed(void) {
     return 0;
 }
 
-void func_0026BFC8(void) {
+void mnuLoadMovieMenuResourceSlots(void) {
     if (((MenuState *)mnuMovieMenuState)->firstResource == 0) {
         ((MenuState *)mnuMovieMenuState)->firstResource =
             (u32)effLoadIndexedResource(D_003BC5D8, D_00379E50, 0);
@@ -153,7 +153,7 @@ void mnuReleaseMenuResourceSlots(void) {
     }
 }
 
-void func_0026C098(s32 mode) {
+void mnuEnsureMovieMenuSpriteHandle(s32 mode) {
     u32 *handle = &((MenuState *)mnuMovieMenuState)->spriteHandle;
 
     if (*handle == 0) {
@@ -227,7 +227,7 @@ void mnuDrawMovieMenuSpriteLayers(s32 context) {
     mnuDrawSprite(1, -10, 0, 0x80, 0, 4, context);
 }
 
-void func_0026C350(s32 base, s32 source, u32 alpha, s32 context) {
+void mnuDrawMovieMenuTransitionWipe(s32 base, s32 source, u32 alpha, s32 context) {
     u32 color = (alpha << 24) | 0x808080;
     MenuSurfacePair surfacePairs[4] = {
         {base, source},
@@ -251,14 +251,14 @@ void func_0026C350(s32 base, s32 source, u32 alpha, s32 context) {
     sdfSubmitGsTestOneRegisterPacket(0x5000DL, context);
 }
 
-void func_0026C4A8(void) {
+void mnuResetMovieMenuOpeningAnimation(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->timer = 0;
     state->slideOffset = 0;
 }
 
-s32 func_0026C4B8(void) {
+s32 mnuAdvanceMovieMenuOpeningAnimation(void) {
     MenuState *state;
     s32 value;
     s32 alpha;
@@ -296,7 +296,7 @@ s32 func_0026C4B8(void) {
         state->slideOffset = 0;
     }
 
-    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawMovieMenuTransitionWipe(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
@@ -341,7 +341,7 @@ s32 func_0026C4B8(void) {
     return 1;
 }
 
-void func_0026C7E0(void) {
+void mnuAdvanceMovieMenuIdleAnimation(void) {
     MenuState *state;
     f32 pulse;
 
@@ -369,7 +369,7 @@ void func_0026C7E0(void) {
         ((MenuState *)mnuMovieMenuState)->slideOffset = 0;
     }
 
-    func_0026C350(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
+    mnuDrawMovieMenuTransitionWipe(((MenuState *)mnuMovieMenuState)->slideOffset - 0x200, 0, 0x80, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 0, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 2, 0x53);
     mnuDrawSprite(0, 0, 0, 0x80, 0, 1, 0x53);
@@ -386,7 +386,7 @@ void mnuStartMovieMenuSfxGroup(void) {
 }
 
 void func_0026CAB0(void) {
-    func_0026C7E0();
+    mnuAdvanceMovieMenuIdleAnimation();
 }
 
 void mnuSwapStateWords(void) {
@@ -406,7 +406,7 @@ void mnuSwapStateWords(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026BD80", func_0026CB10);
 
-void func_0026CD88(f32 *position, f32 *rotation) {
+void mnuUpdateMovieMenuPoseFromInput(f32 *position, f32 *rotation) {
     f32 delta[4];
     f32 forward[4];
     f32 axis[4];
@@ -482,7 +482,7 @@ void func_0026CD88(f32 *position, f32 *rotation) {
     }
 }
 
-void func_0026D108(void) {
+void mnuResetMovieMenuStateAndStartTrack(void) {
     MenuState *state = (MenuState *)mnuMovieMenuState;
 
     state->word34 = 0;
