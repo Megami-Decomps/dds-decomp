@@ -260,7 +260,8 @@ void parObjDispatch(ParObj *object) {
 
 extern void billInvokeCallback(BillObj *);
 
-void func_00162590(ParObj *effect) {
+/* Apply queued updates, then draw live records and submit the kind's resource. */
+void effParUpdateAndDrawInstance(ParObj *effect) {
     EffectBufferRecord *record;
     BillObj *billboard;
     u32 step;
@@ -343,7 +344,8 @@ void effParScaleComponent(float scale, ParObj *work) {
     work->scale8C = work->scale8C * scale;
 }
 
-u16 func_00162938(ParObj *obj) {
+/* Descriptor query: return the complete 16-bit restart state. */
+u16 effParGetInstanceRestartFlag(ParObj *obj) {
     return parGetRestartFlag(obj);
 }
 
@@ -363,7 +365,8 @@ void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-u8 func_001629A0(ParObj *work) {
+/* Descriptor query: select the kind's current mode byte. */
+u8 effParGetInstanceMode(ParObj *work) {
     return parObjGetMode(work);
 }
 
@@ -545,7 +548,8 @@ void parPrependRecordListNode(ParListNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
 
-void func_00163238(ParReleaseRecord *record, SdfTex *texture) {
+/* Replace the record asset's primary texture and dirty its draw state. */
+void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
     sdfSetAssetPrimaryTextureAddress(record->asset, texture);
 }
 
@@ -1227,7 +1231,8 @@ void parFillCellVertexQuads(ParSystem *system, u32 firstColor, u32 secondColor) 
     }
 }
 
-void func_00164690(ParSystem *system, u32 middleWord, u32 edgeWord) {
+/* Keep middle/edge RGB while ramping vertex alpha down to zero in each cell. */
+void effParSetCellColorsWithAlphaFade(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 perCell = system->vertexWordCount >> 2;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;
@@ -1264,7 +1269,8 @@ void func_00164690(ParSystem *system, u32 middleWord, u32 edgeWord) {
     }
 }
 
-void func_00164748(ParSystem *system, u32 middleWord, u32 edgeWord) {
+/* Keep middle/edge RGB while ramping alpha up and down around the cell midpoint. */
+void effParSetCellColorsWithAlphaPeak(ParSystem *system, u32 middleWord, u32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
     u32 middleAlpha = middleWord & 0xFF000000;

@@ -1392,7 +1392,7 @@ s32 btlCommandStateSelectB(ActionStateLink *task) {
 void btlEnterAutoActionState(void) {
 }
 
-extern void func_001DD390(u8 *command, u8 *argument);
+extern void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument);
 extern s32 btlIsActiveActor();
 
 s32 btlCommandStateSelectC(ActionStateLink *task) {
@@ -1421,7 +1421,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
         } else if (!(task->flags & 8)) {
             btlDispatchStateHandler(task, 0xC);
         } else {
-            func_001DD390((u8 *)task, (u8 *)&task->indexWork);
+            btlDispatchCommandViaHookOrDefault((u8 *)task, (u8 *)&task->indexWork);
         }
     }
 }
@@ -1505,7 +1505,7 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
         if (hook != 0) {
             hook((u8 *)task);
         }
-        func_001DD390((u8 *)task, (u8 *)commandData);
+        btlDispatchCommandViaHookOrDefault((u8 *)task, (u8 *)commandData);
     }
 }
 
@@ -2079,8 +2079,8 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
 s32 sndResolveResourceId(s32 category, s32 id);
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit,
         u32 target, u32 option);
-BtlRuntimeTask *btlCreatePermittedBattleVoiceTask(BtlUnit *actor,
-        s32 option);
+BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor,
+        s32 itemId);
 s32 btlFormatActionEventFilename(s32 source, char *output);
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect,
         char *name);
@@ -2262,7 +2262,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             }
             btlStartTask(btlCreateCategoryStatDamageTask(actors[groupIndex], skill, action->indexWork.stageValue));
             if (action->indexWork.phase == 4) {
-                btlStartTask(btlCreatePermittedBattleVoiceTask(actors[groupIndex], action->indexWork.reference));
+                btlStartTask(btlCreateFlaggedCommandItemConsumeTask(actors[groupIndex], action->indexWork.reference));
             }
         }
     }

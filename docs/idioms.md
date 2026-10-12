@@ -262,8 +262,8 @@ that genuinely recurs. Wrapping a one-off call in an inline just to get
 ## Narrow return types and `jal` tails
 
 A function whose recovered return type is narrow can return a narrow callee's
-result with `jal; epilogue` instead of a sibling `j`. DDS1 `func_0015AD48`
-(`u16` over `parGetRestartFlag`) and `func_0015ADB0` (`u8` over `parObjGetMode`)
+result with `jal; epilogue` instead of a sibling `j`. DDS1 `effParGetInstanceRestartFlag`
+(`u16` over `parGetRestartFlag`) and `effParGetInstanceMode` (`u8` over `parObjGetMode`)
 both match this way. The same call with an `s32` return, with or without a
 named local, tail-calls. Use the recovered type from the retail body:
 `parObjGetMode` returns the `u8` fields `mode150`/`mode151`, or 0. This is not a
@@ -9342,4 +9342,39 @@ The obsolete raw constructor prototypes in `eff.h` are aligned with the existing
 types and each game's resource-entry prototype. All function signatures,
 declaration order, casts, control flow and layout are otherwise unchanged;
 the remaining edits are identifiers and comments.
+
+## Particle descriptors, discrete motion flags and inventory tasks
+
+Namer1 batch 28 names the particle descriptor's update/draw and two query
+callbacks from their native operation slots. The query callbacks retain their
+`u16`/`u8` returns and framed `jal` shapes described above. The record-texture
+adapter sets its asset's primary texture and dirties that asset's draw state.
+The two cell-color utilities preserve middle/edge RGB while producing either
+a descending alpha fade or a rise/fall alpha peak. Counts, divisions, pointer
+strides, masks and odd half-count behavior are unchanged.
+
+`sdfMotionApplyKeyFlagDuringBlend` occupies the motion dispatch's +0x10 blend
+slot, but it resamples a discrete key byte instead of interpolating flags.
+It ignores blend weight. Its existing two-argument C definition is retained;
+do not add an argument or blend the flag merely to resemble vector callbacks.
+
+`btlHasAnyOperandLowFlag` names only the observed grouped-operand bit-0 test.
+The meaning of that flag remains unestablished. `btlCompleteTaskImmediately`
+is the process callback of the already-named zero-argument immediate task,
+not an arbitrary name assigned to an unevidenced constant-return stub.
+
+The inventory task callbacks had misleading voice-playback labels. One
+decrements an item's quantity when item-skill table flag 4 is set; the other
+increments the argument's 16-bit item quantity by one. Neither plays audio.
+Their factories carry the actor/item arguments and install those callbacks.
+DDS2's decrement callback retains event-model synchronization for IDs 0x53
+and 0x54. The private DDS2 argument type is `BtlCommandItemWork`, with `itemId`
+at +0x4; field widths and its eight-byte layout are unchanged. Shared legacy
+task argument types are deliberately not changed by this naming closure.
+
+The DDS2 command-hook dispatcher now shares DDS1's
+`btlDispatchCommandViaHookOrDefault` name. A hook result of -1 still selects
+the default command-kind dispatch, including each game's original branches.
+All source edits in this batch are identifiers and comments, without changes
+to types, statement/declaration order, casts, literals or control flow.
 

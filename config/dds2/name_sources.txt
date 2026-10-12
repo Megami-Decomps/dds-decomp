@@ -2447,7 +2447,7 @@
 0x001D5950	btlAiTaskUpdate	inferred	confidence=high; matched-C; src/dds2/game/code_001D4438.c:1596:func_001D5950; Initializes actor AI selection once, waits for its pending task, falls back after a null script result, and advances to the selected state handler.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001D5B38	btlMarkSceneTaskAfterReset	inferred	Resets task control fields and sets its scene-update flag. [names_reviewed13.tsv]
 0x001D5B70	btlCommandStateSelectB	inferred	state handler: if sndHasActiveActor()==0 then state 0xB or 0xC depending on func_0020EBD0
-0x001D5BE0	btlCommandStateSelectC	inferred	state handler: 0xC / 0x1B / func_001DD390 depending on task command (1, or 2 with value 0xF8..0xF9)
+0x001D5BE0	btlCommandStateSelectC	inferred	state handler: 0xC / 0x1B / btlDispatchCommandViaHookOrDefault depending on task command (1, or 2 with value 0xF8..0xF9)
 0x001D5CE8	btlResetCommandIndexWork	inferred	Resets command index work and clears the actor selected index. [names_reviewed8.tsv]
 0x001D5D20	btlCommandStartSoundTasks	inferred	starts effect tasks for the command (btlCreateCommandSoundTask 9/3), optionally state 0xC, marks task flag 0x200
 0x001D5E50	btlCommandPrintAndFetchOwner	inferred	prints "btl:command=%d" and copies the actor ownerId into the task for commands 1-3/7-8
@@ -2495,10 +2495,10 @@
 0x001E0128	btlCreateQueuedActorEntrySelectionTask	inferred	confidence=high; src/dds2/game/code_001DD390.c:func_001E0128; Allocates and initializes the actor-entry-selection sound task, including its callback, owner, identifier and options. [names_qp9.tsv]
 0x001E0200	btlClearQueuedActorEntrySelection	inferred	confidence=high; matched-C; src/dds2/game/code_001DD390.c:1301:func_001E0200; Task callback clears selected actor entry, invokes actor refresh and returns one.; twin=0x001D35E0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001E05B8	btlCreateActorSoundOptionTask	inferred	confidence=high; src/dds2/game/code_001DD390.c:func_001E05B8; Allocates an actor-owned SoundTask, installs its update callback and stores actor/option arguments. [names_qp9.tsv]
-0x001E0640	btlPlayPermittedBattleVoice	inferred	Plays indexed voice only when voice table flag four is present; handles special voice IDs. [names_reviewed5.tsv]
-0x001E06B0	btlCreatePermittedBattleVoiceTask	inferred	Creates owner-bound voice task with table-flag-checked playback callback. [names_reviewed5.tsv]
-0x001E0738	btlPlayQueuedBattleVoice	inferred	Starts playback for queued voice ID using voice request mode one. [names_reviewed5.tsv]
-0x001E0760	btlCreateQueuedBattleVoiceTask	inferred	Creates owner-bound task that starts voice request from its queued voice ID. [names_reviewed5.tsv]
+0x001E0640	btlConsumeFlaggedCommandItem	inferred	confidence=high; corrected prior voice-playback inference: tests item-skill table flag 4, decrements item inventory and returns completion; retains DDS2 event-model flag synchronization for IDs 0x53/0x54; DDS1 twin 0x001D3A20. Namer1 batch 28.
+0x001E06B0	btlCreateFlaggedCommandItemConsumeTask	inferred	confidence=high; corrected prior voice-task inference: queues actor/item arguments and the conditional inventory-decrement callback; LINKAGE caller passes indexWork.reference; DDS1 twin 0x001D3A60. Namer1 batch 28.
+0x001E0738	btlIncrementCommandItemQuantity	inferred	confidence=high; corrected prior voice-playback inference: increments inventory quantity by one for the u16 item ID at arguments+4 and returns completion; DDS1 twin 0x001D3AE8. Namer1 batch 28.
+0x001E0760	btlCreateItemQuantityIncrementTask	inferred	confidence=high; corrected prior voice-task inference: queues an owner and u16 item ID with the inventory-increment callback, task ID 0x52; DDS1 twin 0x001D3B10. Namer1 batch 28.
 0x001E07E8	btlAddEpFromPacket	inferred	same shape as btlAddMoneyFromPacket, string 'btl:epall=%d[%d](packet)'
 0x001E0858	btlScheduleEpPacketTask	inferred	Allocates task 0x53 to add the actor packet amount to experienceEarned. [names_reviewed2.tsv]
 0x001E08E0	btlAddMoneyFromPacket	inferred	string 'btl:money=%d[%d](packet)'
@@ -7605,3 +7605,13 @@
 0x0029CF00	brsCalcApGain	inferred	Computes per-unit AP from the base reward, unit bonus, eligibility state and profile multiplier; DDS1 twin 0x00265610. [LiteH menu naming batch 9]
 0x0029D000	mnuIsTitleEntryAvailable	inferred	DDS2 returns 0; DDS1 twin 0x002656C0 tests flag 0x902 and unitId 4. [LiteH menu naming batch 9]
 0x0029DA98	brsBuildActiveUnitProgressRows	inferred	Clears the list and appends a progress row for each occupied party slot except unitId 9; DDS1 twin 0x002661A8. [LiteH menu naming batch 9]
+0x00162590	effParUpdateAndDrawInstance	inferred	confidence=high; descriptor update slot 0x003AA77C advances queued kind updates and particle scale/spin, draws live billboard records and submits kind drawing; DDS1 twin 0x0015A9A0. Namer1 batch 28.
+0x00162938	effParGetInstanceRestartFlag	inferred	confidence=high; descriptor query slot 0x003AA788 returns parGetRestartFlag's full restartFlag word; preserve u16 return and framed jal; DDS1 twin 0x0015AD48. Namer1 batch 28.
+0x001629A0	effParGetInstanceMode	inferred	confidence=high; descriptor query slot 0x003AA79C selects mode150/mode151 through parObjGetMode according to dispatchIndex; preserve u8 result; DDS1 twin 0x0015ADB0. Namer1 batch 28.
+0x00163238	effParSetAssetRecordTexture	inferred	confidence=high; sets record->asset primary texture and marks its primary draw state dirty through sdfSetAssetPrimaryTextureAddress; DDS1 twin 0x0015B648. Namer1 batch 28.
+0x00164690	effParSetCellColorsWithAlphaFade	inferred	confidence=high; retains supplied middle/edge RGB and ramps both vertex alpha streams down to zero across each cell; DDS1 twin 0x0015CAA0. Namer1 batch 28.
+0x00164748	effParSetCellColorsWithAlphaPeak	inferred	confidence=high; retains middle/edge RGB and writes alpha rising then falling around the cell midpoint; preserves half-count behavior; DDS1 twin 0x0015CB58. Namer1 batch 28.
+0x00335108	sdfMotionApplyKeyFlagDuringBlend	inferred	confidence=high; key-flag dispatch blend slot 0x0040B3F0 resamples the discrete key byte and toggles SDF_MOTION_KEY_SAMPLE_BYTE_ZERO, ignoring blend weight; DDS1 twin 0x002DC258. Namer1 batch 28.
+0x001DDAD0	btlHasAnyOperandLowFlag	inferred	confidence=medium; scans grouped operand entries and returns whether any flags word has bit 0 set; does not assert an unproved meaning for that bit; DDS1 twin 0x001D1218. Namer1 batch 28.
+0x001E1848	btlCompleteTaskImmediately	inferred	confidence=high; process callback returns 1 unconditionally and is installed by btlCreateImmediateCompletionTask's zero-argument task; DDS1 twin 0x001D4B28. Namer1 batch 28.
+0x001DD390	btlDispatchCommandViaHookOrDefault	inferred	confidence=high; aligns existing DDS1 name at 0x001D0BA0: runtime commandHook result -1 falls through to command-kind state dispatch; preserves DDS2 additional flags/kinds. Namer1 batch 28.

@@ -338,7 +338,7 @@ extern s32 btlGetLoggedIndexedCommandItem(s32);
 extern void scrSetGlobalBitFlag(u32);
 
 /* A hook result of -1 leaves dispatch to the command-kind handler. */
-void func_001DD390(u8 *command, u8 *argument) {
+void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
     s32 (*handler)(s32, s32) = ((BtlState *)btlGetRuntime())->commandHook;
 
     if (handler != 0) {
@@ -592,8 +592,8 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
     return 0;
 }
 
-/* Return whether any operand in the live groups has flag bit zero set. */
-s32 func_001DDAD0(s32 unused, BattleIndexWork *state) {
+/* Return whether any grouped operand has flag bit 0; the selector is unused. */
+s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
     u32 groupIndex;
     u32 entryIndex;
     u32 groupCount = btlGetIndexListCount(state->indices);
@@ -1763,18 +1763,19 @@ BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
 
 typedef struct {
     u32 unk0;
-    s32 soundIndex;
-} BattleVoiceWork;
+    s32 itemId;
+} BtlCommandItemWork;
 
 extern void ptyAdjustItemQuantity(s32, s32);
 
 extern void btlSyncModelFlagFromEventThresholds(void);
 
-s32 btlPlayPermittedBattleVoice(BattleVoiceWork *work) {
-    s32 index = work->soundIndex;
-    if (datItemSkillRecords[index].unk01 & 4) {
-        ptyAdjustItemQuantity(index, -1);
-        switch (work->soundIndex) {
+/* Consume a flagged item; DDS2 also synchronizes event flags for IDs 0x53/0x54. */
+s32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
+    s32 itemId = work->itemId;
+    if (datItemSkillRecords[itemId].unk01 & 4) {
+        ptyAdjustItemQuantity(itemId, -1);
+        switch (work->itemId) {
         case 0x53:
         case 0x54:
             btlSyncModelFlagFromEventThresholds();
@@ -1784,38 +1785,41 @@ s32 btlPlayPermittedBattleVoice(BattleVoiceWork *work) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreatePermittedBattleVoiceTask(BtlUnit *actor, s32 option) {
+/* Queue an actor/item argument pair for conditional inventory consumption. */
+BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
     BtlRuntimeTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x51;
     task->ownerId = actor->owner;
-    task->callback = btlPlayPermittedBattleVoice;
+    task->callback = btlConsumeFlaggedCommandItem;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = option;
+    args->option = itemId;
     return task;
 }
 
-u32 btlPlayQueuedBattleVoice(s32 taskArgs) {
+/* Add one to the argument's 16-bit item ID quantity, then complete the task. */
+u32 btlIncrementCommandItemQuantity(s32 taskArgs) {
     ptyAdjustItemQuantity(*(u16 *)(taskArgs + 4), 1);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateQueuedBattleVoiceTask(BtlUnit *actor, u16 option) {
+/* Queue an owner-bound task that increments this item's inventory quantity. */
+BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     BtlRuntimeTask *task = btlAllocTask(8);
     SoundTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x52;
     task->ownerId = actor->owner;
-    task->callback = btlPlayQueuedBattleVoice;
+    task->callback = btlIncrementCommandItemQuantity;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->optionId = option;
+    args->optionId = itemId;
     return task;
 }
 
@@ -2428,14 +2432,15 @@ void btlClearTaskLists(void) {
     btlDeferredTaskHead = 0;
 }
 
-u32 func_001E1848(void) {
+/* Process callback for the zero-argument immediate-completion task. */
+u32 btlCompleteTaskImmediately(void) {
     return 1;
 }
 
 BtlRuntimeTask *btlCreateImmediateCompletionTask(void) {
     BtlRuntimeTask *task = btlAllocTask(0);
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
-    task->callback = func_001E1848;
+    task->callback = btlCompleteTaskImmediately;
     task->taskId = 0x6A;
     task->onStart = 0;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
