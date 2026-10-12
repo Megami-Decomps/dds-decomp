@@ -122,7 +122,7 @@ extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
 
 /* Assemble six 16-word image blocks from little-endian source bytes and upload
  * each to its matching GS buffer. The inner countdown includes zero. */
-void func_0019C358(void) {
+void frFontUploadImageBlocks(void) {
     u32 imageWords[FR_FONT_IMAGE_WORD_COUNT];
     s32 bufferIndex = 0;
     s32 sourceWordOffset = 0;

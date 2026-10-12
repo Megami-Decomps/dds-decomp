@@ -190,7 +190,7 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
 }
 
 extern void func_0019B558(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
-extern void func_0019C358(void);
+extern void frFontUploadImageBlocks(void);
 extern u32 D_004528C0[];
 extern s32 D_00438F1C;
 
@@ -232,7 +232,7 @@ void func_0019BEB8(s32 rowBudget, s32 poolCount) {
     frFontWork.itemPool = itfCreateMemNodeRing(0x2C, poolCount);
     frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
     frFontLoadDefaultFonts();
-    func_0019C358();
+    frFontUploadImageBlocks();
     for (i = 0; i < 32; i++) {
         D_004528C0[i] = 0;
     }
