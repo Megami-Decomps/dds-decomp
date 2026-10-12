@@ -49,7 +49,7 @@ s32 func_0011ED10(void) {
     return 1;
 }
 
-s32 func_0011ED60(void) {
+s32 scrCmdHasEnoughOwnedMantras(void) {
     scrSetIntegerReturnValue(mtrHasEnoughOwnedMantras());
     return 1;
 }
