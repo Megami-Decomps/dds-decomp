@@ -48,7 +48,7 @@ extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
-extern s32 func_00288920(struct MnuStatusResource *);
+extern s32 mtrDrawUnitSelectionOverlay(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 
 
@@ -59,7 +59,7 @@ extern void mnuEnableTerminalTrackMode(s8);
 
 extern u8 mnuResourceTaskName[];
 
-extern void func_00286F18(s32, struct MnuStatusResource *);
+extern void mnuReleaseMantraResourceWork(s32, struct MnuStatusResource *);
 
 extern u8 D_003CFCC0[];
 
@@ -149,7 +149,7 @@ void func_00286BA8(DatPartyRecord *record) {
 }
 
 /* Process each of the 32 game-state records whose flags bit 0 is set, then print the native mantra banner. */
-void func_00286E20(void) {
+void mtrMantraSetBitAll(void) {
     s32 recordIndex;
 
     for (recordIndex = 0; recordIndex < MTR_RECORD_COUNT; recordIndex++) {
@@ -163,7 +163,7 @@ void func_00286E20(void) {
 extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
-extern s32 func_00288748(MnuStatusResource *);
+extern s32 mtrUnitSelectUpdateState(MnuStatusResource *);
 extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
 extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
 extern SdfTaskItemDesc D_003CFCE8;
@@ -174,7 +174,7 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 
 /* Allocate and clear status work, retain its allocation handle and create the progress host.
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
-MnuStatusResource *func_00286E98(void) {
+MnuStatusResource *mnuAllocateMantraResourceWork(void) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocation);
 
@@ -188,7 +188,7 @@ MnuStatusResource *func_00286E98(void) {
 }
 
 /* Release status-owned resources only for a nonzero work address; print the release banner even when it is zero. */
-void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
+void mnuReleaseMantraResourceWork(s32 unused, MnuStatusResource *resourceWork) {
     if (resourceWork != NULL) {
 
         dspCloseChannel();
@@ -206,8 +206,8 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
 /* Store the task handle so the existence probe and explicit stop can
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
-    MnuStatusResource *resourceWork = func_00286E98();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_003CFCC0, func_00286F18, resourceWork);
+    MnuStatusResource *resourceWork = mnuAllocateMantraResourceWork();
+    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_003CFCC0, mnuReleaseMantraResourceWork, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
@@ -225,7 +225,7 @@ void mnuStopResourceTask(void) {
     mnuMantraSelectionResource = 0;
 }
 
-s32 func_00287030(void) {
+s32 mtrPollResourceLoadTask(void) {
     MnuStatusResource *selected = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     s32 result = mtrAdvanceMantraResourceLoadState(&selected->resourceLoad, 0);
 
@@ -258,11 +258,11 @@ void mtrUnitSelectRelease(void) {
 }
 
 /* Status 3 continues this selection task; only status 4 ends it. */
-s32 func_00287670(s32 mode) {
+s32 mtrUnitSelectUpdate(s32 mode) {
     MnuStatusResource *resource = (MnuStatusResource *)sdfGetTaskValueByKey(
         mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
-    switch (func_00288748(resource)) {
+    switch (mtrUnitSelectUpdateState(resource)) {
     case 1:
         if (resource->flags.titleEffectsReadyPendingDisplay == 0) {
             if (mnuPollTitleEffectsReady(resource->progressHost) == 0) {
@@ -289,11 +289,11 @@ s32 func_00287670(s32 mode) {
 }
 
 /* Draw the current unit-selection resource; the handler's native u64 return is always zero. */
-u64 func_00287768(void) {
+u64 mtrUnitSelectDraw(void) {
     MnuStatusResource *resourceWork;
 
     resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
-    func_00288920(resourceWork);
+    mtrDrawUnitSelectionOverlay(resourceWork);
     return 0;
 }
 
@@ -325,7 +325,7 @@ extern s32 func_0028A1D0(MnuStatusResource *);
 
 /* Tick panel sounds and process the selection result. Case 2 intentionally falls through to case 3;
  * case 4 queues item 1 for activation and returns -1, while other results return zero. */
-s32 func_00287848(s32 key) {
+s32 mtrMantraSelectUpdate(s32 key) {
     mnuTickPanelSoundEntries();
     switch (func_0028A1D0((MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY))) {
     case 1:
@@ -345,7 +345,7 @@ s32 func_00287848(s32 key) {
 }
 
 /* Run the current mantra resource's drawing path; retain the native u64 work address and zero return. */
-u64 func_00287900(void) {
+u64 mtrMantraSelectDraw(void) {
     u64 resourceAddress;
 
     resourceAddress = sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -404,7 +404,7 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426208);
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426218);
 
-void func_00287AF8(s32 key, s32 initResult) {
+void mtrMantraEquipRelease(s32 key, s32 initResult) {
     MnuStatusResource *resource = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, -1);
     MantraMenuWork *work = &resource->menu;
 
@@ -654,7 +654,7 @@ struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00380818[4];
 
-s32 func_00288158(void) {
+s32 mtrMantraEquipDraw(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     f32 ratio;
     s32 value;
@@ -796,7 +796,7 @@ extern s32 mnuHandleMantraSelectionInput(MnuStatusResource *);
 extern s32 dspStartEntry(s32);
 extern s32 evtGetMessageWindowControlState(void);
 
-s32 func_00288748(MnuStatusResource *resourceWork) {
+s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
     MtrSelectionState *selection;
     s32 result = 0;
 
@@ -871,11 +871,11 @@ s32 func_00288748(MnuStatusResource *resourceWork) {
 
 extern void func_0026C900(void);
 extern s32 mtrDrawSelectionFadeAndScale(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
-extern s32 func_00288DD0(s32, s32, s32, s32, MnuStatusResource *, s32);
+extern s32 mtrDrawSelectedMantraEntry(s32, s32, s32, s32, MnuStatusResource *, s32);
 
 /* Draw visible unit-selection work using a timer-based triangular alpha.
  * Re-read visibility after the first drawing call; do not clamp the native phase/alpha range. */
-s32 func_00288920(MnuStatusResource *resourceWork) {
+s32 mtrDrawUnitSelectionOverlay(MnuStatusResource *resourceWork) {
     f32 fadePhase = 1.0f;
     s32 alpha;
     MtrSelectionState *selectionState;
@@ -904,7 +904,7 @@ s32 func_00288920(MnuStatusResource *resourceWork) {
     }
     mtrDrawSelectionFadeAndScale(0, 0, 0, alpha, resourceWork, 0x53, fadePhase);
     if (resourceWork->flags.visible) {
-        func_00288DD0(0, 0, 1, alpha, resourceWork, 0x53);
+        mtrDrawSelectedMantraEntry(0, 0, 1, alpha, resourceWork, 0x53);
     }
     return 0;
 }
@@ -1008,7 +1008,7 @@ extern const s8 D_004262B0[];
 extern u32 frFontQueueTextAndOptionallyMeasure(s32, s32, u32, u32, s8, void *, s32, s32);
 
 /* Draw the selected mantra's two sprites, refresh the profile panel opacity and queue the mantra name. */
-s32 func_00288DD0(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource *resource, s32 drawContext) {
+s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource *resource, s32 drawContext) {
     DatPartyRecord *record = (DatPartyRecord *)resource->list->cursor->items;
     u32 entryId;
     MenuProgressHost *host;
