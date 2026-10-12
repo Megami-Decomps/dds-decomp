@@ -3935,7 +3935,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
 }
 
 extern s32 D_003BAB50;
-extern void func_00136DA0(f32 *);
+extern void fldApplyRelativeZoneMotion(f32 *);
 
 /* Probe the current player position; consume a pending target into work/object state. */
 
@@ -3952,7 +3952,7 @@ void fldUpdateCameraTarget(void) {
         cur[0] = st->x;
         cur[1] = st->y;
         cur[2] = st->z;
-        func_00136DA0(cur);
+        fldApplyRelativeZoneMotion(cur);
         if (st->positionPending != 0) {
             st->x = st->targetX;
             st->y = st->targetY;
@@ -6430,7 +6430,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
 
 /* Indexed fields retain index-first addresses; see docs/idioms.md,
  * "Trace-justified indexed field addresses: relative zone motion". */
-void func_00136DA0(f32 *position) {
+void fldApplyRelativeZoneMotion(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
     f32 movement[4];

@@ -758,6 +758,7 @@
 0x00137E00	fldGetRecordValueById	inferred	Searches the field record array for an ID and returns its stored value or zero.
 0x00137E90	fldResetRecordState	inferred	Byte-identical DDS1 counterpart: Zeros all field record values, clears their count and related field state, then frees the record buffers.
 0x00139400	fldClassifyPositionInZoneWithMargin	inferred	Checks planar bounds and zone planes with margin, returning inside state and distance. [names_reviewed8.tsv]
+0x00139950	fldApplyRelativeZoneMotion	inferred	Applies movement deltas from relative zone anchors to the supplied player position and publishes a pending target for fldUpdateCameraTarget.
 0x0013AA90	fldGetPositionZoneClearance	inferred	Finds the closest permitted zone-plane clearance or returns negative one. [names_reviewed8.tsv]
 0x0013B818	fldResetZoneRecordsAndActorSlots	inferred	Clears all field zone records and resets the actor slots. [names_reviewed8.tsv]
 0x0013D308	fldTestRoomProbeFacingAndRange	inferred	R_Structs55
