@@ -9521,3 +9521,42 @@ to 0..128; the resulting halfAlpha range 0..64 makes its left shift by 24
 representable. Fresh post-callback reads and all three draw phases are retained.
 Both original retail hashes, both development targets and a no-op rebuild
 also pass with the shooting-input controller above integrated.
+
+### Child texture payload: canonical variant bits remove a false alias edge
+
+DDS2 `billCreateChildPayloadFromTextureResource` (280 bytes) continues the
+Obsidian/Neon/Quartz, Brass and Sable reconstruction. The actual 0x450-byte
+allocation consists of 0x400-byte packet work and its 0x50-byte child payload.
+Initialize the eight real UV components in contiguous corner order, then
+publish their texture reference. Qualified scheduler/allocation observations
+show how these genuine last uses recover the native width/height temporary
+homes and UV-store order. No extra operation or dummy use is introduced.
+
+The last exchanged pair was the child work-pointer publication and packet
+count clear. Actual sched2 rank observation reached the successor-count tier:
+count clear had a false dependency on the variant clear; work publication
+had none. The variant's signed/unsigned union access had universal alias set
+zero, so the scheduler could not prove these distinct destinations disjoint
+after allocation. A cast-free member-pointer control did not solve this:
+CSE folded its address back into the work base and moved the clear.
+
+The real field is an unsigned halfword of variant bits. Both titles' getter
+and draw consumer read it unsigned; the latter tests bit zero. There is no
+signed read or heterogeneous payload. Keep canonical `u16 variant` storage,
+retain each setter's existing signed argument/narrowing, and explicitly
+convert the six stores to u16. This preserves the low 16 bits, all offsets
+and the existing size assertions; it is not an alias attribute or a layout
+change. Both setter owners remain 119/0 and both draw owners 25/0.
+
+With the actual texture-provider header included, the constructor is 6/0
+and warning-free. Strict ordinary/probe parity covers all 628 assembly lines,
+five allocated sections and 35 relocations. A 3,035-event live trace preserves
+all 28 artifacts and directly confirms both stores now have no successors;
+the real LUID comparison then selects the native work-pointer store first.
+
+DDS1's 280-byte counterpart is identical at all 67 noncall words and differs
+only in the three relocated provider calls. The same source passes its owner
+6/0; strict ordinary/probe parity covers 574 lines, five allocated sections
+and 24 relocations. Independent review checks every 16-bit dimension pattern
+against the native shift/narrowing sequence. Both retail hashes, both
+development targets and a no-op rebuild pass with the paired constructors.

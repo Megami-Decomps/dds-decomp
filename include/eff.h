@@ -436,10 +436,7 @@ typedef char BillPacketWork_size_must_be_0x400[
 /* Child manager at retained allocation +0x400; shared by resource and draw owners. */
 typedef struct BillChildPayload {
     SdfTex *texture; /* 0x00: acquired texture reference. */
-    union {
-        s16 signedVariant;
-        u16 variant;
-    };
+    u16 variant; /* Child variant bits; signed inputs narrow on assignment. */
     u8 pad06[2];
     s32 refCount;      /* 0x08 */
     BillTextureQuad uv; /* 0x0C */
