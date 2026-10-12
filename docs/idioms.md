@@ -9156,3 +9156,92 @@ The sole DDS1 caller now passes `&action->camera`, the offset-zero
 `BtlCamState` member, with the same typed API already used by DDS2. Its whole
 unit remains byte-exact.
 
+## Return constants in likely slots: distinguish hoisting from eager donation
+
+This supplements **Branch-likely selection**. A retail `BEQL` with a
+constant in `$2` does not identify one missing C idiom. Three parked twin
+families have similar final opcode differences but different deciding
+mechanisms under the real compiler and canonical unit options.
+
+| Family | Native contract | Observed candidate mechanism |
+| --- | --- | --- |
+| DDS1 `func_001ACB08` / DDS2 `func_001B7718`, 276 bytes each | At `+0x60`, the cached eligibility predicate branches with `BEQL`; its slot returns one. | Before sched1/allocation, `find_if_case_1` and `dead_or_predicable` hoist the early `return 1` assignment into the test block. Simple delay filling then accepts that assignment unconditionally. The retained candidate differs in one word. |
+| DDS1 `func_001FCAC0` / DDS2 `func_0020EB40`, 140 bytes each | At `+0x70`, the unsigned threshold comparison defines `$2`; `+0x74` is `BEQL $2,$0`, with zero in its slot. | Before sched1/allocation, `find_if_case_2` hoists the failure assignment to hard `$2` across the boolean jump. The comparison pseudo must survive that assignment and receives `$3`, accounting for both remaining words. |
+| `effConvertParamValue`, DDS1 `002BCED8` / DDS2 `00304618`, 180 bytes each | At `+0x28` and `+0x90`, null-output guards use `BEQL`, returning four only on the taken edge. Both guards join the common epilogue; the copy paths also return four. | Canonical ALL tracing finds no successful if-conversion or hoist. Late `fill_slots_from_thread` instead donates the common `return 4` from the taken thread with ordinary eligibility (`flags=0x11`). The opposite path's real `MEM:BLK` copy clobbers `$2`; the earlier resource trace confirms the opposite-needed set excludes `$2`. Both remaining words are branch opcodes. |
+
+The panel's deciding merge contains a real return assignment and a jump;
+the predicate's deciding merge contains the zero return assignment.
+Neither has an observed second effectful instruction that blocks the
+hoist. Adding a fictitious effect is not a reconstruction. In the
+converter, the assignment already remains in the shared return block;
+preventing an if-conversion that did not happen cannot fix its residual.
+
+### Two existing matched C existence proofs
+
+These are controls, not suggested edits. Fresh whole-unit gates and
+canonical ALL probes preserve every matched function, and each probe
+verifies hooked assembly and RTL against its unhooked run.
+
+* **`fldCmdRestoreCameraNodeMode`**, DDS1 `0014D3C0`, 64 bytes,
+  `game/code_0014D110`: the C obtains a real world-player object from a
+  getter, returns one if it is null, otherwise performs the real camera
+  mode call and returns one. Native `0014D3E0` is
+  `BEQL $2,$0` with `LI $2,1` in its slot. Unlike the parked threshold
+  comparison, its tested value is the getter's actual hard `$2` result.
+  `dead_or_predicable` refuses the early-return merge; late cross-jumping
+  joins the two success assignments, and eager filling emits the likely
+  branch. The real false arm contains a call, not a dummy dependency.
+  The controlling unit gates **57 match, 0 differ**.
+* **`btlCanUseLinkedActor`**, DDS1 `001DCD70`, 216 bytes,
+  `game/code_001DCD00`: the last action-animation flag test is an ordinary
+  `category != 0 && (flags & 1)` rejection, followed by `return 1`.
+  Native `001DCE20` is `BEQL $4,$0` with `LI $2,1` in its slot, so testing
+  hard `$2` is not necessary for this opcode shape. Multiple genuine
+  status/category paths reach success. If-conversion declines both
+  cases at that final test; late cross-jumping shares the success and
+  failure tails. Simple filling first puts the failure zero in its
+  unconditional branch's slot; eager filling then takes the success one
+  from its target thread. Final prediction is 3999/no opinion. The
+  controlling unit gates **39 match, 0 differ**.
+
+The ordinary probes expose those verdicts and selected threads, not the
+specific internal bitmap bit responsible for every refusal. Do not
+promote an inferred refusal cause into a measured opposite-path resource
+set. The second control proves a real shared-return CFG can emit the
+requested shape; it does not prove that any extra predecessor, or any
+call, is sufficient. Likewise, neither success constant is itself a call
+result: in the first control the **condition** is a real call result.
+
+### The shared-break experiment is a negative result
+
+One trace-derived, ordinary-C panel form moves the existing cached
+eligibility failure into the genuine list traversal as `break`, retaining
+its real `do`/`while (unit != NULL && canTraverse)` latch and the common
+success return. It introduces no artificial loop or extra condition.
+Both games preserve all older matched C (**199/1** and **240/1**, with
+only the target differing and no safety diagnostics), but regress to
+**4/69 words**, first `+0x60`:
+
+* the guard remains ordinary `BEQ` and targets the final one assignment
+  rather than the epilogue;
+* the two real panel-address calculations move into the former early
+  return slot and following word, leaving a padding word at `+0x6C`.
+
+The probe confirms no successful if-conversion in this form. Thus
+**defeating the early hoist is necessary for that particular baseline
+route but not sufficient for a match**: the donor's placement and legality
+must also agree. Keep the stronger one-word park. Existing predicate
+common-result forms and converter size-query/shared-success forms remain
+negative evidence; this synthesis does not replay them or add a false
+path dependency absent from retail.
+
+Retail supplies only the optimized CFG. Its shared epilogue does not
+establish the original pre-ifcvt predecessor count. For these residuals,
+record the deciding pass, actual merge/other blocks, real condition
+value, shared-return joins, and both simple and eager donation results.
+Keep trace filenames and commands in the park/ledger, not absolute
+sandbox paths in repository source. The renewal41 synthesis record holds
+the exact trace lines, controls and failed form. No flag, visibility stub,
+API/type change, invented arm or code-generation annotation is justified
+by these observations.
+
