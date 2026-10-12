@@ -599,7 +599,7 @@ f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
     return datBattleParameters->partyHpScale[band];
 }
 
-s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -867,8 +867,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 bits;
 
     if (queryArg != 0 && item != NULL) {
-        hpDelta = func_00118D60(channel, queryArg, item, 1, 1);
-        mpDelta = func_00118D60(channel, queryArg, item, 1, 2);
+        hpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 1);
+        mpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 2);
         value = sdfQueryChannelValue(channel, queryArg, item);
         bits = sdfQueryChannelBits(channel, queryArg, item);
         if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {

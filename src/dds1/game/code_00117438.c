@@ -579,7 +579,7 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 
 extern s32 effMiscRandMod(s32 state, s32 modulus);
 
-s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -828,7 +828,7 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return result;
 }
 
-extern s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
+extern s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* These unused-result legacy mutator calls had no prototype in scope. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);
@@ -840,8 +840,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 bits;
 
     if (queryArg != 0 && item != NULL) {
-        hpDelta = func_00118688(channel, queryArg, item, 1, 1);
-        mpDelta = func_00118688(channel, queryArg, item, 1, 2);
+        hpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 1);
+        mpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 2);
         value = sdfQueryChannelValue(channel, queryArg, item);
         bits = sdfQueryChannelBits(channel, queryArg, item);
         if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {

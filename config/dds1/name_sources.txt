@@ -651,6 +651,7 @@
 0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118570	sdfDispatchUnitScriptDefault9	inferred	Same runtime-mode dispatch as 001184A8 but uses script 9 on the default branch.
 0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118688	sdfCalculateCommandVitalDelta	inferred	Computes the signed HP/MP delta from command power, base, vital type and effect handlers; DDS2 twin 0x00118D60.
 0x001189A0	sdfRollActionHit	inferred	Resolves a randomized roll/action result against packed value state. [names_qp9.tsv]
 0x00118DD8	sdfQueryChannelBits	inferred	returns active channel bits masked by packed flags
 0x00118E38	sdfApplyCommandResults	inferred	readability/matching review (QP16)
