@@ -2004,13 +2004,16 @@ to hide a missing generated include.
 
 DDS2 `game/code_0031CA10` covers the native no-sibling-jump run
 `0x31CA10..0x31D680`: 18 functions between sibling-calling `func_0031C940`
-and `itfDrawModelInstanceImage`. The parked `func_0031CE60` and
+and `itfDrawModelInstanceImage`. The `func_0031CE60` and
 `itfDrawUniformlyScaledIndexedImage` bodies both become exact with the flag;
 all existing matched C in the run and its neighbours remains exact. The
 projection/angle `.lit4` values and the `SpriteWork Object Size %d\n` string
 stay together in this run; no literal ownership crosses either cut.
 These are native J-run boundaries, not cuts chosen to isolate the two
-matching candidates. The claimed `func_0031CE60` body remains assembly.
+matching candidates. Both exact sites are natural C. The centred draw uses
+the existing indexed-sprite bank/work-entry macro and the draw provider's
+real `EffectSlotSet *` contract; the neighbouring rotated draw decodes the
+same resource-bank address word at that pointer boundary.
 
 ### Saved-register order: global-alloc priority
 
