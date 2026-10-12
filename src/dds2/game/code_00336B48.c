@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu_color_transform.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
@@ -70,15 +71,6 @@ typedef struct {
     u8 *vertexColors;      /* 0xA8 */
     f32 depth;             /* 0xAC */
 } VuWork;
-
-typedef struct SdfVuColorTransform {
-    u8 pad00[4];
-    f32 scaledY;
-    u8 pad08[4];
-    f32 scale;
-    f32 colorBase[4];
-    f32 colorDelta[4];
-} SdfVuColorTransform;
 
 extern void func_00336EC0(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 

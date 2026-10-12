@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu_color_transform.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
@@ -20,15 +21,6 @@
 extern u32 D_003BDA28;
 
 extern u8 D_003F98A0[];
-
-typedef struct SdfVuColorTransform {
-    u8 pad00[4];
-    f32 scaledY;
-    u8 pad08[4];
-    f32 scale;
-    f32 colorBase[4];
-    f32 colorDelta[4];
-} SdfVuColorTransform;
 
 extern void func_002DE010(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
