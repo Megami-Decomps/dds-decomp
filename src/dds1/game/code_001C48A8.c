@@ -9,6 +9,7 @@ extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "sdf.h"
+#include "btl_scene_initializer.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -1202,12 +1203,6 @@ u32 fldBeginFadeWhenSceneReady(void) {
     }
     return 0;
 }
-
-typedef struct {
-    void (*initialize)(s32);
-    s32 (*update)(s32);
-    s32 flags;
-} SceneInitializer;
 
 extern SceneInitializer D_00359A88[];
 
