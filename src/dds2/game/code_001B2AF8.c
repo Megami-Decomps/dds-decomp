@@ -2767,7 +2767,8 @@ void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
     *handle = taskHandle;
 }
 
-void func_001B88F8(BtlUnit *unit, s8 style, s8 phase, s32 unused, BattlePanelColors *colors) {
+/* Fill four packed panel colors from actor state, style, phase and scene mode. */
+void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, BattlePanelColors *colors) {
     BtlState *state = (BtlState *)btlGetRuntime();
 
     if ((unit->status.flags & 0x20) || (unit->partyRecord.status & 0x4000)) {
@@ -4070,7 +4071,8 @@ s32 func_001C0008(void) {
 }
 
 
-s32 func_001C0080(s32 arg0) {
+/* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
+s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
     s32 count;
     s32 i;
 
@@ -4713,7 +4715,7 @@ typedef struct BattleReservePositions {
 
 extern const BattleReservePositions D_004167E0;
 extern const char *D_004367D0;
-extern s32 func_001C3168(KwlnTask *);
+extern s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *);
 void btlReleaseTrackedTaskResource(void);
 void btlSlotBankPromoteStates(BattleActorPanelWork *bank);
 
@@ -4764,7 +4766,7 @@ void func_001C2450(void) {
     memory = (void *)sdfResourceRetainAddress(allocation);
     memset(memory, 0, 0x368);
     work->reserveUnitAllocation = allocation;
-    task = kwlnTaskCreate(D_004367D0, 0x2B0E, 1, 1, func_001C3168, (TaskDestroy)btlReleaseTrackedTaskResource, (u32)memory);
+    task = kwlnTaskCreate(D_004367D0, 0x2B0E, 1, 1, btlUpdateAndDrawReserveActorPanels, (TaskDestroy)btlReleaseTrackedTaskResource, (u32)memory);
     func_00101968(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(8, (s32)task);
     btlSlotBankPromoteStates(work);
@@ -4772,11 +4774,11 @@ void func_001C2450(void) {
 }
 
 extern const BattleReservePositions D_00416800;
-extern void func_001C35F0(ActionStateLink *, s8, s8);
+extern void btlSetActionActorPanelPresentation(ActionStateLink *, s8, s8);
 extern void sndSetStationedSeVolume(u32);
 
 /* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
-s32 func_001C26E0(KwlnTask *task, BtlState *battle) {
+s32 btlUpdateReservePanelSelection(KwlnTask *task, BtlState *battle) {
     BattleReservePositions positions = D_00416800;
     BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     s32 count = work->reserveCount;
@@ -4796,7 +4798,7 @@ s32 func_001C26E0(KwlnTask *task, BtlState *battle) {
                 btlSlotBankPromoteStates(work);
                 command->state = 7;
                 sndSetStationedSeVolume(0xA);
-                func_001C35F0(command->owner, 0, 0);
+                btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
                 if (D_0037F510.unk25 & 2) {
                     if (work->selectedReserveIndex != count - 1 || D_0037F510.unk25 < 0) {
@@ -4874,7 +4876,8 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C2A98);
 
 extern const BattlePanelColors D_00416820;
 
-void func_001C2EA8(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
+/* Draw a reserve row's paired pulse strips and their two offset echo layers. */
+void btlDrawReservePanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
     BattlePanelColors colors = D_00416820;
     u32 baseColor;
     s32 level = 0;
@@ -4938,12 +4941,13 @@ extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32
 extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
 extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
-extern void func_001C2EA8(BtlUnit *, BattleActorPanelWork *, s32);
+extern void btlDrawReservePanelPulse(BtlUnit *, BattleActorPanelWork *, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
 extern const BattlePanelColors D_00416830;
 extern const char D_00436818[];
 
-s32 func_001C3168(KwlnTask *task) {
+/* Refresh and draw reserve HP/MP panels; return -1 when their selection closes. */
+s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
     BtlUnit *unit;
     KwlnTask *panelTask;
     BattleActorPanelWork *work;
@@ -4960,7 +4964,7 @@ s32 func_001C3168(KwlnTask *task) {
     panelTask = kwlnTaskGetTaskByName(D_004367CC);
     work = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
     reserveCount = work->reserveCount;
-    if (func_001C26E0(panelTask, battle) == 0) {
+    if (btlUpdateReservePanelSelection(panelTask, battle) == 0) {
         return -1;
     }
     i = 0;
@@ -4990,7 +4994,7 @@ s32 func_001C3168(KwlnTask *task) {
             }
 
             func_001C2A98(unit, work, i);
-            func_001C2EA8(unit, work, i);
+            btlDrawReservePanelPulse(unit, work, i);
 
             if ((unit->partyRecord.flags & 0x1010) == 0) {
                 u32 tint = 0x80808000 | (u32)(s32)work->reserveEntries[i].presentation.fade;
@@ -5059,9 +5063,10 @@ extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 extern const char *btlCommandPanelTaskNameRef;
 extern void btlClearClosingActorRowPulses(BattleActorPanelWork *, s8);
 extern void btlUpdateActorSlotStates(u8 *, s8);
-extern void func_001C3DB0(ActionStateLink *, BattleActorPanelWork *, s8);
+extern void btlSyncActorPanelCommandGroups(ActionStateLink *, BattleActorPanelWork *, s8);
 
-void func_001C35F0(ActionStateLink *actor, s8 mode, s8 value) {
+/* Set the action actor's panel state/value and apply mode-selected group updates. */
+void btlSetActionActorPanelPresentation(ActionStateLink *actor, s8 mode, s8 value) {
     s32 count;
     u8 slot;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -5098,9 +5103,9 @@ void func_001C35F0(ActionStateLink *actor, s8 mode, s8 value) {
     work->activeEntries[slot].presentation.presentationState = 2;
     work->activeEntries[slot].presentation.presentationValue = value;
     if (mode == 0) {
-        func_001C3DB0(actor, work, 0);
+        btlSyncActorPanelCommandGroups(actor, work, 0);
     } else if (mode == 2) {
-        func_001C3DB0(actor, work, 1);
+        btlSyncActorPanelCommandGroups(actor, work, 1);
     }
 }
 void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
@@ -5300,7 +5305,8 @@ typedef struct UiSlotMatchRow {
     u8 groupIndex; /* index of the matching primary group */
 } UiSlotMatchRow;
 
-void func_001C3DB0(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
+/* Map eligible actor rows to command groups, optionally retaining active states. */
+void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWork *work, s8 keepActive) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
     UiSlotMatchRow *row;
@@ -5337,7 +5343,8 @@ extern BtlResBlock *btlResourceBlock;
 extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern const BattlePanelColors D_00416870;
 
-void func_001C43F8(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+/* Draw the active row's selected cursor sprite at its stored cursor offset. */
+void btlDrawActorPanelCursor(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     BattlePanelColors colors = D_00416870;
     s32 x = work->activeEntries[slot].position[0];
     s32 y = work->activeEntries[slot].position[1];
@@ -5435,7 +5442,8 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C4C58);
 
 extern const BattlePanelColors D_00416898;
 
-void func_001C50A0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+/* Draw active-row pulse strips and offset echo layers with presentation tint. */
+void btlDrawActorPanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     BattlePanelColors colors = D_00416898;
     s32 x;
     s32 y;
@@ -5540,7 +5548,8 @@ void func_001C53A0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 
 extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_001C5610(void *task, BattleActorPanelWork *work, s32 index) {
+/* Draw four transition triangles with per-vertex alpha; restore alpha mode. */
+void btlDrawActorPanelTransitionTriangles(void *task, BattleActorPanelWork *work, s32 index) {
     s32 x;
     s32 y;
     u32 alpha[8];
@@ -5693,7 +5702,8 @@ void btlAdvanceActorSlotEchoAnimation(BtlUnit *unusedUnit, BattleActorPanelWork 
 
 extern const BattlePanelColors D_004168C8;
 
-void func_001C5D10(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+/* Draw the active row's secondary pulse strips using their own fade and offsets. */
+void btlDrawActorPanelSecondaryPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     BattlePanelColors colors = D_004168C8;
     s32 x;
     s32 y;
@@ -6168,7 +6178,7 @@ s32 btlUpdateCommandUiTransition(void) {
             flow->counter = counter;
             if (btlAreLinkedSceneCountersAtThreshold() != 0) {
                 if (task != NULL) {
-                    func_001C35F0(((BattleSceneObject *)kwlnTaskGetUserValue(task))->owner, 2, 0);
+                    btlSetActionActorPanelPresentation(((BattleSceneObject *)kwlnTaskGetUserValue(task))->owner, 2, 0);
                 }
                 btlTrackedTaskHandles->status.bytes.state = 0;
             }
@@ -7101,7 +7111,7 @@ void func_001CAB60(ActionStateLink *task) {
                                 (u32)object);
         func_00101968(scene->scriptOwner, handle);
         scene->sceneObject = handle;
-        func_001C35F0(task, 0, 0);
+        btlSetActionActorPanelPresentation(task, 0, 0);
         btlInitializeSelectionWork();
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();

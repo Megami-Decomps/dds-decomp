@@ -167,7 +167,7 @@ u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001B83D8(BtlTask *, s8, s8);
+extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
 extern s32 btlGetRuntime(void);
 
@@ -175,7 +175,7 @@ extern s32 datActionAnimationRecords;
 
 void func_001A1948();
 
-extern void func_001B83D8(BtlTask *, s8, s8);
+extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
@@ -867,7 +867,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
 }
 
 void btlMarkSceneTaskAfterReset(BtlTask *task) {
-    func_001B83D8(task, 0, 0);
+    btlSetActionActorPanelPresentation(task, 0, 0);
     task->flags |= 0x20;
 }
 
