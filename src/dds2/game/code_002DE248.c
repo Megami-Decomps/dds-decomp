@@ -8999,8 +8999,8 @@ extern u32 D_003E9FB0[];
 extern s32 D_00437EB4;
 extern SdfPoolNode D_0037FF48;
 extern u32 kwlnGetFrameCounter(void);
-extern void func_00108D80(void);
-extern void func_00108E20(void);
+extern void evtSubmitPrimaryFramePacket(void);
+extern void evtSubmitAlternateFramePacket(void);
 extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
@@ -9033,12 +9033,12 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     surface = kwlnGetFrameCounter();
     if ((s32)D_00437EB4 != (s32)surface) {
         evtSetDrawSurfaceIndex(0x20);
-        func_00108D80();
+        evtSubmitPrimaryFramePacket();
         evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
         evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0,
             0x80808080, 0x80808080,
             0x80808080, 0x80808080);
-        func_00108E20();
+        evtSubmitAlternateFramePacket();
     }
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);

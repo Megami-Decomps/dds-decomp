@@ -237,7 +237,7 @@ extern void dds3AdminSetControlFlag(void);
 extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
 
 
-extern s32 func_0010AEC0(struct KwlnTask *);
+extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
 
 extern void *D_00438E64;
 
@@ -503,7 +503,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     }
 }
 
-void func_00108D80(void) {
+void evtSubmitPrimaryFramePacket(void) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
@@ -516,7 +516,7 @@ void func_00108D80(void) {
     }
 }
 
-void func_00108E20(void) {
+void evtSubmitAlternateFramePacket(void) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
@@ -1068,7 +1068,7 @@ u32 func_0010A680(void) {
     return 0;
 }
 
-void func_0010A688(void) {
+void evtCreateCampTasks(void) {
     mnuCreateCampTasks();
 }
 
@@ -1232,7 +1232,7 @@ u32 func_0010A990(void) {
     return 0;
 }
 
-void func_0010A998(void) {
+void evtCreateCampTasksAlternate(void) {
     mnuCreateCampTasks();
 }
 
@@ -1480,7 +1480,7 @@ extern u16 D_00435D40;
 extern u16 D_00435D42;
 extern char D_00435D48[];
 
-s32 func_0010AEC0(struct KwlnTask *task) {
+s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     SdfListHead *list;
     void *packet;
@@ -1522,7 +1522,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411380);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_0010AEC0, func_0010B110, NULL);
+        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, func_0010B110, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_00438E64, 0);
     }
@@ -1616,7 +1616,7 @@ extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
 extern void EIntr(void);
 
-void func_0010B3D8(void *list, s32 x, s32 y) {
+void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     HeapOverlayBlock *snapshot;
     HeapOverlayBlock *entry;
     SdfMemBlock *block;
@@ -1675,7 +1675,7 @@ void func_0010B3D8(void *list, s32 x, s32 y) {
 extern char D_00435D50[];
 extern char D_00435D58[];
 extern void func_0035C860(char *buffer, const char *format, ...);
-extern void func_0010B3D8(void *list, s32 source, s32 end);
+extern void sdfDrawHeapMapOverlay(void *, s32, s32);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.
    Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
@@ -1690,7 +1690,7 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     sdfGetChipHeapStats(&chipHeapStats);
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
-    func_0010B3D8(packetList, 0x8AC0, 0x79C0);
+    sdfDrawHeapMapOverlay(packetList, 0x8AC0, 0x79C0);
     func_0035C860(statusText, D_00435D50, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText));

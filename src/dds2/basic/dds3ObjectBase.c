@@ -376,8 +376,8 @@ s32 dds3RegisterObjectInHandlerIndex(void *object) {
 extern void evtSetDrawSurfaceIndex(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
-extern void func_00108D80(void);
-extern void func_00108E20(void);
+extern void evtSubmitPrimaryFramePacket(void);
+extern void evtSubmitAlternateFramePacket(void);
 extern void evtSubmitGradientRectAtDepth();
 struct SdfPoolNode;
 extern struct SdfPoolNode *D_00380818[4];
@@ -390,16 +390,16 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     base = dds3GetObjectOwnedHandle(object);
     evtSetDrawSurfaceIndex(0x4A);
     evtSubmitPrimaryAlphaBlendMode(0);
-    func_00108D80();
+    evtSubmitPrimaryFramePacket();
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0x0FFFFFFF, 0x80000000, 0x80000000, 0x80000000, 0x80000000);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     evtSetDrawSurfaceIndex(0x4B);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
-    func_00108D80();
+    evtSubmitPrimaryFramePacket();
     evtSetDrawSurfaceIndex(0x4C);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
-    func_00108D80();
+    evtSubmitPrimaryFramePacket();
 
     context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
@@ -409,7 +409,7 @@ void dds3DrawObjectWithGradientOverlay(void *object) {
     dds3SetObjectFlags(object, 0x10000);
 
     evtSetDrawSurfaceIndex(0x4E);
-    func_00108E20();
+    evtSubmitAlternateFramePacket();
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 2);
     evtSubmitGradientRectAtDepth(0, 0, 0x200, 0x1C0, 0x0EFFFFFF, 0x30586670, 0x30586670, 0x30586670, 0x30586670);

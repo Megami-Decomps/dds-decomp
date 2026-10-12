@@ -181,7 +181,7 @@ extern s8 D_0032453B[];
 extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
 
 
-extern s32 func_0010AC98(struct KwlnTask *);
+extern s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *);
 
 extern void *D_003BD764;
 
@@ -197,7 +197,7 @@ extern s32 D_003BD3C8;
 
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern s32 func_0010B590(KwlnTask *task);
+extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
 
 extern void *D_003BD768;
 
@@ -496,7 +496,7 @@ extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(s32, SdfDmaReferenceChainPacket *, s32);
 
 
-void func_00108E60(void) {
+void evtSubmitPrimaryFramePacket(void) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
@@ -511,7 +511,7 @@ void func_00108E60(void) {
 
 extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
 
-void func_00108F00(void) {
+void evtSubmitAlternateFramePacket(void) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfInitPacketList(list);
@@ -1080,7 +1080,7 @@ u32 func_0010A540(void) {
     return 0;
 }
 
-void func_0010A548(void) {
+void evtCreateCampTasks(void) {
     mnuCreateCampTasks();
 }
 
@@ -1246,7 +1246,7 @@ u32 func_0010A850(void) {
     return 0;
 }
 
-void func_0010A858(void) {
+void evtCreateCampTasksAlternate(void) {
     mnuCreateCampTasks();
 }
 
@@ -1445,7 +1445,7 @@ extern u16 D_003BA970;
 extern u16 D_003BA972;
 extern char D_003BA978[];
 
-s32 func_0010AC98(struct KwlnTask *task) {
+s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     SdfListHead *list;
     void *packet;
@@ -1487,7 +1487,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E200);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_0010AC98, func_0010AEE8, NULL);
+        D_003BD764 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, func_0010AEE8, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD764, 0);
     }
@@ -1581,7 +1581,7 @@ extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
 extern void EIntr(void);
 
-void func_0010B1B0(void *list, s32 x, s32 y) {
+void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     HeapOverlayBlock *snapshot;
     HeapOverlayBlock *entry;
     SdfMemBlock *block;
@@ -1638,7 +1638,7 @@ void func_0010B1B0(void *list, s32 x, s32 y) {
 
 
 
-extern void func_0010B1B0(void *, s32, s32);
+extern void sdfDrawHeapMapOverlay(void *, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
 extern char D_003BA980[];
 extern char D_003BA988[];
@@ -1656,7 +1656,7 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     sdfGetChipHeapStats(&chipHeapStats);
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
-    func_0010B1B0(packetList, 0x86C0, 0x79C0);
+    sdfDrawHeapMapOverlay(packetList, 0x86C0, 0x79C0);
     func_003014F0(statusText, D_003BA980, generalHeapStats.freeBytes);
     sdfAppendPacket(packetList, (u32)(sdfCreateFormattedSifCommand(0x86C0,
         (D_003BA97C / (D_003BA97C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText)));
@@ -1681,7 +1681,7 @@ extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
-s32 func_0010B590(KwlnTask *task) {
+s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     SdfGeneralHeapStats heapStats;
     s32 heapRatio;
     SdfListHead *list;
@@ -1714,7 +1714,7 @@ void func_0010B6A8(void) {
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, (void (*)(void))func_0010B590, func_0010B6A8, NULL);
+        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, (void (*)(void))evtDrawResourceCountDebugTask, func_0010B6A8, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD768, 0);
     }
