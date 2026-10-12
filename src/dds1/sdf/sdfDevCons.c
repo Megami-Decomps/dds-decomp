@@ -44,7 +44,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
 void sdfDevConsAppendBackgroundSprite(DevConsState *arg0, ConsBuf *arg1);
 void sdfDevConsDrawGlyphGrid(DevConsState *arg0, ConsBuf *arg1);
 void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
-s32 func_00305B08(char *destination, const char *format, void *args);
+s32 sdfVFormatString(char *destination, const char *format, void *args);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
@@ -132,7 +132,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     s32 characterCount = 0;
     s32 character;
     __builtin_stdarg_start(arguments, format);
-    func_00305B08(textBuffer, format, arguments);
+    sdfVFormatString(textBuffer, format, arguments);
     character = textBuffer[0];
     if (character != 0) {
         do {

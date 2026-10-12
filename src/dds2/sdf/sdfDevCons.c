@@ -33,7 +33,7 @@ extern void *memset(void *dst, s32 c, u32 n);
 
 void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
 
-s32 func_00360E78(char *destination, const char *format, void *args);
+s32 sdfVFormatString(char *destination, const char *format, void *args);
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
 void sdfDevConsAdvanceRow(DevConsState *console) {
@@ -111,7 +111,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     s32 characterCount = 0;
     s32 character;
     __builtin_stdarg_start(arguments, format);
-    func_00360E78(textBuffer, format, arguments);
+    sdfVFormatString(textBuffer, format, arguments);
     character = textBuffer[0];
     if (character != 0) {
         do {
