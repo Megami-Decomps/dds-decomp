@@ -7,7 +7,7 @@ extern s32 scrReadIntParameter(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
 extern u32 func_0011B140();
 extern u32 func_0011B148();
-extern u32 func_0011B150();
+extern u32 ptyReturnOne();
 
 extern void frFontSetGlyphPosition(struct FrFontGlyph *glyph, u32 x, u32 y);
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
@@ -42,7 +42,7 @@ u32 func_0011CF38(void) {
 }
 
 u32 func_0011CF88(void) {
-    scrSetIntegerReturnValue(func_0011B150(scrReadIntParameter(0)) == 1);
+    scrSetIntegerReturnValue(ptyReturnOne(scrReadIntParameter(0)) == 1);
     return 1;
 }
 
