@@ -931,7 +931,7 @@ u8 func_002010D8(void) {
     return result != 0;
 }
 
-extern void func_001A30F8(s32, BtlIndexList *, s32, s32, s32);
+extern s32 func_001A30F8(void *, BtlIndexList *, s32, s32, s32);
 
 /* Query the context's index list, freeing it on both the first success and exhausted-list paths. */
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
@@ -944,7 +944,7 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     }
     contextAddress = (s32)btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    func_001A30F8(contextAddress, indexList, 2, 0, 0);
+    func_001A30F8((void *)contextAddress, indexList, 2, 0, 0);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {

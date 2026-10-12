@@ -1914,7 +1914,7 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
 extern s32 func_001ABB10(BtlUnit *, s32);
 
-extern u32 func_001AC360(ActionStateLink *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
 
@@ -1977,7 +1977,7 @@ void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
         unit->partyRecord.unk1AC = work->phase;
         unit->partyRecord.actionSlot = work->skillId;
         list = btlAllocateIndexList(13);
-        kind = func_001AC360(task, list, 0);
+        kind = btlSelectCommandTargetPolicy(task, list, 0);
         reason = btlGetCommandTargetEligibility(list, work->skillId);
         switch (reason) {
         case 5:
@@ -1988,7 +1988,7 @@ void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
             unit->partyRecord.actionSlot = work->skillId;
             unit->partyRecord.unk1AC = work->phase;
             btlClearIndexList(list);
-            kind = func_001AC360(task, list, 0);
+            kind = btlSelectCommandTargetPolicy(task, list, 0);
             break;
         }
         count = btlGetIndexListCount(list);
@@ -2021,7 +2021,7 @@ void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
         work->skillId = 0;
         work->phase = 1;
         list = btlAllocateIndexList(13);
-        kind = func_001AC360(task, list, 0);
+        kind = btlSelectCommandTargetPolicy(task, list, 0);
         btlGetIndexListCount(list);
         btlClearIndexList(work->indices);
         switch (kind) {

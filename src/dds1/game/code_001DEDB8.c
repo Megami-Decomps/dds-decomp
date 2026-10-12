@@ -6817,7 +6817,7 @@ extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
-    u32 id = sound->id;
+    u32 id = sound->work.id;
     u32 category = sound->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
@@ -6862,9 +6862,9 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
             if (slot != 0xB) {
                 func_003014F0(filename, D_003A5158, D_003BB6B0, id >> 16);
             } else if (sound->category == 0) {
-                func_003014F0(filename, D_003A5178, D_003A5188, sound->id);
+                func_003014F0(filename, D_003A5178, D_003A5188, sound->work.id);
             } else {
-                func_003014F0(filename, D_003A5198, D_003A5188, sound->id);
+                func_003014F0(filename, D_003A5198, D_003A5188, sound->work.id);
             }
             *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
@@ -6880,7 +6880,7 @@ SoundSlotOwner *sndFindListNodeForChannel(s32 category, s32 id) {
     s32 context = btlGetRuntime();
     SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
-        if (node->category == category && node->id == id) {
+        if (node->category == category && node->work.id == id) {
             return node;
         }
         node = node->next;
@@ -6903,7 +6903,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     }
     node = sdfAllocAndClearQuadwords(0x108);
     node->category = category;
-    node->id = id;
+    node->work.id = id;
     node->work.refCount = 1;
     context = (BtlActorWork *)btlGetRuntime();
     node->prev = 0;
@@ -6994,7 +6994,7 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (owner->work.resourceHandles[args->slot] == 0) {
         return;
     }
-    table = btlSelectSideIndexedActorParameterTable(owner->category, owner->id);
+    table = btlSelectSideIndexedActorParameterTable(owner->category, owner->work.id);
     entry = &table[args->slot];
     args->option = entry->fileId;
     if (args->slot != 0xB) {

@@ -242,7 +242,8 @@ extern void mnuSortItems(struct MenuList *, s32, s32);
 extern void ptySkillMenuDrawEntry();
 extern u8 D_0037CD08[];
 
-void func_00274B80(u32 context) {
+/* Select the visual category used by the party-selection window. */
+void mnuSelectPartySelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(4, context);
 }
 
@@ -461,7 +462,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     memset(menu, 0, sizeof(*menu));
     menu->allocation = allocation;
 
-    func_00274B80((u32)context);
+    mnuSelectPartySelectionVisuals((u32)context);
     mnuCreatePartySelectionWindow(context);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[0],
                                 (EffectSlotSet *)context->panelResource, 0x11, 0x21, -1);
@@ -741,7 +742,8 @@ u8 mnuIsStateNotOne(void) {
     return result != 1;
 }
 
-void func_002762B0(u32 context) {
+/* Select the visual category used while the staff/party view is active. */
+void mnuSelectStaffSelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(3, context);
 }
 
@@ -793,7 +795,7 @@ s32 func_00276368(KwlnTask *task, s32 flag) {
     } else {
         state->staffMode = 1;
     }
-    func_002762B0(context);
+    mnuSelectStaffSelectionVisuals(context);
     state->active = 1;
     mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)((CampMenuContext *)context)->display,
                                               ((CampMenuContext *)context)->staffVariant, 0, 1);
@@ -810,7 +812,8 @@ s32 mnuStaffCloseSelectionState(KwlnTask *task) {
     return 1;
 }
 
-void func_00276478(u32 context) {
+/* Open selection work in staff-view mode; the task argument is forwarded unchanged. */
+void mnuOpenStaffSelectionEntry(u32 context) {
     func_00276368(context, 1);
 }
 
@@ -818,7 +821,8 @@ void func_00276490(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 
-void func_002764A8(u32 context) {
+/* Open the same selection work in party-view mode. */
+void mnuOpenPartySelectionEntry(u32 context) {
     func_00276368(context, 0);
 }
 
@@ -1431,7 +1435,8 @@ MenuWindowContainer *ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *conte
     return window;
 }
 
-void func_00277DD0(u32 context) {
+/* Select the visual category used by the skill-selection windows. */
+void mnuSelectSkillSelectionVisuals(u32 context) {
     mnuSetStaffDisplayMode(1, context);
 }
 
@@ -1507,7 +1512,8 @@ s32 mnuBuildSkillCodeBitset(void) {
 }
 
 
-void func_002782E0(u32 *bits) {
+/* Release the temporary skill-code bitmap allocated for page construction. */
+void mnuReleaseSkillCodeBitset(u32 *bits) {
     sdfReleaseChipBlock(bits);
 }
 
@@ -1602,7 +1608,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
             mnuSeekListNode(firstFilled, menu->categoryList);
         }
         ptySkillMenuRefreshEntries(context);
-        func_002782E0(skillBits);
+        mnuReleaseSkillCodeBitset(skillBits);
         menu->active = 1;
     }
 }
@@ -1631,7 +1637,7 @@ s32 mnuCampMenuInit(KwlnTask *task) {
     work->menu = menu;
     memset(menu, 0, 0x38);
     *menu = handle;
-    func_00277DD0(context);
+    mnuSelectSkillSelectionVisuals(context);
     mnuForwardDupArg((MenuWindowContainer *)work->panelList,
                      (struct EffectSlotSet *)work->option, 0, 0, 0);
     switch (((MenuWindowContainer *)work->panel)->list->cursor->index) {

@@ -7254,7 +7254,86 @@ void func_001CB278(SceneAiWork *work, s32 mode) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416BB8);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CB498);
+void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
+    switch (work->animationPhase) {
+    case 0:
+        work->panelScale[0] = 90.0f;
+        work->panelScale[1] = 80.0f;
+        work->panelScale[2] = 90.0f;
+        work->panelScale[3] = 80.0f;
+        work->panelFade[1] = work->panelFade[3] = 128;
+        work->animationPhase = 4;
+        work->animationCounter = 20;
+        break;
+    case 1:
+        work->panelFade[1] += 128;
+        work->panelFade[1] = work->panelFade[1] <= 0 ? 0 : work->panelFade[1] > 128 ? 128 : work->panelFade[1];
+        if (work->panelFade[1] >= 128) {
+            work->animationPhase++;
+        }
+        break;
+    case 2:
+        work->panelFade[0] += 64;
+        work->panelFade[0] = work->panelFade[0] <= 0 ? 0 : work->panelFade[0] > 255 ? 255 : work->panelFade[0];
+        work->panelFade[2] += 64;
+        work->panelFade[2] = work->panelFade[2] <= 0 ? 0 : work->panelFade[2] > 255 ? 255 : work->panelFade[2];
+        if (work->panelFade[2] >= 255) {
+            work->animationPhase++;
+        }
+        break;
+    case 3:
+        work->panelScale[0] += 3.0f;
+        if (work->panelScale[0] >= 110.0f) {
+            work->panelScale[0] = 110.0f;
+        }
+        work->panelScale[2] += 3.0f;
+        if (work->panelScale[2] >= 110.0f) {
+            work->panelScale[2] = 110.0f;
+        }
+        work->panelFade[0] -= 24;
+        work->panelFade[0] = work->panelFade[0] <= 0 ? 0 : work->panelFade[0] > 255 ? 255 : work->panelFade[0];
+        work->panelFade[2] -= 32;
+        work->panelFade[2] = work->panelFade[2] <= 0 ? 0 : work->panelFade[2] > 255 ? 255 : work->panelFade[2];
+        if (work->panelFade[0] <= 0) {
+            work->animationPhase++;
+        }
+        break;
+    case 4:
+        work->animationCounter++;
+        work->animationCounter = work->animationCounter <= 0 ? 0 : work->animationCounter > 20 ? 20 : work->animationCounter;
+        if (work->animationCounter > 0) {
+            work->animationPhase++;
+            work->panelFade[0] = 192;
+            work->panelFade[2] = 192;
+            work->panelScale[0] = 90.0f;
+            work->panelScale[2] = 90.0f;
+            work->rowPhase[0] = 0;
+            work->rowPhase[1] = 0;
+            work->rowPhase[2] = 0;
+        }
+        break;
+    case 5:
+        work->panelFade[0] -= 8;
+        work->panelFade[0] = work->panelFade[0] <= 0 ? 0 : work->panelFade[0] > 192 ? 192 : work->panelFade[0];
+        work->panelFade[2] -= 6;
+        work->panelFade[2] = work->panelFade[2] <= 0 ? 0 : work->panelFade[2] > 192 ? 192 : work->panelFade[2];
+        work->panelScale[0] -= 2.0f;
+        if (work->panelScale[0] <= 60.0f) {
+            work->panelScale[0] = 60.0f;
+        }
+        work->panelScale[2] -= 2.0f;
+        if (work->panelScale[2] <= 60.0f) {
+            work->panelScale[2] = 60.0f;
+        }
+        if (work->panelFade[2] <= 0) {
+            work->animationPhase = 4;
+            work->panelScale[0] = 90.0f;
+            work->panelScale[2] = 90.0f;
+            work->animationCounter = 0;
+        }
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416C98);
 
@@ -7413,7 +7492,7 @@ void func_001CC020(BtlState *scene, SceneAiWork *state, s32 mode) {
 extern const u8 *D_00435E48;
 extern const u8 *D_00435E4C;
 extern const u8 *D_00435E60;
-extern void func_001CB498(SceneAiWork *work, s32 mode);
+extern void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode);
 extern void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index);
 extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
@@ -7480,7 +7559,7 @@ void func_001CC438(SceneAiWork *work) {
         }
     }
     func_001CB278(work, 0);
-    func_001CB498(work, 0);
+    btlAdvanceTargetPanelAnimation(work, 0);
     for (i = 0; i < count; i++) {
         unit = btlGetIndexListEntry(work->listB, i);
         if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
@@ -7549,9 +7628,9 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
 
 
 
-extern void func_001AC0F8(s32 source, BtlIndexList *list, s32, s32, s32);
+extern s32 func_001AC0F8(void *source, BtlIndexList *list, s32, s32, s32);
 
-extern s32 func_001AC360(s32 source, BtlIndexList *list, s32);
+extern u32 btlSelectCommandTargetPolicy(ActionStateLink *source, BtlIndexList *list, s32);
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 source, BtlIndexList *list);
 
@@ -7572,14 +7651,14 @@ s32 btlCreateAiWork(s32 source) {
         other = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
-            func_001AC0F8(source, work->listA, 1, 4, -0x4801);
+            func_001AC0F8((void *)source, work->listA, 1, 4, -0x4801);
         } else {
-            func_001AC0F8(source, work->listA, 1, 4, -1);
+            func_001AC0F8((void *)source, work->listA, 1, 4, -1);
         }
         btlGetIndexListCount(work->listA);
         work->result = 0;
     } else if (source != 0) {
-        work->result = func_001AC360(source, work->listA, 0);
+        work->result = btlSelectCommandTargetPolicy((ActionStateLink *)source, work->listA, 0);
     }
     work->entry = 0;
     switch (work->result) {

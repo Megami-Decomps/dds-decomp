@@ -1884,7 +1884,75 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
 
 INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC0F8);
 
-INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC360);
+extern s32 func_001AC0F8(void *, BtlIndexList *, s32, s32, s32);
+
+extern s32 datRosterDetails;
+u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
+    s32 category = 3;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 mode = 0;
+    s32 flags = 0;
+    s32 mask = 0;
+    s32 value = task->indexWork.phase;
+
+    switch (value) {
+    case 1: {
+        BtlUnit *actor = task->unit;
+        if ((btlUnitStatusPair(actor) & 0x1400) || (actor->partyRecord.flags & 0x10)) {
+            if (btlCheckSpecialAbility(&actor->partyRecord, 0x23E) != 0) {
+                category = 1;
+                task->unit->unk314 = 0x23E;
+            } else {
+                category = 0;
+            }
+            mode = 2;
+            flags = 0;
+            mask = 0;
+        } else {
+            value = actor->partyRecord.unitId;
+            category = ((EventRosterStat *)datRosterDetails)[value].targetType;
+            mode = ((EventRosterStat *)datRosterDetails)[value].options;
+            flags = ((EventRosterStat *)datRosterDetails)[value].targetFlags;
+            mask = ((EventRosterStat *)datRosterDetails)[value].restriction;
+        }
+        break;
+    }
+    case 2:
+    case 3:
+    case 4:
+    case 7:
+    case 8: {
+        if (value == 4) {
+            value = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+        } else {
+            value = task->indexWork.skillId;
+        }
+        category = datCommandRecords[value].targetType;
+        mode = datCommandRecords[value].options;
+        flags = datCommandRecords[value].unk_0A[0];
+        mask = datCommandRecords[value].restriction;
+        if ((datCommandRecords[value].attribute.bits & 0x400000FF) == 0x40000002 && mask == 0) {
+            mask = -1;
+        }
+        break;
+    }
+    case 9:
+        category = 0;
+        mode = 1;
+        flags = 4;
+        mask = -1;
+        break;
+    }
+    if (battle->unk220 & 0x800) {
+        mode = 3;
+        flags &= ~0xB;
+        mask = 0;
+    }
+    if (destination != NULL) {
+        func_001AC0F8(task, destination, mode, flags, mask);
+    }
+    return category;
+}
 
 extern s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *arg1);
 
@@ -3274,7 +3342,6 @@ f32 func_001B0B20(void) {
     return 1.5f;
 }
 
-extern s32 datRosterDetails;
 
 u8 func_001B0B30(BtlUnit *unit, s32 command) {
     BattleController *controller = (BattleController *)btlGetRuntime();

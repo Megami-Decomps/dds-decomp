@@ -2371,7 +2371,7 @@ void func_001FB178(f32 *position, f32 radius, u32 color, s32 flags) {
 void func_001FB180(void) {
 }
 
-void func_001FB188(void) {
+void func_001FB188(const f32 *position, u32 color, s32 mode, f32 scale) {
 }
 
 void func_001FB190(void) {
@@ -2968,7 +2968,8 @@ void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32
     descriptor->originY = y;
 }
 
-u32 func_001FBF40(s32 recordAddress) {
+/* Read the browser descriptor's zero-based selected entry index. */
+u32 btlGetResourceBrowserSelectedIndex(s32 recordAddress) {
     const u32 *recordWords = (const u32 *)recordAddress;
     return recordWords[5];
 }
@@ -3092,7 +3093,8 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
     return record;
 }
 
-void func_001FC2E8(void *allocation) {
+/* Release the chip allocation used for an editable resource-name record. */
+void btlDestroyResourceNameRecord(void *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 

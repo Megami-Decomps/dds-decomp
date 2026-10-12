@@ -206,7 +206,8 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 func_0027A0A8(KwlnTask *callback) {
+/* Run the skill-detail panel's phase-two control and return its result. */
+s32 mnuStepSkillDetailControl(KwlnTask *callback) {
     return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
@@ -436,7 +437,8 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
-s32 func_0027AC00(KwlnTask *callback) {
+/* Run the camp-status panel's phase-two control and return its result. */
+s32 mnuStepCampStatusControl(KwlnTask *callback) {
     return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 

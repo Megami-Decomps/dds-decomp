@@ -30,7 +30,7 @@ extern void *memmove(void *dst, const void *src, u32 n);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-void func_0033CE08(DevConsState *arg0, s32 arg1, s32 arg2);
+void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
 
 s32 func_00360E78(char *destination, const char *format, void *args);
 
@@ -49,7 +49,8 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
     console->cursorColumn = 0;
 }
 
-void func_0033CE08(DevConsState *console, s32 character, s32 attribute) {
+/* Store one character/attribute cell, interpreting cursor controls and row wrap. */
+void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute) {
     s32 count;
     s32 remainder;
     s32 tabWidth;
@@ -98,7 +99,7 @@ void func_0033CE08(DevConsState *console, s32 character, s32 attribute) {
 
 /* Forward a character and explicit attribute to the console renderer. */
 void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
-    func_0033CE08(console, character, attribute);
+    sdfDevConsStoreCharacter(console, character, attribute);
 }
 
 /* Return the emitted character count. The formatter receives no buffer limit. */
@@ -114,7 +115,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     if (character != 0) {
         do {
             characterCount++;
-            func_0033CE08(console, character, console->textAttribute);
+            sdfDevConsStoreCharacter(console, character, console->textAttribute);
             textCursor = textBuffer + characterCount;
             character = *textCursor;
         } while (character != 0);
@@ -160,7 +161,7 @@ extern u32 D_00439194;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
-void func_0033D068(ConsBuf *buffers) {
+void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
     u8 *cursor = buffers->writeCursor;
     vu64 *tag = (vu64 *)buffers->currentTag;
     s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
@@ -188,7 +189,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
     u32 *channelRegisters;
     u32 nextBufferIndex;
 
-    func_0033D068(packetBuffers);
+    sdfDevConsFinalizeGlyphTag(packetBuffers);
     packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
     if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
         channelRegisters = packetBuffers->dmaChannel;
@@ -212,7 +213,7 @@ void func_0033D1A8(DevConsState *console, ConsBuf *packetBuffers) {
     u32 origin;
     u32 extent;
 
-    func_0033D068(packetBuffers);
+    sdfDevConsFinalizeGlyphTag(packetBuffers);
     if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
         sdfDevConsKickPacketDma(packetBuffers);
     }
@@ -302,7 +303,7 @@ void func_0033D2D8(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void func_0033D480(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
@@ -342,17 +343,17 @@ typedef struct DevConsStackPackets {
 } DevConsStackPackets;
 
 extern DevConsState *D_00438AB0;
-void func_0033D480(ConsBuf *arg0, void *arg1, s32 arg2);
+void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
 void func_0033D2D8(DevConsState *arg0, ConsBuf *arg1);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
-void func_0033D568(void) {
+void sdfDevConsRenderAll(void) {
     DevConsStackPackets storage;
     ConsBuf packetBuffers;
     DevConsState *console;
 
     if (D_00438AB0 != NULL) {
-        func_0033D480(&packetBuffers, storage.data, 0x1000);
+        sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
         for (console = D_00438AB0; console != NULL; console = console->unk4) {
             func_0033D2D8(console, &packetBuffers);
         }

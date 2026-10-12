@@ -1865,7 +1865,7 @@
 0x001943F8	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
 0x00194400	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)
 0x00194428	effMagatuhiUpdateDriftFamily	inferred	readability/matching review (QP16)
-0x00194668	effMagatuhiDispatchByKind	inferred	switch on func_0018CBC0 result (5-entry jump table) [names_M61_EffVu.tsv]
+0x00194668	effMagatuhiDispatchByKind	inferred	switch on effGetDispatchType result (5-entry jump table) [names_M61_EffVu.tsv]
 0x00194A68	effReturnCallbackValue	inferred	medium confidence; src/dds2/game/code_00194700.c func_00194A68: Returns the signed callback argument unchanged. [names_reviewed25.tsv]
 0x00195060	effCreateResourceListDescriptor	inferred	confidence=high; src/dds2/game/code_00194700.c:func_00195060; Allocates a descriptor, initializes its fixed state words and retains the input list head, count and owner reference. [names_qp9.tsv]
 0x00195638	effSetWorkTextureResource	inferred	confidence=high; matched-C; src/dds2/game/code_00194700.c:404:effSetupWorkSound; Correction of effSetupWorkSound: releases old texture reference, loads resource, retains its texture and releases temporary resource; no sound work occurs.; twin=0x0018DA00, anchored ordered retail pairing.; correction: replace existing semantic name, not a placeholder rename.; sources=names_R_Names35.tsv [names_qp10.tsv]

@@ -515,7 +515,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void func_00129900(s32);
 
-extern void fldSelectDisplayBuffer(s32);
+extern void fldSelectDisplayBuffer(u32);
 
 extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -590,7 +590,7 @@ extern void func_0012AEB0(void);
 
 extern u32 D_0032E570[];
 
-extern void fldSelectDisplayBuffer(s32);
+extern void fldSelectDisplayBuffer(u32);
 
 s32 fldTestDrawUpdate(void) {
     if (fldGetEncounterRuntimeResult() != 0) {
@@ -673,7 +673,7 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011EA10);
 extern u8 dds3TestObjectFlags(void *object, s32 mask);
 
 
-extern void fldSelectDisplayBuffer(s32);
+extern void fldSelectDisplayBuffer(u32);
 
 extern void fldSubmitBackgroundResourcePacket(void);
 
