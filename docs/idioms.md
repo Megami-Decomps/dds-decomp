@@ -7912,3 +7912,29 @@ entry use gives the coordinate stores their correct register-death weights.
 Retail stores X before the branch and Y in its delay slot. Preserve the
 natural setup phase rather than introducing extra temporaries or reversing
 coordinate assignments to steer the final slot.
+
+## Column emitters preserve physical quantities and capture phases
+
+DDS1 `func_002ACA40` and DDS2 `func_002EFE20` update 0x30-byte particles and
+their segmented ribbon geometry. Recover the actual motion quantities before
+diagnosing a small floating-register difference. Burst fast-forward computes
+`gravityDisplacement = gravity * ageF * ageF * 0.5f` before applying the radius
+and vertical updates, then adds that displacement after subtracting drag.
+This preserves each left-associative float operation. Computing this real
+quantity in that phase closes the birth allocation and scheduling differences;
+an earlier snapshot of vertical position alone leaves them unchanged.
+
+After constructing the next direction, capture quarter width before dividing
+extent by segment count. These are distinct physical parameters in adjacent
+record fields. Their capture phase changes the actual pre-allocation intervals
+and recovers retail's floating-register homes. Acquire the ribbon's position,
+UV and color cursors together with its row stride; the final owner use also
+affects scheduler register-death weights. Inspect the actual quantities and
+dependencies before testing a supported phase correction, and preserve helper
+read boundaries and float rounding order.
+
+These callbacks initialize only XYZ before loading their temporary vectors
+with the SDK quadword macros. VU operations keep W separate from XYZ, and the
+packet builder stores positions through `EE_MMI_STORE_VEC3_VALUE`, discarding
+W. Preserve this native partial-vector contract rather than inventing a
+fourth-lane initializer.
