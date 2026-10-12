@@ -8077,3 +8077,26 @@ The initializer retains the existing SDK matrix load/store macros seen at
 native +0x198..+0x1B8, and leaves the model-sampling prefix untouched for
 kind-4 tracks that receive their endpoints directly.
 
+## Trace-justified narrowing: packed range index
+
+DDS2 `func_002115B8` (0x002115B8, 160 bytes) either returns the route byte or
+samples between the first and last marked positions in its seven-bit
+mask. The one-based first position is converted in place to a zero-based
+`u8` index after computing the inclusive count. This also retains retail's
+byte wrap for an empty mask; no special-case fallback is introduced.
+
+Property P is that the loop's first-position value remains the used byte
+state through normalization and the RNG call. Vendor-cc1's CSE trace retains
+the `first + 255` and zero extension in that same pseudo (uid119/uid121,
+reg87); the count is computed from the still-one-based position. In sched2,
+`dependents` selects normalization ahead of the count increment, and
+`last_insn_class` then places the increment immediately before the call.
+Reorg accepts that increment (uid112) in the RNG call's delay slot. The
+hooked and unhooked assembly and RTL dumps are identical; the whole unit
+gates 90 match, 0 differ. The prior separate-base draft retained fourteen
+differing words; the earlier battery's base-merge hint retained eight.
+
+The RNG declaration uses the provider's existing `struct EffRandState` tag
+and unsigned return. NULL selects its shared state. There is no new state
+view, assembly, register pin, steering cast or unused staging value.
+
