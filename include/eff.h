@@ -480,8 +480,10 @@ struct EffTrackPolyList;
 typedef struct ParKindState {
     u16 kind;
     u8 pad02[2];
-    u16 templateEntryCount; /* 0x04: subrecords per particle in template clones */
-    u8 pad06[2];
+    /* Preserve the native int-alias edges; see docs/idioms.md,
+     * "Trace-justified alias sets: emitter subrecord count". */
+    u32 templateEntryCount : 16; /* 0x04: subrecords per particle in template clones */
+    u32 : 16;
     union {
         struct ParTable *table;
         f32 scale;

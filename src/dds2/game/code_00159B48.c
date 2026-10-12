@@ -825,7 +825,67 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer) {
     sdfReleaseResourceAllocation(buffer->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
+struct ParColorRamp;
+extern void parInitColorRamp(struct ParColorRamp *, s32);
+extern ParTable *func_001617F8(u32, u16, BillObj **);
+extern u32 func_00162E10(u16);
+extern void parDispatchSub(void *, s32, void *, void *);
+
+/* The subrecord bitfield keeps native int-alias dependencies; see
+ * docs/idioms.md, "Trace-justified alias sets: emitter subrecord count". */
+void func_0015B330(EffEmitterHead *owner) {
+    EffTrackPolyParams params;
+
+    owner->templateSize = 0x150;
+    owner->buffer = effAllocateBuffer(owner->particleCount);
+    if (owner->billboardResource != -1) {
+        owner->billboard = effCreateBillboardSharingIndexedResource(owner->billboardResource);
+        billSetChildScaleComponents(owner->billboard, owner->scale[0], owner->scale[1]);
+        billSetBillboardMode(owner->billboard, owner->drawKind);
+    }
+    parInitColorRamp((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
+    switch (owner->sub.kind) {
+    case 1:
+        owner->sub.value.table = func_001617F8(owner->particleCount,
+                                             owner->sub.templateEntryCount,
+                                             &owner->billboard);
+        break;
+    case 2:
+        owner->sub.primaryDrawSystem = parAllocateCellSystem(
+            owner->particleCount, owner->sub.templateEntryCount,
+            func_00162E10(owner->sub.templateEntryCount), 0);
+        parDispatchSub(owner->sub.primaryDrawSystem, 1,
+                       owner->sub.dispatchParameter, owner->sub.dispatchParameter);
+        parSetCellDrawBucket(owner->sub.primaryDrawSystem, (u16)owner->drawKind);
+        break;
+    case 3:
+        owner->sub.secondaryDraw.system = parAllocateCellSystem(
+            owner->particleCount, owner->sub.templateEntryCount,
+            func_00162E10(owner->sub.templateEntryCount), 1);
+        parDispatchSub(owner->sub.secondaryDraw.system, 1,
+                       owner->sub.dispatchParameter, owner->sub.primaryDrawSystem);
+        parSetCellDrawBucket(owner->sub.secondaryDraw.system, (u16)owner->drawKind);
+        break;
+    case 4:
+        /* These tracks receive endpoints directly; model sampling is unused. */
+        params.sampleInterval = 1;
+        params.historyLength = owner->sub.templateEntryCount;
+        params.unk1C = 10;
+        params.kind = (u16)owner->drawKind;
+        params.gradientColors[0] = owner->sub.firstGradientColor;
+        params.gradientColors[1] = owner->sub.firstGradientColor;
+        params.gradientColors[2] = owner->sub.secondGradientColor;
+        params.gradientColors[3] = owner->sub.secondGradientColor;
+        owner->sub.secondaryDraw.modelList =
+            effTrackPolyCreateModelWorkList(&params, owner->particleCount);
+        break;
+    }
+    owner->pendingRestartSteps = owner->restartStepCount;
+    VU0_LOAD_MATRIX(owner->matrix);
+    VU0_STORE_MATRIX(owner->backupMatrix);
+    owner->active = 1;
+    owner->colorMask = 0x80808080;
+}
 
 /* Release the selected sub-effect resource, billboard and packet-buffer
  * allocation described by the common emitter prefix. */
