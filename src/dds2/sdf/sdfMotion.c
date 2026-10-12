@@ -553,7 +553,7 @@ void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
     }
 }
 
-void func_00335108(SdfMotionKeyFlagBinding *binding, f32 t) {
+void sdfMotionBlendKeyFlag(SdfMotionKeyFlagBinding *binding, f32 t) {
     SdfMotionKeyInterval b;
     SdfDrawNode *node;
 

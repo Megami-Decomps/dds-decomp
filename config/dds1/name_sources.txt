@@ -6621,6 +6621,7 @@
 0x002DC0E8	sdfMotionBlendKeyQuaternionWithBase	inferred	Normalized interpolation between two keyed quaternions then base quaternion; stores orientation and matrix. [names_reviewed6.tsv]
 0x002DC1A0	sdfMotionCreateKeyFlagBinding	inferred	Allocates motion work with the key-flag handler table. [names_reviewed6.tsv]
 0x002DC200	sdfMotionUpdateKeyFlag	inferred	Sets or clears the bit four according to the selected key byte. [names_reviewed6.tsv]
+0x002DC258	sdfMotionBlendKeyFlag	inferred	Blend callback for a key-flag binding: resamples the flag from the first key byte; the blend weight is unused.
 0x002DC2B0	sdfMotionReadKeyFlag	inferred	Inverts the node's bit four into the command result byte. [names_reviewed6.tsv]
 0x002DC2D0	sdfMotionCaptureDrawVector	inferred	Copies the bound node's first draw vector into motion work. [names_reviewed6.tsv]
 0x002DC2F0	sdfMotionCaptureQuaternion	inferred	Copies the bound node's quaternion into motion work. [names_reviewed6.tsv]
