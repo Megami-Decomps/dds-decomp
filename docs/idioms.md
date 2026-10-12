@@ -8996,3 +8996,35 @@ return widths, and neighboring misnamed sound APIs are left unchanged.
 `mdlReleaseViewerAllocation` forwards the allocation pointer directly to
 `sdfReleaseChipBlock`; it does not dereference an allocation wrapper.
 
+## Flash payload duplication callbacks
+
+The `effFlash*Clone` entry points in both games are the `duplicate` callbacks
+at offset `0xC` in the native `0x28`-byte `EffDispatchEntry` rows of
+`effParameterWorkOperations`. `effCloneDispatchedParameterWork` invokes this
+slot with the source payload after allocating the new owner/kind/index work.
+The table base is DDS1 `0x00353880` / DDS2 `0x003B01B0`.
+
+| Kind | Callback | Constructor parameter prefix |
+| --- | --- | --- |
+| 15 | `effFlashRotatingStreakClone` | `0x40` bytes |
+| 16 | `effFlashOrbitScalingClone` | `0x48` bytes |
+| 17 | `effFlashAccumulatingParticleClone` | `0x50` bytes |
+| 18 | `effFlashTrianglePulseClone` | `0x30` bytes |
+| 19 | `effFlashOrbitArcClone` | `0x58` bytes |
+| 64 | `effFlashRotatingQuadClone` | `0x4C` bytes |
+| 65 | `effFlashRadialTriangleClone` | `0x3C` bytes |
+| 66 | `effFlashRadialStripClone` | `0xD0` bytes |
+| 67 | `effFlashFadingOrbitClone` | `0x50` bytes |
+| 84 | `effFlashOffsetRadialTriangleClone` | `0x40` bytes |
+
+Here **clone** denotes the dispatch-table duplication role, not a bitwise
+copy of the live effect. Each adapter returns new constructor work using the
+source's parameter prefix. The constructors allocate fresh particle resources
+and initialize their ages, angles, tint, scale or progress as appropriate;
+they do not copy those live runtime fields from the source. Existing random
+draws and their ordering remain unchanged.
+
+These are not the `restart` callbacks in the separate compact
+`effNodeTypeOperations` table. The earlier rotating-streak dispatch row has
+no duplicate callback; the named streak clone belongs to kind 15.
+
