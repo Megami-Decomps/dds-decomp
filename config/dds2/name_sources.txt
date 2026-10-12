@@ -474,6 +474,7 @@
 0x00117A88	sdfSaveResetSnapshot	inferred	TaskPurist
 0x00118008	sdfRestoreResetSnapshot	inferred	Restores saved runtime data after sdfResetGameRuntime clears the game state; restores flags, ticks, mantra/profile/template data, inventory/event bits, and world slot flags. Paired with DDS1 0x00117C48.
 0x00118598	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:290:func_00118598; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:24 [names_qp13.tsv]
+0x00118680	evtInitializeWorkScriptTask	inferred	Recreates the event work script task and clears its event context after sdfResetChannels reloads channel segments.
 0x001186C8	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
 0x001188F0	ptyComputeMaxHp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:391:func_001188F0; Returns enemy-record maximum HP or party level/stat growth plus HP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001189D0	ptyComputeMaxMp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:413:func_001189D0; Returns enemy-record maximum MP or party level/stat growth plus MP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
