@@ -33,6 +33,7 @@
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "bill_object_api.h"
 #include "sdf_projection.h"
 extern u32 effMiscRand(void *state);
@@ -71,7 +72,6 @@ extern u8 D_003B1A88[];
 extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
 
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void func_00336538(f32 scale);
 extern void func_00336818(f32 angle);
@@ -4163,7 +4163,6 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 extern u8 D_003B1F70[];
 extern SdfPoolNode *D_003B1FB8[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffPCPBeamDrawParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */

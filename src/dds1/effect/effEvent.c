@@ -16,6 +16,7 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
 #define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
@@ -366,7 +367,6 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern void *func_002EF2B0(const f32 [][4], const u32 *, s32, u32);
 extern void func_002DD608(f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 void effDrawSphericalWireRings(const f32 *center, u32 color, f32 radius) {
@@ -1243,7 +1243,6 @@ extern u8 sdfViewUpVector[];
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002DD968(f32 angle);
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */

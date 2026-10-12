@@ -6,6 +6,7 @@
 #include "kwln_sprite.h"
 
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_packet_params.h"
@@ -28,7 +29,6 @@ extern void (*D_003AAFC0[])();
 
 extern BillDispatch effBillConstructorEntries[];
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);

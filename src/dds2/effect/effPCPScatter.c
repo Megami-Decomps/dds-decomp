@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -45,7 +46,6 @@
 #define EFF_SCATTER_RESOURCE_BLOCK 1
 #define EFF_SCATTER_CHILD_BLOCK 2
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern void *effParamTableGetBlock(void *, s32);
 

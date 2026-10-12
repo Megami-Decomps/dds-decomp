@@ -6,6 +6,7 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_scatter_draw.h"
@@ -71,7 +72,6 @@ extern ScatterRenderState D_00452050;
 extern u8 D_003B14C0[];
 extern SdfPoolNode *D_003B1520[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(ScatterRenderState *);
 struct SdfAsset;
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *, s32);

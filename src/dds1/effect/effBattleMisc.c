@@ -3,6 +3,7 @@
 #include "dds3obj.h"
 #include "btl_effect_position.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "btl.h"
 #include "eff.h"
 
@@ -34,7 +35,6 @@ extern f32 func_001F6970(u32 mask, s32 a, s32 b);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern u32 effFieldColorFlags;
 extern void effMiscQuaternionToMatrixVU(void);
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* The selected position provider leaves its vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *out) {
