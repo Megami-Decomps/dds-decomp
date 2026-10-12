@@ -830,11 +830,11 @@ void mnuLoadMovieRollSprite(void) {
     mnuMovieWork->sprite = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
 }
 
-void func_002A6000(void) {
+void mnuPrepareStaffRollText(void) {
     mnuLoadStaffFonts();
 }
 
-void func_002A6018(void) {
+void mnuReleaseStaffRollText(void) {
     mnuUnloadStaffFonts();
 }
 
@@ -842,7 +842,7 @@ struct FrFontGlyph;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
 extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
-s32 func_002A6030(f32 x, f32 y, s32 font, u32 color, const char *text) {
+s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;
     f32 opacity = 1.0f;
@@ -963,7 +963,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void func_002A2200(s32);
 
-void func_002A6480(void)
+void mnuUpdateStaffRollStreamState(void)
 {
     if (mnuMovieWork->frame / 60 > D_003E3970[272].offsetY / 60 - 4) {
         return;
@@ -1416,7 +1416,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
-    func_002A6018();
+    mnuReleaseStaffRollText();
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);

@@ -4,7 +4,7 @@
 
 extern void mnuDrawMantraPanelSprite(s32, s32, s32, s32, u16, s32);
 extern void mnuDrawMantraCostCounter(s32, s32, s32, s32, s32, s32);
-extern void func_00255368(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraCostPlaceholder(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
     MnuMantraGridEntry *entry =
@@ -14,7 +14,7 @@ void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
         if (object->entryMessageInProgress == 0) {
             if (entry->state != 3) {
                 if (entry->profileFlag != 0) {
-                    func_00255368(0, 0, 1, alpha, entry->sceneId, context);
+                    mnuDrawMantraCostPlaceholder(0, 0, 1, alpha, entry->sceneId, context);
                 } else {
                     mnuDrawMantraCostCounter(0, 0, 1, alpha, entry->sceneId, context);
                 }

@@ -4,7 +4,7 @@
 extern u32 *mnuGetSelectedNodeValue(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
-extern void func_00253558(MenuSceneWork *work);
+extern void mnuRestoreMantraGridSelection(MenuSceneWork *work);
 
 void mnuBeginTransitionAlt(MenuSceneWork *work, s32 mode) {
     MnuSceneListNode *transition = mnuAppendNodeToDisplayList(&work->costTransitionList);
@@ -12,10 +12,10 @@ void mnuBeginTransitionAlt(MenuSceneWork *work, s32 mode) {
     if (transition != NULL) {
         if (work->transitionBlendCounter >= 6) {
             mnuStopResourceAnimation();
-            func_00253558(work);
+            mnuRestoreMantraGridSelection(work);
         } else if (work->transitionBlendCounter < -5) {
             mnuResetResourceAnimation();
-            func_00253558(work);
+            mnuRestoreMantraGridSelection(work);
         }
         transition->payload.transition.mode = mode;
         if (mode == 1) {

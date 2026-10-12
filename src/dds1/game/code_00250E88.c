@@ -14,7 +14,7 @@
 #define MNU_SCENE_SHADE_ALPHA_SCALE 112.0f
 #define MNU_SCENE_DRAW_CONTEXT 0x53
 
-extern void func_002512F0(MenuSceneWork *, s32);
+extern void mnuUpdateMantraSelectionPositions(MenuSceneWork *, s32);
 
 extern void mnuInitializeMantraSelectionGrid(MenuSceneWork *);
 
@@ -100,7 +100,7 @@ void func_00251260(MenuSceneWork *work) {
 extern f32 func_002C84F0(f32 *vector);
 extern s32 D_003BC424;
 
-void func_002512F0(MenuSceneWork *work, s32 mode) {
+void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     SdfGrid *grid = work->gridHandle;
     MnuMantraGridEntry *entry;
     f32 vector[4];
@@ -352,7 +352,7 @@ extern s32 func_00252CE8(SdfGrid *, s32, s32, u32);
 extern SdfGridCell *func_002CC0D0(SdfGrid *);
 
 /* Select the connected left neighbor, or fall back to the previous filled cell. */
-s32 func_00252F88(SdfGrid *grid) {
+s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid) {
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
     MnuMantraNodeState *coordinates = (MnuMantraNodeState *)(u32)grid->userData;
     s32 x = coordinates[entry->sceneId].x;
@@ -377,7 +377,7 @@ s32 func_00252F88(SdfGrid *grid) {
 extern s32 func_00252E38(SdfGrid *, s32, s32, u32);
 extern SdfGridCell *func_002CC238(SdfGrid *);
 
-s32 func_00253018(SdfGrid *grid) {
+s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid) {
     MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
         mnuSceneResourceContext, 1);
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)grid->cursor->value;
@@ -411,7 +411,7 @@ extern s32 mdlFlagTest(s32);
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
  * listed once flag 0x908 is set). The entry's state is 1 when requirement 1 passes or the profile flag is set,
  * 2 when only requirement 0 passes, and 3 otherwise. The scheduler argument is unused. */
-MnuMantraGridEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *selection) {
+MnuMantraGridEntry *mnuCreateMantraGridEntry(s32 unused, u16 profileId, MnuProfileProgress *selection) {
     MnuMantraGridEntry *entry;
 
     if (prfReqCheckWithFallback((ScrVmOperand *)selection->partyRecord, profileId) == 0) {
@@ -461,7 +461,7 @@ extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
 extern SdfGridCell *func_002CC0D0(SdfGrid *grid);
 
 
-void func_00253558(MenuSceneWork *work) {
+void mnuRestoreMantraGridSelection(MenuSceneWork *work) {
     SdfGrid *grid = work->gridHandle;
     SdfGridCell *cursor = grid->cursor;
     MnuMantraGridEntry *selected = (MnuMantraGridEntry *)(u32)cursor->value;
@@ -497,7 +497,7 @@ extern s32 evtCreateMessageWindowIfMissing(s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
-s32 func_00253640(void) {
+s32 mnuBeginMantraProfileSelection(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
@@ -517,7 +517,7 @@ extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void func_00258AF0(MnuGridFeedbackState *, u32);
 extern u32 evtFinishMessageWindowAndNotify(void);
-void func_00253778(void) {
+void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     scene->messageShadeFrames = 0;
@@ -552,7 +552,7 @@ extern void itfDspSignalD(void);
 extern void itfDspSignalE(void);
 extern s64 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-s32 func_00253830(void) {
+s32 mnuUpdateMantraSceneState(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -717,7 +717,7 @@ s32 fldResetSceneState(void) {
 /* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     s32 sceneAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    func_002512F0((MenuSceneWork *)(u32)sceneAddress, 1);
+    mnuUpdateMantraSelectionPositions((MenuSceneWork *)(u32)sceneAddress, 1);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
     mnuReleaseListNodes(
         &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList);

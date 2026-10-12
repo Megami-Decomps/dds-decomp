@@ -95,16 +95,16 @@ extern u8 D_0037C388[];
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F230);
 
-void func_0026F500(void) {
+void mnuPrepareStaffRollText(void) {
     mnuLoadStaffFonts();
 }
 
-void func_0026F518(void) {
+void mnuReleaseStaffRollText(void) {
     mnuUnloadStaffFonts();
 }
 
 extern FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
-s32 func_0026F530(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
+s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *source) {
     FrFontGlyph *glyph;
 
     if (alternate == 0) {
@@ -131,7 +131,7 @@ extern void mnuReleaseMovieResourceAfterPendingWork(void);
 extern s32 mnuStaffImageProc(void);
 extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
 
-s32 func_0026F5E8(KwlnTask *task) {
+s32 mnuUpdateStaffRoll(KwlnTask *task) {
     char text[128];
     s32 request;
     s32 i;
@@ -149,7 +149,7 @@ s32 func_0026F5E8(KwlnTask *task) {
         }
         break;
     case 1:
-        func_0026F500();
+        mnuPrepareStaffRollText();
         mnuInitializeMovieRollViewport();
         kwlnTaskCreate(D_003B1140, 0x2B19, 0, 0, mnuStaffImageProc,
                        mnuReleaseMovieResourceAfterPendingWork, 0);
@@ -169,10 +169,10 @@ s32 func_0026F5E8(KwlnTask *task) {
                 entry = &D_00379F70[i];
                 if (entry->leftText != 0 && D_00379F70[i].rightText == 0) {
                     func_003014F0(text, D_003BC628, entry->leftText);
-                    func_0026F530(20.0f, (f32)y, entry->leftFont, 0x80808080, text);
+                    mnuDrawStaffRollText(20.0f, (f32)y, entry->leftFont, 0x80808080, text);
                 } else if (D_00379F70[i].rightText != 0) {
                     func_003014F0(text, D_003BC628, D_00379F70[i].rightText);
-                    func_0026F530(30.0f, (f32)y, D_00379F70[i].rightFont, 0x80808080, text);
+                    mnuDrawStaffRollText(30.0f, (f32)y, D_00379F70[i].rightFont, 0x80808080, text);
                 }
             }
         }
@@ -309,7 +309,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     mnuMovieTaskState = 2;
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
-    func_0026F518();
+    mnuReleaseStaffRollText();
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
@@ -351,7 +351,7 @@ extern char D_003B1168[];
 
 extern void func_0026A5F0(s32);
 
-extern s32 func_0026F5E8(KwlnTask *task);
+extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 
 extern void mnuFinishStaffMovieAndFreeState(void);
 
@@ -368,7 +368,7 @@ void mnuMovieCreateTask(void) {
     movie->scrollTicks = 0;
     func_0026A5F0(0x13);
     mnuMovieTaskState = 1;
-    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, func_0026F5E8, mnuFinishStaffMovieAndFreeState, 0);
+    kwlnTaskCreate(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }
 
 u32 mnuStartStaffMovieRequest(void) {
