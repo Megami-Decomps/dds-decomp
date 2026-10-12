@@ -587,7 +587,7 @@ void mnuBuildEligibleSlotList(MenuSlotState *host) {
     }
 }
 
-u32 func_002674F8(void) {
+u32 mnuShouldExcludeTerminalMenuEntry(void) {
     return 0;
 }
 
@@ -632,7 +632,7 @@ void mnuHighlightProgressNodeFromOwnerSelection(MenuSlotState *host) {
             return;
         }
         if (host->secondaryList->count == 0) {
-            MenuListNode *selected = mnuWalkNodeList(2 - func_002674F8(),
+            MenuListNode *selected = mnuWalkNodeList(2 - mnuShouldExcludeTerminalMenuEntry(),
                                               host->menuList);
             selected->flags48 |= 1;
         }
@@ -649,7 +649,7 @@ void mnuHighlightProgressNodeByMode(MenuSlotState *host) {
         }
         selectedIndex = 0;
     } else {
-        selectedIndex = 3 - func_002674F8();
+        selectedIndex = 3 - mnuShouldExcludeTerminalMenuEntry();
     }
     if (host->progressList->count == 0) {
         MenuListNode *node = mnuWalkNodeList(selectedIndex, host->menuList);
@@ -673,14 +673,14 @@ void mnuTerminalBuildMenus(MenuSlotState *host) {
     case 0:
         row = 0;
         count = 5;
-        if (func_002674F8() != 0) {
+        if (mnuShouldExcludeTerminalMenuEntry() != 0) {
             excluded = 1;
         }
         break;
     case 1:
         row = 1;
         count = 4;
-        if (func_002674F8() != 0) {
+        if (mnuShouldExcludeTerminalMenuEntry() != 0) {
             excluded = 1;
         }
         break;
@@ -1123,7 +1123,7 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
 
 extern char D_003CE848[];
 
-s32 func_002685F0(s32 action, s32 context) {
+s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (*(s32 *)(*(s32 *)(context + 0x7C) + 0x20) == 0) {
@@ -1325,7 +1325,7 @@ s32 fldGetModeFrameRecordIndex(s32 object) {
     }
 }
 
-u8 func_00268C08(MenuSlotState *scene) {
+u8 mnuGetTerminalFrameFade(MenuSlotState *scene) {
     s32 index;
 
     index = fldGetModeFrameRecordIndex((s32)scene);
@@ -1346,7 +1346,7 @@ void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuSlotState *host) {
 }
 
 
-void func_00268CC0(u32 mode, MenuSlotState *state) {
+void mnuConfigureTerminalSlotEffects(u32 mode, MenuSlotState *state) {
     s32 index;
     u32 *entries;
     s32 i;
@@ -1480,7 +1480,7 @@ typedef struct MnuTerminalLayout {
 extern const MnuTerminalLayout D_00424F88;
 
 /* Draw the terminal rows and step their visibility after the panel fade. */
-void func_00269230(s32 closing, MenuSlotState *state) {
+void mnuDrawTerminalSelectionListAndStep(s32 closing, MenuSlotState *state) {
     MnuTerminalLayout layout = D_00424F88;
     s32 row = 0;
     s32 rowSlot;
@@ -1530,7 +1530,7 @@ void func_00269230(s32 closing, MenuSlotState *state) {
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424F88);
 
-s32 func_00269418(MenuList *list) {
+s32 mnuGetTerminalListSlotForCount(MenuList *list) {
     switch (list->count) {
     case 2: return 0x3a;
     case 3: return 0x3b;
@@ -1574,7 +1574,7 @@ void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
         effectIndex = 3;
         break;
     }
-    slot = func_00269418(state->secondaryList);
+    slot = mnuGetTerminalListSlotForCount(state->secondaryList);
     /* The context word transports the terminal state address. */
     effect = (struct EffMappedResource **)(effectIndex * sizeof(state->effect[0]) + context +
         (u32)&((MenuSlotState *)0)->effect);
@@ -1635,12 +1635,12 @@ void func_00269638(s32 close, MenuSlotState *host) {
     }
     itfGridLookupValueOrDefault(host->resourceBank[0], slot);
     mnuCallInitWide(0x3B0, 0x3D8, 0, (s32)host->secondaryList, 0x52);
-    slot = func_00269418(host->secondaryList);
+    slot = mnuGetTerminalListSlotForCount(host->secondaryList);
     itfDrawGridWithResolvedSlot(rows[0].x, rows[0].y, 0, 0x80,
                                host->resourceBank[0], slot, 0x52);
     itfDrawGridWithResolvedSlot(rows[1].x, rows[1].y + count * 0xB0 - 0xB0, 0, 0x80,
                                host->resourceBank[0], rows[1].slot, 0x52);
-    slot = func_00269418(host->secondaryList);
+    slot = mnuGetTerminalListSlotForCount(host->secondaryList);
     slots = host->resourceBank[0];
     progress = ((u32)*(u8 *)&slots->workEntries[slot].geometry.cornerColors[0] << 8) /
                *(u8 *)&slots->workEntries[slot].savedColors[0];
@@ -1818,7 +1818,7 @@ u32 func_00269C48(void) {
     return 1;
 }
 
-extern s32 func_002685F0(s32 action, s32 context);
+extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
@@ -1853,9 +1853,9 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
     if (*state == 0) {
         if (buttons & 1) {
             node = context->menuList->cursor;
-            action = D_003CE7D0[func_002674F8() * 5 + context->reduced * 10 + kind];
+            action = D_003CE7D0[mnuShouldExcludeTerminalMenuEntry() * 5 + context->reduced * 10 + kind];
             if (!(node->flags48 & 1) || action == 3 || action == frames) {
-                if (func_002685F0(action, (s32)context) == 0) {
+                if (mnuOpenTerminalPopupForAction(action, (s32)context) == 0) {
                     switch (action) {
                     case 2:
                         if (context->secondaryList->count == 1) {
@@ -1934,7 +1934,7 @@ extern void mnuReleaseResourceGroup(s32);
 s32 evtBeginSelectionExitFade(KwlnTask *task) {
     s32 state = kwlnTaskGetUserValue(task);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
-    evtRememberDispatchCallback(func_00269230, (MenuSlotState *)state);
+    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
     mnuTerminalSelectSlot(0, -2, state);
     mnuTerminalSetTrack(1, 0);
     mnuReleaseResourceGroup(state);
@@ -1948,7 +1948,7 @@ extern void fileSetPreviewLocation();
 extern void func_002CE208(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
-s32 func_0026A048(KwlnTask *request) {
+s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(request);
     s32 *dispatch = &state->dispatchStatus;
     s32 result = func_002C4038(&state->transitionWork, dispatch, 0, request);
@@ -1991,7 +1991,7 @@ u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
 
     if (context->menuActive == 0) {
         mnuSelectFirstListNode((s32)context->secondaryList);
-        func_00268CC0(3, (s32)context);
+        mnuConfigureTerminalSlotEffects(3, (s32)context);
         evtRememberDispatchCallback(func_00269638, (s32)context);
         mnuConfigureTerminalModeEffects(3, (s32)context);
         mnuSetTerminalPanelMotionMode(4, (s32)context);
@@ -2007,8 +2007,8 @@ u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
     MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
 
     if (context->menuActive != 0) {
-        func_00268CC0(3, (s32)context);
-        evtRememberDispatchCallback(func_00269230, (s32)context);
+        mnuConfigureTerminalSlotEffects(3, (s32)context);
+        evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (s32)context);
         mnuConfigureTerminalModeEffects(4, (s32)context);
         mnuSetTerminalPanelMotionMode(3, (s32)context);
         mnuTerminalSelectSlot(3, 0, (s32)context);
@@ -2019,7 +2019,7 @@ u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
 }
 
 /* Handle owner-panel input only after dispatch completes and the panel is fully shown. */
-s32 func_0026A2E0(KwlnTask *request) {
+s32 mnuUpdateTerminalSelectionInput(KwlnTask *request) {
     MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *dispatch = &context->dispatchStatus;
@@ -2050,7 +2050,7 @@ s32 func_0026A2E0(KwlnTask *request) {
     return 0;
 }
 
-s32 func_0026A3F8(KwlnTask *request) {
+s32 mnuUpdateAndDrawTerminalScene(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
     mnuDrawTerminalBackdrop(state);
@@ -2086,7 +2086,7 @@ u32 evtBEnterStateA(KwlnTask *task) {
     mnuTerminalSelectSlot(3, 0, context);
     mnuApplyGridPanelHostSetting(4, (MenuSlotState *)context);
     mnuSetTerminalPanelMotionMode(3, (MenuSlotState *)context);
-    evtRememberDispatchCallback(func_00269230, (MenuSlotState *)context);
+    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)context);
     mnuHighlightProgressNodeByMode(context);
     return 1;
 }
@@ -2207,12 +2207,12 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     return 0;
 }
 
-s32 func_0026A998(KwlnTask *request) {
+s32 mnuBeginTerminalExitTransition(KwlnTask *request) {
     s32 state = kwlnTaskGetUserValue(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
     if (evtGetMessageWindowControlState() == 0 && dispatchState->exitState == 0) {
-        func_00268CC0(2, (MenuSlotState *)state);
+        mnuConfigureTerminalSlotEffects(2, (MenuSlotState *)state);
         mnuTerminalSelectSlot(2, -1, (MenuSlotState *)state);
         mnuSetTerminalPanelMotionMode(2, (MenuSlotState *)state);
         dispatchState->exitState = 1;
@@ -2220,7 +2220,7 @@ s32 func_0026A998(KwlnTask *request) {
     mnuDrawTerminalBackdrop(state);
     if (dispatchState->mode == 0) {
         mnuDrawAndStepTerminalPanelFade(1, (MenuSlotState *)state);
-    } else if (func_00268C08((MenuSlotState *)state) == 0) {
+    } else if (mnuGetTerminalFrameFade((MenuSlotState *)state) == 0) {
         mnuDrawAndStepTerminalPanelFade(1, (MenuSlotState *)state);
     } else {
         mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
@@ -2262,7 +2262,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
     mnuConfigureSelectedSceneModeEffect(1, (MenuSlotState *)state);
     mnuTerminalSelectSlot(3, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
-    evtRememberDispatchCallback(func_00269230, (MenuSlotState *)state);
+    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
     evtCreateMessageWindowIfMissing(((MenuSlotState *)state)->messageResources.unk04);
     return 1;
 }
@@ -2442,7 +2442,7 @@ s32 evtBSetupDispatchSyncG(KwlnTask *request) {
 u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     MenuSlotState *context = (MenuSlotState *)kwlnTaskGetUserValue(task);
 
-    func_00268CC0(2, (s32)context);
+    mnuConfigureTerminalSlotEffects(2, (s32)context);
     if (context->selectionStep >= 2) {
         mnuTerminalSelectSlot(2, -1, (s32)context);
         mnuConfigureTerminalModeEffects(2, (s32)context);
@@ -2462,10 +2462,10 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
     s32 state = kwlnTaskGetUserValue(task);
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);
-    func_00268CC0(1, (MenuSlotState *)state);
+    mnuConfigureTerminalSlotEffects(1, (MenuSlotState *)state);
     mnuTerminalSelectSlot(1, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
-    evtRememberDispatchCallback(func_00269230, (MenuSlotState *)state);
+    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
     ((MenuSlotState *)state)->stage = 1;
     ((MenuSlotState *)state)->exitState = 0;
     kwlnFadeOutStart(0, 0, 0, 15);
@@ -2505,7 +2505,7 @@ s32 evtBDispatchSyncD2(KwlnTask *request) {
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
     mnuDrawTerminalBackdrop(state);
-    if (func_00268C08((MenuSlotState *)state) == 0) {
+    if (mnuGetTerminalFrameFade((MenuSlotState *)state) == 0) {
         mnuDrawAndStepTerminalPanelFade(1, (MenuSlotState *)state);
     } else {
         mnuDrawAndStepTerminalPanelFade(0, (MenuSlotState *)state);
