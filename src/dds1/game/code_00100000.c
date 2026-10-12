@@ -82,7 +82,7 @@ s32 kwlnInitializeRuntime(void) {
     func_003003F0(D_003BA778);
     kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, dds3RunWorldSecondaryCallbacks, 0, 0);
     func_003003F0(D_003BA780);
-    func_00194228(0x100, 0x200);
+    frFontInitializeSystem(0x100, 0x200);
     kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
     func_003003F0(D_003BA788);
     fileManInit();
