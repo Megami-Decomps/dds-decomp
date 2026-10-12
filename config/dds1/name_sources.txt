@@ -2484,6 +2484,7 @@
 0x00195E60	frFontCountGlyphChainNodes	inferred	Counts one linked glyph node per iteration; DDS2 counterpart counts y-bands at 0x0019DB30, documenting the traversal difference.
 0x00195FA8	frFontGetGlyphPositionAtIndex	inferred	Advances one linked glyph at a time, writes its x/y coordinates and stops at the requested index; the adjacent comment documents DDS1 behavior. twin=DDS2 0x0019DC68.
 0x00196038	frFontMoveChainTo	inferred	moves glyph chain so first glyph sits at x,y
+0x00196220	frFontAppendIndexedTextToGlyphChain	inferred	Looks up the indexed registered text, appends its two-byte glyph codes to the current chain, and applies mode-change context plus configured spacing; DDS2 counterpart is 0x0019DEE0.
 0x00196390	frFontCreateContext	inferred	allocates a new font ctx via 95160 and attaches it
 0x001963E0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
 0x00196450	frFontAdvanceContextCursor	inferred	increments context cursor by font advance factor and sets flags [names_reviewed5.tsv]

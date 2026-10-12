@@ -54,7 +54,7 @@ extern SdfTex *itfBackgroundSpriteTexture;
 extern u8 D_003BB188[];
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frFontAdvanceContextCursor(FrFontCtx *);
-extern void func_00196220(u8, FrFontCtx *);
+extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
@@ -193,7 +193,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     case 0xF203:
         if (D_003D6E20[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
-            func_00196220((u8)(stream->encodedText[*position] - 1), stream);
+            frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
         break;

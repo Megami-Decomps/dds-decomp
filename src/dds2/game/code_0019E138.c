@@ -174,7 +174,7 @@ u32 itfReadEncodedCode(FrFontCtx *stream) {
 
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frFontAdvanceContextCursor(FrFontCtx *);
-extern void func_0019DEE0(u8, FrFontCtx *);
+extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
@@ -212,7 +212,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     case 0xF203:
         if (D_004528C0[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
-            func_0019DEE0((u8)(stream->encodedText[*position] - 1), stream);
+            frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
         break;
