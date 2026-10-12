@@ -115,8 +115,8 @@ void *effGetHandlerArg(EffWork *work) {
     return work->payload;
 }
 
-/* Read the pointed word without validating the pointer or asserting a record kind. */
-u32 func_001947F8(u32 *word) {
+/* Read the dispatch owner's type word; the pointer remains unchecked. */
+u32 effGetDispatchType(u32 *word) {
     return *word;
 }
 
@@ -341,7 +341,8 @@ s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
     return strlen(entry->name);
 }
 
-EffResourceList *func_00194BD0(char *path, s32 flags) {
+/* Enumerate enabled resource extensions into an owned doubly linked filename list. */
+EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
     EffDirEnt entry;
     s32 directory;
     EffResourceList *list;
@@ -448,7 +449,7 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 
 /* Navigate the resource list, update its held preview, and submit fifteen rows. */
 /* Retail 0x001953AC reloads selectedEntry after the case-1 texture update. */
-s32 func_001950F0(EffResourceDescriptor *descriptor) {
+s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
     SdfListHead *packetList;
     SdfPoolNode *surface;

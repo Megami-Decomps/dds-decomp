@@ -581,7 +581,8 @@ u32 func_002B0D48(void) {
     return 1;
 }
 
-void func_002B0D50(u32 context) {
+/* Select the visual category used by the party-selection window. */
+void mnuSelectPartySelectionVisuals(u32 context) {
     mnuSwitchCampVisualCategory(4, context);
 }
 
@@ -811,7 +812,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     context->party = (s32)menuWork;
     memset(menuWork, 0, sizeof(*menuWork));
     menuWork->allocation = allocation;
-    func_002B0D50((u32)contextAddress);
+    mnuSelectPartySelectionVisuals((u32)contextAddress);
     mnuCreatePartySelectionWindow(context);
 
     mnuLoadPanelSectionResources(
@@ -1162,7 +1163,8 @@ u8 mnuIsStateNotOne(void) {
     return state != 1;
 }
 
-void func_002B27F0(u32 context) {
+/* Select the visual category used while the staff/party view is active. */
+void mnuSelectStaffSelectionVisuals(u32 context) {
     mnuSwitchCampVisualCategory(3, context);
 }
 
@@ -1202,7 +1204,7 @@ u32 mnuCreateSelectState(KwlnTask *task, s32 flag) {
     } else {
         state->staffMode = 1;
     }
-    func_002B27F0(context);
+    mnuSelectStaffSelectionVisuals(context);
     state->active = 1;
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
                               ((MenuContext *)context)->displayResource, 0, 0);
@@ -1220,7 +1222,8 @@ s32 mnuStaffCloseSelectionState(KwlnTask *task) {
     return 1;
 }
 
-void func_002B29C8(KwlnTask *context) {
+/* Open selection work in staff-view mode; the task argument is forwarded unchanged. */
+void mnuOpenStaffSelectionEntry(KwlnTask *context) {
     mnuCreateSelectState(context, 1);
 }
 
@@ -1228,7 +1231,8 @@ void func_002B29E0(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 
-void func_002B29F8(KwlnTask *context) {
+/* Open the same selection work in party-view mode. */
+void mnuOpenPartySelectionEntry(KwlnTask *context) {
     mnuCreateSelectState(context, 0);
 }
 
@@ -1740,7 +1744,8 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, KwlnTask *ca
     return party->selectedWindow;
 }
 
-void func_002B4270(u32 context) {
+/* Select the visual category used by the skill-selection windows. */
+void mnuSelectSkillSelectionVisuals(u32 context) {
     mnuSwitchCampVisualCategory(1, context);
 }
 
@@ -1901,7 +1906,8 @@ u32 *mnuBuildOwnedSkillBits(void) {
     return bits;
 }
 
-void func_002B47F8(u32 *bits) {
+/* Release the temporary skill-code bitmap allocated for page construction. */
+void mnuReleaseSkillCodeBitset(u32 *bits) {
     sdfReleaseChipBlock(bits);
 }
 
@@ -2014,7 +2020,7 @@ void ptySkillMenuInitPages(MenuContext *context) {
             mnuSeekListNode(firstFilled, menu->categoryList);
         }
         mnuRefreshSkillWindowOwnershipFlags(context);
-        func_002B47F8(skillBits);
+        mnuReleaseSkillCodeBitset(skillBits);
         menu->skillMenuActive = 1;
     }
 }
@@ -2042,7 +2048,7 @@ u32 mnuCreateItemState(KwlnTask *callback) {
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x3c);
     state[0] = handle;
-    func_002B4270(context);
+    mnuSelectSkillSelectionVisuals(context);
     switch (((MenuContext *)context)->imageHandle->list->cursor->index) {
     case 0:
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
@@ -2742,7 +2748,8 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 func_002B6800(KwlnTask *callback) {
+/* Run the skill-detail panel's phase-two control and return its result. */
+s32 mnuStepSkillDetailControl(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
@@ -2995,7 +3002,8 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 func_002B76B0(KwlnTask *callback) {
+/* Run the camp-status panel's phase-two control and return its result. */
+s32 mnuStepCampStatusControl(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     return menuSetHandler((void *)context, 2, (void *)callback);
 }
