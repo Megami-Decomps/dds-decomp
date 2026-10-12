@@ -7420,3 +7420,20 @@
 0x001AEEA8	btlRestorePartySlotSnapshots	inferred	confidence=high; matched-C; Restores saved actor transformation flag, entry slots and party status by unitId; restores death state for status4000. Aligns existing DDS1 001A57A0. Namer1 batch 18.
 0x001AE678	btlGetAbilityAttributeMultiplierPercent	inferred	confidence=high; matched-C; Starts100, applies attribute-specific enabled ability factor unless suppressed; btlGetAdjustedSlotAffinity applies result/100 to packed affinity low word. Aligns existing DDS1 001A51C8. Namer1 batch 18.
 0x001AEC18	btlGetLowHpAbilityMultiplier	inferred	confidence=high; matched-C; Ability27A gates current/skill-adjusted-max HP percentage and native threshold multipliers; no game-specific skill name asserted. Namer1 batch 18.
+0x00286E20	mtrMantraSetBitAll	evidence	Prints the native "mtrMantraSetBitAll()" banner after updating active party records. LiteH-2 menu naming batch 3.
+0x00286E98	mnuAllocateMantraResourceWork	inferred	Allocates cleared status work, creates its progress host and initializes panel sound entries. DDS1 twin 0x0024F608. LiteH-2 menu naming batch 3.
+0x00286F18	mnuReleaseMantraResourceWork	inferred	Releases status resources and backing work, including progress-host visuals. DDS1 twin 0x0024F6F0. LiteH-2 menu naming batch 3.
+0x00287030	mtrPollResourceLoadTask	inferred	Polls mantra resource-load state and attaches the next task item while loading remains pending. LiteH-2 menu naming batch 3.
+0x00287670	mtrUnitSelectUpdate	inferred	Updates unit-selection task readiness and continuation state, returning -1 when the task ends. LiteH-2 menu naming batch 3.
+0x00287768	mtrUnitSelectDraw	inferred	Task-item draw callback for the current unit-selection work. LiteH-2 menu naming batch 3.
+0x00287848	mtrMantraSelectUpdate	inferred	Ticks panel sounds and processes mantra-selection task results and transitions. LiteH-2 menu naming batch 3.
+0x00287900	mtrMantraSelectDraw	inferred	Task-item draw callback for the current mantra-selection phase. LiteH-2 menu naming batch 3.
+0x00287AF8	mtrMantraEquipRelease	evidence	Prints the native "mtrMantraEquipRelease" banner after completing equip-panel selection state. LiteH-2 menu naming batch 3.
+0x00288158	mtrMantraEquipDraw	inferred	Draws equip-progress sprites and the current profile panel while advancing its fade. LiteH-2 menu naming batch 3.
+0x00288748	mtrUnitSelectUpdateState	inferred	Advances unit-selection timers, handles input and message-window responses, and returns the state result. LiteH-2 menu naming batch 3.
+0x00288920	mtrDrawUnitSelectionOverlay	inferred	Draws the visible unit-selection fade and selected entry when the work remains visible. LiteH-2 menu naming batch 3.
+0x00288DD0	mtrDrawSelectedMantraEntry	inferred	Draws selected-entry sprites and profile panel, then queues its mantra name. LiteH-2 menu naming batch 3.
+0x002C66D0	evtStageTestGetEntryMotionIndex	inferred	Returns the stage-test entry's motion byte. DDS1 twin 0x00287198. LiteH-2 menu naming batch 3.
+0x002C66F8	evtStageTestGetEntryFrame	inferred	Returns the indexed stage-test entry's animation frame. DDS1 twin 0x002871C0. LiteH-2 menu naming batch 3.
+0x002C6720	evtStageTestCopyEntryPosition	inferred	Copies three position components from the indexed stage-test entry. DDS1 twin 0x002871E8. LiteH-2 menu naming batch 3.
+0x002C6758	evtStageTestCopyEntryRotation	inferred	Copies three rotation components from the indexed stage-test entry. DDS1 twin 0x00287220. LiteH-2 menu naming batch 3.

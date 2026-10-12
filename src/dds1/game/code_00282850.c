@@ -2065,24 +2065,24 @@ void mnuOffsetPanelTarget(s32 encodedIndex, s32 dx, s32 dy, s32 dz) {
 }
 
 /* Return the motion byte selected by the low half of the encoded entry index. */
-u8 func_00287198(s32 encodedIndex) {
+u8 evtStageTestGetEntryMotionIndex(s32 encodedIndex) {
     return evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].motionIndex;
 }
 
 /* Return the indexed entry's animation frame. */
-f32 func_002871C0(s32 encodedIndex) {
+f32 evtStageTestGetEntryFrame(s32 encodedIndex) {
     return evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].frame;
 }
 
 /* Copy exactly three position components; any output W component is untouched. */
-void func_002871E8(s32 encodedIndex, f32 *position) {
+void evtStageTestCopyEntryPosition(s32 encodedIndex, f32 *position) {
     position[0] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].position[0];
     position[1] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].position[1];
     position[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].position[2];
 }
 
 /* Copy exactly three stored rotation components. */
-void func_00287220(s32 encodedIndex, f32 *rotation) {
+void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[0] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[0];
     rotation[1] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[1];
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];

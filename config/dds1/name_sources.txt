@@ -8014,3 +8014,9 @@
 0x001A5690	btlPushSavedPartyUnitStates	inferred	confidence=high; matched-C; Copies active party actor flags/id/entries/status into saved array and prints btl:state push; aligns existing DDS2 001AED98. Native status mask retained. Namer1 batch 18.
 0x001A6BE0	btlSortActorMuzzleDirections	inferred	confidence=high; matched-C; Native animation mode selects no-op, side-sensitive target muzzle-x sort or thirteen random swaps; aligns existing DDS2 001B0DB0. Namer1 batch 18.
 0x001A2AE8	btlGetLinkageSlotCost	inferred	confidence=high; matched-C; Returns signed native affinity-record slotCost; command failure predicate compares it with available slots. DDS2 has a separate actor-dependent discounted getter, not an identical raw-return twin. Namer1 batch 18.
+0x0024F608	mnuAllocateMantraResourceWork	inferred	Allocates cleared mantra resource-task work, loads message resources and prepares mantra visuals. DDS2 twin 0x00286E98. LiteH-2 menu naming batch 3.
+0x0024F6F0	mnuReleaseMantraResourceWork	inferred	Releases mantra task slots, visuals, message resources and backing work. DDS2 twin 0x00286F18. LiteH-2 menu naming batch 3.
+0x00287198	evtStageTestGetEntryMotionIndex	inferred	Returns the stage-test entry's motion byte selected by the encoded index. DDS2 twin 0x002C66D0. LiteH-2 menu naming batch 3.
+0x002871C0	evtStageTestGetEntryFrame	inferred	Returns the indexed stage-test entry's animation frame. DDS2 twin 0x002C66F8. LiteH-2 menu naming batch 3.
+0x002871E8	evtStageTestCopyEntryPosition	inferred	Copies three position components from the indexed stage-test entry. DDS2 twin 0x002C6720. LiteH-2 menu naming batch 3.
+0x00287220	evtStageTestCopyEntryRotation	inferred	Copies three rotation components from the indexed stage-test entry. DDS2 twin 0x002C6758. LiteH-2 menu naming batch 3.

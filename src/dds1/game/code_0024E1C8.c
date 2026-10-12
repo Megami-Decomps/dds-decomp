@@ -553,7 +553,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 }
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
-MnuResourceTaskWork *func_0024F608(void) {
+MnuResourceTaskWork *mnuAllocateMantraResourceWork(void) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
     MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress(allocation);
 
@@ -577,7 +577,7 @@ MnuResourceTaskWork *func_0024F608(void) {
 }
 
 /* Release task-owned slots, visuals and message resources before freeing the backing allocation. */
-void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
+void mnuReleaseMantraResourceWork(s32 unused, MnuResourceTaskWork *resourceWork) {
     if (resourceWork == NULL) {
         return;
     }
@@ -595,8 +595,8 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
 /* The task handle is shared by the existence probe and explicit stop;
  * both clear it when the resource group is no longer active. */
 void mnuCreateResourceTask(void) {
-    MnuResourceTaskWork *resourceWork = func_0024F608();
-    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_0036C648, func_0024F6F0, resourceWork);
+    MnuResourceTaskWork *resourceWork = mnuAllocateMantraResourceWork();
+    mnuSceneResourceContext = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_0036C648, mnuReleaseMantraResourceWork, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
