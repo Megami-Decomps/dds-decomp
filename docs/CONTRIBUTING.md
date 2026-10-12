@@ -33,6 +33,15 @@ bytes, and it has to reach that the way the original developers would have.
   meets it will do. Dead stores, dummy variables and the levers above remain
   forbidden. `tools/cc1probe.sh` produces such traces; see
   [cc1probe](cc1probe.md) for usage and the citation template.
+- **Unused locals that explain a frame gap.** ee-gcc 2.96 still reserves
+  stack space for a local array or aggregate that is never read or written,
+  so a leftover buffer in the original can leave a frame larger than the
+  code needs. Such a local is allowed only when all of these hold: the
+  retail frame is larger than the build's by exactly the local's (aligned)
+  size; no retail instruction touches that space; and a second function
+  shows the same gap, either its other-game twin or a function in the same
+  TU. Cite the gap and the corroborating function in a comment. This is the
+  only exception to the dead-variable ban.
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.
