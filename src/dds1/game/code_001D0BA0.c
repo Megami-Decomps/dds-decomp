@@ -405,7 +405,7 @@ extern s32 btlCountTasksForOwner(s64);
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
-extern u8 *func_001D9468(u8 *, u32);
+extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -1573,19 +1573,21 @@ void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
     return task;
 }
 
-s32 func_001D33D0(BtlOperandTaskArgs *args) {
+/* Apply the operand's masked entry changes; complete immediately. */
+s32 btlApplyMaskedActorEntryUpdate(BtlOperandTaskArgs *args) {
     func_001A4C68(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
     return 1;
 }
 
-void *func_001D3400(BtlUnit *owner, BtlOperandEntry *spec) {
+/* Copy the operand into an owner-bound masked-entry-update task. */
+void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x49;
-    task->callback = func_001D33D0;
+    task->callback = btlApplyMaskedActorEntryUpdate;
     task->ownerId = owner->identity;
     task->onStart = 0;
     arguments = btlGetTaskArguments(task);
@@ -1602,7 +1604,8 @@ u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *arg0) {
     return 1;
 }
 
-void *func_001D3510(BtlUnit *owner, BtlOperandEntry *spec) {
+/* Queue the operand's actor entry selection in an owner-bound task. */
+void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlOperandTaskArgs *arguments;
 
@@ -1624,7 +1627,8 @@ u32 btlClearQueuedActorEntrySelection(BtlUnit **arg0) {
     return 1;
 }
 
-void *func_001D3618(BtlUnit *owner) {
+/* Create an owner-bound task to clear the actor's queued entry selection. */
+void *btlCreateClearActorEntrySelectionTask(BtlUnit *owner) {
     BtlRuntimeTask *task = btlAllocTask(4);
     BtlUnit **arguments;
 
@@ -1649,7 +1653,8 @@ typedef char BtlHuntExpArgsSizeCheck[sizeof(BtlHuntExpArgs) == 8 ? 1 : -1];
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-u32 func_001D3688(s32 address) {
+/* Award hunt experience; the sharing ability also rewards eligible party records. */
+u32 btlAwardHuntExperience(s32 address) {
     BtlHuntExpArgs *args = (BtlHuntExpArgs *)address;
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -1720,7 +1725,7 @@ u32 func_001D3688(s32 address) {
     return 1;
 }
 
-extern u32 func_001D3688(s32);
+extern u32 btlAwardHuntExperience(s32);
 
 u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     u8 *task = btlAllocTask(8);
@@ -1729,7 +1734,7 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4C;
-    *(void **)(task + 0x4C) = func_001D3688;
+    *(void **)(task + 0x4C) = btlAwardHuntExperience;
     *(u64 *)(task + 0x40) = arg0->identity;
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
@@ -3152,7 +3157,7 @@ void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
 
 /* vu0 routine: preserve the actor's primary position and rotation quaternion while
  * evaluating the requested model record; return the sampled vector in vf10. */
-s32 func_001D6428(BtlUnit *unit, s32 value) {
+s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value) {
     f32 currentVector[4] __attribute__((aligned(16)));
     f32 primaryVector[4] __attribute__((aligned(16)));
     f32 rotationQuaternion[4] __attribute__((aligned(16)));
@@ -3480,7 +3485,8 @@ extern s32 sdfAllocPacketAligned(s32 size);
 
 /* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
  * model is created (and the update ends) on the first frame it is missing. */
-void func_001D6FB0(BtlUnit *unit) {
+/* Emit the mirror model's transparency packets using its overlay color. */
+void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     MdlCtx *info;
     SdfListHead *list;
 
@@ -4009,7 +4015,8 @@ void btlBeginModelChange(u32 argumentsAddress) {
 }
 
 /* Complete model loading, cross-fade the retained actor, and release it. */
-u32 func_001D8190(BtlModelChangeArgs *args) {
+/* Advance model replacement and mirror crossfade; return one after cleanup. */
+u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
     BtlUnit *unit = args->unit;
     u32 resourceKind = args->resourceKind;
     u32 resourceId = args->resourceId;
@@ -4150,7 +4157,7 @@ u32 func_001D8190(BtlModelChangeArgs *args) {
     return 0;
 }
 
-extern u32 func_001D8190(BtlModelChangeArgs *);
+extern u32 btlUpdateModelChangeTask(BtlModelChangeArgs *);
 
 u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5) {
     u8 *task = btlAllocTask(0x1C);
@@ -4161,7 +4168,7 @@ u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     *(void **)(task + 0x48) = btlBeginModelChange;
-    *(void **)(task + 0x4C) = func_001D8190;
+    *(void **)(task + 0x4C) = btlUpdateModelChangeTask;
     args = btlGetTaskArguments(task);
     args->unit = (BtlUnit *)unit;
     args->resourceKind = arg1;
@@ -4404,7 +4411,8 @@ u32 btlStepUnitDefeatFadeOut(u32 *arguments) {
     return 0;
 }
 
-u8 *func_001D91E0(u8 *owner, u32 value) {
+/* Create the owner-bound defeat fade-out task with a zero elapsed count. */
+u8 *btlCreateUnitDefeatFadeOutTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
@@ -4421,7 +4429,8 @@ u8 *func_001D91E0(u8 *owner, u32 value) {
     return task;
 }
 
-u32 func_001D9268(u32 *arguments) {
+/* Arguments hold unit, mode and elapsed ticks; return one after the exit fade. */
+u32 btlStepUnitExitFade(u32 *arguments) {
     BtlUnit *unit = (BtlUnit *)arguments[0];
     s32 finished = 0;
     u32 alpha;
@@ -4471,14 +4480,15 @@ u32 func_001D9268(u32 *arguments) {
     return 0;
 }
 
-u8 *func_001D9468(u8 *owner, u32 value) {
+/* Queue the selected exit-fade mode for this owner, starting at tick zero. */
+u8 *btlCreateUnitExitFadeTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x15;
-    *(void **)(task + 0x4C) = func_001D9268;
+    *(void **)(task + 0x4C) = btlStepUnitExitFade;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
@@ -4758,7 +4768,8 @@ typedef struct BtlPositionEffectArgs {
     f32 velocity;
 } BtlPositionEffectArgs;
 
-u32 func_001D9C28(BtlPositionEffectArgs *task) {
+/* Request the position-effect motion or advance its fallback position curve. */
+u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
     s32 flags;
@@ -4827,15 +4838,16 @@ u32 func_001D9C28(BtlPositionEffectArgs *task) {
     return 0;
 }
 
-extern u32 func_001D9C28(BtlPositionEffectArgs *);
+extern u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *);
 
-u8 *func_001D9E48(u8 *arg0) {
+/* Queue the actor's position effect with its tick counter reset. */
+u8 *btlCreateActorPositionEffectTask(u8 *arg0) {
     u8 *task = btlAllocTask(0x10);
     u32 *data;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = func_001D9C28;
+    *(void **)(task + 0x4C) = btlAdvanceActorPositionEffectTask;
     *(u16 *)(task + 0x20) = 0x1E;
     *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
     *(s32 *)(task + 0x48) = 0;
@@ -4845,7 +4857,8 @@ u8 *func_001D9E48(u8 *arg0) {
     return task;
 }
 
-u32 func_001D9EC0(s32 *arg0) {
+/* Apply the queued actor's stored orientation and complete immediately. */
+u32 btlApplyQueuedActorRotation(s32 *arg0) {
     BtlUnit *temp_v0;
 
     temp_v0 = (BtlUnit *)(u32)*arg0;
@@ -4860,7 +4873,7 @@ void *btlScheduleActorUpdate(u8 *owner) {
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = func_001D9EC0;
+    *(void **)(task + 0x4C) = btlApplyQueuedActorRotation;
     *(u16 *)(task + 0x20) = 0x1F;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
     *(u32 *)(task + 0x48) = 0;
@@ -4990,7 +5003,8 @@ void *btlCreateActorTransparencyTask(BtlUnit *actor) {
     return task;
 }
 
-s32 func_001DA2E0(BtlActorModelBlendArgs *args) {
+/* Advance the queued model-motion blend in two stages; return one when done. */
+s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
     BtlUnit *unit;
     BtlUnit *target;
 
@@ -5023,7 +5037,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s3
     BtlActorModelBlendArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->callback = func_001DA2E0;
+    task->callback = btlAdvanceActorModelBlendTask;
     task->taskId = 0x26;
     task->ownerId = actor->identity;
     task->onStart = 0;
@@ -5133,7 +5147,7 @@ void btlUpdateActorModelColorAndLinks(void) {
                     }
                 }
                 if (unit->status.flags & 0x10000) {
-                    func_001D6FB0(unit);
+                    btlDrawUnitMirrorTransparency(unit);
                 } else {
                     btlUpdateUnitTransparency(unit);
                 }
@@ -5527,7 +5541,8 @@ u32 func_001DB368(BtlLinkedCommand *command) {
     return 1;
 }
 
-void func_001DB370(BtlCamState *dst, BtlCamState *current, BtlCamState *target, f32 blend) {
+/* Blend position, direction, distance and FOV; both vector W lanes become zero. */
+void btlBlendActionCameraState(BtlCamState *dst, BtlCamState *current, BtlCamState *target, f32 blend) {
     f32 delta;
     f32 value;
 
@@ -5546,7 +5561,7 @@ void func_001DB370(BtlCamState *dst, BtlCamState *current, BtlCamState *target, 
     dst->fov = current->fov + delta * blend;
 }
 
-extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
+extern void btlBlendActionCameraState(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
 s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     f32 blend;
@@ -5561,7 +5576,7 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     if (blend > 0.5f) {
         blend = 0.5f;
     }
-    func_001DB370(&command->camera, &command->frontCamera,
+    btlBlendActionCameraState(&command->camera, &command->frontCamera,
                   &command->backCamera, 2.0f * blend);
     command->progress = blend;
     if (blend >= 0.5f) {
@@ -5570,7 +5585,7 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     return 0;
 }
 
-extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
+extern void btlBlendActionCameraState(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
 s32 btlStepPoseBlend(BtlLinkedCommand *command) {
     BtlExponentialRange *motion = &command->exponentialRange;
@@ -5581,7 +5596,7 @@ s32 btlStepPoseBlend(BtlLinkedCommand *command) {
         btlCopyMotionTransform(&command->camera, from);
     }
     value = btlScalarRangeStepExponential(motion);
-    func_001DB370(&command->camera, from,
+    btlBlendActionCameraState(&command->camera, from,
                   &command->backCamera, value);
     command->progress = value;
     return 0.9999990f <= value;
@@ -5597,7 +5612,7 @@ s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
         return 0;
     }
     value = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
-    func_001DB370(&command->camera, &command->frontCamera,
+    btlBlendActionCameraState(&command->camera, &command->frontCamera,
                   &command->backCamera, value);
     command->progress = value;
     return 0.9999990f <= value;
@@ -5606,7 +5621,7 @@ s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
 s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
     f32 ratio = (f32)command->state / (f32)command->durationFrames;
     if (ratio <= 1.0f) {
-        func_001DB370(&command->camera, &command->frontCamera,
+        btlBlendActionCameraState(&command->camera, &command->frontCamera,
                       &command->backCamera, ratio);
         return 0;
     }

@@ -1019,8 +1019,8 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit
 extern SoundTask *sndCreateSetStateTask(void);
 extern SoundTask *sndCreateClearStateTask(void);
 extern void *btlScheduleActorUpdate(u8 *);
-extern void *func_001D3618(BtlUnit *);
-extern u8 *func_001D9E48(u8 *);
+extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
+extern u8 *btlCreateActorPositionEffectTask(u8 *);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
@@ -1185,12 +1185,12 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         }
         if (group->reflected != 0) currentTarget = action->unit;
         if (group->targetSpecialHit != 0) {
-            task = func_001D3618(indexedTarget);
+            task = btlCreateClearActorEntrySelectionTask(indexedTarget);
             task->startDelay = groupDelay;
             btlStartTask(task);
         }
         if (group->sourceSpecialHit != 0) {
-            task = func_001D3618(currentTarget);
+            task = btlCreateClearActorEntrySelectionTask(currentTarget);
             task->startDelay = groupDelay;
             btlStartTask(task);
         }
@@ -1286,7 +1286,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             }
             lastOperandHandle = operandTask->handle;
             if (group->kind == 2 && operandIndex == 0) {
-                task = (BtlRuntimeTask *)func_001D9E48((u8 *)currentTarget);
+                task = (BtlRuntimeTask *)btlCreateActorPositionEffectTask((u8 *)currentTarget);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 btlStartTask(task);
@@ -1513,8 +1513,8 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
 extern SoundTask *sndCreateSetStateTask(void);
 extern SoundTask *sndCreateClearStateTask(void);
 extern void *btlScheduleActorUpdate(u8 *);
-extern void *func_001D3618(BtlUnit *);
-extern u8 *func_001D9E48(u8 *);
+extern void *btlCreateClearActorEntrySelectionTask(BtlUnit *);
+extern u8 *btlCreateActorPositionEffectTask(u8 *);
 extern const char D_003A3670[];
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
@@ -1534,8 +1534,8 @@ extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *
 struct ActiveSoundNode *sndAllocListNode(void);
 extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
 extern SoundTask *sndCreateSkillSeTask(s32, u16);
-extern void *func_001D3400(BtlUnit *, BtlOperandEntry *);
-extern void *func_001D3510(BtlUnit *, BtlOperandEntry *);
+extern void *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
+extern void *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
 
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
@@ -1696,13 +1696,13 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 commandOwner = unit->identity;
             } else commandOwner = btlAdvanceRuntimeSequenceCounter();
             if (group->targetSpecialHit != 0) {
-                task = func_001D3618(indexedTarget);
+                task = btlCreateClearActorEntrySelectionTask(indexedTarget);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = commandOwner;
                 btlStartTask(task);
             }
             if (group->sourceSpecialHit != 0) {
-                task = func_001D3618(currentTarget);
+                task = btlCreateClearActorEntrySelectionTask(currentTarget);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = commandOwner;
                 btlStartTask(task);
@@ -1759,7 +1759,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 }
                 latestOperandHandle = operandTask->handle;
                 if (group->kind == 2 && operandIndex == 0) {
-                    task = (BtlRuntimeTask *)func_001D9E48((u8 *)currentTarget);
+                    task = (BtlRuntimeTask *)btlCreateActorPositionEffectTask((u8 *)currentTarget);
                     task->startCondition.kind = 4;
                     task->startCondition.value.handle = operandTask->handle;
                     btlStartTask(task);
@@ -1805,12 +1805,12 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 task->ownerId = commandOwner;
                 btlStartTask(task);
 
-                task = func_001D3400(currentTarget, &group->entries[operandIndex]);
+                task = btlCreateMaskedActorEntryUpdateTask(currentTarget, &group->entries[operandIndex]);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
                 btlStartTask(task);
-                task = func_001D3510(currentTarget, &group->entries[operandIndex]);
+                task = btlCreateQueuedActorEntrySelectionTask(currentTarget, &group->entries[operandIndex]);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 task->ownerId = commandOwner;
@@ -2404,7 +2404,7 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     *(s32 *)(object + 0x28) = 0xF;
     *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(task + 0x18) + 0x108);
     btlStartTask(object);
-    object = func_001D9468(actor, 1);
+    object = btlCreateUnitExitFadeTask(actor, 1);
     *(s32 *)(object + 0x28) = 0xF;
     return btlStartTask(object);
 }
@@ -2470,7 +2470,7 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
     BtlUnit *owner = (BtlUnit *)arguments[0x34 / 4];
     BtlRuntimeTask *value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
-    value = (BtlRuntimeTask *)func_001D9468((u8 *)owner, 1);
+    value = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((u8 *)owner, 1);
     value->startDelay = 7;
     btlStartTask(value);
 }
@@ -2748,7 +2748,7 @@ extern void btlAccumulateEnemyDefeatRewards(s32);
 
 extern u8 *btlCreateSelectedEffectUpdateTask(u8 *);
 
-extern u8 *func_001D9468(u8 *, u32);
+extern u8 *btlCreateUnitExitFadeTask(u8 *, u32);
 
 
 void btlStartActorDefeatTransition(s32 command) {
@@ -2815,7 +2815,7 @@ void btlStartActorDefeatTransition(s32 command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (BtlRuntimeTask *)func_001D9468((u8 *)actor, 0);
+                object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((u8 *)actor, 0);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
