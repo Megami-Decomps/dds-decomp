@@ -70,6 +70,35 @@ typedef struct BtlActionAnimationRecord {
     u8 pad1E[2];
 } BtlActionAnimationRecord;
 
+/* Alternate table view used by action metadata and lighting readers. The kind
+ * and resource-type bytes alias cameraKind and kind in the animation view. */
+typedef struct BtlActionTableEntry {
+    u8 kind; /* 0x00 */
+    u8 pad01[2];
+    u8 resourceType; /* 0x03 */
+    u8 pad04[4];
+    f32 lightColorMode; /* 0x08 */
+    f32 lightColor[3]; /* 0x0C */
+    s32 defaultValue; /* 0x18 */
+    u16 flags; /* 0x1C */
+    u8 pad1E[2];
+} BtlActionTableEntry;
+
+typedef char BtlActionTableEntry_size_must_be_0x20[
+    (sizeof(BtlActionTableEntry) == 0x20) ? 1 : -1];
+typedef char BtlActionTableEntry_kind_offset_must_be_0x00[
+    ((u32)&((BtlActionTableEntry *)0)->kind == 0x00) ? 1 : -1];
+typedef char BtlActionTableEntry_resourceType_offset_must_be_0x03[
+    ((u32)&((BtlActionTableEntry *)0)->resourceType == 0x03) ? 1 : -1];
+typedef char BtlActionTableEntry_lightColorMode_offset_must_be_0x08[
+    ((u32)&((BtlActionTableEntry *)0)->lightColorMode == 0x08) ? 1 : -1];
+typedef char BtlActionTableEntry_lightColor_offset_must_be_0x0C[
+    ((u32)&((BtlActionTableEntry *)0)->lightColor == 0x0C) ? 1 : -1];
+typedef char BtlActionTableEntry_defaultValue_offset_must_be_0x18[
+    ((u32)&((BtlActionTableEntry *)0)->defaultValue == 0x18) ? 1 : -1];
+typedef char BtlActionTableEntry_flags_offset_must_be_0x1C[
+    ((u32)&((BtlActionTableEntry *)0)->flags == 0x1C) ? 1 : -1];
+
 /* Group policy takes precedence; target policy falls back to group framing
  * unless exactly one target is present. DDS1's fixed-preset bit selects explicit
  * camera keys, while the DDS2 consumers retain identical arms for that bit. */
