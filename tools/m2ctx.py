@@ -21,9 +21,20 @@ INCLUDE = re.compile(r'^\s*#\s*include\s+["<][^">]+[">]', re.M)
 
 
 def context(source: Path) -> str:
+    source = source.resolve()
     includes = "\n".join(INCLUDE.findall(source.read_text()))
     cmd = ["cpp", "-P", "-undef", "-nostdinc", "-DM2CTX", "-D__GNUC__=2", "-D__mips__", "-D_R5900",
-           f"-I{ROOT / 'include'}", f"-I{ROOT / 'src'}", f"-I{source.parent}", "-"]
+           f"-I{ROOT / 'include'}", f"-I{ROOT / 'src'}", f"-I{source.parent}"]
+    # Match the game-specific preprocessor environment used by native units.
+    # Without it, declarations such as DatSkillList have unresolved array
+    # bounds (DAT_SKILL_LIST_MAX), and DDS1/DDS2-specific layouts disappear.
+    try:
+        game = source.relative_to(ROOT / "src").parts[0]
+    except (ValueError, IndexError):
+        game = None
+    if game in ("dds1", "dds2"):
+        cmd.append(f"-DVERSION_{game.upper()}")
+    cmd.append("-")
     out = subprocess.run(cmd, input=includes, capture_output=True, text=True, check=True).stdout
     return re.sub(r"\n{3,}", "\n\n", out).strip() + "\n"
 
