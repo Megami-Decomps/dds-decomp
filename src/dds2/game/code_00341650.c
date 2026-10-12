@@ -1,5 +1,6 @@
 #include "snd_ring.h"
 #include "common.h"
+#include "snd_command_packet.h"
 #include "snd_track_slot.h"
 #include "sce_io.h"
 
@@ -16,14 +17,6 @@
 #define SND_IOP_BUFFER_COUNT 16
 #define SND_TRACK_SLOT_COUNT 13
 #define SND_IOP_BUFFER_ALIGNMENT 16
-
-typedef struct CmdPacket {
-    /* 0x0 */ u32 trackId;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 setting;
-    /* 0xA */ u16 unkA;
-    /* 0xC */ u32 unkC;
-} CmdPacket;
 
 u32 func_00341650(u32 command, u32 channel, void *packet, s32 size);
 
