@@ -103,7 +103,7 @@ extern void fldStartSequenceRecord(void);
 
 
 
-extern KwlnTask *func_00101820(u32 prio);
+extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
 extern char D_00435D20[];
 
@@ -1164,7 +1164,7 @@ u32 evtEnsureSelectionTask(void) {
     if (kwlnTaskGetTaskByName(D_00435D20) != NULL) {
         return 0;
     }
-    if (func_00101820(0x3FA) == NULL) {
+    if (kwlnTaskFindByPriority(0x3FA) == NULL) {
         fldDispatchDeferredFieldCommand();
         return 1;
     }

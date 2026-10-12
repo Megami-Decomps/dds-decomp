@@ -45,7 +45,7 @@ extern s32 dds3FindEntryIndex();
 
 extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
-extern KwlnTask *func_00101820(u32 priority);
+extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 extern const char *D_003B4CF8[];
 
@@ -910,7 +910,7 @@ void btlCreateDrawTasks(void) {
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     KwlnTask *task;
 
-    task = func_00101820(0x3f9);
+    task = kwlnTaskFindByPriority(0x3f9);
     if (task != 0) {
         BattleController *battle = (BattleController *)btlRuntime;
         kwlnTaskDestroyWithHierarchy(battle->drawTask, 1);
