@@ -554,7 +554,7 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-void func_00119B08(s32 mode) {
+void ptyApplyEventPenalty(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
         DatPartyRecord *entry = datGameState->party;
