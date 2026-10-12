@@ -1660,7 +1660,8 @@ void func_001AB8C0(DatPartyRecord *unit, s32 statIndex) {
     datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
-s32 func_001AB8D8(DatPartyRecord *unit, s32 statIndex) {
+/* Return the requested party-record stat with its native status override. */
+s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
@@ -2056,8 +2057,8 @@ next_actor:
 extern u8 D_003B4DD8[];
 extern DatSkillList *D_00435E28;
 
-/* Enumerate distinct partner pairs for every battle combination command. */
-s32 func_001AC750(BtlUnit *actor, BattleRosterTable *table) {
+/* Build distinct LINKAGE skill/partner rows for actor; return the roster count. */
+s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     BtlUnit *actors[3];
     BtlState *battle;
     BtlUnit *unit;
@@ -2267,7 +2268,8 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 
 extern s32 datFlagToElementIndex(s32);
 
-s32 func_001AD090(s32 flag) {
+/* Decode an element flag through the shared native flag-to-index table. */
+s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
@@ -2431,7 +2433,8 @@ u32 func_001AD310(BtlUnit *enemyUnit, s32 mode) {
     return selected;
 }
 
-void func_001AD5B0(u16 item) {
+/* Accumulate one item drop; new IDs are discarded if all three slots are occupied. */
+void btlAddItemDrop(u16 item) {
     BattleController *controller = (BattleController *)btlGetRuntime();
 
     if (item != 0) {
@@ -2514,7 +2517,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     }
     item = func_001AD310((s32)enemy, 0);
     if (item != 0) {
-        func_001AD5B0(item);
+        btlAddItemDrop(item);
     }
     kind = enemy->partyRecord.unitId;
     if (kind < 104) {
@@ -2709,7 +2712,8 @@ s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     return 0;
 }
 
-void func_001ADD30(BtlUnit *unit, s32 index, s16 delta) {
+/* Clamp a signed entry-code delta and refresh timing only when the result is nonzero. */
+void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
     s16 code = unit->entrySlots[index].code;
     code += delta;
 
@@ -2809,40 +2813,40 @@ void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta) {
         return;
     }
     if (flags & 1) {
-        func_001ADD30(unit, 0, delta);
+        btlAdjustActorEntryCode(unit, 0, delta);
     }
     if (flags & 2) {
-        func_001ADD30(unit, 0, -delta);
+        btlAdjustActorEntryCode(unit, 0, -delta);
     }
     if (flags & 4) {
-        func_001ADD30(unit, 1, delta);
+        btlAdjustActorEntryCode(unit, 1, delta);
     }
     if (flags & 8) {
-        func_001ADD30(unit, 1, -delta);
+        btlAdjustActorEntryCode(unit, 1, -delta);
     }
     if (flags & 0x10) {
-        func_001ADD30(unit, 2, delta);
+        btlAdjustActorEntryCode(unit, 2, delta);
     }
     if (flags & 0x20) {
-        func_001ADD30(unit, 2, -delta);
+        btlAdjustActorEntryCode(unit, 2, -delta);
     }
     if (flags & 0x40) {
-        func_001ADD30(unit, 3, delta);
+        btlAdjustActorEntryCode(unit, 3, delta);
     }
     if (flags & 0x80) {
-        func_001ADD30(unit, 3, -delta);
+        btlAdjustActorEntryCode(unit, 3, -delta);
     }
     if (flags & 0x100) {
-        func_001ADD30(unit, 4, delta);
+        btlAdjustActorEntryCode(unit, 4, delta);
     }
     if (flags & 0x200) {
-        func_001ADD30(unit, 4, -delta);
+        btlAdjustActorEntryCode(unit, 4, -delta);
     }
     if (flags & 0x400) {
-        func_001ADD30(unit, 5, delta);
+        btlAdjustActorEntryCode(unit, 5, delta);
     }
     if (flags & 0x2000) {
-        func_001ADD30(unit, 6, delta);
+        btlAdjustActorEntryCode(unit, 6, delta);
     }
     if (flags & 0x800) {
         if (btlGetActorEntryCode(unit, 0) > 0) {
@@ -2896,7 +2900,8 @@ void btlTickActorEntryCountdowns(BtlUnit *unit) {
     }
 }
 
-f32 func_001AE3A8(BtlUnit *unit, s32 attr) {
+/* Return the element-ability scale, including native party-unit default factors. */
+f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr) {
     f32 scale = 1.0f;
 
     switch (attr) {
@@ -2975,7 +2980,8 @@ f32 func_001AE3A8(BtlUnit *unit, s32 attr) {
     return scale;
 }
 
-s32 func_001AE678(BtlUnit *actor, s32 attr) {
+/* Return the ability-adjusted attribute percentage; the suppression flag leaves it at 100. */
+s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr) {
     u32 value = 100;
 
     if (((BattleController *)btlGetRuntime())->flags21C & 0x20000) {
@@ -3113,7 +3119,8 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
     return 0;
 }
 
-f32 func_001AEC18(BtlUnit *unit) {
+/* Return the enabled low-HP ability's multiplier from the native HP-percent thresholds. */
+f32 btlGetLowHpAbilityMultiplier(BtlUnit *unit) {
     DatPartyRecord *entry = &unit->partyRecord;
     s32 maximum;
     s32 percentage;
@@ -3209,7 +3216,8 @@ void btlPushSavedPartyUnitStates(void) {
 
 extern const char D_00415340[];
 
-void func_001AEEA8(void) {
+/* Restore saved party entries/status and the matching actors' transformation/death state. */
+void btlRestorePartySlotSnapshots(void) {
     u32 index;
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -3572,7 +3580,7 @@ extern s32 D_003B4EF0[];
 
 /* Delay before an action: 9 for a 0x200-group unit in mode 6 with stat bit 0x10 clear on a
  * kind-5 or empty command, 1 for no command, else the animation's delay-table row. */
-s32 func_001B0C68(BtlUnit *unit, s32 actionId) {
+s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     s32 *delayTable;
     s32 *delay;
 

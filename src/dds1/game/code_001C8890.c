@@ -998,7 +998,7 @@ extern BtlRuntimeTask *func_001F12E8(SoundResourceNode *, BtlUnit *, BtlUnit *, 
 extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetSlotRateKind(u8 *, s32);
-extern s32 func_001A6AA0(BtlUnit *, s32);
+extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 func_001D6050(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
@@ -1130,7 +1130,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     }
     currentTarget = action->unit;
     reflectedStarted = 0;
-    actionFrames = func_001A6AA0(action->unit, action->indexWork.skillId);
+    actionFrames = btlGetActionAnimationDelay(action->unit, action->indexWork.skillId);
     commandMap = btlResolveSkillCategory((s32)action->unit, action->indexWork.skillId);
     for (groupIndex = 0; groupIndex < targetCount; groupIndex++, group++) {
         if (resourceNormal == 0 && resourceTimed == 0) {
@@ -1490,7 +1490,7 @@ extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *func_001F0920(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
-extern s32 func_001A6AA0(BtlUnit *, s32);
+extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 func_001D6050(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
@@ -1677,7 +1677,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
         if (state->commandSoundDelay != NULL) task->startDelay = state->commandSoundDelay(skill);
         btlStartTask(task);
         if (state->preActionHook != NULL) state->preActionHook(action, skill, actionOwner, soundHandle, masterOwner);
-        actionFrames = func_001A6AA0(unit, skill);
+        actionFrames = btlGetActionAnimationDelay(unit, skill);
         commandMap = btlResolveSkillCategory((s32)unit, skill);
         blendStarted = 0;
         reflectedStarted = 0;

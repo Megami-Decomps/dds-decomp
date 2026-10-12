@@ -110,7 +110,7 @@ extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern s32 btlMarkInactiveActorCandidates();
 
-extern void func_001AEEA8();
+extern void btlRestorePartySlotSnapshots();
 
 extern void kwlnFadeBackgroundStartOut();
 
@@ -133,7 +133,7 @@ extern s32 btlAreWorkBuffersReady(void);
 extern s32 func_0022E490(void);
 extern s32 btlResetSceneSlotFades(void);
 extern s32 func_001B3DD8(void);
-extern void func_001AD5B0(u16);
+extern void btlAddItemDrop(u16);
 
 extern void kwlnFadeStartIn();
 
@@ -262,7 +262,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
         }
         btlMarkInactiveActorCandidates();
         if (scene->commandRestrictFlags & 0x80) {
-            func_001AEEA8();
+            btlRestorePartySlotSnapshots();
             scene->commandRestrictFlags &= ~0x80;
         }
         if (!(scene->battleFlags & 0x4000)) {
@@ -533,7 +533,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
         func_001B3DD8();
         if (datBattleSceneRecords[scene->battleMode].unk01 != 0) {
             for (i = 0; i < datBattleSceneRecords[scene->battleMode].unk02; i++) {
-                func_001AD5B0(datBattleSceneRecords[scene->battleMode].unk01);
+                btlAddItemDrop(datBattleSceneRecords[scene->battleMode].unk01);
             }
         }
         return 8;
@@ -1345,7 +1345,7 @@ s32 fldClassifyActorSceneGroup(ActionStateLink *task) {
     }
 }
 
-extern s32 func_001AB8D8(DatPartyRecord *unit, s32 statIndex);
+extern s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
 
 /* Sort adjacent occupied tasks by descending accessor value; null slots stay put. */
 void btlSortSceneGroupByPriorityDesc(ActionStateLink **group, s32 entryCount) {
@@ -1358,8 +1358,8 @@ void btlSortSceneGroupByPriorityDesc(ActionStateLink **group, s32 entryCount) {
             ActionStateLink *first = pairCursor[0];
             ActionStateLink *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                (u32)func_001AB8D8(&first->unit->partyRecord, 3) <
-                (u32)func_001AB8D8(&second->unit->partyRecord, 3)) {
+                (u32)btlGetStatWithStatusOverride(&first->unit->partyRecord, 3) <
+                (u32)btlGetStatWithStatusOverride(&second->unit->partyRecord, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;

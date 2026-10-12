@@ -149,7 +149,7 @@ extern void fldClearSceneSlotsAndGroups(void);
 
 u32 btlHasRegisteredGuidePanelTask(void);
 
-s32 func_001A29D0(DatPartyRecord *unit, s32 statIndex);
+s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
 
 void btlRequestGuidePanelClose(void);
 
@@ -514,7 +514,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
         func_001A9780();
         if (datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01 != 0) {
             for (i = 0; i < datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk02; i++) {
-                func_001A4240(datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01);
+                btlAddItemDrop(datBattleSceneRecords[*(s32 *)(arg0 + 0x27C)].unk01);
             }
         }
         return 8;
@@ -794,7 +794,7 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
     return 0;
 }
 
-extern void func_001A5690(void);
+extern void btlPushSavedPartyUnitStates(void);
 extern void btlSetTaskPhase5(void);
 extern s32 func_001ACC20(void);
 extern s32 btlDestroyTaskC(void);
@@ -827,7 +827,7 @@ void func_001C5F80(BtlState *scene) {
     u32 participants;
     u32 i;
 
-    func_001A5690();
+    btlPushSavedPartyUnitStates();
     if (scene->eventReady != 5) {
         btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
@@ -1340,8 +1340,8 @@ void btlSortSceneGroupByPriorityDesc(BtlTask **group, s32 entryCount) {
             BtlTask *first = pairCursor[0];
             BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                (u32)func_001A29D0(&first->unit->partyRecord, 3) <
-                (u32)func_001A29D0(&second->unit->partyRecord, 3)) {
+                (u32)btlGetStatWithStatusOverride(&first->unit->partyRecord, 3) <
+                (u32)btlGetStatWithStatusOverride(&second->unit->partyRecord, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;

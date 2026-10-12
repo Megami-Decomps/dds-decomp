@@ -2853,7 +2853,7 @@
 0x001C5DB8	fldSceneStateWaitScriptRelease	inferred	Established DDS2 counterpart and source-level behavior agree (0.79 match). [names_reviewed19.tsv]
 0x001C7230	btlSetScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001C72A8	btlUpdateScene	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001C74F0	btlSortSceneGroupByPriorityDesc	inferred	twin 0x001D2F40: bubble sort of scene tasks by func_001A29D0(actor+0x120, 3) descending
+0x001C74F0	btlSortSceneGroupByPriorityDesc	inferred	twin 0x001D2F40: bubble sort of scene tasks by btlGetStatWithStatusOverride(actor+0x120, 3) descending
 0x001C75C8	fldSortGroupByPriority	inferred	bubble sort of scene tasks by actor priority (+0x11C)
 0x001C7980	fldCompactSceneSlots	inferred	twin 0x001D34B8: shifts 3-byte scene slots down when slot 0 is empty
 0x001C7CB0	fldSwapSceneSlots	inferred	swaps slots 0/1 when flag 0x100 set
@@ -8004,3 +8004,13 @@
 0x0027CA90	mnuDrawWindowFrameAndOverlay	inferred	Draws the window frame, fade decorations and selected overlay or sprite. LiteH-2 menu naming batch 2.
 0x00281688	mnuDrawPartyPanelSlotWithBlend	inferred	Selects a party-panel resource from its blend state and draws the slot with the selected alpha. LiteH-2 menu naming batch 2.
 0x00281780	mnuQueuePartyPanelSlotBlend	inferred	Selects the lower-blend work entry and queues a party-panel transition. LiteH-2 menu naming batch 2.
+0x001A29D0	btlGetStatWithStatusOverride	inferred	confidence=high; matched-C; Returns datGetStatWithStatusOverride for party record/stat index; scene priority sorter reads stat3 through it. DDS2 twin 001AB8D8. Namer1 batch 18.
+0x001A4060	btlFlagToElementIndex	inferred	confidence=high; matched-C; Returns shared datFlagToElementIndex, used by automatic-guard affinity queries to decode element flags. DDS2 twin 001AD090. Namer1 batch 18.
+0x001A4240	btlAddItemDrop	inferred	confidence=high; matched-C; Merges one item into matching drop slot or first free controller slot among three; ignores zero/new IDs when full. Enemy reward collector and scene initialization call it. DDS2 twin 001AD5B0. Namer1 batch 18.
+0x001A4948	btlAdjustActorEntryCode	inferred	confidence=high; matched-C; Adds signed entry-code delta, clamps to native descriptor upper/lower bounds and refreshes initial value/countdown only for nonzero result. DDS2 twin 001ADD30. Namer1 batch 18.
+0x001A5030	btlGetElementAbilityMultiplier	inferred	confidence=high; matched-C; Multiplies enabled element-specific ability parameter factors for attributes2..6, defaulting to one. DDS2 semantic twin 001AE3A8 retains additional native party defaults. Namer1 batch 18.
+0x001A6AA0	btlGetActionAnimationDelay	inferred	confidence=high; matched-C; Reads animation delayIndex row, prints btl:delay and returns delay; released ATTACK/LINKAGE scheduler callers use it as actionFrames. Native special cases preserved. DDS2 twin 001B0C68. Namer1 batch 18.
+0x001A3740	btlBuildActorLinkageSkillList	inferred	confidence=high; matched-C; Enumerates85 native affinity records over six participant permutations, tests requirements and emits deduplicated skill/partner rows; actual btlHasUnmarkedLinkageSkill and btlGetActorLinkageSkillList callers prove LINKAGE role. DDS2 twin 001AC750. Namer1 batch 18.
+0x001A5690	btlPushSavedPartyUnitStates	inferred	confidence=high; matched-C; Copies active party actor flags/id/entries/status into saved array and prints btl:state push; aligns existing DDS2 001AED98. Native status mask retained. Namer1 batch 18.
+0x001A6BE0	btlSortActorMuzzleDirections	inferred	confidence=high; matched-C; Native animation mode selects no-op, side-sensitive target muzzle-x sort or thirteen random swaps; aligns existing DDS2 001B0DB0. Namer1 batch 18.
+0x001A2AE8	btlGetLinkageSlotCost	inferred	confidence=high; matched-C; Returns signed native affinity-record slotCost; command failure predicate compares it with available slots. DDS2 has a separate actor-dependent discounted getter, not an identical raw-return twin. Namer1 batch 18.

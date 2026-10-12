@@ -172,7 +172,7 @@ s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
-s8 func_001A2AE8(s32 command);
+s8 btlGetLinkageSlotCost(s32 command);
 
 s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
@@ -687,7 +687,7 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
 
 extern SndPad D_00324510;
 
-extern s32 func_001A3740(BtlUnit *, BattleRosterTable *);
+extern s32 btlBuildActorLinkageSkillList(BtlUnit *, BattleRosterTable *);
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
 
@@ -3246,7 +3246,7 @@ s32 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
     s32 i;
 
     func_001ACDF0();
-    count = func_001A3740(unit, &D_00359160);
+    count = btlBuildActorLinkageSkillList(unit, &D_00359160);
     if (count != 0) {
         for (i = 0; i < count; i++) {
             if (func_001ACD30(D_00359160.entries[i].skill, 2) == 0) {
@@ -5403,7 +5403,7 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
 
 /* Refresh and return the shared LINKAGE skill/member list for the owning actor. */
 BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *value) {
-    s32 result = func_001A3740(object->owner->unit, &D_00359160);
+    s32 result = btlBuildActorLinkageSkillList(object->owner->unit, &D_00359160);
     *value = result;
     return &D_00359160;
 }

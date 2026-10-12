@@ -374,7 +374,8 @@ void func_001A29B8(DatPartyRecord *unit, s32 statIndex) {
     datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
-s32 func_001A29D0(DatPartyRecord *unit, s32 statIndex) {
+/* Return the requested party-record stat with its native status override. */
+s32 btlGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
@@ -402,7 +403,8 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
     return value == 0 ? 1 : value;
 }
 
-s8 func_001A2AE8(s32 command) {
+/* Return the LINKAGE command's signed native affinity-record slot cost. */
+s8 btlGetLinkageSlotCost(s32 command) {
     return datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].slotCost;
 }
 
@@ -427,7 +429,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
             return 4;
         }
-        if (fldCountSceneSlots() < (u32)func_001A2AE8(command)) {
+        if (fldCountSceneSlots() < (u32)btlGetLinkageSlotCost(command)) {
             return 6;
         }
     }
@@ -752,8 +754,8 @@ next_unit:
 extern u8 D_003583B8[];
 extern DatSkillList *D_003BAA58;
 
-/* Enumerate distinct partner pairs for every battle combination command. */
-s32 func_001A3740(BtlUnit *actor, BattleRosterTable *table) {
+/* Build distinct LINKAGE skill/partner rows for actor; return the roster count. */
+s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     BtlUnit *actors[3];
     BtlState *battle;
     BtlUnit *unit;
@@ -957,7 +959,8 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
 
 extern s32 datFlagToElementIndex(s32);
 
-s32 func_001A4060(s32 flag) {
+/* Decode an element flag through the shared native flag-to-index table. */
+s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
@@ -1007,7 +1010,8 @@ s32 func_001A4130(s32 actorAddress, s32 mode) {
     return action;
 }
 
-void func_001A4240(u16 item) {
+/* Accumulate one item drop; new IDs are discarded if all three slots are occupied. */
+void btlAddItemDrop(u16 item) {
     BattleController *controller = (BattleController *)btlGetRuntime();
 
     if (item != 0) {
@@ -1083,7 +1087,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     }
     item = func_001A4130((s32)enemy, 0);
     if (item != 0) {
-        func_001A4240(item);
+        btlAddItemDrop(item);
     }
     enemy->status.stateFlags |= 1;
     btlBossDebugPrintf(D_003A1848, enemy);
@@ -1258,7 +1262,8 @@ s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     return 0;
 }
 
-void func_001A4948(BtlUnit *unit, s32 index, s16 delta) {
+/* Clamp a signed entry-code delta and refresh timing only when the result is nonzero. */
+void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
     s16 code = unit->entrySlots[index].code;
     code += delta;
 
@@ -1360,40 +1365,40 @@ void func_001A4C68(BtlUnit *unit, u32 flags, s16 delta) {
         return;
     }
     if (flags & 1) {
-        func_001A4948(unit, 0, delta);
+        btlAdjustActorEntryCode(unit, 0, delta);
     }
     if (flags & 2) {
-        func_001A4948(unit, 0, -delta);
+        btlAdjustActorEntryCode(unit, 0, -delta);
     }
     if (flags & 4) {
-        func_001A4948(unit, 1, delta);
+        btlAdjustActorEntryCode(unit, 1, delta);
     }
     if (flags & 8) {
-        func_001A4948(unit, 1, -delta);
+        btlAdjustActorEntryCode(unit, 1, -delta);
     }
     if (flags & 0x10) {
-        func_001A4948(unit, 2, delta);
+        btlAdjustActorEntryCode(unit, 2, delta);
     }
     if (flags & 0x20) {
-        func_001A4948(unit, 2, -delta);
+        btlAdjustActorEntryCode(unit, 2, -delta);
     }
     if (flags & 0x40) {
-        func_001A4948(unit, 3, delta);
+        btlAdjustActorEntryCode(unit, 3, delta);
     }
     if (flags & 0x80) {
-        func_001A4948(unit, 3, -delta);
+        btlAdjustActorEntryCode(unit, 3, -delta);
     }
     if (flags & 0x100) {
-        func_001A4948(unit, 4, delta);
+        btlAdjustActorEntryCode(unit, 4, delta);
     }
     if (flags & 0x200) {
-        func_001A4948(unit, 4, -delta);
+        btlAdjustActorEntryCode(unit, 4, -delta);
     }
     if (flags & 0x400) {
-        func_001A4948(unit, 5, delta);
+        btlAdjustActorEntryCode(unit, 5, delta);
     }
     if (flags & 0x2000) {
-        func_001A4948(unit, 6, delta);
+        btlAdjustActorEntryCode(unit, 6, delta);
     }
     if (flags & 0x800) {
         if (btlGetActorEntryCode(unit, 0) > 0) {
@@ -1446,7 +1451,8 @@ void btlTickActorEntryCountdowns(u8 *scene) {
     }
 }
 
-f32 func_001A5030(BtlUnit *actor, s32 attr) {
+/* Return the product of enabled element-ability parameters, or one. */
+f32 btlGetElementAbilityMultiplier(BtlUnit *actor, s32 attr) {
     f32 scale = 1.0f;
 
     switch (attr) {
@@ -1632,13 +1638,14 @@ extern BtlActorStateSnapshot D_003D73F0[3];
 
 extern s32 func_003003F0(const char *, ...);
 
+/* Snapshot active party actors for the later party-slot restoration pass. */
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1908);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1918);
 
-void func_001A5690(void) {
+void btlPushSavedPartyUnitStates(void) {
     s32 count = 0;
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -1874,7 +1881,8 @@ extern s32 D_00358490[];
 
 extern char D_003A1A58[]; /* "btl:delay=%d\n" */
 
-s32 func_001A6AA0(BtlUnit *unit, s32 actionId) {
+/* Return the action animation's delay, retaining command-zero and party-unit-six cases. */
+s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId) {
     s32 *delayTable;
     u32 delayIndex;
     s32 *delay;
@@ -1929,7 +1937,7 @@ extern const char D_003A1A88[];
 extern const char D_003A1A98[];
 
 /* Sort adjacent same-side targets for the selected animation, or shuffle them. */
-void func_001A6BE0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
+void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
     BtlUnit *pair[2];
     f32 muzzle[2][4];
     u32 randomIndices[2];

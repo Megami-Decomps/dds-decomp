@@ -126,11 +126,11 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *arg0, s64 arg1);
 
-s8 func_001A2AE8(s32 command);
+s8 btlGetLinkageSlotCost(s32 command);
 
 s32 func_001A2F50(BtlUnit *battler, s32 element);
 
-s32 func_001A4060(s32 flag);
+s32 btlFlagToElementIndex(s32 flag);
 
 extern s32 sdfQueryChannelValue(s32, DatPartyRecord *, DatPartyRecord *);
 extern s32 func_003003F0(const char *, ...);
@@ -170,7 +170,7 @@ s32 func_001A7180(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant
         return value;
     }
     if (value != 0 && !(datCommandRecords[command].options & 1)) {
-        guard = func_001A4060(value);
+        guard = btlFlagToElementIndex(value);
         if (btlHasMappedSpecialAbilityForSlot(defender, guard) || btlHasSpecialAbilityWhenArgumentUnset(defender, guard) ||
             btlHasEnabledSpecialAbilityForSlot(defender, guard)) {
             value = 0;
