@@ -482,6 +482,7 @@ dds3GetWorldNodeData = 0x001178B8; // type:func
 evtLoadValueVectorIntoVu = 0x001178C0; // type:func
 evtResetWorldAndProfileRuntime = 0x00117A10; // type:func
 sdfSaveResetSnapshot = 0x00117A88; // type:func
+sdfRestoreResetSnapshot = 0x00118008; // type:func
 sdfResetGameRuntime = 0x00118598; // type:func
 scrIsCurrentWorkTask = 0x001186C8; // type:func
 ptyComputeMaxHp = 0x001188F0; // type:func
