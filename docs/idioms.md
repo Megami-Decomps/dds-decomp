@@ -3639,11 +3639,19 @@ declarations therefore use `s32` even when a caller discards the result.
 The providers and their battle callers use the same complete record owner.
 
 A discarded return still affects GCC's call RTL and register lifetimes.
-In the retained actor-update candidates (`001D2C78` / `001DF860`), the
+In `btlApplyActorParameterDelta` (DDS1 `001D2C78` / DDS2 `001DF860`), the
 correct return declarations recover `$v1` for the fresh signed HP/MP tests.
-The independent record-move/mask-load ordering before the status-clear
-call remains unresolved. Correct contracts close that register discrepancy;
-they do not establish complete matching of those candidates.
+The complete bodies now match in their current owning-unit contexts:
+`247 match, 0 differ` for DDS1 and `259 match, 0 differ` for DDS2. Their
+callback takes the existing `BtlOperandTaskArgs *` and returns signed
+completion `1`, consistent with the primary runtime task's callback slot.
+DDS1 retains its added-status `0x2000` transition; DDS2 instead retains
+the operand's `0x20000` panel-suppression and `0x10000` state-update flags.
+The unit's canonical `species` (DDS1) / `resourceIndex` (DDS2) owns the
+special `0x1F` status-clear case; no extra storage view is needed.
+The signed-contract private whole-unit gates above are clean. The renamed
+live units each also report one stale `MISSING` row for the old function
+name until asm regeneration; all `247` / `259` C bodies remain exact.
 
 The retained-operand hook is a primary `BtlState` member at DDS1 `+0x5AC`
 and DDS2 `+0x5E0`. Both native callbacks pass the unit and the copied

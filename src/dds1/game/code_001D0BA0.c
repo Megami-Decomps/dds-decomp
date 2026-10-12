@@ -1370,9 +1370,71 @@ void btlReleaseObjectBuffers(BattleIndexWork *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001D0BA0", func_001D2C78);
+extern void btlHighlightActorStatPanel(BtlUnit *, s8);
 
-extern u32 func_001D2C78(void *);
+/* Apply the copied operand, then refresh the actor's status and defeat state. */
+s32 btlApplyActorParameterDelta(BtlOperandTaskArgs *arguments) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = arguments->unit;
+    u16 previousStatus;
+    s32 defeated;
+
+    if (battle->battleFlags & 0x80) {
+        btlAdjustUnitHp(&unit->partyRecord, arguments->operand.hpDelta);
+        if (arguments->operand.hpDelta < 0) {
+            btlHighlightActorStatPanel(unit, 0);
+        }
+        btlAdjustUnitMp(&unit->partyRecord, arguments->operand.mpDelta);
+        if (arguments->operand.mpDelta < 0) {
+            btlHighlightActorStatPanel(unit, 1);
+        }
+    }
+    if (arguments->operand.addedStatus & 0x8000) {
+        if (unit->status.flags & 0x1000) {
+            unit->status.flags |= 0x400000;
+        }
+        arguments->operand.addedStatus &= ~0x8000;
+    }
+    if ((arguments->operand.addedStatus & 0x1000) && unit->partyRecord.status < 0x1000) {
+        unit->status.flags |= 0x10000000;
+    }
+    if ((arguments->operand.addedStatus & 0x2000) && unit->partyRecord.status < 0x2000 &&
+        !(unit->status.flags & 0x1000)) {
+        unit->status.flags |= 0x20000000;
+    }
+    previousStatus = unit->partyRecord.status;
+    func_001A1948(&unit->partyRecord, arguments->operand.addedStatus);
+    func_001A1960(&unit->partyRecord, arguments->operand.removedStatus);
+    defeated = 0;
+    if (unit->partyRecord.status != 0 && unit->partyRecord.status != previousStatus) {
+        unit->status.stateFlags |= 4;
+    }
+    if (battle->actorParameterDeltaCallback != NULL) {
+        battle->actorParameterDeltaCallback(unit, &arguments->operand.hpDelta);
+    }
+    btlRefreshUnitMotionSelection(unit);
+    if (arguments->operand.flags & 1) {
+        unit->status.flags |= 0x800020;
+        defeated = 1;
+    } else if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
+        unit->status.flags |= 0x20;
+        defeated = 1;
+    } else if (arguments->operand.flags & 2) {
+        unit->status.flags |= 0x8000020;
+        defeated = 1;
+    }
+    if (defeated) {
+        unit->partyRecord.hp = 0;
+    }
+    if ((unit->status.flags & 0x20) && (unit->partyRecord.status & 0x1000)) {
+        if (unit->species == 0x1F) {
+            unit->status.flags = (unit->status.flags & ~0x10400000) | 0x20000000;
+        }
+        unit->status.flags &= ~0x10000000;
+        func_001A1960(&unit->partyRecord, 0x1000);
+    }
+    return 1;
+}
 
 extern void *btlAllocTask(s32);
 
@@ -1383,7 +1445,7 @@ void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec) {
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x45;
-    task->callback = func_001D2C78;
+    task->callback = btlApplyActorParameterDelta;
     task->ownerId = owner->identity;
     task->onStart = 0;
     arguments = btlGetTaskArguments(task);
