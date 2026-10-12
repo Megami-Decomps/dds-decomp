@@ -774,4 +774,20 @@ SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00310BC8", sdfGetTaskValueByKey);
+/* Shared successful word result; see docs/idioms.md,
+ * "Trace-justified successful-result join: task-value lookup". */
+s32 sdfGetTaskValueByKey(TaskWork *work, s32 key) {
+    SdfTaskEntry *entry;
+    s32 result;
+
+    if (key == SDF_TASK_VALUE_USER_DATA_KEY) {
+        result = (s32)work->list->userData;
+    } else {
+        entry = sdfFindTaskItemValueByKey(work, key);
+        if (entry == NULL) {
+            return 0;
+        }
+        result = entry->initResult;
+    }
+    return result;
+}
