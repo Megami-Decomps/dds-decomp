@@ -1145,7 +1145,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0022D528);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateTimelineGroupState);
 
 
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
@@ -1335,7 +1335,7 @@ extern void evtViewerUpdateShopFlagTrack(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
-extern void func_0022D528(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
+extern void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
 extern void evtResetUnitVectorSlots();
 extern void kwlnCancelConfiguredFadeFrames(void);
 extern u8 kwlnDrawOverlayEnabled;
@@ -1476,7 +1476,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
                 selected = selected->prev;
             }
         }
-        func_0022D528(group, child, selected, time, &bestDistance, viewer, offset);
+        evtViewerUpdateTimelineGroupState(group, child, selected, time, &bestDistance, viewer, offset);
     }
 
     if (D_003BBE80 != NULL) {
