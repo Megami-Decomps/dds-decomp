@@ -8201,3 +8201,14 @@
 0x001C5F80	btlFinalizeBattleRewards	inferred	confidence=high; aligns existing DDS2 name at 0x001D18D8 from outcome tasks, money level/turn scaling, participant EP division, auto-EP and total-counter settlement; reward debug strings corroborate, all unsigned casts/loops retained. Namer1 batch 29.
 0x00244FA0	mnuCampGetAffordablePurchaseCount	inferred	confidence=high; combines currency affordability with remaining item capacity, returning -1 for no funds, -2 for no capacity, or the smaller count; DDS2 twin 0x00261290. LiteG camp batch.
 0x00245068	mnuCampDisableUnavailableItemEntries	inferred	confidence=high; marks shop item rows unavailable when currency and mode-specific item capacity yield no purchasable count; DDS2 twin 0x00261310. LiteG camp batch.
+0x002444D0	mnuShopInitializeOptionList	inferred	Creates the shop list window for the supplied scene and stores it as its sprite. [LiteH menu naming batch 11]
+0x00244848	mnuCampGetShopPriceStage	inferred	Returns the next shop stage only when the current stage is below five and the current score meets that stage's threshold; otherwise returns zero. [LiteH menu naming batch 11]
+0x00244C00	mnuCampGetSourceItemPrice	inferred	Calculates the source-row item price from row and entry percentages, applies the current progress-stage percentage, or halves the base item price when requested; DDS2 twin 0x00260950. [LiteH menu naming batch 11]
+0x00245DE0	mnuShopPollCommandSelection	inferred	Processes command-phase results and pad input for the shop selection list, updating popup, transition and selection state. [LiteH menu naming batch 11]
+0x00247190	mnuShopBeginTransactionMessage	inferred	Formats the purchase total, opens its message entry and installs the shop-row text draw callback. [LiteH menu naming batch 11]
+0x00247A78	mnuShopDrawMenuState	inferred	Draws the selected shop scene mode and runs the primary panel operation. [LiteH menu naming batch 11]
+0x002501E0	mnuDrawMenuFadePhase	inferred	Draws display sprites, selection strips and windows using the active phase's fade and timer. [LiteH menu naming batch 11]
+0x00250758	mnuGetProfileRequirementFlags	inferred	Returns bit 0 for any qualifying requirement-ID list and bit 1 when both paired requirement flags are set. [LiteH menu naming batch 11]
+0x00250820	mnuGetProfileRequirementIds	inferred	Returns IDs in the first status-one requirement slot if bit 0 is set in the summary; otherwise returns NULL. [LiteH menu naming batch 11]
+0x002508D8	mnuAreRequiredProfilesCapped	inferred	Returns whether both required profile IDs are at cap for the selected party record; no qualifying list returns true. [LiteH menu naming batch 11]
+0x00251260	mnuUpdateMantraSceneScroll	inferred	Scrolls the mantra scene viewport to the selected entry using the unlocked-requirement group to bound horizontal position. [LiteH menu naming batch 11]

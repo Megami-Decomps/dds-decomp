@@ -196,7 +196,7 @@ extern void mnuCreateStaffImageSprite();
 
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
-extern void func_002B2408();
+extern void mnuDrawPartySelectionPreview();
 
 
 
@@ -1394,12 +1394,12 @@ void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuIconState *panel, s
     }
 }
 
-void func_002BA7A8(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 selectionMode, u32 drawArg) {
+void mnuDrawIconState(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 selectionMode, u32 drawArg) {
     mnuDrawIconPanel(x, y, depth, fade, panel, selectionMode, drawArg);
 }
 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg) {
-    func_002BA7A8(x, y, depth, MNU_FULL_FADE, panel, 0, drawArg);
+    mnuDrawIconState(x, y, depth, MNU_FULL_FADE, panel, 0, drawArg);
 }
 
 
@@ -1885,7 +1885,7 @@ void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 p
     }
 }
 
-void func_002BB9C8(MenuSprites *page, u32 flags) {
+void mnuSetMenuPageFlags(MenuSprites *page, u32 flags) {
     page->flags = flags;
 }
 

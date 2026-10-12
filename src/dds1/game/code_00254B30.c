@@ -480,7 +480,7 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
 
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
-extern u32 func_00250758(u16);
+extern u32 mnuGetProfileRequirementFlags(u16);
 
 u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
     u32 flags = 0;
@@ -497,7 +497,7 @@ u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *targ
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1;
     } else if (entry->state == MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2;
-    } else if ((func_00250758(entry->sceneId) & 2) != 0) {
+    } else if ((mnuGetProfileRequirementFlags(entry->sceneId) & 2) != 0) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK;
     } else {
         flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_CLEAR_FALLBACK;

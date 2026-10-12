@@ -33,12 +33,12 @@ extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuSetStateValue(u32 *, u32);
-extern void func_002C2AA8(struct MenuPanelItem *, u32);
+extern void mnuSetPanelItemAuxiliaryValue(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
 extern s32 D_003E7400[];
-extern s32 func_002BDA50();
-extern s32 func_002BDA78();
+extern s32 mnuGetItemRequirementCount();
+extern s32 mnuGetItemRequirementValue();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
@@ -75,7 +75,7 @@ extern s32 mdlFlagTest();
 extern void mnuDrawCampIconBackdropByKind(s32, s32);
 extern void mnuDrawCampGridAndLabel(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
-extern void func_002BB9C8(MenuSprites *, u32);
+extern void mnuSetMenuPageFlags(MenuSprites *, u32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
@@ -692,7 +692,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
                          context->titleFrames[0]);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(slot->windowSprites, 1);
+        mnuSetMenuPageFlags(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->resources.baseResources[1], context->resources.pairResources[0], 0);
     context->spriteHandle = mnuCreateSpriteState(context->resources.baseResources[1],
@@ -981,7 +981,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                          context->titleFrames[0]);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
-        func_002BB9C8(slot->windowSprites, 1);
+        mnuSetMenuPageFlags(slot->windowSprites, 1);
     }
     context->panelHandle = mnuCreatePanelGroup(context->resources.baseResources[1], context->resources.pairResources[0], context->titleFrames[0]);
     context->spriteHandle = mnuCreateSpriteState(context->resources.baseResources[1],
@@ -1034,8 +1034,8 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
     evtCopyEntryStringToActiveWindow(1, (const void *)(D_003E7400[menu->thirdListIndex]));
     func_0035C860(valueText, D_00437BD8, menu->thirdListValue);
     evtCopyEntryStringToActiveWindow(2, valueText);
-    base = func_002BDA50(current);
-    func_0035C860(valueText, D_00437BD8, func_002BDA78(current) - base);
+    base = mnuGetItemRequirementCount(current);
+    func_0035C860(valueText, D_00437BD8, mnuGetItemRequirementValue(current) - base);
     evtCopyEntryStringToActiveWindow(3, valueText);
     if (flag == 0) {
         dspStartEntry(9);
@@ -1168,7 +1168,7 @@ s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
             current = mnuGetPartyEntryCurrentId(party);
             if (current != 0) {
                 if (menu->windows[4]->list->cursor->index == 0) {
-                    if (func_002BDA50(current) != 0) {
+                    if (mnuGetItemRequirementCount(current) != 0) {
                         mnuSetPopupEntry(&context->popupState, D_003E7568);
                     } else {
                         mnuSetStateValue(&context->unkAA50, 1);

@@ -232,7 +232,7 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern void func_00308650(const u32 *, const u32 *, u32, const u32 *, u32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern u32 scrGetIndexedRecordAddress(u32, s32 *);
-extern void func_002BE080(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMenuTextById(s32, s32, s32, s32, s32, s32);
 
 /* Menu runtime fields shared by the party, panel and resource handlers. */
 typedef struct MenuContext {
@@ -863,7 +863,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     party->freezePanel = 1;
 }
 
-s32 func_002B1C68(KwlnTask *callback) {
+s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 inputFlags = mnuMapPadMaskToFlags(0x33);
@@ -993,7 +993,7 @@ void func_002B1EA8(MenuContext *context, MenuPageBar *hpBar, MenuPageBar *mpBar,
 
     if (labelId != 0) {
         if (scrGetIndexedRecordAddress(labelId & 0xFFFF, &textAddress) != 0) {
-            func_002BE080(0xE10, 0xBB0, 0, textColor, labelId, 0x53);
+            mnuDrawMenuTextById(0xE10, 0xBB0, 0, textColor, labelId, 0x53);
         } else {
             glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor,
                                                 (const u8 *)(u32)textAddress, 0);
@@ -1057,11 +1057,11 @@ extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
-extern void func_002B2408(MenuContext *);
+extern void mnuDrawPartySelectionPreview(MenuContext *);
 extern void func_002B1EA8(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
 
 /* Refresh the selected party member's effect pair and profile panel. */
-void func_002B2408(MenuContext *context) {
+void mnuDrawPartySelectionPreview(MenuContext *context) {
     PartyMenuData *menu = (PartyMenuData *)context->party;
     MenuList *list;
     MenuListNode *node;
@@ -1145,7 +1145,7 @@ s32 mnuOpenStaffPartySelectionPanel(KwlnTask *callback) {
     }
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     if (menu->freezePanel == 0) {
-        func_002B2408((MenuContext *)context);
+        mnuDrawPartySelectionPreview((MenuContext *)context);
     }
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
@@ -2078,7 +2078,7 @@ s32 mnuCloseItemSelectionState(KwlnTask *selection) {
     return 1;
 }
 
-s32 func_002B4E58(KwlnTask *callback) {
+s32 ptySkillMenuShellUpdate(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->party;
     s32 inputFlags = mnuMapPadMaskToFlags(3);
@@ -2935,7 +2935,7 @@ typedef struct MnuCampPanelOrigins {
 
 extern const MnuCampPanelOrigins D_0042AE48;
 
-void func_002B7228(MenuContext *context) {
+void mnuDrawSkillMenuFrameIcons(MenuContext *context) {
     MnuCampPanelDrawRecord primaryRows[5] = {
         {(EffectSlotSet *)context->resourceHandle, 0x11, 0x1E0, 0xC0},
         {(EffectSlotSet *)context->resourceHandle, 0x09, 0x110, 0x20},
@@ -2992,7 +2992,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
     mnuCreateStaffImageSprite(0x14);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     label = ((MenuWindowContainer *)*(s32 *)(menu + 0x24 + *(s32 *)(menu + 0x2c) * 4))->list->cursor->sortKeyPrimary;
-    func_002B7228((MenuContext *)context);
+    mnuDrawSkillMenuFrameIcons((MenuContext *)context);
     if (label != 0 && label != 0xffff) {
         label = (u16)label;
         mnuDrawSelectionLabel(label);
@@ -3964,7 +3964,7 @@ extern void mnuDrawIconPair();
 /* Dispatch six DDS2 panel kinds; only kind four forces full fade. */
 void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuIconState *panel, s32 selectionMode, s32 drawArg);
 
-void func_002BA7A8(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 selectionMode, u32 drawArg);
+void mnuDrawIconState(u32 x, u32 y, u32 depth, u32 fade, MenuIconState *panel, u32 selectionMode, u32 drawArg);
 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
 
@@ -4049,7 +4049,7 @@ void mnuResetWindowFadeParameters(MenuFadeFields *menu);
 
 void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
 
-void func_002BB9C8(MenuSprites *page, u32 flags);
+void mnuSetMenuPageFlags(MenuSprites *page, u32 flags);
 
 void mnuSetPageParams(MenuSprites *page, s32 mode);
 

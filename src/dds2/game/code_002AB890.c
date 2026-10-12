@@ -23,7 +23,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AB690(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuBuildStaffItemWindows(MenuStaffContext *);
 
-extern u8 func_002BDA50(s32 index);
+extern u8 mnuGetItemRequirementCount(s32 index);
 
 
 void func_002AB890(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
@@ -275,7 +275,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
                     if (mnuFindPartySlotByCurrentId(itemId) != NULL ||
                         mnuFindReserveSlotByCurrentId(itemId) != NULL) {
                         node->flags48 |= 1;
-                    } else if (func_002BDA50(itemId) != 0) {
+                    } else if (mnuGetItemRequirementCount(itemId) != 0) {
                         node->flags48 |= 4;
                     }
                 } else {
@@ -318,7 +318,7 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
             index = node->sortKeySecondary;
             if (index == previousIndex) {
                 node->flags48 &= ~1;
-                if (func_002BDA50(index) != 0) {
+                if (mnuGetItemRequirementCount(index) != 0) {
                     node->flags48 |= 4;
                 }
             }

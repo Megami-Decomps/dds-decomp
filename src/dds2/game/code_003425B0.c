@@ -607,6 +607,7 @@ void sdfPrintHexMemoryDump(const u8 *data, s32 size) {
     }
 }
 
+/* Print a DMA chain, retaining the native two-entry CALL/RET stack limits. */
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E590);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5B0);
@@ -617,7 +618,6 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5F0);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E610);
 
-/* Print a DMA chain, retaining the native two-entry CALL/RET stack limits. */
 void sdfPrintDmaChain(u32 *dmaTag) {
     u32 *returnStack[2];
     u32 *cursor;

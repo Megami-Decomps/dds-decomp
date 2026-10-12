@@ -25,7 +25,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 arg0, s32 arg1, s32 arg2, u32 *w
 }
 
 
-u8 func_002BDA50(s32 index) {
+u8 mnuGetItemRequirementCount(s32 index) {
     if (index == 0) {
         return 0;
     }
@@ -34,7 +34,7 @@ u8 func_002BDA50(s32 index) {
 
 extern s32 D_00435E3C;
 
-s8 func_002BDA78(s32 value) {
+s8 mnuGetItemRequirementValue(s32 value) {
     s32 index = value - 0xC0;
 
     if (value == 0) {
@@ -71,8 +71,8 @@ void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, s32 sp
     s32 thresholdX = x + 0x130;
 
     if (entryId != 0) {
-        current = func_002BDA50(entryId);
-        required = func_002BDA78(entryId);
+        current = mnuGetItemRequirementCount(entryId);
+        required = mnuGetItemRequirementValue(entryId);
         func_0035C860(text, D_00437C38, required - current);
         color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
         glyph = func_0019F5E8(x, y, 0, color, text, 0);
@@ -134,7 +134,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 
             glyph = itfCreateConvertedTextGlyph(x + 0x630, 0x418, depth, color, D_00435E5C[value], 0);
             style = page->unk75;
-            if (style == 1 || (style == 2 && func_002BDA50(value) == 0)) {
+            if (style == 1 || (style == 2 && mnuGetItemRequirementCount(value) == 0)) {
                 frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 4);
             } else if (style == 2) {
                 frFontSetChildChainFirstOption((FrFontGlyph *)glyph, 3);
@@ -180,7 +180,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 
 extern void func_00314500(u32, s32, char *);
 extern void frFontSetChildColors(FrFontGlyph *, u32);
-void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
+void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
     s32 item;
 
@@ -208,7 +208,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     code = selectedCode != 0 ? selectedCode : cost;
     if (code != 0) {
         if (scrGetIndexedRecordAddress(code & 0xFFFF, &outValue) != 0) {
-            func_002BE080(0x16B0, 0x4B8, depth, texture, code, param);
+            mnuDrawMenuTextById(0x16B0, 0x4B8, depth, texture, code, param);
             return;
         }
         item = itfCreateConvertedTextGlyph(0x16B0, 0x4B8, depth, texture, (const u8 *)outValue, 0);

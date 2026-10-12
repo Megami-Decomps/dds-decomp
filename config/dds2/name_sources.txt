@@ -7625,3 +7625,12 @@
 0x003458E8	sdfSetStreamFrameDrawMode	inferred	confidence=high; stores unchanged u32 mode read at 0x00345BC8 by stream-frame draw consumer; value 1 selects alternate draw path, movie/title viewport callers set 1 and cleanup sets 0; DDS1 twin 0x002ECA40. No boolean narrowing. Namer1 batch 29.
 0x001D2A78	btlFinishScenePartyRecovery	inferred	confidence=high; aligns existing DDS1 name at 0x001C7028: waits for task list empty, applies permitted five-slot recovery/death-HP correction/status cleanup and clears battle activity when no registered tasks; preserves DDS2 skill IDs 0x24A/0x24B and restrictions. Namer1 batch 29.
 0x00261290	mnuCampGetAffordablePurchaseCount	inferred	confidence=high; combines currency affordability with remaining mode-dependent item capacity, returning -1 for no funds, -2 for no capacity, or the smaller count; DDS1 twin 0x00244FA0. LiteG camp batch.
+0x002B1C68	mnuHandlePartySelectionInput	inferred	Processes party-selection navigation, confirm/cancel actions and associated popup/transitions. [LiteH menu naming batch 11]
+0x002B2408	mnuDrawPartySelectionPreview	inferred	Updates the selected party entry's status marker and profile panel, preserving animation state between draws. [LiteH menu naming batch 11]
+0x002B4E58	ptySkillMenuShellUpdate	inferred	Handles skill-menu category and cancel input, opening equipped slots or the appropriate popup transition. [LiteH menu naming batch 11]
+0x002B7228	mnuDrawSkillMenuFrameIcons	inferred	Draws the fixed primary and secondary skill-menu panel sprites at their configured origins. [LiteH menu naming batch 11]
+0x002BA7A8	mnuDrawIconState	inferred	Forwards the icon-state drawing arguments to the icon-panel dispatcher. [LiteH menu naming batch 11]
+0x002BB9C8	mnuSetMenuPageFlags	inferred	Stores the supplied page flags in the MenuSprites record. [LiteH menu naming batch 11]
+0x002BDA50	mnuGetItemRequirementCount	inferred	Returns zero for item ID zero, otherwise the indexed item-requirement count. [LiteH menu naming batch 11]
+0x002BDA78	mnuGetItemRequirementValue	inferred	Returns zero for item ID zero, otherwise the signed requirement value in its indexed item record. [LiteH menu naming batch 11]
+0x002BE080	mnuDrawMenuTextById	inferred	Loads the text for a menu ID, creates a glyph chain, applies its color and position, then queues it for drawing. [LiteH menu naming batch 11]

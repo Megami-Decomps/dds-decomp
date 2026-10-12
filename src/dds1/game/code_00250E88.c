@@ -75,7 +75,7 @@ void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
 
-void func_00251260(MenuSceneWork *work) {
+void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     MnuMantraGridEntry *entry =
         (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
     s32 maximumX = 0x307;
@@ -112,7 +112,7 @@ void mnuUpdateMantraSelectionPositions(MenuSceneWork *work, s32 mode) {
     s32 step;
     s32 moving = 0;
 
-    func_00251260(work);
+    mnuUpdateMantraSceneScroll(work);
     targetX = work->scrollX;
     targetY = work->scrollY;
 
@@ -540,7 +540,7 @@ void mnuFinishMantraProfileSelection(void) {
 }
 
 extern s8 D_00324510[];
-extern s32 func_002508D8(u16);
+extern s32 mnuAreRequiredProfilesCapped(u16);
 extern s32 mnuGetMantraSourceValue(u16);
 extern void itfDspPopulatePrimaryLabels(void);
 extern void itfDspPopulateAlternateLabels(void);
@@ -573,7 +573,7 @@ s32 mnuUpdateMantraSceneState(void) {
                 scene->state = MENU_SCENE_STATE_SIGNAL_D;
                 scene->pendingProfileId = 0;
             } else if (entry->state != MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
-                if (func_002508D8(entry->sceneId) == 0) {
+                if (mnuAreRequiredProfilesCapped(entry->sceneId) == 0) {
                     scene->state = MENU_SCENE_STATE_SIGNAL_C;
                 } else {
                     scene->state = MENU_SCENE_STATE_SIGNAL_A;
