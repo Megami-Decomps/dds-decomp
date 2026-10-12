@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "ee_mmi.h"
 
 #define SDF_DEVCONS_CELL_BYTES 2
@@ -49,7 +50,6 @@ void sceDmaSendN(void *ch, void *addr, s32 size);
 s32 sceGsSyncPath(s32 mode, s32 timeout);
 void *sceDmaGetChan(s32 id);
 struct SdfTex;
-u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
 extern struct SdfTex *D_003BDA34;
 extern DevConsState *D_003BD3C0;
 extern u32 D_00398660[];
