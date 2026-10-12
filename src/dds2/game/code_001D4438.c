@@ -248,7 +248,7 @@ extern void func_003364B8(f32);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effSharedRandomState[];
-extern void func_001EC5F0(BtlLinkedCommand *);
+extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 struct MdlCtx;
 struct SdfPoolNode;

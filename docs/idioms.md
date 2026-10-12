@@ -7614,12 +7614,12 @@ Examples. DDS2 `func_00224500` and `func_00225B48` match only with
 `func_00217470` defined in their own TU (`bne` becomes `bnel` at `+0x38`
 otherwise), so no boundary can lie between 0x217470 and 0x225B48; this is why
 `code_00224FC0` and a 0x2240F8 split are wrong even though their no-sibling-call
-runs look clean. DDS2 `code_001DD390` / `code_001EB5B0`: `func_001ED9A0` needs
+runs look clean. DDS2 `code_001DD390` / `code_001EB5B0`: `btlBeginActionEndCameraPullback` needs
 `btlHasIdleLinkedSlotKindTwo` (0x1EA3F8) opaque and `btlCanUseActorCategoryFlag4`
 (0x1EA748) needs `btlCanUseLinkedActor` (0x1EA210) visible, so the merged unit
-regresses `func_001ED9A0` and `btlStepUnitHeightFramedCamera`, while any
+regresses `btlBeginActionEndCameraPullback` and `btlStepUnitHeightFramedCamera`, while any
 boundary in `[0x1EA7C8, 0x1EB5B0]` keeps every matched function exact. DDS1's
-0x1DDF20 twin regresses `func_001E0100`, `func_001E3E58` and
+0x1DDF20 twin regresses `btlBeginActionEndCameraPullback`, `func_001E3E58` and
 `btlStepUnitHeightFramedCamera` the same way.
 
 Matched-function evidence only brackets a boundary. Cross-check it with hard
@@ -9027,4 +9027,41 @@ draws and their ordering remain unchanged.
 These are not the `restart` callbacks in the separate compact
 `effNodeTypeOperations` table. The earlier rotating-streak dispatch row has
 no duplicate callback; the named streak clone belongs to kind 15.
+
+## Action camera blends and the shared camera cursor
+
+`btlBuildSideSelectedActorCameraBlend` chooses a mirrored actor-relative pose
+from the muzzle's side of the initial view, then initializes the action blend.
+`btlBuildDistanceClampedActionCameraBlend` reduces the destination distance,
+clamps it to an actor-radius or target-reach/FOV-dependent minimum and extends
+the initial distance. Its single-link extension remains DDS1 `25.0f` versus
+DDS2 `75.0f`; the optional actor-facing update and native FOV-read/copy order
+are also retained. `btlFrameLeftmostUnitCameraPair` frames the marked
+minimum-muzzle-X unit against the other group's center and produces the
+second endpoint by a negative 45-degree direction rotation.
+
+`btlBeginActionEndCameraPullback` is the step-five update: at the exact scaled
+actor-motion-end frame, an eligible linked-kind-two state snapshots the
+current pose and adds `500.0f` or `300.0f` to the back-camera distance.
+Its native count test is only `< 2` before fetching target entry zero; no
+empty-list guard, floating-point rewrite or call-prototype modernization is
+introduced.
+
+The `CURSOR` macro refers to shared global camera-script state, DDS1
+`D_0035F100` / DDS2 `D_003BD7D0`, not an action-owned pose.
+`btlSelectLinkageSkillCameraPreset` resets its frame and maps the five
+supported Linkage IDs for actors with native status bit `0x400`.
+`btlAdvanceSkillCameraCursor` evaluates the corresponding timed table,
+applies the pose and endpoint-height constraint, then saturates the frame.
+`btlInitializeRandomCameraCursor` chooses from the native `3 × 3 × 8` matrix
+using marked-party count, actor category and the scaled random draw; its
+copied matrix and unchecked indices remain unchanged.
+`btlAdvanceTimedCameraOrApproach` uses the distinct timed table in cursor
+mode one, or builds the action's approach camera otherwise.
+
+`btlAdvanceActionSkillCamera` and `btlInitializeRandomActionCamera` are the
+embedded-camera adapters for those cursor operations. The former retains
+the action's `0x10000` override guard. Their names do not assert an unproved
+callback-table or generic task identity. Keep all native unprototyped calls,
+extra arguments, pointer casts, VU macros and title-specific constants.
 
