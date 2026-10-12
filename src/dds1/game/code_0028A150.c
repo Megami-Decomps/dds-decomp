@@ -57,7 +57,7 @@ extern u8 D_003482A8[][32];
 extern char D_003BC898[];
 extern char D_003BC8A0[];
 extern char D_003BC8A8[];
-extern u32 func_002904C8(u32, s32, s8);
+extern u32 fileClampPackedColorByte(u32, s32, s8);
 extern void fileDrawSlotIcon(s32, s32, s32, s32);
 extern void fileCursorStepUp(void);
 extern void fileFadeStepDown(void);
@@ -2494,21 +2494,21 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         if (fileLoadMenuState.unk10 != 0) {
             if (row == 0) {
                 alpha = fileLoadMenuState.unk18;
-                titleColor = func_002904C8(titleColor, alpha, 0);
-                detailColor = func_002904C8(detailColor, fileLoadMenuState.unk18, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk18, 0);
             } else if (row == 3) {
                 alpha = fileLoadMenuState.unk1C;
-                titleColor = func_002904C8(titleColor, alpha, 0);
-                detailColor = func_002904C8(detailColor, fileLoadMenuState.unk1C, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk1C, 0);
             } else {
                 alpha = fileLoadMenuState.unkC;
-                titleColor = func_002904C8(titleColor, alpha, 0);
-                detailColor = func_002904C8(detailColor, fileLoadMenuState.unkC, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
             }
         } else {
             alpha = fileLoadMenuState.unkC;
-            titleColor = func_002904C8(titleColor, alpha, 0);
-            detailColor = func_002904C8(detailColor, fileLoadMenuState.unkC, 0);
+            titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+            detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
         kwlnDrawTexturedColorQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_003BC868));
@@ -2800,9 +2800,10 @@ void fileSetMenuValueAndInitializeFlags(u32 value) {
     fileLoadMenuState.unk4 = 0;
 }
 
+/* Lower the selected low/alpha byte, retaining the native signed, unmasked bound. */
 /* Keep the input word separate from the per-mode result; see docs/idioms.md,
  * "Trace-justified result selection: packed byte clamp". */
-u32 func_002904C8(u32 color, s32 limit, s8 alpha) {
+u32 fileClampPackedColorByte(u32 color, s32 limit, s8 alpha) {
     u32 result;
     s32 component = color & 0xFF;
 

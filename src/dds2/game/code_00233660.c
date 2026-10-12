@@ -531,6 +531,7 @@ extern char D_00420FF0[], D_00421000[], D_00421010[], D_00421020[], D_00421030[]
 extern char D_00436FC0[], D_00436FC8[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
+/* Append a kind-specific record description at the supplied packet coordinates/style. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00420FF0);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421000);
@@ -543,7 +544,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
-void func_00233F68(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
+void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
         record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
         switch (record->kind) {
@@ -1219,7 +1220,8 @@ void mdlRotateViewList(void) {
 extern const char *D_003C8780[];
 extern char D_00437060[];
 
-void func_00235568(void) {
+/* Draw the MODE header and current or saved viewer mode label. */
+void mdlDrawViewerModeLabel(void) {
     SifCommand packet;
     s32 phase;
 
@@ -2005,7 +2007,7 @@ void mdlApplyViewerResourceMenuAction(void) {
 extern const char *D_003C88D0[];
 
 /* Draw resource actions with independent eligibility and selection styles. */
-void func_00237088(void) {
+void mdlDrawViewerResourceMenu(void) {
     SifCommand packet;
     s32 row;
     s32 enabled;
@@ -2043,7 +2045,7 @@ void func_00237088(void) {
 
 u32 mdlRunViewerResourceMenuTask(void) {
     mdlApplyViewerResourceMenuAction();
-    func_00237088();
+    mdlDrawViewerResourceMenu();
     return 0;
 }
 
@@ -2201,6 +2203,7 @@ extern char D_004370D8[];
 extern char D_004370E0[];
 extern char D_004370E8[];
 
+/* Draw viewer toggles, time-graph status and the background-color/config controls. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421388);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004213A0);
@@ -2213,7 +2216,7 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004213E0);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004213F0);
 
-void func_002376F0(void) {
+void mdlDrawViewerSettings(void) {
     /* Retail00237754..74 fills and then indexes these three status bytes
      * at sp+0..2; this is a real temporary stack table, not a source view. */
     s8 enabled[3];
@@ -2262,7 +2265,7 @@ void func_002376F0(void) {
 
 u32 mdlRunViewerSettingsTask(void) {
     mdlUpdateViewerSettingsInput();
-    func_002376F0();
+    mdlDrawViewerSettings();
     return 0;
 }
 
@@ -2455,7 +2458,7 @@ void mdlDrawViewerEffectRecordList(void) {
                                             D_004370F0, selectionMarker, listMarker));
                     }
 
-                    func_00233F68(packetList, 0x7300, descriptionY, 0xFF0080,
+                    mdlAppendViewerRecordSummary(packetList, 0x7300, descriptionY, 0xFF0080,
                                   selectedStyle, record);
                     descriptionY += 0x60;
                     rowCount++;
@@ -2745,7 +2748,8 @@ extern s32 func_00103108(const char *);
 extern MdlEyeVec D_003C8A80;
 extern MdlEyeVec D_0037F6C0;
 
-void func_00238D38(void) {
+/* Load viewer config/resources, initialize view state and recreate the viewer tasks. */
+void mdlInitializeViewerTasksAndResources(void) {
     MdlTaskDef *task;
     s32 i;
 
@@ -2892,7 +2896,8 @@ void func_00238FC0(MdlLightEditorState *context, f32 *position)
     }
 }
 
-s32 func_00239188(KwlnTask *task) {
+/* Update/draw the task-selected light and ambient editor; return zero. */
+s32 mdlUpdateLightEditorTask(KwlnTask *task) {
     MdlLightEditorState *state = (MdlLightEditorState *)kwlnTaskGetUserValue(task);
     f32 (*light)[4];
     MdlOptionLabel *label;
@@ -3171,7 +3176,8 @@ extern const char D_004371A8[];
 extern const char D_004371B0[];
 extern const char D_004371B8[];
 
-s32 func_00239C08(KwlnTask *task) {
+/* Update/draw the FACE-DIV soften, bias and divide controls; return zero. */
+s32 mdlUpdateFaceDivisionEditorTask(KwlnTask *task) {
     MdlOptionState *state = &D_00453660;
     MdlOptionLabel *label;
     s8 *pad;
