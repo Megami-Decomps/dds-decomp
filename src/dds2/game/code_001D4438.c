@@ -456,7 +456,7 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 
 
 struct SceneLightRestoreArgs;
-extern s64 func_00201520(struct SceneLightRestoreArgs *);
+extern s64 btlForceSceneLightingRestore(struct SceneLightRestoreArgs *);
 
 
 extern s32 sndPlaySkillSeTask(u32 *);
@@ -2033,7 +2033,7 @@ typedef struct BtlSceneLightParams {
 } BtlSceneLightParams;
 extern char D_00417398[];
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
-extern BtlRuntimeTask *func_002014A8(u32);
+extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
@@ -2069,8 +2069,8 @@ void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light);
 BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value);
 s32 btlGetActionDefaultOrOverride(s32 index);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
-BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link,
-        u32 soundId, u32 variant, u32 channel, u32 flags);
+BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
+        u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags);
 BtlRuntimeTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option,
         s32 flag, s32 mode, s32 command);
 s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
@@ -2236,7 +2236,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         task->ownerId = actionOwner;
         btlStartTask(task);
     }
-    btlStartTask(btlCreateSoundPlaybackTask(action, (u32)companionA, (u32)companionB, skill, 0));
+    btlStartTask(btlCreateLinkageFormationTask(action, (u32)companionA, (u32)companionB, skill, 0));
     btlStartTask(btlCreateCommandSoundWithArguments((s32)action, (s32)companionA, (s32)companionB, 7, skill));
     for (groupIndex = 0; groupIndex < 3; groupIndex++) {
         if (actors[groupIndex] != NULL) {
@@ -2623,7 +2623,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     task->startCondition.kind = 7;
     task->startCondition.value.handle = actionOwner;
     btlStartTask(task);
-    task = func_002014A8(12);
+    task = btlCreateSceneLightingRestoreTask(12);
     task->startCondition.kind = 7;
     task->startCondition.value.handle = actionOwner;
     btlStartTask(task);

@@ -172,7 +172,7 @@ typedef struct {
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
     : : "f" (f))
 /* The same block with $2 declared clobbered: gcc then keeps live values out of
- * $2 around it (DDS2 func_00206C18 addresses D_003BE0A0 through $3). */
+ * $2 around it (DDS2 btlPlacePairedFormationAtFixedCenter addresses D_003BE0A0 through $3). */
 #define VU0_SCALAR_OP_CLOBBER(f, insn) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
     : : "f" (f) : "$2")

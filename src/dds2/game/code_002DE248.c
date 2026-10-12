@@ -51,7 +51,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 
-extern void func_00200930(f32 *, f32 *, s32);
+extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 typedef struct EffPacketParams {
     s16 parameterCount;
@@ -8365,7 +8365,7 @@ void effApplyBattleStateTint(void) {
 
     actor = btlGetRuntime();
     if ((((BtlState *)actor)->battleFlags & 0x6000000) == 0x6000000) {
-        func_00200930((f32 *)(actor + 0x50), (f32 *)(actor + 0x60), 0);
+        btlBeginSceneLightColorTransition((f32 *)(actor + 0x50), (f32 *)(actor + 0x60), 0);
         return;
     }
 }
@@ -8388,7 +8388,7 @@ void effStartTintTransitionFromColors(u8 *work) {
         to[0] = (c & 0xFF) / 255.0f;
         to[1] = ((c >> 8) & 0xFF) / 255.0f;
         to[2] = ((c >> 16) & 0xFF) / 255.0f;
-        func_00200930(from, to, colors[2]);
+        btlBeginSceneLightColorTransition(from, to, colors[2]);
     }
 }
 

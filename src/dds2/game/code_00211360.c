@@ -237,7 +237,7 @@ extern u32 func_001B39E8(s32);
 
 extern AiSpecies D_003BEDD0[];
 
-s32 func_002119E0(s32 context, s32 species, u32 *selected, u32 requestedRow);
+s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow);
 
 void func_00211360(ActionStateLink *task, u32 mode) {
     BtlAiScratchWork *work;
@@ -277,7 +277,7 @@ void func_00211360(ActionStateLink *task, u32 mode) {
     btlActionScratchWork = work;
     work->actor = task;
     work->speciesId = unit->partyRecord.unitId;
-    func_002119E0((s32)unit, species, (u32 *)&row, variant);
+    btlSelectConditionalAiRoute((s32)unit, species, (u32 *)&row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
     func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
@@ -292,9 +292,10 @@ u32 func_002115B0(void) {
     return 1;
 }
 
+/* Return the route byte or sample the inclusive span of its marked bit positions. */
 /* Normalize the byte index before sampling; see docs/idioms.md,
  * "Trace-justified narrowing: packed range index". */
-u32 func_002115B8(u32 route) {
+u32 btlResolvePackedAiRoute(u32 route) {
     u8 result = route;
     u8 first;
     u8 last;
@@ -322,11 +323,12 @@ u32 func_002115B8(u32 route) {
     return result;
 }
 
-extern u32 func_002115B8(u32 route);
+extern u32 btlResolvePackedAiRoute(u32 route);
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+/* Test the tier/predicate matrix, resolve its route byte and dispatch the action. */
+s32 btlSelectTierMatrixAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
     s8 matches[3][3];
     u32 predicates[3];
     u32 firstTier, endTier;
@@ -355,7 +357,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][0] && matches[tier][1] && matches[tier][2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 0;
                 return 1;
@@ -364,7 +366,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][0] && matches[tier][1]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 1;
                 return 1;
@@ -373,7 +375,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][0] && matches[tier][2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 2;
                 return 1;
@@ -382,7 +384,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][1] && matches[tier][2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 3;
                 return 1;
@@ -391,7 +393,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][0]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 4;
                 return 1;
@@ -400,7 +402,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][1]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 5;
                 return 1;
@@ -409,7 +411,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         if (matches[tier][2]) {
             if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
-                *selected = func_002115B8(*selected);
+                *selected = btlResolvePackedAiRoute(*selected);
                 btlActionScratchWork->rowIndex = tier;
                 btlActionScratchWork->conditionKind = 6;
                 return 1;
@@ -417,7 +419,7 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
         }
         if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
             *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
-            *selected = func_002115B8(*selected);
+            *selected = btlResolvePackedAiRoute(*selected);
             btlActionScratchWork->rowIndex = tier;
             btlActionScratchWork->conditionKind = 7;
             return 1;
@@ -431,7 +433,8 @@ s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 func_002119E0(s32 context, s32 species, u32 *selected, u32 requestedRow) {
+/* Choose the first matching tier condition, retaining the native fallback route. */
+s32 btlSelectConditionalAiRoute(s32 context, s32 species, u32 *selected, u32 requestedRow) {
     s8 matches[3];
     u32 predicates[3];
     u32 firstTier, endTier;
