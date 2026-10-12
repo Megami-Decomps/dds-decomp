@@ -1,4 +1,8 @@
 #include "common.h"
+#include "file_pac.h"
+#include "file_request_api.h"
+#include "eff_resource_slots.h"
+#include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -7,6 +11,8 @@
 #include "fld_lmap_task.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
+
+typedef struct SdfSlotSet SdfSlotSet;
 
 extern s32 func_0030AC10(LmapTaskState *);
 
@@ -446,7 +452,158 @@ u8 func_0030ABF0(LmapTaskState *task) {
     return func_0030AC10(task) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AC10);
+typedef struct LmapFileEntry {
+    char name[48];
+    u32 kind;
+    s32 argument;
+} LmapFileEntry;
+
+extern LmapFileEntry D_00400598[];
+extern char D_00438898[];
+extern char D_0042D280[];
+extern char D_0042D298[];
+extern char D_0042D2A8[];
+extern char D_0042D2B8[];
+extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
+extern s32 sndFindPackedTrackLoadStatus(s32);
+extern void sndEnsureMidiBankResident(s32);
+extern void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *);
+extern s32 func_002C7CE8(void *);
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+
+INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D280);
+
+INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D298);
+
+INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2A8);
+
+INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2B8);
+
+s32 func_0030AC10(LmapTaskState *task)
+{
+    LmapLoadState *load = &task->load;
+    LmapFileEntry *files = D_00400598;
+    PacWork *node;
+    s32 slotIndex;
+
+    switch (load->phase) {
+    case 0:
+        load->phase = 2;
+        load->entry = 0;
+        load->unknown0C = 0;
+        break;
+    case 1:
+        sdfInstallNonzeroSpriteSlots((SdfSlotSet *)task);
+        evtPrintDeveloperConsoleMessage(D_0042D280);
+        return 1;
+    case 2:
+        load->file = NULL;
+        switch (files[load->entry].kind) {
+        case 1:
+            effRequestResourceByMode(D_00438898, files[load->entry].name, 0, &task->spriteSlots[files[load->entry].argument]);
+            break;
+        case 2:
+            if (task->variant != files[load->entry].argument) {
+                load->entry++;
+                if (load->entry < 6U) {
+                    load->phase = 2;
+                } else {
+                    load->phase = 1;
+                }
+                return 0;
+            }
+            load->archive = fileQueuePlainDispatchRequest(files[load->entry].name);
+            break;
+        case 4:
+            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == 0) {
+                sndEnsureMidiBankResident(files[load->entry].argument);
+            } else {
+                /* Native 0x0030AD7C stores 4 before the common phase-3 store. */
+                load->phase = 4;
+            }
+            break;
+        case 5:
+            if (files[load->entry].argument == 0) {
+                task->allocation = sdfReadNamedResource(files[load->entry].name, &task->resourceAddress, NULL);
+            }
+            load->phase = 4;
+            return 0;
+        }
+        load->phase = 3;
+        break;
+    case 3:
+        switch (files[load->entry].kind) {
+        case 3:
+            if (fileIsRequestReadyInCurrentMode(load->file)) {
+                load->phase = 4;
+            }
+            break;
+        case 1:
+            if (task->spriteSlots[files[load->entry].argument] != 0) {
+                load->phase = 4;
+            }
+            break;
+        case 2:
+            if (fileRequestIsReady(load->archive)) {
+                load->phase = 4;
+            }
+            break;
+        case 4:
+            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == 1) {
+                load->phase = 4;
+            }
+            break;
+        }
+        break;
+    case 4:
+        if (load->file != NULL) {
+            fileGetLoadedDataAddress(load->file);
+            evtPrintDeveloperConsoleMessage(D_0042D298, fileGetResourceSize(load->file));
+        }
+        if (files[load->entry].kind == 2) {
+            node = ((FilePacRequest *)load->archive)->packet.queueHead;
+            if (node != NULL) {
+                /* Indexed banks form the late cursor; see docs/idioms.md,
+                 * "Local-map PAC slot induction". */
+                slotIndex = 0;
+                do {
+                    if (node->packet[0] == 1) {
+                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetExtensionData((SdfPacStreamPacketHeader *)node));
+                        if (task->variant == 1) {
+                            task->spriteSlots[slotIndex + 1] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                        } else if (task->variant == 2) {
+                            task->spriteSlots[slotIndex + 9] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                        } else if (task->variant == 3) {
+                            task->spriteSlots[slotIndex + 17] = (u32)effCreateResourceSlotSetFromAllocation(node->resourceHandle, 0);
+                        }
+                        sdfReleaseResourceAllocation(node->resourceHandle);
+                    }
+                    node = node->next;
+                    slotIndex++;
+                } while (node != NULL);
+            }
+        }
+        evtPrintDeveloperConsoleMessage(D_0042D2A8, files[load->entry].name);
+        if (load->file != NULL) {
+            sdfReleaseResourceAllocation((SdfMemBlock *)fileGetResourceHandle(load->file));
+            filePollEntryCleanup(load->file);
+            evtPrintDeveloperConsoleMessage(D_0042D2B8);
+        }
+        if (load->archive != NULL) {
+            func_002C7CE8(load->archive);
+            load->archive = NULL;
+        }
+        load->entry++;
+        if (load->entry < 6U) {
+            load->phase = 2;
+        } else {
+            load->phase = 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 void fldInitializeLocalMapScene(void) {
     s32 mask;
