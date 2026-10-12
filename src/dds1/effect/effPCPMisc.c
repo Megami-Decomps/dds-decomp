@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_model.h"
+#include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "fpu.h"
 #include "btl.h"
@@ -4811,7 +4813,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 extern const f32 D_003A0EF0[4] __attribute__((aligned(16)));
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 extern void func_002D9238(struct SdfPoolNode **table, SdfModel *model);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
@@ -4880,16 +4881,6 @@ void effPcpSetSprayScale(EffPCPSprayWork *work, f32 val) {
 }
 
 /* Placement block handed to every spawned event entry. */
-typedef struct EffPCPEventPlace {
-    f32 pos[7];
-    f32 scaleA;
-    f32 scaleB;
-    f32 scaleC;
-    f32 scaleD;
-    u32 color;
-} EffPCPEventPlace;
-
-
 /* Serialized drift ranges followed by the retained event array. */
 typedef struct EffPCPDriftEventParams {
     f32 position[4];
@@ -4941,17 +4932,17 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     work->entries = entry;
     work->scale = 1.0f;
     work->owner = effEventCloneSoundMixer(params);
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -4992,17 +4983,17 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     work->entries = entry;
     work->scale = 1.0f;
     work->owner = src->owner;
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -5072,13 +5063,13 @@ void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
     if (duration == 0) {
         return;
     }
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     for (i = 0; i < count; i++, entry++) {
         frame = entry->frame;
 
@@ -5096,9 +5087,9 @@ void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
 
                 cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
                 sine = sdfSinPoly(angle);
-                place.pos[0] = base[0] + cosine * radius;
-                place.pos[1] = base[1];
-                place.pos[2] = base[2] + sine * radius;
+                place.payload[0] = base[0] + cosine * radius;
+                place.payload[1] = base[1];
+                place.payload[2] = base[2] + sine * radius;
                 entry->position += entry->positionStep;
                 entry->angle += entry->angleStep;
                 entry->angleStep *= angleDecay;
@@ -5185,17 +5176,17 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     work->unk98 = 1;
     work->ownerA = effEventCloneSoundMixer(paramsA);
     work->ownerB = effEventCloneSoundMixer(paramsB);
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -5236,17 +5227,17 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     work->unk98 = 0;
     work->ownerA = src->ownerA;
     work->ownerB = src->ownerB;
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -5335,13 +5326,13 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
     if (duration == 0) {
         return;
     }
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
     VU0_LOAD_VF(vf11, sdfViewTargetVector);
     VU0_SUB(vf10, vf10, vf11);
@@ -5400,10 +5391,10 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 effThunderSetFragmentColor(entry->fragment, fadedColor);
                 effThunderUpdateFragments(entry->fragment);
                 place.color = fadedColor;
-                PCP_COPY_VECTOR(place.pos, fragment->end);
+                PCP_COPY_VECTOR(place.payload, fragment->end);
                 effEventCopyFileRecordHeader(entry->eventA, &place);
                 effEventUpdateEffectParameters(entry->eventA);
-                PCP_COPY_VECTOR(place.pos, fragment->start);
+                PCP_COPY_VECTOR(place.payload, fragment->start);
                 effEventCopyFileRecordHeader(entry->eventB, &place);
                 effEventUpdateEffectParameters(entry->eventB);
                 frame = entry->frame;
@@ -5476,17 +5467,17 @@ EffPCPSpawnRangeWork *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *sr
     work->entries = entry;
     work->scale = 1.0f;
     work->owner = effEventCloneSoundMixer(params);
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -5527,17 +5518,17 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     work->entries = entry;
     work->scale = 1.0f;
     work->owner = src->owner;
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
@@ -5613,13 +5604,13 @@ void effPcpUpdateSpawnRangeEvents(EffPCPSpawnRangeWork *work) {
     if (duration == 0) {
         return;
     }
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     for (i = 0; i < count; i++, entry++) {
         frame = entry->frame;
         if (frame <= duration) {
@@ -5637,9 +5628,9 @@ void effPcpUpdateSpawnRangeEvents(EffPCPSpawnRangeWork *work) {
 
                 cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
                 sine = sdfSinPoly(angle);
-                place.pos[0] = origin[0] + cosine * radius;
-                place.pos[1] = origin[1] + entry->height;
-                place.pos[2] = origin[2] + sine * radius;
+                place.payload[0] = origin[0] + cosine * radius;
+                place.payload[1] = origin[1] + entry->height;
+                place.payload[2] = origin[2] + sine * radius;
                 entry->height += entry->heightStep;
                 entry->position += entry->positionStep;
                 entry->angle += entry->angularStep;
@@ -5722,17 +5713,17 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     work->entriesHandle = sdfAllocGeneralBlock(count << 5);
     entry = (void *)sdfResourceRetainAddress(work->entriesHandle);
     work->entries = entry;
-    place.pos[0] = 0;
-    place.pos[1] = 0;
-    place.pos[2] = 0;
-    place.pos[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (; i < count; i++) {
         entry->hasMoved = 0;
@@ -5832,14 +5823,14 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
 
     VEC3_SPLAT(scale, work->scale);
     scale[3] = 0;
-    place.pos[4] = 0;
-    place.pos[5] = 0;
-    place.pos[6] = 0;
-    place.scaleA = 1.0f;
-    place.pos[3] = 0;
-    place.scaleB = 100.0f;
-    place.scaleC = 100.0f;
-    place.scaleD = 1.0f;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[3] = 0;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     if (frameLimit >= frame) {
         model = effParamWorkGetData(work->modelResource);
         mapModel = model->inner;
@@ -5894,9 +5885,9 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
                             t = 1.0f;
                         }
                         place.color = effBlendColor(color & 0xFFFFFF, color, t);
-                        place.pos[0] = position[0];
-                        place.pos[1] = position[1];
-                        place.pos[2] = position[2];
+                        place.payload[0] = position[0];
+                        place.payload[1] = position[1];
+                        place.payload[2] = position[2];
                         effEventCopyFileRecordHeader(entry->event, &place);
                         effEventUpdateEffectParameters(entry->event);
                         entry->age++;

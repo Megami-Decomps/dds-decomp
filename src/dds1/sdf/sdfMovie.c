@@ -300,7 +300,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, 
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
 s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *data, s32 size) {
-    void func_002ED740(void *destination, const void *source, u32 byteCount) {
+    void sdfMovieCopyPacStreamSpan(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
     MovPacStream *stream = movie->stream.pac;
@@ -326,13 +326,13 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32
 
             if (wrappedBytes >= 0) {
                 s32 firstSpan = size - wrappedBytes;
-                func_002ED740(data, bufferStart + readOffset, firstSpan);
+                sdfMovieCopyPacStreamSpan(data, bufferStart + readOffset, firstSpan);
                 if (wrappedBytes > 0) {
-                    func_002ED740((u8 *)data + firstSpan, bufferStart, wrappedBytes);
+                    sdfMovieCopyPacStreamSpan((u8 *)data + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->pacReadOffset = wrappedBytes;
             } else {
-                func_002ED740(data, bufferStart + readOffset, size);
+                sdfMovieCopyPacStreamSpan(data, bufferStart + readOffset, size);
                 stream->pacReadOffset = readOffset + size;
             }
             stream->pacBufferedBytes -= size;

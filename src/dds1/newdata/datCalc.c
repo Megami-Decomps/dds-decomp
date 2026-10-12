@@ -391,7 +391,7 @@ enum {
 };
 
 extern u8 D_0032AF70[];
-extern s32 func_0011B158(DatPartyRecord *, s32, u8);
+extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *, s32, u8);
 
 
 extern s32 datRosterDetails;
@@ -1074,14 +1074,14 @@ u32 func_0011B148(void) {
     return 1;
 }
 
-u32 func_0011B150(void) {
+u32 ptyReturnOne(void) {
     return 1;
 }
 
 extern DatSkillList *D_003BAA58;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 func_0011B158(DatPartyRecord *unit, s32 affinity, u8 slot) {
+s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slot) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 value;
@@ -1152,7 +1152,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
         matchedCount = 0;
         for (i = 0, orderCursor = D_0032AF70 + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actorValue = *actorCursor++;
-            if (actorValue != 0 && func_0011B158(actorValue, affinity, *orderCursor) != 0) {
+            if (actorValue != 0 && ptyUnitMatchesAffinityRequirement(actorValue, affinity, *orderCursor) != 0) {
                 matchedCount++;
             }
         }
@@ -1407,8 +1407,6 @@ s32 evtPushSecondRosterSelectedStat(void) {
     scrSetIntegerReturnValue(statValue);
     return 1;
 }
-
-extern s32 datFlagToElementIndex(s32);
 
 /* Push the first entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushFirstRosterOptionStat(void) {
@@ -1966,7 +1964,7 @@ extern s32 D_003BAAC0;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 func_0011CB90(s32 index, f32 step) {
+s32 func_0011CB90(f32 step, s32 index) {
     s32 group;
     s32 interval;
     s32 count;

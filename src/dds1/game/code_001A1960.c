@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -28,12 +29,6 @@ typedef struct SceneSlot {
     u8 b;
     u8 id;
 } SceneSlot;
-
-typedef struct BattleItemDrop {
-    u16 id;
-    u8 count;
-    u8 pad03;
-} BattleItemDrop;
 
 typedef struct SceneFadingRecord {
     SceneSlot slot;
@@ -957,8 +952,6 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     }
     return mask;
 }
-
-extern s32 datFlagToElementIndex(s32);
 
 /* Decode an element flag through the shared native flag-to-index table. */
 s32 btlFlagToElementIndex(s32 flag) {

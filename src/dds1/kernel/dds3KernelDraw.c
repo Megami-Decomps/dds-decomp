@@ -718,7 +718,7 @@ extern void evtPolygonMovieBlendMatrixParam(s32 enable, f32 t, KwlnSolidRectPara
  * parameter block from the effect's saved live copy or its staged copy, hands
  * that block to the effect, and clears its bit on the final frame. The overlay
  * arm ramps the vignette alpha and scale before the vignette is drawn. */
-void func_001071E8(void) {
+void kwlnAdvanceDrawFadesAndTransitions(void) {
     s32 alpha;
 
     if (kwlnDrawControlFlags & KWLN_DRAW_OVERLAY_TRANSITION_BIT) {
@@ -964,7 +964,7 @@ void func_001071E8(void) {
 }
 
 /* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
-void func_00107DE8(void) {
+void kwlnBuildShortestArcQuaternion(void) {
     f32 identity[4];
     f32 axis[4];
     f32 dot;

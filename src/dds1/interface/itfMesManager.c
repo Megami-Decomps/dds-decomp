@@ -60,7 +60,7 @@ void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int 
 extern void func_00196BC0();
 
 
-s32 func_00195E60();
+s32 frFontCountGlyphChainNodes();
 
 void func_00196088();
 
@@ -958,7 +958,6 @@ extern char D_003BB220[];
 extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(ItfMesBlkA4 *panel);
@@ -1191,7 +1190,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->unk12 == 3) {
-        if (func_00195E60(glyph) == 1) {
+        if (frFontCountGlyphChainNodes(glyph) == 1) {
             func_00196088(0x1000, 0xC60, glyph);
         } else {
             func_00196088(0x1000, 0xBF8, glyph);

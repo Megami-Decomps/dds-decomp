@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_slot.h"
 
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
@@ -85,13 +86,6 @@ void sndUpdateScaledListenerState(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
         D_004779B0 = state;
     }
 }
-
-typedef struct SndTrackSlot {
-    s32 id;      /* 0x00 */
-    u8 flagA;    /* 0x04 */
-    u8 flagB;    /* 0x05 */
-    u8 pad06[2];
-} SndTrackSlot;
 
 typedef struct SndMixerBlockSlots {
     /* 0x000 */ u8 pad000[0x190];

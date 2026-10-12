@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_dma_packet_header.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
@@ -260,7 +261,6 @@ typedef struct SdfDrawPacket {
     u64 registerAddressC;
 } SdfDrawPacket;
 
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
@@ -504,18 +504,6 @@ void sdfConsBuildFrustumPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *
     packet->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
-typedef struct DmaPacketHeader {
-    u16 quadwords;
-    u16 pad02;
-    u32 address;
-    u32 tag;
-    u32 command;
-    u16 unused10;
-    u8 pad12[6];
-    u32 unused18;
-    u32 unused1C;
-} DmaPacketHeader;
-
 /* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
 void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
     s32 quadwordCount = (payloadBytes + 15) >> SDF_DMA_QWORD_SHIFT;
@@ -523,9 +511,9 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 
     packet->address = sourceAddress & SDF_DMA_ADDRESS_MASK;
     packet->tag = SDF_VIF_FLUSHA_COMMAND;
     packet->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
-    packet->unused10 = 0;
-    packet->unused18 = 0;
-    packet->unused1C = 0;
+    packet->unknown10 = 0;
+    packet->unknown18 = 0;
+    packet->unknown1C = 0;
 }
 
 extern u8 D_00324350[];
@@ -536,9 +524,9 @@ void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeade
     packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
     packet->command = 0;
-    packet->unused10 = 0;
-    packet->unused18 = 0;
-    packet->unused1C = 0;
+    packet->unknown10 = 0;
+    packet->unknown18 = 0;
+    packet->unknown1C = 0;
     sdfAppendReferencePacket(packetList, (u32)packet);
 }
 

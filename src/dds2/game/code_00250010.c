@@ -125,7 +125,6 @@ extern char D_004374F0[]; /* " EVENT" */
 extern char D_004374F8[]; /* "%3d" */
 extern char D_00437500[]; /* "   CUT" */
 extern char D_00437508[]; /* "%03d" */
-extern void kwlnDrawSpriteCell(void *list, s32 x, s32 y, s32 w, s32 h);
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 extern s32 func_002521C8();
 extern s32 evtIsMenuTableEntryEnabled(s32 *);

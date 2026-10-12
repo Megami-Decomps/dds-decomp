@@ -1,3 +1,4 @@
+#include "mdl_motion_api.h"
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -12,11 +13,31 @@
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "evt_solar.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "kwln.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+
+/* Field travel and encounter providers. Integer/FPU argument classes have
+ * independent register sequences; the field-controller call establishes
+ * step-before-index, and all callers are verified. */
+extern void evtSubmitEventRequest(s32, s32);
+extern void evtSubmitEventRequestImmediate(s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void *dds3GetWorldObject(void);
+extern void func_00133F08(void);
+extern u8 fldTestSceneLifecycleFlags(u32);
+
+extern f32 D_0038A6F0[4];
+extern void evtAdvanceSolarClockAndExpireControls(f32);
+extern void evtUpdateFlaggedStats(void);
+extern s32 evtClearRandomStatusFlags(void);
+extern s32 ptyAnyUnitFlagMatch(u32, s32);
+extern void func_0011A510(s32);
+extern s32 func_0011E930(f32, s32);
 
 extern s32 fldDeferredCommand;
 
@@ -80,7 +101,7 @@ extern void fldUpdateTargetGuideController(void);
 
 extern void func_00154F18(s32);
 
-extern void func_00126C80(void);
+extern s32 fldUpdateTravelAndEncounters(void);
 
 extern void fldCreateInputPanelTask(void);
 
@@ -209,7 +230,7 @@ extern u32 D_00435F40;
 
 extern u32 D_00435F3C;
 
-extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
+extern void mdlLoadViewerPackage(s32, s32, s32, s32, s32);
 
 void fldLoadPlayerModel(void);
 
@@ -275,7 +296,7 @@ extern void fileRestoreSlotFlagsToState(void);
 
 void fldSetDeferredFieldCommand(u32, u32);
 
-extern void dds3AdminSubmitModeRequest(s32, void *, s32, s32);
+extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
 
 u32 *fldGetPlayerSceneStateAddress(void);
 
@@ -290,7 +311,7 @@ void fldUnloadPlayerModel(void);
 extern void dds3ClearObjectFlags(u32, s32);
 
 
-extern void dds3RebuildObjectModelContext(u32, s32, s32);
+extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
@@ -319,11 +340,18 @@ extern s32 mdlFlagTest(s32 flag);
 
 extern s32 effMiscRand();
 
-extern u32 D_00435F98[2];
+/* Mode 14 copies this eight-byte request. The packed selection contains
+ * group:8, entry:8, and scene:16; its consumer reads both words as signed. */
+typedef struct FieldEncounterRequest {
+    s32 tableIndex;
+    s32 encounterSelection;
+} FieldEncounterRequest;
+typedef char FieldEncounterRequest_size_check[(sizeof(FieldEncounterRequest) == 8) ? 1 : -1];
+extern FieldEncounterRequest D_00435F98;
 
 extern void fldResetEventSceneState(void);
 
-extern u32 func_00151498(void);
+extern s32 func_00151498(void);
 
 extern void fldResetTaskSlots(void);
 
@@ -622,7 +650,33 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
     return angle;
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", func_001248E8);
+extern f32 sdfAtan2(f32 y, f32 x);
+
+/* Direction in degrees from two X/Z positions, preserving the field's 3.14 PI. */
+f32 func_001248E8(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
+    f32 dx;
+    f32 dz;
+    f32 result;
+    f32 absZ;
+    f32 angle;
+
+    if (fromX == toX && fromZ == toZ) return 0.0f;
+    result = fromX - toX;
+    dx = result;
+    dz = fromZ - toZ;
+    absZ = dz;
+    if (result < 0.0f) result = -result;
+    if (absZ < 0.0f) absZ = -absZ;
+    angle = sdfAtan2(absZ, result) * (180.0f / 3.14f);
+    if (dx < 0.0f) {
+        if (!(dz < 0.0f)) angle = -angle;
+    } else {
+        if (dz < 0.0f) angle = 180.0f - angle;
+        else angle += 180.0f;
+    }
+    result = angle;
+    return result;
+}
 
 f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
     s32 angle = (s32)(360.0f - func_001248E8(ax, ay, bx, by) + 90.0f);
@@ -923,6 +977,7 @@ extern void *func_001178B0(EffWorldNode *node);
 extern void fldStartMiniTitleForUnlock(s32 area);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
+extern void fldApplySceneLightSet(s32, s32);
 extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
 extern void fldPreparePlayerSceneCameraTarget(void);
@@ -1166,7 +1221,94 @@ void fldUnloadPlayerModel(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", func_00125B10);
+typedef struct FieldVec4 {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} FieldVec4;
+
+extern FieldVec4 D_00412EB0;
+extern void effMiscAxisAngleToQuaternionVU(f32);
+extern void effMiscQuatMultiplyVU(void);
+extern s32 D_00389888[];
+extern MdlCtx *fldPlayerModelContext;
+
+/* Toggle the selected player model, preserving and rebuilding its scene pose.
+ * Sable/Garnet/Tidal reconstruction; KiB compiler/ABI qualification.
+ * The four legacy SDK stores are audited against this exact VU/callee-read
+ * pipeline; they are not general-purpose memory barriers. */
+
+extern void ddsReleaseUnitObject(EffWorldNode *);
+extern s32 func_00133B10(void);
+
+void fldTogglePlayerModel(void) {
+    f32 work[4];
+    FieldPlayerSceneWork *sceneWork;
+    EffWorldNode *player;
+    void *source;
+    void *buffer;
+
+    memset(work, 0, sizeof(work));
+    work[3] = 1.0f;
+    {
+        FieldVec4 axis = D_00412EB0;
+
+        player = (EffWorldNode *)fldPlayerObject;
+        {
+            sceneWork = &D_0038A640;
+            effObjFetchInnerPosition(player);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->position);
+            effObjFetchInnerRotationNormalized(player);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
+        }
+        ddsReleaseUnitObject((EffWorldNode *)fldPlayerObject);
+        fldUnloadPlayerModel();
+        /* Rebind the same local for the rebuild phase. Both definitions feed
+         * real phase uses; the resulting two-definition pseudo stays global,
+         * rather than merging snapshot HIGH/base/+16 in local-alloc. */
+        sceneWork = &D_0038A640;
+        fldAreaState.unk118 ^= 1;
+        VU0_LOAD_VF(vf10, &axis);
+        effMiscAxisAngleToQuaternionVU(3.1415926f);
+        VU0_LOAD_VF(vf11, &sceneWork->rotation);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF_UNCLOBBERED(vf10, &sceneWork->rotation);
+        VU0_LOAD_VF(vf10, &axis);
+        effMiscAxisAngleToQuaternionVU(3.1415926f);
+        VU0_LOAD_VF(vf11, &sceneWork->rotation);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF_UNCLOBBERED(vf10, work);
+    }
+    fldPlayerObject = (u32)dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), sceneWork, work);
+    dds3SetWorldNodeValue((struct EffWorldNode *)fldPlayerObject, (u32)D_00412EC0);
+    dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
+    fldLoadPlayerModel();
+    D_00435F40 = D_00435F44;
+    D_00435F38 = (u32)sdfAllocGeneralBlock(D_00435F44);
+    source = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldPlayerModelResource);
+    buffer = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)D_00435F38);
+    memcpy(buffer, source, D_00435F40);
+    D_00435F3C = (u32)buffer;
+    mdlLoadViewerPackage(2, 0, 0x101, (s32)buffer, D_00435F40);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435F38);
+    D_00435F38 = 0;
+    dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0038A640.sequenceWord3C);
+    fldPlayerModelContext = (MdlCtx *)dds3GetObjectBaseResourceHandle((EffWorldNode *)fldPlayerObject);
+    if (D_00389888[0] != 0) {
+        mdlAddEntryFlagged((MdlCtx *)fldPlayerModelContext, 0, 2);
+        mdlSetNodeFrameStep((MdlCtx *)fldPlayerModelContext, 1, 1.0f);
+        mdlAddEntryFlagged((MdlCtx *)fldPlayerModelContext, 1, 2);
+    } else {
+        mdlAddEntryFlagged((MdlCtx *)fldPlayerModelContext, 0, 3);
+        fldUnloadPlayerModel();
+    }
+    fldApplySceneLightSet(0, 0);
+    fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
+    fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
+    func_00133B10();
+}
+
 
 void fldPrepareResourceBuffer(void) {
     void *source;
@@ -1178,7 +1320,7 @@ void fldPrepareResourceBuffer(void) {
     buffer = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
-    mdlLoadViewerPackage(2, 0, 0x101, buffer, D_00435F40);
+    mdlLoadViewerPackage(2, 0, 0x101, (s32)buffer, D_00435F40);
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435F38);
     D_00435F38 = 0;
 }
@@ -1286,7 +1428,7 @@ void fldCreatePlayerObject(void) {
             dds3ClearObjectFlags(fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
+        dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0038A67C[0]);
     }
 }
 
@@ -1311,9 +1453,7 @@ extern s32 fldGetSceneCommandState(void);
 /* The scene reset ignores the command word supplied by this caller. */
 extern void func_00136098();
 
-extern void fldApplySceneLightSet(s16, s32);
 
-extern s32 func_00133B10(void);
 
 
 extern char D_00412F00[];
@@ -1354,7 +1494,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                 dds3ClearObjectFlags(fldPlayerObject, 0x20);
             }
             fldPrepareResourceBuffer();
-            dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
+            dds3RebuildObjectModelContext((EffWorldNode *)fldPlayerObject, 2, D_0038A67C[0]);
             player = (EffWorldNode *)fldPlayerObject;
         } else {
             ObjectTransform *inner = player->inner;
@@ -1388,7 +1528,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             VU0_STORE_VF(vf10, work);
             fldSecondarySceneObject = (u32)dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), input, work);
             dds3SetWorldNodeValue((EffWorldNode *)fldSecondarySceneObject, (u32)D_00412F00);
-            dds3RebuildObjectModelContext(fldSecondarySceneObject, 2, D_0038A67C[0]);
+            dds3RebuildObjectModelContext((EffWorldNode *)fldSecondarySceneObject, 2, D_0038A67C[0]);
             effObjSetInnerPosition((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
             effObjSetInnerRotation((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
             effObjSetInnerScale((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
@@ -1441,12 +1581,6 @@ void fldSpawnPlayerUnits(f32 *input) {
     }
 }
 
-typedef struct FieldVec4 {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} FieldVec4;
 
 extern FieldVec4 D_00412F10;
 
@@ -1507,7 +1641,6 @@ void fldClearSceneCommandFlag(void) {
 
 extern void fldPlayMenuSound(s32);
 
-extern void fldApplySceneLightSet(s16, s32);
 
 void fldActivatePendingSceneCommand(void) {
     u32 value;
@@ -1520,7 +1653,7 @@ void fldActivatePendingSceneCommand(void) {
         fldAreaState.sceneCommand = value;
         datGameState->world.fieldFlags |= 8;
         fldAreaState.consumedFlags &= ~1;
-        fldApplySceneLightSet(value, 0);
+        fldApplySceneLightSet((s16)value, 0);
     }
 }
 
@@ -1548,7 +1681,7 @@ void fldUpdateSceneCommandSpeed(void) {
         if (scene->sceneCommand == 0) {
             value = func_001266E0();
             scene->sceneCommand = value;
-            fldApplySceneLightSet(value, 0x14);
+            fldApplySceneLightSet((s16)value, 0x14);
         }
     } else if (scene->sceneCommand != 0) {
         scene->sceneCommand = 0;
@@ -1686,7 +1819,162 @@ s16 fldRollEncounter(void) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", func_00126C80);
+/* Advance movement-driven solar/attrition state and queue field encounters. */
+s32 fldUpdateTravelAndEncounters(void) {
+    f32 *previousPosition = D_0038A6F0;
+    EffWorldNode *player;
+    f32 distance;
+    f32 interval;
+    s32 previousPhase;
+    s32 phase;
+    s32 encounter;
+    s32 *selection;
+    s32 floor;
+
+    if (fldAreaState.sceneMode > 0) fldAreaState.sceneMode--;
+    if (fldAreaState.sceneState > 0) fldAreaState.sceneState--;
+    if (fldAreaState.unkE8 > 0) fldAreaState.unkE8--;
+    if (!fldIsTargetWithinInteractionRange() && !fldAreaState.targetGuideActive &&
+        !fldTestSceneControlFlags(0x40)) return 0;
+    if (fldTestSceneLifecycleFlags(1) == 1) return 0;
+    if (!dds3GetWorldObject()) return 0;
+    player = (EffWorldNode *)fldPlayerObject;
+    if (!player) return 0;
+
+    effObjFetchInnerPosition(player);
+    VU0_LOAD_VF(vf11, previousPosition);
+    VU0_STORE_VF(vf10, previousPosition);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    if (distance < 0.2f) distance = 0.0f;
+    fldAreaState.frameTravelDistance = distance;
+    previousPhase = evtGetSolarPhase();
+    if (fldAreaState.unkE8 > 0) {
+        if (fldAreaState.unk11C && D_00389988[0x60 / 4]) {
+            fldAreaState.attritionDistance += distance;
+        }
+        effObjFetchInnerPosition(player);
+        VU0_STORE_VF(vf10, previousPosition);
+        fldAreaState.frameTravelDistance = 0.0f;
+        return 0;
+    }
+    if (fldAreaState.transitionMode != 0) return 0;
+    evtAdvanceSolarClockAndExpireControls(distance);
+    phase = evtGetSolarPhase();
+    if (fldAreaState.consumedFlags & 15) {
+        fldResetPlayerSceneObjectState();
+        evtStartSceneResourceTask(dds3GetWorldObject(), D_00412F30);
+        func_00133F08();
+        return 0;
+    }
+    if (!(fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) &&
+        previousPhase != phase) {
+        evtUpdateFlaggedStats();
+        if (phase == 0 && evtClearRandomStatusFlags()) {
+            fldAreaState.sceneMode = 4;
+            fldAreaState.sceneState = 5;
+            fldResetPlayerSceneObjectState();
+            evtStartSceneResourceTask(dds3GetWorldObject(), D_00412F40);
+            return 0;
+        }
+    }
+    if (fldAreaState.unk11C || ptyAnyUnitFlagMatch(0x80, 1)) {
+        if (D_00389988[0x60 / 4]) fldAreaState.attritionDistance += distance;
+        interval = 450.0f;
+        if (!fldAreaState.unk11C && ptyAnyUnitFlagMatch(0x80, 1)) interval = 1000.0f;
+        if (fldAreaState.attritionDistance > interval) {
+            if (fldAreaState.unk11C) {
+                if (fldAreaState.unk11C != 3 && (datGameState->world.fieldFlags & 4)) {
+                    fldAreaState.unk190 = 0;
+                    fldAreaState.attritionDistance = 0.0f;
+                } else {
+                    fldAreaState.unk190 = 60;
+                    fldAreaState.attritionDistance = 0.0f;
+                    if (fldAreaState.unk11C == 3) func_0011A510(3);
+                    else if (fldAreaState.unk11C == 2) func_0011A510(4);
+                    else func_0011A510(2);
+                }
+            } else {
+                fldAreaState.attritionDistance = 0.0f;
+                fldAreaState.unk190 = 60;
+                func_0011A510(1);
+            }
+        }
+    } else {
+        fldAreaState.attritionDistance = 450.0f;
+    }
+    if (fldGetResourceReadyFlag() == 1) return 0;
+    if (fldAreaState.unk13C && D_00389988[0x5C / 4] &&
+        D_00389988[0x44 / 4] && fldIsTargetWithinInteractionRange()) {
+        fldResetTaskSlots();
+        fldSetSceneLifecycleFlags(1);
+        fldSetSceneLifecycleFlags(2);
+        fldResetPlayerSceneObjectState();
+        evtKillFieldScriptTasks();
+        if (mdlFlagTest(0x4D0)) {
+            D_00435F98.tableIndex = 0;
+            D_00435F98.encounterSelection = 0x32A;
+            floor = fldAreaState.floor + 1;
+            switch (floor) {
+            case 11:
+                mdlFlagSet(0x4C3);
+                mdlFlagSet(0x80B);
+                fldSetDeferredFieldCommand(23, 201);
+                evtSubmitEventRequest(0x31E, 0);
+                break;
+            case 14:
+                mdlFlagSet(0x4C2);
+                evtSubmitEventRequestImmediate(0x32B);
+                break;
+            default:
+                mdlFlagSet(0x4C1);
+                evtSubmitEventRequestImmediate(0x32A);
+                break;
+            }
+        } else {
+            D_00435F98.tableIndex = 0;
+            D_00435F98.encounterSelection = 0x302;
+            fldSetDeferredFieldCommand(23, 200);
+            floor = fldAreaState.floor + 1;
+            if (floor == 11 || floor == 14) evtSubmitEventRequest(0x302, 0);
+            else evtSubmitEventRequest(0x302, 0);
+        }
+        return -1;
+    }
+    if (!fldAreaState.transitionMode && !D_00389988[0x44 / 4]) return 0;
+    if (!fldTestSceneControlFlags(0x10)) return 0;
+    fldAreaState.encounterMode = 0;
+    encounter = fldAreaState.unkE0;
+    if (encounter == 0) encounter = fldAreaState.defaultEncounterId;
+    D_00435F98.tableIndex = encounter;
+    selection = &D_00435F98.encounterSelection;
+    if ((*selection = func_0011E930(distance, encounter)) != 0) {
+        encounter = fldRollEncounter();
+        if (encounter != -1) {
+            D_00435F98.tableIndex = encounter;
+            *selection = func_0011E930(99999.0f, encounter);
+            fldAreaState.encounterMode = 1;
+        }
+        if (*selection != 0) {
+            if (D_00389988[0x44 / 4] == 1) {
+                fldAreaState.nextFloor = fldAreaState.floor + 1;
+                fldAreaState.nextArea = fldAreaState.area;
+                fldResetTaskSlots();
+                fldSetSceneLifecycleFlags(1);
+                fldSetSceneLifecycleFlags(2);
+                fldResetPlayerSceneObjectState();
+                evtKillFieldScriptTasks();
+                return -1;
+            }
+            dds3WorkClear();
+            fldAreaState.transitionCount++;
+            sndSetSequenceVolumePan(15, 127, 63);
+            kwlnFadeOutStart(128, 128, 128, 6);
+        }
+    }
+    return 0;
+}
+
 
 /* Queue the current area and next floor, reset the scene lifecycle, and return -1.
  * The pending pair is consumed later with a 200-entry offset on the area value. */
@@ -1695,8 +1983,8 @@ s32 fldAdvanceToNextScene(void) {
     u32 area;
 
     fldResetEventSceneState();
-    D_00435F98[0] = 0;
-    D_00435F98[1] = func_00151498();
+    D_00435F98.tableIndex = 0;
+    D_00435F98.encounterSelection = func_00151498();
     scene = fldAreaState.floor;
     area = fldAreaState.area;
     fldAreaState.nextArea = area;
@@ -2081,10 +2369,10 @@ s32 func_001278D0(void) {
         if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
         if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.targetGuideActive == 1) {
             func_00154F18(1);
-            func_00126C80();
+            fldUpdateTravelAndEncounters();
         } else if (fldTestSceneControlFlags(0x40) != 0) {
             func_00154F18(1);
-            func_00126C80();
+            fldUpdateTravelAndEncounters();
         }
         if (fldTestSceneLifecycleFlags(2) == 1) {
             controller->stage++;
@@ -2107,7 +2395,7 @@ s32 func_001278D0(void) {
         fldAreaState.transitionCount++;
         if (fldAreaState.pendingSceneRequest == 0) D_00435F78 = 1;
         else fldAreaState.pendingSceneRequest = 0;
-        dds3AdminSubmitModeRequest(14, D_00435F98, 8, 1);
+        dds3AdminSubmitModeRequest(14, &D_00435F98, sizeof(D_00435F98), 1);
         return -1;
     case 6:
         break;

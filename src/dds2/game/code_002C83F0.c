@@ -46,7 +46,7 @@ typedef struct FileTransferJob {
 
 /* The open device state retains the resolved path at +0x10. */
 s32 WaitSema(s32 sema);
-s32 func_0034F680(s32 mode, void *command, s32 *result);
+s32 sceMcSync(s32 mode, void *command, s32 *result);
 
 s32 SignalSema(s32 sema);
 
@@ -475,7 +475,7 @@ void fileReqBegin(s32 request) {
 s32 fileReqPoll(void) {
     FileReqEntry *entry = &fileRequestEntries[D_00439000];
     s32 info[2];
-    s32 result = func_0034F680(1, info, &info[1]);
+    s32 result = sceMcSync(1, info, &info[1]);
     s32 retries;
 
     if (result == 1) {

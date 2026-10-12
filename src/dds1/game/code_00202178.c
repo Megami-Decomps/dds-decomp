@@ -14,6 +14,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -100,17 +101,6 @@ extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_003A5D50[];
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-typedef struct AiSlot {
-    u8 weight;
-    u8 pad1;
-    u16 actionId;
-    u32 actionArg;
-} AiSlot;
-
-typedef struct AiDecisionRow {
-    u32 predicates[3];
-    u8 routes[8];
-} AiDecisionRow;
 
 typedef struct AiSpecies {
     u8 pad00[4];

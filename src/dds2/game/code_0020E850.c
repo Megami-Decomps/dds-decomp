@@ -7,6 +7,7 @@
 #include "btl.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "evt_unit.h"
@@ -1225,13 +1226,6 @@ s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction) {
     }
     return result;
 }
-
-typedef struct AiSlot {
-    u8 weight;
-    u8 pad1;
-    u16 actionId;
-    u32 actionArg;
-} AiSlot;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 typedef struct AiSpecies {

@@ -66,7 +66,6 @@ extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern s32 func_0010F190();
-extern void kwlnDrawSpriteCell();
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F543[];
 extern void func_002458B8();

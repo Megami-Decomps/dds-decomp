@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -2192,15 +2193,6 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
     }
 }
 
-typedef struct EffPCPEventPlace {
-    f32 unk00[7];
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u32 color;
-} EffPCPEventPlace;
-
 extern EffPcpThunderFragmentResources *effCreateFragmentResources(s32, s32);
 extern void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *, u32 *);
 
@@ -2238,17 +2230,17 @@ EffPcpThunderGroup *func_00167BF8(const EffPcpThunderGroupParams *src, SoundMixe
     palette[1] = work->params.palette[1];
     palette[2] = work->params.palette[2];
     palette[3] = work->params.palette[3];
-    place.unk00[0] = 0;
-    place.unk00[1] = 0;
-    place.unk00[2] = 0;
-    place.unk00[3] = 0;
-    place.unk00[4] = 0;
-    place.unk00[5] = 0;
-    place.unk00[6] = 0;
-    place.unk1C = 1.0f;
-    place.unk20 = 100.0f;
-    place.unk24 = 100.0f;
-    place.unk28 = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
         slot->fragment = effCreateFragmentResources(a, b);
@@ -2306,17 +2298,17 @@ EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     palette[1] = work->params.palette[1];
     palette[2] = work->params.palette[2];
     palette[3] = work->params.palette[3];
-    place.unk00[0] = 0;
-    place.unk00[1] = 0;
-    place.unk00[2] = 0;
-    place.unk00[3] = 0;
-    place.unk00[4] = 0;
-    place.unk00[5] = 0;
-    place.unk00[6] = 0;
-    place.unk1C = 1.0f;
-    place.unk20 = 100.0f;
-    place.unk24 = 100.0f;
-    place.unk28 = 1.0f;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
         slot->fragment = effCreateFragmentResources(a, b);
@@ -2418,13 +2410,13 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
     color = group->tintColor;
     slot = group->slots;
     PCP_COPY_VECTOR(origin, group->params.origin);
-    place.unk00[4] = 0.0f;
-    place.unk00[5] = 0.0f;
-    place.unk00[6] = 0.0f;
-    place.unk1C = 1.0f;
-    place.unk20 = 100.0f;
-    place.unk24 = 100.0f;
-    place.unk28 = 1.0f;
+    place.payload[4] = 0.0f;
+    place.payload[5] = 0.0f;
+    place.payload[6] = 0.0f;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
     if (func_001619E8()) {
         u32 actor;
         if (mode == 3) actor = effBTLFieldColorGetVariantSelector();
@@ -2785,15 +2777,15 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, cap[6]);
             }
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
-                place.unk00[0] = slot->position[0];
-                place.unk00[1] = slot->position[1];
-                place.unk00[2] = slot->position[2];
-                place.unk00[3] = 0.0f;
+                place.payload[0] = slot->position[0];
+                place.payload[1] = slot->position[1];
+                place.payload[2] = slot->position[2];
+                place.payload[3] = 0.0f;
                 place.color = color;
-                delta[0] = start[0] - place.unk00[0];
-                delta[2] = start[2] - place.unk00[2];
+                delta[0] = start[0] - place.payload[0];
+                delta[2] = start[2] - place.payload[2];
                 sdfConvertEulerAnglesToQuaternionVU(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
-                VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
+                VU0_STORE_VF_UNCLOBBERED(vf10, &place.payload[4]);
                 effEventCopyFileRecordHeader(slot->eventNode, &place);
                 effEventUpdateEffectParameters(slot->eventNode);
             }

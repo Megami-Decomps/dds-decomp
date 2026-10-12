@@ -970,7 +970,6 @@ extern char D_00436620[];
 extern char D_00436628[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_001A7A98(ItfMesWindowRec *window);
 extern void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *panel, s32 selectedItem);
 extern void sndStepIndexByPad(SndPadStepper *panel);
@@ -1185,7 +1184,7 @@ u32 itfMesGetTableItem(ItfMesTable *table, s32 itemIndex) {
     return table->items[itemIndex];
 }
 
-extern s32 func_0019DB30();
+extern s32 frFontCountGlyphBands();
 extern void func_0019DD48();
 extern s8 itfTestTextInterfaceMask();
 extern s32 func_0019E908();
@@ -1212,7 +1211,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
                           (u8 *)itfMesGetTableItem(entryBlock->table, entryBlock->itemIndex), 0);
     if (mes->unk12 == 3) {
-        if (func_0019DB30(glyph) == 1) {
+        if (frFontCountGlyphBands(glyph) == 1) {
             func_0019DD48(0x1000, 0xC60, glyph);
         } else {
             func_0019DD48(0x1000, 0xBF8, glyph);

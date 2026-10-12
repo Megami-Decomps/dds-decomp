@@ -10,6 +10,7 @@
 #include "sdf_texture_flush.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
 #include "sdf_chip.h"
@@ -81,7 +82,6 @@ typedef struct SdfDmaTag {
 } SdfDmaTag;
 
 extern u32 func_002CF930(void);
-extern u32 sdfGetElapsedTimerTicks(u32);
 extern s32 EIntr(void);
 extern u16 D_003BD334;
 extern s32 D_003BD340;

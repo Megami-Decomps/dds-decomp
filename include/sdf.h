@@ -378,6 +378,9 @@ typedef struct SdfTex {
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
 
+/* Return the packed 64-bit TEX0 state from the texture's primary GS packet. */
+u64 sdfTexGetPrimaryTextureState(SdfTex *texture);
+
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 
 

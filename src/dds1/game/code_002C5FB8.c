@@ -2,8 +2,8 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
-extern s32 func_00195CD8(void *, s32, s32);
+extern s32 frFontMeasureTextAdvance(void *, s32, s32);
 
 s32 sdfCounterMeasureLabelWidth(u32 arg0) {
-    return func_00195CD8((void *)arg0, 1, 3);
+    return frFontMeasureTextAdvance((void *)arg0, 1, 3);
 }

@@ -21,15 +21,6 @@ enum {
     PAC_STATE_ALLOCATE_HIGH = 2
 };
 
-typedef struct PacAlloc {
-    s32 entryCount; /* 0x0 */
-    s32 entryIndex; /* 0x4 */
-    u8 pad8[8]; /* 0x8 */
-    SdfPacStreamPacketHeader entry; /* 0x10: current serialized entry header */
-    PacBuf buffer; /* 0x20: resource-buffer work record */
-} PacAlloc;
-
-
 extern void *memcpy(void *dst, const void *src, u32 n);
 
 
@@ -41,11 +32,7 @@ void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *pack
 
 void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
 
-void sdfQueueAndResetPacketWork(PacState *state, void *packet);
-
-void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
-
-s32 func_00347988(void *decoder, void *input, s32 available);
+s32 sdfPacDecodeInputChunk(void *decoder, void *input, s32 available);
 
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 
@@ -219,7 +206,7 @@ void sdfPacCopyPendingBytes(PacState *state) {
 /* Feed compressed input to the active decoder until it finishes. */
 void sdfPacDecodePendingBytes(PacState *state) {
     s32 inputBytes = state->inputAvailable;
-    s32 finished = func_00347988(state->decoder, state->inputCursor, inputBytes);
+    s32 finished = sdfPacDecodeInputChunk(state->decoder, state->inputCursor, inputBytes);
     sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
@@ -358,7 +345,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
 void sdfPacDecodeResourceChunk(PacState *state) {
     /* This handler offers pendingBytes, unlike the packet-level decoder. */
     s32 inputBytes = state->pendingBytes;
-    s32 finished = func_00347988(state->decoder, state->inputCursor, inputBytes);
+    s32 finished = sdfPacDecodeInputChunk(state->decoder, state->inputCursor, inputBytes);
     sdfPacAdvanceInput(state, inputBytes - ((PacBuf *)state->decoder)->remainingBytes);
     if (finished == 0) {
         return;
@@ -459,7 +446,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
-    PacAlloc *allocation = state->slot.list;
+    PacListAllocation *allocation = state->slot.list;
     sdfAppendResourceListItem((s32)state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;

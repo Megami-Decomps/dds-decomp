@@ -43,7 +43,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 extern u8 D_003BB17C;
-FrFontGlyph *func_001951C8(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
 u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
@@ -106,7 +106,7 @@ extern void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image);
 
 /* Assemble six 16-word image blocks from little-endian source bytes and upload
  * each to its matching GS buffer. The inner countdown includes zero. */
-void func_001946C8(void) {
+void frFontUploadImageBlocks(void) {
     u32 imageWords[FR_FONT_IMAGE_WORD_COUNT];
     s32 bufferIndex = 0;
     s32 sourceWordOffset = 0;
@@ -234,7 +234,7 @@ typedef struct FrFontGlyphMeasureWork {
 extern u16 frFontGetSlotCellWidth(s32 index);
 
 /* Fill cell dimensions, advance and horizontal bearing for one glyph. */
-void func_001949B0(void *opaqueWork, s32 glyphIndex) {
+void frFontFillGlyphMetrics(void *opaqueWork, s32 glyphIndex) {
     FrFontGlyphMeasureWork *work = opaqueWork;
     s32 fontIndex;
     s32 defaultSlot = 0;
@@ -480,7 +480,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->contextModeEnabled = 0;
 }
 
-extern void func_001949B0(void *, s32);
+extern void frFontFillGlyphMetrics(void *, s32);
 
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     FrFontChildGlyph *glyph;
@@ -504,7 +504,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
         glyphIndex = 0x147;
     }
     glyph->cachedItem = frFontRetainOrCreateCachedItem(glyph, glyphIndex);
-    func_001949B0(glyph, glyphIndex);
+    frFontFillGlyphMetrics(glyph, glyphIndex);
     if (glyph->renderValueOrSetupOrShade.setupBytes.sharedFlags & 0x10) {
         glyph->y = func_001949A8((s8)fontIndex, glyphIndex);
     } else {
@@ -516,7 +516,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
 FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
-    FrFontGlyph *newGlyphChain = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
+    FrFontGlyph *newGlyphChain = frFontBuildGlyphChain(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
         return previousGlyph;
@@ -525,7 +525,7 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
 }
 
 /* Decode text into child glyphs appended to an existing or newly pooled head. */
-FrFontGlyph *func_001951C8(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph) {
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph) {
     FrFontGlyph *head = existingGlyph;
     FrFontChildGlyph *previous;
     FrFontChildGlyph *glyph;
@@ -834,7 +834,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                             if ((u16)child->glyphCodeOrContext.glyphCode < 0x80) {
                                 enabled = 1;
                             }
-                            func_00193D70(x + child->x + xOffset, y + child->y,
+                            frFontDrawAtlasGlyph(x + child->x + xOffset, y + child->y,
                                          child->cellDimensions.cellWidth,
                                          child->cellDimensions.cellHeight >> 1,
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
@@ -842,7 +842,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                                          &child->cachedItem->list->uv,
                                          atlas, flags);
                         } else {
-                            func_00193D70(x + child->x + xOffset, y + child->y,
+                            frFontDrawAtlasGlyph(x + child->x + xOffset, y + child->y,
                                          child->cellDimensions.cellWidth,
                                          child->cellDimensions.cellHeight >> 1,
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
@@ -998,9 +998,9 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
-extern void func_001949B0(void *work, s32 code);
+extern void frFontFillGlyphMetrics(void *work, s32 code);
 
-s32 func_00195CD8(const u8 *text, u8 fontIndex, u8 mode) {
+s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
     s32 total = 0;
     u32 offset = 0;
@@ -1028,7 +1028,7 @@ s32 func_00195CD8(const u8 *text, u8 fontIndex, u8 mode) {
             u32 adjusted = code - 0x8080;
             glyphIndex = ((adjusted & 0xFF00) >> 1) + (adjusted & 0x7F);
         }
-        func_001949B0(&work, glyphIndex);
+        frFontFillGlyphMetrics(&work, glyphIndex);
         offset++;
         total += work.advance;
     }
@@ -1072,8 +1072,8 @@ void frFontSetContextCursorSpacing(u32 spacing) {
 }
 
 /* Count the y-band rows of the glyph chain. DDS1 scans the band but advances
- * only one next node, as func_00195FA8 does. */
-s32 func_00195E60(FrFontGlyph *glyph) {
+ * only one next node, as frFontGetGlyphPositionAtIndex does. */
+s32 frFontCountGlyphChainNodes(FrFontGlyph *glyph) {
     s32 count = 0;
     FrFontGlyph *currentNode;
     FrFontGlyph *scanNode;
@@ -1146,7 +1146,7 @@ typedef struct FrFontPosition {
 /* Write each visited position and stop at requestedIndex. Missing indices leave
  * the last visited position; empty input leaves output unchanged. DDS1 still
  * scans the y-band but advances only one next node, unlike DDS2's band advance. */
-void func_00195FA8(FrFontPosition *position, s32 requestedIndex, FrFontGlyph *glyph) {
+void frFontGetGlyphPositionAtIndex(FrFontPosition *position, s32 requestedIndex, FrFontGlyph *glyph) {
     s32 positionIndex = 0;
     FrFontGlyph *currentNode;
     FrFontGlyph *scanNode;
@@ -1221,7 +1221,7 @@ u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode) {
 extern u32 D_003D6E20[];
 extern s8 D_003BB160;
 
-void func_00196220(u8 fontIndex, FrFontCtx *ctx) {
+void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
     const char *textData;
     s32 index;
@@ -1261,7 +1261,7 @@ void func_00196220(u8 fontIndex, FrFontCtx *ctx) {
             previousMode = mode;
         }
 
-        existingGlyph = func_001951C8(glyphText, mode, ctx->firstOption,
+        existingGlyph = frFontBuildGlyphChain(glyphText, mode, ctx->firstOption,
                                        ctx->secondOption, ctx->glyphChain);
         ctx->glyphChain = existingGlyph;
         frFontSetSpacingAndMeasureGlyphs(existingGlyph, D_003BB160);

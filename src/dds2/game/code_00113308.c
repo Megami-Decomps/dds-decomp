@@ -1,5 +1,6 @@
 #include "mdl.h"
 #include "common.h"
+#include "sdf_model.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
@@ -600,7 +601,6 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
 
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z);
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 
 INCLUDE_RODATA(const s32, "game/code_00113308", D_004128A0);
 

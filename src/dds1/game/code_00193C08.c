@@ -93,13 +93,13 @@ void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->writes[5].reg = 0x47;
 }
 
-INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
+INCLUDE_ASM(const s32, "game/code_00193C08", frFontDrawAtlasGlyph);
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
 void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
                   s32 drawFlags) {
-    func_00193D70(x + glyph->x, y + glyph->y,
+    frFontDrawAtlasGlyph(x + glyph->x, y + glyph->y,
                  glyph->cellDimensions.cellWidth,
                  glyph->cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
                  glyph->renderValueOrSetupOrShade.setupBytes.firstOption, glyph->parentDimensionsOrRenderWord.renderWord, depth, 1,
@@ -163,12 +163,12 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     }
 }
 
-extern void func_00193920(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
-extern void func_001946C8(void);
+extern void frFontInitializeGlyphAtlas(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+extern void frFontUploadImageBlocks(void);
 extern u32 D_003D6E20[];
 extern s32 D_003BD814;
 
-void func_00194228(s32 rowBudget, s32 poolCount) {
+void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
     s32 i;
     s32 rowCount;
     s32 glyphsPerRow;
@@ -202,11 +202,11 @@ void func_00194228(s32 rowBudget, s32 poolCount) {
     for (i = 0; i < 2; i++) {
         frFontWork.glyphSlots[i] = NULL;
     }
-    func_00193920(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
+    frFontInitializeGlyphAtlas(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
     frFontWork.itemPool = itfCreateMemNodeRing(0x2C, poolCount);
     frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
     frFontLoadDefaultFonts();
-    func_001946C8();
+    frFontUploadImageBlocks();
     for (i = 0; i < 32; i++) {
         D_003D6E20[i] = 0;
     }

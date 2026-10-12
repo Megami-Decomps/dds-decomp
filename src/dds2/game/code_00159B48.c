@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -193,11 +194,11 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
 
 
 
-/* Store the signed variant in one child payload or every child of a list. */
+/* Store the variant bits in one child payload or every child of a list. */
 void billSetAllChildVariants(BillObj *effect, s16 variant) {
     switch (effect->kind) {
     case 0:
-        effect->child->signedVariant = variant;
+        effect->child->variant = (u16)variant;
         break;
     case 1: {
         BillData *childList = effect->animationData;
@@ -208,7 +209,7 @@ void billSetAllChildVariants(BillObj *effect, s16 variant) {
         if (remainingChildren > 0) {
             childCursor = childEntries;
             do {
-                (*childCursor)->signedVariant = variant;
+                (*childCursor)->variant = (u16)variant;
                 childCursor++;
             } while (--remainingChildren != 0);
         }
@@ -234,7 +235,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 
     switch (effect->kind) {
     case 0:
-        effect->child->signedVariant = variantValue;
+        effect->child->variant = (u16)variantValue;
         break;
     case 1:
         effect->pair.cameraFacingMode = variantValue;
@@ -524,7 +525,6 @@ struct EffGeneratedTextureDescriptor {
 };
 
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);

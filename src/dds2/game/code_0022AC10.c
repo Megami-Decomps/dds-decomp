@@ -2957,7 +2957,7 @@ extern void func_0020D228(void);
 extern void func_0020D270(u32);
 extern void func_0020D230(void);
 extern s32 func_0011E848(s32);
-extern s32 func_0011E930(s32, f32);
+extern s32 func_0011E930(f32, s32);
 extern void func_00230D90(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
@@ -3091,7 +3091,7 @@ s32 func_00230978(void) {
         return 0;
     }
     if (D_00436F5F != 0) {
-        encounter = func_0011E930(D_00436F64, 200.0f);
+        encounter = func_0011E930(200.0f, D_00436F64);
         if (encounter == 0) {
             return 0;
         }

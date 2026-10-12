@@ -54,7 +54,7 @@ extern SdfTex *itfBackgroundSpriteTexture;
 extern u8 D_003BB188[];
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frFontAdvanceContextCursor(FrFontCtx *);
-extern void func_00196220(u8, FrFontCtx *);
+extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
@@ -193,7 +193,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     case 0xF203:
         if (D_003D6E20[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
-            func_00196220((u8)(stream->encodedText[*position] - 1), stream);
+            frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
         break;
@@ -311,7 +311,7 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
             if (value < 0x80) {
                 encodedText[0] = value;
                 encodedText[1] = 0;
-                stream->glyphChain = func_001951C8((const char *)encodedText, stream->fontIndex,
+                stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
                     stream->firstOption, stream->secondOption, stream->glyphChain);
             } else {
                 value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
@@ -319,14 +319,14 @@ FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = func_001951C8((const char *)encodedText, stream->fontIndex,
+                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 } else {
                     value -= 0x4000;
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = func_001951C8((const char *)encodedText, 8,
+                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, 8,
                         stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
@@ -727,7 +727,7 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = func_001951C8(text, 2, 0, 0, glyph);
+    glyph = frFontBuildGlyphChain(text, 2, 0, 0, glyph);
     frFontSetSpacingAndMeasureGlyphs(glyph, -1);
     frFontAddSharedGlyphFlags(2);
     frFontSetGlyphPosition(glyph, x, y);
@@ -741,7 +741,7 @@ FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = func_001951C8(text, 3, 0, 0, glyph);
+    glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
     frFontAddSharedGlyphFlags(2);
     frFontSetGlyphPosition(glyph, x, y);
     frFontStoreShiftedRenderValue(glyph, depth << 4);
@@ -754,7 +754,7 @@ FrFontGlyph *func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
-    glyph = func_001951C8(text, 3, 0, 0, glyph);
+    glyph = frFontBuildGlyphChain(text, 3, 0, 0, glyph);
     frFontSetSpacingAndMeasureGlyphs(glyph, -2);
     frFontAddSharedGlyphFlags(2);
     frFontSetGlyphPosition(glyph, x, y);
@@ -768,7 +768,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
                                     void *glyphSource, FrFontGlyph *parent) {
     FrFontGlyph *glyph;
 
-    glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
+    glyph = frFontBuildGlyphChain(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
     frFontSetSpacingAndMeasureGlyphs(glyph, 3);
     frFontSetGlyphPosition(glyph, x, y);
@@ -778,7 +778,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 }
 
 extern u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode);
-extern s32 func_00195E60(FrFontGlyph *text);
+extern s32 frFontCountGlyphChainNodes(FrFontGlyph *text);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
@@ -807,7 +807,7 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
         s32 maxWidth = 0;
         s32 i;
         s32 width;
-        for (i = 0; i < func_00195E60(handle); i++) {
+        for (i = 0; i < frFontCountGlyphChainNodes(handle); i++) {
             width = frFontMeasureGlyphStripWidth(i, handle);
             if (maxWidth < width) {
                 maxWidth = width;

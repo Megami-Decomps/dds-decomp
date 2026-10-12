@@ -14,11 +14,13 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
@@ -37,10 +39,7 @@
 #include "dat_affinity.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
-enum {
-    BTL_SOUND_ENTRY_COUNT = 0x31,
-    BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26
-};
+enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 
 extern s32 func_003014F0(char *dst, const char *format, ...);
 
@@ -86,32 +85,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
-/* Battle runtime prefix: actor/task/sound registrations and packed battle tint. */
-typedef struct BtlActorWork {
-    u8 pad_00[0x208];
-    s32 unk208;
-    u8 pad20C[0x1C];
-    BtlUnit *actorList;
-    struct SoundTask *taskTail; /* Newest registration; reverse traversal. */
-    struct SoundTask *taskHead; /* Oldest registration; forward traversal. */
-    struct SoundResourceNode *soundResourceHead; /* Allocated resource nodes. */
-    struct ActiveSoundNode *soundList;           /* Independent active-node list. */
-    struct SoundSlotOwner *soundSlotOwners;     /* Shared category/id owners. */
-    u8 pad240[0x24];
-    u32 unk264;
-    s32 unk268;
-    u8 pad26C[0x38];
-    s32 unk2A4;
-    u8 pad2A8[0x210];
-    struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT];
-    u8 pad57C[8];
-    u8 fadeEnabled; /* 0 raises the tint, 1 lowers it; refreshed by the frame updater. */
-    u8 pad585[3];
-    u32 fadeColor; /* Packed tint; retain the original whole-word arithmetic. */
-    u8 pad58C[0x58];
-    s32 (*hook5E4)(BtlUnit *); /* Actor-state predicate consulted by the defeat transition. */
-    s32 (*hook5E8)(BtlUnit *); /* Fallback predicate consulted when hook5E4 returns 0. */
-} BtlActorWork;
+
 
 /* Tagged scheduler predicate, embedded for task entry and exit. */
 typedef struct TaskCondition {
@@ -170,13 +144,6 @@ typedef struct SoundTask {
     struct SoundTask *deferPrev;
     u8 pad68[8];
 } SoundTask;
-
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
 
 typedef struct SndPad {
     u8 pad00[0x21];
@@ -302,18 +269,6 @@ typedef struct BtlFxSrcA {
     f32 f10;
     f32 f14;
 } BtlFxSrcA;
-
-/* Shared effect-resource records also provide approach reach and frame limits. */
-typedef struct BtlEffectNode {
-    s16 triggerKind;
-    u8 pad02[2];
-    s16 rateKind;
-    u8 pad06[2];
-    f32 scale;
-    f32 reachOffset;
-    u8 pad10[2];
-    u16 frameCount;
-} BtlEffectNode;
 
 typedef struct BtlEffectResource {
     s128 vec0;
@@ -3127,7 +3082,6 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
