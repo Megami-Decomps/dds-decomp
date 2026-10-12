@@ -139,7 +139,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfSinPoly(f32 angle);
 
-void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
     f32 (*newSlot)[4];
     f32 (*replayPosition)[4];
     f32 (*historyPosition)[4];
@@ -464,7 +464,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
                 fade = 1.0f;
             }
             effMagatuhiSetValue(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
-            func_00191450(valueWork, i, point);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, point);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -652,7 +652,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
                 fade = 1.0f;
             }
             effMagatuhiSetValue(valueWork, i, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (frame >= life && respawn) {
             *delays = -(effMiscRand(effDefaultRandomState) % spread);
@@ -717,7 +717,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
             VU0_LOAD_VF(vf11, endPosition);
             VU0_LERP_VF10(blendFraction);
             VU0_STORE_VF(vf10, samplePosition);
-            func_00191450(valueWork, i, samplePosition);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, samplePosition);
             blendFraction += blendStep;
         }
         (*ages)++;
@@ -885,7 +885,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -972,7 +972,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     angle += angleStep;
                     radius += radiusStep;
                 }
@@ -1137,7 +1137,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -1226,7 +1226,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     height += heightStep;
                     angle += angleStep;
                     radius += radiusStep;
@@ -1380,7 +1380,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -1471,7 +1471,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     scale += scaleStep;
                     angle += angleStep;
                 }
