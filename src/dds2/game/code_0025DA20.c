@@ -559,10 +559,10 @@ void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
-void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 
 /* Use defaults before the first key; otherwise blend the bounding keys. */
-void func_0025E288(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
+void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
     EvtRuntimeChild *lo;
     EvtRuntimeChild *hi;
     s32 startFrame;
@@ -586,7 +586,7 @@ void func_0025E288(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDi
     } else {
         ratio = 0.0f;
     }
-    func_0025E460(lo, hi, display, ratio);
+    mnuBlendCampDisplayFields(lo, hi, display, ratio);
 }
 
 
@@ -605,7 +605,7 @@ void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
     layout->z[2] = 16;
 }
 
-void func_0025E390(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
+void mnuSampleCampListLayoutTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
     EvtRuntimeChild *lower;
     EvtRuntimeChild *upper;
     EvtCameraColorPayload fallback;
@@ -642,7 +642,7 @@ void func_0025E390(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out)
 }
 
 /* Blend the display fields; control bytes always come from the lower key. */
-void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to,
+void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
                    CampDisplayDefaults *display, f32 ratio) {
     if (from == NULL) {
         mnuCampInitializeDisplayDefaults(display);
@@ -1026,7 +1026,7 @@ u32 mnuCampGetSecondaryOption(EvtRuntime *scene) {
 }
 
 /* Clear script registers 200..209 whose type-4 key is not active at this frame. */
-void func_0025F330(EvtRuntime *scene) {
+void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
     EvtRuntimeGroup *track = scene->groups;
     s32 slotIndex;
 
