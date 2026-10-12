@@ -113,7 +113,7 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
     func_0028F8A8(object);
 }
 
-void func_002891C0(MnuStatusResource *object) {
+void mnuSelectPreviousMantraUnit(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     DatPartyRecord *value;
 
@@ -128,7 +128,7 @@ void func_002891C0(MnuStatusResource *object) {
     evtPrintDeveloperConsoleMessage("Next UnitIndex:%d\n", object->list->cursor->index);
 }
 
-void func_002893A0(MnuStatusResource *object) {
+void mnuSelectNextMantraUnit(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     DatPartyRecord *value;
 
@@ -141,7 +141,7 @@ void func_002893A0(MnuStatusResource *object) {
     mnuRefreshNodeTransitionIcons(object, work, value);
 }
 
-void func_00289550(MnuStatusResource *object, s8 target) {
+void mnuSelectMantraUnitByIndex(MnuStatusResource *object, s8 target) {
     MantraMenuWork *work = &object->menu;
 
     if (mnuQueueUnitPanelSelection(object->menu.selectionController, target) != 0) {
@@ -213,7 +213,7 @@ void mnuSelectAvailableMantraNeighbor(MnuStatusResource *object) {
 }
 
 /* Skip unavailable neighbors before refreshing both transition icons. */
-void func_00289928(MnuStatusResource *object) {
+void mnuSelectNextUnitWithAvailableMantraNode(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     MantraNodePos *position;
     MantraNodePos *initialPosition;
@@ -284,7 +284,7 @@ extern void mnuMergePartyMantraProfileCapStates(MantraFlagResource **);
 extern void func_00315A50(void);
 extern void func_0028EF50(MnuStatusResource *);
 extern s32 func_0028F9A0(MnuStatusResource *);
-extern s32 func_00290A78(MnuStatusResource *);
+extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
 extern MantraPanelPool *func_002799D8(s32, MnuStatusResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
@@ -332,7 +332,7 @@ void func_00289BA0(MnuStatusResource *object) {
         mnuBindMantraMenuSourceRecord(object, NULL);
     }
     if (!(state->drawFlags & 0x10002)) {
-        func_00290A78(object);
+        mnuRefreshMantraSelectionResources(object);
     }
     state->resource = func_002799D8(0x3CE, object);
 }
@@ -465,7 +465,7 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
 extern void func_0026C900(MnuStatusResource *);
 extern s32 func_0028B738(s32, s32, s32, s32, MnuStatusResource *, s32);
 extern s32 func_00293DB0(MnuStatusResource *);
-extern s32 func_0028CBF8(s32, s32, s32, s32, MnuStatusResource *, s32);
+extern s32 mnuUpdateMantraPanelStatusFromFlags(s32, s32, s32, s32, MnuStatusResource *, s32);
 
 s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
     MantraMenuWork *work;
@@ -494,7 +494,7 @@ s32 mnuDrawMantraPhaseOpacity(MnuStatusResource *object) {
     case 19:
     case 20:
     case 21:
-        func_0028CBF8(0, 0, 0, 0x80, object, 0x52);
+        mnuUpdateMantraPanelStatusFromFlags(0, 0, 0, 0x80, object, 0x52);
         break;
     case 1:
         break;
@@ -562,11 +562,11 @@ s32 mnuPollMantraNodeNavigation(MnuStatusResource *object) {
     if (work->navigationState == 0) {
         if (D_0037F510[0x28] < 0) {
             sound = 4;
-            func_002891C0(object);
+            mnuSelectPreviousMantraUnit(object);
             work->navigationState = 5;
         } else if (D_0037F510[0x2A] < 0) {
             sound = 4;
-            func_002893A0(object);
+            mnuSelectNextMantraUnit(object);
             work->navigationState = 5;
         }
     }
@@ -648,7 +648,7 @@ extern s32 mnuSelectPreferredMantraNode(MnuStatusResource *, MantraMenuSrc *);
 extern s32 mnuSelectMatchingNode(MnuStatusResource *, MantraMenuSrc *);
 extern void mnuSelectMantraLimitLine(MnuStatusResource *, u16);
 extern void mnuApplyMantraUnlockToPartyList(MnuStatusResource *, u16);
-extern s32 func_00290A78(MnuStatusResource *);
+extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuSetMantraBackgroundVariant(struct MantraDrawPool *, s8);
 extern void mnuEnableMantraBackground(struct MantraDrawPool *);
@@ -667,7 +667,7 @@ extern void func_00278FF0(struct MantraDrawPool *);
 extern void func_002790F0(u32, u32, struct MantraDrawPool *);
 extern void func_00279148(struct MantraDrawPool *);
 extern void mtrDrawRankPass(s32, u16);
-extern void func_0028E0E8(MnuStatusResource *, u16, u16);
+extern void mnuSpawnMantraMapPanels(MnuStatusResource *, u16, u16);
 /* The following three declarations remain inferred from native callers. */
 extern s32 func_0028EB38(MnuStatusResource *, s32);
 extern void func_0028E638(MnuStatusResource *, u16);
@@ -725,7 +725,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
             evtCopyEntryStringToActiveWindow(0, D_00435E48[party->unitId].encodedText);
             evtCopyEntryStringToActiveWindow(1, D_00435E48[party->unitId + 16].encodedText);
             dspStartEntry(3);
-            func_00289550(object, (s8)index);
+            mnuSelectMantraUnitByIndex(object, (s8)index);
             work->sourceNextState = 3;
             work->sourceWaitFrames = 10;
             work->drawBits.sourceKind = 18;
@@ -786,7 +786,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
     case 5:
         evtPrintDeveloperConsoleMessage(D_00426D28);
         mnuHideMantraScrollCursor(object->menu.selectionController);
-        func_00289550(object, work->src->selectedIndex);
+        mnuSelectMantraUnitByIndex(object, work->src->selectedIndex);
         work->sourceNextState = 6;
         work->sourceWaitFrames = 0;
         work->drawBits.sourceKind = 18;
@@ -805,7 +805,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage(D_00426DB0);
         if (!work->drawBits.hasQueuedMastery) {
             evtPrintDeveloperConsoleMessage(D_00426DD0);
-            func_00290A78(object);
+            mnuRefreshMantraSelectionResources(object);
             if (mnuGetActiveMantraModelFlagState() >= 2 ||
                 mdlFlagTest(0x977) || mdlFlagTest(0x978) ||
                 mdlFlagTest(0x979) || mdlFlagTest(0x97A)) {
@@ -842,7 +842,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         } else if ((work->src->bits & 0xF00) == 0x200) {
             position = mnuGetMantraNodePositionRecord(work->src->fields.unitIndex);
             mnuTransitionActivePanelAnimations(work->resource, 1);
-            func_0028E0E8(object, work->src->fields.unitIndex, 2);
+            mnuSpawnMantraMapPanels(object, work->src->fields.unitIndex, 2);
             mnuSpawnMantraIconAtPosition(
                 (s32)((f32)position->x / 10.0f * 40.0f),
                 (s32)((f32)position->y / 10.0f * 39.0f),
@@ -1076,7 +1076,7 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
         mnuSelectAvailableMantraNeighbor(object);
         sound = 4;
     } else if (D_0037F510[0x2A] < 0) {
-        func_00289928(object);
+        mnuSelectNextUnitWithAvailableMantraNode(object);
         sound = 4;
     }
     if (D_0037F510[0x23] < 0 || D_0037F510[0x20] < 0 ||
@@ -1100,7 +1100,7 @@ s32 mnuHandleMantraGridInput(MnuStatusResource *object) {
 
 extern void mnuSetMantraUnitPanelValue(struct MantraDrawPool *pool, s16 value);
 
-s32 func_0028CBF8(s32 unused0, s32 unused1, s32 unused2, s32 unused3, MnuStatusResource *object, s32 unused5) {
+s32 mnuUpdateMantraPanelStatusFromFlags(s32 unused0, s32 unused1, s32 unused2, s32 unused3, MnuStatusResource *object, s32 unused5) {
     MantraFlagResource *table = object->menu.slots[5];
     MantraMenuWork *work = &object->menu;
     MantraNodePos *position;
@@ -1175,7 +1175,7 @@ typedef struct MantraFlagLevel {
 } MantraFlagLevel;
 
 /* Draws every visible node of the mantra map; the fade follows the panel transition. */
-void func_0028CD50(s32 offsetX, s32 offsetY, MnuStatusResource *object, s32 drawArg) {
+void mnuDrawMantraMapNodes(s32 offsetX, s32 offsetY, MnuStatusResource *object, s32 drawArg) {
     MantraMenuWork *work = &object->menu;
     MantraFlagResource *selected;
     MantraFlagResource *profile;
@@ -1469,7 +1469,7 @@ MantraNodePos *func_0028DC08(MnuStatusResource *object, u16 nodeId, s32 mode, s3
 }
 
 extern void mnuStorePanelEntry(s32, s32);
-extern void func_0028DFA0(s32);
+extern void mnuRefreshMantraUnitNodeFlags(s32);
 
 /* Collect selected neighbours, then advance their three rank chains for at most 20 passes. */
 void mtrDrawRankPass(s32 object, u16 index) {
@@ -1513,10 +1513,10 @@ void mtrDrawRankPass(s32 object, u16 index) {
         } while (hasNode && remaining != 0);
     }
     mnuStorePanelEntry(0x20006, 0);
-    func_0028DFA0(object);
+    mnuRefreshMantraUnitNodeFlags(object);
 }
 
-void func_0028DFA0(s32 object) {
+void mnuRefreshMantraUnitNodeFlags(s32 object) {
     s32 modelFlagState = mnuGetActiveMantraModelFlagState();
     struct MenuListNode *node = ((MnuStatusResource *)object)->list->first;
     MantraFlagResource **resourceSlot;
@@ -1560,7 +1560,7 @@ const char D_004271F8[] = "Mantra !!!\n";
 const char D_00427208[] = "Mantra Map!!!\n";
 
 /* Show the selection panels, then eligible nodes outside that selection. */
-void func_0028E0E8(MnuStatusResource *object, u16 nodeId, u16 panelX) {
+void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) {
     MantraNodePos *position;
     MantraPanelAnimation *panel;
     MantraFlagResource *resource;

@@ -19,7 +19,7 @@ extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void func_00291590(MnuStatusResource *, s16, s32, s8, s8, s32);
-extern void func_002932B0(MnuStatusResource *);
+extern void mnuInitializeMantraTutorialParty(MnuStatusResource *);
 extern void func_00294060(MnuStatusResource *);
 
 
@@ -117,7 +117,7 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-s32 func_00290240(MnuStatusResource *object, s8 direction) {
+s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *object, s8 direction) {
     MantraNodePos *position = object->menu.defaultSelector;
     s32 grid[2];
     s32 neighbor;
@@ -141,7 +141,7 @@ s32 func_00290240(MnuStatusResource *object, s8 direction) {
 }
 
 
-s32 func_00290328(MnuStatusResource *object, MantraNodePos *list, s8 position) {
+s32 mnuClassifyMantraNeighborStatus(MnuStatusResource *object, MantraNodePos *list, s8 position) {
     u16 selected;
     MantraNodePos *entry;
     u16 value;
@@ -175,7 +175,7 @@ s32 func_00290328(MnuStatusResource *object, MantraNodePos *list, s8 position) {
 }
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern s32 func_00290240(MnuStatusResource *, s8);
+extern s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *, s8);
 extern MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *, u16, s8);
 typedef struct MantraNeighborIds {
     u16 id;
@@ -197,9 +197,9 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
     selected = (u16)func_002890A8((MnuStatusResource *)object);
     if (state->navigationState == 0 || state->navigationState == 7) {
         node = state->defaultSelector;
-        position = func_00290240(object, flags);
+        position = mnuGetMantraNeighborIndexForDirection(object, flags);
         for (;;) {
-            result = func_00290328(object, node, position);
+            result = mnuClassifyMantraNeighborStatus(object, node, position);
             switch (result) {
                 case -1:
                     return 0;
@@ -368,7 +368,7 @@ extern void mnuUpdateMantraRecordFlags(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
 extern void mnuMergePartyMantraProfileCapStates(void *);
 
-s32 func_00290A78(MnuStatusResource *object) {
+s32 mnuRefreshMantraSelectionResources(MnuStatusResource *object) {
     MantraMenuWork *menu;
     struct MenuListNode *node;
     MantraFlagResource **slot;
@@ -713,7 +713,7 @@ void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector,
     }
 }
 
-void func_00291A20(MnuStatusResource *object, s32 selector, u16 id, s32 panelX) {
+void mnuBuildMantraPanelSelectionView(MnuStatusResource *object, s32 selector, u16 id, s32 panelX) {
     MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     MenuPanelPositionRecord *record;
@@ -761,7 +761,7 @@ void func_00291A20(MnuStatusResource *object, s32 selector, u16 id, s32 panelX) 
     } while (--recordIndex >= 0);
 }
 
-void func_00291C68(MnuStatusResource *object, s32 selector, u16 id) {
+void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *object, s32 selector, u16 id) {
     MantraNodePos *position;
     MantraNodePos **neighbor;
     MenuPanelPositionRecord *record;
@@ -810,7 +810,7 @@ extern void func_00278EE0(struct MantraDrawPool *pool);
 extern void func_00279080(struct MantraDrawPool *pool);
 extern void func_002790B8(struct MantraDrawPool *pool);
 extern void func_002790F0(s32, s32, struct MantraDrawPool *pool);
-extern void func_00291C68(MnuStatusResource *, s32, u16);
+extern void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *, s32, u16);
 extern void func_00291DD0(MnuStatusResource *, s32);
 extern void mnuHideMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
@@ -865,14 +865,14 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
         mnuAcquireMantraAndUnlockNeighbors(object, state->flagBytes[3] & 15, id);
         return 0;
     case 5:
-        func_00291C68(object, state->flagBytes[3] & 15, id);
+        mnuRefreshMantraPanelNeighborStates(object, state->flagBytes[3] & 15, id);
         return 0;
     case 6:
         mnuActivatePanelSelection(object, state->flagBytes[3] & 15);
         goto play_selection_sound;
     case 7:
         mnuTransitionActivePanelAnimations(state->resource, 1);
-        func_00291A20(object, state->flagBytes[3] & 15, id, 5);
+        mnuBuildMantraPanelSelectionView(object, state->flagBytes[3] & 15, id, 5);
         return 0;
     case 8:
         mnuTransitionActivePanelAnimations(state->resource, 1);
@@ -948,7 +948,7 @@ play_selection_sound:
     return 0;
 }
 
-void func_00292998(MnuStatusResource *object) {
+void mnuStartMantraTutorialPanelReveal(MnuStatusResource *object) {
     MantraPanelPool *resource;
     MenuPanelPositionRecord *record;
     MantraPanelAnimation *animation;
@@ -969,7 +969,7 @@ extern void mnuSpawnMantraIconAtPosition(s32, s32, struct MantraDrawPool *pool);
 extern void func_00278EA8(struct MantraDrawPool *pool);
 extern void func_00279080(struct MantraDrawPool *pool);
 
-void func_00292A60(MnuStatusResource *object) {
+void mnuInitializeMantraTutorialSelector(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;
 
     state->defaultSelector = mnuGetMantraPanelPositionRecord(8);
@@ -1009,7 +1009,7 @@ void itfInstallDefaultMantraSelector(MnuStatusResource *object) {
         (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
 }
 
-s32 func_00292CF0(MnuStatusResource *object) {
+s32 mnuRunMantraTutorialFourthSequence(MnuStatusResource *object) {
     MenuPanelTransition steps[23] = {
         {0, 22, 0, 0},
         {30, 22, 0, 4},
@@ -1052,7 +1052,7 @@ s32 func_00292CF0(MnuStatusResource *object) {
 
 
 
-s32 func_00292EA8(MnuStatusResource *object) {
+s32 mnuRunMantraTutorialFifthSequence(MnuStatusResource *object) {
     MenuPanelTransition steps[6] = {
         {0, 0, 0, 6}, {0, 0x16, 0, 0},
         {30, 0x16, 0, 9}, {30, 0x16, 0, 11},
@@ -1074,7 +1074,7 @@ s32 func_00292EA8(MnuStatusResource *object) {
     return 0;
 }
 
-s32 func_00292FF0(MnuStatusResource *object) {
+s32 mnuRunMantraTutorialSixthSequence(MnuStatusResource *object) {
     MenuPanelTransition steps[7] = {
         {0, 0, 1, 13}, {0, 15, 1, 12},
         {30, 0, 2, 13}, {30, 0x71, 2, 12},
@@ -1097,7 +1097,7 @@ s32 func_00292FF0(MnuStatusResource *object) {
     return 0;
 }
 
-s32 func_00293148(MnuStatusResource *object) {
+s32 mnuRunMantraTutorialSeventhSequence(MnuStatusResource *object) {
     MenuPanelTransition steps[8] = {
         {0, 0, 0, 10}, {30, 1, 0, 0},
         {60, 1, 0, 4}, {150, 1, 0, 1},
@@ -1121,7 +1121,7 @@ s32 func_00293148(MnuStatusResource *object) {
 }
 
 /* Set up the three tutorial party records and their display order. */
-void func_002932B0(MnuStatusResource *object) {
+void mnuInitializeMantraTutorialParty(MnuStatusResource *object) {
     MantraMenuWork *state = &object->menu;
     s32 index;
 
@@ -1243,7 +1243,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 5:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_INIT\n");
-        func_002932B0(object);
+        mnuInitializeMantraTutorialParty(object);
         object->menu.scrollX = 124;
         object->menu.scrollY = 160;
         dspCloseChannel();
@@ -1290,7 +1290,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 10:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN\n");
-        func_00292998(object);
+        mnuStartMantraTutorialPanelReveal(object);
         state->tutorialNextState = 11;
         state->tutorialWaitFrames = 30;
         state->flagBytes[0] = 37;
@@ -1298,7 +1298,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case 11:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN2\n");
-        func_00292A60(object);
+        mnuInitializeMantraTutorialSelector(object);
         state->tutorialNextState = 12;
         state->tutorialWaitFrames = 30;
         state->flagBytes[0] = 37;
@@ -1383,7 +1383,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         }
         break;
     case 21:
-        if (func_00292CF0(object)) {
+        if (mnuRunMantraTutorialFourthSequence(object)) {
             state->tutorialNextState = 22;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1409,7 +1409,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         }
         break;
     case 24:
-        if (func_00292EA8(object)) {
+        if (mnuRunMantraTutorialFifthSequence(object)) {
             state->tutorialNextState = 25;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1435,7 +1435,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         }
         break;
     case 27:
-        if (func_00292FF0(object)) {
+        if (mnuRunMantraTutorialSixthSequence(object)) {
             state->tutorialNextState = 28;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1461,7 +1461,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         }
         break;
     case 30:
-        if (func_00293148(object)) {
+        if (mnuRunMantraTutorialSeventhSequence(object)) {
             state->tutorialNextState = 31;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
