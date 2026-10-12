@@ -646,6 +646,7 @@
 0x001180F8	evtInitializeWorkScriptTask	inferred	Recreates the event work script task and clears its event context after sdfResetChannels reloads channel segments.
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]
+0x00118170	sdfLoadChannelFileSegment	inferred	Replaces a destination block with one length-prefixed channel-file payload and returns its 16-byte-aligned span for cursor advancement.
 0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
 0x00118368	ptyComputeMaxHp	inferred	enemy base max HP, or HP script result capped at 999 for party units
 0x00118408	ptyComputeMaxMp	inferred	MP counterpart of ptyComputeMaxHp
