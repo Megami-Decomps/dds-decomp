@@ -958,8 +958,6 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     return mask;
 }
 
-extern s32 datFlagToElementIndex(s32);
-
 /* Decode an element flag through the shared native flag-to-index table. */
 s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);

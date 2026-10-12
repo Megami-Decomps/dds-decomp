@@ -382,4 +382,8 @@ extern DatBattleSceneRecord *datBattleSceneRecords;
 
 extern DatGameState *datGameState;
 
+/* Maps one exact channel flag to its stat/element index; unmatched or combined
+ * flags return -1 (see the paired datCalc.c lookup switches). */
+extern s32 datFlagToElementIndex(s32 flag);
+
 #endif /* DAT_STATE_H */
