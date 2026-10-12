@@ -1729,6 +1729,7 @@
 0x00172468	effScatterCloneRibbonWork	inferred	queued
 0x00172568	effPcpScatterReleaseLinkedParticles	inferred	releases the third scatter variant particle array and its resource and child work handles
 0x001725F0	effScatterInitRibbonParticle	inferred	queued
+0x001726E8	effScatterUpdateRibbonParticles	inferred	Advances ribbon particles and builds six-vertex strips in the shared pool, matching the adjacent source comment; DDS2 counterpart 0x0017A340 already carries this name.
 0x00172C48	effScatterCopyRibbonVector	inferred	queued
 0x00172C58	effScatterSetRibbonColor	inferred	queued
 0x00172C68	effPcpScatterPoolCreate	inferred	allocates count*0x78+0x34 slot pool with a 0x34-byte control block; clears D_003D6580
