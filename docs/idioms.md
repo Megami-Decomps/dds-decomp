@@ -1380,7 +1380,7 @@ vertex: keep the element count distinct from the copied byte stride.
   entry, and the register survives the next call in a callee-saved FPR.
   `t = c ? a / b : 0.0f;` expands with a jump over the then-arm, the join
   label has two uses while cse runs, the path stops there and the constant is
-  reloaded: two entries (`func_0025AA20` family, `3.14159265f` twice).
+  reloaded: two entries (`mnuDrawMantraUpNavigationPulse` family, `3.14159265f` twice).
 - cc1 truncates decimal float literals: `0.2f` is 0x3E4CCCCC, `0.1f` is
   0x3DCCCCCC, `3.14159265f` is 0x40490FDA, and `3.1415925f` is 0x40490FD9.
   Retail's "0.19999999" / "0.099999994" are `0.2f` / `0.1f`; write what the
@@ -3631,7 +3631,7 @@ rodata, undefined-symbol or shared-data diagnostics.
 
 ## Mantra grid and frame share one display-work owner
 
-DDS1 `func_00257BD8` advances the grid at `+0x484` and the wrapping frame
+DDS1 `mnuUpdateMantraPulseGrid` advances the grid at `+0x484` and the wrapping frame
 at `+0x490` in the same allocation. Both fields belong to the existing
 `MantraPulseDisplayWork`, along with scroll coordinates at `+0x5A0/+0x5A2`
 and flags at `+0x5AC`; a shorter `DisplayGridWork` view is unnecessary.
@@ -8644,7 +8644,7 @@ a demonstrated missing 9001 note. The `effConvertParamValue` twins
 their pointer-null tests also receive 3999. Those probabilities alone
 do not diagnose the missing annulment.
 
-DDS2 `func_002A1928` retains candidate `BNEL` versus retail `BNE` at
+DDS2 `mnuUpdateTitleAudioStreams` retains candidate `BNEL` versus retail `BNE` at
 `+0x1B8` (1/300 words). Its final control comparison has probability
 6001/prediction 1; the target donor loads `D_00437A34`. Comparing the
 two actual stream-control fields instead of switching on the second

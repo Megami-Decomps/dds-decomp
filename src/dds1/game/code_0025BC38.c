@@ -573,13 +573,13 @@ typedef struct Bytes7 {
 } Bytes7;
 
 extern Bytes7 D_003BC4E8[];
-extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
 
 /* Select the cost marker from the record's icon index and draw at the fixed badge offset. */
 void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amount, s32 drawArg) {
     Bytes7 table = D_003BC4E8[0];
 
-    func_0024E260(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[*(u16 *)(recordAddress + 4)], drawArg);
+    mnuDrawSpriteFromPlacementTable(x - MNU_MANTRA_COST_ICON_X_OFFSET, y + MNU_MANTRA_COST_ICON_Y_OFFSET, depth, amount, table.b[*(u16 *)(recordAddress + 4)], drawArg);
 }
 
 /* Advance and draw one transient cost/list notification; report expiry at frame 11. */
@@ -608,10 +608,10 @@ s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
     if (opening != 0) {
         progress = (f32)frame / 6.0f;
         if (node->payload.timedDraw.kind == 1) {
-            func_0024E260((s32)(progress * -16.0f + -27.0f), 52, 1,
+            mnuDrawSpriteFromPlacementTable((s32)(progress * -16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x18, context);
         } else if (node->payload.timedDraw.kind == 2) {
-            func_0024E260((s32)(progress * 16.0f + -27.0f), 52, 1,
+            mnuDrawSpriteFromPlacementTable((s32)(progress * 16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x19, context);
         }
     }
@@ -621,10 +621,10 @@ s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
             progress = (f32)(frame - 3) / 6.0f;
             progress = sdfSinPoly(progress * 3.14159265f);
             if (node->payload.timedDraw.kind == 1) {
-                func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
+                mnuDrawSpriteFromPlacementTable(-27, 52, 1, (s32)(progress * 128.0f),
                               0x16, context);
             } else if (node->payload.timedDraw.kind == 2) {
-                func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
+                mnuDrawSpriteFromPlacementTable(-27, 52, 1, (s32)(progress * 128.0f),
                               0x17, context);
             }
         }
@@ -684,11 +684,11 @@ s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
 
     wave = sdfSinPoly(wave * 3.14159265f);
     shown = (f32)amount * (wave * 0.5f + 0.5f);
-    func_0024E260(-27, 52, 0, shown, 0x16, drawArg);
-    func_0024E260(-27, 52, 0, shown, 0x17, drawArg);
+    mnuDrawSpriteFromPlacementTable(-27, 52, 0, shown, 0x16, drawArg);
+    mnuDrawSpriteFromPlacementTable(-27, 52, 0, shown, 0x17, drawArg);
     halfShown = (f32)amount * 0.5f;
-    func_0024E260(-27, 52, 0, halfShown, 0x18, drawArg);
-    func_0024E260(-27, 52, 0, halfShown, 0x19, drawArg);
+    mnuDrawSpriteFromPlacementTable(-27, 52, 0, halfShown, 0x18, drawArg);
+    mnuDrawSpriteFromPlacementTable(-27, 52, 0, halfShown, 0x19, drawArg);
     if (frame < 60) {
         return 0;
     }

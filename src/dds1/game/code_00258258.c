@@ -13,7 +13,7 @@ extern u32 D_003E274C[];
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
 
-u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
+u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
     MantraPrerequisiteRecord *record = &D_0036AE80[scene->sceneId];
     u32 flags = 0x100;
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
@@ -73,7 +73,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
         cellHeight = grid->cellHeight;
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
             if (states[record->ids[i]].state != 0) {
-                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
             }
         }
         for (i = 0; i < 4; i++) {
@@ -130,7 +130,7 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
 void mnuDrawSpriteAtScaledPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY);
 
-void func_00258A70(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
+void mnuDrawMantraEntryStatusIcon(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
                    f32 scaleX, f32 scaleY, s32 context) {
     if (flags & 2) {
         mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x33, context, scaleX, scaleY);
@@ -146,7 +146,7 @@ void func_00258A70(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
 }
 
 
-void func_00258AF0(MnuGridFeedbackState *state, u32 mode) {
+void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, u32 mode) {
     state->mode = mode;
     state->frame = 0;
 }
@@ -156,7 +156,7 @@ void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 /* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
  * Its unused implicit-int result preserves the call's non-sibling epilogue. */
-func_00258B00(MnuGridFeedbackState *voice) {
+mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {
     s32 notify;
 
     notify = 0;
@@ -186,7 +186,7 @@ void mnuDrawPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 void mnuDrawRotatedPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 rotation);
 
-void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
+void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
                    s32 context) {
     f32 progress;
 
@@ -248,10 +248,10 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
 
 
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258EB8);
+INCLUDE_ASM(const s32, "game/code_00258258", mnuUpdateMantraGridEntryPulse);
 
 
-void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
+void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
                    s32 context) {
     MnuMantraGridPulse *pulse = &entry->pulse;
     u32 mode = pulse->mode;
@@ -326,9 +326,9 @@ extern TaskWork *mnuSceneResourceContext;
 
 
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
-extern void func_00258EB8(MnuMantraGridEntry *entry);
+extern void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry);
 
-void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry) {
+void mnuUpdateMantraGridEntry(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry) {
     MenuSceneWork *scene;
     MnuMantraGridEntry *displayEntry;
     u32 flags;
@@ -341,11 +341,11 @@ void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry
     }
     flags = mnuGetMantraDisplayFlags(displayEntry, target);
     if ((flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) != 0) {
-        func_00258B00(&scene->gridFeedback);
+        mnuAdvanceMantraGridFeedback(&scene->gridFeedback);
         return;
     }
     if ((flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) != 0) {
-        func_00258EB8(displayEntry);
+        mnuUpdateMantraGridEntryPulse(displayEntry);
     }
 }
 

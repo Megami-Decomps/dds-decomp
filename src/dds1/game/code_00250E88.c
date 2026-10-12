@@ -515,7 +515,7 @@ s32 mnuBeginMantraProfileSelection(void) {
 
 extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
-extern void func_00258AF0(MnuGridFeedbackState *, u32);
+extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
 extern u32 evtFinishMessageWindowAndNotify(void);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -532,7 +532,7 @@ void mnuFinishMantraProfileSelection(void) {
 
         work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
         mnuReinitializeSceneGrid((s32)work);
-        func_00258AF0(&work->gridFeedback, 1);
+        mnuSetMantraGridFeedbackMode(&work->gridFeedback, 1);
     }
 
     evtFinishMessageWindowAndNotify();
