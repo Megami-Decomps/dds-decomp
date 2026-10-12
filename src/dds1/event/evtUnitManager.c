@@ -59,7 +59,7 @@ extern f32 D_003BD358, D_003BD35C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
-extern void func_00107DE8(void);
+extern void kwlnBuildShortestArcQuaternion(void);
 extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
 
@@ -252,7 +252,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         } else {
             VU0_LOAD_VF(vf11, D_00324770[0] + 4);
         }
-        func_00107DE8();
+        kwlnBuildShortestArcQuaternion();
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, identity);
         effMiscQuaternionNlerpVU(factor);
@@ -283,7 +283,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         factor = transition;
         VU0_LOAD_VF(vf10, unit->vec40);
         VU0_LOAD_VF(vf11, targetDirection);
-        func_00107DE8();
+        kwlnBuildShortestArcQuaternion();
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, identity);
         effMiscQuaternionNlerpVU(factor);
@@ -295,7 +295,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             factor = 1.0f;
             VU0_LOAD_VF(vf10, unit->vec40);
             VU0_LOAD_VF(vf11, previousDirection);
-            func_00107DE8();
+            kwlnBuildShortestArcQuaternion();
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, identity);
             effMiscQuaternionNlerpVU(factor);
@@ -304,7 +304,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf10, oldDirection);
             VU0_LOAD_VF(vf11, blendedDirection);
-            func_00107DE8();
+            kwlnBuildShortestArcQuaternion();
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, identity);
             effMiscQuaternionNlerpVU(transition);

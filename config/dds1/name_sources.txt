@@ -138,6 +138,7 @@
 0x00107018	kwlnSetStaggeredBlurParameterTransition	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelDraw.c:581:func_00107018; Snapshots staggered blur work and either copies desired parameters immediately or sets interpolation control bit; twin=0x00106F38, relocation-masked retail twin report.; sources=names_R_Structs54.tsv,names_reviewed36.tsv [names_qp10.tsv]
 0x001070F8	kwlnDrawSetupD30	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
 0x00107178	kwlnDrawEnableD30	inferred	kwln kernel draw primitives in kernel/dds3KernelDraw.c
+0x00107DE8	kwlnBuildShortestArcQuaternion	inferred	VU0 helper constructs the shortest-arc quaternion rotating direction vf10 to vf11, as documented by the adjacent source comment; DDS2 counterpart is kwlnBuildShortestArcQuaternion.
 0x00107FD8	kwlnSetLightColorTarget	inferred	R_Names31 B94
 0x001080D8	kwlnSetLightDirectionTarget	inferred	R_Names31 B94
 0x00108218	kwlnSetBackgroundColorTarget	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:185:func_00108218; M141; source=names_pending_main.tsv:107; review=Either installs the background color vector immediately or starts a timed interpolation from its previous color. [names_qp11.tsv]
