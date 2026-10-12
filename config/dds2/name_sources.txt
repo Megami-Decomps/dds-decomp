@@ -911,6 +911,7 @@
 0x00156B88	fldCmdUpdateTaskRecordScene	inferred	derives record scene from task key unless global condition, passes to updater [names_R_FuncNames2.tsv]
 0x00156BD0	fldCmdResetAfterEvent	inferred	script wrapper around fldResetAfterEvent [names_R_FuncNames2.tsv]
 0x00156C30	fldCmdGetActorSlotAttribute	inferred	Reads two script operands, queries the actor slot attribute and returns it to the script VM. [names_reviewed13.tsv]
+0x00156C98	fldCmdStartSelectedActorTask	inferred	src/dds2/game/code_00154558.c; calls fldStartSelectedActorTask and returns script-command success; paired 0014F1C0.
 0x00156CB8	fldCmdStartSceneBgm	inferred	stores script music id then calls fldStartSceneBgm [names_R_FuncNames2.tsv]
 0x00156CE8	fldCmdStartSceneBgmAlternate	inferred	stores script music id then calls alternate scene music starter [names_R_FuncNames2.tsv]
 0x00156D18	fldCmdStopCurrentBgm	inferred	script wrapper for func_00144EE0 audio stop [names_R_FuncNames2.tsv]
