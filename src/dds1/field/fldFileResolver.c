@@ -4242,8 +4242,115 @@ void fldApplyPendingCameraHeading(void) {
     }
 }
 
-/* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00131688);
+extern f32 fldAngleDifference(f32 current, f32 target);
+extern void effMiscAxisAngleToQuaternionVU(f32 angle);
+extern f32 D_0032F170[8];
+extern const PcpVectorCopyF32 D_003A00A8;
+
+/* Advance a pending heading, retain position history, and export the player's
+ * smoothed position and rotation. Vertical movement bypasses position damping. */
+void func_00131688(void) {
+    f32 position[4];
+    f32 smoothed[4];
+    union {
+        u128 q;
+        f32 f[4];
+    } quaternion;
+    f32 difference;
+    f32 step;
+    u32 player;
+
+    memset(&quaternion, 0, sizeof(quaternion));
+    quaternion.f[3] = 1.0f;
+    {
+        PcpVectorCopyF32 axis;
+
+        axis = D_003A00A8;
+
+        if (fldPlayerObject != 0) {
+            if (fldAreaState.pointState == 2 || fldAreaState.angleState == 2) {
+                difference = fldAngleDifference(fldAreaState.angle, fldAreaState.targetAngle);
+                step = difference / 5.0f;
+                if (step < 0.0f) {
+                    step = -step;
+                }
+                if (step < 2.0f) {
+                    step = 2.0f;
+                }
+                if ((0.0f <= difference && difference <= step) ||
+                    (difference <= 0.0f && -step <= difference)) {
+                    fldAreaState.angleState = 0;
+                    fldAreaState.pointState = 0;
+                    difference = fldAreaState.targetAngle;
+                } else if (difference < 0.0f) {
+                    difference = fldAreaState.angle - step;
+                } else {
+                    difference = fldAreaState.angle + step;
+                }
+                fldAreaState.angle = difference;
+                VU0_LOAD_VF(vf10, axis.components);
+                effMiscAxisAngleToQuaternionVU(fldAreaState.angle * 3.14f / 180.0f);
+                /* The following out-of-line setter consumes all four lanes;
+                 * no C scalar read is moved across this legacy SDK store. */
+                VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
+                effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, &quaternion.q);
+            } else {
+                f32 angle;
+                effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
+                angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                fldAreaState.angle = angle;
+                fldAreaState.targetAngle = angle;
+            }
+
+            effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
+            VU0_STORE_VF(vf10, position);
+            fldAreaState.previousX = fldAreaState.x;
+            fldAreaState.previousY = fldAreaState.y;
+            fldAreaState.previousZ = fldAreaState.z;
+            fldAreaState.x = position[0];
+            fldAreaState.y = position[1];
+            fldAreaState.z = position[2];
+            effObjSetNodeFlags(((EffWorldNode *)fldPlayerObject)->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+            effObjSetNodeFlags(((EffWorldNode *)fldPlayerObject)->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+            player = fldPlayerObject;
+            if (fldAreaState.verticalStepDirection != 0) {
+                PCP_COPY_VECTOR(((EffWorldNode *)player)->inner->smoothedPosition,
+                                ((EffWorldNode *)player)->inner->position);
+            } else {
+                func_00131290();
+                PCP_COPY_VECTOR_F32(smoothed, ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition);
+                if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+                } else {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[0] =
+                        smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+                }
+                if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+                } else {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[1] =
+                        smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+                }
+                if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+                } else {
+                    ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[2] =
+                        smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+                }
+                ((EffWorldNode *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+                player = fldPlayerObject;
+            }
+            D_0032F170[0] = ((EffWorldNode *)player)->inner->smoothedPosition[0];
+            D_0032F170[1] = ((EffWorldNode *)player)->inner->smoothedPosition[1];
+            D_0032F170[2] = ((EffWorldNode *)player)->inner->smoothedPosition[2];
+            D_0032F170[3] = ((EffWorldNode *)player)->inner->smoothedPosition[3];
+            D_0032F170[4] = ((EffWorldNode *)player)->inner->rotation[0];
+            D_0032F170[5] = ((EffWorldNode *)player)->inner->rotation[1];
+            D_0032F170[6] = ((EffWorldNode *)player)->inner->rotation[2];
+            D_0032F170[7] = ((EffWorldNode *)player)->inner->rotation[3];
+        }
+    }
+}
 
 extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
