@@ -8403,3 +8403,111 @@ unit after closing its references. Old-name `MISSING` rows between a
 rename and the next resplit are bookkeeping, not code differences;
 every renamed definition must still have its own `OK` row.
 
+## Branch-likely selection
+
+Prediction and annulment are separate decisions. This supplements
+“Branch-likely” and “An earlier same-TU definition makes later calls
+nothrow”: a retail `BEQL`/`BNEL` is **not** evidence that its branch had
+a probability of at least 90%. Nineteen small, ordinary-C diagnostic
+functions were compiled with the real vendor cc1 and canonical unit
+options; the probability/reorg probes verified hooked == unhooked.
+The GCC-era `predict.c` and `reorg.c` sources explain the observed rules.
+
+### Read the final probability, not the source `if`
+
+`estimate_probability` uses a base of 10000. Its first pass can attach
+9001 to a conditional jump from a natural-loop member into a nonmember
+block lying within the loop's `first..last` block interval. It does not
+mark every back edge, `while`, `do-while`, or `continue` as strongly taken.
+The second pass preserves existing notes and uses the first applicable
+heuristic:
+
+| Recovered condition or CFG fact | `REG_BR_PROB` |
+| --- | --- |
+| A successor has no successors | 10000 if that successor is fallthrough; otherwise 0 |
+| Pointer equality to null or another pointer | 3999 |
+| Corresponding pointer inequality | 6001 |
+| Other `EQ` / `NE` | 3999 / 6001 |
+| Signed `LT` or `LE` against zero | 3999 |
+| Signed `GE` or `GT` against zero or minus one | 6001 |
+| No applicable heuristic | 5000 |
+
+Pointer tests require pointer-marked register operands; this is not a
+reason to cast an integer as a pointer. The condition recovered by
+`get_condition` need not be the intermediate boolean test printed in
+the jump RTL. Later jump inversion can complement the note: the actor
+marker's initial `NE`/6001 becomes final `EQ`/3999. Follow the final jump
+and its note through the dumps.
+
+`mostly_true_jump` gives an existing note priority over its fallback
+loop, rare-destination, opcode, and direction heuristics:
+
+| Final probability | Prediction result |
+| --- | --- |
+| 9000 through 10000 | 2, strongly taken |
+| 5000 through 8999 | 1, weakly taken |
+| 1000 through 4999 | 0, no opinion |
+| 0 through 999 | -1, unlikely taken |
+
+The rare-destination fallback recognizes returns/end-of-function and
+nonreturning-call barriers; an arbitrary call is not itself a strong
+predictor. A surviving probability note bypasses that fallback.
+
+### Inspect the donor and the opposite path
+
+Strong prediction enables additional target-first/compensation searches,
+but is neither necessary nor sufficient for a hardware likely branch.
+`fill_slots_from_thread` can set `must_annul` because the donor may trap
+or its effects conflict with resources needed by the opposite thread.
+Its `likely=0` argument therefore does **not** mean the emitted branch
+cannot be `BEQL`/`BNEL`.
+
+The diagnostic `if (status == 0) return other(); return *p;` emits
+`BNEL` with the pointer load in its slot despite a 6001 note and weak
+prediction: the load must not run on the other path. A real multi-latch
+loop control has both a 3999/no-opinion parity branch emitted as `BEQL`
+with a taken-only accumulator update, and a 9001/strongly-taken branch
+emitted as ordinary `BNE` with a safe accumulator-to-result move.
+Do not add an artificial loop, early exit, annotation, or signedness
+change merely to obtain a stronger probability.
+
+### Current residuals and genuine provider visibility
+
+The actor-marker twins (`001ACC20` / `001B7830`) retain a one-word
+ordinary-versus-likely miss; their final guard is 3999/no opinion, not
+a demonstrated missing 9001 note. The `effConvertParamValue` twins
+(`002BCED8` / `00304618`) retain two words at `+0x28` and `+0x90`;
+their pointer-null tests also receive 3999. Those probabilities alone
+do not diagnose the missing annulment.
+
+DDS2 `func_002A1928` retains candidate `BNEL` versus retail `BNE` at
+`+0x1B8` (1/300 words). Its final control comparison has probability
+6001/prediction 1; the target donor loads `D_00437A34`. Comparing the
+two actual stream-control fields instead of switching on the second
+field preserves the same residual and prediction.
+
+DDS2 `func_002E9BC8` similarly retains candidate `BNEL` versus retail
+`BNE` at `+0x168` (1/159 words), donating
+`sll $16,$17,4`. Its note is 5000/prediction 1. Replacing the preceding
+`func_002E9B20` assembly placeholder with its complete, natural parked
+C definition makes the caller **0/159** without changing that note,
+prediction, or donor. Calls to the now-visible publisher acquire
+`REG_EH_REGION 0`; ordinary delay eligibility accepts the same shift.
+This is an earlier **C definition** effect, not merely two symbols
+being present in one assembly file.
+
+The publisher itself remains nonmatching: 27/40 compared words differ,
+with two additional native words absent. Consequently the private
+pair is not a landing: match the real publisher before enabling its
+caller. Do not substitute a visibility stub or nothrow attribute.
+The current complete-unit controls are 686/1 with the opaque publisher
+and 687/1 with the genuine nonmatching publisher; the remaining
+difference in the latter is the publisher, not the caller.
+
+For a new residual, record the final condition/probability, prediction,
+chosen thread, donor, ordinary/annul eligibility, and opposite-path
+resources. Compare the RTL immediately before reorg as well as the
+final branch. Keep commands, trace paths, and unsuccessful forms in
+the park/ledger; use `tools/cc1probe.sh ... --reorg --func <function>`
+with the correct canonical `--as-unit` and `--version`.
+
