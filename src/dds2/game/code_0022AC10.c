@@ -200,7 +200,7 @@ extern void scrSetIntegerReturnValue();
 
 extern void ptyAdjustItemQuantity(u32, u32);
 
-extern s32 func_0022D2F8(u32, u32);
+extern s32 btlDrawCapturedScreenTileOverlay(u32, u32);
 
 extern u32 btlAllocTask(u32);
 
@@ -326,7 +326,8 @@ extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 extern void func_00168978(BattleEffect *);
 
-void func_0022AC10(void) {
+/* Advance the current event through release, preparation, playback and completion. */
+void btlUpdateEventPlayback(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 phase = battle->eventActive;
 
@@ -459,7 +460,8 @@ extern void sndReleaseMidiTrack(s32);
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
  * DDS2 releases resident event/0x10000 tracks and also sets event flag bit 4. */
-void func_0022AF90(void) {
+/* Request the scene's event script/resources and link its BE/script sequence task. */
+void btlRequestSceneEventResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     u32 battleMode = battleState->battleMode;
     u16 rawEventId;
@@ -564,8 +566,8 @@ void btlReleaseEventData(void) {
 
 extern void btlCreateIndexedSoundResourceNode(s32 slotIndex, void *handle);
 
-/* Populate sound slots 11..25 from event keys 50..64; skip missing bindings. */
-void func_0022B288(void) {
+/* Bind available event effect keys 50–64 into slots 11–25; absent keys are skipped. */
+void btlBindEventEffectResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 eventTaskId = battleState->eventTaskId;
     s32 resourceIndex;
@@ -1459,7 +1461,8 @@ s32 func_0022CD60(s32 kind, s32 id) {
     return 0;
 }
 
-void func_0022CE30(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
+/* Queue the held texture as a centered scaled quad with caller primitive/color/depth. */
+void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1553,8 +1556,8 @@ typedef struct BtlTileAlphaPacket {
 } BtlTileAlphaPacket;
 typedef char BtlTileAlphaPacketSize[(sizeof(BtlTileAlphaPacket) == 0x30) ? 1 : -1];
 
-/* vu0 routine: animate the captured-screen overlay and its staggered fading tiles. */
-s32 func_0022D2F8(u32 backgroundColor, u32 color) {
+/* vu0 routine: draw/advance captured-screen tiles; return nonzero when their pass completes. */
+s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
     f32 positions[6][4] __attribute__((aligned(16)));
     f32 normals[6][4] __attribute__((aligned(16)));
     f32 coordinates[6][2];
@@ -1624,7 +1627,7 @@ s32 func_0022D2F8(u32 backgroundColor, u32 color) {
         packet[6] = ((u64)((u32)color >> 24) << 32) | 0x64;
         packet[7] = 0x42;
         sdfAppendPacket(list, (u32)packet);
-        func_0022CE30(list, 0x40, color, -0x100, 1.0f);
+        btlDrawScaledHeldTextureQuad(list, 0x40, color, -0x100, 1.0f);
         D_00380608.append(&D_00380608, list);
         if (D_00436D10 == NULL) {
             D_00436D10 = sdfCreateAssetWithDrawEntries();
@@ -1804,7 +1807,7 @@ void btlInitFadeColors(void) {
 }
 
 s32 btlUpdateFadeIn(void) {
-    func_0022D2F8(btlRuntimeState.color14, btlRuntimeState.color10);
+    btlDrawCapturedScreenTileOverlay(btlRuntimeState.color14, btlRuntimeState.color10);
     if ((btlRuntimeState.color14 & 0xFF000000) != 0) {
         btlRuntimeState.color14 -= 0x08000000;
         return 0;
@@ -1816,7 +1819,7 @@ void btlFadeSelectionOverlayAlpha(void) {
 }
 
 s32 btlFadeSharedOverlayAlpha(void) {
-    s32 result = func_0022D2F8(btlRuntimeState.color14, btlRuntimeState.color10);
+    s32 result = btlDrawCapturedScreenTileOverlay(btlRuntimeState.color14, btlRuntimeState.color10);
     if ((btlRuntimeState.color10 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color10 -= 0x08000000;
     } else {
@@ -2017,7 +2020,8 @@ s32 func_0022E450(void) {
     return D_00453068[0];
 }
 
-s32 func_0022E460(void) {
+/* True while idle/inactive or in the initial fade phase; not a fade-complete test. */
+s32 btlIsFadeInPhaseOrIdle(void) {
     u16 state;
 
     if (btlRuntimeState.active == 0) {
@@ -2030,7 +2034,8 @@ s32 func_0022E460(void) {
     return state == 2;
 }
 
-s32 func_0022E490(void) {
+/* True while idle/inactive or after the outgoing fade, awaiting phase-4 cleanup. */
+s32 btlIsFadeOutCompleteOrIdle(void) {
     u16 state;
 
     if (btlRuntimeState.active == 0) {
@@ -2926,7 +2931,8 @@ void func_002303D0(void) {
     sdfFreeMemoryFromEitherHeap(buffer);
 }
 
-void func_00230960(void) {
+/* Reset launch confirmation and the shared work arena before selector polling. */
+void btlResetDebugEncounterSelection(void) {
     D_00436F5D = 0;
     dds3WorkClear();
 }
@@ -2962,6 +2968,8 @@ extern void func_00230D90(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
+/* Preview/select a debug encounter or pack; return one when it can launch. */
+/* Keep the native snapshot/save/restore order around the debug window calls. */
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C118);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C128);
@@ -3020,7 +3028,7 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2C8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
 
-s32 func_00230978(void) {
+s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 unitId;

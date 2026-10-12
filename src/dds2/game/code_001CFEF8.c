@@ -57,10 +57,10 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlSetCommandPanelFadeMode(s8, s32);
 
-extern void func_00230960(s32);
+extern void btlResetDebugEncounterSelection(s32);
 
 
-extern s32 func_00230978(void);
+extern s32 btlUpdateDebugEncounterSelector(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
@@ -68,7 +68,7 @@ extern s32 btlRollMajinEncounter();
 
 extern s32 btlRollSurpriseAttack();
 
-extern void func_0022AF90();
+extern void btlRequestSceneEventResources();
 
 extern void btlInitializeBossCallbacks();
 
@@ -130,7 +130,7 @@ extern void kwlnDrawEnableD30();
 
 extern void btlMarkRuntimeUpdatePending();
 extern s32 btlAreWorkBuffersReady(void);
-extern s32 func_0022E490(void);
+extern s32 btlIsFadeOutCompleteOrIdle(void);
 extern s32 btlResetSceneSlotFades(void);
 extern s32 func_001B3DD8(void);
 extern void btlAddItemDrop(u16);
@@ -201,7 +201,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
     } else {
         ((BtlState *)scene)->encounterKind = 3;
     }
-    func_0022AF90();
+    btlRequestSceneEventResources();
     btlInitializeBossCallbacks(((BtlState *)scene)->battleMode);
     btlSelectSceneAudioTrack(((BtlState *)scene)->effectLayer, ((BtlState *)scene)->battleMode);
     VU0_STORE_VF($vf0, scene);
@@ -210,9 +210,9 @@ void fldBattleSceneEnterInit(u8 *scene) {
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
         btlIsEventSequenceTaskReady() != 0 &&
-        func_0022E460() != 0) {
+        btlIsFadeInPhaseOrIdle() != 0) {
         sndLoadBattleBank();
-        func_0022B288();
+        btlBindEventEffectResources();
         return 3;
     }
     return 0;
@@ -526,7 +526,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
     }
     if (btlCountTasksForOwner(0x8000000000000003LL) == 0 &&
         btlAreWorkBuffersReady() != 0 &&
-        func_0022E490() != 0) {
+        btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
         scene->eventReady = 0;
@@ -1218,12 +1218,12 @@ s32 btlFinishScenePartyRecovery(BtlState *scene) {
 
 
 void fldMarkSceneRefresh(BtlState *scene) {
-    func_00230960((s32)scene);
+    btlResetDebugEncounterSelection((s32)scene);
     scene->unk220 |= 4;
 }
 
 u32 fldBeginFadeWhenSceneReady(void) {
-    if (func_00230978() != 0) {
+    if (btlUpdateDebugEncounterSelector() != 0) {
         kwlnFadeInStart(0, 0, 0, 0);
         return 2;
     }

@@ -593,7 +593,7 @@ extern f32 D_003C9230[];
 extern f32 D_003C9220[];
 extern s32 fldEncProc(void);
 extern void fldResetEncounterAsyncState(void);
-extern s32 func_00213808(void);
+extern s32 btlUpdateRuntimeFadeState(void);
 extern void btlClearRuntimeState(void);
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
                                                       f32 *targetPositionOut);
@@ -3317,7 +3317,7 @@ s32 fldEncProc(void) {
 
     if (state < 3) {
         if (state >= 0) {
-            func_00213808();
+            btlUpdateRuntimeFadeState();
         }
     }
     return 0;

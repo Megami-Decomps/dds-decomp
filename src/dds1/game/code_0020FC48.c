@@ -90,7 +90,7 @@
 
 #define BTL_EVENT_SEQUENCE_PAN 0x3F
 
-extern s8 D_003BBB0D; /* func_00215FF8 tests it with lb */
+extern s8 D_003BBB0D; /* btlUpdateDebugEncounterSelector tests it with lb */
 
 struct BattleModelEntry;
 extern struct BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
@@ -179,7 +179,8 @@ extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId
 
 extern void func_00160D88(BattleEffect *effect);
 
-void func_0020FC48(void) {
+/* Advance the current event through release, preparation, playback and completion. */
+void btlUpdateEventPlayback(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 phase = battle->eventActive;
 
@@ -291,7 +292,8 @@ extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
  * DDS1 ensures the derived sequence is resident, unlike DDS2's release path. */
-void func_0020FF50(void) {
+/* Request the scene's event script/resources and link its BE/script sequence task. */
+void btlRequestSceneEventResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     u32 battleMode = battleState->battleMode;
     u16 rawEventId;
@@ -382,8 +384,8 @@ extern char D_003A67E8[];
 
 extern char D_003A6810[];
 
-/* Populate sound slots 11..25 from event keys 50..64; skip missing bindings. */
-void func_002101C8(void) {
+/* Bind available event effect keys 50–64 into slots 11–25; absent keys are skipped. */
+void btlBindEventEffectResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 resourceIndex;
 
@@ -1289,7 +1291,8 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 
 extern SdfTex *kwlnHeldTextureReference;
 
-void func_00211A60(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
+/* Queue the held texture as a centered scaled quad with caller primitive/color/depth. */
+void btlDrawScaledHeldTextureQuad(SdfListHead *list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1328,7 +1331,8 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern s32 kwlnGetDrawBufferIndex(void);
 
-void func_00211B88(SdfListHead *list, s32 primitive, s32 color, f32 scale, s32 depth) {
+/* Bind the current draw-buffer frame texture packet and queue its scaled quad. */
+void btlDrawScaledFrameBufferQuad(SdfListHead *list, s32 primitive, s32 color, f32 scale, s32 depth) {
     s32 halfWidth;
     s32 halfHeight;
     s32 xOffset;
@@ -1383,7 +1387,7 @@ extern u32 btlMulColor(u32, u32);
 extern void func_00211D40(SdfListHead *, s32, u32, s32, f32, f32, f32);
 
 /* Draw the wind overlay: three tinted sweeps over the grey quad, then advance the sweep phase. */
-void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
+void btlDrawWindOverlay(SdfListHead *list, u32 color, s32 depth) {
     SdfDmaReferenceChainPacket *tag;
     SdfPacket *registers;
     u32 tint;
@@ -1417,11 +1421,11 @@ void func_002121E8(SdfListHead *list, u32 color, s32 depth) {
     sdfAppendPacket(list, (u32)registers);
     tint = btlMulColor(0x3C808080, color);
     func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 5.0f, 2.0f);
-    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
     func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.5f);
-    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
     func_00211D40(list, 0x240, tint, depth, btlRuntimeState.phase, 7.0f, 1.0f);
-    func_00211B88(list, 0x40, 0x98989898, 1.01f, depth);
+    btlDrawScaledFrameBufferQuad(list, 0x40, 0x98989898, 1.01f, depth);
     btlRuntimeState.phase += btlRuntimeState.phaseSpeed;
     btlRuntimeState.phaseSpeed *= 0x1.f851eap-1f;
     if (btlRuntimeState.phaseSpeed > -0.02f) {
@@ -1463,7 +1467,8 @@ void btlReleaseOwnedData(void) {
 
 extern f32 D_00360F30[];
 
-void func_00212680(SdfListHead *packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
+/* Append a six-triangle flat cell fan at the supplied center, depth and scale. */
+void btlDrawFlatGridCell(SdfListHead *packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
     s32 i;
@@ -1696,7 +1701,8 @@ extern char D_003A69D8[];
 
 extern char D_003A69F0[];
 
-s32 func_00213808(void) {
+/* Step fade setup/in/out/cleanup and the frame counter; return zero when inactive. */
+s32 btlUpdateRuntimeFadeState(void) {
     s8 mode;
 
     if (btlRuntimeState.active == 0) {
@@ -1811,7 +1817,8 @@ s32 func_00213B50(void) {
     return D_003D7588[0];
 }
 
-s32 func_00213B60(void) {
+/* True while idle/inactive or in the initial fade phase; not a fade-complete test. */
+s32 btlIsFadeInPhaseOrIdle(void) {
     u16 state;
 
     if (btlRuntimeState.active == 0) {
@@ -1824,7 +1831,8 @@ s32 func_00213B60(void) {
     return state == 2;
 }
 
-s32 func_00213B90(void) {
+/* True while idle/inactive or after the outgoing fade, awaiting phase-4 cleanup. */
+s32 btlIsFadeOutCompleteOrIdle(void) {
     u16 state;
 
     if (btlRuntimeState.active == 0) {
@@ -2697,7 +2705,8 @@ void btlDrawActorStatusUvDiagnostics(void) {
     sdfFreeMemoryFromEitherHeap(buffer);
 }
 
-void func_00215FE0(void) {
+/* Reset launch confirmation and the shared work arena before selector polling. */
+void btlResetDebugEncounterSelection(void) {
     D_003BBB0D = 0;
     dds3WorkClear();
 }
@@ -2731,6 +2740,8 @@ extern s32 func_0011CB90(f32, s32);
 extern void btlApplyPartySetupOverride(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
+/* Preview/select a debug encounter or pack; return one when it can launch. */
+/* Keep the native snapshot/save/restore order around the debug window calls. */
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7128);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7138);
@@ -2785,7 +2796,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72B8);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
-s32 func_00215FF8(void) {
+s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
     u16 enemy;

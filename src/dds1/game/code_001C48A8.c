@@ -135,7 +135,7 @@ extern void btlUpdateScene(void);
 extern s8 D_00324530[];
 
 
-extern void func_00215FE0(s32);
+extern void btlResetDebugEncounterSelection(s32);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
@@ -171,7 +171,7 @@ void fldBattleSceneEnterInit(u8 *arg0) {
     } else {
         *(u8 *)(arg0 + 0x24A) = 0;
     }
-    func_0020FF50();
+    btlRequestSceneEventResources();
     btlInitializeBossCallbacks(*(u32 *)(arg0 + 0x27C));
     sndStartBattleSceneStream(*(u32 *)(arg0 + 0x270), *(u32 *)(arg0 + 0x27C));
     VU0_STORE_VF($vf0, arg0);
@@ -180,9 +180,9 @@ void fldBattleSceneEnterInit(u8 *arg0) {
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
         btlIsEventSequenceTaskReady() != 0 &&
-        func_00213B60() != 0) {
+        btlIsFadeInPhaseOrIdle() != 0) {
         sndLoadBattleBank();
-        func_002101C8();
+        btlBindEventEffectResources();
         return 3;
     }
     return 0;
@@ -499,7 +499,7 @@ void btlQueueSceneActorModelEntry(s32 sceneAddress) {
 }
 
 
-extern s32 func_00213B90(void);
+extern s32 btlIsFadeOutCompleteOrIdle(void);
 
 extern s32 btlAreWorkBuffersReady(void);
 
@@ -508,7 +508,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(u8 *arg0) {
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
         btlAreWorkBuffersReady() != 0 &&
-        func_00213B90() != 0) {
+        btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
         *(u8 *)(arg0 + 0x258) = 0;
@@ -1187,16 +1187,16 @@ s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
 }
 
 void fldMarkSceneRefresh(s32 scene) {
-    func_00215FE0(scene);
+    btlResetDebugEncounterSelection(scene);
     ((BattleSceneWork *)scene)->refreshFlags |= 4;
 }
 
-extern s32 func_00215FF8(void);
+extern s32 btlUpdateDebugEncounterSelector(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 u32 fldBeginFadeWhenSceneReady(void) {
-    if (func_00215FF8() != 0) {
+    if (btlUpdateDebugEncounterSelector() != 0) {
         kwlnFadeInStart(0, 0, 0, 0);
         return 2;
     }
