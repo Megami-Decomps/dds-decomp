@@ -1678,7 +1678,7 @@ void btlInitializeOverlayGraphics(void) {
     btlRuntimeState.options |= 1;
 }
 
-extern void func_00132010(void);
+extern void fldDrawSkyGradient(void);
 
 extern void kwlnFadeBackgroundStartOut(s32);
 
@@ -1705,7 +1705,7 @@ s32 func_00213808(void) {
     switch (btlRuntimeState.state) {
     case 1:
         if (btlRuntimeState.fadeMode < 2) {
-            func_00132010();
+            fldDrawSkyGradient();
             if (btlRuntimeState.counter == 0) {
                 btlBossDebugPrintf(D_003A69C0);
                 break;
@@ -1719,7 +1719,7 @@ s32 func_00213808(void) {
                 kwlnFadeBackgroundStartOut(0);
                 kwlnDrawControlFlags |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
-                    func_00132010();
+                    fldDrawSkyGradient();
                     kwlnDrawControlFlags |= 0x02000000;
                     btlBossDebugPrintf(D_003A69D8);
                     break;

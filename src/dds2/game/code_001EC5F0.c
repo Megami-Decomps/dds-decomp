@@ -4098,7 +4098,7 @@ void btlTickFieldSwayAndTint(void) {
           ((((BtlState *)work)->unk220 & 0x4000000) == 0)) {
         fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
-        func_00134A18();
+        fldDrawSkyGradient();
     }
     btlDrawTintIfVisible();
 }

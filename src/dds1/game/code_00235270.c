@@ -43,9 +43,9 @@ extern void fldSetSkyDrawState(s32 value);
 extern void fldSetSkyAlpha(s32 value);
 extern s16 fldGetSkyAlpha(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
-extern void func_00132010(void);
+extern void fldDrawSkyGradient(void);
 extern void fldSelectDisplayBuffer(s32 id);
-extern void func_0012AEB0(void);
+extern void fldSubmitTexturedOverlaySprite(void);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 sequence);
@@ -163,10 +163,10 @@ void evtAdvanceSkyTransition(void) {
 
 s32 evtUpdateSkyTask(KwlnTask *task) {
     evtAdvanceSkyTransition();
-    func_00132010();
+    fldDrawSkyGradient();
     if (evtSkyOverlayEnabled != 0) {
         fldSelectDisplayBuffer(0x53);
-        func_0012AEB0();
+        fldSubmitTexturedOverlaySprite();
     }
     return 0;
 }

@@ -584,9 +584,9 @@ extern void func_00129900(s32);
 
 extern void func_00134348(void);
 
-extern void func_00132010(void);
+extern void fldDrawSkyGradient(void);
 
-extern void func_0012AEB0(void);
+extern void fldSubmitTexturedOverlaySprite(void);
 
 extern u32 D_0032E570[];
 
@@ -603,14 +603,14 @@ s32 fldTestDrawUpdate(void) {
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     func_00129900(0);
     func_00134348();
-    func_00132010();
+    fldDrawSkyGradient();
     if (D_0032E570[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
             fldSelectDisplayBuffer(0x53);
         } else {
             fldSelectDisplayBuffer(0x5E);
         }
-        func_0012AEB0();
+        fldSubmitTexturedOverlaySprite();
     }
     fldSelectDisplayBuffer(0x27);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
@@ -783,9 +783,9 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120C08);
 
 extern u32 D_0032E570[];
 
-extern void func_00131580(void);
+extern void fldClearCameraFacingPointRequest(void);
 
-extern void func_00131590(void);
+extern void fldClearCameraHeadingRequest(void);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00120EC8);
 

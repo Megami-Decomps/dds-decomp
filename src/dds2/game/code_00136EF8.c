@@ -121,7 +121,7 @@ extern s32 fldHasKiretaLabelProcess(void);
 extern s32 fldHasHirakenaiLabelProcess(void);
 extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern void func_0012DDC0(s32, s32, u32, const u8 *);
+extern void fldDrawConvertedTextGlyph(s32, s32, u32, const u8 *);
 
 extern s16 D_00444C68[];
 
@@ -3469,7 +3469,7 @@ s32 func_00144028(void *task) {
         fldDrawTitleBannerFrame(menu->position);
         fldDrawTitleBannerCursor(D_00399F60[menu->choice] - 9, 0x130);
         itfSetTextDrawLimit(0x13);
-        func_0012DDC0(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
+        fldDrawConvertedTextGlyph(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
         itfSetTextDrawLimit(-1);
         menu->position++;
         menu->pending = 0;

@@ -126,7 +126,7 @@ typedef struct FldTransferChunk {
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
-extern s32 func_001277A8(s32 arg0);
+extern s32 fldGetTransferChunkPayload(s32 arg0);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
@@ -143,7 +143,7 @@ extern s32 D_0032E4E8[];
 extern struct FileRequest *D_003BAFE8;
 extern u32 D_003BAFEC;
 extern u32 D_003BAFF0;
-extern void func_0012EA40(u32, u32);
+extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 evtGetMessageWindowControlState(void);
@@ -886,7 +886,7 @@ void fldLoadAreaModelTransfers(void) {
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceAddress, 0);
     transferStart = resourceAddress + 8;
     fldRelocatePackedTransferChunk(resourceAddress, (FldTransferChunk *)transferStart);
-    header = (u32 *)func_001277A8(transferStart);
+    header = (u32 *)fldGetTransferChunkPayload(transferStart);
     rows = header[1];
     count = header[2];
     fldSceneRecordCount = count;
@@ -894,7 +894,7 @@ void fldLoadAreaModelTransfers(void) {
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
-    /* Descriptor from func_001277A8 precedes the 0x14-byte scene rows. */
+    /* Descriptor from fldGetTransferChunkPayload precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
         s32 rows; /* 0x04: first scene row */
@@ -906,7 +906,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (FldTransferChunk *)transferStart);
         {
-            s32 header = func_001277A8((s32)(u32)transferStart);
+            s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
             s32 count = ((SceneHeader *)header)->count;
 
@@ -2985,7 +2985,7 @@ extern s32 ptyAnyUnitFlagMatch(s32, s32);
 
 extern f32 sdfSinPoly(f32);
 
-extern void func_00129178(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
+extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
 
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
@@ -3004,7 +3004,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                 color |= (color << 8) | (color << 16);
             }
             func_00129900(1);
-            func_00129178(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
+            evtSubmitTexturedRectPacket(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
             fldBannerColorPhase += 1.0f;
             if (fldBannerColorPhase > 90.0f) {
                 fldBannerColorPhase = 0.0f;
@@ -4260,7 +4260,7 @@ void fldUpdateSparkMessageSequence(void) {
         func_0014B688();
         fldLoadWeatherEffects();
         func_001239C8();
-        func_0012EA40(0x66, 0);
+        fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.unk2C = 0;
         fldSparkControlState.dialogPhase = 10;
         evtSetSolarOverlayFullyTransparent();
@@ -4312,7 +4312,7 @@ void fldUpdateSparkEncounterScene(void) {
     if (phase == 1) {
         if (fldSparkControlState.mode == 0) {
             if (D_00324530[0] < 0) {
-                func_0012EA40(6, 20);
+                fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
@@ -4325,14 +4325,14 @@ void fldUpdateSparkEncounterScene(void) {
             if (value == 0) {
                 if (fldSparkControlState.pendingMode == 0) {
                     s32 pendingMode;
-                    func_0012EA40(1, 0);
+                    fldSetCameraModelMotionRequest(1, 0);
                     pendingMode = fldSparkControlState.pendingMode;
                     fldSparkControlState.mode = pendingMode;
                     fldSparkControlState.modeCountdown = 0;
                     fldSparkControlState.pendingMode = 0;
                 }
             } else if (fldSparkControlState.mode == 1 && fldSparkControlState.pendingMode == 0 && value < 14 && D_00324530[0] < 0) {
-                func_0012EA40(6, 20);
+                fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
@@ -4355,7 +4355,7 @@ void fldUpdateSparkEncounterScene(void) {
             func_002E8DD0(0x670017);
             sndSetSequenceVolumePan(0x670016, 0x7F, 0x3F);
             fldReleaseCameraModel(0);
-            func_0012EA40(2, 0);
+            fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
             evtCreateMessageWindowIfMissing((s32)D_0034D8F0);
@@ -4401,7 +4401,7 @@ void fldUpdateSparkEncounterScene(void) {
         fldSparkControlState.object = node;
         effObjClearFlags(node, 1);
         filePollEntryCleanup(D_003BAFE8);
-        func_0012EA40(5, 0);
+        fldSetCameraModelMotionRequest(5, 0);
         effObjSetFlags(fldSparkControlState.object, 1);
         effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
         fldSparkControlState.phase = 7;

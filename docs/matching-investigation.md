@@ -65,12 +65,12 @@ can hide context-sensitive neighbors. For a scratch source, the probe's
 
 ```sh
 python3 tools/ee_gcc_probe.py src/dds1/field/fldFileResolver.c \
-  --function func_001281E0 --out-dir /tmp/scene-baseline
+  --function fldLoadAreaRoomResources --out-dir /tmp/scene-baseline
 python3 tools/ee_gcc_probe.py /tmp/scene-candidate.c \
   --as-unit src/dds1/field/fldFileResolver.c \
-  --function func_001281E0 --out-dir /tmp/scene-probe
+  --function fldLoadAreaRoomResources --out-dir /tmp/scene-probe
 python3 tools/ee_gcc_why.py /tmp/scene-baseline /tmp/scene-probe \
-  --function func_001281E0
+  --function fldLoadAreaRoomResources
 ```
 
 Ignore unrelated pseudo renumbering; follow the first changed operation,

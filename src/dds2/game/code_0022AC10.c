@@ -1895,7 +1895,7 @@ extern char D_0041B9A0[];
 
 extern char D_0041B9B8[];
 
-extern void func_00134A18(void);
+extern void fldDrawSkyGradient(void);
 
 extern void kwlnFadeBackgroundStartOut(s32);
 
@@ -1912,7 +1912,7 @@ s32 btlUpdateRuntimeFadeState(void) {
     switch (btlRuntimeState.state) {
     case 1:
         if (btlRuntimeState.fadeMode < 2) {
-            func_00134A18();
+            fldDrawSkyGradient();
             if (btlRuntimeState.counter == 0) {
                 btlInitLightParams();
                 btlBossDebugPrintf(D_0041B988);
@@ -1927,7 +1927,7 @@ s32 btlUpdateRuntimeFadeState(void) {
                 kwlnFadeBackgroundStartOut(0);
                 kwlnDrawControlFlags |= 0x10000000;
                 if (btlRuntimeState.counter < 3) {
-                    func_00134A18();
+                    fldDrawSkyGradient();
                     btlInitLightParams();
                     kwlnDrawControlFlags |= 0x02000000;
                     btlBossDebugPrintf(D_0041B9A0);

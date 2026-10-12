@@ -863,9 +863,9 @@
 0x00127B98	fldIsAreaResourceReady	inferred	Tests the active area resource handle for completion and otherwise returns the field ready flag from D_0032E428[0].
 0x00127BD8	fldIsAreaFloorResourceReady	inferred	Byte-identical dds2 twin 0x0012A190; Checks the loaded area/floor identifiers and whether the resource file or readiness flag is ready. [names_conflicts.tsv]
 0x00127C40	fldLoadCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
-0x00127CB8	fldLoadCachedRoomF1ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%s.f1" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A270 is called for the matching "%s.f1" path.
-0x00127D30	fldLoadCachedRoomF2ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%s.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A2E8 is called for the matching "%s.f2" path.
-0x00127DA8	fldLoadCachedRoomKF2ResourceIfLocationMatches	inferred	D1 func_001281E0 calls this helper for the "%sk%03d_%03d.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A360 is called for the same literal path.
+0x00127CB8	fldLoadCachedRoomF1ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%s.f1" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A270 is called for the matching "%s.f1" path.
+0x00127D30	fldLoadCachedRoomF2ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%s.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A2E8 is called for the matching "%s.f2" path.
+0x00127DA8	fldLoadCachedRoomKF2ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%sk%03d_%03d.f2" cache path and retains its returned SdfMemBlock descriptor; DDS2 twin 0x0012A360 is called for the same literal path.
 0x00127E20	fldFormatAreaResourceName	inferred	Builds the packed area resource file name (f%03d_000/00a-00d.LB); twin of D2 0x0012A3D8 [names_M53_Field.tsv]
 0x00127FD0	fldHasAreaResourceNameChanged	inferred	Formats the current area resource filename and compares it with the cached filename. [names_reviewed5.tsv]
 0x00128188	fldReleaseAreaResourceCache	inferred	Releases the two retained area handles, clears both globals and resets the first cached area-name byte.
@@ -7882,3 +7882,20 @@
 0x002BAF98	effEditTBoardRotationTrack	inferred	confidence=high; matched-C; Native T-BOARD ROTATE descriptor forwards the rotation track and frame bound. DDS2 twin 0x00302328. Namer1 batch 13.
 0x002BAFC8	effEditWScaleTrack	inferred	confidence=high; matched-C; Native W-family SCALE descriptors select the scale track and frame bound. DDS2 twin 0x00302358. Namer1 batch 13.
 0x002BAFF8	effEditWRotationTrack	inferred	confidence=high; matched-C; Native W-family ROTATE descriptors select the rotation track and independent editor state. DDS2 twin 0x00302388. Namer1 batch 13.
+0x001277A8	fldGetTransferChunkPayload	inferred	confidence=high; matched-C; Returns the transfer-record payload at byte +0xC; DDS2 twin 0x00129D60. LiteG field naming batch.
+0x001281E0	fldLoadAreaRoomResources	inferred	confidence=high; matched-C; Loads and relocates area/room resource chunks, including cached F1/F2 resources; DDS2 twin 0x0012A6F0. LiteG field naming batch.
+0x00129178	evtSubmitTexturedRectPacket	inferred	confidence=high; matched-C; Submits the textured rectangle packet used by the animated field banner; DDS2 twin 0x0012B690. LiteG field naming batch.
+0x0012AEB0	fldSubmitTexturedOverlaySprite	inferred	confidence=high; matched-C; Submits the field's fixed textured overlay sprite packet; DDS2 twin 0x0012D3E0. LiteG field naming batch.
+0x0012B890	fldDrawConvertedTextGlyph	inferred	confidence=high; matched-C; Creates, draws, and queues a converted text glyph; DDS2 twin 0x0012DDC0. LiteG field naming batch.
+0x0012B940	fldDrawProjectedValue	inferred	confidence=high; matched-C; Projects a world point and submits its formatted value; DDS2 twin 0x0012DE70. LiteG field naming batch.
+0x0012C880	fldProbeCameraSupportSurface	inferred	confidence=high; matched-C; Probes the support surface below the camera focus and mirrored heading; DDS2 twin 0x0012EDB0. LiteG field naming batch.
+0x0012D3D8	fldInterpolateCameraEndpoints	inferred	confidence=high; matched-C; Interpolates the camera near and far endpoints; DDS2 twin 0x0012F908. LiteG field naming batch.
+0x0012DB70	fldUpdateCameraViewFromPlayer	inferred	confidence=high; matched-C; Updates the field camera view from the player's orientation; DDS2 twin 0x001300A0. LiteG field naming batch.
+0x0012EA40	fldSetCameraModelMotionRequest	inferred	confidence=high; matched-C; Stores the requested camera-model motion selector and duration; DDS2 twin 0x00130FF0. LiteG field naming batch.
+0x0012EEA0	fldDispatchCameraModelFrameEvents	inferred	confidence=high; matched-C; Dispatches camera-motion frame crossings to sequence sounds and queued effects; DDS2 twin 0x00131478. LiteG field naming batch.
+0x0012FD00	fldUpdateFieldTransition	inferred	confidence=high; matched-C; Advances the field transition while camera-model motion completes; DDS2 twin 0x001322D8. LiteG field naming batch.
+0x0012FE30	fldUpdateAreaDamageReaction	inferred	confidence=high; matched-C; Updates the area-damage camera, fade, and haptic reaction; DDS2 twin 0x00132408. LiteG field naming batch.
+0x00131580	fldClearCameraFacingPointRequest	inferred	confidence=high; matched-C; Clears the camera-facing point request state; DDS2 twin 0x00133DB8. LiteG field naming batch.
+0x00131590	fldClearCameraHeadingRequest	inferred	confidence=high; matched-C; Clears the camera heading request state; DDS2 twin 0x00133DC8. LiteG field naming batch.
+0x00132010	fldDrawSkyGradient	inferred	confidence=high; matched-C; Draws the sky gradient grid using current and prior color sets; DDS2 twin 0x00134A18. LiteG field naming batch.
+0x00133640	fldApplySceneLightSet	inferred	confidence=high; matched-C; Applies the selected scene-light set with its transition duration; DDS2 twin 0x001360B8. LiteG field naming batch.

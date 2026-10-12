@@ -927,7 +927,7 @@ extern void fldSpawnPlayerUnits(f32 *transform);
 extern void fldCreateChaseCameraObject(void);
 extern void fldPreparePlayerSceneCameraTarget(void);
 extern void fldCreateSecondaryWorldCamera(void);
-extern void func_001300A0(void);
+extern void fldUpdateCameraViewFromPlayer(void);
 extern void func_0012F078(void);
 extern void func_0012F400(void);
 extern void fldActivateCameraColorSetting(s32 enabled);
@@ -1061,7 +1061,7 @@ void func_00125380(void) {
                     fldAreaState.focusPos[0] = camera->position[0];
                     fldAreaState.focusPos[1] = camera->position[1];
                     fldAreaState.focusPos[2] = camera->position[2];
-                    func_001300A0();
+                    fldUpdateCameraViewFromPlayer();
                 } else {
                     fldAreaState.mode = 0;
                     func_0012F078();
@@ -1311,7 +1311,7 @@ extern s32 fldGetSceneCommandState(void);
 /* The scene reset ignores the command word supplied by this caller. */
 extern void func_00136098();
 
-extern void func_001360B8(s16, s32);
+extern void fldApplySceneLightSet(s16, s32);
 
 extern s32 func_00133B10(void);
 
@@ -1417,7 +1417,7 @@ void fldSpawnPlayerUnits(f32 *input) {
         }
 
         if (fldAreaState.area < 0xC8) {
-            func_001360B8(0, 0);
+            fldApplySceneLightSet(0, 0);
             fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
             if (fldGetSceneCommandState() == 1) {
@@ -1426,7 +1426,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                 } else {
                     mdlFlagClear(0x818);
                     fldAreaState.sceneCommand = 0;
-                    func_001360B8(0, 0);
+                    fldApplySceneLightSet(0, 0);
                     fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
                     fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
                 }
@@ -1507,7 +1507,7 @@ void fldClearSceneCommandFlag(void) {
 
 extern void fldPlayMenuSound(s32);
 
-extern void func_001360B8(s16, s32);
+extern void fldApplySceneLightSet(s16, s32);
 
 void fldActivatePendingSceneCommand(void) {
     u32 value;
@@ -1520,7 +1520,7 @@ void fldActivatePendingSceneCommand(void) {
         fldAreaState.sceneCommand = value;
         datGameState->world.fieldFlags |= 8;
         fldAreaState.consumedFlags &= ~1;
-        func_001360B8(value, 0);
+        fldApplySceneLightSet(value, 0);
     }
 }
 
@@ -1542,17 +1542,17 @@ void fldUpdateSceneCommandSpeed(void) {
     if (scene->commandEnabled == 0) {
         if (scene->sceneCommand != 0) {
             scene->sceneCommand = 0;
-            func_001360B8(0, 0);
+            fldApplySceneLightSet(0, 0);
         }
     } else if ((datGameState->world.fieldFlags & 8) != 0) {
         if (scene->sceneCommand == 0) {
             value = func_001266E0();
             scene->sceneCommand = value;
-            func_001360B8(value, 0x14);
+            fldApplySceneLightSet(value, 0x14);
         }
     } else if (scene->sceneCommand != 0) {
         scene->sceneCommand = 0;
-        func_001360B8(0, 0x14);
+        fldApplySceneLightSet(0, 0x14);
         fldPlayMenuSound(0x2A);
         mdlFlagClear(0x818);
         evtClearSolarOverlayControl();

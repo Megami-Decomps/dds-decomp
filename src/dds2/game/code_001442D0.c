@@ -302,7 +302,7 @@ extern void func_00341C78(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
-extern s32 func_00129D60(s32 arg0);
+extern s32 fldGetTransferChunkPayload(s32 arg0);
 
 extern s32 D_00389780[];
 
@@ -1126,13 +1126,13 @@ void func_00145698(void) {
     fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
-    header = func_00129D60(transferStart);
+    header = fldGetTransferChunkPayload(transferStart);
     fldSceneRecords = (FldSceneRecord *)(u32)((SceneHeader *)header)->rows;
     fldSceneRecordCount = ((SceneHeader *)header)->count;
 }
 
 void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
-    /* Descriptor from func_00129D60 precedes the 0x14-byte scene rows. */
+    /* Descriptor from fldGetTransferChunkPayload precedes the 0x14-byte scene rows. */
     typedef struct {
         u8 pad00[4];
         s32 rows; /* 0x04: first scene row */
@@ -1144,7 +1144,7 @@ void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle) {
         fldSceneRecordResource = (struct SdfMemBlock *)(u32)resourceHandle;
         fldRelocatePackedTransferChunk((u32)chunk, (s32)(u32)transferStart);
         {
-            s32 header = func_00129D60((s32)(u32)transferStart);
+            s32 header = fldGetTransferChunkPayload((s32)(u32)transferStart);
             s32 rows = ((SceneHeader *)header)->rows;
             s32 count = ((SceneHeader *)header)->count;
 
@@ -4452,7 +4452,7 @@ extern void func_002A2200(s32);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern void func_00130FF0(u32, u32);
+extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void func_00150138(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 
@@ -4573,7 +4573,7 @@ void fldUpdateDevilizeEventSequence(void) {
         func_0014F5F0();
         fldLoadWeatherEffects();
         func_00125B10();
-        func_00130FF0(0x66, 0);
+        fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.unk30 = 0;
         fldSparkControlState.dialogPhase = 10;
         evtSetSolarOverlayFullyTransparent();
@@ -4618,7 +4618,7 @@ void func_00150F20(void) {
     if (phase == 1) {
         if (fldSparkControlState.mode == 0) {
             if ((s8)D_0037F510[1][0][0] < 0) {
-                func_00130FF0(6, 20);
+                fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
@@ -4631,7 +4631,7 @@ void func_00150F20(void) {
             if (value == 0) {
                 if (fldSparkControlState.pendingMode == 0) {
                     s32 pendingMode;
-                    func_00130FF0(1, 0);
+                    fldSetCameraModelMotionRequest(1, 0);
                     pendingMode = fldSparkControlState.pendingMode;
                     fldSparkControlState.mode = pendingMode;
                     fldSparkControlState.modeCountdown = 0;
@@ -4640,7 +4640,7 @@ void func_00150F20(void) {
             } else if (fldSparkControlState.mode == 1 &&
                        fldSparkControlState.pendingMode == 0 && value < 14 &&
                        (s8)D_0037F510[1][0][0] < 0) {
-                func_00130FF0(6, 20);
+                fldSetCameraModelMotionRequest(6, 20);
                 sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
                 fldSparkControlState.mode = 1;
                 fldSparkControlState.pulse = 1;
@@ -4662,7 +4662,7 @@ void func_00150F20(void) {
             func_00341C78(0x680017);
             fldSparkControlState.countdown = 0;
             fldReleaseCameraModel(0);
-            func_00130FF0(2, 0);
+            fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
             fldSparkControlState.phase = 3;
             evtCreateMessageWindowIfMissing(D_003A9EB0);

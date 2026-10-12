@@ -4915,7 +4915,7 @@ homes, recorded in their disabled candidates.
 
 ## Field-reset call arity
 
-DDS1 `func_00131580` is a zero-argument reset: its matched definition
+DDS1 `fldClearCameraFacingPointRequest` is a zero-argument reset: its matched definition
 clears `D_0032E538[0]` and does not consume incoming argument registers.
 The area initializer `00120EC8` still has `$4 = 0x10`, `$5 = D_0032E570`
 and `$6 = 1` before that call because it used them for earlier stores.

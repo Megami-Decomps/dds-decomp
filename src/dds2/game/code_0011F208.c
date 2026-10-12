@@ -82,7 +82,7 @@ extern void func_0012BE18(s32);
 
 extern void func_00136EF8(void);
 
-extern void func_00134A18(void);
+extern void fldDrawSkyGradient(void);
 
 extern void fldSubmitTexturedOverlaySprite(void);
 
@@ -610,7 +610,7 @@ s32 fldTestDrawUpdate(KwlnTask *task) {
     fldSubmitFrameQuad(1, 0, 0x81, 3, 0, 0, 1, 1);
     func_0012BE18(0);
     func_00136EF8();
-    func_00134A18();
+    fldDrawSkyGradient();
     if (D_00389988[9] != 0) {
         if (fldGetSceneReadyFlag() == 0) {
             fldSelectDisplayBuffer(0x53);

@@ -578,7 +578,7 @@ s32 fldUpdateLocalMapController(void) {
     return result;
 }
 
-extern void func_00132010(void);
+extern void fldDrawSkyGradient(void);
 extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
@@ -588,7 +588,7 @@ extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
 
 void fldDrawLocalMapOverlay(void) {
-    func_00132010();
+    fldDrawSkyGradient();
     evtSetDrawSurfaceIndex(84);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitDefaultDepthGradientRect(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);

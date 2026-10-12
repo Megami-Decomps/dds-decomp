@@ -544,7 +544,7 @@ u32 fldCmdClearSceneControlFlag(void) {
 }
 
 
-extern void func_001300A0(void);
+extern void fldUpdateCameraViewFromPlayer(void);
 
 /* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
@@ -561,7 +561,7 @@ s32 fldCmdFocusCameraOnObject(void) {
     work->focusPos[0] = obj->inner->position[0];
     work->focusPos[1] = obj->inner->position[1];
     work->focusPos[2] = obj->inner->position[2];
-    func_001300A0();
+    fldUpdateCameraViewFromPlayer();
     return 1;
 }
 

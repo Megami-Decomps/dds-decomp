@@ -453,16 +453,16 @@ extern void fldClearCameraObjectHighlightFlag(void);
 extern void fldSetCameraObjectHighlightFlag(void);
 extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
-extern void func_0012EEA0(s32, s32);
+extern void fldDispatchCameraModelFrameEvents(s32, s32);
 extern void func_0012FF48(void);
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
 extern void dds3SetCameraFieldOfView(s32, f32);
 extern void fldToggleWorldNodeState(s32);
-extern void func_0012C880(void);
+extern void fldProbeCameraSupportSurface(void);
 extern void fldRestoreCameraModelColor(void);
 extern void func_0012D528(void);
-extern void func_0012D3D8(void);
+extern void fldInterpolateCameraEndpoints(void);
 extern void func_0012DD70(void);
 extern void fldUpdateCameraMoveOscillation(void);
 extern u8 fldTestSceneControlFlags(u32);
@@ -1171,7 +1171,7 @@ void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
     fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
 }
 
-s32 func_001277A8(s32 record) {
+s32 fldGetTransferChunkPayload(s32 record) {
     return record + 0xc;
 }
 
@@ -1569,7 +1569,7 @@ extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
 
 const char D_0039FF18[] = "%sk%03d_%03d.f2";
 
-u32 func_001281E0(const char *name) {
+u32 fldLoadAreaRoomResources(const char *name) {
     char path[0x80];
     char directory[0x40];
     void *roomOffsets;
@@ -1650,7 +1650,7 @@ u32 func_001281E0(const char *name) {
                 D_003BAC24 = (u32)roomData;
                 D_003BAC20 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldProcessFieldRequest((FldSceneRequest *)func_001277A8((s32)chunk));
+                fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
                 break;
             case 2:
                 fldCachedRoomF1ResourceAllocation = 0;
@@ -1659,7 +1659,7 @@ u32 func_001281E0(const char *name) {
                 D_003BAC1C = (u32)roomData;
                 D_003BAC18 = chunk;
                 fldRelocatePackedTransferChunk((u32)roomData, chunk);
-                fldLoadSceneRequestFiles((FldLoadRequest *)func_001277A8((s32)chunk));
+                fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
                 break;
             }
             index++;
@@ -1686,7 +1686,7 @@ u32 func_001281E0(const char *name) {
         D_003BAC24 = (u32)roomData;
         D_003BAC20 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequest((FldSceneRequest *)func_001277A8((s32)chunk));
+        fldProcessFieldRequest((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
     }
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldFormatAreaDirectory(directory, area, 1);
@@ -1699,7 +1699,7 @@ u32 func_001281E0(const char *name) {
         D_003BAC2C = (u32)roomData;
         D_003BAC28 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldProcessFieldRequestAlternate((FldSceneRequest *)func_001277A8((s32)chunk));
+        fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetTransferChunkPayload((s32)chunk));
     }
     if (isField == 0) {
         func_003014F0(path, D_003BACA8, name);
@@ -1711,7 +1711,7 @@ u32 func_001281E0(const char *name) {
         D_003BAC1C = (u32)roomData;
         D_003BAC18 = chunk;
         fldRelocatePackedTransferChunk((u32)roomData, chunk);
-        fldLoadSceneRequestFiles((FldLoadRequest *)func_001277A8((s32)chunk));
+        fldLoadSceneRequestFiles((FldLoadRequest *)fldGetTransferChunkPayload((s32)chunk));
     }
     fldCreateResourceScriptObjects();
     fldActivateRoomFlagObjects();
@@ -1934,7 +1934,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     descriptor->append(descriptor, command);
 }
 
-void func_00129178(s32 x, s32 y, s32 width, s32 height,
+void evtSubmitTexturedRectPacket(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
     SdfListHead *list;
@@ -2678,7 +2678,7 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
 
 
 /* Submit the field overlay's fixed register state and textured sprite payload. */
-void func_0012AEB0(void) {
+void fldSubmitTexturedOverlaySprite(void) {
     SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
@@ -2961,7 +2961,7 @@ void fldSubmitBackgroundDescriptorPacket(void) {
     }
 }
 
-void func_0012B890(x, y, first, second)
+void fldDrawConvertedTextGlyph(x, y, first, second)
 s32 x;
 s32 y;
 u32 first;
@@ -3008,7 +3008,7 @@ extern SdfPoolNode D_00325708;
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern void sdfInvertScaledVuTransform(void);
 
-void func_0012B940(f32 x, f32 y, f32 z, s32 drawValue) {
+void fldDrawProjectedValue(f32 x, f32 y, f32 z, s32 drawValue) {
     FldQuadState quad;
     SifCommand packet;
     f32 screenX;
@@ -3373,7 +3373,7 @@ void fldUpdateLookAtSegmentDistance(void) {
 extern f32 func_00122A00(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
-void func_0012C880(void) {
+void fldProbeCameraSupportSurface(void) {
     FldAreaWork *cam;
     f32 xs[4];
     f32 ys[4];
@@ -3445,7 +3445,7 @@ void fldUpdateCameraProjectionEndpoints(void) {
     D_00330660[3] = 1.0f;
 }
 
-void func_0012D3D8(void) {
+void fldInterpolateCameraEndpoints(void) {
     union {
         u128 q;
         f32 f[4];
@@ -3479,7 +3479,7 @@ extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 
-void func_0012DB70(void) {
+void fldUpdateCameraViewFromPlayer(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
     s32 *world = fldGetPlayerSceneStateAddress();
@@ -3648,7 +3648,7 @@ s32 fldUpdateCameraFollow(void) {
             fldClearCameraObjectHighlightFlag();
             return 0;
         }
-        func_0012C880();
+        fldProbeCameraSupportSurface();
         cam = &fldAreaState;
         dds3SetCameraFieldOfView(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
@@ -3662,7 +3662,7 @@ s32 fldUpdateCameraFollow(void) {
             func_0012DD70();
             break;
         case 4:
-            func_0012D3D8();
+            fldInterpolateCameraEndpoints();
             break;
         }
         fldUpdateCameraProximity();
@@ -3689,7 +3689,7 @@ void fldReleaseCameraModel(u32 enabled) {
     }
 }
 
-void func_0012EA40(u32 index, u32 value) {
+void fldSetCameraModelMotionRequest(u32 index, u32 value) {
     D_003BAD34 = index;
     D_003BAD38 = value;
 }
@@ -3806,7 +3806,7 @@ extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern s32 D_003BAD44;
 
 /* Dispatch camera-model frame crossings to sequence sounds and queued effects. */
-void func_0012EEA0(s32 motion, s32 selector) {
+void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
     union {
         u128 q;
         f32 f[4];
@@ -3983,7 +3983,7 @@ extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 
 /* Advance the field transition while the camera model's motion drives completion. */
-s32 func_0012FD00(void) {
+s32 fldUpdateFieldTransition(void) {
     FldAreaWork *work = &fldAreaState;
     MdlCtx *model;
     s16 node;
@@ -4019,7 +4019,7 @@ s32 func_0012FD00(void) {
             }
         }
 
-        func_0012EEA0(node, 7);
+        fldDispatchCameraModelFrameEvents(node, 7);
         return -1;
     }
 
@@ -4031,7 +4031,7 @@ extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void fldSetSceneControlFlags(u32 mask);
 
-s32 func_0012FE30(void) {
+s32 fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldAreaState;
     MdlCtx *model;
 
@@ -4084,7 +4084,7 @@ s32 fldUpdateCameraFrame(void) {
         fldUpdateCameraTarget();
         func_0012F578();
         node = fldPlayerModelContext->current.h.motionIndex;
-        func_0012EEA0(node, node);
+        fldDispatchCameraModelFrameEvents(node, node);
         if (fldAreaState.unk118 == 1) {
             fldUpdateCameraModelMotion(0, 0, 6.0f);
         }
@@ -4188,11 +4188,11 @@ void fldAddCameraModelPair(s32 first, s32 second) {
     mdlAddEntryFlagged(fldPlayerModelContext, 1, second);
 }
 
-void func_00131580(void) {
+void fldClearCameraFacingPointRequest(void) {
     D_0032E538[0] = 0;
 }
 
-void func_00131590(void) {
+void fldClearCameraHeadingRequest(void) {
     D_0032E544[0] = 0;
 }
 
@@ -4495,7 +4495,7 @@ void fldUpdateSwayOffset(void) {
 }
 
 /* Draw the current filter grid, blending the previous grid during a fade. */
-void func_00132010(void) {
+void fldDrawSkyGradient(void) {
     s32 column, row;
     s32 current = D_003BAD88;
     s32 previous;
@@ -5096,7 +5096,7 @@ void fldSetCameraObjectActiveFlag(s32 enabled) {
     evtEndObjectValueTransition((EffWorldNode *)fldPlayerObject);
 }
 
-/*BEGIN func_00133640*/
+/*BEGIN fldApplySceneLightSet*/
 extern void kwlnSetDrawColorTarget(s32, f32 *);
 extern s32 kwlnSetLightColorTarget(s32, s32, f32 *);
 extern void kwlnSetBackgroundColorTarget(s32, f32 *);
@@ -5107,7 +5107,7 @@ extern u32 D_003BADDC;
 extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
                           f32 redB, f32 greenB, f32 blueB, f32 x, f32 y, f32 z);
 
-void func_00133640(s32 index, s32 mode) {
+void fldApplySceneLightSet(s32 index, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5192,7 +5192,7 @@ void func_00133640(s32 index, s32 mode) {
         }
     }
 }
-/*END func_00133640*/
+/*END fldApplySceneLightSet*/
 
 void fldSetDisplayState(u32 state) {
     D_003BAD98 = state;
@@ -8587,7 +8587,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
         x = 0xF6 - (width >> 1);
         fldDrawGaugeBar(width);
         fldDrawTitleBanner(x, 0x131);
-        func_0012B890(x + 0x14, 0x98, 0xA09DC380, D_0033E900 + ticket[1] * 32);
+        fldDrawConvertedTextGlyph(x + 0x14, 0x98, 0xA09DC380, D_0033E900 + ticket[1] * 32);
         ticket[0] = ticket[0] + 1;
         ticket[2] = 0;
     }
