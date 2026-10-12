@@ -16,6 +16,7 @@
 #include "sdf_resource.h"
 #include "mdl.h"
 #include "active_sound_node.h"
+#include "btl_scene_initializer.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -58,13 +59,6 @@ extern s32 btlRollSurpriseAttack();
 extern void func_0022AF90();
 extern void btlInitializeBossCallbacks();
 extern void btlSelectSceneAudioTrack();
-
-typedef struct {
-    void (*initialize)(s32);
-    s32 (*update)(s32);
-    s32 flags;
-} SceneInitializer;
-
 
 typedef struct SceneControl {
     u8 mode;
