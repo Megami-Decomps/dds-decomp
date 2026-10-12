@@ -5498,7 +5498,7 @@ typedef struct FileWaveMotion {
 extern f32 D_0037E540[4]; /* (0, -1, 0, 0), existing shared axis */
 
 /* vu0 routine: advances axial motion with a quaternion-oriented sine sway. */
-void func_00297CB0(FileSlotTable *record) {
+void effUpdateWaveEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -5739,7 +5739,8 @@ typedef struct ScaleOwner {
     ScaleSet *src;
 } ScaleOwner;
 
-void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
+/* Scale selected wave-emitter parameters from source to destination. */
+void effScaleWaveEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -5765,7 +5766,7 @@ typedef struct FileSlotMotion {
 } FileSlotMotion;
 
 /* vu0 routine: emits and advances randomized radial slots, then samples their key tracks. */
-void func_002985D0(FileSlotTable *record) {
+void effUpdateRadialEmitterSlots(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -5944,7 +5945,8 @@ void func_002985D0(FileSlotTable *record) {
 }
 
 
-void effLoadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
+/* Scale selected radial-emitter parameters from source to destination. */
+void effScaleRadialEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -5977,7 +5979,7 @@ typedef struct FileCircularMotion {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
-void func_00298D28(FileSlotTable *record) {
+void effUpdateCircularEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 orientation[4];
@@ -6186,7 +6188,8 @@ void func_00298D28(FileSlotTable *record) {
     }
 }
 
-void effLoadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
+/* Scale selected circular-emitter parameters from source to destination. */
+void effScaleCircularEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -6222,7 +6225,7 @@ extern void func_002DD968(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
-void func_002995F8(FileSlotTable *record) {
+void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 position[4];
@@ -6422,7 +6425,8 @@ void func_002995F8(FileSlotTable *record) {
     }
 }
 
-void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
+/* Scale selected oriented-ring parameters; keep the destination-first declarations. */
+void effScaleOrientedRingEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *dst = owner->dst;
     ScaleSet *src = owner->src;
     u32 i;
@@ -6438,7 +6442,7 @@ void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
 }
 
 /* vu0 routine: advances directed slots through the emitter quaternion frame. */
-void func_00299E58(FileSlotTable *record) {
+void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -6631,7 +6635,8 @@ void func_00299E58(FileSlotTable *record) {
 
 
 
-void effLoadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
+/* Scale selected directed-emitter parameters from source to destination. */
+void effScaleDirectedEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;

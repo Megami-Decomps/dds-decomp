@@ -5045,12 +5045,12 @@
 0x002D78E8	fileSampleKeyTracks	inferred	dds1 twin func_002973E8 (mode 2 heading is 0 when the projected points coincide) [names_M65_VuFollowup.tsv]
 0x002D7A58	fileInvalidateSlotGroup	inferred	unified with DDS1 twin (was fileResetSlotGroupStates)
 0x002D7AC8	fileCopyAndInvalidateSlotGroup	inferred	twin of DDS1 name (QP5 conflict)
-0x002D8A38	effScaleParameterSet	inferred	Scales the source parameter set's scalar fields and three entry values into its destination.
-0x002DA2D8	effScaleOwnerParametersFromSource	inferred	Scales an effect owner parameter set from source to destination. [names_reviewed8.tsv]
-0x002DAA58	fileScaleEffectSurfaceParameterFields	inferred	Scales selected effect surface parameter fields from owner source to destination. [names_reviewed16.tsv]
-0x002DB200	sdfScaleResourceFloatParameterGroups	inferred	Multiplies selected floating parameter fields by factor when copying from owner source to destination. [names_reviewed19.tsv]
+0x002D8A38	effScaleWaveEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic parameter-scaler naming: native descriptor pairs this callback with axial sine-wave motion; scales selected source parameters into destination. DDS1 twin 0x00298538. Namer1 batch 16.
+0x002DA2D8	effScaleOrientedRingEmitterParameters	inferred	confidence=high; matched-C; Refines inherited owner-scaler naming: native descriptor pairs this callback with the oriented-ring updater. Preserve destination-first declaration order. DDS1 twin 0x00299DD8. Namer1 batch 16.
+0x002DAA58	effScaleDirectedEmitterParameters	inferred	confidence=high; matched-C; Corrects inconsistent cross-game generic scaler naming: native descriptor pairs this callback with the quaternion-directed slot updater; body matches DDS1 0x0029A558. Namer1 batch 16.
+0x002DB200	effScaleSectorEmitterParameters	inferred	confidence=high; matched-C; Corrects unrelated resource-group interpretation: native type-six emitter descriptor pairs this callback with bounded-azimuth sector motion; scales selected source parameters into destination. Namer1 batch 16.
 0x002DB2F8	vu0CubicBezierPoint	inferred	weights (1-t)^3, 3t(1-t)^2, 3t^2(1-t), t^3 over four vec3 control points; result left in vf10 [names_M75_Large2.tsv]
-0x002DBE78	effScaleParameterSetBase	inferred	Scales ScaleSet fields 0x64/0x68 and the three entry values only; sibling of effScaleParameterSet / effLoadObjScaleParamsA/C [names_M47_D2Game.tsv]
+0x002DBE78	effScaleCurveEmitterParameters	inferred	confidence=high; matched-C; Refines generic base-scaler naming: native type-seven descriptor pairs this callback with the cubic-Bezier curve updater; scales only common scale-track values, not curve-tail fields. Namer1 batch 16.
 0x002DBED8	fileAllocateGridRecordSlots	inferred	Allocates count-dependent grid slots with two copies of source data and initializes record pointers. [names_reviewed7.tsv]
 0x002DC028	fileReleaseGridRecordHandle	inferred	Releases allocation handle stored in grid record. [names_reviewed7.tsv]
 0x002DC0A8	fileReadVectorPtr20	inferred	vector read from *(obj+0x20)
@@ -7332,3 +7332,14 @@
 0x003024D8	effEditTwoDimensionalRotationTrack	inferred	confidence=high; matched-C; Native 2D root ROTATE callback; DDS1 twin 0x002BB148. Namer1 batch 14.
 0x00302AD0	effEditSPolygonAlphaTrack	inferred	confidence=high; matched-C; Native S-family POLYGON children select this ALPHA callback; DDS1 twin 0x002BB6B0. Namer1 batch 14.
 0x00302AF0	effEditDoPolygonFadeTrack	inferred	confidence=high; matched-C; Native D-/O-family POLYGON FADE callback preserves frame bound plus one; DDS1 twin 0x002BB6D0. Namer1 batch 14.
+0x002D81B0	effUpdateWaveEmitterSlots	inferred	confidence=high; matched-C; Native emitter descriptor selects this updater for axial travel with quaternion-oriented sine sway; consumes wave-tail amplitude and phase parameters. DDS1 twin 0x00297CB0. Namer1 batch 16.
+0x002D8AD0	effUpdateRadialEmitterSlots	inferred	confidence=high; matched-C; Emits and advances randomized radial slots, applies acceleration/gravity and samples scale/color/heading tracks. DDS1 twin 0x002985D0. Namer1 batch 16.
+0x002D9228	effUpdateCircularEmitterSlots	inferred	confidence=high; matched-C; Advances changing-radius circular motion in the saved emitter orientation with angular/axial speed. DDS1 twin 0x00298D28. Namer1 batch 16.
+0x002D9AF8	effUpdateOrientedRingEmitterSlots	inferred	confidence=high; matched-C; Advances the sampled oriented ring with changing radius, angular acceleration and gravity. DDS1 twin 0x002995F8. Namer1 batch 16.
+0x002DA358	effUpdateDirectedEmitterSlots	inferred	confidence=high; matched-C; Emits and advances randomized directed slots through the emitter quaternion; consumes directed spread/speed/acceleration/gravity. DDS1 twin 0x00299E58. Namer1 batch 16.
+0x002DAAE0	effUpdateSectorEmitterSlots	inferred	confidence=high; matched-C; Native type-six updater confines emission azimuth and spread in the emitter quaternion frame, then advances speed/acceleration/gravity. DDS1 descriptor array has no type-six entry. Namer1 batch 16.
+0x002DB3E0	effUpdateCurveEmitterSlots	inferred	confidence=high; matched-C; Native type-seven updater builds randomized control points and advances slots along cubic-Bezier curves between configured start/end positions. DDS1 descriptor array has no type-seven entry. Namer1 batch 16.
+0x002DB288	effSetCurveEmitterStartPosition	inferred	confidence=high; matched-C; For record type seven only, stores start xyz into the curve-emitter tail; effResolveAndApplySurfaceEndpoints passes its resolved start vector. Namer1 batch 16.
+0x002DB2C0	effSetCurveEmitterEndPosition	inferred	confidence=high; matched-C; For record type seven only, stores end xyz into the curve-emitter tail; effResolveAndApplySurfaceEndpoints passes its resolved end vector. Namer1 batch 16.
+0x002D91A0	effScaleRadialEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic scaler naming: native emitter descriptor pairs this callback with the radial slot updater; scales selected source parameters into destination. DDS1 twin 0x00298CA0. Namer1 batch 16.
+0x002D9A60	effScaleCircularEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic scaler naming: native descriptor pairs this callback with changing-radius circular motion; scales selected source parameters into destination. DDS1 twin 0x00299560. Namer1 batch 16.

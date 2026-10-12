@@ -5443,10 +5443,10 @@
 0x002973E8	fileSampleKeyTracks	inferred	samples colour, scale and heading tracks of a view block at a frame; mode 2 derives the heading from two projected points [names_M65_VuFollowup.tsv]
 0x00297558	fileInvalidateSlotGroup	inferred	sets state=-1 on columns*rows consecutive 0x20-byte slots [names_M48_PcpMisc.tsv]
 0x002975C8	fileCopyAndInvalidateSlotGroup	inferred	copies slot over the group first slot and marks its state -1 [names_M48_PcpMisc.tsv]
-0x00298CA0	effLoadObjScaleParamsA	inferred	wrong or missing short module prefix [names_audit.tsv]
-0x00299560	effLoadObjScaleParamsC	inferred	wrong or missing short module prefix [names_audit.tsv]
-0x00299DD8	effScaleOwnerParametersFromSource	inferred	Scales an effect owner parameter set from source to destination. [names_reviewed8.tsv]
-0x0029A558	effLoadObjScaleParamsB	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x00298CA0	effScaleRadialEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic scaler naming: native emitter descriptor pairs this callback with the radial slot updater; scales selected source parameters into destination. DDS2 twin 0x002D91A0. Namer1 batch 16.
+0x00299560	effScaleCircularEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic scaler naming: native descriptor pairs this callback with changing-radius circular motion; scales selected source parameters into destination. DDS2 twin 0x002D9A60. Namer1 batch 16.
+0x00299DD8	effScaleOrientedRingEmitterParameters	inferred	confidence=high; matched-C; Refines inherited owner-scaler naming: native descriptor pairs this callback with the oriented-ring updater. Preserve destination-first declaration order. DDS2 twin 0x002DA2D8. Namer1 batch 16.
+0x0029A558	effScaleDirectedEmitterParameters	inferred	confidence=high; matched-C; Corrects inconsistent cross-game generic scaler naming: native descriptor pairs this callback with the quaternion-directed slot updater; body matches DDS2 0x002DAA58. Namer1 batch 16.
 0x0029A5E0	fileAllocateGridRecordSlots	inferred	Allocates count-dependent grid slots with two copies of source data and initializes record pointers. [names_reviewed7.tsv]
 0x0029A730	fileReleaseGridRecordHandle	inferred	Releases allocation handle stored in grid record. [names_reviewed7.tsv]
 0x0029A748	fileClearRecordReferences	inferred	file file requests and records in game/code_0028A0E0.c
@@ -6530,7 +6530,7 @@
 0x002DA290	sdfResourceListReleaseAssets	inferred	sdfAssetRelease over every item then sdfDestroyDevRequest(list); registered as queue callback in sdfRegisterResourceQueueCallbacks [names_M33_SmallSweep2.tsv]
 0x002DA2F8	sdfReleaseQueuedResource	inferred	Releases a resource immediately or through the registered disposal queue
 0x002DA340	sdfGrowResourceListStorage	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:436:func_002DA340; Expands the backing buffered request used by a resource list; the append path calls it when count reaches capacity.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
-0x002DA358	sdfAppendAssetToResourceList	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:440:func_002DA358; Ensures capacity, stores the asset at the current count, and increments the resource-list count.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
+0x002DA358	sdfAppendAssetToResourceList	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:528:sdfAppendAssetToResourceList; Ensures capacity, stores the asset at the current count, and increments the resource-list count.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
 0x002DA3C0	sdfSetPrimaryStateWordFirst	inferred	Stores the first primary-state u32 at SdfAsset+0x10 and marks the primary state dirty.
 0x002DA3D8	sdfSetPrimaryStateWordSecond	inferred	Stores the second primary-state u32 at SdfAsset+0x14 and marks the primary state dirty.
 0x002DA3F0	sdfSetPrimaryStateWordThird	inferred	Stores the third primary-state u32 at SdfAsset+0x20 and marks the primary state dirty.
@@ -7937,3 +7937,9 @@
 0x002BB148	effEditTwoDimensionalRotationTrack	inferred	confidence=high; matched-C; Native 2D root ROTATE callback; DDS2 twin 0x003024D8. Namer1 batch 14.
 0x002BB6B0	effEditSPolygonAlphaTrack	inferred	confidence=high; matched-C; Native S-family POLYGON children select this ALPHA callback; DDS2 twin 0x00302AD0. Namer1 batch 14.
 0x002BB6D0	effEditDoPolygonFadeTrack	inferred	confidence=high; matched-C; Native D-family POLYGON FADE callback, additionally used by O-family descriptors in DDS2; preserves frame bound plus one; twin 0x00302AF0. Namer1 batch 14.
+0x00297CB0	effUpdateWaveEmitterSlots	inferred	confidence=high; matched-C; Native emitter descriptor selects this updater for axial travel with quaternion-oriented sine sway; consumes wave-tail amplitude and phase parameters. DDS2 twin 0x002D81B0. Namer1 batch 16.
+0x002985D0	effUpdateRadialEmitterSlots	inferred	confidence=high; matched-C; Emits and advances randomized radial slots, applies acceleration/gravity and samples scale/color/heading tracks. DDS2 twin 0x002D8AD0. Namer1 batch 16.
+0x00298D28	effUpdateCircularEmitterSlots	inferred	confidence=high; matched-C; Advances changing-radius circular motion in the saved emitter orientation with angular/axial speed. DDS2 twin 0x002D9228. Namer1 batch 16.
+0x002995F8	effUpdateOrientedRingEmitterSlots	inferred	confidence=high; matched-C; Advances the sampled oriented ring with changing radius, angular acceleration and gravity. DDS2 twin 0x002D9AF8. Namer1 batch 16.
+0x00299E58	effUpdateDirectedEmitterSlots	inferred	confidence=high; matched-C; Emits and advances randomized directed slots through the emitter quaternion; consumes directed spread/speed/acceleration/gravity. DDS2 twin 0x002DA358. Namer1 batch 16.
+0x00298538	effScaleWaveEmitterParameters	inferred	confidence=high; matched-C; Refines inherited generic parameter-scaler naming: native descriptor pairs this callback with axial sine-wave motion; scales selected source parameters into destination. DDS2 twin 0x002D8A38. Namer1 batch 16.
