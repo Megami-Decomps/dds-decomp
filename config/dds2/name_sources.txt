@@ -3644,6 +3644,7 @@
 0x00249B40	evtViewerApplyGlyphLodChannel	inferred	For each node kind one, picks most recent glyph kind six and updates its LOD channel. [names_reviewed7.tsv]
 0x00249EB0	evtViewerCountFlaggedUpdates	inferred	Increments the viewer update count when the viewer condition is active.
 0x0024A380	evtViewerUpdateTimedAction	inferred	Stops or updates gated action based on viewer position and time boundaries.
+0x0024A400	evtViewerUpdateShopFlagTrack	inferred	Paired per-frame event-viewer routine for timeline group type 31; updates the shop flag and interpolated auxiliary resource.
 0x0024A600	evtViewerAdvanceGlyphTick	inferred	Byte-identical DDS1 counterpart: Resets the viewer font glyph while its tick count is active and stops after thirty ticks.
 0x0024A9F0	evtViewerDispatchFlagMode	inferred	Dispatches mode zero or one according to bit zero of viewer flags.
 0x0024AA38	evtViewFindNextGlyph	inferred	nearest glyph after the advance position over type-2 nodes
