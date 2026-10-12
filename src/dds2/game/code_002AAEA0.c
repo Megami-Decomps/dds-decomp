@@ -97,7 +97,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     return 0;
 }
 
-extern void func_002AAE80(KwlnTask *);
+extern void mnuDrawCampScreenDefault(KwlnTask *);
 extern void func_002AA9D8(s32, u32, u32, u32, u32, u32, u32, u32, u32);
 extern char D_003E69B0[];
 extern char D_003E6F18[];
@@ -107,7 +107,7 @@ s32 func_002AB0E0(KwlnTask *task) {
     s32 state;
     s32 layer = 0x53;
 
-    func_002AAE80(task);
+    mnuDrawCampScreenDefault(task);
     state = mnuInitializeCampMenuWhenResourcesReady(task);
     if (state == 0) {
         return state;
@@ -208,7 +208,7 @@ s32 func_002AB448(KwlnTask *task) {
     s32 state;
     s32 layer = 0x53;
 
-    func_002AAE80(task);
+    mnuDrawCampScreenDefault(task);
     state = mnuInitializeCampMenuWhenResourcesReady(task);
     if (state == 0) {
         return state;

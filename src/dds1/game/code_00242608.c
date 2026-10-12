@@ -1842,7 +1842,7 @@ extern u8 D_0036AB64[];
 extern void mnuStepShopWindowTransition(ShopScene *, s32);
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
-extern void func_00260570(struct MenuList *, u32);
+extern void mnuSetValueListTransition(struct MenuList *, u32);
 extern s32 func_00260AB0(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
@@ -1876,7 +1876,7 @@ typedef struct {
 } MenuSelectionPair;
 
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
-extern void func_00260550(struct MenuList *, u32);
+extern void mnuSetSelectionListTransition(struct MenuList *, u32);
 extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void func_0027C788(MenuWindowContainer *);
 
@@ -1941,7 +1941,7 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
 }
 
 extern s32 mnuMapPadMaskToFlags(s32);
-extern s32 mnuStaffTickState(ShopScene *);
+extern s32 mnuTickCommandPhase(ShopScene *);
 extern MenuPopupEntry D_0036AAD8[];
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
@@ -1959,7 +1959,7 @@ s32 func_00245DE0(KwlnTask *task) {
     if (result != 0) {
         return result;
     }
-    switch (mnuStaffTickState(state)) {
+    switch (mnuTickCommandPhase(state)) {
     case -1:
         return 0;
     case 0:
@@ -1998,13 +1998,13 @@ s32 func_00245DE0(KwlnTask *task) {
                 }
                 if (allowed != 0) {
                     mnuSetCommandPhase(state, 1);
-                    func_00260550(list, 4);
+                    mnuSetSelectionListTransition(list, 4);
                 } else {
                     state->menuMode = 2;
                 }
             } else if (input & 2) {
                 mnuSetCommandPhase(state, 2);
-                func_00260550(list, 4);
+                mnuSetSelectionListTransition(list, 4);
             } else if (!(input & 0x300000)) {
                 func_0027C788(state->sprite);
             } else if (input & 0x10) {
@@ -2060,7 +2060,7 @@ s32 evtSelectStateAction(KwlnTask *task) {
         mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = mnuDrawShopRowTextAndValue;
-        func_00260570(linkedTask, 10);
+        mnuSetValueListTransition(linkedTask, 10);
     }
     ((ShopScene *)stateAddress)->substate = 0;
     return 1;
@@ -2121,7 +2121,7 @@ s32 func_00246220(KwlnTask *task) {
                     }
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
-                    func_00260550(linkedTask, 4);
+                    mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_0027C788(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
@@ -2180,7 +2180,7 @@ s32 evtSelectStateActionB(KwlnTask *task) {
         mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = mnuDrawShopRowTextAndValue;
-        func_00260570(linkedTask, 10);
+        mnuSetValueListTransition(linkedTask, 10);
     }
     ((ShopScene *)stateAddress)->substate = 0;
     return 1;
@@ -2242,7 +2242,7 @@ s32 func_002465F8(KwlnTask *task) {
                     }
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
-                    func_00260550(linkedTask, 4);
+                    mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_0027C788(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
@@ -2300,7 +2300,7 @@ s32 evtSelectStateActionC(KwlnTask *task) {
         mnuSetCommandPhase((ShopScene *)stateAddress, 9);
         linkedTask = ((ShopScene *)stateAddress)->window->list;
         linkedTask->drawCallback = mnuDrawShopRowTextAndValue;
-        func_00260570(linkedTask, 10);
+        mnuSetValueListTransition(linkedTask, 10);
     }
     ((ShopScene *)stateAddress)->substate = 0;
     return 1;
@@ -2351,7 +2351,7 @@ s32 func_002469F0(KwlnTask *task) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 7);
                 } else if (inputFlags & 2) {
                     mnuSetCommandPhase((ShopScene *)stateAddress, 5);
-                    func_00260550(linkedTask, 4);
+                    mnuSetSelectionListTransition(linkedTask, 4);
                 } else if ((inputFlags & 0x300000) == 0) {
                     func_0027C788(((ShopScene *)stateAddress)->window);
                 } else if (inputFlags & 0x10) {
@@ -2449,7 +2449,7 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
 }
 
 extern s32 mnuTickCommandWaitPhase(ShopScene *);
-extern void func_00260590(struct MenuList *, u32);
+extern void mnuSetQuantityListTransition(struct MenuList *, u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
@@ -2484,7 +2484,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
                 mnuSetCommandPhase((ShopScene *)stateAddress, 12);
             } else if (input & 2) {
                 mnuSetCommandPhase((ShopScene *)stateAddress, 10);
-                func_00260590(((ShopScene *)stateAddress)->window->list, 10);
+                mnuSetQuantityListTransition(((ShopScene *)stateAddress)->window->list, 10);
             }
             if (input & 0x300030) {
                 if (input & 0x10) {
@@ -2610,7 +2610,7 @@ s32 mnuPruneSoldOutShopSelection(KwlnTask *task) {
         }
     }
     mnuSetCommandPhase(scene, 8);
-    func_00260590(scene->window->list, 10);
+    mnuSetQuantityListTransition(scene->window->list, 10);
     scene->counter = 1;
     return 1;
 }

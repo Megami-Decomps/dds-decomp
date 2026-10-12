@@ -1066,7 +1066,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
     scene->loadStep = 0;
 }
 
-extern s32 func_002629A8();
+extern s32 brsIsPrimaryPanelUpdateReady();
 
 
 extern s32 fldLoadAreaResource();
@@ -1088,7 +1088,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
     BtlTask *node;
     s32 step;
 
-    if (func_002629A8() == 1) {
+    if (brsIsPrimaryPanelUpdateReady() == 1) {
         work->subFlags |= 0x20;
         if (work->linkedNodes != 0) {
             for (node = work->linkedNodes; node != 0; node = node->next) {

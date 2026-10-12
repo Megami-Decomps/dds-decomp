@@ -90,8 +90,8 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
                       &context->images[0]->list->stateFlags);
     return 0;
 }
-extern void func_00272778(KwlnTask *);
-extern void func_00272668(s32, s32, const void *, StaffMenuWork *, s32, s32);
+extern void mnuDrawCampScreenDefault(KwlnTask *);
+extern void mnuDrawCampGridAndLabelDefault(s32, s32, const void *, StaffMenuWork *, s32, s32);
 extern void mnuDrawStaffCampSlotsAndCurrency(s32, s32, s32, struct EffectSlotSet *, struct EffectSlotSet *, s32);
 extern const u8 D_0037C3A8[];
 
@@ -99,13 +99,13 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     s32 state;
 
-    func_00272778(task);
+    mnuDrawCampScreenDefault(task);
     state = func_002719F0((s32)task);
     if (state == 0) {
         return state;
     }
     mnuCreateStaffImageSprite(0);
-    func_00272668(0, context->images[0]->list->cursor->sortKeyPrimary, D_0037C3A8, context, 1, 0x53);
+    mnuDrawCampGridAndLabelDefault(0, context->images[0]->list->cursor->sortKeyPrimary, D_0037C3A8, context, 1, 0x53);
     mnuDrawStaffCampSlotsAndCurrency(0, 0, 0, context->staffSlots.baseResources[5], context->staffSlots.baseResources[1], 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, context->images[0], 0x53);
     mnuDrawStaffGridLabelsForKind(0, context->staffSlots.baseResources[6]);

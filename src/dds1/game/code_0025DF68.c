@@ -60,7 +60,7 @@ void mnuDrawDispatchProgressIcons(s32 contextAddress, s32 progress) {
 }
 
 extern void func_00260100(ShopScene *, s32);
-extern void func_0025E420(ShopScene *, s32, s32);
+extern void mnuDrawPulsingMenuIcon(ShopScene *, s32, s32);
 
 /* Fade the shop frame, then its currency and pulsing foreground icon. */
 void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
@@ -108,7 +108,7 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
         foregroundScale = (s32)(fraction * 256.0f);
         effDrawSpriteWithCornerFade(x, y, 0, foregroundScale, 0, texture, icon, 0x53);
     }
-    func_0025E420(scene, foregroundScale, 0x53);
+    mnuDrawPulsingMenuIcon(scene, foregroundScale, 0x53);
 }
 
 /* Draw the fixed shop frame, then its pulsing icon. */
@@ -127,12 +127,12 @@ void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
     effDrawSpriteWithCornerFade(D_0036C728[0][BRS_ICON_X] << 4,
                   D_0036C728[0][BRS_ICON_Y] << 3,
                   0, alpha, 0, texture, D_0036C728[0][BRS_ICON_ID], mode);
-    func_0025E420(scene, 0x100, mode);
+    mnuDrawPulsingMenuIcon(scene, 0x100, mode);
 }
 
 extern f32 sdfSinPoly(f32);
 
-void func_0025E420(ShopScene *object, s32 scale, s32 mode) {
+void mnuDrawPulsingMenuIcon(ShopScene *object, s32 scale, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
     s8 phase = object->pulseFrame;
     f32 angle = (f32)phase / 120.0f * 6.2831852f;

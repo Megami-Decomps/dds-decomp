@@ -92,7 +92,7 @@ void mnuStorePendingMenuCommandValue(struct MenuList *list, u32 value) {
     }
 }
 
-void func_00260550(struct MenuList *list, u32 value) {
+void mnuSetSelectionListTransition(struct MenuList *list, u32 value) {
     MnuShopListContext *command;
 
     command = list->context;
@@ -102,7 +102,7 @@ void func_00260550(struct MenuList *list, u32 value) {
     }
 }
 
-void func_00260570(struct MenuList *list, u32 value) {
+void mnuSetValueListTransition(struct MenuList *list, u32 value) {
     MnuShopListContext *command;
 
     command = list->context;
@@ -112,7 +112,7 @@ void func_00260570(struct MenuList *list, u32 value) {
     }
 }
 
-void func_00260590(struct MenuList *list, u32 value) {
+void mnuSetQuantityListTransition(struct MenuList *list, u32 value) {
     MnuShopListContext *command;
 
     command = list->context;
@@ -127,7 +127,7 @@ void mnuSetCommandPhase(ShopScene *work, u32 mode) {
     work->frames = 0;
 }
 
-s32 mnuStaffTickState(ShopScene *work) {
+s32 mnuTickCommandPhase(ShopScene *work) {
     s32 count;
 
     switch (work->action) {
@@ -669,7 +669,7 @@ extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
 extern u32 ptyAddProfilePoints(DatPartyRecord *unit, s32 increment);
-extern void func_00262A30(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
+extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(DatPartyRecord *unit) {
@@ -703,7 +703,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
         if ((currentPartyUnit->flags & 1) != 0 &&
             (currentPartyUnit->status & 0x4000) != 0) {
             unit = currentPartyUnit;
-            func_00262A30(partyWork, partyIndex, unit->level,
+            brsSetSkillProgressAnimations(partyWork, partyIndex, unit->level,
                           unit->totalExp,
                           ptyGetCurrentProfileRecord(currentPartyUnit)->value, 0, 0);
         }
@@ -718,7 +718,7 @@ void brsApplyPartyRewards(BrsSkillPackageWork *partyWork, BrsRewardBatch *batch)
             profilePointGain = values->amount;
             experienceGain = values->secondaryValue;
 
-            func_00262A30(partyWork, values->partySlot, unit->level,
+            brsSetSkillProgressAnimations(partyWork, values->partySlot, unit->level,
                           unit->totalExp, ptyGetCurrentProfileRecord(unit)->value,
                           experienceGain, profilePointGain);
             unit->totalExp += experienceGain;
@@ -999,7 +999,7 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-s32 func_002629A8(void) {
+s32 brsIsPrimaryPanelUpdateReady(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
     BrsSkillPackageWork *work;
 
@@ -1015,7 +1015,7 @@ s32 func_002629A8(void) {
     return work->opacityReady;
 }
 
-void func_00262A30(BrsSkillPackageWork *work, s32 index, s32 level, u32 totalExp, s32 profileExp, s32 levelRemaining, s32 profileRemaining) {
+void brsSetSkillProgressAnimations(BrsSkillPackageWork *work, s32 index, s32 level, u32 totalExp, s32 profileExp, s32 levelRemaining, s32 profileRemaining) {
     work->levelAnimation[index].currentProgress = totalExp;
     work->levelAnimation[index].level = level;
     work->profileAnimation[index].currentProgress = profileExp;

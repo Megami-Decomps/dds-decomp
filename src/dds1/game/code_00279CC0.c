@@ -31,7 +31,7 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 typedef struct MenuListNode MenuListNode;
 
 
-extern void func_00272778(s32);
+extern void mnuDrawCampScreenDefault(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
@@ -40,9 +40,9 @@ extern void ptySkillMenuCopyPageState(s32);
 
 extern void mnuDrawStaffCampScreen(s32, KwlnTask *);
 
-extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 
-extern void func_00272668(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
@@ -195,9 +195,9 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     mnuDrawStaffCampScreen(1, callback);
     mnuCreateStaffImageSprite(0xB);
     if (label != 0xFFFF && label != 0) {
-        func_00272518(1, label, D_003BAA98, context, 1, 1, 0x53);
+        mnuDrawCampGridAndLabel(1, label, D_003BAA98, context, 1, 1, 0x53);
     } else {
-        func_00272668(1, 0, 0, context, 1, 0x53);
+        mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
     }
     window = menu[9];
     ((MenuWindowContainer *)window)->list->stateFlags |= 8;
@@ -418,7 +418,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
     MenuList *list;
     s32 label;
 
-    func_00272778(param);
+    mnuDrawCampScreenDefault(param);
     mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
