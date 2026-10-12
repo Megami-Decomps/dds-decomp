@@ -7555,6 +7555,7 @@
 0x001602F8	dds3UpdateCrossfade	inferred	confidence=high; matched-C; Corrects prior textured-quad name: captures first frame, draws held texture with decreasing alpha, ends when current frame reaches duration. Both native start/end debug strings explicitly name dds3Crossfade. DDS2 twin0x00167EE8. Namer1 batch21.
 0x001624D0	effBattleApplyUnitColorDirection	inferred	Inferred from the current C implementation in game/code_001624D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0018EB08	effDrawSphericalWireRings	inferred	Inferred from the current C implementation in effect/effEvent.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0018EED0	effDrawWireCylinder	inferred	Draws horizontal rings, vertical sides and cap diameters as a wireframe cylinder; DDS2 counterpart 0x00196B08 has the same C body.
 0x00199638	itfDrawFixedPointProgressBar	inferred	Inferred from the current C implementation in game/code_00196478.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00199B80	itfBuildPanelBorderVertexGrid	inferred	Inferred from the current C implementation in game/code_00199AD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00199CF0	itfPanelSetInsetFrameVertices	inferred	Inferred from the current C implementation in game/code_00199AD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

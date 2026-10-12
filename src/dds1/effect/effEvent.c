@@ -442,7 +442,7 @@ extern void *func_002EF2B0(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
-void func_0018EED0(const f32 *center, u32 color, f32 radius, f32 height) {
+void effDrawWireCylinder(const f32 *center, u32 color, f32 radius, f32 height) {
     f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
     f32 vertices[40][4];
     u32 colors[40];
