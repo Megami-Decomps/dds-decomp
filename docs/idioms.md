@@ -1215,7 +1215,14 @@ functions (prologue, scheduling, `movz`/`movn`, `jalr` callbacks).
 Functions of that shape (DDS1 `func_0029C048`, `func_002ECA80`, `func_002ECCF8`,
 `sdfBuildTextureStatePacket`; DDS2 `func_002A7B28`, `func_002DDD60`,
 `func_00345928`, `func_00345BA0`, `sdfBuildTextureStatePacket`) stay `INCLUDE_ASM`
-C targets.
+C targets. Their only non-gcc words are the two `plzcw $2,$n` / `andi $2,$2,0xFF` /
+`addi $n,$0,0x1F` / `subu $n,$n,$2` runs (a log2 of two sizes), which sit
+uninterrupted inside gcc prologues (`sd $16..$18,$31`, `ld`, `jr $31` with the `addiu $29`
+in its delay slot), delay-slot fills, `%gp_rel` loads and `movn`. One
+`__asm__ volatile ("plzcw $2,%0; andi $2,$2,0xFF; addi %0,$0,0x1F; subu %0,%0,$2" : "+r"(v) : : "$2")`
+statement in C compiled with ee-gcc 2.96 emits exactly that run (the `addi` is the
+asm text; plain C and `EE_MMI_PLZCW` give `li` = `addiu`), so the function around it is
+compiler output and the run is an inline-asm macro, not a handwritten function.
 
 | Segment | DDS1 | DDS2 | Contents |
 |---|---|---|---|
