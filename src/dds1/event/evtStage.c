@@ -18,7 +18,7 @@ extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
 void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
-extern KwlnTask *func_00101218(u32 state, s32 index);
+extern KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
 extern s32 kwlnTaskGetStateList(u32 state);
 extern const char D_003AC038[0x28];
 extern void func_003003F0(const char *format, ...);
@@ -142,7 +142,7 @@ void evtKillFieldScriptTasks(void)
     for (state = KWLN_TASK_DELAYED_START; state < KWLN_TASK_DESTROY_PENDING; state++) {
     restartStateScan:
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
-            task = func_00101218(state, taskIndex);
+            task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
                 func_003003F0(D_003AC038, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);

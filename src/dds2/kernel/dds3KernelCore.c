@@ -281,7 +281,7 @@ void* kwlnTaskGetStateList(u32 state)
     }
 }
 
-KwlnTask *func_00101100(u32 state, s32 index)
+KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index)
 {
     KwlnTask *node = kwlnDelayedStartTaskHead;
     s32 i;

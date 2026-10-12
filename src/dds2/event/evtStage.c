@@ -124,7 +124,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
 extern void func_0035C860(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern KwlnTask *func_00101100(u32 state, s32 index);
+extern KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index);
 extern s32 kwlnTaskGetStateList(u32 state);
 extern void func_0035B6E0(const char *format, ...);
 
@@ -144,7 +144,7 @@ void evtKillFieldScriptTasks(void) {
     for (state = KWLN_TASK_DELAYED_START; state < KWLN_TASK_DESTROY_PENDING; state++) {
     restartStateScan:
         for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
-            task = func_00101100(state, taskIndex);
+            task = kwlnTaskGetByStateAndIndex(state, taskIndex);
             if (task->priority == 0x3EA) {
                 func_0035B6E0(D_004215A8, task->name);
                 kwlnTaskDestroyWithHierarchy(task, 0);
