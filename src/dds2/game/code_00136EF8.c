@@ -1530,7 +1530,7 @@ s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 func_0013B0D0(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldClipSegmentToPositionZones(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
