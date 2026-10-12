@@ -1375,6 +1375,7 @@
 0x001784F8	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x001787E0	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x001789C0	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
+0x00178B80	effPcpScatterDrawRadialParticles	inferred	Advances radial particles and builds their six-vertex strips in the shared pool, as documented by the adjacent source comment. twin=DDS1 0x00170F28.
 0x00179168	effScatterCopyRadialVector	inferred	queued
 0x00179178	effScatterSetRadialColor	inferred	queued
 0x00179180	effScatterScaleRadialInputs	inferred	queued
@@ -1382,6 +1383,7 @@
 0x00179438	effScatterCreateSpinFromTable	inferred	queued
 0x001794A0	effScatterCloneSpinWork	inferred	queued
 0x00179618	effScatterSpriteSpawn	inferred	DDS1 twin 0x001719C0 [names_M58_VuSweep.tsv]
+0x00179780	effPcpScatterDrawSpinParticles	inferred	Rotates each particle around its seeded axis and builds its six-vertex strip, as documented by the adjacent source comment. twin=DDS1 0x00171B28.
 0x00179D78	effScatterCopySpinVector	inferred	queued
 0x00179D88	effScatterSetSpinColor	inferred	queued
 0x00179D90	effScatterScaleSpinRadii	inferred	queued

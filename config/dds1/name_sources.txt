@@ -1711,6 +1711,7 @@
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources
 0x00170D68	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
+0x00170F28	effPcpScatterDrawRadialParticles	inferred	Advances radial particles and builds their six-vertex strips in the shared pool, as documented by the adjacent source comment. twin=DDS2 0x00178B80.
 0x00171510	effScatterCopyRadialVector	inferred	queued
 0x00171520	effScatterSetRadialColor	inferred	queued
 0x00171528	effScatterScaleRadialInputs	inferred	queued
@@ -1719,6 +1720,7 @@
 0x00171848	effScatterCloneSpinWork	inferred	queued
 0x00171938	effPcpScatterReleaseSharedParticles	inferred	releases the secondary scatter variant particle array and its resource and child work handles
 0x001719C0	effScatterSpriteSpawn	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
+0x00171B28	effPcpScatterDrawSpinParticles	inferred	Rotates each particle around its seeded axis and builds its six-vertex strip, as documented by the adjacent source comment. twin=DDS2 0x00179780.
 0x00172120	effScatterCopySpinVector	inferred	queued
 0x00172130	effScatterSetSpinColor	inferred	queued
 0x00172138	effScatterScaleSpinRadii	inferred	queued
