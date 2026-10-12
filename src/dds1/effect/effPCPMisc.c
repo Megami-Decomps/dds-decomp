@@ -34,6 +34,7 @@
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "bill_object_api.h"
 
@@ -206,7 +207,6 @@ typedef struct EffPCPRotateWork {
     s32 frame;
 } EffPCPRotateWork;
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
 extern void func_002DD688(f32 scale);
@@ -4032,7 +4032,6 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 extern u8 D_00355640[];
 extern SdfPoolNode *D_00355688[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffPCPBeamDrawParams *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */

@@ -15,6 +15,7 @@
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
@@ -1535,7 +1536,6 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfInvertRigidVuTransform(void);
 extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 func_00353228(f32);
 extern f32 func_00353140(f32);

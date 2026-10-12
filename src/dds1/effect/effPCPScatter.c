@@ -6,6 +6,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -56,7 +57,6 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */

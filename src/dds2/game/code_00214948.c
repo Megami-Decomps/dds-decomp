@@ -7,6 +7,7 @@
 #include "sdf_draw.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
 #include "btl_ai_table.h"
@@ -3134,7 +3135,6 @@ extern void func_003364B8(f32);
 
 extern void func_00336818(f32);
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
 
@@ -6741,7 +6741,6 @@ extern void func_003364B8(f32);
 
 extern void func_00336818(f32);
 
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
     BattleActionContext *runtime = (BattleActionContext *)btlGetRuntime();

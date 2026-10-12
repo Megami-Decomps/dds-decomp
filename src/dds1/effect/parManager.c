@@ -7,6 +7,7 @@
 #include "eff.h"
 #include "par_table.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "bill_object_api.h"
 
 struct ParSystem;
@@ -103,7 +104,6 @@ extern ParDispatch parKindConstructorEntries[];
 extern void (*D_0034E2F0[])();
 
 void effDestroyResources(void *arg);
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
 void parReleaseObject(ParBurstEmitter *obj) {

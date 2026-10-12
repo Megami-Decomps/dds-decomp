@@ -15,6 +15,7 @@
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "sdf_projection.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -370,7 +371,6 @@ void effSubmitPositionedDrawPacket(s32 x, s32 y, s32 arg2, s32 arg3) {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern void func_003364B8(f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *func_00348158(const f32 [][4], const u32 *, s32, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
@@ -1195,7 +1195,6 @@ extern u8 sdfViewUpVector[];
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00336818(f32 angle);
-extern void sdfComposeVuMatrixFromRegisters(void);
 
 /* vu0 routine: leave the selected aim point in vf10, not a C return value.
  * Preserve the non-camera output scratch w, which is not initialized here. */

@@ -8,6 +8,7 @@
 #include "ee_mmi.h"
 
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 #include "eff.h"
 #include "par_table.h"
