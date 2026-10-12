@@ -3218,8 +3218,9 @@ s32 fldTitle(void) {
     }
     fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
     func_00129900(0);
-    /* sched1/2 dependent-pop: const-1 pseudo precedes the switch index load.
-     * Trace: /home/raikaru/sandbox_PurC/title_trace_policy/decisions.log. */
+    /* The next phase is staged before the dispatch: the scheduler issues the
+     * constant-1 pseudo ahead of the phase load (see docs/idioms.md,
+     * "Trace-justified staging: fldTitle next phase"). */
     nextPhase = 1;
     switch (D_003BAFA0) {
     case 0:
