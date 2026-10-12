@@ -4124,6 +4124,7 @@
 0x0022F418	evtEventViewerFadeBackground	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1869:evtEventViewerFadeBackground; Fades the viewer's background colour over its update countdown.; twin=0x0024A020 (DDS2).
 0x0022F550	evtEventViewerApplyEffectChannels	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1898:evtEventViewerApplyEffectChannels; Applies the effect-channel assignments driven by the viewer's tracks.; twin=0x0024A158 (DDS2).
 0x0022F778	evtViewerUpdateTimedAction	inferred	Closes timed action outside glyph interval or advances open-ended interval. [names_reviewed7.tsv]
+0x0022F7F8	evtViewerUpdateShopFlagTrack	inferred	For viewer timeline group type 31, selects keys around the current frame, writes the active flag to shopFlag, and interpolates auxResource.
 0x0022F9F8	evtViewerAdvanceGlyphTick	inferred	Resets the viewer font glyph while its tick count is active and stops after thirty ticks.
 0x0022FB30	evtEventViewerApplyPlaybackMode	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:2041:evtEventViewerApplyPlaybackMode; Applies the viewer playback mode to unit, motion and movie-object tracks.; twin=0x0024A738 (DDS2).
 0x0022FDE8	evtViewerDispatchFlagMode	inferred	Dispatches mode zero or one according to bit zero of viewer flags.

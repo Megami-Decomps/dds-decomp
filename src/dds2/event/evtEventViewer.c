@@ -1349,7 +1349,7 @@ extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
 extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
 extern void evtEventViewerApplyEffectChannels(s32, EvtRuntime *);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
-extern void func_0024A400(EvtRuntime *);
+extern void evtViewerUpdateShopFlagTrack(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
@@ -1389,7 +1389,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     evtViewerCountFlaggedUpdates(viewer);
     evtEventViewerApplyEffectChannels(time, viewer);
     evtViewerUpdateTimedAction(viewer);
-    func_0024A400(viewer);
+    evtViewerUpdateShopFlagTrack(viewer);
 
     for (group = viewer->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
@@ -2057,7 +2057,7 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", func_0024A400);
+INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateShopFlagTrack);
 
 void func_0024A5F8(EvtRuntime *viewer) {
 }
