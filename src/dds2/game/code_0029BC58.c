@@ -123,7 +123,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern char D_003D6458[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
-s32 func_0029BFB8(KwlnTask *request) {
+s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 result;
 
@@ -150,8 +150,8 @@ s32 itfRunPanelMode1(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
-    func_0029AA48(panel);
-    func_0029AC20(panel, 0);
+    mnuDrawItemPanelBackdrop(panel);
+    mnuDrawStatAssignmentPanel(panel, 0);
     return menuSetHandler(panel, 1, request);
 }
 

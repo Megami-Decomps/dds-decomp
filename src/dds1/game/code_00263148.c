@@ -200,7 +200,7 @@ typedef struct ActiveItemSlots {
     s32 count;
 } ActiveItemSlots;
 
-void func_00263640(BrsSkillPackageWork *scene) {
+void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     ActiveItemSlots active;
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 i;
@@ -226,10 +226,10 @@ void func_00263640(BrsSkillPackageWork *scene) {
 
 extern char D_003BC550[];
 extern s32 func_003014F0(char *, const char *, ...);
-extern void func_00263640(BrsSkillPackageWork *);
+extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 /* Cap the available extent by the remaining capacity of five components. */
-void func_00263728(BrsSkillPackageWork *scene) {
+void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 available = scene->selectedRewardRow->values.amount * 3;
@@ -259,7 +259,7 @@ void func_00263728(BrsSkillPackageWork *scene) {
         }
         return;
     }
-    func_00263640(scene);
+    brsShowStatSelectionStatus(scene);
 }
 
 extern void evtStageTestUpdateCamera(void);
@@ -274,7 +274,7 @@ extern void func_002E96D8(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
-s32 func_00263838(KwlnTask *request) {
+s32 brsProcessNextPrimaryReward(KwlnTask *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus;
@@ -298,7 +298,7 @@ s32 func_00263838(KwlnTask *request) {
             slots = scene->statGains;
             ptyAccumulateStatGains(slots, scene->selectedRewardRow->values.amount,
                                    scene->selectedRewardRow->unit);
-            func_00263728(scene);
+            brsUpdateStatSelectionExtent(scene);
             mnuAdvanceTitleEntryAnimation(scene->selectedRewardRow->unit);
             mnuStaffCopyPanelBlock(scene->selectedRewardRow->unit, scene);
             mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);
@@ -334,7 +334,7 @@ extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
 extern u32 uiBlendColors(u32, u32, s32);
 extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
 extern void frFontDrawGlyphChain(u32, s32, s32);
-void func_00263A00(BrsSkillPackageWork *scene) {
+void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 fade = scene->iconFade;
@@ -372,12 +372,12 @@ void func_00263A00(BrsSkillPackageWork *scene) {
 }
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
-extern void func_00263A00(BrsSkillPackageWork *);
+extern void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325788[13][4];
 
-void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
+void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 i;
 
@@ -395,7 +395,7 @@ void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
     }
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
     mnuDrawPartyInfoSprites(0, 0, 0, item, scene->spriteHandle, 0x53);
-    func_00263A00(scene);
+    mnuDrawRemainingSelectionExtent(scene);
     evtStageTestUpdate(D_00325788[0]);
 }
 
@@ -407,7 +407,7 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
         return 0;
     }
     mnuDrawItemPanelBackdrop(context);
-    func_00263B78(context, 0);
+    mnuDrawStatAssignmentPanel(context, 0);
     return menuRunPanel(context, 1, (void *)request);
 }
 

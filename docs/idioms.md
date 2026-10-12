@@ -2745,9 +2745,9 @@ used to turn this unresolved case green.
 
 ### Result helpers and controllers share compilation ownership
 
-DDS1 `func_00268AB8` (644 bytes) and DDS2 `func_002A05C0` (788 bytes)
+DDS1 `brsUpdateProfileProgressAnimation` (644 bytes) and DDS2 `brsUpdateProfileProgressAnimation` (788 bytes)
 each had a sole BEQL/BEQ difference. Their real preceding increment helpers,
-`func_002687C0` and `func_002A0278`, supply the same-unit nothrow information
+`brsCalcProgressAnimationStep` and `brsCalcProgressAnimationStep`, supply the same-unit nothrow information
 when retained with their controllers in `code_002665E0` and `code_0029DF18`.
 Restoring that contiguous ownership matches both complete controllers.
 
@@ -6120,7 +6120,7 @@ declaration is corrected; the room/task controller remains assembly.
 
 ## Result icon ramps distinguish storage from conversion
 
-DDS1 `func_00267850` uses signed lower/upper clamps for
+DDS1 `brsUpdateLevelProgressIndicator` uses signed lower/upper clamps for
 `BrsProgressAnimation.iconColor`, `completionColor` and `auxiliaryColor` at
 `+40/+50/+54`. Their storage is `s32`; the constructor values alone do not
 establish unsigned storage. The sine-derived icon value still uses a `(u32)`
@@ -6555,11 +6555,11 @@ does not solve the retained caller's retail JAL-versus-sibling-jump frontier.
 ## DDS1 result-animation rows start at their phase byte
 
 The `0x68`-byte DDS1 result rows start at owner `+0xEF4` (level) and
-`+0x1234` (profile), not twenty bytes earlier. `func_00268AB8` operates on
-the profile phase at `0x1234 + index * 0x68`; `func_00267FF0` writes its
-icon and completion fields, and `func_00268D40` writes the initialization
+`+0x1234` (profile), not twenty bytes earlier. `brsUpdateProfileProgressAnimation` operates on
+the profile phase at `0x1234 + index * 0x68`; `brsUpdateProfileProgressIndicator` writes its
+icon and completion fields, and `brsDrawProfileProgressDetails` writes the initialization
 flag and previous progress at row `+0x60`/`+0x64`. The renderer
-`func_00268590` reads auxiliary color/X/Y at row `+0x54`/`+0x58`/`+0x5C`.
+`brsDrawProfileProgressIndicator` reads auxiliary color/X/Y at row `+0x54`/`+0x58`/`+0x5C`.
 These are the same record's tail, not a sixth sentinel or an overlapping
 rendering view. Both arrays still contain five rows; the owner stays
 `0x1590` bytes and DDS2's layout is unchanged.
@@ -7387,7 +7387,7 @@ movie-blender owner fold lands.
 
 ## Explicit fixed-step and ramped-step assignments preserve local allocation
 
-DDS1 `game/code_002665E0::func_002687C0` advances either the level or
+DDS1 `game/code_002665E0::brsCalcProgressAnimationStep` advances either the level or
 profile reward row. A positive pending amount selects a fixed increment of
 10000 when `skipRamp` is set; otherwise it increments/clamps the frame
 counter and computes the ramped increment. Keep these two assignments in

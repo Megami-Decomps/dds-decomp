@@ -4279,17 +4279,17 @@
 0x0029A2F8	mnuRequestWeightedProfileMessage	inferred	queued
 0x0029A400	mnuDispatchProfileSelectionScene	inferred	queued
 0x0029A748	mnuKindIsSelectable	inferred	game/code_00299D58: returns 1 for kind 1 and otherwise tests (kind ^ 8) < 1 unsigned [names_L14_MidUnits.tsv]
-0x0029AA68	mnuDrawRemainingSelectionExtent	inferred	readability/matching review (QP16)
+0x0029AA68	mnuDrawRemainingSelectionExtent	inferred	Draws the remaining-stat count and selectable-unit fade update; DDS1 twin 0x00263A00. [LiteH reward/stat batch]
 0x0029AD98	mnuAdvanceSkillPackageToItemPanel	inferred	Advances skill package work before drawing the item panel and running it. [names_reviewed10.tsv]
 0x0029AE10	mnuAdvanceSkillPanelToNextMenu	inferred	Advances the skill package panel and runs the next menu once it finishes. [names_reviewed10.tsv]
 0x0029AE70	mnuResetSelectionWidthsFromConfig	inferred	Computes clamped selection width from configuration and five signed bytes, clears layout widths and refreshes an active resource.
 0x0029AF48	mnuClearItemSelectionSlots	inferred	Byte-identical dds1 twin 0x00263E38; Clears the active slot and five adjacent item-selection slot words. [names_conflicts.tsv]
 0x0029AF80	mnuRefreshPartyUnitVitalsPanels	inferred	Recomputes maximum unit vitals before refreshing selected party panels. [names_reviewed10.tsv]
-0x0029B008	mnuHandleStatPointAssignment	inferred	L13
+0x0029B008	mnuHandleStatPointAssignment	inferred	L13; handles stat-point input and updates the preview. DDS1 twin 0x00263EF8. [LiteH reward/stat batch]
 0x0029B320	mnuDrawItemPanelDuringRequest	inferred	Draws the item panel backdrop and forwards the active request. [names_reviewed10.tsv]
 0x0029B3C0	mnuResetGroupSelectionAndStartMessage	inferred	confidence=high; src/dds2/game/code_0029AFC0.c:func_0029B3C0; Clears the current panel-group selection, starts its message entry and configures message-window sound/options. [names_qp9.tsv]
-0x0029B418	mnuCommitAssignedStatPoints	inferred	L13
-0x0029B6A0	mnuShowProgressLevelChangePopup	inferred	readability/matching review (QP16)
+0x0029B418	mnuCommitAssignedStatPoints	inferred	L13; commits gains or restores the preview after confirmation. DDS1 twin 0x002642D0. [LiteH reward/stat batch]
+0x0029B6A0	mnuShowProgressLevelChangePopup	inferred	Stores the crossed level step and shows its message and sound. DDS1 twin 0x00264538. [LiteH reward/stat batch]
 0x0029B780	mnuRunPanelWithIdleFallback	inferred	Runs the panel in mode 0 and installs a fallback state only when both the panel and state are idle.
 0x0029B810	mnuRunItemPanelWithInactiveBackdrop	inferred	src/dds2/game/code_0029AFC0.c func_0029B810: Draws backdrop with zero mode, then runs item-panel request mode one. Twin of DDS1 func_002646A0. [names_reviewed24.tsv]
 0x0029B8B0	mnuChooseWeightedItem	inferred	confidence=high; matched-C; src/dds2/game/code_0029AFC0.c:143:func_0029B8B0; Uses one random byte against eight cumulative item thresholds, returns the chosen item or zero, and substitutes item nine for gated IDs 109 through 127 while flag 0x990 is unset.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -7227,7 +7227,7 @@
 0x00299018	brsApplyPartyRewards	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00299B98	brsSelectNextUnit	inferred	Inferred from the current C implementation in game/code_00296E98.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0029B950	mnuRollExtraLevelReward	inferred	Inferred from the current C implementation in game/code_0029AFC0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x0029BC58	mnuStartRewardDialogAndMotion	inferred	Inferred from the current C implementation in game/code_0029BC58.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0029BC58	mnuStartRewardDialogAndMotion	inferred	Displays reward-mode text and queues its motion/effect; DDS1 twin 0x002647D0. [LiteH reward/stat batch]
 0x0029D008	brsBuildPartyRewardBatch	inferred	Inferred from the current C implementation in game/code_0029CC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0029D2D8	brsBuildLevelUpList	inferred	Inferred from the current C implementation in game/code_0029CC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002A1790	mnuCopySoundStreamOnStatusChange	inferred	Inferred from the current C implementation in game/code_002A05C0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -7573,3 +7573,11 @@
 0x001B8368	btlCreatePhaseChangePanelTask	inferred	confidence=high; five-point variant layout, phaseGate reset, tracked slot6 task replacement, phase-gated update and Psechg release callbacks match DDS1 canonical0x001AD758. Namer1 batch25.
 0x001C0158	btlRecordListedLinkageSkills	inferred	confidence=high; corrected misleading clearing name: current command-panel roster iteration marks recorded linkage skill bits with operation0, then returns whether the panel exists. DDS1 twin0x001B54C0. Namer1 batch25.
 0x001F1B00	btlBuildActorSetCameraPose	inferred	confidence=high; defeat-camera hook or marked actor-set centers/extents determine camera position/direction/distance, with native mode and framing-preset branches plus DDS2 cameraDistanceOffset. DDS1 twin0x001E4180. Namer1 batch25.
+0x0029A658	brsShowStatSelectionStatus	inferred	Displays the selected unit and stat-assignment message chosen by extentExhausted; DDS1 twin 0x00263640. LiteH reward/stat batch.
+0x0029A768	brsUpdateStatSelectionExtent	inferred	Caps reward-derived extent at remaining base-stat capacity and selects the unit-specific message path; DDS1 twin 0x00263728. LiteH reward/stat batch.
+0x0029A898	brsProcessNextPrimaryReward	inferred	Advances primary reward rows, accumulates growth, opens stat selection or applies gains, then selects the next popup; DDS1 twin 0x00263838. LiteH reward/stat batch.
+0x0029AA48	mnuDrawItemPanelBackdrop	inferred	Draws the camp backdrop used by the item/stat-selection panel; DDS1 twin 0x002639E0. LiteH reward/stat batch.
+0x0029AC20	mnuDrawStatAssignmentPanel	inferred	Draws the stat-allocation panel, mirrors gain slots into the group, and renders party details and remaining extent; DDS1 twin 0x00263B78. LiteH reward/stat batch.
+0x0029BB28	brsPrepareRewardMessage	inferred	Rolls the extra reward, displays its message when applicable, and clears pending stat gains; DDS1 twin 0x00264740. LiteH reward/stat batch.
+0x0029BBC0	brsAcknowledgeRewardMessage	inferred	Finishes the reward message window and notifies its task; DDS1 twin 0x002647B0. LiteH reward/stat batch.
+0x0029BFB8	brsAdvanceRewardPanelAfterMessage	inferred	Waits for the idle reward-panel message, applies pending reward state, and selects the next popup; DDS1 twin 0x002649B0. LiteH reward/stat batch.
