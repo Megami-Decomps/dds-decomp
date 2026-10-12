@@ -42,6 +42,8 @@ typedef struct BattlePanelEdgeWork {
     s16 alpha;
 } BattlePanelEdgeWork;
 
+extern void func_001C4900(BtlUnit *, BattleActorPanelWork *, s32, s8);
+
 extern f32 D_00415F80[4];
 
 extern s32 func_001ABB10(BtlUnit *, s32);
@@ -5538,7 +5540,87 @@ void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s3
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C4900);
+extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_001C4900(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
+    s32 x;
+    s32 y;
+    u32 alpha[8];
+    s32 top;
+    s32 middle;
+    s32 bottom;
+    s32 baseColor;
+    s8 state;
+
+    if (reserve == 0) {
+        baseColor = 0x40FF50;
+        state = work->activeEntries[index].presentation.presentationState;
+        switch (work->activeEntries[index].presentation.presentationValue) {
+        case 1:
+            break;
+        case 0:
+            baseColor = 0xFF6787;
+            break;
+        case 2:
+        default:
+            baseColor = 0x1B11A0;
+            break;
+        }
+    } else {
+        state = work->reserveEntries[index].presentation.presentationState;
+        baseColor = 0xFF6787;
+    }
+
+    if (state != 0) {
+        evtSetDrawSurfaceIndex(0x53);
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        if (reserve == 0) {
+            x = work->activeEntries[index].position[0];
+            y = work->activeEntries[index].position[1];
+            alpha[0] = work->activeEntries[index].presentation.highlightLevel[0];
+            alpha[1] = work->activeEntries[index].presentation.highlightLevel[1];
+            alpha[2] = work->activeEntries[index].presentation.highlightLevel[2];
+            alpha[3] = work->activeEntries[index].presentation.highlightLevel[3];
+            alpha[4] = work->activeEntries[index].presentation.highlightLevel[4];
+            alpha[5] = work->activeEntries[index].presentation.highlightLevel[5];
+            alpha[6] = work->activeEntries[index].presentation.highlightLevel[6];
+            alpha[7] = work->activeEntries[index].presentation.highlightLevel[7];
+        } else {
+            x = work->reserveEntries[index].position[0];
+            y = work->reserveEntries[index].position[1];
+            alpha[0] = work->reserveEntries[index].presentation.highlightLevel[0];
+            alpha[1] = work->reserveEntries[index].presentation.highlightLevel[1];
+            alpha[2] = work->reserveEntries[index].presentation.highlightLevel[2];
+            alpha[3] = work->reserveEntries[index].presentation.highlightLevel[3];
+            alpha[4] = work->reserveEntries[index].presentation.highlightLevel[4];
+            alpha[5] = work->reserveEntries[index].presentation.highlightLevel[5];
+            alpha[6] = work->reserveEntries[index].presentation.highlightLevel[6];
+            alpha[7] = work->reserveEntries[index].presentation.highlightLevel[7];
+        }
+        top = y + 49;
+        middle = y + 63;
+        evtSubmitGradientTriangle(x + 54, top, x + 106, top, x + 93, middle,
+                      baseColor | (alpha[0] << 24),
+                      baseColor | (alpha[1] << 24),
+                      baseColor | (alpha[3] << 24));
+        evtSubmitGradientTriangle(x + 54, top, x + 93, middle, x + 40, middle,
+                      baseColor | (alpha[0] << 24),
+                      baseColor | (alpha[3] << 24),
+                      baseColor | (alpha[2] << 24));
+        bottom = y + 77;
+        evtSubmitGradientTriangle(x + 40, middle, x + 93, middle, x + 80, bottom,
+                      baseColor | (alpha[4] << 24),
+                      baseColor | (alpha[5] << 24),
+                      baseColor | (alpha[7] << 24));
+        evtSubmitGradientTriangle(x + 40, middle, x + 80, bottom, x + 26, bottom,
+                      baseColor | (alpha[4] << 24),
+                      baseColor | (alpha[7] << 24),
+                      baseColor | (alpha[6] << 24));
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C4C58);
 
