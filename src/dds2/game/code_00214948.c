@@ -272,8 +272,6 @@ extern s32 btlIsActiveActor();
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
-extern void fldAppendTaskToGroup(void *);
-
 extern void btlDispatchStateHandler(void *, s32);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
