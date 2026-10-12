@@ -2444,6 +2444,7 @@
 0x00194978	frFontGetCachedItemCount	inferred	Loads the retained font-cache record count at FrFontSystem+0x144.
 0x00194988	frFontGetChildGlyphCount	inferred	Loads the live pooled child-glyph count at FrFontSystem+0x148.
 0x00194998	frFontGetParentGlyphCount	inferred	Loads the live pooled parent-glyph count at FrFontSystem+0x14C.
+0x001949B0	frFontFillGlyphMetrics	inferred	Fills one glyph's cell dimensions, advance and horizontal bearing, as stated in the adjacent source comment; twin=DDS2 0x0019C640.
 0x00194CD0	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x00194D20	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then func_00198088 [names_M33_SmallSweep2.tsv]
