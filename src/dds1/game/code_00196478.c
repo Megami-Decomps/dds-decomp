@@ -778,7 +778,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 }
 
 extern u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode);
-extern s32 func_00195E60(FrFontGlyph *text);
+extern s32 frFontCountGlyphChainNodes(FrFontGlyph *text);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
@@ -807,7 +807,7 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
         s32 maxWidth = 0;
         s32 i;
         s32 width;
-        for (i = 0; i < func_00195E60(handle); i++) {
+        for (i = 0; i < frFontCountGlyphChainNodes(handle); i++) {
             width = frFontMeasureGlyphStripWidth(i, handle);
             if (maxWidth < width) {
                 maxWidth = width;
