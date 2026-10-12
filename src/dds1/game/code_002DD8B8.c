@@ -1,21 +1,10 @@
 #include "common.h"
 #include "sdf_quaternion.h"
+#include "rw_matrix.h"
 #include "pcp_vu0.h"
 
 typedef float f32;
 
-
-typedef struct RwMatrix
-{
-    RwV3d right;
-    u32 flags;
-    RwV3d up;
-    u32 pad1;
-    RwV3d at;
-    u32 pad2;
-    RwV3d pos;
-    u32 pad3;
-} RwMatrix;
 
 extern void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d* axis, RwMatrix* matrix);
 
