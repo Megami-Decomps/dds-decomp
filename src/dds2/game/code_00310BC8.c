@@ -66,9 +66,6 @@ extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 
-extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
-extern s32 sdfTaskWorkRunAll(KwlnTask *task);
-extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void func_00312E20(void);
