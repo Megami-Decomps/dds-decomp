@@ -2297,12 +2297,13 @@ s32 btlCheckSpecialAbility(DatPartyRecord *record, s32 ability) {
 typedef struct DatSkillOwner {
     u16 flags;
     u16 unk2;
-    u16 partyIndex;
+    u16 enemyRecordIndex;
     u8 unk6[0x1C];
     u16 skills[0x18];
 } DatSkillOwner;
 
-s32 func_001AD118(DatSkillOwner *unit, s32 skill) {
+/* Search the first eight owner/enemy skill slots; return whether the ID occurs. */
+s32 btlHasSkillInFirstEightSlots(DatSkillOwner *unit, s32 skill) {
     s32 i;
 
     if (!(unit->flags & 0x20)) {
@@ -2313,7 +2314,7 @@ s32 func_001AD118(DatSkillOwner *unit, s32 skill) {
         }
     } else {
         for (i = 0; i < 8; i++) {
-            if (datEnemyRecords[unit->partyIndex].skills[i] == skill) {
+            if (datEnemyRecords[unit->enemyRecordIndex].skills[i] == skill) {
                 return 1;
             }
         }
@@ -2329,7 +2330,7 @@ s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
 }
 
 s32 btlSelectActorAction(s32 state) {
-    s32 selection = func_001AD310(state, 1);
+    s32 selection = btlSelectEnemyDropItem(state, 1);
     if (selection == 0) {
         selection = (effMiscRand((s32)effSharedRandomState) & 1) ? 2 : 9;
     }
@@ -2360,7 +2361,8 @@ extern s32 btlRollAiBucket(void);
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
-u32 func_001AD310(BtlUnit *enemyUnit, s32 mode) {
+/* Select an enemy item drop; keep DDS2's party ability bonus and event exclusions. */
+u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
     u16 count = 0;
     u16 bonus = 0;
     u32 selected = 0;
@@ -2518,7 +2520,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_00415238, controller->moneyEarned, amount);
     }
-    item = func_001AD310((s32)enemy, 0);
+    item = btlSelectEnemyDropItem((s32)enemy, 0);
     if (item != 0) {
         btlAddItemDrop(item);
     }

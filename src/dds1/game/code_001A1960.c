@@ -982,17 +982,18 @@ s32 btlCheckSpecialAbility(DatPartyRecord *object, s32 flag) {
 extern s8 effSharedRandomState[];
 
 s32 btlSelectActorAction(s32 object) {
-    s32 result = func_001A4130(object, 1);
+    s32 result = btlSelectEnemyDropItem(object, 1);
     if (result == 0) {
         result = (effMiscRand(effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
     return result;
 }
 
-s32 func_001A4130(s32 actorAddress, s32 mode) {
+/* Select an enemy item drop; mode 1 bypasses the story-flag override item. */
+s32 btlSelectEnemyDropItem(s32 actorAddress, s32 mode) {
     BtlUnit *actor = (BtlUnit *)actorAddress;
     DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
-    s32 action = 0;
+    s32 item = 0;
     u16 i;
 
     extern u32 btlRollAiBucket(void);
@@ -1000,15 +1001,15 @@ s32 func_001A4130(s32 actorAddress, s32 mode) {
     if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
         mdlFlagTest(enemy->overrideFlag) != 0) {
         if ((u8)btlRollAiBucket() < enemy->overrideChance) {
-            action = enemy->overrideAction;
+            item = enemy->overrideAction;
         }
     }
-    for (i = 0; i < 2 && action == 0; i++) {
+    for (i = 0; i < 2 && item == 0; i++) {
         if (enemy->unk3E[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
-            action = enemy->unk3E[i];
+            item = enemy->unk3E[i];
         }
     }
-    return action;
+    return item;
 }
 
 /* Accumulate one item drop; new IDs are discarded if all three slots are occupied. */
@@ -1086,7 +1087,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
     }
-    item = func_001A4130((s32)enemy, 0);
+    item = btlSelectEnemyDropItem((s32)enemy, 0);
     if (item != 0) {
         btlAddItemDrop(item);
     }

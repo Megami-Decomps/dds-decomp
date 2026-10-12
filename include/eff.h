@@ -810,10 +810,10 @@ typedef char EffPCPNeedleSlotSizeCheck[sizeof(EffPCPNeedleSlot) == 0x2C ? 1 : -1
 typedef char EffPCPNeedleWorkSizeCheck[sizeof(EffPCPNeedleWork) == 0x74 ? 1 : -1];
 
 #ifdef VERSION_DDS2
-extern EffPCPNeedleWork *func_0017DD50(EffPCPNeedleParams *);
+extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
 extern EffResourceWork *effCreateResourceEntryWork(s32);
 #else
-extern EffPCPNeedleWork *func_001760F8(EffPCPNeedleParams *);
+extern EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *);
 extern EffResourceWork *effCreateResourceEntryWork(u32);
 #endif
 

@@ -351,7 +351,8 @@ void effParamInitFromGlobal(void *work) {
     mdlProcessContextNodesAndTransforms(work, D_00325828);
 }
 
-void func_00162DE0(void *work) {
+/* Release the model context owned by parameter work. */
+void effParamReleaseModelWork(void *work) {
     mdlDestroyContext(work);
 }
 
@@ -399,7 +400,8 @@ void effParamScatterVectors(MdlCtx *work, void *matrix) {
     VU0_STORE_VF(vf30, thirdVector);
 }
 
-void func_00162ED8(void *work, u32 color) {
+/* Set model color and broadcast its alpha with neutral RGB to the resources. */
+void effParamSetModelColor(void *work, u32 color) {
     mdlBroadcastMasked(work, color);
 }
 

@@ -1782,9 +1782,9 @@
 0x00176098	effGetScatterNarrowBlock	inferred	Computes base at offset 0x68 plus index times object stride times 8.
 0x001760B0	effGetScatterEntry	inferred	Returns the indexed entry in a scatter effect resource array.
 0x001760C8	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
-0x001760F8	effNeedleCreateWork	inferred	U3
+0x001760F8	effNeedleCreateWork	inferred	Allocates needle work and slots, copies params, initializes radial resource/cell entries and slot timing; stale eff.h constructor prototype aligned in Namer1 batch 27.
 0x001763B8	effPCPNeedleFree	inferred	releases work handles +0x68/+0x6C/+0x70
-0x001763F0	effPCPNeedleCreate	inferred	spawn wrapper: param-set block 0 + init func_001760F8
+0x001763F0	effPCPNeedleCreate	inferred	spawn wrapper: param-set block 0 + effNeedleCreateWork
 0x00176A00	effPCPNeedleCopyVector	inferred	Copies one effect vector with PCP_COPY_VECTOR.
 0x00176A28	effSetResourceNormalStream	inferred	confidence=high; matched-C; src/dds1/game/code_00176A28.c:82:func_00176A28; Binds the external vector-normal array consumed by resource triangle drawing; the setter neither copies nor allocates the array.; source=names_P6.tsv:5 [names_qp12_apply.tsv]
 0x00176A30	effCreateResourceEntryWork	inferred	confidence=high; matched-C; src/dds1/game/code_00176A28.c:87:func_00176A30; Allocates resource work plus its entry array, initializes the matrix and scale, creates a draw-entry asset, initializes entry values and clears shared render-state work.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -8140,3 +8140,12 @@
 0x002647B0	brsAcknowledgeRewardMessage	inferred	Finishes the reward message window and notifies its task; DDS2 twin 0x0029BBC0. LiteH reward/stat batch.
 0x002647D0	mnuStartRewardDialogAndMotion	inferred	Displays reward-mode unit/stat text and queues the corresponding motion/effect; DDS2 twin 0x0029BC58. LiteH reward/stat batch.
 0x002649B0	brsAdvanceRewardPanelAfterMessage	inferred	Waits for the idle reward-panel message, applies pending reward state, and selects the next popup; DDS2 twin 0x0029BFB8. LiteH reward/stat batch.
+0x00176410	effNeedleCreateFromParams	inferred	confidence=high; forwards the supplied parameter prefix to effNeedleCreateWork; needle descriptor duplicate callback at 0x00353F94; DDS2 twin 0x0017E068. Namer1 batch 27.
+0x00176428	effNeedleUpdateTrails	inferred	confidence=high; advances orbit/axial motion and slot ages, computes camera-facing trail vertices/colors and rebuilds resource triangles; descriptor update callback at 0x00353F8C; DDS2 twin 0x0017E080. Namer1 batch 27.
+0x00176A10	effNeedleSetResourceMatrix	inferred	confidence=high; copies its matrix argument into work->resource->matrix with effCopyMatrixVU; DDS2 twin 0x0017E668. Namer1 batch 27.
+0x001770F8	effCopyMatrixVU	inferred	confidence=high; VU0 loads/stores the four matrix rows through vf28-vf31; called by effNeedleSetResourceMatrix; DDS2 twin 0x0017ED50. Namer1 batch 27.
+0x00162DE0	effParamReleaseModelWork	inferred	confidence=high; parameter callback delegates model-context teardown to mdlDestroyContext; native descriptor row 0x00353790; DDS2 twin 0x0016AA38. Namer1 batch 27.
+0x00162ED8	effParamSetModelColor	inferred	confidence=high; parameter color callback invokes mdlBroadcastMasked, which stores model color and broadcasts alpha with neutral RGB to resources; descriptor row 0x003537A4; DDS2 twin 0x0016AB30. Namer1 batch 27.
+0x00292CE0	sdfProjectPointInForwardConeVU	inferred	confidence=high; tests vf10 distance/facing against the camera forward cone, projects accepted points through the saved camera basis and viewport, returns success; called twice by mnuMeasureProjectedPerpendicularDistance; DDS2 twin 0x002D2D48. Namer1 batch 27.
+0x001A4130	btlSelectEnemyDropItem	inferred	confidence=high; defeat-reward caller passes its result to btlAddItemDrop; mode 1 bypasses conditional override, otherwise rolls enemy drop entries; DDS2 twin 0x001AD310 has party-bonus/event-selection differences. Namer1 batch 27.
+0x00294318	effCloneQueueForNode	inferred	confidence=high; type-5 effect-node create callback at 0x0034DF08 ignores its first argument and returns fileCloneQueueEntries(source); DDS2 twin 0x002D4380. Namer1 batch 27.

@@ -1305,7 +1305,7 @@ register-choice tie. Keep operands and memory effects accurate; register
 pinning, extra barriers and operand-order searches do not establish the source
 contract.
 
-Soft-float libcalls: the `nop` retail leaves in the delay slot of `jal` calls to the double compare helper (`func_002FC6C8`, `func_00292CE0`) comes from assembling with `as -g`; see "Assembler version and `-g`".
+Soft-float libcalls: the `nop` retail leaves in the delay slot of `jal dpcmp` (the double compare helper at DDS1 `0x002FC6C8`, called by `sdfProjectPointInForwardConeVU`) comes from assembling with `as -g`; see "Assembler version and `-g`".
 
 Uses: the colour-modulate function (`func_00151568` and copies in
 `billManager`, `parManager`, `code_0018CAC8`, `code_001FF030`, dds2 twins),
@@ -9309,4 +9309,37 @@ Check **CSE1 and GCSE PRE**, not just the final instructions or pointer-local sy
 A call result, a loaded pointer, a HIGH/LO_SUM root and a GP-small constant are not
 interchangeable. Do not add opaque getters, extra reads/stores, alternative owner
 views or compiler-flag changes merely to manufacture another provenance class.
+
+## Needle, model-parameter and effect-node callback names
+
+Namer1 batch 27 aligns nine DDS1/DDS2 callback or utility pairs and two DDS2
+functions with observed behavior. The needle descriptor's update and duplicate
+slots establish `effNeedleUpdateTrails` and `effNeedleCreateFromParams`; the
+resource-matrix setter calls the four-row VU copier `effCopyMatrixVU`.
+The parameter descriptor's model-context release and color slots establish
+`effParamReleaseModelWork` and `effParamSetModelColor`. The type-5 effect-node
+creation slot ignores its first argument and clones the supplied queue, hence
+`effCloneQueueForNode`.
+
+`sdfProjectPointInForwardConeVU` accepts its point in vf10, rejects distance or
+forward-facing failures, and projects accepted points through the saved camera
+basis and viewport. Its double `16.0` comparison, VU operations, statement order
+and return convention remain unchanged; do not replace that literal with `16.0f`.
+The historical soft-float example above refers to its `dpcmp` call, not to a
+second double-comparison helper.
+
+The defeat-reward caller consumes `btlSelectEnemyDropItem` through `btlAddItemDrop`;
+DDS2 retains its party-ability bonus, event exclusion and weighted selection.
+The existing `btlSelectActorAction` name is deliberately not corrected here:
+doing so would touch a claimed C caller. DDS2 `btlHasSkillInFirstEightSlots`
+names only the observable eight-slot search and does not imply that all owned
+skills are searched; its enemy branch indexes `datEnemyRecords` with the field
+at +0x4. `effBattleApplyUnitColorDirection` already named the identical DDS1
+implementation and now names its DDS2 twin.
+
+The obsolete raw constructor prototypes in `eff.h` are aligned with the existing
+`effNeedleCreateWork` definitions in both games, preserving their pointer return
+types and each game's resource-entry prototype. All function signatures,
+declaration order, casts, control flow and layout are otherwise unchanged;
+the remaining edits are identifiers and comments.
 
