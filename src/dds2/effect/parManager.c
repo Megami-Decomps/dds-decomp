@@ -202,7 +202,7 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     parDispatchKindInit(&effect->head.kindState, particleIndex);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00160EF8);
+INCLUDE_ASM(const s32, "effect/parManager", parUpdateBurstEmitter);
 
 
 void parInitColorRamp(ParColorRamp *p, s32 frames) {
