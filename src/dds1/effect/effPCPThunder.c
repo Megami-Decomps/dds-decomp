@@ -91,7 +91,7 @@ void effThunderReleaseVectorWork(EffThunderVectorWork *work) {
 }
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
-void func_00163508(void *destination, void *source) {
+void effThunderCopyVectorOrigin(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
@@ -387,12 +387,12 @@ void effThunderCreateWorkFromPackedParams(void *parameterTable) {
 }
 
 /* Direct parameter-pointer entry for indexed vector creation; ignore its result. */
-void func_00164020(void *parameters) {
+void effThunderSpawnIndexedVector(void *parameters) {
     effThunderWorkCreate(parameters);
 }
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
-void func_00164038(void *destination, void *source) {
+void effThunderCopyIndexedVectorOrigin(void *destination, void *source) {
     PCP_COPY_VECTOR(destination, source);
 }
 
@@ -731,7 +731,7 @@ extern f32 sdfSinPoly(f32);
 /* Build one spark's kind-0 strip between its lowered and current positions.
  * Every iteration emits two two-vector rows into that spark's own cell.
  */
-void func_00164BA8(EffThunderSparkWork *work, s32 index) {
+void effThunderBuildSparkStripCell(EffThunderSparkWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 negativeWidth[4] __attribute__((aligned(16)));
     f32 position[4] __attribute__((aligned(16)));
@@ -906,7 +906,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
  * Snapshot the entry parameters and age; initialization and geometry callbacks
  * can update the work while the frame's timing decision remains unchanged.
  */
-void func_00165110(EffThunderSparkWork *work) {
+void effThunderUpdateOrbitingSparks(EffThunderSparkWork *work) {
     f32 position[3];
     f32 origin[4] __attribute__((aligned(16)));
     u32 tintColor;
@@ -964,7 +964,7 @@ void func_00165110(EffThunderSparkWork *work) {
             work->head.position[0] = position[0];
             work->head.position[1] = position[1];
             work->head.position[2] = position[2];
-            func_00164BA8(work, i);
+            effThunderBuildSparkStripCell(work, i);
             renderCell->color = color;
             parPrependCellNode(spark->system);
         }
@@ -1319,7 +1319,7 @@ extern void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index);
 
 /* Allocate dual-system fragment work, creating the secondary system before the primary.
    Both systems share one fragment-state array; keep native dispatch/allocation order. */
-EffThunderFragmentWork *func_00165ED0(EffThunderFragmentParams *parameters) {
+EffThunderFragmentWork *effThunderCreateDualFragmentWork(EffThunderFragmentParams *parameters) {
     SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
@@ -1708,7 +1708,7 @@ void effThunderRandomizeCell(EffThunderCellWork *work, s32 index) {
 /* Build a kind-2 cell with three nested width bands. Each randomized step
  * emits two six-vector rows and then turns the direction around the view axis.
  */
-void func_00166C18(EffThunderCellWork *work, s32 index) {
+void effThunderBuildBandedCell(EffThunderCellWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 bandWidth[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
@@ -1859,7 +1859,7 @@ void func_00166C18(EffThunderCellWork *work, s32 index) {
 }
 
 
-extern void func_00166C18(EffThunderCellWork *work, s32 index);
+extern void effThunderBuildBandedCell(EffThunderCellWork *work, s32 index);
 
 /* Delay -> active geometry -> render-cell alpha fade -> restart.
    Unlike fragment/vector state, color lives in the render cells; submit even for count <= 0. */
@@ -1873,7 +1873,7 @@ void effThunderCellUpdate(EffThunderCellWork *work) {
         do {
             if (cell->delayFrames == 0) {
                 if (cell->activeFrames != 0) {
-                    func_00166C18(work, i);
+                    effThunderBuildBandedCell(work, i);
                     cell->activeFrames--;
                 } else if (renderCells[i].color & EFF_THUNDER_ALPHA_MASK) {
                     renderCells[i].color -= EFF_THUNDER_ALPHA_FADE_STEP;
@@ -1923,7 +1923,7 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 
 extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
-extern void func_001673D0(EffThunderFragmentWork *work, s32 index, const u128 *seed);
+extern void effThunderBuildJoinedFragmentStrip(EffThunderFragmentWork *work, s32 index, const u128 *seed);
 
 
 void effThunderGroupRelease(EffThunderGroup *group) {
@@ -1952,7 +1952,7 @@ extern f32 sdfSinPoly(f32);
  * Each iteration emits two rows; seed[3] is the connection anchor used by
  * this profile, not its middle vertex. XYZ calculations and drawing ignore W.
  */
-void func_001673D0(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
+void effThunderBuildJoinedFragmentStrip(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -2180,7 +2180,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
                 previous = group->handles[i - 1];
-                func_001673D0(work, j,
+                effThunderBuildJoinedFragmentStrip(work, j,
                     previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
             } else {
                 effThunderBuildFragmentStrip(work, j);
@@ -2273,7 +2273,7 @@ void effApplyParamBlockPair(void *paramTable) {
     func_00167BF8(firstBlock, secondBlock);
 }
 
-EffPcpThunderGroup *func_00167EC0(EffPcpThunderGroup *src) {
+EffPcpThunderGroup *effThunderCloneCurveGroup(EffPcpThunderGroup *src) {
     u32 count = src->params.groupCount;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));
     EffPcpThunderGroup *work = (EffPcpThunderGroup *)sdfResourceRetainAddress(allocation);
@@ -2378,7 +2378,7 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *);
  */
 typedef f32 EffThunderVector[4] __attribute__((aligned(16)));
 
-void func_001681C0(EffPcpThunderGroup *group) {
+void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
     EffPCPEventPlace place __attribute__((aligned(16)));
     EffThunderVector start;
     EffThunderVector direction;
@@ -2803,11 +2803,11 @@ void func_001681C0(EffPcpThunderGroup *group) {
 }
 
 
-void func_00169928(void *dst, void *src) {
+void effCopyResourceGroupVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_00169938(s32 arg0, u32 arg1) {
+void effThunderSetCurveGroupTint(s32 arg0, u32 arg1) {
     *(u32 *)(arg0 + 0x54) = arg1;
 }
 
