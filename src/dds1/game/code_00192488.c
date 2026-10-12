@@ -667,7 +667,7 @@ s32 effGetFontListCount(void) {
     return frFontResourceList.count;
 }
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_00193920);
+INCLUDE_ASM(const s32, "game/code_00192488", frFontInitializeGlyphAtlas);
 
 INCLUDE_SDATA(const s32, "game/code_00192488", D_003BB150);
 

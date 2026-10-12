@@ -163,7 +163,7 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     }
 }
 
-extern void func_00193920(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+extern void frFontInitializeGlyphAtlas(u32 bufferBase, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 extern void frFontUploadImageBlocks(void);
 extern u32 D_003D6E20[];
 extern s32 D_003BD814;
@@ -202,7 +202,7 @@ void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
     for (i = 0; i < 2; i++) {
         frFontWork.glyphSlots[i] = NULL;
     }
-    func_00193920(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
+    frFontInitializeGlyphAtlas(frFontWork.atlas.bufferBase, glyphsPerRow, rowCount, 0x18, 0x18, 0xC);
     frFontWork.itemPool = itfCreateMemNodeRing(0x2C, poolCount);
     frFontWork.glyphPool = itfCreateMemNodeRing(0x44, glyphRingCount);
     frFontLoadDefaultFonts();

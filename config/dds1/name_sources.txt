@@ -2422,6 +2422,7 @@
 0x001938F8	effSetChanStep	inferred	stores channel-A step float at +0x14
 0x00193900	effGetFontListHead	inferred	returns address of D_003D68C0 font list header
 0x00193910	effGetFontListCount	inferred	returns word at D_003D68D8, the +0x18 count of the font list
+0x00193920	frFontInitializeGlyphAtlas	inferred	Initializes the font glyph atlas grid from its GS buffer, cells-per-row and row count, using the supplied glyph-cell dimensions and spacing. Called during font-system startup; DDS2 counterpart is 0x0019B558.
 0x00193B70	fmGslReleaseActiveResourceBuffers	inferred	Frees both allocated resource buffers and clears their active flag. [names_reviewed11.tsv]
 0x00193BB8	frFontDetachFirstResourceNode	inferred	confidence=high; src/dds1/interface/fmGslCont.c:func_00193BB8; Removes the first nonsentinel resource node, reconnects both neighbors and decrements the list node count. [names_qp9.tsv]
 0x00193C08	frFontListInsert	inferred	doubly-linked insert after D_003D68C0 head, bumps count at +0x18
