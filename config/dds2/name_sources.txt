@@ -7703,3 +7703,8 @@
 0x00326018	sdfVectorRotateY	inferred	high confidence; x/z scalar cosine/sine rotation about Y, leaving y/other lanes; no handedness assumption or VU-helper substitution. [Namer1 batch 32]
 0x00326158	sdfVectorRotateZ	inferred	high confidence; x/y scalar cosine/sine rotation about Z, leaving z/other lanes; original trig count and four-lane temporary preserved. [Namer1 batch 32]
 0x003262A8	sdfVectorRotateAxis	inferred	high confidence; normalizes axis, forms scalar Rodrigues matrix and rotates three source components; native normalization and libm behavior unchanged. [Namer1 batch 32]
+0x002B1EA8	mnuDrawPartySelectionPreviewPanel	inferred	Draws the selected party member's panel geometry, portrait, HP/MP bars and label. [LiteH menu naming batch 13]
+0x002B3CA0	ptySkillMenuDrawEquippedSkillEntry	inferred	Draws one equipped-skill list entry through the menu's row callback. [LiteH menu naming batch 13]
+0x002B6B00	ptySkillMenuDrawEntry	inferred	Draws one selectable skill row with its cost/range and linkage display; DDS1 twin 0x00277DF8. [LiteH menu naming batch 13]
+0x002B6D78	ptySkillMenuBuildLinkageSkills	inferred	Builds available linkage-skill rows for the active menu; DDS1 twin 0x0027A540. [LiteH menu naming batch 13]
+0x002B8E30	mnuScrollListToPreviousPage	inferred	Moves the list cursor and visible window to the previous page, then updates scroll flags. [LiteH menu naming batch 13]

@@ -366,7 +366,7 @@ extern u8 (*D_00435E64)[17];
 extern char D_00437C00[];
 extern u8 brsGetLevelStepForValue(s32);
 extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
-extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
+extern void ptySkillMenuDrawEquippedSkillEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
@@ -924,7 +924,7 @@ s32 mnuHandlePartySelectionInput(KwlnTask *callback) {
     return 0;
 }
 
-void func_002B1EA8(MenuContext *context, MenuPageBar *hpBar, MenuPageBar *mpBar,
+void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar, MenuPageBar *mpBar,
                    DatPartyRecord *entry, EffectSlotSet *portrait, u32 fade,
                    u32 frameFade, s32 dimmed)
 {
@@ -1058,7 +1058,7 @@ extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuDrawPartySelectionPreview(MenuContext *);
-extern void func_002B1EA8(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
+extern void mnuDrawPartySelectionPreviewPanel(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
 
 /* Refresh the selected party member's effect pair and profile panel. */
 void mnuDrawPartySelectionPreview(MenuContext *context) {
@@ -1109,7 +1109,7 @@ void mnuDrawPartySelectionPreview(MenuContext *context) {
         menu->panelSnapshots[selectionKey][0].activeEffect = context->partyWindow.slots[selectionKey].hp.activeEffect;
         menu->panelSnapshots[selectionKey][1].activeEffect = context->partyWindow.slots[selectionKey].mp.activeEffect;
     }
-    func_002B1EA8(context, &menu->panelSnapshots[selectionKey][0], &menu->panelSnapshots[selectionKey][1], record, marker,
+    mnuDrawPartySelectionPreviewPanel(context, &menu->panelSnapshots[selectionKey][0], &menu->panelSnapshots[selectionKey][1], record, marker,
                   menu->fadeA, menu->fadeB, found);
     profilePanel = mnuCreateProfilePanel(record);
     if (menu->profileSaved != 0) {
@@ -1645,7 +1645,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B3CA0);
+INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuDrawEquippedSkillEntry);
 
 s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
@@ -1675,7 +1675,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, (struct EffectSlotSet *)(u32)context->resourceHandle, 0xD, placement);
     window->list->context = context;
-    window->list->drawCallback = func_002B3CA0;
+    window->list->drawCallback = ptySkillMenuDrawEquippedSkillEntry;
     for (i = 0; i < skillCount; i++) {
         u16 skill = datGameState->party[selected].effectData[i];
         MenuListNode *node;
@@ -2815,7 +2815,7 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6B00);
+INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuDrawEntry);
 
 /* Collect up to max pointers to occupied, frontline party slots. */
 void mnuCollectFrontlinePartySlots(DatPartyRecord **out, s32 max) {
@@ -2854,7 +2854,7 @@ s32 mnuHasAvailableSlotResource(s32 id) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B6D78);
+INCLUDE_ASM(const s32, "game/code_002B0278", ptySkillMenuBuildLinkageSkills);
 
 u32 mnuDestroySkillSelectionWindow(KwlnTask *callback) {
     s32 party;
@@ -2872,7 +2872,7 @@ u32 mnuResetSelection(KwlnTask *callback) {
     mnuCreateItemState(callback);
     context = kwlnTaskGetUserValue(callback);
     state = (SkillMenuRuntime *)((MenuContext *)context)->party;
-    func_002B6D78(callback);
+    ptySkillMenuBuildLinkageSkills(callback);
     mnuFlagActiveWindows(&((MenuContext *)context)->partyWindow);
     state->unk2C = 0;
     mnuBeginWindowFadeTransition(state->selectedWindow, &((MenuContext *)context)->transition);
@@ -3831,7 +3831,7 @@ MenuListNode *mnuScrollListToEnd(MenuList *list) {
     return list->cursor;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8E30);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuScrollListToPreviousPage);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags) {
     *flags &= ~1;

@@ -4,7 +4,7 @@
 #include "mnu_scene_work.h"
 #include "dsp_name.h"
 
-extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
 extern TaskWork *mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 mnuDrawMantraSparkScene();
@@ -59,11 +59,11 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
         func_0025D2F8(0, 0, 1, scaled, scene, 0x53);
         func_00254758(0, 0, 1, 0x80, 0x53);
-        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-        func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
         mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
-        func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
+        mnuDrawSpriteFromPlacementTable(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 2:
         frac = (f32)*(s32 *)(nodePrev + 0x20) / 10.0f;
@@ -73,11 +73,11 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
         func_0025D2F8(0, 0, 1, scaled, scene, 0x53);
         func_00254758(0, 0, 0, 0x80, 0x53);
-        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-        func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
         mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
-        func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
+        mnuDrawSpriteFromPlacementTable(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 1:
         /* frac keeps its 0.0f initializer when raw == 0. */
@@ -92,41 +92,41 @@ s32 mnuDrawMantraCostTransition(void) {
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
         func_0025D2F8(0, 0, 1, (s32)(frac * 128.0f), scene, 0x53);
         func_00254758(0, 0, 1, 0x80, 0x53);
-        func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
-        func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, 0x80, 0xF, 0x53);
+        mnuDrawSpriteFromPlacementTable(0, 0, 0, 0x80, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
         mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, 0x80, 0x53);
-        func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
+        mnuDrawSpriteFromPlacementTable(0x20, 0, 0, 0x80, 0xB, 0x53);
         break;
     default:
         break;
     }
     mnuChooseDisplaySpriteKindFromEntryFlags(scene, 0x80, 0x53);
-    func_0024E260(0, 0, 0, 0x80, 0xD, 0x53);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, 0x80, 0xD, 0x53);
     return 0;
 }
 
 void mnuDrawDisplaySpriteAndPanelMarks(s32 p0, s32 a1, s32 a2) {
     mnuDrawMantraSparkScene();
-    func_0024E260(0, 0, 0, a1, 0x5A, a2);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, a1, 0x5A, a2);
     itfDspDrawMarksA(a1, a2);
 }
 
 /* Three sprite layers drawn at the origin for one draw context. */
 void func_002546D8(s32 scale, s32 context) {
-    func_0024E260(0, 0, 0, scale, 0x4F, context);
-    func_0024E260(0, 0, 0, scale, 0xC, context);
-    func_0024E260(0, 0, 0, scale, 0xD, context);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, scale, 0x4F, context);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, scale, 0xC, context);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, scale, 0xD, context);
 }
 
 void func_00254758(s32 x, s32 y, s32 z, s32 drawContext, s32 drawArgument) {
-    func_0024E260(x, y, z, drawContext, 14, drawArgument);
+    mnuDrawSpriteFromPlacementTable(x, y, z, drawContext, 14, drawArgument);
 }
 
 void func_00254778(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4) {
-    func_0024E260(a0, a1, a2, a3, 0x47, a4);
-    func_0024E260(a0, a1, a2, a3, 0x48, a4);
-    func_0024E260(a0, a1, a2, a3, 0x49, a4);
+    mnuDrawSpriteFromPlacementTable(a0, a1, a2, a3, 0x47, a4);
+    mnuDrawSpriteFromPlacementTable(a0, a1, a2, a3, 0x48, a4);
+    mnuDrawSpriteFromPlacementTable(a0, a1, a2, a3, 0x49, a4);
 }
 
 typedef struct {
@@ -186,7 +186,7 @@ void func_00254810(s32 x, s32 y, s32 z, s32 alpha, DspTableWindowContext *window
     u8 scratch[0x20];
 
     selectedValue[1] = alpha;
-    func_0024E260(x, y, z, alpha, sprites.spriteIndices[progress->partyRecord->unitId] + 0x4A, drawContext);
+    mnuDrawSpriteFromPlacementTable(x, y, z, alpha, sprites.spriteIndices[progress->partyRecord->unitId] + 0x4A, drawContext);
     scene->effectRoot->shade->shade = (s32)((f32)(alpha << 8) * 0.0078125f);
     effUpdateAttached(0xD80, 0xC30, 1, scene->effectRoot, 0x53);
     memset(scratch, 0, sizeof(scratch));

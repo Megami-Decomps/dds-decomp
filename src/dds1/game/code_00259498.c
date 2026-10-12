@@ -21,7 +21,7 @@ extern void *memcpy(void *, const void *, u32);
 
 extern f32 sdfSinPoly(f32);
 
-extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
@@ -30,13 +30,13 @@ extern TaskWork *mnuSceneResourceContext;
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0024EC08(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void func_00258A70(s32, s32, s32, s32, u32, f32, f32, s32);
+extern void mnuDrawMantraEntryStatusIcon(s32, s32, s32, s32, u32, f32, f32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_00259498);
+INCLUDE_ASM(const s32, "game/code_00259498", mnuDrawMantraGridEntry);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
-void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
+void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
                    MnuProfileProgress *profileOwner, SdfGrid *grid,
                    f32 scaleX, f32 scaleY, SdfGridCell *entry,
                    s32 context) {
@@ -89,13 +89,13 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
                 }
             }
         }
-        func_00258A70(drawX, drawY, depth,
+        mnuDrawMantraEntryStatusIcon(drawX, drawY, depth,
                       (s32)((f32)alpha * (pulse * 0.4f + 0.2f)),
                       flags, scaleX, scaleY, context);
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00259498", func_00259B40);
+INCLUDE_ASM(const s32, "game/code_00259498", mnuDrawMantraGridEntryIndicators);
 
 
 extern char D_003BC458[];
@@ -103,7 +103,7 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern u32 mnuGetSelectedNodeValue(void);
-extern u32 func_00258508(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
+extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
 extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -135,7 +135,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
             if (states[record->ids[i]].state != 0) {
-                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
             }
         }
     }
@@ -172,56 +172,56 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     }
 }
 
-void func_0025AA20(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraUpNavigationPulse(s32 frame, s32 size, s32 param) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    func_0024E260(0, -10, 0, (s32)(scale * t), 0, param);
+    mnuDrawSpriteFromPlacementTable(0, -10, 0, (s32)(scale * t), 0, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    func_0024E260(0, 0, 0, (s32)(scale * t), 0, param);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 0, param);
 }
 
-void func_0025AB38(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 param) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    func_0024E260(10, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawSpriteFromPlacementTable(10, 0, 0, (s32)(scale * t), 1, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    func_0024E260(0, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 1, param);
 }
 
-void func_0025AC50(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 param) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    func_0024E260(0, 10, 0, (s32)(scale * t), 2, param);
+    mnuDrawSpriteFromPlacementTable(0, 10, 0, (s32)(scale * t), 2, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    func_0024E260(0, 0, 0, (s32)(scale * t), 2, param);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 2, param);
 }
 
-void func_0025AD68(s32 frame, s32 size, s32 param) {
+void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 param) {
     f32 x = frame;
     f32 scale = size;
     f32 t;
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    func_0024E260(-10, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawSpriteFromPlacementTable(-10, 0, 0, (s32)(scale * t), 3, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
 void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 param) {
@@ -270,22 +270,22 @@ void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 p
 
         switch (i) {
         case 0:
-            func_0025AA20(pulse->frame,
+            mnuDrawMantraUpNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
                           param);
             break;
         case 1:
-            func_0025AC50(pulse->frame,
+            mnuDrawMantraDownNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
                           param);
             break;
         case 2:
-            func_0025AD68(pulse->frame,
+            mnuDrawMantraLeftNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
                           param);
             break;
         case 3:
-            func_0025AB38(pulse->frame,
+            mnuDrawMantraRightNavigationPulse(pulse->frame,
                           (s32)((f32)(inputScale * pulse->alpha[i]) * 0.0078125f),
                           param);
             break;
@@ -351,7 +351,7 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
                                     0, currencyText, 0, context);
 }
 
-void func_0025B350(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
+void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
     u32 prerequisiteFlags[4];
     MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;
@@ -375,7 +375,7 @@ void func_0025B350(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 su
     if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
             if (states[record->ids[i]].state != 0) {
-                prerequisiteFlags[i] = func_00258508(i, scene, states, selection);
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
             }
         }
         /* The prerequisite markers are no longer drawn; only their colours remain. */

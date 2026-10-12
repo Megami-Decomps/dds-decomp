@@ -7,7 +7,7 @@
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void mnuDrawSelectedMantraEntry(MenuSceneWork *, s32, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
-extern void func_0024E260(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 context) {
     itfDspDrawStrip(0, 0, 0, scale, context);
@@ -76,7 +76,7 @@ void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, surface);
 }
 
-extern void func_002593E0(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
+extern void mnuUpdateMantraGridEntry(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
 extern TaskWork *mnuSceneResourceContext;
 
 void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *grid) {
@@ -89,25 +89,25 @@ void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *gr
         cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
             if (cell[col].value != 0) {
-                func_002593E0(selection, grid, &cell[col]);
+                mnuUpdateMantraGridEntry(selection, grid, &cell[col]);
             }
         }
     }
 }
 
 
-extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
-extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
-extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
-extern void func_00257ED0(s32, s32, s32, s32, MenuSceneWork *, s32);
-extern void func_00258B90(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
+extern void mnuDrawScaledSpriteAtCoordinatePlacement(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern void mnuDrawMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
+extern void mnuDrawScaledMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
+extern void mnuDrawMantraGridEntryIndicators(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
+extern void mnuDrawMantraCursorTrail(s32, s32, s32, s32, MenuSceneWork *, s32);
+extern void mnuDrawMantraGridFeedback(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern TaskWork *mnuSceneResourceContext;
 
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
  * selected entry with its offsets from the display table. */
-void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+void mnuDrawMantraPulseGridAtUnitScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
                    MnuProfileProgress *selection, SdfGrid *grid,
                    s32 arg6) {
     MenuSceneWork *display;
@@ -117,14 +117,14 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
 
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
-        func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                func_00259498(arg0, arg1, arg2, arg3, selection, grid, cell, arg6);
+                mnuDrawMantraGridEntry(arg0, arg1, arg2, arg3, selection, grid, cell, arg6);
             }
             cell++;
             n--;
@@ -134,10 +134,10 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             ? 0x1E
             : 0x1A;
     for (row = 0; row <= n; row++) {
-        func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
     }
-    func_00257ED0(0, 0, arg2, arg3, display, arg6);
-    func_00258B90(arg0 + D_0036B7F0[selection->profileId][2],
+    mnuDrawMantraCursorTrail(0, 0, arg2, arg3, display, arg6);
+    mnuDrawMantraGridFeedback(arg0 + D_0036B7F0[selection->profileId][2],
                   arg1 + D_0036B7F0[selection->profileId][3],
                   arg2, arg3, &display->gridFeedback, arg6);
     for (row = 0; row < 0x11; row++) {
@@ -145,7 +145,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
         n = 0xE;
         do {
             if (cell->value != 0) {
-                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, cell, arg6);
+                mnuDrawMantraGridEntryIndicators(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, cell, arg6);
             }
             cell++;
             n--;
@@ -157,7 +157,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
  * loops and the final-row bound in the band loop: one declared type, one
  * neutral name, as a C89 programmer with all declarations at the top would
  * write. That reuse is what retail's bytes require. */
-void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
+void mnuDrawMantraPulseGridAtScale(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
                    MnuProfileProgress *selection, SdfGrid *grid, s32 arg6,
                    f32 scaleX, f32 scaleY) {
     MenuSceneWork *display;
@@ -167,14 +167,14 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
 
     display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
-        func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                func_00259890(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
+                mnuDrawScaledMantraGridEntry(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
             }
             cell++;
             n--;
@@ -184,14 +184,14 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             ? 0x1E
             : 0x1A;
     for (row = 0; row <= n; row++) {
-        func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, scaleX, scaleY, arg6);
+        mnuDrawScaledSpriteAtCoordinatePlacement(arg0, arg1, arg2, arg3, row, 0x20, scaleX, scaleY, arg6);
     }
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
             if (cell->value != 0) {
-                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
+                mnuDrawMantraGridEntryIndicators(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
             }
             cell++;
             n--;
@@ -199,7 +199,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     }
 }
 
-void func_00257BD8(MenuSceneWork *work, MnuProfileProgress *selection) {
+void mnuUpdateMantraPulseGrid(MenuSceneWork *work, MnuProfileProgress *selection) {
     mnuAdvanceMantraPulseGridEntries(selection, work->gridHandle);
     mnuAdvanceWrappingFrame(&work->coordinateRing.frame);
 }
@@ -213,7 +213,7 @@ void mnuDrawMantraPulseFrame(s32 x, s32 y, s32 depth, s32 amount,
     s32 offsetY;
 
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    func_00257BD8(work, selection);
+    mnuUpdateMantraPulseGrid(work, selection);
     grid = work->gridHandle;
     offsetX = -9 - work->cursorPosition.x;
     offsetY = 0x45 - work->cursorPosition.y;
@@ -229,19 +229,19 @@ void mnuDrawMantraPulseFrame(s32 x, s32 y, s32 depth, s32 amount,
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
     sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
-    func_00257718(x + offsetX, y + offsetY, 1, amount, selection, grid, surface);
+    mnuDrawMantraPulseGridAtUnitScale(x + offsetX, y + offsetY, 1, amount, selection, grid, surface);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
     sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surface);
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, surface);
 }
 
-void func_00257DF0(MenuSceneWork *work, s32 layer) {
+void mnuDrawMantraGridSelectionMarkers(MenuSceneWork *work, s32 layer) {
     s32 x = work->entryPosition.x - work->cursorPosition.x - 9;
     s32 y = work->entryPosition.y - work->cursorPosition.y + 0x45;
 
-    func_0024E260(x, y, 0, 0x80, 0x3E, layer);
-    func_0024E260(x, y, 0, 0x80, 0x3D, layer);
+    mnuDrawSpriteFromPlacementTable(x, y, 0, 0x80, 0x3E, layer);
+    mnuDrawSpriteFromPlacementTable(x, y, 0, 0x80, 0x3D, layer);
 }
 
 void mnuCopySceneCoordinates(MenuSceneWork *work) {
@@ -268,7 +268,7 @@ void mnuAdvanceWrappingFrame(s32 *frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00257200", func_00257ED0);
+INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraCursorTrail);
 
 INCLUDE_RODATA(const s32, "game/code_00257200", D_003AF950);
 

@@ -100,7 +100,7 @@ void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 pl
                          context);
 }
 
-void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
+void mnuDrawSpriteFromPlacementTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,
@@ -360,7 +360,7 @@ void func_0024EC08(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     }
 }
 
-void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
@@ -489,7 +489,7 @@ void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s
                   context);
 }
 
-void func_0024F338(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 spriteIndex, s32 flags, s32 context, f32 scaleX,
                    f32 scaleY) {
     {

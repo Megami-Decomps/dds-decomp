@@ -101,7 +101,7 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
-extern s32 func_002B8E30();
+extern s32 mnuScrollListToPreviousPage();
 
 extern void func_002BE730();
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
@@ -1791,7 +1791,7 @@ void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *bu
     if (active != 0) {
         if (list->count >= list->visibleCount) {
             if (*buttons & 0x400) {
-                top = func_002B8E30(list);
+                top = mnuScrollListToPreviousPage(list);
             }
             if (*buttons & 0x800) {
                 bottom = mnuScrollListToEnd(window->list);
