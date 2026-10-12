@@ -805,13 +805,16 @@ s32 fldReleaseIdleSceneActorResources(BtlUnit *actor) {
     return btlCountTasksByKind(0x2E) == 0;
 }
 
-void func_001D48E0(void) {
+/* Empty entry callback for the retail NON action state. */
+void btlEnterNonActionState(void) {
 }
 
-void func_001D48E8(void) {
+/* The retail NON state's update callback performs no work. */
+void btlUpdateNonActionState(void) {
 }
 
-void func_001D48F0(s32 task) {
+/* Enter STANDBY DEAD by clearing this action's pre-status-processing flag. */
+void btlEnterStandbyDeadState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xfffffdff;
 }
 
@@ -865,7 +868,8 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
     }
 }
 
-void func_001D4A30(s32 task) {
+/* Initialize the retail STANDBY action flags without changing their bit meanings. */
+void btlEnterStandbyState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = (((ActionStateLink *)task)->pendingFlags | 0x10) & ~0x200;
 }
 
@@ -893,7 +897,8 @@ void btlUnitStateSelectAfterAction(u8 *task) {
     }
 }
 
-void func_001D4B90(s32 task) {
+/* Enter the retail START state by clearing action flag 0x10. */
+void btlEnterStartActionState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xffffffef;
 }
 
@@ -1031,7 +1036,8 @@ void btlProcessStatusRecoveryAction(ActionStateLink *task) {
     btlDispatchStateHandler(task, 0x1C);
 }
 
-void func_001D4FE0(void) {
+/* Empty entry callback for BAD_BEFORE, the pre-action status-processing state. */
+void btlEnterPreActionStatusState(void) {
 }
 
 /* Starts the command sound tasks and the follow-up action for the acting
@@ -1219,7 +1225,8 @@ extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
 extern void fldMarkActiveSceneScriptState(void);
 extern s32 btlSetTaskPhase2(void);
 
-void func_001D5668(ActionStateLink *task) {
+/* Validate/copy the selected target list and initialize the actor's chosen command. */
+void btlInitializeActorCommandState(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
     u32 state;
     BtlIndexList *selected;
@@ -1296,7 +1303,8 @@ void func_001D5668(ActionStateLink *task) {
     }
 }
 
-void func_001D5938(s32 task) {
+/* Allow the AI updater to bind this acting unit's script slot once again. */
+void btlEnterAiActionState(s32 task) {
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xffffff7f;
 }
 
@@ -1380,7 +1388,8 @@ s32 btlCommandStateSelectB(ActionStateLink *task) {
     }
 }
 
-void func_001D5BD8(void) {
+/* Empty entry callback for the retail AUTO action state. */
+void btlEnterAutoActionState(void) {
 }
 
 extern void func_001DD390(u8 *command, u8 *argument);
@@ -2003,7 +2012,8 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
 }
 
 
-void func_001D7228(void) {
+/* Empty entry callback for the retail SKILL action state. */
+void btlEnterSkillActionState(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
@@ -2641,7 +2651,8 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
 }
 
 /* Command-state callbacks mark the same world unit as the return/end handlers. */
-void func_001DA1F8(ActionStateLink *task) {
+/* Mark the HUMAN-state actor in progress; use the established DDS1 callback name. */
+void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
@@ -2936,7 +2947,8 @@ void btlScheduleBatStateModelChange(u8 *task) {
     }
 }
 
-void func_001DACE0(ActionStateLink *task) {
+/* Mark the actor in progress on entry to DDS2's retail TUNING state. */
+void btlEnterTuningActionState(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
@@ -3026,7 +3038,8 @@ void btlStartAlternateModelChange(ActionStateLink *action) {
 }
 
 
-void func_001DB048(void) {
+/* Empty entry callback for the retail WAIT action state. */
+void btlEnterWaitActionState(void) {
 }
 
 void btlCommandTaskStartEffects(ActionStateLink *task) {
@@ -3199,7 +3212,8 @@ extern void btlSyncPlayerWork(BtlUnit *unit);
 extern void btlSynchronizePartyActorRecords(BtlUnit *unit, u8 index);
 extern void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta);
 
-void func_001DBE70(ActionStateLink *task) {
+/* Reload the linked party unit and queue load-dependent motion, lighting and effects. */
+void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     BtlUnit *unit = task->indexWork.linkedUnit;
     DatPartyRecord *record;
     BtlRuntimeTask *load;
@@ -3429,7 +3443,8 @@ void btlSchedulePressStateSceneAction(u8 *unit) {
     btlDispatchStateHandler(unit, 0x1b);
 }
 
-void func_001DC838(void) {
+/* Empty entry callback for the retail PACKET action state. */
+void btlEnterPacketActionState(void) {
 }
 
 void btlAdvanceStateWhenLinkedTasksFinish(ActionStateLink *unit) {
@@ -3591,7 +3606,8 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
 }
 
 
-void func_001DCD80(void) {
+/* Empty entry callback for the retail DEAD action state. */
+void btlEnterDeadActionState(void) {
 }
 
 void btlCommandTaskReleaseActor(ActionStateLink *task) {
@@ -3634,13 +3650,16 @@ void btlRunHookAndAdvanceUnitState(ActionStateLink *unit) {
     btlDispatchStateHandler(unit, 0x1B);
 }
 
-void func_001DCEB0(void) {
+/* Empty entry callback for the retail DEBUG action state. */
+void btlEnterDebugActionState(void) {
 }
 
-void func_001DCEB8(void) {
+/* The retail DEBUG state's update callback performs no work. */
+void btlUpdateDebugActionState(void) {
 }
 
-void func_001DCEC0(void) {
+/* Initialize the battle debug-menu tables on entry to the retail TEST state. */
+void btlEnterTestActionState(void) {
     func_0022F068();
 }
 
