@@ -2457,7 +2457,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     descriptor->append(descriptor, command);
 }
 
-void func_0012A5D8(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
+void fldSubmitGsGradientQuadFloatRect(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
     s32 coords[8];
     SdfListHead *command;
     SdfDrawPacket *packet;
@@ -2505,7 +2505,7 @@ void func_0012A5D8(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a
     descriptor->append(descriptor, command);
 }
 
-void func_0012A890(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
+void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
     s32 coords[8];
     SdfListHead *command;
     SdfDrawPacket *packet;
@@ -8464,7 +8464,7 @@ extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 
 /* Advance an actor slot's first/second interpolation (ease-weighted for 40-frame moves) or start its door
  * transition, returning the current values for the key. */
-s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z) {
+s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,

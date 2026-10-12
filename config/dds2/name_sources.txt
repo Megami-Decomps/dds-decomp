@@ -7390,3 +7390,4 @@
 0x0018C078	effPcpEventWorkSetPosition	inferred	confidence=high; matched-C; Native PCP callback table 003B0EA8 position slot; actual EffPCPMapEventWork.params.position owner confirms the leading VU vector copy. DDS1 twin 00184420. Namer1 batch 15.
 0x0018C088	effPcpEventWorkSetScale	inferred	confidence=high; matched-C; Native PCP callback table scale slot stores +2C; actual map-event owner initializes and consumes params.scale. DDS1 twin 00184430. Namer1 batch 15.
 0x0018C090	effPcpEventWorkSetColor	inferred	confidence=high; matched-C; Native PCP callback table color slot stores packed color +3C, consumed for child tint/fading. DDS1 twin 00184438. Namer1 batch 15.
+0x0012CB08	fldSubmitGsGradientQuadFloatRect	inferred	confidence=high; matched-C; src/dds2/field/fldFileResolver.c:2562; Builds a four-corner GS gradient quad from RGBA values and float rectangle dimensions, then appends it to the active field surface. twin=0x0012A5D8 (DDS1). LiteG batch 5.

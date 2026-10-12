@@ -702,6 +702,7 @@ fldSubmitGsCommandWord = 0x0012BC40; // type:func
 fldSubmitPackedRectangleGsPacket = 0x0012C360; // type:func
 fldSubmitGsGradientTriangle = 0x0012C650; // type:func
 fldSubmitGsGradientQuad = 0x0012C888; // type:func
+fldSubmitGsGradientQuadFloatRect = 0x0012CB08; // type:func
 fldSubmitTaggedGsRectangle = 0x0012CDC0; // type:func
 fldSubmitPrimaryFramePacket = 0x0012D070; // type:func
 fldSubmitAlternateFramePacket = 0x0012D110; // type:func
