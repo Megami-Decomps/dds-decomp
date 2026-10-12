@@ -63,7 +63,7 @@
 0x00231C88  # reads $16 before setting it
 0x00231C90  # reads $16 before setting it
 0x00232488  # reads $17 before setting it
-0x002324F8  # branched into from func_00232438
+0x002324F8  # branched into from evtEventViewerCopyEffectSetupPayload
 0x00232530  # branched into from func_002324F8
 0x00232540  # branched into from func_00232530
 0x00232550  # branched into from func_00232540

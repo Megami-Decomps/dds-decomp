@@ -57,7 +57,7 @@
 0x0024C998  # reads $16 before setting it
 0x0024C9A0  # reads $16 before setting it
 0x0024D198  # reads $17 before setting it
-0x0024D208  # branched into from func_0024D148
+0x0024D208  # branched into from evtEventViewerCopyEffectSetupPayload
 0x0024D240  # branched into from func_0024D208
 0x0024D250  # branched into from func_0024D240
 0x0024D260  # branched into from func_0024D250

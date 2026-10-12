@@ -4083,12 +4083,16 @@
 0x0022CB68	evtEventViewerFreeBuffer	inferred	frees the +0x2c buffer if non-null and NULLs it
 0x0022CBA0	evtViewerApplyInterpolatedNodeKey	inferred	confidence=high; matched-C; src/dds1/game/code_0022CBA0.c:159:func_0022CBA0; For a present starting key, computes glyphAdvancePosition-relative time ratio (zero for missing/zero-span end key), generates a thirty-two-byte interpolated key block, and applies it to the node handle; DDS2 also subtracts 35 from its output word.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0022CC40	evtViewerApplyParameterKeyTracks	inferred	readability/matching review (QP16)
+0x0022CD30	evtEventViewerApplyEffectToggles	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:762:evtEventViewerApplyEffectToggles; Applies each blur, textured, square, filter, staggered, framebuffer and colour-rectangle effect toggle from the viewer's enable flags, then refreshes key tracks.; twin=0x002476B8 (DDS2).
 0x0022CE68	evtViewerApplySelectedEntry	inferred	Selects the active or fallback viewer entry and sends it to world and view state helpers.
+0x0022CED0	evtEventViewerApplyTimelineKey	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:853:evtEventViewerApplyTimelineKey; Applies one timeline key to its effect, audio, message or fade channel.; twin=0x00247858 (DDS2).
+0x0022D420	evtEventViewerFadeEffectSlot	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1106:evtEventViewerFadeEffectSlot; Fades an effect slot's alpha over the key's duration and frees the slot once its interval ends.; twin=0x00247EE0 (DDS2).
 0x0022E098	evtEventViewerUpdateUnitTransitions	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1155:evtEventViewerUpdateUnitTransitions; Selects each named unit's latest kind-9 transition key and starts, ends or leaves its value transition.; twin=0x00248B80 (DDS2).
 0x0022EA18	evtViewerClampMovieTimes	inferred	walks world objects and clamps polygon-movie time from viewer nodes (DDS2 twin 00249598)
 0x0022EF38	evtViewerApplyGlyphLodChannel	inferred	For each node kind one, picks most recent glyph kind six and updates its LOD channel. [names_reviewed7.tsv]
 0x0022F038	evtEventViewerAttachIndexedObject	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1720:evtEventViewerAttachIndexedObject; At an exact kind-7 key frame attaches the indexed world object; index -1 restores the saved vectors.; twin=0x00249C40 (DDS2).
 0x0022F1C0	evtViewerActivateWindowForGlyphEntry	inferred	readability/matching review (QP16)
+0x0022F2E0	evtEventViewerStartEndCountdown	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1830:evtEventViewerStartEndCountdown; Near the end of the frame range sets the update-countdown flag and stops title voice or sound channels.; twin=0x00249EE8 (DDS2).
 0x0022F408	evtViewerHasUpdateFlag	inferred	Tests bit 0x10 of the viewer state flags word used by its update counter.
 0x0022F418	evtEventViewerFadeBackground	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1869:evtEventViewerFadeBackground; Fades the viewer's background colour over its update countdown.; twin=0x0024A020 (DDS2).
 0x0022F550	evtEventViewerApplyEffectChannels	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1898:evtEventViewerApplyEffectChannels; Applies the effect-channel assignments driven by the viewer's tracks.; twin=0x0024A158 (DDS2).
@@ -4102,11 +4106,15 @@
 0x00230128	evtViewerMarkWindowActive	inferred	Sets viewer windowActive flag to one. [names_reviewed7.tsv]
 0x00230138	evtViewerMarkWindowInactive	inferred	Sets viewer windowActive flag to zero. [names_reviewed7.tsv]
 0x00230438	evtViewerTestIndexedCondition	inferred	Accepts zero index or compares low condition bits with indexed work table entry. [names_reviewed7.tsv]
+0x00230478	evtEventViewerOpenInputMenu	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:2336:evtEventViewerOpenInputMenu; Selects the menu title and item list for the viewer's input action and records command history; returns one on the commit action.; twin=0x0024B080 (DDS2).
+0x00230A68	evtEventViewerHandleKeyEditCommand	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:2454:evtEventViewerHandleKeyEditCommand; Key-edit command dispatcher: sets DELETE FRAME, HOKAN, ON/OFF and TRANS menus per command category and records history.; twin=0x0024B6A8 (DDS2).
 0x00231C18	evtViewerStoreCommandInSelectedField	inferred	Stores command value into entry halfword chosen by selection field and refreshes viewer. [names_reviewed7.tsv]
 0x00231CC8	evtViewerStoreCommandInEntryWord	inferred	Writes command value to selected entry word, refreshes viewer and pops history. [names_reviewed7.tsv]
+0x00231D18	evtEventViewerCommitGroupSelection	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3060:evtEventViewerCommitGroupSelection; Writes the chosen group selection into the frame group metadata (name index for the named-group case), refreshes the timeline frame and pops history.; twin=0x0024CA28 (DDS2).
 0x00231E10	kwlnBattleCopyMatrix	inferred	copies three columns of four floats to battle record transform
 0x00231EF8	evtViewCmdCancelSelection	inferred	Event-viewer command callback pops current command history without modifying pending script entry. [names_reviewed18.tsv]
 0x002323E8	evtViewerClearPendingNodeAndPushHistory	inferred	Clears pending event viewer values and records a history command. [names_reviewed8.tsv]
+0x00232438	evtEventViewerCopyEffectSetupPayload	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3226:evtEventViewerCopyEffectSetupPayload; Copies the effect setup parameter block for the frame group type into the pending node payload, refreshes the timeline frame and pops history.; twin=0x0024D148 (DDS2).
 0x002326F8	evtViewerPickNextHandler	inferred	calls func_00101A70 then returns func_00232720; parked (3 words: $31 restore emitted before the %hi/%lo pair) [names_L18_Units.tsv]
 0x002329A0	evtViewerScheduleFrameVariableTask	inferred	Refreshes glyph position, links frame-variable task and returns next update callback. [names_reviewed7.tsv]
 0x00232A00	evtViewerInitializeUpdateSequence	inferred	Resets viewer, sets update flag and returns viewer update callback. [names_reviewed7.tsv]
@@ -4114,8 +4122,10 @@
 0x00232B30	evtViewerStartUpdate	inferred	initialises the active viewer and returns func_00232A50; parked (2 words: li $2,1 vs li $3,1) [names_L18_Units.tsv]
 0x00232BC0	evtViewerReleaseResources	inferred	Releases viewer windows, waits for pending work, and tears down resources.
 0x00232D08	evtEventViewerDestroyActive	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3504:evtEventViewerDestroyActive; Destroys the currently active event viewer.; twin=0x0024DAA0 (DDS2).
+0x00232D28	evtEventViewerDestroyActiveAlternate	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3512:evtEventViewerDestroyActiveAlternate; Alternate destroy callback for the active event viewer, used as the polygon-movie task destroy function.; twin=0x0024DAC0 (DDS2).
 0x00232D60	evtViewerCreateTaskWithSky	inferred	Allocates and clears viewer state, creates EventViewer task and links sky task. [names_reviewed7.tsv]
 0x00232E00	evtEventViewerDestroyTask	inferred	destroys hierarchy of task named "EventViewer" via kwlnTaskDestroyWithHierarchyByName
+0x00232E20	evtEventViewerPollMovieResources	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3550:evtEventViewerPollMovieResources; Polls the movie's three resource requests, retains loaded addresses and initializes the polygon-movie work once all are ready.; twin=0x0024DBB8 (DDS2).
 0x00232F88	evtPolygonMovieTestFlag	inferred	returns bit 8 of the first word of the event state [names_M67_Named.tsv]
 0x00232FB0	evtMovieInterpolateFloatIfEnabled	inferred	confidence=high; matched-C; src/dds1/event/evtPolygonMovie.c:245:func_00232FB0; Returns a*(1-t)+b*t when enabled, otherwise the first floating endpoint.; source=revalidated-unapplied-names_R_Names31.tsv:31 [names_qp12_apply.tsv]
 0x00232FE0	evtMovieInterpolateIntIfEnabled	inferred	confidence=high; matched-C; src/dds1/event/evtPolygonMovie.c:253:func_00232FE0; Interpolates signed integer endpoints through float arithmetic when enabled, otherwise returns a.; source=revalidated-unapplied-names_R_Names31.tsv:32 [names_qp12_apply.tsv]
