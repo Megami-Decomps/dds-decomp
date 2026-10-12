@@ -9268,3 +9268,45 @@ in C. The four `datCalc.c` externs already use `s32 (u32)` and remain unchanged.
 Keep the native forwarding form and all flag-1 definitions and externs; those
 are outside this return-type closure.
 
+## Global-plus-offset folding: root provenance
+
+A native base-plus-offset sequence does not by itself identify the C mechanism.
+Classify the root's provenance before transferring a source shape between functions.
+The following DDS2 controls have native-exact C; official cc1probe runs verified
+hooked and unhooked output identity.
+
+| Control | Address / size | Root provenance | Deciding observation |
+|---|---|---|---|
+| btlGetWorldObjectDefault | 001E99C0 / 88B | Runtime call results | CSE1 keeps loads through the returned root at +536 and the camera at +8. |
+| fldResolveWorldObjectByResourceId | 001287B8 / 272B | Mutable global pointer, then pointer member | Loading D_00438EC0 obtains a pointer value, not the global's address; names at +24 and its +4 member remain indirect. |
+| fldUpdateCameraColorEffect | 001379C0 / 412B | Constant array address using HIGH/LO_SUM | CSE1 retains root-relative +4/+8 stores; array syntax using -> is not evidence of a mutable pointer. |
+| fldSetSceneLifecycleFlags | 00128340 / 20B | GP-small symbol, real read-modify-write | MEM(REG) survives CSE1 at offset zero; this is not proof that a nonzero member load will retain its base. |
+| func_003413F0 | 003413F0 / 224B | Direct ClockTime member addresses | CSE1 reconstructs later addresses as offsets from the first member-address quantity, cache+1. |
+| fldLoadAreaRoomResources | 0012A6F0 / 1440B | Early FieldPlayerSceneWork HIGH/LO_SUM address | CSE1 preserves the late +0x58 read; reload rematerializes LUI / ADDIU / LW without requiring additional member reads. |
+
+### fldProcDraw: a local fix can create global address sharing
+
+The honest DDS1/DDS2 draw candidates materialize the controller after weather work.
+CSE1 rewrites their `MEM(controller + 4)` stage load to `MEM(symbol + 4)`.
+A real stage-field pointer tests the zero-offset MEM(REG) property:
+
+```c
+s32 *stage;
+/* After the existing weather update. */
+stage = &fldSceneLifecycleFlags.stage;
+if (*stage < 2 || D_00389988[10] == 0 ||
+    fldGetEncounterRuntimeResult() != 0) {
+    return 0;
+}
+```
+
+CSE1 now retains MEM(REG), but GCSE PRE recognizes the same constant field address
+in the earlier guards and replaces the late materialization with a reaching quantity.
+That quantity occupies $17 across calls: both games grow from retail's 404B / 0x10
+frame to 416B / 0x20. The form is nonmatching and is not enabled in either game.
+
+Check **CSE1 and GCSE PRE**, not just the final instructions or pointer-local syntax.
+A call result, a loaded pointer, a HIGH/LO_SUM root and a GP-small constant are not
+interchangeable. Do not add opaque getters, extra reads/stores, alternative owner
+views or compiler-flag changes merely to manufacture another provenance class.
+
