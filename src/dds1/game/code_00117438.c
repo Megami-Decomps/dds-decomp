@@ -716,7 +716,6 @@ s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 
     return damage > 0 ? -damage : healing;
 }
 
-extern s32 datFlagToElementIndex(u32);
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 extern s32 effMiscRandMod(s32, s32);

@@ -1803,8 +1803,6 @@ s32 evtPushSecondRosterSelectedStat(void) {
     return 1;
 }
 
-extern s32 datFlagToElementIndex(s32);
-
 /* Push the first entry's option-selected stat, retaining the same default selectors. */
 s32 evtPushFirstRosterOptionStat(void) {
     s8 statIndex = datFlagToElementIndex(D_0043E5C0.options);
