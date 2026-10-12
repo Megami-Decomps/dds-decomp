@@ -77,9 +77,11 @@ extern s32 D_003BAFC0;
 
 extern SdfTex *D_003BAFB4;
 
-extern u32 D_003BAFA0;
+extern s32 D_003BAFA0;
 
-extern u32 D_003BAFA8;
+extern s32 D_003BAFA8;
+extern s32 D_003BAF9C;
+extern s32 D_003BAFAC;
 
 extern u32 D_003BAFB0;
 
@@ -3204,7 +3206,112 @@ void func_0014A2C8(void) {
     D_003BAFA0 = 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", fldTitle);
+s32 fldTitle(void) {
+    s32 nextFrame;
+    s32 alpha;
+    s32 nextPhase;
+
+    if (D_003BAFB0 == 0) {
+        fldSelectDisplayBuffer(0x53);
+    } else {
+        fldSelectDisplayBuffer(0x5E);
+    }
+    fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
+    func_00129900(0);
+    /* sched1/2 dependent-pop: const-1 pseudo precedes the switch index load.
+     * Trace: /home/raikaru/sandbox_PurC/title_trace_policy/decisions.log. */
+    nextPhase = 1;
+    switch (D_003BAFA0) {
+    case 0:
+        if (D_003BAFA8 > 0) {
+            D_003BAFA8--;
+        }
+        if (D_003BAFA8 == 0) {
+            D_003BAFA0 = nextPhase;
+            D_003BAF9C = 0;
+        }
+        break;
+    case 1:
+        if (D_003BAF9C >= 20) {
+            alpha = (D_003BAF9C - 19) * 128 / 15;
+            if (alpha > 0x80) {
+                alpha = 0x80;
+            }
+            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+                                    alpha / 64, 0, 0, 0, alpha / 2);
+            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
+        }
+        if (D_003BAF9C >= 20 && D_003BAF9C < 30) {
+            func_00129900(1);
+            alpha = (D_003BAF9C - 20) * 128 / 10;
+            if (alpha > 0x80) {
+                alpha = 0x80;
+            }
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+                                    alpha / 64, 0, 0, 0, alpha / 2);
+            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
+            func_00129900(0);
+        }
+        if (D_003BAF9C >= 30) {
+            func_00129900(1);
+            alpha = (0x30 - D_003BAF9C) * 128 / 18;
+            if (alpha > 0x80) {
+                alpha = 0x80;
+            }
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+                                    alpha / 64, 0, 0, 0, alpha / 2);
+            fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
+            func_00129900(0);
+        }
+        nextFrame = D_003BAF9C + 1;
+        if (nextFrame > 60) {
+            D_003BAF9C = 0;
+            D_003BAFA0++;
+        } else {
+            D_003BAF9C = nextFrame;
+        }
+        break;
+    case 2:
+        fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, 0xC, 0, 0, 0, 2, 0, 0, 0, 0x40);
+        fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, 0x80808080, D_003BAFB4);
+        nextFrame = D_003BAF9C + 1;
+        if (nextFrame > 60) {
+            D_003BAF9C = 0;
+            D_003BAFA0++;
+        } else {
+            D_003BAF9C = nextFrame;
+        }
+        break;
+    case 3:
+        alpha = (20 - D_003BAF9C) * 128 / 20;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha > 0x80) {
+            alpha = 0x80;
+        }
+        fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+                                alpha / 64, 0, 0, 0, alpha / 2);
+        fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
+        nextFrame = D_003BAF9C + 1;
+        if (nextFrame > D_003BAFAC) {
+            D_003BAF9C = 0;
+            D_003BAFA0++;
+        } else {
+            D_003BAF9C = nextFrame;
+        }
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
 
 void fldReleaseTitleTextureReference(void) {
     if (D_003BAFB4 != 0) {
@@ -3213,14 +3320,12 @@ void fldReleaseTitleTextureReference(void) {
     }
 }
 
-extern void fldTitle(void);
+extern s32 fldTitle(void);
 
 
 extern u32 D_003BAFA4;
 
-extern u32 D_003BAFAC;
 
-extern u32 D_003BAF9C;
 
 
 extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */

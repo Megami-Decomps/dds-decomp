@@ -58,9 +58,9 @@ extern SdfTex *D_003BAFC4;
 
 extern SdfTex *D_003BAFB4;
 
-extern u32 D_003BAFA0;
+extern s32 D_003BAFA0;
 
-extern u32 D_003BAFA8;
+extern s32 D_003BAFA8;
 
 extern u32 D_003BAFB0;
 
@@ -187,9 +187,9 @@ extern int strcmp(const char *, const char *);
 
 extern u32 D_003BAFA4;
 
-extern u32 D_003BAFAC;
+extern s32 D_003BAFAC;
 
-extern u32 D_003BAF9C;
+extern s32 D_003BAF9C;
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
