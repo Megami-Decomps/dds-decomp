@@ -2408,6 +2408,7 @@
 0x00190AD8	effEventBillSetCreate	inferred	0x7C head copy, clamps counters, shares dbball01/02 billboards, zero delays [names_M61_EffVu.tsv]
 0x00190CD0	effEventReleaseSharedResources	inferred	Decrements active-event count, dispatches both shared handles on final release, then releases the instance resource.
 0x00190D18	effEventRandomizeBillboardParticle	inferred	Randomizes delays, directions, radii and rotational values for selected billboard particle. [names_reviewed6.tsv]
+0x001914E0	effEventDrawBillSet	inferred	Builds compact billboard batches and submits their texture references, geometry, GS draw state and draw-surface packets for an EffEventBillSet; DDS2 twin 0x00199118.
 0x00192018	effEventCopyVector	inferred	PCP_COPY_VECTOR transfers the supplied vector between the two pointers.
 0x00192028	effEventSetWorkFlag	inferred	assigns work flag from supplied value [names_reviewed5.tsv]
 0x00192030	effEventCopyParameterBlock	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:1340:func_00192030; requires-symbol-registration; Copies the complete serialized billboard-emitter parameter block without normalization.; source=fresh-R_Names31-QP15 [names_qp15.tsv]
