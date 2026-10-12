@@ -5937,7 +5937,7 @@ extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
 u32 sndBuildMotSeResourceKey(const SoundSlotOwner *sound, u32 slot) {
-    u32 id = sound->id;
+    u32 id = sound->work.id;
     u32 category = sound->category;
     SoundSlotTableEntry *table = btlSelectSideIndexedActorParameterTable(category, id);
     s32 specialCategory = 1;
@@ -5989,9 +5989,9 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
             if (slot != 0xB) {
                 func_0035C860(filename, D_004192D8, D_00436AE8, id >> 16);
             } else if (sound->category == 0) {
-                func_0035C860(filename, D_004192F8, D_00419308, sound->id);
+                func_0035C860(filename, D_004192F8, D_00419308, sound->work.id);
             } else {
-                func_0035C860(filename, D_00419318, D_00419308, sound->id);
+                func_0035C860(filename, D_00419318, D_00419308, sound->work.id);
             }
             *(struct FileRequest **)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
@@ -6006,7 +6006,7 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
 SoundSlotOwner *sndFindListNodeForChannel(s32 category, s32 id) {
     SoundSlotOwner *node = ((BtlState *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
-        if (node->category == category && node->id == id) {
+        if (node->category == category && node->work.id == id) {
             return node;
         }
         node = node->next;
@@ -6025,7 +6025,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
     }
     owner = sdfAllocAndClearQuadwords(0x108);
     owner->category = category;
-    owner->id = id;
+    owner->work.id = id;
     owner->work.refCount = 1;
     work = (BtlState *)btlGetRuntime();
     owner->prev = 0;
@@ -6112,7 +6112,7 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (owner->work.resourceHandles[args->unk_08] == 0) {
         return;
     }
-    table = btlSelectSideIndexedActorParameterTable(owner->category, owner->id);
+    table = btlSelectSideIndexedActorParameterTable(owner->category, owner->work.id);
     entry = &table[args->unk_08];
     args->option = entry->fileId;
     if (args->unk_08 != 0xB) {
