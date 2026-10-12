@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -1061,18 +1062,6 @@ s32 kwlnEnsureDefaultResource(void) {
     kwlnTextureAttachTask(&kwlnPositionedTextSurface);
     return 0;
 }
-
-typedef struct DmaPacketHeader {
-    u16 quadwords;
-    u16 pad02;
-    u32 address;
-    u32 tag;
-    u32 command;
-    u16 unused10;
-    u8 pad12[6];
-    u32 unused18;
-    u32 unused1C;
-} DmaPacketHeader;
 
 typedef struct ConsMatrixPacket {
     u16 quadwords;
