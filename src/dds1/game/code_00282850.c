@@ -14,6 +14,7 @@
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
+#include "kwln.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
@@ -2599,7 +2600,6 @@ extern SdfPoolNode D_00325708;
 extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 extern s32 sdfAllocPacketAligned(s32);
-extern void kwlnDrawSpriteCell(SdfListHead *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
