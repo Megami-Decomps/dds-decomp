@@ -1054,7 +1054,8 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_002BE728(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle) {
+/* Rotate an offset in degrees, apply screen aspect correction, and add the supplied center. */
+void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle) {
     f32 aspect = 1.75f;
     f32 radians = angle * 0.017453293f;
     f32 rotatedX;

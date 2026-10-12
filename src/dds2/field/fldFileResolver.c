@@ -143,7 +143,7 @@ extern struct EffectObj *effObjCreateResourceKindOne(const char *, void *, s32);
 extern struct EffectObj *effObjSpawnSharedBillNodeClone(struct EffectObj *, void *, s32);
 extern struct EffectObj *effObjSpawnSharedBillClone(struct EffectObj *, void *, s32);
 extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
-extern struct EffectObj *func_001156C8(const char *, void *, void *, f32);
+extern struct EffectObj *effObjCreateNamedScaledEffect(const char *, void *, void *, f32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
@@ -158,7 +158,7 @@ extern void dds3SetPathStateValue(EffWorldNode *, u32);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00412FF0);
 
-void func_001289A8(FldSpawnBatch *batch, u32 batchCount) {
+void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
     f32 position[4];
     f32 rotation[4];
     char path[64];
@@ -259,7 +259,7 @@ void func_001289A8(FldSpawnBatch *batch, u32 batchCount) {
                     }
                     break;
                 case 100:
-                    object = func_001156C8(resource->name, position, rotation, config->width * 0.5f);
+                    object = effObjCreateNamedScaledEffect(resource->name, position, rotation, config->width * 0.5f);
                     effObjClearFlags(object, 1);
                     break;
                 }
@@ -490,7 +490,7 @@ extern u32 D_003899C0[];
 
 extern void fldCreatePlayerObject(void);
 
-extern void func_00128FE8(u32, u32, s32);
+extern void fldSpawnPlacementObjectsFromBatches(u32, u32, s32);
 
 extern u32 D_00436064;
 
@@ -545,7 +545,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern void func_001289A8(FldSpawnBatch *, u32);
+extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
 
 extern f32 D_003897DC[];
 
@@ -689,7 +689,7 @@ extern u32 D_00436134;
 
 extern u32 D_003899B4[];
 
-extern void func_00135A68(u32 value, s32 enabled);
+extern void fldApplySkyLightSet(u32 value, s32 mode);
 extern char D_00413388[];
 
 extern u32 D_00436128;
@@ -836,7 +836,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void func_00128FE8(u32 batchAddress, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
     f32 *transform;
@@ -1247,7 +1247,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    func_001289A8((FldSpawnBatch *)request->unk_4, request->unk_0);
+    fldSpawnSceneResourceBatches((FldSpawnBatch *)request->unk_4, request->unk_0);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
@@ -1256,12 +1256,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    func_00128FE8(request->secondaryValue, request->primaryValue, 0);
+    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    func_00128FE8(request->secondaryValue, request->primaryValue, 1);
+    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
 }
 
 s32 func_00129D60(s32 record) {
@@ -4754,11 +4754,11 @@ u32 fldGetSkyDrawState(void) {
     return fldSkyDrawState;
 }
 
-void func_00135588(u32 value) {
+void fldSetSkyAlpha(u32 value) {
     D_003899C0[0] = value;
 }
 
-u32 func_00135598(void) {
+u32 fldGetSkyAlpha(void) {
     return D_003899C0[0];
 }
 
@@ -4768,10 +4768,10 @@ void fldBeginSelectedValueTransition(u32 value) {
     D_0043612C = value;
     D_00436130 = 0;
     D_00436134 = selectedValue;
-    func_00135A68(selectedValue, 1);
+    fldApplySkyLightSet(selectedValue, 1);
 }
 
-void func_001355D8(void) {
+void fldUpdateSelectedValueTransition(void) {
     EvtUnit *player;
     f32 direction[4];
     s32 red, green, blue;
@@ -4783,27 +4783,27 @@ void func_001355D8(void) {
     case 1:
         D_00436130 += 1.0f;
         if (D_00436130 == 30.0f) {
-            func_00135A68((D_00436134 + 1) & 0xFF, 30);
+            fldApplySkyLightSet((D_00436134 + 1) & 0xFF, 30);
         } else if (D_00436130 == 60.0f) {
-            func_00135A68(D_00436134, 30);
+            fldApplySkyLightSet(D_00436134, 30);
             D_00436130 = 0;
         }
         break;
     case 2:
         D_00436130 += 1.0f;
         if (D_00436130 == 15.0f) {
-            func_00135A68((D_00436134 + 1) & 0xFF, 1);
+            fldApplySkyLightSet((D_00436134 + 1) & 0xFF, 1);
         } else if (D_00436130 == 30.0f) {
-            func_00135A68(D_00436134, 1);
+            fldApplySkyLightSet(D_00436134, 1);
             D_00436130 = 0;
         }
         break;
     case 3:
         D_00436130 += 1.0f;
         if (D_00436130 == 60.0f) {
-            func_00135A68((D_00436134 + 1) & 0xFF, 60);
+            fldApplySkyLightSet((D_00436134 + 1) & 0xFF, 60);
         } else if (D_00436130 == 120.0f) {
-            func_00135A68(D_00436134, 60);
+            fldApplySkyLightSet(D_00436134, 60);
             D_00436130 = 0;
         }
         break;
@@ -4938,7 +4938,7 @@ extern u32 D_0043615C;
 extern f32 D_00436160;
 extern u32 D_00436164;
 
-void func_00135A68(u32 index, s32 mode) {
+void fldApplySkyLightSet(u32 index, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5029,12 +5029,12 @@ void fldApplyPendingSceneValueWithSpeed(s32 speed) {
         if (D_00389898[0] == 0) {
             D_003899B4[0] = D_00436158;
         }
-        func_00135A68(D_00436158, speed);
+        fldApplySkyLightSet(D_00436158, speed);
     }
 }
 
-/*BEGIN func_00135D80*/
-void func_00135D80(s32 index, s32 mode) {
+/*BEGIN fldTransitionSkyLightSet*/
+void fldTransitionSkyLightSet(s32 index, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -5134,7 +5134,7 @@ void func_00135D80(s32 index, s32 mode) {
         }
     }
 }
-/*END func_00135D80*/
+/*END fldTransitionSkyLightSet*/
 
 void func_00136098(void) {
     dds3ClearObjectFlags(fldPlayerObject, 0x100);

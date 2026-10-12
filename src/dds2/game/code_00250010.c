@@ -29,9 +29,9 @@ extern u32 evtSkyOverlayEnabled;
 
 extern u16 evtSkyTransitionActive;
 
-extern void func_00135588(s32 value);
+extern void fldSetSkyAlpha(s32 value);
 
-extern s16 func_00135598(void);
+extern s16 fldGetSkyAlpha(void);
 
 extern u16 evtSkyTransitionFrame;
 
@@ -173,10 +173,10 @@ void evtSetSkyOverlayEnabled(u32 enabled) {
 void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     s16 current;
 
-    current = func_00135598();
+    current = fldGetSkyAlpha();
     if (current != target) {
         if (duration == 0) {
-            func_00135588(target);
+            fldSetSkyAlpha(target);
             evtSkyTransitionActive = 0;
         } else {
             evtSkyTransitionDuration = duration;
@@ -195,7 +195,7 @@ u16 evtIsSkyTransitionActive(void) {
 void evtAdvanceSkyTransition(void) {
     if (evtSkyTransitionActive != 0) {
         evtSkyTransitionFrame += 1;
-        func_00135588(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
+        fldSetSkyAlpha(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
         if (evtSkyTransitionFrame >= evtSkyTransitionDuration) {
             evtSkyTransitionActive = 0;
         }
@@ -228,13 +228,13 @@ void evtDestroySkyTask(void) {
 
 extern void fldSetSwayMode();
 extern void fldSetSkyDrawState();
-extern void func_00135588();
+extern void fldSetSkyAlpha();
 extern void fldSetFadeTarget();
 
 void evtCreateSkyTask(void) {
     fldSetSwayMode(0);
     fldSetSkyDrawState(0x80);
-    func_00135588(0);
+    fldSetSkyAlpha(0);
     fldSetFadeTarget(0, 1, 0);
     kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
@@ -5265,7 +5265,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     runtime->flags |= 1;
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    work = func_0024FB48(D_004372B0, D_004372B2, mode);
+    work = evtGetPolygonMovieWorkData2(D_004372B0, D_004372B2, mode);
     if (work != NULL) {
         runtime->windowContext = work;
         func_0025A280(work, runtime);
@@ -5465,7 +5465,7 @@ extern EvtModelScaleEntry *D_00435DE0;
 extern EvtModelScaleEntry *D_00435DF0;
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
-extern void *func_00115500(void *obj, void *vecA, void *vecB);
+extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */
@@ -5480,7 +5480,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     memset(vecB, 0, 0x10);
     found = evtFindTaskResourceEntryByKey(taskId, key);
     if (found != 0) {
-        obj = func_00115500(found, vecA, vecB);
+        obj = effObjCreateEventNode(found, vecA, vecB);
         if (obj != 0) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {

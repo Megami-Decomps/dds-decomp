@@ -129,7 +129,7 @@ void kwlnRequestMainLoopExit(void) {
     D_003BA708 = 1;
 }
 
-u32 func_00100510(void) {
+u32 kwlnGetFrameCounter(void) {
     return D_003BA700;
 }
 

@@ -136,7 +136,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *table);
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 void kwlnPadResetMotorLevelsAndOutput(void);
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
-void func_0022BF00(EvtRuntime *viewer);
+void evtEventViewerReleasePendingNode(EvtRuntime *viewer);
 void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
 void *memset(void *dst, s32 value, u32 size);
@@ -181,7 +181,7 @@ void evtEventViewerReleaseNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node)
 }
 
 /* Release the pending node and consume its position in the viewer queue. */
-void func_0022BF00(EvtRuntime *viewer)
+void evtEventViewerReleasePendingNode(EvtRuntime *viewer)
 {
     EvtRuntimeGroup *entry;
     EvtRuntimeChild *node;
@@ -216,7 +216,7 @@ void func_0022BF00(EvtRuntime *viewer)
 }
 
 /* Release a supplied queued node, with the same resource and counter handling. */
-void func_0022BFD8(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node)
+void evtEventViewerReleaseQueuedNode(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node)
 {
     switch (entry->type) {
     case 3:
@@ -249,7 +249,7 @@ void func_0022BFD8(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *
 void evtEventViewerProcessPending(EvtRuntime *viewer)
 {
     while (evtEventViewerGetPendingNode(viewer) != 0) {
-        func_0022BF00(viewer);
+        evtEventViewerReleasePendingNode(viewer);
     }
 }
 
@@ -569,11 +569,11 @@ void evtViewerBindNamedOwner(EffWorldNode *obj, s32 value, s32 type, u32 word, E
 
 
 extern void effObjSetFlags(s32 obj, s32 flags);
-extern void *func_00115298(void *resource, void *position, void *scale);
+extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern void effObjReplaceActiveEventNode(void *obj, u32 entryId);
 struct EffNodeDescriptor;
 extern struct EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern s32 func_001150B0(s32 arg, f32 *vec0, f32 *vec1);
+extern s32 effObjCreateBillboardFromFactory(s32 arg, f32 *vec0, f32 *vec1);
 extern struct EffectObj *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
 extern void effObjDispatchReadyState(s32 obj);
 extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
@@ -607,7 +607,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *cmd, EvtRuntime
         if (cmd->type == 3) {
             handle = (s32)effObjSpawnDescriptorBoundEffect((struct EffNodeDescriptor *)cmd->resourceData, vec0, vec1);
         } else {
-            handle = func_001150B0((s32)cmd->resourceData, vec0, vec1);
+            handle = effObjCreateBillboardFromFactory((s32)cmd->resourceData, vec0, vec1);
         }
         if (params->p0C.sb[0] != 0) {
             effObjDispatchReadyState(handle);
@@ -657,7 +657,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer)
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-void *func_0022CA88(void *resource, u32 entryId, s32 value, s32 type, u32 word,
+void *evtEventViewerCreateOriginEffect(void *resource, u32 entryId, s32 value, s32 type, u32 word,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
@@ -666,7 +666,7 @@ void *func_0022CA88(void *resource, u32 entryId, s32 value, s32 type, u32 word,
     memset(position, 0, 0x10);
     memset(scale, 0, 0x10);
     scale[3] = 1.0f;
-    effect = func_00115298(resource, position, scale);
+    effect = effObjCreateEventNode(resource, position, scale);
     effObjSetFlags((s32)effect, 1);
     effObjReplaceActiveEventNode(effect, entryId);
     evtViewerBindNamedOwner((EffWorldNode *)effect, value, type, word, viewer);
@@ -818,7 +818,7 @@ extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChi
 extern struct EffectObj *evtEventViewerGetNameObject(s32, EvtRuntime *);
 extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *, struct EffectObj *, struct EffectObj *, struct EffectObj *, struct EffectObj *);
 extern void evtEventViewerFreeBuffer(EvtRuntimeChild *);
-extern void *func_0022CA88(void *, u32, s32, s32, u32, EvtRuntime *);
+extern void *evtEventViewerCreateOriginEffect(void *, u32, s32, s32, u32, EvtRuntime *);
 extern s32 evtSetBgmVolumePan(s32, s32);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
 extern s32 evtPlayBgm(s32, s32);
@@ -888,9 +888,9 @@ void func_0022CED0(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 frame, s32 
         }
         evtEventViewerFreeBuffer(key);
         if (track->metadata.extra1 == 0) {
-            key->payload = func_0022CA88(track->resourceData, key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
+            key->payload = evtEventViewerCreateOriginEffect(track->resourceData, key->p0C.sb[0], key->p08.sh[1], -1, key->frame, viewer);
         } else {
-            key->payload = func_0022CA88(track->resourceData, key->p0C.sb[0], key->p08.sh[1], -1, 0, viewer);
+            key->payload = evtEventViewerCreateOriginEffect(track->resourceData, key->p0C.sb[0], key->p08.sh[1], -1, 0, viewer);
         }
         break;
     case 5:
@@ -1152,7 +1152,7 @@ extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
-void func_0022E098(s32 time, EvtRuntime *viewer) {
+void evtEventViewerUpdateUnitTransitions(s32 time, EvtRuntime *viewer) {
     EffWorldNode *object;
     EvtRuntimeGroup *node;
     EvtRuntimeChild *key;
@@ -1326,10 +1326,10 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
 extern void evtViewerClampMovieTimes(s32, EvtRuntime *);
 extern void evtViewerSyncWorldGroups(s32, EvtRuntime *);
 extern void evtViewerApplyGlyphLodChannel(s32, EvtRuntime *);
-extern void func_0022F038(s32, EvtRuntime *);
+extern void evtEventViewerAttachIndexedObject(s32, EvtRuntime *);
 extern void evtViewerActivateWindowForGlyphEntry(s32, EvtRuntime *);
 extern void evtViewerCountFlaggedUpdates(EvtRuntime *);
-extern void func_0022F550(s32, EvtRuntime *);
+extern void evtEventViewerApplyEffectChannels(s32, EvtRuntime *);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
 extern void func_0022F7F8(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
@@ -1366,10 +1366,10 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
     evtViewerClampMovieTimes(time, viewer);
     evtViewerSyncWorldGroups(time, viewer);
     evtViewerApplyGlyphLodChannel(time, viewer);
-    func_0022F038(time, viewer);
+    evtEventViewerAttachIndexedObject(time, viewer);
     evtViewerActivateWindowForGlyphEntry(time, viewer);
     evtViewerCountFlaggedUpdates(viewer);
-    func_0022F550(time, viewer);
+    evtEventViewerApplyEffectChannels(time, viewer);
     evtViewerUpdateTimedAction(viewer);
     func_0022F7F8(viewer);
 
@@ -1483,7 +1483,7 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
         viewer->fallbackEntry = (s32)D_003BBE80->info;
         evtViewerApplySelectedEntry(viewer);
     }
-    func_0022E098(time, viewer);
+    evtEventViewerUpdateUnitTransitions(time, viewer);
     if (viewer->flags & 1) {
         if (!(viewer->flags & 2)) {
             kwlnCancelConfiguredFadeFrames();
@@ -1717,7 +1717,7 @@ extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
  * restores the saved vectors; losing the active key restores them once too. */
-void func_0022F038(s32 position, EvtRuntime *viewer) {
+void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
     EvtRuntimeGroup *node = viewer->groups;
     EvtRuntimeChild *glyph;
     EvtRuntimeChild *best;
@@ -1866,7 +1866,7 @@ s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
 }
 
 /* Fades the viewer's background colour over its update countdown. */
-void func_0022F418(EvtRuntime *viewer) {
+void evtEventViewerFadeBackground(EvtRuntime *viewer) {
     s32 fade = 0;
 
     kwlnGetDrawBufferIndex();
@@ -1895,7 +1895,7 @@ void func_0022F418(EvtRuntime *viewer) {
 }
 
 /* Applies the effect-channel assignments driven by the viewer's tracks. */
-void func_0022F550(s32 frame, EvtRuntime *viewer) {
+void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
     EvtRuntimeGroup *track = viewer->groups;
 
     while (track != NULL) {
@@ -2038,7 +2038,7 @@ extern void sdfFreezeFloatCounter(void *counter);
 extern void sdfUnfreezeFloatCounter(void *counter);
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
-void func_0022FB30(s32 mode, u32 frame, EvtRuntime *viewer) {
+void evtEventViewerApplyPlaybackMode(s32 mode, u32 frame, EvtRuntime *viewer) {
     EvtWorldTable *table;
     EffWorldNode *object;
     EvtRuntimeGroup *track;
@@ -2139,10 +2139,10 @@ updateMovie:
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
 void evtViewerDispatchFlagMode(EvtRuntime *viewer) {
     if ((viewer->flags & 1) != 0) {
-        func_0022FB30(0, viewer->curFrame, viewer);
+        evtEventViewerApplyPlaybackMode(0, viewer->curFrame, viewer);
         return;
     }
-    func_0022FB30(1, viewer->curFrame, viewer);
+    evtEventViewerApplyPlaybackMode(1, viewer->curFrame, viewer);
 }
 
 /* Returns the address word of the nearest kind-2 key strictly after the current
@@ -3346,7 +3346,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         evtViewerApplySelectedEntry(viewer);
     }
     evtUpdateViewerMessageWindow(viewer);
-    func_0022F418(viewer);
+    evtEventViewerFadeBackground(viewer);
     mnuAdvanceShopMenuState((struct EvtRuntime *)viewer);
     if (viewer->flags & 8) {
         if (viewer->curFrame >= viewer->frameRange.word) {
@@ -3501,7 +3501,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
 }
 
 /* Destroy the currently active event viewer. */
-void func_00232D08(KwlnTask *task) {
+void evtEventViewerDestroyActive(KwlnTask *task) {
     EvtRuntime *viewer;
 
     viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
@@ -3536,7 +3536,7 @@ void evtViewerCreateTaskWithSky(void) {
     viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
     viewer->resourceHandle = viewerHandle;
-    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, func_00232D08, (u32)viewer);
+    viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
     func_00101A80((s32)viewerTask, evtCreateSkyTask());
     func_00232D48(viewer);
 }

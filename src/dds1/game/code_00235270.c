@@ -37,11 +37,11 @@ extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
-extern void *func_00115298(void *obj, void *vecA, void *vecB);
+extern void *effObjCreateEventNode(void *obj, void *vecA, void *vecB);
 extern void fldSetSwayMode(s32 mode);
 extern void fldSetSkyDrawState(s32 value);
-extern void func_00132B80(s32 value);
-extern s16 func_00132B90(void);
+extern void fldSetSkyAlpha(s32 value);
+extern s16 fldGetSkyAlpha(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void func_00132010(void);
 extern void fldSelectDisplayBuffer(s32 id);
@@ -132,10 +132,10 @@ void evtSetSkyOverlayEnabled(u32 enabled) {
 void evtBeginSkyParameterTransition(s32 duration, s32 target) {
     s16 current;
 
-    current = func_00132B90();
+    current = fldGetSkyAlpha();
     if (current != target) {
         if (duration == 0) {
-            func_00132B80(target);
+            fldSetSkyAlpha(target);
             evtSkyTransitionActive = 0;
         } else {
             evtSkyTransitionDuration = duration;
@@ -154,7 +154,7 @@ u16 evtIsSkyTransitionActive(void) {
 void evtAdvanceSkyTransition(void) {
     if (evtSkyTransitionActive != 0) {
         evtSkyTransitionFrame += 1;
-        func_00132B80(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
+        fldSetSkyAlpha(evtSkyTransitionStartValue + (s32)((f32)(evtSkyTransitionTargetValue - evtSkyTransitionStartValue) * ((f32)evtSkyTransitionFrame / (f32)evtSkyTransitionDuration)));
         if (evtSkyTransitionFrame >= evtSkyTransitionDuration) {
             evtSkyTransitionActive = 0;
         }
@@ -188,7 +188,7 @@ void evtDestroySkyTask(void) {
 void evtCreateSkyTask(void) {
     fldSetSwayMode(0);
     fldSetSkyDrawState(0x80);
-    func_00132B80(0);
+    fldSetSkyAlpha(0);
     fldSetFadeTarget(0, 1, 0);
     kwlnTaskCreate(evtSkyTaskName, 0x2B0E, 1, 1, evtUpdateSkyTask, evtResetSkyTaskFlags, 0);
 }
@@ -5289,7 +5289,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     runtime->flags |= 1;
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    work = func_00234DA8(D_003BBE78, D_003BBE7A, mode);
+    work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, mode);
     if (work != NULL) {
         runtime->windowContext = work;
         func_0023EF90(work, runtime);
@@ -5500,7 +5500,7 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     memset(vecB, 0, 0x10);
     found = evtFindTaskResourceEntryByKey(taskId, key);
     if (found != 0) {
-        obj = func_00115298(found, vecA, vecB);
+        obj = effObjCreateEventNode(found, vecA, vecB);
         if (obj != 0) {
             effObjSetFlags(obj, 1);
             if (index >= 0) {

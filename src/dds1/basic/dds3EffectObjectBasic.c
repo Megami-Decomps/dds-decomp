@@ -46,8 +46,8 @@ void billSetKind1Entry(void *arg);
 EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
 EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
-EffectObj *func_001150F0();
-EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector, f32 scale);
+EffectObj *effObjCreateEventNodeFromMixer();
+EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
 EffectObj *effObjCreateMagatuhiForKind();
 extern const f32 D_0039F800[10];
@@ -498,7 +498,7 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-void func_001150B0(u32 unused, void *firstVector, s32 secondVectorAddress) {
+void effObjCreateBillboardFromFactory(u32 unused, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = func_0014FE28();
@@ -516,7 +516,7 @@ typedef struct EffectEventVectorParameters {
 
 extern const EffectEventVectorParameters D_0039F7D0;
 
-EffectObj *func_001150F0(source, firstVector, secondVector)
+EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     SoundMixer *source;
     const u128 *firstVector;
     const u128 *secondVector;
@@ -556,8 +556,8 @@ EffectObj *func_001150F0(source, firstVector, secondVector)
 }
 
 
-void *func_00115298(void *resource, void *position, void *scale) {
-    return func_001150F0(resource, position, scale);
+void *effObjCreateEventNode(void *resource, void *position, void *scale) {
+    return effObjCreateEventNodeFromMixer(resource, position, scale);
 }
 
 /* Resolve the resource address, create from it, then release the temporary resource. */
@@ -568,7 +568,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *
 
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = func_001150F0((SoundMixer *)resolvedId, firstVector, secondVector);
+    created = effObjCreateEventNodeFromMixer((SoundMixer *)resolvedId, firstVector, secondVector);
     sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }
@@ -595,7 +595,7 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
     data->node = effEventCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
-EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector, f32 scale) {
+EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale) {
     EffectObj *obj;
     EffectDependencyState *data;
     ObjBase *objectHandle;
@@ -627,8 +627,8 @@ EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector
     return obj;
 }
 
-EffectObj *func_00115460(const char *name, void *firstVector, void *secondVector, f32 scale) {
-    return func_00115398(name, firstVector, secondVector, scale);
+EffectObj *effObjCreateNamedScaledEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    return effObjCreateNamedScaledEffectObject(name, firstVector, secondVector, scale);
 }
 
 EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)
