@@ -132,10 +132,19 @@ says a later-pass change cannot.
   `estimate_probability` section of a `--reorg` log shows each note when it is
   made; the `mostly_true_jump` lines show the value read at reorg time, which can
   differ because jump optimization may invert a branch (3999 after a 6001 on the
-  same jump, for example). reorg thresholds on the note are 90/50/10
-  (`mostly_true_jump`): ≥9000 gives likely/annul (2), ≥5000 gives 1, ≥1000 gives
-  0, below that -1. `fill_slots_from_thread(... likely=1)` is the branch-likely
-  path. The pass-1 9001 note is the loop-exit rule: a cold block outside the
+  same jump, for example). reorg maps the note to a prediction in
+  `mostly_true_jump`: ≥9000 gives 2, ≥5000 gives 1, ≥1000 gives 0, below that
+  -1. The prediction chooses which thread `fill_eager_delay_slots` searches
+  first (1 or 2: the branch target first; 0 or -1: the fall-through first), and
+  a prediction of 2 also enables extra compensation searches. It does not by
+  itself decide the branch form: whether the slot is filled, and whether the
+  branch becomes `beql`/`bnel` with an annulled slot, depends on the slot insn's
+  safety against the other path (resources, trapping, liveness). So `likely=0`
+  can still end as a branch-likely, and prediction 2 can end as an ordinary
+  branch with a safe move in the slot. The `fill_slots_from_thread(...)` line
+  and its `=> delay_list` name the donor insns but not the annul bit; the final
+  assembly (or the RTL `/u` flag) is authoritative for the branch form. The
+  pass-1 9001 note is the loop-exit rule: a cold block outside the
   loop's members, inside its first..last interval, whose predecessor is inside
   the loop. The emit-time reasons are reconstructed from the compiled code, so
   treat them as hints and check the note value itself.
