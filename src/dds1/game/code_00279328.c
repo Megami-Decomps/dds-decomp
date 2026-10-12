@@ -67,7 +67,7 @@ typedef struct SkillMenuContext {
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
 
-extern void func_00282DA0(s32, s32, s32, s32, s32);
+extern void mnuDrawPanelState(s32, s32, s32, s32, s32);
 
 s32 ptySkillMenuUpdate(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -109,7 +109,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     itfDrawGridWithResolvedSlot(0x10E0, 0xA18, 0, 1, (struct EffectSlotSet *)(u32)pageGrid,
                                 0x1D, 0x53);
     mnuSetPanelState(menu->panelState, index);
-    func_00282DA0(0xDE0, 0x350, 0, (s32)menu->panelState, 0x53);
+    mnuDrawPanelState(0xDE0, 0x350, 0, (s32)menu->panelState, 0x53);
     mnuDrawWindowContainer(0x1220, 0x678, 0,
                            *getSkillPageSlot(windows, index), 0x53);
     for (i = 0; i < 4; i++) {

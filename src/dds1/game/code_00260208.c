@@ -10,7 +10,7 @@
 #include "kwln_task_lifecycle.h"
 
 extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
-extern s32 func_002877A8(void);
+extern s32 evtStageTestPollModelRequest(void);
 
 extern s32 kwlnFadeIsActive(void);
 
@@ -820,7 +820,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (mnuStaffSlotsAllFilled(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
-    if (func_002877A8() == 1) {
+    if (evtStageTestPollModelRequest() == 1) {
         return 1;
     }
     if (ctx->unitResource == NULL) {
@@ -1028,7 +1028,7 @@ s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
         return 0;
     }
-    return func_002877A8() != 1;
+    return evtStageTestPollModelRequest() != 1;
 }
 
 void mnuRefreshSelectedUnitPanels(DatPartyRecord *unused, BrsSkillPackageWork *menu) {

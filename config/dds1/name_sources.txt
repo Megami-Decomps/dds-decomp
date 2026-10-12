@@ -5057,6 +5057,7 @@
 0x00281908	mnuDrawWidthScaledPanelGradient	inferred	confidence=high; matched-C; src/dds1/game/code_002818B8.c:26:func_00281908; Builds four packed corner colors from blend, chooses full/compact placement, scales the rectangular panel width by (512-blend)/512 with a minimum extent, and submits its gradient rectangle.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002819F8	mnuDrawHeightScaledPanelGradient	inferred	confidence=high; matched-C; src/dds1/game/code_002818B8.c:46:func_002819F8; Builds the alternate packed corner-color gradient, chooses full/compact placement, computes its height extent from (512-blend)/512, anchors it above the supplied y coordinate, and submits the rectangle.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00282850	mnuDispatchListPanel	inferred	Chooses selected panel drawing mode from panel flags and selection state. [names_reviewed5.tsv]
+0x002828D0	mnuCalcListEntryOffset	inferred	Computes per-entry panel X/Y offsets from group count, panel index and selection state; DDS2 twin 0x002C03B0.
 0x002829C0	mnuAdvancePanelTransition	inferred	Increments the panel value at +4 by 8 until it reaches 0x100; sequel twin 002C04C0.
 0x002829E0	mnuDrawPanelWithTemporaryOverride	inferred	Temporarily writes selected node override, draws at scroll-adjusted coordinates, then clears the override; sequel twin 002C04E0.
 0x00282B08	mnuDrawStageTestList	inferred	draws every panel of the list at func_002828D0 offsets, or the temporary-override panel when selectedPanel >= 0; then advances transition [names_M56_D1Battle.tsv]
@@ -5069,6 +5070,7 @@
 0x00282D28	mnuSetPanelThirdGridSlot	inferred	Stores MenuPanelState.thirdSlot and its grid index.
 0x00282D50	mnuSetPanelFourthGridSlot	inferred	Stores MenuPanelState.fourthSlot and its grid index, then stores the companion value.
 0x00282D98	mnuSetPanelState	inferred	Assigns panel state word used by the panel render path. [names_reviewed5.tsv]
+0x00282DA0	mnuDrawPanelState	inferred	Draws panel background, heading, selected row and corner sprites, then updates panel-handle state; DDS2 twin 0x002C0958.
 0x00282F98	mnuCreatePanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00283038	mnuDestroyPanelGroup	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00283090	mnuUpdateFiveListEntries	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
@@ -5106,6 +5108,7 @@
 0x002850D8	mnuCreateProfilePanel	inferred	Creates a profile panel using the selected operand cap and current profile record, with full initial frame. [names_reviewed5.tsv]
 0x00285160	mnuFreeProfilePanelWork	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:777:func_00285160; Profile-panel storage-release entry paired with the 0x3C-byte cap/option/grid-origin work constructor.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00285178	mnuCacheProfilePanelGridPositions	inferred	Stores the menu profile panel origin and two selected grid positions. [names_reviewed14.tsv]
+0x00285208	mnuDrawProfilePanel	inferred	Draws the profile completion bar and tiled background; DDS2 twin 0x002C33C0.
 0x00285440	mnuDrawAndAdvanceProfilePanel	inferred	Draws profile panel and wraps its frame counter after limit. [names_reviewed5.tsv]
 0x00285490	mnuClearPanelTransitionState	inferred	Clears panel transition work area before processing. [names_reviewed8.tsv]
 0x002854B0	mnuApplyPanelTransitionAction	inferred	matched-body; maintains the MenuPopupEntry transition stack, registers and de-duplicates enter callbacks, and pops entries with optional leave callbacks; native callers dispatch add and pop actions
@@ -5147,6 +5150,7 @@
 0x00286D20	btlItemApplyDirectEffect	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x00286EA0	mnuGetMatchingPartyEntryMask	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00286EF8	mnuClassifyQuarterHalfPercent	inferred	Computes percentage, returns separate categories below 25 and 50. [names_reviewed5.tsv]
+0x00286F48	mnuIsStaffMenuInputBlocked	inferred	Returns the global guard checked before staff-menu input; DDS2 twin 0x002C6480.
 0x00286F58	evtStageTestSetModelScalingEnabled	inferred	Sets stage-test scaling flag that chooses profile-based vector scale. [names_reviewed5.tsv]
 0x00286F80	evtStageTestGetActiveModel	inferred	Returns current stage-test model handle. [names_reviewed5.tsv]
 0x00286F90	evtStageTestGetSlotModelId	inferred	Returns current stage-test model ID from active slot. [names_reviewed5.tsv]
@@ -5164,6 +5168,7 @@
 0x002875E8	mnuHasPendingBlockFlag	inferred	confidence=high; matched-C; src/dds1/game/code_00282850.c:1831:func_002875E8; Tests the pending-selection bit consumed by mnuCommitPendingBlock.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00287678	evtStageTestClearPendingFlag	inferred	Clears pending-block flag in stage-test state. [names_reviewed5.tsv]
 0x00287788	evtStageTestSelectEntryWithoutInitialValue	inferred	Selects stage-test model entry with sentinel initial value and caller option. [names_reviewed5.tsv]
+0x002877A8	evtStageTestPollModelRequest	inferred	Polls the stage-test model request queue; returns 0 with no queue, 1 while handling a request, and 2 otherwise.
 0x00287A18	mnuResetWorkPair	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00287B88	evtStageTestApplyEntryRotation	inferred	Byte-identical dds2 twin 0x002C70D0; DDS1 has the same unprefixed symbol; game/code_002BE628 uses evt for the already-described stageTestApplyEntryRotation behavior. [names_conflicts.tsv]
 0x00287C20	evtStageTestUpdateCamera	inferred	copies stage-test camera vectors to the view work area, builds the look-at basis (eye 600 units back) and hands the matrix to the model packet [names_M68_VuRest.tsv]

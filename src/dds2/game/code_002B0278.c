@@ -98,7 +98,7 @@ extern void mnuClearListFlagsOneAndTwo();
 
 extern s32 func_002C6CE8(void);
 
-extern s32 func_002C6480();
+extern s32 mnuIsStaffMenuInputBlocked();
 
 extern char D_003E75C4[];
 
@@ -1425,7 +1425,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
     if (stateWord != 0) {
         return stateWord;
     }
-    if (func_002C6480() != 0) {
+    if (mnuIsStaffMenuInputBlocked() != 0) {
         return 0;
     }
     stateWord = *popupState;
@@ -1919,9 +1919,9 @@ s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits) {
 
 /* DDS2 page setup uses the same full owners as the surrounding menu code. */
 extern struct MenuPanelState *mnuCreatePanelState(s32, s32);
-extern void func_002C07D8(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
-extern void func_002C08E0(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
-extern void func_002C0908(struct MenuPanelState *, u32, u32, EffectSlotSet *, const s32 *);
+extern void mnuSetPanelFirstGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
+extern void mnuSetPanelSecondGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, s32);
+extern void mnuSetPanelThirdGridSlot(struct MenuPanelState *, u32, u32, EffectSlotSet *, const s32 *);
 extern void mnuSetPanelCornerGeometry(struct MenuPanelState *, s32, s32, EffectSlotSet *, s32, s32);
 extern void mnuInitializePanelResource(struct MenuPanelState *, s32, s32);
 extern MenuList *mnuCreateListState(u32, u32, s32);
@@ -1944,9 +1944,9 @@ void ptySkillMenuInitPages(MenuContext *context) {
         owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
         skillBits = (u32 *)mnuBuildOwnedSkillBits();
         menu->skillPanel = mnuCreatePanelState(4, 0x2C0);
-        func_002C07D8(menu->skillPanel, 0, 0, (EffectSlotSet *)context->labelHandle, 0x1B);
-        func_002C08E0(menu->skillPanel, 0x420, 0x128, (EffectSlotSet *)context->labelHandle, 0x11);
-        func_002C0908(menu->skillPanel, 0x3A0, 0x10, (EffectSlotSet *)context->labelHandle, D_003E7808);
+        mnuSetPanelFirstGridSlot(menu->skillPanel, 0, 0, (EffectSlotSet *)context->labelHandle, 0x1B);
+        mnuSetPanelSecondGridSlot(menu->skillPanel, 0x420, 0x128, (EffectSlotSet *)context->labelHandle, 0x11);
+        mnuSetPanelThirdGridSlot(menu->skillPanel, 0x3A0, 0x10, (EffectSlotSet *)context->labelHandle, D_003E7808);
         mnuSetPanelCornerGeometry(menu->skillPanel, 0x3E0, 0x108, (EffectSlotSet *)context->labelHandle, 9, 0xF);
         mnuInitializePanelResource(menu->skillPanel, context->labelHandle, context->skillPanelResource);
         menu->categoryList = mnuCreateListState(0, 1, 1);
@@ -2425,7 +2425,7 @@ typedef struct MenuPanelWindow {
     s32 field94;
 } MenuPanelWindow;
 
-extern void func_002C0958();
+extern void mnuDrawPanelState();
 
 void ptySkillMenuCopyPageState(s32 context) {
     s32 *party = (s32 *)((MenuContext *)context)->party;
@@ -2439,7 +2439,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     window = *slot;
     itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, (EffectSlotSet *)(u32)((MenuContext *)context)->labelHandle, 0x24, 0x53);
     mnuSetPanelState((struct MenuPanelState *)party[8], index);
-    func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
+    mnuDrawPanelState(0xED0, 0x328, 0, party[8], 0x53);
     if (window->list->cursor->index == 0) {
         window->list->stateFlags |= 0x10;
     } else {

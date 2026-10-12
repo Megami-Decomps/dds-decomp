@@ -235,7 +235,7 @@ extern s32 func_002BD5C8(MenuPageWindow *window, s32 mode);
 extern void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount);
 
 /* Draw the window surface; while the window is in selection state 1, blend its second resource in. */
-void func_002BE628(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 mode, EffectSlotSet **resources, u32 alpha, s32 surface) {
+void mnuDrawPanelWindowSurface(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 mode, EffectSlotSet **resources, u32 alpha, s32 surface) {
     EffectSlotSet *resource;
     s32 blendState = 1;
 
@@ -397,7 +397,7 @@ extern const MenuCommandScatterLayout D_0042B0D0;
 typedef char MenuCommandScatterLayout_size_check[
     sizeof(MenuCommandScatterLayout) == 0x38 ? 1 : -1];
 
-void func_002BF478(s32 unusedX, s32 unusedY, s32 unusedDepth,
+void mnuDrawQueuedCommandScatterEffect(s32 unusedX, s32 unusedY, s32 unusedDepth,
                   MenuQueuedCommand *command, s32 surface) {
     MenuCommandScatterLayout layout = D_0042B0D0;
     s32 phase = command->initialValue;
@@ -721,7 +721,7 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_002C07D8(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
                                     s32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
@@ -747,14 +747,14 @@ void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 materia
     panel->resourceHandle = mnuCreatePanelIconState(5, resource, material);
 }
 
-void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+void mnuSetPanelSecondGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
                                     s32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
     itfGridStorePosition(&panel->rowSlot, resource, index);
 }
 
-void func_002C0908(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
+void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
                                     const s32 *indices) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
@@ -769,7 +769,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
 extern void func_002BA7A8(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(struct MenuIconState *);
 
-void func_002C0958(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
+void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
     s32 corner;
     s32 rowX;
     s32 rowY;
@@ -1076,7 +1076,7 @@ void mnuSetPairedEffectPositions(MenuPageBar *pair) {
 }
 
 /* Divide a quantized horizontal span into the two effect-grid regions. */
-void func_002C1D10(MenuPageBar *pair) {
+void mnuUpdatePairedEffectBounds(MenuPageBar *pair) {
     s32 start = ((pair->quantizedSpan * 8) / 100) * 16;
     s32 end = ((pair->quantizedSpan * 77) / 100) * 16;
     s32 offset = -0x60;
@@ -1096,7 +1096,7 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     s32 *settings;
     s32 setting;
 
-    func_002C1D10(pair);
+    mnuUpdatePairedEffectBounds(pair);
     mnuSetPairedEffectPositions(pair);
     settings = pair->settings;
     setting = 0;
@@ -1349,7 +1349,7 @@ void mnuInitializePanelItemGridSlots(MenuPanelItem *item, EffectSlotSet *gridObj
     itfSetGridEntryQuantizedAndRefresh(item->gridSlots[4].set, item->gridSlots[4].index, 0x130, -0x30, 0, 0);
 }
 
-void func_002C2A88(MenuPanelItem *item, u32 value) {
+void mnuSetPanelItemPixelSpan(MenuPanelItem *item, u32 value) {
     item->value10 = value;
 }
 
@@ -1362,7 +1362,7 @@ void mnuStorePanelItemValue(MenuPanelItem *item, u32 value) {
     item->value24 = value;
 }
 
-void func_002C2AA8(MenuPanelItem *item, u32 value) {
+void mnuSetPanelItemAuxiliaryValue(MenuPanelItem *item, u32 value) {
     item->value28 = value;
 }
 
@@ -1479,15 +1479,15 @@ void mnuSetGroupProperties(MenuProfilePanel *panel, EffectSlotSet *panelSet,
     panel->particleIndex = particleIndex;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
-extern void func_002C33C0(s32, s32, s32, MenuProfilePanel *, s32);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawProfilePanel);
+extern void mnuDrawProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 
 /* Draw first, then advance the native phase by one with a single period subtraction. */
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
     s32 phase;
     s32 nextPhase;
 
-    func_002C33C0(x, y, z, panel, option);
+    mnuDrawProfilePanel(x, y, z, panel, option);
     phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {
@@ -2631,7 +2631,7 @@ s32 mnuUseFieldSkillOnParty(PartyPanel *partyPanel, MenuPageWindow *page, s32 co
     return 0;
 }
 
-u8 func_002C6480(void) {
+u8 mnuIsStaffMenuInputBlocked(void) {
     return D_00437C9C != 0;
 }
 
