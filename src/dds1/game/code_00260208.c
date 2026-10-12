@@ -153,7 +153,80 @@ s32 mnuStaffTickState(ShopScene *work) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00260208", func_00260670);
+extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void func_00260100(ShopScene *, s32);
+extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
+
+/* Draw the command panel through its entry, exit and stable phases. */
+s32 func_00260670(ShopScene *scene) {
+    s32 frames;
+    f32 progress;
+    f32 opacity;
+    f32 position;
+
+    func_0025E308(0, 0, 0, scene, 0x100, 0x53);
+    progress = 0.0f;
+    opacity = 0.0f;
+    switch (scene->action) {
+    case 0:
+        if ((f32)scene->frames > 0.0f) {
+            frames = (s32)((f32)scene->frames - 0.0f);
+            if (frames < 0) {
+                frames = 0;
+            }
+            progress = (f32)frames / 10.0f;
+            if (!(progress < 0.5f)) {
+                opacity = (progress - 0.5f) * 2.0f;
+            }
+        } else {
+            opacity = progress;
+        }
+        position = progress;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (opacity > 1.0f) {
+            opacity = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        mnuDrawStatusIconAndCompanion(0, (s32)((1.0f - position) * -48.0f) << 3,
+                                     0, scene, (s32)(opacity * 256.0f), 0x53);
+        func_00260100(scene, 0xA09DC300 | (s32)(opacity * 128.0f));
+        func_00260370((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        break;
+    case 2:
+        if ((f32)scene->frames > 0.0f) {
+            progress = ((f32)scene->frames - 0.0f) / 10.0f;
+            if (progress > 1.0f) {
+                progress = 1.0f;
+            }
+        }
+        position = progress;
+        if (progress > 1.0f) {
+            progress = 1.0f;
+        }
+        if (position > 1.0f) {
+            position = 1.0f;
+        }
+        mnuDrawStatusIconAndCompanion(0, (s32)(position * 64.0f) << 3, 0, scene,
+                                     (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
+        func_00260100(scene, 0xA09DC380);
+        func_00260208((s32)scene, (u32)((1.0f - progress) * 256.0f), 4, 0x53);
+        break;
+    case 1:
+    case 3:
+        mnuDrawStatusIconAndCompanion(0, 0, 0, scene, 0x100, 0x53);
+        mnuDrawListChildrenWithCountdown(0, 0, 0, scene->sprite->list, 0x53);
+        func_00260100(scene, 0xA09DC380);
+        func_00260208((s32)scene, 0x100, 4, 0x53);
+        break;
+    }
+    return 0;
+}
 
 /* Phase machine of the menu command: phases 4, 5 and 8 wait for the frame
  * counter to pass 10.0f before reporting themselves, 6 and 7 report at once.
@@ -188,11 +261,7 @@ s32 mnuTickExtendedCommandPhase(ShopScene *work) {
     return -1;
 }
 
-extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_00260100(ShopScene *, s32);
-extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025F7F0(s32, s32, s32, ShopScene *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
