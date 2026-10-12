@@ -70,7 +70,8 @@ typedef struct FldAreaWork {
     s32 overlayMode;
     s32 overlayCounter;
     s32 unkD4;
-    u8 padD8[8];
+    u8 padD8[4];
+    s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
     s32 unkE0;
     s32 encounterMode;
     s32 unkE8;
@@ -156,6 +157,7 @@ extern FldAreaWork fldAreaState;
 typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];
 typedef char FldTextureResource_size_check[(sizeof(FldTextureResource) == 0xC) ? 1 : -1];
 typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
+typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
 typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
 typedef char FldAreaWork_transitionMode_offset_check[(FLD_AREA_OFFSET(transitionMode) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
