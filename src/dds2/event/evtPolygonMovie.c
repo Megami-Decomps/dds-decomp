@@ -769,7 +769,7 @@ extern char D_004373B8[];
 
 /* Build the 0x20-byte PMD3 resource header, copy it into a fresh allocation and
  * hand the retained address back through `out`. */
-SdfMemBlock *func_0024F9B8(u8 **out) {
+SdfMemBlock *evtPolygonMovieSynthesizePmd3Header(u8 **out) {
     u8 buffer[0x20];
     s32 size = 0x20;
     SdfMemBlock *handle;
@@ -804,7 +804,7 @@ const char D_00423320[] = "evtGetPolygonMovieWorkData2:2\n";
 const char D_00423340[] = "evtGetPolygonMovieWorkData3:3\n";
 
 /* Load or synthesize the three PMD resources for an event scene and bind them to a new work object. */
-PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode) {
+PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     char path1[0x40];
     char path2[0x40];
     char path3[0x40];
@@ -832,7 +832,7 @@ PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode) {
         handle3 = sdfReadNamedResource(path3, &address3, 0);
         func_0035B6E0(D_00423300);
     } else {
-        handle3 = (SdfMemBlock *)func_0024F9B8((u8 **)&address3);
+        handle3 = (SdfMemBlock *)evtPolygonMovieSynthesizePmd3Header((u8 **)&address3);
     }
     func_0035B6E0(D_00423320);
     work = evtPolygonMovieAllocWork();

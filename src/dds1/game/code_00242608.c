@@ -242,7 +242,7 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
     evtViewerDispatchFlagMode(scene);
 }
 
-extern void func_0022BFD8();
+extern void evtEventViewerReleaseQueuedNode();
 
 /* Process keys at or beyond threshold, restarting at the head after each call. */
 void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
@@ -258,7 +258,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
             if (key->frame + track->metadata.value < threshold) {
                 key = key->next;
             } else {
-                func_0022BFD8(scene, track, key);
+                evtEventViewerReleaseQueuedNode(scene, track, key);
                 key = track->children;
             }
         }

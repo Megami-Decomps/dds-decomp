@@ -123,7 +123,7 @@ typedef struct BtlPackedCtx {
 } BtlPackedCtx;
 extern s32 D_00435E5C;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
-extern void func_001B8580(s32);
+extern void btlCreateSkillNamePanel(s32);
 extern void btlReplaceDialogTasksAndQueueMessage(s32, s32);
 extern u32 btlHasRegisteredSkillNamePanelTask(void);
 extern u32 btlHasRegisteredAphNamePanelTask(void);
@@ -724,18 +724,18 @@ s32 btlPollActorOrEntryLabelTask(void *arguments) {
 
         if (resourceIndex == 0) {
             if ((btlUnitStatusPair(owner) & 0x1400) == 0 && (owner->partyRecord.flags & 0x10) == 0) {
-                func_001B8580((s32)btlGetIndexedUiResource(owner));
+                btlCreateSkillNamePanel((s32)btlGetIndexedUiResource(owner));
             } else if (battleState->commandRestrictFlags & 0x400) {
                 if (owner->status.flags & 0x400) {
-                    func_001B8580(D_003BEB60[0]);
+                    btlCreateSkillNamePanel(D_003BEB60[0]);
                 } else {
-                    func_001B8580(D_003BEB58[0]);
+                    btlCreateSkillNamePanel(D_003BEB58[0]);
                 }
             } else {
-                func_001B8580(D_003BEB58[0]);
+                btlCreateSkillNamePanel(D_003BEB58[0]);
             }
         } else {
-            func_001B8580(D_00435E64 + resourceIndex * 17);
+            btlCreateSkillNamePanel(D_00435E64 + resourceIndex * 17);
         }
     }
     if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
@@ -766,7 +766,7 @@ s32 btlPollTimedTaskLink(void *arguments) {
     BtlEffLink *link = arguments;
     btlGetRuntime();
     if (link->elapsedTicks == 0) {
-        func_001B8580(D_00435E5C + link->arg * 25);
+        btlCreateSkillNamePanel(D_00435E5C + link->arg * 25);
     }
     if (btlHasRegisteredSkillNamePanelTask() == 0 || link->elapsedTicks >= 0x1E) {
         return 1;
@@ -801,27 +801,27 @@ s32 btlPollCategoryLabelTask(void *arguments) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            func_001B8580((s32)D_003BEB28);
+            btlCreateSkillNamePanel((s32)D_003BEB28);
             break;
         case 5: {
             u32 flags = owner->status.flags;
             if (flags & 0x200) {
                 if (!(flags & 0x1000)) {
-                    func_001B8580(D_003BEB38[0]);
+                    btlCreateSkillNamePanel(D_003BEB38[0]);
                     break;
                 }
             }
-            func_001B8580(D_003BEB48[0]);
+            btlCreateSkillNamePanel(D_003BEB48[0]);
             break;
         }
         case 6:
-            func_001B8580((s32)D_003BEB30);
+            btlCreateSkillNamePanel((s32)D_003BEB30);
             break;
         case 9:
-            func_001B8580(D_003BEB4C[0]);
+            btlCreateSkillNamePanel(D_003BEB4C[0]);
             break;
         case 11:
-            func_001B8580(D_003BEB50[0]);
+            btlCreateSkillNamePanel(D_003BEB50[0]);
             break;
         case 1:
         case 2:

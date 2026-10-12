@@ -28,7 +28,7 @@ void fldDestroyPanelTaskIfPresent(void) {
     }
 }
 
-void *func_00141190(s32 value) {
+void *fldSetInputPanelStateWord2(s32 value) {
     u16 *panelState;
 
     panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
@@ -36,7 +36,7 @@ void *func_00141190(s32 value) {
     return panelState;
 }
 
-void *func_001411C0(s32 value) {
+void *fldSetInputPanelStateWord1(s32 value) {
     u16 *panelState;
 
     panelState = (u16 *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);

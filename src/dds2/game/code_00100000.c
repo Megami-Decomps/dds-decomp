@@ -35,22 +35,22 @@ extern u8 D_00435BB8[];
 extern u8 D_00435BC0[];
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern s32 kwlnPrepareFrameDrawPackets(void);
-extern s32 func_00101D30(void);
+extern s32 kwlnBuildFrameScenePackets(void);
 extern s32 kwlnRenderFrame(void);
-extern u32 func_00102740(void);
-extern u32 func_00102768(void);
+extern u32 dds3RunWorldPrimaryCallbacks(void);
+extern u32 dds3RunWorldSecondaryCallbacks(void);
 extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
 extern void frFontReleaseAll(void);
 extern s32 func_001A1810(void);
 
-s32 func_001001D8(void) {
+s32 kwlnInitializeRuntime(void) {
     evtResetDisplayProjectionAndVectorState();
     kwlnResetPadInputAndMotorState();
     kwlnTaskCreate(D_00435BB8, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
-    kwlnTaskCreate(D_00435BC0, 0x2710, 0, 0, func_00101D30, 0, 0);
+    kwlnTaskCreate(D_00435BC0, 0x2710, 0, 0, kwlnBuildFrameScenePackets, 0, 0);
     kwlnTaskCreate("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
-    kwlnTaskCreate("basic_main", 0x3FC, 1, 1, func_00102740, 0, 0);
-    kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, func_00102768, 0, 0);
+    kwlnTaskCreate("basic_main", 0x3FC, 1, 1, dds3RunWorldPrimaryCallbacks, 0, 0);
+    kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, dds3RunWorldSecondaryCallbacks, 0, 0);
     func_0019BEB8(0x100, 0x200);
     kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
     fileManInit();
@@ -79,11 +79,11 @@ s32 func_001001D8(void) {
     return dds3AdminSubmitModeRequest(1, 0, 0, 0);
 }
 
-void func_001003E8(void) {
+void kwlnRequestMainLoopExit(void) {
     D_00435B88 = 1;
 }
 
-u32 func_001003F8(void) {
+u32 kwlnGetFrameCounter(void) {
     return D_00435B80;
 }
 
@@ -91,25 +91,25 @@ u32 kwlnGetDrawBufferIndex(void) {
     return D_00438D80;
 }
 
-void func_00100408(void) {
+void kwlnPauseTaskScheduler(void) {
     D_00435B90 = 0;
     D_00435B8C = 1;
     D_00435B94 = 0;
 }
 
-void func_00100420(void) {
+void kwlnResumeTaskScheduler(void) {
     D_00435B8C = 0;
     D_00435B90 = 0;
     D_00435B94 = 0;
 }
 
-void func_00100430(u32 value) {
+void kwlnSetTaskPauseCount(u32 value) {
     D_00435B90 = value;
     D_00435B8C = 1;
     D_00435B94 = 0;
 }
 
-void func_00100448(u32 first, u32 second) {
+void kwlnSetFrameControlParameters(u32 first, u32 second) {
     u32 value = D_00435B84;
     D_00435B94 = 1;
     D_00435B98 = first;
@@ -119,7 +119,7 @@ void func_00100448(u32 first, u32 second) {
     D_00435B90 = 0;
 }
 
-void func_00100470(void) {
+void kwlnResetFrameControl(void) {
     D_00435B8C = 0;
     D_00435B98 = 4;
     D_00435B90 = 0;
@@ -155,10 +155,10 @@ extern void sdfRaiseDeviceThreadPriority(void);
 extern void sdfRestoreDeviceThreadPriority(void);
 extern void LoadExecPS2(const char *, s32, char **);
 
-void func_001004B0(void) {
+void kwlnRunMainLoop(void) {
     u32 startTick;
 
-    func_001001D8();
+    kwlnInitializeRuntime();
     D_00438D80 = 0;
     while (D_00435B88 == 0) {
         sdfSleepThreadCount(mnuMovieTaskState);

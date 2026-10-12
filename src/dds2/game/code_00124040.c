@@ -52,7 +52,7 @@ extern void func_00122E50(void);
 
 extern void func_00125380(void);
 
-extern void func_00135A68(u32, s32);
+extern void fldApplySkyLightSet(u32, s32);
 
 extern void func_001512D8(void);
 
@@ -131,7 +131,7 @@ extern s32 fldUpdateCameraFrame(void);
 
 extern void fldUpdateSwayOffset(void);
 
-extern void func_001355D8(void);
+extern void fldUpdateSelectedValueTransition(void);
 
 extern void func_0013DDC0(EffWorldNode *);
 
@@ -290,7 +290,7 @@ void fldUnloadPlayerModel(void);
 extern void dds3ClearObjectFlags(u32, s32);
 
 
-extern void func_00112058(u32, s32, s32);
+extern void dds3RebuildObjectModelContext(u32, s32, s32);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
@@ -1286,7 +1286,7 @@ void fldCreatePlayerObject(void) {
             dds3ClearObjectFlags(fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        func_00112058(fldPlayerObject, 2, D_0038A67C[0]);
+        dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
     }
 }
 
@@ -1354,7 +1354,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                 dds3ClearObjectFlags(fldPlayerObject, 0x20);
             }
             fldPrepareResourceBuffer();
-            func_00112058(fldPlayerObject, 2, D_0038A67C[0]);
+            dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0038A67C[0]);
             player = (EffWorldNode *)fldPlayerObject;
         } else {
             ObjectTransform *inner = player->inner;
@@ -1388,7 +1388,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             VU0_STORE_VF(vf10, work);
             fldSecondarySceneObject = (u32)dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), input, work);
             dds3SetWorldNodeValue((EffWorldNode *)fldSecondarySceneObject, (u32)D_00412F00);
-            func_00112058(fldSecondarySceneObject, 2, D_0038A67C[0]);
+            dds3RebuildObjectModelContext(fldSecondarySceneObject, 2, D_0038A67C[0]);
             effObjSetInnerPosition((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
             effObjSetInnerRotation((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
             effObjSetInnerScale((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
@@ -1418,7 +1418,7 @@ void fldSpawnPlayerUnits(f32 *input) {
 
         if (fldAreaState.area < 0xC8) {
             func_001360B8(0, 0);
-            func_00135A68(D_00389988[0x2C / 4], 0);
+            fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
             if (fldGetSceneCommandState() == 1) {
                 if (fldAreaState.commandEnabled != 0) {
@@ -1427,7 +1427,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                     mdlFlagClear(0x818);
                     fldAreaState.sceneCommand = 0;
                     func_001360B8(0, 0);
-                    func_00135A68(D_00389988[0x2C / 4], 0);
+                    fldApplySkyLightSet(D_00389988[0x2C / 4], 0);
                     fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
                 }
             } else if (fldAreaState.commandEnabled == 0) {
@@ -1974,7 +1974,7 @@ s32 func_001278D0(void) {
         if (fldAreaState.area >= 200) {
             D_00389988[0x2C / 4] = 0;
             D_00389988[0x30 / 4] = 0;
-            func_00135A68(0, 0);
+            fldApplySkyLightSet(0, 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
         }
         if (fldAreaState.transitionMode == 0) func_001512D8();
@@ -2134,7 +2134,7 @@ s32 func_001278D0(void) {
     }
     if (fldGetCampSceneControlMode() != 1) {
         fldUpdateSceneCommandSpeed();
-        func_001355D8();
+        fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
     }
     if (controller->stage >= 4) {

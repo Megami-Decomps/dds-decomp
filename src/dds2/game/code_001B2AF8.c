@@ -1180,7 +1180,8 @@ extern char D_004158D8[]; /* "btl:start voice off[UNIT NON]\n" */
 extern char D_00415948[]; /* "btl:start voice off[STATE=%X,ID=%X]\n" */
 extern char D_00415970[]; /* "btl:start voice on[VOICE=%X,STATE=%X,ID=%X]\n" */
 
-s8 func_001B4EB8(void) {
+/* Choose a battle-start voice ID, or -1 when no permitted choice is available. */
+s8 btlChooseStartVoice(void) {
     BtlState *state;
     BtlUnit *candidates[3];
     BtlUnit *unit;
@@ -1648,7 +1649,8 @@ extern const BattleCornerFadeDefaults D_00415C30;
 
 extern const BattleCornerPhaseDefaults D_00415C58;
 
-void func_001B6438(void) {
+/* Advance the global command panel fades and its pulsing corner opacity. */
+void btlUpdateCommandPanelFades(void) {
     BattleCornerFadeDefaults limits = D_00415C30;
     BattleCornerPhaseDefaults phases = D_00415C58;
     s32 i;
@@ -1735,7 +1737,8 @@ extern const BattleClassLabelOffsets D_00415C98;
 
 extern void func_001B6180(void);
 
-void func_001B6A20(void) {
+/* Draw the global command panel class sprites and label with their current fades. */
+void btlDrawCommandPanelClassLabel(void) {
     BattlePanelColors colors = D_00415C88;
     BattleClassLabelOffsets offsets = D_00415C98;
     if (btlCommandPanelWork->state < 5) {
@@ -1778,7 +1781,8 @@ void btlReleaseAndClearChipBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B6CA8);
 
-void func_001B6FC0(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
+/* Initialize scaled sprite bounds, then shrink active mirrored records until hidden. */
+void btlUpdateShrinkingMirroredSprites(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
     if (count > 0) {
         BattleMirroredSpriteRecord *record = records;
         s32 remaining = count;
@@ -1819,7 +1823,8 @@ void func_001B6FC0(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 cou
     }
 }
 
-void func_001B70B8(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
+/* Draw both positions of each active record, restoring shared sprite bounds afterward. */
+void btlDrawMirroredPanelSprites(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
     BattlePanelColors colors = D_00415CE8;
     if (count > 0) {
         BattleMirroredSpriteRecord *record = records;
@@ -2642,7 +2647,8 @@ typedef struct BtlPanelTransitionWork {
     BattleSelectionPosition current[2];
 } BtlPanelTransitionWork;
 
-s32 func_001B8580(const u8 *text) {
+/* Replace conflicting label tasks and create a skill-name transition; returns one. */
+s32 btlCreateSkillNamePanel(const u8 *text) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
     BtlPanelTransitionWork *work;
@@ -2912,7 +2918,7 @@ void func_001B8E68(s32 section, s32 delta) {
 
 extern void func_001B9C70(BtlLinkedCommand *, BtlAnalysisPanelWork *);
 extern void func_001BA1E8(BtlLinkedCommand *, BtlAnalysisPanelWork *);
-extern void func_001BB1E8(void *, s32, s32, u32);
+extern void btlDrawCompositePanelSprites(void *, s32, s32, u32);
 extern void func_001BAB90(BtlAnalysisPanelWork *, s32, s32, s32, s32);
 extern u16 *btlGatherEnemyCommands(BtlUnit *, s16 *);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
@@ -2993,7 +2999,7 @@ s32 func_001B9158(KwlnTask *task) {
                 xOffset = rowOffsets[row];
                 switch (row) {
                 case 0:
-                    func_001BB1E8(work, work->x, work->y, work->fade);
+                    btlDrawCompositePanelSprites(work, work->x, work->y, work->fade);
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
@@ -3232,7 +3238,8 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
 
 
 
-void func_001BB1E8(void *unused, s32 x, s32 y, u32 alpha) {
+/* Draw the fixed panel composition at x/y using the requested corner opacity. */
+void btlDrawCompositePanelSprites(void *unused, s32 x, s32 y, u32 alpha) {
     s32 strips[37][3] = {
         { 0, -16, 0x5E },
         { 186, -16, 0x5F },
@@ -3420,18 +3427,19 @@ typedef char BattleRegisteredPanelWork_size_check[
 typedef char BattleRegisteredPanelWork_backdrop_offset_check[
     (u32)&((BattleRegisteredPanelWork *)0)->backdropAlpha == 0x1C ? 1 : -1];
 
-extern s32 func_001BBA80(KwlnTask *task);
+extern s32 btlUpdateRegisteredPanelTask(KwlnTask *task);
 
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
 
 void btlStartRegisteredChildTask(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
+    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
     func_00101968(work->scriptOwner, task);
     btlSetTrackedTaskHandle(7, (s32)task);
 }
 
-void func_001BBA60(BattleRegisteredPanelWork *work) {
+/* Reset panel entrance mode and its initial horizontal offset. */
+void btlResetRegisteredPanelEntrance(BattleRegisteredPanelWork *work) {
     work->mode = 1;
     work->x = 0x80;
     work->y = 0;
@@ -3440,7 +3448,8 @@ void func_001BBA60(BattleRegisteredPanelWork *work) {
 
 extern const u32 D_004163A0[4];
 
-s32 func_001BBA80(KwlnTask *task) {
+/* Advance the registered panel slide/fade animation and draw its layered sprites. */
+s32 btlUpdateRegisteredPanelTask(KwlnTask *task) {
     u32 colors[4];
     BattleRegisteredPanelWork *work;
     s32 sprite;
@@ -3571,6 +3580,7 @@ extern const BattlePhaseFadeLimits D_004163C0;
 
 extern const BattlePhaseXBounds D_004163F0;
 
+/* Advance phase-panel movement, cropping and corner fades in the supplied work. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163A0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163B0);
@@ -3579,7 +3589,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163C0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004163F0);
 
-void func_001BC138(BattlePhasePanelWork *work) {
+void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     BattlePhaseSlotIds slots = D_004163B0;
     BattlePhaseFadeLimits limits = D_004163C0;
     BattlePhaseXBounds bounds = D_004163F0;
@@ -3679,7 +3689,7 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BCFB0);
 
 extern s32 btlGetNamedTaskPairStatusOrUnavailable();
 
-extern void func_001BC138();
+extern void btlUpdatePhasePanelAnimation();
 
 extern void func_001BC618();
 
@@ -3693,7 +3703,7 @@ s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *task) {
     if ((u32)((btlGetNamedTaskPairStatusOrUnavailable() - 1) & 0xFF) < 2U) {
         return 0;
     }
-    func_001BC138(state);
+    btlUpdatePhasePanelAnimation(state);
     if (btlTrackedTaskHandles->phaseGate == 0) {
         func_001BC618(state);
     }
@@ -3741,7 +3751,8 @@ extern const char *D_004367D4;
 extern s32 func_001BEBD0(KwlnTask *);
 extern void btlReleaseCmsleffPanelWork(KwlnTask *);
 
-void func_001BE9E8(s32 unused, s32 previousRow, s32 targetRow) {
+/* Replace tracked slot five with a staggered trail from previousRow to targetRow. */
+void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(5);
     BattleSelectionTrailWork *work;
@@ -4924,8 +4935,8 @@ void func_001C2EA8(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 index) {
 }
 
 extern void btlUpdateActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
-extern void func_001C6010(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
-extern void func_001C6320(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
+extern void btlUpdateActorVitalPulseTrail(BtlUnit *, BattleActorPanelWork *, s16, s32, s8);
+extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *, BattleStatPulse *, s32, s32, s16, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void func_001C2EA8(BtlUnit *, BattleActorPanelWork *, s32);
 extern void func_001B6CA8(s32, s32, u32, const char *, s32);
@@ -4970,12 +4981,12 @@ s32 func_001C3168(KwlnTask *task) {
                           work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
 
             if (work->reserveEntries[i].presentation.fade >= 0x80) {
-                func_001C6320(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                btlUpdateAndDrawVitalBarPulse(unit, &work->reserveEntries[i].presentation.hpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
                               work->reserveEntries[i].presentation.fade, i, 2);
-                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
-                func_001C6320(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
+                btlUpdateActorVitalPulseTrail(unit, work, work->reserveEntries[i].presentation.fade, i, 2);
+                btlUpdateAndDrawVitalBarPulse(unit, &work->reserveEntries[i].presentation.mpBarPulse, work->reserveEntries[i].position[0], work->reserveEntries[i].position[1],
                               work->reserveEntries[i].presentation.fade, i, 3);
-                func_001C6010(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
+                btlUpdateActorVitalPulseTrail(unit, work, work->reserveEntries[i].presentation.fade, i, 3);
             }
 
             func_001C2A98(unit, work, i);
@@ -5748,9 +5759,10 @@ void func_001C5D10(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     }
 }
 
-extern void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat);
+extern void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat);
 
-void func_001C6010(BtlUnit *unit, BattleActorPanelWork *work, s16 alpha, s32 slot, s8 stat) {
+/* Advance the selected HP/MP trail and draw up to three delayed bar pulses. */
+void btlUpdateActorVitalPulseTrail(BtlUnit *unit, BattleActorPanelWork *work, s16 alpha, s32 slot, s8 stat) {
     s8 *frame;
     s32 count;
     s32 n;
@@ -5776,22 +5788,22 @@ void func_001C6010(BtlUnit *unit, BattleActorPanelWork *work, s16 alpha, s32 slo
         for (n = 0; n < count && n < 3; n++) {
             switch (stat) {
             case 0:
-                func_001C6320(unit, &work->activeEntries[slot].presentation.hpBarPulses[n],
+                btlUpdateAndDrawVitalBarPulse(unit, &work->activeEntries[slot].presentation.hpBarPulses[n],
                               work->activeEntries[slot].position[0], work->activeEntries[slot].position[1],
                               alpha - (n + 1) * 0x20, slot, 0);
                 break;
             case 1:
-                func_001C6320(unit, &work->activeEntries[slot].presentation.mpBarPulses[n],
+                btlUpdateAndDrawVitalBarPulse(unit, &work->activeEntries[slot].presentation.mpBarPulses[n],
                               work->activeEntries[slot].position[0], work->activeEntries[slot].position[1],
                               alpha - (n + 1) * 0x20, slot, 1);
                 break;
             case 2:
-                func_001C6320(unit, &work->reserveEntries[slot].presentation.hpBarPulses[n],
+                btlUpdateAndDrawVitalBarPulse(unit, &work->reserveEntries[slot].presentation.hpBarPulses[n],
                               work->reserveEntries[slot].position[0], work->reserveEntries[slot].position[1],
                               alpha - (n + 1) * 0x20, slot, 2);
                 break;
             default:
-                func_001C6320(unit, &work->reserveEntries[slot].presentation.mpBarPulses[n],
+                btlUpdateAndDrawVitalBarPulse(unit, &work->reserveEntries[slot].presentation.mpBarPulses[n],
                               work->reserveEntries[slot].position[0], work->reserveEntries[slot].position[1],
                               alpha - (n + 1) * 0x20, slot, stat);
                 break;
@@ -5804,7 +5816,8 @@ void func_001C6010(BtlUnit *unit, BattleActorPanelWork *work, s16 alpha, s32 slo
 
 extern const BattlePanelColors D_004168D8;
 
-void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {
+/* Advance one HP/MP bar pulse and draw it when the unit status permits. */
+void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {
     BattlePanelColors colors = D_004168D8;
     f32 value;
     f32 maximum;
@@ -5875,7 +5888,8 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004168D8);
 
 const BattleStatEffectOffsets D_004168E8 = {{0x36, 0x31}, {0x1A, 0x40}};
 
-void func_001C68D0(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
+/* Draw active HP/MP change effects while fading and clearing their effect states. */
+void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
     BattleStatEffectOffsets offsets = D_004168E8;
     s32 alpha;
     s32 type;
@@ -5922,7 +5936,8 @@ void func_001C68D0(BtlUnit *unit, BattleActorPanelWork *work, s32 slot) {
 }
 
 
-void func_001C6B98(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 kind) {
+/* Compare cached HP/MP with current values and prepare change targets and pulse states. */
+void btlTrackActorVitalChanges(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 kind) {
     switch (kind) {
     case 0:
         if (work->activeEntries[slot].presentation.hpState == 2) {
@@ -6070,7 +6085,7 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
 
 extern const char *D_004367DC;
 extern BattleCmdPanel *btlCommandPanelWork;
-extern void func_001BBA60(BattleRegisteredPanelWork *);
+extern void btlResetRegisteredPanelEntrance(BattleRegisteredPanelWork *);
 
 void func_001C7DB8(s8 mode, s32 duration) {
     struct KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
@@ -6110,7 +6125,7 @@ void func_001C7DB8(s8 mode, s32 duration) {
             btlTrackedTaskHandles->presentationState = 2;
         }
         if (registeredTask != NULL) {
-            func_001BBA60((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask));
+            btlResetRegisteredPanelEntrance((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask));
         }
         {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
@@ -7742,7 +7757,8 @@ void fldMarkActiveSceneScriptState(void) {
     }
 }
 
-void func_001CCD80(s32 index, s8 operation) {
+/* Request the selected slot-order transition in the enabled current bank. */
+void btlRequestActorSlotOrderTransition(s32 index, s8 operation) {
     s32 bank = D_00438F54->bank;
     s32 count;
     s32 i;
@@ -7772,13 +7788,14 @@ void func_001CCD80(s32 index, s8 operation) {
 typedef struct BtlActorSlotLimits { s32 values[12]; } BtlActorSlotLimits;
 extern const BtlActorSlotLimits D_00416D58;
 extern const BtlActorSlotLimits D_00416D88;
-extern void func_001CDEC0(s32, s32);
+extern void btlUpdateActorSlotOrderColors(s32, s32);
 
+/* Advance enabled slot-order states, scales, fades and secondary corner colors. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D58);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D88);
 
-void func_001CCEB8(void) {
+void btlUpdateActorSlotOrderAnimation(void) {
     BtlActorSlotLimits right = D_00416D58;
     BtlActorSlotLimits left = D_00416D88;
     s32 *limits;
@@ -7821,7 +7838,7 @@ void func_001CCEB8(void) {
                         D_00438F58[side]->state[i + 1] = 1;
                     }
                     if ((D_00438F58[side]->flags >> i) & 1) {
-                        func_001CCD80(i, 0);
+                        btlRequestActorSlotOrderTransition(i, 0);
                         D_00438F58[D_00438F54->bank]->flags &= 0xFFF;
                     } else {
                         D_00438F58[side]->state[i]++;
@@ -7845,7 +7862,7 @@ void func_001CCEB8(void) {
             if (D_00438F58[side]->unk8C[i] <= 100.0f) {
                 D_00438F58[side]->unk8C[i] = 100;
             }
-            func_001CDEC0(side, i);
+            btlUpdateActorSlotOrderColors(side, i);
             break;
         case 3:
             D_00438F58[side]->scalePercent[i][0] = 120.0f;
@@ -7919,13 +7936,14 @@ extern void func_001CDD38(EffectSlotSet *resource, s32 slot, s32 x, s32 y,
                           s32 bank, s32 index, s32 mode);
 extern void fldScaleSceneCoordinateRecord(EffectSlotSet *resource, s32 slot);
 
+/* Draw enabled bank-selected slot-order sprites with their current colors and scales. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DE0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416DF0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416E50);
 
-void func_001CD6E0(void) {
+void btlDrawActorSlotOrder(void) {
     u32 colors[4];
     SceneSlotCoordinate bankOneCoordinates[8];
     SceneSlotCoordinate bankZeroCoordinates[8];
@@ -8041,9 +8059,10 @@ void func_001CD6E0(void) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001CDD38);
 
+/* Advance one slot-order secondary state and its four corner-color adjustments. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416ED0);
 
-void func_001CDEC0(s32 bank, s32 index) {
+void btlUpdateActorSlotOrderColors(s32 bank, s32 index) {
     if (D_00438F58[bank]->secondaryState[index] == 8) {
         D_00438F58[bank]->colorAdjustments[index][0] -= 8;
         D_00438F58[bank]->colorAdjustments[index][0] = D_00438F58[bank]->colorAdjustments[index][0] <= 0 ? 0 : D_00438F58[bank]->colorAdjustments[index][0] > 127 ? 127 : D_00438F58[bank]->colorAdjustments[index][0];

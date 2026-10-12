@@ -148,7 +148,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
-extern void *func_00115298(void *, f32 *, f32 *);
+extern void *effObjCreateEventNode(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
 extern void effObjSetFlags(void *, s32);
 extern void effObjReplaceActiveEventNode(void *, u32);
@@ -3653,7 +3653,7 @@ typedef struct FldSparkEntryInfo {
 extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
-extern void func_00111E30(EffWorldNode *node, s32 kind, s32 resource);
+extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerScale(EffWorldNode *node, u128 *vector);
 extern void func_00147DB0(void *unit);
 
@@ -3685,9 +3685,9 @@ void func_0014B688(void) {
             fldSparkObjectEntries[i].objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
             dds3SetWorldNodeValue(fldSparkObjectEntries[i].objectHandle, (u32)D_003A0908);
             if (i == 16) {
-                func_00111E30(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);
+                dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, ((FldSparkEntryInfo *)fldSparkControlState.entry)->modelId);
             } else {
-                func_00111E30(fldSparkObjectEntries[i].objectHandle, 1, 0x146);
+                dds3RebuildObjectModelContext(fldSparkObjectEntries[i].objectHandle, 1, 0x146);
             }
             effObjSetInnerScale(fldSparkObjectEntries[i].objectHandle, (u128 *)&scale);
             resource = (MdlCtx *)dds3GetObjectBaseResourceHandle(fldSparkObjectEntries[i].objectHandle);
@@ -4104,7 +4104,7 @@ void fldUpdateSparkMessageSequence(void) {
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
             position[2] = fldAreaState.z;
-            node = func_00115298((void *)D_003BAFF0, position, rotation);
+            node = effObjCreateEventNode((void *)D_003BAFF0, position, rotation);
             fldSparkControlState.object = node;
             effObjClearFlags(node, 1);
             filePollEntryCleanup(D_003BAFE8);
@@ -4291,7 +4291,7 @@ void fldUpdateSparkEncounterScene(void) {
         firstVector[0] = area->x;
         firstVector[1] = area->y;
         firstVector[2] = area->z;
-        node = func_00115298((void *)D_003BAFF0, firstVector, secondVector);
+        node = effObjCreateEventNode((void *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
         effObjClearFlags(node, 1);
         filePollEntryCleanup(D_003BAFE8);

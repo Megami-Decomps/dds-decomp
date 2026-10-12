@@ -643,7 +643,7 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
 }
 
 
-extern void func_001AD970(s32);
+extern void btlCreateSkillNamePanel(s32);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 extern void *btlGetIndexedUiResource();
 extern s32 D_003BAA8C;
@@ -661,18 +661,18 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
             if ((btlUnitStatusPair(owner) & 0x1400) != 0) {
                 if (battleState->commandRestrictFlags & 0x400) {
                     if (owner->status.flags & 0x400) {
-                        func_001AD970(D_00360460[0]);
+                        btlCreateSkillNamePanel(D_00360460[0]);
                     } else {
-                        func_001AD970(D_00360458[0]);
+                        btlCreateSkillNamePanel(D_00360458[0]);
                     }
                 } else {
-                    func_001AD970(D_00360458[0]);
+                    btlCreateSkillNamePanel(D_00360458[0]);
                 }
             } else {
-                func_001AD970((s32)btlGetIndexedUiResource(owner));
+                btlCreateSkillNamePanel((s32)btlGetIndexedUiResource(owner));
             }
         } else {
-            func_001AD970(D_003BAA8C + resourceIndex * 17);
+            btlCreateSkillNamePanel(D_003BAA8C + resourceIndex * 17);
         }
     }
     if (btlHasRegisteredSkillNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x1E) {
@@ -702,13 +702,13 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
 }
 
 extern s32 D_003BAA84;
-extern void func_001AD970(s32);
+extern void btlCreateSkillNamePanel(s32);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
 s32 btlPollTimedTaskLink(BtlObjLink *link) {
     btlGetRuntime();
     if (link->elapsedTicks == 0) {
-        func_001AD970(D_003BAA84 + link->arg * 0x19);
+        btlCreateSkillNamePanel(D_003BAA84 + link->arg * 0x19);
     }
     if (btlHasRegisteredSkillNamePanelTask() == 0 || (u32)link->elapsedTicks >= 0x1E) {
         return 1;
@@ -751,23 +751,23 @@ s32 btlPollCategoryLabelTask(BtlObjLink *link) {
     if (link->elapsedTicks == 0) {
         switch (link->arg) {
         case 10:
-            func_001AD970((s32)D_00360428);
+            btlCreateSkillNamePanel((s32)D_00360428);
             break;
         case 5:
             if (owner->status.flags & 0x1000) {
-                func_001AD970(D_00360448[0]);
+                btlCreateSkillNamePanel(D_00360448[0]);
             } else {
-                func_001AD970(D_00360438[0]);
+                btlCreateSkillNamePanel(D_00360438[0]);
             }
             break;
         case 6:
-            func_001AD970((s32)D_00360430);
+            btlCreateSkillNamePanel((s32)D_00360430);
             break;
         case 9:
-            func_001AD970(D_0036044C[0]);
+            btlCreateSkillNamePanel(D_0036044C[0]);
             break;
         case 11:
-            func_001AD970(D_00360450[0]);
+            btlCreateSkillNamePanel(D_00360450[0]);
             break;
         case 1:
         case 2:
