@@ -399,7 +399,7 @@ extern void func_002A6440(s32);
 
 extern void func_002AB290(s32);
 
-extern u32 func_002B7388(const char *, const void *, u32);
+extern u32 effSelectCameraFileJobFromRows(const char *, const void *, u32);
 
 extern char D_003B3968[];
 
@@ -4695,7 +4695,8 @@ extern void func_002DD968(f32);
 extern f32 func_002FA1D8(f32);
 extern f32 func_002F9CD0(f32);
 
-void func_002A9DA8(EffClassWork *work) {
+/* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
+void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];
@@ -8576,7 +8577,8 @@ void *effFindAssetObject(FileJob *entry) {
     return NULL;
 }
 
-u32 func_002B5990(void) {
+/* Return the selected queue row plus the offset of its visible window. */
+u32 effGetSelectedFileQueueIndex(void) {
     return D_0038F2FC[0] + D_003BD058;
 }
 
@@ -8945,8 +8947,9 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
 
 extern void effResetFileResourceManager(void);
 
-u32 func_002B6778(void) {
-    FileJob *entry = fileQueueGetAt(effFileQueue, func_002B5990());
+/* Load the selected job's payload and camera snapshots; return the refresh status. */
+u32 effLoadSelectedFileJob(void) {
+    FileJob *entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     EffFileJobRequest *request;
     u8 *fileData;
     u32 job;
@@ -9031,7 +9034,7 @@ extern u32 D_0038EB3C[];
 
 
 u32 effResetFileQueueState(void) {
-    fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, func_002B5990()));
+    fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
     D_0038EB3C[0] = 0;
     D_003BD058 = 0;
     D_0038F2F0[3] = 0;
@@ -9044,7 +9047,7 @@ extern u32 D_0038EAD4[];
 
 
 u32 effFinalizeQueuedFile(void) {
-    s32 index = func_002B5990();
+    s32 index = effGetSelectedFileQueueIndex();
     FileJob *record = fileQueueGetAt(effFileQueue, index);
     FileJob *copy = fileJobDuplicateAfter(effFileQueue, record);
     D_0038EAD4[0] = 0;
@@ -9056,7 +9059,8 @@ u32 effFinalizeQueuedFile(void) {
 extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
 extern FileJob *fileQueueFindById(FileQueue *, u32);
 
-u32 func_002B6C00(void) {
+/* Clone the selected job, preserve its sector leader, and refresh the selected asset. */
+u32 effCloneSelectedFileJob(void) {
     FileJob *source;
     FileJob *entry;
     FileJob *leader;
@@ -9064,7 +9068,7 @@ u32 func_002B6C00(void) {
     void *fileData;
     s32 linkedCount;
 
-    source = fileQueueGetAt(effFileQueue, func_002B5990());
+    source = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     entry = fileDuplicateAndAppendJob(effFileQueue,
                                       (FileJobPayload *)source->id);
     effCurrentFileQueueEntry = entry;
@@ -9165,7 +9169,7 @@ extern BtlCommandEntry D_0038EC80[];
 extern u8 D_003BD954;
 
 u32 effLoadBattleCameraSnapshot(u32 value) {
-    FileJob *record = fileQueueGetAt(effFileQueue, func_002B5990());
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)D_003DF840 = *(EffectBlock90 *)record;
     *(EffectAlignedBlock128 *)D_003DF840 = *(EffectAlignedBlock128 *)D_003DF9A0;
@@ -9186,7 +9190,7 @@ u32 effLoadBattleCameraSnapshot(u32 value) {
 }
 
 u32 effStoreBattleCameraSnapshot(u32 value) {
-    FileJob *record = fileQueueGetAt(effFileQueue, func_002B5990());
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)record = *(EffectBlock90 *)D_003DF840;
     *(EffectAlignedBlock128 *)D_003DF9A0 = *(EffectAlignedBlock128 *)D_003DF840;
@@ -9207,7 +9211,8 @@ u32 effStoreBattleCameraSnapshot(u32 value) {
     return value;
 }
 
-u32 func_002B7388(const char *nameKey, const void *sourceRows, u32 sourceCount) {
+/* Present named camera/file requests, maintaining a preview job and returning selection status. */
+u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, u32 sourceCount) {
     const EffCameraCreateRow *requests = (const EffCameraCreateRow *)sourceRows;
     EffQueuedFileObject *menuObject;
     EffCameraMenuState *state;
@@ -9310,67 +9315,67 @@ u32 func_002B7388(const char *nameKey, const void *sourceRows, u32 sourceCount) 
 }
 
 s32 effCreateParticleTask(void) {
-    return func_002B7388(D_003B3968, D_0038DE70, 8);
+    return effSelectCameraFileJobFromRows(D_003B3968, D_0038DE70, 8);
 }
 
 s32 effCreatePolyTrackControlTask(void) {
-    return func_002B7388(D_003B3958, D_0038DF50, 6);
+    return effSelectCameraFileJobFromRows(D_003B3958, D_0038DF50, 6);
 }
 
 s32 effCreatePolyTrackTask(void) {
-    return func_002B7388("POLY TRACK S", D_0038E000, 6);
+    return effSelectCameraFileJobFromRows("POLY TRACK S", D_0038E000, 6);
 }
 
 s32 effCreateBlurTask(void) {
-    return func_002B7388(D_003BCA40, D_0038E0F0, 6);
+    return effSelectCameraFileJobFromRows(D_003BCA40, D_0038E0F0, 6);
 }
 
 s32 effCreateFilterTask(void) {
-    return func_002B7388(D_003BD050, D_0038E1A0, 3);
+    return effSelectCameraFileJobFromRows(D_003BD050, D_0038E1A0, 3);
 }
 
 s32 effCreateEnvironmentTask(void) {
-    return func_002B7388(D_003B38C8, D_0038E280, 5);
+    return effSelectCameraFileJobFromRows(D_003B38C8, D_0038E280, 5);
 }
 
 s32 effCreatePolyTextureTask(void) {
-    return func_002B7388(D_003B3938, D_0038E240, 2);
+    return effSelectCameraFileJobFromRows(D_003B3938, D_0038E240, 2);
 }
 
 s32 effCreatePolyFlashTask(void) {
-    return func_002B7388(D_003B3928, D_0038E310, 0xB);
+    return effSelectCameraFileJobFromRows(D_003B3928, D_0038E310, 0xB);
 }
 
 s32 effCreatePolyRingTask(void) {
-    return func_002B7388(D_003B3918, D_0038E450, 6);
+    return effSelectCameraFileJobFromRows(D_003B3918, D_0038E450, 6);
 }
 
 s32 effCreatePolyThunderTask(void) {
-    return func_002B7388(D_003B3908, D_0038E500, 4);
+    return effSelectCameraFileJobFromRows(D_003B3908, D_0038E500, 4);
 }
 
 s32 effCreatePolyTwinkleTask(void) {
-    return func_002B7388("POLY TWINKLE", D_0038E570, 6);
+    return effSelectCameraFileJobFromRows("POLY TWINKLE", D_0038E570, 6);
 }
 
 s32 effCreatePolyWindTask(void) {
-    return func_002B7388(D_003B38F8, D_0038E620, 7);
+    return effSelectCameraFileJobFromRows(D_003B38F8, D_0038E620, 7);
 }
 
 s32 effCreatePolyScalyTask(void) {
-    return func_002B7388(D_003B38E8, D_0038E6F0, 5);
+    return effSelectCameraFileJobFromRows(D_003B38E8, D_0038E6F0, 5);
 }
 
 s32 effCreatePolyCrackTask(void) {
-    return func_002B7388(D_003B38D8, D_0038E7C0, 2);
+    return effSelectCameraFileJobFromRows(D_003B38D8, D_0038E7C0, 2);
 }
 
 s32 effCreateBattleOnlyTask(void) {
-    return func_002B7388(D_003B3888, D_0038E800, 0xA);
+    return effSelectCameraFileJobFromRows(D_003B3888, D_0038E800, 0xA);
 }
 
 s32 effCreateTwoDimensionalTask(void) {
-    return func_002B7388(D_003BD000, D_0038E9A0, 2);
+    return effSelectCameraFileJobFromRows(D_003BD000, D_0038E9A0, 2);
 }
 
 /* Resource-bank request shared with the DDS2 effect loader. */
@@ -9642,7 +9647,7 @@ s32 effResetCameraSnapshotSelection(void) {
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B8648);
 
 u32 effLoadFileSlotAndPoll(void) {
-    FileJob *file = fileQueueGetAt(effFileQueue, func_002B5990());
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
@@ -9672,7 +9677,7 @@ s32 effRunWithStateBackup(void) {
 extern u32 func_002B8648(u8 *, s32);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
-    FileJob *file = fileQueueGetAt(effFileQueue, func_002B5990());
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
@@ -9759,7 +9764,7 @@ void effInitializeResourceQueue(void) {
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_003BCF30);
     btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
     btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
-    record = fileQueueGetAt(effFileQueue, func_002B5990());
+    record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     btlResourceRecordSetName(effFileQueueNameRecord, record->name);
 }
 
@@ -9767,7 +9772,7 @@ u32 effPollResourceQueue(void) {
     u32 state;
 
     btlUpdateResourceNameEditor(effFileQueueNameRecord);
-    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002B5990())->name);
+    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex())->name);
     state = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(state - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
         btlDestroyResourceNameRecord(effFileQueueNameRecord);

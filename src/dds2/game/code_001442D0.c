@@ -39,7 +39,7 @@ extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern EffWorldNode *dds3GetWorldSecondaryObject(void);
-extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
+extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
 extern void func_00136718(void);
@@ -4092,7 +4092,7 @@ void func_0014F5F0(void) {
             entry = &fldSparkObjectEntries[i];
             entry->objectHandle = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), &position, &rotation);
             dds3SetWorldNodeValue(entry->objectHandle, (u32)D_00413DD8);
-            func_00112058(entry->objectHandle, 1, 0x130);
+            dds3RebuildObjectModelContext(entry->objectHandle, 1, 0x130);
             effObjSetInnerScale(entry->objectHandle, (u128 *)&scale);
             model = (MdlCtx *)dds3GetObjectBaseResourceHandle(entry->objectHandle);
             model->first->frameStep = 1.0f;
@@ -4444,7 +4444,7 @@ extern u32 D_004363A8;
 extern void func_0026C900(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void *func_00115500(void *, void *, void *);
+extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
@@ -4523,7 +4523,7 @@ void fldUpdateDevilizeEventSequence(void) {
             position[0] = fldAreaState.x;
             position[1] = fldAreaState.y;
             position[2] = fldAreaState.z;
-            node = func_00115500((void *)D_004363A8, position, rotation);
+            node = effObjCreateEventNode((void *)D_004363A8, position, rotation);
             fldSparkControlState.object = node;
             effObjClearFlags(node, 1);
             filePollEntryCleanup(D_004363A0);
@@ -5772,7 +5772,7 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
                                         rotation);
         dds3SetWorldNodeValue(object, (u32)"TUKAMI_UNIT");
         dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), object);
-        func_00112058(object, 2, 0x10);
+        dds3RebuildObjectModelContext(object, 2, 0x10);
         effObjSetInnerFloat(object, 180.0f);
 
         stepScaleX = D_004363C0;
@@ -5864,7 +5864,7 @@ void fldCreateChaseCameraObject(void) {
     D_00435F1C = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), position, rotation);
     dds3SetWorldNodeValue(D_00435F1C, (u32)"OIKAKE_UNIT");
     dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), D_00435F1C);
-    func_00112058(D_00435F1C, 1, 0x103);
+    dds3RebuildObjectModelContext(D_00435F1C, 1, 0x103);
     effObjSetInnerFloat(D_00435F1C, 180.0f);
     dds3SetObjectFlags(D_00435F1C, 0x400);
     position[0] = 800.0f;

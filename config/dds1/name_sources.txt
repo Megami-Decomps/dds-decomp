@@ -1,5 +1,14 @@
 # addr	name	evidence|inferred	note
+0x001001D8	kwlnInitializeRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:69; Initializes runtime tasks and game subsystems.; twin=0x001001D8 (DDS2).
+0x00100500	kwlnRequestMainLoopExit	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:128; Sets the flag polled by the main-loop condition.; twin=0x001003E8 (DDS2).
+0x00100510	kwlnGetFrameCounter	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:132; Returns the current frame counter.; twin=0x001003F8 (DDS2).
 0x00100518	kwlnGetDrawBufferIndex	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:47:func_00100518; Returns current draw buffer selector used throughout matched frame-packet and scene/viewer double-buffer indexing; twin=0x00100400, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x00100520	kwlnPauseTaskScheduler	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:140; Enables pause mode and clears its countdown.; twin=0x00100408 (DDS2).
+0x00100538	kwlnResumeTaskScheduler	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:146; Clears pause mode and its countdown.; twin=0x00100420 (DDS2).
+0x00100548	kwlnSetTaskPauseCount	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:152; Stores a pause countdown and enables pause mode.; twin=0x00100430 (DDS2).
+0x00100560	kwlnSetFrameControlParameters	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:158; Stores two frame-control values and snapshots the loop counter.; twin=0x00100448 (DDS2).
+0x00100588	kwlnResetFrameControl	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:171; Clears frame-control state and sets the stored value to four.; twin=0x00100470 (DDS2).
+0x001005C8	kwlnRunMainLoop	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:207; Runs input and scheduler updates until the exit flag, then loads the exit executable.; twin=0x001004B0 (DDS2).
 0x001006E0	kwlnTaskRemoveFromStateQueue	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:107:func_001006E0; M141; source=names_pending_main.tsv:112; review=Unlinks a task from its delayed-start, active or delayed-destroy state queue, repairing head/tail and neighboring links. [names_qp11.tsv]
 0x00100858	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds1/game/code_00100000.c:func_00100858; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
 0x00100B40	kwlnTaskStep	inferred	Prepares input state, runs the task callback, applies transition or destruction and advances its timer
@@ -23,7 +32,10 @@
 0x00101B78	dds3SetScopedObjectFlags	inferred	Passes set mode, object, mask and scope to the kernel dispatcher, which ORs the selected masked bits into object flags at offset 0x1C.
 0x00101BA8	dds3ClearScopedObjectFlags	inferred	Passes clear mode to the same dispatcher, which clears the selected masked bits from scoped object flags.
 0x00101D60	kwlnPrepareFrameDrawPackets	inferred	readability/matching review (QP16)
+0x00101E40	kwlnBuildFrameScenePackets	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:234; Rebuilds and queues the selected buffer's scene, overlay, and view packets.; twin=0x00101D30 (DDS2).
 0x001024D8	kwlnRenderFrame	inferred	Runs frame-level draw/update dispatch and rendering. [names_qp9.tsv]
+0x00102850	dds3RunWorldPrimaryCallbacks	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:516; Invokes the active world's first callback column.; twin=0x00102740 (DDS2).
+0x00102878	dds3RunWorldSecondaryCallbacks	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:522; Invokes the active world's second callback column.; twin=0x00102768 (DDS2).
 0x001028A0	dds3GetAdminTaskWork	inferred	Finds the named admin task and returns its attached AdminWork. [names_reviewed12.tsv]
 0x001028C8	dds3GetAdminTaskValue	inferred	Reads the value field from the named admin task work. [names_reviewed12.tsv]
 0x001028E8	dds3AdminSubmitModeRequest	inferred	src/dds1/game/code_00101B08.c func_001028E8: Stores requested mode and flags, releases previous payload and copies new payload when within size limit. [names_reviewed24.tsv]
@@ -219,6 +231,7 @@
 0x0010BD08	scrCreateProcessAtFirstProcedure	inferred	confidence=high; matched-C; src/dds1/script/scrScriptProcess.c:76:func_0010BD08; Creates a script VM process from caller-supplied FLW0 sections with procedure index zero, without creating a scheduler task.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0010BD20	scrProcDestroyTask	inferred	logs process completion and releases the process buffers
 0x0010BDB8	scrDestroyAllNamedProcesses	inferred	Walks the script-name list and destroys each eligible task or standalone process. [names_reviewed6.tsv]
+0x0010BE30	scrStartProcessProcedure	inferred	confidence=high; matched-C; src/dds1/script/scrScriptProcess.c:144:scrStartProcessProcedure; Starts a procedure on a script process: copies its name, sets pc, clears the stack and timers. Returns zero for an out-of-range index.; twin=0x0010C058 (DDS2).
 0x0010BED8	scrFindNamedProcessNode	inferred	Compares requested name against each linked script process node. [names_reviewed6.tsv]
 0x0010BF30	bfFindScriptIndexByName	inferred	legacy BF_FindScriptIndexByName: searches the FLW0 script-name table for an exact name
 0x0010C028	scrSetCurrentActor	inferred	Battle caller passes its actor into active script offset 0xF0; other callers clear it.
@@ -308,6 +321,7 @@
 0x0010DD98	scrCommandSetupFadeFrames	inferred	forwards script frame parameters to fade setup [names_reviewed5.tsv]
 0x0010DDD8	scrCommandCancelConfiguredFrameFade	inferred	confidence=high; matched-C; src/dds1/script/scrCommonCommand.c:292:func_0010DDD8; Cancels the configured frame-fade state and reports command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0010DDF8	scrCmdStoreDirectionVector	inferred	Loads three script floats with zero homogeneous component into a vector register. [names_reviewed16.tsv]
+0x0010DE70	scrCommandSetSceneLightDirection	inferred	confidence=high; matched-C; src/dds1/script/scrCommonCommand.c:300:scrCommandSetSceneLightDirection; Reads three float script arguments as a direction and sets the scene light target, warning on a zero-length vector.; twin=0x0010E098 (DDS2).
 0x0010DF20	scrCmdStorePositionVector	inferred	Loads three script floats with unit homogeneous component into a position vector. [names_reviewed16.tsv]
 0x0010DF90	scrCmdSetPackedRgbFromFloatArgs	inferred	Reads three float script arguments as a vector and calls vector-to-byte color packing and transition setter. [names_reviewed19.tsv]
 0x0010DFE8	scrCommandSetDrawVectorTarget	inferred	Rearranges four integer operands as float coordinates and sets a target vector. [names_reviewed6.tsv]
@@ -465,8 +479,11 @@
 0x00111B00	dds3GetObjectIndexNode	inferred	readability/matching review (QP16)
 0x00111B20	dds3GetObjectBaseResourceHandle	inferred	readability/matching review (QP16)
 0x00111B40	dds3ReleaseObjectBaseResources	inferred	confidence=high; src/dds1/basic/dds3ObjectBase.c:func_00111B40; Releases model/transition or development/motion resources according to the base resource kind, then clears ownership. [names_qp9.tsv]
+0x00111E30	dds3RebuildObjectModelContext	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:251; Destroys an existing model context, creates one from the resource key, and resolves its model bindings.; twin=0x00112058 (DDS2).
+0x00111F40	dds3CreateObjectModelAndMotion	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:290; Creates the model from the object's slot, attaches motion, updates root transforms, and stores both on the object base.; twin=0x00112168 (DDS2).
 0x00112008	dds3SetObjectModeAndDefaultWeight	inferred	src/dds1/basic/dds3ObjectBase.c func_00112008: Sets supported mode and its default weight: modes zero, four and five use one, others zero. [names_reviewed24.tsv]
 0x001120C0	dds3RegisterObjectInHandlerIndex	inferred	readability/matching review (QP16)
+0x00112100	dds3DrawObjectWithGradientOverlay	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:373; Submits gradient rectangles around processing the object's model context.; twin=0x00112328 (DDS2).
 0x001127C0	dds3InvokeSlot1Handler	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112800	dds3RunSlot1Handlers	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112848	dds3ReleaseSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
@@ -522,11 +539,13 @@
 0x001143D8	effObjReleaseStateDependencies	inferred	Releases owned dependencies according to kind-seven payload state, preserves borrowed state-four handle, then clears the active state and handle.
 0x00114508	evtInitializeEffectObjectData	inferred	Allocates effect-object data, obtains its handle and sets flags. [names_reviewed8.tsv]
 0x00114570	effObjReleaseObjectData	inferred	Frees dependent resources and clears the object's data pointer after releasing its inner object.
+0x00114988	effObjUpdateDependencies	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:234; Updates the configured billboard and dispatches dependent updates according to stored state.; twin=0x00114BF0 (DDS2).
 0x00114A78	effObjCreateWithVectors	inferred	allocates effect object kind seven and initializes its vectors and data [names_reviewed5.tsv]
 0x00114B18	effObjCreateKindTwo	inferred	readability/matching review (QP16)
-0x00114BF0	effObjSpawnSharedBillClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:168:func_00114BF0; Clones the object-owned billboard retaining its shared data, then creates a new effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00114BF0	effObjSpawnSharedBillClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:331:effObjSpawnSharedBillClone; Clones the object-owned billboard retaining its shared data, then creates a new effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00114C38	effObjCreateIndexedKindOne	inferred	Creates a billboard via billCreateIndexed with kind one and dispatches its vector and extra argument.
 0x00114C80	effObjCreateResourceKindOne	inferred	Creates a billboard via billCreateFromResource with kind one and dispatches its vector and extra argument.
+0x00114CC8	effObjSelectStoredBill	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:355; Selects the stored bill as the current kind-one entry.; twin=0x00114F30 (DDS2).
 0x00114CE8	effObjCreateBillNode	inferred	confidence=medium; src/dds1/basic/dds3EffectObjectBasic.c:func_00114CE8; Creates an effect world object backed by the supplied billboard, initializes ownership fields, and attaches it to a world slot if available. [names_qp9.tsv]
 0x00114DB8	effObjSpawnSharedBillNodeClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:227:func_00114DB8; Clones the object-owned billboard retaining its shared data, then creates a new billboard-node effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00114E00	effObjCreateIndexedKindZero	inferred	Creates a billboard via billCreateIndexed with kind zero and dispatches its vector and extra argument.
@@ -535,8 +554,13 @@
 0x00114F60	effObjSpawnDescriptorBoundEffect	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:280:func_00114F60; Creates an effect handle through the descriptor constructor, then registers a world effect object with that bill and the supplied vector/context; the created object is owned through its world slot.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00114FA0	effObjSpawnLoadedResourceEffect	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:287:func_00114FA0; Obtains a loaded resource node and registers its bill as a world effect object using the supplied vector/context; contrasts with the descriptor-constructor entry path.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00114FE0	effObjCreateBillboardInWorld	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:294:func_00114FE0; Creates an effect object, configures supplied billboard/vector, initializes ownership and links it to current world node.; source=revalidated-unapplied-names_R_Names31.tsv:5 [names_qp12_apply.tsv]
+0x001150B0	effObjCreateBillboardFromFactory	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:501; Creates a billboard from the factory result and registers it in the world.; twin=0x00115318 (DDS2).
+0x001150F0	effObjCreateEventNodeFromMixer	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:519; Clones the mixer and stores it on a newly created event-node effect object.; twin=0x00115358 (DDS2).
+0x00115298	effObjCreateEventNode	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:559; Forwards resource and vectors to the event-node constructor.; twin=0x00115500 (DDS2).
 0x001152B0	effObjCreateFromResolvedResource	inferred	resolves resource identifier before invoking effect constructor [names_reviewed5.tsv]
 0x00115318	effObjReplaceActiveEventNode	inferred	releases previous event node and creates new one in active state [names_reviewed5.tsv]
+0x00115398	effObjCreateNamedScaledEffectObject	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:598; Creates a named effect object, assigns its scale, and attaches it to the available world node.; twin=0x00115600 (DDS2).
+0x00115460	effObjCreateNamedScaledEffect	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:630; Forwards to the named scaled effect-object constructor.; twin=0x001156C8 (DDS2).
 0x00115478	effObjCreateMagatuhiForKind	inferred	Lite3
 0x00115858	effObjCreateKindFromResource	inferred	resolves resource and creates effect of requested kind [names_reviewed5.tsv]
 0x001158B8	effObjGetReadyData	inferred	returns effect data only for kind seven in state six [names_reviewed5.tsv]
@@ -824,10 +848,12 @@
 0x00126198	fldCreateDummyMatter	inferred	fld field scene and resources in game/code_0011D3A0.c
 0x00126200	fldResolveWorldObjectByResourceId	inferred	Resolves a resource ID through its named kind-6 world objects, or lazily creates and caches dummy matter for resources without a name-entry list; returns NULL when unresolved.
 0x00126310	fldResolveWorldObjectByResourceEntryName	inferred	Matches the supplied string against resource name entries, then resolves a kind-11 world object using the enclosing resource name; returns NULL when unresolved.
+0x001263F0	fldSpawnSceneResourceBatches	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:161; Loads and creates scene objects from file-resource batches.; twin=0x001289A8 (DDS2).
+0x00126A30	fldSpawnPlacementObjectsFromBatches	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:764; Creates placement objects by processing resource and event batches.; twin=0x00128FE8 (DDS2).
 0x001270A8	fldCreateResourceScriptObjects	inferred	L13
 0x00127588	fldLoadSceneRequestFiles	inferred	copies four file-name pointers from the request record, then formats area directory + name and loads each file (func_002EB028) when scene state < 500 [names_M72_FieldLarge.tsv]
 0x00127708	fldProcessFieldRequest	inferred	Uses request words to invoke the field setup routine and creates the player for non-special scene states; DDS2 twin 00129CC0.
-0x00127788	fldProcessFieldRequestAlternate	inferred	Passes field request entries to func_00126A30 with mode 1; normal path passes mode 0. [names_R_FuncNames6.tsv]
+0x00127788	fldProcessFieldRequestAlternate	inferred	Passes field request entries to fldSpawnPlacementObjectsFromBatches with mode 1; normal path passes mode 0. [names_R_FuncNames6.tsv]
 0x00127898	fldRelocatePackedTransferChunk	inferred	Passes resource base plus FldTransferChunk.offset and size to sdfRelocatePackedResourceWords; DDS2 twin 00129E50.
 0x001278C0	fldRelocateTransferChunkWords	inferred	Relocates packed words at transfer chunk offset using chunk size. [names_R_FuncNames6.tsv]
 0x001278E8	fldSetPendingAreaAndFloor	inferred	Byte-identical dds2 twin 0x00129EA0; Stores the area and floor identifiers subsequently consumed by fldLoadAreaResource. [names_conflicts.tsv]
@@ -921,7 +947,12 @@
 0x00132AE8	fldSetFadeTarget	inferred	stores fade progress/target floats (1.0 or 1/duration) and the area value for D_003BAD74
 0x00132B70	fldSetSkyDrawState	inferred	Stores the sky draw-state word also initialized while loading sky resources. [names_reviewed5.tsv]
 0x00132B78	fldGetSkyDrawState	inferred	Returns the sky draw-state word also initialized while loading sky resources. [names_reviewed5.tsv]
+0x00132B80	fldSetSkyAlpha	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4697; Stores the sky alpha value.; twin=0x00135588 (DDS2).
+0x00132B90	fldGetSkyAlpha	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4701; Returns the current sky alpha value.; twin=0x00135598 (DDS2).
+0x00132BD0	fldUpdateSelectedValueTransition	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4720; Advances the selected-value transition and applies live lighting edits.; twin=0x001355D8 (DDS2).
+0x00132FD0	fldApplySkyLightSet	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4872; Starts a transition to the indexed sky light set and updates display and player lighting.; twin=0x00135A68 (DDS2).
 0x00133280	fldApplyPendingSceneValueWithSpeed	inferred	Applies a queued field value when different from current with gated update speed. [names_reviewed11.tsv]
+0x001332E8	fldTransitionSkyLightSet	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:4989; Applies the indexed sky light set using the requested transition mode.; twin=0x00135D80 (DDS2).
 0x00133600	fldSetCameraObjectActiveFlag	inferred	Sets or clears the camera object's 0x100 flag and activates its associated object on enable. [names_reviewed5.tsv]
 0x001338F0	fldSetDisplayState	inferred	stores arg to D_003BAD98 and D_0032E570[11], zeroes D_003BADC8/D_003BADD8/D_0032E570[12]; parked store-order diff
 0x00133CA0	fldApplyLightSetCurrent	inferred	applies the current 0xE0 FldLightSet record
@@ -982,6 +1013,8 @@
 0x001410E8	fldReleasePanelState	inferred	Frees the panel data from func_00101A70 and clears the panel state global.
 0x00141110	fldCreateInputPanelTask	inferred	Creates the task literally named inputpanel with its update and release callbacks. [names_reviewed14.tsv]
 0x00141158	fldDestroyPanelTaskIfPresent	inferred	Destroys existing field panel task and descendants only when task handle is nonzero. [names_reviewed6.tsv]
+0x00141190	fldSetInputPanelStateWord2	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:31; Stores a value in input-panel state word 2 and returns the panel state.; twin=0x00144270 (DDS2).
+0x001411C0	fldSetInputPanelStateWord1	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:39; Stores a value in input-panel state word 1 and returns the panel state.; twin=0x001442A0 (DDS2).
 0x00141320	fldFieldTaskUpdate	inferred	Field task callback draws field overlays only when menus, title and camp control are inactive. [names_reviewed13.tsv]
 0x001413A8	fldFieldTaskCreate	inferred	allocates four-word task work and returns field update callback [names_R_FuncNames2.tsv]
 0x001413F8	fldFieldTaskDestroy	inferred	frees task work and clears active task handle [names_R_FuncNames2.tsv]
@@ -3900,12 +3933,14 @@
 0x00225E40	evtOpSetModelObjectPosition	inferred	Stores script position either in the object header or its parameters. [names_reviewed8.tsv]
 0x00225F08	evtOpSetModelObjectRotationFromAngles	inferred	Builds rotation quaternion from three script angles for a model object. [names_reviewed8.tsv]
 0x00225FE8	evtOpCopyModelTransformFromSource	inferred	Copies position and quaternion from another world object when enabled. [names_reviewed8.tsv]
+0x002260C0	evtCommandCopyEffectSourcePoints	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:165:evtCommandCopyEffectSourcePoints; Copies two source points into the primary effect object for the EFFMG1_POS command.; twin=0x00240D20 (DDS2).
 0x002262A0	evtCommandEnablePathUnit	inferred	Looks up a type-seven path unit by script ID and enables both of its flag handlers.
 0x002262F8	evtCommandAssignEffectObjectOwner	inferred	Resolves effect and owner by ID; assigns owner, resets entry ID and updates attachment flags. [names_reviewed6.tsv]
 0x00226388	evtCommandAssignEffectObjectOwnerWithEntry	inferred	Resolves effect and owner by ID; assigns owner and specified attachment entry. [names_reviewed6.tsv]
 0x00226430	evtCmdResetWorldResourceState	inferred	Finds a scripted world resource and clears its current state fields and flags. [names_reviewed17.tsv]
 0x00226470	evtCommandClearSelectedEffectNode	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:253:func_00226470; Resolves script operand zero as a kind-seven world object and dispatches its supported inner-node clear callback with flag zero.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002264B0	evtCommandAttachLightToUnitPath	inferred	Resolves unit-path and light object; attaches light to path when both exist. [names_reviewed6.tsv]
+0x00226540	evtCommandWaitEffectResourceScale	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:341:evtCommandWaitEffectResourceScale; Finds the effect object by ID and holds the script until its resource scale resolves (EFFECT_PATH_WAIT).; twin=0x002411A0 (DDS2).
 0x002265B8	evtCommandReadSecondaryWorldIdValue	inferred	Looks up named ID in secondary world and returns node value or zero with warning. [names_reviewed6.tsv]
 0x002266E0	evtCommandSubmitPairedAdminRequest	inferred	Passes two script parameters to administrative request queue and sets script return to zero. [names_reviewed6.tsv]
 0x00226730	evtCommandDeferFieldTransition	inferred	Logs CALL_NEXT arguments and saves two of them as deferred field command. [names_reviewed6.tsv]
@@ -3918,6 +3953,7 @@
 0x00226948	evtCommandSubmitEventWithMode	inferred	Reads an event identifier and a mode from script operands and submits the request.
 0x00226988	evtCommandRequestFieldSequence	inferred	Resets BGM, builds sequence request from three script operands and dispatches it. [names_reviewed6.tsv]
 0x00226A08	evtCommandRequestCurrentGroupSequence	inferred	Builds field sequence request using current group and script operands, then dispatches it. [names_reviewed6.tsv]
+0x00226A70	evtCommandSubmitScalarAdminRequest	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:533:evtCommandSubmitScalarAdminRequest; Forwards the first VM integer as an opaque four-byte admin payload.; twin=0x002416D0 (DDS2).
 0x00226AA8	evtCommandRequestAlternateFieldSequence	inferred	Builds alternate field sequence request using current group and script operands. [names_reviewed6.tsv]
 0x00226B10	evtCommandDispatchFieldBE	inferred	Dispatches two script operands to the field BE handler between FIELD_BE debug messages.
 0x00226B68	evtCommandHandleChangedSecondaryWorldKey	inferred	Compares script operands packed as a key and dispatches an update only when secondary world key differs. [names_reviewed6.tsv]
@@ -3929,11 +3965,16 @@
 0x00226D50	evtCommandClearAllUnitsAndWait	inferred	Clears units and blocks until outstanding resource work completes. [names_reviewed6.tsv]
 0x00226D98	evtCommandAddEffectUnitToWorld	inferred	Resolves requested effect unit and registers it with the active world. [names_reviewed6.tsv]
 0x00226E10	evtCommandAddFlaggedEffectUnitToWorld	inferred	Sets a status flag on explicitly selected effect unit before registering it with world. [names_reviewed6.tsv]
+0x00226E98	evtCommandRelinkCameraOwnerToPath	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:685:evtCommandRelinkCameraOwnerToPath; Relinks the selected camera owner to its path and reports CAM_PATH_MOVE errors.; twin=0x00241AF8 (DDS2).
+0x00226F38	evtCommandWaitCameraOwnerResourceScale	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:710:evtCommandWaitCameraOwnerResourceScale; Holds the script until the selected camera owner's resource scale resolves.; twin=0x00241B98 (DDS2).
 0x00226FC0	evtCommandCreateWorldEffectObject	inferred	Creates a world object at origin with identity rotation and returns its world ID. [names_reviewed6.tsv]
 0x00227050	evtCommandDestroyEffectUnitById	inferred	src/dds1/event/evtCommand.c func_00227050: Reads script ID and destroys world kind 4 list node if found. [names_reviewed24.tsv]
 0x00227090	evtCommandSetEffectUnitPosition	inferred	Sets three position components on a kind-4 effect unit, or the current player for a negative ID; leaves the initialized fourth component zero. Native registration takes four operands.
 0x00227138	evtCommandSetEffectUnitEulerRotation	inferred	readability/matching review (QP16)
 0x00227210	evtCommandSetEffectUnitQuaternionRotation	inferred	Stores four quaternion components on a kind-4 effect unit, or the current player for a negative ID; preserves raw input without angle conversion. Native registration takes five operands.
+0x002272B0	evtCommandAttachObjectPath	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:837:evtCommandAttachObjectPath; Binds a path target to the unit's slot data and sets the path counter direction with room flag updates.; twin=0x00241F10 (DDS2).
+0x002274A0	evtCommandReattachObjectPath	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:896:evtCommandReattachObjectPath; Rebinds an attached slot to a new path target, refreshing its stored vector and reporting re attach.; twin=0x00242100 (DDS2).
+0x00227648	evtCommandWaitObjectResourceScale	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:961:evtCommandWaitObjectResourceScale; Holds the script until the object's resource scale resolves (OBJ_PATH_WAIT).; twin=0x002422A8 (DDS2).
 0x00227708	evtCommandEnableSolarAdvance	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:709:func_00227708; Enables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00227728	evtCommandDisableSolarAdvance	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:715:func_00227728; Disables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00227748	evtCommandReadMirroredSolarPhase	inferred	Places the mirrored solar phase in the script VM command result.
@@ -4017,6 +4058,8 @@
 0x0022B710	evtReorderListNodes	inferred	Walks the event list and relocates nodes whose order keys are out of sequence.
 0x0022BE40	evtEventViewerGetPendingNode	inferred	walks the queue entry at viewer+0x2308 by (count A + count B) nodes [names_M34_SmallSweep3.tsv]
 0x0022BEA8	evtEventViewerReleaseNode	inferred	unlinks a queued node, frees its buffer unless entry id is 0x12, frees the node [names_M34_SmallSweep3.tsv]
+0x0022BF00	evtEventViewerReleasePendingNode	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:184:evtEventViewerReleasePendingNode; Releases the pending node and consumes its position in the viewer queue.; twin=0x00246878 (DDS2).
+0x0022BFD8	evtEventViewerReleaseQueuedNode	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:219:evtEventViewerReleaseQueuedNode; Releases a supplied queued node with the same resource and counter handling.; twin=0x00246950 (DDS2).
 0x0022C0A8	evtEventViewerProcessPending	inferred	drains pending items while query nonzero, dispatching each
 0x0022C0E8	evtEventViewerInsertEntry	inferred	id-ordered insertion into the viewer's doubly linked entry list [names_M34_SmallSweep3.tsv]
 0x0022C188	evtEventViewerUnlinkEntry	inferred	Detaches a doubly linked viewer entry from its owning list, clears both links and decrements count.
@@ -4036,16 +4079,22 @@
 0x0022C6B0	evtViewerBindNamedOwner	inferred	U1
 0x0022C7F0	evtViewerCreateObjectInFreeSlot	inferred	confidence=high; src/dds1/event/evtEventViewer.c:func_0022C7F0; Finds a free viewer slot, creates/binds the command-selected object, optionally activates it and returns the slot index. [names_qp9.tsv]
 0x0022CA48	evtEventViewerFreeSlot	inferred	frees indexed pointer slot via free-like helper and NULLs it
+0x0022CA88	evtEventViewerCreateOriginEffect	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:660:evtEventViewerCreateOriginEffect; Creates an event-viewer effect at the origin and attaches its active event node.; twin=0x00247400 (DDS2).
 0x0022CB68	evtEventViewerFreeBuffer	inferred	frees the +0x2c buffer if non-null and NULLs it
 0x0022CBA0	evtViewerApplyInterpolatedNodeKey	inferred	confidence=high; matched-C; src/dds1/game/code_0022CBA0.c:159:func_0022CBA0; For a present starting key, computes glyphAdvancePosition-relative time ratio (zero for missing/zero-span end key), generates a thirty-two-byte interpolated key block, and applies it to the node handle; DDS2 also subtracts 35 from its output word.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0022CC40	evtViewerApplyParameterKeyTracks	inferred	readability/matching review (QP16)
 0x0022CE68	evtViewerApplySelectedEntry	inferred	Selects the active or fallback viewer entry and sends it to world and view state helpers.
+0x0022E098	evtEventViewerUpdateUnitTransitions	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1155:evtEventViewerUpdateUnitTransitions; Selects each named unit's latest kind-9 transition key and starts, ends or leaves its value transition.; twin=0x00248B80 (DDS2).
 0x0022EA18	evtViewerClampMovieTimes	inferred	walks world objects and clamps polygon-movie time from viewer nodes (DDS2 twin 00249598)
 0x0022EF38	evtViewerApplyGlyphLodChannel	inferred	For each node kind one, picks most recent glyph kind six and updates its LOD channel. [names_reviewed7.tsv]
+0x0022F038	evtEventViewerAttachIndexedObject	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1720:evtEventViewerAttachIndexedObject; At an exact kind-7 key frame attaches the indexed world object; index -1 restores the saved vectors.; twin=0x00249C40 (DDS2).
 0x0022F1C0	evtViewerActivateWindowForGlyphEntry	inferred	readability/matching review (QP16)
 0x0022F408	evtViewerHasUpdateFlag	inferred	Tests bit 0x10 of the viewer state flags word used by its update counter.
+0x0022F418	evtEventViewerFadeBackground	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1869:evtEventViewerFadeBackground; Fades the viewer's background colour over its update countdown.; twin=0x0024A020 (DDS2).
+0x0022F550	evtEventViewerApplyEffectChannels	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1898:evtEventViewerApplyEffectChannels; Applies the effect-channel assignments driven by the viewer's tracks.; twin=0x0024A158 (DDS2).
 0x0022F778	evtViewerUpdateTimedAction	inferred	Closes timed action outside glyph interval or advances open-ended interval. [names_reviewed7.tsv]
 0x0022F9F8	evtViewerAdvanceGlyphTick	inferred	Resets the viewer font glyph while its tick count is active and stops after thirty ticks.
+0x0022FB30	evtEventViewerApplyPlaybackMode	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:2041:evtEventViewerApplyPlaybackMode; Applies the viewer playback mode to unit, motion and movie-object tracks.; twin=0x0024A738 (DDS2).
 0x0022FDE8	evtViewerDispatchFlagMode	inferred	Dispatches mode zero or one according to bit zero of viewer flags.
 0x0022FF30	evtViewerPushCommandHistory	inferred	Appends mode and parameters to viewer history, resets command words for mode three. [names_reviewed7.tsv]
 0x0022FF98	evtViewerPopHistory	inferred	Removes the last eight-byte viewer history entry, saves its ID as current and returns it.
@@ -4064,6 +4113,7 @@
 0x00232A50	evtViewerAdvanceUpdate	inferred	viewer update step: reads the message window flags, ticks EventViewerState.unk2440 or hands over to func_002329A0; matched [names_L18_Units.tsv]
 0x00232B30	evtViewerStartUpdate	inferred	initialises the active viewer and returns func_00232A50; parked (2 words: li $2,1 vs li $3,1) [names_L18_Units.tsv]
 0x00232BC0	evtViewerReleaseResources	inferred	Releases viewer windows, waits for pending work, and tears down resources.
+0x00232D08	evtEventViewerDestroyActive	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:3504:evtEventViewerDestroyActive; Destroys the currently active event viewer.; twin=0x0024DAA0 (DDS2).
 0x00232D60	evtViewerCreateTaskWithSky	inferred	Allocates and clears viewer state, creates EventViewer task and links sky task. [names_reviewed7.tsv]
 0x00232E00	evtEventViewerDestroyTask	inferred	destroys hierarchy of task named "EventViewer" via kwlnTaskDestroyWithHierarchyByName
 0x00232F88	evtPolygonMovieTestFlag	inferred	returns bit 8 of the first word of the event state [names_M67_Named.tsv]
@@ -4089,7 +4139,9 @@
 0x00234418	evtPolygonMovieInitWork	inferred	parses PMD2 entries into work [names_M67_Named.tsv]
 0x00234A30	evtPolygonMovieFreeWork	inferred	releases resources, prints "sound stop all" [names_M67_Named.tsv]
 0x00234B30	evtPolygonMovieCreateHeader	inferred	allocs 0x40 resource with PMD2 header [names_M67_Named.tsv]
+0x00234C18	evtPolygonMovieSynthesizePmd3Header	inferred	confidence=high; matched-C; src/dds1/event/evtPolygonMovie.c:796:evtPolygonMovieSynthesizePmd3Header; Builds the 0x20-byte PMD3 header and retains it as the synthesized third resource.; twin=0x0024F9B8 (DDS2).
 0x00234CA8	evtFormatPolygonMoviePaths	inferred	confidence=high; matched-C; src/dds1/game/code_00234C18.c:13:func_00234CA8; Formats the event/id directory and the three sequential PM resource filenames into caller-provided output paths.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00234DA8	evtGetPolygonMovieWorkData2	inferred	confidence=high; matched-C; src/dds1/event/evtPolygonMovie.c:831:evtGetPolygonMovieWorkData2; Loads or synthesizes the three PMD resources and binds them to a new work object (debug strings name the function).; twin=0x0024FB48 (DDS2).
 0x00234F18	evtViewerCreateTask	inferred	confidence=high; matched-C; src/dds1/game/code_00234C18.c:56:func_00234F18; M141; source=names_pending_main.tsv:111; review=Creates the named EventViewer task, allocates viewer/movie work and requests its two required and optional third movie files. [names_qp11.tsv]
 0x00235088	evtSetContextFlag	inferred	Sets bit zero in the active event context flags.
 0x002350B0	evtClearContextFlag	inferred	Clears bit zero in the active event context flags.
@@ -7067,7 +7119,7 @@
 0x003BAE14	fldTaskSlotCount	inferred	high confidence; src/dds1/game/code_00126A30.c fldResetTaskSlots(): for (i = 0; i < D_003BAE14; i++) { Number of field task slots traversed when resetting task state and removing named room tasks. [names_reviewed26.tsv]
 0x003BAE64	fldSelectedActorEntryIndex	inferred	high confidence; src/dds1/game/code_00126A30.c fldSelectCurrentActorOnNextFloor(): D_003BAE64 = index; Selected actor-template index set when resolving a current-floor actor entry. [names_reviewed26.tsv]
 0x003BAE70	fldFieldTaskHandle	inferred	confidence=high; data D_003BAE70; matched-C-users=3; src/dds1/game/code_001411F0.c:268:fldFieldTaskDestroy; src/dds1/game/code_001411F0.c:276:fldEnsureTask; src/dds1/game/code_001411F0.c:282:fldDestroyTask; Field task creator latches task handle; destroy callback clears it; data-twin=D_00436200, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00126A30.sdata.s:882.; seed-placeholder=D_003BAE70; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x003BAE74	fldInputPanelTaskHandle	inferred	confidence=high; data D_003BAE74; matched-C-users=5; src/dds1/field/fldPanel.c:12:fldReleasePanelState; src/dds1/field/fldPanel.c:20:fldCreateInputPanelTask; src/dds1/field/fldPanel.c:24:fldDestroyPanelTaskIfPresent; src/dds1/field/fldPanel.c:30:func_00141190; src/dds1/field/fldPanel.c:38:func_001411C0; Input-panel creator stores task handle; release clears it and conditional teardown reads it; data-twin=D_00436204, supported by 5 independently paired matched functions.; retail-data-start=asm/dds1/data/field/fldPanel.sdata.s:9.; seed-placeholder=D_003BAE74; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003BAE74	fldInputPanelTaskHandle	inferred	confidence=high; data D_003BAE74; matched-C-users=5; src/dds1/field/fldPanel.c:12:fldReleasePanelState; src/dds1/field/fldPanel.c:20:fldCreateInputPanelTask; src/dds1/field/fldPanel.c:24:fldDestroyPanelTaskIfPresent; src/dds1/field/fldPanel.c:31:fldSetInputPanelStateWord2; src/dds1/field/fldPanel.c:39:fldSetInputPanelStateWord1; Input-panel creator stores task handle; release clears it and conditional teardown and state accessors use it; data-twin=D_00436204, supported by 5 independently paired matched functions.; retail-data-start=asm/dds1/data/field/fldPanel.sdata.s:9.; seed-placeholder=D_003BAE74; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BAE80	fldCurrentBgmHandle	inferred	high confidence; src/dds1/game/code_001411F0.c fldStartSceneBgm(): if (D_003BAE80 != handle) { Current field BGM handle changed when starting the resolved scene track. [names_reviewed26.tsv]
 0x003BAE84	fldSceneSoundBase	inferred	high confidence; src/dds1/game/code_001411F0.c fldStartSceneBgm(): D_003BAE84 = D_0033EAB0[stage]; Scene-indexed sound-resource base added to the resolved track index to form the BGM handle. [names_reviewed26.tsv]
 0x003BAE8C	fldPendingSoundCount	inferred	high confidence; src/dds1/game/code_001411F0.c fldAppendClearEntry(): s32 i = D_003BAE8C; Number of occupied pending field-sound entries; append increments it and reset clears it. [names_reviewed26.tsv]
@@ -7644,3 +7696,50 @@
 0x002E41B8	sdfDevConsFinalizeGlyphTag	inferred	confidence=high; matched-C; Closes the five-register sprite list and pads an odd register-value count. DDS2 twin 0x0033D068. Namer1 batch 2.
 0x002E45D0	sdfDevConsInitPacketBuffers	inferred	confidence=high; matched-C; Initializes uncached alternating packet buffers, GS setup state and DMA channel. DDS2 twin 0x0033D480. Namer1 batch 2.
 0x002E46B8	sdfDevConsRenderAll	inferred	confidence=high; matched-C; Renders the global console chain into a stack packet buffer and submits DMA. DDS2 twin 0x0033D568. Namer1 batch 2.
+0x0017D2F8	effPcpUpdateCameraRelativeTripleGroups	inferred	confidence=high; matched-C; Places three delayed groups in the camera-relative basis and updates their seven handles. DDS2 twin 0x00184F50. Namer1 batch 3.
+0x0017F898	effPcpSpawnMuzzleThunderRay	inferred	confidence=high; matched-C; Allocates a muzzle thunder ray with start distance zero and length 375. DDS2 twin 0x001874F0. Namer1 batch 3.
+0x0017F900	effPcpSpawnOffsetMuzzleThunderRay	inferred	confidence=high; matched-C; Allocates a muzzle thunder ray with start distance 325 and length 225. DDS2 twin 0x00187558. Namer1 batch 3.
+0x00180080	effPcpStepScaledThunderTimeline	inferred	confidence=high; matched-C; Interpolates extent, scales thunder dimensions and applies lifetime opacity; adopts the existing DDS2 name. DDS2 twin 0x00187CD8. Namer1 batch 3.
+0x001808F8	effPcpUpdateBeamGrowthAndFade	inferred	confidence=high; matched-C; Grows visible beam vertex groups and radius, then draws using lifetime opacity. DDS2 twin 0x00188550. Namer1 batch 3.
+0x001818A8	effPcpUpdateRadialFragmentGroupSet	inferred	confidence=high; matched-C; Updates orbital radius and angle, blended fragment direction and color, and optional event followers. DDS2 twin 0x00189500. Namer1 batch 3.
+0x00182398	effPcpCreateDriftEventRingFromTable	inferred	confidence=high; matched-C; Passes parameter-table blocks zero and one to the drift-event ring constructor. DDS2 twin 0x00189FF0. Namer1 batch 3.
+0x00182A38	effPcpSetDriftEventColor	inferred	confidence=high; matched-C; Stores the drift-event ring color consumed by its updater. DDS2 twin 0x0018A690. Namer1 batch 3.
+0x001834D0	effPcpSetPairedEventColor	inferred	confidence=high; matched-C; Stores the paired-event color consumed by its updater. DDS2 twin 0x0018B128. Namer1 batch 3.
+0x00163508	effThunderCopyVectorOrigin	inferred	confidence=high; matched-C; Copies all four origin components into the vector work parameter prefix. DDS2 twin 0x0016B160. Namer1 batch 3.
+0x00164020	effThunderSpawnIndexedVector	inferred	confidence=high; matched-C; Creates indexed vector work from a direct parameter pointer and discards the returned work. DDS2 twin 0x0016BC78. Namer1 batch 3.
+0x00164038	effThunderCopyIndexedVectorOrigin	inferred	confidence=high; matched-C; Copies all four origin components for the indexed vector variant. DDS2 twin 0x0016BC90. Namer1 batch 3.
+0x00164BA8	effThunderBuildSparkStripCell	inferred	confidence=high; matched-C; Builds the spark strip between lowered and current positions using two two-vector rows per step. DDS2 twin 0x0016C800. Namer1 batch 3.
+0x00165110	effThunderUpdateOrbitingSparks	inferred	confidence=high; matched-C; Advances delayed spark initialization, damped orbit and vertical motion, and opacity fades. DDS2 twin 0x0016CD68. Namer1 batch 3.
+0x00165ED0	effThunderCreateDualFragmentWork	inferred	confidence=high; matched-C; Creates secondary and primary particle systems sharing one fragment-state array. DDS2 twin 0x0016DB28. Namer1 batch 3.
+0x00166C18	effThunderBuildBandedCell	inferred	confidence=high; matched-C; Builds kind-two cell geometry with core, band and edge widths and view-axis direction changes. DDS2 twin 0x0016E870. Namer1 batch 3.
+0x001673D0	effThunderBuildJoinedFragmentStrip	inferred	confidence=high; matched-C; Continues fragment-strip geometry from the preceding segment final five-vector row. DDS2 twin 0x0016F028. Namer1 batch 3.
+0x00167EC0	effThunderCloneCurveGroup	inferred	confidence=high; matched-C; Copies group parameters and borrows the mixer while allocating fresh ribbon histories and event slots. DDS2 twin 0x0016FB18. Namer1 batch 3.
+0x001681C0	effThunderUpdateCurveGroup	inferred	confidence=high; matched-C; Updates joined cubic segments, ribbon histories and endpoint events for each thunder group slot. DDS2 twin 0x0016FE18. Namer1 batch 3.
+0x00169928	effCopyResourceGroupVector	inferred	confidence=high; matched-C; Copies the complete group origin quadword; adopts the existing DDS2 name. DDS2 twin 0x00171580. Namer1 batch 3.
+0x00169938	effThunderSetCurveGroupTint	inferred	confidence=high; matched-C; Writes offset 0x54, identified by the canonical group layout as tintColor. DDS2 twin 0x00171590. Namer1 batch 3.
+0x001AB810	btlUpdateCommandPanelFades	inferred	confidence=high; matched-C; Advances command-panel label/class/corner fade states and sinusoidal corner opacity. DDS2 twin 0x001B6438. Namer1 batch 4.
+0x001ABDF8	btlDrawCommandPanelClassLabel	inferred	confidence=high; matched-C; Draws command-panel frame, class sprites and indexed label with their tracked fades. DDS2 twin 0x001B6A20. Namer1 batch 4.
+0x001AC4A8	btlDrawMirroredPanelSprites	inferred	confidence=high; matched-C; Temporarily applies record dimensions, draws both mirrored positions and restores template bounds. DDS2 twin 0x001B70B8. Namer1 batch 4.
+0x001AD970	btlCreateSkillNamePanel	inferred	confidence=high; matched-C; Creates text/glyph transition work and registers the existing skill-name panel updater in tracked slot one. DDS2 twin 0x001B8580. Namer1 batch 4.
+0x001B05D0	btlDrawCompositePanelSprites	inferred	confidence=high; matched-C; Draws the fixed 37-sprite panel composition using per-corner opacity adjustments. DDS2 twin 0x001BB1E8. Namer1 batch 4.
+0x001B0E48	btlResetRegisteredPanelEntrance	inferred	confidence=high; matched-C; Resets the registered panel to mode-one fade-in with initial horizontal offset 128. DDS2 twin 0x001BBA60. Namer1 batch 4.
+0x001B1518	btlUpdatePhasePanelAnimation	inferred	confidence=high; matched-C; Advances phase-panel wait, horizontal movement, cropping and corner-opacity stages. DDS2 twin 0x001BC138. Namer1 batch 4.
+0x001B3DC8	btlCreateSelectionTrailTask	inferred	confidence=high; matched-C; Creates four staggered trail positions/fade countdowns between previous and target selection rows. DDS2 twin 0x001BE9E8. Namer1 batch 4.
+0x001BAE08	btlUpdateActorVitalPulseTrail	inferred	confidence=high; matched-C; Advances HP/MP pulse frame counters and emits up to three staggered pulses for active or reserve entries. DDS2 twin 0x001C6010. Namer1 batch 4.
+0x001BB118	btlUpdateAndDrawVitalBarPulse	inferred	confidence=high; matched-C; Computes an HP/MP bar position, advances pulse progress/sinusoidal opacity and draws its sprite. DDS2 twin 0x001C6320. Namer1 batch 4.
+0x001BB6C8	btlUpdateActorVitalChangeEffects	inferred	confidence=high; matched-C; Draws HP/MP change effects and decrements their opacity until resetting effect states. DDS2 twin 0x001C68D0. Namer1 batch 4.
+0x001BB990	btlTrackActorVitalChanges	inferred	confidence=high; matched-C; Compares cached HP/MP levels to current values and prepares decrease/increase targets, pulse resets and fades. DDS2 twin 0x001C6B98. Namer1 batch 4.
+0x001C1850	btlRequestActorSlotOrderTransition	inferred	confidence=high; matched-C; Requests actor-slot order state three or seven, resetting successor scaling or fade phases. DDS2 twin 0x001CCD80. Namer1 batch 4.
+0x001C2158	btlDrawActorSlotOrder	inferred	confidence=high; matched-C; Draws bank-selected actor-slot order sprites using tracked angles, scales, corner colors and layered states. DDS2 twin 0x001CD6E0. Namer1 batch 4.
+0x001C2938	btlUpdateActorSlotOrderColors	inferred	confidence=high; matched-C; Advances the secondary slot-order state machine, ramping and fading four corner-color adjustments. DDS2 twin 0x001CDEC0. Namer1 batch 4.
+0x001AA548	btlChooseStartVoice	inferred	confidence=high; matched-C; Debug strings explicitly identify start-voice selection; chooses a unit/category and returns a voice or minus one. DDS2 twin 0x001B4EB8. Namer1 batch 4.
+0x001AC398	btlUpdateShrinkingMirroredSprites	inferred	confidence=high; matched-C; Initializes scaled mirrored-sprite bounds, then shrinks their dimensions until inactive. DDS2 twin 0x001B6FC0. Namer1 batch 4.
+0x001B0E68	btlUpdateRegisteredPanelTask	inferred	confidence=high; matched-C; Updates the registered panel slide/fade state and draws backdrop, sprite and overlay. DDS2 twin 0x001BBA80. Namer1 batch 4.
+0x001C1988	btlUpdateActorSlotOrderAnimation	inferred	confidence=high; matched-C; Advances slot-order timers, sprite indices, scales, fades and secondary color animations. DDS2 twin 0x001CCEB8. Namer1 batch 4.
+0x001E1CF8	btlFrameSingleTargetActionCamera	inferred	matched-C; src/dds1/game/code_001DEDB8.c; frames a single linked target using its position, reach and field of view, with conditional target facing and the standard camera-plane adjustment. Native 16-byte float rotation vector and center-distance plus projected-extent expression recover the source shape; DDS2 twin 0x001EF668 remains ASM (PurD deep refinement; LiteG and Quartz prior camera drafts preserved).
+0x002A9DA8	effUpdateOrbitalPointSpanWaves	inferred	confidence=high; matched-C; Advances randomized circular entry positions with angular acceleration and rebuilds camera-facing wavy five-point spans. DDS2 twin 0x002EC370. Namer1 batch 5.
+0x002B5990	effGetSelectedFileQueueIndex	inferred	confidence=high; matched-C; Adds the visible selection row to its queue-window offset; callers use the result with fileQueueGetAt. DDS2 twin 0x002FCA40. Namer1 batch 5.
+0x002B6778	effLoadSelectedFileJob	inferred	confidence=high; matched-C; Snapshots the selected file job and camera, loads its primary payload into the selected asset, queues it and returns refresh status. DDS2 twin 0x002FD900. Namer1 batch 5.
+0x002B6C00	effCloneSelectedFileJob	inferred	confidence=high; matched-C; Duplicates the selected file job while retaining its sector leader, rebinds the asset payload and refreshes selected queue views. DDS2 twin 0x002FDDD8. Namer1 batch 5.
+0x002B7388	effSelectCameraFileJobFromRows	inferred	confidence=high; matched-C; Builds the named request list, tracks preview selection, appends the selected positioned camera/file job on accept and returns selection status. DDS2 twin 0x002FE5B8. Namer1 batch 5.
+0x002BE728	itfRotateScreenOffset	inferred	confidence=high; matched-C; Rotates the supplied offset in degrees with 1.75 aspect correction and the retail signed pre-truncation bias, then adds the supplied screen center. DDS2 twin 0x00305EB0 adds a mode-selected aspect. Namer1 batch 5.

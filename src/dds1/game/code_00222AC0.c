@@ -1405,7 +1405,7 @@ u32 func_00225880(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    object = (EffWorldNode *)func_00115298(resource, position, scale);
+    object = (EffWorldNode *)effObjCreateEventNode(resource, position, scale);
     if (object == NULL) {
         scrSetIntegerReturnValue(0);
     } else {

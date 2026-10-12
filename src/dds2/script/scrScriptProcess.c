@@ -146,7 +146,7 @@ void scrDestroyAllNamedProcesses(void)
 }
 
 /* Start procedure `index` on a script process: copy its name, set pc, clear the stack and timers. Returns 0 for an out-of-range index. */
-s32 func_0010C058(ScrData *process, s32 index)
+s32 scrStartProcessProcedure(ScrData *process, s32 index)
 {
     s32 i;
 

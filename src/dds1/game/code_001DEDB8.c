@@ -1169,7 +1169,88 @@ INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E1288);
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E16C0);
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E1CF8);
+extern f32 func_002F9F60(f32);
+extern f32 func_002FA060(f32);
+extern f32 func_002FA1C0(f32);
+
+/* vu0 routine: fit the action camera around one target and its reach. */
+void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out) {
+    BtlUnit *user;
+    BtlUnit *target;
+    f32 targetPosition[4];
+    f32 center[4];
+    f32 userPosition[4];
+    f32 rotation[4];
+    f32 height;
+    f32 halfFov;
+    f32 angle;
+    f32 extent;
+    f32 span;
+    f32 t;
+    f32 distance;
+    f32 firstLength;
+    f32 secondLength;
+    f32 dot;
+    f32 centerDistance;
+    f32 minimum;
+    f32 diameter;
+
+    user = action->task->unit;
+    if (btlGetIndexListCount(action->targetList) >= 2U) {
+        func_001DF358(action, out);
+        return;
+    }
+    target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlFlagAllUnitsDefeatCandidate();
+    out->fov = action->camera.fov;
+    extent = target->reach * target->scale;
+    span = func_001F66D8(user->status.flags & 0x600, 0, &height);
+    VU0_STORE_VF_UNCLOBBERED(vf10, center);
+    center[1] = -height * 0.5f;
+    btlUnitGetMuzzlePosVU(target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, targetPosition);
+    targetPosition[1] = -btlUnitGetTopY(target);
+    halfFov = out->fov * 1.3333333f * 0.5f;
+    VU0_LOAD_VF(vf10, targetPosition);
+    VU0_LOAD_VF(vf11, center);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf12, vf10);
+    VU0_LENGTH_VF10(firstLength);
+    VU0_LOAD_VF(vf10, targetPosition);
+    VU0_SCALAR_OP(center[0], "vaddx.x vf10, vf0, vf2x");
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(secondLength);
+    VU0_MOVE_VF(vf11, vf12);
+    VU0_DOT_XYZ(dot, vf10, vf11);
+    angle = func_002FA1C0(dot / (firstLength * secondLength));
+    t = span * func_002F9F60(angle);
+    distance = t / func_002FA148(halfFov);
+    distance += t * func_002FA148(angle);
+    VU0_LOAD_VF(vf10, center);
+    VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
+    VU0_LOAD_VF(vf11, targetPosition);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(centerDistance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF_UNCLOBBERED(vf10, out->direction);
+    diameter = extent + extent;
+    t = diameter / func_002FA060(1.5707963f - halfFov);
+    minimum = centerDistance + (extent + t) / func_002FA148(halfFov);
+    if (distance < minimum) {
+        out->distance = minimum;
+    } else {
+        out->distance = distance;
+    }
+    if (target->status.flags & 0x80000) {
+        btlUnitGetBodyPosVU(user);
+        VU0_STORE_VF_UNCLOBBERED(vf10, userPosition);
+        if (btlAimHorizontalDirectionVU(targetPosition, userPosition) != 0) {
+            VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+            btlSetUnitRotation(target, (s128 *)rotation);
+        }
+    }
+    btlAdjustCameraDirectionForDefaultPlane(out);
+}
 
 void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
     s128 vec[3];
@@ -1301,9 +1382,7 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
     }
 }
 
-extern f32 func_002F9F60(f32);
 
-extern f32 func_002FA060(f32);
 
 #define BTL_APPROACH_DIST_START 0.55f
 
@@ -1385,7 +1464,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
         func_001DF358(command, &command->camera);
         return;
     }
-    func_001E1CF8(command, (f32 *)&command->frontCamera);
+    btlFrameSingleTargetActionCamera(command, &command->frontCamera);
     btlUnitGetMuzzlePosVU(user);
     VU0_STORE_VF_UNCLOBBERED(vf10, userPos);
     btlUnitGetMuzzlePosVU(target);
@@ -4805,7 +4884,7 @@ void btlTickFieldSwayAndTint(void) {
 
     if ((((*(u32 *)(temp_v0 + 500) & 0x20000) != 0) && ((*(u32 *)(temp_v0 + 0x1f8) & 0x20) == 0)) &&
           ((*(u32 *)(temp_v0 + 0x1fc) & 0x4000000) == 0)) {
-        func_00132BD0();
+        fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
         func_00132010();
     }

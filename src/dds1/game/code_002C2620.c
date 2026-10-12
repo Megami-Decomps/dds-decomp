@@ -89,7 +89,7 @@ extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);
 extern void sdfInitInnerVectors(void);
-extern void func_00132BD0(void);
+extern void fldUpdateSelectedValueTransition(void);
 extern void fldUpdateSwayOffset(void);
 extern u32 D_003BA8EC;
 extern s32 D_003BD240;
@@ -573,7 +573,7 @@ s32 fldUpdateLocalMapController(void) {
         break;
     }
     sdfInitInnerVectors();
-    func_00132BD0();
+    fldUpdateSelectedValueTransition();
     fldUpdateSwayOffset();
     return result;
 }

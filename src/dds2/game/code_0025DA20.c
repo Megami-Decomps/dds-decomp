@@ -74,7 +74,7 @@ extern s32 ptyCountBulletItem(s32);
 
 extern s8 mnuCampListedItems[34];
 
-extern void func_00246950();
+extern void evtEventViewerReleaseQueuedNode();
 
 typedef struct CampFlagRow {
     u32 messageSet;  /* 0x00: shop message resource number */
@@ -352,7 +352,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
             if (key->frame + track->metadata.value < threshold) {
                 key = key->next;
             } else {
-                func_00246950(scene, track, key);
+                evtEventViewerReleaseQueuedNode(scene, track, key);
                 key = track->children;
             }
         }

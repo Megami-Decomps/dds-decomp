@@ -248,7 +248,7 @@ void dds3ResolveModelChunkBindings(ObjBase *base, MdlCtx *model) {
 
 /* Rebuild the model resource, synchronize object vectors and initialize
  * transition work only when no transition is already associated with it. */
-void func_00111E30(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
+void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
     f32 scale[4];
     ObjBase *base;
     MdlCtx *model;
@@ -287,7 +287,7 @@ extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 
-void func_00111F40(void *object) {
+void dds3CreateObjectModelAndMotion(void *object) {
     ObjBase *base;
     void *slot;
     Motion *motion;
@@ -370,7 +370,7 @@ struct SdfPoolNode;
 extern struct SdfPoolNode *D_00325818[4];
 
 
-void func_00112100(void *object) {
+void dds3DrawObjectWithGradientOverlay(void *object) {
     ObjBase *base;
     MdlCtx *context;
     SdfModel *inner;

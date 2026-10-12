@@ -15,9 +15,9 @@ struct SdfTex;
 
 extern s32 fldGetSceneStatusCode(void);
 
-extern void func_001442A0(s32);
+extern void fldSetInputPanelStateWord1(s32);
 
-extern void func_00144270(s32);
+extern void fldSetInputPanelStateWord2(s32);
 
 
 
@@ -409,8 +409,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = func_001442D0();
     switch (result) {
     case 1:
@@ -443,8 +443,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = func_001442D0();
     switch (result) {
     case 1:
@@ -458,15 +458,15 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     return 1;
 }
 
-extern void func_001442A0(s32);
+extern void fldSetInputPanelStateWord1(s32);
 
-extern void func_00144270(s32);
+extern void fldSetInputPanelStateWord2(s32);
 
 s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
-    func_001442A0(scrReadIntParameter(0));
-    func_00144270(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = func_001442D0();
     if (result == -1) {
         scrSetIntegerReturnValue(-1);
@@ -773,7 +773,7 @@ s32 fldCmdSetFieldParameterPair(void) {
 
     D_00389988[11] = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
-    func_00135A68(D_00389988[11], value);
+    fldApplySkyLightSet(D_00389988[11], value);
     return 1;
 }
 

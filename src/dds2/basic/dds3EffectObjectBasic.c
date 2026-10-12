@@ -62,7 +62,7 @@ typedef struct EffectObj {
     ObjectTransform *params; /* Separately allocated position, rotation and scale owner. */
 } EffectObj;
 
-EffectObj *func_00115600(const char *name, void *firstVector, void *secondVector, f32 scale);
+EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale);
 
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
@@ -223,7 +223,7 @@ struct EffNode;
 extern u8 dds3TestObjectFlags(u32 unused, u32 flags);
 extern void billInvokeCallback(struct BillObj *bill);
 
-s32 func_00114BF0(EffectObj *obj) {
+s32 effObjUpdateDependencies(EffectObj *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
@@ -350,7 +350,7 @@ EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
-void func_00114F30(EffectObj *obj) {
+void effObjSelectStoredBill(EffectObj *obj) {
     billSetKind1Entry((u32)obj->data->handle);
 }
 
@@ -508,7 +508,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
 }
 
 /* Feed the third source factory's result to the world-bill constructor. */
-void func_00115318(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) {
+void effObjCreateBillboardFromFactory(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
     bill = func_001579C8();
@@ -526,7 +526,7 @@ typedef struct EffectEventVectorParameters {
 
 extern const EffectEventVectorParameters D_00412950;
 
-EffectObj *func_00115358(source, firstVector, secondVector)
+EffectObj *effObjCreateEventNodeFromMixer(source, firstVector, secondVector)
     SoundMixer *source;
     const u128 *firstVector;
     const u128 *secondVector;
@@ -565,8 +565,8 @@ EffectObj *func_00115358(source, firstVector, secondVector)
     return obj;
 }
 
-void *func_00115500(void *resource, void *position, void *scale) {
-    return func_00115358(resource, position, scale);
+void *effObjCreateEventNode(void *resource, void *position, void *scale) {
+    return effObjCreateEventNodeFromMixer(resource, position, scale);
 }
 
 /* Resolve the resource identifier, create from it, then release the temporary resource.
@@ -578,7 +578,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *
 
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = func_00115358(resolvedId, firstVector, secondVector);
+    created = effObjCreateEventNodeFromMixer(resolvedId, firstVector, secondVector);
     sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }
@@ -605,7 +605,7 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
     data->node = effEventCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
-EffectObj *func_00115600(const char *name, void *firstVector, void *secondVector, f32 scale) {
+EffectObj *effObjCreateNamedScaledEffectObject(const char *name, void *firstVector, void *secondVector, f32 scale) {
     EffectObj *obj;
     EffectDependencyState *data;
     ObjectTransform *params;
@@ -639,8 +639,8 @@ EffectObj *func_00115600(const char *name, void *firstVector, void *secondVector
     return obj;
 }
 
-EffectObj *func_001156C8(const char *name, void *firstVector, void *secondVector, f32 scale) {
-    return func_00115600(name, firstVector, secondVector, scale);
+EffectObj *effObjCreateNamedScaledEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    return effObjCreateNamedScaledEffectObject(name, firstVector, secondVector, scale);
 }
 
 extern const f32 D_00412980[10];

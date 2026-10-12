@@ -960,7 +960,7 @@ extern ItfMesSub D_00385228;
 
 extern u16 mnuMovieTaskState;
 
-extern u32 func_001003F8(void);
+extern u32 kwlnGetFrameCounter(void);
 
 extern u32 func_001B5600(void);
 
@@ -1009,7 +1009,7 @@ void func_001A9B80(void) {
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk2B0 = 0;
     ((BattleInitState *)btlRuntime)->unk2B4 = func_001B5600();
-    seed = func_001003F8();
+    seed = kwlnGetFrameCounter();
     effMiscSeedRandom(effSharedRandomState, seed);
     btlResetActorEntryState();
 

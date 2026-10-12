@@ -143,7 +143,7 @@ extern EffWorldNode *effObjCreateResourceKindOne(const char *, void *, s32);
 extern EffWorldNode *effObjSpawnSharedBillNodeClone(EffWorldNode *, void *, s32);
 extern EffWorldNode *effObjSpawnSharedBillClone(EffWorldNode *, void *, s32);
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *, void *, void *);
-extern EffWorldNode *func_00115460(const char *, void *, void *, f32);
+extern EffWorldNode *effObjCreateNamedScaledEffect(const char *, void *, void *, f32);
 extern void effObjSetFlags(EffWorldNode *, s32);
 extern void effObjClearFlags(EffWorldNode *, s32);
 extern void billCopySourceVectorAndSetConfig(EffWorldNode *, BillConfig *);
@@ -158,7 +158,7 @@ extern void dds3SetPathStateValue(EffWorldNode *, u32);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FD50);
 
-void func_001263F0(FldSpawnBatch *batch, u32 batchCount) {
+void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
     f32 position[4];
     f32 rotation[4];
     char path[64];
@@ -259,7 +259,7 @@ void func_001263F0(FldSpawnBatch *batch, u32 batchCount) {
                     }
                     break;
                 case 100:
-                    object = func_00115460(resource->name, position, rotation, config->width * 0.5f);
+                    object = effObjCreateNamedScaledEffect(resource->name, position, rotation, config->width * 0.5f);
                     effObjClearFlags(object, 1);
                     break;
                 }
@@ -500,7 +500,7 @@ extern s8 D_0032C9A0[];
 extern void fldReleaseSkyResources(void);
 extern void fldCreatePlayerObject(void);
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
-extern void func_00126A30(u32, u32, s32);
+extern void fldSpawnPlacementObjectsFromBatches(u32, u32, s32);
 
 extern s32 D_003BAE68;
 
@@ -585,7 +585,7 @@ extern char D_003C9200[];
 extern u32 D_003C92E0[];
 extern s16 D_003C9518[];
 extern void fldFormatAreaResourceName(char *arg0);
-extern void func_00132FD0(u32 arg0, s32 arg1);
+extern void fldApplySkyLightSet(u32 arg0, s32 arg1);
 extern s32 strcmp(const char *a, const char *b);
 extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
@@ -693,7 +693,7 @@ typedef struct FldSceneRequest {
 
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
-extern void func_001263F0(FldSpawnBatch *, u32);
+extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
 
 /* Relocated collision headers contain their eight-word geometry header. */
 
@@ -761,7 +761,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void func_00126A30(u32 batchAddress, u32 batchCount, s32 appended) {
+void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 appended) {
     f32 position[4];
     f32 rotation[4];
     f32 *transform;
@@ -958,7 +958,7 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void effObjSetRoomNumber(EffWorldNode *, u32);
-extern void func_00111F40(void *);
+extern void dds3CreateObjectModelAndMotion(void *);
 extern void fldSetRecordValueById(s32, s32);
 extern void dds3RegisterObjectInHandlerIndex(void *);
 
@@ -1031,7 +1031,7 @@ void fldCreateResourceScriptObjects(void) {
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName(resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
-        func_00111F40(object);
+        dds3CreateObjectModelAndMotion(object);
         binding = D_003BD7B8;
         for (j = 0; j < D_003BD7BC; j++, binding++) {
             if (binding->names != NULL) {
@@ -1154,7 +1154,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    func_001263F0((FldSpawnBatch *)request->unk_4, request->unk_0);
+    fldSpawnSceneResourceBatches((FldSpawnBatch *)request->unk_4, request->unk_0);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
@@ -1163,12 +1163,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    func_00126A30(request->secondaryValue, request->primaryValue, 0);
+    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    func_00126A30(request->secondaryValue, request->primaryValue, 1);
+    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
 }
 
 s32 func_001277A8(s32 record) {
@@ -4694,11 +4694,11 @@ u32 fldGetSkyDrawState(void) {
     return fldSkyDrawState;
 }
 
-void func_00132B80(u32 value) {
+void fldSetSkyAlpha(u32 value) {
     D_0032E5A8[0] = value;
 }
 
-u32 func_00132B90(void) {
+u32 fldGetSkyAlpha(void) {
     return D_0032E5A8[0];
 }
 
@@ -4708,7 +4708,7 @@ void fldBeginSelectedValueTransition(u32 value) {
     D_003BAD9C = value;
     D_003BADA0 = 0;
     D_003BADA4 = previousValue;
-    func_00132FD0(previousValue, 1);
+    fldApplySkyLightSet(previousValue, 1);
 }
 
 extern char D_003A0138[];
@@ -4717,7 +4717,7 @@ extern char D_003A0138[];
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 
 /* Alternate the selected value at the requested rate, and apply live lighting edits. */
-void func_00132BD0(void) {
+void fldUpdateSelectedValueTransition(void) {
     EvtUnit *player;
     f32 direction[4];
     s32 red, green, blue;
@@ -4729,27 +4729,27 @@ void func_00132BD0(void) {
     case 1:
         D_003BADA0 += 1.0f;
         if (D_003BADA0 == 30.0f) {
-            func_00132FD0((D_003BADA4 + 1) & 0xFF, 30);
+            fldApplySkyLightSet((D_003BADA4 + 1) & 0xFF, 30);
         } else if (D_003BADA0 == 60.0f) {
-            func_00132FD0(D_003BADA4, 30);
+            fldApplySkyLightSet(D_003BADA4, 30);
             D_003BADA0 = 0;
         }
         break;
     case 2:
         D_003BADA0 += 1.0f;
         if (D_003BADA0 == 15.0f) {
-            func_00132FD0((D_003BADA4 + 1) & 0xFF, 1);
+            fldApplySkyLightSet((D_003BADA4 + 1) & 0xFF, 1);
         } else if (D_003BADA0 == 30.0f) {
-            func_00132FD0(D_003BADA4, 1);
+            fldApplySkyLightSet(D_003BADA4, 1);
             D_003BADA0 = 0;
         }
         break;
     case 3:
         D_003BADA0 += 1.0f;
         if (D_003BADA0 == 60.0f) {
-            func_00132FD0((D_003BADA4 + 1) & 0xFF, 60);
+            fldApplySkyLightSet((D_003BADA4 + 1) & 0xFF, 60);
         } else if (D_003BADA0 == 120.0f) {
-            func_00132FD0(D_003BADA4, 60);
+            fldApplySkyLightSet(D_003BADA4, 60);
             D_003BADA0 = 0;
         }
         break;
@@ -4869,7 +4869,7 @@ extern void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 /* Start fading to the sky light set at index. A zero scene command also applies the set to the
  * display state and player lighting using the (clamped) transition duration. */
-void func_00132FD0(u32 index, s32 mode) {
+void fldApplySkyLightSet(u32 index, s32 mode) {
     FldAreaWork *state = &fldAreaState;
     FldLightSet *light;
     f32 vec[4];
@@ -4965,7 +4965,7 @@ void fldApplyPendingSceneValueWithSpeed(s32 speed) {
         if (D_0032E4D8[0] == 0) {
             D_0032E59C[0] = D_003BADC8;
         }
-        func_00132FD0(D_003BADC8, speed);
+        fldApplySkyLightSet(D_003BADC8, speed);
     }
 }
 
@@ -4986,7 +4986,7 @@ extern void kwlnSetBackgroundColorTarget(s32, f32 *);
 extern s32 kwlnSetLightDirectionTarget(s32, s32, f32 *);
 extern void evtSetDrawVectorTarget(s32, f32, f32, f32, f32);
 
-void func_001332E8(s32 index, s32 mode) {
+void fldTransitionSkyLightSet(s32 index, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];

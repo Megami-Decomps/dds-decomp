@@ -297,7 +297,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F4E8);
 
 const char D_0039F508[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
 
-s32 func_0010DE70(void) {
+s32 scrCommandSetSceneLightDirection(void) {
     ScrVecW direction;
 
     direction.x = bfWaitReadArgFloat(1);
@@ -822,7 +822,7 @@ s32 scrCommandResetFieldEffects(void)
     kwlnDrawEnableE08(0);
     fldSetSwayMode(0);
     fldSetSkyDrawState(0x80);
-    func_00132B80(0);
+    fldSetSkyAlpha(0);
     fldSetFadeTarget(0, 1, 0);
     return 1;
 }
