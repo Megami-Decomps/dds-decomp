@@ -10,7 +10,7 @@
 
 extern s32 func_0030AC10(LmapTaskState *);
 
-extern void func_00134A18(void);
+extern void fldDrawSkyGradient(void);
 extern void func_00137888(void);
 extern void func_0030C8E8(s32);
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
@@ -614,7 +614,7 @@ s32 func_0030B1E8(void) {
 }
 
 void fldDrawLocalMapOverlay(void) {
-    func_00134A18();
+    fldDrawSkyGradient();
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x21, 0, 0x53);
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
 

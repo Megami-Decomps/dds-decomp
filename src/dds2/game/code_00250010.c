@@ -41,7 +41,7 @@ extern s16 evtSkyTransitionStartValue;
 
 extern s16 evtSkyTransitionTargetValue;
 
-extern void func_00134A18(void);
+extern void fldDrawSkyGradient(void);
 
 extern void fldSelectDisplayBuffer(s32 id);
 
@@ -204,7 +204,7 @@ void evtAdvanceSkyTransition(void) {
 
 s32 evtUpdateSkyTask(KwlnTask *task) {
     evtAdvanceSkyTransition();
-    func_00134A18();
+    fldDrawSkyGradient();
     if (evtSkyOverlayEnabled != 0) {
         fldSelectDisplayBuffer(0x53);
         fldSubmitTexturedOverlaySprite();

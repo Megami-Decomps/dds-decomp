@@ -978,7 +978,7 @@ extern void fldResetCameraModelHandles(void);
 
 extern void dds3SetObjectFlags(void *, s32);
 
-extern void func_00133640(s16, s32);
+extern void fldApplySceneLightSet(s16, s32);
 
 extern void fldApplySkyLightSet(u32, s32);
 
@@ -1045,7 +1045,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     sdfSetModelScalarOverrides(fldPlayerModelContext->inner, 15.0f, 0.0f);
     dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
-        func_00133640(0, 0);
+        fldApplySceneLightSet(0, 0);
         fldApplySkyLightSet(D_0032E570[11], 0);
         fldBeginSelectedValueTransition(D_0032E570[12]);
         if (fldGetSceneCommandState() == 1) {
@@ -1053,7 +1053,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
                 fldEnterSceneCommand();
             } else {
                 fldAreaState.sceneCommand = 0;
-                func_00133640(0, 0);
+                fldApplySceneLightSet(0, 0);
                 fldApplySkyLightSet(D_0032E570[11], 0);
                 fldBeginSelectedValueTransition(D_0032E570[12]);
             }
@@ -1144,7 +1144,7 @@ void fldClearSceneCommandFlag(void) {
 
 extern void fldPlayFieldSeVolumePan(s32);
 
-extern void func_00133640(s16, s32);
+extern void fldApplySceneLightSet(s16, s32);
 
 void fldEnterSceneCommand(void) {
     s32 code;
@@ -1159,7 +1159,7 @@ void fldEnterSceneCommand(void) {
     fldAreaState.sceneCommand = code;
     datGameState->world.fieldFlags |= 8;
     fldAreaState.consumedFlags &= ~1;
-    func_00133640(code, 0);
+    fldApplySceneLightSet(code, 0);
 }
 
 s32 fldGetSceneCommandState(void) {
@@ -1181,17 +1181,17 @@ void fldUpdateSceneCommand(void) {
     if (state->commandEnabled == 0) {
         if (state->sceneCommand != 0) {
             state->sceneCommand = 0;
-            func_00133640(0, 0);
+            fldApplySceneLightSet(0, 0);
         }
     } else if ((datGameState->world.fieldFlags & 8) != 0) {
         if (state->sceneCommand == 0) {
             code = fldSelectSceneCommand();
             state->sceneCommand = code;
-            func_00133640(code, 0x14);
+            fldApplySceneLightSet(code, 0x14);
         }
     } else if (state->sceneCommand != 0) {
         state->sceneCommand = 0;
-        func_00133640(0, 0x14);
+        fldApplySceneLightSet(0, 0x14);
         fldPlayFieldSeVolumePan(0x2A);
     }
 }

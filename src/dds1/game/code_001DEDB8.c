@@ -4886,7 +4886,7 @@ void btlTickFieldSwayAndTint(void) {
           ((*(u32 *)(temp_v0 + 0x1fc) & 0x4000000) == 0)) {
         fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
-        func_00132010();
+        fldDrawSkyGradient();
     }
     btlDrawTintIfVisible();
 }
