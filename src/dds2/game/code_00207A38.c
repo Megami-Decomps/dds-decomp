@@ -1292,7 +1292,8 @@ u32 btlScriptSelectDirect(void) {
     return 1;
 }
 
-s32 func_0020A048(void) {
+/* Select a permitted party-derived shadow skill, or retain the empty command. */
+s32 btlScriptSelectShadowSkill(void) {
     func_0021F3E8(scrGetCurrentCommandWork());
     return 1;
 }
@@ -1418,7 +1419,8 @@ u32 btlScriptCmdWithArgF(void) {
     return 1;
 }
 
-s32 func_0020A458(void) {
+/* Append the selected-or-current actor to the script command target list. */
+s32 btlScriptAppendSelectedOrCurrentTarget(void) {
     func_00211108(scrGetCurrentCommandWork());
     return 1;
 }
@@ -1435,7 +1437,8 @@ u32 btlScriptCmdSimpleI(void) {
     return 1;
 }
 
-s32 func_0020A4F0(void) {
+/* Remember the choice only when the actor satisfies the HP-percentage bound. */
+s32 btlNbScriptCheckActorFlag(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x400000)) {
@@ -1680,7 +1683,8 @@ s32 btlCmdRememberUpperEntryCondition(void) {
     return 1;
 }
 
-u32 func_0020AE98(void) {
+/* Remember the actor entry-code-10 gate result; failure clears only its selection flag. */
+u32 btlCmdRememberActorActionGate(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
         scrSetIntegerReturnValue(1);
@@ -1756,7 +1760,8 @@ u32 btlCmdReturnActorEligibility(void) {
     return 1;
 }
 
-u32 func_0020B150(void) {
+/* Report whether active-enemy and cumulative-spawn limits permit another enemy. */
+u32 btlCmdReportEnemySpawnCapacity(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -1872,7 +1877,8 @@ s32 btlCmdRememberUpperActorTripleCheck(void) {
     return 1;
 }
 
-s32 func_0020B640(void) {
+/* Remember the actor entry-code condition choice only when its query succeeds. */
+s32 btlCmdRememberActorEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0CC00000)) {
@@ -2060,7 +2066,8 @@ s32 btlCmdRememberLowerMissingStatus(void) {
     return 1;
 }
 
-u32 func_0020BDE8(void) {
+/* Report a queued party action with nonzero target type and options equal to two. */
+u32 btlCmdReturnQueuedSpecialAction(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -2072,7 +2079,8 @@ u32 func_0020BDE8(void) {
     return 1;
 }
 
-u32 func_0020BE38(void) {
+/* Report extended bit 0x800000 on the actor, or an eligible enemy when requested. */
+u32 btlCmdReturnExtendedStatusCheck(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandCtx *)context)->actor, scrReadIntParameter(0) | 0x10C00000)) {
         scrSetIntegerReturnValue(1);
@@ -2593,7 +2601,8 @@ void func_0020CE30(void) {
 void func_0020CE38(void) {
 }
 
-u32 func_0020CE40(void) {
+/* EFFECT EDIT menu callback requests the editor through the shared debug flags. */
+u32 btlRequestEffectEditor(void) {
     D_00436B00 = D_00436B00 | 0x2000000;
     return 0;
 }
@@ -2629,7 +2638,8 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020CEF8);
 
-void func_0020D0D0(void) {
+/* Clear bit 0x80 in both battle debug-menu descriptors. */
+void btlResetBattleDebugMenuFlags(void) {
     D_003BEA48[4] &= ~0x80;
     D_003BE6E0[4] &= ~0x80;
 }
@@ -2657,10 +2667,11 @@ void btlBossDebugPrintfN(s32 a, s32 b, s32 c, const char *format, ...) {
 }
 
 /* Retail discards debug text while retaining the callers' four-argument ABI. */
-void func_0020D1B0(s32 x, s32 y, s32 style, const char *text) {
+void btlDebugDrawText(s32 x, s32 y, s32 style, const char *text) {
 }
 
-void func_0020D1B8(s32 x, s32 y, s32 width, s32 height) {
+/* Retail discards debug rectangles; name-editor callers pass position and size. */
+void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 }
 
 void func_0020D1C0(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1) {
