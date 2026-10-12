@@ -1439,7 +1439,7 @@ argument-register limit, varargs, or an unspecified declaration.
 
 The diagnostic sphere helper `func_0020D1F8` takes
 `(f32 *position, f32 radius, u32 color, s32 flags)`. Both sphere calls in
-`func_002FF0B8` establish this source order: the integer arguments use
+`effUpdateCameraDiagnostics` establish this source order: the integer arguments use
 `$a0`–`$a2` and the radius uses `$f12`. Placing the radius last preserves those
 incoming registers but changes the first call's float/color/flags setup.
 The empty retail provider does not establish the interleaving by itself.

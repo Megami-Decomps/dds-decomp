@@ -4560,7 +4560,7 @@
 0x002B4CC8	mnuCreateItemState	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B4DE8	mnuCloseItemSelectionState	inferred	Closes selected window if present and releases menu state resource handle. [names_reviewed5.tsv]
 0x002B5028	mnuCampMenuDrawSlotLabel	inferred	Draws label for selected image-list entry and changes staff image by cursor index. [names_reviewed5.tsv]
-0x002B5128	mnuStepSkillSlotControl	inferred	confidence=medium; matched-C; src/dds2/game/code_002B0278.c:1274:func_002B5128; Runs the current skill-slot panel control callback through panel mode two; paired with the adjacent camp slot-label draw operation.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x002B5128	mnuStepSkillSlotControl	inferred	confidence=medium; matched-C; src/dds2/game/code_002B0278.c:1274:mnuStepSkillSlotControl; Runs the current skill-slot panel control callback through panel mode two; paired with the adjacent camp slot-label draw operation.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002B5160	mnuClearSelectedListNodeId	inferred	Stores -1 sentinel into staff menu selected-node ID; twin 0x00278BC8. [names_R_FuncNames5.tsv]
 0x002B5190	mnuHasSelectedListNodeId	inferred	Returns whether selected-node ID differs from -1; twin 0x00278BF0. [names_R_FuncNames5.tsv]
 0x002B51C8	mnuHighlightSelectedListNode	inferred	Sets node flag 2 only for entry matching selected-node ID; twin 0x00278C20. [names_R_FuncNames5.tsv]
