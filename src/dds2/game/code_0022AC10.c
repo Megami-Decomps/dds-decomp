@@ -324,7 +324,7 @@ extern void func_00209078(void);
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 
-extern void func_00168978(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 void func_0022AC10(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -425,7 +425,7 @@ void func_0022AC10(void) {
             } else {
                 s32 selector = (s32)battle->eventUnit;
                 effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
-                func_00168978((BattleEffect *)battle->eventData);
+                effBattleUpdate((BattleEffect *)battle->eventData);
                 return;
             }
         }

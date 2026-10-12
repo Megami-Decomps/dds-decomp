@@ -4465,7 +4465,7 @@ typedef struct UnitEffectTaskArgs {
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern void func_00160D88(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -4498,7 +4498,7 @@ u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
             unit->status.flags = (unit->status.flags & ~0x80) | 0x40;
             return 1;
         }
-        func_00160D88(arguments->effect);
+        effBattleUpdate(arguments->effect);
         return 0;
     }
 }

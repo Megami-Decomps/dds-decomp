@@ -343,7 +343,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void func_00160D88(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 extern f32 *D_00324770[];
 
@@ -5786,7 +5786,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         }
     }
     if (args->effect != NULL && (owner->status.flags & 2)) {
-        func_00160D88(args->effect);
+        effBattleUpdate(args->effect);
     }
     return 0;
 }
@@ -5889,7 +5889,7 @@ s32 sndUpdateActorEffectTask(ActorEffectTaskArgs *args) {
         args->effect->flags &= ~8;
     }
     if (unit->status.flags & 2) {
-        func_00160D88((u8 *)args->effect);
+        effBattleUpdate((u8 *)args->effect);
     }
     args->counter++;
     return 0;
@@ -6137,7 +6137,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
         args->effect->flags &= ~8;
     }
     if (flags & 2) {
-        func_00160D88(args->effect);
+        effBattleUpdate(args->effect);
     }
     args->frameCount++;
     return 0;
@@ -6550,7 +6550,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         EE_MMI_RGBA_PACK(packed);
         blended[0] = packed;
         link->effectHandle->color = blended[0];
-        func_00160D88((u8 *)link->effectHandle);
+        effBattleUpdate((u8 *)link->effectHandle);
     }
 }
 

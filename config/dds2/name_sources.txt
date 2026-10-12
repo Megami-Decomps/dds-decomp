@@ -7673,6 +7673,7 @@
 0x00160EF8	parUpdateBurstEmitter	inferred	Updates live burst-emitter particle slots, their age/color/history/position and kind-specific behavior; paired DDS1 0x00159308.
 0x00161B38	parBuildHistoryRibbonStrip	inferred	high confidence; rebuilds a slot's history strip with two opposed vertices per segment using normalized segment/view-axis cross product and width, then sets alpha/color. Paired DDS1 0x00159F48. [Namer1 batch 30]
 0x00161B20	parClearHistorySlotPoints	inferred	high confidence; corrects flag misnomer: clears selected ParSlot.pointCount halfword, consumed as a count by parDrawHistorySlots. Paired DDS1 0x00159F30; no call-surface changes. [Namer1 batch 30]
+0x00168978	effBattleUpdate	inferred	Processes the active BattleEffect frame and entries, dispatches frame callbacks, then advances and returns currentFrame; paired DDS1 0x00160D88.
 0x00191010	effMagatuhiDrawHistoryTrails	inferred	Builds batched compact-vertex packets from the Magatuhi value-work history slots and submits them for drawing; paired DDS1 0x001893D8.
 0x002A1928	mnuUpdateTitleAudioStreams	inferred	Advances title stream states, decodes and mixes sample frames, and updates both stream frame indices. Paired DDS1 0x00269D18. [LiteH b12]
 0x002A1E58	mnuInitializeTitleAudioStreams	inferred	Initializes the title stream and sound-buffer decoder states and starts the stream thread. Paired DDS1 0x0026A248. [LiteH b12]
