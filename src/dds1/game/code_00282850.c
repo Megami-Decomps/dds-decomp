@@ -137,7 +137,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 
-extern s32 func_002877A8(void);
+extern s32 evtStageTestPollModelRequest(void);
 
 typedef struct MenuPanelItem MenuPanelItem;
 
@@ -242,7 +242,7 @@ void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIn
     }
 }
 
-void func_002828D0(s32 *position, MenuPageWindow *menu, s32 panelIndex) {
+void mnuCalcListEntryOffset(s32 *position, MenuPageWindow *menu, s32 panelIndex) {
     MenuPageSlot *panel = &menu->slots[panelIndex];
     PartyPanel *layout = menu->records;
     u32 panelFlags = panel->flags;
@@ -298,7 +298,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     MenuPageSlot *panel = &menu->slots[menu->selected];
     MenuSprites *node;
 
-    func_002828D0(positionOffset, menu, 0);
+    mnuCalcListEntryOffset(positionOffset, menu, 0);
     node = panel->windowSprites;
     if (node != NULL) {
         node->unkC = overrideValue;
@@ -330,7 +330,7 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow
         mnuDrawPanelWithTemporaryOverride(x, y, z, overrideValue, menu, param);
     } else {
         for (panelIndex = 0; panelIndex < panelCount; panelIndex++) {
-            func_002828D0(positionOffset, menu, panelIndex);
+            mnuCalcListEntryOffset(positionOffset, menu, panelIndex);
             mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, panelIndex, param);
         }
     }
@@ -425,7 +425,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
     panel->state = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_00282DA0);
+INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPanelState);
 
 /* Create the five panel items owned by this group and clear its selection. */
 MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
@@ -999,7 +999,7 @@ extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void func_002C1548(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 /* Draw the filled profile bar and its animated background strips. */
-void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
+void mnuDrawProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     s32 progress = panel->option;
     s32 capacity = panel->capValue;
     s32 percent = progress * 100 / capacity;
@@ -1047,7 +1047,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
     s32 phase;
     s32 nextPhase;
-    func_00285208(x, y, z, panel, option);
+    mnuDrawProfilePanel(x, y, z, panel, option);
     phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {
@@ -1992,7 +1992,7 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     return 0;
 }
 
-u8 func_00286F48(void) {
+u8 mnuIsStaffMenuInputBlocked(void) {
     return D_003BC7B4 != 0;
 }
 
@@ -2254,7 +2254,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
 
 extern u64 sdfCheckPendingWorkWithInterrupts(void);
 /* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
-s32 func_002877A8(void) {
+s32 evtStageTestPollModelRequest(void) {
     StageTestSlot *slot = evtStageTestState.queue.slot;
     s32 ready;
 
@@ -2411,7 +2411,7 @@ void evtStageTestUpdateCamera(void)
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
-    s8 result = func_002877A8();
+    s8 result = evtStageTestPollModelRequest();
 
     if (result == 1) {
         return 1;

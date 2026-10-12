@@ -93,7 +93,6 @@ extern void mnuClearListFlagsOneAndTwo();
 
 extern s32 func_002C6CE8(void);
 
-extern s32 func_002C6480();
 
 extern char D_003E75C4[];
 
@@ -576,7 +575,6 @@ typedef struct MenuPanelWindow {
     s32 field94;
 } MenuPanelWindow;
 
-extern void func_002C0958();
 
 void ptySkillMenuCopyPageState(s32 context);
 
@@ -2319,7 +2317,7 @@ void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
     mnuRefreshWindowSlots(menu, MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES);
 }
 
-extern void func_002C1D10(MenuPageBar *bar);
+extern void mnuUpdatePairedEffectBounds(MenuPageBar *bar);
 
 void mnuRefreshPartyPanelBars(MenuPageWindow *page) {
     PartyPanel *party;
@@ -2339,12 +2337,12 @@ void mnuRefreshPartyPanelBars(MenuPageWindow *page) {
         hp = page->records->slots[row].hp;
         maxHp = page->records->slots[row].maxHp;
         page->slots[row].hp.quantizedSpan = (hp * 100) / maxHp;
-        func_002C1D10(&page->slots[row].hp);
+        mnuUpdatePairedEffectBounds(&page->slots[row].hp);
 
         mp = page->records->slots[row].mp;
         maxMp = page->records->slots[row].maxMp;
         page->slots[row].mp.quantizedSpan = (mp * 100) / maxMp;
-        func_002C1D10(&page->slots[row].mp);
+        mnuUpdatePairedEffectBounds(&page->slots[row].mp);
         party = page->records;
         row++;
     } while (row < party->unk0 + party->unk4);

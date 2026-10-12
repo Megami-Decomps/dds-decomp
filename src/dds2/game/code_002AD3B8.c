@@ -196,7 +196,7 @@ s32 mnuPollStaffSlotSelectionConfirmation(KwlnTask *task) {
 }
 
 /* The three staff image states share the same setup, but select different images. */
-s32 func_002AD808(KwlnTask *task) {
+s32 mnuDrawAlternateStaffImagePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(9);
@@ -209,7 +209,7 @@ s32 func_002AD808(KwlnTask *task) {
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
-s32 func_002AD8B0(KwlnTask *task) {
+s32 mnuExitAlternateStaffImagePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
@@ -246,7 +246,7 @@ s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
     return 0;
 }
 
-s32 func_002AD9F8(KwlnTask *task) {
+s32 mnuDrawStaffValueImagePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     mnuDrawCampScreenDefault(task);
     mnuCreateStaffImageSprite(11);
@@ -259,7 +259,7 @@ s32 func_002AD9F8(KwlnTask *task) {
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
-s32 func_002ADAA0(KwlnTask *task) {
+s32 mnuExitStaffValueImagePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
@@ -667,7 +667,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
 }
 
 /* Request value one from the message-window worker before the teardown phase. */
-s32 func_002AEA58(KwlnTask *task) {
+s32 mnuExitStaffPartyValuePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
     func_0026C900();
@@ -1118,7 +1118,7 @@ extern char D_003E74A4[];
 extern char D_003E754C[];
 extern char D_003E7568[];
 
-s32 func_002AFE18(KwlnTask *task) {
+s32 mnuHandleStaffOwnedCatalogInput(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = context->menu;
     MenuWindowContainer *window;
@@ -1224,14 +1224,14 @@ void mnuSetPanelItemsFromRow(MenuPanelGroup *config, s32 rowIndex) {
     configEntry = config->entries;
     entryFlags = D_003E7202 + rowIndex * 0x1C;
     for (i = 4; i >= 0; i--, entryFlags++) {
-        func_002C2AA8(*configEntry++, *entryFlags ? lastActiveSlot : 0);
+        mnuSetPanelItemAuxiliaryValue(*configEntry++, *entryFlags ? lastActiveSlot : 0);
     }
 }
 
 void mnuClearStaffSceneConfigEntries(MenuPanelGroup *config) {
     s32 i;
     for (i = 0; i < 5; i++) {
-        func_002C2AA8(config->entries[i], 0);
+        mnuSetPanelItemAuxiliaryValue(config->entries[i], 0);
     }
 }
 

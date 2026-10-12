@@ -429,6 +429,7 @@ extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[]
 extern char D_003BBB80[], D_003BBB88[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
+/* Append a kind-specific record description at the supplied packet coordinates/style. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA80);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA90);
@@ -441,7 +442,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAC0);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAD0);
 
-/* Append a kind-specific record description at the supplied packet coordinates/style. */
 void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
         record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
@@ -1314,6 +1314,7 @@ extern u8 sdfPfsDebugMode;
 
 /* Step the viewer's selected row, then apply that row's pending resource or
  * entry selection when the confirm buttons are pressed. */
+/* Handle resource, node and motion selection, including load/confirm input. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBB0);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBC0);
@@ -1350,7 +1351,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCC8);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCD8);
 
-/* Handle resource, node and motion selection, including load/confirm input. */
 void mdlHandleViewerAssetSelection(void) {
     s32 pageStep;
     s32 motionIndex;
@@ -2187,6 +2187,7 @@ extern char D_003BBC98[];
 extern char D_003BBCA0[];
 extern char D_003BBCA8[];
 
+/* Draw viewer toggles, time-graph status and the background-color/config controls. */
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE18);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE30);
@@ -2199,7 +2200,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE70);
 
 INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE80);
 
-/* Draw viewer toggles, time-graph status and the background-color/config controls. */
 void mdlDrawViewerSettings(void) {
     /* The native prologue fills and then indexes these three status bytes
      * at sp+0..2; this is a real temporary stack table, not a source view. */

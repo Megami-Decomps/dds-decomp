@@ -171,7 +171,7 @@ s32 mnuStaffCampCancelCheck(s32 menu) {
     result = 0;
     if (evtGetMessageWindowControlState() == 0) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
-            if (func_002877A8() != 1) {
+            if (evtStageTestPollModelRequest() != 1) {
                 if (fileConsumeConfigTaskReady() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);

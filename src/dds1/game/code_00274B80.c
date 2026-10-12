@@ -222,7 +222,7 @@ extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
 extern void evtStageTestInit(s32);
 
-extern s32 func_002877A8(void);
+extern s32 evtStageTestPollModelRequest(void);
 
 
 
@@ -738,7 +738,7 @@ s32 mnuStepPartySelectionControl(KwlnTask *callback) {
 u8 mnuIsStateNotOne(void) {
     s64 result;
 
-    result = func_002877A8();
+    result = evtStageTestPollModelRequest();
     return result != 1;
 }
 
@@ -1015,7 +1015,7 @@ s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
     return 0;
 }
 
-extern s32 func_00286F48();
+extern s32 mnuIsStaffMenuInputBlocked();
 extern u8 D_0037CA94[];
 
 /* Update popup state before page navigation, view toggles, and exit requests.
@@ -1037,7 +1037,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
     if (stateWord != 0) {
         return stateWord;
     }
-    if (func_00286F48() != 0) {
+    if (mnuIsStaffMenuInputBlocked() != 0) {
         return 0;
     }
     stateWord = *popupState;
@@ -1057,7 +1057,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
             menuWork->activeMark = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            if (func_002877A8() != 1) {
+            if (evtStageTestPollModelRequest() != 1) {
                 btlStopStage();
                 menuWork->staffExit = 1;
                 menuWork->selectedList = 1;
@@ -1227,7 +1227,7 @@ typedef struct MenuIdleVoiceState {
 void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer) {
     u32 voiceCount;
 
-    if (voiceTimer->voiceState == -1 && func_002877A8() != 1) {
+    if (voiceTimer->voiceState == -1 && evtStageTestPollModelRequest() != 1) {
         if (evtStageTestHasPendingMotion() == 0) {
             voiceTimer->idleTicks = voiceTimer->idleTicks + 1;
         }

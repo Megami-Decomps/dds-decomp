@@ -531,6 +531,7 @@ extern char D_00420FF0[], D_00421000[], D_00421010[], D_00421020[], D_00421030[]
 extern char D_00436FC0[], D_00436FC8[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
+/* Append a kind-specific record description at the supplied packet coordinates/style. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00420FF0);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421000);
@@ -543,7 +544,6 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421030);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421040);
 
-/* Append a kind-specific record description at the supplied packet coordinates/style. */
 void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
         record->kind <= MDL_VIEWER_RECORD_KIND_OBJECT_PART) {
@@ -2203,6 +2203,7 @@ extern char D_004370D8[];
 extern char D_004370E0[];
 extern char D_004370E8[];
 
+/* Draw viewer toggles, time-graph status and the background-color/config controls. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421388);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004213A0);
@@ -2215,7 +2216,6 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_004213E0);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_004213F0);
 
-/* Draw viewer toggles, time-graph status and the background-color/config controls. */
 void mdlDrawViewerSettings(void) {
     /* Retail00237754..74 fills and then indexes these three status bytes
      * at sp+0..2; this is a real temporary stack table, not a source view. */
