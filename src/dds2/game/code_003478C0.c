@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
@@ -485,7 +486,6 @@ extern s32 SignalSema(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 extern s32 func_003287E0(void);
-extern s32 sdfGetElapsedTimerTicks(s32);
 
 s32 func_003482B0(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
@@ -514,11 +514,11 @@ s32 func_003482B0(DevState *deviceState, s32 command, s32 sourceAddress,
         dmaId = sceSifSetDma(&transfer, 1);
         while (sceSifDmaStat(dmaId) >= 0) {
             timer = func_003287E0();
-            while (sdfGetElapsedTimerTicks(timer) <= 0) {
+            while ((s32)sdfGetElapsedTimerTicks(timer) <= 0) {
             }
         }
         timer = func_003287E0();
-        while (sdfGetElapsedTimerTicks(timer) < 0x64) {
+        while ((s32)sdfGetElapsedTimerTicks(timer) < 0x64) {
         }
         stream->destinationAddress += byteCount;
         stream->transferredBytes += byteCount;

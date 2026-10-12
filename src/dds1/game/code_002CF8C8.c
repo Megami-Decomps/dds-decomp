@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf.h"
 #include "sdf_thread.h"
 
