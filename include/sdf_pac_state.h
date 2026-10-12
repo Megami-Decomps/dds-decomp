@@ -5,7 +5,6 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_work.h"
 
-struct PacAlloc;
 struct SdfMemBlock;
 struct SdfTex;
 
@@ -24,6 +23,26 @@ typedef char PacBuf_resourceSlot_offset_must_be_4[
 typedef char PacBuf_remainingBytes_offset_must_be_C[
     ((u32)&((PacBuf *)0)->remainingBytes == 0xC) ? 1 : -1];
 
+/* Per-queue allocation-list descriptor selected through PacState.slot. */
+typedef struct PacListAllocation {
+    s32 entryCount; /* 0x00 */
+    s32 entryIndex; /* 0x04 */
+    u8 pad08[8]; /* 0x08 */
+    SdfPacStreamPacketHeader entry; /* 0x10 */
+    PacBuf buffer; /* 0x20 */
+} PacListAllocation;
+
+typedef char PacListAllocation_size_must_be_0x30[
+    (sizeof(PacListAllocation) == 0x30) ? 1 : -1];
+typedef char PacListAllocation_entryCount_must_be_at_0[
+    ((u32)&((PacListAllocation *)0)->entryCount == 0) ? 1 : -1];
+typedef char PacListAllocation_entryIndex_must_be_at_4[
+    ((u32)&((PacListAllocation *)0)->entryIndex == 4) ? 1 : -1];
+typedef char PacListAllocation_entry_must_be_at_0x10[
+    ((u32)&((PacListAllocation *)0)->entry == 0x10) ? 1 : -1];
+typedef char PacListAllocation_buffer_must_be_at_0x20[
+    ((u32)&((PacListAllocation *)0)->buffer == 0x20) ? 1 : -1];
+
 /* Complete 0x38-byte PAC decoder state shared by file and model loaders. */
 typedef struct PacState {
     s8 phase; /* 0x00: -1 complete, 0 boundary, 1 skip, 2 input handler */
@@ -41,7 +60,7 @@ typedef struct PacState {
     PacBuf *resourceBuffer; /* 0x28 */
     union {
         PacBuf *resource;
-        struct PacAlloc *list;
+        PacListAllocation *list;
     } slot; /* 0x2C */
     PacWork *queueHead; /* 0x30 */
     PacWork *queueTail; /* 0x34 */
@@ -61,6 +80,11 @@ typedef char PacState_queueTail_must_be_at_0x34[
 
 void sdfPacInitializeDispatchPacket(PacState *state, void *callbackAddress);
 s32 sdfPacFeedInput(PacState *state, u8 *input, s32 available);
+void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
+void sdfPacReadListAllocationCount(PacState *state);
+void sdfPacSkipAllocationEntryBytes(PacState *state);
+void sdfQueueAndResetPacketWork(PacState *state,
+                                SdfPacStreamPacketHeader *packet);
 void sdfPacUsePacketPayloadMemory(PacState *state);
 void sdfPacReleasePacketQueueNodes(PacState *state);
 
