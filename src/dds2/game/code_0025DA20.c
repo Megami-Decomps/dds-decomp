@@ -3915,7 +3915,34 @@ s32 func_00264FF0(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00265038);
+/* Select the highest reached reward tier, retiring earlier tier flags first. */
+s32 func_00265038(void) {
+    DatGameState *state = datGameState;
+    s32 index;
+    s32 selected = -1;
+    s32 flag;
+
+    for (index = 0; index < sizeof(D_003CE1A8) / sizeof(D_003CE1A8[0]); index++) {
+        if (D_003CE1A8[index].threshold != 0) {
+            if ((u32)state->progressTotal >= D_003CE1A8[index].threshold) {
+                selected = index;
+            }
+        }
+    }
+    for (index = 0; index < selected; index++) {
+        flag = D_003CE1A8[index].flag;
+        if (flag != 0) {
+            mdlFlagSet(flag);
+        }
+    }
+    if (selected >= 0) {
+        flag = D_003CE1A8[selected].flag;
+        if (flag != 0 && mdlFlagTest(flag) == 0) {
+            return selected;
+        }
+    }
+    return -1;
+}
 
 s32 evtIsLastSlot(s32 slotIndex) {
     s32 activeSlots = 0;
