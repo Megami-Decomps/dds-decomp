@@ -1196,10 +1196,165 @@ s32 mdlIsInnerSentinel(PacWork *packetWork) {
 
 
 extern PacWork *mdlApplyQueuedGroupPackets(PacWork *, s32, s32, s32);
-INCLUDE_ASM(const s32, "model/mdlManager", mdlApplyQueuedGroupPackets);
+struct EffNodeDescriptor;
+extern u16 mdlGetRecordPartIndex(MdlRecord *record);
+extern DevRequest *mdlCreateBufferedPartRequest(u32 count);
+extern void mdlAddBillboardPart(DevRequest *list, void *descriptor);
+extern void mdlAddEffectPart(DevRequest *list, struct EffNodeDescriptor *descriptor);
+
+/* Generic transports preserve the queue/payload alias relationship; see
+ * docs/idioms.md, "Pointer transport aliasing: queued model packets". */
+PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) {
+    MdlLoadPayload setup;
+    DevRequest *parts;
+    s32 count;
+
+    memset(&setup, 0, sizeof(setup));
+    parts = NULL;
+    while (work != NULL) {
+        switch (((PacHead *)work->packet)->command) {
+        case 1:
+            switch (((PacHead *)work->packet)->tag) {
+            case 0x30424950:
+                setup.partInfo = work->dataCursor;
+                setup.resourceHandle = (s32)work->resourceHandle;
+                count = mdlGetRecordPartIndex((MdlRecord *)work->dataCursor);
+                if (count > 0) {
+                    parts = mdlCreateBufferedPartRequest(count);
+                    setup.partList = parts;
+                }
+                break;
+            case 0x413250:
+                mdlAddBillboardPart(parts, work->dataCursor);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)work->resourceHandle);
+                break;
+            case 0x503344:
+                mdlAddEffectPart(parts, (struct EffNodeDescriptor *)work->dataCursor);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)work->resourceHandle);
+                break;
+            }
+            break;
+        case 9:
+            setup.resourceList = (DevRequest *)work->resourceHandle;
+            break;
+        case 6:
+            if (setup.requestAllocation == NULL) {
+                setup.requestAllocation = (struct SdfMemBlock *)work->resourceHandle;
+                setup.itemList = (struct SdfItemListRef *)work->dataCursor;
+            }
+            break;
+        case 8:
+            if (setup.motionResource == NULL) {
+                setup.motionResource = (struct SdfMemBlock *)work->resourceHandle;
+                setup.motionTable = (MotionTable *)work->dataCursor;
+            }
+            break;
+        }
+        work = sdfPacRemovePacket(work);
+    }
+    mdlApplyGroupSetup(group, id, mode, &setup);
+    return work;
+}
+
 
 extern PacWork *func_00233280(PacWork *, s32, s32, s32);
-INCLUDE_ASM(const s32, "model/mdlManager", func_00233280);
+typedef struct MdlPartTagRecord {
+    u32 tag;
+    u8 state;
+    u8 pad05[3];
+} MdlPartTagRecord;
+extern u32 mdlGetViewerRecordPayloadWord(MdlRecord *record);
+extern u16 func_00233F60(MdlRecord *record);
+extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfMemBlock *allocation, s32 size);
+
+PacWork *func_00233280(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+    MdlLoadPayload groupSetup;
+    MdlPartTagRecord unknownPart;
+    PacHead *packetHeader;
+    MdlRecord *record;
+    MdlRecord *slotRecord;
+    s32 partCount;
+    DevRequest *partList;
+    s32 slotCount;
+    s32 objectSize;
+    s32 remainingParts;
+    s32 payloadValue;
+
+    if (mdlIsInnerSentinel(packetWork) == 0) {
+        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
+    }
+    record = (MdlRecord *)packetWork->dataCursor;
+    payloadValue = mdlGetViewerRecordPayloadWord(record);
+    if (payloadValue <= 0) {
+        return mdlApplyQueuedGroupPackets(packetWork, group, id, mode);
+    }
+
+    memset(&groupSetup, 0, sizeof(groupSetup));
+    groupSetup.partInfo = record;
+    groupSetup.resourceHandle = (s32)packetWork->resourceHandle;
+    packetWork = sdfPacRemovePacket(packetWork);
+    partCount = mdlGetRecordPartIndex(record);
+    remainingParts = partCount;
+    if (partCount > 0) {
+        partList = mdlCreateBufferedPartRequest(partCount);
+        groupSetup.partList = partList;
+    }
+    if (remainingParts > 0) {
+        do {
+            switch (((PacHead *)packetWork->packet)->tag) {
+            case 0x413250:
+                mdlAddBillboardPart(partList, packetWork->dataCursor);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
+                break;
+            case 0x503344:
+                mdlAddEffectPart(partList, (struct EffNodeDescriptor *)packetWork->dataCursor);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)packetWork->resourceHandle);
+                break;
+            case 0x555049:
+                objectSize = ((PacHead *)packetWork->packet)->decodedSize;
+                if (objectSize == 0) {
+                    objectSize = ((PacHead *)packetWork->packet)->payloadSize
+                               + (((PacHead *)packetWork->packet)->flags & 0xF0) - 0x10;
+                }
+                mdlAppendObjectPart(partList, (s32)packetWork->dataCursor,
+                                    (struct SdfMemBlock *)packetWork->resourceHandle, objectSize);
+                break;
+            default:
+                /* Retail retains these metadata stores: DDS1 2188E0/2188E4,
+                 * DDS2 2333F8/2333FC. */
+                packetHeader = (PacHead *)packetWork->packet;
+                unknownPart.tag = packetHeader->tag;
+                unknownPart.state = 0;
+                break;
+            }
+            packetWork = sdfPacRemovePacket(packetWork);
+            remainingParts--;
+        } while (remainingParts != 0);
+    }
+
+    if (((PacHead *)packetWork->packet)->command == 9) {
+        groupSetup.resourceList = (DevRequest *)packetWork->resourceHandle;
+        packetWork = sdfPacRemovePacket(packetWork);
+    }
+    groupSetup.requestAllocation = (struct SdfMemBlock *)packetWork->resourceHandle;
+    groupSetup.itemList = (struct SdfItemListRef *)packetWork->dataCursor;
+    packetWork = sdfPacRemovePacket(packetWork);
+    mdlApplyGroupSetup(group, id, mode, &groupSetup);
+
+    slotCount = func_00233F60(record);
+    while (slotCount > 0) {
+        slotRecord = (MdlRecord *)(packetWork->dataCursor - (u32)&((MdlRecord *)0)->tail);
+        mdlConfigureGroupedEntitySlot(group, id, mode, (s16)slotRecord->parameter.word,
+                                      slotRecord->payload.stream.selectorA,
+                                      slotRecord->payload.stream.selectorB,
+                                      (MotionTable *)packetWork->dataCursor,
+                                      (struct SdfMemBlock *)packetWork->resourceHandle);
+        packetWork = sdfPacRemovePacket(packetWork);
+        slotCount--;
+    }
+    return packetWork;
+}
+
 
 /* Completion job created by mdlRequestLoadWithCallback and run by mdlCompleteGroupedJobAndNotify. */
 typedef struct MdlDoneJob {

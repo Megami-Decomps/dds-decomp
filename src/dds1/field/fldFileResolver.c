@@ -1284,7 +1284,7 @@ void fldFreeDisplayObjects(void) {
 
         if (work != NULL) {
             do {
-                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)work->resourceHandle);
                 work = work->next;
             } while (work != NULL);
         }
@@ -1478,34 +1478,34 @@ void fldLoadAreaPackedResources(void) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldCopyInfoTable(work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
-                    (struct SdfMemBlock *)(u32)work->resourceHandle);
+                    (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_NPC_PALETTE:
                 fldSetNpcPalette(work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
-                    (struct SdfMemBlock *)(u32)work->resourceHandle);
+                    (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
                 fldUploadSkyBuffer(work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
-                    (struct SdfMemBlock *)(u32)work->resourceHandle);
+                    (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
                 fldCopyActorWaypointTable(work->dataCursor);
                 sdfQueueGeneralAllocationRelease(
-                    (struct SdfMemBlock *)(u32)work->resourceHandle);
+                    (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_RETAINED_COPY:
                 fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
-                    sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)work->resourceHandle));
+                    sdfMemoryGetBlockSize((struct SdfMemBlock *)work->resourceHandle));
                 memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
-                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)work->resourceHandle),
-                       sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)work->resourceHandle));
+                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)work->resourceHandle),
+                       sdfMemoryGetBlockSize((struct SdfMemBlock *)work->resourceHandle));
                 sdfQueueGeneralAllocationRelease(
-                    (struct SdfMemBlock *)(u32)work->resourceHandle);
+                    (struct SdfMemBlock *)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, (s32)work->resourceHandle);
                 break;
             }
         }
@@ -1837,7 +1837,7 @@ void fldReleaseFieldResources(void) {
         if (work != 0) {
             do {
                 if (i > 0) {
-                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)work->resourceHandle);
+                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)work->resourceHandle);
                 }
                 work = work->next;
                 i++;

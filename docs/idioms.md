@@ -2187,7 +2187,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     This ordered access model applies to the console packet pipeline; DMA
     consumption alone does not make every packet or CPU descriptor volatile.
     Preserve the earlier Vesper/Claude trials and Amber's console owner review.
-    The 304-byte console background builder `func_002E42F8` closes under the
+    The 304-byte console background builder `sdfDevConsAppendBackgroundSprite` closes under the
     same ordered access model. Emit the completed seven-doubleword packet,
     reserve `currentTag = packet + 0x40`, then derive `writeCursor` from that
     tag plus 16 bytes. Publishing both independent cursors before the payload
@@ -2203,8 +2203,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     starts is required for the owner contract. Moving reservation after the
     complete setup closes the observed 15-word register-allocation residual;
     mimicking the native interleaved stores had left 18 words different.
-    The 424-byte glyph renderers DDS2 `func_0033D2D8` and DDS1
-    `func_002E4428` keep their packed row
+    The 424-byte `sdfDevConsDrawGlyphGrid` renderers in DDS2 and DDS1 keep their packed row
     step as a signed word. A separately maintained bottom coordinate, initialized
     at each row, lets GCSE partial redundancy elimination hoist the step's
     signed 64-bit conversion before the outer loop; it then spills with SD/LD
@@ -2431,7 +2430,7 @@ retail's `lwc1, abs.s, lwc1` order). Check the `prio` column before trying varia
   registers in order of local-alloc priority, and priority falls with live
   length: the constant with the longest live range gets the highest register.
   Writing its store first in the first block and last in the last block makes it
-  `$22` instead of `$18` (DDS1 `func_0014F860`).
+  `$22` instead of `$18` (DDS1 `effSubmitFieldBlendStateTask`).
 - `xori $r,$r,0` ahead of `movz/movn` is cc1's `x != y` with `y` folded to 0 only
   after expansion. `(m & 0x2000) != 0`, `?:`, `if`, `== 0`, u64/u16/s16 params
   never produce it (15 scratch spellings, `btlLowestSetPairIndex` tail).
@@ -8857,4 +8856,48 @@ an address-valued result intermediate nor declaration-order steering.
 Whole-unit gates are DDS1 **83 match, 0 differ** and DDS2 **47 match,
 0 differ**, with all earlier C exact and no safety rows. Both retail SHA-1
 checks pass in a sandbox full link; compiler settings remain `-O2 -G8`.
+
+
+## Pointer transport aliasing: queued model packets
+
+The model packet consumers are `mdlApplyQueuedGroupPackets` (DDS1 `0x002185B0`,
+DDS2 `0x002330C8`, 440 bytes) and the following counted consumers
+`func_00218768` / `func_00233280` (624 bytes).
+
+**Property P:** the resource-pointer load must not commute past the preceding
+borrowed-record-pointer store, without overconstraining the later allocation and
+cursor accesses. The native counted consumers store the borrowed record at DDS1
+`0x002187F0` / DDS2 `0x00233308`, then load the queued resource at `0x002187F4` /
+`0x0023330C`. The earlier helpers show the same ordering at `0x00218678`–
+`0x0021867C` / `0x00233190`–`0x00233194`.
+
+**Deciding pass:** ee-gcc 2.96 `sched1`, readiness through the memory dependency.
+With a numeric queue resource and a typed `MdlRecord *` transport, the initial
+RTL has disjoint alias sets 3 and 17. The resource load (uid154, priority 5) is
+ready before the borrowed-record store (uid151, priority 3). Changing only the
+queue resource to `void *` gives alias set 31 versus 17 and leaves the same four
+counted-consumer words and thirteen helper words different. Giving both actual
+generic transports their truthful `void *` type puts both accesses in alias set
+31. The store has priority 7 and the load is not ready until it completes; the
+argument copy (uid167) precedes them. Hooked and unhooked cc1 output is identical.
+
+This is a type recovery, not a scheduling cast or a global aliasing relaxation.
+`PacWork.resourceHandle` is populated with allocation pointers or acquired
+texture/list pointers; consumers choose the concrete pointer type from the
+packet tag, with no arithmetic on this field. `MdlLoadPayload.partInfo` merely
+transports borrowed record data; `mdlApplyGroupSetup` installs it in the existing
+typed `BattleGroupNode.partInfo` owner. `PacWork` remains 0x10 bytes and
+`MdlLoadPayload` remains 0x20 bytes. Casts to signed address words remain only at
+existing integer-address API/storage boundaries. The distinct later pointer
+fields retain their types and native load order.
+
+The earlier helper must be a real same-TU C definition: keeping its asm fallback
+while compiling the counted consumer changes a branch-likely instruction. The
+API declarations for record access and part creation follow their actual
+providers, not implicit return-type guesses.
+
+The default-tag branch also retains two apparently unused metadata stores.
+These are present in retail, at DDS1 `0x002188E0` / `0x002188E4` and DDS2
+`0x002333F8` / `0x002333FC`; the local describes their native word/byte layout,
+not invented padding or stores for register allocation.
 
