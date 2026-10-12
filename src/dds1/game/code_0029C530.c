@@ -1586,7 +1586,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceFrameInstances);
 
 extern u8 D_0037E0E0[];
 
-extern void func_002A3E10(EffTrackSet *, Matrix4 *);
+extern void effDrawTrackSet(EffTrackSet *, Matrix4 *);
 
 typedef struct EffMeshOutput {
     u32 field_00;       // 0x00
@@ -1646,7 +1646,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetCellIndices(u8 *work) {
@@ -1726,7 +1726,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetParticleIndices(u8 *work) {
@@ -1806,7 +1806,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void effClearAnimatedFrames(u8 *work) {
@@ -1944,7 +1944,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetEmitterIndices(u8 *work) {
@@ -2070,7 +2070,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void effClearStripFrames(u8 *work) {
@@ -2199,7 +2199,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetTrailIndices(u8 *work) {
@@ -2280,7 +2280,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetQuadIndices(u8 *work) {
@@ -2406,7 +2406,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002A3E10(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 
@@ -2703,7 +2703,8 @@ extern u32 D_0037EA70[16];
 extern SdfTex *func_0029C048(void *, RefObj *);
 struct SdfAsset;
 
-void func_002A3E10(EffTrackSet *track, Matrix4 *matrix) {
+/* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
+void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -3266,7 +3267,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002A3E10(out, (Matrix4 *)mtx);
+        effDrawTrackSet(out, (Matrix4 *)mtx);
     }
 }
 
@@ -5586,7 +5587,7 @@ extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
-void func_002ACA40(EffClassWork *work) {
+void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
     EffBillColumnConfig *config = (EffBillColumnConfig *)work->payload;
     EffBillEmitterCommon *common = &config->common;
     u32 frameLimit = work->frame;
@@ -7000,7 +7001,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
             EffTrackSet *references = record->references;
 
             references->color = color;
-            func_002A3E10(references, &matrix);
+            effDrawTrackSet(references, &matrix);
         }
     }
 }
