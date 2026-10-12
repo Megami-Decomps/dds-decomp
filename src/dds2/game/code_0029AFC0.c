@@ -142,7 +142,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B378(KwlnTask *request) {
+s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
@@ -201,7 +201,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     return 0;
 }
 
-s32 func_0029B600(KwlnTask *request) {
+s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuDrawItemPanelBackdrop(context);
@@ -209,7 +209,7 @@ s32 func_0029B600(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B658(KwlnTask *request) {
+s32 mnuAdvanceStatAssignmentPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
@@ -267,7 +267,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B868(KwlnTask *request) {
+s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();

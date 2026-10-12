@@ -228,7 +228,7 @@ extern void itfMesClearFlags();
 extern void brsTaskAllowUpdate();
 extern void evtBeginSolarOverlayFadeOut();
 extern void btlClearPartyRecordStatusBits();
-extern s32 func_0029D000(DatPartyRecord *);
+extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 extern void datAdjustCurrentHp();
 
 extern s32 brsIsPrimaryPanelUpdateReady();

@@ -136,7 +136,7 @@ s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 func_00264238(KwlnTask *input) {
+s32 mnuAdvanceItemPanelAfterRequest(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
     func_0024DD78();
@@ -195,7 +195,7 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     return 0;
 }
 
-s32 func_00264498(KwlnTask *request) {
+s32 mnuDrawItemPanelAfterStatAssignment(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuDrawItemPanelBackdrop(context);
@@ -203,7 +203,7 @@ s32 func_00264498(KwlnTask *request) {
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 func_002644F0(KwlnTask *input) {
+s32 mnuAdvanceStatAssignmentPanel(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
     func_0024DD78();
@@ -263,7 +263,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 func_002646F8(KwlnTask *input) {
+s32 mnuAdvanceInactiveItemPanel(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
 
     func_0024DD78();
@@ -542,7 +542,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
+void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
     FrFontGlyph *glyph;
 

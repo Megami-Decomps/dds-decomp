@@ -234,16 +234,16 @@ void func_0029C800(void) {
 void func_0029C808(void) {
 }
 
-void func_0029C810(BrsSkillPackageWork *work) {
+void brsStepAnimDecay(BrsSkillPackageWork *work) {
     work->fadeProgress = (s32)((f32)work->fadeProgress / 1.19999998f);
 }
 
 /* Getter/clear pair for one word at byte offset 0xB6E0 of the work block. */
-s32 func_0029C848(BrsSkillPackageWork *work) {
+s32 mnuGetTitleState(BrsSkillPackageWork *work) {
     return work->fadeProgress;
 }
 
-void func_0029C860(BrsSkillPackageWork *work) {
+void mnuClearTitleState(BrsSkillPackageWork *work) {
     work->fadeProgress = 0;
 }
 
@@ -256,7 +256,7 @@ extern s32 func_0019F6C8();
 extern s32 func_0035C860();
 
 /* Draw the three reward icon rows: name, label shadow, value text and its shadow. */
-void func_0029C880(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 surface, BrsSkillPackageWork *work) {
+void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *res, s32 surface, BrsSkillPackageWork *work) {
     char name[32];
     u32 valueColor[4];
     u32 labelColor[4];
@@ -324,7 +324,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
 
 extern s32 mdlFlagTest();
 
-void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
+void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, s32 arg5, BrsSkillPackageWork *work) {
     char name[32];
     u32 color[4];
     s32 sprite;

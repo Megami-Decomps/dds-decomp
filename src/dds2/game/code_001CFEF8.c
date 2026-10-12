@@ -1069,7 +1069,7 @@ extern void brsTaskAllowUpdate();
 
 extern void btlClearPartyRecordStatusBits();
 
-extern s32 func_0029D000(DatPartyRecord *);
+extern s32 mnuIsTitleEntryAvailable(DatPartyRecord *);
 
 extern void datAdjustCurrentHp();
 
@@ -1090,7 +1090,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
                 if (scene->eventReady == 1) {
                     if (datGameState->party[i].huntExp != 0 || scene->unk2F8 != 0) {
                         if (!(datGameState->party[i].status & 0x40)) {
-                            if (func_0029D000(&datGameState->party[i]) == 0) {
+                            if (mnuIsTitleEntryAvailable(&datGameState->party[i]) == 0) {
                                 datAdjustCurrentHp(&datGameState->party[i], (s32)((f32)datGameState->party[i].maxHp * scale));
                             }
                         }

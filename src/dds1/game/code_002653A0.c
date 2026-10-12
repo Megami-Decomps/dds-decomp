@@ -25,7 +25,7 @@ extern s32 ptyHasSkill(DatPartyRecord *, s32);
 extern struct { s32 v[6]; } D_0036D4B0;
 extern u32 uiBlendColors(u32, u32, s32);
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
-extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
+extern void brsDrawMaccaRewardTotal(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
@@ -34,7 +34,7 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     u32 color = uiBlendColors(0x80808080, 0x80808000, 0x100 - work->fadeProgress);
 
     itfDrawCountText(D_0036D4B0.v[0], D_0036D4B0.v[1] + rowOffset, 0, color, res, 0x53);
-    mnuQueueRightAlignedFormattedInfoText(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
+    brsDrawMaccaRewardTotal(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
     brsDrawRewardEntryRows(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
 }
 

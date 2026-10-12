@@ -29,9 +29,9 @@ extern struct { s32 v[6]; } D_003D6500;
 
 extern void mnuCampDrawMenuIconLayer(s32, s32, s32, u32, const BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
-extern void func_0029CB70(s32, s32, s32, u32, const BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void brsDrawMaccaRewardTotal(s32, s32, s32, u32, const BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
-extern void func_0029C880(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
 
 extern void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context);
 
@@ -40,8 +40,8 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     u32 color = uiBlendColors(0xFFF06480, 0xFFF06400, 0x100 - work->fadeProgress);
 
     mnuCampDrawMenuIconLayer(D_003D6500.v[0], D_003D6500.v[1], 0, color, res, 0x53, work);
-    func_0029CB70(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
-    func_0029C880(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
+    brsDrawMaccaRewardTotal(D_003D6500.v[2], D_003D6500.v[3], 0, color, res, 0x53, work);
+    brsDrawRewardEntryRows(D_003D6500.v[4], D_003D6500.v[5], 0, color, res, 0x53, work);
 }
 
 void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
@@ -55,10 +55,10 @@ void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *work) {
     mnuTitleDrawFadeMenuEntries(work);
 }
 
-extern void func_0029C810(BrsSkillPackageWork *);
+extern void brsStepAnimDecay(BrsSkillPackageWork *);
 
 void brsDecaySharedAnimCounter(BrsSkillPackageWork *work) {
-    func_0029C810(work);
+    brsStepAnimDecay(work);
 }
 
 extern u8 brsLevelStepThresholds[];
@@ -128,7 +128,7 @@ extern BrsProfileApRecord *D_00435E18;
 extern s32 func_001514A8(void);
 extern s16 func_001514B8(void);
 
-s32 func_0029CF00(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
+s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
     s32 profileIndex;
 
@@ -168,7 +168,7 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     return result;
 }
 
-s32 func_0029D000(DatPartyRecord *unit) {
+s32 mnuIsTitleEntryAvailable(DatPartyRecord *unit) {
     return 0;
 }
 
@@ -190,12 +190,12 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
             ((BrsRewardValues *)(values +
                 batch->count * sizeof(BrsRewardRow)))->partySlot = i;
             profile = ptyGetCurrentProfileRecord(unit);
-            ap = func_0029CF00(unit, summary->totalAp, summary->unitApBonus[i]);
+            ap = brsCalcApGain(unit, summary->totalAp, summary->unitApBonus[i]);
             exp = brsCalcExpGain(unit, summary->totalExp);
             if (unit->profileId == 0) {
                 ap = 0;
             }
-            if (func_0029D000(unit) != 0) {
+            if (mnuIsTitleEntryAvailable(unit) != 0) {
                 ap = 0;
             }
             {
@@ -415,7 +415,7 @@ u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *re
 }
 
 
-void func_0029DA98(BrsActiveProgressList *output) {
+void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
     u32 *count = &output->count;
     s32 i;
 
