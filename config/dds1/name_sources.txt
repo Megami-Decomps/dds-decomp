@@ -1186,6 +1186,7 @@
 0x0014EFB8	fldCmdGetRowValue	inferred	returns fldGetRowValue of first script parameter [names_R_FuncNames2.tsv]
 0x0014F098	fldCmdQuerySceneValue	inferred	DDS2 00156B58 twin; passes first script integer through func_00140780 then returns result [names_R_FuncNames2.tsv]
 0x0014F0C8	fldCmdUpdateTaskRecordScene	inferred	DDS2 00156B88 twin; derives record scene from task key unless global condition, passes to updater [names_R_FuncNames2.tsv]
+0x0014F1C0	fldCmdStartSelectedActorTask	inferred	src/dds1/game/code_0014F098.c; calls fldStartSelectedActorTask and returns script-command success; paired 00156C98.
 0x0014F1E0	fldCmdStartSceneBgm	inferred	DDS2 00156CB8 twin; stores script music id then calls fldStartSceneBgm [names_R_FuncNames2.tsv]
 0x0014F210	fldCmdStartSceneBgmAlternate	inferred	DDS2 00156CE8 twin; stores script music id then calls alternate scene music starter [names_R_FuncNames2.tsv]
 0x0014F240	fldCmdStopCurrentBgm	inferred	DDS2 00156D18 twin; script wrapper for func_00144EE0 audio stop [names_R_FuncNames2.tsv]
