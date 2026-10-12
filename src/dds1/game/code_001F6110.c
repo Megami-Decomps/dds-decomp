@@ -1464,7 +1464,8 @@ u32 btlCmdRememberUpperEntryCondition(void) {
     return 1;
 }
 
-u32 func_001F9070(void) {
+/* Remember the actor entry-code-10 gate result; failure clears only its selection flag. */
+u32 btlCmdRememberActorActionGate(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, 0x4800000)) {
         scrSetIntegerReturnValue(1);
@@ -1537,7 +1538,8 @@ u32 btlCmdReturnActorEligibility(void) {
     return 1;
 }
 
-u32 func_001F9328(void) {
+/* Report whether active-enemy and cumulative-spawn limits permit another enemy. */
+u32 btlCmdReportEnemySpawnCapacity(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();
@@ -1630,7 +1632,8 @@ u32 btlCmdRememberUpperActionAvailability(void) {
     }
     return 1;
 }
-u32 func_001F9750(void) {
+/* Remember the actor entry-code condition choice only when its query succeeds. */
+u32 btlCmdRememberActorEntryCondition(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xAC00000)) {
         scrSetIntegerReturnValue(1);
@@ -1760,7 +1763,8 @@ u32 btlCmdReturnEnemyActionPresence(void) {
     return 1;
 }
 
-u32 func_001F9D48(void) {
+/* Remember a choice matching an eligible enemy's selected-action element. */
+u32 btlCmdRememberUpperSelectedElement(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0x9800000)) {
         scrSetIntegerReturnValue(1);
@@ -1822,7 +1826,8 @@ u32 btlCmdReturnPartyHeldFlagCheck(void) {
     return 1;
 }
 
-u32 func_001F9F90(void) {
+/* Remember actor record bit 0x2000 when status bit 0x200 is clear. */
+u32 btlCmdRememberNonLowerStatFlag(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, 0xB000000)) {
         scrSetIntegerReturnValue(1);
@@ -2273,7 +2278,8 @@ void func_001FADB0(void) {
 void func_001FADB8(void) {
 }
 
-u32 func_001FADC0(void) {
+/* EFFECT EDIT menu callback requests the editor through the shared debug flags. */
+u32 btlRequestEffectEditor(void) {
     D_003BB6C8 = D_003BB6C8 | 0x2000000;
     return 0;
 }
@@ -2311,7 +2317,8 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FAE78);
 
-void func_001FB050(void) {
+/* Clear bit 0x80 in both battle debug-menu descriptors. */
+void btlResetBattleDebugMenuFlags(void) {
     D_00360348[4] &= ~0x80;
     D_0035FFE0[4] &= ~0x80;
 }
@@ -2338,10 +2345,12 @@ void btlBossDebugPrintf(const char *format, ...) {
 void btlBossDebugPrintfN(s32 arg0, s32 arg1, s32 arg2, s32 arg3, ...) {
 }
 
-void func_001FB130(s32 x, s32 y, s32 style, const char *text) {
+/* Retail discards positioned debug text; name-editor callers retain this ABI. */
+void btlDebugDrawText(s32 x, s32 y, s32 style, const char *text) {
 }
 
-void func_001FB138(s32 x, s32 y, s32 width, s32 height) {
+/* Retail discards debug rectangles; name-editor callers pass position and size. */
+void btlDebugDrawRectangle(s32 x, s32 y, s32 width, s32 height) {
 }
 
 void func_001FB140(void) {
