@@ -118,7 +118,7 @@ extern s32 btlCountTasksByKind(u16);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern u32 func_001AC360(u64, BtlIndexList *, u64);
+extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
@@ -1112,7 +1112,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     }
     flaggedTargetCount = 0;
     targetList = btlAllocateIndexList(0xD);
-    func_001AC360((s32)actionTask, targetList, 0);
+    btlSelectCommandTargetPolicy(actionTask, targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
     if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {

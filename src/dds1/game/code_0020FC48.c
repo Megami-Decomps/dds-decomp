@@ -100,7 +100,7 @@ extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-extern u32 func_001A3360(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -875,7 +875,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     }
     flaggedTargetCount = 0;
     targetList = btlAllocateIndexList(0xD);
-    func_001A3360(actionTask, targetList, 0);
+    btlSelectCommandTargetPolicy(actionTask, targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
     /* Preserve this byte-sized prefix check separately from commandRecord. */
     if (datCommandRecords[commandId].flags & 8) {

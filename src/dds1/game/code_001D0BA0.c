@@ -48,7 +48,7 @@ extern s32 fileTestSavedSlotFlags(u32);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
-extern u32 func_001A3360(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
@@ -1908,7 +1908,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
         unit->partyRecord.unk18C = work->phase;
         unit->partyRecord.unk190 = work->skillId;
         list = btlAllocateIndexList(13);
-        kind = func_001A3360(task, list, 0);
+        kind = btlSelectCommandTargetPolicy(task, list, 0);
         reason = btlGetCommandTargetEligibility(list, work->skillId);
         if (reason == 5 || reason == 8) {
             work->skillId = 0;
@@ -1916,7 +1916,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
             unit->partyRecord.unk190 = work->skillId;
             unit->partyRecord.unk18C = work->phase;
             btlClearIndexList(list);
-            kind = func_001A3360(task, list, 0);
+            kind = btlSelectCommandTargetPolicy(task, list, 0);
         }
         count = btlGetIndexListCount(list);
         sides = 0;
@@ -1948,7 +1948,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
         work->skillId = 0;
         work->phase = 1;
         list = btlAllocateIndexList(13);
-        kind = func_001A3360(task, list, 0);
+        kind = btlSelectCommandTargetPolicy(task, list, 0);
         btlGetIndexListCount(list);
         btlClearIndexList(work->indices);
         switch (kind) {
