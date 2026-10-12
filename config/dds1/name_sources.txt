@@ -2250,6 +2250,7 @@
 0x00189220	effCreateMagatuhiValueWork	inferred	allocates and initializes the indexed value-work owner and slots
 0x001893C0	effMagatuhiReleaseResource	inferred	Releases the resource at work offset 0x34.
 0x00189BA8	effMagatuhiFillColorTable	inferred	count04 effBlendColor samples from colorA to colorB [names_M61_EffVu.tsv]
+0x00189C80	effMagatuhiResetValueHistorySlot	inferred	Forwards the indexed value-history slot to effResetMagatuhiValueSlot; called by Magatuhi particle reset and respawn paths; DDS2 twin 0x001918B8.
 0x00189C98	effMagatuhiCreateFirst	inferred	first-family create: 0x30 particles before work [names_M61_EffVu.tsv]
 0x00189E60	effMagatuhiReleaseMathOwnerAndBuffer	inferred	Releases math resource, owner and allocated buffer held in wide work. [names_reviewed6.tsv]
 0x00189E98	effMagatuhiInitWideFirstParticle	inferred	Initializes the indexed WideFirst particle and its curve/value slots on the age-zero updater path; paired DDS2 twin 0x00191AD0.
@@ -2263,7 +2264,7 @@
 0x0018ADD8	effMagatuhiInitializeInterpolatedHistory	inferred	confidence=high; src/dds1/effect/effMagatuhi.c:func_0018ADD8; Randomizes grouped start delays, samples two scaled positions and fills value-work history by interpolation. [names_qp9.tsv]
 0x0018AFE8	effMagatuhiCreateRingWork	inferred	readability/matching review (QP16)
 0x0018B1D0	effMagatuhiReleaseOwnerAndBuffer	inferred	Releases the first managed resource and its owned buffer. [names_reviewed6.tsv]
-0x0018B200	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then func_00189C80/effMagatuhiSetValue [names_M61_EffVu.tsv]
+0x0018B200	effMagatuhiInitParticleA	inferred	randomizes a 0x18 particle then effMagatuhiResetValueHistorySlot/effMagatuhiSetValue [names_M61_EffVu.tsv]
 0x0018B348	effMagatuhiUpdateRingParticles	inferred	Updates ring particle positions, fade and respawn state; the Magatuhi operation row at 0x00355750 stores this function at +0x14; paired DDS2 twin 0x00192F80.
 0x0018B600	effMagatuhiSetRingOrigin	inferred	readability/matching review (QP16)
 0x0018B618	effMagatuhiSetRingColor	inferred	readability/matching review (QP16)

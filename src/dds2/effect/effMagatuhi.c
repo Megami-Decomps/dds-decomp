@@ -259,7 +259,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 
-void func_001918B8(EffMagatuhiValueWork *valueWork, s32 index) {
+void effMagatuhiResetValueHistorySlot(EffMagatuhiValueWork *valueWork, s32 index) {
     effResetMagatuhiValueSlot(valueWork, index);
 }
 
@@ -351,7 +351,7 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -614,7 +614,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->controlPoints[3][0] = point[0];
     slot->controlPoints[3][1] = point[1];
     slot->controlPoints[3][2] = point[2];
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -825,7 +825,7 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
     blend = work->head.endJitter;
     t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -1076,7 +1076,7 @@ void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
     blend = work->head.endJitter;
     t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -1317,7 +1317,7 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     particle->liftStep = work->head.initialLift *
         (effMiscRandUnitFloat(effDefaultRandomState) * work->head.initialLiftRandomness +
          (1.0f - work->head.initialLiftRandomness));
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
