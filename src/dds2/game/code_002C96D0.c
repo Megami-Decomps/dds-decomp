@@ -2924,7 +2924,28 @@ void fileSetMenuValueAndInitializeFlags(u32 value) {
     fileLoadMenuState.unk4 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CF978);
+/* Keep the input word separate from the per-mode result; see docs/idioms.md,
+ * "Trace-justified result selection: packed byte clamp". */
+u32 func_002CF978(u32 color, s32 limit, s8 alpha) {
+    u32 result;
+    s32 component = color & 0xFF;
+
+    if (alpha == 0) {
+        if (limit >= component) {
+            result = color;
+        } else {
+            result = (color & 0xFFFFFF00) | limit;
+        }
+    } else {
+        component = color >> 24;
+        if (limit >= component) {
+            result = color;
+        } else {
+            result = (color & 0xFFFFFF) | ((u32)limit << 24);
+        }
+    }
+    return result;
+}
 
 void fileCursorStepUp(void) {
     fileLoadMenuState.unk4 += 1;
