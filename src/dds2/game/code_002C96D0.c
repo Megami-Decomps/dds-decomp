@@ -2684,7 +2684,7 @@ void func_002CE208(s32 mode) {
 
     func_001004A0();
     request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    func_002C81D0((struct FileRequest *)request);
+    fileWaitForRequestReady((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {

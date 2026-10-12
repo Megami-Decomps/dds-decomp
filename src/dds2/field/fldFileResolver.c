@@ -1541,7 +1541,7 @@ void fldLoadAreaPackedResources(void) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
-        func_002C81D0(fldAreaPackedArchive);
+        fileWaitForRequestReady(fldAreaPackedArchive);
         request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
@@ -1699,7 +1699,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
             func_0035C860(path, D_004130D8, directory, area, room);
             request = fileQueuePlainDispatchRequest(path);
             D_00435FC8 = request;
-            func_002C81D0(request);
+            fileWaitForRequestReady(request);
         }
         index = 0;
         D_00435FA4 = NULL;

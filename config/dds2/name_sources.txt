@@ -4909,6 +4909,7 @@
 0x002C8118	fileGetResourceSize	inferred	Byte-identical DDS1 counterpart: Returns the file work's loaded resource size used by sound buffer transfer.
 0x002C8128	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x002C8168	fileRequestIsReady	inferred	Returns true only when the file request has a nonzero marker at offset 0x68 and its status byte is 6; field area-loading callers use it as their readiness test.
+0x002C81D0	fileWaitForRequestReady	inferred	src/dds2/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 00288C50.
 0x002C8238	fileWindowSlotCreate	inferred	Allocates a window slot and initializes its ranges; DDS1 twin. [names_qp9.tsv]
 0x002C82C8	fileQueueWindowSlotRequest	inferred	confidence=high; matched-C; src/dds2/file/fileManager.c:302:func_002C82C8; Creates a file-window request retaining the two supplied slot values, with no completion callbacks.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002C82E8	fileQueuePendingRequestInFreeSlot	inferred	Semaphore guards a free-slot check and moves a queued request from state three to four. [names_reviewed21.tsv]

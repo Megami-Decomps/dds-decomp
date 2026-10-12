@@ -1372,7 +1372,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, const char *reques
                                                                 (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_00288C50((struct FileRequest *)requestSlot);
+        fileWaitForRequestReady((struct FileRequest *)requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

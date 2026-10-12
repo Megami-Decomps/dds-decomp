@@ -2654,7 +2654,7 @@ void fldParseMixLb(void) {
 
     index = 0;
     lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    func_00288C50((struct FileRequest *)lb);
+    fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:

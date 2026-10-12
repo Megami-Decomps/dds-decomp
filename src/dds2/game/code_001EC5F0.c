@@ -5585,7 +5585,7 @@ void sndLoadSysEffLb(void) {
     s32 node;
     u32 i;
 
-    func_002C81D0((struct FileRequest *)archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
     node = *(s32 *)(archive + 0x60);
     i = 0;
