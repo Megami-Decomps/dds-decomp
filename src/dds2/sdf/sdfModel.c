@@ -29,11 +29,6 @@ typedef struct {
 } SdfPacket; /* 0x10 */
 
 
-extern void sdfFreeNodeLists(SdfDrawNode *node);
-
-extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
-
-
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 
 extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);

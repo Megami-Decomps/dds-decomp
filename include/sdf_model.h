@@ -63,6 +63,12 @@ typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkT
 SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef);
+/* The draw node owns the lazily allocated workspace; callers receive a borrowed
+ * pointer to it, and must not release it independently. */
+void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root);
+/* Releases each allocation in both free-node lists. The list heads remain
+ * stored on root and must not be traversed again after this call. */
+void sdfFreeNodeLists(SdfDrawNode *root);
 /* Refresh the current per-node transforms from the model's selected frame. */
 void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 

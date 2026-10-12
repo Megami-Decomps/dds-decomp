@@ -13,6 +13,7 @@
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -161,7 +162,6 @@ typedef struct ConsNode {
 
 extern ConsNode *D_00438AB0;
 
-extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 
 extern u8 D_0037B080[];
 
