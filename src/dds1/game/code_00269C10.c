@@ -690,7 +690,7 @@ void mnuReleaseSoundBufferLocked(void) {
 }
 
 void func_0026AEB0(void) {
-    func_0026BFC8();
+    mnuLoadMovieMenuResourceSlots();
 }
 
 INCLUDE_RODATA(const s32, "game/code_00269C10", D_003AFD48);

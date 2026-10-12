@@ -64,7 +64,7 @@ extern struct MenuList *mnuCreateListState(u32, u32, s32);
 
 
 
-extern void func_002A5A78();
+extern void mnuDrawMovieMenuListItem();
 
 void mnuRecreateMenuSelectionList(void) {
     s32 i;
@@ -74,7 +74,7 @@ void mnuRecreateMenuSelectionList(void) {
     }
     node = mnuCreateListState(0, 3, 0);
     ((SpriteMenuState *)mnuMovieMenuState)->list = node;
-    ((SpriteMenuList *)node)->callback = func_002A5A78;
+    ((SpriteMenuList *)node)->callback = mnuDrawMovieMenuListItem;
     for (i = 0; i < 3; i++) {
         mnuListAppendNode(((SpriteMenuState *)mnuMovieMenuState)->list, 0);
     }
@@ -84,7 +84,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(((SpriteMenuState *)mnuMovieMenuState)->list);
 }
 
-u32 func_002A3C78(void) {
+u32 mnuGetMovieMenuSelectionIndex(void) {
     return *((SpriteMenuList *)((SpriteMenuState *)mnuMovieMenuState)->list)->selected;
 }
 
@@ -117,7 +117,7 @@ extern u8 D_003E3760[];
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 
-void func_002A3D70(void) {
+void mnuLoadMovieMenuResourceSlots(void) {
     u32 *state = (u32 *)mnuMovieMenuState;
     u32 resource;
 
@@ -150,7 +150,7 @@ void mnuReleaseMenuResourceSlots(void) {
     }
 }
 
-void func_002A3E38(s32 mode) {
+void mnuEnsureMovieMenuSpriteHandle(s32 mode) {
     u32 *handle = (u32 *)&((SpriteMenuState *)mnuMovieMenuState)->spriteHandle;
 
     if (*handle == 0) {
@@ -352,13 +352,13 @@ void mnuTitlePickRandomSlot(PickList *list) {
     } while (tries <= 0);
 }
 
-extern void func_002A44C0(PickList *, s32);
+extern void mnuDrawMovieMenuSpritePickList(PickList *, s32);
 
 extern s16 D_003E38F0[32][2];
 extern u8 D_00437A50[];
 
 /* Draw the pick list sprites and advance each entry's fade step; drop entries that finished. */
-void func_002A44C0(PickList *work, s32 drawContext) {
+void mnuDrawMovieMenuSpritePickList(PickList *work, s32 drawContext) {
     u8 palette[5];
     s32 i;
 
@@ -538,7 +538,7 @@ extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 void mnuAdvanceSlideBar(PickList *bar, s32 drawContext) {
     if (bar->control.active != 0 || bar->control.pos != 0) {
         mnuTitlePickRandomSlot(bar);
-        func_002A44C0(bar, drawContext);
+        mnuDrawMovieMenuSpritePickList(bar, drawContext);
         mnuDrawSprite(0, 0, 0, bar->control.pos, 0, 0x16, drawContext);
         func_002A4B70(bar, drawContext);
         if (bar->control.active != 0) {
@@ -624,7 +624,7 @@ typedef struct MovieMenuFadeState {
     s32 amount;
 } MovieMenuFadeState;
 
-void func_002A5040(SlideBarTimed *primary, SlideBar *secondary, s32 drawContext) {
+void mnuDrawMovieMenuSlideBar(SlideBarTimed *primary, SlideBar *secondary, s32 drawContext) {
     MovieMenuFadeState *fade;
     s32 primaryPos = primary->pos;
     s32 x;

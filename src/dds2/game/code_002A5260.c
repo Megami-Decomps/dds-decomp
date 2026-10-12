@@ -103,7 +103,7 @@ extern void mnuStopTitleMovieDraw(void);
 
 extern void func_003458E8(u32);
 
-extern s32 func_002A5A78();
+extern s32 mnuDrawMovieMenuListItem();
 
 void mnuMarkTitleStreamResetPending(void);
 
@@ -111,7 +111,7 @@ void mnuResetTitleStreamLocked(void);
 
 extern void func_002A5260(s32, s32);
 
-extern void func_002A55B8(s32, s32);
+extern void mnuDrawMovieChoiceTransition(s32, s32);
 
 extern void func_002A50E8(s32, s32, u8);
 
@@ -126,7 +126,7 @@ extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5260);
 
-void func_002A55B8(s32 mode, s32 frame) {
+void mnuDrawMovieChoiceTransition(s32 mode, s32 frame) {
     s32 i;
     s32 elapsed;
     s32 alpha;
@@ -265,7 +265,7 @@ void mnuUpdateTitlePageByMode(void) {
 }
 
 /* Draw a list row's sprite pair: the base sprite, then the highlight on the cursor node. */
-func_002A5A78(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
+mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
     s32 index = node->index;
 
     mnuDrawSprite(0, 0, 0, 0x80, 0, index + 0xC, priority);
@@ -277,7 +277,7 @@ func_002A5A78(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNo
 extern s8 D_0037F510[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-extern u32 func_002A3C78(void);
+extern u32 mnuGetMovieMenuSelectionIndex(void);
 
 s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
@@ -298,7 +298,7 @@ s32 mnuHandleMovieMenuInput(void) {
         mnuClearListFlagsOneAndTwo(&mnuMovieMenuState->selectionList->stateFlags);
     }
     if (D_0037F510[0x21] < 0) {
-        selection = func_002A3C78();
+        selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
             return 1;
         }
@@ -332,11 +332,11 @@ void mnuDrawTitleSceneForPhase(void) {
     switch (((MenuTitleState *)mnuMovieMenuState)->phase) {
     case 1:
         func_002A5260(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
-        func_002A55B8(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 0:
-        func_002A55B8(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 1);
         return;
     case 2:
@@ -344,7 +344,7 @@ void mnuDrawTitleSceneForPhase(void) {
         return;
     case 3:
     case 4:
-        func_002A55B8(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
+        mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)mnuMovieMenuState)->selectedPage);
         func_002A50E8((s32)&mnuMovieMenuState->movie, 1, 0);
         break;
     }

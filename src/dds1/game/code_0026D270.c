@@ -6,7 +6,7 @@ extern MovieMenuState *mnuMovieMenuState;
 extern s8 D_00324510[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-extern u32 func_0026BED0(void);
+extern u32 mnuGetMovieMenuSelectionIndex(void);
 
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 extern f32 sdfSinPoly(f32);
@@ -47,7 +47,7 @@ void mnuDrawMovieMenuBackdrop(void) {
 
 
 /* Draw a list row's sprite pair: the base sprite, then the highlight on the cursor node. */
-func_0026D480(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
+mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct MenuListNode *node, s32 priority) {
     s32 index = node->index;
 
     mnuDrawSprite(0, 0, 0, 0x80, 0, index + 0x10, priority);
@@ -75,7 +75,7 @@ s32 mnuHandleMovieMenuInput(void) {
         mnuClearListFlagsOneAndTwo(&mnuMovieMenuState->selectionList->stateFlags);
     }
     if (D_00324510[0x21] < 0) {
-        selection = func_0026BED0();
+        selection = mnuGetMovieMenuSelectionIndex();
         if (selection < 0) {
             return 1;
         }
