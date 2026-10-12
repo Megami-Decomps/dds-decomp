@@ -430,7 +430,7 @@ enum {
 };
 
 extern u8 D_00386350[];
-extern s32 func_0011C6A8(DatPartyRecord *, s32, u8);
+extern s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *, s32, u8);
 
 
 
@@ -1382,7 +1382,7 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_00435E28;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 func_0011C6A8(DatPartyRecord *unit, s32 affinity, u8 slot) {
+s32 ptyUnitMatchesAffinityRequirement(DatPartyRecord *unit, s32 affinity, u8 slot) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 value;
@@ -1454,7 +1454,7 @@ s32 ptyMatchAffinityPermutation(s32 *actors, s32 affinity) {
         matchedCount = 0;
         for (i = 0, orderCursor = D_00386350 + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actorValue = *actorCursor++;
-            if (actorValue != 0 && func_0011C6A8(actorValue, affinity, *orderCursor) != 0) {
+            if (actorValue != 0 && ptyUnitMatchesAffinityRequirement(actorValue, affinity, *orderCursor) != 0) {
                 matchedCount++;
             }
         }
