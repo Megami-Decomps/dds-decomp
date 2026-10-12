@@ -7554,3 +7554,14 @@
 0x00292FF0	mnuRunMantraTutorialSixthSequence	inferred	Runs the sixth tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
 0x00293148	mnuRunMantraTutorialSeventhSequence	inferred	Runs the seventh tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
 0x002932B0	mnuInitializeMantraTutorialParty	inferred	Initializes three tutorial party records, their pointer order and selection bookkeeping. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x0029DF18	brsUpdateResultBackgroundFade	inferred	confidence=high; updates each result row's background opacity until its ready flag is set. DDS1 twin0x002665E0. LiteH result-animation batch.
+0x0029E478	brsUpdateResultPortraitFade	inferred	confidence=high; updates each result row's portrait opacity and position until its ready flag is set. DDS1 twin0x00266B10. LiteH result-animation batch.
+0x0029E820	brsUpdateLevelProgressAnimation	inferred	confidence=high; advances the level/EXP result animation, applies EXP increments, updates level and drives level-up effects. DDS1 twin0x00266E28. LiteH result-animation batch.
+0x0029EE80	brsDrawLevelProgressDetails	inferred	confidence=high; result-row assembly formats and queues level/EXP values and blends their state-dependent colors. DDS1 twin0x002673C8. LiteH result-animation batch.
+0x0029F440	brsUpdateLevelProgressIndicator	inferred	confidence=high; updates the level progress indicator's bob, opacity and completion animation state. DDS1 twin0x00267850. LiteH result-animation batch.
+0x0029FA98	brsDrawLevelProgressIndicator	inferred	confidence=high; draws the result level-progress icon and completion indicator from level animation state. DDS1 twin0x00267E20. LiteH result-animation batch.
+0x0029FBE0	brsUpdateProfileProgressIndicator	inferred	confidence=high; updates the profile-cap progress indicator's bob, opacity and completion animation state. DDS1 twin0x00267FF0. LiteH result-animation batch.
+0x002A0148	brsDrawProfileProgressIndicator	inferred	confidence=high; draws result profile-cap indicator icons from profile animation state. DDS1 twin0x00268590. LiteH result-animation batch.
+0x002A0278	brsCalcProgressAnimationStep	inferred	confidence=high; computes and consumes one EXP or profile-cap animation increment from the remaining amount. DDS1 twin0x002687C0. LiteH result-animation batch.
+0x002A05C0	brsUpdateProfileProgressAnimation	inferred	confidence=high; advances profile-cap progress toward its cap and drives completion effects. DDS1 twin0x00268AB8. LiteH result-animation batch.
+0x002A08D8	brsDrawProfileProgressDetails	inferred	confidence=high; result-row assembly reads profile/cap state, formats and queues its profile progress display. DDS1 twin0x00268D40. LiteH result-animation batch.

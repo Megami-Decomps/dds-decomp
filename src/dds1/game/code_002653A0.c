@@ -440,18 +440,18 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 
 extern char D_003AFBA0[];
 extern u8 D_00324510[2][2][16];
-extern void func_002665E0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateResultBackgroundFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void func_00266668(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00266B10(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateResultPortraitFade(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void func_00266BC0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00266E28(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00268AB8(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_002673C8(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00268D40(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00267850(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00267E20(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00267FF0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern void func_00268590(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateLevelProgressAnimation(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateProfileProgressAnimation(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawLevelProgressDetails(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawProfileProgressDetails(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateLevelProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawLevelProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
+extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void func_00266908(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
 extern void func_002E8DD0(u32 sound);
@@ -475,19 +475,19 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
         if (work != NULL) {
             BrsProgressRow *row = &list->rows[i];
 
-            func_002665E0(x, y, z, work, row, context, i);
+            brsUpdateResultBackgroundFade(x, y, z, work, row, context, i);
             func_00266668(x, y, z, work, row, context, i);
-            func_00266B10(x, y, z, work, row, context, i);
+            brsUpdateResultPortraitFade(x, y, z, work, row, context, i);
             func_00266BC0(x, y, z, work, row, context, i);
             mnuBlendNeutralColorAlpha(x, y, z, alpha, row, context);
-            func_00266E28(x, y, z, work, row, context, i);
-            func_00268AB8(x, y, z, work, row, context, i);
-            func_002673C8(x, y, z, work, row, context, i);
-            func_00268D40(x, y, z, work, row, context, i);
-            func_00267850(x, y, z, work, row, context, i);
-            func_00267E20(x, y, z, work, row, context, i);
-            func_00267FF0(x, y, z, work, row, context, i);
-            func_00268590(x, y, z, work, row, context, i);
+            brsUpdateLevelProgressAnimation(x, y, z, work, row, context, i);
+            brsUpdateProfileProgressAnimation(x, y, z, work, row, context, i);
+            brsDrawLevelProgressDetails(x, y, z, work, row, context, i);
+            brsDrawProfileProgressDetails(x, y, z, work, row, context, i);
+            brsUpdateLevelProgressIndicator(x, y, z, work, row, context, i);
+            brsDrawLevelProgressIndicator(x, y, z, work, row, context, i);
+            brsUpdateProfileProgressIndicator(x, y, z, work, row, context, i);
+            brsDrawProfileProgressIndicator(x, y, z, work, row, context, i);
             func_00266908(x, y, z, work, row, context, i);
             count = list->count;
         }
