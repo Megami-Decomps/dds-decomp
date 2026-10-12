@@ -483,7 +483,7 @@ functions use trampolines and are a different case.
   occupy the following `jal` delay slot (`func_001E64B0`).
 - `s32 bank = kind >= 2; return m->banks[bank].x;` retains the indexed
   shift/add, whereas `banks[kind >= 2]` becomes `li/movn`
-  (`func_00168448`).
+  (`sndGetMixerBankCallbackFrame`).
 - A word set by `header = h | (w << 60); header |= f << 47; header |= K;`
   loads `K` late with `dli`; one combined OR chain hoists it
   (`func_0033A2D8`).
