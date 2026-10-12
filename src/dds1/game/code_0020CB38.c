@@ -130,7 +130,8 @@ typedef char BtlUnitScaleTransitionLayout[
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *);
 
-void func_0020D168(BtlUnit *unit) {
+/* Initialize the supported boss-unit scale transition using the active lead's model value. */
+void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *actor;
     BtlUnitScaleTransition *payload;
@@ -690,11 +691,13 @@ extern char D_003A6358[];
 extern char D_003A6398[];
 extern char D_003A63C0[];
 
+/* Select the linked-action boss camera from category, sides and target count.
+ * The native result is not a general "camera changed" flag. */
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8A8);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
 
-s32 func_0020E170(BtlLinkedCommand *command, s8 firstSide, s8 secondSide) {
+s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 secondSide) {
     BtlTask *task;
     s32 choice;
     u32 count;

@@ -64,13 +64,13 @@ extern s32 func_00230978(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-extern s32 func_001B4040();
+extern s32 btlRollMajinEncounter();
 
 extern s32 btlRollSurpriseAttack();
 
 extern void func_0022AF90();
 
-extern void func_00229728();
+extern void btlInitializeBossCallbacks();
 
 extern void btlSelectSceneAudioTrack();
 
@@ -192,7 +192,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
         ((BtlState *)scene)->commandRestrictFlags |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
-    if (func_001B4040() == 0) {
+    if (btlRollMajinEncounter() == 0) {
         if (btlRollSurpriseAttack() == 0) {
             ((BtlState *)scene)->encounterKind = 0;
         } else {
@@ -202,7 +202,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
         ((BtlState *)scene)->encounterKind = 3;
     }
     func_0022AF90();
-    func_00229728(((BtlState *)scene)->battleMode);
+    btlInitializeBossCallbacks(((BtlState *)scene)->battleMode);
     btlSelectSceneAudioTrack(((BtlState *)scene)->effectLayer, ((BtlState *)scene)->battleMode);
     VU0_STORE_VF($vf0, scene);
 }

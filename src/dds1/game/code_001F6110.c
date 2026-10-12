@@ -1091,7 +1091,8 @@ u32 btlScriptSelectEmptyCommand(void) {
     return 1;
 }
 
-u32 func_001F8358(void) {
+/* Select the fixed mode-6/value-0xC2 command and continue the script VM. */
+u32 btlScriptSelectFixedCommand(void) {
     BtlCmdCtx *context;
 
     context = (BtlCmdCtx *)scrGetCurrentCommandWork();
@@ -1776,7 +1777,8 @@ u32 btlCmdRememberUpperSelectedElement(void) {
     }
     return 1;
 }
-u32 func_001F9DD8(void) {
+/* Remember the choice when an eligible party unit's queued action matches its category query. */
+u32 btlCmdRememberPartyQueuedActionCategory(void) {
     s32 context = scrGetCurrentCommandWork();
     if (btlDispatchPackedActionWithScratch(context, ((BtlCommandContext *)context)->actor, scrReadIntParameter(0) | 0xDC00000)) {
         scrSetIntegerReturnValue(1);

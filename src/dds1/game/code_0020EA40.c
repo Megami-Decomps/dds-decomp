@@ -266,13 +266,13 @@ extern void func_00209528(void);
 extern s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b);
 extern u32 func_0020CB28(s32 action);
 extern void func_0020CCA8(void);
-extern void func_0020D168(BtlUnit *unit);
+extern void btlInitializeBossUnitScaleTransition(BtlUnit *unit);
 extern u32 func_0020D548(void);
 extern s32 func_0020D598(BtlUnit *unit, s32 action);
 extern s32 func_0020D690(BtlUnit *unit, s32 action);
 extern u8 func_0020D9A8(s32 action);
 extern s32 func_0020D9F8(BtlUnit *unit, s32 action);
-extern s32 func_0020E170(BtlLinkedCommand *command, s8 firstSide, s8 secondSide);
+extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 secondSide);
 extern void mdlFlagSet(s32 flag);
 
 /* Native providers whose bodies remain assembly in their own units. */
@@ -301,7 +301,7 @@ extern u32 kwlnDrawControlFlags;
 }
 
 /* Install the mode-specific battle providers before starting their setup. */
-void func_0020ED90(s32 mode) {
+void btlInitializeBossCallbacks(s32 mode) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     void *allocation;
     void (*setup)(void);
@@ -512,7 +512,7 @@ void func_0020ED90(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->commandSoundDelay, 0x0, func_0020CB28);
         BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimationB);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, func_0020CCC0);
-        BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, func_0020D168);
+        BTL_INSTALL_CALLBACK(battle->finishModelUnit, 0x0, btlInitializeBossUnitScaleTransition);
         BTL_INSTALL_CALLBACK(battle->postTargetHook, 0x0, btlStartPairedActorCommandEffect);
         BTL_INSTALL_CALLBACK(battle->pad680, 0x0, btlAllowsSpeciesCondition);
         BTL_INSTALL_CALLBACK(battle->pad680, 0x4, btlFormatBattleEffectResourceName);
@@ -573,7 +573,7 @@ void func_0020ED90(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->cameraStateChangePredicate, 0x0, btlFrameMarkedTargetDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->pad614, 0x4, btlHandleLinkedUnitDefeatAction);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectSpecialActionCameraPose);
-        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_0020E170);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectBossLinkedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlApplyActionDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->pad620, 0x0, btlDispatchActionAnimation);
         break;

@@ -268,7 +268,7 @@ INCLUDE_ASM(const s32, "game/code_001B1350", func_001B17E8);
 void func_001B1F78(void) {
 }
 
-extern f32 func_001B20C8(BtlUnit *, BtlUnit *, s32);
+extern f32 btlGetRewardLevelMultiplier(BtlUnit *, BtlUnit *, s32);
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
@@ -284,7 +284,7 @@ s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
         return result;
     }
     entry = &datEnemyRecords[enemy->partyRecord.unitId];
-    ratio = func_001B20C8(acquirer, enemy, 1);
+    ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 1);
     ep = (u32)((f32)entry->experience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
@@ -297,7 +297,8 @@ s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
     return ep;
 }
 
-f32 func_001B20C8(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKind) {
+/* Return the normal/hunt EP level multiplier with the native level-difference caps. */
+f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKind) {
     s32 level;
     s32 difference;
     f32 factor;
@@ -353,7 +354,7 @@ s32 btlGetEnemyMoney(BtlUnit *acquirer, BtlUnit *enemy) {
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
 s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
     DatEnemyRecord *entry = &datEnemyRecords[enemy->partyRecord.unitId];
-    f32 ratio = func_001B20C8(acquirer, enemy, 0);
+    f32 ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;

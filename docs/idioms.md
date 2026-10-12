@@ -9530,3 +9530,40 @@ same slot ownership but different panel/corner drawing; that behavior is not
 transplanted. No compiler flags, owner layouts, helpers or visibility
 boundaries change.
 
+## Boss callback and battle-script naming closure
+
+The following names describe matched C behavior, with title-specific
+callback sets, opcode values and storage layouts preserved:
+
+| Name | DDS1 / DDS2 address | Observable contract |
+|---|---|---|
+| `btlGetRewardLevelMultiplier` | 0x001A7C20 / 0x001B20C8 | Normal/hunt EP multiplier selected by reward kind and the capped level difference. |
+| `btlInitializeBossCallbacks` | 0x0020ED90 / 0x00229728 | Installs mode-specific boss callbacks and state, invokes setup, and enables the boss-state flag. |
+| `btlScriptSelectFixedCommand` | 0x001F8358 / 0x00209DA8 | Writes command mode 6 and fixed value 0xC2; its skill identity is not asserted. |
+| `btlCmdRememberPartyQueuedActionCategory` | 0x001F9DD8 / 0x0020BCD0 | Publishes the eligible-party queued-action category predicate and remembers its choice on success. |
+| `btlInitializeBossUnitScaleTransition` | 0x0020D168 / not established | Initializes the supported incoming unit's scale-transition payload from an active lead. |
+| `btlSelectBossLinkedActionCamera` | 0x0020E170 / not established | Selects camera poses/transforms from linked-action eligibility, actor category, sides and target count. |
+| `btlIsSpecialActionKind` | 0x00207B00 / 0x00228F20 | Accepts linked-command action codes 0x171 and 0x189; the established DDS1 name is retained. |
+| `btlFilterListedUnitMotionChoice` | not established / 0x002295D8 | Maps choice 13 to -1 only for enemy units listed by the current scene. |
+| `btlInitializeSpecialUnitHpOverride` | not established / 0x00229420 | Applies a conditional one-HP entry override, not an alternate unit kind. |
+| `btlRollMajinEncounter` | not established / 0x001B4040 | Applies scene/story gates, solar-phase chance, attempt scaling and a party override before the random roll. |
+| `btlIsCurrentDarkZone` | not established / 0x001B5600 | Tests the current area/floor against the native dark-zone table unless its model flag disables it. |
+| `btlCmdRememberPartyHighHpChoice` | not established / 0x0020A7C0 | Remembers a threshold when an eligible party unit reaches the requested HP percentage. |
+| `btlScriptSetBossStatSelector` | not established / 0x0020C6F8 | Forwards the script parameter to the mode-0x31B statistic selector. |
+
+The queued-category callbacks use different choice-bank storage in the
+two titles but the same success flag, so their shared name deliberately
+avoids an upper/lower-bank claim. Failure clears the flag without clearing
+the previous choice. The fixed-command name is intentionally observable
+rather than a guessed skill name.
+
+The HP override is confirmed by the native halfword store at unit+0x126,
+the HP member, rather than unitId at +0x124. The stat-selector callback's
+protected provider retains its existing actor-byte misnomer; its actual
+mode-0x31B store is to `effect.statIndex`. Likewise, the established DDS1
+special-action predicate in the protected boss unit is not edited.
+
+This closure changes identifiers and comments only. It preserves argument
+types and arities, declaration order, casts, callback-slot installation,
+VM parameter-read ordering, and native camera-handler return values.
+

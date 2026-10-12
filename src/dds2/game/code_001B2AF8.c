@@ -187,7 +187,7 @@ extern char D_004366F0[];
 
 extern SdfMemBlock *D_004366E0;
 
-extern u32 func_001B5600(void);
+extern u32 btlIsCurrentDarkZone(void);
 
 extern s32 itfMesCreateWindow(ItfMesSub *);
 
@@ -848,7 +848,8 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004156F8);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B3DD8);
 
-s32 func_001B4040(void) {
+/* Roll the solar-phase Majin encounter chance after scene gates and the party override. */
+s32 btlRollMajinEncounter(void) {
     BtlState *battle;
     u16 sceneFlags;
     u32 rate;
@@ -1436,7 +1437,8 @@ u32 btlPickWeightedEntry(u16 index) {
     return 0;
 }
 
-u32 func_001B5600(void) {
+/* Test the current area/floor against the dark-zone list unless flag 0x818 blocks it. */
+u32 btlIsCurrentDarkZone(void) {
     u32 i;
 
     if (mdlFlagTest(0x818) != 0) {

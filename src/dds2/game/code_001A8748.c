@@ -962,7 +962,7 @@ extern u16 mnuMovieTaskState;
 
 extern u32 kwlnGetFrameCounter(void);
 
-extern u32 func_001B5600(void);
+extern u32 btlIsCurrentDarkZone(void);
 
 extern void effMiscSeedRandom(void *, u32);
 
@@ -1008,7 +1008,7 @@ void func_001A9B80(void) {
     ((BattleInitState *)btlRuntime)->backgroundA = 0xC9;
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk2B0 = 0;
-    ((BattleInitState *)btlRuntime)->unk2B4 = func_001B5600();
+    ((BattleInitState *)btlRuntime)->unk2B4 = btlIsCurrentDarkZone();
     seed = kwlnGetFrameCounter();
     effMiscSeedRandom(effSharedRandomState, seed);
     btlResetActorEntryState();

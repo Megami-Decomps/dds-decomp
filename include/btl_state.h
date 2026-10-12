@@ -76,8 +76,8 @@ typedef struct BattleQueryEffectState {
     u16 count;
 } BattleQueryEffectState;
 
-/* func_00229728 allocates 12 bytes for mode 779's guard result and
- * eight bytes for mode 782's marked-scene/summon selection. */
+/* DDS2 btlInitializeBossCallbacks allocates 12 bytes for mode 0x30B's guard
+ * result and eight bytes for mode 0x30E's marked-scene/summon selection. */
 typedef struct BattleGuardState {
     BtlUnit *unit;
     BtlUnit *guard;

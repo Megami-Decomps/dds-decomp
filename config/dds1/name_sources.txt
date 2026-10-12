@@ -3538,7 +3538,7 @@
 0x00207030	btlHasDifferentActiveTarget	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00207070	btlSetLinkFlagOff	inferred	mirror of func_002071B0
 0x002071B0	btlSetLinkFlagOn	inferred	sets/clears bit 1 in model flags for species 0x107 unit pair
-0x00207B00	btlIsSpecialActionKind	inferred	btl unit+0x114 action id equals 0x171 or 0x189
+0x00207B00	btlIsSpecialActionKind	inferred	high confidence; retained canonical name for the linked-command actionCode predicate accepting 0x171/0x189. Corrects the older unit-owner wording; matched DDS2 0x00228F20 now uses this name. Protected DDS1 body unchanged. [Namer1 batch 31]
 0x00207C18	btlIsSpecialEnemyEffectLinkSatisfied	inferred	Checks whether a special enemy has the required status and owns the linked effect. [names_reviewed14.tsv]
 0x00207CA0	btlFadeAndTintNamedChunkTree	inferred	U2
 0x00207DD0	btlDispatchNamedChunkNode	inferred	Looks up an active unit model named chunk and dispatches the selected descriptor; established DDS2 name. [names_reviewed16.tsv]
@@ -8238,3 +8238,9 @@
 0x0026E240	mnuUpdateMovieSpriteResourceGroup	inferred	Spawns and ticks the active task groups held by the movie sprite resource group. [LiteH b12]
 0x0026E388	mnuDrawMovieSpriteGroup	inferred	Traverses active movie cue nodes and draws their animated sprite variants. [LiteH b12]
 0x0026E608	mnuDrawMovieMenuFrame	inferred	Updates movie sprite resources and draws the movie menu frame and active sprite group. [LiteH b12]
+0x001A7C20	btlGetRewardLevelMultiplier	inferred	high confidence; normal/hunt EP callers select reward kinds 1/0; cap acquirer level at 60, clamp enemy-level difference to [-15,15], read the interleaved level multiplier table. Paired DDS2 0x001B20C8. [Namer1 batch 31]
+0x001F8358	btlScriptSelectFixedCommand	inferred	medium confidence; current script command context receives mode 6 and fixed value 0xC2, then VM continuation 1. No skill identity asserted. Paired DDS2 0x00209DA8. [Namer1 batch 31]
+0x001F9DD8	btlCmdRememberPartyQueuedActionCategory	inferred	high confidence; native selector 55 queries eligible party units' queued action category; publish Boolean and remember choice/flag 0x1000 on success. Bank-neutral twin name, paired DDS2 0x0020BCD0. [Namer1 batch 31]
+0x0020D168	btlInitializeBossUnitScaleTransition	inferred	high confidence; mode 0x10E finishModelUnit hook hides supported incoming enemy units, initializes their scale groups and transition payload using the active lead model value. [Namer1 batch 31]
+0x0020E170	btlSelectBossLinkedActionCamera	inferred	high confidence; mode 0x14C actor-category camera hook chooses linked-action poses/transforms from eligibility, side/count and actor-category branches; preserves fixed presets and native handler result. [Namer1 batch 31]
+0x0020ED90	btlInitializeBossCallbacks	inferred	high confidence; boss-init debug string, mode-specific callback installation/state allocation, setup invocation and flag 0x80000; paired DDS2 0x00229728 with title-specific modes preserved. [Namer1 batch 31]
