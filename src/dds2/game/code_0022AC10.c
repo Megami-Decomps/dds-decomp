@@ -2363,7 +2363,451 @@ void func_0022F068(void) {
     state->unk_E0E = -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F180);
+/* Battle debug record views. Only observed members are named. */
+typedef struct BtlDebugValueEntry {
+    const char *name;
+    u32 flags;
+    u32 valueAddress;
+    u8 pad0C[0x0C];
+} BtlDebugValueEntry;
+
+typedef struct BtlDebugValueMenu {
+    const char *name;
+    s32 x;
+    s32 y;
+    u32 cursor;
+    u32 flags;
+    BtlDebugValueEntry *entries;
+    u32 count;
+} BtlDebugValueMenu;
+
+typedef struct BtlDebugTransformParameters {
+    f32 position[3];
+    f32 scaleOverride;
+    f32 reach;
+    f32 height;
+} BtlDebugTransformParameters;
+
+typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
+typedef char BtlDebugTransformExtent[(sizeof(BtlDebugTransformParameters) == 0x18) ? 1 : -1];
+
+extern BtlIndexList *fldGetSceneScriptValue(void);
+extern s32 fldGetSceneScriptState(void);
+extern void fldCreateSceneSpriteTask(s32);
+extern void fldMarkActiveSceneScriptState(void);
+extern void func_001E3108(BtlUnit *, f32 *);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateControlObject(void);
+extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
+extern s32 btlGetUnitModelFrameCount(BtlUnit *);
+extern s32 btlCountTasksForOwner(u64);
+extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
+extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern void btlApplyUnitEffectScale(BtlUnit *);
+extern void btlApplyUnitModelScaledValue(BtlUnit *);
+extern void btlSeekUnitModelFrameZero(BtlUnit *);
+extern void func_001AA898(DatPartyRecord *, u32);
+extern void func_0020D208(f32 *, u32, s32, f32);
+extern void func_0020D1B0(s32, s32, s32, const char *);
+extern void func_0020D228(void);
+extern void func_0020D230(void);
+extern u32 func_0020D260(u32);
+extern void func_0020D270(u32);
+extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 D_003BFB50[], D_003BFB70[];
+extern BtlDebugValueMenu D_003BFE40, D_003BFEC0, D_003BFF88, D_003C0260;
+extern BtlDebugValueEntry D_003BFFC0[];
+extern DatPartyRecord *D_00435DD4;
+extern s16 D_00436D8E;
+extern BtlUnit *D_00436D90;
+extern u16 D_00436E58;
+extern char D_00436F00[];
+extern u8 D_00438F88;
+extern s32 D_00438F8C;
+extern u16 D_004530B0[7];
+extern DatPartyRecord D_004530C0;
+extern f32 D_00453290[4];
+extern BtlDebugTransformParameters D_004532A0;
+extern BtlActorStatusRecord D_004532C0;
+extern BtlActorMotionSlot D_00453530;
+
+/* Advance the battle model/debug editor. The selected state remains active
+ * until its pending unit tasks have completed. */
+s32 func_0022F180(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    char text[0x70];
+    BtlState *battle;
+    BtlUnit *unit;
+    BtlIndexList *units;
+    BtlRuntimeTask *modelTask;
+    BtlRuntimeTask *soundTask;
+    BtlRuntimeTask *dependent;
+    MenuList *actionMenu;
+    MenuList *modelMenu;
+    MenuList *motionMenu;
+    MenuList *gunMenu;
+    BtlActorStatusRecord *record;
+    BtlDebugTransformParameters *parameters;
+    u32 modelIndex;
+    u32 model;
+    u32 health;
+    u32 mana;
+    s32 currentFrame;
+    s32 sceneState;
+    u32 motion;
+    f32 savedScale;
+    u32 selectedAddress;
+    u64 packedStatus;
+
+    battle = (BtlState *)btlGetRuntime();
+    switch (battle->debug.unk00) {
+    case 0:
+        battle->battleFlags = (battle->battleFlags | 0x80000000) & ~0x200;
+        battle->debug.unk00 = 1;
+        fldCreateSceneSpriteTask(0);
+        break;
+    case 1:
+        sceneState = fldGetSceneScriptState();
+        if (sceneState == 3) {
+            battle->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
+            fldMarkActiveSceneScriptState();
+            battle->debug.unk00 = 2;
+        } else if (sceneState == 4) {
+            fldMarkActiveSceneScriptState();
+            battle->debug.unk00 = 10;
+        } else {
+            units = fldGetSceneScriptValue();
+            if (btlGetIndexListCount(units) == 1) {
+                unit = btlGetIndexListEntry(units, 0);
+                func_001E3108(unit, position);
+                btlBossDebugPrintfN(150, 396, 0, "MDL:[%03X (%X-%03X)]",
+                    unit->partyRecord.unitId, unit->resourceKind, unit->resourceIndex);
+                btlBossDebugPrintfN(150, 408, 0, "FLD:[%03d_%02d]",
+                    battle->background.ids.major, battle->background.ids.minor);
+                btlBossDebugPrintfN(150, 420, 0, "POS:[%.2f,%.2f,%.2f]",
+                    (double)position[0], (double)position[1], (double)position[2]);
+                if ((u8)sdfPadButtonStates[9] & 2) {
+                    btlStartTask(btlCreateEffObjB(unit, D_00436D8E));
+                    D_00436D8E = D_00436D8E >= 205 ? 0 : D_00436D8E + 1;
+                }
+                if (btlCountTasksByKind(63)) {
+                    btlBossDebugPrintfN(150, 396, 0, "MSG:[%03d]", D_00436D8E);
+                }
+            }
+        }
+        break;
+    case 2:
+        actionMenu = &battle->debug.actionMenu;
+        if (mnuListMoveCursor(actionMenu)) {
+            switch (battle->debug.actionMenu.cursor) {
+            case 0: battle->debug.unk00 = 3; break;
+            case 1: battle->debug.unk00 = 4; break;
+            case 2: battle->debug.unk00 = 5; break;
+            case 3: battle->debug.unk00 = 6; break;
+            case 4: battle->debug.unk00 = 7; break;
+            case 5: battle->debug.unk00 = 8; break;
+            case 6: battle->debug.unk00 = 9; break;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 10;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100, (u8 *)actionMenu, D_003BFB50);
+        break;
+    case 3:
+        modelMenu = &battle->debug.modelMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(modelMenu)) {
+            modelTask = btlCreateModelChangeTask(unit, (unit->partyRecord.flags >> 5) & 1,
+                battle->debug.modelMenu.cursor, 0, 0, 1);
+            btlStartTask(modelTask);
+            unit->status.flags &= ~2;
+            dependent = btlCreateControlObject();
+            dependent->startCondition.kind = 4;
+            dependent->startCondition.value.handle = modelTask->handle;
+            btlStartTask(dependent);
+            if (unit->status.flags & 0x200) {
+                model = battle->debug.modelMenu.cursor;
+                modelIndex = model - 32;
+                if (model < 32) {
+                    if (model >= 16) {
+                        model -= 16;
+                    }
+                    modelIndex = model;
+                }
+                btlCopyUnitStats(unit, &D_00435DD4[modelIndex]);
+                if (battle->debug.modelMenu.cursor >= 32) {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags |= 0x17;
+                } else if (battle->debug.modelMenu.cursor >= 16) {
+                    unit->status.flags |= 0x1000;
+                    unit->partyRecord.flags |= 0x1007;
+                } else {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags |= 7;
+                }
+            } else {
+                btlBossDebugPrintf("btl:id=%X\n", battle->debug.modelMenu.cursor);
+                func_001AA898(&unit->partyRecord, battle->debug.modelMenu.cursor);
+                unit->partyRecord.flags |= 0x23;
+            }
+            battle->debug.unk00 = 10;
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        if (unit->partyRecord.flags & 0x20) {
+            if (battle->unk_E0C != 0) {
+                battle->unk_E0C = 0;
+                battle->debug.modelMenu.count = 384;
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+            if (battle->debug.modelMenu.cursor >= 384) {
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+        } else {
+            if (battle->unk_E0C != 1) {
+                battle->unk_E0C = 1;
+                battle->debug.modelMenu.count = 48;
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+            if (battle->debug.modelMenu.cursor >= 48) {
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)64, 164, (u8 *)modelMenu,
+            (unit->partyRecord.flags & 0x20) ? battle->debug.table1 : battle->debug.table0);
+        break;
+    case 4:
+        unit = battle->debug.selectedUnit;
+        memcpy(&D_004530C0, &unit->partyRecord, sizeof(DatPartyRecord));
+        D_004530B0[0] = unit->entrySlots[0].code;
+        D_004530B0[1] = unit->entrySlots[1].code;
+        D_004530B0[2] = unit->entrySlots[2].code;
+        D_004530B0[3] = unit->entrySlots[3].code;
+        D_004530B0[4] = unit->entrySlots[4].code;
+        D_004530B0[5] = unit->entrySlots[5].code;
+        D_004530B0[6] = unit->entrySlots[6].code;
+        D_00438F8C = unit->selectedEntryIndex;
+        func_0020D260((u32)&D_003BFE40);
+        func_0020D228();
+        func_0020D270((u32)&D_003BFE40);
+        func_0020D230();
+        btlDrawUnitAffinityDebug(unit, 256, 32);
+        if (sdfPadButtonStates[0] & 2) {
+            health = D_004530C0.hp >> 1;
+            D_004530C0.hp = health;
+            if (health == 0) {
+                D_004530C0.hp = 1;
+            }
+            mana = D_004530C0.mp >> 1;
+            D_004530C0.mp = mana;
+            if (mana == 0) {
+                D_004530C0.mp = 1;
+            }
+        }
+        if (D_00438F88 != 0) {
+            D_004530C0.status = 1 << (D_00438F88 - 1);
+        } else {
+            D_004530C0.status = 0;
+        }
+        memcpy(&unit->partyRecord, &D_004530C0, sizeof(DatPartyRecord));
+        btlRefreshUnitMotionSelection(unit);
+        if (unit->status.flags & 0x200) {
+            memcpy(&datGameState->party[unit->unk2E4], &D_004530C0, sizeof(DatPartyRecord));
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        break;
+    case 5:
+        motionMenu = &battle->debug.motionMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(motionMenu)) {
+            battle->unk_E0E = 0;
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        if (sdfPadButtonStates[0] < 0) {
+            battle->unk_E0E = (s8)battle->unk4C4 * 3;
+        }
+        if (battle->unk_E0E > 0) {
+            battle->unk_E0E--;
+            func_0035C860(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
+            func_0020D1B0(32, 400, 6, text);
+        }
+        if (battle->unk_E0E == 0) {
+            motion = battle->debug.motionMenu.cursor;
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                soundTask = btlCreateHookedUnitSoundTask(unit, motion);
+                btlStartTask(soundTask);
+                dependent = btlAllocateIndexedUnitEffectTask(unit, motion, 0, 1.0f);
+                dependent->startCondition.kind = 4;
+                dependent->startCondition.value.handle = soundTask->handle;
+                btlStartTask(dependent);
+                battle->unk_E0E = -1;
+            }
+        }
+        if (battle->unk_E0E <= 0) {
+            currentFrame = (s32)btlGetUnitModelValue1C(unit);
+            func_0035C860(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
+            func_0020D1B0(32, 400, 0, text);
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, (u8 *)motionMenu, D_003BFB70);
+        break;
+    case 6:
+        gunMenu = &battle->debug.gunMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(gunMenu)) {
+            memcpy(&packedStatus, &unit->status, sizeof(packedStatus));
+            if ((packedStatus & 0x1200) == 0x200) {
+                unit->partyRecord.menuValue = (u16)battle->debug.gunMenu.cursor + 0xA0;
+                btlStartTask(btlCreateGunLoadPollTask(unit));
+                battle->debug.unk00 = 2;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, (u8 *)gunMenu, battle->debug.table2);
+        break;
+    case 7:
+        unit = battle->debug.selectedUnit;
+        if (sdfPadButtonStates[3] < 0) {
+            battle->battleFlags &= ~0x400000;
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        PCP_COPY_VECTOR(D_00453290, unit->position);
+        func_0020D260((u32)&D_003BFEC0);
+        if (sdfPadButtonStates[2] < 0) {
+            D_00453290[0] = 0.0f;
+            D_00453290[1] = 0.0f;
+            D_00453290[2] = 0.0f;
+            D_00453290[3] = 0.0f;
+        }
+        func_0020D228();
+        func_0020D270((u32)&D_003BFEC0);
+        func_0020D230();
+        PCP_COPY_VECTOR(unit->position, D_00453290);
+        btlSetUnitPosition(unit, unit->position);
+        break;
+    case 8:
+        unit = battle->debug.selectedUnit;
+        if (!(unit->status.flags & 0x400)) {
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            battle->battleFlags &= ~0x400000;
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        parameters = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->resourceIndex);
+        if (sdfPadButtonStates[2] < 0) {
+            record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+            parameters->reach = record->unk18;
+            parameters->height = record->unk1C;
+            parameters->position[0] = record->position[0];
+            parameters->position[1] = record->position[1];
+            parameters->position[2] = record->position[2];
+        }
+        memcpy(&D_004532A0, parameters, sizeof(BtlDebugTransformParameters));
+        func_0020D260((u32)&D_003BFF88);
+        func_0020D228();
+        func_0020D270((u32)&D_003BFF88);
+        func_0020D230();
+        memcpy(parameters, &D_004532A0, sizeof(BtlDebugTransformParameters));
+        savedScale = parameters->scaleOverride;
+        parameters->scaleOverride = 1.0f;
+        battle->battleFlags |= 0x400000;
+        btlApplyUnitEffectScale(unit);
+        parameters->scaleOverride = savedScale;
+        break;
+    case 9:
+        unit = battle->debug.selectedUnit;
+        D_00436D90 = unit;
+        record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        memcpy(&D_004532C0, record, sizeof(BtlActorStatusRecord));
+        memcpy(&D_00453530, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
+        func_0020D260((u32)&D_003C0260);
+        func_0020D228();
+        func_0020D270((u32)&D_003C0260);
+        func_0020D230();
+        memcpy(record, &D_004532C0, sizeof(BtlActorStatusRecord));
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_00436E58) {
+            memcpy(&record->motions[D_00436E58], &D_00453530, sizeof(BtlActorMotionSlot));
+        }
+        mnuQueueColoredGlyphAtPosition(D_003BFE40.x, D_003BFE40.y + D_003BFE40.count * 10 + 4,
+            D_003BFB70[D_00436E58]);
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk20) {
+            battle->battleFlags |= 0x800000;
+        } else {
+            battle->battleFlags &= ~0x800000;
+        }
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk24) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_0020D208(position, 0x10808080, 0, record->unk24 * unit->scale);
+        }
+        selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
+        if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
+             (u32)selectedAddress < (u32)&D_004532C0.scale) ||
+             selectedAddress == (u32)&D_004532C0.unk1C || selectedAddress == (u32)&D_004532C0.unk18) {
+            battle->unk220 |= 0x200;
+        } else {
+            battle->unk220 &= ~0x200;
+        }
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_00453530.unk0C) {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_0020D208(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
+        }
+        if (D_003C0260.flags & 8) {
+            btlApplyUnitModelScaledValue(unit);
+            if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_004532C0.model) {
+                unit->status.flags &= 0x7FFFFFFF;
+                unit->status.flags &= ~0x2000;
+                motion = D_00436E58;
+            } else {
+                unit->status.flags |= 0x80002000;
+                motion = 0;
+            }
+            btlApplyUnitEffectScale(unit);
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                btlApplyScaledUnitEffectParameter(unit, motion,
+                    btlGetSlotRateKind((u8 *)unit, motion), 1.0f);
+                if (D_00453530.kind == 2) {
+                    btlSeekUnitModelFrameZero(unit);
+                }
+            }
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+        }
+        break;
+    case 10:
+        unit = battle->debug.selectedUnit;
+        if (unit == NULL || btlCountTasksForOwner(unit->owner) == 0) {
+            battle->battleFlags = (battle->battleFlags | 0x200) & 0x7FFFFFFF;
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
+
 
 extern BtlUnit *D_00436D90;
 
