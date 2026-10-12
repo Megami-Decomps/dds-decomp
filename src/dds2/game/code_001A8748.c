@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_item_drop.h"
 #include "itf_mes_window.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
@@ -94,12 +95,6 @@ typedef struct EncBgRow {
 extern EncBgRow *D_00435E14;
 
 extern s32 fldConsumeNextSceneRequest(s32 *, s32 *);
-
-typedef struct BattleItemDrop {
-    u16 id;
-    u8 count;
-    u8 pad03;
-} BattleItemDrop;
 
 typedef struct BattleController {
     u8 pad_000[0x214];

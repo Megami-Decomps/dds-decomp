@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -28,12 +29,6 @@ typedef struct SceneSlot {
     u8 b;
     u8 id;
 } SceneSlot;
-
-typedef struct BattleItemDrop {
-    u16 id;
-    u8 count;
-    u8 pad03;
-} BattleItemDrop;
 
 typedef struct SceneFadingRecord {
     SceneSlot slot;
