@@ -878,7 +878,7 @@ extern u32 D_003BA8EC;
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
-extern void func_00232D28(KwlnTask *task);
+extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void func_00232D48(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
@@ -912,7 +912,7 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;
     }
-    task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, func_00232D28, (u32)viewer);
+    task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
     viewer->windowContext = work;
     work->task = task;
     func_00232D48(viewer);

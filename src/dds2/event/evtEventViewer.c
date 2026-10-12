@@ -670,7 +670,7 @@ extern void effEnableColorRectangle(void);
 extern void effDisableColorRectangle(void);
 extern void func_0025EE00(EvtRuntime *);
 
-void func_002476B8(EvtRuntime *viewer) {
+void evtEventViewerApplyEffectToggles(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
         effDrawBlurRectangle(&effGetLoadDescA()->source);
     }
@@ -758,7 +758,7 @@ extern char D_004224A8[];
 /* Apply one timeline key to its effect, audio, message, or fade channel. */
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
 
-void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s32 unused,
+void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s32 unused,
                    EvtRuntime *viewer) {
     s32 nibbles[2];
 
@@ -971,7 +971,7 @@ extern void sdfSetViewFieldOfView(f32);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
-extern void func_002476B8(EvtRuntime *viewer);
+extern void evtEventViewerApplyEffectToggles(EvtRuntime *viewer);
 extern void evtViewerApplySelectedEntry(EvtRuntime *viewer);
 extern u8 D_004372C0[3];
 extern u32 kwlnGetDrawBufferIndex(void);
@@ -1016,7 +1016,7 @@ extern u32 kwlnDrawControlFlags;
 
 void fldInitializeCameraColorResource(void);
 
-extern void func_0024DBB8(PolyMovieWork *work);
+extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuMarkTitleStreamResetPending(void);
 extern s32 func_0024D760(PolyMovieWork *ctx);
@@ -1121,7 +1121,7 @@ void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s3
 extern void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 extern void evtEventViewerFreeBuffer(EvtRuntimeChild *key);
 
-void func_00247EE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
+void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
                    s32 interval, EvtRuntime *viewer) {
     u8 slot;
     s32 active;
@@ -1351,8 +1351,8 @@ extern void evtEventViewerApplyEffectChannels(s32, EvtRuntime *);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *);
 extern void func_0024A400(EvtRuntime *);
 extern s32 evtViewerTestIndexedCondition(u32);
-extern void func_00247858(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
-extern void func_00247EE0(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
+extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *, EvtRuntimeChild *, s32, s32, EvtRuntime *);
 extern void func_00248000(EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntimeChild *, s32, s32 *, EvtRuntime *, s32);
 extern void evtResetUnitVectorSlots();
 extern void kwlnCancelConfiguredFadeFrames(void);
@@ -1442,10 +1442,10 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
             if ((difference == 0 && time == child->frame) ||
                 (difference > 0 && time >= child->frame &&
                  time < child->frame + difference)) {
-                func_00247858(group, child, time, difference, viewer);
+                evtEventViewerApplyTimelineKey(group, child, time, difference, viewer);
                 func_00247DE0(group, child, time, difference, viewer);
             } else {
-                func_00247EE0(group, child, time, difference, viewer);
+                evtEventViewerFadeEffectSlot(group, child, time, difference, viewer);
             }
         }
     }
@@ -1896,7 +1896,7 @@ extern s32 fldTitleIsActive(void);
 extern void func_0014E668(s32 active);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 
-void func_00249EE8(EvtRuntime *viewer) {
+void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
     if (func_0025E7B0(viewer) == 1 || scrCommandIsProcessControlFlagClear() == 0) {
         if (viewer->glyphTickCount == 0) {
             viewer->glyphTickCount = 1;
@@ -2402,7 +2402,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004227C0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004227D0);
 
-s32 func_0024B080(s32 arg0, s32 arg1, EvtRuntime *viewer) {
+s32 evtEventViewerOpenInputMenu(s32 arg0, s32 arg1, EvtRuntime *viewer) {
     switch ((u32)viewer->inputA) {
     case 0:
     case 1:
@@ -2543,7 +2543,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AB0);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00422AC0);
 
-s32 func_0024B6A8(s32 command, s32 unused, EvtRuntime *viewer) {
+s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *viewer) {
     EvtRuntimeChild *key;
 
     if (command == -4) {
@@ -3205,7 +3205,7 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, EvtRuntime *viewe
     }
 }
 
-s32 func_0024CA28(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeGroup *group;
     s32 selection;
     s32 target;
@@ -3366,7 +3366,7 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime
 /* Restore default effect parameters for the selected timeline key. */
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00423050);
 
-s32 func_0024D148(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
     u128 *destination;
     u128 *source;
@@ -3450,7 +3450,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         func_0024A5F8(viewer);
     }
     evtViewerAdvanceGlyphTick(viewer);
-    func_002476B8(viewer);
+    evtEventViewerApplyEffectToggles(viewer);
     flags = viewer->flags;
     if (!(flags & 8)) {
         if (D_0037F510[0x22] < 0) {
@@ -3470,7 +3470,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         }
         if (D_0037F510[0x22] >= 0 && D_0037F510[0x2C] < 0 &&
             evtViewerHasUpdateFlag(viewer) == 0) {
-            func_00249EE8(viewer);
+            evtEventViewerStartEndCountdown(viewer);
         }
     }
     if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
@@ -3553,7 +3553,7 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
     PolyMovieWork *window;
     s32 windowFlags;
 
-    func_0024DBB8(viewer->windowContext);
+    evtEventViewerPollMovieResources(viewer->windowContext);
     window = viewer->windowContext;
     windowFlags = window->flags;
     if ((windowFlags & 8) == 0) {
@@ -3670,7 +3670,7 @@ void evtEventViewerDestroyActive(KwlnTask *task) {
     evtViewerRelease(viewer);
 }
 
-void func_0024DAC0(KwlnTask *task) {
+void evtEventViewerDestroyActiveAlternate(KwlnTask *task) {
     EvtRuntime *viewer;
 
     viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
@@ -3705,7 +3705,7 @@ void evtEventViewerDestroyTask(void) {
 }
 
 
-void func_0024DBB8(PolyMovieWork *assets) {
+void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
 
     if (assets->flags & 8) {
         return;

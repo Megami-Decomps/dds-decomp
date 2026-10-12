@@ -855,7 +855,7 @@ extern s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
-extern void func_0024DAC0(KwlnTask *task);
+extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void func_0024DAE0(EvtRuntime *viewer);
 extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */
 
@@ -889,7 +889,7 @@ KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;
     }
-    task = kwlnTaskCreate(D_00423360, taskId, 1, 1, evtViewerStartUpdate, func_0024DAC0, (u32)viewer);
+    task = kwlnTaskCreate(D_00423360, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
     viewer->windowContext = work;
     work->task = task;
     func_0024DAE0(viewer);
