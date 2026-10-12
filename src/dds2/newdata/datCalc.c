@@ -2074,14 +2074,14 @@ s32 evtPushAvailableIntegerValue(void) {
 
 /* The paired DDS1 readers identify the halfword index as the entry's level.
  * The shared coefficient arrays start at level one. */
-s32 func_0011DFE0(void) {
+s32 evtPushLevelMaxHpGrowth(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[levelIndex - 1]);
     return 1;
 }
 
-s32 func_0011E018(void) {
+s32 evtPushLevelMaxMpGrowth(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[levelIndex - 1]);
@@ -2119,14 +2119,14 @@ s32 evtSelectStatGrade(void) {
     return 1;
 }
 
-s32 func_0011E128(void) {
+s32 evtPushLevelValueA(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesA[levelIndex - 1]);
     return 1;
 }
 
-s32 func_0011E160(void) {
+s32 evtPushLevelValueB(void) {
     DatPartyRecord *entry = (DatPartyRecord *)D_0043E5C0.first;
     u16 levelIndex = entry->level;
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[levelIndex - 1]);

@@ -747,7 +747,11 @@
 0x0011C2A8	evtPushAvailableChoiceRatio	inferred	When available, divides choice-dependent constant by second script parameter and pushes result. [names_reviewed7.tsv]
 0x0011C310	evtPushAvailableFloatValue	inferred	Pushes fetched float when data is available, otherwise pushes zero float. [names_reviewed7.tsv]
 0x0011C350	evtPushAvailableIntegerValue	inferred	Pushes fetched integer when data is available, otherwise pushes zero. [names_reviewed7.tsv]
+0x0011C390	evtPushLevelMaxHpGrowth	inferred	Reads the current party record level and pushes maxHpGrowth[level - 1] as the script float result.
+0x0011C3C0	evtPushLevelMaxMpGrowth	inferred	Reads the current party record level and pushes maxMpGrowth[level - 1] as the script float result.
 0x0011C3F0	evtSelectStatGrade	inferred	evt event state and dispatch in game/code_00119900.c
+0x0011C4C0	evtPushLevelValueA	inferred	Reads the current party record level and pushes levelValuesA[level - 1] as the script float result.
+0x0011C4F0	evtPushLevelValueB	inferred	Reads the current party record level and pushes levelValuesB[level - 1] as the script float result.
 0x0011C580	evtScriptSelectRandomValue	inferred	evt event state and dispatch in game/code_00119900.c
 0x0011C5D8	evtPushRosterBaseValue	inferred	Indexes roster details using current event entry and pushes base value. [names_reviewed7.tsv]
 0x0011C610	evtSelectFineStatGrade	inferred	evt event state and dispatch in game/code_00119900.c
