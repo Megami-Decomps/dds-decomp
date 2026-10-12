@@ -1678,11 +1678,11 @@ s32 evtPushAvailableIntegerValue(void) {
     return 1;
 }
 
-void func_0011C390(void) {
+void evtPushLevelMaxHpGrowth(void) {
     scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C3C0(void) {
+void evtPushLevelMaxMpGrowth(void) {
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
@@ -1716,11 +1716,11 @@ void evtSelectStatGrade(void) {
     scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
 }
 
-void func_0011C4C0(void) {
+void evtPushLevelValueA(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C4F0(void) {
+void evtPushLevelValueB(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
