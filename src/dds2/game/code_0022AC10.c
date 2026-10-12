@@ -28,6 +28,12 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "eff_packet_params.h"
+#include "sdf_packet_append.h"
+#include "sdf_asset_state.h"
+#include "sdf_quaternion.h"
+#include "sdf_gs_packet.h"
+#include "fpu.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
@@ -89,7 +95,7 @@
 
 #define BTL_EVENT_SEQUENCE_PAN 0x3F
 
-extern u8 D_00436F5D;
+extern s8 D_00436F5D;
 
 extern s32 mdlFlagTest(s32);
 
@@ -1525,7 +1531,267 @@ void btlReleaseOwnedData(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022D2F8);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void sdfInvertRigidVuTransform(void);
+extern void sdfSetPrimaryIdentityMatrixVU(void);
+extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern void *func_00167A10(EffPacketParams *);
+extern f32 func_00353228(f32);
+extern f32 func_00353140(f32);
+extern SdfAsset *D_00436D10;
+extern EffPacketParams D_00453030;
+extern u32 D_003BFB30[];
+extern f32 D_003BFAF0[6][2];
+extern f32 D_003BFB40[4];
+extern f32 D_00384790[4][4];
+extern SdfPoolNode D_00380708, D_00380628;
+
+typedef struct BtlTileAlphaPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite alpha;
+} BtlTileAlphaPacket;
+typedef char BtlTileAlphaPacketSize[(sizeof(BtlTileAlphaPacket) == 0x30) ? 1 : -1];
+
+/* vu0 routine: animate the captured-screen overlay and its staggered fading tiles. */
+s32 func_0022D2F8(u32 backgroundColor, u32 color) {
+    f32 positions[6][4] __attribute__((aligned(16)));
+    f32 normals[6][4] __attribute__((aligned(16)));
+    f32 coordinates[6][2];
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 center[4] __attribute__((aligned(16)));
+    s32 complete = 1;
+    SdfListHead *list;
+    SdfListHead *tiles;
+    u64 *packet;
+    u32 row;
+    u32 column;
+    u32 vertex;
+    s32 x;
+    s32 y;
+    s32 xStep;
+    s32 yStep;
+    s32 pixelX;
+    s32 pixelY;
+    s32 centerX;
+    s32 centerY;
+    s32 centerOffsetX;
+    s32 centerOffsetY;
+    u32 alpha;
+    f32 height;
+    f32 width;
+    f32 phase;
+    f32 waveRadius;
+    f32 dx;
+    f32 dy;
+    f32 radius;
+    f32 influence;
+    f32 directionX;
+    f32 directionY;
+    f32 depth;
+    f32 size;
+    f32 angle;
+    f32 fade;
+    f32 planarX;
+    f32 planarY;
+
+    if (color & 0xFF000000) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = 0x44;
+        packet[7] = 0x42;
+        sdfAppendPacket(list, (u32)packet);
+        btlBuildOverlayQuadPacket(list, 0x40, backgroundColor, -0x100);
+        D_00380708.append(&D_00380708, list);
+    }
+    if (btlRuntimeState.options & 1) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = ((u64)((u32)color >> 24) << 32) | 0x64;
+        packet[7] = 0x42;
+        sdfAppendPacket(list, (u32)packet);
+        func_0022CE30(list, 0x40, color, -0x100, 1.0f);
+        D_00380608.append(&D_00380608, list);
+        if (D_00436D10 == NULL) {
+            D_00436D10 = sdfCreateAssetWithDrawEntries();
+            btlInitLightParams();
+            memset(&D_00453030, 0, sizeof(D_00453030));
+            D_00453030.primitive = 0x4000;
+            D_00453030.parameters = D_003BFB30;
+            D_00453030.parameterCount = 4;
+            D_00453030.vertexCount = 6;
+        }
+        tiles = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(tiles);
+        VU0_LOAD_MATRIX(D_00384790);
+        sdfInvertRigidVuTransform();
+        waveRadius = 640.0f;
+        sdfConsAppendVuPacket(tiles, NULL);
+        kwlnHeldTextureReference->primaryBuffer->clampState = 0x37C00000008ULL;
+        sdfSetAssetPrimaryTextureAddress(D_00436D10, kwlnHeldTextureReference);
+        sdfConsAppendAssetPacket(tiles, D_00436D10, NULL);
+        D_00453030.color = 0x80808080;
+        D_00453030.positions = (u128 *)positions;
+        D_00453030.normals = (u128 *)normals;
+        D_00453030.texcoords = (u32 *)coordinates;
+        height = func_00353228(D_0037F980.camera.fov * 0.5f) * 1000.0f;
+        width = height * 1.333333254f;
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = 0x8000000064ULL;
+        packet[7] = 0x42;
+        sdfAppendPacket(tiles, (u32)packet);
+        xStep = btlRuntimeState.unk20 << 5;
+        yStep = btlRuntimeState.unk24 << 5;
+        phase = -(btlRuntimeState.unk28 / waveRadius) * 1.5707963f;
+        y = 0;
+        for (row = 0; row < (u32)btlRuntimeState.particleRowCount; row++) {
+            x = (row & 1) ? xStep >> 1 : 0;
+            for (column = 0; column < (u32)btlRuntimeState.particlesPerRow; column++) {
+                dx = (f32)(x - 0x1000);
+                dy = (f32)(y - 0xE00);
+                if (dx > 0.0001f || dy > 0.0001f || dx < -0.0001f || dy < -0.0001f) {
+                    radius = fsqrtf(dx * dx + dy * dy);
+                    influence = btlRuntimeState.unk28 / radius;
+                    directionX = dx / radius;
+                    directionY = dy / radius;
+                    if (influence > 1.0f) {
+                        influence = 1.0f;
+                    }
+                    angle = func_00353140(radius / waveRadius * 1.5707963f + phase);
+                    axis[0] = -directionY;
+                    axis[1] = directionX;
+                    axis[2] = 0.0f;
+                    sdfBuildVuRotationFromAxisAngle(angle * 0.78539815f * influence, (RwV3d *)axis);
+                } else {
+                    radius = 0.0f;
+                    influence = 0.0f;
+                    directionX = 0.0f;
+                    directionY = 0.0f;
+                    sdfSetPrimaryIdentityMatrixVU();
+                }
+                if (radius < btlRuntimeState.unk30) {
+                    if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay == 0) {
+                        u32 age;
+                        fade = (f32)btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age / 18.0f;
+                        if (fade > 1.0f) {
+                            fade = 1.0f;
+                        }
+                        size = (1.0f - fade) * 240.0f;
+                        axis[0] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0];
+                        axis[1] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1];
+                        axis[2] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2];
+                        sdfVuLoadRotationMatrixFromAxisAngle((RwV3d *)axis,
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle);
+                        sdfComposeVuMatrixFromRegisters();
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle +=
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed;
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement +=
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed;
+                        if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha) {
+                            if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age >= 11) {
+                                btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha -= 32;
+                            }
+                            complete = 0;
+                        }
+                        age = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age;
+                        alpha = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha;
+                        depth = 1000.0f - btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement;
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = age + 1;
+                        goto draw_tile;
+                    } else {
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay--;
+                    }
+                }
+                size = 240.0f;
+                alpha = 0x80;
+                depth = 1000.0f;
+                complete = 0;
+draw_tile:
+                if (alpha) {
+                    BtlTileAlphaPacket *alphaPacket = (BtlTileAlphaPacket *)sdfAllocPacketAligned(sizeof(BtlTileAlphaPacket));
+                    alphaPacket->header.dmaTag = 2;
+                    alphaPacket->header.vifCommands = 0x5000000210000000ULL;
+                    alphaPacket->header.gifTag = 0x1000000000008001ULL;
+                    alphaPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+                    alphaPacket->alpha.value = ((u64)alpha << 32) | 0x64;
+                    alphaPacket->alpha.registerId = SDF_GS_ALPHA_1;
+                    sdfAppendPacket(tiles, (u32)alphaPacket);
+                    planarX = directionX * radius;
+                    centerOffsetX = (s32)(planarX * (1.0f + influence * 0.125f));
+                    planarY = directionY * radius;
+                    centerOffsetY = (s32)(planarY * (1.0f + influence * 0.125f));
+                    center[0] = width * (f32)centerOffsetX / 4096.0f;
+                    center[1] = height * (f32)centerOffsetY / 3584.0f;
+                    center[2] = depth;
+                    centerX = centerOffsetX + 0x1000;
+                    centerY = centerOffsetY + 0xE00;
+                    VU0_LOAD_VF($vf11, center);
+                    for (vertex = 0; vertex < 6; vertex++) {
+                        pixelX = centerX + (s32)(D_003BFAF0[vertex][0] * size);
+                        pixelY = centerY + (s32)(D_003BFAF0[vertex][1] * size);
+                        coordinates[vertex][0] = (f32)pixelX / 8192.0f;
+                        coordinates[vertex][1] = (f32)(pixelY >> 1) * 0.875f / 3584.0f;
+                        positions[vertex][0] = width * (f32)(pixelX - 0x1000) / 4096.0f;
+                        positions[vertex][1] = height * (f32)(pixelY - 0xE00) / 3584.0f;
+                        positions[vertex][2] = depth;
+                        VU0_LOAD_VF($vf10, positions[vertex]);
+                        VU0_SUB($vf10, $vf10, $vf11);
+                        VU0_APPLY_MATRIX($vf10, $vf10);
+                        VU0_ADD($vf10, $vf10, $vf11);
+                        VU0_STORE_VF($vf10, positions[vertex]);
+                        VU0_LOAD_VF($vf10, D_003BFB40);
+                        VU0_ROTATE_VEC($vf10, $vf10);
+                        VU0_STORE_VF($vf10, normals[vertex]);
+                    }
+                    sdfAppendPacket(tiles, (u32)func_00167A10(&D_00453030));
+                }
+                x += xStep;
+            }
+            y += yStep;
+        }
+        btlRuntimeState.unk28 += btlRuntimeState.unk2C;
+        btlRuntimeState.unk2C += -5.877550602f;
+        if (btlRuntimeState.unk2C < 45.71428299f) {
+            btlRuntimeState.unk2C = 45.71428299f;
+        }
+        if ((s32)color >= 0) {
+            btlRuntimeState.unk30 += btlRuntimeState.unk34;
+        }
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x717FB;
+        packet[5] = 0x47;
+        packet[6] = 0x44;
+        packet[7] = 0x42;
+        sdfAppendPacket(tiles, (u32)packet);
+        D_00380628.append(&D_00380628, tiles);
+    }
+    return complete;
+}
+
 
 void btlInitFadeColors(void) {
     func_0022D040();
@@ -2097,7 +2363,451 @@ void func_0022F068(void) {
     state->unk_E0E = -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F180);
+/* Battle debug record views. Only observed members are named. */
+typedef struct BtlDebugValueEntry {
+    const char *name;
+    u32 flags;
+    u32 valueAddress;
+    u8 pad0C[0x0C];
+} BtlDebugValueEntry;
+
+typedef struct BtlDebugValueMenu {
+    const char *name;
+    s32 x;
+    s32 y;
+    u32 cursor;
+    u32 flags;
+    BtlDebugValueEntry *entries;
+    u32 count;
+} BtlDebugValueMenu;
+
+typedef struct BtlDebugTransformParameters {
+    f32 position[3];
+    f32 scaleOverride;
+    f32 reach;
+    f32 height;
+} BtlDebugTransformParameters;
+
+typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
+typedef char BtlDebugTransformExtent[(sizeof(BtlDebugTransformParameters) == 0x18) ? 1 : -1];
+
+extern BtlIndexList *fldGetSceneScriptValue(void);
+extern s32 fldGetSceneScriptState(void);
+extern void fldCreateSceneSpriteTask(s32);
+extern void fldMarkActiveSceneScriptState(void);
+extern void func_001E3108(BtlUnit *, f32 *);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateControlObject(void);
+extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
+extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
+extern s32 btlGetUnitModelFrameCount(BtlUnit *);
+extern s32 btlCountTasksForOwner(u64);
+extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern void btlSetUnitPosition(BtlUnit *, f32 *);
+extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern void btlApplyUnitEffectScale(BtlUnit *);
+extern void btlApplyUnitModelScaledValue(BtlUnit *);
+extern void btlSeekUnitModelFrameZero(BtlUnit *);
+extern void func_001AA898(DatPartyRecord *, u32);
+extern void func_0020D208(f32 *, u32, s32, f32);
+extern void func_0020D1B0(s32, s32, s32, const char *);
+extern void func_0020D228(void);
+extern void func_0020D230(void);
+extern u32 func_0020D260(u32);
+extern void func_0020D270(u32);
+extern void *btlSelectSharedOrIndexedTransformParameters(s32, s32);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 D_003BFB50[], D_003BFB70[];
+extern BtlDebugValueMenu D_003BFE40, D_003BFEC0, D_003BFF88, D_003C0260;
+extern BtlDebugValueEntry D_003BFFC0[];
+extern DatPartyRecord *D_00435DD4;
+extern s16 D_00436D8E;
+extern BtlUnit *D_00436D90;
+extern u16 D_00436E58;
+extern char D_00436F00[];
+extern u8 D_00438F88;
+extern s32 D_00438F8C;
+extern u16 D_004530B0[7];
+extern DatPartyRecord D_004530C0;
+extern f32 D_00453290[4];
+extern BtlDebugTransformParameters D_004532A0;
+extern BtlActorStatusRecord D_004532C0;
+extern BtlActorMotionSlot D_00453530;
+
+/* Advance the battle model/debug editor. The selected state remains active
+ * until its pending unit tasks have completed. */
+s32 func_0022F180(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    char text[0x70];
+    BtlState *battle;
+    BtlUnit *unit;
+    BtlIndexList *units;
+    BtlRuntimeTask *modelTask;
+    BtlRuntimeTask *soundTask;
+    BtlRuntimeTask *dependent;
+    MenuList *actionMenu;
+    MenuList *modelMenu;
+    MenuList *motionMenu;
+    MenuList *gunMenu;
+    BtlActorStatusRecord *record;
+    BtlDebugTransformParameters *parameters;
+    u32 modelIndex;
+    u32 model;
+    u32 health;
+    u32 mana;
+    s32 currentFrame;
+    s32 sceneState;
+    u32 motion;
+    f32 savedScale;
+    u32 selectedAddress;
+    u64 packedStatus;
+
+    battle = (BtlState *)btlGetRuntime();
+    switch (battle->debug.unk00) {
+    case 0:
+        battle->battleFlags = (battle->battleFlags | 0x80000000) & ~0x200;
+        battle->debug.unk00 = 1;
+        fldCreateSceneSpriteTask(0);
+        break;
+    case 1:
+        sceneState = fldGetSceneScriptState();
+        if (sceneState == 3) {
+            battle->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
+            fldMarkActiveSceneScriptState();
+            battle->debug.unk00 = 2;
+        } else if (sceneState == 4) {
+            fldMarkActiveSceneScriptState();
+            battle->debug.unk00 = 10;
+        } else {
+            units = fldGetSceneScriptValue();
+            if (btlGetIndexListCount(units) == 1) {
+                unit = btlGetIndexListEntry(units, 0);
+                func_001E3108(unit, position);
+                btlBossDebugPrintfN(150, 396, 0, "MDL:[%03X (%X-%03X)]",
+                    unit->partyRecord.unitId, unit->resourceKind, unit->resourceIndex);
+                btlBossDebugPrintfN(150, 408, 0, "FLD:[%03d_%02d]",
+                    battle->background.ids.major, battle->background.ids.minor);
+                btlBossDebugPrintfN(150, 420, 0, "POS:[%.2f,%.2f,%.2f]",
+                    (double)position[0], (double)position[1], (double)position[2]);
+                if ((u8)sdfPadButtonStates[9] & 2) {
+                    btlStartTask(btlCreateEffObjB(unit, D_00436D8E));
+                    D_00436D8E = D_00436D8E >= 205 ? 0 : D_00436D8E + 1;
+                }
+                if (btlCountTasksByKind(63)) {
+                    btlBossDebugPrintfN(150, 396, 0, "MSG:[%03d]", D_00436D8E);
+                }
+            }
+        }
+        break;
+    case 2:
+        actionMenu = &battle->debug.actionMenu;
+        if (mnuListMoveCursor(actionMenu)) {
+            switch (battle->debug.actionMenu.cursor) {
+            case 0: battle->debug.unk00 = 3; break;
+            case 1: battle->debug.unk00 = 4; break;
+            case 2: battle->debug.unk00 = 5; break;
+            case 3: battle->debug.unk00 = 6; break;
+            case 4: battle->debug.unk00 = 7; break;
+            case 5: battle->debug.unk00 = 8; break;
+            case 6: battle->debug.unk00 = 9; break;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 10;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100, (u8 *)actionMenu, D_003BFB50);
+        break;
+    case 3:
+        modelMenu = &battle->debug.modelMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(modelMenu)) {
+            modelTask = btlCreateModelChangeTask(unit, (unit->partyRecord.flags >> 5) & 1,
+                battle->debug.modelMenu.cursor, 0, 0, 1);
+            btlStartTask(modelTask);
+            unit->status.flags &= ~2;
+            dependent = btlCreateControlObject();
+            dependent->startCondition.kind = 4;
+            dependent->startCondition.value.handle = modelTask->handle;
+            btlStartTask(dependent);
+            if (unit->status.flags & 0x200) {
+                model = battle->debug.modelMenu.cursor;
+                modelIndex = model - 32;
+                if (model < 32) {
+                    if (model >= 16) {
+                        model -= 16;
+                    }
+                    modelIndex = model;
+                }
+                btlCopyUnitStats(unit, &D_00435DD4[modelIndex]);
+                if (battle->debug.modelMenu.cursor >= 32) {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags |= 0x17;
+                } else if (battle->debug.modelMenu.cursor >= 16) {
+                    unit->status.flags |= 0x1000;
+                    unit->partyRecord.flags |= 0x1007;
+                } else {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags |= 7;
+                }
+            } else {
+                btlBossDebugPrintf("btl:id=%X\n", battle->debug.modelMenu.cursor);
+                func_001AA898(&unit->partyRecord, battle->debug.modelMenu.cursor);
+                unit->partyRecord.flags |= 0x23;
+            }
+            battle->debug.unk00 = 10;
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        if (unit->partyRecord.flags & 0x20) {
+            if (battle->unk_E0C != 0) {
+                battle->unk_E0C = 0;
+                battle->debug.modelMenu.count = 384;
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+            if (battle->debug.modelMenu.cursor >= 384) {
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+        } else {
+            if (battle->unk_E0C != 1) {
+                battle->unk_E0C = 1;
+                battle->debug.modelMenu.count = 48;
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+            if (battle->debug.modelMenu.cursor >= 48) {
+                battle->debug.modelMenu.top = 0;
+                battle->debug.modelMenu.cursor = 0;
+            }
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)64, 164, (u8 *)modelMenu,
+            (unit->partyRecord.flags & 0x20) ? battle->debug.table1 : battle->debug.table0);
+        break;
+    case 4:
+        unit = battle->debug.selectedUnit;
+        memcpy(&D_004530C0, &unit->partyRecord, sizeof(DatPartyRecord));
+        D_004530B0[0] = unit->entrySlots[0].code;
+        D_004530B0[1] = unit->entrySlots[1].code;
+        D_004530B0[2] = unit->entrySlots[2].code;
+        D_004530B0[3] = unit->entrySlots[3].code;
+        D_004530B0[4] = unit->entrySlots[4].code;
+        D_004530B0[5] = unit->entrySlots[5].code;
+        D_004530B0[6] = unit->entrySlots[6].code;
+        D_00438F8C = unit->selectedEntryIndex;
+        func_0020D260((u32)&D_003BFE40);
+        func_0020D228();
+        func_0020D270((u32)&D_003BFE40);
+        func_0020D230();
+        btlDrawUnitAffinityDebug(unit, 256, 32);
+        if (sdfPadButtonStates[0] & 2) {
+            health = D_004530C0.hp >> 1;
+            D_004530C0.hp = health;
+            if (health == 0) {
+                D_004530C0.hp = 1;
+            }
+            mana = D_004530C0.mp >> 1;
+            D_004530C0.mp = mana;
+            if (mana == 0) {
+                D_004530C0.mp = 1;
+            }
+        }
+        if (D_00438F88 != 0) {
+            D_004530C0.status = 1 << (D_00438F88 - 1);
+        } else {
+            D_004530C0.status = 0;
+        }
+        memcpy(&unit->partyRecord, &D_004530C0, sizeof(DatPartyRecord));
+        btlRefreshUnitMotionSelection(unit);
+        if (unit->status.flags & 0x200) {
+            memcpy(&datGameState->party[unit->unk2E4], &D_004530C0, sizeof(DatPartyRecord));
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        break;
+    case 5:
+        motionMenu = &battle->debug.motionMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(motionMenu)) {
+            battle->unk_E0E = 0;
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        if (sdfPadButtonStates[0] < 0) {
+            battle->unk_E0E = (s8)battle->unk4C4 * 3;
+        }
+        if (battle->unk_E0E > 0) {
+            battle->unk_E0E--;
+            func_0035C860(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
+            func_0020D1B0(32, 400, 6, text);
+        }
+        if (battle->unk_E0E == 0) {
+            motion = battle->debug.motionMenu.cursor;
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                soundTask = btlCreateHookedUnitSoundTask(unit, motion);
+                btlStartTask(soundTask);
+                dependent = btlAllocateIndexedUnitEffectTask(unit, motion, 0, 1.0f);
+                dependent->startCondition.kind = 4;
+                dependent->startCondition.value.handle = soundTask->handle;
+                btlStartTask(dependent);
+                battle->unk_E0E = -1;
+            }
+        }
+        if (battle->unk_E0E <= 0) {
+            currentFrame = (s32)btlGetUnitModelValue1C(unit);
+            func_0035C860(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
+            func_0020D1B0(32, 400, 0, text);
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, (u8 *)motionMenu, D_003BFB70);
+        break;
+    case 6:
+        gunMenu = &battle->debug.gunMenu;
+        unit = battle->debug.selectedUnit;
+        if (mnuListMoveCursor(gunMenu)) {
+            memcpy(&packedStatus, &unit->status, sizeof(packedStatus));
+            if ((packedStatus & 0x1200) == 0x200) {
+                unit->partyRecord.menuValue = (u16)battle->debug.gunMenu.cursor + 0xA0;
+                btlStartTask(btlCreateGunLoadPollTask(unit));
+                battle->debug.unk00 = 2;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            battle->debug.unk00 = 2;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, (u8 *)gunMenu, battle->debug.table2);
+        break;
+    case 7:
+        unit = battle->debug.selectedUnit;
+        if (sdfPadButtonStates[3] < 0) {
+            battle->battleFlags &= ~0x400000;
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        PCP_COPY_VECTOR(D_00453290, unit->position);
+        func_0020D260((u32)&D_003BFEC0);
+        if (sdfPadButtonStates[2] < 0) {
+            D_00453290[0] = 0.0f;
+            D_00453290[1] = 0.0f;
+            D_00453290[2] = 0.0f;
+            D_00453290[3] = 0.0f;
+        }
+        func_0020D228();
+        func_0020D270((u32)&D_003BFEC0);
+        func_0020D230();
+        PCP_COPY_VECTOR(unit->position, D_00453290);
+        btlSetUnitPosition(unit, unit->position);
+        break;
+    case 8:
+        unit = battle->debug.selectedUnit;
+        if (!(unit->status.flags & 0x400)) {
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            battle->battleFlags &= ~0x400000;
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+            break;
+        }
+        parameters = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->resourceIndex);
+        if (sdfPadButtonStates[2] < 0) {
+            record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+            parameters->reach = record->unk18;
+            parameters->height = record->unk1C;
+            parameters->position[0] = record->position[0];
+            parameters->position[1] = record->position[1];
+            parameters->position[2] = record->position[2];
+        }
+        memcpy(&D_004532A0, parameters, sizeof(BtlDebugTransformParameters));
+        func_0020D260((u32)&D_003BFF88);
+        func_0020D228();
+        func_0020D270((u32)&D_003BFF88);
+        func_0020D230();
+        memcpy(parameters, &D_004532A0, sizeof(BtlDebugTransformParameters));
+        savedScale = parameters->scaleOverride;
+        parameters->scaleOverride = 1.0f;
+        battle->battleFlags |= 0x400000;
+        btlApplyUnitEffectScale(unit);
+        parameters->scaleOverride = savedScale;
+        break;
+    case 9:
+        unit = battle->debug.selectedUnit;
+        D_00436D90 = unit;
+        record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        memcpy(&D_004532C0, record, sizeof(BtlActorStatusRecord));
+        memcpy(&D_00453530, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
+        func_0020D260((u32)&D_003C0260);
+        func_0020D228();
+        func_0020D270((u32)&D_003C0260);
+        func_0020D230();
+        memcpy(record, &D_004532C0, sizeof(BtlActorStatusRecord));
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_00436E58) {
+            memcpy(&record->motions[D_00436E58], &D_00453530, sizeof(BtlActorMotionSlot));
+        }
+        mnuQueueColoredGlyphAtPosition(D_003BFE40.x, D_003BFE40.y + D_003BFE40.count * 10 + 4,
+            D_003BFB70[D_00436E58]);
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk20) {
+            battle->battleFlags |= 0x800000;
+        } else {
+            battle->battleFlags &= ~0x800000;
+        }
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk24) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_0020D208(position, 0x10808080, 0, record->unk24 * unit->scale);
+        }
+        selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
+        if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
+             (u32)selectedAddress < (u32)&D_004532C0.scale) ||
+             selectedAddress == (u32)&D_004532C0.unk1C || selectedAddress == (u32)&D_004532C0.unk18) {
+            battle->unk220 |= 0x200;
+        } else {
+            battle->unk220 &= ~0x200;
+        }
+        if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_00453530.unk0C) {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_0020D208(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
+        }
+        if (D_003C0260.flags & 8) {
+            btlApplyUnitModelScaledValue(unit);
+            if (D_003BFFC0[D_003C0260.cursor].valueAddress != (u32)&D_004532C0.model) {
+                unit->status.flags &= 0x7FFFFFFF;
+                unit->status.flags &= ~0x2000;
+                motion = D_00436E58;
+            } else {
+                unit->status.flags |= 0x80002000;
+                motion = 0;
+            }
+            btlApplyUnitEffectScale(unit);
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                btlApplyScaledUnitEffectParameter(unit, motion,
+                    btlGetSlotRateKind((u8 *)unit, motion), 1.0f);
+                if (D_00453530.kind == 2) {
+                    btlSeekUnitModelFrameZero(unit);
+                }
+            }
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            btlRefreshUnitMotionSelection(unit);
+            battle->debug.unk00 = 2;
+        }
+        break;
+    case 10:
+        unit = battle->debug.selectedUnit;
+        if (unit == NULL || btlCountTasksForOwner(unit->owner) == 0) {
+            battle->battleFlags = (battle->battleFlags | 0x200) & 0x7FFFFFFF;
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
+
 
 extern BtlUnit *D_00436D90;
 
@@ -2279,14 +2989,134 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2C8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_00230978);
+typedef struct BattleDebugSelector {
+    const char *title;
+    u32 unk04;
+    u32 *index;
+} BattleDebugSelector;
+
+typedef struct BattleDebugWindow {
+    u32 unk00;
+    s32 x;
+    s32 y;
+} BattleDebugWindow;
+
+extern BattleDebugSelector D_003C0298;
+extern BattleDebugWindow D_003C05E0;
+extern u8 D_00436F5F, D_00436F61;
+extern u32 D_00436F64, D_00436F68;
+extern u16 D_00436F6C, D_00436F6E, D_00436F70;
+extern u32 D_00436F74, D_00436F78;
+extern const char *D_00436F80, *D_00436F84;
+extern char D_00436F98[];
+extern DatPartyRecord D_003C0620[][5];
+extern u32 func_0020D260(u32);
+extern void func_0020D228(void);
+extern void func_0020D270(u32);
+extern void func_0020D230(void);
+extern s32 func_0011E848(s32);
+extern s32 func_0011E930(s32, f32);
+extern void func_00230D90(void);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
+
+/* Edit encounter settings, preview party/enemy names, and launch the test. */
+s32 func_00230978(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    u32 i;
+    u16 unitId;
+    struct FrFontGlyph *glyph;
+    s32 encounter;
+
+    if (sdfPadButtonStates[3] < 0) {
+        state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11010000;
+        state->unk220 |= 0x40;
+        D_00436F70 = 1;
+    }
+    if (sdfPadButtonStates[0] < 0) {
+        state->battleFlags = (state->battleFlags & 0xEFFEFE3F) | 0x01000000;
+        state->unk220 |= 0x40;
+        D_00436F70 = 1;
+    }
+    if (sdfPadButtonStates[13] < 0) {
+        D_00436F5F ^= 1;
+    }
+    if (D_00436F5F != 0) {
+        D_003C0298.title = D_00436F84;
+        D_003C0298.index = &D_00436F64;
+    } else {
+        D_003C0298.title = D_00436F80;
+        D_003C0298.index = &D_00436F68;
+    }
+    {
+        BattleDebugWindow *window = &D_003C05E0;
+        D_00436F78 = state->unk220;
+        D_00436F74 = state->battleFlags;
+        func_0020D260((u32)window);
+        state->battleFlags = D_00436F74;
+        state->unk220 = D_00436F78;
+        func_0020D228();
+        func_0020D270((u32)window);
+        func_0020D230();
+    }
+    if (D_00436F5F == 0) {
+        for (i = 0; i < 5 && (unitId = D_003C0620[D_00436F61][i].unitId) != 0; i++) {
+            if (unitId - 1u < 15) {
+                glyph = itfCreateConvertedTextGlyph((D_003C05E0.x - 72) << 4,
+                    (D_003C05E0.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                    (const u8 *)D_00435E48 + unitId * 17, NULL);
+                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            }
+        }
+        if (D_00436F68 < 0x400) {
+            for (i = 0; i < 8; i++) {
+                unitId = datBattleSceneRecords[D_00436F68].unitModes[i];
+                if (unitId - 1u < 0x17F) {
+                    glyph = itfCreateConvertedTextGlyph((D_003C05E0.x + 185) << 4,
+                        (D_003C05E0.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                        (const u8 *)D_00435E4C + unitId * 17, NULL);
+                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                }
+            }
+        }
+    } else {
+        btlBossDebugPrintfN(D_003C05E0.x + 185, D_003C05E0.y + 4, 0,
+            D_00436F98, datGameState->unk1444, func_0011E848(D_00436F64));
+    }
+    if (sdfPadButtonStates[1] < 0) {
+        D_00436F5D = 1;
+    }
+    if (D_00436F5D == 0) {
+        return 0;
+    }
+    if (D_00436F5F != 0) {
+        encounter = func_0011E930(D_00436F64, 200.0f);
+        if (encounter == 0) {
+            return 0;
+        }
+        state->effectLayer = D_00436F64;
+        D_00436F68 = encounter & 0xFFFF;
+        btlBossDebugPrintf("btl:test encNo = %X\n", D_00436F68);
+    }
+    func_00230D90();
+    state->battleMode = D_00436F68;
+    if (datBattleSceneRecords[D_00436F68].unk1C != 0 &&
+        datBattleSceneRecords[D_00436F68].unk1E != 0) {
+        state->background.ids.major = datBattleSceneRecords[D_00436F68].unk1C;
+        state->background.ids.minor = datBattleSceneRecords[D_00436F68].unk1E;
+    } else {
+        state->background.ids.major = D_00436F6C;
+        state->background.ids.minor = D_00436F6E;
+    }
+    state->unk26C = D_00436F70;
+    return 1;
+}
 
 extern u8 D_00436F5E;
 extern u8 D_00436F60;
-extern u8 D_00436F61;
 extern u8 D_00436F62;
 extern u8 D_00436F96;
-extern DatPartyRecord D_003C0620[][5];
 extern s32 D_003C3248[5][24];
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *);

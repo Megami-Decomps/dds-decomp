@@ -90,7 +90,170 @@ typedef struct EventDispatchState {
     s32 stage; /* 0x14C */
 } EventDispatchState;
 
-INCLUDE_ASM(const s32, "game/code_00265AD8", func_00265AD8);
+extern const char D_00424D08[];
+extern u8 D_003CE674[];
+extern u8 D_003CE498[];
+extern ShopRankPriceRow D_003CBB70[];
+extern const u8 (*D_00435E5C)[25];
+extern s32 evtIsActiveFlagSet(s32);
+extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
+extern s32 func_00265A60(MenuTerminalContext *);
+extern void dspSetActive(s32);
+extern s32 dspStartEntry(s32);
+extern s32 evtGetMessageWindowControlState(void);
+extern u32 func_00260460(void);
+extern s32 mnuCampFindActiveSlot(void);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
+extern void mnuAwardCampProgressCurrency(void);
+extern void dspStartActivePresetEntry(void);
+
+/* DDS2's twelve-state shop sequence. The stock scan and dispatcher pattern
+ * share the exact DDS1 donor, but fade, reward and preset paths are DDS2's. */
+s32 func_00265AD8(KwlnTask *task) {
+    MenuTerminalContext *state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    s32 *dispatchSlot = &state->popupState;
+    s32 allowed;
+    s32 result;
+
+    result = func_002C4038(&state->transitionWork, dispatchSlot,
+                          0, task);
+    if (result == 0) {
+        if (*dispatchSlot == 0) {
+            allowed = 0;
+            if (kwlnTaskGetTaskByName(D_00424D08) == NULL) {
+                allowed = 1;
+            }
+            if (evtIsActiveFlagSet(0) != 0) {
+                allowed = 1;
+            }
+            if (allowed) {
+                switch (state->phase) {
+                case 0:
+                    mnuShopLoadSpriteAssets(state);
+                    kwlnFadeOutStart(0, 0, 0, 0xF);
+                    state->prepared = 1;
+                    state->phase = 1;
+                    break;
+
+                case 1:
+                    if (state->delayFrames > 0) {
+                        state->delayFrames--;
+                    } else if (evtMenuSetProgressFlag(state) != 0) {
+                        state->phase = 8;
+                    } else if (func_00265A60(state) != 0) {
+                        state->phase = 10;
+                    } else if (mdlFlagTest(4) == 0) {
+                        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE674);
+                    } else if (state->options != 0) {
+                        dspSetActive(1);
+                        dspStartEntry(state->options + 0xF);
+                        state->phase = 2;
+                    } else {
+                        state->phase = 5;
+                    }
+                    break;
+
+                case 2:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->options = func_00260460();
+                        state->phase = 3;
+                        state->rewardCursor = 0;
+                    }
+                    break;
+
+                case 3: {
+                    s32 activeSlot = mnuCampFindActiveSlot();
+                    u32 index;
+
+                    if (activeSlot == -1) {
+                        state->phase = 5;
+                    }
+                    index = state->rewardCursor;
+                    if (index < 32) {
+                        u32 stockOffset = index * sizeof(ShopRankPriceEntry) +
+                                          activeSlot * (s32)sizeof(ShopRankPriceRow);
+                        u32 flagsAddress = (u32)&D_003CBB70[0].entries[0].flags + stockOffset;
+
+                        do {
+                            ShopRankPriceEntry *entry = (ShopRankPriceEntry *)(flagsAddress - sizeof(u32));
+                            u16 itemId = entry->itemId;
+
+                            if ((*(u32 *)flagsAddress & 1) != 0) {
+                                state->rewardCursor = index + 1;
+                                dspSetActive(1);
+                                evtCopyEntryStringToActiveWindow(0, D_00435E5C[itemId]);
+                                dspStartEntry(15);
+                                break;
+                            }
+                            index++;
+                            flagsAddress += sizeof(ShopRankPriceEntry);
+                        } while (index < 32);
+                    }
+                    if (index == 32) {
+                        state->rewardCursor = -1;
+                    }
+                    state->phase = 4;
+                    break;
+                }
+
+                case 4:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        if (state->rewardCursor == -1) {
+                            if (state->options == 2) {
+                                state->phase = 6;
+                            } else {
+                                state->phase = 1;
+                            }
+                        } else {
+                            state->phase = 3;
+                        }
+                    }
+                    break;
+
+                case 6:
+                    dspSetActive(1);
+                    dspStartEntry(0x18);
+                    state->phase = 7;
+                    break;
+
+                case 8:
+                    mnuAwardCampProgressCurrency();
+                    state->phase = 9;
+                    break;
+
+                case 10:
+                    dspStartActivePresetEntry();
+                    state->phase = 11;
+                    break;
+
+                case 7:
+                case 9:
+                case 11:
+                    if (evtGetMessageWindowControlState() == 0) {
+                        evtFinishMessageWindowAndNotify();
+                        state->phase = 1;
+                    }
+                    break;
+
+                case 5:
+                    if (state->retryFrames < 20) {
+                        state->retryFrames++;
+                    } else {
+                        state->phase = 0;
+                        mnuSetPopupEntryFlagged(dispatchSlot, D_003CE498);
+                    }
+                    break;
+                }
+            }
+        }
+        result = 0;
+    }
+    return result;
+}
 
 s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
