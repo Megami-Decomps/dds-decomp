@@ -433,7 +433,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     s32 i;
 
     /* Nested helper retains the outer file cursor and reports one 16-byte-aligned segment span. */
-    s32 func_001186F8(void **slot, u32 unused) {
+    s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
         u32 advance;
 
@@ -461,7 +461,7 @@ void sdfReloadChannelSegments(SdfChannel *table) {
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
-        address += func_001186F8(table->entries[i].slot, table->entries[i].unused);
+        address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfReleaseResourceAllocation(block);
     func_0035B6E0(D_00412AB0, table->path);

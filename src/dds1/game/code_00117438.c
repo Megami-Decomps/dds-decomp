@@ -436,7 +436,7 @@ void sdfReloadChannelSegments(SdfResourceTable *table) {
     s32 i;
 
     /* Copy one segment into *slot and report its length rounded up to 16 bytes. */
-    s32 func_00118170(void **slot, u32 unused) {
+    s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
         u32 advance;
 
@@ -464,7 +464,7 @@ void sdfReloadChannelSegments(SdfResourceTable *table) {
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
-        address += func_00118170(table->entries[i].slot, table->entries[i].unused);
+        address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfReleaseResourceAllocation(block);
     func_003003F0(D_0039F930, table->path);
