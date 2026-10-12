@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -3906,15 +3907,6 @@ void btlInitializeSceneLightingAndTint(void) {
     VU0_STORE_VF_UNCLOBBERED(vf10, context + 0x60);
     ((BtlState *)context)->tint71C = 0x807E5C5E;
 }
-
-typedef struct BtlSceneLightParams {
-    f32 position[3];
-    f32 unk0C;
-    f32 color[3];
-    f32 unk1C;
-    f32 secondaryColor[3];
-    f32 unk2C;
-} BtlSceneLightParams;
 
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     BtlState *work = (BtlState *)btlGetRuntime();

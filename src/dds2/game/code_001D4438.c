@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "btl_task_condition.h"
@@ -2018,11 +2019,6 @@ INCLUDE_ASM(const s32, "game/code_001D4438", func_001D7230);
 void btlEnterLinkageActionState(void) {
 }
 
-typedef struct BtlSceneLightParams {
-    f32 position[3]; f32 unk0C;
-    f32 color[3]; f32 unk1C;
-    f32 secondaryColor[3]; f32 unk2C;
-} BtlSceneLightParams;
 extern char D_00417398[];
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
