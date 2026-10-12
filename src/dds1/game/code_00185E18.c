@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_frame_draw_buffer.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
 #include "sdf.h"
@@ -105,15 +106,8 @@ extern void *billGetWorkTransformMatrix(void *packet);
 struct SdfListHead;
 struct SdfDmaNode;
 
-
-/* Per-frame draw state; DMA builders select packet ranges within each record. */
-typedef struct {
-    u8 dmaPacket[0x40];
-    u8 pad40[0x1F00];
-} BlurFramePacketRecord;
-
 extern SdfPoolNode D_003253E8;
-extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
+extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern u32 kwlnGetDrawBufferIndex(void);
 extern void func_002D4CC8(s32, SdfDmaReferenceChainPacket *, s32);
@@ -274,7 +268,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, tag);
         samplingPacket = (void *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -414,7 +408,7 @@ void effAppendBlurRectanglePackets(void *list, BlurSource *source, u8 fixedPoint
 void effDrawBlurListWithFramePacket(void *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfAllocPacketAligned(0x40);
 
-    func_002D4CC8((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
+    func_002D4CC8((s32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].baseBytes, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
     D_003253E8.append(&D_003253E8, list);
 }
