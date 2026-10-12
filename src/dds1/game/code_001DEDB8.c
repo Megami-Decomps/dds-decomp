@@ -121,9 +121,9 @@ extern void func_001EB368(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001E6260(BtlLinkedCommand *, BtlCamState *);
+extern void btlAdvanceSkillCameraCursor(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001E6368(BtlLinkedCommand *, BtlCamState *);
+extern void btlInitializeRandomCameraCursor(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceCommandCursor(BtlLinkedCommand *, BtlCamState *);
 
@@ -401,7 +401,7 @@ extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, Btl
 
 extern void func_001E4708(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001E4720(BtlCamState *, BtlCamState *, BtlCamState *);
+extern void btlFrameLeftmostUnitCameraPair(BtlCamState *, BtlCamState *, BtlCamState *);
 
 extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
 
@@ -423,7 +423,7 @@ extern void btlRefreshActionPoseBlendSnapshot();
 
 extern void btlAimEffectPoseAtUnit();
 
-extern void func_001E0100();
+extern void btlBeginActionEndCameraPullback();
 
 extern void func_001E5718(BtlLinkedCommand *, BtlCamState *);
 
@@ -501,15 +501,17 @@ extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
-void func_001DEDB8(BtlLinkedCommand *action) {
+/* Advance the action's skill camera unless its native override flag is set. */
+void btlAdvanceActionSkillCamera(BtlLinkedCommand *action) {
     if ((action->flags & 0x10000) != 0) {
         return;
     }
-    func_001E6260(action, &action->camera);
+    btlAdvanceSkillCameraCursor(action, &action->camera);
 }
 
-void func_001DEDE8(BtlLinkedCommand *action) {
-    func_001E6368(action, &action->camera);
+/* Initialize the action's camera from the randomized global cursor choice. */
+void btlInitializeRandomActionCamera(BtlLinkedCommand *action) {
+    btlInitializeRandomCameraCursor(action, &action->camera);
 }
 
 void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
@@ -797,7 +799,7 @@ typedef struct CameraAimPose {
 
 /* Build the from pose, then aim the to pose at the unit's muzzle using the pose row
  * for the side of the from view the muzzle lies on. */
-void func_001DFAE0(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
+void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
     f32 muzzle[4];
     f32 quat[4];
     CameraAimPose poses[2] = {
@@ -867,7 +869,8 @@ void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
     }
 }
 
-void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
+/* Build action camera endpoints with a FOV-dependent minimum distance. */
+void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
     f32 targetPosition[4];
     f32 rotation[4];
     f32 bodyPosition[4];
@@ -941,7 +944,8 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 
-void func_001E0100(BtlLinkedCommand *action, BtlCamState *pose) {
+/* Start eligible linked-slot pullback at the exact scaled motion-end frame. */
+void btlBeginActionEndCameraPullback(BtlLinkedCommand *action, BtlCamState *pose) {
     BtlUnit *user;
     BtlUnit *target;
     s32 frames;
@@ -2032,7 +2036,7 @@ void func_001E4708(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *ou
 }
 
 /* vu0 routine: frame the leftmost marked unit in two camera poses. */
-void func_001E4720(BtlCamState *source, BtlCamState *from,
+void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from,
                    BtlCamState *to) {
     f32 point[4];
     f32 center[4];
@@ -2374,7 +2378,8 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-void func_001E6180(BtlLinkedCommand *action) {
+/* Reset global cursor frame; flag0x400 actors select a Linkage skill preset. */
+void btlSelectLinkageSkillCameraPreset(BtlLinkedCommand *action) {
     u16 selection;
 
     CURSOR->frame = 0;
@@ -2410,7 +2415,8 @@ void func_001E6180(BtlLinkedCommand *action) {
 
 extern const BtlCameraTimedInstruction *D_0035DA40[];
 
-void func_001E6260(BtlLinkedCommand *action, BtlCamState *state) {
+/* Evaluate the skill camera script, apply its pose, then advance the cursor. */
+void btlAdvanceSkillCameraCursor(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->status.flags & 0x400)) {
         func_001E9DE0(action, state, D_0035DA40[CURSOR->unk_0C]);
         func_001EB368(action, state);
@@ -2454,7 +2460,8 @@ typedef struct BtlCursorChoices {
 
 extern const BtlCursorChoices D_003A4668;
 
-void func_001E6368(BtlLinkedCommand *action, BtlCamState *state) {
+/* Choose a camera preset by marked-party count, actor category and random draw. */
+void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *state) {
     BtlCursorChoices choices = D_003A4668;
     DatGameState *game;
     s16 markedCount = 0;
@@ -4437,8 +4444,8 @@ void btlInitCommandCursorForCategory(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-/* Advance the command cursor with the neighboring animation-entry table. */
-void func_001EEED8(BtlLinkedCommand *action, BtlCamState *state) {
+/* Advance timed camera instructions, or use the action's approach camera. */
+void btlAdvanceTimedCameraOrApproach(BtlLinkedCommand *action, BtlCamState *state) {
     if (CURSOR->unk_00 == 1) {
         if (action->task->unit->status.flags & 0x400) {
             return;
