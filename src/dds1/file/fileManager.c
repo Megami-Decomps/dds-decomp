@@ -293,7 +293,7 @@ void fileWaitReady(FileRequest *request) {
 }
 
 /* Forward the opaque request pointer to the readiness wait, without cleanup. */
-void func_00288C50(FileRequest *request) {
+void fileWaitForRequestReady(FileRequest *request) {
     fileWaitReady(request);
 }
 

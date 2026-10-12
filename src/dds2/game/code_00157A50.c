@@ -102,7 +102,7 @@ void effInitializeBillResourceOwners(void) {
 
     D_00438EFC = 0;
     archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
-    func_002C81D0((struct FileRequest *)archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     node = archive->nodes;
     if (node != NULL) {
         configTable = (u8 *)D_003AA880;

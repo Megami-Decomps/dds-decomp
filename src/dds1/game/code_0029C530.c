@@ -10840,7 +10840,7 @@ s32 effPollResourceList(EffectList *list) {
                 }
                 list->request = (struct EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
-                    func_00288C50((struct FileRequest *)list->request);
+                    fileWaitForRequestReady((struct FileRequest *)list->request);
                 }
                 node->state = 1;
             } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {

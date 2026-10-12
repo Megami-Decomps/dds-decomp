@@ -5230,6 +5230,7 @@
 0x00288B98	fileGetResourceSize	inferred	Returns the file work's loaded resource size used by sound buffer transfer.
 0x00288BA8	fileIsRequestReadyInCurrentMode	inferred	Returns whether request reached ready state; one mode additionally requires a nonzero field. [names_reviewed6.tsv]
 0x00288C08	fileWaitReady	inferred	spins until func_00288BA8 reports ready, pumping system tasks each pass
+0x00288C50	fileWaitForRequestReady	inferred	src/dds1/file/fileManager.c; forwards FileRequest unchanged to fileWaitReady, which pumps updates until request readiness; paired 002C81D0.
 0x00288C68	fileWaitIdle	inferred	spins on fileManUpdate until FileManWork.unk8 and unk18 are both clear [names_L5_LiteSweep.tsv]
 0x00288CB8	fileWindowSlotCreate	inferred	Allocates a window slot and initializes its ranges. [names_qp9.tsv]
 0x00288D48	fileQueueWindowSlotRequest	inferred	confidence=high; matched-C; src/dds1/file/fileManager.c:305:func_00288D48; Creates a file-window request retaining the two supplied slot values, with no completion callbacks.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
