@@ -4114,6 +4114,7 @@
 0x0022CE68	evtViewerApplySelectedEntry	inferred	Selects the active or fallback viewer entry and sends it to world and view state helpers.
 0x0022CED0	evtEventViewerApplyTimelineKey	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:853:evtEventViewerApplyTimelineKey; Applies one timeline key to its effect, audio, message or fade channel.; twin=0x00247858 (DDS2).
 0x0022D420	evtEventViewerFadeEffectSlot	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1106:evtEventViewerFadeEffectSlot; Fades an effect slot's alpha over the key's duration and frees the slot once its interval ends.; twin=0x00247EE0 (DDS2).
+0x0022D528	evtViewerUpdateTimelineGroupState	inferred	Dispatches the selected group by type, interpolates its active key from adjacent keys, updates viewer/world channels, and tracks the nearest active group.
 0x0022E098	evtEventViewerUpdateUnitTransitions	inferred	confidence=high; matched-C; src/dds1/event/evtEventViewer.c:1155:evtEventViewerUpdateUnitTransitions; Selects each named unit's latest kind-9 transition key and starts, ends or leaves its value transition.; twin=0x00248B80 (DDS2).
 0x0022EA18	evtViewerClampMovieTimes	inferred	walks world objects and clamps polygon-movie time from viewer nodes (DDS2 twin 00249598)
 0x0022EF38	evtViewerApplyGlyphLodChannel	inferred	For each node kind one, picks most recent glyph kind six and updates its LOD channel. [names_reviewed7.tsv]
