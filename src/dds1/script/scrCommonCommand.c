@@ -844,7 +844,7 @@ s32 scrCommandIsProcessControlFlagClear(void)
     return datGameState->unk388 == 0;
 }
 
-s32 func_0010EE40(void)
+s32 scrCommandAdjustItemQuantity(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
