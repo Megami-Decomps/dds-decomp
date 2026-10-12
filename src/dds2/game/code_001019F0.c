@@ -67,7 +67,7 @@ extern void sdfEnsureDeviceWorkerThreadStarted(s32);
 extern void func_00329C20(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
 extern s32 sdfThreadSleepSelf(void);
-extern void func_001004B0(void);
+extern void kwlnRunMainLoop(void);
 
 extern const char D_004110A8[];
 extern const char D_004110C8[];
@@ -116,7 +116,7 @@ s32 func_00101AC0(void) {
     func_00329C20(D_00411158, D_00411178);
     sdfStartAndSuspendWorkerThread();
     sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_00438D80 + 8),
-                         func_001004B0, D_00439410, 0x4000, 0x60, 0);
+                         kwlnRunMainLoop, D_00439410, 0x4000, 0x60, 0);
     sdfThreadSleepSelf();
     return 0;
 }
@@ -230,7 +230,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Rebuild and queue the selected buffer's scene, overlay and view packets. */
-s32 func_00101D30(void) {
+s32 kwlnBuildFrameScenePackets(void) {
     s128 eye;
     s128 target;
     const u32 bufferIndex = kwlnGetDrawBufferIndex();
@@ -511,13 +511,13 @@ s32 kwlnRenderFrame(void) {
 }
 
 /* Invoke the active world's first callback column; this task step returns zero. */
-u32 func_00102740(void) {
+u32 dds3RunWorldPrimaryCallbacks(void) {
     dds3InvokeWorldCallbackFirst(dds3ActiveWorld);
     return 0;
 }
 
 /* Invoke the active world's second callback column; this task step returns zero. */
-u32 func_00102768(void) {
+u32 dds3RunWorldSecondaryCallbacks(void) {
     dds3InvokeWorldCallbackSecond(dds3ActiveWorld);
     return 0;
 }
