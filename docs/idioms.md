@@ -84,7 +84,7 @@ if (work->phase < 7) {
 }
 ```
 
-Confirmed by DDS1 `func_001B55A8` and DDS2 `func_001C0240`. GCC can retain a
+Confirmed by `btlUpdateLinkageNoticeTask` in both games. GCC can retain a
 short signed-SI dispatch value and a separate QI continuation value. In the
 DDS1 controller, a duplicate mutable `s32` phase stays live through dispatch
 and conflicts with the range-test output in `$v0` and jump-table destination
@@ -785,7 +785,7 @@ biased pointer views merely to request an address shape. Check every actual
 header consumer, including the other title.
 
 The same address structure feeds loop.c's induction-variable grouping.
-DDS1 `func_001B7238` and DDS2 `func_001C2450` use two reduced pointers for the
+`btlCreateReserveActorPanelTask` in both games uses two reduced pointers for the
 primary presentation channel and position/health fields. Nested channels,
 the channel's real two-word array, and a local `s32 entries[4][2]` preserve
 those groups; a cached row pointer or a two-scalar row collapses or splits
@@ -1901,7 +1901,7 @@ and gives a `b` onto the `find` call instead.
 
 ### Leading exits can make loop.c report a loop as "phony"
 
-DDS2 `func_001C9BE8` has two independent bounds at the loop head:
+DDS2 `btlDrawItemCommandRows` has two independent bounds at the loop head:
 
 ```c
 for (;;) {
