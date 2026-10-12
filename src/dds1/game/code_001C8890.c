@@ -359,14 +359,17 @@ s32 fldReleaseIdleSceneActorResources(BtlUnit *actor) {
     return btlCountTasksByKind(0x2B) == 0;
 }
 
-void func_001C8D38(void) {
+/* Empty entry callback for the retail NON action state. */
+void btlEnterNonActionState(void) {
 }
 
-void func_001C8D40(void) {
+/* The retail NON state's update callback performs no work. */
+void btlUpdateNonActionState(void) {
 }
 
-void func_001C8D48(s32 arg0) {
-    *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xfffffdff;
+/* Enter STANDBY DEAD by clearing this action's pre-status-processing flag. */
+void btlEnterStandbyDeadState(s32 task) {
+    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xfffffdff;
 }
 
 void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
@@ -400,8 +403,9 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
     return;
 }
 
-void func_001C8E60(s32 arg0) {
-    *(u32 *)(arg0 + 8) = (*(u32 *)(arg0 + 8) | 0x10) & ~0x200;
+/* Initialize the retail STANDBY action flags without changing their bit meanings. */
+void btlEnterStandbyState(s32 task) {
+    *(u32 *)(task + 8) = (*(u32 *)(task + 8) | 0x10) & ~0x200;
 }
 
 void btlTaskUpdateFlags(BtlTask *task) {
@@ -426,8 +430,9 @@ void btlTaskUpdateFlags(BtlTask *task) {
     }
 }
 
-void func_001C8F88(s32 arg0) {
-    *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xffffffef;
+/* Enter the retail START state by clearing action flag 0x10. */
+void btlEnterStartActionState(s32 task) {
+    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xffffffef;
 }
 
 void btlActionSeqCheckDispatch(u8 *task) {
@@ -554,7 +559,8 @@ void btlProcessStatusRecoveryAction(BtlTask *link) {
     btlDispatchStateHandler(link, 0x1B);
 }
 
-void func_001C93A0(void) {
+/* Empty entry callback for BAD_BEFORE, the pre-action status-processing state. */
+void btlEnterPreActionStatusState(void) {
 }
 
 void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
@@ -808,8 +814,9 @@ void btlInitializeActorCommandState(BtlTask *task) {
     }
 }
 
-void func_001C9C20(s32 arg0) {
-    *(u32 *)(arg0 + 8) = *(u32 *)(arg0 + 8) & 0xffffff7f;
+/* Allow the AI updater to bind this acting unit's script slot once again. */
+void btlEnterAiActionState(s32 task) {
+    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xffffff7f;
 }
 
 /* Bind the acting unit's AI slot once, then wait for its script task. */
@@ -875,7 +882,8 @@ s32 btlCommandStateSelectB(s32 arg0) {
     }
 }
 
-void func_001C9EC0(void) {
+/* Empty entry callback for the retail AUTO action state. */
+void btlEnterAutoActionState(void) {
 }
 
 void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
@@ -1456,7 +1464,8 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     else btlDispatchStateHandler(action, 26);
 }
 
-void func_001CB408(void) {
+/* Empty entry callback for the retail SKILL action state. */
+void btlEnterSkillActionState(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
@@ -2309,7 +2318,8 @@ void btlScheduleBatStateModelChange(u8 *task) {
     }
 }
 
-void func_001CEB78(void) {
+/* Empty entry callback for the retail WAIT action state. */
+void btlEnterWaitActionState(void) {
 }
 
 void btlCommandTaskStartEffects(u8 *task) {
@@ -2681,7 +2691,8 @@ void btlSchedulePressStateSceneAction(u8 *arg0) {
     btlDispatchStateHandler(arg0, 0x1a);
 }
 
-void func_001D0088(void) {
+/* Empty entry callback for the retail PACKET action state. */
+void btlEnterPacketActionState(void) {
 }
 
 extern s32 btlCountTasksForOwner(s64);
@@ -2847,7 +2858,8 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
     }
 }
 
-void func_001D0590(void) {
+/* Empty entry callback for the retail DEAD action state. */
+void btlEnterDeadActionState(void) {
 }
 
 void btlCommandTaskReleaseActor(s32 arg0) {
@@ -2893,13 +2905,16 @@ void btlRunHookAndAdvanceUnitState(s32 object) {
     btlDispatchStateHandler(object, 0x1A);
 }
 
-void func_001D06C0(void) {
+/* Empty entry callback for the retail DEBUG action state. */
+void btlEnterDebugActionState(void) {
 }
 
-void func_001D06C8(void) {
+/* The retail DEBUG state's update callback performs no work. */
+void btlUpdateDebugActionState(void) {
 }
 
-void func_001D06D0(void) {
+/* Initialize the battle debug-menu tables on entry to the retail TEST state. */
+void btlEnterTestActionState(void) {
     btlInitDrawTables();
 }
 
