@@ -139,7 +139,7 @@ INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0DF0);
 
 INCLUDE_RODATA(const s32, "effect/effBattle", D_003A0E00);
 
-INCLUDE_ASM(const s32, "effect/effBattle", func_00160D88);
+INCLUDE_ASM(const s32, "effect/effBattle", effBattleUpdate);
 
 void func_00161588(BattleEffect *effect, f32 scale) {
     s32 i;

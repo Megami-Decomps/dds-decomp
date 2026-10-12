@@ -177,7 +177,7 @@ extern void effResetSlots(void);
 
 extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
 
-extern void func_00160D88(BattleEffect *effect);
+extern void effBattleUpdate(BattleEffect *effect);
 
 void func_0020FC48(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -264,7 +264,7 @@ void func_0020FC48(void) {
             } else {
                 s32 selector = (s32)battle->eventUnit;
                 effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
-                func_00160D88((BattleEffect *)battle->eventData);
+                effBattleUpdate((BattleEffect *)battle->eventData);
                 return;
             }
         }
