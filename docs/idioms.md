@@ -8215,3 +8215,22 @@ uses one to edit the fade-in fraction instead of the fade-out fraction, and
 shares it with the color editor. The reset stores one; it does not enqueue an
 update.
 
+## Trace-justified result selection: packed byte clamp
+
+DDS1 `func_002904C8` (`0x002904C8`) and DDS2 `func_002CF978`
+(`0x002CF978`) preserve or lower one byte of a packed word. Keep the truthful
+`u32 color, s32 limit, s8 alpha` interface and assign the real result in both
+alternatives of each mode, rather than initializing it to `color` before the
+mode selection. Every path defines the result; no unused value is introduced.
+
+With `tools/cc1probe.sh --sched --alloc --cse --reorg`, hooked and unhooked
+outputs agree. The deciding CSE/global-allocation property is that the incoming
+word and branch-selected result remain distinct: the exact form retains
+input pseudo 84 (seven references, live 18) and result pseudo 90 (five
+references, live 9), instead of folding the initialized result into the
+incoming word's longer-lived quantity (pseudo 90, eight references, live 20).
+The separate result preserves the native `v1` copies and final return move.
+Initializing the result outside the mode branches loses those copies and
+remains 11 differing words with one native word absent. Both complete units
+stay exact with the explicit per-mode assignments.
+
