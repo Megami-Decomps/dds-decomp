@@ -36,7 +36,7 @@ extern void evtAdvanceSolarClockAndExpireControls(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32, s32);
-extern void func_0011A510(s32);
+extern void ptyApplyFieldHpAttrition(s32);
 extern s32 func_0011E930(f32, s32);
 
 extern s32 fldDeferredCommand;
@@ -1890,14 +1890,14 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldAreaState.unk190 = 60;
                     fldAreaState.attritionDistance = 0.0f;
-                    if (fldAreaState.unk11C == 3) func_0011A510(3);
-                    else if (fldAreaState.unk11C == 2) func_0011A510(4);
-                    else func_0011A510(2);
+                    if (fldAreaState.unk11C == 3) ptyApplyFieldHpAttrition(3);
+                    else if (fldAreaState.unk11C == 2) ptyApplyFieldHpAttrition(4);
+                    else ptyApplyFieldHpAttrition(2);
                 }
             } else {
                 fldAreaState.attritionDistance = 0.0f;
                 fldAreaState.unk190 = 60;
-                func_0011A510(1);
+                ptyApplyFieldHpAttrition(1);
             }
         }
     } else {

@@ -510,6 +510,7 @@
 0x0011A288	evtGetFlaggedRosterValue	inferred	Reads the indexed roster byte only when the entry's flag 0x20 is set.
 0x0011A318	ptyReadSignedRosterStatByte	inferred	R_Names31 B92
 0x0011A328	ptyApplyEventPenalty	inferred	Applies mode-selected HP loss and packed status penalties across the active party while keeping living members at one or more HP.
+0x0011A510	ptyApplyFieldHpAttrition	inferred	Applies mode-selected frontline HP attrition during field processing and preserves a minimum of one HP for living party members.
 0x0011A808	ptyApplySkillRecovery	inferred	R_Names31 B92
 0x0011AA58	datCalculateCommandBaseValue	inferred	R_Names31 B92
 0x0011AB38	ptyInitRuntime	inferred	U1
