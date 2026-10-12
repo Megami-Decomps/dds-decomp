@@ -812,7 +812,7 @@ EffScreenDrawParams *effGetLoadDescA(void) {
 }
 
 /* Replace the screen-draw source prefix while preserving the trailing bytes. */
-void func_001975F8(void *parameters) {
+void effSetLoadDescA(void *parameters) {
     memcpy(&D_003B22D0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
@@ -921,7 +921,7 @@ EffScreenDrawParams *effGetLoadDescD(void) {
 }
 
 /* Replace this screen-draw source prefix without changing trailing bytes. */
-void func_00197980(void *parameters) {
+void effSetLoadDescD(void *parameters) {
     memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
