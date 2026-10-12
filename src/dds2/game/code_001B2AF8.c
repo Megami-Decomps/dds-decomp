@@ -18,6 +18,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "scr.h"
 #include "dat_state.h"
 #include "mnu_result.h"
@@ -105,14 +106,6 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void mdlFlagSet(s32);
 
 extern void mdlFlagClear(s32);
-
-/* Native per-species AI record, shared layout with the action evaluator. */
-typedef struct AiSlot {
-    u8 weight;
-    u8 pad1;
-    u16 actionId;
-    u32 actionArg;
-} AiSlot;
 
 typedef struct AiSpecies {
     u8 unk00;
