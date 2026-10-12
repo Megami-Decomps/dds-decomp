@@ -77,7 +77,7 @@ extern void fldApplySkyLightSet(u32, s32);
 
 extern void func_001512D8(void);
 
-extern KwlnTask *func_00101820(u32);
+extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern s32 func_00153560(s32, s32);
 
@@ -2338,7 +2338,7 @@ s32 func_001278D0(void) {
             fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
-        if (func_00101820(0x3EA) == NULL && func_00150F10() == 0) {
+        if (kwlnTaskFindByPriority(0x3EA) == NULL && func_00150F10() == 0) {
             fldPreparePlayerSceneCameraTarget();
         }
         dds3ClearObjectFlags(fldPlayerObject, 0x40);

@@ -523,7 +523,7 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
     return NULL;
 }
 
-KwlnTask* func_00101820(u32 value)
+KwlnTask* kwlnTaskFindByPriority(u32 value)
 {
     s32 state;
     KwlnTask* node;

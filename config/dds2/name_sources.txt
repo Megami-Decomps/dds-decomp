@@ -22,6 +22,7 @@
 0x001016E0	kwlnTaskSetDestroyDelay	inferred	Stores the tick count consumed by the task destruction countdown.
 0x00101700	kwlnTaskGetRegisteredState	inferred	Returns the task's low-four-bit state only when the task is registered and state is below four.
 0x00101740	kwlnTaskGetTaskByName	inferred	DDS1 twin name
+0x00101820	kwlnTaskFindByPriority	inferred	Searches all three task queues for the first task with the requested priority; matches DDS1 at 0x00101938.
 0x00101950	kwlnTaskSetUserValue	inferred	Writes a caller value to the task's opaque user storage word. [names_reviewed6.tsv]
 0x00101958	kwlnTaskGetUserValue	inferred	Returns the same opaque task user storage word written by the setter. [names_reviewed6.tsv]
 0x00101968	kwlnTaskAddChild	inferred	src/dds2/kernel/dds3KernelCore.c; appends child to parent task list after unlinking previous parent; paired 00101A80.

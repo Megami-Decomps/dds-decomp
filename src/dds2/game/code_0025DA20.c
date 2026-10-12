@@ -102,7 +102,7 @@ extern s32 D_003C99B8[];
 extern void evtViewerCleanupMessageWindow();
 
 
-extern KwlnTask *func_00101820(u32 priority);
+extern KwlnTask *kwlnTaskFindByPriority(u32 priority);
 
 
 extern s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *);
@@ -220,7 +220,7 @@ void mnuCampDestroyTaskById(s32 taskId) {
 void mnuCampDestroyAllTasks(void) {
     KwlnTask *task;
 
-    while (task = func_00101820(CAMP_TASK_PRIORITY), task != NULL) {
+    while (task = kwlnTaskFindByPriority(CAMP_TASK_PRIORITY), task != NULL) {
         kwlnTaskDestroyWithHierarchy(task, 0);
     }
 }
