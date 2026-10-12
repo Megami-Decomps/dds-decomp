@@ -3316,7 +3316,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", func_00185950);
+INCLUDE_ASM(const s32, "effect/effPCPMisc", effPcpBlockSetUpdate);
 
 void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src) {
     PCP_COPY_VECTOR(work->params.position, src);
@@ -3478,7 +3478,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     frame = work->frame;
     do {
         if (work->params.startFrame[i] <= frame) {
-            func_00185950((u32)work->blockSets[i]);
+            effPcpBlockSetUpdate((u32)work->blockSets[i]);
             frame = work->frame;
         }
         i = i + 1;
