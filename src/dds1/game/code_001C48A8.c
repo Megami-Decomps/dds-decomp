@@ -312,7 +312,8 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-void func_001C50C0(s32 sceneAddress) {
+/* Queue actor model, light, fade and entry tasks using their completion handles. */
+void btlQueueSceneActorModelEntry(s32 sceneAddress) {
     BtlUnit *unit;
     BtlUnit *tail;
     BtlRuntimeTask *task;
@@ -684,7 +685,8 @@ extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern u32 kwlnDrawControlFlags;
 
-void func_001C5B90(BattleSceneWork *scene) {
+/* Select a hook/fallback scene script and start its script/audio transition tasks. */
+void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
     scene->scriptState = -1;
     fldClearSceneAdvanceFlag();
     scene->flags |= 0x20;
@@ -812,7 +814,7 @@ extern s32 btlCountAvailableParticipants(void);
 extern void brsTaskStart(void);
 
 /* Prepare the outcome tasks, then settle battle money and participant EP. */
-void func_001C5F80(BtlState *scene) {
+void btlFinalizeBattleRewards(BtlState *scene) {
     BtlRuntimeTask *task;
     BtlTask *actor;
     BtlUnit *unit;

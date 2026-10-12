@@ -101,7 +101,7 @@ extern char D_00437AC0[];
 
 extern void mnuStopTitleMovieDraw(void);
 
-extern void func_003458E8(u32);
+extern void sdfSetStreamFrameDrawMode(u32);
 
 extern s32 mnuDrawMovieMenuListItem();
 
@@ -1428,7 +1428,7 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
     effDestroyResourceSlotSet(mnuMovieWork->sprite);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
-    func_003458E8(0);
+    sdfSetStreamFrameDrawMode(0);
 }
 
 extern s32 D_00437AB4;
@@ -1437,7 +1437,7 @@ void mnuInitializeMovieRollViewport(void) {
     D_00437AB8 = 4;
     D_00437AB4 = 0;
     mnuLoadMovieRollSprite();
-    func_003458E8(1);
+    sdfSetStreamFrameDrawMode(1);
     sdfSetGridScaledDrawBounds(0x80, 0x60, 0x180, 0x100, 0x80808080);
 }
 

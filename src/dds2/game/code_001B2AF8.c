@@ -121,7 +121,7 @@ typedef struct AiSpecies {
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 func_001B32F8(s32, s32 *);
+extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
@@ -476,10 +476,11 @@ s32 func_001B3200(BtlUnit *requester) {
 }
 
 
-s32 func_001B32F8(s32 object, s32 *choices) {
+/* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
+s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
     s32 count = 0;
     u32 i;
-    u16 *entry = (u16 *)(object + 0x142);
+    u16 *entry = (u16 *)(actorAddress + 0x142);
     u16 value;
 
     for (i = 0; i < 0x18; i++) {
@@ -495,7 +496,7 @@ s32 func_001B32F8(s32 object, s32 *choices) {
                 continue;
             }
         }
-        if (func_001ABB10((BtlUnit *)object, value) != 0) {
+        if (func_001ABB10((BtlUnit *)actorAddress, value) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -509,13 +510,13 @@ s32 func_001B32F8(s32 object, s32 *choices) {
 u8 btlHasAvailableOption(u32 arg0) {
     s64 temp_v0;
 
-    temp_v0 = func_001B32F8(arg0, 0);
+    temp_v0 = btlCollectAvailableOptionSkills(arg0, 0);
     return temp_v0 != 0;
 }
 
 s32 btlChooseRandomAvailableOption(s32 object) {
     s32 choices[24];
-    s32 count = func_001B32F8(object, choices);
+    s32 count = btlCollectAvailableOptionSkills(object, choices);
     if (count != 0) {
         return choices[effMiscRandMod(0, count)];
     }
