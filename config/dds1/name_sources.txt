@@ -6946,6 +6946,7 @@
 0x002EE9A8	sdfPacSkipAllocationEntryBytes	inferred	Consumes pending input before requesting another allocation entry.
 0x002EEA18	sdfPacReadListAllocationCount	inferred	src/dds1/game/code_002EEA18.c func_002EEA18: Reads count, resets progress, allocates list and computes aligned skip bytes for next handler. [names_reviewed24.tsv]
 0x002EEAA0	sdfQueueAndResetPacketWork	inferred	Queues current packet work, allocates another buffer and resets its callback. [names_reviewed9.tsv]
+0x002EEAE0	sdfPacDecodeInputChunk	inferred	Incrementally decodes PAC input bytes, retains partial command state across chunks, updates decoder cursors and returns one when the end marker completes decoding; DDS2 twin is 0x00347988.
 0x002EEE98	sdfStoreWordAndSetState	inferred	Stores a word at offset four and marks its byte state as one.
 0x002EEEA8	sdfDrawClippedLinePairs	inferred	Fam
 0x002EF340	sdfInitializeTmxImageHeader	inferred	src/dds1/game/code_002EEA18.c func_002EF340: Clears header, writes TMX0 magic, type, dimensions, depth and two flags. [names_reviewed24.tsv]
