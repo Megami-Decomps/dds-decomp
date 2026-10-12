@@ -964,7 +964,7 @@ void func_001071E8(void) {
 }
 
 /* vu0 routine: shortest-arc quaternion rotating direction vf10 to vf11. */
-void func_00107DE8(void) {
+void kwlnBuildShortestArcQuaternion(void) {
     f32 identity[4];
     f32 axis[4];
     f32 dot;
