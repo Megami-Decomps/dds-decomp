@@ -661,7 +661,7 @@ extern s32 func_001A6EC0(BtlUnit *, s32);
 
 extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, BtlOperandGroup *, s32);
 
-extern void func_001A6BE0(BtlUnit *, BtlIndexList *, s32);
+extern void btlSortActorMuzzleDirections(BtlUnit *, BtlIndexList *, s32);
 
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
@@ -815,7 +815,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
         randomTargets = 1;
         btlDistributeRandomTargetHits(action->unit, work->indices, group, command);
     }
-    func_001A6BE0(action->unit, work->indices, command);
+    btlSortActorMuzzleDirections(action->unit, work->indices, command);
     targetCount = btlGetIndexListCount(work->indices);
     btlBossDebugPrintf("btl:skillID=%X\n", command);
     element = btlGetActorIndexedSignedValue(source, command);

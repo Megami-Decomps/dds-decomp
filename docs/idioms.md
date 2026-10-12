@@ -6361,7 +6361,7 @@ request typed removes the integer/pointer adapters in both controller paths.
 
 ## Paired-actor command roster records
 
-DDS2 `func_001AC750` clears a halfword count and writes twelve-byte rows
+DDS2 `btlBuildActorLinkageSkillList` clears a halfword count and writes twelve-byte rows
 starting at `+4`: a skill ID and two actor pointers. `BattleRosterTable`
 describes that variable-length record without guessing its backing capacity.
 The shared record is in retail `.data`, so its extern retains that section
@@ -7651,7 +7651,7 @@ alone is neutral. Inspect the particular call note and donor; do not infer
 ownership merely from which branch spelling seems more conservative.
 
 DDS2 `func_001B1350` separates a boundary error from a real type error.
-Making `func_001AD090` opaque removes only its two `REG_EH_REGION 0`
+Making `btlFlagToElementIndex` opaque removes only its two `REG_EH_REGION 0`
 notes (call UIDs 234 and 398); all 170 real pass-28 instruction patterns
 remain identical. The actual split at `0x001B1350` closes the ordinary/likely
 branch differences at `+0x140` and `+0x21C`. The remaining `+0x19C`
@@ -8707,4 +8707,34 @@ for both the pointer baseline and indexed candidate. Default-flag whole
 units gate DDS1 25 match, 0 differ and DDS2 24 match, 0 differ, preserving
 every earlier matched body. These units are absent from devbuild moves,
 replacements, and additions, so no dev layout update is required.
+
+## Battle LINKAGE rosters, actor-entry adjustments and native ability factors
+
+`btlBuildActorLinkageSkillList` is the underlying builder used by
+`btlHasUnmarkedLinkageSkill` and `btlGetActorLinkageSkillList`. Its native
+affinity records produce skill IDs plus one or two partner pointers.
+Participant permutations and duplicate elimination remain in their original
+order. DDS1 scans 85 records and DDS2 scans 117; DDS2 additionally excludes
+unit ID 9 and uses its larger grouped-skill table. A shared descriptive name
+does not collapse those title-specific conditions or assume roster capacity.
+
+`btlAdjustActorEntryCode` adds the signed delta before applying the native
+entry descriptor's bounds. It refreshes initial value/countdown only when
+the resulting code is nonzero, even if the delta was zero; a zero result does
+not clear those other fields. The mask-selected caller's independent tests
+and signed negations stay unchanged.
+
+The element-ability factor is a float product, whereas
+`btlGetAbilityAttributeMultiplierPercent` starts at integer 100 and is used
+by the packed-affinity reader as a percentage. DDS2 retains both its native
+party-unit default factors and its percent-suppression flag. The low-HP
+ability helper keeps its existing integer HP-percentage truncation and
+threshold ladder; no skill display name or divide-by-zero policy is inferred.
+
+Snapshot push/restore and target ordering use their already established
+cross-game names. Target ordering's random mode still makes thirteen random
+pair swaps rather than a full shuffle; its other modes compare same-side
+muzzle x coordinates. The raw DDS1 LINKAGE slot-cost getter remains distinct
+from DDS2's actor-dependent discounted getter. All existing parameter widths,
+pointer/address-word boundaries, casts and declaration order are preserved.
 

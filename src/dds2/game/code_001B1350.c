@@ -134,9 +134,9 @@ s32 btlHasSpecialAbility274(BtlUnit *unit, u32 slot);
 
 s32 func_001ABF50(BtlUnit *battler, s32 element);
 
-s32 func_001AD090(s32 flag);
+s32 btlFlagToElementIndex(s32 flag);
 
-s32 func_001AE678(BtlUnit *actor, s32 attr);
+s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
 u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
                   s32 reaction, s32 mode) {
@@ -179,7 +179,7 @@ u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
 
     if (guardMask != 0 && result == 0 && reaction == 2) {
         result = guardMask;
-        if (func_001ABF50(defender, func_001AD090(guardMask)) & 0x170000) {
+        if (func_001ABF50(defender, btlFlagToElementIndex(guardMask)) & 0x170000) {
             result = 0;
         }
         if ((defender->partyRecord.status & 0x7FFF) >= result) {
@@ -198,7 +198,7 @@ u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
     }
 
     if (result != 0 && !(datCommandRecords[command].options & 1)) {
-        s32 element = func_001AD090(result);
+        s32 element = btlFlagToElementIndex(result);
         if (btlHasMappedSpecialAbilityForSlot(defender, element) != 0 ||
             btlHasSpecialAbility274(defender, element) != 0 ||
             btlHasEnabledSpecialAbilityForSlot(defender, element) != 0) {
@@ -243,7 +243,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
         return 100;
     }
     value = func_001ABF50(unit, index);
-    ratio = func_001AE678(unit, index);
+    ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;
         value = (value & 0xFFFF0000) | ratio;

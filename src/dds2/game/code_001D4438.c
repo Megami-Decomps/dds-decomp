@@ -105,7 +105,7 @@ extern SceneInitializer D_003B6938[];
 extern s32 btlCountFlaggedSceneActors(void);
 extern void btlRemoveTaskFromSceneGroup(ActionStateLink *);
 
-extern s32 func_001AC750(s32, void *);
+extern s32 btlBuildActorLinkageSkillList(s32, void *);
 
 extern s32 D_004367C0;
 
@@ -128,7 +128,7 @@ extern SceneSlotFadeWork *D_00438F54;
 extern s32 func_00206090();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlMarkInactiveActorCandidates();
-extern void func_001AEEA8();
+extern void btlRestorePartySlotSnapshots();
 extern void kwlnFadeBackgroundStartOut();
 extern void kwlnDrawSetOverlayTransition();
 extern void kwlnDrawEnableD88();
@@ -1556,7 +1556,7 @@ extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counterAmount, s32 counterMode);
-extern s32 func_001B0C68(BtlUnit *unit, s32 actionId);
+extern s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId);
 extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
 extern s32 func_001E2E58(BtlUnit *unit, s32 motionIndex);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
@@ -1676,7 +1676,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         state->preActionHook(action, action->indexWork.skillId, masterOwner, moveHandle, moveHandle);
     currentTarget = action->unit;
     reflectedStarted = 0;
-    actionFrames = func_001B0C68(action->unit, action->indexWork.skillId);
+    actionFrames = btlGetActionAnimationDelay(action->unit, action->indexWork.skillId);
     commandMap = btlMapActionCode((s32)action->unit, action->indexWork.skillId);
     for (groupIndex = 0; groupIndex < targetCount; groupIndex++, group++) {
         if (resourceNormal == 0 && resourceTimed == 0) {
@@ -2036,7 +2036,7 @@ extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *func_002014A8(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(u8 *, s32);
-extern s32 func_001B0C68(BtlUnit *, s32);
+extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32, u32);
 extern s32 func_001E2E58(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
@@ -2296,7 +2296,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
         if (state->unk65C != NULL) task->startDelay = state->unk65C(skill);
         btlStartTask(task);
         if (state->preActionHook != NULL) state->preActionHook(action, skill, actionOwner, soundHandle, masterOwner);
-        actionFrames = func_001B0C68(unit, skill);
+        actionFrames = btlGetActionAnimationDelay(unit, skill);
         commandMap = btlMapActionCode((s32)unit, skill);
         blendStarted = 0;
         reflectedStarted = 0;

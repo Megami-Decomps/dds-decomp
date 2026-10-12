@@ -4081,7 +4081,7 @@ s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
     s32 i;
 
     func_001B7A00();
-    count = func_001AC750(arg0, &D_003B5D10);
+    count = btlBuildActorLinkageSkillList(arg0, &D_003B5D10);
     if (count != 0) {
         for (i = 0; i < count; i++) {
             if (func_001B7940(D_003B5D10.entries[i].skill, 2) == 0) {
@@ -6251,7 +6251,7 @@ extern u32 btlGetActorCommandClass(s32, s8);
 
 extern s32 btlCountFlaggedSceneActors(void);
 
-extern s32 func_001AC750(s32, void *);
+extern s32 btlBuildActorLinkageSkillList(s32, void *);
 
 extern s32 D_004367C0;
 
@@ -6526,7 +6526,7 @@ BattleRosterTable *btlGetActorLinkageSkillList(s32 address, u16 *outCount) {
     BattleSceneObject *object = (BattleSceneObject *)address;
     s32 cachedCount = D_004367C0;
     if (cachedCount == 0) {
-        cachedCount = func_001AC750((s32)object->owner->unit, &D_003B5D10);
+        cachedCount = btlBuildActorLinkageSkillList((s32)object->owner->unit, &D_003B5D10);
         D_004367C0 = cachedCount;
     }
     *outCount = cachedCount;
