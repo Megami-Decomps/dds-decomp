@@ -99,8 +99,8 @@ void *effGetHandlerArg(EffWork *work) {
     return work->payload;
 }
 
-/* Read the pointed word without validating the pointer or asserting a record kind. */
-u32 func_0018CBC0(u32 *word) {
+/* Read the dispatch owner's type word; the pointer remains unchecked. */
+u32 effGetDispatchType(u32 *word) {
     return *word;
 }
 
@@ -329,7 +329,8 @@ s32 effNextDataDirEntry(s32 directory, EffDirEnt *entry) {
 }
 
 
-EffResourceList *func_0018CF98(char *path, s32 flags) {
+/* Enumerate enabled resource extensions into an owned doubly linked filename list. */
+EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags) {
     EffDirEnt entry;
     s32 directory;
     EffResourceList *list;
@@ -435,7 +436,7 @@ EffResourceDescriptor *effCreateResourceListDescriptor(EffResourceList *list) {
 
 /* Navigate the resource list, update its held preview, and submit fifteen rows. */
 /* Retail 0x0018D774 reloads selectedEntry after the case-1 texture update. */
-s32 func_0018D4B8(EffResourceDescriptor *descriptor) {
+s32 effUpdateResourceBrowser(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
     SdfListHead *packetList;
     SdfPoolNode *surface;
@@ -546,7 +547,7 @@ s32 func_0018D4B8(EffResourceDescriptor *descriptor) {
                 descriptor->cachedEntry = selectedEntry;
             }
             if (descriptor->previewActive != 0) {
-                func_0018DA70(descriptor);
+                effDrawResourceTexturePreview(descriptor);
             }
         }
     }
@@ -661,7 +662,7 @@ extern SdfPoolNode D_003255A8;
 
 
 /* Queue the overlay's texture as a quad at its screen position. */
-void func_0018DA70(EffResourceDescriptor *overlay) {
+void effDrawResourceTexturePreview(EffResourceDescriptor *overlay) {
     SdfListHead *list;
     void *sprite;
     KwlnSpriteVertex *vertex;

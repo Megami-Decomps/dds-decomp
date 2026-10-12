@@ -2221,7 +2221,7 @@
 0x0018C7C0	effMagatuhiSetDriftColor	inferred	readability/matching review (QP16)
 0x0018C7C8	effMagatuhiCopyDriftMatrix	inferred	readability/matching review (QP16)
 0x0018C7F0	effMagatuhiUpdateDriftFamily	inferred	readability/matching review (QP16)
-0x0018CA30	effMagatuhiDispatchByKind	inferred	switch on func_0018CBC0 result (5-entry jump table) [names_M61_EffVu.tsv]
+0x0018CA30	effMagatuhiDispatchByKind	inferred	switch on effGetDispatchType result (5-entry jump table) [names_M61_EffVu.tsv]
 0x0018CAC8	effAllocDispatch	inferred	allocs 8-byte record, runs D_00355730 type handler, stores selector plus result
 0x0018CB38	effTypeDispatch	inferred	calls D_00355734 type handler with +0x4 arg, no free
 0x0018CB70	effTypeDispatchFree	inferred	calls D_00355738 type handler then frees object via func_002CFF98
@@ -7615,3 +7615,15 @@
 0x00103B10	kwlnUpdatePadInputState	inferred	matched-C; src/dds1/game/code_00102ED8.c; copies the two controllers' raw buttons and sticks, synthesizes right-stick direction buttons, updates held/new-press/repeat flags for button banks and sticks, and advances motor durations. Exact1268-byte DDS2 0x00103A00 twin; native-majority flat32-byte signed primary button array and separate per-stick magnitude scope preserve natural signed angle quantization (PurC deep refinement).
 0x001A3360	btlSelectCommandTargetPolicy	inferred	matched-C; src/dds1/game/code_001A1960.c; extracts roster/command target policy and optionally builds the target index list; DDS2 0x001AC360 semantic twin. Native owner field order and the command-record arm recover the restriction load's true last-base-use scheduler weight (PurD cc1probe refinement).
 0x001BFAD0	btlAdvanceTargetPanelAnimation	inferred	matched-C; src/dds1/game/code_001A9780.c; advances panel fade/scale and row animation states; exact780-byte DDS2 0x001CB498 twin. Enter the next animation phase before setting its presentation state; the final row-phase clear carries the native owner-register death (PurD cc1probe refinement).
+0x0018CBC0	effGetDispatchType	inferred	confidence=high; matched-C reads the first word of EffWork; effMagatuhi callers compare it against replay-kind constants before obtaining the payload. DDS2 twin 0x001947F8. Namer1 batch 1.
+0x0018CF98	effBuildResourceDirectoryList	inferred	confidence=high; matched-C enumerates directory entries, filters enabled resource extensions, and builds a doubly linked filename list with copied directory path. DDS2 twin 0x00194BD0. Namer1 batch 1.
+0x0018D4B8	effUpdateResourceBrowser	inferred	confidence=high; matched-C handles row/page navigation and confirm/cancel, refreshes texture preview, draws fifteen filename rows, and returns selection result. DDS2 twin 0x001950F0. Namer1 batch 1.
+0x0018DA70	effDrawResourceTexturePreview	inferred	confidence=high; matched-C draws the browser's retained texture as a quad above the filename rows; adopts existing DDS2 twin name at 0x001956A8. Namer1 batch 1.
+0x00274B80	mnuSelectPartySelectionVisuals	inferred	confidence=high; matched-C selects visual category four before the party-selection window and its resources are initialized. DDS2 twin 0x002B0D50. Namer1 batch 1.
+0x002762B0	mnuSelectStaffSelectionVisuals	inferred	confidence=high; matched-C selects visual category three during creation of StaffMenuRuntime and activation of its panel. DDS2 twin 0x002B27F0. Namer1 batch 1.
+0x00276478	mnuOpenStaffSelectionEntry	inferred	confidence=high; matched-C entry creates StaffMenuRuntime with staffView/staffMode set to one. DDS2 twin 0x002B29C8. Namer1 batch 1.
+0x002764A8	mnuOpenPartySelectionEntry	inferred	confidence=high; matched-C entry creates StaffMenuRuntime with staffView/staffMode set to zero; existing mnuStaffIdlePartyUpdate handles this mode. DDS2 twin 0x002B29F8. Namer1 batch 1.
+0x00277DD0	mnuSelectSkillSelectionVisuals	inferred	confidence=high; matched-C selects visual category one while creating the skill-selection runtime and its category windows. DDS2 twin 0x002B4270. Namer1 batch 1.
+0x002782E0	mnuReleaseSkillCodeBitset	inferred	confidence=high; matched-C frees the allocated skill-code bitmap after the skill-page initialization consumes it. DDS2 twin 0x002B47F8. Namer1 batch 1.
+0x0027A0A8	mnuStepSkillDetailControl	inferred	confidence=medium; matched-C callback following mnuOpenSkillDetailPanel invokes panel handler phase two and returns its result. DDS2 twin 0x002B6800. Namer1 batch 1.
+0x0027AC00	mnuStepCampStatusControl	inferred	confidence=medium; matched-C callback following mnuCampMenuDrawStatus invokes panel handler phase two and returns its result. DDS2 twin 0x002B76B0. Namer1 batch 1.

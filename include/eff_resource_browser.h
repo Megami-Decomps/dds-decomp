@@ -55,14 +55,8 @@ void effSetWorkFirst(EffResourceDescriptor *work, u32 delay);
 void effSetWorkSecond(EffResourceDescriptor *work, u32 surface);
 void effSetMsgPair(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
 void effSetWorkTextureResource(EffResourceDescriptor *work, const char *textureResource);
-#ifdef VERSION_DDS2
-EffResourceList *func_00194BD0(char *path, s32 flags);
-s32 func_001950F0(EffResourceDescriptor *work);
+EffResourceList *effBuildResourceDirectoryList(char *path, s32 flags);
+s32 effUpdateResourceBrowser(EffResourceDescriptor *work);
 void effDrawResourceTexturePreview(EffResourceDescriptor *overlay);
-#else
-EffResourceList *func_0018CF98(char *path, s32 flags);
-s32 func_0018D4B8(EffResourceDescriptor *work);
-void func_0018DA70(EffResourceDescriptor *work);
-#endif
 
 #endif
