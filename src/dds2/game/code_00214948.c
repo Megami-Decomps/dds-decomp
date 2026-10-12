@@ -9,6 +9,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_ai_table.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "btl_model_record.h"
@@ -189,12 +190,6 @@ typedef struct BtlAiScratchWork {
 extern BtlAiScratchWork *btlActionScratchWork;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
-typedef struct AiSlot {
-    u8 weight;
-    u8 pad1;
-    u16 actionId;
-    u32 actionArg;
-} AiSlot;
 
 /* AICALC.TBL: each decision tier tests three packed predicates, then
  * selects a route in most-specific-first order; route 8 makes no selection. */
