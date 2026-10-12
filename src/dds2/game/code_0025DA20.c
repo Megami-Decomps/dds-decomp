@@ -58,7 +58,7 @@
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
 
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPreparePopupAndDispatchSelection(KwlnTask *task);
 extern s32 mnuAdvanceCampPopup(KwlnTask *task);
 extern s32 mnuFinishCampPopup(KwlnTask *task);
@@ -1654,7 +1654,7 @@ void func_00260708(const s32 *stockGroup) {
         mnuFinishCampPopup, mnuTerminalReleaseContextAndResources, (u32)scene);
     fadeTask = kwlnTaskCreate("shop_fade", 0x2B13, 1, 0,
         mnuTerminalSyncMessageWindowControl, NULL, (u32)scene);
-    func_00101968(drawTask, fadeTask);
+    kwlnTaskAddChild(drawTask, fadeTask);
     mnuPanelTaskCompletionState = 1;
 }
 

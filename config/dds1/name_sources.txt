@@ -30,6 +30,7 @@
 0x001019C8	kwlnTaskIsRegistered	inferred	Scans all three task lists and returns whether the target task pointer is present.
 0x00101A68	kwlnTaskSetUserValue	inferred	Writes a caller value to the task's opaque user storage word. [names_reviewed6.tsv]
 0x00101A70	kwlnTaskGetUserValue	inferred	Returns the same opaque task user storage word written by the setter. [names_reviewed6.tsv]
+0x00101A80	kwlnTaskAddChild	inferred	src/dds1/kernel/dds3KernelCore.c; appends child to parent task list after unlinking previous parent; paired 00101968.
 0x00101B08	kwlnUnlinkListNode	inferred	L69; sources=names_pending_main.tsv; twin=0x001019F0, input-family pairing. [names_qp10.tsv]
 0x00101B78	dds3SetScopedObjectFlags	inferred	Passes set mode, object, mask and scope to the kernel dispatcher, which ORs the selected masked bits into object flags at offset 0x1C.
 0x00101BA8	dds3ClearScopedObjectFlags	inferred	Passes clear mode to the same dispatcher, which clears the selected masked bits from scoped object flags.

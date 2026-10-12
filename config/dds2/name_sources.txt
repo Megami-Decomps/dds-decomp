@@ -24,6 +24,7 @@
 0x00101740	kwlnTaskGetTaskByName	inferred	DDS1 twin name
 0x00101950	kwlnTaskSetUserValue	inferred	Writes a caller value to the task's opaque user storage word. [names_reviewed6.tsv]
 0x00101958	kwlnTaskGetUserValue	inferred	Returns the same opaque task user storage word written by the setter. [names_reviewed6.tsv]
+0x00101968	kwlnTaskAddChild	inferred	src/dds2/kernel/dds3KernelCore.c; appends child to parent task list after unlinking previous parent; paired 00101A80.
 0x001019F0	kwlnUnlinkListNode	inferred	L69; sources=names_pending_main.tsv; twin=0x00101B08, input-family pairing. [names_qp10.tsv]
 0x00101A60	dds3SetScopedObjectFlags	inferred	Calls the kernel dispatcher with set mode, object, mask and scope; its MIPS code ORs the masked bits into object flags at offset 0x1C.
 0x00101A90	dds3ClearScopedObjectFlags	inferred	Calls the same kernel dispatcher with clear mode, which ANDs the complement of the supplied flag mask into the selected object or scope.

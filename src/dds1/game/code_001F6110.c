@@ -2266,7 +2266,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
         BtlUnit *unit = actor->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
-    func_00101A80(state->scriptOwner, slot);
+    kwlnTaskAddChild(state->scriptOwner, slot);
     state->boundTask = slot;
 }
 

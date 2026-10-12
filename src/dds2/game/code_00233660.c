@@ -2591,7 +2591,7 @@ extern MdlViewerTaskDef D_003C87F0[];
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-extern void func_00101968(s32, s32);
+extern void kwlnTaskAddChild(s32, s32);
 
 void mdlRestartViewerPhaseTask(void) {
     mdlViewerTaskDestroy();
@@ -2599,7 +2599,7 @@ void mdlRestartViewerPhaseTask(void) {
         (s32)kwlnTaskCreate(D_003C87F0[mdlViewerState.taskPhase - 1].name, 0x2B00, 1, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].update, 0,
                        D_003C87F0[mdlViewerState.taskPhase - 1].data);
-    func_00101968(mdlViewerState.unk00, mdlViewerState.viewerTask);
+    kwlnTaskAddChild(mdlViewerState.unk00, mdlViewerState.viewerTask);
 }
 
 INCLUDE_ASM(const s32, "game/code_00233660", mdlViewer);

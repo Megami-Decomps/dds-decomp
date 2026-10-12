@@ -449,7 +449,7 @@ extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 
 extern char D_0041B710[]; /* "btl:BSE free\n" */
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
@@ -490,7 +490,7 @@ void func_0022AF90(void) {
     btlBossDebugPrintf(D_0041B6C8, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_0041B6D8, battleState->eventTaskId);
-    func_00101968(battleState->scriptOwner, eventTask);
+    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
         sndReleaseMidiTrack(battleState->sequenceHandle);

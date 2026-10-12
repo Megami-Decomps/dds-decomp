@@ -999,7 +999,7 @@ void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3)
 
 s32 evtViewerUpdateFrame(KwlnTask *task);
 
-void func_00101968(s32 arg0, s32 arg1);
+void kwlnTaskAddChild(s32 arg0, s32 arg1);
 
 s32 evtCreateFrameVariableTask(void);
 
@@ -3522,7 +3522,7 @@ s32 evtViewerScheduleFrameVariableTask(KwlnTask *task) {
 
     viewer = (void *)kwlnTaskGetUserValue(task);
     evtApplyViewerTimelineFrame(((EvtRuntime *)viewer)->curFrame, viewer);
-    func_00101968(task, evtCreateFrameVariableTask());
+    kwlnTaskAddChild(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
     return (s32)(u32)evtViewerUpdateFrame;
 }
@@ -3696,7 +3696,7 @@ void evtViewerCreateTaskWithSky(void) {
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
     viewerTask = kwlnTaskCreate(evtViewerTaskName, 0x3EB, 1, 1, evtViewerInitializeUpdateSequence, evtEventViewerDestroyActive, (u32)viewer);
-    func_00101968((s32)viewerTask, evtCreateSkyTask());
+    kwlnTaskAddChild((s32)viewerTask, evtCreateSkyTask());
     func_0024DAE0(viewer);
 }
 
