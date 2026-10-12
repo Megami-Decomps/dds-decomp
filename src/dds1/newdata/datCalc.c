@@ -448,7 +448,7 @@ extern f32 btlGetEncounterAdjustmentScale(void);
 extern u32 func_001A4630(void);
 extern s32 btlAverageAllMaximumForMask(u32 arg0);
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
-extern s32 func_001A94A0(u32 arg0);
+extern s32 btlAverageAllLevelsForMask(u32 arg0);
 extern void *memset(void *dst, s32 c, u32 n);
 extern s32 mdlFlagTest(s32 flagIndex);
 extern void mdlFlagSet(s32 flagIndex);
@@ -1630,7 +1630,7 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrReadIntParameter(0);
-        averageValue = func_001A94A0(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
+        averageValue = btlAverageAllLevelsForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
     }
     else {
         averageValue = 0;

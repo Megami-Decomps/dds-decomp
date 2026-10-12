@@ -197,7 +197,7 @@ done:
 
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
-extern s32 func_001F12E8(u32, u32, u8 *, u16);
+extern s32 btlCreateReferencedBattleEffectTask(u32, u32, u8 *, u16);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
@@ -238,7 +238,7 @@ void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit 
         return;
     }
 
-    created = (BtlRuntimeTask *)func_001F12E8(
+    created = (BtlRuntimeTask *)btlCreateReferencedBattleEffectTask(
         (u32)state->resources[species - 0x12A], (u32)unit, (u8 *)supplied, 0);
     switch (condition) {
     case -1:

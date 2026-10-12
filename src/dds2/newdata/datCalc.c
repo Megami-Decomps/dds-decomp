@@ -528,7 +528,7 @@ extern s32 btlAverageAllCurrentForMask(u32 arg0);
 
 extern s32 btlAverageAllMaximumForMask(u32 arg0);
 
-extern s32 func_001B3A00(u32 arg0);
+extern s32 btlAverageAllLevelsForMask(u32 arg0);
 
 
 extern void *memset(void *dst, s32 c, u32 n);
@@ -2023,7 +2023,7 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrReadIntParameter(0);
-        averageValue = func_001B3A00(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
+        averageValue = btlAverageAllLevelsForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
     }
     else {
         averageValue = 0;

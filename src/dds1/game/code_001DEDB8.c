@@ -497,7 +497,7 @@ void func_001D6300(u8 *object, void *position);
 
 /* vu0 routine: preserve the actor's primary position and rotation quaternion while * evaluating the requested model record; return the sampled vector in vf10. */ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value);
 
-extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
@@ -1763,7 +1763,8 @@ extern void func_001E3310(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 extern void btlBuildShoulderActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
-void func_001E3E58(BtlLinkedCommand *action, BtlCamState *pose,
+/* Apply the marked actor's action camera, honoring the runtime camera-arrangement hook. */
+void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
                    BtlUnit *target, s32 mode) {
     BtlState *runtime;
     BtlUnit *unit;
@@ -1886,7 +1887,8 @@ static inline void btlDefeatCameraStoreVector(f32 *dst) {
         : "=m" (*(PcpVectorCopyF32 *)dst) : "r" (dst));
 }
 
-void func_001E4180(BtlLinkedCommand *action, BtlCamState *pose,
+/* Use the defeat-camera hook or frame the selected actor set with the native extent rules. */
+void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
                    BtlUnit *startActor, BtlIndexList *indices, s8 mode) {
     typedef s32 (*CameraArrangementCallback)(BtlLinkedCommand *, BtlCamState *, s32);
     struct {
@@ -1911,7 +1913,7 @@ void func_001E4180(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     if (mode == 0) {
-        func_001E3E58(action, pose, startActor, 1);
+        btlApplyMarkedUnitActionCamera(action, pose, startActor, 1);
         i = 0;
         count = btlGetIndexListCount(indices);
         if ((u32)(s32)mode < count) {
@@ -5512,7 +5514,8 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
 
 extern void effBattleSetInputValue(BattleEffect *, s32);
 
-s32 func_001F1110(SoundEffectReferenceArgs *args) {
+/* Advance the referenced battle effect; return one when its battle or duration ends. */
+s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *owner;
 
@@ -5571,7 +5574,8 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     sndDeleteSystemEffect(effect);
 }
 
-BtlRuntimeTask *func_001F12E8(SoundResourceNode *effect, BtlUnit *source, BtlUnit *owner, u16 variant) {
+/* Create a deferred effect task whose start/finish callbacks balance resource and actor references. */
+BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source, BtlUnit *owner, u16 variant) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
     SoundEffectReferenceArgs *arguments;
 
@@ -5581,7 +5585,7 @@ BtlRuntimeTask *func_001F12E8(SoundResourceNode *effect, BtlUnit *source, BtlUni
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->identity;
     task->onStart = sndAddEffectReferences;
-    task->callback = func_001F1110;
+    task->callback = btlUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     arguments = btlGetTaskArguments(task);
     arguments->source = effect;
@@ -5597,7 +5601,7 @@ BtlRuntimeTask *func_001F12E8(SoundResourceNode *effect, BtlUnit *source, BtlUni
 
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *sourceOwner,
                                          s32 source, s32 target, BtlUnit *owner, u16 variant) {
-    BtlRuntimeTask *task = func_001F12E8(effect, sourceOwner, owner, variant);
+    BtlRuntimeTask *task = btlCreateReferencedBattleEffectTask(effect, sourceOwner, owner, variant);
     SoundEffectReferenceArgs *data = btlGetTaskArguments(task);
     data->sourceSelector = source;
     data->targetSelector = target;

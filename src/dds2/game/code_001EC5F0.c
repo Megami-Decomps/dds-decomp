@@ -1779,6 +1779,7 @@ extern void func_001F0C80(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 extern void btlBuildShoulderActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
+/* Apply the marked actor's action camera, honoring the runtime camera-arrangement hook. */
 void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
                   BtlUnit *target, s32 mode) {
     BtlState *runtime;
@@ -1915,7 +1916,7 @@ static inline void btlDefeatCameraStoreVector(f32 *dst) {
 
 /* Derive a camera pose around the supplied actor set, honoring the runtime
  * override slot before building either the selected-target or group view. */
-void func_001F1B00(BtlLinkedCommand *action, BtlCamState *pose,
+void btlBuildActorSetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
                    BtlUnit *startActor, BtlIndexList *indices, s8 mode) {
     typedef s32 (*CameraArrangementCallback)(BtlLinkedCommand *, BtlCamState *, s32);
     struct {
@@ -4653,7 +4654,8 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
 
 extern void effBattleSetInputValue(BattleEffect *, s32);
 
-s32 sndUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
+/* Advance the referenced battle effect; return one when its battle or duration ends. */
+s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *owner;
     BtlUnit *source;
@@ -4724,12 +4726,13 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     sndDeleteSystemEffect(effect);
 }
 
-extern s32 sndUpdateReferencedBattleEffect(SoundEffectReferenceArgs *);
+extern s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *);
 
-BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, BtlUnit *source,
-                                                 BtlUnit *actor, u16 frames) {
-    s32 v1 = 0;
-    s32 v2;
+/* Create a deferred effect task whose start/finish callbacks balance resource and actor references. */
+BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source,
+                                                 BtlUnit *actor, u16 variant) {
+    s32 sourceSelector = 0;
+    s32 targetSelector;
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
     SoundEffectReferenceArgs *args;
     BtlState *work;
@@ -4741,34 +4744,34 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, Bt
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = actor->owner;
     task->onStart = sndAddEffectReferences;
-    task->callback = sndUpdateReferencedBattleEffect;
+    task->callback = btlUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     work = (BtlState *)btlGetRuntime();
     if (work->unk6E4 != 0) {
-        v1 = work->unk6E4(actor);
+        sourceSelector = work->unk6E4(actor);
     }
-    if (v1 == 0) {
-        v1 = sourceOwner.selectorKey;
+    if (sourceSelector == 0) {
+        sourceSelector = sourceOwner.selectorKey;
     }
-    v2 = 0;
+    targetSelector = 0;
     if (work->unk6E8 != 0) {
-        v2 = work->unk6E8(actor);
+        targetSelector = work->unk6E8(actor);
     }
-    if (v2 == 0) {
-        v2 = sourceOwner.selectorKey;
+    if (targetSelector == 0) {
+        targetSelector = sourceOwner.selectorKey;
     }
     if (work->selectSoundEffectTarget != 0) {
-        BtlUnit *r = work->selectSoundEffectTarget(actor);
-        if (r != 0) {
-            actor = r;
+        BtlUnit *overrideActor = work->selectSoundEffectTarget(actor);
+        if (overrideActor != 0) {
+            actor = overrideActor;
         }
     }
     args = btlGetTaskArguments(task);
     args->source = effect;
     args->sourceOwner.unit = source;
-    args->sourceSelector = v1;
-    args->targetSelector = v2;
-    args->option = frames;
+    args->sourceSelector = sourceSelector;
+    args->targetSelector = targetSelector;
+    args->option = variant;
     args->targetOwner.unit = actor;
     args->effect = 0;
     args->duration = 0;
@@ -4777,7 +4780,7 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, Bt
 
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *sourceOwner,
                                          s32 source, s32 target, BtlUnit *actor, s32 frames) {
-    BtlRuntimeTask *task = btlCreateReferencedSoundEffectTask(effect, sourceOwner, actor, frames & 0xFFFF);
+    BtlRuntimeTask *task = btlCreateReferencedBattleEffectTask(effect, sourceOwner, actor, frames & 0xFFFF);
     SoundEffectReferenceArgs *args = btlGetTaskArguments(task);
     args->sourceSelector = source;
     args->targetSelector = target;
