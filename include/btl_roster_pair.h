@@ -40,7 +40,7 @@ extern BattleRosterTable D_00359160 __attribute__((section(".data")));
 #endif
 #ifdef VERSION_DDS2
 extern BattleRosterTable D_003B5D10 __attribute__((section(".data")));
-BattleRosterTable *fldGetCachedSceneActorNameAndId(s32, u16 *);
+BattleRosterTable *btlGetActorLinkageSkillList(s32, u16 *);
 #endif
 
 #endif

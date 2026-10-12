@@ -39,7 +39,7 @@ extern char *D_004367B8;
 
 extern char *btlCommandPanelTaskNameRef;
 
-extern void func_001C7DB8(s32, s32);
+extern void btlSetCommandPanelFadeMode(s32, s32);
 
 extern void btlSetActionActorPanelPresentation(s32, s32, s32);
 
@@ -96,7 +96,7 @@ extern SceneControl *btlCommandPanelWork;
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
-extern u32 func_001C82D8(s32, s8);
+extern u32 btlGetActorCommandClass(s32, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
 extern s32 btlCountTasksForOwner(s64);
 
@@ -160,12 +160,12 @@ extern s8 D_0037F531[];
 
 
 extern SceneKindTable *D_00438F4C;
-extern void func_001C8518();
+extern void btlGatherActorCommandsByKind();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
 extern void func_001C92A0(s32, s32, s32, s32);
 extern void func_001C9EA0(s32);
-extern void func_001C9BE8(s32);
+extern void btlDrawItemCommandRows(s32);
 extern void func_001C98E8(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
@@ -211,8 +211,8 @@ extern BtlPanelBlock *btlResourceBlock;
 extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
 extern s32 btlGetEffectActive();
-extern void func_001CC020();
-extern void func_001CC438();
+extern void btlUpdateTargetSelectionInput();
+extern void btlUpdateAndDrawTargetActorPanels();
 
 
 extern char *D_004367CC;
@@ -1135,7 +1135,7 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
 void btlEnterCommandSelectionState(ActionStateLink *task) {
     btlGetRuntime();
     task->pendingFlags = task->pendingFlags & 0xfffffffb;
-    func_001CAB60(task);
+    btlOpenBattleCommandPanel(task);
 }
 
 extern s32 fldGetSceneObjectState(void);

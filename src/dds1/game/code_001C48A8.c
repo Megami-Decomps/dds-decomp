@@ -166,7 +166,7 @@ void fldBattleSceneEnterInit(u8 *arg0) {
         *(u32 *)(arg0 + 0x1F8) |= 8;
         kwlnFadeInStart(0xFF, 0xFF, 0xFF, 0);
     }
-    if (func_001A99B0() != 0) {
+    if (btlRollSurpriseAttack() != 0) {
         *(u8 *)(arg0 + 0x24A) = 2;
     } else {
         *(u8 *)(arg0 + 0x24A) = 0;

@@ -2800,9 +2800,9 @@
 0x001B4C98	btlReleaseDialogTaskData	inferred	Cleans the task message window, frees its data and clears registration. [names_reviewed8.tsv]
 0x001B4CE8	btlCreateMessageWindow	inferred	allocates 0x40-byte window block D_003BB3DC with fixed colours and size 0xBB x 0x196
 0x001B5370	btlReleaseRegisteredTaskBuffer	inferred	Frees retained battle task data, resets its pointer and clears its registration. [names_reviewed10.tsv]
-0x001B53A0	sndAreSlotsEmpty	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x001B53A0	btlIsLinkageTutorialEligible	inferred	confidence=high; matched-C; Correction: prior audio-slot interpretation was incorrect. Tests three datGameState->battleFlags words for zero before the LINKAGE notice callback starts tutorial DSP entry 1. DDS2 twin 0x001C0008 adds model-flag suppression. Namer1 batch 11.
 0x001B5480	btlGetTaskState6	inferred	returns btlHasUnmarkedLinkageSkill(state[6]) of the task's state pointer
-0x001B54C0	btlClearFlagEntries	inferred	iterates FlagEntry list from func_001BD708 calling func_001ACD30(id, 0)
+0x001B54C0	btlClearFlagEntries	inferred	iterates FlagEntry list from btlGetActorLinkageSkillList calling func_001ACD30(id, 0)
 0x001B5550	btlDestroyTaskC	inferred	destroys hierarchy of task 0xC when the D_003BB3D0 task exists
 0x001B5910	btlFinishTrackedBattleTaskAndCloseWindow	inferred	Frees task user data and closes its tracked message window. [names_reviewed11.tsv]
 0x001B5B68	btlDestroyTaskD	inferred	same as above for 0xD / D_003BB3D4
@@ -2826,7 +2826,7 @@
 0x001BD070	btlIsSceneActorLimitSatisfied	inferred	Accepts a flagged scene actor or tests the count against the requested limit. [names_reviewed14.tsv]
 0x001BD190	btlGetCommandOptionCount	inferred	U0
 0x001BD658	btlBuildEligibleActorList	inferred	Unless current battle entry disables selection, scans 192 actor slots and flags, writing pairs of slot index and actor identifier and returning their count.
-0x001BDE98	fldDispatchSceneKindHandler	inferred	twin 0x001C91D8: switch on func_001BD0D0(kind) -> per-state handler
+0x001BDE98	fldDispatchSceneKindHandler	inferred	twin 0x001C91D8: switch on btlGetActorCommandClass(kind) -> per-state handler
 0x001BE8A0	btlDrawItemCommandRows	inferred	LeverAudit
 0x001BEA80	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001BF488	fldGetSceneObjectState	inferred	Returns active scene object state or zero without an active task. [names_reviewed5.tsv]
@@ -7823,3 +7823,16 @@
 0x001B9E98	btlDrawActorPanelPulse	inferred	confidence=high; matched-C; Chooses presentation tint and draws active-row pulse strips with transition geometry/fade plus two pulse-offset echo layers. DDS2 twin 0x001C50A0. Namer1 batch 10.
 0x001BA408	btlDrawActorPanelTransitionTriangles	inferred	confidence=high; matched-C; Emits four gradient triangles using eight per-vertex alpha values when transitionState is active, selects the battle draw surface and restores alpha mode afterward. DDS2 twin 0x001C5610. Namer1 batch 10.
 0x001BAB08	btlDrawActorPanelSecondaryPulse	inferred	confidence=high; matched-C; Uses secondaryPresentationValue, secondaryGeometry, secondaryFade and secondaryPulseOffsets/Level to draw active-row secondary pulse strips and echoes. DDS2 twin 0x001C5D10. Namer1 batch 10.
+0x001A99B0	btlRollSurpriseAttack	inferred	confidence=high; matched-C; Debug string btl:surprise; rolls chance scaled by active-party/enemy level difference and passive ability 0x22D, with scene overrides. Existing DDS2 twin 0x001B4210. Namer1 batch 11.
+0x001AE540	btlUpdateAndDrawAnalysisPanel	inferred	confidence=high; matched-C; Analysis-task callback advances page/fade and renders seven rows: level, category/name, HP/MP, commands and descriptive text. DDS2 twin 0x001B9158. Namer1 batch 11.
+0x001B0D70	btlSetActorCommandSelection	inferred	confidence=medium; matched-C; Confirm-input caller stores or clears three actor-record halfwords through the scene owner; DDS2 exposes the third as actionSlot. First two fields remain opaque. DDS2 twin 0x001BB988. Namer1 batch 11.
+0x001B55A8	btlUpdateLinkageNoticeTask	inferred	confidence=high; matched-C; Iterates unmarked eligible LINKAGE skills, inserts skill names into DSP entry 0, waits for message completion, optionally starts tutorial entry 1 and closes/marks flags. DDS2 twin 0x001C0240, selected by the New Linkage debug-labelled constructor branch. Namer1 batch 11.
+0x001B7238	btlCreateReserveActorPanelTask	inferred	confidence=high; matched-C; Counts inactive party members, initializes reserve row positions/pulses, allocates scratch unit memory and starts the reserve panel callback. DDS2 twin 0x001C2450. Namer1 batch 11.
+0x001BD0D0	btlGetActorCommandClass	inferred	confidence=high; matched-C; Selects command-class table from owner actor status flags and indexes it by requested class slot; consumed by command counts/draw/selection. DDS2 twin 0x001C82D8 retains an additional party-flag table. Namer1 batch 11.
+0x001BD2C0	btlGatherActorCommandsByKind	inferred	confidence=high; matched-C; Filters actor command IDs by selector kinds and record/status eligibility, removes IDs above the game-specific limit and returns shared scratch plus a count including the default slot for kinds 0/5. DDS2 twin 0x001C8518. Namer1 batch 11.
+0x001BD708	btlGetActorLinkageSkillList	inferred	confidence=high; matched-C; Calls native 0x001A3740 to populate/return shared BattleRosterTable of LINKAGE skill IDs and participant pairs. Correction: DDS2 twin 0x001C8A28 caches the corresponding list/count, not actor names; native 0x001AC750 uses the same skill/member tuple layout. Namer1 batch 11.
+0x001BF0F8	btlUpdateBattleSceneCommands	inferred	confidence=high; matched-C; Command-panel task state machine handles per-state selection and reserve actor transfer; returns -1 for state five. Existing DDS2 twin 0x001CA490. Namer1 batch 11.
+0x001BF8B0	btlAdvanceTargetRowAnimation	inferred	confidence=high; matched-C; Initializes three target-row indicators and advances their bounded step/position phases during target-panel animation. Native mode argument remains unused. DDS2 twin 0x001CB278. Namer1 batch 11.
+0x001C0650	btlStepTargetGridSelection	inferred	confidence=high; matched-C; Steps a fixed 3x3 ID grid with wraparound and missing-ID retries, resolves a present ID into listA entry and reports whether the selected ID changed. Used by special-scene directional target input. Namer1 batch 11.
+0x001C08B8	btlUpdateTargetSelectionInput	inferred	confidence=high; matched-C; Handles target confirm/cancel and mode-dependent directional wrapping, stores command-selection operands and rebuilds listB on selection changes. DDS1 retains special-scene grid navigation absent in DDS2 twin 0x001CC020. Namer1 batch 11.
+0x001C0DF8	btlUpdateAndDrawTargetActorPanels	inferred	confidence=high; matched-C; Draws selected actor name/category labels, updates target row/panel animation and actor secondary presentations for listB. DDS2 twin 0x001CC438 retains different ally-label centering. Namer1 batch 11.

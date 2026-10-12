@@ -55,7 +55,7 @@ extern void btlBossDebugPrintf(const char *, ...);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001C7DB8(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern void func_00230960(s32);
 
@@ -751,7 +751,7 @@ void btlChooseAndStartSceneScript(BtlState *scene) {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
             }
         }
-        func_001C7DB8(0, 20);
+        btlSetCommandPanelFadeMode(0, 20);
         return;
     }
     default:
@@ -791,7 +791,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_0037F531[0] < 0) {
                     btlRequestGuidePanelClose();
-                    func_001C7DB8(1, 0x14);
+                    btlSetCommandPanelFadeMode(1, 0x14);
                 }
             } else {
                 finished = 1;
@@ -856,7 +856,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
 
     btlPushSavedPartyUnitStates();
     if (scene->eventReady != 5) {
-        func_001C7DB8(0, 8);
+        btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
         func_001B7830();
         btlDestroyTaskC();

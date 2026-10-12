@@ -182,7 +182,8 @@ extern const f32 D_003A1D28[9];
 extern const char D_003A1D50[];
 extern void func_0011CE48(s32 chance);
 
-s32 func_001A99B0(void) {
+/* Roll the level/ability-scaled surprise chance, including scene overrides. */
+s32 btlRollSurpriseAttack(void) {
     extern u32 btlRollAiBucket(void);
     f32 levelScale[9];
     BtlState *state;
@@ -1426,7 +1427,7 @@ typedef struct BtlAnalysisPanelWork {
     u8 pad31[0x6F];
 } BtlAnalysisPanelWork;
 
-extern s32 func_001AE540(KwlnTask *);
+extern s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *);
 
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *);
 
@@ -1459,7 +1460,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->duration = duration;
     data->entry = entry;
     data->frame = 0;
-    task = (s32)kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001AE540,
+    task = (s32)kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
     func_00101A80(context->scriptOwner, (KwlnTask *)task);
     btlSetTrackedTaskHandle(11, task);
@@ -2071,7 +2072,7 @@ extern void btlDrawIndexedBattleEntryGlyphs(s32, s32, s32, s32, u16);
 extern void btlDrawThreePanelSpriteStrips(s32, s32, s32, s32);
 
 /* Advance and draw the seven analysis rows while the panel fades. */
-s32 func_001AE540(KwlnTask *task) {
+s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     char text[128];
     s32 offsets[8] = {52, 95, 157, 132, 132, 53, 53, 48};
     BtlState *battle;
@@ -2551,7 +2552,8 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
     return (~btlUnitStatusPair(unit) & 0x201) == 0;
 }
 
-void func_001B0D70(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+/* Store the confirmed command-selection tuple on the owning actor. */
+void btlSetActorCommandSelection(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     s32 temp_v0;
 
     temp_v0 = *(s32 *)(*(s32 *)(arg0 + 0x2c) + 0x18);
@@ -3225,7 +3227,8 @@ void btlReleaseRegisteredTaskBuffer(KwlnTask *unused) {
     btlSetTrackedTaskHandle(4, 0);
 }
 
-s32 sndAreSlotsEmpty(void) {
+/* The notice callback permits its LINKAGE tutorial while all three flag words are clear. */
+s32 btlIsLinkageTutorialEligible(void) {
     u32 *slot = datGameState->battleFlags;
     s32 i;
     for (i = 0; i < 3; i++) {
@@ -3260,7 +3263,7 @@ extern s32 btlGetTaskState6(void);
 INCLUDE_ASM(const s32, "game/code_001A9780", btlGetTaskState6);
 
 
-extern BattleRosterTable *func_001BD708(BattleSceneObject *, u16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 
 s32 btlClearFlagEntries(void) {
     u16 count;
@@ -3268,7 +3271,7 @@ s32 btlClearFlagEntries(void) {
     BattleRosterTable *table;
     s32 i;
     if (task != 0) {
-        table = func_001BD708((BattleSceneObject *)kwlnTaskGetUserValue(task), &count);
+        table = btlGetActorLinkageSkillList((BattleSceneObject *)kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
             func_001ACD30(table->entries[i].skill, 0);
         }
@@ -3307,9 +3310,10 @@ typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ?
 extern const BattlePanelColors D_003A2B20;
 extern u8 *D_003BAA8C;
 
+/* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2B20);
 
-s32 func_001B55A8(KwlnTask *task) {
+s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2B20;
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
     BattleRosterTable *list;
@@ -3341,7 +3345,7 @@ s32 func_001B55A8(KwlnTask *task) {
             work->phase = 6;
             break;
         }
-        list = func_001BD708((BattleSceneObject *)kwlnTaskGetUserValue(panelTask), &count);
+        list = btlGetActorLinkageSkillList((BattleSceneObject *)kwlnTaskGetUserValue(panelTask), &count);
         scanIndex = (u16)work->itemIndex;
         while (scanIndex < count) {
             id = list->entries[work->itemIndex].skill;
@@ -3364,7 +3368,7 @@ s32 func_001B55A8(KwlnTask *task) {
         break;
     }
     case 5:
-        if (sndAreSlotsEmpty()) {
+        if (btlIsLinkageTutorialEligible()) {
             dspStartEntry(1);
             work->phase++;
         }
@@ -3686,7 +3690,7 @@ extern s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *);
 extern void btlReleaseTrackedTaskResource(void);
 
 /* Build the reserve actor panels: place one row per inactive party member and start the panel task. */
-void func_001B7238(void) {
+void btlCreateReserveActorPanelTask(void) {
     s32 i;
     BattleReservePositions positions = D_003A2C70;
     BtlState *controller = (BtlState *)btlGetRuntime();
@@ -5184,7 +5188,7 @@ extern const s8 D_003BB468[];
 extern const s8 D_003BB470[];
 
 /* Resolve the command class through the owning actor's status-selected table. */
-s32 func_001BD0D0(BattleSceneObject *object, s8 mode) {
+s32 btlGetActorCommandClass(BattleSceneObject *object, s8 mode) {
     s32 flags = object->owner->unit->status.flags;
     s8 normal[6];
     s8 alternate[6];
@@ -5205,11 +5209,11 @@ s32 func_001BD0D0(BattleSceneObject *object, s8 mode) {
     return classes[mode];
 }
 
-extern u16 *func_001BD2C0(s32, s16 *, u16, u16, u16);
+extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
 extern void btlBuildEligibleActorList(s32, s16 *);
 
-extern BattleRosterTable *func_001BD708(BattleSceneObject *, u16 *);
+extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2DB0);
 
@@ -5218,16 +5222,16 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2DC8);
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2DD8);
 
 u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
-    s32 kind = func_001BD0D0((BattleSceneObject *)object, mode);
+    s32 kind = btlGetActorCommandClass((BattleSceneObject *)object, mode);
     s16 count;
 
     switch (kind) {
     case 0:
-        func_001BD2C0(object, &count, 0, 2, 3);
+        btlGatherActorCommandsByKind(object, &count, 0, 2, 3);
         D_003BD834->value[0] = count + 1;
         break;
     case 4:
-        func_001BD708((BattleSceneObject *)object, (u16 *)&count);
+        btlGetActorLinkageSkillList((BattleSceneObject *)object, (u16 *)&count);
         D_003BD834->value[4] = count;
         break;
     case 2:
@@ -5256,7 +5260,8 @@ extern u16 D_00359960[12];
 
 extern u16 D_00358B20[0x260];
 
-u16 *func_001BD2C0(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
+/* Gather kind-filtered actor commands; count includes the default slot for kinds 0/5. */
+u16 *btlGatherActorCommandsByKind(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
     BattleSceneObject *object = (BattleSceneObject *)address;
     s32 wanted;
     BtlUnit *unit;
@@ -5396,7 +5401,8 @@ void btlBuildEligibleActorList(s32 unused, s16 *count) {
 }
 
 
-BattleRosterTable *func_001BD708(BattleSceneObject *object, u16 *value) {
+/* Refresh and return the shared LINKAGE skill/member list for the owning actor. */
+BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *value) {
     s32 result = func_001A3740(object->owner->unit, &D_00359160);
     *value = result;
     return &D_00359160;
@@ -5409,7 +5415,7 @@ extern void btlDrawRetreatCommandLabel(s32);
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
 void fldDispatchSceneKindHandler(s32 arg0) {
-    switch (func_001BD0D0((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
+    switch (btlGetActorCommandClass((BattleSceneObject *)arg0, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001BDF60(arg0, 0, 2, 3);
         return;
@@ -5511,9 +5517,10 @@ extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
-    func_001B2D80(object, func_001BD0D0(object, btlCommandPanelWork->classIndex));
+    func_001B2D80(object, btlGetActorCommandClass(object, btlCommandPanelWork->classIndex));
 }
 
+/* Drive the command-panel state machine; state five terminates its task. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E50);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E60);
@@ -5526,7 +5533,7 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2E90);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2EA0);
 
-s32 func_001BF0F8(KwlnTask *task) {
+s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleSceneObject *object = (BattleSceneObject *)kwlnTaskGetUserValue(task);
     BattleActorPanelWork *panel;
@@ -5606,11 +5613,11 @@ void fldClearBattleSceneObject(KwlnTask *arg0) {
 
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
 
-extern s32 func_001BF0F8(KwlnTask *task);
+extern s32 btlUpdateBattleSceneCommands(KwlnTask *task);
 
 extern s32 func_001B5970(KwlnTask *task);
 
-extern s32 func_001B55A8(KwlnTask *task);
+extern s32 btlUpdateLinkageNoticeTask(KwlnTask *task);
 
 extern void func_001B2AC8(BattleSceneObject *object);
 
@@ -5651,7 +5658,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
         object = sdfAllocAndClearQuadwords(sizeof(*object));
         fldInitializeSceneObject(object, task);
         handle = (u32)kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
-                               func_001BF0F8, fldClearBattleSceneObject, (u32)object);
+                               btlUpdateBattleSceneCommands, fldClearBattleSceneObject, (u32)object);
         func_00101A80(scene->scriptOwner, (KwlnTask *)handle);
         scene->sceneObject = handle;
         btlSetActionActorPanelPresentation(task, 0, 0);
@@ -5676,7 +5683,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
             } else if (btlGetTaskState6() != 0) {
                 scene->battleFlags &= ~0x100000;
                 handle = (u32)kwlnTaskCreate(D_003BB3D0, 0x2B0E, 1, 1,
-                                       func_001B55A8, btlFinishTrackedBattleTaskAndCloseWindow,
+                                       btlUpdateLinkageNoticeTask, btlFinishTrackedBattleTaskAndCloseWindow,
                                        (u32)sdfAllocAndClearQuadwords(0x18));
                 func_00101A80(scene->scriptOwner, (KwlnTask *)handle);
                 btlSetTrackedTaskHandle(0xC, handle);
@@ -5723,7 +5730,8 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-void func_001BF8B0(SceneAiWork *work, s32 mode) {
+/* Initialize or advance the three target-row indicators; mode remains unused. */
+void btlAdvanceTargetRowAnimation(SceneAiWork *work, s32 mode) {
     s32 i;
     switch (work->animationPhase) {
     case 0:
@@ -5845,9 +5853,10 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A2FE8);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BFDE0);
 
+/* Step through the fixed 3x3 target-ID grid, skipping missing IDs; return whether the ID changed. */
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3020);
 
-s32 func_001C0650(s32 direction, SceneAiWork *work) {
+s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
     s32 ids[9] = {0x13E, 0xFFFF, 0x13D, 0x140, 0xFFFF, 0x13F, 0x141, 0x11B, 0x142};
     s32 count;
     s32 oldId;
@@ -5931,7 +5940,8 @@ extern s16 D_003BB494;
 extern s16 D_003BB496;
 extern s16 D_003BB498;
 
-void func_001C08B8(BtlState *battle, SceneAiWork *work, s32 mode) {
+/* Process target confirm/cancel and mode-selected directional input. */
+void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode) {
     BattleSceneObject *object;
     KwlnTask *task;
     BtlUnit *unit;
@@ -5947,13 +5957,13 @@ void func_001C08B8(BtlState *battle, SceneAiWork *work, s32 mode) {
             object->state = 9;
             object->commandData->linkedUnit =
                 (BtlUnit *)btlGetIndexListEntry(work->listA, work->entry);
-            func_001B0D70((s32)object, 0, 0, 0);
+            btlSetActorCommandSelection((s32)object, 0, 0, 0);
             sndSetStationedSeVolume(9);
             return;
         }
         work->state = 3;
-        if (func_001BD0D0(object, btlCommandPanelWork->classIndex) == 0) {
-            func_001B0D70((s32)object, D_003BB494, D_003BB496, D_003BB498);
+        if (btlGetActorCommandClass(object, btlCommandPanelWork->classIndex) == 0) {
+            btlSetActorCommandSelection((s32)object, D_003BB494, D_003BB496, D_003BB498);
         }
         return;
     }
@@ -6034,7 +6044,7 @@ void func_001C08B8(BtlState *battle, SceneAiWork *work, s32 mode) {
     }
 
     if (battle->battleMode == 0x10E && selection != 0 && mode >= 4) {
-        if (func_001C0650(selection, work) != 0) {
+        if (btlStepTargetGridSelection(selection, work) != 0) {
             sndSetStationedSeVolume(1);
         }
         goto update_list;
@@ -6074,7 +6084,7 @@ extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
 
 /* Draw selected actor names and advance the battle scene's actor panels. */
-void func_001C0DF8(SceneAiWork *work) {
+void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     BtlUnit *unit;
     u32 glyph;
     u32 categoryGlyph;
@@ -6131,7 +6141,7 @@ void func_001C0DF8(SceneAiWork *work) {
             }
         }
     }
-    func_001BF8B0(work, 0);
+    btlAdvanceTargetRowAnimation(work, 0);
     btlAdvanceTargetPanelAnimation(work, 0);
     for (i = 0; i < count; i++) {
         unit = btlGetIndexListEntry(work->listB, i);
@@ -6196,8 +6206,8 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
             }
             break;
         }
-        func_001C08B8(work, state, mode);
-        func_001C0DF8(state);
+        btlUpdateTargetSelectionInput(work, state, mode);
+        btlUpdateAndDrawTargetActorPanels(state);
         break;
     case 3:
     case 4:
@@ -6213,7 +6223,7 @@ extern s32 func_001A30F8(void *source, BtlIndexList *list, s32, s32, s32);
 
 extern u32 btlSelectCommandTargetPolicy(void *source, BtlIndexList *list, s32);
 
-extern s32 func_001C0650(s32, SceneAiWork *);
+extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
 
 SceneAiWork *btlCreateAiWork(BtlTask *source) {
     SceneAiWork *work;
@@ -6279,7 +6289,7 @@ nextActor:
 selectTarget:
     work->cursor.position.row = 2;
     work->cursor.position.column = 1;
-    func_001C0650(0, work);
+    btlStepTargetGridSelection(0, work);
     btlClearIndexList(work->listB);
     btlAppendIndexListEntry(work->listB,
                             btlGetIndexListEntry(work->listA, work->entry));

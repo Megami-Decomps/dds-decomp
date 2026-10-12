@@ -2304,7 +2304,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-extern s32 func_001B9158(KwlnTask *task);
+extern s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task);
 
 extern void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *task);
 
@@ -2336,7 +2336,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->duration = duration;
     data->unit = (BtlUnit *)entry;
     data->frame = 0;
-    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, func_001B9158,
+    task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
     func_00101968(context->scriptOwner, task);
     btlSetTrackedTaskHandle(11, (s32)task);
@@ -2844,6 +2844,7 @@ extern const s32 D_00415E00[2][3], D_00415E18[2][3], D_00415E30[2][3], D_00415F0
 
 extern const s32 D_00415E48[16][3];
 
+/* Draw the selected analysis icon section with its packed fade level. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415D58);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415D88);
@@ -2864,7 +2865,7 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415E48);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F08);
 
-void func_001B8E68(s32 section, s32 delta) {
+void btlDrawPanelIconGroup(s32 section, s32 delta) {
     /* Rows contain pixel X, pixel Y and sprite slot; section 3 is the sixteen-row grid. */
     u32 colors[4];
     s32 primary[2][3];
@@ -2939,9 +2940,10 @@ extern const char D_00436820[];
 extern char D_00436828[];
 extern DatEnemyRecord *datEnemyRecords;
 
+/* Advance and draw the seven analysis rows while the panel fades. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00415F38);
 
-s32 func_001B9158(KwlnTask *task) {
+s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
     u8 text[0x80];
     s32 rowOffsets[8];
     s16 skillCount;
@@ -3004,7 +3006,7 @@ s32 func_001B9158(KwlnTask *task) {
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
-                        func_001B8E68(0, work->fade);
+                        btlDrawPanelIconGroup(0, work->fade);
                     } else {
                         func_0035C860((char *)text, D_00436818, work->unit->partyRecord.level);
                         glyph = func_0019F5E8((work->x + xOffset) << 4, (work->y - 2) << 3,
@@ -3032,7 +3034,7 @@ s32 func_001B9158(KwlnTask *task) {
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
-                        func_001B8E68(1, work->fade);
+                        btlDrawPanelIconGroup(1, work->fade);
                     } else {
                         func_0035C860((char *)text, D_00436820,
                                       work->unit->partyRecord.hp, work->unit->partyRecord.maxHp);
@@ -3047,7 +3049,7 @@ s32 func_001B9158(KwlnTask *task) {
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
-                        func_001B8E68(2, work->fade);
+                        btlDrawPanelIconGroup(2, work->fade);
                     } else {
                         func_0035C860((char *)text, D_00436820,
                                       work->unit->partyRecord.mp, work->unit->partyRecord.maxMp);
@@ -3063,7 +3065,7 @@ s32 func_001B9158(KwlnTask *task) {
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
-                        func_001B8E68(3, work->fade);
+                        btlDrawPanelIconGroup(3, work->fade);
                     } else {
                         skills = btlGatherEnemyCommands(work->unit, &skillCount);
                         for (item = 0; item < skillCount; item++) {
@@ -3085,7 +3087,7 @@ s32 func_001B9158(KwlnTask *task) {
                     if ((datBattleSceneRecords[battle->battleMode].flags & 1) != 0 ||
                         (datEnemyRecords[work->unit->partyRecord.unitId].flags & 0x800) != 0 ||
                         datEnemyRecords[work->unit->partyRecord.unitId].pad16[0] != 0) {
-                        func_001B8E68(4, work->fade);
+                        btlDrawPanelIconGroup(4, work->fade);
                     } else {
                         position = 0;
                         memset(D_003B6828, 0, sizeof(D_003B6828));
@@ -3389,7 +3391,8 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
     return (~btlUnitStatusPair(unit) & 0x201) == 0;
 }
 
-void func_001BB988(BattleSceneObject *object, s32 first, s32 second, s32 slot) {
+/* Store the confirmed command-selection tuple on the owning actor. */
+void btlSetActorCommandSelection(BattleSceneObject *object, s32 first, s32 second, s32 slot) {
     BtlUnit *unit = object->owner->unit;
     unit->partyRecord.unk1AC = first;
     unit->partyRecord.unk1AE = second;
@@ -4055,7 +4058,8 @@ void btlReleaseRegisteredTaskBuffer(s32 unused) {
     btlSetTrackedTaskHandle(4, 0);
 }
 
-s32 func_001C0008(void) {
+/* Gate the LINKAGE tutorial on the model flag and four cleared notice words. */
+s32 btlIsLinkageTutorialEligible(void) {
     s32 i;
     u32 *flags;
     if (mdlFlagTest(0xb8f)) {
@@ -4103,7 +4107,7 @@ s32 btlClearFlagEntries(void) {
     BattleRosterTable *table;
     s32 i;
     if (task != 0) {
-        table = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(task), &count);
+        table = btlGetActorLinkageSkillList(kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
             func_001B7940(table->entries[i].skill, 0);
         }
@@ -4145,14 +4149,15 @@ extern u32 btlGetActiveUnitId(void);
 extern s32 dspStartEntry(s32);
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
-extern void func_001C7DB8(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_001B7A38(s32, s32);
 
+/* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
 
-s32 func_001C0240(KwlnTask *task) {
+s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
     BattlePanelColors colors = D_00416650;
     BtlTutorialDialogWork *work;
     BattleRosterTable *list;
@@ -4188,7 +4193,7 @@ s32 func_001C0240(KwlnTask *task) {
             work->phase = 6;
             break;
         }
-        list = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(panelTask), &count);
+        list = btlGetActorLinkageSkillList(kwlnTaskGetUserValue(panelTask), &count);
         scanIndex = (u16)work->itemIndex;
         while (scanIndex < count) {
             id = list->entries[work->itemIndex].skill;
@@ -4211,7 +4216,7 @@ s32 func_001C0240(KwlnTask *task) {
         break;
     }
     case 5:
-        if (func_001C0008() != 0) {
+        if (btlIsLinkageTutorialEligible() != 0) {
             dspStartEntry(1);
             work->phase++;
         }
@@ -4244,7 +4249,7 @@ s32 func_001C0240(KwlnTask *task) {
     }
     dspCloseChannel();
     btlClearFlagEntries();
-    func_001C7DB8(1, 8);
+    btlSetCommandPanelFadeMode(1, 8);
     return -1;
 
 dialog_active:
@@ -4272,13 +4277,14 @@ extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
 extern void func_001E3108(void *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
-extern void func_001C7DB8(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-s32 func_001C0828(KwlnTask *task) {
+/* Run the Majin tutorial's message/camera sequence; return -1 when complete. */
+s32 btlUpdateMajinTutorialTask(KwlnTask *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)kwlnTaskGetUserValue(task);
     s32 windowState = evtGetMessageWindowControlState();
@@ -4439,7 +4445,7 @@ s32 func_001C0828(KwlnTask *task) {
             }
         }
         dspCloseChannel();
-        func_001C7DB8(1, 8);
+        btlSetCommandPanelFadeMode(1, 8);
         return -1;
     }
     if (windowState == 1) {
@@ -4720,7 +4726,7 @@ void btlReleaseTrackedTaskResource(void);
 void btlSlotBankPromoteStates(BattleActorPanelWork *bank);
 
 /* Build the reserve actor panels: place one row per inactive party member and start the panel task. */
-void func_001C2450(void) {
+void btlCreateReserveActorPanelTask(void) {
     s32 i;
     BattleReservePositions positions = D_004167E0;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -5509,9 +5515,10 @@ void btlDrawActorPanelPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32
     }
 }
 
+/* Advance/fade the eight vertex pulse levels for an actor-panel transition. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416898);
 
-void func_001C53A0(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+void btlWriteTriangleHighlightPulse(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
     s32 i;
 
     switch (work->activeEntries[slot].presentation.transitionState) {
@@ -6097,7 +6104,8 @@ extern const char *D_004367DC;
 extern BattleCmdPanel *btlCommandPanelWork;
 extern void btlResetRegisteredPanelEntrance(BattleRegisteredPanelWork *);
 
-void func_001C7DB8(s8 mode, s32 duration) {
+/* Coordinate command/actor panel fades; duration sets the 0x80 ramp step. */
+void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
     struct KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     struct KwlnTask *panelTask = kwlnTaskGetTaskByName(D_004367CC);
     struct KwlnTask *registeredTask = kwlnTaskGetTaskByName(D_004367DC);
@@ -6239,7 +6247,7 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
-extern u32 func_001C82D8(s32, s8);
+extern u32 btlGetActorCommandClass(s32, s8);
 
 extern s32 btlCountFlaggedSceneActors(void);
 
@@ -6333,7 +6341,8 @@ extern const BtlSlotTable D_00436888[];
 extern const BtlSlotTable D_00436890[];
 extern const BtlSlotTable D_00436898[];
 
-u32 func_001C82D8(s32 address, s8 index) {
+/* Resolve the command class through the actor's status/party-flag-selected table. */
+u32 btlGetActorCommandClass(s32 address, s8 index) {
     BattleSceneObject *object = (BattleSceneObject *)address;
     BtlUnit *unit = object->owner->unit;
     BtlSlotTable normal = D_00436880[0];
@@ -6355,7 +6364,7 @@ u32 func_001C82D8(s32 address, s8 index) {
 
 extern SceneKindTable *D_00438F4C;
 
-extern u16 *func_001C8518(s32, s16 *, u16, u16, u16);
+extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
@@ -6375,17 +6384,17 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
         s16 ids[8];
         u16 count;
     } buffer;
-    u32 type = func_001C82D8(ctx, kind);
+    u32 type = btlGetActorCommandClass(ctx, kind);
     if (type != 4) {
         D_004367C0 = 0;
     }
     switch (type) {
     case 0:
-        func_001C8518(ctx, buffer.ids, 0, 2, 3);
+        btlGatherActorCommandsByKind(ctx, buffer.ids, 0, 2, 3);
         D_00438F4C->value[0] = buffer.ids[0] + 1;
         break;
     case 4:
-        fldGetCachedSceneActorNameAndId(ctx, &buffer.count);
+        btlGetActorLinkageSkillList(ctx, &buffer.count);
         D_00438F4C->value[4] = buffer.ids[0];
         break;
     case 2:
@@ -6413,7 +6422,8 @@ u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
 extern u16 D_003B6810[12];
 extern u16 D_003B55D0[0x260];
 
-u16 *func_001C8518(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
+/* Gather kind-filtered actor commands; count includes the default slot for kinds 0/5. */
+u16 *btlGatherActorCommandsByKind(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
     BattleSceneObject *object = (BattleSceneObject *)address;
     s32 wanted;
     BtlUnit *unit;
@@ -6511,8 +6521,8 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     *count = found;
 }
 
-/* Cache the roster count while returning the shared paired-actor record. */
-BattleRosterTable *fldGetCachedSceneActorNameAndId(s32 address, u16 *outCount) {
+/* Cache the LINKAGE list count while returning shared skill/member records. */
+BattleRosterTable *btlGetActorLinkageSkillList(s32 address, u16 *outCount) {
     BattleSceneObject *object = (BattleSceneObject *)address;
     s32 cachedCount = D_004367C0;
     if (cachedCount == 0) {
@@ -6529,14 +6539,14 @@ extern void func_001C92A0(s32, s32, s32, s32);
 
 extern void func_001C9EA0(s32);
 
-extern void func_001C9BE8(BattleSceneObject *);
+extern void btlDrawItemCommandRows(BattleSceneObject *);
 
 extern void func_001C98E8(s32);
 
 extern void btlDrawRetreatCommandLabel(s32);
 
 void fldDispatchSceneKindHandler(s32 sceneContext) {
-    switch (func_001C82D8(sceneContext, btlCommandPanelWork->classIndex)) {
+    switch (btlGetActorCommandClass(sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001C92A0(sceneContext, 0, 2, 3);
         return;
@@ -6544,7 +6554,7 @@ void fldDispatchSceneKindHandler(s32 sceneContext) {
         func_001C9EA0(sceneContext);
         return;
     case 2:
-        func_001C9BE8((BattleSceneObject *)sceneContext);
+        btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
         return;
     case 3:
         func_001C98E8(sceneContext);
@@ -6567,7 +6577,8 @@ typedef struct ItemRowColors {
 extern const ItemRowColors D_00416A00;
 extern char D_004368A0[];
 
-void func_001C9BE8(BattleSceneObject *object) {
+/* Draw visible item-command names/counts and highlight the selected row. */
+void btlDrawItemCommandRows(BattleSceneObject *object) {
     char text[16];
     ItemRowColors colors = D_00416A00;
     s32 shown;
@@ -6857,7 +6868,7 @@ extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 /* The same native command-selection sequence occurs in four switch paths. */
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
-    func_001BD9A0(object, func_001C82D8((s32)object, btlCommandPanelWork->classIndex));
+    func_001BD9A0(object, btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex));
 }
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169F0);
@@ -7087,8 +7098,8 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void *memset(void *, s32, u32);
 extern s32 func_001C0630(KwlnTask *);
-extern s32 func_001C0828(KwlnTask *);
-extern s32 func_001C0240(KwlnTask *);
+extern s32 btlUpdateMajinTutorialTask(KwlnTask *);
+extern s32 btlUpdateLinkageNoticeTask(KwlnTask *);
 extern void btlReleaseDialogTaskAndMarkBattleState(KwlnTask *);
 extern void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *);
 extern u8 D_003B52D0[];
@@ -7096,7 +7107,7 @@ extern u8 D_00385228[];
 extern char D_00436828[];
 
 /* Open the battle command panel task and, on the first eligible ally turn, start the matching tutorial dialog. */
-void func_001CAB60(ActionStateLink *task) {
+void btlOpenBattleCommandPanel(ActionStateLink *task) {
     char text[32];
     BtlState *scene;
     BattleSceneObject *object;
@@ -7130,21 +7141,21 @@ void func_001CAB60(ActionStateLink *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
                 dspStartEntry(2);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             case 6:
                 btlBossDebugPrintf("-----------------Tutorial Majin!!-------------------\n");
                 mdlFlagSet(0x81A);
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x300;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0828,
+                handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateMajinTutorialTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
                 func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
                 dspStartEntry(4);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             case 2:
                 btlBossDebugPrintf("-----------------Tutorial Weak!!-------------------\n");
@@ -7158,7 +7169,7 @@ void func_001CAB60(ActionStateLink *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
                 dspStartEntry(1);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             case 3:
                 btlBossDebugPrintf("-----------------Tutorial Hunt!!-------------------\n");
@@ -7175,7 +7186,7 @@ void func_001CAB60(ActionStateLink *task) {
                 func_0035C860(text, D_00436828, D_00435E64 + func_001CA8D8() * 17);
                 evtCopyEntryStringToActiveWindow(0, text);
                 dspStartEntry(2);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             case 4:
                 btlBossDebugPrintf("-----------------Tutorial Fear!!-------------------\n");
@@ -7189,20 +7200,20 @@ void func_001CAB60(ActionStateLink *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
                 dspStartEntry(3);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             case 5:
                 btlBossDebugPrintf("-----------------New Linkage!!-------------------\n");
                 ((SceneGlobalState *)btlTrackedTaskHandles)->flags |= 0x200;
                 scene->battleFlags &= ~0x100000;
-                handle = kwlnTaskCreate(D_004367EC, 0x2B0E, 1, 1, func_001C0240,
+                handle = kwlnTaskCreate(D_004367EC, 0x2B0E, 1, 1, btlUpdateLinkageNoticeTask,
                                         btlFinishTrackedBattleTaskAndCloseWindow,
                                         (u32)sdfAllocAndClearQuadwords(0x18));
                 func_00101968(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xC, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
-                func_001C7DB8(0, 8);
+                btlSetCommandPanelFadeMode(0, 8);
                 break;
             default:
                 scene->battleFlags |= 0x100000;
@@ -7242,7 +7253,8 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-void func_001CB278(SceneAiWork *work, s32 mode) {
+/* Initialize or advance the three target-row indicators; mode remains unused. */
+void btlAdvanceTargetRowAnimation(SceneAiWork *work, s32 mode) {
     s32 i;
     switch (work->animationPhase) {
     case 0:
@@ -7374,9 +7386,10 @@ extern s16 D_004368BC;
 extern s16 D_004368BE;
 extern s16 D_004368C0;
 
+/* Process target confirm/cancel and mode-selected directional input. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416D00);
 
-void func_001CC020(BtlState *scene, SceneAiWork *state, s32 mode) {
+void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode) {
     BattleSceneObject *object;
     u32 oldIndex;
     u32 count;
@@ -7394,16 +7407,16 @@ void func_001CC020(BtlState *scene, SceneAiWork *state, s32 mode) {
             object->state = 9;
             object->commandData->linkedUnit =
                 (BtlUnit *)btlGetIndexListEntry(state->listA, state->entry);
-            func_001BB988(object, 0, 0, 0);
+            btlSetActorCommandSelection(object, 0, 0, 0);
             sndSetStationedSeVolume(9);
             return;
         }
 
         state->state = 3;
-        if (func_001C82D8((s32)object, btlCommandPanelWork->classIndex) != 0) {
+        if (btlGetActorCommandClass((s32)object, btlCommandPanelWork->classIndex) != 0) {
             return;
         }
-        func_001BB988(object, D_004368BC, D_004368BE, D_004368C0);
+        btlSetActorCommandSelection(object, D_004368BC, D_004368BE, D_004368C0);
         return;
     }
 
@@ -7526,7 +7539,7 @@ extern void btlSetActorSecondaryPresentation(BtlUnit *unit, s32 unused, s8 phase
 extern DatEnemyRecord *datEnemyRecords;
 
 /* Draw selected actor names and advance the battle scene's actor panels. */
-void func_001CC438(SceneAiWork *work) {
+void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     BtlUnit *unit;
     u32 glyph;
     u32 categoryGlyph;
@@ -7583,7 +7596,7 @@ void func_001CC438(SceneAiWork *work) {
             }
         }
     }
-    func_001CB278(work, 0);
+    btlAdvanceTargetRowAnimation(work, 0);
     btlAdvanceTargetPanelAnimation(work, 0);
     for (i = 0; i < count; i++) {
         unit = btlGetIndexListEntry(work->listB, i);
@@ -7613,7 +7626,7 @@ void btlDrawCenteredPanelSegments(s32 width) {
 extern s32 btlGetEffectActive();
 
 
-extern void func_001CC438();
+extern void btlUpdateAndDrawTargetActorPanels();
 
 s32 fldStepSceneStateMachine(KwlnTask *handle) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -7632,8 +7645,8 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
         if (work->battleMode == 0x312) {
             mode = btlGetEffectActive() == 1 ? 5 : 1;
         }
-        func_001CC020(work, state, mode);
-        func_001CC438(state);
+        btlUpdateTargetSelectionInput(work, state, mode);
+        btlUpdateAndDrawTargetActorPanels(state);
         break;
     case 3:
     case 4:
@@ -8560,13 +8573,13 @@ void fldResetSceneStatus(KwlnTask *task) {
 
 void fldBeginSceneTransition(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
-    func_001C7DB8(1, 8);
+    btlSetCommandPanelFadeMode(1, 8);
     scene->battleFlags |= 0x200;
 }
 
 void fldClearSceneTransition(void) {
     btlGetRuntime();
-    func_001C7DB8(0, 8);
+    btlSetCommandPanelFadeMode(0, 8);
 }
 
 void func_001CFB48(void) {
