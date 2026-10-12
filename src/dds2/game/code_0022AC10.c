@@ -2931,6 +2931,37 @@ void func_00230960(void) {
     dds3WorkClear();
 }
 
+typedef struct BattleDebugSelector {
+    const char *title;
+    u32 unk04;
+    u32 *index;
+} BattleDebugSelector;
+
+typedef struct BattleDebugWindow {
+    u32 unk00;
+    s32 x;
+    s32 y;
+} BattleDebugWindow;
+
+extern BattleDebugSelector D_003C0298;
+extern BattleDebugWindow D_003C05E0;
+extern u8 D_00436F5F, D_00436F61;
+extern u32 D_00436F64, D_00436F68;
+extern u16 D_00436F6C, D_00436F6E, D_00436F70;
+extern u32 D_00436F74, D_00436F78;
+extern const char *D_00436F80, *D_00436F84;
+extern char D_00436F98[];
+extern DatPartyRecord D_003C0620[][5];
+extern u32 func_0020D260(u32);
+extern void func_0020D228(void);
+extern void func_0020D270(u32);
+extern void func_0020D230(void);
+extern s32 func_0011E848(s32);
+extern s32 func_0011E930(s32, f32);
+extern void func_00230D90(void);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
+
+/* Edit encounter settings, preview party/enemy names, and launch the test. */
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C118);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C128);
@@ -2989,37 +3020,6 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2C8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
 
-typedef struct BattleDebugSelector {
-    const char *title;
-    u32 unk04;
-    u32 *index;
-} BattleDebugSelector;
-
-typedef struct BattleDebugWindow {
-    u32 unk00;
-    s32 x;
-    s32 y;
-} BattleDebugWindow;
-
-extern BattleDebugSelector D_003C0298;
-extern BattleDebugWindow D_003C05E0;
-extern u8 D_00436F5F, D_00436F61;
-extern u32 D_00436F64, D_00436F68;
-extern u16 D_00436F6C, D_00436F6E, D_00436F70;
-extern u32 D_00436F74, D_00436F78;
-extern const char *D_00436F80, *D_00436F84;
-extern char D_00436F98[];
-extern DatPartyRecord D_003C0620[][5];
-extern u32 func_0020D260(u32);
-extern void func_0020D228(void);
-extern void func_0020D270(u32);
-extern void func_0020D230(void);
-extern s32 func_0011E848(s32);
-extern s32 func_0011E930(s32, f32);
-extern void func_00230D90(void);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
-/* Edit encounter settings, preview party/enemy names, and launch the test. */
 s32 func_00230978(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
