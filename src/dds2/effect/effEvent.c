@@ -1467,7 +1467,7 @@ extern SdfPoolNode D_003802A8;
 /* DDS2 event-bill renderer, reconstructed from the native owner and its
  * current providers. The VIF position stream consumes XYZ only: native never
  * initializes the temporary position's W before its full-vector add/copy. */
-void func_00199118(EffEventBillSet *work) {
+void effEventDrawBillSet(EffEventBillSet *work) {
     EffEventBillBatch primary, secondary;
     f32 matrix[4][4];
     f32 position[4], origin[4], lateral[4];
