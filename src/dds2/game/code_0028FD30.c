@@ -619,7 +619,22 @@ static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
     return (flags & ~15) | status;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
+extern MenuPanelPositionRecord D_003CFEB8[][37];
+
+/* Find one panel record by its script ID within a selected 37-entry row. */
+MenuPanelPositionRecord *func_00291400(s32 selector, u16 id) {
+    s32 offset = (selector << 7) + ((selector * 5) << 2);
+    MenuPanelPositionRecord *entry =
+        (MenuPanelPositionRecord *)((u8 *)D_003CFEB8 + offset);
+    u32 i = 0;
+
+    for (i = 0; i < 37; i++, entry++) {
+        if (id == entry->id) {
+            return entry;
+        }
+    }
+    return NULL;
+}
 extern MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
 
 
