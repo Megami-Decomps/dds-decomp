@@ -799,7 +799,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer) {
 
 struct ParColorRamp;
 extern void parInitColorRamp(struct ParColorRamp *, s32);
-extern ParTable *func_00159C08(u32, u16, BillObj **);
+extern ParTable *parCreateHistorySlotTable(u32, u16, BillObj **);
 extern u32 func_0015B220(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
 
@@ -820,7 +820,7 @@ void effInitializeEmitterHead(void *effect) {
     parInitColorRamp((struct ParColorRamp *)owner->fade, owner->lifetimeFrames);
     switch (owner->sub.kind) {
     case 1:
-        owner->sub.value.table = func_00159C08(owner->particleCount,
+        owner->sub.value.table = parCreateHistorySlotTable(owner->particleCount,
                                              owner->sub.templateEntryCount,
                                              &owner->billboard);
         break;

@@ -1350,6 +1350,7 @@
 0x00158FA8	parInitializeRadialParticle	inferred	confidence=high; src/dds1/effect/parManager.c:func_00158FA8; Initializes delayed particle age, independently jittered radial offset, rotation axis, radial step, billboard scale and initial phase. [names_qp9.tsv]
 0x001596E8	parInitColorRamp	inferred	Initializes color-ramp data. [names_qp9.tsv]
 0x00159AB8	parEvaluateColorRampAtAge	inferred	evaluates emitter ramp channels and age-dependent alpha into packed RGBA; DDS2 twin 0x001616A8.
+0x00159C08	parCreateHistorySlotTable	inferred	src/dds1/effect/parManager.c and src/dds1/game/code_00151F58.c; allocates ParTable point slabs and per-slot free chains, stores capacity/billboard/allocation; paired 001617F8.
 0x00159CD8	parReleaseHistorySlotTable	inferred	high confidence; corrects node misnomer: releases the history-slot table's shared point/slot allocation handle. Paired DDS2 0x001618C8 and emitter kind-one cleanup confirm ownership. [Namer1 batch 30]
 0x00159CF0	parPrependHistorySample	inferred	Shifts the selected slot history backward, captures the current vector sample, and stores color and billboard scale
 0x00159D68	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale

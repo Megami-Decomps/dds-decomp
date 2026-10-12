@@ -253,7 +253,7 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
 INCLUDE_ASM(const s32, "effect/parManager", parEvaluateColorRampAtAge);
 
 /* Allocate contiguous point slabs, slot records and the trailing table header. */
-ParTable *func_001617F8(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
+ParTable *parCreateHistorySlotTable(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
     u32 pointBytes = pointCapacity * sizeof(u128);
     u32 slabBytes = pointBytes + sizeof(ParSlot);
     u32 totalBytes = slabBytes * slotCount;
