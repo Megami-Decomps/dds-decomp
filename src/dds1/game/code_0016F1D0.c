@@ -4,6 +4,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
 #include "pcp_vu0.h"
@@ -263,8 +264,6 @@ void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
     particle = &work->vertices[index];
     particle->angle = particle->angle + work->increment;
 }
-
-extern u32 effBlendColor(u32, u32, f32);
 extern void effDrawTransformedRecordPool(EffRecordPool *);
 
 void func_0016F7B0(EffRingWork *work)

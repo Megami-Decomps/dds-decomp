@@ -8,6 +8,7 @@
 #include "sdf.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "pcp_vu0.h"
 
 
@@ -18,8 +19,6 @@ typedef struct {
     f32 twoThirds[4];/* 0x20 */
     f32 end[4];     /* 0x30: work->startVec */
 } BlurVectorRecord;
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
 extern void effSetResourceBlendColor(s32 handle, u32 color);

@@ -1501,7 +1501,6 @@ typedef char EffEventBillBatch_size[(sizeof(EffEventBillBatch) == 0x400) ? 1 : -
 
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 struct DmaPacketHeader;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *texture);

@@ -2,6 +2,7 @@
 #include "sdf_quaternion.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
@@ -42,8 +43,6 @@ extern f32 sdfSinPoly(f32 angle);
 extern u8 sdfViewEyeVector[];
 
 extern u8 sdfViewTargetVector[];
-
-extern s32 effBlendColor(s32, s32, f32);
 
 extern void effFlashTrianglePulseWriteCorners();
 

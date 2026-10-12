@@ -33,8 +33,6 @@ typedef struct {
     u8 pad04[4];
     EffWork *effect;
 } EffMagatuhiCallback;
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
