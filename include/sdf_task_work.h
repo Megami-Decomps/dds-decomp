@@ -6,6 +6,7 @@
 struct SdfMemBlock;
 struct SdfList;
 struct SdfListNode;
+struct KwlnTask;
 
 /* Caller-supplied description copied into one scheduled task entry (0x14). */
 typedef struct SdfTaskItemDesc {
@@ -101,6 +102,13 @@ SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *, s32);
  * the matching entry's initializer result, or zero when no entry exists.
  * Both domains retain the native signed 32-bit word return. */
 s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
+
+/* Scheduler updates drain the current entry/callback pass. They return -1
+ * when the task work has no current entry, otherwise 0 after the pass. */
+s32 sdfTaskWorkRunAllEntries(struct KwlnTask *task);
+s32 sdfTaskWorkRunAll(struct KwlnTask *task);
+/* The scheduler destroy callback releases the TaskWork owned by task's user value. */
+void sdfReleaseCurrentTaskOwnedResources(struct KwlnTask *task);
 
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);
