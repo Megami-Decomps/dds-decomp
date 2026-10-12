@@ -271,7 +271,7 @@ void effAdvanceVectorRecord(EffRingWork *work, s32 index) {
 }
 extern void effDrawTransformedRecordPool(EffRecordPool *);
 
-void func_00177408(EffRingWork *work)
+void effUpdateOrbitingRingFan(EffRingWork *work)
 {
     s32 index;
     s32 count;
