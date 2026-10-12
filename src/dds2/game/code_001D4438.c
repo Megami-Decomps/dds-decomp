@@ -14,6 +14,7 @@
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
 #include "mdl.h"
+#include "active_sound_node.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
@@ -477,13 +478,6 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 
 
 extern s32 datActionAnimationRecords;
-
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
 
 extern void btlRunTask(BtlRuntimeTask *);
 

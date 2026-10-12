@@ -144,13 +144,6 @@ typedef struct SoundTask {
     u8 pad68[8];
 } SoundTask;
 
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
-
 typedef struct SndPad {
     u8 pad00[0x21];
     s8 confirm;

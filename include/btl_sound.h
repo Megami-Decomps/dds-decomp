@@ -2,6 +2,7 @@
 #define BTL_SOUND_H
 
 #include "common.h"
+#include "active_sound_node.h"
 
 typedef struct BattleEffect BattleEffect;
 typedef void (*BattleEffectCallback)(BattleEffect *effect);
@@ -245,8 +246,6 @@ typedef char Atrac3LoadTaskArgs_state_offset_must_be_4[
     ((u32)&((Atrac3LoadTaskArgs *)0)->state == 4) ? 1 : -1];
 typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
-
-struct ActiveSoundNode;
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);

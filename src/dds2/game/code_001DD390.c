@@ -179,13 +179,6 @@ extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s32 datActionAnimationRecords;
 
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
-
 extern s32 btlCountTasksForOwner(s64);
 
 extern void btlRunTask(BtlRuntimeTask *);
