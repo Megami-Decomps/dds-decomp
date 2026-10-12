@@ -130,7 +130,7 @@ extern u8 *sdfResolveSceneCounterInfo(s32);
 extern void sdfCounterSelectChannelByIndex(SdfCounterRuntime *, s32);
 extern s16 sdfGetCounterChannelValueAtIndex(s32);
 extern void func_0030C250(s32, s32);
-extern void func_0030CC68();
+extern void func_0030CC68(s32, s32, s32, SdfCounterRuntime *, SdfCounterChannel *, s32);
 extern u8 D_00400AF0[];
 
 extern void sdfCounterIncrease(void);
@@ -353,7 +353,7 @@ s32 sdfCreateMaskedCounterChannels(s32 mask, s32 index) {
     sdfActiveCounterRuntime = (s32)mnuCreateListState(0, 8, 0x16);
     ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer = sdfAllocSizeClassBlock(0x24);
     memset(((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer, 0, 0x24);
-    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = (SdfCounterDrawFn)func_0030CC68;
+    ((SdfCounterRuntime *)sdfActiveCounterRuntime)->draw = func_0030CC68;
     completedMask = mdlCollectFlagBitsIntoMask();
     for (i = 0; i != 8; i++) {
         if ((mask >> i) & 1) {
@@ -576,7 +576,47 @@ void func_0030CA38(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
         PACK(0x40, 0x40, 0x40, (u32)(fade * 64.0f)));
 }
 
-INCLUDE_ASM(const s32, "game/code_0030B838", func_0030CC68);
+extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
+
+void func_0030CC68(s32 unusedX, s32 unusedY, s32 unused, SdfCounterRuntime *runtime, SdfCounterChannel *channel, s32 unusedMode) {
+    SdfCounterTimer *timer = runtime->timer;
+    f32 frame = (f32)timer->value;
+    f32 fade = 1.0f - frame / 10.0f;
+    s32 isCurrent = channel->index == timer->mode;
+    s32 index = channel->index;
+    s16 mapNumber = channel->display->value;
+    /* Emit the pulse after mapNumber to shorten its constant's live range;
+     * see docs/idioms.md, "Local-map row pulse lifetime". */
+    f32 pulse = (f32)timer->countdown * 0.125f;
+    s32 row = mapNumber - 1;
+    s32 active = runtime->channel->index;
+    s32 flag = channel->display->flag;
+    s32 drawX = (s32)((1.0f - fade * fade) * -64.0f);
+    s32 drawY;
+    s32 alpha;
+
+    fade = 1.0f - frame / 7.0f;
+    if (fade < 0.0f) {
+        fade = 0.0f;
+    }
+    drawY = index * 23;
+    alpha = (s32)(fade * 128.0f);
+    sdfDrawPositionedSlotImage(drawX, drawY, 0, alpha, 0x10, 0, 0x54);
+    if (channel->index != active) {
+        sdfDrawPositionedSlotImage(drawX, drawY, 0, alpha, row, 0, 0x54);
+    } else {
+        sdfDrawPositionedSlotImage(drawX, drawY, 0, alpha, mapNumber + 7, 0, 0x54);
+    }
+    if (flag) {
+        sdfDrawPositionedSlotImage(drawX, index * 23, 0, (s32)(fade * 128.0f), 0x12, 0, 0x54);
+    }
+    if (channel->index == active) {
+        sdfDrawPositionedSlotImage(drawX, index * 23, 0, (s32)(fade * 128.0f), 0x11, 0, 0x54);
+    }
+    if (isCurrent) {
+        sdfDrawPositionedSlotImage(drawX, index * 23, 0, (s32)(pulse * 76.0f * fade), 0x11, 0, 0x54);
+    }
+}
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
 void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt, SdfCounterChannel *channel) {
