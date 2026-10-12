@@ -22,7 +22,7 @@ void effReleaseMagatuhiOwner(EffMagatuhiOwner *resource) {
 }
 
 void func_001891A8(EffMagatuhiOwner *resource) {
-    func_001893D8(resource->valueWork);
+    effMagatuhiDrawHistoryTrails(resource->valueWork);
 }
 
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {
