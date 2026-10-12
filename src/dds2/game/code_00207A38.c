@@ -2572,7 +2572,7 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
 }
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
-extern void func_00101968(s32, s32);
+extern void kwlnTaskAddChild(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(s32 actor, s32 option) {
@@ -2592,7 +2592,7 @@ void btlBindActorSlot(s32 actor, s32 option) {
         }
         itfMesSetTextSlotFromValue(window, 0, ((BtlUnit *)unit)->partyRecord.unitId, width);
     }
-    func_00101968((s32)((BtlState *)battle)->scriptOwner, task);
+    kwlnTaskAddChild((s32)((BtlState *)battle)->scriptOwner, task);
     ((BtlState *)battle)->boundTask = task;
 }
 

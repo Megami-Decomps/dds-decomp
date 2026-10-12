@@ -616,7 +616,7 @@ u32 kwlnTaskGetUserValue(KwlnTask* task)
 void func_00101A78(void) {
 }
 
-void func_00101A80(KwlnTask* parent, KwlnTask* child)
+void kwlnTaskAddChild(KwlnTask* parent, KwlnTask* child)
 {
     KwlnTask* tail;
 

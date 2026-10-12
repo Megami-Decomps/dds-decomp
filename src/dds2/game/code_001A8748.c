@@ -69,7 +69,7 @@ extern s32 D_00435DF8;
 
 extern s32 btlGetRuntime(void);
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s8 D_0037F530[];
 
@@ -904,7 +904,7 @@ void btlCreateDrawTasks(void) {
     KwlnTask *draw;
     draw = kwlnTaskCreate(D_004366F0, 0x3F9, 0, 0, btlUpdateActiveBattleFrame, func_001A9AA8, 0);
     battle->drawTask = draw;
-    func_00101968(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
+    kwlnTaskAddChild(draw, kwlnTaskCreate("battle_draw", 0x2B0E, 0, 0, btlUpdateBattleFieldPresentation, 0, 0));
 }
 
 void btlDestroyDrawTaskAtPriorityWhenPresent(void) {

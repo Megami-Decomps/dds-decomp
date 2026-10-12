@@ -31,7 +31,7 @@
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
 
 extern KwlnTask *kwlnTaskCreate();
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 func_00268550(KwlnTask *task);
 extern s32 func_00268588(KwlnTask *task);
@@ -1065,7 +1065,7 @@ void func_00268380(s32 reduced, s32 slot) {
         func_00268588, mnuReleaseTerminalWorkAndResumeField, (u32)scene);
     fadeTask = kwlnTaskCreate("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
-    func_00101968(drawTask, fadeTask);
+    kwlnTaskAddChild(drawTask, fadeTask);
     mnuTerminalTaskState = 1;
 }
 

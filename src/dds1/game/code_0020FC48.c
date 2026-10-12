@@ -286,7 +286,7 @@ extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
 
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
 
-extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
@@ -322,7 +322,7 @@ void func_0020FF50(void) {
     btlBossDebugPrintf(D_003A6758, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
-    func_00101A80(battleState->scriptOwner, eventTask);
+    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {

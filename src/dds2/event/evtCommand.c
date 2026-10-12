@@ -109,7 +109,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
@@ -999,7 +999,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101968(commandWork->task, mnuCampCreateTask(taskId));
+        kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -1026,7 +1026,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    func_00101968(commandWork->task, mnuCampCreateTask(taskId));
+    kwlnTaskAddChild(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -1081,7 +1081,7 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101968(commandWork->task, movieTask);
+    kwlnTaskAddChild(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
@@ -1116,7 +1116,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    func_00101968(commandWork->task, movieTask);
+    kwlnTaskAddChild(commandWork->task, movieTask);
     scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }
