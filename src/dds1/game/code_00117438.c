@@ -56,7 +56,7 @@ extern void dds3ForEachEntry(void);
 extern void mdlFlagClear(s32 flag);
 extern void func_00120C08(s32 mode);
 extern void sdfSaveResetSnapshot(void);
-extern void func_00117C48(void);
+extern void sdfRestoreResetSnapshot(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 
@@ -312,7 +312,7 @@ extern void mdlFlagSet(s32 flag);
 extern void mnuApplyFlagArray(u8 *flags);
 extern void dds3ForEachFlagged(void);
 
-void func_00117C48(void) {
+void sdfRestoreResetSnapshot(void) {
     u32 index;
 
     if (D_003BA9E5 != 0) {
@@ -388,7 +388,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     if (fullReset == 1) {
-        func_00117C48();
+        sdfRestoreResetSnapshot();
     }
 }
 

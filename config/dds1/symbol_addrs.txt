@@ -633,6 +633,7 @@ sdfDestroyRuntimeTask = 0x00117730; // type:func
 sdfBumpTickCounters = 0x00117780; // type:func
 evtResetWorldAndProfileRuntime = 0x001177A8; // type:func
 sdfSaveResetSnapshot = 0x00117810; // type:func
+sdfRestoreResetSnapshot = 0x00117C48; // type:func
 sdfResetGameRuntime = 0x00118020; // type:func
 sdfFirePendingCallback = 0x00118110; // type:func
 scrIsCurrentWorkTask = 0x00118140; // type:func

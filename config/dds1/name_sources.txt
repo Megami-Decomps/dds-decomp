@@ -641,6 +641,7 @@
 0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x001177A8	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
 0x00117810	sdfSaveResetSnapshot	inferred	Fam
+0x00117C48	sdfRestoreResetSnapshot	inferred	Restores saved runtime data after sdfResetGameRuntime clears the game state; restores flags, ticks, mantra/profile/template data, and world slot flags. Paired with DDS2 0x00118008.
 0x00118020	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00117438.c:292:func_00118020; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task handle against the expected handle. [names_reviewed10.tsv]

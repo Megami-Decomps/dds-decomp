@@ -36,7 +36,7 @@ extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
 extern void mdlFlagClear(s32 flag);
 extern void mdlFlagSet(s32 flag);
 extern void sdfSaveResetSnapshot(void);
-extern void func_00118008(void);
+extern void sdfRestoreResetSnapshot(void);
 
 s32 sdfBumpTickCounters(void);
 
@@ -324,7 +324,7 @@ extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
 extern void func_0011D0D8(void);
 
-void func_00118008(void) {
+void sdfRestoreResetSnapshot(void) {
     DatMantraBitmap *mantra;
     DatProfileBank *profiles;
     DatPartyRecord *templates;
@@ -400,7 +400,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     dds3ForEachEntry();
     ptyAssignPartyRosterItemsAndMarkOwned();
     if (fullReset == 1) {
-        func_00118008();
+        sdfRestoreResetSnapshot();
     }
 }
 
