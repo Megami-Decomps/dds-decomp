@@ -9463,3 +9463,61 @@ not authority to alter allocation statistics, pad the coordinate object or
 reuse the invalid traversal. The native and indexed loops already increment
 the marker index before the draw call; moving that increment in C is not a
 new native lifetime requirement.
+
+### Shooting-input controller: source last uses can reverse independent pairs
+
+DDS2 `game/code_00316E08::func_00318660` (1,440 bytes) closes the
+KiB/PiM/Brass reconstruction and released Sable continuation. Its last four
+mismatching words were two exchanged pairs, not missing behavior: pause-choice
+2's result/phase halfword stores and the signed action-input loads at 0x22/0x23.
+
+Output-preserving observation of the pinned cc1 shows the deciding tier in
+`sched1` is register pressure, before any source-order tie-break. At equal
+priority 1, the result store had weight -2 and the phase store -1; the former
+owned the work-pointer last use. At equal priority 4, key 0x23's load had
+weight 0 versus key 0x22's weight 1, again because of the shared base's last use.
+
+Publishing the real result before the phase in C transfers the last-use note
+to the phase store. Capturing signed key 0x23 into a genuine local before the
+existing signed key 0x22 working value, then ORing the two, transfers the input
+base's last use to key 0x22. The measured weights reverse as predicted, and
+all 360 retail instruction words match. These are independent nonvolatile
+accesses with no intervening callback: the source form is equivalent, not a
+new semantic ordering constraint. The extra local holds an input actually
+consumed by the predicate; there is no dummy use or artificial dependency.
+
+The baseline and corrected observations contain 3,130 and 3,126 live events;
+all 27 ordinary/observed artifacts are identical for each source. The corrected
+whole owner is 28/0, its 4,900-line ordinary/probe assembly agrees after ignoring
+only `.file`, and all six allocated sections plus 622 relocations agree.
+Both original retail SHA1s and both development builds pass. Preserve PiM,
+Brass, KiB and Sable's earlier source and current-owner recovery credit.
+
+### Mahen opacity: reuse the real intermediate across fresh color stages
+
+DDS2 `game/code_001B2AF8::func_001B8A80` (848 bytes) retains Garnet,
+Obsidian, Tidal and KiB's earlier complete reconstruction. Its remaining
+14 differing words include three half-alpha temporary register groups and
+one independent rectangle-argument pair.
+
+Actual local-allocation observation shows `combine_regs` merging each raw
+alpha load, signed shift, half-alpha result and packed-color expression into
+one quantity, allocated to v0. Native instead keeps the raw/shifted input in
+v1 and the half-alpha/output in v0. A single ordinary `halfAlpha` local,
+recomputed from `work->alpha` before each of the three actual color stages,
+expresses the reused intermediate without retaining a stale value across
+callbacks. The compiler rejects both cross-boundary coalesces for this reused
+quantity, recovering the native temporary homes. Every assignment is consumed
+by its stage's packed-color expression; no extra read, dummy use or alias is
+introduced.
+
+The same source also closes the rectangle-argument pair in sched2. Its visible
+priority, pressure weight and LUID comparisons remain tied; the deeper reason
+for the changed rank result is not established, so it is not attributed to the
+local-coalescing mechanism. Full ordinary/probe assembly agrees over 39,501
+lines after ignoring only `.file`; all six allocated sections and 2,965
+relocations agree. The complete owner checks 241/0. Signed alpha is clamped
+to 0..128; the resulting halfAlpha range 0..64 makes its left shift by 24
+representable. Fresh post-callback reads and all three draw phases are retained.
+Both original retail hashes, both development targets and a no-op rebuild
+also pass with the shooting-input controller above integrated.
