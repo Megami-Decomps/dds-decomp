@@ -804,18 +804,18 @@ void effResetSelectionEntryBuffers(SdfFlagListWork *);
 void effResetSelectionEntriesAndState(SdfFlagListWork *);
 void effDrawSelectionEntryVectors(SdfFlagListWork *);
 void effUpdateAndDrawSelectionEntries(SdfFlagListWork *);
-float scrGetOperandFloatValue(SdfFlagListWork *);
-void scrSetOperandFloatValue(SdfFlagListWork *, float);
+float sdfGetFlagListSpeed(SdfFlagListWork *);
+void sdfSetFlagListSpeed(SdfFlagListWork *, float);
 void itfSetPackedRgbAlpha(SdfFlagListWork *, u32);
 void itfCopyColorFields(SdfFlagListWork *, const SdfFlagListParams *);
 
 #ifdef VERSION_DDS1
-void func_002CEC40(SdfFlagListWork *);
-void func_002CF248(SdfFlagListWork *);
+void sdfUpdateFlagListEntries(SdfFlagListWork *);
+void sdfDrawFlagListVertices(SdfFlagListWork *);
 void effUpdateSelectionEntryState(SdfFlagListWork *);
 #elif defined(VERSION_DDS2)
-void func_00316680(SdfFlagListWork *);
-void func_00316C88(SdfFlagListWork *);
+void sdfUpdateFlagListEntries(SdfFlagListWork *);
+void sdfDrawFlagListVertices(SdfFlagListWork *);
 void effUpdateSelectionEntryState(SdfFlagListWork *);
 #endif
 

@@ -680,11 +680,11 @@ void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
 }
 
 void effUpdateSelectionEntryState(SdfFlagListWork *work) {
-    func_002CEC40(work);
+    sdfUpdateFlagListEntries(work);
 }
 
 void effDrawSelectionEntryVectors(SdfFlagListWork *work) {
-    func_002CF248(work);
+    sdfDrawFlagListVertices(work);
 }
 
 void effUpdateAndDrawSelectionEntries(SdfFlagListWork *work) {
@@ -10301,15 +10301,18 @@ void effEditDoPolygonFadeTrack(s32 work) {
     func_002BB188((s32)((BaObj *)work)->x0C + 0x60, ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
 }
 
-void func_002BB6F8(s32 work) {
+/* FADE callback for N-family POLYGON children; preserve bound plus one. */
+void effEditNPolygonFadeTrack(s32 work) {
     func_002BB188((s32)((BaObj *)work)->x0C + 0x70, ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
-void func_002BB720(s32 work) {
+/* FADE callback for the native U-CYLND POLYGON child. */
+void effEditUCylinderPolygonFadeTrack(s32 work) {
     func_002BB188((s32)((BaObj *)work)->x0C + 0x70, ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
 }
 
-void func_002BB748(s32 work) {
+/* FADE callback for the native U-SPHRE POLYGON child. */
+void effEditUSpherePolygonFadeTrack(s32 work) {
     func_002BB188((s32)((BaObj *)work)->x0C + 0x60, ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
 }
 
@@ -10434,18 +10437,18 @@ s32 effPollAlternateEpResourceFile(void) {
     return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
 }
 
-/* First distinct native callback for TMX-only material selection. */
-s32 effPollMaterialTmxFileA(void) {
+/* TMX-only TEXTURE chooser for B-/F-family MATERIAL groups. */
+s32 effPollBfMaterialTmxFile(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
-/* Second distinct native callback for TMX-only material selection. */
-s32 effPollMaterialTmxFileB(void) {
+/* TMX-only TEXTURE chooser for N-family MATERIAL groups. */
+s32 effPollNMaterialTmxFile(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
-/* Third distinct native callback for TMX-only material selection. */
-s32 effPollMaterialTmxFileC(void) {
+/* TMX-only TEXTURE chooser for S-RAD_T/SPK_T/RNG_T/SCT_T MATERIAL groups. */
+s32 effPollSTMaterialTmxFile(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 

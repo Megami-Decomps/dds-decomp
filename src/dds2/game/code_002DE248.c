@@ -850,13 +850,13 @@ void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
 /* DDS2 suppresses the entry-state update while effect-frame advancement is paused. */
 void effUpdateSelectionEntryState(SdfFlagListWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        func_00316680(work);
+        sdfUpdateFlagListEntries(work);
         return;
     }
 }
 
 void effDrawSelectionEntryVectors(SdfFlagListWork *work) {
-    func_00316C88(work);
+    sdfDrawFlagListVertices(work);
 }
 
 void effUpdateAndDrawSelectionEntries(SdfFlagListWork *p) {
@@ -12106,7 +12106,8 @@ s32 effEditTwoDimensionalColorTrack(s32 request) {
     return result;
 }
 
-s32 func_00301750(s32 request) {
+/* COLOR editor for native O-P2_TRK; restore the default curve-key table afterward. */
+s32 effEditOP2TrackColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -12118,7 +12119,8 @@ s32 func_00301750(s32 request) {
     return result;
 }
 
-s32 func_003017B8(s32 request) {
+/* COLOR editor shared by the six native M-family descriptors. */
+s32 effEditMColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -12130,7 +12132,8 @@ s32 func_003017B8(s32 request) {
     return result;
 }
 
-s32 func_00301820(s32 request) {
+/* COLOR editor for native O-PLSCL; do not expand the native identifier. */
+s32 effEditOPlsclColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -12281,17 +12284,20 @@ void effEditTwoDimensionalRotationTrack(s32 *work) {
     func_003018C8(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
-void func_00302508(s32 *work) {
+/* SCALE editor for the native O-P2_TRK root descriptor. */
+void effEditOP2TrackScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x7C, ((EffMappingObject *)source)->valueD4, D_00400150, D_00400068);
 }
 
-void func_00302538(s32 *work) {
+/* ROTATE editor for the native O-P2_TRK root descriptor. */
+void effEditOP2TrackRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0xA8, ((EffMappingObject *)source)->valueD4, D_00400250, D_004001A0);
 }
 
-void func_00302568(s32 *work) {
+/* SCALE editor shared by the six native M-family descriptors. */
+void effEditMScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0xB0, ((EffMappingObject *)source)->value108, D_00400150, D_00400068);
 }
@@ -12313,19 +12319,23 @@ void effEditDoPolygonFadeTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x60, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value3C + 1);
 }
 
-void func_00302B18(s32 work) {
+/* FADE callback for N-family POLYGON children; preserve bound plus one. */
+void effEditNPolygonFadeTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x70, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value8C + 1);
 }
 
-void func_00302B40(s32 work) {
+/* FADE callback for the native U-CYLND POLYGON child. */
+void effEditUCylinderPolygonFadeTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x70, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value8C + 1);
 }
 
-void func_00302B68(s32 work) {
+/* FADE callback for the native U-SPHRE POLYGON child. */
+void effEditUSpherePolygonFadeTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x60, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value74 + 1);
 }
 
-void func_00302B90(s32 work) {
+/* FADE editor for the native OLMODEL descriptor. */
+void effEditOlModelFadeTrack(s32 work) {
     func_003025A8((u32 *)((EffMappingRequest *)work)->object + 4, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value00);
 }
 
@@ -12421,22 +12431,23 @@ void effPollAlternateEpResourceFile(void) {
     effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
 }
 
-void func_00302E10(void) {
+/* EPL chooser for MATERIAL groups under K-family and O-P2_TRK descriptors. */
+void effPollKoMaterialEplFile(void) {
     effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
-/* First distinct native callback for TMX-only material selection. */
-void effPollMaterialTmxFileA(void) {
+/* TMX-only TEXTURE chooser for B-/F-family MATERIAL groups; discard status. */
+void effPollBfMaterialTmxFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
-/* Second distinct native callback for TMX-only material selection. */
-void effPollMaterialTmxFileB(void) {
+/* TMX-only TEXTURE chooser for N-family MATERIAL groups; discard status. */
+void effPollNMaterialTmxFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
-/* Third distinct native callback for TMX-only material selection. */
-void effPollMaterialTmxFileC(void) {
+/* TMX-only TEXTURE chooser for S-RAD_T/SPK_T/RNG_T/SCT_T MATERIAL groups. */
+void effPollSTMaterialTmxFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
@@ -12451,15 +12462,18 @@ void effPollHlpPbResourceFile(void) {
     effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
-void func_00302EE8(void) {
+/* PB chooser for M-family MATERIAL groups, using /tool/effect/mat/. */
+void effPollMMaterialPbFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_PB);
 }
 
-void func_00302F08(void) {
+/* EPL chooser for M-family MATERIAL groups, using /tool/effect/. */
+void effPollMMaterialEplFile(void) {
     effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
-void func_00302F28(void) {
+/* PB chooser for O-HLP_UT/O-P2_HT MATERIAL groups, using /tool/effect/hlp/. */
+void effPollOMaterialPbFile(void) {
     effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 
