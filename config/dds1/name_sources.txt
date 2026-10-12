@@ -2372,6 +2372,7 @@
 0x0018F848	effDispatchActive	inferred	calls per-channel handlers for each set flag D_003BB070-D_003BB076
 0x0018F8F8	effUpdateCh72Params	inferred	eff refreshes parameter block: getter + memcpy shadow + notify
 0x0018F9B0	effGetLoadDescA	inferred	returns address of the 0x30-byte load descriptor D_003559A0
+0x0018F9C0	effSetLoadDescA	inferred	Copies the edited screen-draw source prefix from the event-viewer payload into the A descriptor returned by effGetLoadDescA.
 0x0018FA20	effEventAdvanceBlurTemplateSetup	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:670:func_0018FA20; Initializes the blur-template channel using its template-body getter and optional copy, runs both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0018FAD8	effEventGetBlurTemplateSetupParams	inferred	readability/matching review (QP16)
 0x0018FAE8	effEventSetBlurTemplateParameters	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:539:func_0018FAE8; Copies the complete EffBlurTemplateBody into the event blur-template parameter block used by its channel initializer; no allocation or active-owner replacement.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -2380,6 +2381,7 @@
 0x0018FC18	effEventSetScatterBlurParameters	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:579:func_0018FC18; Copies the complete EffBlurScatterParams into the event scatter-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0018FC80	effEventAdvanceScreenDrawSetup	inferred	Reads the screen-draw setup record, performs its optional copy and callback, runs the setup helpers while ready, then applies the shared reset control.
 0x0018FD38	effGetLoadDescD	inferred	returns address of the 0x30-byte load descriptor D_00355E48
+0x0018FD48	effSetLoadDescD	inferred	Copies the edited screen-draw source prefix from the event-viewer payload into the D descriptor returned by effGetLoadDescD.
 0x0018FDA8	effEventAdvanceSolidRectangleSetup	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:790:func_0018FDA8; Advances the setup state paired with the solid-rectangle descriptor, running getter/copy once, callback stages while ready, and marker-driven readiness reset.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x0018FE60	effEventGetSolidRectangleSetupParams	inferred	readability/matching review (QP16)
 0x0018FE70	effEventSetSolidRectangleParameters	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:823:func_0018FE70; Copies the event-channel solid-rectangle parameter record: color, blend control, and four bounds.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]

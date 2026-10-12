@@ -2778,7 +2778,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     }
                     case 13:
-                        func_0018F9C0(key->payload);
+                        effSetLoadDescA(key->payload);
                         viewer->blurRectangleEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -2801,7 +2801,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 27:
-                        func_0018FD48(key->payload);
+                        effSetLoadDescD(key->payload);
                         viewer->framebufferQuadEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;

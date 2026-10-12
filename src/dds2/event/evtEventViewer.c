@@ -2493,8 +2493,8 @@ extern const char D_004373A8[];
 extern const char D_004373B0[];
 extern u8 D_00438A34;
 extern void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
-extern void func_001975F8(void *parameters);
-extern void func_00197980(void *parameters);
+extern void effSetLoadDescA(void *parameters);
+extern void effSetLoadDescD(void *parameters);
 extern void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters);
 extern void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters);
 extern void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters);
@@ -2908,7 +2908,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     }
                     case 13:
-                        func_001975F8(key->payload);
+                        effSetLoadDescA(key->payload);
                         viewer->blurRectangleEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
@@ -2931,7 +2931,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 27:
-                        func_00197980(key->payload);
+                        effSetLoadDescD(key->payload);
                         viewer->framebufferQuadEnabled = 0;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
