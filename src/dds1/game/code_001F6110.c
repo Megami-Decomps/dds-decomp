@@ -3107,7 +3107,135 @@ void btlDestroyResourceNameRecord(void *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_001F6110", btlUpdateResourceNameEditor);
+extern u8 D_003603A0[];
+extern char D_003BB828[8];
+extern char D_003BB830[];
+extern char D_003BB838[];
+
+/* Three 13-cell rows end in a blank; BS/OK follow the grid. */
+#define EDITOR_KEY_COLS 13
+#define EDITOR_KEY_ROWS 3
+#define EDITOR_KEY_CELLS (EDITOR_KEY_COLS * EDITOR_KEY_ROWS)
+#define EDITOR_CHARACTER_COUNT (EDITOR_KEY_CELLS - 1)
+#define EDITOR_BLANK_CELL (EDITOR_KEY_CELLS - 1)
+#define EDITOR_BACKSPACE_CELL EDITOR_KEY_CELLS
+#define EDITOR_CONFIRM_CELL (EDITOR_KEY_CELLS + 1)
+#define EDITOR_DELETE_CODE (EDITOR_KEY_CELLS + 3)
+
+void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record) {
+    char text[0x20];
+    s32 x = record->x;
+    s32 y = record->y;
+    s32 editCode = -1;
+    s32 deleteCharacter;
+    s32 editLimit;
+    s32 selection;
+    u32 index;
+    s32 row;
+    s32 column;
+
+    if (record->selectionStatus != BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if ((sdfPadButtonStates[6] & 2) != 0) {
+            if (record->selection == EDITOR_BACKSPACE_CELL) {
+                record->selection = EDITOR_KEY_CELLS - 2;
+            } else if (record->selection == EDITOR_CONFIRM_CELL) {
+                record->selection = EDITOR_BACKSPACE_CELL;
+            } else {
+                record->selection -= EDITOR_KEY_COLS;
+                if (record->selection < 0) {
+                    record->selection = EDITOR_CONFIRM_CELL;
+                }
+            }
+        } else if ((sdfPadButtonStates[7] & 2) != 0) {
+            if (record->selection == EDITOR_BACKSPACE_CELL) {
+                record->selection = EDITOR_CONFIRM_CELL;
+            } else if (record->selection == EDITOR_CONFIRM_CELL) {
+                record->selection = EDITOR_KEY_COLS - 1;
+            } else {
+                record->selection += EDITOR_KEY_COLS;
+                if ((u32)record->selection >= EDITOR_BACKSPACE_CELL) {
+                    record->selection = EDITOR_BACKSPACE_CELL;
+                }
+            }
+        } else if ((sdfPadButtonStates[4] & 2) != 0) {
+            selection = record->selection;
+            if ((u32)(selection - EDITOR_BACKSPACE_CELL) >= 2) {
+                if (selection % EDITOR_KEY_COLS == 0) {
+                    record->selection = selection + EDITOR_KEY_COLS - 1;
+                } else {
+                    record->selection = selection - 1;
+                }
+            }
+        } else if ((sdfPadButtonStates[5] & 2) != 0) {
+            selection = record->selection;
+            if ((u32)(selection - EDITOR_BACKSPACE_CELL) >= 2) {
+                if (selection % EDITOR_KEY_COLS == EDITOR_KEY_COLS - 1) {
+                    record->selection = selection - (EDITOR_KEY_COLS - 1);
+                } else {
+                    record->selection = selection + 1;
+                }
+            }
+        } else if (sdfPadButtonStates[1] < 0) {
+            selection = record->selection;
+            if (selection == EDITOR_CONFIRM_CELL) {
+                if (record->nameLength > 0) {
+                    record->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
+                }
+            } else if (selection == EDITOR_BACKSPACE_CELL) {
+                editCode = EDITOR_DELETE_CODE;
+            } else if (selection == EDITOR_BLANK_CELL) {
+                /* Native001FC4E8 branches directly to shared001FC538. */
+                goto next_cell;
+            } else {
+                editCode = selection;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            record->selectionStatus = BTL_RESOURCE_SELECTION_CANCELED;
+        }
+        if (record->selection == EDITOR_BLANK_CELL) {
+        next_cell:
+            record->selection++;
+        }
+        /* Stage the comparison bound before expansion; see docs/idioms.md,
+         * "Trace-justified comparison staging: resource-name editor". */
+        editLimit = EDITOR_DELETE_CODE - 1;
+        deleteCharacter = editLimit < editCode;
+        if (deleteCharacter && record->nameLength > 0) {
+            record->nameLength--;
+        } else if ((u32)editCode < EDITOR_CHARACTER_COUNT) {
+            record->resourceName[record->nameLength] = D_003603A0[editCode];
+            if (record->nameLength < (s32)record->maximumNameLength) {
+                record->nameLength++;
+            }
+        }
+        record->resourceName[record->nameLength] = 0;
+    }
+    btlDebugDrawRectangle(x, y, 0xA4, 0x14);
+    func_003014F0(text, D_003BB818, record->resourceName, record->extension);
+    btlDebugDrawText(x + 4, y + 4, 0, text);
+    y += 0x18;
+    btlDebugDrawRectangle(x, y, 0xA4, 0x44);
+    if (record->overwritePromptActive == 0) {
+        x += 4;
+        y += 4;
+        for (index = 0, row = 0; row < EDITOR_KEY_ROWS; row++) {
+            for (column = EDITOR_KEY_COLS - 1; column >= 0; column--) {
+                if (index < EDITOR_CHARACTER_COUNT) {
+                    s32 color = record->selection == index ? 4 : 0;
+                    D_003BB828[0] = D_003603A0[index];
+                    btlDebugDrawText(x, y, color, D_003BB828);
+                }
+                x += 12;
+                index++;
+            }
+            x -= EDITOR_KEY_COLS * 12;
+            y += 12;
+        }
+        x += 0x84;
+        btlDebugDrawText(x, y, record->selection == index++ ? 4 : 0, D_003BB830);
+        btlDebugDrawText(x, y + 12, record->selection == index ? 4 : 0, D_003BB838);
+    }
+}
 
 void btlSetResourceNamePosition(struct BtlResourceNameRecord *record, s32 x, s32 y) {
     record->x = x;
