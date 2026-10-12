@@ -31,7 +31,8 @@ bytes, and it has to reach that the way the original developers would have.
   pass, property) in a comment or the landing notes. The trace shows what the
   compiler needed, not which line the original had, so any ordinary form that
   meets it will do. Dead stores, dummy variables and the levers above remain
-  forbidden.
+  forbidden. `tools/cc1probe.sh` produces such traces; see
+  [cc1probe](cc1probe.md) for usage and the citation template.
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.
