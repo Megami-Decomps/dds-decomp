@@ -26,9 +26,9 @@ extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 D_003E7050[];
 extern char D_003E7207[20];
 extern char D_003E7202[];
-extern void func_002ABEB0(s32);
-extern void func_002AC660(s32);
-extern void func_002ACA98(s32);
+extern void mnuDestroyStaffBulletItemWindow(s32);
+extern void mnuDestroyOrderedStaffItemWindow(s32);
+extern void mnuDestroyOwnedCatalogItemWindow(s32);
 extern void func_002B2C88(MenuPageWindow *, s32, u32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
@@ -446,7 +446,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
-    func_002ABEB0(context);
+    mnuDestroyStaffBulletItemWindow(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
@@ -711,7 +711,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
-    func_002AC660(context);
+    mnuDestroyOrderedStaffItemWindow(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
@@ -1003,7 +1003,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
-    func_002ACA98(context);
+    mnuDestroyOwnedCatalogItemWindow(context);
     func_002B2C88(entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
     mnuClearEntries(entryList);
@@ -1113,7 +1113,7 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
 }
 
 extern s32 evtGetMessageWindowControlState(void);
-extern s32 func_002ACAC0(s32, MenuStaffContext *);
+extern s32 mnuRefreshOwnedCatalogItemList(s32, MenuStaffContext *);
 extern char D_003E74A4[];
 extern char D_003E754C[];
 extern char D_003E7568[];
@@ -1198,7 +1198,7 @@ s32 func_002AFE18(KwlnTask *task) {
         }
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     } else {
-        if (func_002ACAC0(menu->thirdListState, context) == 0) {
+        if (mnuRefreshOwnedCatalogItemList(menu->thirdListState, context) == 0) {
             mnuSetPopupEntryFlagged(&context->popupState, D_003E7434);
             mnuClearActionFlags(0, &context->partyWindow);
             mnuBeginWindowFadeTransition(0, &context->fade);

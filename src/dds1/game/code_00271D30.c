@@ -93,9 +93,9 @@ extern void evtCreateMessageWindowIfMissing(s32);
 
 extern char D_0037B9E0[];
 
-extern void func_00271368(void *);
+extern void mnuLoadStaffImageResources(void *);
 
-extern void func_002717D8(void *);
+extern void mnuAppendStaffResourceRequests(void *);
 
 extern void mnuResetGradientFadeColor(void *, s32);
 
@@ -119,8 +119,8 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     mnuInitPartyPanelSlots(&menu->partyPanel);
     mnuLoadBackdropAssetsAndTintSlots(menu->background);
     evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
-    func_00271368(menu);
-    func_002717D8(menu);
+    mnuLoadStaffImageResources(menu);
+    mnuAppendStaffResourceRequests(menu);
     mnuResetGradientFadeColor(menu->timer, 0x40);
     func_002E9708();
     return menu;

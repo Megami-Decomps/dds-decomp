@@ -23,7 +23,7 @@ extern void mnuDrawCampScreenDefault(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_00273A30(s32, s32);
+extern void mnuRefreshStaffWindowDescription(s32, s32);
 extern void mnuDrawStaffPanelGridBackdrop(s32, StaffSlots *);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
@@ -107,7 +107,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
     mnuCreateStaffImageSprite(5);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
-        func_00273A30(context, 0);
+        mnuRefreshStaffWindowDescription(context, 0);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
@@ -231,7 +231,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     mnuCreateStaffImageSprite(9);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->secondaryObject, 0x53);
     if (menu->secondaryObject->list->count != 0) {
-        func_00273A30(context, 1);
+        mnuRefreshStaffWindowDescription(context, 1);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->secondaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);
@@ -309,7 +309,7 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
     mnuCreateStaffImageSprite(6);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
-        func_00273A30(context, 0);
+        mnuRefreshStaffWindowDescription(context, 0);
     } else {
         effDrawSpriteWithCornerFade(0x550, 0x5D8, 0, menu->primaryObject->fadeScale, 1, ((StaffImageContext *)context)->spriteArg2, 0x10, 0x53);
         mnuDrawCampGridAndLabelDefault(1, 0, 0, context, 1, 0x53);

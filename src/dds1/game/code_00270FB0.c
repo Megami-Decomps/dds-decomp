@@ -171,7 +171,7 @@ void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
 
 /* Load both mapped images and initialize the two status batches' word arrays.
  * Batch categories and the initial 0xF word remain opaque. */
-void func_00271368(void *menuData) {
+void mnuLoadStaffImageResources(void *menuData) {
     StaffMenuWork *menu = (StaffMenuWork *)menuData;
     EffMappedResource *batch;
     EffMappedRecord *record;

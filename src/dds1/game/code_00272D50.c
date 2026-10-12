@@ -305,7 +305,7 @@ extern char D_0037CA00[];
 extern char D_0037C990[];
 
 /* Handle staff-item selection and window navigation while the popup is idle. */
-s32 func_002734C0(KwlnTask *callback) {
+s32 mnuHandleStaffDisplayInput(KwlnTask *callback) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;
@@ -438,7 +438,7 @@ extern char D_0037CA1C[];
 extern char D_0037C9AC[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
-s32 func_002738A0(KwlnTask *task) {
+s32 mnuHandleStaffInventoryListInput(KwlnTask *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;
@@ -500,7 +500,7 @@ s32 func_002738A0(KwlnTask *task) {
 
 
 /* Refresh the description panel from the selected node in one of the staff-menu windows. */
-void func_00273A30(StaffDisplayContext *context, s32 windowIndex) {
+void mnuRefreshStaffWindowDescription(StaffDisplayContext *context, s32 windowIndex) {
     StaffWindowResources *resources = context->resources;
     struct MenuListNode *node = resources->windows[windowIndex]->list->cursor;
     s32 emptyLabel = 0;

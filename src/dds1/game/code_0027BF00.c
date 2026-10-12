@@ -50,7 +50,7 @@ enum MenuPanelKind {
 typedef struct MenuList MenuList;
 
 
-extern void func_0027CA90(s32, s32, s32, MenuWindowContainer *, s32);
+extern void mnuDrawWindowFrameAndOverlay(s32, s32, s32, MenuWindowContainer *, s32);
 
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
@@ -411,7 +411,7 @@ void mnuCheckWindowListStatus(MenuWindowContainer *window) {
 }
 
 /* Draw the row separators and the three cursor decorations of a window. */
-void func_0027C7B8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
+void mnuDrawWindowEntryDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
     MenuListNode *neighbors[3];
     s32 slotOffsets[3] = {1, 0, 1};
     s32 fadeScale = window->fadeScale;
@@ -464,10 +464,10 @@ void func_0027C7B8(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 dra
 }
 
 void func_0027CA78(s32 x, s32 y, s32 depth, s32 menu, s32 param) {
-    func_0027C7B8(x, y, depth, (MenuWindowContainer *)menu, param);
+    mnuDrawWindowEntryDecorations(x, y, depth, (MenuWindowContainer *)menu, param);
 }
 
-void func_0027CA90(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
+void mnuDrawWindowFrameAndOverlay(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
     s32 fadeScale = window->fadeScale;
     s32 weight = fadeScale;
     s32 firstFade;
@@ -570,7 +570,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     struct MenuWindowSpriteGroup *textures;
 
     menu->list->scale = fadeScale;
-    func_0027CA90(x, y, depth, menu, drawArg);
+    mnuDrawWindowFrameAndOverlay(x, y, depth, menu, drawArg);
     func_0027CA78(x, y, depth, menu, drawArg);
     if (menu->list->count != 0) {
         mnuDrawWindowSelectionPanel(x, y, depth, menu, drawArg);
@@ -2304,7 +2304,7 @@ void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     }
 }
 
-void func_00281688(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, EffectSlotSet **pair, s32 flag, s32 surface) {
+void mnuDrawPartyPanelSlotWithBlend(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, EffectSlotSet **pair, s32 flag, s32 surface) {
     s32 blendState = 1;
     s32 alpha = window->transitionValue;
     EffectSlotSet *resource;
@@ -2319,7 +2319,7 @@ void func_00281688(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, E
                   flag == 0 ? alpha : 0x100, 1, resource, 0, surface);
 }
 
-void func_00281780(MenuPageWindow *menu, s32 window, u32 kind, s32 delay) {
+void mnuQueuePartyPanelSlotBlend(MenuPageWindow *menu, s32 window, u32 kind, s32 delay) {
     MenuPageSlot *panel = &menu->slots[window];
     s32 best = 0x200;
     s32 bestIndex = 0;
