@@ -2199,7 +2199,7 @@ extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern s32 btlCountTasksForOwner(s64);
-extern void func_001FB130(s32, s32, s32, const char *);
+extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* The retail debug primitive receives a float radius in $f12. */
 extern void func_001FB188(f32 *, u32, s32, f32);
 extern void func_001FB1E0(void *);
@@ -2382,7 +2382,7 @@ s32 func_00214868(void) {
         if (state->unk_E0E > 0) {
             state->unk_E0E--;
             func_003014F0(text, D_003BBAB0, state->unk_E0E / state->timingRate + 1);
-            func_001FB130(32, 400, 6, text);
+            btlDebugDrawText(32, 400, 6, text);
         }
         if (state->unk_E0E == 0) {
             motion = state->debug.motionMenu.cursor;
@@ -2400,7 +2400,7 @@ s32 func_00214868(void) {
         if (state->unk_E0E <= 0) {
             func_003014F0(text, "%3d/%3d\n", (s32)btlGetUnitModelValue1C(unit),
                 btlGetUnitModelFrameCount(unit));
-            func_001FB130(32, 400, 0, text);
+            btlDebugDrawText(32, 400, 0, text);
         }
         mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, &state->debug.motionMenu, D_00361310);
         break;

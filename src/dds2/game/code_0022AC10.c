@@ -2413,7 +2413,7 @@ extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void func_001AA898(DatPartyRecord *, u32);
 extern void func_0020D208(f32 *, u32, s32, f32);
-extern void func_0020D1B0(s32, s32, s32, const char *);
+extern void btlDebugDrawText(s32, s32, s32, const char *);
 extern void func_0020D228(void);
 extern void func_0020D230(void);
 extern u32 func_0020D260(u32);
@@ -2642,7 +2642,7 @@ s32 func_0022F180(void) {
         if (battle->unk_E0E > 0) {
             battle->unk_E0E--;
             func_0035C860(text, D_00436F00, battle->unk_E0E / (s8)battle->unk4C4 + 1);
-            func_0020D1B0(32, 400, 6, text);
+            btlDebugDrawText(32, 400, 6, text);
         }
         if (battle->unk_E0E == 0) {
             motion = battle->debug.motionMenu.cursor;
@@ -2659,7 +2659,7 @@ s32 func_0022F180(void) {
         if (battle->unk_E0E <= 0) {
             currentFrame = (s32)btlGetUnitModelValue1C(unit);
             func_0035C860(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
-            func_0020D1B0(32, 400, 0, text);
+            btlDebugDrawText(32, 400, 0, text);
         }
         mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, (u8 *)motionMenu, D_003BFB70);
         break;
