@@ -180,7 +180,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
     return node;
 }
 
-void func_0014FE28(u32 parameter) {
+void effCreateNodeFromParameter(u32 parameter) {
     effCreateNode(5, 0, parameter);
 }
 

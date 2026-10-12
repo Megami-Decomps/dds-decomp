@@ -932,6 +932,7 @@
 0x00157838	effDispatchOptionalNodeFlag	inferred	src/dds2/effect/effManager.c func_00157838: If per-type flag callback exists, invokes it with node instance and caller byte flag. Twin of DDS1 func_0014FC98. [names_reviewed24.tsv]
 0x00157878	effInvokeOptionalNodeInstanceCallback	inferred	Invokes node-type callback with instance when available; otherwise returns success directly. [names_reviewed19.tsv]
 0x001578C0	effCreateNodeFromDescriptor	inferred	confidence=high; matched-C; src/dds2/effect/effManager.c:143:func_001578C0; M141; source=names_pending_main.tsv:108; review=Converts pre-1.03 descriptors, creates their effect node, and supplies identity matrices for pre-1.02-compatible node types. [names_qp11.tsv]
+0x001579C8	effCreateNodeFromParameter	inferred	Creates effect node type 5 with argument zero and the supplied parameter; counterpart 0x0014FE28.
 0x001579E8	effLoadResourceNode	inferred	confidence=high; src/dds2/effect/effManager.c:func_001579E8; Logs d3p file read, loads the requested resource, creates the resolved node, and releases the temporary resource handle. [names_qp9.tsv]
 0x00157A50	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds2/game/code_00157A50.c:func_00157A50; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
 0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.

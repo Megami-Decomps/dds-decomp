@@ -2473,7 +2473,7 @@ extern s32 fldEffectTextureNodes[];
 extern s32 D_0034C8A0[];
 
 
-extern s32 func_0014FE28();
+extern s32 effCreateNodeFromParameter();
 
 extern char *D_003A06B0[4]; /* {"/fld/f/bin/KUT_3Z.EPL", "ASI_2MZ", "ASI_2HZ", "MAN_2Z"} */
 
@@ -2484,7 +2484,7 @@ void fldLoadFieldEffectTextureSlots(void) {
     memcpy(names, D_003A06B0, sizeof(names));
     for (i = 0; i < 4; i++) {
         fldEffectTextureLoadHandles[i] = (s32)sdfReadNamedResource(names[i], (u32 *)&fldEffectTextureData[i], 0);
-        fldEffectTextureNodes[i] = func_0014FE28(fldEffectTextureData[i]);
+        fldEffectTextureNodes[i] = effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_0034C8A0[i] = 0;
     }
 }
@@ -2551,7 +2551,7 @@ extern s32 D_003BAF88;
 void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
-        mnuPositionedResourceNodes[i] = func_0014FE28(D_003BAF88);
+        mnuPositionedResourceNodes[i] = effCreateNodeFromParameter(D_003BAF88);
         mnuPositionedResourceActive[i] = 0;
     }
 }
@@ -3645,7 +3645,7 @@ void fldRequestMiniTitleDismiss(void) {
 }
 
 
-extern s32 func_0014FE28();
+extern s32 effCreateNodeFromParameter();
 
 void fldLoadWeatherEffects(void) {
     s32 handle;
@@ -3655,10 +3655,10 @@ void fldLoadWeatherEffects(void) {
     fldWeatherLimitTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(resourceAddress));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
-    fldDamEffectNode = func_0014FE28(fldDamEffectData);
+    fldDamEffectNode = effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
     fldYukEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &fldYukEffectData, 0);
-    fldYukEffectNode = func_0014FE28(fldYukEffectData);
+    fldYukEffectNode = effCreateNodeFromParameter(fldYukEffectData);
     fldYukEffectPositioned = 0;
 }
 

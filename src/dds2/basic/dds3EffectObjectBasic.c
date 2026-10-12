@@ -30,7 +30,7 @@
 #define EFF_OBJ_OWNER_KIND_EXTRA 0x11
 #define EFF_OBJ_OWNER_BILL_KIND 5
 
-extern u64 func_001579C8(void);
+extern u64 effCreateNodeFromParameter(void);
 
 
 struct EffNode;
@@ -511,7 +511,7 @@ EffectObj *effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress)
 void effObjCreateBillboardFromFactory(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) {
     u64 bill;
 
-    bill = func_001579C8();
+    bill = effCreateNodeFromParameter();
     effObjCreateBillboardInWorld(bill, firstVectorAddress, secondVectorAddress);
 }
 
