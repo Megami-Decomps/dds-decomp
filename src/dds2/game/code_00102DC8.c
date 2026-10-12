@@ -14,7 +14,7 @@
 #include "sdf_draw.h"
 #include "kwln_task_lifecycle.h"
 
-extern s8 D_00435C60;
+extern u8 D_00435C60;
 
 extern u32 kwlnTextureViewerPageIndex;
 
@@ -876,7 +876,46 @@ s32 kwlnTextureViewerHandlePad(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104AA8);
+extern s32 D_00435CB0;
+
+void func_00104AA8(void *data, s32 handle) {
+    SdfPoolNode *surface;
+    SdfTex *image;
+    SdfListHead *packetList;
+    s32 counter;
+    s32 mode;
+
+    surface = (SdfPoolNode *)data;
+    image = (SdfTex *)handle;
+    if (handle == 0) {
+        return;
+    }
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011F250(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
+    kwlnTextureDrawPageCounter(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011F250(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
+    kwlnDrawImageOutline(packetList, image);
+    sdfAppendPacket(packetList, (u32)func_0011F250(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
+    func_00104700(packetList, image);
+
+    if (D_00435C60 != 0) {
+        kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
+        counter = D_00435CB0;
+        mode = (counter >> 4) & 1;
+        if (image->primaryResource != NULL) {
+            func_00104D40(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
+        }
+        counter = D_00435CB0;
+        /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
+        mode = (counter & 0x10) ? 2 : 0;
+        if (image->secondaryResource != NULL) {
+            func_00104D40(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
+        }
+        D_00435CB0++;
+    }
+    surface->append(surface, packetList);
+}
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
  * surfaceAddress identifies the submission callback owner; return input status. */

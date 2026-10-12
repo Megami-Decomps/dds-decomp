@@ -37,7 +37,7 @@ extern SdfTexResource *D_003BA8F4;
 extern SdfTex *kwlnHeldTextureReference;
 
 extern u32 kwlnTextureViewerPageIndex;
-extern s8 D_003BA890;
+extern u8 D_003BA890;
 
 extern s8 D_003BA7FC;
 
@@ -850,7 +850,46 @@ s32 kwlnTextureViewerHandlePad(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104B88);
+extern s32 D_003BA8E0;
+
+void func_00104B88(void *data, s32 handle) {
+    SdfPoolNode *surface;
+    SdfTex *image;
+    SdfListHead *packetList;
+    s32 counter;
+    s32 mode;
+
+    surface = (SdfPoolNode *)data;
+    image = (SdfTex *)handle;
+    if (handle == 0) {
+        return;
+    }
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(0x7160, 0x79B0, 0x0FFFFF7F, 0x1040, 0x80, 0x80000000, 0x80806020));
+    kwlnTextureDrawPageCounter(packetList);
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(0x7160, 0x7A50, 0x0FFFFF7F, 0x1040, 0x820, 0x80000000, 0x80806020));
+    kwlnDrawImageOutline(packetList, image);
+    sdfAppendPacket(packetList, (u32)func_0011D3E8(0x7160, 0x8290, 0x0FFFFF7F, 0x1040, 0xE0, 0x80000000, 0x80806020));
+    func_00104810(packetList, image);
+
+    if (D_003BA890 != 0) {
+        kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
+        counter = D_003BA8E0;
+        mode = (counter >> 4) & 1;
+        if (image->primaryResource != NULL) {
+            func_00104E20(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
+        }
+        counter = D_003BA8E0;
+        /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
+        mode = (counter & 0x10) ? 2 : 0;
+        if (image->secondaryResource != NULL) {
+            func_00104E20(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
+        }
+        D_003BA8E0++;
+    }
+    surface->append(surface, packetList);
+}
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
  * surfaceAddress identifies the submission callback owner; return input status. */
