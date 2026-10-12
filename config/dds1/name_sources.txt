@@ -150,6 +150,8 @@
 0x00108BA0	evtSubmitSecondaryGsTest	inferred	R_Names31 B94
 0x00108CB8	evtSubmitPrimaryAlphaBlendMode	inferred	R_Names31 B94
 0x00108DC0	evtSubmitFixedAlphaBlend	inferred	R_Names31 B94
+0x00108E60	evtSubmitPrimaryFramePacket	inferred	DDS2 twin 0x00108D80; builds and submits the primary frame-reference packet to the active draw surface.
+0x00108F00	evtSubmitAlternateFramePacket	inferred	DDS2 twin 0x00108E20; builds and submits the alternate frame-reference packet to the active draw surface.
 0x00109108	evtSubmitGradientRectAtDepth	inferred	R_Names31 B94
 0x001093B8	evtSubmitDefaultDepthGradientRect	inferred	R_Names31 B94
 0x00109640	evtSubmitQuadFromVertices	inferred	readability/matching review (QP16)
@@ -177,6 +179,7 @@
 0x0010A480	evtStartSelectionFadeOut	inferred	Starts background fade-out among the selection-scene callbacks. [names_reviewed8.tsv]
 0x0010A4A8	evtDispatchSelectionValue	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x0010A510	evtCloseSkyEventTask	inferred	DDS2 0010A650 twin; sets sky-event flag, destroys sky task and resets mode [names_R_FuncNames2.tsv]
+0x0010A548	evtCreateCampTasks	inferred	DDS2 twin 0x0010A688; event entry delegates to mnuCreateCampTasks.
 0x0010A560	evtDestroyCampTasks	inferred	DDS2 0010A6A0 twin; calls mnuDestroyCampTasks [names_R_FuncNames2.tsv]
 0x0010A580	evtWaitCampStateAcknowledged	inferred	DDS2 0010A6C0 twin; polls mnuAcknowledgeCampState until zero [names_R_FuncNames2.tsv]
 0x0010A5E8	evtDestroyStaffTasks	inferred	DDS2 0010A728 twin; resets event mode and destroys staff tasks [names_R_FuncNames2.tsv]
@@ -193,6 +196,7 @@
 0x0010A7A8	evtInitializeSelectionScene	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x0010A7E8	evtClearSecondaryWorldAndViewer	inferred	DDS2 0010A928 twin; destroys secondary world node and calls event cleanup [names_R_FuncNames2.tsv]
 0x0010A808	evtInitializeSelectionScreen	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
+0x0010A858	evtCreateCampTasksAlternate	inferred	DDS2 twin 0x0010A998; second event entry delegates to mnuCreateCampTasks.
 0x0010A870	evtExitCampTaskGroup	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:907:func_0010A870; Lifecycle callback removes camp tasks then returns zero completion status.; twin=0x0010A9B0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0010A890	mnuCheckCampStateAndAcknowledge	inferred	Calls mnuAcknowledgeCampState, which clears completed state; original Is name hid mutation. [names_reviewed21.tsv]
 0x0010A8B0	evtCreateSkyAndCampTasks	inferred	DDS2 0010A9F0 twin; creates sky task and calls camp panel initializer [names_R_FuncNames2.tsv]
@@ -212,10 +216,13 @@
 0x0010AB90	evtEnsureFontResourceChain	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
 0x0010ABE0	evtDestroyFontResourceChain	inferred	Destroys existing console font resource node and clears global handle. [names_reviewed7.tsv]
 0x0010AC10	evtPrintDeveloperConsoleMessage	inferred	src/dds1/game/code_00107FD8.c func_0010AC10: Formats variadic message into stack buffer and prints it only when developer console node exists. [names_reviewed24.tsv]
+0x0010AC98	evtDrawGeneralHeapUsageGraph	inferred	DDS2 twin 0x0010AEC0; draws current general-heap free percentage and peak bar, then advances the peak hold.
 0x0010AEF0	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
 0x0010AF68	sdfDrawHeapSpanOverlay	inferred	U2
+0x0010B1B0	sdfDrawHeapMapOverlay	inferred	DDS2 twin 0x0010B3D8; snapshots heap blocks and draws their spans with size markers.
 0x0010B428	evtDrawHeapUsageOverlay	inferred	readability/matching review (QP16)
 0x0010B558	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
+0x0010B590	evtDrawResourceCountDebugTask	inferred	DDS2 twin 0x0010B7B8; draws parent/child glyph counts and effect-font resource count.
 0x0010B6B0	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds1/game/code_00107FD8.c:1192:func_0010B6B0; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010B728	evtLinkWorkNode	inferred	Appends a work node to the doubly linked event list and increments its count.
 0x0010B768	evtUnlinkWorkNode	inferred	Unlinks a work node from the doubly linked event list and decrements its count.
