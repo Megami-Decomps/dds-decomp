@@ -10,6 +10,7 @@
 #include "sdf_texture_flush.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
 #include "sdf_chip.h"
@@ -31,7 +32,6 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_draw.h"
 
 extern u32 func_003287E0(void);
-extern u32 sdfGetElapsedTimerTicks(u32);
 extern s32 EIntr(void);
 extern u16 D_00438A24;
 extern s32 D_00438A30;

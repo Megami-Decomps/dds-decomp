@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "kwln.h"
 
 extern void kwlnUpdatePadInputState(void);
@@ -196,7 +197,6 @@ extern u16 D_003BD32E;
 extern u16 D_003BD334;
 extern u16 mnuMovieTaskState;
 extern u32 func_002CF930(void);
-extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfSleepThreadCount(s32);
 extern void sdfSetNonnegativePacketIndex(s32);
 extern void sdfPadBuildButtonStates(void);

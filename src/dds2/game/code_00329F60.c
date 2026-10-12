@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_texture_queue.h"
 #include "sdf_image_upload.h"
 #include "sdf_thread.h"
@@ -196,7 +197,6 @@ extern s32 SleepThread(void);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern u32 func_003287E0(void);
-extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
 extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_0032DEC8(void);
