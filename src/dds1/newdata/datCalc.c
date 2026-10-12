@@ -1074,7 +1074,7 @@ u32 func_0011B148(void) {
     return 1;
 }
 
-u32 func_0011B150(void) {
+u32 ptyReturnOne(void) {
     return 1;
 }
 

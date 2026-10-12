@@ -981,7 +981,7 @@ s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
 
 extern void fldActivateObjectById(s32);
 
-extern void func_0011C6A0(s32);
+extern void ptyReturnOne(s32);
 
 void fldActivateFlaggedObject(u32 flagIndex) {
     datGameState->activationFlags[(s32)flagIndex >> 3] |= 1 << (flagIndex & 7);
@@ -990,7 +990,7 @@ void fldActivateFlaggedObject(u32 flagIndex) {
         mdlFlagSet(flagIndex + 0x610);
     }
     if (D_003A8EB0[flagIndex].kind == 2) {
-        func_0011C6A0(D_003A8EB0[flagIndex].parameter);
+        ptyReturnOne(D_003A8EB0[flagIndex].parameter);
     }
 }
 

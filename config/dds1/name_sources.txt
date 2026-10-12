@@ -686,6 +686,7 @@
 0x0011A9C8	ptyGetAverageLevel	inferred	legacy Party_GetActiveAverageLevelCeil: ceil of the average level across present active rows
 0x0011AA28	ptyAddUnit	inferred	legacy Party_AddUnitById: adds a unit to the active party from the stock row
 0x0011AE78	ptyRemoveUnit	inferred	legacy Party_RemoveUnitById: removes a unit from the active party back to stock
+0x0011B150	ptyReturnOne	inferred	returns constant one; called for kind-two records by fldActivateFlaggedObject
 0x0011B308	ptyMatchAffinityPermutation	inferred	confidence=high; matched-C; src/dds1/game/code_00119900.c:375:func_0011B308; Counts required affinity slots, checks the six gameplay actor orders, and succeeds when the occupied actors match all requirements; no compiler-order search is performed.; source=names_P5.tsv:5 [names_qp11.tsv]
 0x0011B418	evtCopyRosterTableValue	inferred	Copies the indexed roster table word into the entry's value field.
 0x0011B438	evtUpdateFlaggedEntries	inferred	evt event state and dispatch in game/code_00119900.c
