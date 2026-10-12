@@ -239,7 +239,7 @@ extern SdfSoundResidentBuffer D_003FEA98;
 extern char *mnuBuildVoiceResourcePath(char *, char *);
 extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
-extern void func_002E8938(s32, void *, s32);
+extern void sndCopyToIopAndWait(s32, void *, s32);
 
 u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
     char path[0x100];
@@ -277,7 +277,7 @@ u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
         if (buffer != NULL) {
             sdfDevQueueRead(D_003BDA7C, buffer, D_003BDA74->byteCount);
             WaitSema(sdfSoundRpcSemaphore);
-            func_002E8938(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
+            sndCopyToIopAndWait(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
             sdfReleaseResourceAllocation(allocation);
             D_003FEAC0[0] = D_003BDA74->byteCount;
         } else {
@@ -300,7 +300,7 @@ u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
     case 4: {
         s32 bytes;
         D_003BDA74 = request;
-        func_002E8938(request->destination, D_003FEA98.data + D_003BDA78, request->byteCount);
+        sndCopyToIopAndWait(request->destination, D_003FEA98.data + D_003BDA78, request->byteCount);
         bytes = D_003BDA74->byteCount;
         D_003FEAC0[0] = bytes;
         D_003BDA78 += bytes;
@@ -322,7 +322,7 @@ u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
         D_003BDA74 = request;
         buffer = D_003BD494.read(request->byteCount);
         if (buffer != NULL) {
-            func_002E8938(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
+            sndCopyToIopAndWait(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
             D_003FEAC0[0] = D_003BDA74->byteCount;
         } else {
             D_003FEAC0[0] = -1;
@@ -452,7 +452,7 @@ void sdfSoundSetTableEntry(u32 kind, u8 *src) {
         }
         break;
     }
-    func_002E8938(D_003BDA8C, sndMidiTrackState, 0x8D0);
+    sndCopyToIopAndWait(D_003BDA8C, sndMidiTrackState, 0x8D0);
     sndSendCommandPacket(0x1F0, 0, 0, 0);
 }
 

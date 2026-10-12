@@ -72,7 +72,7 @@ extern s8 D_004391E0;
 extern s32 D_004391EC;
 extern s32 sceSifInitIopHeap(void);
 extern s32 func_003415A8(void);
-extern void func_003417E0(s32, void *, s32);
+extern void sndCopyToIopAndWait(s32, void *, s32);
 
 extern SndRingPacket D_00477A00[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_00438B90;
@@ -146,7 +146,8 @@ typedef struct SifDmaTransfer {
 
 extern SifDmaTransfer D_00479A00;
 
-void func_003417E0(s32 destination, void *source, s32 size) {
+/* Transfer an EE buffer to IOP memory, retrying submission and waiting for completion. */
+void sndCopyToIopAndWait(s32 destination, void *source, s32 size) {
     s32 dmaId;
     s32 delay;
 
@@ -178,7 +179,8 @@ extern s32 sceSifLoadModule(const char *, s32, const char *);
 extern s32 func_0036B6E0(const char *, SceIoStat *);
 extern s32 sdfSendNamedResourceRequest(char *, s32, void *, s32 *);
 
-void func_00341878(void) {
+/* Load the sound modules; debug PFS may override only the SDF sound manager. */
+void sndLoadIopSoundModules(void) {
     SceIoStat info;
     char *module;
 
@@ -256,7 +258,7 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
 
 void func_00341AD8(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
     D_004391E0 = 1;
-    func_00341878();
+    sndLoadIopSoundModules();
     sceSifInitIopHeap();
     func_003415A8();
     sndMidiTrackState.unk008 = sndReserveIopWorkMemory(0x4000);
@@ -266,7 +268,7 @@ void func_00341AD8(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
     D_004391EC = sndReserveIopWorkMemory(0x8D0);
     sndMidiTrackState.unk1F8 = (u32)&sndMidiTrackState;
     sndMidiTrackState.unk1FC = 0x8D0;
-    func_003417E0(D_004391EC, &sndMidiTrackState, 0x8D0);
+    sndCopyToIopAndWait(D_004391EC, &sndMidiTrackState, 0x8D0);
     sndSendCommandPacket(0, 0, &D_004391EC, 4);
     D_004391E0 = 0;
 }
