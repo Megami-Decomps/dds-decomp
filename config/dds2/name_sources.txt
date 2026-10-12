@@ -2027,6 +2027,7 @@
 0x0019DB28	frFontSetContextCursorSpacing	inferred	confidence=high; src/dds2/interface/frFont.c:func_0019DB28; Sets the spacing used by the font context cursor advance routine. [names_qp9.tsv]
 0x0019DB30	frFontCountGlyphBands	inferred	Counts each y-band by advancing to the first node outside it, as documented by the adjacent source comment; DDS1 counterpart 0x00195E60 counts one linked glyph node per iteration.
 0x0019DC68	frFontGetGlyphPositionAtIndex	inferred	Advances by y-band, writes the selected glyph position and stops at the requested band index; the adjacent comment documents DDS2 behavior. twin=DDS1 0x00195FA8.
+0x0019DEE0	frFontAppendIndexedTextToGlyphChain	inferred	Looks up the indexed registered text, appends its two-byte glyph codes to the current chain, and applies mode-change context plus configured spacing; DDS1 counterpart is 0x00196220.
 0x0019E0A0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
 0x0019E110	frFontAdvanceContextCursor	inferred	increments context cursor by font advance factor and sets flags [names_reviewed5.tsv]
 0x0019E138	itfReadEncodedTextLead	inferred	Reads the encoded first byte from the current text-stream offset and advances the position by two, mirroring DDS1.

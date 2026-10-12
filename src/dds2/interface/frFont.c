@@ -1253,7 +1253,7 @@ u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode) {
 extern u32 D_004528C0[];
 extern s8 D_00436550;
 
-void func_0019DEE0(u8 fontIndex, FrFontCtx *ctx) {
+void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
     char glyphText[3];
     const char *textData;
     s32 index;
