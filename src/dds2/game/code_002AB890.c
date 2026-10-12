@@ -427,7 +427,7 @@ s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
     return resources->windows[4]->list->count != 0;
 }
 
-void func_002ACB18(u32 arg0) {
+void mnuSelectStaffDisplayCategory(u32 arg0) {
     mnuSwitchCampVisualCategory(2, arg0);
 }
 
@@ -442,7 +442,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     context->menu = resource;
     memset(resource, 0, 0x54);
     resource->allocation = allocation;
-    func_002ACB18((u32)context);
+    mnuSelectStaffDisplayCategory((u32)context);
     mnuBuildStaffItemWindows(context);
     mnuConfigurePanelResource(context->scrollPanel, context->titleFrames[0], 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
@@ -473,7 +473,7 @@ extern char D_003E74A4[];
 extern char D_003E74C0[];
 extern char D_003E7418[];
 extern s32 evtGetMessageWindowControlState(void);
-extern void func_002C1B68(u32 *, u32);
+extern void mnuSetStateValue(u32 *, u32);
 extern char D_003E7434[];
 extern char D_003E74DC[];
 
@@ -597,7 +597,7 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
                   datGameState->inventory.counts[index];
         resources->secondListState = index;
     }
-    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
+    mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 1);
 }
 
 u32 func_002AD0A8(KwlnTask *task) {
@@ -638,7 +638,7 @@ s32 func_002AD118(KwlnTask *callback) {
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    func_002C1B68(&context->unkAA50, 0);
+    mnuSetStateValue(&context->unkAA50, 0);
     if (resources->secondListState == 0) {
         if (input & 1) {
             panel = resources->windows[0]->list;

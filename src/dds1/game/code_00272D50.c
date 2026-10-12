@@ -259,7 +259,7 @@ s32 func_00273220(s32 itemId, s32 previousItemId, void *owner) {
     return window->list->count != 0;
 }
 
-void func_00273390(u32 context) {
+void mnuSelectStaffDisplayCategory(u32 context) {
     mnuSetStaffDisplayMode(2, context);
 }
 
@@ -277,7 +277,7 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     context->resources = resources;
     memset(resources, 0, 0x2C);
     resources->allocation = handle;
-    func_00273390((u32)context);
+    mnuSelectStaffDisplayCategory((u32)context);
     mnuCreateStaffItemWindow(context);
     mnuForwardDupArg(context->activeWindow, (struct EffectSlotSet *)context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(
@@ -415,7 +415,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
     return 1;
 }
 
-extern void func_00283BF0(u32 *, u32);
+extern void mnuSetStateValue(u32 *, u32);
 
 /* On successful item use, publish the remaining count and record the selected item. */
 void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
@@ -429,7 +429,7 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
                   ((SaveItemCounts *)datGameState)->counts[selection];
         resources->selection = selection;
     }
-    func_00283BF0(&((StaffDisplayContext *)context)->gradient.active, 1);
+    mnuSetStateValue(&((StaffDisplayContext *)context)->gradient.active, 1);
 }
 
 extern s32 evtGetMessageWindowControlState(void);
@@ -458,7 +458,7 @@ s32 func_002738A0(KwlnTask *task) {
         return result;
     }
     if (evtGetMessageWindowControlState() == 0) {
-        func_00283BF0(&context->gradient.active, 0);
+        mnuSetStateValue(&context->gradient.active, 0);
         if (input & 1) {
             list = resources->windows[0]->list;
             if (list->count != 0) {

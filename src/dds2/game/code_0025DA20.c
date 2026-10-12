@@ -134,7 +134,7 @@ extern void evtReleaseResourcePairHandle();
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
-extern void func_002C1B68(u32 *, u32);
+extern void mnuSetStateValue(u32 *, u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
@@ -1625,9 +1625,9 @@ s32 mnuTerminalSyncMessageWindowControl(KwlnTask *task) {
     MenuGradientFade *state = &((MenuTerminalContext *)kwlnTaskGetUserValue(task))->gradientFade;
     mnuDrawAndStepGradientFade(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
-        func_002C1B68(&state->active, 1);
+        mnuSetStateValue(&state->active, 1);
     } else {
-        func_002C1B68(&state->active, 0);
+        mnuSetStateValue(&state->active, 0);
     }
     return 0;
 }

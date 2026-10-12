@@ -122,7 +122,7 @@ extern s32 func_002C6CE8(void);
 extern s8 D_003E7970[];
 extern u8 D_003E7978[];
 
-extern void func_002C6E20(s32 initialMotionIndex);
+extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
 extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
@@ -1020,7 +1020,7 @@ void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->blend = 0;
 }
 
-void func_002C1B68(u32 *out, u32 value) {
+void mnuSetStateValue(u32 *out, u32 value) {
     *out = value;
 }
 
@@ -1605,7 +1605,7 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void func_002C4328(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
     if (entry->flags & 2)
@@ -1634,7 +1634,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         partyEntry = &datGameState->party[partyIndex];
         if (partyEntry->flags & 1) {
-            func_002C4328(partyEntry, 0, partyIndex, panel);
+            mnuPopulatePartyPanelSlot(partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
         } else {
             panel->slots[partyIndex].unk8 = -1;
@@ -2089,11 +2089,11 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
     return 0;
 }
 
-void func_002C5128(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
+void ptyCommitFieldSkillUse(u16 ability, DatPartyRecord *target, DatPartyRecord *entry) {
     sdfApplyCommandResults(ability);
 }
 
-u32 func_002C5140(MenuPageWindow *context, s32 ability, DatPartyRecord *target, DatPartyRecord *entry) {
+u32 ptyCheckFieldUseOverride(MenuPageWindow *context, s32 ability, DatPartyRecord *target, DatPartyRecord *entry) {
     return 0;
 }
 
@@ -2103,7 +2103,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
     s32 applied = 0;
     s32 mask;
 
-    if (func_002C5140(context, ability, target, entry) != 0) {
+    if (ptyCheckFieldUseOverride(context, ability, target, entry) != 0) {
         return 1;
     }
 
@@ -2113,7 +2113,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         if (btlCheckSelectedPartyCommandEligibility(ability, mask) != 0) {
             return 0;
         }
-        func_002C5128(ability, target, entry);
+        ptyCommitFieldSkillUse(ability, target, entry);
         mnuQueueListEntry(context,
                           mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
@@ -2125,7 +2125,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (btlCheckSelectedPartyCommandEligibility(ability, mask) == 0) {
-                    func_002C5128(ability, target, entry);
+                    ptyCommitFieldSkillUse(ability, target, entry);
                     applied = 1;
                 }
             }
@@ -2663,7 +2663,7 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
         motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
-    func_002C6E20(-1);
+    evtStageTestApplyInitialMotion(-1);
 }
 
 /* Advance the indexed entry's animation frame and request a stage refresh.
@@ -2677,7 +2677,7 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     }
     stageEntry = (StageTestEntry *)(entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
     stageEntry->frame += delta;
-    func_002C6E20(-1);
+    evtStageTestApplyInitialMotion(-1);
 }
 
 /* Add integer XYZ deltas to the indexed entry's floating-point position. */
@@ -2907,7 +2907,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
 
-void func_002C6E20(s32 initialMotionIndex) {
+void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     MdlCtx *model = evtStageTestState.model;
     StageTestSlot *slot = &evtStageTestState.queue.slot[0];
     s8 motionIndex;
@@ -3209,7 +3209,7 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7750);
 
-u32 func_002C79B8(void) {
+u32 evtStageTestCameraUpdate(void) {
     func_002C7750();
     return 0;
 }
@@ -3221,7 +3221,7 @@ void *evtCreateBattleStageTestCamera(void) {
     EffWorldNode *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
     cameraTarget->value = D_00437CB0;
-    return func_002C79B8;
+    return evtStageTestCameraUpdate;
 }
 
 /* Draw the battle-stage selector; confirmation creates the selected world object

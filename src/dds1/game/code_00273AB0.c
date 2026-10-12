@@ -29,7 +29,7 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
-extern void func_00283BF0(u32 *out, u32 value);
+extern void mnuSetStateValue(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_0037C860[];
@@ -367,7 +367,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
         mnuFreeSpriteStateWork(((StaffImageContext *)context)->spriteHandle);
         ((StaffImageContext *)context)->spriteHandle = 0;
     }
-    func_00283BF0((u32 *)(context + 0x914), 0);
+    mnuSetStateValue((u32 *)(context + 0x914), 0);
     mnuReleaseStaffMenuTextureHandles((void *)(context + 0x60));
     return 1;
 }
@@ -397,7 +397,7 @@ void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
     MnuEquipContext *equipContext = ((MnuEquipScene *)scene)->context;
     s32 equipped = mnuGetPartyEntryMenuValue(unit);
 
-    func_00283BF0((u32 *)(scene + 0x914), 1);
+    mnuSetStateValue((u32 *)(scene + 0x914), 1);
     if (equipped != itemId) {
         /* Actor names use 17-byte records; item names use 25-byte records. */
         evtCopyEntryStringToActiveWindow(0, D_003BAA70 + unit->unitId * 17);
@@ -482,7 +482,7 @@ s32 func_00274768(KwlnTask *task) {
     if (evtGetMessageWindowControlState() != 0) {
         return 0;
     }
-    func_00283BF0((u32 *)&context->transitionFade, 0);
+    mnuSetStateValue((u32 *)&context->transitionFade, 0);
     if (menu->listState == 0) {
         if (mnuHandleStaffValuePageInput(task) != 0) {
             return 0;

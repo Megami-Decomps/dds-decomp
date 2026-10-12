@@ -336,7 +336,7 @@ void mnuCopyPartyEntries(context)
     menuWork->selection = 0;
 }
 
-extern void func_00285960(DatPartyRecord *, s32, u32, PartyPanel *);
+extern void mnuPopulatePartyPanelSlot(DatPartyRecord *, s32, u32, PartyPanel *);
 extern void func_00280048(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */
@@ -353,11 +353,11 @@ void func_00275030(s32 partyIndex, s32 mode, s32 skipUpdate,
     if (mode == 2) {
         menu->backup[menu->selection].flags |= 2;
         context->partyWindow.slots[menu->selection].flags &= ~0x80;
-        func_00285960(&menu->backup[menu->selection], 0,
+        mnuPopulatePartyPanelSlot(&menu->backup[menu->selection], 0,
                       menu->selection, &context->partyPanel);
     } else {
         menu->backup[menu->selection].flags &= ~2;
-        func_00285960(&menu->backup[menu->selection], 0,
+        mnuPopulatePartyPanelSlot(&menu->backup[menu->selection], 0,
                       menu->selection, &context->partyPanel);
     }
 
@@ -817,7 +817,7 @@ void mnuOpenStaffSelectionEntry(u32 context) {
     func_00276368(context, 1);
 }
 
-void func_00276490(KwlnTask *task) {
+void mnuFinishStaffSelectionEntry(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 
@@ -826,7 +826,7 @@ void mnuOpenPartySelectionEntry(u32 context) {
     func_00276368(context, 0);
 }
 
-void func_002764C0(KwlnTask *task) {
+void mnuFinishPartySelectionEntry(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 

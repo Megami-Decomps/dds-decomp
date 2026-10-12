@@ -425,11 +425,11 @@ s32 mnuStaffCloseSelectionState(void);
 
 void mnuOpenStaffSelectionEntry(u32 context);
 
-void func_002B29E0(void);
+void mnuFinishStaffSelectionEntry(void);
 
 void mnuOpenPartySelectionEntry(u32 context);
 
-void func_002B2A10(void);
+void mnuFinishPartySelectionEntry(void);
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
@@ -1030,7 +1030,7 @@ void func_002B9808(MenuWindowContainer *menu) {
     mnuClearListFlagsOneAndTwo((u32)menu->list);
 }
 
-void func_002B9820(MenuWindowContainer *menu) {
+void mnuCheckWindowListStatus(MenuWindowContainer *menu) {
     mnuTestListFlagTwo((u32)menu->list);
 }
 

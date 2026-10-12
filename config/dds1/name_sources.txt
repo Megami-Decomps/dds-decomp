@@ -7853,3 +7853,13 @@
 0x002BB9F0	effPollMaterialTmxFileB	inferred	confidence=medium; matched-C; Second distinct TMX-only material chooser callback; identical body/filter must not be merged. DDS2 twin 0x00302E50 keeps void ABI. Namer1 batch 12.
 0x002BBA10	effPollMaterialTmxFileC	inferred	confidence=medium; matched-C; Third distinct TMX-only material chooser callback; identical body/filter must not be merged. DDS2 twin 0x00302E70 keeps void ABI. Namer1 batch 12.
 0x002BBA68	effPollHlpPbResourceFile	inferred	confidence=high; matched-C; Chooser uses /tool/effect/hlp/ and PB-only mask; Hlp retains the literal directory spelling rather than guessing its expansion. Returns status; DDS2 twin 0x00302EC8 keeps void ABI. Namer1 batch 12.
+0x00273390	mnuSelectStaffDisplayCategory	inferred	Selects staff display visual category 2 using the owner context. DDS2 twin 0x002ACB18. LiteH-2 naming batch.
+0x00276490	mnuFinishStaffSelectionEntry	inferred	Routes the staff-selection completion callback to shared menu teardown. DDS2 twin 0x002B29E0. LiteH-2 naming batch.
+0x002764C0	mnuFinishPartySelectionEntry	inferred	Routes the party-selection completion callback to shared menu teardown. DDS2 twin 0x002B2A10. LiteH-2 naming batch.
+0x0027C7A0	mnuCheckWindowListStatus	inferred	Runs the flag-two list check on a window's list state. DDS2 twin 0x002B9820. LiteH-2 naming batch.
+0x00283BF0	mnuSetStateValue	inferred	Writes a supplied word through a state pointer. DDS2 twin 0x002C1B68. LiteH-2 naming batch.
+0x00285960	mnuPopulatePartyPanelSlot	inferred	Copies party-record values and base stats into a panel slot while updating counts. DDS2 twin 0x002C4328. LiteH-2 naming batch.
+0x002866B0	ptyCommitFieldSkillUse	inferred	Invokes command-result application for a field skill. DDS2 twin 0x002C5128. LiteH-2 naming batch.
+0x002866C8	ptyCheckFieldUseOverride	inferred	Returns zero from the field-use override check. DDS2 twin 0x002C5140. LiteH-2 naming batch.
+0x002878D8	evtStageTestApplyInitialMotion	inferred	Selects the stage-test motion, bounds-checks it, and sets its frame. DDS2 twin 0x002C6E20. LiteH-2 naming batch.
+0x00288458	evtStageTestCameraUpdate	inferred	Invokes the stage-test camera update callback and returns zero. DDS2 twin 0x002C79B8. LiteH-2 naming batch.
