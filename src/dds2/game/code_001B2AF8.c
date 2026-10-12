@@ -2824,7 +2824,95 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B8A80);
+extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern char D_00436810[];
+extern s32 func_0035C860(char *, const char *, ...);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
+
+s32 func_001B8A80(KwlnTask *task) {
+    MesWindowSet *work;
+    s32 i;
+    s32 count;
+    s32 lineOffset = 0;
+    s32 value;
+    s32 width;
+    s32 halfAlpha;
+    char text[16];
+
+    btlGetRuntime();
+    work = (MesWindowSet *)kwlnTaskGetUserValue(task);
+    switch (work->state) {
+    case 0:
+        work->alpha += 16;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 128 ? 128 : work->alpha;
+        if (work->alpha >= 128) {
+            work->state = 1;
+        }
+        break;
+    case 1:
+        break;
+    case 2:
+    default:
+        work->alpha -= 16;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 128 ? 128 : work->alpha;
+        if (work->alpha <= 0) {
+            return -1;
+        }
+        break;
+    }
+    switch (work->state) {
+    case 0:
+    case 1:
+    case 2:
+        count = 0;
+        if (work->state == 1) {
+            for (i = 0; i < 9; i++) {
+                if (work->config.active[i].textId != 0) {
+                    value = work->config.active[i].value;
+                    count++;
+                    itfMesSetTextSlotFromValue(work->handle[i], 0, work->config.active[i].textId, 12);
+                    func_0035C860(text, D_00436810, value);
+                    itfMesCopyStringToWindowTableSlot(work->handle[i], 1, text);
+                    width = itfMesMeasureEntryItem(work->handle[i], 0, 0);
+                    itfMesBlk24MoveTo(work->handle[i], (256 - (width >> 5)) << 4,
+                                      (work->y + lineOffset) << 4);
+                    lineOffset += 12;
+                    itfMesStartEntry(work->handle[i], 0, 0);
+                }
+            }
+        }
+        if (count != 0) {
+            halfAlpha = work->alpha >> 1;
+            work->colors[3] = work->colors[2] = work->colors[1] = work->colors[0] =
+                (halfAlpha << 24) | 0xA0A0A0;
+            evtSetDrawSurfaceIndex(0x53);
+            evtSubmitPrimaryGsTest(1, 1, 128, 3, 0, 0, 1, 1);
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y - 2, 456, 2,
+                work->colors[0], work->colors[1], work->colors[2], work->colors[3]);
+            halfAlpha = work->alpha >> 1;
+            work->colors[3] = work->colors[2] = work->colors[1] = work->colors[0] =
+                (halfAlpha << 24) | 0x101010;
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y, 456, count * 24 + 48,
+                work->colors[0], work->colors[1], work->colors[2], work->colors[3]);
+            halfAlpha = work->alpha >> 1;
+            work->colors[3] = work->colors[2] = work->colors[1] = work->colors[0] =
+                (halfAlpha << 24) | 0xA0A0A0;
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y + count * 24 + 48, 456, 2,
+                work->colors[0], work->colors[1], work->colors[2], work->colors[3]);
+            evtSubmitPrimaryAlphaBlendMode(1);
+        }
+        break;
+    }
+    return 0;
+}
+
 
 extern void itfMesCleanupWindow(s32, s32);
 

@@ -663,7 +663,168 @@ void func_00318570(MnuShootingWork *work) {
     evtPrintDeveloperConsoleMessage("stgRelease_Section !!\n");
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00318660);
+extern u8 D_0037F510[2][2][16];
+extern void func_0031AEB8(MnuShootingWork *);
+extern s32 func_0031AF68(MnuShootingWork *);
+extern s32 mnuAdvanceCursorStepUntilThreshold(void);
+extern s32 func_00321340(MenuProgressState *);
+extern void mnuVisitActiveRecords(s32);
+extern void func_00323748(MenuWorkEntry *, MnuShootingWork *);
+extern s32 func_003233E8(s32);
+extern void func_003223F8(void);
+extern s32 func_00324840(void);
+extern s32 func_0031A0B8(MnuShootingWork *);
+extern MenuRuntimeRecord *mnuFindOverlappingRuntimeRecord(MenuWorkEntry *, MnuShootingWork *);
+extern s32 func_00323BB8(MnuShootingWork *);
+extern s32 func_00324070(MenuWorkEntry *);
+extern MenuRuntimeList *func_00321ED8(void);
+extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
+extern void func_0031B188(void);
+extern void mnuTickScoreProgressState(MnuShootingWork *);
+extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
+extern void func_0031A7F8(MnuShootingWork *);
+extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
+void func_0031A090(void);
+extern void func_0031A730(MnuShootingWork *);
+extern void dds3UpdateSoundSlots(void);
+
+s32 func_00318660(MnuShootingWork *work) {
+    MenuInputActionSnapshot input;
+    MenuRuntimeRecord *record;
+    MnuModelNode *node;
+    MdlCtx *model;
+    s32 result;
+    s32 actionFlags;
+    s32 alternateAction;
+    s32 mode;
+
+    if ((s8)D_0037F510[1][0][12] < 0 && work->phase == 2 &&
+        !D_0040ABF8.flagsBits.updated && D_0040ABF8.inputCountdown == 0 &&
+        !D_0040ABF8.flagsBits.inputDisabled) {
+        func_0031AEB8(work);
+    }
+    if (work->unk70Bit0) {
+        result = func_0031AF68(work);
+        switch (result) {
+        case -1:
+            break;
+        case 0:
+            func_0031AEB8(work);
+            break;
+        case 1:
+            work->flags |= 4;
+            func_0031AEB8(work);
+            work->flags |= 0x20;
+            work->phase = 11;
+            work->result = 0;
+            D_0040ABF8.remaining = 0;
+            return 1;
+        case 2:
+            work->flags |= 4;
+            func_0031AEB8(work);
+            work->flags |= 0x20;
+            work->result = 1;
+            work->phase = 11;
+            D_0040ABF8.remaining = 0;
+            return 1;
+        }
+        return 0;
+    }
+    if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
+    func_00321340(mnuGetResourceProgressStepState());
+    mnuVisitActiveRecords((s32)work);
+    func_00323748(&D_0040ABF8, work);
+    if (work->phase == 2) func_003233E8(0);
+    else func_003233E8(1);
+    func_003223F8();
+    memset(&input, 0, sizeof(input));
+    if (!((work->flags >> 2) & 1)) {
+        if ((s8)D_0037F510[1][0][6] != 0) input.verticalNegative = 1;
+        else if ((s8)D_0037F510[1][0][7] != 0) input.verticalPositive = 1;
+        if ((s8)D_0037F510[1][0][4] != 0) {
+            if ((f32)work->unk90 < 20.0f) work->unk90 = (f32)work->unk90 + 1.0f;
+            input.horizontalNegative = 1;
+        } else if ((s8)D_0037F510[1][0][5] != 0) {
+            if ((f32)work->unk90 > -20.0f) work->unk90 = (f32)work->unk90 - 1.0f;
+            input.horizontalPositive = 1;
+        }
+        if (!input.horizontalNegative && (f32)work->unk90 > 0.0f)
+            work->unk90 = (f32)work->unk90 - 1.0f;
+        if (!input.horizontalPositive && (f32)work->unk90 < 0.0f)
+            work->unk90 = (f32)work->unk90 + 1.0f;
+        if (((s8)D_0037F510[1][0][0] < 0) | ((s8)D_0037F510[1][0][1] != 0))
+            input.actionSlot0 = 1;
+        alternateAction = (s8)D_0037F510[1][0][3];
+        actionFlags = (s8)D_0037F510[1][0][2];
+        actionFlags |= alternateAction;
+        if (actionFlags < 0)
+            input.actionSlot1 = 1;
+    }
+    mnuSetInputActionSnapshot(&input);
+    if (func_00324840() == 0) func_0031A0B8(work);
+    if (!((work->flags >> 5) & 1)) {
+        record = mnuFindOverlappingRuntimeRecord(&D_0040ABF8, work);
+        if (record != NULL) {
+            if ((record->state.kind & 15) == 3) dds3ClaimSoundSlot(0x1E00004, 0);
+            record->state.word &= ~1;
+        }
+    }
+    if (work->phase < 3) {
+        func_00323BB8(work);
+        if (work->phase < 3) func_00324070(&D_0040ABF8);
+    }
+    mnuDispatchRuntimeWorkOverlaps(func_00321ED8(), work);
+    func_0031B188();
+    mnuTickScoreProgressState(work);
+    switch (mnuAdvanceShootingRoundPhase(work)) {
+    case 0:
+        break;
+    case 3:
+        work->unkB0 = 2;
+        work->unk94 = 0;
+        work->flags |= 4;
+        func_0031A7F8(work);
+        work->progress = 0;
+        work->completed = 0;
+        work->currentScore = 0;
+        func_0031E8E8(&work->gauge, 0);
+        work->round = 0;
+        return 1;
+    case 2:
+        work->state = -1;
+        work->round = 0;
+        work->flags |= 4;
+        return 1;
+    case 1:
+        mode = D_0040ABF8.flagsBits.mode;
+        work->progress = 0;
+        work->completed = 0;
+        work->unk94 = mode;
+        func_0031E8E8(&work->gauge, 0);
+        mnuClearRuntimeRecordStorage(func_00321ED8());
+        func_0031A090();
+        if (work->round >= 3) {
+            work->state = -1;
+            func_0031A730(work);
+        }
+        return 1;
+    }
+    dds3UpdateSoundSlots();
+    if ((s8)D_0037F510[1][1][13] < 0) work->phase = 3;
+    if (D_00438934 > 0) {
+        D_00438934--;
+        if (D_00438934 == 0) {
+            node = D_0040ABF8.object.modelNode;
+            model = node->model;
+            model->first->frameStep = 1.0f;
+            node->savedModelValue = 1.0f;
+            mdlAddEntryFlaggedEx(model, 0, 0, 20.0f, 20.0f);
+        }
+    }
+    return 0;
+}
+
+
 
 extern u32 mnuGetWorkEntryPool(void);
 extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
