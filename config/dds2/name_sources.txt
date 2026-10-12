@@ -6559,6 +6559,11 @@
 0x00348B10	sdfRebuildPoolChain	inferred	confidence=high; matched-C; src/dds2/game/code_003478C0.c:433:func_00348B10; Peer-matched C proposal: M141; source=names_pending_main.tsv:148 [names_qp13.tsv]
 0x00348B78	sdfUpdatePoolFreeListByMode	inferred	Resets pool state or returns an owned node to the pool free list. [names_reviewed11.tsv]
 0x00348BD8	sdfInstallPoolNodeReleaseCallbacks	inferred	Registers release and recycling callbacks on a pool work item. [names_reviewed10.tsv]
+0x0034EFE0	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS1 counterpart is 0x002F61D8.
+0x0034F680	sceMcSync	inferred	Polls the active memory-card RPC command and returns its completion state through the command and result pointers. DDS1 counterpart is 0x002F6858.
+0x0034F9B0	sceMcGetDir	inferred	Starts a directory-entry query using port, slot, path, mode, entry limit and output table. DDS1 counterpart is 0x002F6B80.
+0x0034FB90	sceMcChdir	inferred	Starts a directory change using port, slot, path and mode zero. DDS1 counterpart is 0x002F6D50.
+0x0034FDA8	sceMcDelete	inferred	Starts deletion of a path on the selected memory-card port and slot. DDS1 counterpart is 0x002F6F60.
 0x00352B50	cos	inferred	fdlibm s_cos: |x|<=pi/4 calls __kernel_cos, quadrant switch after __ieee754_rem_pio2
 0x00352C78	sin	inferred	fdlibm s_sin: |x|<=pi/4 calls __kernel_sin(x,0,0)
 0x00353300	__ieee754_rem_pio2	inferred	argument reduction called by sin/cos for |x|>pi/4
