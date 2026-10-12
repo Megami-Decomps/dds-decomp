@@ -2093,7 +2093,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
 
 extern s32 D_003BAA70;
 
-extern s32 D_003BAA74;
+extern const u8 *D_003BAA74;
 
 extern s32 D_003BAA84;
 
@@ -2117,7 +2117,8 @@ void btlInitDrawTables(void) {
         state->debug.table0[i] = D_003BAA70 + i * 0x11;
     }
     for (i = 0; i < 0x180; i++) {
-        state->debug.table1[i] = D_003BAA74 + i * 0x11;
+        /* Debug row tables carry string addresses in EE words. */
+        state->debug.table1[i] = (s32)(D_003BAA74 + i * 0x11);
     }
     for (i = 0; i < 0x20; i++) {
         state->debug.table2[i] = D_003BAA84 + 0xFA0 + i * 0x19;
@@ -2250,6 +2251,35 @@ void func_00215FE0(void) {
     dds3WorkClear();
 }
 
+typedef struct BattleDebugSelector {
+    const char *title;
+    u32 unk04;
+    u32 *index;
+} BattleDebugSelector;
+
+typedef struct BattleDebugWindow {
+    u32 unk00;
+    s32 x;
+    s32 y;
+} BattleDebugWindow;
+
+extern BattleDebugSelector D_00361A38;
+extern BattleDebugWindow D_00361D68;
+extern u8 D_003BBB0F;
+extern u32 D_003BBB14, D_003BBB18;
+extern u16 D_003BBB1C, D_003BBB1E, D_003BBB20;
+extern u32 D_003BBB24, D_003BBB28;
+extern const char *D_003BBB2C, *D_003BBB30;
+extern char D_003BBB50[];
+extern void func_001FB1E0(void *);
+extern void func_001FB1A8(void);
+extern void func_001FB1F0(void *);
+extern void func_001FB1B0(void);
+extern s32 func_0011CAB0(s32);
+extern s32 func_0011CB90(s32, f32);
+extern void btlApplyPartySetupOverride(void);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7128);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7138);
@@ -2304,7 +2334,84 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72B8);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00215FF8);
+s32 func_00215FF8(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    u32 i;
+    u16 enemy;
+    struct FrFontGlyph *glyph;
+    s32 encounter;
+
+    if (sdfPadButtonStates[3] < 0) {
+        state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11000000;
+        state->unk_1FC |= 0x40;
+        D_003BBB20 = 1;
+    }
+    if (sdfPadButtonStates[13] < 0) {
+        D_003BBB0F ^= 1;
+    }
+    if (D_003BBB0F != 0) {
+        D_00361A38.title = D_003BBB30;
+        D_00361A38.index = &D_003BBB14;
+    } else {
+        D_00361A38.title = D_003BBB2C;
+        D_00361A38.index = &D_003BBB18;
+    }
+    {
+        BattleDebugWindow *window = &D_00361D68;
+        D_003BBB28 = state->unk_1FC;
+        D_003BBB24 = state->battleFlags;
+        func_001FB1E0(window);
+        state->unk_1FC = D_003BBB28;
+        state->battleFlags = D_003BBB24;
+        func_001FB1A8();
+        func_001FB1F0(window);
+        func_001FB1B0();
+    }
+    if (D_003BBB0F == 0) {
+        if (D_003BBB18 < 0x400) {
+            for (i = 0; i < 8; i++) {
+                enemy = datBattleSceneRecords[D_003BBB18].unitModes[i];
+                if (enemy - 1u < 0x17F) {
+                    glyph = itfCreateConvertedTextGlyph((D_00361D68.x + 185) << 4,
+                        (D_00361D68.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
+                        D_003BAA74 + enemy * 17, NULL);
+                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+                }
+            }
+        }
+    } else {
+        btlBossDebugPrintfN(D_00361D68.x + 185, D_00361D68.y + 4, 0,
+            D_003BBB50, datGameState->unk1364, func_0011CAB0(D_003BBB14));
+    }
+    if (sdfPadButtonStates[1] < 0) {
+        D_003BBB0D = 1;
+    }
+    if (D_003BBB0D == 0) {
+        return 0;
+    }
+    if (D_003BBB0F != 0) {
+        encounter = func_0011CB90(D_003BBB14, 200.0f);
+        if (encounter == 0) {
+            return 0;
+        }
+        state->encounterPack = D_003BBB14;
+        D_003BBB18 = encounter & 0xFFFF;
+        btlBossDebugPrintf("btl:test encNo = %X\n", D_003BBB18);
+    }
+    btlApplyPartySetupOverride();
+    state->battleMode = D_003BBB18;
+    if (datBattleSceneRecords[D_003BBB18].unk1C != 0 &&
+        datBattleSceneRecords[D_003BBB18].unk1E != 0) {
+        state->encounterParamA = datBattleSceneRecords[D_003BBB18].unk1C;
+        state->encounterParamB = datBattleSceneRecords[D_003BBB18].unk1E;
+    } else {
+        state->encounterParamA = D_003BBB1C;
+        state->encounterParamB = D_003BBB1E;
+    }
+    state->turnPhase = D_003BBB20;
+    return 1;
+}
 
 extern u8 D_003BBB0E;
 
