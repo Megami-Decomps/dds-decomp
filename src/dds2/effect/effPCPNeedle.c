@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+#include "eff_math.h"
 
 /* Parameter block zero supplies the work passed to the needle initializer. */
 extern void *effParamTableGetBlock(void *, s32);
@@ -15,7 +16,6 @@ extern void sdfVuBuildLookAtBasis(void *origin, void *target, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
 
 extern f32 sdfViewEyeVector[4];

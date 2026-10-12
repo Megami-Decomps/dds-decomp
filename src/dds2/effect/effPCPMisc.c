@@ -16,6 +16,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "eff_thunder_fragment.h"
@@ -1827,7 +1828,6 @@ void *effAllocateThunderHandleWork(void) {
 }
 
 extern void effThunderCopyVectorOrigin(void *destination, void *source);
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
 void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {

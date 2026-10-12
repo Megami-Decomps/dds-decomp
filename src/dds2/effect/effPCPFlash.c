@@ -2,6 +2,7 @@
 #include "sdf_quaternion.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
@@ -124,7 +125,6 @@ void effFlashTrianglePulseWriteCorners(PcpFlashTrianglePulseWork *work, s32 inde
 extern void effFlashTrianglePulseWriteCorners();
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effFlashBillboardQuad(PcpFlashStreakWork *, s32, void *);
 extern void effDrawTriangleRecordPool(EffRecordPool *pool);
 
@@ -403,8 +403,6 @@ void effRotateFlashParticlePosition(PcpFlashStreakWork *work, s32 index, void *o
     part->position[1] = position[1];
     part->position[2] = position[2];
 }
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effDrawScaledRecordPool(EffRecordPool *pool);
 extern u8 effDefaultRandomState[];
 extern u8 sdfViewEyeVector[];
