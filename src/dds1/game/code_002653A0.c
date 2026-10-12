@@ -97,7 +97,7 @@ u32 func_00265598(void) {
 }
 
 
-extern s32 D_0036F40C[];
+extern s32 D_0036F40C[][100];
 
 u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta) {
     s32 unitId = unit->unitId;
@@ -106,7 +106,7 @@ u32 ptyComputeTotalExp(DatPartyRecord *unit, s32 levelDelta) {
 
     for (level = 1; level <= unit->level + levelDelta; level++) {
         if (level < 100) {
-            total += D_0036F40C[unitId * 100 + level - 1];
+            total += D_0036F40C[unitId][level - 1];
         }
     }
     return total;
@@ -205,7 +205,34 @@ s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
+/* Keep the level progression indexed; see docs/idioms.md,
+ * "Trace-justified party experience table progression". */
+s32 ptyCalcLevelUps(DatPartyRecord *unit) {
+    u16 level = unit->level;
+    u16 unitId = unit->unitId;
+    u32 exp = unit->totalExp;
+    u32 total;
+    s32 steps;
+
+    if (level == 99) {
+        return 0;
+    }
+    total = ptyComputeTotalExp(unit, 0);
+    steps = 0;
+    do {
+        s32 nextLevel = level + steps + 1;
+
+        total += D_0036F40C[unitId][level + steps];
+        if (exp < total) {
+            break;
+        }
+        steps++;
+        if (nextLevel >= 99) {
+            break;
+        }
+    } while (1);
+    return steps;
+}
 
 
 s32 mnuCountAdvancingTitleAnimations(void) {
