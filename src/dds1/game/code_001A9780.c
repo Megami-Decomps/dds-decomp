@@ -1314,7 +1314,7 @@ void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     }
 }
 
-typedef struct { u16 flag; u16 unk_02; } MesWindowState;
+typedef struct { u16 flag; u8 value; u8 pad03; } MesWindowState;
 
 typedef struct MesWindowConfig {
     MesWindowState state[9];
@@ -1935,7 +1935,94 @@ void btlChooseActorPanelColors(BtlUnit *unit, s8 style, s8 phase, s32 unused, Ba
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001ADE68);
+extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
+extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+extern char D_003BB3F8[];
+extern s32 func_003014F0(char *, const char *, ...);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
+
+s32 func_001ADE68(KwlnTask *task) {
+    MesWindowList *work;
+    s32 i;
+    s32 count;
+    s32 lineOffset = 0;
+    s32 value;
+    s32 width;
+    s32 halfAlpha;
+    char text[16];
+
+    btlGetRuntime();
+    work = (MesWindowList *)kwlnTaskGetUserValue(task);
+    switch (work->state) {
+    case 0:
+        work->alpha += 16;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 128 ? 128 : work->alpha;
+        if (work->alpha >= 128) {
+            work->state = 1;
+        }
+        break;
+    case 1:
+        break;
+    case 2:
+    default:
+        work->alpha -= 16;
+        work->alpha = work->alpha <= 0 ? 0 : work->alpha > 128 ? 128 : work->alpha;
+        if (work->alpha <= 0) {
+            return -1;
+        }
+        break;
+    }
+    switch (work->state) {
+    case 0:
+    case 1:
+    case 2:
+        count = 0;
+        if (work->state == 1) {
+            for (i = 0; i < 9; i++) {
+                if (work->config.state[i].flag != 0) {
+                    value = work->config.state[i].value;
+                    count++;
+                    itfMesSetTextSlotFromValue(work->window[i], 0, work->config.state[i].flag, 12);
+                    func_003014F0(text, D_003BB3F8, value);
+                    itfMesCopyStringToWindowTableSlot(work->window[i], 1, text);
+                    width = itfMesMeasureEntryItem(work->window[i], 0, 0);
+                    itfMesBlk24MoveTo(work->window[i], (256 - (width >> 5)) << 4,
+                                      (work->y + lineOffset) << 4);
+                    lineOffset += 12;
+                    itfMesStartEntry(work->window[i], 0, 0);
+                }
+            }
+        }
+        if (count != 0) {
+            halfAlpha = work->alpha >> 1;
+            work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+                (halfAlpha << 24) | 0xA0A0A0;
+            evtSetDrawSurfaceIndex(0x53);
+            evtSubmitPrimaryGsTest(1, 1, 128, 3, 0, 0, 1, 1);
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y - 2, 456, 2,
+                work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+            halfAlpha = work->alpha >> 1;
+            work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+                (halfAlpha << 24) | 0x101010;
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y, 456, count * 24 + 48,
+                work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+            halfAlpha = work->alpha >> 1;
+            work->colors.values[3] = work->colors.values[2] = work->colors.values[1] = work->colors.values[0] =
+                (halfAlpha << 24) | 0xA0A0A0;
+            evtSubmitPrimaryAlphaBlendMode(1);
+            evtSubmitDefaultDepthGradientRect(work->x, work->y + count * 24 + 48, 456, 2,
+                work->colors.values[0], work->colors.values[1], work->colors.values[2], work->colors.values[3]);
+            evtSubmitPrimaryAlphaBlendMode(1);
+        }
+        break;
+    }
+    return 0;
+}
 
 void itfMesCloseAllWindows(KwlnTask *handle) {
     MesWindowList *list;
