@@ -8318,3 +8318,35 @@ The COLOR callbacks that save/restore property options retain their
 explicit status return in both games. Renaming does not justify
 changing types, casts, offsets, declarations, or statement order.
 
+## Trace-justified boolean extraction: texture viewer highlight
+
+DDS1 `func_00104B88` and DDS2 `func_00104AA8` select a primary highlight
+mode of zero/one and a secondary mode of zero/two from frame-counter bit 4.
+The counter is genuinely 32-bit: both games access it with three `LW`s and
+one `SW`. The identical Nocturne function at `0x001065F8` accesses its
+counter at `0x00552564`, four-byte aligned but not eight-byte aligned; the
+next word is an independently used global. The retail secondary `DSRL`
+is therefore not evidence for a 64-bit counter declaration.
+
+**Deciding pass / property P:** represent the secondary mode as a zero-or-two
+selection from a single-bit predicate. In the canonical cc1probe RTL, the
+initial SI `if_then_else` becomes, in `combine`, uid411's
+`LSHIFTRT:DI (SUBREG:DI counter), 3`, followed by uid413's SI `AND 2`.
+The widening is internal to the compiler, not a source cast or wide field.
+The ordinary C `mode = (counter & 0x10) ? 2 : 0` expresses the actual
+highlight selection; the counter and mode remain `s32`. Signed arithmetic
+shift/mask and boolean-bit doubling instead retain `ASHIFTRT:SI` and leave
+one instruction different at offset `+0x144`.
+
+The unsigned-byte viewer flag declaration follows retail's `LBU`. Its
+remaining same-unit initialization and toggle retain exact code; there are
+no declarations or accesses in other C units or headers.
+Both canonical `tools/cc1probe.sh <scratch> --as-unit <unit> --version <game>
+--func <function> --sched --alloc --cse` probes verify hooked == unhooked
+assembly and every RTL dump. DDS2's deciding trace lines are 3018/3024
+(combine shape at scheduler input) and 3431/3436 (post-reload logical
+extract/mask); saved logs and commands are in the landing receipts. Private
+whole-unit gates after resplitting are 66 match, 0 differ in each game,
+preserving all 65 earlier C functions, with no context, rodata, or
+undefined-symbol rows.
+
