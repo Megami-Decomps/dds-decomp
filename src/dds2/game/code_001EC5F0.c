@@ -165,7 +165,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern f32 func_00208000(s32, f32 *, f32 *);
 
-extern s32 func_001E3230(BtlUnit *, s32);
+extern s32 btlSampleActorModelPositionVU(BtlUnit *, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
@@ -683,7 +683,7 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
         from->fov = fov;
         to->fov = fov;
         if (!btlIsCurrentValueBelowQuarterThreshold(unit) || !(unit->status.flags & 0x200)) {
-            if (func_001E3230(unit, 1) == 0) {
+            if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
             }
             VU0_STORE_VF(vf10, from->position);
@@ -759,7 +759,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         to->fov = fov;
         span = func_00208000(flags & 0x600, 0, 0) * 1.25f;
         VU0_STORE_VF(vf10, from->position);
-        if (func_001E3230(unit, 1) == 0) {
+        if (btlSampleActorModelPositionVU(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF(vf10, to->position);
@@ -850,7 +850,7 @@ void func_001ED380(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         }
         fov = action->camera.fov;
         to->fov = fov;
-        if (func_001E3230(unit, 1) == 0) {
+        if (btlSampleActorModelPositionVU(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF(vf10, to->position);
@@ -907,7 +907,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
-            if (func_001E3230(unit, 1) == 0) {
+            if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
             }
             VU0_STORE_VF(vf10, to->position);
@@ -997,7 +997,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     btlCopyUnitRotationQuaternion(unit, quat);
     fov = action->camera.fov;
     from->fov = fov;
-    if (func_001E3230(unit, 1) == 0) {
+    if (btlSampleActorModelPositionVU(unit, 1) == 0) {
         btlUnitGetMuzzlePosVU(unit);
     }
     VU0_STORE_VF(vf10, from->position);
@@ -2311,7 +2311,7 @@ void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
-        if (func_001E3230(unit, 1) == 0) {
+        if (btlSampleActorModelPositionVU(unit, 1) == 0) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF(vf10, from->position);

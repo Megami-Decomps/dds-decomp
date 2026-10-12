@@ -644,7 +644,7 @@ extern void mnuReleaseSoundBufferLocked(void);
 
 extern void func_002A27A8(s32, s32, u8);
 extern void btlMoveActorOutOfActiveParty(BtlUnit *);
-extern s32 func_001E6428(s32 owner, s32 option);
+extern s32 btlCreateUnitExitFadeTask(s32 owner, s32 option);
 
 
 extern void btlDebugPrintf(s32 tag, ...);
@@ -1557,9 +1557,9 @@ extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counterAmount, s32 counterMode);
 extern s32 func_001B0C68(BtlUnit *unit, s32 actionId);
-extern BtlRuntimeTask *func_001E0238(BtlUnit *unit);
+extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
 extern s32 func_001E2E58(BtlUnit *unit, s32 motionIndex);
-extern BtlRuntimeTask *func_001E6E18(BtlUnit *unit);
+extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *soundId);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
@@ -1731,12 +1731,12 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         }
         if (group->reflected != 0) currentTarget = action->unit;
         if (group->targetSpecialHit != 0) {
-            task = func_001E0238(indexedTarget);
+            task = btlCreateClearActorEntrySelectionTask(indexedTarget);
             task->startDelay = groupDelay;
             btlStartTask(task);
         }
         if (group->sourceSpecialHit != 0) {
-            task = func_001E0238(currentTarget);
+            task = btlCreateClearActorEntrySelectionTask(currentTarget);
             task->startDelay = groupDelay;
             btlStartTask(task);
         }
@@ -1832,7 +1832,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             }
             lastOperandHandle = operandTask->handle;
             if (group->kind == 2 && operandIndex == 0) {
-                task = func_001E6E18(currentTarget);
+                task = btlCreateActorPositionEffectTask(currentTarget);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 btlStartTask(task);
@@ -2059,8 +2059,8 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *);
-extern BtlRuntimeTask *func_001E0238(BtlUnit *);
-extern BtlRuntimeTask *func_001E6E18(BtlUnit *);
+extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *);
+extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *);
 extern const char D_00417348[];
 extern const char D_00417360[];
 
@@ -2318,13 +2318,13 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 commandOwner = unit->owner;
             } else commandOwner = btlAdvanceRuntimeSequenceCounter();
             if (group->targetSpecialHit != 0) {
-                task = func_001E0238(indexedTarget);
+                task = btlCreateClearActorEntrySelectionTask(indexedTarget);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = commandOwner;
                 btlStartTask(task);
             }
             if (group->sourceSpecialHit != 0) {
-                task = func_001E0238(currentTarget);
+                task = btlCreateClearActorEntrySelectionTask(currentTarget);
                 task->startCondition.kind = 7;
                 task->startCondition.value.handle = commandOwner;
                 btlStartTask(task);
@@ -2382,7 +2382,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 }
                 latestOperandHandle = operandTask->handle;
             if (group->kind == 2 && operandIndex == 0) {
-                task = func_001E6E18(currentTarget);
+                task = btlCreateActorPositionEffectTask(currentTarget);
                 task->startCondition.kind = 4;
                 task->startCondition.value.handle = operandTask->handle;
                 btlStartTask(task);
@@ -3139,7 +3139,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         object->ownerId = task->unit->owner;
         btlStartTask(object);
     }
-    object = (BtlRuntimeTask *)func_001E6428((s32)actor, 1);
+    object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((s32)actor, 1);
     object->startDelay = 0xF;
     btlStartTask(object);
     actor->status.stateFlags &= ~0x40000;
@@ -3202,7 +3202,7 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
     s32 owner = arguments[0x34 / 4];
     s32 value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
-    value = func_001E6428(owner, 1);
+    value = btlCreateUnitExitFadeTask(owner, 1);
     *(s32 *)(value + 0x28) = 7;
     btlStartTask(value);
 }
@@ -3554,7 +3554,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = (BtlRuntimeTask *)func_001E6428((s32)actor, 0);
+                object = (BtlRuntimeTask *)btlCreateUnitExitFadeTask((s32)actor, 0);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
