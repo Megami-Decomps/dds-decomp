@@ -208,7 +208,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
 
 /* Append the console background sprite, then reserve the next glyph tag.
  * Packed coordinates wrap as words before their zero-extended packet writes. */
-void func_0033D1A8(DevConsState *console, ConsBuf *packetBuffers) {
+void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers) {
     vu64 *packet;
     u32 origin;
     u32 extent;
@@ -241,8 +241,9 @@ void func_0033D1A8(DevConsState *console, ConsBuf *packetBuffers) {
 extern u32 D_0040B810[];
 extern u32 D_0040B990[];
 
-/* Emit five ordered register values per glyph into the console DMA buffer. */
-void func_0033D2D8(DevConsState *console, ConsBuf *buffers) {
+/* Emit five ordered register values per glyph into the console DMA buffer.
+ * The native do-loops have no zero-dimension guard. */
+void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
     u8 *cells;
     vu64 *writeCursor;
     u8 *packetStart;
@@ -261,7 +262,7 @@ void func_0033D2D8(DevConsState *console, ConsBuf *buffers) {
     }
     buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
     if (console->controlByte & 2) {
-        func_0033D1A8(console, buffers);
+        sdfDevConsAppendBackgroundSprite(console, buffers);
     }
     cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
     row = 0;
@@ -344,7 +345,7 @@ typedef struct DevConsStackPackets {
 
 extern DevConsState *D_00438AB0;
 void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
-void func_0033D2D8(DevConsState *arg0, ConsBuf *arg1);
+void sdfDevConsDrawGlyphGrid(DevConsState *arg0, ConsBuf *arg1);
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
 void sdfDevConsRenderAll(void) {
@@ -355,7 +356,7 @@ void sdfDevConsRenderAll(void) {
     if (D_00438AB0 != NULL) {
         sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
         for (console = D_00438AB0; console != NULL; console = console->unk4) {
-            func_0033D2D8(console, &packetBuffers);
+            sdfDevConsDrawGlyphGrid(console, &packetBuffers);
         }
         sdfDevConsKickPacketDma(&packetBuffers);
     }

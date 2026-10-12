@@ -154,8 +154,8 @@ extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 void polyInitializeBandRecordAges(PolyBand *obj);
-void func_001664A8(PolyArc *obj);
-void func_00166AE0(PolyRotatingBand *obj);
+void polyInitializeArcRecordAges(PolyArc *obj);
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj);
 
 /* Release the cell system, then the basic node itself. */
 void effPolyDestroyWork(PolyNode *obj) {
@@ -164,7 +164,7 @@ void effPolyDestroyWork(PolyNode *obj) {
 }
 
 /* The cell initializer writes the same ages that the basic-ring update reads. */
-void func_00165600(PolyNode *node) {
+void polyInitializeBasicRingCells(PolyNode *node) {
     u16 count;
     s32 age;
     s32 *ages;
@@ -538,7 +538,7 @@ void effPolyScaleFourComponents(f32 scale, PolyBand *obj) {
 }
 
 /* Advance band ages, fades, geometry, and loop completion. */
-void func_001661C8(PolyBand *obj) {
+void polyUpdateBandCells(PolyBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -622,7 +622,7 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
     }
     clone->strip = parAllocateCellSystem(clone->head.entryCount, clone->segments, 1, 0);
     parDispatchSub(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
-    func_001664A8(clone);
+    polyInitializeArcRecordAges(clone);
     VU0_LOAD_MATRIX(clone->head.matrix);
     VU0_STORE_MATRIX(clone->head.matrixCopy);
     parSetCellDrawBucket(clone->strip, clone->head.unk66);
@@ -636,7 +636,7 @@ void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
 }
 
 /* Seed arc records with staggered inactive ages. */
-void func_001664A8(PolyArc *obj) {
+void polyInitializeArcRecordAges(PolyArc *obj) {
     u32 count = obj->head.entryCount;
     PolyArcRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
@@ -655,7 +655,7 @@ void func_001664A8(PolyArc *obj) {
 }
 
 /* Reset one arc record and choose its jittered radius. */
-void func_001664F0(PolyArc *obj, s32 index) {
+void polyRandomizeArcRecord(PolyArc *obj, s32 index) {
     PolyArcRecord *record = obj->records;
     f32 spread = obj->radiusJitter;
 
@@ -728,7 +728,8 @@ void polyScaleTransformFirstComponent(f32 scale, PolyArc *obj) {
     obj->radius = obj->radius * scale;
 }
 
-void func_001667F8(PolyArc *obj) {
+/* Advance arc ages, fades and geometry; no-ramp windows retain the prior tint. */
+void polyUpdateArcCells(PolyArc *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -752,7 +753,7 @@ void func_001667F8(PolyArc *obj) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                func_001664F0(obj, index);
+                polyRandomizeArcRecord(obj, index);
                 age = record->age;
             }
             if (age < 0) {
@@ -812,7 +813,7 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     }
     band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
     parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
-    func_00166AE0(band);
+    polyInitializeRotatingBandRecordAges(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
     parSetCellDrawBucket(band->strip, band->head.unk66);
@@ -826,7 +827,7 @@ void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
 }
 
 /* Seed rotating-band records, advancing the age after each delay group. */
-void func_00166AE0(PolyRotatingBand *obj) {
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj) {
     u32 count = obj->head.entryCount;
     PolyRotatingBandRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
@@ -924,7 +925,8 @@ void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *obj) {
     obj->targetRadius = obj->targetRadius * scale;
 }
 
-void func_00166EC0(PolyRotatingBand *obj) {
+/* Advance rotating-band cells; native completion requires a duration of at least two. */
+void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;

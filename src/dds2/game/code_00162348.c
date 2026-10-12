@@ -125,7 +125,7 @@ struct SdfListHead;
 
 
 extern void *memcpy(void *dst, void *src, u32 n);
-extern void func_00165600(void *);
+extern void polyInitializeBasicRingCells(void *);
 
 /* The serialized cell-state block is copied after the variable emitter header. */
 typedef struct ParEmitCellState {
@@ -1732,7 +1732,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     }
     desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
-    func_00165600(desc);
+    polyInitializeBasicRingCells(desc);
     return desc;
 }
 

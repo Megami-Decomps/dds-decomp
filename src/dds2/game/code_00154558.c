@@ -1779,7 +1779,7 @@ extern void effInitWorks(void);
 
 extern void effBTLFieldColorResetFlags(void);
 
-extern void func_00157400(void);
+extern void effSubmitFieldBlendStateTask(void);
 
 extern void effManagerUpdateAndDispatch(void);
 
@@ -1795,7 +1795,7 @@ void fldCreateFieldEffectTask(void) {
     effInitializeBillResourceOwners();
     parSysReset();
     func_0015B270();
-    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, func_00157400, NULL, 0);
+    kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
     func_00194A70();
     effInitWorks();
