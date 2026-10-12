@@ -7664,8 +7664,8 @@ all 31 command-record user gates and closes the 752-byte body.
 
 ### Initialize the heap-overlay count in its collection phase
 
-DDS2 `func_0010B3D8` and DDS1 `func_0010B1B0` first copy heap metadata
-into 12-byte records while interrupts are disabled, then draw the snapshot.
+`sdfDrawHeapMapOverlay` in both games first copies heap metadata
+into 12-byte records while interrupts are disabled, then draws the snapshot.
 The counter belongs to the collection loop: initialize it after obtaining the
 heap base, immediately before the `do` loop, rather than at function entry.
 This is a real lifetime distinction even though late scheduling puts the zero
@@ -7693,8 +7693,8 @@ Credit Vesper's earlier DDS2 reconstruction and Sable's DDS1 investigation.
 
 ### Preserve derived coordinates before diagnosing loop-bound allocation
 
-The five-row resource menu (`func_00237088` in DDS2, `func_0021C518` in
-DDS1) has a fixed row count and a Y coordinate derived as `0x7960 + row *
+The five-row resource menu (`mdlDrawViewerResourceMenu` in both games)
+has a fixed row count and a Y coordinate derived as `0x7960 + row *
 0x60`. Reconstructing Y as an independently incremented local instead changes
 more than its eventual register: it changes the intermediate loop program on
 which invariant-motion profitability is decided.
@@ -8217,8 +8217,8 @@ update.
 
 ## Trace-justified result selection: packed byte clamp
 
-DDS1 `func_002904C8` (`0x002904C8`) and DDS2 `func_002CF978`
-(`0x002CF978`) preserve or lower one byte of a packed word. Keep the truthful
+`fileClampPackedColorByte` in DDS1 (`0x002904C8`) and DDS2
+(`0x002CF978`) preserves or lowers one byte of a packed word. Keep the truthful
 `u32 color, s32 limit, s8 alpha` interface and assign the real result in both
 alternatives of each mode, rather than initializing it to `color` before the
 mode selection. Every path defines the result; no unused value is introduced.
@@ -8737,4 +8737,94 @@ pair swaps rather than a full shuffle; its other modes compare same-side
 muzzle x coordinates. The raw DDS1 LINKAGE slot-cost getter remains distinct
 from DDS2's actor-dependent discounted getter. All existing parameter widths,
 pointer/address-word boundaries, casts and declaration order are preserved.
+
+
+## Viewer panel and saved-file preview names
+
+The viewer's mode/options, pending asset selection, resource actions and
+settings panels have distinct input/rendering entry points. Their names follow
+the existing `mdlRunViewer...Task` callers rather than treating each panel as
+an unspecified menu. `mdlAppendViewerRecordSummary` formats descriptions by
+record kind and appends them to the supplied packet list.
+
+Native `<FACE-DIV>`, `SOFTEN:`, `BIAS:` and `DIVIDE:` labels establish the
+face-division editor's role in both games. Its soften/bias bounds and packed
+cursor/blink mask remain unchanged, as do the directional/ambient light
+editor's task-selected state and fifteen-field navigation.
+
+`fileDrawSlotListAndPreview` keeps native snapped scrolling, including DDS2's
+import-mode and additional portrait/badge cases. Its color-byte clamp retains
+the signed, unmasked bound and the previously documented trace-justified
+result selection. Party-record synchronization keeps full-record swaps and
+active/stat refreshes without changing the actor's stored slot index.
+
+## Trace-justified indexed field addresses: relative zone motion
+
+DDS1 `func_00136DA0` and DDS2 `func_00139950` apply movement from the primary
+and, when its room-scene flag is clear, secondary linked zone actor. Each
+record saves its actor's previous world position. Both retail bodies are
+584 bytes and use the existing `FldValueRecord` owner at stride `0xE4`;
+the field-state target-position offsets differ between games.
+
+The deciding source property **P** is an index-first address `PLUS` for
+the record's fields. The pointer control, which captures
+`record = &((FldValueRecord *)fldValueRecords)[index]`, has two residual
+words in each game: at `+0x7C`, `addu v1,a1,a0` instead of retail
+`addu v1,a0,a1`, and at `+0x13C`, `addu v1,v0,s0` instead of retail
+`addu v1,s0,v0`. Spelling pointer arithmetic instead of subscripting in
+the earlier park did not change that result.
+
+Canonical `cc1probe --all` traces of the current-owner pointer control and
+the exact indexed form have hooked/unhooked assembly and all-RTL parity.
+At entry to **cse1**, control instruction `uid97` is already
+`PLUS(base reg106, scaled-index reg105)`. Direct accesses such as
+`((FldValueRecord *)fldValueRecords)[index].value` instead enter cse1
+with `uid97 = PLUS(scaled-index reg105, base reg99)`. The field form
+retains the native operand order through the later passes. This evidence
+locates the distinction in address-expression lowering, before cse1;
+it is not a declaration-order or general quantity-number-order rule.
+
+The exact source therefore uses direct indexed fields, not a second
+record view, an explicitly expanded stride, a copied index, an invented
+inline, or a compiler flag. It also naturally re-fetches the record base
+after the second room-scene test, as retail does. The old/global position
+and newly computed position are copied to the native three-float stack
+homes (`+0x1F0` onward), rather than deleting those retail-present copies.
+
+Authoritative whole-unit gates are DDS1 **234 match, 0 differ** and DDS2
+**79 match, 0 differ**, with all earlier C exact and no safety rows.
+No shared owner, prototype, flag, symbol name, or devbuild entry changes.
+
+## Title-audio controller transport boundary
+
+The 1200-byte title controllers (`00269D18` / `002A1928`) need the
+transport status-copy provider (`00269B80` / `002A1790`) opaque. Both
+providers remain real C with the unchanged `s32 (u32, u32)` interface;
+removing only the earlier **definition**, not correcting a prototype,
+closes the controller's sole residual at `+0x1B8` (ordinary `BNE` versus
+retail `BNEL`).
+
+Direct vendor `cc1probe` resource hooks, with hooked/unhooked parity,
+identify the mechanism in reorg's `fill_slots_from_thread`: the ready-flag
+load into `$2` is nontrapping. With the earlier provider definition,
+`opposite_needed` excludes `$2` and the ordinary slot is safe. Across the
+real TU boundary it includes `$2`, so `insn_sets_resource_p` forces a
+taken-only, annulled slot. `REG_BR_PROB` remains 6001 in both cases; strong
+taken prediction is neither the missing property nor a substitute for
+the boundary.
+
+The nearest function boundaries after the providers are `00269C10` /
+`002A1820`. These keep the following upload and sample-mix definitions
+visible to their controllers. No other existing matched function is
+visibility-sensitive across these cuts. `TitleAudioStreamState` moves
+verbatim to `mnu_title_stream.h`; the menu/snapshot-only private types
+stay in their actual consuming unit.
+
+Native data corroborates the split without crossing a known shared
+literal core: DDS1's voice-format/print pool ends at `003AFCD8`, where the
+fixed AT3 path begins; DDS2's preceding graphics blobs end at `00428590`.
+All four `.lit4` references precede the text cuts. DDS1's shared `.sdata`
+definitions retain their existing owner. The split gates are 43/0 and
+32/0 in DDS1, 45/0 and 39/0 in DDS2, including both exact controllers;
+both full retail SHA-1 checks pass with unchanged `-O2 -G8` settings.
 
