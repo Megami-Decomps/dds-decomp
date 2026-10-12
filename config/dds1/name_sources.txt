@@ -680,6 +680,7 @@
 0x001198E8	datHasEnoughCurrency	inferred	Compares current currency counter against the requested amount. [names_reviewed6.tsv]
 0x00119900	ptyAdjustItemQuantity	inferred	R_Names31 B92
 0x001199B0	evtCheckValueThreshold	inferred	evt event state and dispatch in game/code_00119900.c
+0x00119A00	ptyIsInventoryItemAtCapacity	inferred	Returns whether an inventory stack is full, treating flag-range items as full after any quantity and other ranges as capped at 99.
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
 0x00119AF8	ptyReadSignedRosterStatByte	inferred	R_Names31 B92
 0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row

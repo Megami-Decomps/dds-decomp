@@ -506,6 +506,7 @@
 0x0011A0D0	datAddCurrencyClamped	inferred	Adds signed delta to currency counter, clamps to zero and maximum currency. [names_reviewed6.tsv]
 0x0011A100	datHasEnoughCurrency	inferred	Compares current currency counter against the requested amount. [names_reviewed6.tsv]
 0x0011A118	ptyAdjustItemQuantity	inferred	R_Names31 B92
+0x0011A220	ptyIsInventoryItemAtCapacity	inferred	Returns whether an inventory stack is full, treating flag-range items as full after any quantity and other ranges as capped at 99.
 0x0011A288	evtGetFlaggedRosterValue	inferred	Reads the indexed roster byte only when the entry's flag 0x20 is set.
 0x0011A318	ptyReadSignedRosterStatByte	inferred	R_Names31 B92
 0x0011A808	ptyApplySkillRecovery	inferred	R_Names31 B92
