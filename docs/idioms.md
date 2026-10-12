@@ -8511,3 +8511,113 @@ final branch. Keep commands, trace paths, and unsuccessful forms in
 the park/ledger; use `tools/cc1probe.sh ... --reorg --func <function>`
 with the correct canonical `--as-unit` and `--version`.
 
+## Native effect-property owners: material choosers and remaining curves
+
+The remaining editor callbacks in `game/code_0029C530` (DDS1) and
+`game/code_002DE248` (DDS2) are named by native descriptor ownership,
+not by their often identical forwarding bodies. Native property rows
+are **24 bytes**. A `MATERIAL` property has type `0x16` and holds its
+child descriptor in the third word; `POLYGON` uses type `0x17`.
+Following those links distinguishes a material chooser from a root or
+polygon editor. The child descriptor's property-table pointer and
+count are at `+0x14` and `+0x18`.
+
+Three previously generic TMX chooser identities now have independently
+confirmed parents in both retail ELFs:
+
+| Callback | Native MATERIAL parents | DDS1 TEXTURE rows | DDS2 TEXTURE rows |
+| --- | --- | --- | --- |
+| `effPollBfMaterialTmxFile` | `B-MULTI`, `B-DIST`, `B-RIPLE`, `F-MULTI` | `3840F0`, `3842A0`, `3844C8`, `3848C0` | `3F03A8`, `3F0558`, `3F0780`, `3F0C60` |
+| `effPollNMaterialTmxFile` | `N-SPIRL`, `N-CYLND`, `N-SPHRE` | `38A7A0`, `38ADE0`, `38B3D0` | `3F70A8`, `3F76E8`, `3F7CD8` |
+| `effPollSTMaterialTmxFile` | `S-RAD_T`, `S-SPK_T`, `S-RNG_T`, `S-SCT_T` | `385CA0`, `386110`, `386600`, `387150` | `3F21E8`, `3F2658`, `3F2B48`, `3F3698` |
+
+`ST` retains the literal native `S` and `_T` group identifier. These
+callbacks all scan TMX in `/tool/effect/mat/`, but must not be merged:
+their native identities and descriptor owners differ. DDS1 returns
+the chooser status; DDS2's existing void callbacks discard it. Keep
+each game's return type and call expression.
+
+DDS2 additionally has the following distinct material callbacks:
+
+| Callback | Native MATERIAL parents | Format/directory |
+| --- | --- | --- |
+| `effPollKoMaterialEplFile` | Six `K-` families and `O-P2_TRK` | EPL in `/tool/effect/` |
+| `effPollMMaterialPbFile` | Six `M-` families | PB in `/tool/effect/mat/` |
+| `effPollMMaterialEplFile` | Six `M-` families | EPL in `/tool/effect/` |
+| `effPollOMaterialPbFile` | `O-HLP_UT`, `O-P2_HT` | PB in `/tool/effect/hlp/` |
+
+The native `M-` families are `M-SMOKE`, `M-SPARK`, `M-SPIRL`,
+`M-SPHRE`, `M-HSPAK`, and `M-ASPAK`. The same owners establish
+`effEditMColorTrack` and `effEditMScaleTrack`. `O-P2_TRK` establishes
+its COLOR/SCALE/ROTATE editors; `O-PLSCL` establishes its COLOR editor;
+`OLMODEL` establishes its FADE editor. `P2`, `PLSCL`, and `OL` are
+literal identifiers, not guessed expansions. These additional DDS2
+owner roles are not established in DDS1 merely because another
+callback has identical instructions.
+
+The paired `effEditNPolygonFadeTrack`,
+`effEditUCylinderPolygonFadeTrack`, and
+`effEditUSpherePolygonFadeTrack` belong to the relevant POLYGON
+children. Preserve the first two callbacks' alpha record `+0x70` and
+bound `+0x8C + 1`, and the last callback's record `+0x60` and bound
+`+0x74 + 1`. COLOR editors temporarily change the shared curve-key
+table and restore the defaults; do not treat that temporary table
+selection as a permanent mode change.
+
+## Flag-list speed and PCP map-event setter ownership
+
+`sdfUpdateFlagListEntries` advances the camera-relative drop vertex
+pairs and their fade timers. `sdfDrawFlagListVertices` copies the
+pairs, optionally adds the view-target vector, submits the colored
+packet list to `params.alpha.surfaceIndex`, and releases its temporary
+vertex allocation. Their update and draw guards intentionally differ:
+update checks `maxFrames > 0`, draw checks `maxFrames != 0`.
+Neither naming nor shared prototypes justify normalizing those guards.
+
+`sdfGetFlagListSpeed` and `sdfSetFlagListSpeed` access
+`SdfFlagListWork.params.speed`, which the movement update consumes.
+The earlier script-operand interpretation was incorrect.
+`sdfSampleFlagListStartColor` invokes the color/alpha sampler with
+frame and duration zero and **discards** its result through the
+existing void ABI. It does not initialize the work's color buffer.
+DDS2's `effUpdateSelectionEntryState` still suppresses advancement
+while effect-frame advancement is paused; DDS1's wrapper does not.
+
+Native PCP callback tables at DDS1 `00354578` and DDS2 `003B0EA8`
+pair creation/update/release/clone with three concrete setters:
+`effPcpEventWorkSetPosition`, `effPcpEventWorkSetScale`, and
+`effPcpEventWorkSetColor`. The actual `EffPCPMapEventWork` owner in
+`effect/effPCPMisc` confirms position at the leading vector, scale
+at `+0x2C`, and packed color at `+0x3C`; its updater consumes all
+three. The setters keep a partial unit-local view and all original
+types/padding. The position copy remains the VU0 macro and copies its
+fourth lane too. The neighboring empty/zero-return functions remain
+unnamed: these callback tables do not establish a distinct role for
+every dormant entrypoint.
+
+## Trace-justified switch tails: fileReqPoll
+
+The 248-byte twins at DDS1 `0x00289AA0` and DDS2 `0x002C9020` use
+the primary `FileReqEntry` and the default `-O2 -G8` configuration.
+Hooked/unhooked `cc1probe --sched --jump --reorg` output is identical.
+The deciding property is twofold:
+
+- The case-zero tail must end in the zero **status** store, not the
+  selector clear. With source order dirty/status/selector, the selector
+  store carries the entry pointer's last use; `sched1`'s register-weight
+  tier schedules it before status. Late cross-jumping then keeps this
+  distinct tail, leaving the status store in the branch delay slot.
+  Dirty/selector/status instead gives status the death note and merges
+  the selector clear into the default tail: the original 8/62-word miss.
+- Case two puts the retry work in `if (entry->unkC == 0)` and the ready
+  status in its `else`. `reorg` follows the ready arm's jump to the common
+  return and folds its status store into the native `bnel` delay slot.
+  The measured branch probability is 6001 (weakly taken), not an invented
+  strong-likelihood annotation. Keeping the ready arm before retry work
+  leaves an extra branch; returning directly from it also disturbs allocation.
+
+Both original whole units gate at 23 matches, zero differences with
+`fileReqInit` still in assembly. Poll also matches in the private no-sibling
+envelope, but is **not** flag-sensitive: it provides no second independent
+site for changing that envelope's compiler flags.
+
