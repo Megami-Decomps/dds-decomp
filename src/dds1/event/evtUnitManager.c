@@ -949,10 +949,10 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 }
 
 
-extern s32 func_00220678(EvtUnit *unit);
+extern s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit);
 extern void func_003003F0(const char *fmt, ...);
 
-/* Run a copy of the unit until func_00220678 reports done, and derive its per-step Y speed. */
+/* Run a copy of the unit until evtUnitHasReachedMotionEndpoint reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC060);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC070);
@@ -971,7 +971,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         savedB[i] = unit->effObj->inner->rotation[i];
     }
     copy = *unit;
-    while (func_00220678(&copy) == 0) {
+    while (evtUnitHasReachedMotionEndpoint(&copy) == 0) {
         count++;
         evtApplyUnitDirectionOffset(&copy);
     }
