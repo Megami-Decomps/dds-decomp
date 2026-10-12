@@ -9453,3 +9453,44 @@ control flow. In particular, the existing clear-dispatch call surface is
 not restructured here. The history allocator twins remain address-named
 because the DDS2 body has a retained narrow collaborator claim.
 
+## Trace-justified terminal effect byte displacement
+
+DDS1 `mnuConfigureTerminalModeEffects` (`0x0024AE18`, formerly
+`func_0024AE18`) selects an effect-field address from the encoded terminal
+context, then applies the real mode-specific flags and geometry to grids
+9 and 10. The matched DDS2 function at `0x00269478` supplies the complete
+mode-switch idiom and the owner-derived member-offset spelling; its grid
+indices and additional slot-query behavior are not transplanted.
+
+The native DDS1 address calculation is `(index * 4 + 0xA0) + context`.
+Direct `&work->effect[index]`, the matched donor's single integer address
+expression, and even an explicitly parenthesized
+`context + (index * sizeof(slot) + memberOffset)` retain a two-word residual
+at `+0xB0` / `+0xB8`: the generated code adds context before the field offset.
+The parenthesized form already has that association in its initial RTL,
+before the traced `cse1` tier. The trace does not identify the earlier
+canonicalization pass.
+
+Property P is that the **selected-field byte displacement is a real
+intermediate value**, computed before it is combined with context.
+Writing `effectOffset = index * sizeof(work->effect[0]) + memberOffset`
+as its own statement gives that quantity an ordinary C local. The following
+statement consumes it once to form the actual selected-field address.
+This is not a copied index or an unused scheduling variable: its value
+includes the owner's member displacement and is needed by the address
+calculation.
+
+The exact trace's `cse1` preserves UID 114 as scaled-index plus 160 and
+UID 117 as context plus that displacement. Reload and scheduling keep the
+native association. The separate statement reaches an exact 320-byte
+body while every other DDS1 function in the unit remains exact
+(`116 match, 0 differ` in the private pre-rename gate). The canonical ALL
+trace has 3140 decision lines and verifies hooked/unhooked assembly and
+every RTL dump. Trace paths and gate receipts are retained in the agent
+ledger, not in game source.
+
+The unsigned mode and encoded-context signature agrees with the matched
+DDS2 function. All three DDS1 calls now use the shared name, and the
+obsolete later signed declaration is removed. No compiler flag, layout,
+inline helper, dummy value or frame padding is introduced.
+

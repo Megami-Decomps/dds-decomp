@@ -1449,7 +1449,48 @@ void mnuDrawTerminalSelectionListAndStep(s32 close, MenuTerminalWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024AE18);
+void mnuConfigureTerminalModeEffects(u32 mode, s32 context) {
+    MenuTerminalWork *work = (MenuTerminalWork *)context;
+    s32 effectIndex = 0;
+    s32 materialFlags = 0;
+    s32 height = 0;
+    s32 stateFlags = 0;
+    s32 yOffset = 0;
+    u32 effectOffset;
+    EffMappedResource **effect;
+
+    switch (mode) {
+    case 2:
+        stateFlags = 2;
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    case 3:
+        stateFlags = 2;
+        materialFlags = 7;
+        yOffset = -0x100;
+        height = 0;
+        effectIndex = 2;
+        break;
+    case 4:
+        materialFlags = 4;
+        yOffset = 0;
+        height = 0x100;
+        effectIndex = 3;
+        break;
+    }
+    /* Keep the selected-field byte displacement separate from the context;
+     * see docs/idioms.md, "Trace-justified terminal effect byte displacement". */
+    effectOffset = effectIndex * sizeof(work->effect[0]) +
+                   (u32)&((MenuTerminalWork *)0)->effect;
+    effect = (EffMappedResource **)(context + effectOffset);
+    itfSetGridEntryQuantizedAndRefresh(work->batch, 9, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting(work->batch, 9, *effect, 0, materialFlags, stateFlags);
+    itfSetGridEntryQuantizedAndRefresh(work->batch, 10, 0, yOffset, 0, height);
+    effConfigureWithDefaultSetting(work->batch, 10, *effect, 0, materialFlags, stateFlags);
+}
 
 void mnuDrawOwnerProgressAndFade(s32 close, MenuTerminalWork *work) {
     MenuGridPositions positions = D_003AF6F0;
@@ -1786,7 +1827,6 @@ s32 evtBSetupDispatchSyncB(KwlnTask *request) {
 
 extern void mnuSelectFirstListNode(struct MenuList *);
 extern void mnuSelectLastListNode(struct MenuList *);
-extern void func_0024AE18(s32, s32);
 
 
 u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
@@ -1796,7 +1836,7 @@ u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
         mnuSelectFirstListNode(((MenuTerminalWork *)context)->owner);
         mnuConfigureTerminalSlotEffects(3, (MenuTerminalWork *)context);
         evtRememberDispatchCallback(mnuDrawOwnerProgressAndFade, (MenuTerminalWork *)context);
-        func_0024AE18(3, context);
+        mnuConfigureTerminalModeEffects(3, context);
         mnuAnimateTerminalSelection(4, (MenuTerminalWork *)context);
         mnuTerminalSelectSlot(3, 1, context);
     }
@@ -1813,7 +1853,7 @@ u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
     if (((MenuTerminalWork *)context)->transitionPending != 0) {
         mnuConfigureTerminalSlotEffects(3, (MenuTerminalWork *)context);
         evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuTerminalWork *)context);
-        func_0024AE18(4, context);
+        mnuConfigureTerminalModeEffects(4, context);
         mnuAnimateTerminalSelection(3, (MenuTerminalWork *)context);
         mnuTerminalSelectSlot(3, 0, context);
         evtFinishMessageWindowAndNotify();
@@ -2285,7 +2325,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     mnuConfigureTerminalSlotEffects(2, (MenuTerminalWork *)context);
     if (((MenuTerminalWork *)context)->transitionStage >= 2) {
         mnuTerminalSelectSlot(2, -1, context);
-        func_0024AE18(2, context);
+        mnuConfigureTerminalModeEffects(2, context);
     } else {
         mnuTerminalSelectSlot(2, -1, context);
         mnuAnimateTerminalSelection(2, (MenuTerminalWork *)context);
