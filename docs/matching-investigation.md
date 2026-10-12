@@ -114,7 +114,7 @@ identify an optimization without justifying a production flag.
 
 ### Battle selection: distinguish membership, completion and commit
 
-DDS1 `game/code_001A9780::func_001C0650` initially had a matching scan prefix
+DDS1 `game/code_001A9780::btlStepTargetGridSelection` initially had a matching scan prefix
 but a different success tail. Returning directly from the matching iteration
 exposes the old-ID/target-ID XOR inside the loop. The actual loop-motion
 comparison accepts that invariant: threshold 64 × savings 1 × lifetime 1 = 64
@@ -155,7 +155,7 @@ completion operations. The correction follows their genuine value roles;
 these numbers are evidence for this input, not a register-placement recipe.
 
 The real earlier selector definition also supplies `REG_EH_REGION 0` to the
-later `func_001C08B8` call. With short-circuit OR pairs for adjacent same-action
+later `btlUpdateTargetSelectionInput` call. With short-circuit OR pairs for adjacent same-action
 inputs, the input handler is 1340 bytes exact. Those pairs preserve the native
 mode 4/5 key priorities and suppressed later reads. The complete owner passes
 198 match/0 differ, including data, and both retail hashes pass under the
