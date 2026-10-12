@@ -175,8 +175,6 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSyncPlayerWork(BtlUnit *actor);
 
-void fldAppendTaskToGroup(BtlTask *task);
-
 void fldCreateSceneSpriteTask(s32 arg0);
 
 void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask);
