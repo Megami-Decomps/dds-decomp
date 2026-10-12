@@ -2009,7 +2009,7 @@ s32 func_00261198(MenuTerminalContext *scene) {
     return count;
 }
 
-s32 func_00261290(MenuTerminalContext *scene) {
+s32 mnuCampGetAffordablePurchaseCount(MenuTerminalContext *scene) {
     CampWindowParams *item = &scene->window->list->cursor->camp;
     s32 affordable;
     s32 remaining;
@@ -2707,7 +2707,7 @@ s32 func_00262330(KwlnTask *task) {
             if ((cursor->flags48 & 1) == 0) {
                 mnuSetCommandPhase(state, 7);
             } else {
-                if (func_00261290(state) == -2) {
+                if (mnuCampGetAffordablePurchaseCount(state) == -2) {
                     state->dispatchMode = 1;
                 }
                 confirmAccepted = 1;
@@ -2822,7 +2822,7 @@ s32 func_00262740(KwlnTask *task) {
                     if (!(cursor->flags48 & 1)) {
                         mnuSetCommandPhase(state, 7);
                     } else {
-                        if (func_00261290(state) == -2) {
+                        if (mnuCampGetAffordablePurchaseCount(state) == -2) {
                             state->dispatchMode = 1;
                         }
                         handled = 1;
@@ -2947,7 +2947,7 @@ s32 func_00262B50(KwlnTask *callbackContext) {
             if (!(selected->flags48 & 1)) {
                 mnuSetCommandPhase(state, 7);
             } else {
-                if (func_00261290(state) == -2) {
+                if (mnuCampGetAffordablePurchaseCount(state) == -2) {
                     state->dispatchMode = 1;
                 }
                 rejected = 1;
