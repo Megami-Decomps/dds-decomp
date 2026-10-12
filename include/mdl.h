@@ -120,7 +120,7 @@ typedef struct MdlLoadPayload {
     struct SdfMemBlock *requestAllocation;
     MotionTable *motionTable;
     struct SdfMemBlock *motionResource;
-    struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
+    void *partInfo; /* Borrowed relative-linked record-list transport. */
     s32 resourceHandle;
     DevRequest *partList;
 } MdlLoadPayload;

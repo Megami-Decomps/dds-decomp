@@ -237,9 +237,9 @@ void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet)
         state->phase = 2;
         node = sdfPacEnqueuePacket(state, packet);
         if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-            node->resourceHandle = (u32)sdfAllocGeneralBlockHigh(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlockHigh(allocationSize);
         } else {
-            node->resourceHandle = (u32)sdfAllocGeneralBlock(allocationSize);
+            node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->resourceHandle));
         switch (packet->flags & PAC_ENCODING_MASK) {
@@ -401,7 +401,7 @@ void sdfPacStartResourceChunk(PacState *state, SdfPacStreamPacketHeader *packet,
 }
 
 void sdfPacCompleteResourcePacket(PacState *state) {
-    state->queueTail->resourceHandle = (s32)state->slot.resource->texture;
+    state->queueTail->resourceHandle = state->slot.resource->texture;
     sdfReleaseChipBlock(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
 }
@@ -437,7 +437,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->slot.list;
-    sdfAppendResourceListItem(state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
+    sdfAppendResourceListItem((s32)state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;

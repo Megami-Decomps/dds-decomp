@@ -10,7 +10,7 @@ struct SdfPacStreamPacketHeader;
 typedef struct PacWork {
     struct PacWork *next; /* 0x00 */
     struct PacState *owner; /* 0x04 */
-    s32 resourceHandle; /* 0x08: generic stored resource word */
+    void *resourceHandle; /* 0x08: tag-selected allocation or resource-list pointer */
     u8 *dataCursor; /* 0x0C */
     u8 packet[0]; /* 0x10: copied packet header, extensions, and data */
 } PacWork;
