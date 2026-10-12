@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_counter_channel.h"
 #include "dds3obj.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
@@ -19,14 +20,6 @@ extern s32 func_002C3DB0(void);
 extern s32 sdfCounterGetDisplayValue(void);
 
 typedef struct {
-    u32 *word;         /* 0x00 */
-    u8 *info;          /* 0x04 */
-    s16 value;         /* 0x08 */
-    u8 pad0A[4];
-    s16 flag;          /* 0x0E */
-} SdfCounterDisplay;
-
-typedef struct {
     s32 value;         /* 0x00 */
     s16 countdown;     /* 0x04 */
     s16 mode;          /* 0x06 */
@@ -42,15 +35,6 @@ typedef struct {
     s16 curY;          /* 0x1E */
     s32 frames;        /* 0x20 */
 } SdfCounterTimer;
-
-typedef struct SdfCounterChannel {
-    s32 index;                     /* 0x00 */
-    u8 pad04[0x54];
-    struct SdfCounterChannel *next;    /* 0x58 */
-    struct SdfCounterChannel *prev;    /* 0x5C */
-    u8 pad60[0x10];
-    SdfCounterDisplay *display;        /* 0x70 */
-} SdfCounterChannel;
 
 struct SdfCounterRuntime;
 typedef void (*SdfCounterDrawFn)(s32, s32, s32, struct SdfCounterRuntime *, SdfCounterChannel *, s32);
