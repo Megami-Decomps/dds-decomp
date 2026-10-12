@@ -692,6 +692,7 @@
 0x0012BBD0	fldProjectPointWithPreparedMatrix	inferred	Transforms a position with the prepared VU matrix, perspective-divides, and writes screen coordinates. [names_reviewed5.tsv]
 0x0012BC38	fldSelectDisplayBuffer	inferred	Stores the index used to select a field display buffer descriptor for subsequent packets. [names_reviewed5.tsv]
 0x0012BC40	fldSubmitGsCommandWord	inferred	Builds a GS register command from supplied bitfields and submits it through the selected display buffer. [names_reviewed5.tsv]
+0x0012BE18	fldSetGsAlphaBlendEquation	inferred	src/dds2/field/fldFileResolver.c; writes the GS ALPHA_1 equation selected by field blend mode, including native FIX mode 30; paired 00129900.
 0x0012C360	fldSubmitPackedRectangleGsPacket	inferred	confidence=high; matched-C; src/dds2/game/code_00128FE8.c:1401:func_0012C360; requires-symbol-registration; Builds four fixed-point rectangle vertices with supplied packed GS words and vertex tag, appends the packet and submits through the active field descriptor.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0012C650	fldSubmitGsGradientTriangle	inferred	3-vertex gradient GS packet submit
 0x0012C888	fldSubmitGsGradientQuad	inferred	4-corner gradient GS packet submit
