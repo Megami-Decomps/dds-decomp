@@ -1000,7 +1000,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
 extern void frFontFillGlyphMetrics(void *work, s32 code);
 
-s32 func_00195CD8(const u8 *text, u8 fontIndex, u8 mode) {
+s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
     s32 total = 0;
     u32 offset = 0;

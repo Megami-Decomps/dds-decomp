@@ -1032,7 +1032,7 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
 
 extern void frFontFillGlyphMetrics(void *work, s32 code);
 
-s32 func_0019D9A8(const u8 *text, u8 fontIndex, u8 mode) {
+s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
     FrFontGlyphMeasureWork work;
     s32 total = 0;
     u32 offset = 0;

@@ -2475,6 +2475,7 @@
 0x00195C10	frFontCountChars	inferred	counts characters of a shift-jis string
 0x00195C50	frFontMeasureGlyphChain	inferred	Sums each linked glyph's offset-C width plus the parent glyph's byte-1 spacing.
 0x00195C88	frFontMeasureLines	inferred	sums advance and spacing over every line chain
+0x00195CD8	frFontMeasureTextAdvance	inferred	Decodes each single- or double-byte text code, fills glyph metrics and sums the resulting advance; byte-identical DDS2 counterpart is 0x0019D9A8.
 0x00195DC8	frFontGetGlyphCellWidth	inferred	Returns default font width for the built-in slots or font resource first halfword; caller stores it as glyph width and halves narrow glyphs. [names_reviewed19.tsv]
 0x00195E08	frFontGetGlyphCellHeight	inferred	Returns default font height for the built-in slots or font resource second halfword; caller stores it as glyph height. [names_reviewed19.tsv]
 0x00195E48	frFontResetContextCursorSpacing	inferred	confidence=high; src/dds1/interface/frFont.c:func_00195E48; Restores the default font-context cursor increment, consumed as the stored setting multiplied by eight. [names_qp9.tsv]

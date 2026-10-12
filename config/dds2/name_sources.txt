@@ -2019,6 +2019,7 @@
 0x0019D830	frFontLinkGlyphAfterPrevious	inferred	Byte-identical DDS1 counterpart: Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x0019D8A8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]
 0x0019D8C8	frFontFreeTemporaryEntry	inferred	releases temporary font entry [names_reviewed5.tsv]
+0x0019D9A8	frFontMeasureTextAdvance	inferred	Decodes each single- or double-byte text code, fills glyph metrics and sums the resulting advance; byte-identical DDS1 counterpart is 0x00195CD8.
 0x0019DA98	frFontGetGlyphCellWidth	inferred	Returns default font width for the built-in slots or font resource first halfword; caller stores it as glyph width and halves narrow glyphs. [names_reviewed19.tsv]
 0x0019DAD8	frFontGetGlyphCellHeight	inferred	Returns default font height for the built-in slots or font resource second halfword; caller stores it as glyph height. [names_reviewed19.tsv]
 0x0019DB18	frFontResetContextCursorSpacing	inferred	confidence=high; src/dds2/interface/frFont.c:func_0019DB18; Restores the default font-context cursor increment, consumed as the stored setting multiplied by eight. [names_qp9.tsv]

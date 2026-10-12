@@ -8611,7 +8611,7 @@ void func_00140F68(void) {
 extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
 extern s32 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern s32 func_00195CD8(void *, s32, s32);
+extern s32 frFontMeasureTextAdvance(void *, s32, s32);
 extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
@@ -8646,7 +8646,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
     ticket = (u16 *)kwlnTaskGetUserValue(task);
     if (ticket[2] != 0) {
         label = D_0033E900 + ticket[1] * 32;
-        width = func_00195CD8(label, 1, 0x13);
+        width = frFontMeasureTextAdvance(label, 1, 0x13);
         x = 0xF6 - (width >> 1);
         fldDrawGaugeBar(width);
         fldDrawTitleBanner(x, 0x131);
