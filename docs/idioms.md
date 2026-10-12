@@ -8828,3 +8828,33 @@ definitions retain their existing owner. The split gates are 43/0 and
 32/0 in DDS1, 45/0 and 39/0 in DDS2, including both exact controllers;
 both full retail SHA-1 checks pass with unchanged `-O2 -G8` settings.
 
+## Trace-justified successful-result join: task-value lookup
+
+`sdfGetTaskValueByKey` (`002CB3B8` / `00312810`, 64 bytes) returns either
+the reserved-key user-data address word or a task entry's signed initializer
+result. Both successful domains use one ordinary `s32 result` and a shared
+return; a missing entry returns zero early. The user-data conversion is the
+existing mixed-domain API, not a new return-home cast. All canonical owners
+and prototypes stay unchanged.
+
+The deciding passes are **local-alloc** and **global-alloc**. Property **P**
+is a shared successful-value pseudo carrying both real return values. In the
+early-return control, the local list pointer receives `$3`, and the entry
+pseudo has no copy preference and also receives `$3`. With the successful
+join, the local list pointer receives `$2`; the entry has a genuine `$4`
+preference, and the shared result has `$2`/`$4` preferences with a `$2` copy
+preference. Global allocation therefore puts the entry in `$4` and the
+result in `$2`, reproducing the native null-test/load slot without an extra
+zero or boolean-materialization instruction.
+
+Verified vendor traces in both games have hooked/unhooked assembly and RTL
+parity. Removing the earlier finder's definition while retaining its true
+prototype leaves the control's decisions unchanged: this case is **not** a
+TU-opacity fix. A real presence/result accumulator instead adds `sltu` and
+does not reproduce the native sequence. The successful join needs neither
+an address-valued result intermediate nor declaration-order steering.
+
+Whole-unit gates are DDS1 **83 match, 0 differ** and DDS2 **47 match,
+0 differ**, with all earlier C exact and no safety rows. Both retail SHA-1
+checks pass in a sandbox full link; compiler settings remain `-O2 -G8`.
+
