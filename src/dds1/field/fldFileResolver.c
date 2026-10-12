@@ -4244,7 +4244,7 @@ void fldApplyPendingCameraHeading(void) {
 
 extern f32 fldAngleDifference(f32 current, f32 target);
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern f32 D_0032F170[8];
+extern f32 D_0032F170[12];
 extern const PcpVectorCopyF32 D_003A00A8;
 
 /* Advance a pending heading, retain position history, and export the player's
@@ -4351,6 +4351,7 @@ void func_00131688(void) {
         }
     }
 }
+
 
 extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
