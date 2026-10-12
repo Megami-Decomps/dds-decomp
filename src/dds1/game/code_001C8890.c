@@ -2475,7 +2475,7 @@ void btlStartOwnerEffectTasks(s32 *arguments) {
     btlStartTask(value);
 }
 
-extern void func_001A2608(BtlUnit *, u8);
+extern void btlSynchronizePartyActorRecords(BtlUnit *, u8);
 
 extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
 
@@ -2518,7 +2518,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     }
     btlReleaseUnitResources(unit);
     btlResetUnitLinks(unit);
-    func_001A2608(unit, (u8)task->indexWork.unk18);
+    btlSynchronizePartyActorRecords(unit, (u8)task->indexWork.unk18);
     flags = unit->status.flags;
     unit->status.flags = flags | 0x301;
     if (record->flags & 0x1000) {

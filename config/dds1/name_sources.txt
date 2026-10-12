@@ -8027,3 +8027,15 @@
 0x002871C0	evtStageTestGetEntryFrame	inferred	Returns the indexed stage-test entry's animation frame. DDS2 twin 0x002C66F8. LiteH-2 menu naming batch 3.
 0x002871E8	evtStageTestCopyEntryPosition	inferred	Copies three position components from the indexed stage-test entry. DDS2 twin 0x002C6720. LiteH-2 menu naming batch 3.
 0x00287220	evtStageTestCopyEntryRotation	inferred	Copies three rotation components from the indexed stage-test entry. DDS2 twin 0x002C6758. LiteH-2 menu naming batch 3.
+0x002193F8	mdlAppendViewerRecordSummary	inferred	confidence=high; matched-C; Kind-dependent formatted viewer record description appended to supplied packet list and coordinates/style. DDS2 twin 0x00233F68. Namer1 batch 19.
+0x0021A9F8	mdlDrawViewerModeLabel	inferred	confidence=high; matched-C; Draws native MODE : header and current/saved mode-name table entry. DDS2 twin 0x00235568. Namer1 batch 19.
+0x0021AAB8	mdlDrawViewerOptionLabels	inferred	confidence=high; matched-C; Phase-zero thirteen-option list in two columns with cursor/blink styling; aligns existing DDS2 name at 0x00235628. Namer1 batch 19.
+0x0021AE00	mdlHandleViewerAssetSelection	inferred	confidence=high; matched-C; Handles resource/node/motion selection, dimensions, debug reload and confirm/add input; aligns existing DDS2 name at 0x00235970. Namer1 batch 19.
+0x0021B0B0	mdlDrawViewerAssetSelection	inferred	confidence=high; matched-C; Draws pending resource details and model-node selection, motions and references; aligns existing DDS2 name at 0x00235C20. Namer1 batch 19.
+0x0021C518	mdlDrawViewerResourceMenu	inferred	confidence=high; matched-C; Five resource actions with independent capacity/count eligibility and selection styling; mdlRunViewerResourceMenuTask caller. DDS2 twin 0x00237088. Namer1 batch 19.
+0x0021CB80	mdlDrawViewerSettings	inferred	confidence=high; matched-C; Viewer toggles/time-graph status and native BACK COLOR/SAVE CONFIG controls. DDS2 twin 0x002376F0. Namer1 batch 19.
+0x0021E1C8	mdlInitializeViewerTasksAndResources	inferred	confidence=high; matched-C; Loads viewer config, initializes view state/resources and recreates named viewer tasks. DDS2 twin 0x00238D38. Namer1 batch 19.
+0x0021E618	mdlUpdateLightEditorTask	inferred	confidence=high; matched-C; Task-selected directional-light RGB/direction and ambient editor input/rendering; returns zero. DDS2 twin 0x00239188. Namer1 batch 19.
+0x0021F098	mdlUpdateFaceDivisionEditorTask	inferred	confidence=high; matched-C; Native labels <FACE-DIV>, SOFTEN:, BIAS:, DIVIDE: identify task input/rendering role; preserves native bounds and cursor/blink mask. DDS2 twin 0x00239C08. Namer1 batch 19.
+0x002904C8	fileClampPackedColorByte	inferred	confidence=high; matched-C; Signed downward clamp of low byte or high alpha byte selected by mode; unmasked bound and trace-justified result staging retained. DDS2 twin 0x002CF978. Namer1 batch 19.
+0x001A2608	btlSynchronizePartyActorRecords	inferred	confidence=high; matched-C; Swaps full party records at actor/target slots and refreshes stats/active flags without changing actor index; aligns existing DDS2 name at 0x001AB510. Namer1 batch 19.

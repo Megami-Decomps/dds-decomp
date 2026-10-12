@@ -346,7 +346,7 @@ void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
 }
 
 /* Swap complete records while keeping the actor in its original party slot. */
-void func_001A2608(BtlUnit *actor, u8 targetIndex) {
+void btlSynchronizePartyActorRecords(BtlUnit *actor, u8 targetIndex) {
     DatPartyRecord previous;
 
     if (actor->unk2C4 != targetIndex) {

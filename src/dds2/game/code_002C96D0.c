@@ -64,7 +64,7 @@ extern u8 D_003A47E8[][32];
 extern char D_00437D98[];
 extern char D_00437DA0[];
 extern char D_00437DA8[];
-extern u32 func_002CF978(u32, s32, s8);
+extern u32 fileClampPackedColorByte(u32, s32, s8);
 extern void fileDrawSlotIcon(s32, s32, s32, s32);
 extern void fileCursorStepUp(void);
 extern void fileFadeStepDown(void);
@@ -2296,7 +2296,8 @@ s32 func_002CCAD0(void) {
     return 0;
 }
 
-s32 func_002CD028(s32 work) {
+/* Draw save slots and the selected preview; native scrolling snaps to its target. */
+s32 fileDrawSlotListAndPreview(s32 work) {
     char text[64];
     s32 row;
     s32 rowBase;
@@ -2400,21 +2401,21 @@ s32 func_002CD028(s32 work) {
         if (fileLoadMenuState.unk10 != 0) {
             if (row == 0) {
                 alpha = fileLoadMenuState.unk18;
-                titleColor = func_002CF978(titleColor, alpha, 0);
-                detailColor = func_002CF978(detailColor, fileLoadMenuState.unk18, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk18, 0);
             } else if (row == 3) {
                 alpha = fileLoadMenuState.unk1C;
-                titleColor = func_002CF978(titleColor, alpha, 0);
-                detailColor = func_002CF978(detailColor, fileLoadMenuState.unk1C, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unk1C, 0);
             } else {
                 alpha = fileLoadMenuState.unkC;
-                titleColor = func_002CF978(titleColor, alpha, 0);
-                detailColor = func_002CF978(detailColor, fileLoadMenuState.unkC, 0);
+                titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+                detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
             }
         } else {
             alpha = fileLoadMenuState.unkC;
-            titleColor = func_002CF978(titleColor, alpha, 0);
-            detailColor = func_002CF978(detailColor, fileLoadMenuState.unkC, 0);
+            titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
+            detailColor = fileClampPackedColorByte(detailColor, fileLoadMenuState.unkC, 0);
         }
         baseColor = (alpha << 24) | 0x808080;
         evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, (struct SdfTex *)(u32)(D_00437D5C));
@@ -2620,7 +2621,7 @@ s32 fileDrawMenuFrame(s32 task) {
                       (struct SdfTex *)(u32)(D_00437D78));
     }
     if (D_00437CF8 != 0) {
-        func_002CD028(task);
+        fileDrawSlotListAndPreview(task);
     }
     fade = D_00437D4C;
     if (fade > 0) {
@@ -2924,9 +2925,10 @@ void fileSetMenuValueAndInitializeFlags(u32 value) {
     fileLoadMenuState.unk4 = 0;
 }
 
+/* Lower the selected low/alpha byte, retaining the native signed, unmasked bound. */
 /* Keep the input word separate from the per-mode result; see docs/idioms.md,
  * "Trace-justified result selection: packed byte clamp". */
-u32 func_002CF978(u32 color, s32 limit, s8 alpha) {
+u32 fileClampPackedColorByte(u32 color, s32 limit, s8 alpha) {
     u32 result;
     s32 component = color & 0xFF;
 

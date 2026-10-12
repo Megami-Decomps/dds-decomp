@@ -7437,3 +7437,12 @@
 0x002C66F8	evtStageTestGetEntryFrame	inferred	Returns the indexed stage-test entry's animation frame. DDS1 twin 0x002871C0. LiteH-2 menu naming batch 3.
 0x002C6720	evtStageTestCopyEntryPosition	inferred	Copies three position components from the indexed stage-test entry. DDS1 twin 0x002871E8. LiteH-2 menu naming batch 3.
 0x002C6758	evtStageTestCopyEntryRotation	inferred	Copies three rotation components from the indexed stage-test entry. DDS1 twin 0x00287220. LiteH-2 menu naming batch 3.
+0x00233F68	mdlAppendViewerRecordSummary	inferred	confidence=high; matched-C; Kind-dependent formatted viewer record description appended to supplied packet list and coordinates/style. DDS1 twin 0x002193F8. Namer1 batch 19.
+0x00235568	mdlDrawViewerModeLabel	inferred	confidence=high; matched-C; Draws native MODE : header and current/saved mode-name table entry. DDS1 twin 0x0021A9F8. Namer1 batch 19.
+0x00237088	mdlDrawViewerResourceMenu	inferred	confidence=high; matched-C; Five resource actions with independent capacity/count eligibility and selection styling; mdlRunViewerResourceMenuTask caller. DDS1 twin 0x0021C518. Namer1 batch 19.
+0x002376F0	mdlDrawViewerSettings	inferred	confidence=high; matched-C; Viewer toggles/time-graph status and native BACK COLOR/SAVE CONFIG controls. DDS1 twin 0x0021CB80. Namer1 batch 19.
+0x00238D38	mdlInitializeViewerTasksAndResources	inferred	confidence=high; matched-C; Loads viewer config, initializes view state/resources and recreates named viewer tasks. DDS1 twin 0x0021E1C8. Namer1 batch 19.
+0x00239188	mdlUpdateLightEditorTask	inferred	confidence=high; matched-C; Task-selected directional-light RGB/direction and ambient editor input/rendering; returns zero. DDS1 twin 0x0021E618. Namer1 batch 19.
+0x00239C08	mdlUpdateFaceDivisionEditorTask	inferred	confidence=high; matched-C; Native labels <FACE-DIV>, SOFTEN:, BIAS:, DIVIDE: identify task input/rendering role; preserves native bounds and cursor/blink mask. DDS1 twin 0x0021F098. Namer1 batch 19.
+0x002CF978	fileClampPackedColorByte	inferred	confidence=high; matched-C; Signed downward clamp of low byte or high alpha byte selected by mode; unmasked bound and trace-justified result staging retained. DDS1 twin 0x002904C8. Namer1 batch 19.
+0x002CD028	fileDrawSlotListAndPreview	inferred	confidence=high; matched-C; Save slot rows/status, map/playtime, party portrait/level preview and navigation arrows; native snapped scroll and DDS2 import-mode enhancements retained. Aligns existing DDS1 name at 0x0028E180. Namer1 batch 19.
