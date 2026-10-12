@@ -8000,3 +8000,19 @@ an append-order change nor alternate compiler flags is needed. These are
 specific, evidence-backed capture/transition shapes, not permission to
 search assignment orders.
 
+
+## Trace-justified staging: fldTitle next phase
+
+DDS1 `fldTitle` (0x0014A2D8) loads the title phase `D_003BAFA0` for its
+dispatch switch while several arms publish phase 1. Retail materializes the
+constant 1 (`li`) before the phase load at +0x5C/+0x60. A vendor-cc1 trace
+(hooked output identical to unhooked) shows that no rank tier decides this.
+Both instructions become ready when the preceding call issues, and
+haifa-sched's dependent pop takes the last appended one without re-sorting.
+The constant's pseudo must therefore be created before the index load. A
+`nextPhase = 1;` local assigned immediately before the switch, and stored by
+the arms that advance the phase, gives that order in sched1 and sched2. Other
+placements, such as a declaration initializer, a cast or a separate local
+phase copy, keep the 2-word residual. This is accepted under the
+trace-justified rule in CONTRIBUTING.md: ordinary C that meets a property the
+trace proves the compiler needs.
