@@ -3843,6 +3843,7 @@
 0x00220560	evtApplyIndexValueToWorldNodes	inferred	Computes an indexed value and sends it to every world node. [names_reviewed8.tsv]
 0x002205D8	evtComputeHorizontalDisplacementVu	inferred	Subtracts vectors in VU0 and resets the vertical component. [names_reviewed11.tsv]
 0x00220600	evtComputePlanarTargetDirectionVu	inferred	Derives a normalized planar target direction from a model quaternion. [names_reviewed10.tsv]
+0x00220678	evtUnitHasReachedMotionEndpoint	inferred	Returns nonzero when direct motion is within the target radius or the selected path has reached its endpoint, as described by the adjacent VU0 comment; twin=DDS2 0x0023B1E8.
 0x00220830	evtMeasurePathTrajectoryLength	inferred	Samples path at increments of one twentieth; sums distances and restores saved scale. [names_reviewed6.tsv]
 0x00220910	evtAdvanceUnitVisualTransitions	inferred	Advances an event unit's model colour and directional transition state; paired exact DDS2 C twin.
 0x00221890	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
