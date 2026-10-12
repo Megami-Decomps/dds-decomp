@@ -262,7 +262,7 @@ void func_0018CE28(void) {
 }
 
 /* Return the callback word unchanged, retaining this entry's unsigned C surface. */
-u32 func_0018CE30(u32 value) {
+u32 effReturnCallbackValue(u32 value) {
     return value;
 }
 

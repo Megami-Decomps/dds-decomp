@@ -1335,11 +1335,11 @@
 0x00158E10	effCloneTemplateWithPacketDescriptors	inferred	Copies template and allocates per-packet descriptors and subrecord storage [names_reviewed6.tsv]
 0x00158FA8	parInitializeRadialParticle	inferred	confidence=high; src/dds1/effect/parManager.c:func_00158FA8; Initializes delayed particle age, independently jittered radial offset, rotation axis, radial step, billboard scale and initial phase. [names_qp9.tsv]
 0x001596E8	parInitColorRamp	inferred	Initializes color-ramp data. [names_qp9.tsv]
-0x00159CD8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
+0x00159CD8	parReleaseHistorySlotTable	inferred	high confidence; corrects node misnomer: releases the history-slot table's shared point/slot allocation handle. Paired DDS2 0x001618C8 and emitter kind-one cleanup confirm ownership. [Namer1 batch 30]
 0x00159CF0	parPrependHistorySample	inferred	Shifts the selected slot history backward, captures the current vector sample, and stores color and billboard scale
 0x00159D68	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
 0x00159E20	parDrawHistorySlots	inferred	submits each particle slot history as progressively fading billboard points
-0x00159F30	parClearSlotFlag	inferred	Clears the halfword flag of the indexed particle-table slot.
+0x00159F30	parClearHistorySlotPoints	inferred	high confidence; corrects flag misnomer: clears the selected ParSlot.pointCount halfword, consumed as a count by parDrawHistorySlots. No bit flags or call-surface changes. [Namer1 batch 30]
 0x0015A2F8	effParModulateColors	inferred	multiplies particle RGBA channels using VU [names_reviewed5.tsv]
 0x0015A378	parCreateIndexed	inferred	creates particle via D_0034E250 table, stamps index at +0x140
 0x0015A3C0	parDispatchByKind	inferred	runs D_0034E258 command for particle kind
@@ -8212,3 +8212,11 @@
 0x00250820	mnuGetProfileRequirementIds	inferred	Returns IDs in the first status-one requirement slot if bit 0 is set in the summary; otherwise returns NULL. [LiteH menu naming batch 11]
 0x002508D8	mnuAreRequiredProfilesCapped	inferred	Returns whether both required profile IDs are at cap for the selected party record; no qualifying list returns true. [LiteH menu naming batch 11]
 0x00251260	mnuUpdateMantraSceneScroll	inferred	Scrolls the mantra scene viewport to the selected entry using the unlocked-requirement group to bound horizontal position. [LiteH menu naming batch 11]
+0x00152560	effCalcViewAxisWidthFactor	inferred	high confidence; returns one minus absolute XYZ dot of normalized eye-target against supplied axis; billboard-frame consumer clamps at 0.3 and scales width. Paired DDS2 0x0015A150. [Namer1 batch 30]
+0x00153680	effSeedEmitterDelayRandomState	inferred	high confidence; clock-seeds effEmitterDelayRandomState during fldCreateFieldEffectTask initialization. Paired DDS2 0x0015B270. [Namer1 batch 30]
+0x00153740	effInitializeEmitterHead	inferred	high confidence; initializes common emitter buffer, optional billboard, color ramp, kind-specific draw resources, restart state, matrix backup and active/color state; used by template clone paths. Paired DDS2 0x0015B330. Existing trace-justified body retained. [Namer1 batch 30]
+0x001547D8	effInitializeBallisticParticle	inferred	high confidence; initializes indexed ballistic packet position, velocity, gravity, launch delay and jitter, then initializes its subeffect; effEmitterBallisticUpdate consumes it. Paired DDS2 0x0015C3C8. [Namer1 batch 30]
+0x001575D0	effUpdateReflectingRadiusEmitter	inferred	high confidence; advances packet lifetimes and motion, reflects velocity at frame-entry radius and clamps position to the boundary; retains native next-frame radius update. Paired DDS2 0x0015F1C0. [Namer1 batch 30]
+0x00157D28	effInitializeOffsetGravityParticle	inferred	high confidence; initializes indexed offset-gravity packet native mode-dependent offset, velocity, acceleration, delay and jitter for effEmitterOffsetGravityUpdate. Paired DDS2 0x0015F918. [Namer1 batch 30]
+0x00159F48	parBuildHistoryRibbonStrip	inferred	high confidence; rebuilds a slot's history strip with two opposed vertices per segment using normalized segment/view-axis cross product and width, then sets alpha/color. Paired DDS2 0x00161B38. [Namer1 batch 30]
+0x0018CE30	effReturnCallbackValue	inferred	high confidence; returns incoming callback word unchanged; aligns existing DDS2 0x00194A68 name while retaining unsigned DDS1 and signed DDS2 source surfaces. Sole previously absent symbol row added with Main approval. [Namer1 batch 30]

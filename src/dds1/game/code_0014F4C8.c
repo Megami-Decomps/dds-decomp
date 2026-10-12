@@ -123,7 +123,7 @@ extern void effInitializeBillResourceOwners(void);
 
 extern void parSysReset(void);
 
-extern void func_00153680(void);
+extern void effSeedEmitterDelayRandomState(void);
 
 extern void kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
@@ -148,7 +148,7 @@ void fldCreateFieldEffectTask(void) {
     fileManagerResetSubsystems();
     effInitializeBillResourceOwners();
     parSysReset();
-    func_00153680();
+    effSeedEmitterDelayRandomState();
     kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     kwlnTaskCreate(D_003BB008, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
     func_0018CE38();

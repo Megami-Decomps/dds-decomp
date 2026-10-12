@@ -61,7 +61,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescrip
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
 
-void func_00153740(void *effect);
+void effInitializeEmitterHead(void *effect);
 
 void effSetTemplateTagPeriod(EffTemplatePacketList *effect);
 
@@ -387,7 +387,7 @@ f32 effComputeProjectedOffsetAngle(const void *position, const void *offset) {
 extern u8 sdfViewEyeVector[], sdfViewTargetVector[];
 
 /* vu0 routine: 1 - |dot(normalised eye - target, axis)|, how far the axis is from the view direction */
-f32 func_00152560(void *self, f32 *axis) {
+f32 effCalcViewAxisWidthFactor(void *self, f32 *axis) {
     f32 dot;
 
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -764,7 +764,8 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
     surface->append(surface, packetList);
 }
 
-void func_00153680(void) {
+/* Seed the generator used for per-particle launch delays. */
+void effSeedEmitterDelayRandomState(void) {
     effMiscSeedRandomFromClock(&effEmitterDelayRandomState);
 }
 
@@ -802,9 +803,10 @@ extern ParTable *func_00159C08(u32, u16, BillObj **);
 extern u32 func_0015B220(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
 
+/* Allocate drawing resources and reset the emitter's common runtime state. */
 /* The subrecord bitfield keeps native int-alias dependencies; see
  * docs/idioms.md, "Trace-justified alias sets: emitter subrecord count". */
-void func_00153740(void *effect) {
+void effInitializeEmitterHead(void *effect) {
     EffEmitterHead *owner = effect;
     EffTrackPolyParams params;
 
@@ -868,7 +870,7 @@ void effDestroyResources(effect)
     EffEmitterHead *owner = (EffEmitterHead *)effect;
     switch (owner->sub.kind) {
     case 1:
-        effParReleaseNodeResource(owner->sub.value.table);
+        parReleaseHistorySlotTable(owner->sub.value.table);
         break;
     case 2:
         parReleaseCellSystem(owner->sub.primaryDrawSystem);
@@ -925,7 +927,7 @@ s32 effCloneRingTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effSetTemplateTagPeriod(clone);
     return clone;
 }
@@ -1129,7 +1131,7 @@ s32 effCloneTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetDiscPacketAges(clone);
     return clone;
 }
@@ -1316,7 +1318,7 @@ s32 effCloneBallisticTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetBallisticPacketAges(clone);
     return clone;
 }
@@ -1342,12 +1344,12 @@ typedef struct EffBallisticEmitter {
     f32 jitter;      /* 0x170 */
 } EffBallisticEmitter;
 
-void func_001547D8(EffBallisticEmitter *effect, s32 index);
+void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index);
 /* Twelve authored ballistic launch directions, stored as four-float vectors. */
 extern f32 D_0034E0C0[12][4];
 
 /* Seed a ballistic packet; positions are emitter-relative and then offset by the origin. */
-void func_001547D8(EffBallisticEmitter *effect, s32 index) {
+void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
     f32 position[4];
     f32 direction[4];
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
@@ -1526,7 +1528,7 @@ void effEmitterBallisticUpdate(EffBallisticEmitter *effect) {
         s32 age = packet->age;
 
         if (age == EFF_PACKET_INITIAL_TAG) {
-            func_001547D8(effect, packetIndex);
+            effInitializeBallisticParticle(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
@@ -1607,7 +1609,7 @@ s32 effCloneLookAtRingTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effInitLookAtRingPacketSchedule(clone);
     return clone;
 }
@@ -1782,7 +1784,7 @@ s32 effCloneBurstTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetBurstPacketAges(clone);
     return clone;
 }
@@ -1984,7 +1986,7 @@ s32 effCloneSphereTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetSpherePacketAges(clone);
     return clone;
 }
@@ -2177,7 +2179,7 @@ s32 billCloneTemplateSmall(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effInitExpandRingPacketSchedule(clone);
     return clone;
 }
@@ -2351,7 +2353,7 @@ s32 effCloneConeTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x180);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetConePacketAges(clone);
     return clone;
 }
@@ -2531,7 +2533,7 @@ s32 effClonePacketRecordScaleTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x170);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effApplyTemplateScaleToRecords(clone);
     return clone;
 }
@@ -2548,7 +2550,7 @@ void func_00157280(EffTemplatePacketList *, s32);
 
 /* Reflect moving packets at the frame's entry radius. The first record's
  * updated radius becomes the boundary on the following frame. */
-void func_001575D0(EffTemplatePacketList *effect) {
+void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
     f32 origin[4];
     f32 previousPosition[4];
     /* Retail leaves the fourth broadcast components uninitialized. The
@@ -2701,7 +2703,7 @@ void *effCloneSingleParticleTemplate(EffTemplatePacketList *source) {
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->head.templateSize, tailBytes);
     clone->head.particleCount = 1;
     clone->head.lifetimeFrames = 0;
-    func_00153740(clone);
+    effInitializeEmitterHead(clone);
     return clone;
 }
 
@@ -2818,7 +2820,7 @@ s32 effCloneOffsetGravityTemplate(EffTemplatePacketList *source) {
     memset((void *)clone, 0, 0x190);
     memcpy((void *)clone, source, source->head.templateSize);
     memcpy((void *)(clone + EFF_TEMPLATE_TAIL_OFFSET), (u8 *)source + source->head.templateSize, tailBytes);
-    func_00153740((void *)clone);
+    effInitializeEmitterHead((void *)clone);
     effResetOffsetGravityPacketAges(clone);
     return clone;
 }
@@ -2844,12 +2846,12 @@ typedef struct EffOffsetGravityEmitter {
     f32 jitter;      /* 0x170: launch magnitude jitter */
 } EffOffsetGravityEmitter;
 
-void func_00157D28(EffOffsetGravityEmitter *effect, s32 index);
+void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 index);
 /* Twelve authored velocity directions, stored as four-float vectors. */
 extern f32 D_0034E190[12][4];
 
 /* Seed an offset-gravity packet; preserve each mode's native partial vector setup. */
-void func_00157D28(EffOffsetGravityEmitter *effect, s32 index) {
+void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 index) {
     f32 position[4];
     f32 direction[4];
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
@@ -3020,7 +3022,7 @@ void effEmitterOffsetGravityUpdate(EffOffsetGravityEmitter *effect) {
         s32 age = packet->age;
 
         if (age == EFF_PACKET_INITIAL_TAG) {
-            func_00157D28(effect, packetIndex);
+            effInitializeOffsetGravityParticle(effect, packetIndex);
             age = packet->age;
         }
         if (age >= 0) {
@@ -3103,7 +3105,7 @@ EffTemplatePacketList *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->head.particleCount << 4);
     clone->auxiliaryAllocation = auxAllocationHandle;
     clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
-    func_00153740(clone);
+    effInitializeEmitterHead(clone);
     effResetDiscAuxPacketAges(clone);
     return clone;
 }
@@ -3302,7 +3304,7 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
     memset((void *)copy, 0, 0x190);
     memcpy((void *)copy, source, source->head.templateSize);
     memcpy((void *)(copy + 0x150), (u8 *)source + source->head.templateSize, tailLen);
-    func_00153740((void *)copy);
+    effInitializeEmitterHead((void *)copy);
     perRecord = 0;
     if (((EffTemplatePacketList *)copy)->head.sub.kind != 0) {
         count = ((EffTemplatePacketList *)copy)->head.particleCount;

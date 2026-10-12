@@ -1771,7 +1771,7 @@ extern void effInitializeBillResourceOwners(void);
 
 extern void parSysReset(void);
 
-extern void func_0015B270(void);
+extern void effSeedEmitterDelayRandomState(void);
 
 extern void func_00194A70(void);
 
@@ -1794,7 +1794,7 @@ void fldCreateFieldEffectTask(void) {
     effLoadCommonTexturesAndResetRenderFlags();
     effInitializeBillResourceOwners();
     parSysReset();
-    func_0015B270();
+    effSeedEmitterDelayRandomState();
     kwlnTaskCreate("effect_f", 0x2B04, 0, 0, effSubmitFieldBlendStateTask, NULL, 0);
     kwlnTaskCreate(D_004363F8, 0x2B18, 0, 0, effManagerUpdateAndDispatch, effManagerInitializeSubsystems, 0);
     func_00194A70();

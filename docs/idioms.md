@@ -135,7 +135,7 @@ Independent constant loads and argument moves can cross the builtin but stay
 after the helper in the matching game-code cases.
 
 Use the existing `ffabsf` helper when the surrounding instruction sequence
-supports it. DDS1 `func_00152560` and DDS2 `func_0015A150` are the paired
+supports it. DDS1/DDS2 `effCalcViewAxisWidthFactor` is the paired
 reference; DDS1 `func_001726E8` is a larger transfer. This is a module
 convention, not a global replacement rule: `kwlnAdvanceShakeOffsets` in the
 kernel uses builtin `fabsf` and changes code under the helper. Check the whole
@@ -183,8 +183,8 @@ whole unit.
 GCSE has a separate spelling-sensitive effect. Its expression table hashes a
 `SYMBOL_REF` by the symbol's name; table traversal can change PRE pseudo
 creation order and a later allocation tie. This is distinct from CSE's
-address-sensitive context effect. The paired `func_001547D8` /
-`func_0015C3C8` became exact with the recovered `effDefaultRandomState` name;
+address-sensitive context effect. The paired `effInitializeBallisticParticle`
+bodies became exact with the recovered `effDefaultRandomState` name;
 the existing sibling generators also remained exact.
 
 Treat this as a reason to inspect the first changed GCSE expression, not to
@@ -2410,7 +2410,7 @@ insn order, and that order is `prio` in the `-dS -fsched-verbose=5` dependence t
 (`prio` = longest latency path to the block end: `abs.s` 13 against `lwc1` 11, so
 `abs.s` issues first; the higher prio is picked first, and only an equal prio falls
 back to source order). Reordering or renaming declarations never changes a prio, so
-such residuals (DDS1 `func_0010F9A8`, `func_00152560`, `func_0017FD30`,
+such residuals (DDS1 `func_0010F9A8`, `effCalcViewAxisWidthFactor`, `func_0017FD30`,
 `func_001725F0`, `func_00205730`) only match when the expression shape changes the
 latency chain, e.g. one more `add.s` in the limit's path that lifts the load's prio
 above the abs (the sibling `dds3TestObjectSphereOverlap` has such an add and gets
@@ -8033,7 +8033,7 @@ not loop shaping (DDS1 0x001FC4E8→0x001FC538; DDS2 0x0020E568→0x0020E5B8).
 
 ## Trace-justified alias sets: emitter subrecord count
 
-DDS1 `func_00153740` and DDS2 `func_0015B330` (480 bytes each) allocate
+DDS1/DDS2 `effInitializeEmitterHead` (480 bytes each) allocate
 an emitter's buffer, billboard and kind-specific drawing resources. Kind 4
 constructs the track descriptor before creating its per-particle work list.
 Retail loads the subrecord count with `lhu` at +0x154, then loads the particle
@@ -9420,4 +9420,36 @@ branches, unsigned reward conversions, per-title recovery skill IDs and
 DDS2's extra reward behavior are all retained. This batch changes only
 identifiers and comments, including the collector's `actorAddress` parameter;
 it introduces no layout, type, control-flow or statement-order changes.
+
+## Emitter and particle-history naming closure
+
+The common emitter and history-slot names follow the matched bodies and
+their consumers, not guessed skill identities or unnamed scalar fields:
+
+| Name | DDS1 / DDS2 address | Observable contract |
+| --- | --- | --- |
+| `effCalcViewAxisWidthFactor` | 0x00152560 / 0x0015A150 | Returns `1 - abs(dot(normalized eye-target, axis))`; the billboard-frame caller clamps it at 0.3 and scales width. |
+| `effSeedEmitterDelayRandomState` | 0x00153680 / 0x0015B270 | Seeds the launch-delay generator from the clock during field effect-task creation. |
+| `effInitializeEmitterHead` | 0x00153740 / 0x0015B330 | Creates common buffer/billboard/kind-specific drawing resources and resets restart, matrix, active and color state. |
+| `effInitializeBallisticParticle` | 0x001547D8 / 0x0015C3C8 | Seeds one ballistic packet and its subeffect, including launch delay and speed/spin jitter. |
+| `effUpdateReflectingRadiusEmitter` | 0x001575D0 / 0x0015F1C0 | Advances motion, reflects velocity at the frame-entry radius and clamps the position to that boundary. |
+| `effInitializeOffsetGravityParticle` | 0x00157D28 / 0x0015F918 | Seeds one packet's mode-dependent offset, velocity, acceleration and launch state. |
+| `parBuildHistoryRibbonStrip` | 0x00159F48 / 0x00161B38 | Builds two opposing width vertices per history segment from the view-axis cross product. |
+| `parReleaseHistorySlotTable` | 0x00159CD8 / 0x001618C8 | Releases the table's point/slot allocation, not a separate node. |
+| `parClearHistorySlotPoints` | 0x00159F30 / 0x00161B20 | Clears the selected slot's point count, not a bit flag. |
+| `parDrawHistoryRibbonTriangles` | 0x0015A118 / 0x00161D08 | Three-vertex history variant: center plus opposing width edges; the DDS2 name now agrees with DDS1. |
+| `effReturnCallbackValue` | 0x0018CE30 / 0x00194A68 | Returns the incoming callback word unchanged; the unsigned DDS1 and signed DDS2 C surfaces are retained. |
+
+The width factor is not an angle or an opacity, and this function does not
+normalize its input axis. The reflecting emitter uses the radius captured
+before updating the first record; the new radius becomes the boundary on
+the next frame. Its native uninitialized W lanes, partial particle-vector
+initialization and per-mode preintegration remain unchanged.
+
+The emitter's trace-justified integer alias class remains as documented in
+"Trace-justified alias sets: emitter subrecord count". This naming closure
+does not change types, layouts, casts, call arities, declaration order or
+control flow. In particular, the existing clear-dispatch call surface is
+not restructured here. The history allocator twins remain address-named
+because the DDS2 body has a retained narrow collaborator claim.
 
