@@ -592,7 +592,7 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
 }
 
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
-extern s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z);
+extern s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F720);
@@ -702,7 +702,7 @@ s32 effUpdateTransformOpacityMode(EffWorldNode *object) {
         VU0_STORE_VF(vf10, model->rotationQuaternion);
         dds3LoadOrBuildObjectMatrix(object);
         effObjFetchInnerPosition(object);
-        if (func_00140BE8(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
+        if (fldStepActorMotionByKey(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
             inner = object->inner;
