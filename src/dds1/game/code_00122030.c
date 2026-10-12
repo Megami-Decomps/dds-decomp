@@ -1648,7 +1648,7 @@ extern void func_00228930(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32,s32);
-extern void func_00119CF0(s32);
+extern void ptyApplyFieldHpAttrition(s32);
 extern s32 func_0011CB90(f32,s32);
 extern void dds3WorkClear(void);
 extern void sndSetSequenceVolumePan(s32,s32,s32);
@@ -1726,12 +1726,12 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldAreaState.unk184 = 60;
                     fldAreaState.attritionDistance = 0.0f;
-                    func_00119CF0(2);
+                    ptyApplyFieldHpAttrition(2);
                 }
             } else {
                 fldAreaState.attritionDistance = 0.0f;
                 fldAreaState.unk184 = 60;
-                func_00119CF0(1);
+                ptyApplyFieldHpAttrition(1);
             }
         }
     } else {

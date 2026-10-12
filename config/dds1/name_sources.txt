@@ -684,6 +684,7 @@
 0x00119AA8	dds3FindEntryIndex	inferred	counts entries until +4 == arg0 with flag set; returns count or -1 (max 5)
 0x00119AF8	ptyReadSignedRosterStatByte	inferred	R_Names31 B92
 0x00119B08	ptyApplyEventPenalty	inferred	Applies mode-selected HP loss and packed status penalties across the active party while keeping living members at one or more HP.
+0x00119CF0	ptyApplyFieldHpAttrition	inferred	Applies mode-selected frontline HP attrition during field processing and preserves a minimum of one HP for living party members.
 0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row
 0x00119E88	ptyAnyUnitFlagMatch	inferred	returns 1 if any active roster entry (optionally with flag 2) has a halfword at +0xE matching the mask [names_M36_SmallSweep5.tsv]
 0x00119EF8	evtAdvanceCounterValue	inferred	Adds increment to the counter word held at the supplied address. [names_reviewed7.tsv]

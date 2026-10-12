@@ -696,7 +696,7 @@ void ptyApplyEventPenalty(s32 mode) {
 
 
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
-void func_0011A510(s32 mode) {
+void ptyApplyFieldHpAttrition(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1) {
         DatPartyRecord *entry = datGameState->party;
