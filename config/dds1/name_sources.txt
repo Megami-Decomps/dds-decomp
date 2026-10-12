@@ -4642,7 +4642,7 @@
 0x002633D8	mnuMarkItemSelectionSceneVisited	inferred	Marks the item-selection scene as visited if its model flag was not already set. [names_reviewed16.tsv]
 0x00263408	prfCapTaskStep	inferred	legacy ProfileCapReward_TaskStep: profile-cap reward task step
 0x00263608	mnuResetItemSelectionMarkers	inferred	Clears two menu scene markers at offsets 0x240 and 0x3C4.
-0x002639E0	mnuDrawItemPanelBackdrop	inferred	Draws the scene's embedded item panel backdrop using mnuDrawBackdrop.
+0x002639E0	mnuDrawItemPanelBackdrop	inferred	Draws the scene's embedded item panel backdrop using mnuDrawBackdrop; DDS2 twin 0x0029AA48.
 0x00263C98	mnuAdvanceSkillPackageToItemPanel	inferred	Advances skill package work before drawing the item panel and running it. [names_reviewed10.tsv]
 0x00263D10	mnuAdvanceSkillPanelToNextMenu	inferred	Advances the skill package panel and runs the next menu once it finishes. [names_reviewed10.tsv]
 0x00263D70	mnuInitializeItemSelectionExtent	inferred	Computes a clamped extent from five signed item components, clears menu slots, and refreshes an existing resource.
@@ -8128,3 +8128,15 @@
 0x001F1110	btlUpdateReferencedBattleEffect	inferred	confidence=high; deferred task callback creates/advances BattleEffect, applies field-color selectors/owner flags and finishes at its duration or battle flag clear. Native effect constructor duplicates effParamWork and logs effBTL handle creation. DDS2 twin0x00201C98. Namer1 batch25.
 0x001F12E8	btlCreateReferencedBattleEffectTask	inferred	confidence=high; allocates deferred BtlRuntimeTask with start/update/finish reference lifecycle and source/target selector arguments; actual attack schedulers and paired-command effect caller. DDS2 twin0x00201F08 adds selector/target overrides. Namer1 batch25.
 0x001E5800	btlInitSkillCommandCursor	inferred	confidence=high; matched-C; initializes shared skill-camera cursor from linked command, native preset/path/side tables and actor-facing flags; semantic matched DDS2 twin0x001F41F0. Trace-justified real path selection, documented in docs/idioms.md.
+0x00263640	brsShowStatSelectionStatus	inferred	Displays the selected unit and stat-assignment message chosen by extentExhausted; DDS2 twin 0x0029A658. LiteH reward/stat batch.
+0x00263728	brsUpdateStatSelectionExtent	inferred	Caps the reward-derived extent at remaining base-stat capacity, records exhaustion, and selects the unit-specific message path; DDS2 twin 0x0029A768. LiteH reward/stat batch.
+0x00263838	brsProcessNextPrimaryReward	inferred	Advances primary reward rows, accumulates growth, opens stat selection or applies gains, then selects the next popup; DDS2 twin 0x0029A898. LiteH reward/stat batch.
+0x00263A00	mnuDrawRemainingSelectionExtent	inferred	Draws the remaining-stat count and fading icon, updating fade only for a selectable unit; DDS2 twin 0x0029AA68. LiteH reward/stat batch.
+0x00263B78	mnuDrawStatAssignmentPanel	inferred	Draws the stat-allocation panel, mirrors gain slots into the group, and renders party details and remaining extent; DDS2 twin 0x0029AC20. LiteH reward/stat batch.
+0x00263EF8	mnuHandleStatPointAssignment	inferred	Handles stat-point input, enforces per-stat caps, applies preview changes, updates selection, and plays input sound; DDS2 twin 0x0029B008. LiteH reward/stat batch.
+0x002642D0	mnuCommitAssignedStatPoints	inferred	Commits assigned gains or restores the preview after message-window confirmation; DDS2 twin 0x0029B418. LiteH reward/stat batch.
+0x00264538	mnuShowProgressLevelChangePopup	inferred	Stores the crossed level step and displays its message and sound when a threshold is crossed; DDS2 twin 0x0029B6A0. LiteH reward/stat batch.
+0x00264740	brsPrepareRewardMessage	inferred	Prepares the reward message and clears pending stat gains; DDS2 twin 0x0029BB28. LiteH reward/stat batch.
+0x002647B0	brsAcknowledgeRewardMessage	inferred	Finishes the reward message window and notifies its task; DDS2 twin 0x0029BBC0. LiteH reward/stat batch.
+0x002647D0	mnuStartRewardDialogAndMotion	inferred	Displays reward-mode unit/stat text and queues the corresponding motion/effect; DDS2 twin 0x0029BC58. LiteH reward/stat batch.
+0x002649B0	brsAdvanceRewardPanelAfterMessage	inferred	Waits for the idle reward-panel message, applies pending reward state, and selects the next popup; DDS2 twin 0x0029BFB8. LiteH reward/stat batch.

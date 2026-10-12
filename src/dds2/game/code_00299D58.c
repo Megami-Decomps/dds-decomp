@@ -347,7 +347,7 @@ u32 func_0029A650(void) {
     return 1;
 }
 
-void func_0029A658(BrsSkillPackageWork *scene) {
+void brsShowStatSelectionStatus(BrsSkillPackageWork *scene) {
     struct ActiveItemSlots {
         s32 indices[DAT_BASE_STAT_COUNT];
         s32 values[DAT_BASE_STAT_COUNT];
@@ -382,11 +382,11 @@ u32 mnuKindIsSelectable(u32 kind) {
 
 extern char D_004379B0[];
 extern s32 func_0035C860(char *, const char *, ...);
-extern void func_0029A658(BrsSkillPackageWork *);
+extern void brsShowStatSelectionStatus(BrsSkillPackageWork *);
 
 
 /* Cap the available extent by the remaining capacity of five components. */
-void func_0029A768(BrsSkillPackageWork *scene) {
+void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 available = scene->selectedRewardRow->values.amount * 3;
@@ -417,7 +417,7 @@ void func_0029A768(BrsSkillPackageWork *scene) {
             dspStartEntry(0x14);
         }
     } else {
-        func_0029A658(scene);
+        brsShowStatSelectionStatus(scene);
     }
 }
 
@@ -435,7 +435,7 @@ extern char D_003D6474[];
 extern char D_003D64AC[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
-s32 func_0029A898(KwlnTask *request) {
+s32 brsProcessNextPrimaryReward(KwlnTask *request) {
     s32 result;
     BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus;
@@ -460,7 +460,7 @@ s32 func_0029A898(KwlnTask *request) {
             slots = scene->statGains;
             ptyAccumulateStatGains(slots, scene->selectedRewardRow->values.amount,
                                    scene->selectedRewardRow->unit);
-            func_0029A768(scene);
+            brsUpdateStatSelectionExtent(scene);
             mnuAdvanceTitleEntryAnimation(scene->selectedRewardRow->unit);
             mnuStaffCopyPanelBlock(scene->selectedRewardRow->unit, scene);
             mnuRefreshSelectedUnitPanels(scene->selectedRewardRow->unit, scene);

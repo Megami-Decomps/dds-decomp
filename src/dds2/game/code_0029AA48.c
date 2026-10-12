@@ -8,13 +8,13 @@
 
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 
-extern void func_0029AC20(BrsSkillPackageWork *, s32);
+extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
 extern void func_0026C900(void);
 
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *, s32);
 
-void func_0029AA48(BrsSkillPackageWork *context) {
+void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
     mnuDrawCampIconBackdrop(&context->campEffect, 0x20);
 }
 
@@ -73,7 +73,7 @@ struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00380788[13][4];
 
-void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
+void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
     DatPartyRecord *unit = context->selectedRewardRow->unit;
     s32 i;
 
@@ -103,8 +103,8 @@ s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
     }
-    func_0029AA48(context);
-    func_0029AC20(context, 0);
+    mnuDrawItemPanelBackdrop(context);
+    mnuDrawStatAssignmentPanel(context, 0);
     return menuSetHandler(context, 1, (void *)request);
 }
 

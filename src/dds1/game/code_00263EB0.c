@@ -47,7 +47,7 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
 
-s32 func_00263EF8(KwlnTask *request) {
+s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 inputFlags;
@@ -126,13 +126,13 @@ s32 func_00263EF8(KwlnTask *request) {
 }
 
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
-extern void func_00263B78(BrsSkillPackageWork *, s32);
+extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
 s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuDrawItemPanelBackdrop(context);
-    func_00263B78(context, 1);
+    mnuDrawStatAssignmentPanel(context, 1);
     return menuRunPanel(context, 1, (void *)request);
 }
 
@@ -162,7 +162,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern char D_0036D45C[];
 
-s32 func_002642D0(KwlnTask *request) {
+s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 result;
@@ -199,7 +199,7 @@ s32 func_00264498(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuDrawItemPanelBackdrop(context);
-    func_00263B78(context, 1);
+    mnuDrawStatAssignmentPanel(context, 1);
     return menuRunPanel(context, 1, (void *)request);
 }
 
@@ -210,7 +210,7 @@ s32 func_002644F0(KwlnTask *input) {
     return menuRunPanel((void *)context, 2, (void *)input);
 }
 
-u32 func_00264538(KwlnTask *task) {
+u32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     char text[0x20];
     BrsSkillPackageWork *work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     BrsRewardRow *state = work->selectedRewardRow;
@@ -259,7 +259,7 @@ s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuDrawItemPanelBackdrop(context);
-    func_00263B78(context, 0);
+    mnuDrawStatAssignmentPanel(context, 0);
     return menuRunPanel(context, 1, (void *)request);
 }
 
@@ -271,7 +271,7 @@ s32 func_002646F8(KwlnTask *input) {
 }
 
 
-u32 func_00264740(KwlnTask *task) {
+u32 brsPrepareRewardMessage(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     DatPartyRecord *item = context->selectedRewardRow->unit;
 
@@ -283,12 +283,12 @@ u32 func_00264740(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002647B0(void) {
+u32 brsAcknowledgeRewardMessage(void) {
     evtFinishMessageWindowAndNotify();
     return 1;
 }
 
-s32 func_002647D0(BrsSkillPackageWork *work) {
+s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
     DatPartyRecord *entry = work->selectedRewardRow->unit;
     s32 result;
 
@@ -363,7 +363,7 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
 extern char D_0036D408[];
 
 /* Terminal panel poll: once the message window is idle, apply the pending reward step or open the popup. */
-s32 func_002649B0(KwlnTask *request) {
+s32 brsAdvanceRewardPanelAfterMessage(KwlnTask *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 result;
 
@@ -375,7 +375,7 @@ s32 func_002649B0(KwlnTask *request) {
     if (panel->transition.state == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (panel->rewardMode != 0) {
-                func_002647D0(panel);
+                mnuStartRewardDialogAndMotion(panel);
                 kwlnItemUpdateDisplay(panel);
                 panel->rewardMode = 0;
             } else {
@@ -388,7 +388,7 @@ s32 func_002649B0(KwlnTask *request) {
 
 
 extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
-extern void func_00263B78(BrsSkillPackageWork *, s32);
+extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 
 /* The dispatcher consumes the inline work area and its adjacent status word. */
 
@@ -397,7 +397,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     mnuDrawItemPanelBackdrop(panel);
-    func_00263B78(panel, 0);
+    mnuDrawStatAssignmentPanel(panel, 0);
     return menuRunPanel(panel, 1, request);
 }
 

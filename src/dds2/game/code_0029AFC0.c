@@ -9,9 +9,9 @@ extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void func_0026C900(void);
 
-extern void func_0029AA48(BrsSkillPackageWork *);
+extern void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *);
 
-extern void func_0029AC20(BrsSkillPackageWork *, s32);
+extern void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *, s32);
 extern void mnuRollExtraLevelReward(DatPartyRecord *, BrsSkillPackageWork *);
 extern u8 *D_00435E48;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -137,8 +137,8 @@ s32 mnuHandleStatPointAssignment(KwlnTask *request) {
 s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
-    func_0029AA48(context);
-    func_0029AC20(context, 1);
+    mnuDrawItemPanelBackdrop(context);
+    mnuDrawStatAssignmentPanel(context, 1);
     return menuSetHandler(context, 1, (void *)request);
 }
 
@@ -204,8 +204,8 @@ s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
 s32 func_0029B600(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
-    func_0029AA48(context);
-    func_0029AC20(context, 1);
+    mnuDrawItemPanelBackdrop(context);
+    mnuDrawStatAssignmentPanel(context, 1);
     return menuSetHandler(context, 1, (void *)request);
 }
 
@@ -262,8 +262,8 @@ s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
 s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
-    func_0029AA48(context);
-    func_0029AC20(context, 0);
+    mnuDrawItemPanelBackdrop(context);
+    mnuDrawStatAssignmentPanel(context, 0);
     return menuSetHandler(context, 1, (void *)request);
 }
 
@@ -358,7 +358,7 @@ void mnuRollExtraLevelReward(DatPartyRecord *unit, BrsSkillPackageWork *work) {
     }
 }
 
-u32 func_0029BB28(KwlnTask *task) {
+u32 brsPrepareRewardMessage(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     DatPartyRecord *item = context->selectedRewardRow->unit;
     s32 mode;
@@ -373,7 +373,7 @@ u32 func_0029BB28(KwlnTask *task) {
     return 1;
 }
 
-u32 func_0029BBC0(void) {
+u32 brsAcknowledgeRewardMessage(void) {
     evtFinishMessageWindowAndNotify();
     return 1;
 }
