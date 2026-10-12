@@ -9860,3 +9860,41 @@ only in the three relocated provider calls. The same source passes its owner
 and 24 relocations. Independent review checks every 16-bit dimension pattern
 against the native shift/narrowing sequence. Both retail hashes, both
 development targets and a no-op rebuild pass with the paired constructors.
+
+## Local-map PAC slot induction
+
+DDS2 `func_0030AC10` (`game/code_0030A128`, 1124 bytes) fills one of three
+eight-slot banks in `LmapTaskState::spriteSlots`: positions `index + 1`,
+`index + 9`, or `index + 17`. The index advances once per PAC node, including
+nodes that do not create an image slot. Expressing this as an ordinary integer
+index lets ee-gcc 2.96 strength-reduce the accesses to the retail pointer
+cursor. A handwritten cursor initialized to `&spriteSlots[17]` with negative
+offsets leaves three setup words out of order.
+
+**Deciding pass/tier:** post-reload `sched2`, original-LUID tie-break after
+equal priority, register weight and cost. **Property P:** the loop's constant
+1 and 2 pseudos precede the synthesized cursor initializer; constant 3 follows
+it. Retail `0x0030AF00–0x0030AF0C` has that order. The qualified indexed form
+has constant 1/2 UIDs 1036/1039 at LUIDs 195/196, cursor UID 1065 at 197, and
+constant 3 UID 1103 at 198. Mutable variant locals staged before a handwritten
+cursor duplicate the constant-1 carrier and expand the body; const-qualified
+locals fold back to the three-word residual. Neither staging form is retained.
+The saved `tools/cc1probe.sh --all --func func_0030AC10` qualification and trace
+paths are in the investigation ledger; hooked and unhooked outputs agree.
+
+The SDK interfaces remain concrete. Native `0x0030AC90` passes the task prefix
+to `sdfInstallNonzeroSpriteSlots(SdfSlotSet*)`; `0x0030AF1C` passes the PAC node
+base to `sdfPacGetExtensionData(SdfPacStreamPacketHeader*)`. These are
+SDK-boundary casts, not alternate field views or erased helper formals.
+The caller needs only an opaque declaration of the existing `SdfSlotSet`
+owner in `code_0030B838`.
+
+The native audio-resident arm stores phase 4 at `0x0030AD7C` before the common
+phase-3 store. Preserve this retail-present store rather than simplifying it
+away. Preserve all four debug-message blobs as `INCLUDE_RODATA`, including
+their native zero bytes. The first message at `0x0042D280` follows eight zero
+bytes after the preceding switch table; plain string-literal `.align 3` does
+not recreate the boundary. Normal `force_not_migration:True` symbol metadata
+keeps the blobs separate, and the existing retail-backed `eeas_compat.py`
+alignment correction reproduces it without changing TU flags or data bytes.
+
