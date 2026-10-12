@@ -1228,6 +1228,7 @@
 0x00150260	effReleaseSharedTextureRecord	inferred	src/dds1/game/code_0014FEB0.c func_00150260: Decrements reference count and releases texture reference plus allocation on final reference. [names_reviewed24.tsv]
 0x001502B0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00150750	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
+0x00150840	billAppendPairedQuadEntry	inferred	Appends one matching color, UV and transformed-position entry to both child quad streams; counterpart 0x00158430.
 0x00151010	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
 0x00151178	billInitializeCommonDrawState	inferred	Initializes the billboard's default scales, offsets, gray color, and packet-list selection; called for newly created and cloned objects.
 0x001511C0	billAllocChild	inferred	allocates a 0x34 billboard object and attaches a child payload from its resource argument
@@ -1235,6 +1236,7 @@
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
 0x00151398	billStepAnimationEntryAndUpdateChild	inferred	Advances one animation entry timer, updates the selected frame, and copies its color, UVs, dimensions, and placement into the referenced child payload; plural entries are handled by the caller.
 0x00151568	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
+0x001515E8	billUpdateAnimation	inferred	Advances active billboard animation entries and appends the resulting child quads; counterpart 0x001591D8.
 0x001518A0	billResolveEntry	inferred	Resolves a billboard table entry's offset against its base and copies its 0x12 halfword into the output.
 0x001518D8	billSetAnimationEntry	inferred	LeverAudit
 0x00151A88	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList.
