@@ -254,7 +254,7 @@ extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
-extern void func_00113AF0(EffWorldNode *);
+extern void effUpdateValueTransitionProximity(EffWorldNode *);
 extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
 extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
 extern void *dds3GetWorldNodeData(EffWorldNode *node);
@@ -326,7 +326,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         effObjInnerVecBackup(obj->inner);
     }
     if (!dds3TestObjectFlags(obj, 0x100)) {
-        func_00113AF0(obj);
+        effUpdateValueTransitionProximity(obj);
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
@@ -433,7 +433,7 @@ typedef struct EffectValueObject {
 
 struct WorldIndexNode;
 extern s32 dds3IsPointWithinObjectRadius(f32 *, f32 *);
-void func_00113AF0(EffWorldNode *obj) {
+void effUpdateValueTransitionProximity(EffWorldNode *obj) {
     EffectObjectData *data = obj->data;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
     struct WorldIndexNode *list;
