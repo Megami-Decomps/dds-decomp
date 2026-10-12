@@ -612,4 +612,11 @@ typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS2 */
 
+/* Append an existing actor task to its scene group; the group borrows the pointer. */
+#ifdef VERSION_DDS1
+void fldAppendTaskToGroup(struct BtlTask *task);
+#elif defined(VERSION_DDS2)
+void fldAppendTaskToGroup(struct ActionStateLink *task);
+#endif
+
 #endif /* BTL_STATE_H */

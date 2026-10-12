@@ -645,8 +645,6 @@ extern void btlDebugPrintf(s32 tag, ...);
 
 extern void fldCreateSceneSpriteTask(s32 sourceTask);
 
-extern void fldAppendTaskToGroup(ActionStateLink *task);
-
 extern void fldUpdateSceneGroupTask(ActionStateLink *task);
 
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actor, u32 owner, s32 groupIndex);
