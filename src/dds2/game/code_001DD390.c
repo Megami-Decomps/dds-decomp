@@ -3160,7 +3160,6 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 

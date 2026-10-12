@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "fpu.h"
@@ -4920,7 +4921,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
