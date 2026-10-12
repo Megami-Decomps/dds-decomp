@@ -518,12 +518,13 @@ typedef char ParDispatch_size_must_be_0x0C[(sizeof(ParDispatch) == 0x0C) ? 1 : -
 /* Per-resource effect buffer entry (0x40); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferRecord {
     f32 position[4];
-    u8 pad10[0x10];
+    f32 velocity[4]; /* 0x10 */
     s32 age;        /* 0x20: live frame age; negative values encode delays or initialization states. */
     u32 color;      /* 0x24: packed color passed to billboard and subeffect drawing. */
     f32 scale;      /* 0x28: current billboard scale */
     f32 spin;       /* 0x2C: current billboard rotation */
-    u8 pad30[0x10];
+    f32 f30;       /* 0x30 */
+    u8 pad34[0x0C];
 } EffectBufferRecord;
 
 typedef char EffectBufferRecord_size_must_be_0x40[(sizeof(EffectBufferRecord) == 0x40) ? 1 : -1];
