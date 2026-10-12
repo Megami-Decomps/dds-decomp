@@ -652,6 +652,8 @@
 0x001184A8	sdfDispatchUnitScriptDefault5	inferred	Dispatches scripts by runtime mode and flags, selecting script 5 on the default branch.
 0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118570	sdfDispatchUnitScriptDefault9	inferred	Same runtime-mode dispatch as 001184A8 but uses script 9 on the default branch.
+0x00118620	evtRunCommandContext10	inferred	Invokes the command script's fixed event context 10 with the supplied script arguments and unit index.
+0x00118648	evtRunCommandContext7	inferred	Invokes the command script's fixed event context 7 with the supplied script arguments and unit index.
 0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
 0x00118688	sdfCalculateCommandVitalDelta	inferred	Computes the signed HP/MP delta from command power, base, vital type and effect handlers; DDS2 twin 0x00118D60.
 0x001189A0	sdfRollActionHit	inferred	Resolves a randomized roll/action result against packed value state. [names_qp9.tsv]

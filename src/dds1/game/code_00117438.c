@@ -565,16 +565,16 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-s32 func_00118620(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext10(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-s32 func_00118648(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext7(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
 s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    return func_00118648(unitIndex, scriptArg, contextArg, (u8)mode);
+    return evtRunCommandContext7(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 extern s32 effMiscRandMod(s32 state, s32 modulus);
@@ -640,7 +640,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
             healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
             break;
         case 1:
-            healing = func_00118620(channel, queryArg, (u32)item, vital);
+            healing = evtRunCommandContext10(channel, queryArg, (u32)item, vital);
             break;
         }
         healing += base;
@@ -702,7 +702,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
         }
         break;
     case 6:
-        damage = func_00118648(channel, queryArg, (u32)item, vital) + base;
+        damage = evtRunCommandContext7(channel, queryArg, (u32)item, vital) + base;
         if (damage == 0) {
             damage = 1;
         }
