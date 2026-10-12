@@ -17,6 +17,7 @@ struct StaffMenuRuntime;
 #include "fpu.h"
 #include "sdf.h"
 #include "itf.h"
+#include "menu_fade_entry.h"
 
 extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 
@@ -4019,13 +4020,6 @@ void mnuFreeListEntries(s32 *list);
 /* Store the active word and window address in the header-selected slot.
  * Preserve the native below-five early return; it is not an upper capacity bound. */
 void mnuAppendFadingWindowEntry(s32 activeValue, s32 windowAddress, s32 *list);
-
-typedef struct MenuFadeEntry {
-    u32 active;
-    u32 pad4[3];
-    void *window;
-    u32 pad14;
-} MenuFadeEntry;
 
 /* Native removal only accepts indices at least five. Propagate the tail
  * record backward to the target, clearing each source's window pointer. */
