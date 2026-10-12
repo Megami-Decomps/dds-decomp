@@ -2437,6 +2437,7 @@
 0x001944A0	frFontBindResourceSections	inferred	confidence=high; matched-C; src/dds1/game/code_00193C08.c:223:func_001944A0; Retains a missing font header, stores the resource buffer, binds optional flag/value sections, width-count sections, and the optional header-relative lookup table.; source=names_P5.tsv:2 [names_qp11.tsv]
 0x001945A8	frFontFreeEntry	inferred	frees indexed entry buffer if present, clears +0x18/+0x1C, skips idx < 2
 0x00194668	frFontFreeAllEntries	inferred	loops frFontFreeEntry over the nine D_003D6C80 entries; called by frFontReleaseAll [names_M33_SmallSweep2.tsv]
+0x001946C8	frFontUploadImageBlocks	inferred	Assembles six 16-word little-endian image blocks from table data and uploads each to its matching GS image buffer; DDS2 counterpart is 0x0019C358.
 0x00194788	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x00194800	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x00194840	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:217:func_00194840; Peer-matched C proposal; M141; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]

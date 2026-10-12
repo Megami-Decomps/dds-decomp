@@ -1985,6 +1985,7 @@
 0x0019BE20	frFontEnsureSlotLoaded	inferred	src/dds2/game/code_0019B840.c func_0019BE20: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. Twin of DDS1 func_00194190. [names_reviewed24.tsv]
 0x0019C130	frFontBindResourceSections	inferred	confidence=high; matched-C; src/dds2/game/code_0019B840.c:264:func_0019C130; Retains a missing font header, stores the resource buffer, binds optional flag/value sections, width-count sections, and the optional header-relative lookup table.; source=names_P5.tsv:2 [names_qp11.tsv]
 0x0019C2A8	frFontLoadDefaultFonts	inferred	Loads four files named /font/font0.fnt through /font/font3.fnt.
+0x0019C358	frFontUploadImageBlocks	inferred	Assembles six 16-word little-endian image blocks from table data and uploads each to its matching GS image buffer; DDS1 counterpart is 0x001946C8.
 0x0019C418	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x0019C490	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x0019C4D0	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:232:func_0019C4D0; Peer-matched C proposal; M141; source=names_pending_main.tsv:144 [names_qp12_apply.tsv]
