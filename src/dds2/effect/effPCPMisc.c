@@ -1824,7 +1824,7 @@ void *effAllocateThunderHandleWork(void) {
     return work;
 }
 
-extern void func_0016B160(void *destination, void *source);
+extern void effThunderCopyVectorOrigin(void *destination, void *source);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
@@ -1849,7 +1849,7 @@ void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effThunderSetVectorTint(work->handle, fadedColor);
-    func_0016B160((void *)work->handle, work);
+    effThunderCopyVectorOrigin((void *)work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
@@ -2015,7 +2015,7 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
     } else {
         effThunderSetVectorTint(work->handle, work->color);
     }
-    func_0016B160((void *)work->handle, work);
+    effThunderCopyVectorOrigin((void *)work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
@@ -2805,7 +2805,7 @@ void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effThunderSetVectorTint(work->handle, fadedColor);
-    func_0016B160((void *)work->handle, work);
+    effThunderCopyVectorOrigin((void *)work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
@@ -2878,7 +2878,7 @@ void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effThunderSetVectorTint(work->handle, fadedColor);
-    func_0016B160((void *)work->handle, work);
+    effThunderCopyVectorOrigin((void *)work->handle, work);
     effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
@@ -3124,7 +3124,7 @@ extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */
-void func_00184F50(EffPCPTripleWork *work) {
+void effPcpUpdateCameraRelativeTripleGroups(EffPCPTripleWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     f32 basis[4][4] __attribute__((aligned(16)));
     s32 frame = work->frame;
@@ -3773,7 +3773,7 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     return work;
 }
 
-void func_001874F0(void) {
+void effPcpSpawnMuzzleThunderRay(void) {
     effAllocateThunderFragmentWork(0);
 }
 
@@ -3787,7 +3787,7 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     return work;
 }
 
-void func_00187558(void) {
+void effPcpSpawnOffsetMuzzleThunderRay(void) {
     effAllocateThunderFragmentBurstWork(0);
 }
 
@@ -4092,7 +4092,7 @@ void effPcpStepScaledThunderTimeline(EffPCPGrowWork *work) {
     }
     color = work->color;
     effThunderSetVectorTint(work->handle, effBlendColor(color & 0xFFFFFF, color, opacity));
-    func_0016B160(work->handle, work->position);
+    effThunderCopyVectorOrigin(work->handle, work->position);
     effThunderScaleVectorDimensions(work->scale * scale, work->handle);
     effThunderUpdateVectorCells(work->handle);
     work->frame = (s32)((u32)work->frame + 1);
@@ -4308,7 +4308,7 @@ void effPcpReleaseBeamClone(EffPCPBeamWork *work) {
 }
 
 /* Grow the beam's visible geometry and fade it over its configured lifetime. */
-void func_00188550(EffPCPBeamWork *work) {
+void effPcpUpdateBeamGrowthAndFade(EffPCPBeamWork *work) {
     s32 vertexFrames = work->params.vertexGrowthFrames;
     s32 endFrame = vertexFrames;
     s32 frame = work->frame;
@@ -4733,7 +4733,7 @@ void effPcpGroupSetInitEntry(EffPCPGroupSet *work, s32 index) {
     entry->unk14 = work->head.unk78 * (effMiscRandUnitFloat(effDefaultRandomState) * ratio + (1.0f - ratio));
 }
 
-void func_00189500(EffPCPGroupSet *work) {
+void effPcpUpdateRadialFragmentGroupSet(EffPCPGroupSet *work) {
     f32 point[3];
     f32 origin[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
@@ -5074,7 +5074,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     return work;
 }
 
-void func_00189FF0(void *data) {
+void effPcpCreateDriftEventRingFromTable(void *data) {
     void *work0;
     void *work1;
 
@@ -5234,7 +5234,7 @@ void effPcpDriftSetScale(EffPCPDriftEventWork *work, f32 val) {
     work->scale = val;
 }
 
-void func_0018A690(EffPCPDriftEventWork *work, u32 value) {
+void effPcpSetDriftEventColor(EffPCPDriftEventWork *work, u32 value) {
     work->color = value;
 }
 
@@ -5526,7 +5526,7 @@ void effPcpCopyRandomizedVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0018B128(EffPCPPairedEventWork *work, u32 value) {
+void effPcpSetPairedEventColor(EffPCPPairedEventWork *work, u32 value) {
     work->color = value;
 }
 
