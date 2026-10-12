@@ -9494,3 +9494,39 @@ DDS2 function. All three DDS1 calls now use the shared name, and the
 obsolete later signed declaration is removed. No compiler flag, layout,
 inline helper, dummy value or frame padding is introduced.
 
+## Row-derived paired panel sprites
+
+DDS1 `mnuDrawPanelState` (`0x00282DA0`, 500 bytes) draws a heading,
+unselected row sprites, the selected row's decoration and alternate sprite,
+then its icon-panel handles. The `MenuPanelState` owner supplies real
+`MenuGridSlot` resource/index pairs. Its first pair is read together:
+retail loads the index in the nullable resource guard's delay slot, so the
+index read is retained even when that resource is null.
+
+Property P is to express the two row sprites as derivatives of the genuine
+logical row counter: `slot + i * 2` and `slot + i * 2 + 1`. The counter
+also selects the decorated row and controls the native loop. These are real
+sprite identifiers, not unused allocation variables or index copies.
+The manually maintained base/selected cursors retained a 21-word residual
+with direct descriptor reads, or 20 words after reading the first pair
+together. Replacing those cursors with the natural counter-derived
+identifiers makes the complete body exact.
+
+The deciding source-to-RTL mechanism is the loop pass's induction-variable
+classification and strength reduction. Its `rtl.09.loop` dump verifies
+basic induction variable 93, recognizes the scale-two base and adjacent
+sprite expressions, and reduces them to general induction variables
+137, 138 and 139. The subsequent loop analysis eliminates redundant 138,
+leaving the two increment-by-two sprite carriers visible in retail.
+This is not a claim that a particular later scheduler tie is the cause:
+the induction transformation is directly observed, and the final allocation
+and scheduling are verified byte-exact.
+
+The whole-unit gate is `154 match, 0 differ`: all 153 previously matched
+functions remain exact. The canonical ALL trace has 4245 decision lines and
+verifies hooked/unhooked assembly and every RTL dump. Trace paths and gate
+receipts remain in the agent ledger. DDS2's matched counterpart uses the
+same slot ownership but different panel/corner drawing; that behavior is not
+transplanted. No compiler flags, owner layouts, helpers or visibility
+boundaries change.
+

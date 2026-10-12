@@ -425,7 +425,57 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
     panel->state = state;
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawPanelState);
+/* Paired sprites derive from their row; see docs/idioms.md,
+ * "Row-derived paired panel sprites". */
+void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
+    s32 rowX;
+    s32 offsetY;
+    EffectSlotSet *rowSet;
+    s32 slot;
+    s32 i;
+
+    rowSet = panel->firstSlot.set;
+    slot = panel->firstSlot.index;
+    if (rowSet != NULL) {
+        itfDrawGridWithResolvedSlot(x, y, depth, 1, rowSet,
+                                   slot, drawArg);
+    }
+    rowX = panel->fourthValueA;
+    offsetY = panel->fourthValueB;
+    rowSet = panel->fourthSlot.set;
+    if (panel->fourthValueC == 0) {
+        slot = panel->fourthSlot.index + panel->state * 2;
+    } else {
+        slot = ((s32 *)panel->fourthValueC)[panel->state];
+    }
+    i = 0;
+    itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
+                               rowSet, slot, drawArg);
+    rowX = panel->thirdValueA;
+    offsetY = panel->thirdValueB;
+    rowSet = panel->thirdSlot.set;
+    slot = panel->thirdSlot.index;
+    if (panel->width > 0) {
+        do {
+            if (panel->state != i) {
+                itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
+                                           rowSet, slot + i * 2, drawArg);
+            } else {
+                s32 drawX = x + rowX;
+                itfDrawGridWithResolvedSlot(drawX + panel->secondValueA,
+                                           y + offsetY + panel->secondValueB, depth, 1,
+                                           panel->secondSlot.set,
+                                           panel->secondSlot.index, drawArg);
+                itfDrawGridWithResolvedSlot(drawX, y + offsetY, depth, 1,
+                                           rowSet, slot + i * 2 + 1, drawArg);
+            }
+            i++;
+            rowX += panel->height;
+        } while (i < panel->width);
+    }
+    mnuDrawIconPanelDefaultFlag(x, y, depth, 0x100, panel->resourceHandle, drawArg);
+    mnuUpdateWindowPanelHandleStates(panel->resourceHandle);
+}
 
 /* Create the five panel items owned by this group and clear its selection. */
 MenuPanelGroup *mnuCreatePanelGroup(EffectSlotSet *parent) {
