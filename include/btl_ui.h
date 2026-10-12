@@ -52,7 +52,7 @@ void fldInitializeSceneObject(BattleSceneObject *object, struct BtlTask *owner);
 #else
 void fldInitializeSceneObject(BattleSceneObject *object, struct ActionStateLink *owner);
 s32 fldSelectSceneMode(struct ActionStateLink *task);
-void func_001CAB60(struct ActionStateLink *task);
+void btlOpenBattleCommandPanel(struct ActionStateLink *task);
 #endif
 
 /* One allocated 0xCC-byte command panel, not a header plus overlapping rows.

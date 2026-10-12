@@ -1038,12 +1038,12 @@ s32 btlWaitEffectTask(void *arguments) {
     BtlWaitTask *task = arguments;
     if (task->ticks == 0) {
         btlCreateAnalysisPanelTask(task->value, 0);
-        func_001C7DB8(0, 8);
+        btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->ticks >= 0x11) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
-                func_001C7DB8(1, 8);
+                btlSetCommandPanelFadeMode(1, 8);
                 btlRequestAnalysisPanelClose();
                 return 1;
             }

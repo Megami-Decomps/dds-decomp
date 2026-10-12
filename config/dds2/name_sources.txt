@@ -2349,8 +2349,8 @@
 0x001C82A0	btlIsSceneActorCountWithinLimit	inferred	Returns whether the count of flagged battle scene actors is at most the supplied limit.
 0x001C83D0	fldUpdateSceneKindCounter	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:334:func_001C83D0; Refreshes the per-kind scene counter according to the selected scene kind and clamps its returned value to four unless requested otherwise.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001C89A0	fldCollectAvailableRosterEntries	inferred	Scans 256 roster entries and eight-byte availability records, packing available nonzero entries into a two-byte output list.
-0x001C8A28	fldGetCachedSceneActorNameAndId	inferred	Caches the resolved actor entry ID and returns the shared name buffer. [names_reviewed13.tsv]
-0x001C91D8	fldDispatchSceneKindHandler	inferred	switch on func_001C82D8(arg, control->kind) to per-kind handlers func_001C92A0/9EA0/9BE8/98E8/9DC8
+0x001C8A28	btlGetActorLinkageSkillList	inferred	confidence=high; matched-C; Correction: prior actor-name/name-buffer interpretation was incorrect. Caches the count from native 0x001AC750 and returns shared BattleRosterTable of LINKAGE skill IDs and participant pairs; DDS1 twin 0x001BD708 refreshes its list on each call. Namer1 batch 11.
+0x001C91D8	fldDispatchSceneKindHandler	inferred	switch on btlGetActorCommandClass(arg, control->kind) to per-kind handlers func_001C92A0/9EA0, btlDrawItemCommandRows, func_001C98E8/9DC8
 0x001C9DC8	btlDrawRetreatCommandLabel	inferred	Draws the literal Retreat command label in the battle menu. [names_reviewed12.tsv]
 0x001CA390	btlCheckScenePairResult	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:489:func_001CA390; Queries self and both optional scene objects; returns self result first, then first-object result, then second-object result.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001CA490	btlUpdateBattleSceneCommands	inferred	TaskPurist4
@@ -2365,7 +2365,7 @@
 0x001CB158	fldSetSceneObjectAndGroupStates	inferred	Sets a present scene object and the shared scene group to their next states. [names_reviewed17.tsv]
 0x001CB190	fldGetSceneDirectionStepOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
 0x001CC7C8	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
-0x001CC8D0	fldStepSceneStateMachine	inferred	switch on state (1->2, 2 runs func_001CC020/438, 6 -> -1)
+0x001CC8D0	fldStepSceneStateMachine	inferred	switch on state (1->2, 2 runs btlUpdateTargetSelectionInput/btlUpdateAndDrawTargetActorPanels, 6 -> -1)
 0x001CC9C0	btlCreateAiWork	inferred	confidence=high; matched-C; src/dds2/game/code_001C7FF8.c:797:func_001CC9C0; Allocates scene AI work and two target index lists, populates them from current scene state and selects initial target entry.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001CCB50	fldReleaseSceneSpriteWork	inferred	Releases both sprite resources and frees the sprite work allocation.
 0x001CCB88	fldReleaseSceneSprite	inferred	Releases current sprite using scene handle, then clears the scene object's slot at +0x2d4.
