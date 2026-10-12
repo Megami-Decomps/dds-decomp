@@ -54,7 +54,7 @@ extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 
-extern void *func_0014FE28(void);
+extern void *effCreateNodeFromParameter(void);
 
 
 struct EffNode;
@@ -501,7 +501,7 @@ EffectObj *effObjCreateBillboardInWorld(void *bill, void *firstVector, s32 secon
 void effObjCreateBillboardFromFactory(u32 unused, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
-    bill = func_0014FE28();
+    bill = effCreateNodeFromParameter();
     effObjCreateBillboardInWorld(bill, firstVector, secondVectorAddress);
 }
 
