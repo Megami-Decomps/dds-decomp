@@ -37,12 +37,12 @@ typedef struct ConsBuf {
     u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
 } ConsBuf;
 
-void func_002E3F58(DevConsState *arg0, s32 arg1, s32 arg2);
-void func_002E41B8(ConsBuf *arg0);
+void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
+void sdfDevConsFinalizeGlyphTag(ConsBuf *arg0);
 void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
 void func_002E42F8(DevConsState *arg0, ConsBuf *arg1);
 void func_002E4428(DevConsState *arg0, ConsBuf *arg1);
-void func_002E45D0(ConsBuf *arg0, void *arg1, s32 arg2);
+void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
 s32 func_00305B08(char *destination, const char *format, void *args);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
 void sceDmaSendN(void *ch, void *addr, s32 size);
@@ -72,7 +72,8 @@ void sdfDevConsAdvanceRow(DevConsState *console) {
     console->cursorColumn = 0;
 }
 
-void func_002E3F58(DevConsState *console, s32 character, s32 attribute) {
+/* Store one character/attribute cell, interpreting cursor controls and row wrap. */
+void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribute) {
     s32 count;
     s32 remainder;
     s32 tabWidth;
@@ -120,7 +121,7 @@ void func_002E3F58(DevConsState *console, s32 character, s32 attribute) {
 
 /* Forward a character and explicit attribute to the console renderer. */
 void sdfDevConsWriteCharacter(DevConsState *console, s32 character, s32 attribute) {
-    func_002E3F58(console, character, attribute);
+    sdfDevConsStoreCharacter(console, character, attribute);
 }
 
 /* Return the emitted character count. The formatter receives no buffer limit. */
@@ -136,7 +137,7 @@ s32 sdfDevConsPrintf(DevConsState *console, const char *format, ...) {
     if (character != 0) {
         do {
             characterCount++;
-            func_002E3F58(console, character, console->textAttribute);
+            sdfDevConsStoreCharacter(console, character, console->textAttribute);
             textCursor = textBuffer + characterCount;
             character = *textCursor;
         } while (character != 0);
@@ -167,7 +168,7 @@ void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.
  * Five eight-byte register values form one sprite; pad an odd value count. */
-void func_002E41B8(ConsBuf *buffers) {
+void sdfDevConsFinalizeGlyphTag(ConsBuf *buffers) {
     u8 *cursor = buffers->writeCursor;
     vu64 *tag = (vu64 *)buffers->currentTag;
     s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
@@ -192,7 +193,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
     u32 *channelRegisters;
     u32 nextBufferIndex;
 
-    func_002E41B8(packetBuffers);
+    sdfDevConsFinalizeGlyphTag(packetBuffers);
     packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
     if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
         channelRegisters = packetBuffers->dmaChannel;
@@ -216,7 +217,7 @@ void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
     u32 origin;
     u32 extent;
 
-    func_002E41B8(packetBuffers);
+    sdfDevConsFinalizeGlyphTag(packetBuffers);
     if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
         sdfDevConsKickPacketDma(packetBuffers);
     }
@@ -303,7 +304,7 @@ void func_002E4428(DevConsState *console, ConsBuf *buffers) {
 
 /* Initialize both uncached packet buffers and complete the GS setup packet.
  * Reserve the first glyph tag only after the setup values have been written. */
-void func_002E45D0(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
+void sdfDevConsInitPacketBuffers(ConsBuf *packetBuffers, void *buffer, s32 bufferBytes) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
@@ -343,13 +344,13 @@ typedef struct DevConsStackPackets {
 } DevConsStackPackets;
 
 /* Render every console in the global chain into a stack packet buffer and submit it. */
-void func_002E46B8(void) {
+void sdfDevConsRenderAll(void) {
     DevConsStackPackets storage;
     ConsBuf packetBuffers;
     DevConsState *console;
 
     if (D_003BD3C0 != NULL) {
-        func_002E45D0(&packetBuffers, storage.data, 0x1000);
+        sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
         for (console = D_003BD3C0; console != NULL; console = console->unk4) {
             func_002E4428(console, &packetBuffers);
         }

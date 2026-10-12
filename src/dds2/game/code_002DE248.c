@@ -1304,7 +1304,8 @@ void effReleaseFadeColorWork(EffResourceRectWork *work) {
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
 extern void effResourceRectDrawGsCoords(EffResourceRectWork *work);
 
-void func_002DFAB0(EffKindWork *work) {
+/* Update the fade rectangle's projected extent, center and multiplied tint. */
+void effUpdateProjectedFadeColor(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffResourceRectWork *out = (EffResourceRectWork *)work->handle;
     s32 duration = config->duration;
@@ -3118,7 +3119,8 @@ typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 
-void func_002E64F0(EffClassWork *work) {
+/* Generate the timed ring's four radial point bands; reverse-time mode is retained. */
+void effUpdateExpandingRingPoints(EffClassWork *work) {
     EffExpandingRingParams *config = work->payload;
     EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
     f32 direction[4];
@@ -3318,7 +3320,8 @@ typedef struct EffClassRowOutput {
 
 extern void effAdvanceClassFrame(EffClassWork *);
 
-void func_002E6B68(BillCellDrawWork *work) {
+/* Advance frame geometry and rebuild scaled row offsets with predecessor wrapping. */
+void effUpdateScaledClassFrameRows(BillCellDrawWork *work) {
     u8 *config = work->config;
     s32 limit = work->frameLimit;
     s32 progress = ((EffBillTimedHeader *)config)->time.progress;
@@ -3963,7 +3966,7 @@ s32 effRecreateSurfaceNodeFromWork(u8 *work) {
 }
 
 
-void func_002E7F60(EffectSlotNode54 *, u8 *);
+void effCloneSurfaceGridResources(EffectSlotNode54 *, u8 *);
 
 u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
     FileSlotTable *config = ((EffectSlotNode54 *)work)->record;
@@ -3972,11 +3975,12 @@ u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
 
     effRebuildSurfaceHandles(object, ((EffectSlotNode54 *)work)->record->type, (s32)work + 0x10);
     effReplaceResourceRef(object, ((EffectSlotNode54 *)work)->record->type, arg);
-    func_002E7F60(object, work);
+    effCloneSurfaceGridResources(object, work);
     return object;
 }
 
-void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
+/* Replace the destination's kind-selected resources with clones or retained references. */
+void effCloneSurfaceGridResources(EffectSlotNode54 *dst, u8 *work) {
     EffectSlotNode54 *src = (EffectSlotNode54 *)work;
     u32 count;
     s32 size;
@@ -4619,7 +4623,7 @@ typedef struct Matrix4 Matrix4;
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
 
 /* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
-void func_002EB728(EffClassWork *work) {
+void effDrawTintedFivePointGroupRows(EffClassWork *work) {
     EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
     EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
     s32 frame = work->frame;
@@ -5663,7 +5667,8 @@ void effSetStripRecordColor(EffectStripNode *node, u32 color) {
     node->color = color;
 }
 
-void func_002EEDA8(EffectStripNode *p, f32 value) {
+/* Store opacity and notify the strip's active-record callback. */
+void effSetStripOpacity(EffectStripNode *p, f32 value) {
     p->opacity = value;
     dds3DispatchIndexedCallback((s32)p->active, value);
 }
@@ -6718,7 +6723,7 @@ typedef struct EffMeshOutput {
     u8 mode;            // 0x14
 } EffMeshOutput;
 
-void func_002F2760(BillCellDrawWork *work) {
+void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillFlameConfig *)config)->header.timed.time.progress;
@@ -7744,7 +7749,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
 extern void evtConfigureUnitTransition(EvtUnit *, s32);
 
 /* Restore actor light endpoints and directions when the field-light effect ends. */
-void func_002F5EF0(u32 unusedResource) {
+void effRestoreBattleActorLighting(u32 unusedResource) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     u32 first[4];
@@ -7824,7 +7829,8 @@ extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
-void func_002F6000(EffActiveResource *work) {
+/* Apply timed actor light transitions, then fade back to the original colors/directions. */
+void effUpdateBattleActorLighting(EffActiveResource *work) {
     EffectVectorRequest request;
     BtlUnit *actors[16];
     f32 direction[4];
@@ -11678,7 +11684,7 @@ void effInitializeResourceQueue(void) {
     FileJob *queueFile;
 
     if (effFileQueueNameRecord != 0) {
-        func_0020E368(effFileQueueNameRecord);
+        btlDestroyResourceNameRecord(effFileQueueNameRecord);
     }
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_004384E8);
     btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
@@ -11693,7 +11699,7 @@ u32 effPollResourceQueue(void) {
     btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002FCA40())->name);
     result = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(result - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
-        func_0020E368(effFileQueueNameRecord);
+        btlDestroyResourceNameRecord(effFileQueueNameRecord);
         effFileQueueNameRecord = 0;
         return 0;
     }
@@ -11702,7 +11708,7 @@ u32 effPollResourceQueue(void) {
 
 void effReleaseQueuedResourceName(void) {
     if (effQueuedResourceNameRecord != 0) {
-        func_0020E368(effQueuedResourceNameRecord);
+        btlDestroyResourceNameRecord(effQueuedResourceNameRecord);
         effQueuedResourceNameRecord = 0;
     }
 }
@@ -11732,7 +11738,7 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {
-            func_0020E368(effQueuedResourceNameRecord);
+            btlDestroyResourceNameRecord(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {
             record->completion.state = BTL_RESOURCE_SELECTION_PENDING;
