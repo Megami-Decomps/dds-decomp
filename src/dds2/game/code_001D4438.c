@@ -51,10 +51,10 @@ extern s32 D_003B6940[];
 extern s32 func_00230978(void);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern s32 func_001B4040();
+extern s32 btlRollMajinEncounter();
 extern s32 btlRollSurpriseAttack();
 extern void func_0022AF90();
-extern void func_00229728();
+extern void btlInitializeBossCallbacks();
 extern void btlSelectSceneAudioTrack();
 
 typedef struct {

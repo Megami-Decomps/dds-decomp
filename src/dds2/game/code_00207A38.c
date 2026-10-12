@@ -1174,7 +1174,8 @@ u32 btlScriptSelectEmptyCommand(void) {
     return 1;
 }
 
-u32 func_00209DA8(void) {
+/* Select the fixed mode-6/value-0xC2 command and continue the script VM. */
+u32 btlScriptSelectFixedCommand(void) {
     BtlCommandCtx *context;
 
     context = (BtlCommandCtx *)scrGetCurrentCommandWork();
@@ -1508,7 +1509,8 @@ s32 btlCmdSelectChoiceSlot2Code0C(void) {
     return 1;
 }
 
-s32 func_0020A7C0(void) {
+/* Remember the percentage choice when an eligible party unit reaches that HP proportion. */
+s32 btlCmdRememberPartyHighHpChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x1000000)) {
@@ -2038,7 +2040,8 @@ s32 btlCmdRememberUpperSelectedElement(void) {
     return 1;
 }
 
-s32 btlCmdRememberLowerLeadingElement(void) {
+/* Remember the choice when an eligible party unit's queued action matches its category query. */
+s32 btlCmdRememberPartyQueuedActionCategory(void) {
     u8 *context = (u8 *)scrGetCurrentCommandWork();
     u32 choice = scrReadIntParameter(0);
     if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
@@ -2379,7 +2382,8 @@ u32 btlScriptSetBattleCommand(void) {
     return 1;
 }
 
-s32 func_0020C6F8(void) {
+/* Forward the script parameter to mode 0x31B's stat selector and continue the VM. */
+s32 btlScriptSetBossStatSelector(void) {
     btlSetSpecialBattleEffectActorByte(scrReadIntParameter(0));
     return 1;
 }

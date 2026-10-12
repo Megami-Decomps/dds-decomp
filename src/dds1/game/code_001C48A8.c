@@ -172,7 +172,7 @@ void fldBattleSceneEnterInit(u8 *arg0) {
         *(u8 *)(arg0 + 0x24A) = 0;
     }
     func_0020FF50();
-    func_0020ED90(*(u32 *)(arg0 + 0x27C));
+    btlInitializeBossCallbacks(*(u32 *)(arg0 + 0x27C));
     sndStartBattleSceneStream(*(u32 *)(arg0 + 0x270), *(u32 *)(arg0 + 0x27C));
     VU0_STORE_VF($vf0, arg0);
 }

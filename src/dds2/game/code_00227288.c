@@ -789,7 +789,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
 }
 
 /* Recognize the two action codes accepted by the linked-command aim handler. */
-s32 func_00228F20(BtlLinkedCommand *command) {
+s32 btlIsSpecialActionKind(BtlLinkedCommand *command) {
     switch (command->actionCode) {
     case 0x171:
         return 1;
@@ -987,7 +987,8 @@ void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
     }
 }
 
-void btlSetAlternateKindForEnabledSpecialUnit(BtlUnit *unit) {
+/* Apply the conditional one-HP override at unit entry. */
+void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
     if ((unit->status.flags & 0x400) &&
         unit->partyRecord.unitId == 0x144 &&
         mdlFlagTest(0x841)) {
@@ -1047,7 +1048,8 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     }
 }
 
-s32 func_002295D8(BtlUnit *unit, s32 action, s32 unused) {
+/* Suppress motion choice 13 only for enemy units listed by this battle scene. */
+s32 btlFilterListedUnitMotionChoice(BtlUnit *unit, s32 action, s32 unused) {
     BtlState *battle;
     u16 *listedMode;
     u32 i;
@@ -1310,7 +1312,8 @@ extern void func_00227DA8(ActionStateLink *, s32, u64, u64, u64);
     memcpy((u8 *)&(storage) + (byteOffset), &callback, sizeof(callback)); \
 }
 
-void func_00229728(s32 mode) {
+/* Install mode-specific boss callbacks/state, then invoke their setup hook. */
+void btlInitializeBossCallbacks(s32 mode) {
     BtlState *battle;
     void *allocation;
     void (*setup)(void);
@@ -1323,7 +1326,7 @@ void func_00229728(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, func_00217EB8);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSelectionEmptyValue);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlShiftUnitUpForScriptAction);
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         allocation = sdfAllocateBlockBySizeThreshold(0x1);
         battle->effect = allocation;
         memset(allocation, 0, 0x1);
@@ -1340,7 +1343,7 @@ void func_00229728(s32 mode) {
             BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_00218150);
         }
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlRestoreEnemyUnitWhenModelFlagSet);
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         break;
     }
     case 0x303:
@@ -1506,7 +1509,7 @@ void func_00229728(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->pad6C0, 0x4, btlMapActorMotionId);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x0, func_0021F848);
         BTL_INSTALL_CALLBACK(battle->unk618, 0x0, btlIsSpecialMotion);
-        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, func_002295D8);
+        BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlFilterListedUnitMotionChoice);
         allocation = sdfAllocateBlockBySizeThreshold(0x8);
         battle->effect = allocation;
         memset(allocation, 0, 0x8);
@@ -1735,7 +1738,7 @@ void func_00229728(s32 mode) {
         BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, func_00228B08);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
-        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, func_00228F20);
+        BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
         BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, func_00228F48);
         allocation = sdfAllocateBlockBySizeThreshold(0x18);
         battle->effect = allocation;
@@ -1779,7 +1782,7 @@ void func_00229728(s32 mode) {
             battle->commandRestrictFlags |= 0x40000;
         }
         battle->commandRestrictFlags |= 0x82800;
-        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlSetAlternateKindForEnabledSpecialUnit);
+        BTL_INSTALL_CALLBACK(battle->initializeUnitEntry, 0x0, btlInitializeSpecialUnitHpOverride);
         BTL_INSTALL_CALLBACK(battle->pad5E8, 0x0, func_00229470);
         break;
     }
