@@ -14,8 +14,9 @@ void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     } while (-1 < remaining);
 }
 
-extern u32 uiBlendColors(u32, u32, s32);
+extern u32 uiBlendColors(u32, u32, u32);
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
 void mnuDrawWidthScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
     u32 colors[4];
@@ -58,7 +59,24 @@ void mnuDrawHeightScaledPanelGradient(s32 x, s32 y, s32 z, MenuPanelFade *work, 
     uiDrawGradientColorRect(x, y - extent, z, 0x1000, extent, colors, surface);
 }
 
-INCLUDE_ASM(const s32, "game/code_002818B8", func_00281AE8);
+/* Draw the expanding panel gradient and its dim full-size overlay. */
+void func_00281AE8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {
+    u32 colors[4];
+    u32 color;
+    u32 transparentColor;
+    s32 height;
+
+    color = uiBlendColors(0x5A3C8026, 0x5A3C8000, work->blend);
+    transparentColor = color & 0xFFFFFF00;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = transparentColor;
+    colors[3] = transparentColor;
+    height = ((0x200 - work->blend) / 2 + 0x40) << 4;
+    uiDrawGradientColorRect(x, y, z, 0x2000, height, colors, surface);
+    uiDrawUniformColorRect(x, y, z, 0x2000, 0xE00,
+                          transparentColor | ((color & 0xFF) >> 2), surface);
+}
 
 typedef enum MenuPanelFadeKind {
     MENU_PANEL_FADE_WIDTH,
@@ -66,7 +84,6 @@ typedef enum MenuPanelFadeKind {
     MENU_PANEL_FADE_SPRITE
 } MenuPanelFadeKind;
 
-extern void func_00281AE8(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface);
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 
 void func_00281BE0(s32 x, s32 y, s32 z, MenuPanelFade *work, s32 surface) {

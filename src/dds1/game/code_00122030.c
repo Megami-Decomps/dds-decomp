@@ -962,7 +962,7 @@ extern FieldVec4 D_0039FC60;
 
 extern FieldVec4 D_0039FC70;
 
-extern u128 D_0032F170[3];
+extern f32 D_0032F170[12];
 
 extern char D_003BABB8[];
 

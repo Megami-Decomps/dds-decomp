@@ -25,6 +25,11 @@
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
+#include "sdf_textured_rect.h"
+
+extern void fldSetCameraNodeModeWithTen(void);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mdlFlagSet(s32);
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -4309,7 +4314,104 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00150138);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+/* Draw the countdown, pickup total, and expanding pickup pulse. */
+INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
+
+void func_00150138(void) {
+    s32 timerOrigins[10][2] = {
+        {2, 2}, {21, 2}, {40, 2}, {59, 2}, {78, 2}, {97, 2},
+        {2, 21}, {21, 21}, {40, 21}, {59, 21}
+    };
+    s32 pickupOrigins[10][2] = {
+        {2, 2}, {26, 2}, {50, 2}, {74, 2}, {98, 2},
+        {2, 25}, {26, 25}, {50, 25}, {74, 25}, {98, 25}
+    };
+    /* Each layer row contains radius, packed vertex color, and copy count. */
+    s32 pickupEffects[5][3] = {
+        {1, 0x18808080, 1}, {1, 0x30808080, 2}, {1, 0x60808080, 3},
+        {2, 0x60808080, 2}, {3, 0x60808080, 1}
+    };
+    s32 remainingFrames;
+    s32 remaining;
+    s32 digit;
+    s32 pickupTens;
+    s32 pickupOnes;
+    s32 i;
+    s32 radius;
+    s32 color;
+    s32 diameter;
+    u32 vertexColor;
+
+    remainingFrames = fldSparkControlState.countdown;
+    vertexColor = 0x80808080;
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitGradientTriangle(0, 0, 180, 0, 0, 140,
+                              0x1A063564, 0x01063564, 0x01063564);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitTexturedGradientQuad(15, 19, 74, 13, 2, 41, 74, 13,
+        vertexColor, vertexColor, vertexColor, vertexColor, D_004363AC);
+    evtSubmitTexturedGradientQuad(24, 26, 122, 48, 2, 2, 122, 48,
+        vertexColor, vertexColor, vertexColor, vertexColor, D_004363B4);
+
+    remaining = remainingFrames / 30;
+    if (remaining >= 100) {
+        remaining = 99;
+    }
+    digit = remaining / 10;
+    if (digit > 0) {
+        evtSubmitTexturedGradientQuad(89, 15, 18, 18,
+            timerOrigins[digit][0], timerOrigins[digit][1], 18, 18,
+            vertexColor, vertexColor, vertexColor, vertexColor, D_004363AC);
+    }
+    digit = remaining % 10;
+    evtSubmitTexturedGradientQuad(99, 15, 18, 18,
+        timerOrigins[digit][0], timerOrigins[digit][1], 18, 18,
+        vertexColor, vertexColor, vertexColor, vertexColor, D_004363AC);
+
+    remaining = (s16)fldAreaState.collectedCount;
+    if (remaining >= 100) {
+        remaining = 99;
+    }
+    pickupTens = remaining / 10;
+    pickupOnes = remaining % 10;
+    if (pickupTens > 0) {
+        evtSubmitTexturedGradientQuad(33, 37, 22, 21,
+            pickupOrigins[pickupTens][0], pickupOrigins[pickupTens][1], 22, 21,
+            vertexColor, vertexColor, vertexColor, vertexColor, D_004363B0);
+    }
+    evtSubmitTexturedGradientQuad(50, 37, 22, 21,
+        pickupOrigins[pickupOnes][0], pickupOrigins[pickupOnes][1], 22, 21,
+        vertexColor, vertexColor, vertexColor, vertexColor, D_004363B0);
+
+    if (fldSparkControlState.pickupDelay > 0) {
+        evtSubmitPrimaryAlphaBlendMode(1);
+        for (i = 0; i < pickupEffects[fldSparkControlState.pickupDelay][2]; i++) {
+            radius = pickupEffects[fldSparkControlState.pickupDelay + i][0];
+            color = pickupEffects[fldSparkControlState.pickupDelay][1] / (i + 1);
+            diameter = radius * 2;
+            if (pickupTens > 0) {
+                evtSubmitTexturedGradientQuad(33 - radius, 37 - radius,
+                    22 + diameter, 21 + diameter,
+                    pickupOrigins[pickupTens][0], pickupOrigins[pickupTens][1], 22, 21,
+                    color, color, color, color, D_004363B0);
+            }
+            evtSubmitTexturedGradientQuad(50 - radius, 37 - radius,
+                22 + diameter, 21 + diameter,
+                pickupOrigins[pickupOnes][0], pickupOrigins[pickupOnes][1], 22, 21,
+                color, color, color, color, D_004363B0);
+        }
+        evtSubmitPrimaryAlphaBlendMode(0);
+        if (fldSparkControlState.pickupDelay > 0) {
+            fldSparkControlState.pickupDelay--;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
 
@@ -4353,13 +4455,6 @@ extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void func_00130FF0(u32, u32);
 extern void func_00150138(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DF8);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E48);
-
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E98);
 
 void fldUpdateDevilizeEventSequence(void) {
     f32 position[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -4514,7 +4609,125 @@ s32 func_00150F10(void) {
     return fldSparkControlState.dialogPhase;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00150F20);
+/* Update the spark encounter, its timeout dialog, and the return-to-field fade. */
+void func_00150F20(void) {
+    s32 phase;
+    s32 value;
+
+    phase = fldSparkControlState.phase;
+    if (phase == 1) {
+        if (fldSparkControlState.mode == 0) {
+            if ((s8)D_0037F510[1][0][0] < 0) {
+                func_00130FF0(6, 20);
+                sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
+                fldSparkControlState.mode = 1;
+                fldSparkControlState.pulse = 1;
+                fldSparkControlState.modeCountdown = 20;
+                fldSparkControlState.pendingMode = 0;
+            }
+        } else if (fldSparkControlState.modeCountdown > 0) {
+            value = fldSparkControlState.modeCountdown - 1;
+            fldSparkControlState.modeCountdown = value;
+            if (value == 0) {
+                if (fldSparkControlState.pendingMode == 0) {
+                    s32 pendingMode;
+                    func_00130FF0(1, 0);
+                    pendingMode = fldSparkControlState.pendingMode;
+                    fldSparkControlState.mode = pendingMode;
+                    fldSparkControlState.modeCountdown = 0;
+                    fldSparkControlState.pendingMode = 0;
+                }
+            } else if (fldSparkControlState.mode == 1 &&
+                       fldSparkControlState.pendingMode == 0 && value < 14 &&
+                       (s8)D_0037F510[1][0][0] < 0) {
+                func_00130FF0(6, 20);
+                sndSetSequenceVolumePan(0x680012, 0x7F, 0x3F);
+                fldSparkControlState.mode = 1;
+                fldSparkControlState.pulse = 1;
+                fldSparkControlState.modeCountdown = 20;
+            }
+        }
+
+        if (func_00150F10() == 0 && fldTestSceneControlFlags(0x40) != 0) {
+            if (fldSparkControlState.countdown == 300) {
+                sndSetSequenceVolumePan(0x680017, 0x7F, 0x3F);
+            }
+            if (fldSparkControlState.countdown > 0) {
+                fldSparkControlState.countdown--;
+            }
+        }
+
+        func_00150138();
+        if (fldSparkControlState.countdown < 31) {
+            func_00341C78(0x680017);
+            fldSparkControlState.countdown = 0;
+            fldReleaseCameraModel(0);
+            func_00130FF0(2, 0);
+            fldSetCameraNodeModeWithTen();
+            fldSparkControlState.phase = 3;
+            evtCreateMessageWindowIfMissing(D_003A9EB0);
+            dspStartEntry(7);
+            fldResetPlayerSceneObjectState();
+        } else {
+            func_0014FD28();
+        }
+        return;
+    } else if (phase == 3) {
+        func_0026C900();
+        if (evtGetMessageWindowControlState() == 0) {
+            evtFinishMessageWindowAndNotify();
+            dspCloseChannel();
+            fldSparkControlState.frame = 0;
+            fldSparkControlState.phase = 6;
+            fldSparkControlState.terminated = 1;
+        }
+        if (fldSparkControlState.terminated != 0) {
+            mnuMarkTitleStreamResetPending();
+            fldAreaState.pendingSceneRequest = 1;
+            fldResetPlayerSceneObjectState();
+            fldSparkControlState.phase = 7;
+            mdlFlagSet(0x802);
+            return;
+        }
+    } else if (phase == 6) {
+        return;
+    } else if (phase == 7) {
+        fldSparkControlState.frame++;
+        if (fldSparkControlState.frame == 40) {
+            kwlnFadeInStart(255, 255, 255, 4);
+        }
+        if (fldSparkControlState.frame < 45) {
+            return;
+        }
+        fldSparkControlState.phase = 8;
+    } else if (phase == 8) {
+        sndSetSequenceVolumePan(0x680011, 0x7F, 0x3F);
+        func_00125B10();
+        fldStartSceneBgmAlternate();
+        evtSetSolarOverlayFullyVisible();
+        fldAreaState.unk138 = 1;
+        fldSparkControlState.phase = 9;
+        fldSparkControlState.frame = 0;
+    } else if (phase == 9) {
+        fldSparkControlState.frame++;
+        if (fldSparkControlState.frame == 1) {
+            kwlnFadeOutStart(255, 255, 255, 4);
+        }
+        if (fldSparkControlState.frame == 6) {
+            effObjClearFlags(fldSparkControlState.object, 1);
+            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363A4);
+        }
+        if (fldSparkControlState.frame >= 11) {
+            D_003899E0[0] = 0;
+            fldPreparePlayerSceneCameraTarget();
+            fldSparkControlState.phase = 0;
+            fldAreaState.transitionMode = 0;
+        }
+    } else {
+        return;
+    }
+}
 
 
 void func_001512D8(void) {
