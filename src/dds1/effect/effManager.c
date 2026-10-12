@@ -6,6 +6,13 @@
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
+#include "sdf_packet_list.h"
+#include "sdf_gs_packet.h"
+#include "kwln.h"
+
+extern SdfPoolNode kwlnDrawSurfaces[];
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void effObjectListCountersReset(void);
 
 
 void effManagerInitializeSubsystems(void) {
@@ -14,7 +21,46 @@ void effManagerInitializeSubsystems(void) {
     effBillDispatchAll();
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", func_0014F860);
+/* Submit the test and alpha state packets to both field draw buffers. */
+s32 func_0014F860(KwlnTask *task) {
+    SdfListHead *list;
+    SdfGsBlendPacket *state;
+    SdfPoolNode *surface;
+
+    (void)task;
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = 0xE;
+    state->registers.test.value = 0x51801;
+    state->registers.test.registerId = 0x47;
+    state->registers.alpha.value = 0x44;
+    state->registers.alpha.registerId = 0x42;
+    sdfAppendPacket(list, (u32)state);
+    surface = &kwlnDrawSurfaces[51];
+    surface->append(surface, list);
+
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
+    state->header.dmaTag = 3;
+    state->header.vifCommands = 0x5000000310000000ULL;
+    state->header.gifTag = 0x1000000000008002ULL;
+    state->header.gifRegisters = 0xE;
+    state->registers.test.value = 0x71801;
+    state->registers.test.registerId = 0x47;
+    state->registers.alpha.value = 0x42;
+    state->registers.alpha.registerId = 0x42;
+    sdfAppendPacket(list, (u32)state);
+    surface++;
+    surface->append(surface, list);
+
+    effObjectListCountersReset();
+    return 0;
+}
 
 u32 effManagerUpdateAndDispatch(void) {
     func_0015B420();

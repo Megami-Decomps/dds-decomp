@@ -823,7 +823,70 @@ s32 func_00318C00(MnuShootingWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_003191B0);
+extern u8 *mnuAcquireUnusedModelNode(u32 *group);
+extern s32 itfClaimFreeModelInstance(ModelInstanceList *list);
+extern MnuModelNode *D_00438928;
+
+void func_003191B0(MenuWorkEntry *entry, MnuShootingWork *work) {
+    u32 tagClass = entry->tag & MNU_WORK_TAG_CLASS_MASK;
+    MnuNodeList *groups = work->modelWork->groups;
+    ModelInstanceList *instances = work->work24->lists;
+    u32 parameterIndex;
+    MenuRegistryParameters *parameters = NULL;
+    s32 kind;
+
+    if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) goto movement;
+    parameterIndex = 0;
+    if (tagClass == MNU_WORK_TAG_REGISTRY_TABLE) goto registry;
+    kind = 0;
+    goto create;
+
+movement:
+    kind = 3;
+    func_002A2628(0x12);
+    mnuClearInactiveSoundBufferState();
+    parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
+    D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(
+        (u32 *)&groups[8]);
+    evtPrintDeveloperConsoleMessage("---------------------BG create!!\n");
+    goto create;
+
+registry: {
+    MenuRegistry *record = mnuGetMenuRecordRegistryEntry(entry->tag);
+    parameterIndex = record->parameterIndex;
+    parameters = mnuGetMenuRegistryParametersByIndex(parameterIndex);
+    kind = parameters->kind;
+    work->targets++;
+}
+
+create:
+
+    if (kind != 1) {
+        if (kind == 3) {
+            MnuModelNode *node = (MnuModelNode *)mnuAcquireUnusedModelNode(
+                (u32 *)&groups[parameterIndex]);
+            entry->object.modelNode = node;
+            if (node != NULL) {
+                if (tagClass == MNU_WORK_TAG_MOVEMENT_TABLE) node->flags |= 2;
+                func_00319A58(entry, work);
+            } else {
+                evtPrintDeveloperConsoleMessage("model none\n");
+            }
+        }
+    } else {
+        ModelInstance *instance = (ModelInstance *)itfClaimFreeModelInstance(
+            &instances[parameterIndex]);
+        entry->object.modelInstance = instance;
+        if (instance != NULL) {
+            instance->scale = (f32)parameters->scale / 100.0f;
+            func_00319A58(entry, work);
+        } else {
+            func_0035B6E0("sprite none\n");
+        }
+    }
+    evtPrintDeveloperConsoleMessage("---------------------create!!\n");
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00319388);
 
@@ -894,7 +957,60 @@ void func_0031A090(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_0031A0B8);
+s32 func_0031A0B8(MnuShootingWork *work) {
+    MenuWorkEntry *entry = &D_0040ABF8;
+    MnuModelNode *node = entry->object.modelNode;
+    s32 finished = 0;
+    s32 mode;
+
+    switch (work->unkA8) {
+    case 0:
+        work->unkA8 = 2;
+        entry->currentX = 120.0f;
+        entry->currentY = 500.0f;
+        mode = entry->flagsBits.mode;
+        if (entry->flagsBits.finished && mode >= 2) {
+            mode = mode >= 3 ? mode - 2 : mode - 1;
+            func_003242D0(entry, mode);
+        }
+        entry->flags = ((mode & 0xF) << 15) | 0x4001;
+        work->unkAC = 0;
+        break;
+    case 2:
+        work->unkAC++;
+        if (work->unkAC >= 0x1F) {
+            MdlCtx *model = node->model;
+            u32 modelFlags;
+
+            work->unkA8 = 3;
+            work->unkAC = 0;
+            modelFlags = model->flags & ~1;
+            model->flags = modelFlags;
+            entry->currentX = 120.0f;
+            entry->currentY = 400.0f;
+            entry->inputCountdown = 0x82;
+        }
+        break;
+    case 3:
+        work->unkAC++;
+        if (work->unkAC >= 0x1F) {
+            work->unkA8 = 1;
+        }
+        entry->currentY -= 2.0f;
+        break;
+    case 1:
+        work->unkA8 = 0;
+        finished = 1;
+        entry->flags &= ~0x4000;
+        break;
+    case 4:
+        entry->currentX = 120.0f;
+        entry->currentY = 500.0f;
+        entry->flags = (entry->flags | 0x4000) & ~4;
+        break;
+    }
+    return finished;
+}
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043891C);
 

@@ -2453,6 +2453,24 @@ loads or stores even when every instruction is right:
   before the callback-table load (DDS2 `func_00317FE0`); a scalar `u32 flags`
   lets the load move up.
 
+The object model-rebuild pair (DDS1 `func_00111E30`, DDS2 `func_00112058`)
+requires the real pointer type of `ObjBase.resourceHandle`. State 0 stores an
+allocated `MdlCtx *`; state 1 stores an allocated `SdfModel *`. The motion
+pointer is a separate field. A `void *` therefore describes the actual common
+owner without inventing an alternate view.
+
+With the same complete DDS2 body, the old `u32` field gives seven differing
+words in the 272-byte function; the pointer field matches. Qualified full-unit
+ordinary/probe output first diverges in `17.sched`, not in earlier executable
+RTL: the pointer declaration gives the handle store and `object->data` load
+the same alias set. A possible-alias dependency keeps publication before the
+payload load and changes the payload's later saved-register home. This is a
+compiler dependence, not evidence that the separately allocated records
+actually overlap. Both complete owners and retail images must remain exact,
+and both development builds must pass after changing this shared field. Retain
+explicit casts at legacy interfaces that still transport pointer bits as
+integer words.
+
 For automatic lookup tables, preserve the typed initializer when native data
 and exact neighboring source establish it. DDS2 `func_002805E0` and
 `func_00283090` match with numeric sprite-ID and signed-offset array
@@ -7875,3 +7893,58 @@ indexed by `pad * 16 + button`, as its producer and most native users already
 do; bit seven marks a new press. Length, normalization and dot operations use
 the existing SDK VU0 macros, not game-code assembly.
 
+
+## Shooting creation initializes the kind on each dispatch route
+
+DDS2 `func_003191B0` (468 bytes) dispatches movement, registry and default
+records into a shared object-creation stage. Movement sets kind 3; registry
+loads its parameter row and kind; the default route sets kind 0. Each route
+also defines the parameter index before use. The parameter pointer is used
+only by registry kind 1. Keep these real route assignments without a
+redundant declaration-time kind initializer: GCC can otherwise reuse the
+unrelated known-NULL parameter quantity for the default kind, changing one
+register-copy instruction. Removing the redundant initializer preserves
+defined behavior on every path and matches retail.
+
+## Typed countdown ownership and complete transition setup
+
+`MenuWorkEntry.inputCountdown` is a signed halfword at `0x44`, followed by two
+padding bytes; the record remains `0x48` bytes. Native stores and the updater's
+signed load/decrement establish this field. An unused overlapping char-array
+view made GCC assign universal alias class 0 to the countdown store, adding
+false dependencies against model flags and position fields. Remove obsolete
+raw overlays only when the actual field is established and no consumers need
+the view; verify all affected owners.
+
+DDS2 `func_0031A0B8` (460 bytes) completes its state-2 model and position
+updates before arming that countdown. Keeping the countdown as the final
+entry use gives the coordinate stores their correct register-death weights.
+Retail stores X before the branch and Y in its delay slot. Preserve the
+natural setup phase rather than introducing extra temporaries or reversing
+coordinate assignments to steer the final slot.
+
+## Column emitters preserve physical quantities and capture phases
+
+DDS1 `func_002ACA40` and DDS2 `func_002EFE20` update 0x30-byte particles and
+their segmented ribbon geometry. Recover the actual motion quantities before
+diagnosing a small floating-register difference. Burst fast-forward computes
+`gravityDisplacement = gravity * ageF * ageF * 0.5f` before applying the radius
+and vertical updates, then adds that displacement after subtracting drag.
+This preserves each left-associative float operation. Computing this real
+quantity in that phase closes the birth allocation and scheduling differences;
+an earlier snapshot of vertical position alone leaves them unchanged.
+
+After constructing the next direction, capture quarter width before dividing
+extent by segment count. These are distinct physical parameters in adjacent
+record fields. Their capture phase changes the actual pre-allocation intervals
+and recovers retail's floating-register homes. Acquire the ribbon's position,
+UV and color cursors together with its row stride; the final owner use also
+affects scheduler register-death weights. Inspect the actual quantities and
+dependencies before testing a supported phase correction, and preserve helper
+read boundaries and float rounding order.
+
+These callbacks initialize only XYZ before loading their temporary vectors
+with the SDK quadword macros. VU operations keep W separate from XYZ, and the
+packet builder stores positions through `EE_MMI_STORE_VEC3_VALUE`, discarding
+W. Preserve this native partial-vector contract rather than inventing a
+fourth-lane initializer.

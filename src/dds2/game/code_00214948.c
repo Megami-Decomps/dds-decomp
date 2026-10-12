@@ -3589,7 +3589,504 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021CF18);
+extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
+extern void func_001EF030(BtlLinkedCommand *, BtlCamState *);
+extern void func_001EFEE8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern s32 btlCanUseActorCategoryFlag2(s32);
+extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
+extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
+extern void btlApplyCombinedActorFlags(u8 *);
+extern u32 effMiscRand(void *);
+extern u8 effSharedRandomState[];
+extern char D_0041A5E0[], D_0041A5F8[];
+
+/* VURI camera selection retains the command link and mode payload across
+ * camera-provider calls; actor/status and form reads remain callback-fresh. */
+s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
+    ActionStateLink *link;
+    BtlState *runtime;
+    BattleGuardState *sub;
+    BtlUnit *target;
+    u32 count;
+    u32 targetSlot;
+    u32 cameraMode;
+
+    if (btlIsActorCategoryMarked(command)) {
+        return 0;
+    }
+    link = command->link;
+    runtime = (BtlState *)btlGetRuntime();
+    sub = &runtime->effect->guard;
+    if (link->unit->status.flags & 0x200) {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (side == 1 && targetSide == 0) {
+            return 0;
+        }
+        if (count == 1 && side == 0 && targetSide == 1) {
+            BtlUnit *entry = btlGetIndexListEntry(link->indexWork.indices, 0);
+            if (!(entry->status.flags & 0x400)) {
+                return 0;
+            }
+            if (entry->partyRecord.unitId == 0x110) {
+                if (btlCanUseActorCategoryFlag4(command)) {
+                    btlClearAllUnitDefeatCandidatesTask();
+                    btlApplyCombinedActorFlags((u8 *)command);
+                    switch (effMiscRandMod(0, 2)) {
+                    case 0:
+                        btlBossDebugPrintf(D_0041A5E0);
+                        btlSetEffectCameraKeys((s32)command,
+                            402.9f, -23.9f, -520.1f, -0.163f, 0.153f, -0.035f, 0.965f, 426.4f,
+                            -32.5f, -625.2f, -0.127f, 0.154f, -0.029f, 0.971f, 40.0f, 30.0f);
+                        return 1;
+                    case 1:
+                        btlBossDebugPrintf(D_0041A5F8);
+                        btlSetEffectCameraKeys((s32)command,
+                            -312.4f, -7.6f, -572.6f, -0.145f, -0.203f, 0.022f, 0.959f, -360.7f,
+                            -182.3f, -705.7f, -0.062f, -0.151f, 0.001f, 0.978f, 40.0f, 30.0f);
+                        return 1;
+                    }
+                } else {
+                    target = btlGetTargetUnitForLink(command);
+                    if (target == NULL) {
+                        return 1;
+                    }
+                    if (target->status.flags & 0x400) {
+                        return 1;
+                    }
+                    if (runtime->unk268 == 3) {
+                        targetSlot = target->lookupId;
+                    } else {
+                        targetSlot = target->lookupId == 0 ? 0 : 2;
+                    }
+                    btlFlagAllUnitDefeatCandidatesTask();
+                    switch (targetSlot) {
+                    case 0:
+                        btlBossDebugPrintf("VURI:ITP-ONLY-0 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -725.3f, -245.4f, -962.1f, 0.009f, -0.204f, -0.012f, 0.97f, -770.0f,
+                            -392.1f, -1049.9f, 0.054f, -0.204f, -0.021f, 0.968f, 40.0f, 30.0f);
+                        return 1;
+                    case 1:
+                        btlBossDebugPrintf("VURI:ITP-ONLY-1 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            185.1f, -157.8f, -752.2f, -0.045f, 0.117f, -0.014f, 0.983f, 211.4f,
+                            -132.1f, -924.4f, -0.045f, 0.117f, -0.014f, 0.983f, 40.0f, 30.0f);
+                        return 1;
+                    case 2:
+                        btlBossDebugPrintf("VURI:ITP-ONLY-2 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            589.9f, -93.2f, -770.8f, -0.062f, 0.236f, -0.024f, 0.96f, 644.2f,
+                            -71.9f, -926.8f, -0.063f, 0.216f, -0.022f, 0.965f, 40.0f, 30.0f);
+                        return 1;
+                    }
+                }
+            }
+            if (sub->guardHandled != 0) {
+                btlBossDebugPrintf("VURI:IT-0 ++++\n");
+                func_001EEB78(command, &command->frontCamera, 1);
+                btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
+                command->backCamera.distance += 100.0f;
+                command->motionParameter = 35.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            } else {
+                btlBossDebugPrintf("VURI:IT-1 ++++\n");
+                func_00217650(command, &command->frontCamera, &command->backCamera, 0, 0.5f, 0.0f);
+                command->frontCamera.distance += 150.0f;
+                command->backCamera.distance += 300.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            }
+            return 1;
+        }
+        if (count >= 2 && side == 0 && targetSide == 1) {
+            if (btlCanUseActorCategoryFlag4(command)) {
+                func_001EFEE8(command, &command->frontCamera, &command->backCamera);
+                goto flag_defeat_candidates;
+            }
+            if (btlCanUseLinkedActor(command)) {
+                cameraMode = 0;
+                if (!btlCanUseActorCategoryFlag2((s32)command)) {
+                    cameraMode = effMiscRandMod(0, 2);
+                }
+            } else {
+                cameraMode = 1;
+            }
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("VURI:TP-P ++++\n");
+                func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+flag_defeat_candidates:
+                btlFlagAllUnitDefeatCandidatesTask();
+                return 1;
+            } else {
+                btlBossDebugPrintf("VURI:ITP-P ++++\n");
+                func_001EF030(command, &command->frontCamera);
+                btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
+                command->backCamera.distance += 100.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForPlane(&command->frontCamera, -100.0f);
+                btlAdjustCameraDirectionForPlane(&command->backCamera, -100.0f);
+            }
+            return 1;
+        }
+        btlPrepareDefeatEffectCamera((u8 *)command);
+        return 1;
+    }
+    if (btlCanUseLinkedActor(command)) {
+        cameraMode = 0;
+        if (!btlCanUseActorCategoryFlag2((s32)command)) {
+            cameraMode = effMiscRandMod(0, 2);
+        }
+    } else {
+        cameraMode = 1;
+    }
+    switch (link->unit->partyRecord.unitId) {
+    case 0x110:
+        if (command->actionCode == 0x199) {
+            if (btlGetIndexListCount(link->indexWork.indices) == 1) {
+                BtlUnit *revivedEntry;
+                btlClearAllUnitDefeatCandidatesTask();
+                btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+                revivedEntry = btlGetIndexListEntry(link->indexWork.indices, 0);
+                if (!(revivedEntry->status.flags & 0x400)) {
+                    return 0;
+                }
+                switch (revivedEntry->partyRecord.unitId) {
+                case 0x111:
+                    btlBossDebugPrintf("VURI:SAISEI-A ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        65.0f, -1045.3f, -913.1f, 0.143f, 0.224f, 0.023f, 0.954f, 248.5f,
+                        -1096.7f, -1335.1f, 0.148f, 0.224f, 0.024f, 0.953f, 40.0f, 15.0f);
+                    break;
+                case 0x112:
+                    btlBossDebugPrintf("VURI:SAISEI-B ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        -46.6f, -787.1f, -842.4f, 0.048f, -0.172f, -0.02f, 0.975f, -19.4f,
+                        -674.6f, -1287.5f, 0.048f, -0.172f, -0.02f, 0.975f, 40.0f, 25.0f);
+                    break;
+                }
+            } else {
+                btlBossDebugPrintf("VURI:SAISEI-All ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    1364.9f, -754.2f, -1317.5f, 0.079f, 0.187f, 0.007f, 0.97f, 605.6f,
+                    -785.5f, -2600.3f, 0.053f, 0.105f, -0.003f, 0.984f, 40.0f, 10.0f);
+            }
+            return 1;
+        }
+        count = btlGetIndexListCount(link->indexWork.indices);
+        if (count == 1 && side == 1 && targetSide == 0) {
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("VURI:T-Def ++++\n");
+                if (btlHasSingleLinkedResource(command)) {
+                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                } else {
+                    func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                }
+                return 1;
+            } else {
+                btlBossDebugPrintf("VURI:IT-0 ++++\n");
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                    0.8f, -0.5f, 0.075f, 0, 0);
+                command->frontCamera.distance += 500.0f;
+                command->backCamera.distance += 500.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+            }
+            return 1;
+        }
+        if (count >= 2 && side == 1 && targetSide == 0) {
+            if (cameraMode == 0) {
+                btlBossDebugPrintf("VURI:ITP-Def ++++\n");
+                func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+            btlFlagAllUnitDefeatCandidatesTask();
+            switch (effMiscRandMod(0, 3)) {
+            case 0:
+                btlBossDebugPrintf("VURI:ITP-0 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -525.4f, -91.1f, -1120.4f, -0.106f, -0.17f, 0.011f, 0.97f, -568.6f,
+                    -59.7f, -1499.6f, -0.091f, -0.143f, 0.006f, 0.976f, 40.0f, 20.0f);
+                return 1;
+            case 1:
+                btlBossDebugPrintf("VURI:ITP-1 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    254.2f, -109.3f, -1110.7f, -0.096f, -0.102f, -0.014f, 0.98f, 315.8f,
+                    -80.9f, -1455.3f, -0.096f, 0.102f, -0.014f, 0.98f, 40.0f, 15.0f);
+                return 1;
+            case 2:
+                btlBossDebugPrintf("VURI:ITP-2 ++++\n");
+                btlSetEffectCameraKeys((s32)command,
+                    -451.7f, -47.4f, -1382.0f, -0.107f, -0.122f, 0.01f, 0.977f, 358.1f,
+                    -80.6f, -1381.5f, -0.106f, 0.11f, -0.015f, 0.978f, 40.0f, 20.0f);
+                return 1;
+            }
+        }
+        break;
+    case 0x111:
+    case 0x112:
+        switch (command->actionCode) {
+        case 0x10D: {
+            BtlUnit *attackTarget;
+            if (btlHasMarkedEntry14((s32)command)) {
+                btlBossDebugPrintf("VURI_AB:ATTACK-HANSYA ++++\n");
+                btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                    0.8f, -0.5f, 0.075f, 0, 0);
+                command->frontCamera.distance += 500.0f;
+                command->backCamera.distance += 500.0f;
+                command->motionParameter = 30.0f;
+                command->flags |= 0x41;
+                btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+                return 1;
+            }
+            attackTarget = btlGetIndexListEntry(link->indexWork.indices, 0);
+            if (attackTarget == NULL) {
+                return 1;
+            }
+            if (attackTarget->status.flags & 0x400) {
+                return 1;
+            }
+            if (runtime->unk268 == 3) {
+                targetSlot = attackTarget->lookupId;
+            } else {
+                targetSlot = attackTarget->lookupId == 0 ? 0 : 2;
+            }
+            btlFlagAllUnitDefeatCandidatesTask();
+            if (link->unit->partyRecord.unitId == 0x111) {
+                switch (targetSlot) {
+                case 0:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
+                            -123.5f, -1316.3f, -0.041f, -0.102f, -0.005f, 0.985f, 40.0f, 15.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_A:ATTACK-0-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -438.4f, -401.1f, -962.4f, 0.138f, -0.131f, -0.028f, 0.972f, -502.8f,
+                            -472.8f, -1171.6f, 0.161f, -0.141f, -0.032f, 0.967f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                case 1:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
+                            -99.3f, -1182.5f, -0.053f, -0.154f, 0.0f, 0.978f, 40.0f, 10.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_A:ATTACK-1-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -289.2f, -429.4f, -1089.6f, 0.142f, -0.154f, -0.03f, 0.968f, -324.7f,
+                            -487.5f, -1285.8f, 0.142f, -0.154f, -0.03f, 0.968f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                case 2:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
+                            -155.6f, -1124.4f, -0.016f, -0.156f, -0.004f, 0.979f, 40.0f, 10.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_A:ATTACK-2-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            16.0f, -503.5f, -841.1f, 0.226f, -0.156f, -0.042f, 0.951f, -36.7f,
+                            -584.1f, -995.2f, 0.226f, -0.156f, -0.042f, 0.951f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                }
+            } else {
+                switch (targetSlot) {
+                case 0:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
+                            -96.9f, -1068.0f, -0.044f, 0.231f, -0.015f, 0.962f, 40.0f, 10.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_B:ATTACK-0-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            365.3f, -95.9f, -1276.7f, -0.109f, 0.169f, -0.023f, 0.97f, 444.3f,
+                            -101.1f, -1437.6f, -0.107f, 0.169f, -0.022f, 0.97f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                case 1:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
+                            -66.9f, -1119.0f, -0.116f, 0.146f, -0.021f, 0.973f, 40.0f, 10.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_B:ATTACK-1-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            232.1f, -50.4f, -1257.7f, -0.149f, 0.041f, -0.007f, 0.978f, 299.7f,
+                            -53.2f, -1351.6f, -0.129f, 0.062f, -0.009f, 0.98f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                case 2:
+                    if (effMiscRand(effSharedRandomState) & 1) {
+                        btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,
+                            -368.9f, -1049.1f, 0.119f, 0.121f, 0.013f, 0.976f, 40.0f, 10.0f);
+                    } else {
+                        btlBossDebugPrintf("VURI_B:ATTACK-2-up ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            760.6f, -131.0f, -1250.6f, -0.08f, 0.132f, -0.011f, 0.978f, 835.9f,
+                            -107.4f, -1478.9f, -0.11f, 0.131f, -0.015f, 0.976f, 40.0f, 10.0f);
+                    }
+                    return 1;
+                }
+            }
+            return 1;
+        }
+        case 0x10E:
+            btlFlagAllUnitDefeatCandidatesTask();
+            if (btlHasMarkedEntry14((s32)command)) {
+                btlBossDebugPrintf("VURI_A:NAGIBA-HANSYA ++++\n");
+                btlSetCameraPresetForBossUnitMode(command);
+                return 1;
+            }
+            if (link->unit->partyRecord.unitId == 0x111) {
+                switch (effMiscRandMod(0, 2)) {
+                case 0:
+                    btlBossDebugPrintf("VURI_A:NAGIBA-0 ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        908.3f, -142.3f, -1422.4f, -0.006f, 0.312f, -0.04f, 0.938f, -886.3f,
+                        -258.1f, -1536.0f, -0.027f, -0.249f, -0.03f, 0.956f, 40.0f, 10.0f);
+                    return 1;
+                case 1:
+                    btlBossDebugPrintf("VURI_A:NAGIBA-1 ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        -325.9f, -253.9f, -1869.0f, 0.034f, -0.01f, -0.035f, 0.988f, -560.3f,
+                        -270.8f, -1811.2f, 0.028f, -0.173f, -0.04f, 0.972f, 40.0f, 10.0f);
+                    return 1;
+                }
+            } else {
+                switch (effMiscRandMod(0, 2)) {
+                case 0:
+                    btlBossDebugPrintf("VURI_B:NAGIBA-0 ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        227.4f, -166.2f, -1417.0f, -0.034f, -0.183f, -0.026f, 0.971f, 464.1f,
+                        -165.6f, -1479.2f, -0.021f, 0.192f, -0.037f, 0.969f, 40.0f, 10.0f);
+                    return 1;
+                case 1:
+                    btlBossDebugPrintf("VURI_B:NAGIBA-1 ++++\n");
+                    btlSetEffectCameraKeys((s32)command,
+                        -620.3f, -499.0f, -1769.3f, 0.029f, -0.187f, -0.042f, 0.969f, 518.7f,
+                        -407.2f, -1738.1f, 0.04f, 0.128f, -0.03f, 0.979f, 40.0f, 15.0f);
+                    return 1;
+                }
+            }
+            return 1;
+        default:
+            if (sub->enemyCommand != 0 && !btlHasMarkedEntry14((s32)command)) {
+                target = btlGetTargetUnitForLink(command);
+                if (target != NULL && (target->status.flags & 0x400)) {
+                    switch (target->partyRecord.unitId) {
+                    case 0x111:
+                        btlBossDebugPrintf("VURI_A:collision change  ++++\n");
+                        target->bodyOffset[0] = 50.0f;
+                        target->bodyOffset[1] = -330.0f;
+                        target->bodyOffset[2] = 2555.0f;
+                        target->bodyOffset[3] = 0.0f;
+                        target->reach = 320.0f;
+                        target->height = 645.0f;
+                        break;
+                    case 0x112:
+                        btlBossDebugPrintf("VURI_B:collision change  ++++\n");
+                        target->bodyOffset[0] = -175.0f;
+                        target->bodyOffset[1] = -265.0f;
+                        target->bodyOffset[2] = 2475.0f;
+                        target->bodyOffset[3] = 0.0f;
+                        target->reach = 320.0f;
+                        target->height = 530.0f;
+                        break;
+                    }
+                }
+            }
+            count = btlGetIndexListCount(link->indexWork.indices);
+            if (count == 1 && side == 1 && targetSide == 0) {
+                if (cameraMode == 0) {
+                    btlBossDebugPrintf("VURI_AB:T-Def ++++\n");
+                    func_001EDC38(command, &command->frontCamera, &command->backCamera);
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                    return 1;
+                } else {
+                    btlBossDebugPrintf("VURI_AB:IT-0 ++++\n");
+                    btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
+                        0.8f, -0.5f, 0.075f, 0, 0);
+                    command->frontCamera.distance += 500.0f;
+                    command->backCamera.distance += 500.0f;
+                    command->motionParameter = 30.0f;
+                    command->flags |= 0x41;
+                    btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+                    btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
+                }
+                return 1;
+            }
+            if (count >= 2 && side == 1 && targetSide == 0) {
+                if (cameraMode == 0) {
+                    btlBossDebugPrintf("VURI_AB:ITP-Def ++++\n");
+                    func_001EDFB8(command, &command->frontCamera, &command->backCamera);
+                    return 1;
+                }
+                btlFlagAllUnitDefeatCandidatesTask();
+                if (btlHasMarkedEntry14((s32)command)) {
+                    btlBossDebugPrintf("VURI_AB:HANSYA ++++\n");
+                    btlSetCameraPresetForBossUnitMode(command);
+                    return 1;
+                }
+                if (link->unit->partyRecord.unitId == 0x111) {
+                    switch (effMiscRandMod(0, 2)) {
+                    case 0:
+                        btlBossDebugPrintf("VURI_A:ITP-0 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            45.7f, -118.9f, -1236.2f, -0.041f, 0.045f, -0.024f, 0.988f, 665.1f,
+                            -419.5f, -1055.4f, 0.099f, 0.269f, 0.003f, 0.947f, 40.0f, 30.0f);
+                        return 1;
+                    case 1:
+                        btlBossDebugPrintf("VURI_A:ITP-1 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            500.3f, -83.0f, -1092.0f, -0.041f, 0.208f, -0.044f, 0.966f, 572.7f,
+                            -450.0f, -1110.0f, 0.088f, 0.227f, -0.016f, 0.959f, 40.0f, 30.0f);
+                        return 1;
+                    }
+                } else {
+                    switch (effMiscRandMod(0, 2)) {
+                    case 0:
+                        btlBossDebugPrintf("VURI_B:ITP-0 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -715.0f, -376.2f, -1071.8f, 0.029f, -0.323f, -0.033f, 0.935f, 24.2f,
+                            -337.9f, -1296.1f, 0.038f, -0.007f, -0.022f, 0.989f, 40.0f, 40.0f);
+                        return 1;
+                    case 1:
+                        btlBossDebugPrintf("VURI_B:ITP-1 ++++\n");
+                        btlSetEffectCameraKeys((s32)command,
+                            -600.0f, -139.2f, -1077.6f, -0.062f, -0.247f, -0.01f, 0.957f, -574.7f,
+                            -575.6f, -1139.4f, 0.148f, -0.216f, -0.058f, 0.953f, 40.0f, 35.0f);
+                        return 1;
+                    }
+                }
+                return 0;
+            }
+            btlPrepareDefeatEffectCamera((u8 *)command);
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 func_0021E778(BtlLinkedCommand *command) {
     u32 flags = datActionAnimationRecords[command->actionCode].flags;

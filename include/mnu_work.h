@@ -158,13 +158,8 @@ typedef struct MenuWorkEntry {
         u32 flags;
         MenuWorkFlagBits flagsBits;
     };
-    union {
-        u8 pad44[4];
-        struct {
-            s16 inputCountdown; /* 0x44: decremented by the active-effect updater */
-            u8 pad46[2];
-        };
-    };
+    s16 inputCountdown; /* 0x44: decremented by the active-effect updater */
+    u8 pad46[2];
 } MenuWorkEntry;
 
 typedef union MenuRuntimeState {
@@ -223,8 +218,6 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->elapsed==0x3A &&
     (unsigned long)&((MenuWorkEntry*)0)->callback==0x3C &&
     (unsigned long)&((MenuWorkEntry*)0)->flags==0x40 &&
-    (unsigned long)&((MenuWorkEntry*)0)->pad44==0x44 &&
-    sizeof(((MenuWorkEntry*)0)->pad44)==4 &&
     (unsigned long)&((MenuWorkEntry*)0)->inputCountdown==0x44 &&
     (unsigned long)&((MenuWorkEntry*)0)->pad46==0x46)?1:-1];
 typedef char MenuRuntimeLayoutAssert[(sizeof(MenuRuntimeRecord)==0x24 && sizeof(MenuRuntimeState)==4 &&
