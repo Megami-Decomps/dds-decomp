@@ -425,7 +425,7 @@ extern s8 effSharedRandomState[];
 
 extern void effMiscSeedRandom(s8 *, s32);
 
-extern u32 func_00100510(void);
+extern u32 kwlnGetFrameCounter(void);
 
 extern s32 itfMesCreateWindow(ItfMesSub *);
 
@@ -478,7 +478,7 @@ void func_001A0F10(void) {
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk28C = 0;
 
-    effMiscSeedRandom(effSharedRandomState, func_00100510());
+    effMiscSeedRandom(effSharedRandomState, kwlnGetFrameCounter());
     btlResetActorEntryState();
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
         itfMesCreateWindow(D_003BAAA4);

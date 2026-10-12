@@ -3765,7 +3765,7 @@
 0x0025DAB0	mnuCampDestroyTaskById	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyTaskById behavior.
 0x0025DAE8	mnuCampDestroyAllTasks	inferred	DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyAllTasks behavior.
 0x0025DB98	mnuFxWorldScrollDelta	inferred	DDS1 twin func_00242780 (scrolls fx node/child offsets by delta) [names_reviewed2.tsv]
-0x0025DD68	mnuFxWorldDropOutOfRange	inferred	calls func_00246950 on nodes with child offset >= threshold [names_reviewed2.tsv]
+0x0025DD68	mnuFxWorldDropOutOfRange	inferred	calls evtEventViewerReleaseQueuedNode on nodes with child offset >= threshold [names_reviewed2.tsv]
 0x0025DFE8	mnuInitializeCampPanelVisualDefaults	inferred	Writes panel color vectors and numeric defaults into five output groups. [names_reviewed10.tsv]
 0x0025E240	mnuCampInitializeDisplayDefaults	inferred	Initializes camp display dimensions, neutral colors, unit scales and enabled state. [names_reviewed15.tsv]
 0x0025E338	mnuInitializeCampListLayoutDefaults	inferred	Fills the camp list window layout with its default sizes and settings. [names_reviewed10.tsv]
@@ -5358,7 +5358,7 @@
 0x002F1CD0	effResetAnimationFrameEntries	inferred	For every configured frame, clears flag word and sets frame entry index to minus one. [names_reviewed7.tsv]
 0x002F1D90	effFillFadeColorRows	inferred	Builds one row of vertex colours (0x808080 with a ramp-up/ramp-down alpha byte from config fade fractions 0x78/0x7C) and replicates it for the remaining rows of the texture animation buffer [names_M80_EffLarge.tsv]
 0x002F2020	effReleaseTextureAnimationWork	inferred	Releases owned animation texture asset and buffer backing allocation. [names_reviewed5.tsv]
-0x002F2950	effClampSlotCount	inferred	(count?count:stride)*(stride?:other) capped to 200; siblings cap 100/300 (func_002E7AE0, func_002EE3C8, func_002FA5B8)
+0x002F2950	effClampSlotCount	inferred	(count?count:stride)*(stride?:other) capped to 200; siblings cap 100/300 (func_002E7AE0, func_002EE3C8, effCreateConfiguredSlotNode)
 0x002F2A30	effReleaseAnimationFrameResources	inferred	Releases animation texture handle, optional record and frame state allocation. [names_reviewed7.tsv]
 0x002F3100	effCreatePrimarySlotAnimationState	inferred	confidence=medium; matched-C; src/dds2/game/code_002DE248.c:5647:func_002F3100; Clamps slot count, creates state and initializes primary-kind animation record.; source=revalidated-unapplied-names_R_Names10.tsv:105 [names_qp12_apply.tsv]
 0x002F3168	effCreateAlternateSlotAnimationState	inferred	confidence=medium; matched-C; src/dds2/game/code_002DE248.c:5656:func_002F3168; Clamps slot count, creates state and initializes alternate-kind animation record.; source=revalidated-unapplied-names_R_Names10.tsv:106 [names_qp12_apply.tsv]

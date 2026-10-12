@@ -521,7 +521,7 @@ extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
 
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
-extern s32 func_0010C058(ScrData *context, s32 procedureIndex);
+extern s32 scrStartProcessProcedure(ScrData *context, s32 procedureIndex);
 
 
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
@@ -1698,7 +1698,7 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
-    func_0010C058(evtWorkScriptTask, script);
+    scrStartProcessProcedure(evtWorkScriptTask, script);
     D_0043E5C0.third = third;
     D_0043E5C0.first = first;
     D_0043E5C0.second = second;

@@ -4884,7 +4884,7 @@ void btlTickFieldSwayAndTint(void) {
 
     if ((((*(u32 *)(temp_v0 + 500) & 0x20000) != 0) && ((*(u32 *)(temp_v0 + 0x1f8) & 0x20) == 0)) &&
           ((*(u32 *)(temp_v0 + 0x1fc) & 0x4000000) == 0)) {
-        func_00132BD0();
+        fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
         func_00132010();
     }

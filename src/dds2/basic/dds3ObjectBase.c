@@ -261,7 +261,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
 
 /* Rebuild the model resource, synchronize object vectors and initialize
  * transition work only when no transition is already associated with it. */
-void func_00112058(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
+void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 resourceId) {
     f32 scale[4];
     ObjBase *base;
     MdlCtx *model;

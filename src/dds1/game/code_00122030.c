@@ -920,7 +920,7 @@ void fldResetPlayerSceneObjectState(void) {
 extern void dds3ClearObjectFlags(void *, s32);
 
 
-extern void func_00111E30(u32, s32, s32);
+extern void dds3RebuildObjectModelContext(u32, s32, s32);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 
@@ -947,7 +947,7 @@ void fldCreatePlayerObject(void) {
             dds3ClearObjectFlags((void *)fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        func_00111E30(fldPlayerObject, 2, D_0032F1DC[0]);
+        dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0032F1DC[0]);
     }
 }
 
@@ -980,7 +980,7 @@ extern void dds3SetObjectFlags(void *, s32);
 
 extern void func_00133640(s16, s32);
 
-extern void func_00132FD0(u32, s32);
+extern void fldApplySkyLightSet(u32, s32);
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -1022,7 +1022,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
             dds3ClearObjectFlags((void *)fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
-        func_00111E30(fldPlayerObject, 2, D_0032F1DC[0]);
+        dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0032F1DC[0]);
         object = (EffWorldNode *)fldPlayerObject;
     } else {
         ObjectTransform *inner = object->inner;
@@ -1046,7 +1046,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
     if (fldAreaState.area < 200) {
         func_00133640(0, 0);
-        func_00132FD0(D_0032E570[11], 0);
+        fldApplySkyLightSet(D_0032E570[11], 0);
         fldBeginSelectedValueTransition(D_0032E570[12]);
         if (fldGetSceneCommandState() == 1) {
             if (fldAreaState.commandEnabled != 0) {
@@ -1054,7 +1054,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
             } else {
                 fldAreaState.sceneCommand = 0;
                 func_00133640(0, 0);
-                func_00132FD0(D_0032E570[11], 0);
+                fldApplySkyLightSet(D_0032E570[11], 0);
                 fldBeginSelectedValueTransition(D_0032E570[12]);
             }
         } else if (fldAreaState.commandEnabled == 0) {
@@ -1623,9 +1623,9 @@ extern void func_001233D0(void);
 
 extern void func_001249E0(void);
 
-extern void func_00132BD0(void);
+extern void fldUpdateSelectedValueTransition(void);
 
-extern void func_00132FD0(u32, s32);
+extern void fldApplySkyLightSet(u32, s32);
 
 extern void func_0013B1D8(EffWorldNode *);
 
@@ -1721,7 +1721,7 @@ s32 fldProcSequence(void) {
         if (fldAreaState.area >= 200) {
             D_0032E570[11] = 0;
             D_0032E570[12] = 0;
-            func_00132FD0(0, 0);
+            fldApplySkyLightSet(0, 0);
             fldBeginSelectedValueTransition(D_0032E570[12]);
         }
         coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
@@ -1864,7 +1864,7 @@ s32 fldProcSequence(void) {
     }
     if (fldGetCampSceneControlMode() != 1) {
         fldUpdateSceneCommand();
-        func_00132BD0();
+        fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
     }
     if (controller->stage >= 4) {

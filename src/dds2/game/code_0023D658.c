@@ -116,7 +116,7 @@ extern void effObjSetFlags(void *object, s32 flags);
 
 extern void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key);
 extern EffWorldNode *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
-extern void *func_00115500(void *resource, void *position, void *scale);
+extern void *effObjCreateEventNode(void *resource, void *position, void *scale);
 extern EffWorldNode *effForwardMagatuhiDescriptor(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 
@@ -1452,7 +1452,7 @@ u32 func_002404E0(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    object = (EffWorldNode *)func_00115500(descriptor, position, scale);
+    object = (EffWorldNode *)effObjCreateEventNode(descriptor, position, scale);
     if (object == NULL) {
         scrSetIntegerReturnValue(0);
     } else {

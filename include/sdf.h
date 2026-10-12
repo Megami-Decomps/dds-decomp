@@ -816,7 +816,7 @@ void effUpdateSelectionEntryState(SdfFlagListWork *);
 #elif defined(VERSION_DDS2)
 void func_00316680(SdfFlagListWork *);
 void func_00316C88(SdfFlagListWork *);
-void func_002DEC08(SdfFlagListWork *);
+void effUpdateSelectionEntryState(SdfFlagListWork *);
 #endif
 
 

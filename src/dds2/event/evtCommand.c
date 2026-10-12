@@ -141,7 +141,7 @@ extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
 /* Copy two source points into the primary effect object. */
-s32 func_00240D20(void) {
+s32 evtCommandCopyEffectSourcePoints(void) {
     struct EffectObj *primary;
     struct EffectObj *point0;
     struct EffectObj *point1;
@@ -299,7 +299,7 @@ s32 evtCommandAttachLightToUnitPath(void) {
 
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
-s32 func_002411A0(void) {
+s32 evtCommandWaitEffectResourceScale(void) {
     s32 id = scrReadIntParameter(0);
     void *object = evtFindWorldObjectByIdAndKind(7, id);
     s32 status;
@@ -495,7 +495,7 @@ s32 evtCommandRequestCurrentGroupSequence(void)
 }
 
 /* Forward the first VM integer as an opaque four-byte admin payload. */
-s32 func_002416D0(void)
+s32 evtCommandSubmitScalarAdminRequest(void)
 {
     s32 payloadValue;
 
@@ -645,7 +645,7 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
 }
 
 /* Relink the selected camera owner to its path, reporting any failure. */
-s32 func_00241AF8(void) {
+s32 evtCommandRelinkCameraOwnerToPath(void) {
     void *owner;
     void *path;
 
@@ -671,7 +671,7 @@ s32 func_00241AF8(void) {
 }
 
 
-s32 func_00241B98(void) {
+s32 evtCommandWaitCameraOwnerResourceScale(void) {
     void *object;
     s32 status;
 
@@ -803,7 +803,7 @@ extern void dds3ReplaceObjectResource(EffWorldNode *);
 extern void sdfSetFloatCounterDirection(u32 *, u32);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
 
-s32 func_00241F10(void) {
+s32 evtCommandAttachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
     ObjBase *data;
@@ -862,7 +862,7 @@ s32 func_00241F10(void) {
 
 extern char D_00421E98[]; /* "re attach...!\n" */
 
-s32 func_00242100(void) {
+s32 evtCommandReattachObjectPath(void) {
     void *unit;
     EffWorldNode *target;
     ObjBase *data;
@@ -927,7 +927,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E78);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
-s32 func_002422A8(void) {
+s32 evtCommandWaitObjectResourceScale(void) {
     s32 id = scrReadIntParameter(0);
     void *object = evtFindWorldObjectByIdAndKind(6, id);
     s32 status;

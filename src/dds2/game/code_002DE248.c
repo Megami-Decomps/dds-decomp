@@ -846,7 +846,8 @@ void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
     p->frame = 0;
 }
 
-void func_002DEC08(SdfFlagListWork *work) {
+/* DDS2 suppresses the entry-state update while effect-frame advancement is paused. */
+void effUpdateSelectionEntryState(SdfFlagListWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         func_00316680(work);
         return;
@@ -858,7 +859,7 @@ void effDrawSelectionEntryVectors(SdfFlagListWork *work) {
 }
 
 void effUpdateAndDrawSelectionEntries(SdfFlagListWork *p) {
-    func_002DEC08(p);
+    effUpdateSelectionEntryState(p);
     effDrawSelectionEntryVectors(p);
 }
 
@@ -1361,7 +1362,8 @@ void effUpdateProjectedFadeColor(EffKindWork *work) {
     effResourceRectDrawGsCoords(out);
 }
 
-void func_002DFC78(EffKindWork *work, SdfTex *value) {
+/* Replace the rectangle handle's texture without changing the kind-work asset reference. */
+void effSetKindRectangleTexture(EffKindWork *work, SdfTex *value) {
     ((EffResourceRectWork *)work->handle)->texture = value;
 }
 
@@ -1401,7 +1403,8 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
 
 extern EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
-EffKindWork *func_002DFDB8(FileJob *work) {
+/* Build kind work from a file job and retain its optional secondary asset holder. */
+EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
     void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
     s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
@@ -4935,7 +4938,8 @@ extern void func_00336818(f32);
 extern f32 func_003532D0(f32);
 extern f32 func_00352DB0(f32);
 
-void func_002EC370(EffClassWork *work) {
+/* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
+void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];
@@ -5355,7 +5359,7 @@ typedef struct EffPointSetCompactTable {
 } EffPointSetCompactTable;
 
 /* Per-frame update of a compact five-point-group class (rows without the radial phase). */
-void func_002EDB10(EffClassWork *work) {
+void effDrawTintedCompactPointGroups(EffClassWork *work) {
     EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
     EffPointSetCompactRow *row = ((EffPointSetCompactTable *)work->resource)->rows;
     s32 frame = work->frame;
@@ -7996,7 +8000,7 @@ typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
 /* Tint selected eligible actors, then restore their original RGB at fade-out. */
-void func_002F64D8(EffActiveResource *work) {
+void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *actors[16];
     EffActorTintConfig *config = work->payload;
@@ -8095,7 +8099,8 @@ typedef struct EffFieldColorConfig {
     EffectVectorRequest direction; /* 0x08 */
 } EffFieldColorConfig;
 
-void func_002F67D8(EffActiveResource *work) {
+/* On the first frame, resolve the light position and publish both normalized light colors. */
+void effInitializeFieldLightColors(EffActiveResource *work) {
     EffectVectorRequest request;
     EffFieldColorConfig *config;
     u32 handle;
@@ -8522,7 +8527,7 @@ void effReleaseOwnedClassResourceWork(u32 handle) {
 }
 
 /* vu0 routine: orient along the vector between two requested positions and advance the resource. */
-void func_002F7AC8(u8 *work) {
+void effUpdateAimedClassResource(u8 *work) {
     u8 *object = ((EffActiveResource *)work)->payload;
     s32 *handle = (s32 *)((EffActiveResource *)work)->resource;
     u128 mtx[4];
@@ -8767,7 +8772,8 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
     }
 }
 
-EffModelBindings *func_002F81A8(s32 *owner) {
+/* Allocate an empty material/model binding pair; owner is unused in the retail body. */
+EffModelBindings *effAllocateModelBindings(s32 *owner) {
     EffModelBindings *work = sdfAllocSizeClassBlock(sizeof(*work));
     work->material = 0;
     work->model = NULL;
@@ -8775,7 +8781,7 @@ EffModelBindings *func_002F81A8(s32 *owner) {
 }
 
 EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void *source, u32 settings) {
-    EffModelBindings *work = func_002F81A8(owner);
+    EffModelBindings *work = effAllocateModelBindings(owner);
     MdlCtx *object;
     Motion *active;
 
@@ -8796,7 +8802,7 @@ EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void
 EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     s32 *owner = ((EffActiveResource *)request)->payload;
     EffModelBindings *source = (EffModelBindings *)((EffActiveResource *)request)->resource;
-    EffModelBindings *work = func_002F81A8(owner);
+    EffModelBindings *work = effAllocateModelBindings(owner);
     s32 a;
     s32 b;
     MdlCtx *object;
@@ -8950,7 +8956,7 @@ typedef char EffRadialCylinderConfig_size[(sizeof(EffRadialCylinderConfig) == 0x
 extern u32 D_003E9FB0[];
 extern s32 D_00437EB4;
 extern SdfPoolNode D_0037FF48;
-extern u32 func_001003F8(void);
+extern u32 kwlnGetFrameCounter(void);
 extern void func_00108D80(void);
 extern void func_00108E20(void);
 extern void evtSetDrawSurfaceIndex(s32);
@@ -8959,7 +8965,8 @@ extern void evtSubmitGradientRectAtDepth(s32, s32, s32, s32, u32,
                                          s32, s32, s32, s32);
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
-void func_002F8648(EffActiveResource *work) {
+/* Draw a scaled radial cylinder, advancing its travel counter up to the payload limit. */
+void effDrawMovingRadialCylinder(EffActiveResource *work) {
     EffDrawableAssetWork *state = (EffDrawableAssetWork *)work->resource;
     EffRadialCylinderConfig *config = (EffRadialCylinderConfig *)work->payload;
     SdfPrimitiveRequest request;
@@ -8981,7 +8988,7 @@ void func_002F8648(EffActiveResource *work) {
     scale[1] = config->scale[1];
     scale[2] = config->scale[2];
     scale[3] = 0.0f;
-    surface = func_001003F8();
+    surface = kwlnGetFrameCounter();
     if ((s32)D_00437EB4 != (s32)surface) {
         evtSetDrawSurfaceIndex(0x20);
         func_00108D80();
@@ -9275,7 +9282,7 @@ void effDestroyBillboardAndOwnedAssetWork(EffMotionResource *work) {
 extern SdfPoolNode *D_003EA000[];
 
 /* vu0 routine: construct a growing textured strip between two requested positions. */
-void func_002F91D0(EffActiveResource *work) {
+void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     EffMotionResourceConfig *config = work->payload;
     s32 frame = work->frame;
     s32 duration = config->duration;
@@ -9679,7 +9686,8 @@ EffectSlotNode80 *effAllocateActiveEffectSlotNode(u32 count) {
     return node;
 }
 
-s32 *func_002FA5B8(s32 *source) {
+/* Allocate a slot node with the grid-derived entry count capped at 300. */
+s32 *effCreateConfiguredSlotNode(s32 *source) {
     return effAllocateActiveEffectSlotNode(effSlotCount((u8 *)source, 300));
 }
 
@@ -9689,10 +9697,11 @@ extern void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *, void
 
 extern void effRebuildResourceEntryClones(EffectSlotNode80 *, FileQueue *);
 
-s32 *func_002FA5F0(FileJobPayload *request) {
+/* Copy the primary slot configuration and bind optional model or per-entry queue resources. */
+s32 *effCreateSlotNodeFromFileJob(FileJobPayload *request) {
     u8 *buffer = fileResolvePrimaryBuffer(request);
     s32 *size = (s32 *)(buffer + 0x50);
-    s32 *work = func_002FA5B8(size);
+    s32 *work = effCreateConfiguredSlotNode(size);
     void *secondary;
     u32 kind;
 
@@ -9741,19 +9750,20 @@ void effDestroyOwnedResources(s32 *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern s32 *func_002FA5B8(s32 *);
+extern s32 *effCreateConfiguredSlotNode(s32 *);
 
 s32 *effCloneOwnedState(u8 *owner) {
     s32 *source = (s32 *)((EffectSlotNode80 *)owner)->record->data1;
-    s32 *work = func_002FA5B8(source);
+    s32 *work = effCreateConfiguredSlotNode(source);
     memcpy(&((EffectSlotNode80 *)work)->randomDirection,
         &((EffectSlotNode80 *)owner)->randomDirection, 0x50);
     effRebuildResourceEntries((u8 *)work, ((EffectSlotNode80 *)owner)->record->type, source);
-    func_002FA978(work, owner);
+    effCloneSlotNodeSecondaryResources(work, owner);
     return work;
 }
 
-void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
+/* Replace secondary ownership with cloned model/device resources or cloned queues. */
+void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
     s32 kind = src->resourceKind;
     MdlCtx *model;
     BattleGroupNode *modelData;
@@ -10001,7 +10011,7 @@ u8 *effCreateSharedEffectResourceWork(FileJobPayload *source) {
         work->resource->model = NULL;
         work->resource->deviceSlot = 0;
         work->resource->data = NULL;
-        work->resource->unk0C = func_001003F8();
+        work->resource->unk0C = kwlnGetFrameCounter();
         work->resource->references = 1;
         work->resource->data = sdfAllocAndClearQuadwords(0xE0);
         secondary = fileResolveSecondaryBuffer(source);
@@ -10058,7 +10068,8 @@ void effShareReferenceCountedEffectObject(s32 target, s32 source) {
     ((EffSharedEffectWork *)source)->resource->references++;
 }
 
-void func_002FB968(EffSharedEffectWork *work) {
+/* Sample the retained model's first motion at frame zero when a model is present. */
+void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
     MdlCtx *context = work->resource->model;
     if (context != NULL) {
         sdfMotionSampleAtFrame(context->first, 0.0f);
@@ -10428,7 +10439,8 @@ void *effFindAssetObject(FileJob *entry) {
     return NULL;
 }
 
-u32 func_002FCA40(void) {
+/* Return the selected queue row plus the offset of its visible window. */
+u32 effGetSelectedFileQueueIndex(void) {
     return D_003FFA84[0] + D_004386B0;
 }
 
@@ -10821,8 +10833,9 @@ u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
     return 0x800000;
 }
 
-u32 func_002FD900(void) {
-    FileJob *entry = fileQueueGetAt(effFileQueue, func_002FCA40());
+/* Load the selected job's payload and camera snapshots; return the refresh status. */
+u32 effLoadSelectedFileJob(void) {
+    FileJob *entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     EffFileJobRequest *request;
     u8 *fileData;
     u32 job;
@@ -10904,7 +10917,7 @@ extern u32 D_003FF22C[11];
 
 
 u32 effResetFileQueueState(void) {
-    fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, func_002FCA40()));
+    fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
     D_003FF294[0] = 0;
     D_004386B0 = 0;
     D_003FFA78[3] = 0;
@@ -10915,7 +10928,7 @@ u32 effResetFileQueueState(void) {
 u32 effFinalizeQueuedFile(void) {
     FileJob *resource;
     FileJob *entry;
-    entry = fileQueueGetAt(effFileQueue, func_002FCA40());
+    entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     resource = fileJobDuplicateAfter(effFileQueue, entry);
     D_003FF22C[0] = 0;
     fileJobCopyHeader(resource, entry);
@@ -10924,7 +10937,7 @@ u32 effFinalizeQueuedFile(void) {
 }
 
 /* Clone the selected file job, rebind its asset payload and refresh queue views. */
-u32 func_002FDDD8(void) {
+u32 effCloneSelectedFileJob(void) {
     FileJob *selected;
     FileJob *job;
     FileJob *leader;
@@ -10936,7 +10949,7 @@ u32 func_002FDDD8(void) {
     extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
     extern FileJob *fileQueueFindById(FileQueue *, u32);
 
-    selected = fileQueueGetAt(effFileQueue, func_002FCA40());
+    selected = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     job = fileDuplicateAndAppendJob(effFileQueue, (FileJobPayload *)selected->id);
     effCurrentFileQueueEntry = job;
     fileJobCopyHeader(job, selected);
@@ -11033,7 +11046,7 @@ typedef struct EffectAlignedBlock128 {
 } EffectAlignedBlock128;
 
 u32 effLoadBattleCameraSnapshot(u32 arg0) {
-    FileJob *record = fileQueueGetAt(effFileQueue, func_002FCA40());
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)D_0045C110 = *(EffectBlock90 *)record;
     *(EffectAlignedBlock128 *)D_0045C110 = *(EffectAlignedBlock128 *)D_0045C270;
@@ -11054,7 +11067,7 @@ u32 effLoadBattleCameraSnapshot(u32 arg0) {
 }
 
 u32 effStoreBattleCameraSnapshot(u32 arg0) {
-    FileJob *record = fileQueueGetAt(effFileQueue, func_002FCA40());
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
 
     *(EffectBlock90 *)record = *(EffectBlock90 *)D_0045C110;
     *(EffectAlignedBlock128 *)D_0045C270 = *(EffectAlignedBlock128 *)D_0045C110;
@@ -11116,7 +11129,8 @@ typedef struct EffCameraCreateRow {
 
 typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
 
-u32 func_002FE5B8(const char *nameKey, const void *sourceRows, u32 sourceCount) {
+/* Present named camera/file requests, maintaining a preview job and returning selection status. */
+u32 effSelectCameraFileJobFromRows(const char *nameKey, const void *sourceRows, u32 sourceCount) {
     const EffCameraCreateRow *requests = (const EffCameraCreateRow *)sourceRows;
     EffQueuedFileObject *menuObject;
     EffCameraMenuState *state;
@@ -11219,14 +11233,14 @@ u32 func_002FE5B8(const char *nameKey, const void *sourceRows, u32 sourceCount) 
 }
 
 
-extern u32 func_002FE5B8(const char *, const void *, u32);
+extern u32 effSelectCameraFileJobFromRows(const char *, const void *, u32);
 
 extern char D_0042CEF8[];
 
 extern u8 D_003FE280[];
 
 void effCreateParticleTask(void) {
-    func_002FE5B8(D_0042CEF8, D_003FE280, 0xF);
+    effSelectCameraFileJobFromRows(D_0042CEF8, D_003FE280, 0xF);
 }
 
 extern char D_0042CED8[];
@@ -11234,13 +11248,13 @@ extern char D_0042CED8[];
 extern u8 D_003FE430[];
 
 void effCreatePolyTrackControlTask(void) {
-    func_002FE5B8(D_0042CED8, D_003FE430, 7);
+    effSelectCameraFileJobFromRows(D_0042CED8, D_003FE430, 7);
 }
 
 extern u8 D_003FE500[];
 
 void effCreatePolyTrackTask(void) {
-    func_002FE5B8("POLY TRACK S", D_003FE500, 7);
+    effSelectCameraFileJobFromRows("POLY TRACK S", D_003FE500, 7);
 }
 
 extern char D_00437F30[];
@@ -11248,7 +11262,7 @@ extern char D_00437F30[];
 extern u8 D_003FE610[];
 
 void effCreateBlurTask(void) {
-    func_002FE5B8(D_00437F30, D_003FE610, 7);
+    effSelectCameraFileJobFromRows(D_00437F30, D_003FE610, 7);
 }
 
 extern char D_004386A8[];
@@ -11256,7 +11270,7 @@ extern char D_004386A8[];
 extern u8 D_003FE6E0[];
 
 void effCreateFilterTask(void) {
-    func_002FE5B8(D_004386A8, D_003FE6E0, 3);
+    effSelectCameraFileJobFromRows(D_004386A8, D_003FE6E0, 3);
 }
 
 extern char D_0042CE48[];
@@ -11264,7 +11278,7 @@ extern char D_0042CE48[];
 extern u8 D_003FE7C0[];
 
 void effCreateEnvironmentTask(void) {
-    func_002FE5B8(D_0042CE48, D_003FE7C0, 5);
+    effSelectCameraFileJobFromRows(D_0042CE48, D_003FE7C0, 5);
 }
 
 extern char D_0042CEB8[];
@@ -11272,7 +11286,7 @@ extern char D_0042CEB8[];
 extern u8 D_003FE780[];
 
 void effCreatePolyTextureTask(void) {
-    func_002FE5B8(D_0042CEB8, D_003FE780, 2);
+    effSelectCameraFileJobFromRows(D_0042CEB8, D_003FE780, 2);
 }
 
 extern char D_0042CEA8[];
@@ -11280,7 +11294,7 @@ extern char D_0042CEA8[];
 extern u8 D_003FE850[];
 
 void effCreatePolyFlashTask(void) {
-    func_002FE5B8(D_0042CEA8, D_003FE850, 0xB);
+    effSelectCameraFileJobFromRows(D_0042CEA8, D_003FE850, 0xB);
 }
 
 extern char D_0042CE98[]; /* "POLY RING" */
@@ -11288,7 +11302,7 @@ extern char D_0042CE98[]; /* "POLY RING" */
 extern u8 D_003FE990[];
 
 void effCreatePolyRingTask(void) {
-    func_002FE5B8(D_0042CE98, D_003FE990, 6);
+    effSelectCameraFileJobFromRows(D_0042CE98, D_003FE990, 6);
 }
 
 extern char D_0042CE88[];
@@ -11296,13 +11310,14 @@ extern char D_0042CE88[];
 extern u8 D_003FEA40[];
 
 void effCreatePolyThunderTask(void) {
-    func_002FE5B8(D_0042CE88, D_003FEA40, 5);
+    effSelectCameraFileJobFromRows(D_0042CE88, D_003FEA40, 5);
 }
 
 extern u8 D_003FEAD0[];
 
-void func_002FEAD8(void) {
-    func_002FE5B8("POLY TWINKLE", D_003FEAD0, 6);
+/* Present the six POLY TWINKLE requests through the shared camera/file selector. */
+void effCreatePolyTwinkleTask(void) {
+    effSelectCameraFileJobFromRows("POLY TWINKLE", D_003FEAD0, 6);
 }
 
 extern char D_0042CE78[];
@@ -11310,7 +11325,7 @@ extern char D_0042CE78[];
 extern u8 D_003FEB80[];
 
 void effCreatePolyWindTask(void) {
-    func_002FE5B8(D_0042CE78, D_003FEB80, 7);
+    effSelectCameraFileJobFromRows(D_0042CE78, D_003FEB80, 7);
 }
 
 extern char D_0042CE68[];
@@ -11318,7 +11333,7 @@ extern char D_0042CE68[];
 extern u8 D_003FEC50[];
 
 void effCreatePolyScalyTask(void) {
-    func_002FE5B8(D_0042CE68, D_003FEC50, 5);
+    effSelectCameraFileJobFromRows(D_0042CE68, D_003FEC50, 5);
 }
 
 extern char D_0042CE58[];
@@ -11326,7 +11341,7 @@ extern char D_0042CE58[];
 extern u8 D_003FED20[];
 
 void effCreatePolyCrackTask(void) {
-    func_002FE5B8(D_0042CE58, D_003FED20, 2);
+    effSelectCameraFileJobFromRows(D_0042CE58, D_003FED20, 2);
 }
 
 extern char D_0042CDF8[];
@@ -11334,7 +11349,7 @@ extern char D_0042CDF8[];
 extern u8 D_003FED60[];
 
 void effCreateBattleOnlyTask(void) {
-    func_002FE5B8(D_0042CDF8, D_003FED60, 0x12);
+    effSelectCameraFileJobFromRows(D_0042CDF8, D_003FED60, 0x12);
 }
 
 extern char D_00438640[]; /* "2D" */
@@ -11342,7 +11357,7 @@ extern char D_00438640[]; /* "2D" */
 extern u8 D_003FEFE0[];
 
 void effCreateTwoDimensionalTask(void) {
-    func_002FE5B8(D_00438640, D_003FEFE0, 2);
+    effSelectCameraFileJobFromRows(D_00438640, D_003FEFE0, 2);
 }
 
 extern char D_0042CEE8[];
@@ -11350,7 +11365,7 @@ extern char D_0042CEE8[];
 extern u8 D_003FF020[];
 
 void effCreateObjectParticleTask(void) {
-    func_002FE5B8(D_0042CEE8, D_003FF020, 7);
+    effSelectCameraFileJobFromRows(D_0042CEE8, D_003FF020, 7);
 }
 
 extern char D_0042CF58[];
@@ -11584,7 +11599,7 @@ s32 effResetCameraSnapshotSelection(void) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FF8A0);
 
 u32 effLoadFileSlotAndPoll(void) {
-    FileJob *file = fileQueueGetAt(effFileQueue, func_002FCA40());
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
 
     memcpy(D_0045C110, file, 0x90);
@@ -11613,7 +11628,7 @@ s32 effRunWithStateBackup(void) {
 extern u32 func_002FF8A0(u8 *, s32);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
-    FileJob *file = fileQueueGetAt(effFileQueue, func_002FCA40());
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
     memcpy(D_0045C110, file, 0x90);
     result = func_002FF8A0(D_0045C110, 1);
@@ -11689,14 +11704,14 @@ void effInitializeResourceQueue(void) {
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_004384E8);
     btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
     btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
-    queueFile = fileQueueGetAt(effFileQueue, func_002FCA40());
+    queueFile = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     btlResourceRecordSetName(effFileQueueNameRecord, queueFile->name);
 }
 
 u32 effPollResourceQueue(void) {
     u32 result;
     btlUpdateResourceNameEditor(effFileQueueNameRecord);
-    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, func_002FCA40())->name);
+    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex())->name);
     result = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
     if ((u32)(result - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
         btlDestroyResourceNameRecord(effFileQueueNameRecord);
@@ -13708,7 +13723,8 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_00305EB0(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle, s32 mode) {
+/* Rotate an offset in degrees and add its center; mode selects the screen aspect correction. */
+void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 centerY, f32 angle, s32 mode) {
     f32 aspect = 1.75f;
     f32 radians = angle * 0.017453293f;
     f32 adjustedY;

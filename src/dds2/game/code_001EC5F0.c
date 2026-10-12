@@ -4016,7 +4016,7 @@ void btlTickFieldSwayAndTint(void) {
     work = btlGetRuntime();
     if ((((((BtlState *)work)->battleFlags & 0x20000) != 0) && ((((BtlState *)work)->commandRestrictFlags & 0x20) == 0)) &&
           ((((BtlState *)work)->unk220 & 0x4000000) == 0)) {
-        func_001355D8();
+        fldUpdateSelectedValueTransition();
         fldUpdateSwayOffset();
         func_00134A18();
     }

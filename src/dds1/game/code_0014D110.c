@@ -217,8 +217,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    func_001411C0(scrReadIntParameter(0));
-    func_00141190(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
@@ -251,8 +251,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    func_001411C0(scrReadIntParameter(0));
-    func_00141190(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
@@ -269,8 +269,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
 s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
-    func_001411C0(scrReadIntParameter(0));
-    func_00141190(1);
+    fldSetInputPanelStateWord1(scrReadIntParameter(0));
+    fldSetInputPanelStateWord2(1);
     result = fldResolvePendingTitleBanner();
     if (result == -1) {
         scrSetIntegerReturnValue(-1);
@@ -586,7 +586,7 @@ s32 fldCmdSetFieldParameterPair(void) {
 
     D_0032E570[11] = scrReadIntParameter(0);
     value = scrReadIntParameter(1);
-    func_00132FD0(D_0032E570[11], value);
+    fldApplySkyLightSet(D_0032E570[11], value);
     return 1;
 }
 
