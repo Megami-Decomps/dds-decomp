@@ -33,7 +33,7 @@ s32 ptyScriptRemoveUnitAndReturnResult(void) {
 }
 
 /* Evaluate a two-operand VM expression and publish its result. */
-s32 func_0011ECC8(void) {
+s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
     s32 firstOperand = scrReadIntParameter(0);
     s32 secondOperand = scrReadIntParameter(1);
 
