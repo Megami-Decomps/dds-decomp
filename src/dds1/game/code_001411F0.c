@@ -259,7 +259,7 @@ extern FldClear18 fldPendingSounds[];
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void func_00129900(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -1202,7 +1202,7 @@ void func_00142D78(void) {
     D_003BAEB8 = D_003BAEF0;
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00329790);
     fldSelectDisplayBuffer(0x56);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
     fldSelectDisplayBuffer(0x57);
@@ -1278,7 +1278,7 @@ void func_00142D78(void) {
     }
 
     fldSelectDisplayBuffer(0x56);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitPrimaryFramePacket();
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
@@ -1375,7 +1375,7 @@ void func_00142D78(void) {
         evtSubmitPrimaryAlphaBlendMode(0);
     }
 
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
     D_003BAF10 += 0.4f;
@@ -1565,7 +1565,7 @@ void func_00142D78(void) {
 
             fldGetSceneEntryPosition(D_003BAEB4, &sceneX, &sceneZ);
             fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             worldX = fldAreaState.x + sceneX;
             distanceX = focus[0] - worldX;
             if (distanceX < 0.0f) {
@@ -1579,22 +1579,22 @@ void func_00142D78(void) {
             fldProjectPointSetupAlt(&playerX, &playerY,
                                     worldX, D_003BAEF8, worldZ);
             if (distanceX < 80000.0f && distanceZ < 80000.0f) {
-                func_00129900(1);
+                fldSetGsAlphaBlendEquation(1);
                 func_001428C0(1, playerX, playerY, -fldAreaState.negatedAngle);
-                func_00129900(0);
+                fldSetGsAlphaBlendEquation(0);
                 func_001428C0(0, playerX, playerY, fldAreaState.angle);
             }
         }
     }
 
     fldSelectDisplayBuffer(0x5E);
-    func_00129900(0);
-    func_00129900(1);
+    fldSetGsAlphaBlendEquation(0);
+    fldSetGsAlphaBlendEquation(1);
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitSpriteRect(0, 0, 512, 448, 32, 59, 22, 22,
                         0x40808080, D_003D40A0[1]);
-    func_00129900(0);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitSpriteRect(332, 410, 156, 27, 2, 83, 156, 27,
                         0x80808080, D_003D40A0[0]);
 
@@ -1609,7 +1609,7 @@ void func_00142D78(void) {
     maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
     minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
 
     fldSubmitSpriteRect(242, 63, 28, 27, 172, 61, 28, 27,
                         0x80808080, D_003D40A0[0]);
@@ -1653,7 +1653,7 @@ void func_00142D78(void) {
     }
 
     fldSelectDisplayBuffer(0x5E);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 0, 128, 2, 0, 0, 1, 2);
     fldSubmitFrameQuad(1, 5, 128, 3, 0, 0, 1, 2);
 
@@ -1728,11 +1728,11 @@ void fldDrawFieldBackdropFrame(void) {
 
     fldSelectDisplayBuffer(0x56);
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
     fldSubmitSpriteRect(0, 0, 0x200, 0x1C0, 0, 0, 0x40, 0x40,
                         0x80404040, D_003D40A0[2]);
-    func_00129900(1);
+    fldSetGsAlphaBlendEquation(1);
 
     alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
     color = ((u32)alpha << 24) | 0x00808080;
@@ -1758,7 +1758,7 @@ void fldDrawFieldBackdropFrame(void) {
     color = ((u32)alpha << 24) | 0x00808080;
     fldSubmitSpriteRect(0xF2, 0xBA, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
                         color, D_003D40A0[3]);
-    func_00129900(1);
+    fldSetGsAlphaBlendEquation(1);
 
     for (i = 0; i < 9; i++) {
         x = 0x0C + i * 0x17;
@@ -1785,12 +1785,12 @@ void fldDrawFieldBackdropFrame(void) {
                             0x20808080, D_003D40A0[1]);
     }
 
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     fldSelectDisplayBuffer(0x5E);
     fldSubmitFrameQuad(1, 5, 0x81, 1, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 
@@ -2991,7 +2991,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
 
     if (D_0032E4C8[0] != 1) {
         fldSelectDisplayBuffer(0x53);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitSpriteRect(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
         fldSubmitSpriteRect(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
@@ -3002,14 +3002,14 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                 color = (s32)(sdfSinPoly(fldBannerColorPhase * 4.0f * 3.14f / 180.0f) * 128.0f) + 0x80;
                 color |= (color << 8) | (color << 16);
             }
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             evtSubmitTexturedRectPacket(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, color, color | 0x5A000000, color | 0x5A000000, color, D_003BAF30);
             fldBannerColorPhase += 1.0f;
             if (fldBannerColorPhase > 90.0f) {
                 fldBannerColorPhase = 0.0f;
             }
         }
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -3018,30 +3018,30 @@ void fldDrawGaugeBar(s32 width) {
 
     if (D_0032E3C0[0] < 200) {
         fldSelectDisplayBuffer(0x53);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         x = 0x9D - (width >> 1);
         fldSubmitSpriteRect(x, 0x123, 0x63, 0x2E, 2, 1, 0x63, 0x2E, 0x80808080, D_003BAF30);
         fldSubmitSpriteRect(x + 0x63, 0x123, width, 0x2E, 0x64, 1, 1, 0x2E, 0x80808080, D_003BAF30);
         x += width;
         fldSubmitSpriteRect(x + 0x63, 0x123, 0x63, 0x2E, 0x65, 1, -0x63, 0x2E, 0x80808080, D_003BAF30);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
 extern void fldSelectDisplayBuffer(u32);
 
-extern void func_00129900(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void fldDrawTitleBanner(s32 x, s32 y) {
     if (D_0032E3C0[0] < 200) {
         fldSelectDisplayBuffer(0x53);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitSpriteRect(x, y, 0x10, 0x11, 0x68, 1, 0x10, 0x11, 0x80808080, D_003BAF30);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -3076,19 +3076,19 @@ void fldDrawLocationPanel(void) {
     case 7:
         color = 0x80808080;
         fldSelectDisplayBuffer(0x53);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitGsGradientQuad(0x194, 0x91, 0x5F, 0x47, 0, 0, 0, 0x26,
             0, 0, 0, 0x26, 0, 0, 0, 0x26, 0, 0, 0, 0x26);
         fldSubmitSpriteRect(0x188, 0x117, 0x78, 0x80, 1, 0, 0x78, 0x80, color, D_003BAF34);
         fldSubmitSpriteRect(0x188, 0x197, 0x78, 0x1C, 1, 0x7F, 0x78, 1, color, D_003BAF34);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitGsGradientQuad(0x190, 0x8F, 0x70, 0x49, 0, 0xD, 0xA2, 0x18,
             0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0);
         fldSubmitGsGradientQuad(0x193, 0x90, 0x6D, 0x4E, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18);
         fldSubmitSpriteRect(0x1B4, 0x112, 0x1F, 0x10, 1, 1, 0x1F, 0x10, color, D_003BAF38);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldResetCameraAndSceneView();
         break;
     }
@@ -3216,7 +3216,7 @@ s32 fldTitle(void) {
         fldSelectDisplayBuffer(0x5E);
     }
     fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     /* The next phase is staged before the dispatch: the scheduler issues the
      * constant-1 pseudo ahead of the phase load (see docs/idioms.md,
      * "Trace-justified staging: fldTitle next phase"). */
@@ -3242,7 +3242,7 @@ s32 fldTitle(void) {
             fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
         }
         if (D_003BAF9C >= 20 && D_003BAF9C < 30) {
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             alpha = (D_003BAF9C - 20) * 128 / 10;
             if (alpha > 0x80) {
                 alpha = 0x80;
@@ -3253,10 +3253,10 @@ s32 fldTitle(void) {
             fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
             fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
-            func_00129900(0);
+            fldSetGsAlphaBlendEquation(0);
         }
         if (D_003BAF9C >= 30) {
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             alpha = (0x30 - D_003BAF9C) * 128 / 18;
             if (alpha > 0x80) {
                 alpha = 0x80;
@@ -3267,7 +3267,7 @@ s32 fldTitle(void) {
             fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
             fldSubmitSpriteRect(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
-            func_00129900(0);
+            fldSetGsAlphaBlendEquation(0);
         }
         nextFrame = D_003BAF9C + 1;
         if (nextFrame > 60) {
@@ -3376,7 +3376,7 @@ s32 fldTitleMini(void) {
     }
     fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
-    func_00129900(0);
+    fldSetGsAlphaBlendEquation(0);
     switch (D_003BAFBC) {
     case 0:
         nextFrame = D_003BAFB8 + 1;
@@ -3411,13 +3411,13 @@ s32 fldTitleMini(void) {
             if (alpha > 128) {
                 alpha = 128;
             }
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
         if (D_003BAFB8 >= 8) {
             alpha = (D_003BAFB8 - 8) * 16;
-            func_00129900(0);
+            fldSetGsAlphaBlendEquation(0);
             fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
@@ -3437,26 +3437,26 @@ s32 fldTitleMini(void) {
             0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
         alpha -= D_003BAFB8 * 8;
         if (alpha > 0) {
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
             0x80808080, D_003BAFC4);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
             0x80808080, D_003BAFC4);
         highlightRgb = 0x808080;
         if (D_003BAFB8 < 4) {
             alpha = D_003BAFB8 * 40 / 3;
-            func_00129900(1);
+            fldSetGsAlphaBlendEquation(1);
             fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                 (alpha << 24) | highlightRgb, D_003BAFC4);
         } else {
             alpha = 56 - D_003BAFB8 * 4;
             if (alpha > 0) {
-                func_00129900(1);
+                fldSetGsAlphaBlendEquation(1);
                 fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x24, 0, 0, 0x100, 0x24,
                     (alpha << 24) | highlightRgb, D_003BAFC4);
             }
@@ -3483,7 +3483,7 @@ s32 fldTitleMini(void) {
         if (D_003BAFB8 < 10) {
             alpha = 128 - D_003BAFB8 * 16;
             if (alpha > 0) {
-                func_00129900(0);
+                fldSetGsAlphaBlendEquation(0);
                 fldSubmitSpriteRect(0x80, 0x152, 0x100, 0x1C, 0, 0x24, 0x100, 0x1C,
                     (alpha << 24) | 0x808080, D_003BAFC4);
             }
@@ -3506,7 +3506,7 @@ s32 fldTitleMini(void) {
             height = 36 - height;
         }
         if (alpha > 0) {
-            func_00129900(0);
+            fldSetGsAlphaBlendEquation(0);
             fldSubmitSpriteRect(x, y, width, height, 0, 0, 0x100, 0x24,
                 (alpha << 24) | 0x808080, D_003BAFC4);
         }

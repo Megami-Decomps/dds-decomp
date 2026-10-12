@@ -899,6 +899,7 @@
 0x00129720	fldSelectDisplayBuffer	inferred	Stores the index used to select a field display buffer descriptor for subsequent packets. [names_reviewed5.tsv]
 0x00129728	fldSubmitGsCommandWord	inferred	Builds a GS register command from supplied bitfields and submits it through the selected display buffer. [names_reviewed5.tsv]
 0x001297E8	fldSubmitFrameQuad	inferred	builds a 0x30-byte DMA packet with packed flag bits (arg0..arg7) and command 0x47, then calls the descriptor open() for the current buffer
+0x00129900	fldSetGsAlphaBlendEquation	inferred	src/dds1/field/fldFileResolver.c; writes the GS ALPHA_1 equation selected by the field blend mode; paired 0012BE18.
 0x00129A08	fldSubmitGsLinesScaled	inferred	same packet as func_00129B68 but coords are x*16 and offset by 0x7000/0x7900 (GS primitive space)
 0x00129B68	fldSubmitGsLines	inferred	builds a 4-qword-per-vertex GS packet (two iterations) from four coords and three tag words, then opens the current display buffer descriptor
 0x00129CA8	fldSubmitGsQuadTagged	inferred	four-corner GS packet with lo/hi words from args 4-7 and fixed 0xFFFFFF tag

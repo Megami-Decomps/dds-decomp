@@ -2224,7 +2224,7 @@ void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag1
 }
 
 /* Write the selected blend equation to GS ALPHA_1, including DDS2's FIX mode. */
-void func_0012BE18(s32 mode) {
+void fldSetGsAlphaBlendEquation(s32 mode) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *data;
@@ -2986,7 +2986,7 @@ void fldDrawMarkerQuad(f32 *pos) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -3017,7 +3017,7 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -3026,7 +3026,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
     fldSubmitSpriteRect(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitSpriteRect(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 void fldAllocateBackgroundBuffer(void) {
@@ -3281,7 +3281,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     if (fade != 0) {
         color = fade & 0xFF;
         fldSelectDisplayBuffer(0x39);
-        func_0012BE18(5);
+        fldSetGsAlphaBlendEquation(5);
         if (color > 0x80) {
             color = 0x80;
         }
@@ -3307,7 +3307,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
                                 x + sinA, y - 2.0f, z + cosA,
                                 x + sinB, y - 2.0f, z + cosB);
         }
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -4592,13 +4592,13 @@ void fldDrawSkyGradient(void) {
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
     switch (D_00436104[current].mode) {
     case 0:
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         break;
     case 1:
-        func_0012BE18(1);
+        fldSetGsAlphaBlendEquation(1);
         break;
     case 2:
-        func_0012BE18(2);
+        fldSetGsAlphaBlendEquation(2);
         break;
     }
 
@@ -4720,7 +4720,7 @@ void fldDrawSkyGradient(void) {
         }
     }
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
