@@ -2731,7 +2731,6 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
 }
 
 extern u32 kwlnGetDrawBufferIndex(void);
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 D_003E7960[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];

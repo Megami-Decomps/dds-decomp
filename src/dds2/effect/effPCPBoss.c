@@ -9,6 +9,7 @@
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
+#include "sdf_projection.h"
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
@@ -21,7 +22,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 func_001695C8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern u8 D_003B1FF0[];
 

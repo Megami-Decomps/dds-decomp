@@ -11,6 +11,7 @@
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_projection.h"
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern s32 effEmitterDelayRandomState[];
@@ -1654,7 +1655,6 @@ struct EffLookAtRingEmitter {
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */

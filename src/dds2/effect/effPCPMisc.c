@@ -34,6 +34,7 @@
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "bill_object_api.h"
+#include "sdf_projection.h"
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -3122,7 +3123,6 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */

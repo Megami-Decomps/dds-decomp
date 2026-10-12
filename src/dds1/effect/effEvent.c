@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
@@ -1239,7 +1240,6 @@ extern f32 D_003563A0[];
 extern f32 D_003563B8[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002DD968(f32 angle);

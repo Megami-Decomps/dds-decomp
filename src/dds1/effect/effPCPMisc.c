@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "common.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
@@ -2959,7 +2960,6 @@ void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: place three staggered groups in the camera-relative basis. */

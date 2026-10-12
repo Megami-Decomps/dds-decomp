@@ -524,7 +524,6 @@ extern u8 sdfViewTargetVector[];
 
 extern u8 sdfViewUpVector[];
 
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 
 extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *);
 

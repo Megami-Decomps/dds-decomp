@@ -49,6 +49,8 @@ extern SdfProjectionRecord D_0037F7B0;
 extern SdfProjectionRecord D_0037F980;
 #endif
 extern void sdfCameraBuildProjection(SdfCamera *);
+/* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
+void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, const void *up);
 struct ConsMatrixPacket;
 extern void sdfConsBuildMatrixPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, void *);
 extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);

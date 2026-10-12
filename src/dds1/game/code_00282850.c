@@ -105,7 +105,6 @@ extern void mnuApplyModelCamera(MdlCtx *);
 extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
 extern s32 kwlnGetDrawBufferIndex(void);
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];

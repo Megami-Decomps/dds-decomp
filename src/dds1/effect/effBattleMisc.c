@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "common.h"
 #include "dds3obj.h"
 #include "btl_effect_position.h"
@@ -26,7 +27,6 @@ extern void btlUnitGetMuzzlePosVU(void *unit);
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *target, void *origin, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern void func_002DD608(f32 value);
 extern void func_002DD968(f32 value);
