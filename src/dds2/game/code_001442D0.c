@@ -4416,7 +4416,7 @@ void func_00150138(void) {
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
 
 
-extern void func_00125B10(void);
+extern void fldTogglePlayerModel(void);
 
 /* Restores field presentation once an active event finishes, then clears the
  * event latch. An already-cleared latch leaves field resources untouched. */
@@ -4425,7 +4425,7 @@ void fldFinishEventFieldState(void) {
 
     if (work->transitionMode != 0) {
         D_003899E0[0] = 0;
-        func_00125B10();
+        fldTogglePlayerModel();
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
@@ -4572,7 +4572,7 @@ void fldUpdateDevilizeEventSequence(void) {
     case 9:
         func_0014F5F0();
         fldLoadWeatherEffects();
-        func_00125B10();
+        fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.unk30 = 0;
         fldSparkControlState.dialogPhase = 10;
@@ -4702,7 +4702,7 @@ void func_00150F20(void) {
         fldSparkControlState.phase = 8;
     } else if (phase == 8) {
         sndSetSequenceVolumePan(0x680011, 0x7F, 0x3F);
-        func_00125B10();
+        fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
         evtSetSolarOverlayFullyVisible();
         fldAreaState.unk138 = 1;

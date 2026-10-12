@@ -1444,6 +1444,19 @@ The diagnostic sphere helper `func_0020D1F8` takes
 incoming registers but changes the first call's float/color/flags setup.
 The empty retail provider does not establish the interleaving by itself.
 
+The DDS2 encounter selector `func_0011E930` takes `(f32 step, s32 index)`.
+Its provider alone matches with either order, but the field travel controller
+establishes the interleaving. In real-cc1 pass 00, the order assigns the float
+and integer moves UIDs 1142 and 1144. Pass 25 gives both priority 3 and cost 1,
+with no incoming dependencies and the same two forward users; the earlier
+logical instruction wins. The native sequence is request-base address,
+float argument, table-index store, integer argument, then call with the
+selection-output address in the delay slot. Integer-first swaps the two
+argument moves. Float-first preserves all 121 provider and 82 debug-owner
+matches and closes the 1,572-byte field controller (80/0 for its whole unit).
+All three retail calls use only one integer and one floating argument;
+update the definition, both declarations, and all three calls together.
+
 ## Seven or more arguments
 
 The EE ABI passes arguments 5 to 8 in `$8`–`$11` (not on the stack), so a
@@ -2431,9 +2444,19 @@ retail's `lwc1, abs.s, lwc1` order). Check the `prio` column before trying varia
   length: the constant with the longest live range gets the highest register.
   Writing its store first in the first block and last in the last block makes it
   `$22` instead of `$18` (DDS1 `effSubmitFieldBlendStateTask`).
-- `xori $r,$r,0` ahead of `movz/movn` is cc1's `x != y` with `y` folded to 0 only
-  after expansion. `(m & 0x2000) != 0`, `?:`, `if`, `== 0`, u64/u16/s16 params
-  never produce it (15 scratch spellings, `btlLowestSetPairIndex` tail).
+- `xori $r,$r,0` before `movz/movn` can survive conditional-move expansion
+  even when the comparison RHS was already literal zero. In
+  `btlLowestSetPairIndex`, the baseline's first early `if_convert(0)` emits
+  it before the `02.jump` dump; first CSE folds it away. A genuinely consumed
+  running-index control defers conversion to the second early
+  `if_convert(0)`, but CSE2 removes its XOR instead. A nonmatching common-result
+  control retains an XOR emitted later in `15.ce`. Both early paths were
+  observed in the pinned compiler with all 28 ordinary/observed artifacts
+  identical. The earlier 15 spellings failed to retain the native XOR;
+  they do not prove that zero must arise after expansion. The retail source
+  relationship remains unresolved. Preserve Tidal/Brass/Sable's prior
+  reconstruction and negative controls; this is a compiler-mechanism
+  correction, not a new match.
 
 ### Alias sets stop gcse merging a reload
 
@@ -8267,6 +8290,148 @@ native restore order and permits cross-jumping to remove two words.
 The exact direct-indexed form preserves both stores and all surrounding
 functions: both complete units report 25 match, 0 differ.
 
+
+### Rebind scene work across player-model teardown and rebuild
+
+DDS2 `fldTogglePlayerModel` (original `func_00125B10`, 612 bytes) snapshots
+position and rotation, destroys the old object/model, then rotates and
+respawns from the same scene storage. Use one `sceneWork` local and assign
+its real address separately in the snapshot and rebuild phases. Splitting
+these into different locals creates a single-definition snapshot quantity:
+local-alloc merges its HIGH, base and +16 address into s0, leaving player in
+s1 and moving the address construction before memset.
+
+The qualified read-only vendor-compiler trace shows why the rebind works.
+The shared local has nine references, two definitions and two deaths across
+seven calls. Local allocation rejects its coalesces and assigns player to
+s0; global allocation then assigns scene work to s1 because s0 conflicts.
+This restores every one of the forty residual words, including derived
+address registers and delay slots. Both observed compiler runs preserve all
+28 compiler/assembler artifacts; the complete owner passes 81/0.
+
+The four existing SDK input-address-only VU stores are qualified only for
+this pipeline: position and rotation snapshots are consumed through actual
+VU reloads or callee quadword loads, the rotated scene value is reloaded by
+VU, and the final stack vector is read by the spawn provider. There is no
+cached C scalar readback. All four generated destinations are 16-byte
+aligned. Do not generalize this to arbitrary store/reload code; keep the
+ordinary memory-clobbered form unless an equally specific audit supports
+this legacy contract. Preserve Sable/Garnet/Tidal source lineage (public
+handoff 574160a); this continuation supplies compiler and ABI qualification.
+
+### Audit the DDS1 travel-history SDK stores before changing their contract
+
+DDS1 `fldUpdateTravelAndEncounters` (original `func_001249E0`, 1,076 bytes)
+uses two historical input-address-only SDK stores to the previous-position
+quadword. Replacing them with the ordinary memory-clobbered PARALLEL form
+produces a 1,068-byte near-match. This is a specific compiler-contract
+boundary, not a reason to use the legacy form as a general memory barrier.
+
+The pinned real-cc1 trace shows the distinction at first CSE: its top-level
+volatile ASM_OPERANDS test at 0x0810799E--0x081079AD calls flush_hash_table
+at 0x081079AF. The PARALLEL memory-clobbered form does not take this path;
+it leaves a valid full field-work base available, and the cooldown reset
+reuses that base. With the original SDK form, the store flushes the earlier
+base equivalence; the reset retains a fresh low-address materialization.
+Later jump optimization also retains the native local return-zero setup.
+The qualified observer recorded 12,973 events with unchanged input hashes
+and byte-identical assembly, object and all 22 RTL dumps. The complete
+controller matches all 269 words and its owner passes 79/0.
+
+Both stores target the aligned 16-byte history cell D_0032F250. The normal
+path loads the old quadword into VU before overwriting it with current
+position and computes displacement entirely in registers. The cooldown
+path refetches position, saves it, clears the separate frame-distance
+field and returns. A later invocation reads history with a fresh VU load.
+There is no other identified user, partial write, cached C scalar readback
+or loop-hoisted read. This scoped emitted-code audit supports these two
+stores only. The DDS2 controller retains its separately verified contract.
+
+The DDS1 selector twin `func_0011CB90` likewise takes `(f32 step, s32 index)`;
+its definition and three calls must be reconciled together. Native DDS1
+does not recheck the forced selection result, and it has neither DDS2's
+special-floor event dispatch nor its gated cooldown attrition update.
+
+This travel closure preserves KiB's earlier DDS1 reconstruction and
+Peregrine Forge's complete continuation and native-behavior corrections
+(issue #11 comment 6030630106; issue #16 release 6093132528).
+
+The player-model toggle transfers directly to DDS1's original
+`func_001239C8` (also 612 bytes) with its actual scene/resource globals and
+provider contracts. Both titles use the same two-definition scene-work
+identity and the same four qualified SDK stores. The DDS1 scene singleton
+is D_0032F1A0, with aligned position/rotation at +0/+16; its stack vectors
+likewise occupy aligned SP+0/SP+16 in the 64-byte frame.
+
+Keep provider declarations truthful when adding either body. Model-context
+rebuild consumes `EffWorldNode *`, node-frame step has a floating third
+argument, and scene-light selection takes a signed 32-bit index. The scene
+command callers deliberately convert their stored command to signed 16 bits
+before passing that index; keep the explicit conversion there rather than
+narrowing the provider prototype. The viewer request provider currently
+uses a pointer fourth parameter in DDS1 and a signed address word in DDS2;
+spell the conversion explicitly at DDS2 callers and use each actual current
+provider signature. Both final field-state update callbacks return s32,
+even though these rebuild callers discard their result.
+
+### Field bearing: preserve the used magnitude/result identity
+
+DDS1 `func_001228D8` and DDS2 `func_001248E8` are the same 208-byte
+X/Z bearing calculation. Keep the field's `180.0f / 3.14f` conversion,
+conditional magnitude negations, and unordered-safe quadrant branches.
+In the negative-X arm, `!(dz < 0.0f)` is intentional: `dz >= 0.0f`
+changes the NaN case. Both deltas exist before either is normalized.
+
+The X magnitude and final returned result reuse one working scalar, while
+the quadrant arithmetic uses a separate angle. Both assignments have real
+consumers. Actual vendor CSE traces show that this later result use keeps
+the magnitude pseudo as the equivalence representative instead of promoting
+the signed-X snapshot. Signed X then has only two references and receives
+$f22; the shared zero receives $f21. Combine later eliminates the final
+result/angle copy, allowing the magnitude to use $f13 before the call and
+the angle to use $f1 afterward. Qualified negative and positive observer
+runs reproduced all ordinary artifacts. No dummy values or pinned registers
+are involved; the trace explains an ordinary source identity, not proof of
+an original author's spelling.
+
+Both version bodies have identical native operations and scale bits
+0x42654ca3. A host control-flow audit compared 248,832 coordinate/atan-result
+cases, including signed zero, subnormals, infinities, and NaNs; the final
+source retained call count, argument bits, and result bits. This is an
+additional logic check, not an EE floating-point emulator; retail builds
+remain the platform-level acceptance gate.
+
+This bearing closure continues Tidal's complete reconstruction and the
+released Brass Osprey / Peregrine Forge CSE investigations on collaboration
+issue #16 (comments 6101995119 and 6102047378). Their earlier signed-copy
+promotion diagnosis is consistent with the independently qualified trace
+above; the newly validated working-result identity closes that frontier.
+
+### DDS1 field scene initializer and generated axis ownership
+
+The 1,256-byte DDS1 `func_001233D0` transfers from PiM's exact DDS2
+`func_00125380` (commit f75bf24579a84cfd7b71301e7dbfb5338865e31f), with
+actual DDS1 behavior restored: the title threshold is 39, player/camera
+preparation is one provider call, and two independent reads of flag 0x413
+gate camera color and the location-bit-8 menu initialization. DDS1 has no
+DDS2 extra chase-camera/world-player or indexed-resource tail calls.
+Keep the last matching area in the sixteen-record scan, signed room flag
+promotion, separate status calls, and the fresh scene-state read following
+player/camera setup.
+
+The local axis initializer owns the native sixteen bytes at D_0039FBD0.
+Emit the preceding task-name string D_0039FBC0 before the function and remove
+the old axis INCLUDE_RODATA when introducing the initializer. Keeping both
+owners duplicates the data and shifts the string even with all function
+instructions exact. This is actual data ownership, not padding.
+
+Preserve the earlier Obsidian/Slate, Peregrine Forge, and Sable Forge DDS1
+reconstructions (issue #16 releases 6093344538 and 6113377661), and PiM's
+exact DDS2 donor, its recorded Cinder research lineage, and shared
+field-layout work. The current port is not a
+claim of first reconstruction or a retrospective qualification of those
+older source snapshots.
+
 ## Nested polygon ownership: effect UV-scale and fade callbacks
 
 The remaining curve callbacks in DDS1 `game/code_0029C530` and DDS2
@@ -9268,3 +9433,33 @@ in C. The four `datCalc.c` externs already use `s32 (u32)` and remain unchanged.
 Keep the native forwarding form and all flag-1 definitions and externs; those
 are outside this return-type closure.
 
+
+## Mantra orbit marker rows: bounds and induction profitability
+
+DDS2 `func_0027CDD0` remains assembly. Preserve the released
+Quartz/Azure/Sable/Brass/KiB reconstruction and compiler-analysis lineage.
+The typed six-row coordinate draft has native 1,544-byte extent but 38
+instruction differences. A historical two-word draft is diagnostic only:
+its `s8 *` begins at the first row's Y element, crosses row subobjects, and
+finally advances beyond the complete twelve-byte array. Instruction proximity
+does not qualify those pointer operations.
+
+A legal whole-row cursor with a Y pointer derived inside each valid iteration
+avoids both bounds problems, but emits an extra per-iteration address addition.
+The pinned compiler's actual strength-reduction decision explains why: this
+replaceable Y GIV has benefit 2, minus update cost 2, leaving zero. Marking the
+row BIV eliminable does not credit removal of its old increment at this test.
+The indexed draft instead has benefit 4 minus 2, so its derived Y cursor is
+created after the index reset. That setup extends the index's live interval
+from the diagnostic draft's 288 to 290, lowering its allocation priority below
+the packet argument and exchanging their saved-register homes.
+
+Fresh current-input observations reproduce the indexed statistics: 29
+references, live length 290 and 17 calls for the index; 28 references, live
+length 279 and 29 calls for the packet. The row and indexed observations record
+28 and 49 events respectively, with all 27 ordinary/observed artifacts
+identical in each case. These are causal bounds on two nonmatching sources,
+not authority to alter allocation statistics, pad the coordinate object or
+reuse the invalid traversal. The native and indexed loops already increment
+the marker index before the draw call; moving that increment in C is not a
+new native lifetime requirement.

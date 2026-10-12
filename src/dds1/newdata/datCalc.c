@@ -1966,7 +1966,7 @@ extern s32 D_003BAAC0;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 func_0011CB90(s32 index, f32 step) {
+s32 func_0011CB90(f32 step, s32 index) {
     s32 group;
     s32 interval;
     s32 count;
