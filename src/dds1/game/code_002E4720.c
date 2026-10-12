@@ -227,7 +227,7 @@ extern void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *forma
 
 extern void sdfDevConsInit(void);
 
-extern s32 func_00305B08(char *destination, const char *format, void *args);
+extern s32 sdfVFormatString(char *destination, const char *format, void *args);
 
 extern s32 sdfGetPacketCursor(void);
 
@@ -285,7 +285,7 @@ void *sdfBuildFormattedConsolePacket(SifCommand *input, const char *format, void
     s32 quadwordCount;
 
     sdfDevConsInit();
-    formattedCount = func_00305B08(text, format, arguments);
+    formattedCount = sdfVFormatString(text, format, arguments);
     start = (u8 *)sdfGetPacketCursor();
     if (formattedCount == 0) {
         *(u128 *)start = 0;
@@ -451,7 +451,7 @@ s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
     s32 length;
 
     __builtin_stdarg_start(args, fmt);
-    length = func_00305B08(buffer, fmt, args);
+    length = sdfVFormatString(buffer, fmt, args);
     sdfDevPrintText(buffer);
     return length;
 }

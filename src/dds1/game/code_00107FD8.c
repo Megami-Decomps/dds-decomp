@@ -1418,7 +1418,7 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-extern s32 func_00305B08();
+extern s32 sdfVFormatString();
 extern void sdfDevConsPrintf();
 
 /* printf into the dev console node when one exists. */
@@ -1436,7 +1436,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
 
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
-        func_00305B08(messageBuffer, format, formatArgs);
+        sdfVFormatString(messageBuffer, format, formatArgs);
         sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
