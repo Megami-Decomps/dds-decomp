@@ -406,7 +406,7 @@ void func_0027C788(MenuWindowContainer *window) {
     mnuClearListFlagsOneAndTwo(&window->list->stateFlags);
 }
 
-void func_0027C7A0(MenuWindowContainer *window) {
+void mnuCheckWindowListStatus(MenuWindowContainer *window) {
     mnuTestListFlagTwo(&window->list->stateFlags);
 }
 

@@ -119,7 +119,7 @@ extern u8 fldIsFlagActive(void);
 extern u8 fldTestSecondarySceneFlag(void);
 extern void fldSetPrimarySceneFlag(void);
 extern void fldSetSecondarySceneFlag(void);
-extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
+extern void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 
@@ -127,7 +127,7 @@ extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
 
 
-extern void func_002878D8(s32 arg0);
+extern void evtStageTestApplyInitialMotion(s32 arg0);
 
 extern s32 D_003BC7B4;
 
@@ -586,7 +586,7 @@ void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->blend = 0;
 }
 
-void func_00283BF0(u32 *out, u32 value) {
+void mnuSetStateValue(u32 *out, u32 value) {
     *out = value;
 }
 
@@ -1165,7 +1165,7 @@ void mnuBindPresentMenuEntry(MenuPopupState *state, s32 *entrySlot) {
     }
 }
 
-void func_00285960(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
+void mnuPopulatePartyPanelSlot(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *panel) {
     s32 i;
 
     if (entry->flags & 2)
@@ -1194,7 +1194,7 @@ void mnuInitPartyPanelSlots(PartyPanel *panel) {
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         partyEntry = &datGameState->party[partyIndex];
         if (partyEntry->flags & 1) {
-            func_00285960(partyEntry, 0, partyIndex, panel);
+            mnuPopulatePartyPanelSlot(partyEntry, 0, partyIndex, panel);
             panel->slots[partyIndex].index = partyIndex;
         } else {
             panel->slots[partyIndex].unk8 = -1;
@@ -1647,11 +1647,11 @@ s32 mnuGetAbilityTargetCategory(u16 commandId) {
     return 0;
 }
 
-void func_002866B0(u16 ability, s32 target, DatPartyRecord *entry) {
+void ptyCommitFieldSkillUse(u16 ability, s32 target, DatPartyRecord *entry) {
     sdfApplyCommandResults(ability);
 }
 
-u32 func_002866C8(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {
+u32 ptyCheckFieldUseOverride(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {
     return 0;
 }
 
@@ -1661,7 +1661,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
     s32 applied = 0;
     s32 mask;
 
-    if (func_002866C8((s32)context, ability, (s32)target, entry) != 0) {
+    if (ptyCheckFieldUseOverride((s32)context, ability, (s32)target, entry) != 0) {
         return 1;
     }
 
@@ -1671,7 +1671,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         if (btlCheckPartyCommandCounterEligibility(ability, mask) != 0) {
             return 0;
         }
-        func_002866B0(ability, (s32)target, entry);
+        ptyCommitFieldSkillUse(ability, (s32)target, entry);
         func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 partyIndex;
@@ -1683,7 +1683,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (btlCheckPartyCommandCounterEligibility(ability, mask) == 0) {
-                    func_002866B0(ability, (s32)target, entry);
+                    ptyCommitFieldSkillUse(ability, (s32)target, entry);
                     applied = 1;
                 }
             }
@@ -2023,7 +2023,7 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
         motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
-    func_002878D8(-1);
+    evtStageTestApplyInitialMotion(-1);
 }
 
 /* Advance the indexed entry's animation frame and request a stage refresh.
@@ -2037,7 +2037,7 @@ void evtStageTestAddEntryValue(s32 encodedIndex, f32 delta) {
     }
     stageEntry = (StageTestEntry *)(entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
     stageEntry->frame += delta;
-    func_002878D8(-1);
+    evtStageTestApplyInitialMotion(-1);
 }
 
 /* Add integer XYZ deltas to the indexed entry's floating-point position. */
@@ -2284,7 +2284,7 @@ s32 func_002877A8(void) {
                     evtStageTestState.queue.flags |= EVT_STAGE_QUEUE_REQUESTING;
                     return 1;
                 }
-                func_002878D8(slot->initialMotionIndex);
+                evtStageTestApplyInitialMotion(slot->initialMotionIndex);
                 evtStageTestState.queue.flags =
                     (evtStageTestState.queue.flags & ~EVT_STAGE_QUEUE_REQUESTING) |
                     EVT_STAGE_QUEUE_SETUP_COMPLETE;
@@ -2296,7 +2296,7 @@ s32 func_002877A8(void) {
     return 0;
 }
 
-void func_002878D8(s32 initialMotionIndex) {
+void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     MdlCtx *model = evtStageTestState.model;
     StageTestSlot *slot = &evtStageTestState.queue.slot[0];
     s8 motionIndex;
@@ -2580,7 +2580,7 @@ INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2560);
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002881F0);
 
-u32 func_00288458(void) {
+u32 evtStageTestCameraUpdate(void) {
     func_002881F0();
     return 0;
 }
@@ -2592,7 +2592,7 @@ void *evtCreateBattleStageTestCamera(void) {
     EffWorldNode *cameraTarget = evtCreateWorldObjectAtTransform(position, orientation);
 
     cameraTarget->value = D_003BC7C8;
-    return func_00288458;
+    return evtStageTestCameraUpdate;
 }
 
 extern SdfPoolNode D_00325708;

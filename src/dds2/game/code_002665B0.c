@@ -147,7 +147,7 @@ extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
-extern void func_002C1B68(u32 *, u32);
+extern void mnuSetStateValue(u32 *, u32);
 
 
 
@@ -1038,9 +1038,9 @@ s32 mnuUpdateTerminalMessageWindowIndicator(KwlnTask *task) {
     MenuGradientFade *context = &((MenuSlotState *)kwlnTaskGetUserValue(task))->gradientFade;
     mnuDrawAndStepGradientFade(context, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
-        func_002C1B68(&context->active, 1);
+        mnuSetStateValue(&context->active, 1);
     } else {
-        func_002C1B68(&context->active, 0);
+        mnuSetStateValue(&context->active, 0);
     }
     return 0;
 }

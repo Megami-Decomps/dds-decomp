@@ -457,7 +457,7 @@ u32 mnuEnterSelectedResourceLabel(KwlnTask *task) {
 
     context = kwlnTaskGetUserValue(task);
     resourceOwner = ((MenuContext *)context)->party;
-    func_002C1B68(context + 0xaa50, 1);
+    mnuSetStateValue(context + 0xaa50, 1);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C +
                                     *(s32 *)(*(s32 *)(*(s32 *)(*(s32 *)(resourceOwner + 0x18) + 0x18) + 0x1c) + 100) * 0x19));
     dspStartEntry(8);
@@ -528,7 +528,7 @@ u32 mnuEnterSlotLabel(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     DatPartyRecord *slot = &datGameState->party[((MenuContext *)context)->partyWindow.lists[0]->cursor->index];
     s32 selectedEntry;
-    func_002C1B68(context + 0xaa50, 1);
+    mnuSetStateValue(context + 0xaa50, 1);
     selectedEntry = mnuGetPartyEntryCurrentId(slot);
     evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E5C + selectedEntry * 0x19));
     dspStartEntry(0xd);
@@ -688,7 +688,7 @@ void mnuCopyPartyEntries(context)
 
 /* Move a current party entry into the selected backup slot and refresh its panel. */
 extern void *memcpy(void *, const void *, u32);
-extern void func_002C4328(u8 *, s32, u32, PartyPanel *);
+extern void mnuPopulatePartyPanelSlot(u8 *, s32, u32, PartyPanel *);
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 activeCount = context->partyPanel.unk0;
@@ -702,11 +702,11 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
         s32 selection = menuWork->selection;
         context->partyWindow.slots[selection].flags &= ~0x40;
         menuWork->backup[selection].flags |= 2;
-        func_002C4328((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
+        mnuPopulatePartyPanelSlot((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
                       &context->partyPanel);
     } else {
         menuWork->backup[menuWork->selection].flags &= ~2;
-        func_002C4328((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
+        mnuPopulatePartyPanelSlot((u8 *)&menuWork->backup[menuWork->selection], 0, menuWork->selection,
                       &context->partyPanel);
     }
     context->partyPanel.slots[menuWork->selection].index = entryIndex;
@@ -1227,7 +1227,7 @@ void mnuOpenStaffSelectionEntry(KwlnTask *context) {
     mnuCreateSelectState(context, 1);
 }
 
-void func_002B29E0(KwlnTask *task) {
+void mnuFinishStaffSelectionEntry(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 
@@ -1236,7 +1236,7 @@ void mnuOpenPartySelectionEntry(KwlnTask *context) {
     mnuCreateSelectState(context, 0);
 }
 
-void func_002B2A10(KwlnTask *task) {
+void mnuFinishPartySelectionEntry(KwlnTask *task) {
     mnuStaffCloseSelectionState(task);
 }
 
@@ -3878,7 +3878,7 @@ MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step);
 
 void func_002B9808(MenuWindowContainer *menu);
 
-void func_002B9820(MenuWindowContainer *menu);
+void mnuCheckWindowListStatus(MenuWindowContainer *menu);
 
 
 void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value,
