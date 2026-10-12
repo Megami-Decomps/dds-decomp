@@ -38,7 +38,7 @@ s32 mnuApplyInnerEffectVectorsAndTickObject(void) {
     return mnuTitleCameraObject->ops->update(mnuTitleCameraObject);
 }
 
-void func_0026AF78(void) {
+void mnuInitializeTitleCameraScene(void) {
     evtCreateWorldObjectForKey(1, 1);
     dds3SetWorldObject(NULL);
     mnuCreateTitleCameraWorldEntry();

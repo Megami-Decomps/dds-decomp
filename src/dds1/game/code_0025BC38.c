@@ -169,7 +169,7 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
     effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
-extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void mnuTickMantraSparkParticles(DspParticleState *);
 extern void mnuDrawMantraSparkBackdrop(DspParticleState *, s32, s32);
 
@@ -183,11 +183,11 @@ void mnuDrawMantraPulseAndSparks(MnuSparkleSpriteWork *work, s32 alpha, s32 cont
     DspParticleState *sparkles;
     f32 factor;
 
-    func_0024E1C8(0, 0, 0, alpha, work->sprite, 0x2A, 0, context);
+    mnuDrawSpriteAtPlacement(0, 0, 0, alpha, work->sprite, 0x2A, 0, context);
     factor = (f32)work->sparkles.countdown / (f32)work->sparkles.period;
     factor = 1.0f - factor;
     factor = work->sparkles.strength * sdfSinPoly(factor * 3.14159265f) + 0.2f;
-    func_0024E1C8(0, 0, 0, (f32)alpha * factor, work->sprite, 0x2B, 0, context);
+    mnuDrawSpriteAtPlacement(0, 0, 0, (f32)alpha * factor, work->sprite, 0x2B, 0, context);
     sparkles = &work->sparkles;
     mnuTickMantraSparkParticles(sparkles);
     mnuDrawMantraSparkBackdrop(sparkles, work->sprite, context);

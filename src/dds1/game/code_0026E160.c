@@ -51,7 +51,7 @@ SdfList *mnuTickMovieGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     return group;
 }
 
-void func_0026E240(MnuSpriteResourceGroup *resources) {
+void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
@@ -87,7 +87,7 @@ void func_0026E240(MnuSpriteResourceGroup *resources) {
 
 extern f32 sdfSinPoly(f32);
 
-void func_0026E388(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGroup *group, s32 a5) {
+void mnuDrawMovieSpriteGroup(s32 a0, s32 a1, s32 a2, s32 a3, MnuSpriteResourceGroup *group, s32 a5) {
     s32 i;
     SdfList *list;
     SdfListNode *node;
@@ -154,15 +154,15 @@ void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *resources) {
 
 
 extern MovieMenuState *mnuMovieMenuState;
-extern void func_0026E240(MnuSpriteResourceGroup *);
+extern void mnuUpdateMovieSpriteResourceGroup(MnuSpriteResourceGroup *);
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 
-void func_0026E608(s32 alpha) {
-    func_0026E240(mnuMovieMenuState->resources);
+void mnuDrawMovieMenuFrame(s32 alpha) {
+    mnuUpdateMovieSpriteResourceGroup(mnuMovieMenuState->resources);
     sdfSubmitGsTestOneRegisterPacket(0x30000, 0x53);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x53);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, 0x53);
@@ -171,7 +171,7 @@ void func_0026E608(s32 alpha) {
     sdfDispatchSurfaceWithPreparedTexturePacket(0x53);
     sdfSubmitGsAlphaOneRegisterPacket(0x48, 0x53);
     sdfSubmitGsTestOneRegisterPacket(0x50000, 0x53);
-    func_0026E388(0, 0, 0, alpha, mnuMovieMenuState->resources, 0x53);
+    mnuDrawMovieSpriteGroup(0, 0, 0, alpha, mnuMovieMenuState->resources, 0x53);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x53);
     sdfSubmitGsTestOneRegisterPacket(0x30000, 0x53);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x53);

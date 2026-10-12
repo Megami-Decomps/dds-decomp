@@ -71,7 +71,7 @@ typedef struct {
 extern DspEntrySpriteLookup D_003BC448[];
 extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
-extern void func_0024E310(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteByIndex(s32, s32, s32, s32, s32, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
 extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
@@ -86,9 +86,9 @@ void itfDspDrawSelectionStrip(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *
     if (rowIndex >= 0) {
         do {
             if (rowIndex == selectedIndex) {
-                func_0024E310(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_SELECTED_ROW_SPRITE, drawContext);
+                mnuDrawPlacedSpriteByIndex(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_SELECTED_ROW_SPRITE, drawContext);
             } else {
-                func_0024E310(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_UNSELECTED_ROW_SPRITE, drawContext);
+                mnuDrawPlacedSpriteByIndex(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_UNSELECTED_ROW_SPRITE, drawContext);
             }
             rowIndex--;
         } while (rowIndex >= 0);
@@ -113,9 +113,9 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
     u32 textColor;
 
     if (list->selectedNode == node) {
-        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
                       spriteLookup.spriteIndices[profileProgress->partyRecord->unitId] + 1, drawContext);
-        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
         func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
@@ -123,9 +123,9 @@ void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, Dsp
                                        textColor,
                                        4, levelText, 0, drawContext);
     } else {
-        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
                       spriteLookup.spriteIndices[profileProgress->partyRecord->unitId], drawContext);
-        func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
         func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
@@ -377,7 +377,7 @@ void mnuTickMantraSparkParticles(DspParticleState *state) {
 }
 
 extern f32 sdfSinPoly(f32);
-extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
     f32 fraction;
@@ -392,7 +392,7 @@ void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 sur
     x = (s32)(particle->x + fraction * particle->z);
     y = particle->y;
     alpha = (s32)(sdfSinPoly(fraction * 3.14159265f) * 25.6f);
-    func_0024E1C8(x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
+    mnuDrawSpriteAtPlacement(x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
 }
 
 /* Preserve the provider's legacy K&R GS-register argument boundary. */
@@ -413,8 +413,8 @@ void mnuDrawMantraSparkBackdrop(DspParticleState *state, s32 sprite, s32 surface
     for (i = 0; i < 7; i++) {
         s32 y = i * 64;
 
-        func_0024E1C8(0, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
-        func_0024E1C8(0x100, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+        mnuDrawSpriteAtPlacement(0, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+        mnuDrawSpriteAtPlacement(0x100, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
     }
     sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);

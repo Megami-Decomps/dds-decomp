@@ -42,7 +42,7 @@ s32 mnuUpdateMovieMenuEffects(void) {
 
 extern void sndEnsureMidiBankResident(s32 trackId);
 extern void mnuDrawMovieMenuBackgroundQuad(s32 alpha);
-extern void func_0026AF78(void);
+extern void mnuInitializeTitleCameraScene(void);
 extern void mnuEnsureMovieMenuSpriteHandle(s32 mode);
 extern u8 mnuHasSpriteHandle(void);
 extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
@@ -97,7 +97,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
         mnuMovieMenuState->cursor = 0;
         D_003BA730 = 0;
         mnuDrawMovieMenuBackgroundQuad(0x80);
-        func_0026AF78();
+        mnuInitializeTitleCameraScene();
         if (mnuMovieMenuState->mode != 0) {
             mnuMovieMenuState->state = 3;
         } else {
