@@ -7534,3 +7534,23 @@
 0x001F4F10	btlAdvanceSkillCameraCursor	inferred	confidence=high; matched-C; Evaluates timed camera table003BBFC8, applies pose/height constraints and saturating cursor advance; flag400 actors restricted to five supported Linkage IDs. DDS1 twin0x001E6260. Namer1 batch24.
 0x001F5018	btlInitializeRandomCameraCursor	inferred	confidence=high; matched-C; Resets global cursor, indexes3x3x8 preset choices by marked-party count/actor category/scaled random8 and initializes selected camera pose/motion setup. Native copied matrix and unchecked indices unchanged. DDS1 twin0x001E6368. Namer1 batch24.
 0x001FFAD8	btlAdvanceTimedCameraOrApproach	inferred	confidence=high; matched-C; Cursor mode1 advances distinct timed table003BC0C8 unless actorflag400, applying pose/height constraints and frame saturation; other modes build action's approach camera. DDS1 twin0x001EEED8. Namer1 batch24.
+0x002891C0	mnuSelectPreviousMantraUnit	inferred	Retreats the list cursor, refreshes the selected unit node and transition icons. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x002893A0	mnuSelectNextMantraUnit	inferred	Advances the list cursor, refreshes the selected unit node and transition icons. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x00289550	mnuSelectMantraUnitByIndex	inferred	Queues a unit-list selection, moves the cursor to that index and refreshes its selected node display. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x00289928	mnuSelectNextUnitWithAvailableMantraNode	inferred	Advances the unit selection and switches to a non-locked neighboring node when needed. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x0028CBF8	mnuUpdateMantraPanelStatusFromFlags	inferred	Derives the panel status value from selected and shared mantra flags. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x0028CD50	mnuDrawMantraMapNodes	inferred	Draws visible mantra map nodes with panel-transition fade and selected/profile flags. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x0028DFA0	mnuRefreshMantraUnitNodeFlags	inferred	Rechecks eligible node flags for every party unit against model state and requirement rules. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x0028E0E8	mnuSpawnMantraMapPanels	inferred	Spawns the selected node panel, its neighbors and other eligible visible map panels. src/dds2/game/code_00289058.c. LiteH menu batch 6.
+0x00290240	mnuGetMantraNeighborIndexForDirection	inferred	Maps the direction mask to one neighbor slot in the staggered mantra grid. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00290328	mnuClassifyMantraNeighborStatus	inferred	Classifies a candidate node as absent, locked, direct or requiring a two-step move. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00290A78	mnuRefreshMantraSelectionResources	inferred	Updates or allocates one flag workspace per list node and merges shared cap states. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00291A20	mnuBuildMantraPanelSelectionView	inferred	Spawns panels for a selected node, its neighbors and other eligible nodes in the selector view. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00291C68	mnuRefreshMantraPanelNeighborStates	inferred	Resets selector records for a node and recomputes states from its neighboring flags. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00292998	mnuStartMantraTutorialPanelReveal	inferred	Queues the tutorial node-8 panel transition and marks its selected panel state. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00292A60	mnuInitializeMantraTutorialSelector	inferred	Selects tutorial node 8 and spawns the two selector icons at its coordinates. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00292CF0	mnuRunMantraTutorialFourthSequence	inferred	Runs the fourth tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00292EA8	mnuRunMantraTutorialFifthSequence	inferred	Runs the fifth tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00292FF0	mnuRunMantraTutorialSixthSequence	inferred	Runs the sixth tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x00293148	mnuRunMantraTutorialSeventhSequence	inferred	Runs the seventh tutorial panel-command schedule and returns when a command completes. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
+0x002932B0	mnuInitializeMantraTutorialParty	inferred	Initializes three tutorial party records, their pointer order and selection bookkeeping. src/dds2/game/code_0028FD30.c. LiteH menu batch 6.
