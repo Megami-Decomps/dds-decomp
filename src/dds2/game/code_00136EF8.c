@@ -1280,7 +1280,7 @@ void fldUpdatePositionZoneHits(f32 *input) {
 
 /* Indexed fields retain index-first addresses; see docs/idioms.md,
  * "Trace-justified indexed field addresses: relative zone motion". */
-void func_00139950(f32 *position) {
+void fldApplyRelativeZoneMotion(f32 *position) {
     f32 newPosition[3];
     f32 previous[3];
     f32 movement[4];

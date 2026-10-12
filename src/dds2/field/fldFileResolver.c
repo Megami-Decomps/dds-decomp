@@ -723,7 +723,7 @@ extern void func_0033B530(u8 *, const f32 *, u32, const BillTextureQuad *, const
 
 extern s32 D_00435F30;
 
-extern void func_00139950(f32 *);
+extern void fldApplyRelativeZoneMotion(f32 *);
 
 
 
@@ -4086,7 +4086,7 @@ void fldUpdateCameraTarget(void) {
         cur[0] = st->x;
         cur[1] = st->y;
         cur[2] = st->z;
-        func_00139950(cur);
+        fldApplyRelativeZoneMotion(cur);
         if (st->positionPending != 0) {
             st->x = st->targetX;
             st->y = st->targetY;
