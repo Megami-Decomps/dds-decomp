@@ -300,7 +300,7 @@ extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 
-void func_00112168(void *object) {
+void dds3CreateObjectModelAndMotion(void *object) {
     ObjBase *base;
     void *slot;
     Motion *motion;
@@ -382,7 +382,7 @@ extern void evtSubmitGradientRectAtDepth();
 struct SdfPoolNode;
 extern struct SdfPoolNode *D_00380818[4];
 
-void func_00112328(void *object) {
+void dds3DrawObjectWithGradientOverlay(void *object) {
     ObjBase *base;
     MdlCtx *context;
     SdfModel *inner;

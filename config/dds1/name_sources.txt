@@ -1,5 +1,13 @@
 # addr	name	evidence|inferred	note
+0x001001D8	kwlnInitializeRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:69; Initializes runtime tasks and game subsystems.; twin=0x001001D8 (DDS2).
+0x00100500	kwlnRequestMainLoopExit	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:128; Sets the flag polled by the main-loop condition.; twin=0x001003E8 (DDS2).
 0x00100518	kwlnGetDrawBufferIndex	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:47:func_00100518; Returns current draw buffer selector used throughout matched frame-packet and scene/viewer double-buffer indexing; twin=0x00100400, relocation-masked retail twin report.; sources=names_reviewed36.tsv [names_qp10.tsv]
+0x00100520	kwlnPauseTaskScheduler	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:140; Enables pause mode and clears its countdown.; twin=0x00100408 (DDS2).
+0x00100538	kwlnResumeTaskScheduler	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:146; Clears pause mode and its countdown.; twin=0x00100420 (DDS2).
+0x00100548	kwlnSetTaskPauseCount	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:152; Stores a pause countdown and enables pause mode.; twin=0x00100430 (DDS2).
+0x00100560	kwlnSetFrameControlParameters	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:158; Stores two frame-control values and snapshots the loop counter.; twin=0x00100448 (DDS2).
+0x00100588	kwlnResetFrameControl	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:171; Clears frame-control state and sets the stored value to four.; twin=0x00100470 (DDS2).
+0x001005C8	kwlnRunMainLoop	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:207; Runs input and scheduler updates until the exit flag, then loads the exit executable.; twin=0x001004B0 (DDS2).
 0x001006E0	kwlnTaskRemoveFromStateQueue	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:107:func_001006E0; M141; source=names_pending_main.tsv:112; review=Unlinks a task from its delayed-start, active or delayed-destroy state queue, repairing head/tail and neighboring links. [names_qp11.tsv]
 0x00100858	kwlnTaskInsertIntoOrderedStateQueue	inferred	confidence=high; src/dds1/game/code_00100000.c:func_00100858; Selects the queue from task state, inserts by ascending comparison key, repairs links and increments that queue count. [names_qp9.tsv]
 0x00100B40	kwlnTaskStep	inferred	Prepares input state, runs the task callback, applies transition or destruction and advances its timer
@@ -23,7 +31,10 @@
 0x00101B78	dds3SetScopedObjectFlags	inferred	Passes set mode, object, mask and scope to the kernel dispatcher, which ORs the selected masked bits into object flags at offset 0x1C.
 0x00101BA8	dds3ClearScopedObjectFlags	inferred	Passes clear mode to the same dispatcher, which clears the selected masked bits from scoped object flags.
 0x00101D60	kwlnPrepareFrameDrawPackets	inferred	readability/matching review (QP16)
+0x00101E40	kwlnBuildFrameScenePackets	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:234; Rebuilds and queues the selected buffer's scene, overlay, and view packets.; twin=0x00101D30 (DDS2).
 0x001024D8	kwlnRenderFrame	inferred	Runs frame-level draw/update dispatch and rendering. [names_qp9.tsv]
+0x00102850	dds3RunWorldPrimaryCallbacks	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:516; Invokes the active world's first callback column.; twin=0x00102740 (DDS2).
+0x00102878	dds3RunWorldSecondaryCallbacks	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:522; Invokes the active world's second callback column.; twin=0x00102768 (DDS2).
 0x001028A0	dds3GetAdminTaskWork	inferred	Finds the named admin task and returns its attached AdminWork. [names_reviewed12.tsv]
 0x001028C8	dds3GetAdminTaskValue	inferred	Reads the value field from the named admin task work. [names_reviewed12.tsv]
 0x001028E8	dds3AdminSubmitModeRequest	inferred	src/dds1/game/code_00101B08.c func_001028E8: Stores requested mode and flags, releases previous payload and copies new payload when within size limit. [names_reviewed24.tsv]
@@ -465,8 +476,10 @@
 0x00111B00	dds3GetObjectIndexNode	inferred	readability/matching review (QP16)
 0x00111B20	dds3GetObjectBaseResourceHandle	inferred	readability/matching review (QP16)
 0x00111B40	dds3ReleaseObjectBaseResources	inferred	confidence=high; src/dds1/basic/dds3ObjectBase.c:func_00111B40; Releases model/transition or development/motion resources according to the base resource kind, then clears ownership. [names_qp9.tsv]
+0x00111F40	dds3CreateObjectModelAndMotion	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:290; Creates the model from the object's slot, attaches motion, updates root transforms, and stores both on the object base.; twin=0x00112168 (DDS2).
 0x00112008	dds3SetObjectModeAndDefaultWeight	inferred	src/dds1/basic/dds3ObjectBase.c func_00112008: Sets supported mode and its default weight: modes zero, four and five use one, others zero. [names_reviewed24.tsv]
 0x001120C0	dds3RegisterObjectInHandlerIndex	inferred	readability/matching review (QP16)
+0x00112100	dds3DrawObjectWithGradientOverlay	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:373; Submits gradient rectangles around processing the object's model context.; twin=0x00112328 (DDS2).
 0x001127C0	dds3InvokeSlot1Handler	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112800	dds3RunSlot1Handlers	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112848	dds3ReleaseSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
@@ -522,11 +535,13 @@
 0x001143D8	effObjReleaseStateDependencies	inferred	Releases owned dependencies according to kind-seven payload state, preserves borrowed state-four handle, then clears the active state and handle.
 0x00114508	evtInitializeEffectObjectData	inferred	Allocates effect-object data, obtains its handle and sets flags. [names_reviewed8.tsv]
 0x00114570	effObjReleaseObjectData	inferred	Frees dependent resources and clears the object's data pointer after releasing its inner object.
+0x00114988	effObjUpdateDependencies	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:234; Updates the configured billboard and dispatches dependent updates according to stored state.; twin=0x00114BF0 (DDS2).
 0x00114A78	effObjCreateWithVectors	inferred	allocates effect object kind seven and initializes its vectors and data [names_reviewed5.tsv]
 0x00114B18	effObjCreateKindTwo	inferred	readability/matching review (QP16)
-0x00114BF0	effObjSpawnSharedBillClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:168:func_00114BF0; Clones the object-owned billboard retaining its shared data, then creates a new effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00114BF0	effObjSpawnSharedBillClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:331:effObjSpawnSharedBillClone; Clones the object-owned billboard retaining its shared data, then creates a new effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00114C38	effObjCreateIndexedKindOne	inferred	Creates a billboard via billCreateIndexed with kind one and dispatches its vector and extra argument.
 0x00114C80	effObjCreateResourceKindOne	inferred	Creates a billboard via billCreateFromResource with kind one and dispatches its vector and extra argument.
+0x00114CC8	effObjSelectStoredBill	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:355; Selects the stored bill as the current kind-one entry.; twin=0x00114F30 (DDS2).
 0x00114CE8	effObjCreateBillNode	inferred	confidence=medium; src/dds1/basic/dds3EffectObjectBasic.c:func_00114CE8; Creates an effect world object backed by the supplied billboard, initializes ownership fields, and attaches it to a world slot if available. [names_qp9.tsv]
 0x00114DB8	effObjSpawnSharedBillNodeClone	inferred	confidence=high; matched-C; src/dds1/basic/dds3EffectObjectBasic.c:227:func_00114DB8; Clones the object-owned billboard retaining its shared data, then creates a new billboard-node effect object using the supplied vector and extra argument.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00114E00	effObjCreateIndexedKindZero	inferred	Creates a billboard via billCreateIndexed with kind zero and dispatches its vector and extra argument.

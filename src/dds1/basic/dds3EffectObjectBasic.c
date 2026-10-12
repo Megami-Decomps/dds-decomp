@@ -231,7 +231,7 @@ struct EffNode;
 extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void billInvokeCallback(struct BillObj *bill);
 
-s32 func_00114988(EffectObj *obj) {
+s32 effObjUpdateDependencies(EffectObj *obj) {
     EffectDependencyState *data;
 
     data = obj->data;
@@ -352,7 +352,7 @@ EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
-void func_00114CC8(EffectObj *obj) {
+void effObjSelectStoredBill(EffectObj *obj) {
     billSetKind1Entry(((EffectDependencyState *)obj->data)->handle);
 }
 

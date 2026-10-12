@@ -1051,7 +1051,7 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
-extern void func_00112168(void *);
+extern void dds3CreateObjectModelAndMotion(void *);
 extern void fldSetRecordValueById(s32, s32);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
@@ -1124,7 +1124,7 @@ void fldCreateResourceScriptObjects(void) {
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
-        func_00112168(object);
+        dds3CreateObjectModelAndMotion(object);
         binding = D_00438EC0;
         for (j = 0; j < D_00438EC4; j++, binding++) {
             if (binding->names != NULL) {
