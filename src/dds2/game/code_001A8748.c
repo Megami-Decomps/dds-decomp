@@ -862,7 +862,7 @@ extern s32 btlSweepFloorModelLists(void);
 
 extern s32 btlUpdateActorModelColorAndLinks(void);
 
-extern void func_0022AC10(void);
+extern void btlUpdateEventPlayback(void);
 
 extern s32 func_0020D110(void);
 
@@ -880,7 +880,7 @@ s32 btlUpdateBattleFieldPresentation(KwlnTask *task) {
         btlReleaseRainSoundTransition();
         btlSweepFloorModelLists();
         btlUpdateActorModelColorAndLinks();
-        func_0022AC10();
+        btlUpdateEventPlayback();
         func_0020D110();
         fldInitializeBattleSceneFlow();
         btlClearDeferredTasks();

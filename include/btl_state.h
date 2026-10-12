@@ -234,7 +234,7 @@ typedef struct BtlState {
     u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
     u16 unk26C;
     u16 unk26E;
-    s32 encounterPack; /* 0x270: ENC PACK test selection (func_00215FF8) */
+    s32 encounterPack; /* 0x270: ENC PACK test selection (btlUpdateDebugEncounterSelector) */
     s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
     s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
     s32 battleMode; /* 0x27C */

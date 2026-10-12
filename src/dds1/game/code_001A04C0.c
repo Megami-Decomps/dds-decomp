@@ -348,7 +348,7 @@ s32 btlUpdateBattleFieldPresentation(void) {
         btlDispatchLinkedEffectWhenBattleGatesClear();
         btlSweepFloorModelLists();
         btlUpdateActorModelColorAndLinks();
-        func_0020FC48();
+        btlUpdateEventPlayback();
         func_001FB090();
         fldInitializeBattleSceneFlow();
         btlClearDeferredTasks();

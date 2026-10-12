@@ -222,7 +222,7 @@ typedef struct DatGameState {
     s32 partyCount;                        /* 0x0129C */
     DatInventory inventory;               /* 0x012A0 */
     f32 unk1360;
-    u16 unk1364; /* read with lhu by the battle test menu (func_00215FF8) */
+    u16 unk1364; /* read with lhu by the battle test menu (btlUpdateDebugEncounterSelector) */
     u8 pad1366[0xA];
     DatFieldMapBank maps[40];              /* 0x01370 */
     u64 areaFlags[13][64];                 /* 0x13F70 */

@@ -10000,3 +10000,41 @@ at **0/161 words**; actual objdiff reports **100.0%**. All 55 previously
 matched bodies remain exact. The existing six-argument counter callback
 contract is made explicit, and its obsolete assignment cast is removed.
 
+## Battle event playback, fade phases and encounter selection
+
+The matched battle units `code_0020FC48` (DDS1) and `code_0022AC10` (DDS2)
+share the following evidenced APIs. The title-specific paths, types, casts,
+declaration/statement order and native snapshot/save/restore order are retained.
+
+| API | DDS1 | DDS2 | Observable role |
+|---|---|---|---|
+| `btlUpdateEventPlayback` | `0020FC48` | `0022AC10` | Release/prepare/play/finish phase driver; native `eve mot` diagnostic. |
+| `btlRequestSceneEventResources` | `0020FF50` | `0022AF90` | Scene event script/resource request and BE/script sequence task linkage. |
+| `btlBindEventEffectResources` | `002101C8` | `0022B288` | Available keys 50–64 installed into slots 11–25; native `invoke effect` diagnostics. |
+| `btlDrawScaledHeldTextureQuad` | `00211A60` | `0022CE30` | Centered scaled quad from `kwlnHeldTextureReference`. |
+| `btlUpdateRuntimeFadeState` | `00213808` | `0022E0E0` | Initial setup/fade, outgoing fade, cleanup and frame counter; DDS2 name already established. |
+| `btlIsFadeInPhaseOrIdle` | `00213B60` | `0022E460` | Inactive/state 0/state 2, **not** a test that fading has completed. |
+| `btlIsFadeOutCompleteOrIdle` | `00213B90` | `0022E490` | Inactive/state 0/state 4, after the outgoing fade and before cleanup. |
+| `btlResetDebugEncounterSelection` | `00215FE0` | `00230960` | Clear launch confirmation and shared work before selector polling. |
+| `btlUpdateDebugEncounterSelector` | `00215FF8` | `00230978` | Input, preview names, selected battle parameters and launch-ready result. |
+
+The event binding name follows the native effect diagnostics, not the older
+sound-oriented record typedefs. Those typedefs and cross-unit prototype arities
+are intentionally unchanged: identifier evidence is not proof of a type change.
+Likewise, the selector reset is not called an exit callback: its scene-refresh
+caller resets it before polling.
+
+DDS1 also has `btlDrawScaledFrameBufferQuad` (`00211B88`), which references the
+current draw-buffer frame texture packet via `sdfAppendDmaPrimary` (record
+offset `0x1A0`) before its scaled quad. The same frame sampling path is used by
+`effDrawBlurRectangle`; the framebuffer interpretation has medium confidence.
+`btlDrawWindOverlay` (`002121E8`) obtains the wind texture, draws three tinted
+sweeps interleaved with grey frame quads, restores frame packets and advances
+the sweep. `btlDrawFlatGridCell` (`00212680`) draws the six flat triangles using
+the same rim geometry as the adjacent textured-cell API.
+
+DDS2's `btlDrawCapturedScreenTileOverlay` (`0022D2F8`) renders the held texture
+as a tiled overlay, applying radial VU rotation and per-tile delay, age,
+displacement and alpha updates. Its completion result is consumed by the
+outgoing fade path. These are naming/comment changes only, not new source forms.
+
