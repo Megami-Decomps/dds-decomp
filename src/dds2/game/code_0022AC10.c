@@ -321,7 +321,7 @@ extern void effResetSlots(void);
 
 extern void func_00209078(void);
 
-extern struct BtlRuntimeTask *func_002014A8(u32);
+extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 
 extern void func_00168978(BattleEffect *);
@@ -376,7 +376,7 @@ void func_0022AC10(void) {
             return;
         }
         btlStartTask(sndCreateReleaseTask(0xC));
-        btlStartTask(func_002014A8(0xC));
+        btlStartTask(btlCreateSceneLightingRestoreTask(0xC));
         return;
 
     case 3: {

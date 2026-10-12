@@ -3210,7 +3210,7 @@
 0x001F57D0	btlPlaceTripleFormationAroundMiddleActor	inferred	L13
 0x001F5A20	btlOrientFrontAndBackUnitsTowardTargets	inferred	Orients front and back battle units to their respective target positions. [names_reviewed12.tsv]
 0x001F5B50	btlAlignTripleFormationWithTarget	inferred	U1
-0x001F6030	btlCreateSoundPlaybackTask	inferred	Allocates a battle task and records sound identifier, channel and flags. [names_reviewed10.tsv]
+0x001F6030	btlCreateLinkageFormationTask	inferred	confidence=high; matched-C; CORRECTION: old sound-playback name/evidence were wrong. Native LINKAGE scheduler passes action, two companion addresses, skill and flags; five-word payload and formation callback apply the selected command-row formation. DDS2 twin0x00207958. Namer1 batch22.
 0x001F60E8	btlCommandRecenterParty	inferred	confidence=high; src/dds1/game/code_001F60E8.c:func_001F60E8; Runs the party-recentering operation and the subsequent battle callback, returning script-command completion. [names_qp9.tsv]
 0x001F6110	btlCreateControlObject	inferred	btl battle control and actor operations in game/code_001F6110.c
 0x001F6158	btlProjectForwardPositionToScreen	inferred	readability/matching review (QP16)
@@ -8069,3 +8069,10 @@
 0x001A1960	btlClearPartyRecordStatusBits	inferred	confidence=high; matched-C; Forwards party record and mask to datClearUnitStatusBits; native callee clears masked status bits. DDS2 twin0x001AA868. Namer1 batch21.
 0x001A1D48	btlInsertPartyActorByPriority	inferred	confidence=high; matched-C; Inserts complete party record before active actors with greater lookupId/priority, shifts records/indices and copies unit stats; native party-in debug message corroborates. DDS2 twin0x001AAC50. Namer1 batch21.
 0x001DD7E8	btlDispatchActionCursorStepByKind	inferred	confidence=high; matched-C; Optional battle hook intercepts, then kinds9/10/11 dispatch approach camera, target camera pose and unmarked cursor advance. Existing DDS2 twin0x001EADC0 includes native extra kind12, unchanged. Namer1 batch21.
+0x001EFD58	btlBeginSceneLightColorTransition	inferred	confidence=high; matched-C; Battle light/ambient RGB callers stage transform position/scale channels on the scene listener; evtBeginUnitValueColorTransition stores blendFrames or clears the blend for zero. DDS2 twin0x00200930. Namer1 batch22.
+0x001F0430	btlApplySceneLightingTransition	inferred	confidence=high; matched-C; Starts scene-node color blend, copies runtime light/ambient colors and direction, updates per-unit blended colors and increments the lighting hold count. DDS2 twin0x00200FB8. Namer1 batch22.
+0x001F0920	btlCreateSceneLightingRestoreTask	inferred	confidence=high; matched-C; Allocates four-byte deferred task4, installs btlRestoreSceneTransformLighting and copies its value argument. DDS2 twin0x002014A8 retains native K&R signature. Namer1 batch22.
+0x001F0998	btlForceSceneLightingRestore	inferred	confidence=high; matched-C; Sets lighting hold count to one before the existing decrement/baseline restore callback; native suppression flag and return type unchanged. DDS2 twin0x00201520. Namer1 batch22.
+0x001F0B90	btlForceReleaseTintTransition	inferred	confidence=high; matched-C; Sets tint hold count to one before existing tint-release callback; native suppression flag and return type unchanged. DDS2 twin0x00201718. Namer1 batch22.
+0x001F5ED8	btlApplyLinkageFormation	inferred	confidence=high; matched-C; LINKAGE scheduler supplies companion actors and skill; command row beginning at0x1AB selects the native formation callback. Returns task completion one. DDS2 twin0x002077C0 preserves extra native cases. Namer1 batch22.
+0x00218BE8	mdlReleaseViewerAllocation	inferred	confidence=high; matched-C; Direct chip-cell allocation pointer is forwarded to sdfReleaseChipBlock, not treated as pointer-to-pointer. DDS2 twin0x00233700. Namer1 batch22.

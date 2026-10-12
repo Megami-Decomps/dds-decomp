@@ -1267,7 +1267,7 @@ the plain-C forms that were tried. Use these instead of writing the asm again.
 | `VU0_STORE_VF_UNCLOBBERED(vf, dst)` | same `sqc2` without a memory clobber |
 | `VU0_SET_ONES_XYZ(vf)` | `vaddw.xyz vf,vf0,vf0w; vmulx.w vf,vf0,vf0x`: vf = (1,1,1,0), the unit scale stored beside the zero vectors and the unit matrix in object transform setup |
 | `VU0_SCALAR_OP(f, "insn")` | `mfc1 $2,f; qmtc2.ni $2,vf2; insn` where insn reads vf2x (`vmulx`, `vaddx.x`, ...): scale or set components from a C float |
-| `VU0_SCALAR_OP_CLOBBER(f, "insn")` | the same block with `$2` declared clobbered, where retail keeps a live value out of `$2` around it (DDS2 `func_00206C18`) |
+| `VU0_SCALAR_OP_CLOBBER(f, "insn")` | the same block with `$2` declared clobbered, where retail keeps a live value out of `$2` around it (DDS2 `btlPlacePairedFormationAtFixedCenter`) |
 | `VU0_SCALE_VF(vf, f)` | `qmtc2.ni reg,vf2; vmulx.xyzw vf,vf,vf2x` with the float's bits in a gcc-chosen GPR (kept across a loop); `VU0_SCALAR_OP` re-does `mfc1 $2` each use |
 | `VU0_LERP_VF10(t)` | `qmtc2.ni reg,vf2; vsubx.w vf3,vf0,vf2x; vmulax.xyzw ACC,vf11,vf2x; vmaddw.xyzw vf10,vf10,vf3w`: vf10 = lerp(vf10, vf11, t), 45 sites (particles, battle tweens) |
 | `VU0_MOVE_VF(dst, src)` | `vmove.xyzw dst,src` between calls (keeping vf10's result in vf11) |
@@ -6322,7 +6322,7 @@ the model manager and viewer now share their types. The separate selection
 and path tables use the existing generic pointer/count descriptor.
 DDS2's slot setter takes three filename pointers: its battle callers pass
 the `.data` strings `human/pc001_00.PB` and `human/pc001_01.PB`.
-DDS1's `func_00218BE8`, like DDS2's `func_00233700`, receives the allocated
+`mdlReleaseViewerAllocation` in both games receives the allocated
 chip-cell pointer directly and forwards it to `sdfReleaseChipBlock`.
 
 ## Scene AI sprite angles and scale-call boundaries
@@ -8078,7 +8078,7 @@ kind-4 tracks that receive their endpoints directly.
 
 ## Trace-justified narrowing: packed range index
 
-DDS2 `func_002115B8` (0x002115B8, 160 bytes) either returns the route byte or
+DDS2 `btlResolvePackedAiRoute` (0x002115B8, 160 bytes) either returns the route byte or
 samples between the first and last marked positions in its seven-bit
 mask. The one-based first position is converted in place to a zero-based
 `u8` index after computing the inclusive count. This also retains retail's
@@ -8963,4 +8963,36 @@ callee's status-dependent randomization; it is not rewritten as a bitwise OR.
 `btlInsertPartyActorByPriority` retains record/index shifting and stat copying.
 `btlDispatchActionCursorStepByKind` respects the optional hook before selecting
 approach, target-pose or unmarked-advance paths. DDS2's extra kind is unchanged.
+
+## Linkage formations, AI routes and scene-light holds
+
+`btlCreateLinkageFormationTask` replaces the incorrect sound-playback name.
+The LINKAGE action scheduler supplies an action, two companion addresses,
+skill and flags; the native five-word payload is consumed by
+`btlApplyLinkageFormation`, which selects a command row beginning at `0x1AB`.
+The factory's integer address arguments, casts, declaration order and task IDs
+remain unchanged. DDS2 retains its additional paired and both-side formations.
+`btlArrangeFormationSlots` and `btlPlaceTripleFormationAroundMiddleActor` now
+share the existing DDS1 names. Fixed-center paired placement orders the two
+actors by lookup ID; near-target placement retains native reach, muzzle and
+special-ID rules. The native sixteen-slot collection has no added bounds check.
+
+`btlSelectTierMatrixAiRoute` resolves its packed route with
+`btlResolvePackedAiRoute`; `btlSelectConditionalAiRoute` does not.
+The packed selector samples the entire first-to-last marked-bit interval,
+including holes, rather than selecting only marked bits. Its byte wrap,
+empty-mask behavior and trace-justified index normalization are unchanged.
+The already-named DDS1 selectors in the protected unit are not edited.
+
+`btlBeginSceneLightColorTransition` stages light/ambient RGB through the
+scene-node transform channels and passes the duration to the color blend.
+`btlApplySceneLightingTransition` also updates runtime and unit light colors
+and retains a lighting hold. `btlCreateSceneLightingRestoreTask` packages the
+four-byte restore argument; DDS2's native K&R definition is retained.
+The force-restore and force-tint-release callbacks set the respective hold
+count to one before the existing release logic. Native suppression flags,
+return widths, and neighboring misnamed sound APIs are left unchanged.
+
+`mdlReleaseViewerAllocation` forwards the allocation pointer directly to
+`sdfReleaseChipBlock`; it does not dereference an allocation wrapper.
 

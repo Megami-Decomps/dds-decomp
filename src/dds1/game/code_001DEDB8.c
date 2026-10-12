@@ -238,13 +238,13 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 
-extern s64 func_001F0998(SceneLightRestoreArgs *);
+extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *);
 
-extern s64 func_001F0B90(const BtlTintReleaseArgs *args);
+extern s64 btlForceReleaseTintTransition(const BtlTintReleaseArgs *args);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
@@ -4897,16 +4897,17 @@ extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
 
 extern void evtBeginUnitValueColorTransition(EffWorldNode *, s32);
 
-void func_001EFD58(f32 *position, f32 *scale, s32 value) {
+/* Stage light/ambient RGB on the scene node and start its frames-long blend. */
+void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames) {
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 listener = work->listener;
 
-    D_003D74A0.transform.position[0] = position[0];
-    D_003D74A0.transform.position[1] = position[1];
-    D_003D74A0.transform.position[2] = position[2];
-    D_003D74A0.transform.scale[0] = scale[0];
-    D_003D74A0.transform.scale[1] = scale[1];
-    D_003D74A0.transform.scale[2] = scale[2];
+    D_003D74A0.transform.position[0] = lightColor[0];
+    D_003D74A0.transform.position[1] = lightColor[1];
+    D_003D74A0.transform.position[2] = lightColor[2];
+    D_003D74A0.transform.scale[0] = ambientColor[0];
+    D_003D74A0.transform.scale[1] = ambientColor[1];
+    D_003D74A0.transform.scale[2] = ambientColor[2];
     D_003D74A0.unk00 = 0;
     D_003D74A0.flags = 0;
     D_003D74A0.mode = 0;
@@ -4915,7 +4916,7 @@ void func_001EFD58(f32 *position, f32 *scale, s32 value) {
     D_003D74A0.transform.rotation[2] = 0.0f;
     D_003D74A0.transform.rotation[3] = 0.0f;
     dds3LoadWorldTransformSetup((EffWorldNode *)listener, &D_003D74A0);
-    evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, value);
+    evtBeginUnitValueColorTransition((EffWorldNode *)work->listener, frames);
 }
 
 extern SdfFlagListParams D_0035F5F8;
@@ -5192,7 +5193,8 @@ typedef struct SceneLightTransitionArgs {
 
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 
-u32 func_001F0430(SceneLightTransitionArgs *args) {
+/* Apply the scene blend and per-unit light colors, then retain a lighting hold. */
+u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *args) {
     f32 *first = args->lightColor;
     f32 *second = args->ambientColor;
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -5203,7 +5205,7 @@ u32 func_001F0430(SceneLightTransitionArgs *args) {
     u32 secondColor;
     u32 transitionCount;
 
-    func_001EFD58(first, second, args->value);
+    btlBeginSceneLightColorTransition(first, second, args->value);
     lightColor = work->lightColor;
     PCP_COPY_VECTOR_F32(lightColor, first);
     ambientColor = work->ambientColor;
@@ -5231,7 +5233,7 @@ u32 func_001F0430(SceneLightTransitionArgs *args) {
     return 1;
 }
 
-extern u32 func_001F0430(SceneLightTransitionArgs *);
+extern u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *);
 
 void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     u8 *task = btlAllocTask(0x34);
@@ -5241,7 +5243,7 @@ void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 3;
     *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
-    *(void **)(task + 0x4C) = func_001F0430;
+    *(void **)(task + 0x4C) = btlApplySceneLightingTransition;
     *(u32 *)(task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     *(u32 *)(arguments + 0x30) = value;
@@ -5320,7 +5322,8 @@ s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
     return 1;
 }
 
-BtlRuntimeTask *func_001F0920(u32 value) {
+/* Create the deferred lighting-restore task with its native four-byte argument. */
+BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
     SceneLightRestoreArgs *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -5334,15 +5337,16 @@ BtlRuntimeTask *func_001F0920(u32 value) {
     return task;
 }
 
-s64 func_001F0998(SceneLightRestoreArgs *arguments) {
+/* Collapse lighting holds to one before the normal restore callback. */
+s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *arguments) {
     D_003BB694 = 1;
     return btlRestoreSceneTransformLighting(arguments);
 }
 
 BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
-    BtlRuntimeTask *task = func_001F0920(value);
+    BtlRuntimeTask *task = btlCreateSceneLightingRestoreTask(value);
     task->taskId = 7;
-    task->callback = func_001F0998;
+    task->callback = btlForceSceneLightingRestore;
     return task;
 }
 
@@ -5399,7 +5403,8 @@ BtlRuntimeTask *sndCreateReleaseTask(u32 frames) {
     return task;
 }
 
-s64 func_001F0B90(const BtlTintReleaseArgs *args) {
+/* Collapse tint holds to one before the existing tint-release callback. */
+s64 btlForceReleaseTintTransition(const BtlTintReleaseArgs *args) {
     btlTintTransitionHoldCount = 1;
     return sndTickFadeCounter(args);
 }
@@ -5407,7 +5412,7 @@ s64 func_001F0B90(const BtlTintReleaseArgs *args) {
 BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames) {
     BtlRuntimeTask *task = sndCreateReleaseTask(frames);
     task->taskId = 8;
-    task->callback = func_001F0B90;
+    task->callback = btlForceReleaseTintTransition;
     return task;
 }
 
@@ -7988,6 +7993,7 @@ typedef struct BattleFormationActionArgs {
 
 extern BattleFormationActionTable *D_003BAA64;
 
+/* Select the linkage formation by command row; task completion is always one. */
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5328);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A5340);
@@ -8002,7 +8008,7 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A53B0);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A53D0);
 
-u32 func_001F5ED8(BattleFormationActionArgs *args) {
+u32 btlApplyLinkageFormation(BattleFormationActionArgs *args) {
     BtlTask *link;
     BtlUnit *first;
     BattleFormationActionRow *row;
@@ -8062,25 +8068,26 @@ u32 func_001F5ED8(BattleFormationActionArgs *args) {
     return 1;
 }
 
-extern u32 func_001F5ED8(BattleFormationActionArgs *);
+extern u32 btlApplyLinkageFormation(BattleFormationActionArgs *);
 
-u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel, u32 flags) {
+/* Package the action, two companion addresses, skill and flags for formation. */
+u8 *btlCreateLinkageFormationTask(u8 *owner, u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags) {
     u8 *task = btlAllocTask(20);
     u32 *arguments;
-    u8 *sound;
+    u8 *unit;
 
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = func_001F5ED8;
-    sound = *(u8 **)(owner + 0x18);
+    *(void **)(task + 0x4C) = btlApplyLinkageFormation;
+    unit = *(u8 **)(owner + 0x18);
     *(u16 *)(task + 0x20) = 0x5F;
     *(u32 *)(task + 0x48) = 0;
-    *(u64 *)(task + 0x40) = *(u64 *)(sound + 0x108);
+    *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     arguments = btlGetTaskArguments(task);
     arguments[0] = (u32)owner;
-    arguments[1] = soundId;
-    arguments[2] = variant;
-    arguments[3] = channel;
+    arguments[1] = firstActorAddress;
+    arguments[2] = secondActorAddress;
+    arguments[3] = skillId;
     arguments[4] = flags;
     return task;
 }

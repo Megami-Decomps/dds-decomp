@@ -7927,7 +7927,7 @@ void effApplyBattleStateTint(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if ((battle->battleFlags & 0x6000000) != 0) {
-        func_001EFD58(battle->lightColor, battle->ambientColor, 0);
+        btlBeginSceneLightColorTransition(battle->lightColor, battle->ambientColor, 0);
         return;
     }
 }
@@ -7950,7 +7950,7 @@ void effStartTintTransitionFromColors(u8 *work) {
         to[0] = (c & 0xFF) / 255.0f;
         to[1] = ((c >> 8) & 0xFF) / 255.0f;
         to[2] = ((c >> 16) & 0xFF) / 255.0f;
-        func_001EFD58(from, to, colors[2]);
+        btlBeginSceneLightColorTransition(from, to, colors[2]);
     }
 }
 

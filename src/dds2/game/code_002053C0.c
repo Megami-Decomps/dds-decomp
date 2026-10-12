@@ -464,7 +464,8 @@ extern f32 D_003BE090[4];
 
 extern f32 func_00352DB0(f32);
 
-s32 func_00205CC8(s32 filter) {
+/* Arrange filtered active actors in the native spacing/angle slots; return one. */
+s32 btlArrangeFormationSlots(s32 filter) {
     f32 position[4];
     f32 rotation[4];
     BtlUnit *actors[16];
@@ -577,7 +578,7 @@ s32 btlRepositionPartyAroundBattleCenter(void) {
 }
 
 s32 func_00206090(void) {
-    return func_00205CC8(0x400);
+    return btlArrangeFormationSlots(0x400);
 }
 
 void btlMoveOtherUnitsAway(ActionStateLink *link) {
@@ -704,7 +705,8 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
     }
 }
 
-void func_00206570(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
+/* Place three actors around the middle actor, retaining the native fallbacks. */
+void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
     BtlUnit *slot[3];
     f32 center[4];
     f32 pos[4];
@@ -921,7 +923,8 @@ void func_00206C10(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
 
 extern s128 D_003BE0A0;
 
-void func_00206C18(ActionStateLink *link, BtlUnit *other) {
+/* Place the pair around the fixed center in lookup-ID order, hiding other units. */
+void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other) {
     BtlUnit *slot[2];
     f32 pos[4];
     f32 dir[4];
@@ -991,7 +994,8 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
 extern s128 D_003BE0B0;
 extern s128 D_003BE0C0;
 
-void func_00206EA8(ActionStateLink *link, BtlUnit *other) {
+/* Place the pair near its target using native reach, muzzle and special-ID rules. */
+void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
     BtlUnit *slots[2];
     f32 position[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
@@ -1119,7 +1123,7 @@ INCLUDE_ASM(const s32, "game/code_002053C0", func_00207268);
 extern f32 D_003E9110[4];
 
 /* Arrange the two marked three-slot groups around the battle origin. */
-void func_00207438(ActionStateLink *link, BtlUnit *firstActor, BtlUnit *secondActor) {
+void btlPlaceBothSidesInRadialFormation(ActionStateLink *link, BtlUnit *firstActor, BtlUnit *secondActor) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *first[3];
     BtlUnit *second[3];
@@ -1231,7 +1235,7 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s
     return task;
 }
 
-extern void func_00206EA8(ActionStateLink *, BtlUnit *);
+extern void btlPlacePairedFormationNearTarget(ActionStateLink *, BtlUnit *);
 
 /* The formation task allocates five words, independently of the sound work. */
 typedef struct BtlFormationTaskArgs {
@@ -1244,7 +1248,8 @@ typedef struct BtlFormationTaskArgs {
 
 typedef char BtlFormationTaskArgs_size[(sizeof(BtlFormationTaskArgs) == 0x14) ? 1 : -1];
 
-s32 func_002077C0(u32 *rawArgs) {
+/* Select the linkage formation by command row; task completion is always one. */
+s32 btlApplyLinkageFormation(u32 *rawArgs) {
     BtlFormationTaskArgs *args = (BtlFormationTaskArgs *)rawArgs;
     BtlState *work = (BtlState *)btlGetRuntime();
     u16 category;
@@ -1259,7 +1264,7 @@ s32 func_002077C0(u32 *rawArgs) {
             func_00206C10(args->actor, args->first, args->second);
             break;
         case 11:
-            func_00207438(args->actor, args->first, args->second);
+            btlPlaceBothSidesInRadialFormation(args->actor, args->first, args->second);
             break;
         }
         return 1;
@@ -1282,7 +1287,7 @@ s32 func_002077C0(u32 *rawArgs) {
         }
         break;
     case 3:
-        func_00206570(args->actor, args->first, args->second);
+        btlPlaceTripleFormationAroundMiddleActor(args->actor, args->first, args->second);
         break;
     case 4:
         btlOrientFrontAndBackUnitsTowardTargets(args->actor, args->first, args->second);
@@ -1291,29 +1296,30 @@ s32 func_002077C0(u32 *rawArgs) {
         btlAlignTripleFormationWithTarget(args->actor, args->first, args->second);
         break;
     case 8:
-        func_00206C18(args->actor, args->first);
+        btlPlacePairedFormationAtFixedCenter(args->actor, args->first);
         break;
     case 9:
-        func_00206EA8(args->actor, args->first);
+        btlPlacePairedFormationNearTarget(args->actor, args->first);
         break;
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link, u32 soundId, u32 variant, u32 channel, u32 flags) {
+/* Package the action, two companion addresses, skill and flags for formation. */
+BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, u32 firstActorAddress, u32 secondActorAddress, u32 skillId, u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
     BtlFormationTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
-    task->callback = func_002077C0;
+    task->callback = btlApplyLinkageFormation;
     task->taskId = 0x65;
     task->onStart = 0;
     task->ownerId = link->unit->owner;
     args = btlGetTaskArguments(task);
     args->actor = link;
-    args->first = (BtlUnit *)soundId;
-    args->second = (BtlUnit *)variant;
-    args->commandId = channel;
+    args->first = (BtlUnit *)firstActorAddress;
+    args->second = (BtlUnit *)secondActorAddress;
+    args->commandId = skillId;
     args->unknown10 = flags;
     return task;
 }

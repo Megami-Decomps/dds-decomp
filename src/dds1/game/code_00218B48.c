@@ -251,7 +251,8 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
     sdfPacReleasePacketQueueNodes(&request);
 }
 
-void func_00218BE8(void *memory) {
+/* Release the chip-cell allocation itself, not a pointer-to-pointer wrapper. */
+void mdlReleaseViewerAllocation(void *memory) {
     sdfReleaseChipBlock(memory);
 }
 

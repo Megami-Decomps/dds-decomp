@@ -157,7 +157,7 @@ extern s32 abs(s32);
 struct SoundTask;
 
 
-extern struct BtlRuntimeTask *func_001F0920(u32 value);
+extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32 value);
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
 
@@ -220,7 +220,7 @@ void func_0020FC48(void) {
                                           battle->eventUnit, 0);
         battle->eventActive = 3;
         btlStartTask(sndCreateReleaseTask(0xC));
-        btlStartTask(func_001F0920(0xC));
+        btlStartTask(btlCreateSceneLightingRestoreTask(0xC));
         return;
 
     case 3: {
