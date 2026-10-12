@@ -7041,6 +7041,7 @@ sdfGraphApplyModeDefaults = 0x00329CE0; // type:func
 sdfGraphResetDeviceForCurrentMode = 0x00329ED0; // type:func
 sdfGraphWakeDisplayThread = 0x00329F30; // type:func
 mdlGetSelectedRecord = 0x00237A70; // type:func
+mdlUpdateDevSlotTransforms = 0x00231FD8; // type:func  // dds1 0x002174C0
 
 // Inner-transform helpers and script transform setters (inferred names).
 effObjSetInnerPosition = 0x0010F908; // type:func  // dds1 0x0010F6E0
@@ -10099,7 +10100,6 @@ func_00230978 = 0x00230978; // type:func
 func_00230D90 = 0x00230D90; // type:func
 mdlRequestAssetBlocking = 0x00231DB0; // type:func
 func_00231E28 = 0x00231E28; // type:func
-func_00231FD8 = 0x00231FD8; // type:func
 mdlGetResourceTableCount = 0x00232F08; // type:func
 mdlApplyGroupedPartPackets = 0x00233280; // type:func
 mdlReleaseViewerAllocation = 0x00233700; // type:func

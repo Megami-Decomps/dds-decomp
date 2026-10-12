@@ -582,7 +582,7 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231FD8);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlUpdateDevSlotTransforms);
 
 extern DevRequest *sdfResourceListClone(DevRequest *list);
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
@@ -659,7 +659,7 @@ void mdlDestroyContext(MdlCtx *ctx) {
 }
 
 struct SdfPoolNode;
-extern void func_00231FD8(MdlCtx *, struct SdfPoolNode **);
+extern void mdlUpdateDevSlotTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
@@ -698,7 +698,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
     if (ctx->devList == NULL) {
         return;
     }
-    func_00231FD8(ctx, surfaces);
+    mdlUpdateDevSlotTransforms(ctx, surfaces);
 }
 
 extern void sdfSetPrimaryIdentityMatrixVU(void *);
@@ -783,7 +783,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     if (ctx->devList == NULL) {
         return;
     }
-    func_00231FD8(ctx, surfaces);
+    mdlUpdateDevSlotTransforms(ctx, surfaces);
 }
 
 /* Enable each table entry. The signed table count governs iteration; entry
