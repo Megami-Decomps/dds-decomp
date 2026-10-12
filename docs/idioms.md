@@ -8031,3 +8031,49 @@ Both complete units remain exact. The 13-column, three-row layout constants
 also drive navigation and rendering; no mutable threshold or unused local is
 introduced. The single `next_cell` edge is the native shared blank-cell handler,
 not loop shaping (DDS1 0x001FC4E8→0x001FC538; DDS2 0x0020E568→0x0020E5B8).
+
+## Trace-justified alias sets: emitter subrecord count
+
+DDS1 `func_00153740` and DDS2 `func_0015B330` (480 bytes each) allocate
+an emitter's buffer, billboard and kind-specific drawing resources. Kind 4
+constructs the track descriptor before creating its per-particle work list.
+Retail loads the subrecord count with `lhu` at +0x154, then loads the particle
+population with `lw` at +0x15C. Nocturne's `0x0015FB68` has the same order at
+`0x0015FCBC`/`0x0015FCC4` and the same plain halfword access.
+
+The vendor-cc1 trace (hooked assembly and every RTL dump identical to the
+unhooked run) identifies the deciding sched2 tier as `dependents`, not
+register-death weight or a source-order search. With a plain `u16` count,
+the history load has two edges: its descriptor-store data edge and the
+call's clobber anti edge. The population load has nine: eight memory
+anti edges against the descriptor stores and one actual call-argument
+use. These are scheduler dependency counts, not nine genuine uses of
+the population value. Both loads have priority 5 and cost 2.
+
+Property P is that the halfword history access must remain in the integer
+alias class, while the drawing-kind halfword remains in the short alias
+class. `ParKindState.templateEntryCount` is represented as an unsigned
+32-bit-base, 16-bit bitfield followed by 16 unnamed padding bits. Its offset,
+unsigned 16-bit value domain and enclosing 0x18-byte layout are unchanged;
+the optimized access is still `lhu`, but its memory reference retains the
+integer alias class. The history and population loads now each have nine
+edges, so sched2 reaches `luid` and selects history first. Drawing kind still
+has two edges and follows population. No load, store or extra value use is
+introduced.
+
+This bitfield representation is trace-justified, not independently attested
+as an original declaration. The Nocturne sibling reads and stripped debug
+ELF do not provide additional bitfield-packing evidence. An early population
+snapshot instead moves population into the wrong branch delay slot and
+leaves four differing words. Disabling strict aliasing globally leaves two
+differing words at a different offset and changes thirteen already-matched
+functions in each emitter unit; it is not a TU flag fix.
+
+The owner change preserves every previous matched function in all six
+direct owner-consumer units: both emitter units, both `parManager` units
+and DDS1 `game/code_0015A758` / DDS2 `game/code_00162348`. The approved source
+uses the primary owner only; there is no alternative view or steering cast.
+The initializer retains the existing SDK matrix load/store macros seen at
+native +0x198..+0x1B8, and leaves the model-sampling prefix untouched for
+kind-4 tracks that receive their endpoints directly.
+
