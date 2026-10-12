@@ -7308,3 +7308,7 @@
 0x00133DC8	fldClearCameraHeadingRequest	inferred	confidence=high; matched-C; Clears the camera heading request state; DDS1 twin 0x00131590. LiteG field naming batch.
 0x00134A18	fldDrawSkyGradient	inferred	confidence=high; matched-C; Draws the sky gradient grid using current and prior color sets; DDS1 twin 0x00132010. LiteG field naming batch.
 0x001360B8	fldApplySceneLightSet	inferred	confidence=high; matched-C; Applies the selected scene-light set with its transition duration; DDS1 twin 0x00133640. LiteG field naming batch.
+0x002A6000	mnuPrepareStaffRollText	inferred	confidence=high; matched-C; Prepares staff-roll text display by loading its font resources. DDS1 twin 0x0026F500. LiteH-2 menu naming batch.
+0x002A6018	mnuReleaseStaffRollText	inferred	confidence=high; matched-C; Releases staff-roll text resources during task cleanup. DDS1 twin 0x0026F518. LiteH-2 menu naming batch.
+0x002A6030	mnuDrawStaffRollText	inferred	confidence=high; matched-C; Draws and queues a staff-roll caption with vertical alpha fade. DDS1 twin 0x0026F530. LiteH-2 menu naming batch.
+0x002A6480	mnuUpdateStaffRollStreamState	inferred	confidence=high; matched-C; Updates staff-roll stream phase after the end-of-roll threshold. LiteH-2 menu naming batch.

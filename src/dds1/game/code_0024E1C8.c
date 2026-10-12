@@ -658,7 +658,7 @@ typedef struct MnuPartyRecord {
     u8 pad06[0x19E];
 } MnuPartyRecord;
 
-extern void func_00254C68();
+extern void mnuDrawMantraPartyListEntry();
 extern void *memset(void *, s32, u32);
 
 typedef char MnuResourceTask_size_must_be_0x10[(sizeof(MnuResourceTask) == 0x10) ? 1 : -1];
@@ -673,7 +673,7 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     u16 *orderCursor;
     struct MenuList *list = mnuCreateListState(0, 6, 0x1A);
 
-    list->drawCallback = func_00254C68;
+    list->drawCallback = mnuDrawMantraPartyListEntry;
     list->context = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
     memset(list->context, 0, MNU_LIST_DRAW_VALUE_BYTES);
     memset(partyOrder, 0, sizeof(partyOrder));
@@ -971,7 +971,7 @@ extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s3
 extern SdfGridCell *func_002CC0D0(SdfGrid *);
 extern void func_00253208(MenuSceneWork *, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
-extern void func_002512F0(MenuSceneWork *, s32);
+extern void mnuUpdateMantraSelectionPositions(MenuSceneWork *, s32);
 
 /* Construct the selection grid and callbacks, select its initial coordinates, then reset the cached scroll position. */
 void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
@@ -994,5 +994,5 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     }
     sceneWork->scrollX = 0;
     sceneWork->scrollY = 0;
-    func_002512F0(sceneWork, 1);
+    mnuUpdateMantraSelectionPositions(sceneWork, 1);
 }

@@ -7,8 +7,8 @@ extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s8 D_00324510[64];
 extern SdfGridCell *func_002CBE18(SdfGrid *grid);
 extern SdfGridCell *func_002CBF60(SdfGrid *grid);
-extern s32 func_00252F88(SdfGrid *grid);
-extern s32 func_00253018(SdfGrid *grid);
+extern s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid);
+extern s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid);
 extern void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan);
 
 extern u32 *mnuGetSelectedNodeValue(void);
@@ -73,11 +73,11 @@ void func_00250B60(MenuSceneWork *work) {
                 feedback = 1;
             }
         } else if ((D_00324510[0x24] & 2) && (direction & 0x20)) {
-            if (func_00252F88(work->gridHandle) != 0) {
+            if (mnuSelectMantraGridLeftNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
         } else if ((D_00324510[0x25] & 2) && (direction & 0x10)) {
-            if (func_00253018(work->gridHandle) != 0) {
+            if (mnuSelectMantraGridRightNeighbor(work->gridHandle) != 0) {
                 feedback = 1;
             }
         }

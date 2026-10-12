@@ -104,7 +104,7 @@ void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 drawValue, DspWindowConte
 }
 
 /* Draw one party entry, highlighting the currently selected list node. */
-void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *node,
+void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *node,
                    s32 drawContext) {
     char levelText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
     DspEntrySpriteLookup spriteLookup = D_003BC448[0];
@@ -168,7 +168,7 @@ void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 drawConte
 }
 
 /* Draw a formatted integer value with the same dim sprite/text treatment as the placeholder. */
-void func_00255010(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue, s32 drawContext) {
+void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue, s32 drawContext) {
     u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
     char valueText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
 
@@ -224,11 +224,11 @@ void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 d
         const u8 *style = D_0036C490[label - 1];
         frFontDrawStyledGlyphChainAndMeasure(x + 0xBA, y + 0x171, z, dimColor, 0, style, 0, drawContext);
     }
-    func_00255010(x + 0x18, y + 0x1A, z, alpha, mnuGetMantraSourceValue((u16)sceneId), drawContext);
+    mnuDrawMantraCostValue(x + 0x18, y + 0x1A, z, alpha, mnuGetMantraSourceValue((u16)sceneId), drawContext);
 }
 
 /* Draw the profile label and placeholder for an unavailable mantra cost. */
-void func_00255368(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
+void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
     struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
     u32 textColor = (u32)alpha | MNU_DISPLAY_TEXT_RGB;
     u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
@@ -439,7 +439,7 @@ extern void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
                           struct MnuSpriteResourceGroup *resources, s32 drawArg);
 
 /* Scroll the sprite cues opposite the scene cursor and draw them. */
-void func_00255D00(MenuSceneMetadata *scene, s32 alpha, s32 drawArg) {
+void mnuDrawMantraSceneBackground(MenuSceneMetadata *scene, s32 alpha, s32 drawArg) {
     MenuSceneWork *work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
 
     if (work != NULL) {
@@ -524,7 +524,7 @@ extern char D_003BC450[];
 extern s32 frFontQueueFlaggedGlyphAndMeasure(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Draw the unit-specific display sprite and its two-column numeric level. */
-void func_002561A0(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
     DspUnitSpriteLookup lookup = D_003BC470[0];
     char text[0x10];
     u32 textColor = scale | 0xA09DC300;
@@ -543,7 +543,7 @@ void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entr
 }
 
 /* Draw both layers of a display entry and queue its formatted value. */
-void func_002562E8(s32 x, s32 y, s32 layer, DatPartyRecord *entry, s32 scale, s32 context) {
+void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, DatPartyRecord *entry, s32 scale, s32 context) {
     DspEntrySpriteLookup lookup = D_003BC480[0];
     char text[0x10];
     u32 tag = scale | 0xA09DC300;
