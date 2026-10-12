@@ -70,7 +70,11 @@ typedef struct {
     MnuTitlePaletteTransition paletteTransition; /* 0x8C */
     StaffScrollTransition scrollTransition; /* 0xA8 */
     s32 scrollPaused; /* 0xBC: suppresses staff text and frame advancement. */
-    u8 padC0[0x14];
+    s32 imagePhase; /* 0xC0: staff image sequence state. */
+    s32 imageStartDelay;
+    s32 imageHoldFrames;
+    s32 imageEndDelay;
+    s32 imageAlpha;
     s32 streamPhase;
 } StaffTaskState;
 
@@ -864,7 +868,96 @@ s32 func_002A6030(f32 x, f32 y, s32 font, u32 color, const char *text) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6180);
+typedef struct StaffImageTiming {
+    s32 startDelay;
+    s32 endDelay;
+    s32 fadeInStep;
+    s32 holdFrames;
+    s32 fadeOutStep;
+} StaffImageTiming;
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+s32 mnuStaffImageProc(void) {
+    StaffImageTiming timing[2] = {
+        {60, 0, 1, 150, 2},
+        {0, 240, 2, 240, 4}
+    };
+    EffectSlotSet *sprite = mnuMovieWork->sprite;
+    s32 phase;
+
+    if (mnuMovieWork->scrollPaused == 0) {
+        mnuMovieWork->scrollPaused = 1;
+    }
+    if (mnuMovieWork->imagePhase == 3) {
+        if (mnuMovieWork->scrollPaused == 2) {
+            return 0;
+        }
+        mnuMovieWork->scrollPaused++;
+        mnuMovieWork->imageStartDelay = 0;
+        mnuMovieWork->imageEndDelay = 0;
+        mnuMovieWork->imageHoldFrames = 0;
+        mnuMovieWork->imagePhase = 0;
+    }
+    phase = mnuMovieWork->imagePhase;
+    if (phase == 2) {
+        if (mnuMovieWork->imageEndDelay > 0) {
+            mnuMovieWork->imageEndDelay--;
+        } else {
+            mnuMovieWork->imagePhase = 3;
+        }
+        return 1;
+    }
+    if (phase == 0) {
+        if (mnuMovieWork->imageStartDelay < timing[mnuMovieWork->scrollPaused - 1].startDelay) {
+            mnuMovieWork->imageStartDelay++;
+        } else {
+            mnuMovieWork->imagePhase = 1;
+        }
+        return 1;
+    }
+    if (phase == 1) {
+        if (mnuMovieWork->imageHoldFrames == 0) {
+            kwlnFadeOutStart(0, 0, 0, 0);
+            if (mnuMovieWork->imageAlpha < 256) {
+                mnuMovieWork->imageAlpha += timing[mnuMovieWork->scrollPaused - 1].fadeInStep;
+            }
+            if (mnuMovieWork->imageAlpha >= 256) {
+                mnuMovieWork->imageHoldFrames = 1;
+                mnuMovieWork->imageAlpha = 256;
+            }
+        } else {
+            if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0 ||
+                D_0037F510[0x22] < 0 || D_0037F510[0x20] < 0 ||
+                D_0037F510[0x2A] < 0 || D_0037F510[0x2B] < 0 ||
+                D_0037F510[0x28] < 0 || D_0037F510[0x29] < 0 ||
+                D_0037F510[0x2D] < 0 || D_0037F510[0x2C] < 0) {
+                /* 0x002A6330..0x002A6370: predicate retained in retail; body compiled out */
+            }
+            if (mnuMovieWork->imageHoldFrames >= timing[mnuMovieWork->scrollPaused - 1].holdFrames) {
+                if (mnuMovieWork->imageAlpha > 0) {
+                    mnuMovieWork->imageAlpha -= timing[mnuMovieWork->scrollPaused - 1].fadeOutStep;
+                }
+                if (mnuMovieWork->imageAlpha <= 0) {
+                    mnuMovieWork->imagePhase = 2;
+                    mnuMovieWork->imageAlpha = 0;
+                    mnuMovieWork->imageEndDelay = timing[mnuMovieWork->scrollPaused - 1].endDelay;
+                }
+            } else {
+                mnuMovieWork->imageHoldFrames++;
+            }
+        }
+    }
+    switch (mnuMovieWork->scrollPaused) {
+    case 1:
+        func_00306CD0(0, 0, 0, mnuMovieWork->imageAlpha, 0, sprite, 10, 0x53);
+        break;
+    case 2:
+        func_00306CD0(0x19D0, 0xC70, 0, mnuMovieWork->imageAlpha, 0, sprite, 11, 0x53);
+        break;
+    }
+    return 1;
+}
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
@@ -1016,7 +1109,6 @@ void mnuFadeSetState(SlideBar *state, u32 mode) {
     state->active = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     EffectSlotSet *sprite = mnuMovieWork->sprite;

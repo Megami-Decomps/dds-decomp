@@ -36,7 +36,7 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 
-extern u32 func_001A3360(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
 extern u32 effMiscRandMod(void *state, u32 modulus);
 

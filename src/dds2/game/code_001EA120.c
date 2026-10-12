@@ -117,7 +117,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern u32 func_001AC360(ActionStateLink *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
