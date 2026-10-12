@@ -43,7 +43,7 @@ extern s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 extern u8 D_003BB17C;
-FrFontGlyph *func_001951C8(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
 FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
 u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
@@ -516,7 +516,7 @@ FrFontChildGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 fi
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
 FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
-    FrFontGlyph *newGlyphChain = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
+    FrFontGlyph *newGlyphChain = frFontBuildGlyphChain(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
         return previousGlyph;
@@ -525,7 +525,7 @@ FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 fir
 }
 
 /* Decode text into child glyphs appended to an existing or newly pooled head. */
-FrFontGlyph *func_001951C8(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph) {
+FrFontGlyph *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph) {
     FrFontGlyph *head = existingGlyph;
     FrFontChildGlyph *previous;
     FrFontChildGlyph *glyph;
@@ -1261,7 +1261,7 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
             previousMode = mode;
         }
 
-        existingGlyph = func_001951C8(glyphText, mode, ctx->firstOption,
+        existingGlyph = frFontBuildGlyphChain(glyphText, mode, ctx->firstOption,
                                        ctx->secondOption, ctx->glyphChain);
         ctx->glyphChain = existingGlyph;
         frFontSetSpacingAndMeasureGlyphs(existingGlyph, D_003BB160);

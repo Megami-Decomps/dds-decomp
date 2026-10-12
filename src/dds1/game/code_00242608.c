@@ -829,7 +829,7 @@ extern s32 D_00368BD8[];
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = (s32)(u32)func_001951C8((const char *)D_00368BD8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)frFontBuildGlyphChain((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
     frFontSetGlyphPosition((struct FrFontGlyph *)(u32)fontHandle,
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);

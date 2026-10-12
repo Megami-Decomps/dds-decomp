@@ -2457,6 +2457,7 @@
 0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
 0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
 0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
+0x001951C8	frFontBuildGlyphChain	inferred	Decodes a byte string into pooled child glyphs, links them to an existing or new head and records aggregate child count/advance; twin of DDS2 0x0019CE78.
 0x00195360	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x001953A8	frFontSetSpacingAndMeasureGlyphs	inferred	Stores the signed spacing byte at glyph+1 and refreshes the cached child-chain advance.
 0x001953D8	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
