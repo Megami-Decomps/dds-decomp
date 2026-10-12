@@ -900,8 +900,6 @@ u32 fldGetSceneStatusCode(void) {
     return sceneWork->primaryState != 0 ? 2 : 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);
-
 /* Sixteen area records, each with sixty-four twelve-byte room choices. */
 typedef struct FieldAreaEncounterRow {
     s32 defaultEncounter;
@@ -936,6 +934,8 @@ extern void fldActivateCameraColorSetting(s32 enabled);
 extern void mnuInitializeResourceEntries(void);
 extern void fldLoadFieldEffectTextureSlots(void);
 extern void fldLoadResourceByIndex(s32 index);
+
+INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);
 
 void func_00125380(void) {
     f32 fallback[12];
