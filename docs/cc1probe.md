@@ -47,7 +47,7 @@ tools/cc1probe.sh /tmp/candidate.c --as-unit src/dds1/game/code_001411F0.c \
 | `--ifcvt` | `noce_process_if_block` shapes, `noce_try_*` successes, `find_if_case_1/2`, `dead_or_predicable` hoists with the merged block's insns |
 | `--jump` | cross-jumping: `find_cross_jump` pairs and matched runs, `do_cross_jump` |
 | `--gcse` | PRE/cprop expression table, insert/delete verdicts, deletions and copies |
-| `--reorg` | `mostly_true_jump`, `eligible_for_delay`, `fill_slots_from_thread`, `redundant_insn`, the simple and eager fill passes |
+| `--reorg` | `estimate_probability` (the REG_BR_PROB note each conditional jump gets, with the rule that produced it: loop-exit 9001, pointer EQ/NE 3999/6001, opcode table, default 5000), then `mostly_true_jump` (shows the note value it read, or `none(fallback heuristics)`), `eligible_for_delay`, `fill_slots_from_thread`, `redundant_insn`, the simple and eager fill passes |
 | `--loops` | the R5900 short-loop nop padding |
 | `--all` | every mode |
 | `--as-unit src/<v>/<dir>/<unit>.c` | compile a scratch file as that unit (names and per-unit cflags as the build; same as `DDS_AS_UNIT`) |
@@ -128,9 +128,17 @@ says a later-pass change cannot.
 - sched1 order, not final order, decides reload's spill-ring walk: `reload`
   allocates in the stream sched1 produced (sched2 runs afterwards), so a
   different temp register can be a sched1 tie.
-- REG_BR_PROB notes exist; reorg uses 90/50/10 thresholds on them
-  (`mostly_true_jump`). `fill_slots_from_thread(... likely=1)` is the branch-likely
-  path.
+- REG_BR_PROB notes are emitted before reorg by `estimate_probability`. The
+  `estimate_probability` section of a `--reorg` log shows each note when it is
+  made; the `mostly_true_jump` lines show the value read at reorg time, which can
+  differ because jump optimization may invert a branch (3999 after a 6001 on the
+  same jump, for example). reorg thresholds on the note are 90/50/10
+  (`mostly_true_jump`): ≥9000 gives likely/annul (2), ≥5000 gives 1, ≥1000 gives
+  0, below that -1. `fill_slots_from_thread(... likely=1)` is the branch-likely
+  path. The pass-1 9001 note is the loop-exit rule: a cold block outside the
+  loop's members, inside its first..last interval, whose predecessor is inside
+  the loop. The emit-time reasons are reconstructed from the compiled code, so
+  treat them as hints and check the note value itself.
 - The hooks decode structures with layouts taken from the binary's STABS; the
   script asserts them on startup, so a different compiler build fails loudly
   rather than printing nonsense.
