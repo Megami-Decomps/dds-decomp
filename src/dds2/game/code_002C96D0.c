@@ -6156,7 +6156,7 @@ typedef struct FileWaveMotion {
 extern f32 D_003E95B0[4]; /* (0, -1, 0, 0), existing shared axis */
 
 /* vu0 routine: advances axial motion with a quaternion-oriented sine sway. */
-void func_002D81B0(FileSlotTable *record) {
+void effUpdateWaveEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -6367,7 +6367,8 @@ void func_002D81B0(FileSlotTable *record) {
 }
 
 
-void effScaleParameterSet(ScaleOwner *owner, f32 scale) {
+/* Scale selected wave-emitter parameters from source to destination. */
+void effScaleWaveEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -6393,7 +6394,7 @@ typedef struct FileSlotMotion {
 } FileSlotMotion;
 
 /* vu0 routine: emits and advances randomized radial slots, then samples their key tracks. */
-void func_002D8AD0(FileSlotTable *record) {
+void effUpdateRadialEmitterSlots(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -6571,7 +6572,8 @@ void func_002D8AD0(FileSlotTable *record) {
     }
 }
 
-void effLoadObjScaleParamsA(ScaleOwner *owner, f32 scale) {
+/* Scale selected radial-emitter parameters from source to destination. */
+void effScaleRadialEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -6604,7 +6606,7 @@ typedef struct FileCircularMotion {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
-void func_002D9228(FileSlotTable *record) {
+void effUpdateCircularEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 orientation[4];
@@ -6813,7 +6815,8 @@ void func_002D9228(FileSlotTable *record) {
     }
 }
 
-void effLoadObjScaleParamsC(ScaleOwner *owner, f32 scale) {
+/* Scale selected circular-emitter parameters from source to destination. */
+void effScaleCircularEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;
@@ -6849,7 +6852,7 @@ extern void func_00336818(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
-void func_002D9AF8(FileSlotTable *record) {
+void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 position[4];
@@ -7049,7 +7052,8 @@ void func_002D9AF8(FileSlotTable *record) {
     }
 }
 
-void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
+/* Scale selected oriented-ring parameters; keep the destination-first declarations. */
+void effScaleOrientedRingEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *dst = owner->dst;
     ScaleSet *src = owner->src;
     u32 i;
@@ -7065,7 +7069,7 @@ void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
 }
 
 /* vu0 routine: advances directed slots through the emitter quaternion frame. */
-void func_002DA358(FileSlotTable *record) {
+void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -7256,7 +7260,8 @@ void func_002DA358(FileSlotTable *record) {
     }
 }
 
-void fileScaleEffectSurfaceParameterFields(ScaleOwner *owner, f32 factor) {
+/* Scale selected directed-emitter parameters; this is the DDS1 callback's twin. */
+void effScaleDirectedEmitterParameters(ScaleOwner *owner, f32 factor) {
     f32 *source = (f32 *)owner->src;
     f32 *destination = (f32 *)owner->dst;
     u8 *sourceEntries = (u8 *)source + 4;
@@ -7278,7 +7283,7 @@ void fileScaleEffectSurfaceParameterFields(ScaleOwner *owner, f32 factor) {
 }
 
 /* vu0 routine: advances slots within a bounded azimuth of the emitter frame. */
-void func_002DAAE0(FileSlotTable *record) {
+void effUpdateSectorEmitterSlots(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -7474,7 +7479,8 @@ void func_002DAAE0(FileSlotTable *record) {
 }
 
 
-void sdfScaleResourceFloatParameterGroups(ScaleOwner *owner, f32 factor) {
+/* Scale selected parameters for the bounded-azimuth sector emitter. */
+void effScaleSectorEmitterParameters(ScaleOwner *owner, f32 factor) {
     f32 *source = (f32 *)owner->src;
     f32 *destination = (f32 *)owner->dst;
     u8 *sourceEntries = (u8 *)source + 4;
@@ -7495,7 +7501,8 @@ void sdfScaleResourceFloatParameterGroups(ScaleOwner *owner, f32 factor) {
     destination[0xE4 / 4] = source[0xE4 / 4] * factor;
 }
 
-void func_002DB288(FileSlotTable *record, const f32 *value) {
+/* Replace type-seven curve-emitter start xyz; other record types are untouched. */
+void effSetCurveEmitterStartPosition(FileSlotTable *record, const f32 *value) {
     if (record->type == 7) {
         f32 *sprite = (f32 *)record->data0;
         sprite[0xFC / 4] = value[0];
@@ -7504,7 +7511,8 @@ void func_002DB288(FileSlotTable *record, const f32 *value) {
     }
 }
 
-void func_002DB2C0(FileSlotTable *record, const f32 *value) {
+/* Replace type-seven curve-emitter end xyz; other record types are untouched. */
+void effSetCurveEmitterEndPosition(FileSlotTable *record, const f32 *value) {
     if (record->type == 7) {
         f32 *sprite = (f32 *)record->data0;
         sprite[0x108 / 4] = value[0];
@@ -7549,7 +7557,7 @@ typedef struct FileCurveMotion {
 extern f32 D_003E9140[4];
 
 /* vu0 routine: advances randomized cubic-curve slots and their axial rotation. */
-void func_002DB3E0(FileSlotTable *record) {
+void effUpdateCurveEmitterSlots(FileSlotTable *record) {
     f32 axis[4];
     f32 previousPosition[4];
     f32 start[4];
@@ -7829,7 +7837,8 @@ void func_002DB3E0(FileSlotTable *record) {
 
 
 
-void effScaleParameterSetBase(ScaleOwner *owner, f32 scale) {
+/* Curve-emitter scaling changes only the common scale-track values. */
+void effScaleCurveEmitterParameters(ScaleOwner *owner, f32 scale) {
     ScaleSet *src = owner->src;
     ScaleSet *dst = owner->dst;
     u32 i;

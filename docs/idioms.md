@@ -8350,3 +8350,56 @@ whole-unit gates after resplitting are 66 match, 0 differ in each game,
 preserving all 65 earlier C functions, with no context, rodata, or
 undefined-symbol rows.
 
+## Emitter descriptor pairs: trajectory updates and parameter scalers
+
+DDS1 `game/code_0028A150` and DDS2 `game/code_002C96D0` contain the
+slot-emitter engine, despite sharing their translation units with file
+and menu functions. The native descriptor array establishes the update
+and scale callback pairs: its four words are update callback, scale
+callback, per-instance work bytes, and serialized parameter bytes.
+DDS1's array is at `D_0037E550` (the scaler-field label is
+`dds3IndexedCallbacks`); DDS2's equivalent is at `D_003E95C0`.
+The initial descriptor is empty.
+
+| Type | Update callback | Paired parameter scaler | Observed trajectory |
+| --- | --- | --- | --- |
+| 1 | `effUpdateWaveEmitterSlots` | `effScaleWaveEmitterParameters` | Axial travel with quaternion-oriented sine sway and interpolated amplitude |
+| 2 | `effUpdateRadialEmitterSlots` | `effScaleRadialEmitterParameters` | Random radial direction, signed speed, acceleration and gravity |
+| 3 | `effUpdateCircularEmitterSlots` | `effScaleCircularEmitterParameters` | Changing radius plus angular and axial motion in a saved quaternion frame |
+| 4 | `effUpdateOrientedRingEmitterSlots` | `effScaleOrientedRingEmitterParameters` | Sampled ring orientation, changing radius, angular acceleration and gravity |
+| 5 | `effUpdateDirectedEmitterSlots` | `effScaleDirectedEmitterParameters` | Random spread transformed through the emitter quaternion, speed, acceleration and gravity |
+| 6 (DDS2) | `effUpdateSectorEmitterSlots` | `effScaleSectorEmitterParameters` | Directed motion within a bounded azimuth |
+| 7 (DDS2) | `effUpdateCurveEmitterSlots` | `effScaleCurveEmitterParameters` | Randomized cubic-Bezier control points and travel between configured endpoints |
+
+DDS1's descriptor array ends after type five. Types six and seven,
+including their endpoint setters, therefore have no equivalent
+descriptor entries in DDS1; they are not unresolved twin renames.
+The bodies independently establish the names by consuming the matching
+`FileKeyBlock.emitter` variants and advancing each slot's position,
+state, color, scale, and heading tracks.
+
+The scalers are source-to-destination operations on **selected**
+parameters, not blanket copies or multipliers over the whole record.
+In particular, the curve scaler modifies only the common scale-track
+values and does not scale the curve-tail fields. Keep its short body.
+The oriented-ring scalers declare destination before source; do not
+normalize that order while improving their names.
+
+The native pair table also corrects the earlier vague scaler names and
+the directed scaler's inconsistent names across games. Its role is the
+same in both games even though DDS1 accesses `ScaleSet` fields and DDS2
+uses the existing float/byte-pointer expressions. Naming is not grounds
+to change either source form, types, casts, declarations, or arithmetic.
+
+`effSetCurveEmitterStartPosition` and `effSetCurveEmitterEndPosition`
+write only xyz and only when `FileSlotTable.type == 7`; other types are
+untouched. `effResolveAndApplySurfaceEndpoints` supplies the resolved
+start/end vectors. The corresponding `FileKeyBlock.emitter.curve`
+members and the Bezier sampler confirm their endpoint roles.
+
+Both containing translation units are context-fragile. Gate the whole
+units, not just these callbacks, and gate the endpoint caller's effect
+unit after closing its references. Old-name `MISSING` rows between a
+rename and the next resplit are bookkeeping, not code differences;
+every renamed definition must still have its own `OK` row.
+

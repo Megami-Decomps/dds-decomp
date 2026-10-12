@@ -341,7 +341,7 @@ typedef struct BillCellDrawWork {
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void func_002DB288(s32, void *);
+extern void effSetCurveEmitterStartPosition(s32, void *);
 
 extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
@@ -349,7 +349,7 @@ extern u8 D_003E9140[];
 
 extern u8 D_003E9110[];
 
-extern void func_002DB2C0(s32, void *);
+extern void effSetCurveEmitterEndPosition(s32, void *);
 
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
@@ -8687,8 +8687,8 @@ void effResolveAndApplySurfaceEndpoints(u8 *work) {
         VU0_LOAD_VF(vf10, offset);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, end);
-    func_002DB288(((EffectSlotNode54 *)*handle)->record, start);
-    func_002DB2C0(((EffectSlotNode54 *)*handle)->record, end);
+    effSetCurveEmitterStartPosition(((EffectSlotNode54 *)*handle)->record, start);
+    effSetCurveEmitterEndPosition(((EffectSlotNode54 *)*handle)->record, end);
     effAcquireSurfaceRecord(*handle);
 }
 
