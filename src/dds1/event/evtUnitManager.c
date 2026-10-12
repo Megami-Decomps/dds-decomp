@@ -23,7 +23,7 @@ extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
-s32 func_00222498(EvtUnit *unit, f32 *dir, f32 scale);
+s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 scale);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
@@ -907,9 +907,9 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_00222498);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtRotateUnitTowardTarget);
 
-/* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with func_00222498. */
+/* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
@@ -922,7 +922,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
-    return func_00222498(unit, v, angle);
+    return evtRotateUnitTowardTarget(unit, v, angle);
 }
 
 s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
@@ -930,7 +930,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 scale;
     EffWorldNode *obj;
 
-    func_00222498(unit, unit->targetVector, unit->directionOffset * 0.01f);
+    evtRotateUnitTowardTarget(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
         evtComputePlanarTargetDirectionVu(unit);
         obj = unit->effObj;

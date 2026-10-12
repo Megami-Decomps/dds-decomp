@@ -3487,6 +3487,7 @@
 0x0023CEA8	evtActivateStoredUnitMotionSlot	inferred	Uses stored slot selection and values to configure a motion slot in mode two. [names_reviewed6.tsv]
 0x0023CED8	evtConfigureUnitMotionSlot	inferred	Writes indexed motion slot parameters and selects its behavior flag from mode. [names_reviewed6.tsv]
 0x0023CF70	evtPrepareUnitMotionState	inferred	Clears prior mode flags, records three short parameters and sets selected mode. [names_reviewed6.tsv]
+0x0023D030	evtRotateUnitTowardTarget	inferred	Compares the unit's current planar facing with a world-space target and applies the scaled, clamped axis-angle rotation to its inner effect object; paired DDS1 implementation at 0x00222498.
 0x0023D1F0	evtAimUnitFromFlatQuaternion	inferred	Converts quaternion to direction, flattens and negates it, then aims from object position. [names_reviewed6.tsv]
 0x0023D298	evtApplyUnitDirectionOffset	inferred	Aims toward saved target and adds scaled direction to effect object vector. [names_reviewed6.tsv]
 0x0023D360	evtUnitPrepareVerticalMoveSteps	inferred	confidence=high; src/dds2/event/evtUnitManager.c:func_0023D360; Simulates direction steps on a copy, restores shared vectors and derives vertical increment from the resulting step count. [names_qp9.tsv]
