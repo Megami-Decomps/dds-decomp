@@ -216,7 +216,34 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", ptyCalcLevelUps);
+/* Keep the level progression indexed; see docs/idioms.md,
+ * "Trace-justified party experience table progression". */
+s32 ptyCalcLevelUps(DatPartyRecord *unit) {
+    u16 level = unit->level;
+    u16 unitId = unit->unitId;
+    u32 exp = unit->totalExp;
+    u32 total;
+    s32 steps;
+
+    if (level == 99) {
+        return 0;
+    }
+    total = ptyComputeTotalExp(unit, 0);
+    steps = 0;
+    do {
+        s32 nextLevel = level + steps + 1;
+
+        total += D_003D845C[unitId][level + steps];
+        if (exp < total) {
+            break;
+        }
+        steps++;
+        if (nextLevel >= 99) {
+            break;
+        }
+    } while (1);
+    return steps;
+}
 
 s32 mnuCountAdvancingTitleAnimations(void) {
     s32 i;
