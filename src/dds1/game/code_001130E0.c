@@ -518,7 +518,7 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
 }
 
 
-void func_00113DA8(EffWorldNode *node) {
+void effObjRemoveWorldNode(EffWorldNode *node) {
     dds3RemoveWorldObjectNode(node);
 }
 
