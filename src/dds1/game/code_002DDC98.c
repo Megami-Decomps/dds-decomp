@@ -120,11 +120,11 @@ void sdfVuCross3(void *outputVector, void *leftVector, void *rightVector) {
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
-void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
-    VU0_LOAD_VF(vf10, origin);
+void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, const void *up) {
+    VU0_LOAD_VF(vf10, basisOrigin);
     VU0_MOVE_VF(vf31, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf10, directionPoint);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf30, vf10);

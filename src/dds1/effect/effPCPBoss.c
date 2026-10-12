@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
@@ -21,7 +22,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern u8 D_003556C0[];
 

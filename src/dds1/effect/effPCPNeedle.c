@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "common.h"
 #include "sdf_quaternion.h"
 #include "par_cell_api.h"
@@ -12,7 +13,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
-extern void sdfVuBuildLookAtBasis(void *origin, void *target, void *up);
 extern void sdfInvertRigidVuTransform(void);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);

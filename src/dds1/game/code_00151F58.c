@@ -1,3 +1,4 @@
+#include "sdf_projection.h"
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
@@ -1632,7 +1633,6 @@ struct EffLookAtRingEmitter {
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewUpVector[];
-extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfInvertRigidVuTransform(void);
 
 /* Seed a view-oriented ring packet and initialize its subeffect. */
