@@ -994,7 +994,7 @@ extern void *btlCreateTargetedCommandSoundTask(s32, s32, u32);
 extern u8 *btlAllocateApproachTargetTask(u8 *, s32, f32);
 extern s32 btlIsBattleRecordEligible(u8 *, u8 *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *);
-extern BtlRuntimeTask *func_001F12E8(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
+extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetSlotRateKind(u8 *, s32);
@@ -1159,7 +1159,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                     elapsed += spacing;
                     if (elapsed >= 3) {
                         elapsed = 0;
-                        groupTask = func_001F12E8(resource, action->unit, currentTarget, 2);
+                        groupTask = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 2);
                         groupTask->startCondition.kind = 4;
                         groupTask->startCondition.value.handle = moveHandle;
                         groupTask->startDelay = groupDelay - spacing * operandIndex;
@@ -1209,7 +1209,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         }
         if (group->kind != 0x40000) {
             if (group->kind != 2 && (group->reflected == 0 || reflectedStarted == 0)) {
-                groupTask = func_001F12E8(resource, action->unit, currentTarget, 2);
+                groupTask = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 2);
                 groupTask->startCondition.kind = 4;
                 groupTask->startCondition.value.handle = moveHandle;
                 groupTask->startDelay = groupDelay;
@@ -1233,7 +1233,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
                 btlStartTask(groupTask);
             }
         } else {
-            groupTask = func_001F12E8(state->resources[30], action->unit, currentTarget, 2);
+            groupTask = btlCreateReferencedBattleEffectTask(state->resources[30], action->unit, currentTarget, 2);
             groupTask->startCondition.kind = 4;
             groupTask->startCondition.value.handle = moveHandle;
             groupTask->startDelay = groupDelay;
@@ -1247,7 +1247,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             btlStartTask(groupTask);
         }
         if (group->reflected != 0) {
-            groupTask = func_001F12E8(state->resources[28], action->unit, indexedTarget, 2);
+            groupTask = btlCreateReferencedBattleEffectTask(state->resources[28], action->unit, indexedTarget, 2);
             groupTask->startCondition.kind = 4;
             groupTask->startCondition.value.handle = moveHandle;
             groupTask->startDelay = groupDelay;
@@ -1421,7 +1421,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         btlStartTask(task);
     }
     if (resourceNormal != 0 && resource != NULL) {
-        task = func_001F12E8(resource, action->unit, currentTarget, 1);
+        task = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 1);
         task->startCondition.kind = 4;
         task->startCondition.value.handle = moveHandle;
         task->startDelay = initialDelay;

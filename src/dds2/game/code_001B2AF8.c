@@ -731,8 +731,9 @@ s32 func_001B39E8(u32 mask) {
     return btlAverageMaskedActorStat(mask, 1);
 }
 
-void func_001B3A00(u32 arg0) {
-    btlAverageMaskedActorStat(arg0, 0);
+/* Include bit-0x20 actors in the masked mean level; preserve the forwarding signature. */
+void btlAverageAllLevelsForMask(u32 actorMask) {
+    btlAverageMaskedActorStat(actorMask, 0);
 }
 
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
@@ -761,6 +762,7 @@ void btlAverageFilteredActorAttribute(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 1);
 }
 
+/* Keep this name: evtPushAvailableChoiceRatio in newdata/datCalc.c lowers its u64 division to __udivdi3. */
 void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
@@ -788,6 +790,7 @@ extern void func_0011EBE8();
 
 extern const char D_004156F8[];
 
+/* Select outcome 1 or 2 using scene overrides and the native preemptive chance roll. */
 s32 btlSelectPreemptiveOutcome(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 chance;
@@ -1454,7 +1457,7 @@ extern char D_004159C0[]; /* "btl:auto attack[%X]\n" */
 
 /* Pick one of the unit's auto-attack skills at random (0x96/0x95/0x94 for abilities 0x22C/0x22B/0x22A);
  * -1 when it has none. */
-s32 func_001B5688(BtlUnit *unit) {
+s32 btlSelectRandomAutoAttackSkill(BtlUnit *unit) {
     s32 skills[3];
     u16 count = 0;
     s32 skill;
@@ -1950,7 +1953,7 @@ extern ActorSlotOrder *D_00438F58[2];
 
 extern void btlClearTaskActorSlots(void);
 
-extern s32 func_001B8368(s32);
+extern s32 btlCreatePhaseChangePanelTask(s32);
 
 s32 btlResetSceneSlotFades(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -1991,7 +1994,7 @@ s32 btlResetSceneSlotFades(void) {
     }
     btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
-    return func_001B8368(kind);
+    return btlCreatePhaseChangePanelTask(kind);
 }
 
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
@@ -2078,7 +2081,8 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-s32 func_001B7940(s32 id, s32 operation) {
+/* Mark (0), clear (1), or query (other) the recorded bit for a linkage skill ID. */
+s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation) {
     s32 selector;
     s32 offset;
     u32 word;
@@ -2107,14 +2111,16 @@ s32 func_001B7940(s32 id, s32 operation) {
     return 1;
 }
 
-void func_001B7A00(void) {
+/* Clear the four DDS2 scratch words used to deduplicate linkage notices. */
+void btlClearPendingLinkageSkillFlags(void) {
     s32 i;
     for (i = 3; i >= 0; i--) {
         D_003B6928[i] = 0;
     }
 }
 
-s32 func_001B7A38(s32 id, s32 operation) {
+/* Mark (0), clear (1), or query (other) the scratch bit for a pending linkage notice. */
+s32 btlAccessPendingLinkageSkillFlag(s32 id, s32 operation) {
     s32 selector;
     s32 offset;
     u32 word;
@@ -2562,7 +2568,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern void func_00101968(KwlnTask *, KwlnTask *);
 
 /* Create the phase-gated PSECHG panel with one of two initial point sets. */
-s32 func_001B8368(s32 variant) {
+s32 btlCreatePhaseChangePanelTask(s32 variant) {
     BtlPsechgPositions firstPoints = D_00415DA0;
     BtlPsechgPositions secondPoints = D_00415DC8;
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -4080,11 +4086,11 @@ s32 btlHasUnmarkedLinkageSkill(s32 arg0) {
     s32 count;
     s32 i;
 
-    func_001B7A00();
+    btlClearPendingLinkageSkillFlags();
     count = btlBuildActorLinkageSkillList(arg0, &D_003B5D10);
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (func_001B7940(D_003B5D10.entries[i].skill, 2) == 0) {
+            if (btlAccessRecordedLinkageSkillFlag(D_003B5D10.entries[i].skill, 2) == 0) {
                 return 1;
             }
         }
@@ -4099,9 +4105,10 @@ INCLUDE_ASM(const s32, "game/code_001B2AF8", btlGetTaskState6);
 
 
 
-extern s32 func_001B7940(s32, s32);
+extern s32 btlAccessRecordedLinkageSkillFlag(s32, s32);
 
-s32 btlClearFlagEntries(void) {
+/* Record every listed linkage skill; return whether the command-panel task exists. */
+s32 btlRecordListedLinkageSkills(void) {
     u16 count;
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     BattleRosterTable *table;
@@ -4109,7 +4116,7 @@ s32 btlClearFlagEntries(void) {
     if (task != 0) {
         table = btlGetActorLinkageSkillList(kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
-            func_001B7940(table->entries[i].skill, 0);
+            btlAccessRecordedLinkageSkillFlag(table->entries[i].skill, 0);
         }
         return 1;
     }
@@ -4152,7 +4159,7 @@ extern void func_0026C900(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
-extern s32 func_001B7A38(s32, s32);
+extern s32 btlAccessPendingLinkageSkillFlag(s32, s32);
 
 /* Advance new-LINKAGE notices; return -1 after closing and updating notice flags. */
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416650);
@@ -4197,8 +4204,8 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
         scanIndex = (u16)work->itemIndex;
         while (scanIndex < count) {
             id = list->entries[work->itemIndex].skill;
-            if (func_001B7940(id, 2) == 0 && func_001B7A38(id, 2) == 0) {
-                func_001B7A38(id, 0);
+            if (btlAccessRecordedLinkageSkillFlag(id, 2) == 0 && btlAccessPendingLinkageSkillFlag(id, 2) == 0) {
+                btlAccessPendingLinkageSkillFlag(id, 0);
                 evtCopyEntryStringToActiveWindow(0, D_00435E64 + id * 17);
                 dspStartEntry(0);
                 work->itemIndex++;
@@ -4248,7 +4255,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
         }
     }
     dspCloseChannel();
-    btlClearFlagEntries();
+    btlRecordListedLinkageSkills();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
 

@@ -1202,7 +1202,8 @@ void btlClearSharedBattleStateWords(void) {
     } while (-1 < temp_v0);
 }
 
-s32 func_001ACD30(s32 id, s32 operation) {
+/* Mark (0), clear (1), or query (other) the recorded bit for a linkage skill ID. */
+s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation) {
     s32 selector;
     s32 offset;
     u32 word;
@@ -1231,21 +1232,23 @@ s32 func_001ACD30(s32 id, s32 operation) {
     return 1;
 }
 
-void func_001ACDF0(void) {
-    s32 *temp_v0;
-    s32 temp_v1;
+/* Clear the three DDS1 scratch words used to deduplicate linkage notices. */
+void btlClearPendingLinkageSkillFlags(void) {
+    s32 *flagWord;
+    s32 counter;
 
-    temp_v0 = D_00359A78;
-    temp_v0 += 2;
-    temp_v1 = 2;
+    flagWord = D_00359A78;
+    flagWord += 2;
+    counter = 2;
     do {
-        temp_v1 = temp_v1 - 1;
-        *temp_v0 = 0;
-        temp_v0 = temp_v0 - 1;
-    } while (-1 < temp_v1);
+        counter = counter - 1;
+        *flagWord = 0;
+        flagWord = flagWord - 1;
+    } while (-1 < counter);
 }
 
-s32 func_001ACE28(s32 id, s32 operation) {
+/* Mark (0), clear (1), or query (other) the scratch bit for a pending linkage notice. */
+s32 btlAccessPendingLinkageSkillFlag(s32 id, s32 operation) {
     s32 selector;
     s32 offset;
     u32 word;
@@ -3245,11 +3248,11 @@ s32 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
     s32 count;
     s32 i;
 
-    func_001ACDF0();
+    btlClearPendingLinkageSkillFlags();
     count = btlBuildActorLinkageSkillList(unit, &D_00359160);
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (func_001ACD30(D_00359160.entries[i].skill, 2) == 0) {
+            if (btlAccessRecordedLinkageSkillFlag(D_00359160.entries[i].skill, 2) == 0) {
                 return 1;
             }
         }
@@ -3265,7 +3268,8 @@ INCLUDE_ASM(const s32, "game/code_001A9780", btlGetTaskState6);
 
 extern BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *, u16 *);
 
-s32 btlClearFlagEntries(void) {
+/* Record every listed linkage skill; return whether the command-panel task exists. */
+s32 btlRecordListedLinkageSkills(void) {
     u16 count;
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
     BattleRosterTable *table;
@@ -3273,7 +3277,7 @@ s32 btlClearFlagEntries(void) {
     if (task != 0) {
         table = btlGetActorLinkageSkillList((BattleSceneObject *)kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
-            func_001ACD30(table->entries[i].skill, 0);
+            btlAccessRecordedLinkageSkillFlag(table->entries[i].skill, 0);
         }
         return 1;
     }
@@ -3349,8 +3353,8 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
         scanIndex = (u16)work->itemIndex;
         while (scanIndex < count) {
             id = list->entries[work->itemIndex].skill;
-            if (func_001ACD30(id, 2) == 0 && func_001ACE28(id, 2) == 0) {
-                func_001ACE28(id, 0);
+            if (btlAccessRecordedLinkageSkillFlag(id, 2) == 0 && btlAccessPendingLinkageSkillFlag(id, 2) == 0) {
+                btlAccessPendingLinkageSkillFlag(id, 0);
                 evtCopyEntryStringToActiveWindow(0, D_003BAA8C + id * 17);
                 dspStartEntry(0);
                 work->itemIndex++;
@@ -3400,7 +3404,7 @@ s32 btlUpdateLinkageNoticeTask(KwlnTask *task) {
         }
     }
     dspCloseChannel();
-    btlClearFlagEntries();
+    btlRecordListedLinkageSkills();
     btlSetCommandPanelFadeMode(1, 8);
     return -1;
 return_zero:

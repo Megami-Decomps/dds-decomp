@@ -1538,8 +1538,8 @@ extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg);
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind);
-extern BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, BtlUnit *source,
-                                                 BtlUnit *actor, u16 frames);
+extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source,
+                                                 BtlUnit *actor, u16 variant);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 command);
@@ -1705,7 +1705,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                     elapsed += spacing;
                     if (elapsed >= 3) {
                         elapsed = 0;
-                        groupTask = btlCreateReferencedSoundEffectTask(resource, action->unit, currentTarget, 2);
+                        groupTask = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 2);
                         groupTask->startCondition.kind = 4;
                         groupTask->startCondition.value.handle = moveHandle;
                         groupTask->startDelay = groupDelay - spacing * operandIndex;
@@ -1755,7 +1755,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         }
         if (group->kind != 0x40000) {
             if (group->kind != 2 && (group->reflected == 0 || reflectedStarted == 0)) {
-                groupTask = btlCreateReferencedSoundEffectTask(resource, action->unit, currentTarget, 2);
+                groupTask = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 2);
                 groupTask->startCondition.kind = 4;
                 groupTask->startCondition.value.handle = moveHandle;
                 groupTask->startDelay = groupDelay;
@@ -1779,7 +1779,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
                 btlStartTask(groupTask);
             }
         } else {
-            groupTask = btlCreateReferencedSoundEffectTask(state->resources[30], action->unit, currentTarget, 2);
+            groupTask = btlCreateReferencedBattleEffectTask(state->resources[30], action->unit, currentTarget, 2);
             groupTask->startCondition.kind = 4;
             groupTask->startCondition.value.handle = moveHandle;
             groupTask->startDelay = groupDelay;
@@ -1793,7 +1793,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             btlStartTask(groupTask);
         }
         if (group->reflected != 0) {
-            groupTask = btlCreateReferencedSoundEffectTask(state->resources[group->reflectionKind != 0 ? 29 : 28], action->unit, indexedTarget, 2);
+            groupTask = btlCreateReferencedBattleEffectTask(state->resources[group->reflectionKind != 0 ? 29 : 28], action->unit, indexedTarget, 2);
             groupTask->startCondition.kind = 4;
             groupTask->startCondition.value.handle = moveHandle;
             groupTask->startDelay = groupDelay;
@@ -1967,7 +1967,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         btlStartTask(task);
     }
     if (resourceNormal != 0 && resource != NULL) {
-        task = btlCreateReferencedSoundEffectTask(resource, action->unit, currentTarget, 1);
+        task = btlCreateReferencedBattleEffectTask(resource, action->unit, currentTarget, 1);
         task->startCondition.kind = 4;
         task->startCondition.value.handle = moveHandle;
         task->startDelay = initialDelay;

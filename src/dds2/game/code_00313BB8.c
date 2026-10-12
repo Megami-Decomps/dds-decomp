@@ -671,7 +671,7 @@ void scrResetAndSetPairedGlobalFlags(void) {
     first = mnuPickPairedTableValue(0x10, 0);
     last = mnuPickPairedTableValue(0x10, 1);
     for (; (s32)first < last; first = first + 1) {
-        func_001B7940(first & 0xffff, 1);
+        btlAccessRecordedLinkageSkillFlag(first & 0xffff, 1);
     }
 }
 

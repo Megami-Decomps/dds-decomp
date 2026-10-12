@@ -144,8 +144,8 @@ or replace an unrelated arithmetic expression just to constrain scheduling.
 
 ## Scalar outputs and address reuse
 
-The linked-defeat cameras (`func_001E4180` in DDS1 and `func_001F1B00` in
-DDS2) combine the SDK `ffabsf` boundary with two independent `f32` extent
+The linked-defeat cameras (`btlBuildActorSetCameraPose` in both games)
+combine the SDK `ffabsf` boundary with two independent `f32` extent
 outputs. The bounds providers accept independently nullable output pointers;
 the three VU vectors remain in a separate, genuinely 16-byte-aligned record.
 Both routines match with this source organization and complete 16-byte
@@ -7619,7 +7619,7 @@ runs look clean. DDS2 `code_001DD390` / `code_001EB5B0`: `btlBeginActionEndCamer
 (0x1EA748) needs `btlCanUseLinkedActor` (0x1EA210) visible, so the merged unit
 regresses `btlBeginActionEndCameraPullback` and `btlStepUnitHeightFramedCamera`, while any
 boundary in `[0x1EA7C8, 0x1EB5B0]` keeps every matched function exact. DDS1's
-0x1DDF20 twin regresses `btlBeginActionEndCameraPullback`, `func_001E3E58` and
+0x1DDF20 twin regresses `btlBeginActionEndCameraPullback`, `btlApplyMarkedUnitActionCamera` and
 `btlStepUnitHeightFramedCamera` the same way.
 
 Matched-function evidence only brackets a boundary. Cross-check it with hard
@@ -9064,4 +9064,48 @@ embedded-camera adapters for those cursor operations. The former retains
 the action's `0x10000` override guard. Their names do not assert an unproved
 callback-table or generic task identity. Keep all native unprototyped calls,
 extra arguments, pointer casts, VU macros and title-specific constants.
+
+## Recorded linkage flags and referenced battle-effect tasks
+
+The two linkage flag accessors have the same operation protocol: `0` marks,
+`1` clears, and every other narrowed operation queries. Both index by the
+linkage skill ID minus `0x1AB`. `btlAccessRecordedLinkageSkillFlag` uses
+`datGameState->battleFlags`; `btlAccessPendingLinkageSkillFlag` uses the
+scratch words which deduplicate notices before their roster is recorded.
+`btlClearPendingLinkageSkillFlags` clears three words in DDS1 and four in
+DDS2. Preserve each title's word count, narrowing, unchecked indexing and
+write/query return behavior.
+
+`btlRecordListedLinkageSkills` marks every skill in the current command-panel
+roster using operation `0`. Its old clearing description was wrong: it sets
+recorded bits, and returns whether the named panel task exists. The notice
+controller marks pending bits before presenting each unrecorded skill and
+records the roster when it finishes.
+
+`btlUpdateReferencedBattleEffect` and `btlCreateReferencedBattleEffectTask`
+share the resource/actor reference lifecycle in both games. Native effect
+creation duplicates effect parameter work and logs `effBTL` handle creation;
+the update callback sets field-color selectors, tracks effect duration and
+updates owner/render state. This establishes a battle-effect task, not an
+audio-only task. Keep the existing resource types and lifecycle callbacks.
+DDS2's selector/target hooks and floor-refresh flags remain title-specific;
+its factory's `variant` argument selects an option, not a frame count.
+
+`btlApplyMarkedUnitActionCamera` honors the camera-arrangement hook and frames
+the marked actor groups. `btlBuildActorSetCameraPose` uses the defeat-camera
+hook or derives a pose from selected actor-set centers and extents. Preserve
+their native mode branches, independently addressable extents, VU operations
+and DDS2 distance-offset additions.
+
+`btlAverageAllLevelsForMask` includes active masked actors even with status
+bit `0x20` set; its callee averages `partyRecord.level`, falling back to `1`
+for an empty group. This naming batch preserves the existing void definition
+and the `s32` extern consumed by the script getter.
+
+The `__udivdi3` name is load-bearing in both games. The `u64` division in
+`newdata/datCalc.c`'s `evtPushAvailableChoiceRatio` compiles to a call bearing
+that name; native calls resolve to `0x001A95B0` and `0x001B3B10`. Do not rename
+it merely because its retained C body forwards actor-attribute averaging.
+This is a symbol-binding constraint, not proof of a general-purpose division
+implementation.
 

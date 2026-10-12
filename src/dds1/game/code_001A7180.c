@@ -931,8 +931,9 @@ s32 func_001A9488(u32 arg0) {
     return btlAverageMaskedActorStat(arg0, 1);
 }
 
-void func_001A94A0(u32 arg0) {
-    btlAverageMaskedActorStat(arg0, 0);
+/* Include bit-0x20 actors in the masked mean level; preserve the forwarding signature. */
+void btlAverageAllLevelsForMask(u32 actorMask) {
+    btlAverageMaskedActorStat(actorMask, 0);
 }
 
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
@@ -961,6 +962,7 @@ void btlAverageFilteredActorAttribute(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 1);
 }
 
+/* Keep this name: evtPushAvailableChoiceRatio in newdata/datCalc.c lowers its u64 division to __udivdi3. */
 void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
@@ -969,7 +971,8 @@ extern void func_0011CE38();
 
 const char D_003A1CA8[] = "btl:preemptive=%d%%[ratio=%.2f]\n";
 
-s32 func_001A95C8(void) {
+/* Select outcome 1 or 2 using scene overrides and the native preemptive chance roll. */
+s32 btlSelectPreemptiveOutcome(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 chance;
     f32 ratio;

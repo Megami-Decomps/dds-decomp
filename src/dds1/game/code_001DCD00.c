@@ -1018,7 +1018,7 @@ void btlAdvanceTargetCursorUnlessHookHandles(BtlLinkedCommand *actor) {
     }
 }
 
-extern void func_001E3E58(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     BtlUnit *target;
@@ -1032,11 +1032,11 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     }
     if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
         btlCopyMotionTransform(&action->frontCamera, &action->camera);
-        func_001E3E58(action, &action->backCamera, action->task->unit, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->backCamera, action->task->unit, 0);
         action->motionParameter = 7.0f;
         action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
     } else {
-        func_001E3E58(action, &action->camera, action->task->unit, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->camera, action->task->unit, 0);
     }
 }
 
@@ -1060,7 +1060,7 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     if (action->task->unit->status.flags & 0x200) {
-        func_001E3E58(action, &action->camera, target, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->camera, target, 0);
         return;
     }
     if (btlHasActorCategoryFlag100(action) != 0) {

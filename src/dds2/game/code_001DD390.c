@@ -446,7 +446,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, s32 *argument) {
         if (argument[1] > 0) {
             return argument[1];
         }
-        value = func_001B5688();
+        value = btlSelectRandomAutoAttackSkill();
         if (value > 0) {
             return value;
         }
