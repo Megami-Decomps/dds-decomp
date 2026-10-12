@@ -1104,7 +1104,7 @@ void frFontSetContextCursorSpacing(u32 spacing) {
 }
 
 /* Count the y-bands in a glyph chain, using the same band walk as frFontGetGlyphPositionAtIndex. */
-s32 func_0019DB30(FrFontGlyph *glyph) {
+s32 frFontCountGlyphBands(FrFontGlyph *glyph) {
     s32 bandCount = 0;
     FrFontGlyph *currentNode;
     FrFontGlyph *scanNode;
