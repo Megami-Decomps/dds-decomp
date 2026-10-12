@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -4922,15 +4923,6 @@ typedef struct BtlActionTableEntry {
     u16 flags;
     u8 pad1E[2];
 } BtlActionTableEntry;
-
-typedef struct BtlSceneLightParams {
-    f32 position[3];
-    f32 unk0C;
-    f32 color[3];
-    f32 unk1C;
-    f32 secondaryColor[3];
-    f32 unk2C;
-} BtlSceneLightParams;
 
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     u8 *work = (u8 *)btlGetRuntime();
