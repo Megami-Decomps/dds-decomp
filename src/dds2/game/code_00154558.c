@@ -177,7 +177,7 @@ extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
 extern const char *fldGetTaskRecordValue(u32 key);
 
-extern void func_00140A58(const char *entry);
+extern void fldSelectCameraByActorName(const char *entry);
 
 
 typedef struct FldSceneParamRow {
@@ -1616,7 +1616,7 @@ s32 fldCmdApplyTaskRecordEntry(void) {
     const char *entry = fldGetTaskRecordValue((u32)work->task);
 
     if (entry != NULL) {
-        func_00140A58(entry);
+        fldSelectCameraByActorName(entry);
     }
     return 1;
 }

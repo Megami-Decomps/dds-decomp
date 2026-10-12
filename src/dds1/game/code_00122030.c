@@ -1919,7 +1919,7 @@ extern char D_0039FD30[], D_0039FD40[];
 extern s32 fldProcDraw(void);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
-void func_00125E08(FieldSequenceRecord *record, u32 mode) {
+void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
     FieldSequenceRecord *scene = (FieldSequenceRecord *)&D_0032F1A0;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
 

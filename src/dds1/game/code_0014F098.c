@@ -9,7 +9,7 @@ extern void scrSetIntegerReturnValue(s32 value);
 
 extern const char *fldGetTaskRecordValue(u32 key);
 
-extern void func_0013DDF0(const char *entry);
+extern void fldSelectCameraByActorName(const char *entry);
 
 extern s32 func_0013CBA8(s32 index);
 
@@ -182,7 +182,7 @@ s32 fldCmdApplyTaskRecordEntry(void) {
     const char *record = fldGetTaskRecordValue((u32)command->task);
 
     if (record != NULL) {
-        func_0013DDF0(record);
+        fldSelectCameraByActorName(record);
     }
     return 1;
 }

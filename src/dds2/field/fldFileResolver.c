@@ -152,7 +152,7 @@ extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
-extern void func_00137F10(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern s32 fldParseRoomNumberFromName(char *);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 
@@ -327,7 +327,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                 }
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
                     s32 room = fldParseRoomNumberFromName((char *)resource->name);
-                    func_00137F10(((FldSpawnCollision *)resource->data)->header, position,
+                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header, position,
                                   resource->id, room, -1);
                     object = evtSpawnActionObjB(resource->id, (s32)resource->data, (s32)position, (s32)resource->name);
                     dds3SetPathStateValue(object, pathIndex);
@@ -798,7 +798,7 @@ extern u32 D_00438EC4;
 extern s32 D_00435FA0;
 extern s16 D_00389874[];
 extern s32 fldParseRoomNumberFromName(char *);
-extern void func_00137F10(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
@@ -880,7 +880,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                 fldCopySpawnTransform(position, rotation, resource->transform);
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
                     room = fldParseRoomNumberFromName((char *)resource->name);
-                    func_00137F10(((FldSpawnCollision *)resource->data)->header,
+                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header,
                                  position, resource->id, room, -1);
                     object = evtSpawnActionObjB(resource->id, (s32)resource->data,
                                               (s32)position, (s32)resource->name);

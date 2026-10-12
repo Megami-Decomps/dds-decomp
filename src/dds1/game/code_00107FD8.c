@@ -1017,7 +1017,7 @@ u8 evtWaitFileMenuTaskExit(void) {
 
 void evtStartAreaFromSelection(u32 selection, u32 area) {
     kwlnFadeBackgroundStartOut(0);
-    func_00125E08(area, selection);
+    fldStartFieldSceneTasks(area, selection);
 }
 
 u32 evtPollSelectedAreaReady(void) {

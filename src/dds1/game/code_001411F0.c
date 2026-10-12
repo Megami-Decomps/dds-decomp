@@ -774,9 +774,9 @@ u32 fldGetCurrentBgmHandle(void) {
     return fldCurrentBgmHandle;
 }
 
-extern s32 func_00121818(s32, s32);
+extern s32 fldFindMapLabelIndexByCoordinate(s32, s32);
 
-extern s32 func_00121870(s32, s32);
+extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32, s32);
 
 extern s32 fldFindMapCoordinateIndex(s32, s32);
 
@@ -794,10 +794,10 @@ void fldCacheMapLabelLengths(s32 map) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_003D43B0[i] = strlen(D_0033F06C[func_00121818(map, i)]);
+        D_003D43B0[i] = strlen(D_0033F06C[fldFindMapLabelIndexByCoordinate(map, i)]);
     }
     for (i = 0; i < 24; i++) {
-        D_003D4460[i] = strlen(D_0034286C[func_00121870(map, i)]);
+        D_003D4460[i] = strlen(D_0034286C[fldFindSecondaryMapLabelIndexByCoordinate(map, i)]);
     }
     for (i = 0; i < 41; i++) {
         D_003D4408[i] = strlen(D_0034606C[fldFindMapCoordinateIndex(map, i)]);

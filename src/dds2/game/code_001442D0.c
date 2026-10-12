@@ -1084,9 +1084,9 @@ extern FldName24 D_0039A1D0[];
 
 extern s32 strlen(const char *);
 
-extern s32 func_001237B0(s32, s32);
+extern s32 fldFindMapLabelIndexByCoordinate(s32, s32);
 
-extern s32 func_00123808(s32, s32);
+extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32, s32);
 
 extern s32 fldFindMapCoordinateIndex(s32, s32);
 
@@ -1094,10 +1094,10 @@ void fldCacheMapLabelLengths(s32 world) {
     s32 i;
 
     for (i = 0; i < 41; i++) {
-        D_0044FC98[i] = strlen((const char *)D_0039A5A8[func_001237B0(world, i)].name);
+        D_0044FC98[i] = strlen((const char *)D_0039A5A8[fldFindMapLabelIndexByCoordinate(world, i)].name);
     }
     for (i = 0; i < 24; i++) {
-        D_0044FD48[i] = strlen((const char *)D_0039E1A8[func_00123808(world, i)].name);
+        D_0044FD48[i] = strlen((const char *)D_0039E1A8[fldFindSecondaryMapLabelIndexByCoordinate(world, i)].name);
     }
     for (i = 0; i < 41; i++) {
         D_0044FCF0[i] = strlen(D_003A25AC[fldFindMapCoordinateIndex(world, i)].s);

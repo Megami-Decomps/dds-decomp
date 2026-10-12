@@ -170,7 +170,7 @@ void func_0020EA10(void) {
 extern s32 btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
-extern void func_001200E8(f32 x, f32 y, f32 z, f32 radius, s32 fade);
+extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
 void btlDrawActorGroundDisc(BtlUnit *unit) {
     f32 position[4] __attribute__((aligned(16)));
@@ -224,7 +224,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
         VU0_LOAD_VF(vf10, actorPosition);
     }
     VU0_STORE_VF(vf10, position);
-    func_001200E8(position[0], actorPosition[1], position[2], radius, alpha);
+    fldDrawShadowDisc(position[0], actorPosition[1], position[2], radius, alpha);
 }
 
 INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);

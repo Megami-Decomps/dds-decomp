@@ -20,7 +20,7 @@ struct SdfModel;
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
-extern void func_0011E280(f32, f32, f32, f32, s32);
+extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern s32 btlGetRuntime();
@@ -136,7 +136,7 @@ void func_001FC998(BtlUnit *unit) {
         x = position[0];
         y = ownPosition[1];
         z = position[2];
-        func_0011E280(x, y, z, radius, alpha);
+        fldDrawShadowDisc(x, y, z, radius, alpha);
     }
 }
 
