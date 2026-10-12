@@ -374,6 +374,7 @@
 0x0010EE08	scrCommandClearProcessControlFlag	inferred	Writes zero to the script process control word used by the subsequent test command. [names_reviewed6.tsv]
 0x0010EE18	scrCommandSetProcessControlFlag	inferred	Writes one to the same script process control word read by the adjacent test command. [names_reviewed6.tsv]
 0x0010EE30	scrCommandIsProcessControlFlagClear	inferred	Tests whether the shared script process control word equals zero. [names_reviewed6.tsv]
+0x0010EE40	scrCommandAdjustItemQuantity	inferred	forwards script parameters 0 and 1 to ptyAdjustItemQuantity
 0x0010EE80	scrCommandAddPartyCurrency	inferred	Reads script parameter as currency delta and updates clamped party currency. [names_reviewed6.tsv]
 0x0010EF18	ptyScriptRestoreEntireParty	inferred	confidence=high; src/dds1/game/code_0010EEF0.c:func_0010EF18; Restores every party unit and returns command completion without a separate result value. [names_qp9.tsv]
 0x0010F268	dds3DrawObjectFlagDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_0010EEF0.c:83:func_0010F268; Formats FLAG : 0x%08X from object-owned handle and appends diagnostic drawing packet.; twin=0x0010F490, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
