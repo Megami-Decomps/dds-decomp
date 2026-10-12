@@ -5513,7 +5513,7 @@
 0x00300548	effResetMappingFlags	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described resetEffectMappingFlags behavior.
 0x003012B0	effMapObjectWithTemporaryMappingTable	inferred	Switches the typed EffectMapping.table for object mapping, then restores its default table. [names_reviewed9.tsv]
 0x00301528	effResolveMappingWithTemporaryTable	inferred	Temporarily swaps an effect mapping lookup table while resolving a resource entry. [names_reviewed14.tsv]
-0x00302598	effMarkMappingUpdatePending	inferred	Sets global mapping pending flag, used by mapping update dispatch. [names_reviewed5.tsv]
+0x00302598	effResetCurveEditorSelection	inferred	confidence=high; matched-C; Corrects the earlier pending-update interpretation: native color/alpha editors use this word as selected curve key, toggle it 1/2 on pad input, and edit corresponding fractions. Reset writes one. DDS1 twin 0x002BB178. Namer1 batch 13.
 0x00302BB0	effPollFileQueueRecord	inferred	quiet3 twin unification
 0x00302CC0	effPollFileRecord	inferred	quiet3 twin unification
 0x00302E90	effFileJobSecondaryDataSet	inferred	body calls fileJobSetSecondaryData [names_R_FuncNames7.tsv]
@@ -7275,3 +7275,22 @@
 0x001A9130	itfEditOverlayColor	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0028D7C8	mnuActivateMantraNeighborEdges	inferred	Activates eligible neighboring mantra nodes and their panel transitions; mode 3 recursively visits activated edges, marks nodes visited, and returns the unvisited mode-2 frontier.
 0x003378C8	sdfVuMultiplyNodeColors	inferred	Multiplies two packed RGBA colors into float lanes scaled by 1/128, fills the contiguous node colors, then copies source colors along the blend chain.
+0x00301318	effEditGkColorTrack	inferred	confidence=high; matched-C; Native G-/K-family COLOR descriptors call the color/alpha curve editor with a temporary eight-entry property-option table, then restore the default. DDS1 twin 0x002BA0C0. Namer1 batch 13.
+0x003013C8	effEditTBoardColorTrack	inferred	confidence=high; matched-C; Native T-BOARD COLOR callback selects the alternate property-option table and edits its color/alpha tracks. DDS1 twin 0x002BA170. Namer1 batch 13.
+0x00301428	effEditRainColorTrack	inferred	confidence=high; matched-C; Native E-RAIN COLOR callback forwards base color/alpha tracks and frame bound. DDS1 twin 0x002BA1D0. Namer1 batch 13.
+0x00301448	effEditFlareColorTrack	inferred	confidence=high; matched-C; Native E-FLARE COLOR callback forwards base color/alpha tracks and frame bound. DDS1 twin 0x002BA1F0. Namer1 batch 13.
+0x00301468	effEditSColorTrack	inferred	confidence=high; matched-C; COLOR callback shared by native S-family descriptors. DDS1 twin 0x002BA210. Namer1 batch 13.
+0x00301488	effEditRColorTrack	inferred	confidence=high; matched-C; Native R-NOMAL/R-CRCLE COLOR callback temporarily selects its distinct property-option table. DDS1 twin 0x002BA230. Namer1 batch 13.
+0x003014E8	effEditRTrackColorTrack	inferred	confidence=high; matched-C; Native R-TRACK descriptor registers this as its COLOR curve editor. DDS1 twin 0x002BA290. Namer1 batch 13.
+0x00301508	effEditDoColorTrack	inferred	confidence=high; matched-C; Native D-POINT/D-BUG/D-P2_V2/O-P2_TND/O-P2_HT COLOR callback. DDS1 twin 0x002BA2B0. Namer1 batch 13.
+0x003021A8	effEditPScaleTrack	inferred	confidence=high; matched-C; Native P-family SCALE descriptors select the scale track and frame bound. DDS1 twin 0x002BAE18. Namer1 batch 13.
+0x003021D8	effEditPRotationTrack	inferred	confidence=high; matched-C; Native P-family ROTATE descriptors select the rotation track and independent editor state. DDS1 twin 0x002BAE48. Namer1 batch 13.
+0x00302208	effEditGkScaleTrack	inferred	confidence=high; matched-C; Native G-/K-family SCALE descriptors select the scale track and frame bound. DDS1 twin 0x002BAE78. Namer1 batch 13.
+0x00302238	effEditKRotationTrack	inferred	confidence=high; matched-C; Native K-family ROTATE descriptors select the rotation track and independent editor state. DDS1 twin 0x002BAEA8. Namer1 batch 13.
+0x00302268	effEditBScaleTrack	inferred	confidence=high; matched-C; Native B-FULL/B-MULTI/B-DIST/B-RIPLE/B-PARAL/B-CAMRA SCALE callback. DDS1 twin 0x002BAED8. Namer1 batch 13.
+0x00302298	effEditBRotationTrack	inferred	confidence=high; matched-C; Native B-family ROTATE callback, distinguished by its descriptor from identical P-family SCALE forwarding code. DDS1 twin 0x002BAF08. Namer1 batch 13.
+0x003022C8	effEditBfAreaTrack	inferred	confidence=high; matched-C; AREA callback shared by native B-MULTI/B-DIST/B-RIPLE/F-MULTI descriptors. DDS1 twin 0x002BAF38. Namer1 batch 13.
+0x003022F8	effEditTBoardScaleTrack	inferred	confidence=high; matched-C; Native T-BOARD SCALE descriptor forwards its scale track and frame bound. DDS1 twin 0x002BAF68. Namer1 batch 13.
+0x00302328	effEditTBoardRotationTrack	inferred	confidence=high; matched-C; Native T-BOARD ROTATE descriptor forwards its rotation track and frame bound. DDS1 twin 0x002BAF98. Namer1 batch 13.
+0x00302358	effEditWScaleTrack	inferred	confidence=high; matched-C; Native W-family SCALE descriptors select the scale track and frame bound. DDS1 twin 0x002BAFC8. Namer1 batch 13.
+0x00302388	effEditWRotationTrack	inferred	confidence=high; matched-C; Native W-family ROTATE descriptors select the rotation track and independent editor state. DDS1 twin 0x002BAFF8. Namer1 batch 13.
