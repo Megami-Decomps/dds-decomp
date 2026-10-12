@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_quaternion.h"
+#include "rw_matrix.h"
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -250,17 +251,6 @@ INCLUDE_ASM(const s32, "game/code_002DD038", func_002DD708);
 extern f32 func_002F9F60(f32 angle);
 extern f32 func_002FA060(f32 angle);
 
-
-typedef struct RwMatrix {
-    RwV3d right;
-    u32 flags;
-    RwV3d up;
-    u32 pad1;
-    RwV3d at;
-    u32 pad2;
-    RwV3d pos;
-    u32 pad3;
-} RwMatrix;
 
 void sdfBuildRotationMatrixFromAxisAngle(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 normalizedAxis[4];
