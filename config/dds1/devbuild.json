@@ -346,10 +346,10 @@
       "object": "build/dds1/src/dds1/game/code_00288E70.o",
       "section": ".text",
       "old_size": "0xEF8",
-      "new_size": "0xF20",
+      "new_size": "0xF38",
       "alignment": 8,
       "old_vaddr": "0x00288E70",
-      "expected_relocations": 152,
+      "expected_relocations": 154,
       "expected_target_relocations": 113
     },
     {
