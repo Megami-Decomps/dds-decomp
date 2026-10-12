@@ -6909,6 +6909,7 @@
 0x002ED198	sdfMovieProcessPendingData	inferred	Checks movie buffer space and invokes the data handler with at most 0x4000 pending units.
 0x002ED230	sdfMovieHandlePacDeviceEvent	inferred	Handles device events for movie PAC header, mask, and payload reads.
 0x002ED5C0	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
+0x002ED740	sdfMovieCopyPacStreamSpan	inferred	Copies one contiguous byte span; the movie PAC stream callback uses it for linear and wrapped reads from the PAC ring buffer. DDS2 counterpart is 0x003465E8.
 0x002ED760	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
 0x002ED8D0	sdfMovieInitializeStreamWork	inferred	Selects and initializes the movie linear or PAC stream work.
 0x002EDAE0	sdfCancelAndReleaseMovieStreamWork	inferred	Releases a movie's active linear or PAC stream and its embedded sound node after the device release callback.
