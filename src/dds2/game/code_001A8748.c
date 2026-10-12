@@ -2051,7 +2051,189 @@ next_actor:
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A8748", func_001AC750);
+#include "btl_roster_pair.h"
+
+extern u8 D_003B4DD8[];
+extern DatSkillList *D_00435E28;
+
+/* Enumerate distinct partner pairs for every battle combination command. */
+s32 func_001AC750(BtlUnit *actor, BattleRosterTable *table) {
+    BtlUnit *actors[3];
+    BtlState *battle;
+    BtlUnit *unit;
+    DatAffinityRecord *record;
+    s32 actorCount;
+    u32 count;
+    u32 affinity;
+    u32 order;
+    s32 command;
+    u32 participant;
+    u32 skillIndex;
+    u32 previous;
+    s32 allRequired;
+    s32 requirement;
+    s32 value;
+    u32 matched;
+    s32 duplicate;
+
+    battle = (BtlState *)btlGetRuntime();
+    table->count = 0;
+    if (actor->partyRecord.unitId == 9) {
+        return 0;
+    }
+    actors[0] = actor;
+    actors[1] = NULL;
+    actors[2] = NULL;
+    actorCount = 1;
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        if ((unit->status.flags & 0x200) == 0) {
+            continue;
+        }
+        if (unit == actor) {
+            continue;
+        }
+        if ((unit->status.flags & 1) == 0) {
+            continue;
+        }
+        if ((unit->status.flags & 0xC0) != 0) {
+            continue;
+        }
+        if ((unit->status.flags & 0x20) != 0) {
+            continue;
+        }
+        if (unit->partyRecord.unitId == 9) {
+            continue;
+        }
+        actors[actorCount++] = unit;
+    }
+    if (actorCount == 1) {
+        return 0;
+    }
+
+    count = 0;
+    record = datAffinityRecords;
+    for (command = DAT_AFFINITY_FIRST_COMMAND, affinity = 0;
+         affinity < 117; affinity++, command++, record++) {
+        allRequired = 1;
+        for (order = 0; order < 6; order++) {
+            matched = 0;
+            for (participant = 0; participant < 3; participant++) {
+                requirement = record->requirements[D_003B4DD8[participant + order * 3]];
+                if ((battle->battleFlags & 0x1000000) == 0) {
+                    if (requirement == -1) {
+                        allRequired = 0;
+                        continue;
+                    }
+                } else {
+                    if (requirement == -1) {
+                        allRequired = 0;
+                    } else {
+                        matched |= 1 << participant;
+                    }
+                    continue;
+                }
+                if (actors[participant] == NULL) {
+                    continue;
+                }
+                if ((record->flags & 1) != 0 &&
+                    (actors[participant]->status.flags & 0x200) == 0) {
+                    continue;
+                }
+                if ((record->flags & 2) != 0 &&
+                    (actors[participant]->status.flags & 0x400) == 0 &&
+                    actors[participant]->partyRecord.unitId < 0x100) {
+                    continue;
+                }
+                switch (requirement & 0xF0000000) {
+                case 0:
+                    if ((actors[participant]->status.flags & 0x1000) == 0) {
+                        continue;
+                    }
+                    if (requirement == 0 ||
+                        btlCheckSpecialAbility(&actors[participant]->partyRecord, requirement) != 0) {
+                        matched |= 1 << participant;
+                    }
+                    break;
+                case 0x10000000:
+                    if ((actors[participant]->status.flags & 0x1000) == 0) {
+                        continue;
+                    }
+                    value = requirement & 0x0FFFFFFF;
+                    for (skillIndex = 0; skillIndex < 24; skillIndex++) {
+                        if (actors[participant]->partyRecord.effectData[skillIndex] != 0 &&
+                            (1 << datCommandSelectors[actors[participant]->partyRecord.effectData[skillIndex]].stat) == value) {
+                            matched |= 1 << participant;
+                            break;
+                        }
+                    }
+                    continue;
+                case 0x20000000:
+                    if ((actors[participant]->status.flags & 0x1000) != 0) {
+                        continue;
+                    }
+                    value = requirement & 0x0FFFFFFF;
+                    if (value != 0 && value != (1 << actors[participant]->partyRecord.unitId)) {
+                        continue;
+                    }
+                    matched |= 1 << participant;
+                    break;
+                case 0x40000000:
+                    if ((actors[participant]->status.flags & 0x1000) == 0) {
+                        continue;
+                    }
+                    value = requirement & 0x0FFFFFFF;
+                    for (skillIndex = 0; skillIndex < 24; skillIndex++) {
+                        s16 skill = D_00435E28[value].skills[skillIndex];
+                        if (skill >= 0 && btlCheckSpecialAbility(&actors[participant]->partyRecord, skill)) {
+                            matched |= 1 << participant;
+                            break;
+                        }
+                    }
+                    continue;
+                default:
+                    continue;
+                }
+            }
+            if ((matched & 1) != 0 && (matched & 6) != 0) {
+                duplicate = 0;
+                if (matched == 7) {
+                    table->entries[count].skill = command;
+                    table->entries[count].first = actors[1];
+                    table->entries[count].second = actors[2];
+                } else if (!allRequired) {
+                    if (matched == 3) {
+                        table->entries[count].skill = command;
+                        table->entries[count].first = actors[1];
+                        table->entries[count].second = NULL;
+                    } else if (matched == 5) {
+                        table->entries[count].skill = command;
+                        table->entries[count].first = actors[2];
+                        table->entries[count].second = NULL;
+                    }
+                } else {
+                    duplicate = 1;
+                }
+                if (!duplicate) {
+                    for (previous = 0; previous < count; previous++) {
+                        if (table->entries[count].skill == table->entries[previous].skill &&
+                            ((table->entries[count].first == table->entries[previous].first &&
+                              table->entries[count].second == table->entries[previous].second) ||
+                             (table->entries[count].first == table->entries[previous].second &&
+                              table->entries[count].second == table->entries[previous].first))) {
+                            duplicate = 1;
+                            break;
+                        }
+                    }
+                }
+                if (!duplicate) {
+                    count++;
+                }
+            }
+        }
+    }
+    table->count = count;
+    return count;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A8748", func_001ACD10);
 
