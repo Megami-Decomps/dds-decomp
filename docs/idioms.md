@@ -2600,8 +2600,8 @@ vector[2] = result.z;
 vector[1] = result.y;
 ```
 
-Controlled scalar-versus-vector copies of DDS2 `func_00325EC8`,
-`func_00326018`, and `func_00326158` differ in 18/83, 18/79, and 18/83
+Controlled scalar-versus-vector copies of DDS2 `sdfVectorRotateX`,
+`sdfVectorRotateY`, and `sdfVectorRotateZ` differ in 18/83, 18/79, and 18/83
 compared words respectively with scalar locals (`0x30` frame, first result
 in `$f20`). All three are exact with the canonical `SdfVec4` local (`0x40`
 frame and the retail coordinate stack slot); the whole unit ends
@@ -9897,4 +9897,64 @@ bytes after the preceding switch table; plain string-literal `.align 3` does
 not recreate the boundary. Normal `force_not_migration:True` symbol metadata
 keeps the blobs separate, and the existing retail-backed `eeas_compat.py`
 alignment correction reproduces it without changing TU flags or data bytes.
+
+## Packed SPR0 assets and scalar vector rotations
+
+DDS2 `code_0031F0E8` builds packed resource streams; `code_00324F50`
+owns the corresponding deep copies and scalar vector operations. The native
+`SPR0`, `%s%s`, `wb` and `rb` strings establish the file contract. No matched
+DDS1 C twins are established for this family; address proximity to DDS1
+geometry helpers is not pairing evidence.
+
+| Native DDS2 | Name | Observable role |
+|---|---|---|
+| `0031F1B8` | `dds3ReleaseNamedReference` | Free the owned name buffer and its record. |
+| `0031F1E8` | `dds3DestroyPackedSegmentCallback` | Release a removed segment-list value. |
+| `0031F208` | `dds3DestroyNamedReferenceCallback` | Release a removed named/pending-reference value. |
+| `0031F878` | `dds3PackWordArrayRecords` | Pack headers, counted word arrays and sixteen-byte payloads. |
+| `0031FA60` | `dds3PackNestedResourceRecords` | Pack named arrays and optional nested groups/counts/payloads. |
+| `00320020` | `dds3PackSpriteRecords` | Pack basic sprite headers and referenced payloads. |
+| `003201A0` | `dds3PackExtendedSpriteRecords` | Pack larger headers with eight inline bytes and references. |
+| `00320388` | `dds3WriteArraySpriteFile` | Write the word-array variant's SPR0 data and fixup streams. |
+| `00320560` | `dds3WriteNestedSpriteFile` | Write the nested variant's SPR0 streams. |
+| `00320738` | `dds3WriteSpriteFile` | Write basic sprite records and fixup values. |
+| `003208C0` | `dds3LoadSpriteRecords` | Read, relocate and deep-copy basic records. |
+| `00320910` | `dds3WriteExtendedSpriteFile` | Write extended sprite records and fixup values. |
+| `00320A98` | `dds3LoadExtendedSpriteRecords` | Read, relocate and deep-copy extended records. |
+| `00320AE8` | `dds3ReadRelocatedSpriteFile` | Read payload/fixups, apply relative offsets and publish count. |
+| `00324F50` | `sdfAllocateOwnedResourceBuffer` | Track an allocation in the owner's resource list. |
+| `003255A0` | `sdfCloneEnabledFilterRecords` | Copy only nonzero-enabled eight-byte records. |
+| `00325AB8` | `sdfCloneSpriteRecords` | Deep-copy basic headers and sixteen-byte vectors. |
+| `00325BB0` | `sdfCloneExtendedSpriteRecords` | Deep-copy extended headers and sixteen-byte vectors. |
+| `00325EC8` | `sdfVectorRotateX` | Rotate y/z, leaving x and any fourth lane unchanged. |
+| `00326018` | `sdfVectorRotateY` | Rotate x/z, leaving y and any fourth lane unchanged. |
+| `00326158` | `sdfVectorRotateZ` | Rotate x/y, leaving z and any fourth lane unchanged. |
+| `003262A8` | `sdfVectorRotateAxis` | Normalize the axis and apply an axis-angle matrix. |
+
+The packed-object constructor installs cleanup callbacks at the list owner's
+`onRemove` slot (`+0x10`), not its final `onDestroy` slot (`+0x14`).
+Removal supplies the node index and value; these callbacks ignore the index
+and free the value's owned storage. Preserve their two-word callback surface.
+
+Packers retain their separate header/reference, array and payload passes.
+Writers retain the version word `0x1000000`, the five-word info record,
+unconditional return `1` even on open failure, and both owner releases.
+The low-level reader returns `NULL` on open failure and does not validate
+the file header. Higher readers' existing failure behavior remains unchanged.
+Do not add validation, coalesce passes, advance the byte-appender's source
+pointer, or alter these lifetime rules as part of naming.
+
+The basic/extended deep copies preserve their original `0x1C`/`0x30` header
+layouts, vector pointers at `+0x18`/`+0x2C`, and sixteen-byte vector storage.
+All declarations, casts, loop forms and publication order stay unchanged,
+including the different existing pointer types in cross-unit externs.
+The scalar rotation routines retain their double-precision libc trig calls,
+four-lane coordinate temporaries, expression/store order and normalization
+behavior. An axis name does not claim a handedness or positive-angle convention.
+
+The constant stub at `00320380` and identical unreferenced loader wrappers at
+`00320510`/`003206E8` remain unnamed: their distinct API roles are not proved.
+The unresolved constructors/list insertion and nested clone ASM bodies are
+also unchanged. Existing historical rotation experiments above use the new
+names without changing their recorded compiler results.
 

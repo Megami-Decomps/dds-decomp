@@ -53,10 +53,11 @@ extern void *memcpy(void *, const void *, u32);
 
 /* Reset the first resource list in a two-list owner. */ void func_00324DF8(u32 *lists, u32 option);
 
-void *func_00324F50(u32 *owner, u32 resource) {
+/* Allocate bytes, track the handle in owner[1], and return the owned buffer. */
+void *sdfAllocateOwnedResourceBuffer(u32 *owner, u32 bytes) {
     void *handle;
 
-    handle = func_0035A828(resource);
+    handle = func_0035A828(bytes);
     func_00320CE0((MnuCallbackList *)owner[1], 0, (u32)handle);
     return handle;
 }
@@ -87,7 +88,7 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list
         totalSize += dds3MeasureMenuRecord((DdsNestedGroup *)node->value);
         node = node->next;
     } while (node != NULL);
-    buffer = func_00324F50(owner, totalSize + sizeof(*buffer));
+    buffer = sdfAllocateOwnedResourceBuffer(owner, totalSize + sizeof(*buffer));
     memset(buffer, 0, totalSize);
     buffer->groupCount = (*list)->count;
     buffer->groups = (DdsNestedGroup *)(buffer + 1);
@@ -153,7 +154,7 @@ DdsNestedGroup *func_00325398(u32 *owner, MnuCallbackList **firstList,
         node = node->next;
     }
     totalBytes = firstBytes + secondBytes + sizeof(*group);
-    group = func_00324F50(owner, totalBytes);
+    group = sdfAllocateOwnedResourceBuffer(owner, totalBytes);
     memset(group, 0, totalBytes);
     group->firstCount = (*firstList)->count;
     group->secondCount = (*secondList)->count;
@@ -212,7 +213,9 @@ typedef struct SdfFilteredRecords {
     SdfFilterRecord *records;
 } SdfFilteredRecords;
 
-SdfFilteredRecords *func_003255A0(u32 *owner, SdfFilterRecord *records, u32 count) {
+/* Copy enabled eight-byte records into owner-managed contiguous storage.
+ * Return a count/pointer header containing only nonzero-enabled records. */
+SdfFilteredRecords *sdfCloneEnabledFilterRecords(u32 *owner, SdfFilterRecord *records, u32 count) {
     u32 enabled = 0;
     u32 i;
     s32 size;
@@ -225,7 +228,7 @@ SdfFilteredRecords *func_003255A0(u32 *owner, SdfFilterRecord *records, u32 coun
         }
     }
     size = sizeof(*result) + enabled * sizeof(*records);
-    result = func_00324F50(owner, size);
+    result = sdfAllocateOwnedResourceBuffer(owner, size);
     memset(result, 0, size);
     out = (SdfFilterRecord *)(result + 1);
     result->count = enabled;
@@ -243,12 +246,12 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
 
     if (count != 0) {
         do {
-            SdfResourceRecord *copy = (SdfResourceRecord *)func_00324F50(owner, sizeof(*copy));
+            SdfResourceRecord *copy = (SdfResourceRecord *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy));
 
             *copy = *source;
-            copy->items = (u32 *)func_00324F50(owner, copy->count * sizeof(*copy->items));
+            copy->items = (u32 *)sdfAllocateOwnedResourceBuffer(owner, copy->count * sizeof(*copy->items));
             memcpy(copy->items, source->items, copy->count * sizeof(*copy->items));
-            copy->info = (SdfResourceInfo *)func_00324F50(owner, sizeof(*copy->info));
+            copy->info = (SdfResourceInfo *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy->info));
             *copy->info = *source->info;
             func_00324DF8(owner, (u32)copy);
             source++;
@@ -260,12 +263,14 @@ u32 *sdfCloneOwnedResourceRecords(const SdfResourceRecord *source, s32 count) {
 
 INCLUDE_ASM(const s32, "game/code_00324F50", func_00325790);
 
-u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
+/* Deep-copy count basic sprite headers and their sixteen-byte vectors.
+ * Return the resource-list owner; each copied header points to its own vector. */
+u32 *sdfCloneSpriteRecords(const SdfResourceVectorRecord1C *source, s32 count) {
     u32 *owner = func_00324D50();
 
     while (count != 0) {
         SdfResourceVectorRecord1C *copy =
-            (SdfResourceVectorRecord1C *)func_00324F50(owner, sizeof(*copy) + sizeof(SdfVec4));
+            (SdfResourceVectorRecord1C *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy) + sizeof(SdfVec4));
         SdfVec4 *vector;
 
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
@@ -280,12 +285,14 @@ u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
     return owner;
 }
 
-u32 *func_00325BB0(const SdfResourceVectorRecord30 *source, s32 count) {
+/* Deep-copy count extended sprite headers and their sixteen-byte vectors.
+ * Return the resource-list owner with each copied vector stored after its header. */
+u32 *sdfCloneExtendedSpriteRecords(const SdfResourceVectorRecord30 *source, s32 count) {
     u32 *owner = func_00324D50();
 
     while (count != 0) {
         SdfResourceVectorRecord30 *copy =
-            (SdfResourceVectorRecord30 *)func_00324F50(owner, sizeof(*copy) + sizeof(SdfVec4));
+            (SdfResourceVectorRecord30 *)sdfAllocateOwnedResourceBuffer(owner, sizeof(*copy) + sizeof(SdfVec4));
         SdfVec4 *vector;
 
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
@@ -309,7 +316,7 @@ typedef struct SdfRelocatedResource {
     u32 unk10;
 } SdfRelocatedResource;
 
-extern u32 *func_0031FA60(MnuCallbackList **);
+extern u32 *dds3PackNestedResourceRecords(MnuCallbackList **);
 
 extern void dds3ApplyNamedRelocations(u32 *);
 
@@ -336,14 +343,14 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackLis
         return NULL;
     }
     size = 0;
-    result = func_00324F50(owner, sizeof(*result));
+    result = sdfAllocateOwnedResourceBuffer(owner, sizeof(*result));
     memset(result, 0, sizeof(*result));
-    sourceHeader = func_0031FA60(source);
+    sourceHeader = dds3PackNestedResourceRecords(source);
     dds3ApplyNamedRelocations(sourceHeader);
     relocationHeader = dds3WritePendingNamedReferenceValues(sourceHeader);
-    data = func_00324F50(owner, *sourceHeader);
+    data = sdfAllocateOwnedResourceBuffer(owner, *sourceHeader);
     memset(data, 0, *sourceHeader);
-    relocations = func_00324F50(owner, *relocationHeader);
+    relocations = sdfAllocateOwnedResourceBuffer(owner, *relocationHeader);
     memset(relocations, 0, *relocationHeader);
     dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
     func_0035A880(relocations);
@@ -353,7 +360,7 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackLis
         payload = (DdsCountedPayload *)node->value;
         size += payload->count * 8 + sizeof(*payload);
     }
-    result->groups = func_00324F50(owner, size);
+    result->groups = sdfAllocateOwnedResourceBuffer(owner, size);
     memset(result->groups, 0, size);
     result->secondCount = (*groups)->count;
     record = result->groups;
@@ -374,7 +381,9 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackLis
     return result;
 }
 
-void func_00325EC8(f32 *vector, f32 angle) {
+/* Rotate y/z about the X axis by angle radians; leave x and any fourth lane.
+ * Preserve the scalar double-precision libm calls and coordinate temporary. */
+void sdfVectorRotateX(f32 *vector, f32 angle) {
     f32 rotated[4];
 
     rotated[1] = vector[1] * cos(angle) + vector[2] * sin(angle);
@@ -383,7 +392,8 @@ void func_00325EC8(f32 *vector, f32 angle) {
     vector[2] = rotated[2];
 }
 
-void func_00326018(f32 *vector, f32 angle) {
+/* Rotate x/z about the Y axis by angle radians; leave y and any fourth lane. */
+void sdfVectorRotateY(f32 *vector, f32 angle) {
     f32 rotated[4];
 
     rotated[0] = vector[0] * cos(angle) - vector[2] * sin(angle);
@@ -392,7 +402,8 @@ void func_00326018(f32 *vector, f32 angle) {
     vector[2] = rotated[2];
 }
 
-void func_00326158(f32 *vector, f32 angle) {
+/* Rotate x/y about the Z axis by angle radians; leave z and any fourth lane. */
+void sdfVectorRotateZ(f32 *vector, f32 angle) {
     f32 rotated[4];
 
     rotated[0] = vector[0] * cos(angle) + vector[1] * sin(angle);
@@ -401,8 +412,9 @@ void func_00326158(f32 *vector, f32 angle) {
     vector[1] = rotated[1];
 }
 
-/* Rotate a vector about a normalized axis using an axis-angle matrix. */
-void func_003262A8(f32 *vector, f32 *axis, f32 angle) {
+/* Normalize axis and rotate vector's first three lanes by angle radians.
+ * The axis-angle matrix, scalar libm calls and normalization behavior are retained. */
+void sdfVectorRotateAxis(f32 *vector, f32 *axis, f32 angle) {
     SdfVec4 normalized;
     SdfVec4 source;
     SdfVec4 temporary;

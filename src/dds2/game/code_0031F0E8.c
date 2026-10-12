@@ -8,19 +8,19 @@ typedef struct DdsSpriteFileHeader {
     u32 reserved[2];
 } DdsSpriteFileHeader;
 
-extern u32 *func_0031F878(u32 **);
-extern u32 *func_0031FA60(u32 **);
-extern u32 *func_00320020(u32 **);
-extern u32 *func_003201A0(u32 **);
+extern u32 *dds3PackWordArrayRecords(u32 **);
+extern u32 *dds3PackNestedResourceRecords(u32 **);
+extern u32 *dds3PackSpriteRecords(u32 **);
+extern u32 *dds3PackExtendedSpriteRecords(u32 **);
 extern const char D_00438980[];
 extern const char D_00438988[];
 extern const char D_00438990[];
 
-extern u32 *func_00325BB0(const void *, u32);
+extern u32 *sdfCloneExtendedSpriteRecords(const void *, u32);
 
-extern u32 *func_00325AB8(const void *, u32);
+extern u32 *sdfCloneSpriteRecords(const void *, u32);
 
-extern void *func_00320AE8(const char *, const char *, u32 *);
+extern void *dds3ReadRelocatedSpriteFile(const char *, const char *, u32 *);
 
 extern u32 *func_00325790(const void *, s32);
 
@@ -148,19 +148,22 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F168);
 
-void func_0031F1B8(u32 node) {
-    func_0035A880((void *)*(u32 *)node);
-    func_0035A880((void *)node);
+/* Release a named reference's owned name buffer and the reference record. */
+void dds3ReleaseNamedReference(u32 referenceAddress) {
+    func_0035A880((void *)*(u32 *)referenceAddress);
+    func_0035A880((void *)referenceAddress);
 }
 
 
-void func_0031F1E8(u32 unused, u32 node) {
-    dds3ReleasePackedValueBuffer(node);
+/* Segment-list onRemove callback: ignore the index and release its value. */
+void dds3DestroyPackedSegmentCallback(u32 index, u32 blockAddress) {
+    dds3ReleasePackedValueBuffer(blockAddress);
 }
 
 
-void func_0031F208(u32 unused, u32 node) {
-    func_0031F1B8(node);
+/* Named-reference-list onRemove callback: release the removed node's value. */
+void dds3DestroyNamedReferenceCallback(u32 index, u32 referenceAddress) {
+    dds3ReleaseNamedReference(referenceAddress);
 }
 
 
@@ -355,8 +358,9 @@ void dds3ApplyRelocationOffsets(u8 *base, u32 adjustment, u32 *offsets, u32 size
     }
 }
 
-/* Header references precede word arrays, which precede the fixed-size payloads. */
-u32 *func_0031F878(u32 **source) {
+/* Pack *source in header, word-array, then sixteen-byte payload order.
+ * Return the packed owner; resolving its named references is a separate step. */
+u32 *dds3PackWordArrayRecords(u32 **source) {
     DdsPackedObject *object = func_0031F280();
     DdsNamedNode *node;
     DdsArrayRecord *record;
@@ -394,8 +398,9 @@ u32 *func_0031F878(u32 **source) {
     return (u32 *)object;
 }
 
-/* Nested references precede their arrays of counted eight-byte payloads. */
-u32 *func_0031FA60(u32 **source) {
+/* Pack *source and its optional nested headers, groups and counted payloads.
+ * Return the packed owner with named references still awaiting resolution. */
+u32 *dds3PackNestedResourceRecords(u32 **source) {
     DdsPackedObject *object = func_0031F280();
     DdsNamedNode *node;
     DdsNestedRecord *record;
@@ -501,8 +506,9 @@ u32 *func_0031FA60(u32 **source) {
     return (u32 *)object;
 }
 
-/* Write pointer-named references first, then their sixteen-byte payloads. */
-u32 *func_00320020(u32 **source) {
+/* Pack basic sprite headers and named references before sixteen-byte payloads.
+ * Return the packed owner; leave its relocation resolution to the caller. */
+u32 *dds3PackSpriteRecords(u32 **source) {
     DdsPackedObject *object = func_0031F280();
     DdsNamedNode *node;
     DdsSpriteRecord *record;
@@ -532,8 +538,9 @@ u32 *func_00320020(u32 **source) {
     return (u32 *)object;
 }
 
-/* This sprite variant also stores eight inline bytes before its data reference. */
-u32 *func_003201A0(u32 **source) {
+/* Pack extended sprite headers, including eight inline bytes, then payloads.
+ * Return the packed owner with the data references still unresolved. */
+u32 *dds3PackExtendedSpriteRecords(u32 **source) {
     DdsPackedObject *object = func_0031F280();
     DdsNamedNode *node;
     DdsSpriteExtendedRecord *record;
@@ -573,11 +580,13 @@ u32 func_00320380(void) {
     return 0;
 }
 
-s32 func_00320388(const char *directory, const char *name, u32 **source) {
+/* Write *source's word-array records to directory + name in SPR0 format.
+ * Native behavior returns 1 even when the file cannot be opened. */
+s32 dds3WriteArraySpriteFile(const char *directory, const char *name, u32 **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = func_0031F878(source);
+    u32 *packed = dds3PackWordArrayRecords(source);
     u32 *references;
     SdkFileStream *file;
 
@@ -612,17 +621,19 @@ u32 *func_00320510(const char *source, const char *request) {
     u32 *result;
     u32 metadata[4];
 
-    buffer = func_00320AE8(source, request, metadata);
+    buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
     result = func_00325790(buffer, metadata[0]);
     func_0035A880(buffer);
     return result;
 }
 
-s32 func_00320560(const char *directory, const char *name, u32 **source) {
+/* Write nested resource records to directory + name in SPR0 format.
+ * Native behavior returns 1 even when the file cannot be opened. */
+s32 dds3WriteNestedSpriteFile(const char *directory, const char *name, u32 **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = func_0031FA60(source);
+    u32 *packed = dds3PackNestedResourceRecords(source);
     u32 *references;
     SdkFileStream *file;
 
@@ -657,17 +668,19 @@ u32 *func_003206E8(const char *source, const char *request) {
     u32 *result;
     u32 metadata[4];
 
-    buffer = func_00320AE8(source, request, metadata);
+    buffer = dds3ReadRelocatedSpriteFile(source, request, metadata);
     result = func_00325790(buffer, metadata[0]);
     func_0035A880(buffer);
     return result;
 }
 
-s32 func_00320738(const char *directory, const char *name, u32 **source) {
+/* Write basic sprite records to directory + name in SPR0 format.
+ * Native behavior returns 1 even when the file cannot be opened. */
+s32 dds3WriteSpriteFile(const char *directory, const char *name, u32 **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = func_00320020(source);
+    u32 *packed = dds3PackSpriteRecords(source);
     u32 *references;
     SdkFileStream *file;
 
@@ -697,22 +710,26 @@ s32 func_00320738(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u32 *func_003208C0(const char *source, const char *request) {
+/* Read directory + name and return an owning list of copied sprite records.
+ * The source file allocation is released after the records are cloned. */
+u32 *dds3LoadSpriteRecords(const char *directory, const char *name) {
     void *buffer;
     u32 *result;
     u32 metadata[4];
 
-    buffer = func_00320AE8(source, request, metadata);
-    result = func_00325AB8(buffer, metadata[0]);
+    buffer = dds3ReadRelocatedSpriteFile(directory, name, metadata);
+    result = sdfCloneSpriteRecords(buffer, metadata[0]);
     func_0035A880(buffer);
     return result;
 }
 
-s32 func_00320910(const char *directory, const char *name, u32 **source) {
+/* Write extended sprite records to directory + name in SPR0 format.
+ * Native behavior returns 1 even when the file cannot be opened. */
+s32 dds3WriteExtendedSpriteFile(const char *directory, const char *name, u32 **source) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
-    u32 *packed = func_003201A0(source);
+    u32 *packed = dds3PackExtendedSpriteRecords(source);
     u32 *references;
     SdkFileStream *file;
 
@@ -742,17 +759,21 @@ s32 func_00320910(const char *directory, const char *name, u32 **source) {
     return 1;
 }
 
-u32 *func_00320A98(const char *source, const char *request) {
+/* Read directory + name and return an owning list of extended sprite copies.
+ * Their pointed-to vectors outlive the released source file allocation. */
+u32 *dds3LoadExtendedSpriteRecords(const char *directory, const char *name) {
     void *buffer;
     u32 *result;
     u32 metadata[4];
 
-    buffer = func_00320AE8(source, request, metadata);
-    result = func_00325BB0(buffer, metadata[0]);
+    buffer = dds3ReadRelocatedSpriteFile(directory, name, metadata);
+    result = sdfCloneExtendedSpriteRecords(buffer, metadata[0]);
     func_0035A880(buffer);
     return result;
 }
 
+/* Read directory + name, apply relative offsets, and publish its record count.
+ * Return the owned payload or NULL on open failure; the header is not checked. */
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438960);
 
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438968);
@@ -767,7 +788,7 @@ INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438988);
 
 INCLUDE_SDATA(const s32, "game/code_0031F0E8", D_00438990);
 
-void *func_00320AE8(const char *directory, const char *name, u32 *countOut) {
+void *dds3ReadRelocatedSpriteFile(const char *directory, const char *name, u32 *countOut) {
     DdsSpriteFileHeader header;
     u32 info[5];
     char path[128];
