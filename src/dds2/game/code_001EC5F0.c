@@ -154,13 +154,6 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern s32 datActionAnimationRecords;
 
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
-
 extern void btlBossDebugPrintf(const char *format, ...);
 
 extern f32 func_00208000(s32, f32 *, f32 *);

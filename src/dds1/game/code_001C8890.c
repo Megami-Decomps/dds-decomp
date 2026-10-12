@@ -123,13 +123,6 @@ typedef struct SoundTask {
     u8 pad68[8];
 } SoundTask;
 
-typedef struct ActiveSoundNode {
-    u32 flags;
-    u8 unk_04[8];
-    struct ActiveSoundNode *previous;
-    struct ActiveSoundNode *next;
-} ActiveSoundNode;
-
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
