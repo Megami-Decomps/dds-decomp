@@ -11,7 +11,7 @@ extern s32 scrReadIntParameter(s32);
 
 extern s8 ptyReadSignedRosterStatByte(s32);
 extern void scrSetIntegerReturnValue(s32);
-extern void func_0011A328(s32);
+extern void ptyApplyEventPenalty(s32);
 
 
 
@@ -23,7 +23,7 @@ u32 ptyScriptApplyEventPenalty(void) {
     s32 mode;
 
     mode = scrReadIntParameter(0);
-    func_0011A328(mode);
+    ptyApplyEventPenalty(mode);
     return 1;
 }
 
