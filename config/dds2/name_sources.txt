@@ -479,6 +479,8 @@
 0x001188F0	ptyComputeMaxHp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:391:func_001188F0; Returns enemy-record maximum HP or party level/stat growth plus HP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x001189D0	ptyComputeMaxMp	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:413:func_001189D0; Returns enemy-record maximum MP or party level/stat growth plus MP bonus, capped at 999.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00118AB0	sdfDispatchPrimaryUnitScript	inferred	confidence=high; matched-C; src/dds2/game/code_001176A0.c:435:func_00118AB0; Selects event context from command kind/script flags, including the special command-index case, and returns evtRunContext result.; source=reviewed-prior-QP15 [names_qp15.tsv]
+0x00118C58	evtRunCommandContext10	inferred	Invokes the command script's fixed event context 10 with the supplied script arguments and unit index.
+0x00118C80	evtRunCommandContext7	inferred	Invokes the command script's fixed event context 7 with the supplied script arguments and unit index.
 0x00118CC0	sdfGetHpBracketScale	inferred	confidence=high; src/dds2/game/code_001176A0.c:369:func_00118CC0; Computes clamped HP fraction band and returns party/enemy HP scale-table entry.; sources=names_M143.tsv [names_qp10.tsv]
 0x00118D60	sdfCalculateCommandVitalDelta	inferred	Computes the signed HP/MP delta from command power, base, vital type and effect handlers; DDS1 twin 0x00118688.
 0x001190B0	sdfRollActionHit	inferred	Resolves a randomized roll/action result against packed value state; DDS1 twin. [names_qp9.tsv]
