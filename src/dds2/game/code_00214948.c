@@ -3585,10 +3585,6 @@ s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
-
 extern void func_001EDC38(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EDFB8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001EEB78(BtlLinkedCommand *, BtlCamState *, u8);
@@ -3604,6 +3600,10 @@ extern char D_0041A5E0[], D_0041A5F8[];
 
 /* VURI camera selection retains the command link and mode payload across
  * camera-provider calls; actor/status and form reads remain callback-fresh. */
+INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5E0);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_0041A5F8);
+
 s32 func_0021CF18(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     ActionStateLink *link;
     BtlState *runtime;
