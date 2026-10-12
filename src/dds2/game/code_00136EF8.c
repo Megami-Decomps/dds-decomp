@@ -1278,7 +1278,70 @@ void fldUpdatePositionZoneHits(f32 *input) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00139950);
+/* Indexed fields retain index-first addresses; see docs/idioms.md,
+ * "Trace-justified indexed field addresses: relative zone motion". */
+void func_00139950(f32 *position) {
+    f32 newPosition[3];
+    f32 previous[3];
+    f32 movement[4];
+    s32 index;
+
+    memset(movement, 0, sizeof(movement));
+    movement[3] = 1.0f;
+    fldAreaState.positionPending = 0;
+    if (fldAreaState.unk90 == -1) {
+        fldUpdatePositionZoneHits(position);
+    }
+    index = fldAreaState.unk90;
+    if (index != -1) {
+        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+            ObjectTransform *transform;
+
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            movement[0] = transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
+            movement[1] = transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
+            movement[2] = transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
+            ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = transform->position[0];
+            ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = transform->position[1];
+            ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = transform->position[2];
+        }
+        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
+                               ((FldValueRecord *)fldValueRecords)[index].sceneFlag) == 0) {
+            index = fldAreaState.unk94;
+            if (index != -1 && fldTestRoomSceneFlag(fldAreaState.area,
+                        fldAreaState.floor + 1,
+                        ((FldValueRecord *)fldValueRecords)[index].sceneFlag) == 0) {
+                if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+                    ObjectTransform *transform;
+
+                    transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+                    movement[0] += transform->position[0] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[0];
+                    movement[1] += transform->position[1] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[1];
+                    movement[2] += transform->position[2] - ((FldValueRecord *)fldValueRecords)[index].previousPosition[2];
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = transform->position[0];
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = transform->position[1];
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = transform->position[2];
+                }
+            }
+            newPosition[0] = position[0] + movement[0];
+            newPosition[1] = position[1] + movement[1];
+            newPosition[2] = position[2] + movement[2];
+            previous[0] = D_0038BBF0[0];
+            previous[1] = D_0038BBF0[1];
+            previous[2] = D_0038BBF0[2];
+            fldAreaState.positionPending = 1;
+            fldAreaState.targetX = newPosition[0];
+            fldAreaState.targetY = newPosition[1];
+            fldAreaState.targetZ = newPosition[2];
+            position[0] = newPosition[0];
+            position[1] = newPosition[1];
+            position[2] = newPosition[2];
+            D_0038BBF0[0] = newPosition[0];
+            D_0038BBF0[1] = newPosition[1];
+            D_0038BBF0[2] = newPosition[2];
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00139B98);
 
