@@ -63,5 +63,7 @@ typedef char SdfItemListRef_chunkTable_at_C[((u32)&((SdfItemListRef *)0)->chunkT
 SdfModel *sdfModelCreateFromAssetData(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef);
 SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef);
+/* Refresh the current per-node transforms from the model's selected frame. */
+void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 
 #endif /* SDF_MODEL_H */

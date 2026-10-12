@@ -969,7 +969,6 @@ extern SdfPoolNode *D_00325838[];
 
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 
