@@ -12,7 +12,7 @@
 
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void func_00184BC8(void *work);
+extern void effBossUpdateGeometry(void *work);
 extern void effBossSetPosition(void *dst, void *src);
 extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectParams *src);
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
@@ -169,7 +169,7 @@ void effBossDestroy(EffBossWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", func_00184BC8);
+INCLUDE_ASM(const s32, "effect/effPCPBoss", effBossUpdateGeometry);
 
 void effBossSetPosition(void *dst, void *src)
 {
@@ -461,7 +461,7 @@ void effBossReleaseWorkCallback(void *work) {
 }
 
 void effBossUpdateGeometryCallback(void *work) {
-    func_00184BC8(work);
+    effBossUpdateGeometry(work);
 }
 
 void effBossSetPositionCallback(void *work, void *position) {
