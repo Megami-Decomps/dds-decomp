@@ -844,7 +844,7 @@ extern char D_003D05C8[];
 extern s32 brsBuildPartyRewardBatch(BrsRewardBatch *, BrsRewardSummary *);
 extern s32 brsBuildLevelUpList(BrsRewardBatch *);
 extern s32 brsBuildProfileCapList(BrsRewardBatch *);
-extern void func_0029DA98(BrsActiveProgressList *);
+extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 
@@ -877,7 +877,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     brsBuildLevelUpList(primary);
     secondary = &work->secondaryRewards;
     brsBuildProfileCapList(secondary);
-    func_0029DA98(&work->partyProgress);
+    brsBuildActiveUnitProgressRows(&work->partyProgress);
     brsMarkPartyRowsFromLists(party, primary, secondary);
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);

@@ -51,7 +51,7 @@ extern char D_003D64E4[];
 extern char D_003D6458[];
 
 extern void func_0029C878(void *);
-extern void func_0029C860(BrsSkillPackageWork *);
+extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern s32 brsPollResultCounterCompletion(void);
 extern u8 D_0037F530[];
 extern u8 D_003D643C[];
@@ -76,7 +76,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
         func_0029C878(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
-            func_0029C860(context);
+            mnuClearTitleState(context);
             mnuSetPopupEntry(window, D_003D643C);
         }
     }
@@ -121,7 +121,7 @@ s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *input) {
     return menuSetHandler(context, 1, (void *)input);
 }
 
-s32 func_00299FA0(KwlnTask *input) {
+s32 mnuAdvanceResultPanel(KwlnTask *input) {
     s32 context = kwlnTaskGetUserValue(input);
     return menuSetHandler((void *)context, 2, (void *)input);
 }

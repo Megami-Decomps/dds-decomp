@@ -4662,7 +4662,7 @@
 0x002650B0	mnuGetTitleState	inferred	Returns the title work state at offset 0x1574.
 0x002650B8	mnuClearTitleState	inferred	Zeros the title work state at offset 0x1574.
 0x00265220	itfDrawCountText	inferred	itf formats count text and draws right aligned
-0x002652E0	mnuQueueRightAlignedFormattedInfoText	inferred	Formats menu info text, right-aligns its glyph chain in a fixed region and queues it for drawing. [names_reviewed14.tsv]
+0x002652E0	brsDrawMaccaRewardTotal	inferred	Formats and queues the macca reward total in a right-aligned text region; DDS2 twin 0x0029CB70 also draws its associated icon layer when flag 0x290 is set. [LiteH menu naming batch 9]
 0x002653A0	mnuTitleDrawFadeMenuEntries	inferred	Calculates opacity from title state and draws three menu entry groups with shared fade; established DDS2 twin agrees. [names_reviewed19.tsv]
 0x00265478	mnuRefreshPanelLayer	inferred	redraws panel pieces then calls func_002653A0
 0x002654E8	brsDecaySharedAnimCounter	inferred	legacy BattleResultUi_DecaySharedAnimCounter: steps the shared battle-result animation counter down (wraps brsStepAnimDecay)
@@ -8149,3 +8149,9 @@
 0x00292CE0	sdfProjectPointInForwardConeVU	inferred	confidence=high; tests vf10 distance/facing against the camera forward cone, projects accepted points through the saved camera basis and viewport, returns success; called twice by mnuMeasureProjectedPerpendicularDistance; DDS2 twin 0x002D2D48. Namer1 batch 27.
 0x001A4130	btlSelectEnemyDropItem	inferred	confidence=high; defeat-reward caller passes its result to btlAddItemDrop; mode 1 bypasses conditional override, otherwise rolls enemy drop entries; DDS2 twin 0x001AD310 has party-bonus/event-selection differences. Namer1 batch 27.
 0x00294318	effCloneQueueForNode	inferred	confidence=high; type-5 effect-node create callback at 0x0034DF08 ignores its first argument and returns fileCloneQueueEntries(source); DDS2 twin 0x002D4380. Namer1 batch 27.
+0x00263570	mnuRefreshAndRunResultPanel	inferred	Refreshes the current result panel layer, then runs its input request in mode 1; DDS2 has mnuRefreshAndDispatchCurrentPanel at 0x00299F50. [LiteH menu naming batch 9]
+0x002635C0	mnuAdvanceResultPanel	inferred	Completes the display transition and runs the result-panel request in mode 2; DDS2 twin 0x00299FA0. [LiteH menu naming batch 9]
+0x00264238	mnuAdvanceItemPanelAfterRequest	inferred	Completes the display transition and runs the item-panel request in mode 2; DDS2 twin 0x0029B378. [LiteH menu naming batch 9]
+0x00264498	mnuDrawItemPanelAfterStatAssignment	inferred	Draws the item backdrop and stat-assignment panel before running the request in mode 1; DDS2 twin 0x0029B600. [LiteH menu naming batch 9]
+0x002644F0	mnuAdvanceStatAssignmentPanel	inferred	Completes the display transition and runs the stat-assignment request in mode 2; DDS2 twin 0x0029B658. [LiteH menu naming batch 9]
+0x002646F8	mnuAdvanceInactiveItemPanel	inferred	Completes the display transition and runs the inactive item-panel request in mode 2; DDS2 twin 0x0029B868. [LiteH menu naming batch 9]

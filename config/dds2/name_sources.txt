@@ -7592,3 +7592,16 @@
 0x002D4380	effCloneQueueForNode	inferred	confidence=high; type-5 effect-node create callback at 0x003AA838 ignores its first argument and returns fileCloneQueueEntries(source); DDS1 twin 0x00294318. Namer1 batch 27.
 0x0016A100	effBattleApplyUnitColorDirection	inferred	confidence=high; same 824-byte implementation as DDS1 effBattleApplyUnitColorDirection at 0x001624D0; applies/restores selected-group two-color and normalized-direction keyframes. Namer1 batch 27.
 0x001AD118	btlHasSkillInFirstEightSlots	inferred	confidence=high; checks exactly eight owner skill slots, or enemy-record skill slots when flags & 0x20; returns 1 on ID match and 0 otherwise; field +0x4 is the enemy record index in that branch. Namer1 batch 27.
+0x00299FA0	mnuAdvanceResultPanel	inferred	Runs the result-panel request in mode 2; DDS1 twin 0x002635C0. [LiteH menu naming batch 9]
+0x0029B378	mnuAdvanceItemPanelAfterRequest	inferred	Completes the display transition and runs the item-panel request in mode 2; DDS1 twin 0x00264238. [LiteH menu naming batch 9]
+0x0029B600	mnuDrawItemPanelAfterStatAssignment	inferred	Draws the item backdrop and stat-assignment panel before running the request in mode 1; DDS1 twin 0x00264498. [LiteH menu naming batch 9]
+0x0029B658	mnuAdvanceStatAssignmentPanel	inferred	Completes the display transition and runs the stat-assignment request in mode 2; DDS1 twin 0x002644F0. [LiteH menu naming batch 9]
+0x0029B868	mnuAdvanceInactiveItemPanel	inferred	Completes the display transition and runs the inactive item-panel request in mode 2; DDS1 twin 0x002646F8. [LiteH menu naming batch 9]
+0x0029C810	brsStepAnimDecay	inferred	Reduces work->fadeProgress by the shared decay factor; DDS1 twin 0x00265088. [LiteH menu naming batch 9]
+0x0029C848	mnuGetTitleState	inferred	Returns work->fadeProgress; DDS1 twin 0x002650B0. [LiteH menu naming batch 9]
+0x0029C860	mnuClearTitleState	inferred	Clears work->fadeProgress; DDS1 twin 0x002650B8. [LiteH menu naming batch 9]
+0x0029C880	brsDrawRewardEntryRows	inferred	Draws the three reward icon rows with label and value text; DDS1 twin 0x002650C8. [LiteH menu naming batch 9]
+0x0029CB70	brsDrawMaccaRewardTotal	inferred	Formats and queues the macca reward total; when flag 0x290 is set, draws its associated icon layer. DDS1 counterpart 0x002652E0. [LiteH menu naming batch 9]
+0x0029CF00	brsCalcApGain	inferred	Computes per-unit AP from the base reward, unit bonus, eligibility state and profile multiplier; DDS1 twin 0x00265610. [LiteH menu naming batch 9]
+0x0029D000	mnuIsTitleEntryAvailable	inferred	DDS2 returns 0; DDS1 twin 0x002656C0 tests flag 0x902 and unitId 4. [LiteH menu naming batch 9]
+0x0029DA98	brsBuildActiveUnitProgressRows	inferred	Clears the list and appends a progress row for each occupied party slot except unitId 9; DDS1 twin 0x002661A8. [LiteH menu naming batch 9]

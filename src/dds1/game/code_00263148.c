@@ -170,13 +170,13 @@ s32 prfCapTaskStep(KwlnTask *request) {
     return result;
 }
 
-s32 func_00263570(KwlnTask *request) {
+s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     mnuRefreshPanelLayer(context);
     return menuRunPanel(context, 1, (void *)request);
 }
 
-s32 func_002635C0(KwlnTask *request) {
+s32 mnuAdvanceResultPanel(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
