@@ -864,7 +864,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                             if ((u16)child->glyphCodeOrContext.glyphCode < 0x80) {
                                 enabled = 1;
                             }
-                            func_0019BA00(x + child->x + xOffset, y + child->y,
+                            frFontDrawAtlasGlyph(x + child->x + xOffset, y + child->y,
                                          child->cellDimensions.cellWidth,
                                          child->cellDimensions.cellHeight >> 1,
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,
@@ -872,7 +872,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                                          &child->cachedItem->list->uv,
                                          atlas, flags);
                         } else {
-                            func_0019BA00(x + child->x + xOffset, y + child->y,
+                            frFontDrawAtlasGlyph(x + child->x + xOffset, y + child->y,
                                          child->cellDimensions.cellWidth,
                                          child->cellDimensions.cellHeight >> 1,
                                          child->renderValueOrSetupOrShade.setupBytes.firstOption, child->parentDimensionsOrRenderWord.renderWord,

@@ -2430,6 +2430,7 @@
 0x00193C70	frFontReverseWordBytes	inferred	Native paired ten-instruction helper reverses all four byte positions of an unsigned word using shifts, masks and ORs.
 0x00193C98	frFontHighestSetBitIndex	inferred	Returns floor(log2(value)) for nonzero values and zero for zero, not bit length.
 0x00193CD8	frFontBuildGsSetupPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00193C08.c:111:func_00193CD8; Builds fixed GS register setup packet used by font drawing.; twin=0x0019B968, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]
+0x00193D70	frFontDrawAtlasGlyph	inferred	Draws one glyph from its atlas using screen position, cell dimensions, render state, UV rectangle, atlas state and draw flags; paired call sites render each child glyph. DDS2 counterpart is 0x0019BA00.
 0x00193FD0	frFontDrawCachedGlyphRelative	inferred	Native paired wrapper adds glyph-relative X/Y, reads unsigned cell width/half-height and cached UV rectangle, then submits through the font atlas with enable one.
 0x00194038	sdfUploadGsImageUnderSemaphore	inferred	Creates GS image upload, executes it under a semaphore and waits for GS sync. [names_reviewed21.tsv]
 0x001940B8	frFontUploadClearedTexture	inferred	confidence=high; src/dds1/game/code_00193C08.c:func_001940B8; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
