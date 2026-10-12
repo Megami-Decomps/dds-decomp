@@ -168,7 +168,7 @@ extern void frFontUploadImageBlocks(void);
 extern u32 D_003D6E20[];
 extern s32 D_003BD814;
 
-void func_00194228(s32 rowBudget, s32 poolCount) {
+void frFontInitializeSystem(s32 rowBudget, s32 poolCount) {
     s32 i;
     s32 rowCount;
     s32 glyphsPerRow;

@@ -1983,6 +1983,7 @@
 0x0019BCC8	sdfUploadGsImageUnderSemaphore	inferred	Creates GS image upload, executes it under a semaphore and waits for GS sync. [names_reviewed21.tsv]
 0x0019BD48	frFontUploadClearedTexture	inferred	confidence=high; src/dds2/game/code_0019B840.c:func_0019BD48; Allocates a zeroed font texture image, uploads it to GS under semaphore protection and releases the temporary buffer. [names_qp9.tsv]
 0x0019BE20	frFontEnsureSlotLoaded	inferred	src/dds2/game/code_0019B840.c func_0019BE20: Loads font slot once; special slot uses existing entry buffer, others load requested resource path. Twin of DDS1 func_00194190. [names_reviewed24.tsv]
+0x0019BEB8	frFontInitializeSystem	inferred	Initializes the font atlas, glyph/item pools, default fonts and image buffers, then clears the indexed-text table; startup calls this before creating the font task. DDS1 counterpart is 0x00194228.
 0x0019C130	frFontBindResourceSections	inferred	confidence=high; matched-C; src/dds2/game/code_0019B840.c:264:func_0019C130; Retains a missing font header, stores the resource buffer, binds optional flag/value sections, width-count sections, and the optional header-relative lookup table.; source=names_P5.tsv:2 [names_qp11.tsv]
 0x0019C2A8	frFontLoadDefaultFonts	inferred	Loads four files named /font/font0.fnt through /font/font3.fnt.
 0x0019C358	frFontUploadImageBlocks	inferred	Assembles six 16-word little-endian image blocks from table data and uploads each to its matching GS image buffer; DDS1 counterpart is 0x001946C8.
