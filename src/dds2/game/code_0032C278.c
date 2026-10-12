@@ -30,6 +30,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_gs_flat_shapes.h"
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 
 extern u32 func_003287E0(void);
 extern s32 EIntr(void);

@@ -13,6 +13,7 @@
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -166,8 +167,6 @@ extern SdfTex *D_003BD37C;
 extern SdfTex *D_003BD380;
 
 extern SdfTex *D_003BD390;
-
-extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 
 extern s32 sdfAllocPacketAligned(s32);
 

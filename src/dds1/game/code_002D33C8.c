@@ -26,6 +26,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 
 /* DMAC tag IDs occupy the high nibble of the header byte at offset three. */
 #define SDF_DMA_TAG_NEXT_BYTE 0x20
