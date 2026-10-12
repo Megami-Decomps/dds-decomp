@@ -36,7 +36,6 @@ extern char D_003B1A78[]; /* "mnuMovieDraw" */
 extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void func_0026E8D8(void);
-extern void sdfSetStreamFrameDrawMode(s32);
 extern void sdfSetGridScaledDrawBounds(s32, s32, s32, s32, u32);
 extern void func_002ECCF8(void *, SdfPoolNode *);
 

@@ -101,7 +101,6 @@ extern char D_00437AC0[];
 
 extern void mnuStopTitleMovieDraw(void);
 
-extern void sdfSetStreamFrameDrawMode(u32);
 
 extern s32 mnuDrawMovieMenuListItem();
 
