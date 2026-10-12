@@ -543,7 +543,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void fldSubmitGsTriangle(s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
-void func_001200E8(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
+void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     s32 color;
     s32 angle;
     s32 prev;
@@ -999,7 +999,7 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 }
 
 /* Search records 1..511 of the 30-byte coordinate table; return zero on miss. */
-s32 func_001237B0(s32 x, s32 y) {
+s32 fldFindMapLabelIndexByCoordinate(s32 x, s32 y) {
     s32 index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
         if (x == D_0039A5A8[index].x && y == D_0039A5A8[index].y) {
@@ -1010,7 +1010,7 @@ s32 func_001237B0(s32 x, s32 y) {
 }
 
 /* Search the second coordinate table (34-byte records), reserving index zero. */
-s32 func_00123808(s32 x, s32 y) {
+s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 x, s32 y) {
     s32 index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
         if (x == D_0039E1A8[index].x && y == D_0039E1A8[index].y) {
@@ -1121,7 +1121,7 @@ FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
 extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 
 /* Convert a scene-relative offset to a signed bitmap byte, row and bit. */
-s32 func_00123A58(s32 scene, s32 floor, f32 xOffset, f32 zOffset,
+s32 fldGetStageBitmapBitCoordinates(s32 scene, s32 floor, f32 xOffset, f32 zOffset,
                   s32 *byteOut, s32 *rowOut, s32 *bitOut) {
     f32 entryX;
     f32 entryZ;

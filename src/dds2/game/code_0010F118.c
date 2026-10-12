@@ -19,7 +19,7 @@ extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
 void effObjInnerVecInit(ObjectTransform *node);
 
-u32 func_0010F118(void) {
+u32 ptyScriptApplyEventPenalty(void) {
     s32 mode;
 
     mode = scrReadIntParameter(0);
@@ -32,7 +32,7 @@ u32 ptyScriptRestoreEntireParty(void) {
     return 1;
 }
 
-u32 func_0010F160(void) {
+u32 ptyScriptGetRosterStat(void) {
     s32 value;
 
     value = scrReadIntParameter(0);

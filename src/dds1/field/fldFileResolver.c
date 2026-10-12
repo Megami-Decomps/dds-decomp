@@ -152,7 +152,7 @@ extern EffWorldNode *evtSpawnActionObj10(s32, void *, const char *);
 extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern void dds3LoadWorldTransformSetup(EffWorldNode *, WorldTransformSetup *);
-extern void func_00135360(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 
@@ -327,7 +327,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
                 }
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
                     s32 room = fldParseRoomNumberFromName(resource->name);
-                    func_00135360(((FldSpawnCollision *)resource->data)->header, position,
+                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header, position,
                                   resource->id, room, -1);
                     object = evtSpawnActionObjB(resource->id, resource->data, position, resource->name);
                     dds3SetPathStateValue(object, pathIndex);
@@ -723,7 +723,7 @@ extern u32 D_003BD7BC;
 extern s32 D_003BAC10;
 extern s16 D_0032E4B4[];
 extern s32 fldParseRoomNumberFromName(const char *);
-extern void func_00135360(void *, f32 *, u32, s32, s32);
+extern void fldBuildCollisionRecordsFromGeometry(void *, f32 *, u32, s32, s32);
 extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
@@ -805,7 +805,7 @@ void fldSpawnPlacementObjectsFromBatches(u32 batchAddress, u32 batchCount, s32 a
                 fldCopySpawnTransform(position, rotation, resource->transform);
                 if (((FldSpawnCollision *)resource->data)->kind == 0) {
                     room = fldParseRoomNumberFromName(resource->name);
-                    func_00135360(((FldSpawnCollision *)resource->data)->header,
+                    fldBuildCollisionRecordsFromGeometry(((FldSpawnCollision *)resource->data)->header,
                                  position, resource->id, room, -1);
                     object = evtSpawnActionObjB(resource->id, resource->data, position, resource->name);
                     dds3SetPathStateValue(object, pathState);
@@ -5670,7 +5670,7 @@ typedef struct FldCollisionDescriptor {
 } FldCollisionDescriptor;
 typedef char FldCollisionDescriptorSize[(sizeof(FldCollisionDescriptor) == 0x18) ? 1 : -1];
 
-void func_00135360(void *geometry, f32 *translation,
+void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
@@ -6337,7 +6337,7 @@ extern f32 D_00330750[3];
 extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-void func_00136A78(f32 *input) {
+void fldUpdatePositionZoneHits(f32 *input) {
     f32 position[4];
     f32 previous[4];
     f32 savedPosition[4];
@@ -6495,7 +6495,7 @@ typedef struct FldStopEntry {
     const u8 *name;
 } FldStopEntry;
 
-s32 func_00138058(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -7288,7 +7288,7 @@ extern s32 D_003BAE38;
 extern const char D_00332DF0[];
 extern s32 strcmp(const char *, const char *);
 
-const char *func_0013C600(const char *eventName) {
+const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -7318,7 +7318,7 @@ const char *func_0013C600(const char *eventName) {
 }
 
 
-const char *func_0013C7F8(const char *eventName) {
+const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -7348,7 +7348,7 @@ const char *func_0013C7F8(const char *eventName) {
 }
 
 
-const char *func_0013C9E0(const char *eventName) {
+const char *fldResolveEventSetByNameEitherKindArea(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -7666,7 +7666,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     }
 }
 
-void func_0013DDF0(const char *name) {
+void fldSelectCameraByActorName(const char *name) {
     FldActorEntry *entry;
     char *entryName;
     EffWorldNode *camera;

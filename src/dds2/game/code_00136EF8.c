@@ -519,7 +519,7 @@ typedef struct FldCollisionDescriptor {
 } FldCollisionDescriptor;
 typedef char FldCollisionDescriptorSize[(sizeof(FldCollisionDescriptor) == 0x18) ? 1 : -1];
 
-void func_00137F10(void *geometry, f32 *translation,
+void fldBuildCollisionRecordsFromGeometry(void *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
@@ -1187,7 +1187,7 @@ extern f32 D_0038BBF0[3];
 extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-void func_00139628(f32 *input) {
+void fldUpdatePositionZoneHits(f32 *input) {
     f32 position[4];
     f32 previous[4];
     f32 savedPosition[4];
@@ -1348,7 +1348,7 @@ typedef struct FldStopEntry {
     const u8 *name;
 } FldStopEntry;
 
-s32 func_0013AC40(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldFindFieldSegmentIntersection(f32 *start, f32 *end, f32 *hitPoint) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -2057,7 +2057,7 @@ extern s32 D_004361C8;
 extern const char D_0038E290[];
 extern s32 strcmp(const char *, const char *);
 
-const char *func_0013F1E8(const char *eventName) {
+const char *fldResolveEventSetByNameKindAreaOne(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -2087,7 +2087,7 @@ const char *func_0013F1E8(const char *eventName) {
 }
 
 
-const char *func_0013F3E0(const char *eventName) {
+const char *fldResolveEventSetByNameKindAreaZero(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -2117,7 +2117,7 @@ const char *func_0013F3E0(const char *eventName) {
 }
 
 
-const char *func_0013F5C8(const char *eventName) {
+const char *fldResolveEventSetByNameEitherKindArea(const char *eventName) {
     s32 i;
     s32 j;
     if (eventName == 0) return 0;
@@ -2423,7 +2423,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
     }
 }
 
-void func_00140A58(const char *name) {
+void fldSelectCameraByActorName(const char *name) {
     FldActorEntry *entry;
     char *entryName;
     EffWorldNode *camera;
