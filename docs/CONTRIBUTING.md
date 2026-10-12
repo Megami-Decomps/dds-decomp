@@ -21,6 +21,17 @@ bytes, and it has to reach that the way the original developers would have.
   - one-off inline wrappers that exist only to change codegen
   - decomp-permuter, or any scripted/enumerated search over statement or
     declaration order: every change has to be one a person made for a reason
+- **Compiler-trace justification.** When a residual comes from a compiler
+  decision (scheduler tie, allocation priority, CSE choice, delay-slot fill),
+  a trace of the real cc1 can show the property the source must have, e.g.
+  "a pseudo holding 1 exists before the index load". A form that gives the
+  compiler that property with ordinary C (plain statements, locals holding
+  values the program uses, ordering, truthful types) is acceptable, provided
+  every other matched function stays exact. Record the trace (log, deciding
+  pass, property) in a comment or the landing notes. The trace shows what the
+  compiler needed, not which line the original had, so any ordinary form that
+  meets it will do. Dead stores, dummy variables and the levers above remain
+  forbidden.
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.
