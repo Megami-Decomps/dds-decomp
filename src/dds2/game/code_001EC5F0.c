@@ -6008,11 +6008,6 @@ void sndClearList(void) {
     }
 }
 
-typedef struct SoundSlotTableEntry {
-    s16 resourceOffset;
-    u16 fileId;
-} SoundSlotTableEntry;
-
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
 /* Return the category/id/slot's packed motion-SE key, or zero if unavailable. */
