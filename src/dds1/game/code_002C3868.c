@@ -474,7 +474,40 @@ s32 sdfHandleMapCounterSelectionInput(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C4850);
+extern void sdfCounterDecrease(void);
+extern void sdfCounterIncrease(void);
+extern void sdfCounterDrawFadingLabelPanel(s32, s32);
+extern void mnuDrawMapCounterTimerHints(void);
+extern void sdfUpdateCounterSelectionFade(void);
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
+
+s32 func_002C4850(s32 decrease) {
+    /* Untouched retail 32-byte slot: frame 0x70 rather than 0x50.
+     * DDS2 func_0030C8E8 has the same 32-byte frame gap. */
+    s32 drawScratch[8];
+    f32 progress = (f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f;
+    s32 x = progress * -32.0f;
+    u32 color;
+
+    if (decrease) {
+        sdfCounterDecrease();
+    } else {
+        sdfCounterIncrease();
+    }
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    color = ((u32)((1.0f - progress) * 128.0f) << 24) | 0x808080U;
+    kwlnDrawTexturedColorQuad(x, 0x77, 0xAA, 0xA3, 9, 0x151, 0xAA, 0xA3,
+                  color, color, color, color, fldLocalMapTextureResource.texture);
+    evtSetDrawSurfaceIndex(0x54);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    sdfCounterDrawFadingLabelPanel(0x100, 0x180);
+    mnuDrawMapCounterTimerHints();
+    mnuCallInitWide(x << 4, ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->y << 3,
+                    0, sdfActiveCounterRuntime, 0x54);
+    sdfUpdateCounterSelectionFade();
+    return 1;
+}
 
 u32 sdfCounterGetDisplayWordPointer(void) {
     return (u32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->word;
