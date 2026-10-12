@@ -1425,7 +1425,7 @@ extern u8 effSharedRandomState[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
  * own direction, and fade them over their last ten frames. */
-void func_00316680(SdfFlagListWork *work) {
+void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     f32 pos[4];
     u32 count;
     u32 i;
@@ -1569,7 +1569,7 @@ extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
  * count is reused first as an entry count and then as a vertex count. */
-void func_00316C88(SdfFlagListWork *work) {
+void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     f32 (*sourceVertices)[4];
     f32 (*copiedVertices)[4];
     u32 count;
@@ -1602,17 +1602,18 @@ void func_00316C88(SdfFlagListWork *work) {
     sdfReleaseResourceAllocation(vertexAllocation);
 }
 
-/* Read the camera color effect's stored float. */
-float scrGetOperandFloatValue(SdfFlagListWork *work) {
+/* Return the drop list's movement speed; this is not a script operand. */
+float sdfGetFlagListSpeed(SdfFlagListWork *work) {
     return work->params.speed;
 }
 
-/* Replace the camera color effect's stored float without validation. */
-void scrSetOperandFloatValue(SdfFlagListWork *work, float value) {
+/* Replace the drop list's movement speed without validation. */
+void sdfSetFlagListSpeed(SdfFlagListWork *work, float value) {
     work->params.speed = value;
 }
 
-void func_00316DE0(SdfFlagListWork *work) {
+/* Sample color/alpha at frame zero with duration zero; discard the return value. */
+void sdfSampleFlagListStartColor(SdfFlagListWork *work) {
     effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, 0, 0);
 }
 

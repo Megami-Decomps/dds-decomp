@@ -5800,8 +5800,8 @@
 0x00316450	frFontQueueColoredGlyph	inferred	Sets glyph colors and rendering option before queuing the font glyph. [names_reviewed8.tsv]
 0x00316648	sdfInitializeFlagListFromResource	inferred	confidence=high; matched-C; src/dds2/game/code_00313BB8.c:920:func_00316648; Resolves the primary resource buffer and constructs its selection flag-list work.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00316668	sdfReleaseFlagListResource	inferred	Releases the flag list work resource handle. [names_reviewed8.tsv]
-0x00316DD0	scrGetOperandFloatValue	inferred	Returns the floating-point value held in the script operand block. [names_reviewed13.tsv]
-0x00316DD8	scrSetOperandFloatValue	inferred	Sets the floating-point value held in the script operand block. [names_reviewed13.tsv]
+0x00316DD0	sdfGetFlagListSpeed	inferred	confidence=high; matched-C; CORRECTED script-operand interpretation: returns SdfFlagListWork.params.speed, consumed by camera-relative drop movement. DDS1 twin 002CF390. Original names_reviewed13.tsv interpretation superseded by actual owner/update evidence. Namer1 batch 15.
+0x00316DD8	sdfSetFlagListSpeed	inferred	confidence=high; matched-C; CORRECTED script-operand interpretation: assigns params.speed without validation or script-operand operations. DDS1 twin 002CF398. Original names_reviewed13.tsv interpretation superseded by actual owner/update evidence. Namer1 batch 15.
 0x00316E08	itfSetPackedRgbAlpha	inferred	Splits an AARRGGBB color into the object's RGB and alpha fields.
 0x00316E38	itfCopyColorFields	inferred	Copies RGB, alpha, a float, and one additional word from a source color record.
 0x00316E78	mdlCreateViewerPackageTask	inferred	Initializes viewer globals, allocates viewer work and creates the named task with polling callback. [names_reviewed19.tsv]
@@ -7367,3 +7367,26 @@
 0x002AAC70	mnuDrawCampGridAndLabel	inferred	Draws the camp grid pieces and, when supplied, a bank-text label. twin=0x00272518 (DDS1). LiteH menu naming batch.
 0x002AAC98	mnuDrawCampGridAndLabelDefault	inferred	Forwards to camp grid-and-label drawing with text option zero. twin=0x00272668 (DDS1). LiteH menu naming batch.
 0x002AAE80	mnuDrawCampScreenDefault	inferred	Calls the camp screen renderer with kind zero. twin=0x00272778 (DDS1). LiteH menu naming batch.
+0x00302B18	effEditNPolygonFadeTrack	inferred	confidence=high; matched-C; Native FADE callback on N-family POLYGON children; preserves alpha record +70 and bound +8C plus one. DDS1 twin 002BB6F8. Namer1 batch 15.
+0x00302B40	effEditUCylinderPolygonFadeTrack	inferred	confidence=high; matched-C; Native U-CYLND POLYGON FADE callback; preserves bound plus one. DDS1 twin 002BB720. Namer1 batch 15.
+0x00302B68	effEditUSpherePolygonFadeTrack	inferred	confidence=high; matched-C; Native U-SPHRE POLYGON FADE callback; alpha record +60 and bound +74 plus one. DDS1 twin 002BB748. Namer1 batch 15.
+0x00301750	effEditOP2TrackColorTrack	inferred	confidence=high; matched-C; Native O-P2_TRK COLOR property; temporarily selects the alternate curve-key table, edits tracks +48/+6C with bound +D4, then restores defaults. P2 is the literal native identifier. No DDS1 equivalent owner descriptor. Namer1 batch 15.
+0x003017B8	effEditMColorTrack	inferred	confidence=high; matched-C; Native COLOR callback shared by M-SMOKE/M-SPARK/M-SPIRL/M-SPHRE/M-HSPAK/M-ASPAK, tracks +7C/+A0 and bound +108. Namer1 batch 15.
+0x00301820	effEditOPlsclColorTrack	inferred	confidence=high; matched-C; Native O-PLSCL COLOR callback; preserves PLSCL without guessing an expansion, edits +24/+48 with the leading word as bound. Namer1 batch 15.
+0x00302508	effEditOP2TrackScaleTrack	inferred	confidence=high; matched-C; Native O-P2_TRK root SCALE property forwards track +7C and bound +D4. Namer1 batch 15.
+0x00302538	effEditOP2TrackRotationTrack	inferred	confidence=high; matched-C; Native O-P2_TRK root ROTATE property forwards track +A8 and bound +D4. Namer1 batch 15.
+0x00302568	effEditMScaleTrack	inferred	confidence=high; matched-C; Native root SCALE callback shared by the six M-family descriptors; track +B0 and bound +108. Namer1 batch 15.
+0x00302B90	effEditOlModelFadeTrack	inferred	confidence=high; matched-C; Native OLMODEL FADE property, track +10 and leading bound; OL is literal, not an inferred expansion. Namer1 batch 15.
+0x00302E10	effPollKoMaterialEplFile	inferred	confidence=high; matched-C; Native EPL callbacks trace through MATERIAL type-16 child groups to six K-family descriptors and O-P2_TRK; uses /tool/effect/ and EPL-only scan. Namer1 batch 15.
+0x00302EE8	effPollMMaterialPbFile	inferred	confidence=high; matched-C; Native PB chooser in six M-family MATERIAL groups; uses /tool/effect/mat/. Namer1 batch 15.
+0x00302F08	effPollMMaterialEplFile	inferred	confidence=high; matched-C; Native EPL chooser in six M-family MATERIAL groups; uses /tool/effect/. Namer1 batch 15.
+0x00302F28	effPollOMaterialPbFile	inferred	confidence=high; matched-C; Native PB chooser in MATERIAL groups of O-HLP_UT/O-P2_HT; uses /tool/effect/hlp/. Namer1 batch 15.
+0x00302E30	effPollBfMaterialTmxFile	inferred	confidence=high; matched-C; CORRECTED generic TMX chooser A: MATERIAL parent chains establish B-MULTI/B-DIST/B-RIPLE/F-MULTI, independently paired with DDS1 002BB9D0. Preserve void ABI while DDS1 returns status. Namer1 batch 15.
+0x00302E50	effPollNMaterialTmxFile	inferred	confidence=high; matched-C; CORRECTED generic TMX chooser B: MATERIAL parent chains establish N-SPIRL/N-CYLND/N-SPHRE, independently paired with DDS1 002BB9F0. Preserve void ABI. Namer1 batch 15.
+0x00302E70	effPollSTMaterialTmxFile	inferred	confidence=high; matched-C; CORRECTED generic TMX chooser C: MATERIAL parent chains establish S-RAD_T/S-SPK_T/S-RNG_T/S-SCT_T; ST is literal S plus _T. DDS1 twin 002BBA10; preserve void ABI. Namer1 batch 15.
+0x00316680	sdfUpdateFlagListEntries	inferred	confidence=high; matched-C; Respawns free camera-relative drops, advances vertex pairs, fades their final ten of thirty frames and increments work.frame. DDS1 twin 002CEC40. Namer1 batch 15.
+0x00316C88	sdfDrawFlagListVertices	inferred	confidence=high; matched-C; Copies vertex pairs, optionally adds view target, builds colored packets and submits via alpha.surfaceIndex. DDS1 twin 002CF248. Namer1 batch 15.
+0x00316DE0	sdfSampleFlagListStartColor	inferred	confidence=high; matched-C; Invokes color/alpha track sampler at frame/duration zero, discarding the result through the existing void ABI. DDS1 twin 002CF3A0. Namer1 batch 15.
+0x0018C078	effPcpEventWorkSetPosition	inferred	confidence=high; matched-C; Native PCP callback table 003B0EA8 position slot; actual EffPCPMapEventWork.params.position owner confirms the leading VU vector copy. DDS1 twin 00184420. Namer1 batch 15.
+0x0018C088	effPcpEventWorkSetScale	inferred	confidence=high; matched-C; Native PCP callback table scale slot stores +2C; actual map-event owner initializes and consumes params.scale. DDS1 twin 00184430. Namer1 batch 15.
+0x0018C090	effPcpEventWorkSetColor	inferred	confidence=high; matched-C; Native PCP callback table color slot stores packed color +3C, consumed for child tint/fading. DDS1 twin 00184438. Namer1 batch 15.
