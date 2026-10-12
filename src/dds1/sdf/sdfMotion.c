@@ -555,7 +555,7 @@ void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
 }
 
 /* The blend slot resamples the discrete flag; it does not consume blend weight. */
-void sdfMotionApplyKeyFlagDuringBlend(SdfMotionKeyFlagBinding *binding, f32 frame) {
+void sdfMotionBlendKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
     SdfDrawNode *node;
 

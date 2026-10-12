@@ -21,7 +21,7 @@ extern void effMiscQuatMultiplyVU();
 extern void effMiscQuaternionToMatrixVU(void);
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
-s32 func_0023D030(EvtUnit *unit, f32 *dir, f32 angle);
+s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
@@ -69,7 +69,7 @@ extern f32 D_00438A48, D_00438A4C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
-extern void func_00107D08(void);
+extern void kwlnBuildShortestArcQuaternion(void);
 extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
 
@@ -262,7 +262,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         } else {
             VU0_LOAD_VF(vf11, D_0037F770[0] + 4);
         }
-        func_00107D08();
+        kwlnBuildShortestArcQuaternion();
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, identity);
         effMiscQuaternionNlerpVU(factor);
@@ -293,7 +293,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         factor = transition;
         VU0_LOAD_VF(vf10, unit->vec40);
         VU0_LOAD_VF(vf11, targetDirection);
-        func_00107D08();
+        kwlnBuildShortestArcQuaternion();
         VU0_MOVE_VF(vf11, vf10);
         VU0_LOAD_VF(vf10, identity);
         effMiscQuaternionNlerpVU(factor);
@@ -305,7 +305,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             factor = 1.0f;
             VU0_LOAD_VF(vf10, unit->vec40);
             VU0_LOAD_VF(vf11, previousDirection);
-            func_00107D08();
+            kwlnBuildShortestArcQuaternion();
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, identity);
             effMiscQuaternionNlerpVU(factor);
@@ -314,7 +314,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             VU0_APPLY_MATRIX(vf10, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf10, oldDirection);
             VU0_LOAD_VF(vf11, blendedDirection);
-            func_00107D08();
+            kwlnBuildShortestArcQuaternion();
             VU0_MOVE_VF(vf11, vf10);
             VU0_LOAD_VF(vf10, identity);
             effMiscQuaternionNlerpVU(transition);
@@ -925,9 +925,9 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_0023D030);
+INCLUDE_ASM(const s32, "event/evtUnitManager", evtRotateUnitTowardTarget);
 
-/* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with func_0023D030. */
+/* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
@@ -940,7 +940,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
-    return func_0023D030(unit, v, angle);
+    return evtRotateUnitTowardTarget(unit, v, angle);
 }
 
 s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
@@ -948,7 +948,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 scale;
     EffWorldNode *obj;
 
-    func_0023D030(unit, unit->targetVector, unit->directionOffset * 0.01f);
+    evtRotateUnitTowardTarget(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
         evtComputePlanarTargetDirectionVu(unit);
         obj = unit->effObj;
@@ -967,10 +967,10 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
 }
 
 
-extern s32 func_0023B1E8(EvtUnit *unit);
+extern s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit);
 extern void func_0035B6E0(const char *fmt, ...);
 
-/* Run a copy of the unit until func_0023B1E8 reports done, and derive its per-step Y speed. */
+/* Run a copy of the unit until evtUnitHasReachedMotionEndpoint reports done, and derive its per-step Y speed. */
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215D0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
@@ -989,7 +989,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         savedB[i] = unit->effObj->inner->rotation[i];
     }
     copy = *unit;
-    while (func_0023B1E8(&copy) == 0) {
+    while (evtUnitHasReachedMotionEndpoint(&copy) == 0) {
         count++;
         evtApplyUnitDirectionOffset(&copy);
     }

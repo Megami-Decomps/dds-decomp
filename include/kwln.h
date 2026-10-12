@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfListHead;
+
 /* Shared fog/depth state consumed by sdfConsBuildFrustumPacket (0x14).
  * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
  * timeline payloads store fogFar before fogNear instead. */
@@ -48,5 +50,9 @@ u32 kwlnTaskGetUserValue(KwlnTask *task);
 KwlnTask *kwlnTaskGetTaskByName(const char *name);
 s32 kwlnTaskIsRegistered(KwlnTask *task);
 s32 kwlnTaskExists(const char *name);
+
+/* Append the common rectangle used to frame a grid of sprite cells. */
+void kwlnDrawSpriteCell(struct SdfListHead *packetList, s32 column, s32 row,
+                        s32 columnCount, s32 rowCount);
 
 #endif /* KWLN_H */

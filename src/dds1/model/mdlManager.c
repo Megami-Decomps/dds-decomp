@@ -639,7 +639,6 @@ void mdlDestroyContext(MdlCtx *ctx) {
 
 struct SdfPoolNode;
 extern void func_002174C0(MdlCtx *, struct SdfPoolNode **);
-extern void sdfModelUpdateCurrentFrameTransforms();
 extern void func_002D9238(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 

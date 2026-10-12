@@ -340,7 +340,7 @@ s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *te
 }
 
 s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 type, void *name, s32 flag, s32 option) {
-    FrFontGlyph *handle = func_001951C8(name, 0, type, 0, 0);
+    FrFontGlyph *handle = frFontBuildGlyphChain(name, 0, type, 0, 0);
     s32 result = 0;
     frFontSetChildColors(handle, second);
     frFontSetGlyphPosition(handle, x << 4, y << 3);

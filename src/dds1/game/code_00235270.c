@@ -102,7 +102,6 @@ extern u16 D_003BBE7A;
 
 extern u32 evtSkyOverlayEnabled;
 
-extern void kwlnDrawSpriteCell(u32 list, s32 x, s32 y, s32 w, s32 h);
 
 extern char D_003BC0C8[]; /* "NAME:" */
 
@@ -220,7 +219,7 @@ void evtDrawMenuFrame(SdfListHead *list, s32 x, s32 y, s32 width, s32 rows, s32 
     s32 textY;
     s32 index;
 
-    kwlnDrawSpriteCell((u32)list, x, y, width, rows);
+    kwlnDrawSpriteCell(list, x, y, width, rows);
     textX = (x << 4) + 0x7000;
     textY = (y << 3) + 0x7900;
     if (header != NULL) {
@@ -851,7 +850,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
 void evtDrawSelectedEntryLabel(SdfListHead *list, EvtRuntimeGroup *selected, s32 x,
                                s32 unused, EvtRuntime *runtime) {
     x += 0x6C0;
-    kwlnDrawSpriteCell((u32)list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
     if (selected->entryHeader >= 0) {
         sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
@@ -2961,7 +2960,7 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
     s32 style;
 
     packetList = sdfCreateResetPacketList();
-    kwlnDrawSpriteCell((u32)packetList, 0x78, 0x138, 0xC, 9);
+    kwlnDrawSpriteCell(packetList, 0x78, 0x138, 0xC, 9);
     key = evtEventViewerGetPendingNode(runtime);
 
     style = runtime->editField == 0 ? 6 : 0;
@@ -3211,7 +3210,7 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 
     packetList = (s32)sdfCreateResetPacketList();
     panelX = 0x138;
-    kwlnDrawSpriteCell((u32)packetList, panelX, 0x30, 0xD, 0x10);
+    kwlnDrawSpriteCell(packetList, panelX, 0x30, 0xD, 0x10);
     key = evtEventViewerGetPendingNode(runtime)->payload;
 
     style = runtime->colorSelection == 0 ? 6 : 0;

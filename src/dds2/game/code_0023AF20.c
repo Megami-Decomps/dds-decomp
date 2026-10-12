@@ -147,7 +147,7 @@ void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
-s32 func_0023B1E8(EvtUnit *unit) {
+s32 evtUnitHasReachedMotionEndpoint(EvtUnit *unit) {
     f32 value;
 
     switch (unit->motionSubmode) {

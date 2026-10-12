@@ -78,7 +78,8 @@ typedef struct FldAreaWork {
     u32 transitionCount;
     s32 nextArea;
     s32 nextFloor;
-    u8 padF8[8];
+    u8 padF8[4];
+    f32 frameTravelDistance;     /* 0xFC: current player displacement length. */
     s32 unk100;
     s16 transitionMode;          /* 0x104 */
     u16 collectedCount;          /* 0x106: spark pickups. */
@@ -88,11 +89,12 @@ typedef struct FldAreaWork {
     s32 deferredExit;
     s32 unk118;
     s32 unk11C;
+    f32 attritionDistance;      /* 0x120: movement toward the next HP attrition tick. */
 #ifdef VERSION_DDS2
-    u8 pad120[6];
+    u8 pad124[2];
     s16 movementSoundActive;    /* 0x126 */
 #else
-    u8 pad120[8];
+    u8 pad124[4];
 #endif
     s16 sceneCommand;
     s16 colorEffectSuppressed;
@@ -150,6 +152,9 @@ typedef struct FldAreaWork {
     FldTextureResource fieldTextures[4]; /* 0x1E8: d2_fild1..4.tmx */
 #endif
 } FldAreaWork;
+
+typedef char FldAreaWork_frameTravelDistance_at_FC[((u32)&((FldAreaWork *)0)->frameTravelDistance == 0xFC) ? 1 : -1];
+typedef char FldAreaWork_attritionDistance_at_120[((u32)&((FldAreaWork *)0)->attritionDistance == 0x120) ? 1 : -1];
 
 extern FldAreaWork fldAreaState;
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_track_slot.h"
 
 extern s32 sndFindPackedTrackLoadStatus(s32 id);
 
@@ -24,13 +25,6 @@ typedef struct CmdPacket {
     /* 0xA */ u16 unkA;
     /* 0xC */ u32 unkC;
 } CmdPacket;
-
-typedef struct SndTrackSlot {
-    s32 id;      /* 0x00 */
-    u8 flagA;    /* 0x04 */
-    u8 flagB;    /* 0x05 */
-    u8 pad06[2];
-} SndTrackSlot;
 
 typedef struct FE0C0 {
     /* 0x000 */ u8 pad000[0x208];

@@ -2727,7 +2727,7 @@ extern void func_001FB1A8(void);
 extern void func_001FB1F0(void *);
 extern void func_001FB1B0(void);
 extern s32 func_0011CAB0(s32);
-extern s32 func_0011CB90(s32, f32);
+extern s32 func_0011CB90(f32, s32);
 extern void btlApplyPartySetupOverride(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
@@ -2842,7 +2842,7 @@ s32 func_00215FF8(void) {
         return 0;
     }
     if (D_003BBB0F != 0) {
-        encounter = func_0011CB90(D_003BBB14, 200.0f);
+        encounter = func_0011CB90(200.0f, D_003BBB14);
         if (encounter == 0) {
             return 0;
         }

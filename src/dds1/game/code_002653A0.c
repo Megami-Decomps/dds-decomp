@@ -341,7 +341,70 @@ s32 btlAddBaseStats(s32 *src, DatPartyRecord *obj) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", ptyAccumulateStatGains);
+typedef struct PartyStatGrowthBank {
+    u8 unk0[5];
+    u8 levelStats[99][DAT_BASE_STAT_COUNT];
+} PartyStatGrowthBank;
+
+extern PartyStatGrowthBank D_0036D4C8[];
+extern u32 effMiscRand(void *state);
+
+void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
+    s32 eligible[DAT_BASE_STAT_COUNT];
+    s32 eligibleCount;
+    s32 overflow;
+    s32 overCapCount;
+    s32 stat;
+    u16 unitId;
+    s32 level;
+
+    memset(gains, 0, sizeof(s32) * DAT_BASE_STAT_COUNT);
+    unitId = unit->unitId;
+    level = unit->level;
+    while (levelDelta-- > 0) {
+        for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
+            gains[stat] += D_0036D4C8[unitId].levelStats[level][stat];
+        }
+        level++;
+    }
+
+    for (;;) {
+
+        eligibleCount = 0;
+        for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
+            if (unit->baseStats[stat] + gains[stat] < 99) {
+                eligible[eligibleCount++] = stat;
+            }
+        }
+
+        overflow = 0;
+        overCapCount = 0;
+        for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
+            s32 total = unit->baseStats[stat] + gains[stat];
+            if (total >= 100) {
+                if (overCapCount == 0) {
+                    overflow = total - 99;
+                    goto cap_gain;
+                }
+                if (eligibleCount != 0) {
+                    goto counted;
+                }
+cap_gain:
+                gains[stat] = 99 - unit->baseStats[stat];
+counted:
+                overCapCount++;
+            }
+        }
+
+        if (eligibleCount == 0 || overCapCount == 0) {
+            break;
+        }
+        {
+            s32 recipient = eligible[effMiscRand(NULL) % eligibleCount];
+            gains[recipient] += overflow;
+        }
+    }
+}
 
 
 extern void scrClearFlags(DatPartyRecord *);

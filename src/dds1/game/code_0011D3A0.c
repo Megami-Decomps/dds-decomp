@@ -88,7 +88,7 @@ extern void fldActivateObjectById(s32);
 
 extern void mdlFlagSet(s32);
 
-extern void func_0011B150(s32);
+extern void ptyReturnOne(s32);
 
 extern FieldStageCoordinate D_0032DDB0[];
 
@@ -963,7 +963,7 @@ void fldActivateFlaggedObject(u32 flagIndex) {
         mdlFlagSet(flagIndex + 0x610);
     }
     if (D_0034C8F0[flagIndex].kind == 2) {
-        func_0011B150(D_0034C8F0[flagIndex].parameter);
+        ptyReturnOne(D_0034C8F0[flagIndex].parameter);
     }
 }
 

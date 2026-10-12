@@ -13,6 +13,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "sdf.h"
+#include "kwln.h"
 #include "sdf_pac_state.h"
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
@@ -222,7 +223,6 @@ extern char D_0042B610[];
 
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void kwlnDrawSpriteCell(SdfListHead *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);

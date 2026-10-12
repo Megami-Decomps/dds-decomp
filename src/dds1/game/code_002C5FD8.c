@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_counter_channel.h"
 #include "sdf_textured_rect.h"
 #include "sdf_resource.h"
 #include "fpu.h"
@@ -42,14 +43,6 @@ extern u32 D_003DFEE0[];
 
 
 typedef struct {
-    u32 *word;         /* 0x00 */
-    u8 *info;          /* 0x04 */
-    s16 value;         /* 0x08 */
-    u8 pad0A[4];
-    s16 flag;          /* 0x0E */
-} SdfCounterDisplay;
-
-typedef struct {
     s32 value;            /* 0x00 */
     s16 countdown;        /* 0x04 */
     s16 mode;             /* 0x06 */
@@ -65,15 +58,6 @@ typedef struct {
     s16 curY;             /* 0x1E */
     s32 frames;           /* 0x20 */
 } SdfCounterTimer;
-
-typedef struct SdfCounterChannel {
-    s32 index;                      /* 0x00 */
-    u8 pad04[0x54];
-    struct SdfCounterChannel *next; /* 0x58 */
-    struct SdfCounterChannel *prev; /* 0x5C */
-    u8 pad60[0x10];
-    SdfCounterDisplay *display;     /* 0x70 */
-} SdfCounterChannel;
 
 struct SdfCounterRuntime;
 

@@ -2166,7 +2166,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     s32 width;
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
-    glyph = func_001951C8(text, 0, 0, 0, 0);
+    glyph = frFontBuildGlyphChain(text, 0, 0, 0, 0);
     frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;
     frFontSetGlyphPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);

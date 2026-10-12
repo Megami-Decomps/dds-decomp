@@ -396,7 +396,7 @@ extern void kwlnStepBackgroundFade(void);
 extern void func_00106288(void);
 extern void kwlnFadeUpdate(void);
 extern void func_00105CF8(void);
-extern void func_00107108(void);
+extern void kwlnAdvanceDrawFadesAndTransitions(void);
 extern u32 func_001200E0(void);
 extern void func_00343468(s32);
 extern void sdfQueueFramePackets(SdfListHead *, SdfPacketChain *);
@@ -433,7 +433,7 @@ s32 kwlnRenderFrame(void) {
     func_00106288();
     kwlnFadeUpdate();
     func_00105CF8();
-    func_00107108();
+    kwlnAdvanceDrawFadesAndTransitions();
     groupHeads = D_00380788;
     packetGroups = D_003808B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;
     for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {

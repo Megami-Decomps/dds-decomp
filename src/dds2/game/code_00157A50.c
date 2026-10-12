@@ -3,6 +3,7 @@
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_texture_file.h"
 #include "eff.h"
 #include "eff_node.h"
 #include "file_request_api.h"
@@ -134,7 +135,51 @@ void effBillDispatchAll(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00157A50", billCreateChildPayloadFromTextureResource);
+BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource) {
+    struct SdfMemBlock *allocation;
+    BillPacketWork *work;
+    BillChildPayload *child;
+    SdfTex *texture;
+    s16 widthUv;
+    s16 heightUv;
+    s32 pendingIndex;
+
+    allocation = sdfAllocGeneralBlock(0x450);
+    work = (BillPacketWork *)(u32)sdfResourceRetainAddress(allocation);
+    child = (BillChildPayload *)((u8 *)work + sizeof(*work));
+
+    child->refCount = 0;
+    child->allocation = allocation;
+    child->work = work;
+    work->count = 0;
+    child->next = child;
+    child->variant = 0;
+    for (pendingIndex = 4; pendingIndex >= 0; pendingIndex--) {
+        child->pendingLists[pendingIndex] = NULL;
+    }
+    child->packetListIndex = 0;
+
+    texture = sdfTexAcquireResourceTexture(resource);
+    heightUv = (s16)((u16)texture->height << 4);
+    widthUv = (s16)((u16)texture->width << 4);
+
+    child->refCount++;
+    child->uv.components[0] = 0;
+    child->uv.components[1] = 0;
+    child->uv.components[2] = widthUv;
+    child->uv.components[3] = 0;
+    child->uv.components[4] = widthUv;
+    child->uv.components[5] = heightUv;
+    child->uv.components[6] = 0;
+    child->uv.components[7] = heightUv;
+    child->texture = texture;
+    child->halfWidth = (f32)(widthUv >> 5) * 0.0625f;
+    child->halfHeight = (f32)(heightUv >> 5) * 0.0625f;
+    child->x = 0.0f;
+    child->y = 0.0f;
+    return child;
+}
+
 
 /* Drop one reference; the last one releases the texture and its allocation. */
 void effReleaseSharedTextureRecord(BillChildPayload *entry) {

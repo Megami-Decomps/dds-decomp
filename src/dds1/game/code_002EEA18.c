@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
@@ -8,6 +9,8 @@
 #include "sce_io.h"
 #include "sdf_dev_state.h"
 #include "sdf_dev_event.h"
+#include "sdf_pac_state.h"
+#include "sdf_pac_work.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -22,65 +25,33 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-typedef struct SdfPacCounter {
-    u32 count;     /* 0x0 */
-    u32 progress;  /* 0x4 */
-} SdfPacCounter;
-
-typedef struct SdfPacList {
-    u8 pad00[8];
-    DevRequest *list; /* 0x8 */
-} SdfPacList;
-
-typedef struct SdfPacRead {
-    u8 pad00[8];
-    void (*handler)();      /* 0x08 */
-    u8 pad0C[4];
-    u32 *input;             /* 0x10 */
-    s32 active;             /* 0x14 */
-    u8 pad18[8];
-    u32 skipBytes;          /* 0x20 */
-    u8 pad24[8];
-    SdfPacCounter *counter; /* 0x2C */
-    u8 pad30[4];
-    SdfPacList *dest;       /* 0x34 */
-} SdfPacRead;
-
-extern void sdfPacAdvanceInput();
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32 count);
-extern void sdfPacSkipAllocationEntryBytes();
 
 /* Read the entry count word, size the list for it and arm the skip handler. */
-void sdfPacReadListAllocationCount(SdfPacRead *state) {
+void sdfPacReadListAllocationCount(PacState *state) {
     u32 count;
-    SdfPacList *dest;
+    PacListAllocation *allocation;
+    PacWork *work;
 
-    if (state->active != 0) {
-        count = *state->input;
+    if (state->inputAvailable != 0) {
+        /* The aligned packet count is read with native lw semantics. */
+        count = *(u32 *)state->inputCursor;
         sdfPacAdvanceInput(state, 4);
-        dest = state->dest;
-        state->counter->count = count;
-        state->counter->progress = 0;
-        dest->list = sdfCreateConfiguredBufferedResourceList(count);
-        state->skipBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
-        state->handler = sdfPacSkipAllocationEntryBytes;
+        allocation = state->slot.list;
+        work = state->queueTail;
+        allocation->entryCount = count;
+        allocation->entryIndex = 0;
+        work->resourceHandle = sdfCreateConfiguredBufferedResourceList(count);
+        state->pendingBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
+        state->onInput = sdfPacSkipAllocationEntryBytes;
     }
 }
 
-typedef struct SdfAllocWork {
-    u8 unk0[8];
-    void (*handler)();
-    u8 unkC[0x20];
-    void *buffer;
-} SdfAllocWork;
-
-extern void sdfPacEnqueuePacket(SdfAllocWork *);
-extern void sdfPacReadListAllocationCount();
-
-void sdfQueueAndResetPacketWork(SdfAllocWork *work) {
-    sdfPacEnqueuePacket(work);
-    work->buffer = sdfAllocSizeClassBlock(0x30);
-    work->handler = sdfPacReadListAllocationCount;
+void sdfQueueAndResetPacketWork(PacState *state,
+                                SdfPacStreamPacketHeader *packet) {
+    sdfPacEnqueuePacket(state, packet);
+    state->slot.list = sdfAllocSizeClassBlock(0x30);
+    state->onInput = sdfPacReadListAllocationCount;
 }
 
 enum {
@@ -127,7 +98,7 @@ extern u8 *D_003FF300[16];
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-s32 func_002EEAE0(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
+s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;
@@ -476,7 +447,6 @@ extern s32 SignalSema(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 extern s32 func_002CF930(void);
-extern s32 sdfGetElapsedTimerTicks(s32);
 
 s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
@@ -505,11 +475,11 @@ s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
         dmaId = sceSifSetDma(&transfer, 1);
         while (sceSifDmaStat(dmaId) >= 0) {
             timer = func_002CF930();
-            while (sdfGetElapsedTimerTicks(timer) <= 0) {
+            while ((s32)sdfGetElapsedTimerTicks(timer) <= 0) {
             }
         }
         timer = func_002CF930();
-        while (sdfGetElapsedTimerTicks(timer) < 0x64) {
+        while ((s32)sdfGetElapsedTimerTicks(timer) < 0x64) {
         }
         stream->destinationAddress += byteCount;
         stream->transferredBytes += byteCount;

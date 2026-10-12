@@ -1,5 +1,7 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf.h"
+#include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf_draw.h"
@@ -233,7 +235,6 @@ extern void sdfSetPacketCursorAligned(s32 cursorAddress);
 
 struct SdfTex;
 
-extern u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
 
 extern u32 D_00398660[96];
 
@@ -405,7 +406,6 @@ extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBy
 
 extern s32 func_002CF930(void);
 
-extern s32 sdfGetElapsedTimerTicks(s32);
 
 extern s32 sceSifMBindRpc(void *, s32, s32);
 
@@ -422,7 +422,7 @@ void sdfStartDevRpcServerAndBindClient(void) {
             break;
         }
         waitStart = func_002CF930();
-        while (sdfGetElapsedTimerTicks(waitStart) < SDF_DEV_RPC_BIND_POLL_TICKS) {
+        while ((s32)sdfGetElapsedTimerTicks(waitStart) < SDF_DEV_RPC_BIND_POLL_TICKS) {
         }
     }
 }

@@ -65,7 +65,6 @@ extern f32 D_003BD35C;
 extern SdfPendingRequest sdfResourceReleaseQueue;
 extern SdfPendingRequest sdfAssetReleaseQueue;
 extern s32 sdfLiveAssetCount;
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 

@@ -19,6 +19,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "file.h"
 #include "eff_update_flags.h"
@@ -45,18 +46,6 @@ extern u8 effSharedRandomState[];
 extern void func_001ECBF8();
 
 typedef struct BtlUnit BtlUnit;
-
-/* Motion selection and approach tasks share these 0x14-byte resource nodes. */
-typedef struct BtlEffectNode {
-    s16 triggerKind;
-    u8 pad02[2];
-    s16 rateKind;
-    u8 pad06[2];
-    f32 scale;
-    f32 reachOffset;
-    u8 pad10[2];
-    u16 frameCount;
-} BtlEffectNode;
 
 typedef struct BtlEffectResource {
     s128 vec0;

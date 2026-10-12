@@ -174,7 +174,7 @@ u32 itfReadEncodedCode(FrFontCtx *stream) {
 
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frFontAdvanceContextCursor(FrFontCtx *);
-extern void func_0019DEE0(u8, FrFontCtx *);
+extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
@@ -212,7 +212,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     case 0xF203:
         if (D_004528C0[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
-            func_0019DEE0((u8)(stream->encodedText[*position] - 1), stream);
+            frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
         break;
@@ -835,7 +835,7 @@ extern u16 D_00436582;
 extern s32 D_00436584;
 extern s32 D_00436588;
 extern u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode);
-extern s32 func_0019DB30(FrFontGlyph *text);
+extern s32 frFontCountGlyphBands(FrFontGlyph *text);
 extern s32 frFontMeasureLineWidth(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
@@ -881,7 +881,7 @@ FrFontGlyph *func_0019FA08(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *
         s32 maxWidth = 0;
         s32 i;
         s32 width;
-        for (i = 0; i < func_0019DB30(handle); i++) {
+        for (i = 0; i < frFontCountGlyphBands(handle); i++) {
             width = frFontMeasureLineWidth(i, handle);
             if (maxWidth < width) {
                 maxWidth = width;
@@ -929,7 +929,7 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
         s32 maxWidth = 0;
         s32 i;
         s32 width;
-        for (i = 0; i < func_0019DB30(handle); i++) {
+        for (i = 0; i < frFontCountGlyphBands(handle); i++) {
             width = frFontMeasureLineWidth(i, handle);
             if (maxWidth < width) {
                 maxWidth = width;

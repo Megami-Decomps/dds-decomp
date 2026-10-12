@@ -163,7 +163,6 @@ void *evtGetTestTaskUpdateCallback(void) {
 }
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void kwlnDrawSpriteCell(u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern s32 sdfPathExists(char *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
@@ -181,7 +180,7 @@ s32 evtUpdateScriptTestSelection(void) {
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    kwlnDrawSpriteCell((u32)list, 0x84, 0x54, 0x15, 10);
+    kwlnDrawSpriteCell(list, 0x84, 0x54, 0x15, 10);
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7840, 0x7BA0, 0xFEFFFF, 0, D_003ACC68));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, D_003ACC78, D_003BBDEC));
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, D_003ACC88));

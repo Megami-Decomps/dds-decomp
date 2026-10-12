@@ -969,7 +969,6 @@ extern SdfPoolNode *D_00325838[];
 
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
-extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 
@@ -4097,7 +4096,7 @@ extern s32 D_0032E5C4[];
 
 extern FldSparkController fldSparkControlState;
 
-extern void func_001239C8(void);
+extern void fldTogglePlayerModel(void);
 
 extern void fldClearObjectEntryHandles(void);
 
@@ -4116,7 +4115,7 @@ void fldFinishEventFieldState(void) {
 
     if (state->transitionMode != 0) {
         D_0032E5C4[0] = 0;
-        func_001239C8();
+        fldTogglePlayerModel();
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
@@ -4259,7 +4258,7 @@ void fldUpdateSparkMessageSequence(void) {
     case 9:
         func_0014B688();
         fldLoadWeatherEffects();
-        func_001239C8();
+        fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);
         fldSparkControlState.unk2C = 0;
         fldSparkControlState.dialogPhase = 10;
@@ -4416,7 +4415,7 @@ void fldUpdateSparkEncounterScene(void) {
         fldSparkControlState.phase = 8;
     } else if (phase == 8) {
         sndSetSequenceVolumePan(0x670011, 0x7F, 0x3F);
-        func_001239C8();
+        fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
         evtSetSolarOverlayFullyVisible();
         D_0032E4E8[0] = 1;

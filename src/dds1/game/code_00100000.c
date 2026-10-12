@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "kwln.h"
 
 extern void kwlnUpdatePadInputState(void);
@@ -82,7 +83,7 @@ s32 kwlnInitializeRuntime(void) {
     func_003003F0(D_003BA778);
     kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, dds3RunWorldSecondaryCallbacks, 0, 0);
     func_003003F0(D_003BA780);
-    func_00194228(0x100, 0x200);
+    frFontInitializeSystem(0x100, 0x200);
     kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
     func_003003F0(D_003BA788);
     fileManInit();
@@ -196,7 +197,6 @@ extern u16 D_003BD32E;
 extern u16 D_003BD334;
 extern u16 mnuMovieTaskState;
 extern u32 func_002CF930(void);
-extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfSleepThreadCount(s32);
 extern void sdfSetNonnegativePacketIndex(s32);
 extern void sdfPadBuildButtonStates(void);

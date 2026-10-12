@@ -1,5 +1,6 @@
 #include "snd_ring.h"
 #include "common.h"
+#include "snd_track_slot.h"
 #include "sce_io.h"
 
 #define SND_COMMAND_RING_ENTRY_COUNT 32
@@ -39,13 +40,6 @@ typedef struct SndChannel {
     u32 unk8;     /* 0x8 */
     u32 unkC;     /* 0xC */
 } SndChannel;
-
-typedef struct SndTrackSlot {
-    s32 id;       /* 0x0 */
-    u8 flagA;     /* 0x4 */
-    u8 flagB;     /* 0x5 */
-    u8 pad6[2];
-} SndTrackSlot;
 
 typedef struct SndIopBuffer {
     s32 size;
@@ -218,8 +212,8 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     sndMidiTrackState.unk204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
         sndMidiTrackState.slots[i].id = -1;
-        sndMidiTrackState.slots[i].flagA = 0;
-        sndMidiTrackState.slots[i].flagB = 0;
+        sndMidiTrackState.slots[i].unknown_04[0] = 0;
+        sndMidiTrackState.slots[i].unknown_04[1] = 0;
     }
 }
 

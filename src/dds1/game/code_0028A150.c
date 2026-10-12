@@ -566,7 +566,7 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
-    D_003BD8F0 = (u32)func_001951C8((const char *)(u32)font, 0, 0, 0, 0);
+    D_003BD8F0 = (u32)frFontBuildGlyphChain((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
     frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_003BD8F0, 1);
     frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_003BD8F0, x << 4, y << 3);

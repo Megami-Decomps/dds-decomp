@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -276,7 +277,6 @@ extern s32 sceSifLoadModule(const char *path, s32 argLen, const char *args);
 extern s32 sceSifMBindRpc(SifRpcClientData *client, s32 id, s32 mode);
 extern void func_0034D8E0(s32 arg);
 extern s32 func_003287E0(void);
-extern s32 sdfGetElapsedTimerTicks(s32 start);
 
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
 void func_00329C20(const char *modulePath, const char *optionalModulePath) {
@@ -297,7 +297,7 @@ void func_00329C20(const char *modulePath, const char *optionalModulePath) {
             break;
         }
         retryStartTick = func_003287E0();
-        while (sdfGetElapsedTimerTicks(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
+        while ((s32)sdfGetElapsedTimerTicks(retryStartTick) < SDF_RPC_BIND_RETRY_TICKS) {
         }
     }
 }
