@@ -119,13 +119,13 @@ void frFontBuildGsSetupPacket(FrFontGsPacket *packet) {
     packet->writes[5].reg = 0x47;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019B840", func_0019BA00);
+INCLUDE_ASM(const s32, "game/code_0019B840", frFontDrawAtlasGlyph);
 
 
 /* Submit glyph-relative coordinates and the cache node's owned UV rectangle. */
 void frFontDrawCachedGlyphRelative(s32 x, s32 y, s32 depth, FrFontChildGlyph *glyph,
                   s32 drawFlags) {
-    func_0019BA00(x + glyph->x, y + glyph->y,
+    frFontDrawAtlasGlyph(x + glyph->x, y + glyph->y,
                  glyph->cellDimensions.cellWidth,
                  glyph->cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
                  glyph->renderValueOrSetupOrShade.setupBytes.firstOption, glyph->parentDimensionsOrRenderWord.renderWord, depth, 1,
