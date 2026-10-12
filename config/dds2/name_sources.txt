@@ -14,6 +14,7 @@
 0x001010A8	kwlnTaskGetStateList	inferred	Selects one of the three task-list pointers according to the low four state bits.
 0x00101198	kwlnTraverseDiagnosticTaskQueue	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:181:func_00101198; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001011D0	kwlnPrintTaskQueueDiagnostics	inferred	confidence=high; src/dds2/kernel/dds3KernelCore.c:func_001011D0; Prints delayed-start, middle, and delayed-destroy task lists and queue counters. [names_qp9.tsv]
+0x00101250	kwlnPrintTaskTreeRecursive	inferred	Emits a task node with the current indentation, then recursively visits child and sibling tasks; counterpart 0x00101368.
 0x00101328	kwlnVisitTaskForestRoots	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:211:func_00101328; Initializes the task-name scratch buffer, visits only parentless tasks in all three scheduler lists and dispatches the root handler with its second argument zero.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00101428	kwlnTaskTickScheduler	inferred	Runs the start, intermediate, and destruction queues once.
 0x00101678	kwlnTaskMarkDestroyPending	inferred	Transitions only active state-2 tasks into state 3 without freeing them.
