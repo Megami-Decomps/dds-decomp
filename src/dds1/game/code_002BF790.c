@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -500,22 +501,6 @@ void itfGridUnpackColorChannels(u64 *channels, u32 color) {
     blueBits = color & 0xFF00;
     channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
 }
-
-typedef struct ConsMatrixPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u8 matrixA[0x40];
-    u8 matrixB[0x40];
-    u8 vecC[0x10];
-    u8 vecD[0x10];
-    u8 vecE[0x10];
-    u32 stmodCommand;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-} ConsMatrixPacket;
 
 extern SdfListHead D_003DFAB0[2];
 

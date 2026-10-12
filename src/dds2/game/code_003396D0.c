@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
@@ -349,22 +350,6 @@ void *sdfConsAllocateColumnPacket(s32 loopCount) {
     return packet;
 }
 
-typedef struct ConsMatrixPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u8 matrixA[0x40]; /* 0x10 */
-    u8 matrixB[0x40]; /* 0x50 */
-    u8 vecA[0x10];    /* 0x90 */
-    u8 vecB[0x10];    /* 0xA0 */
-    u8 vecC[0x10];    /* 0xB0 */
-    u32 stmodCommand;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-} SdfVuBonePacket;
-
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
 void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
     packet->quadwords = 0xC;
@@ -385,8 +370,8 @@ void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node
         VU0_STORE_VF_UNCLOBBERED(vf10, node->inverseOrigin);
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
-    packet->reservedA = 0;
-    packet->reservedB = 0;
+    packet->unknownC8 = 0;
+    packet->unknownCC = 0;
 }
 
 extern u8 D_0040B620[];

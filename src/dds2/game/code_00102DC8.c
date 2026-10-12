@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -1062,23 +1063,6 @@ s32 kwlnEnsureDefaultResource(void) {
     kwlnTextureAttachTask(&kwlnPositionedTextSurface);
     return 0;
 }
-
-typedef struct ConsMatrixPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u8 matrixA[0x40];
-    u8 matrixB[0x40];
-    u8 vecA[0x10];
-    u8 vecB[0x10];
-    u8 vecC[0x10];
-    u32 stmodCommand;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-} ConsMatrixPacket;
-
 
 /* Two fixed frame banks: thirteen draw groups and their scene/overlay packets. */
 typedef struct KwlnFrameDrawBank {
