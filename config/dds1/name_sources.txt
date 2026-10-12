@@ -2479,6 +2479,7 @@
 0x00195E08	frFontGetGlyphCellHeight	inferred	Returns default font height for the built-in slots or font resource second halfword; caller stores it as glyph height. [names_reviewed19.tsv]
 0x00195E48	frFontResetContextCursorSpacing	inferred	confidence=high; src/dds1/interface/frFont.c:func_00195E48; Restores the default font-context cursor increment, consumed as the stored setting multiplied by eight. [names_qp9.tsv]
 0x00195E58	frFontSetContextCursorSpacing	inferred	confidence=high; src/dds1/interface/frFont.c:func_00195E58; Sets the spacing used by the font context cursor advance routine. [names_qp9.tsv]
+0x00195FA8	frFontGetGlyphPositionAtIndex	inferred	Advances one linked glyph at a time, writes its x/y coordinates and stops at the requested index; the adjacent comment documents DDS1 behavior. twin=DDS2 0x0019DC68.
 0x00196038	frFontMoveChainTo	inferred	moves glyph chain so first glyph sits at x,y
 0x00196390	frFontCreateContext	inferred	allocates a new font ctx via 95160 and attaches it
 0x001963E0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
