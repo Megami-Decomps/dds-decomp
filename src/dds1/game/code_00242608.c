@@ -59,7 +59,7 @@
 
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
-extern s32 func_00244848();
+extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
 extern void mnuUnpackNibbleFields();
 
@@ -1172,7 +1172,7 @@ MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, Shop
 }
 
 
-void func_002444D0(ShopScene *scene) {
+void mnuShopInitializeOptionList(ShopScene *scene) {
     scene->sprite = mnuCreateShopListWindow(D_00368C40, 3, scene);
 }
 
@@ -1262,7 +1262,7 @@ s32 mnuCampGetProgressStage(void) {
     return result;
 }
 
-s32 func_00244848(void) {
+s32 mnuCampGetShopPriceStage(void) {
     u32 stage = mnuCampGetProgressStage();
 
     if (stage < 5) {
@@ -1310,7 +1310,7 @@ ShopScene *mnuShopCreateScene(void) {
     evtLoadResourcePair("/facility/msg/shop/mes_data.bmd", obj->resourcePair);
     evtCreateMessageWindowIfMissing(obj->pairedHandle);
     D_003BC520 = obj->spriteResource;
-    obj->count98 = func_00244848();
+    obj->count98 = mnuCampGetShopPriceStage();
     obj->count8C = mnuCountActivePartyEntries();
     return obj;
 }
@@ -1409,7 +1409,7 @@ typedef struct ShopSourcePriceRow {
 
 extern ShopSourcePriceRow D_00368CF0[];
 
-s32 func_00244C00(s32 index, s32 source, s32 halfPrice) {
+s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     u32 rowIndex;
     u32 itemId;
     u32 rowPercent;
@@ -1909,7 +1909,7 @@ void evtInstallStateTable(ShopScene *state) {
 }
 
 extern s32 func_00244658();
-extern void func_002444D0(ShopScene *);
+extern void mnuShopInitializeOptionList(ShopScene *);
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
@@ -1920,7 +1920,7 @@ s32 evtInitializeActiveMenuState(KwlnTask *task) {
     evtSetBoundedDisplayValue(0, 2);
     if (((ShopScene *)stateAddress)->sprite == 0) {
         ((ShopScene *)stateAddress)->extraOption = func_00244658(stateAddress);
-        func_002444D0((ShopScene *)stateAddress);
+        mnuShopInitializeOptionList((ShopScene *)stateAddress);
     }
     windowData = ((ShopScene *)stateAddress)->sprite->list->context;
     pendingSelection = mnuShopHasPendingFlag((ShopScene *)stateAddress);
@@ -1948,7 +1948,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 
-s32 func_00245DE0(KwlnTask *task) {
+s32 mnuShopPollCommandSelection(KwlnTask *task) {
     s32 allowed = 1;
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
     s32 input = mnuMapPadMaskToFlags(0x33);
@@ -2555,7 +2555,7 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
 
-s32 func_00247190(KwlnTask *task) {
+s32 mnuShopBeginTransactionMessage(KwlnTask *task) {
     ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(task);
     char text[16];
     s32 options[2] = {1, 3};
@@ -2821,7 +2821,7 @@ extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 
-s32 func_00247A78(KwlnTask *callbackContext) {
+s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(callbackContext);
 
     switch (state->menuMode) {
@@ -2927,7 +2927,7 @@ s32 mnuTickShopMessageSequence(KwlnTask *task) {
                 case 2:
                     if (evtGetMessageWindowControlState() == 0) {
                         evtFinishMessageWindowAndNotify();
-                        state->count98 = func_00244848();
+                        state->count98 = mnuCampGetShopPriceStage();
                         state->action = 3;
                         state->scanIndex = 0;
                     }

@@ -780,7 +780,7 @@ typedef struct MenuFadeWork {
 
 /* Draw phase-specific sprite/window alpha and vertical offsets; every path returns zero.
  * Phases 1/5 use the timer ratio, 2/3 its inverse, and 4 full alpha. */
-s32 func_002501E0(s32 unused, MenuFadeWork *work) {
+s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
     f32 shadeFactor;
     f32 elapsedFrames;
     f32 fadeRatio;
@@ -890,7 +890,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
 
 /* Summarize two requirement slots: bit 0 marks a qualifying list of at least three IDs;
  * bit 1 reflects the conjunction of the two native record flags. */
-s32 func_00250758(u16 profileId) {
+s32 mnuGetProfileRequirementFlags(u16 profileId) {
     s32 resultFlags = 0;
     u8 *profileRecord = (u8 *)prfReqGetEntryRecord(profileId);
     s32 requirementWordIndex = 0;
@@ -926,11 +926,11 @@ s32 func_00250758(u16 profileId) {
 }
 
 /* Return the first status-exactly-one requirement list when summary bit 0 is set, otherwise NULL. */
-u8 *func_00250820(u16 profileId) {
+u8 *mnuGetProfileRequirementIds(u16 profileId) {
     s32 slotIndex = 0;
     PrfDds1RequirementRecord *profileRecord;
 
-    if ((func_00250758(profileId) & 1) != 0) {
+    if ((mnuGetProfileRequirementFlags(profileId) & 1) != 0) {
         profileRecord = prfReqGetEntryRecord(profileId);
         while (profileRecord->slots[slotIndex].status != 1) {
             slotIndex++;
@@ -945,11 +945,11 @@ u8 *func_00250820(u16 profileId) {
 
 /* Return whether the selected party row has capped both required profiles.
  * No qualifying requirement list is treated as satisfied; only its first two IDs are checked. */
-s32 func_002508D8(u16 profileId) {
+s32 mnuAreRequiredProfilesCapped(u16 profileId) {
     MnuResourceTask *task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     MnuProfileProgress *progress =
         (MnuProfileProgress *)task->menuList->cursor->unk70;
-    u8 *requiredProfiles = func_00250820(profileId);
+    u8 *requiredProfiles = mnuGetProfileRequirementIds(profileId);
 
     if (requiredProfiles == NULL) {
         return 1;

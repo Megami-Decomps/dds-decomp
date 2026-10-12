@@ -766,7 +766,7 @@ void mnuSetPanelState(MenuPanelState *panel, u32 state) {
     panel->state = state;
 }
 
-extern void func_002BA7A8(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
+extern void mnuDrawIconState(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(struct MenuIconState *);
 
 void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
@@ -810,7 +810,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
             rowX += panel->height;
         }
     }
-    func_002BA7A8(x, y, depth, 0x100, panel->resourceHandle, 0, drawArg);
+    mnuDrawIconState(x, y, depth, 0x100, panel->resourceHandle, 0, drawArg);
     mnuUpdateWindowPanelHandleStatesKindFourFive(panel->resourceHandle);
 }
 
