@@ -96,7 +96,7 @@ extern s32 sdfDevReplySemaphore;
 
 extern s32 func_002E5158(u32, u8 *, u32);
 
-extern void func_002E5D98(s32 arg0);
+extern void sdfDevSetFallbackDeviceWorker(s32 worker);
 
 extern s32 sdfOpenDiscFileRecord;
 
@@ -116,7 +116,7 @@ extern DevWorkerEntry sdfDeviceWorkerEntries[];
 
 extern u8 sdfPfsPathPrefix[];
 
-extern char *func_002E5970(char *path);
+extern char *sdfDevAllocateNormalizedPath(char *path);
 
 extern s32 SignalSema(s32 sema);
 
@@ -194,7 +194,7 @@ extern s32 func_00312618(const char *, s32, void *, s32 *);
 
 extern void func_003003F0(const char *);
 
-extern void func_002E4B80(const char *text);
+extern void sdfDevPrintText(const char *text);
 
 extern u8 sdfDiscReadMode;
 
@@ -427,7 +427,8 @@ void sdfStartDevRpcServerAndBindClient(void) {
     }
 }
 
-void func_002E4B80(const char *text) {
+/* Print text through the bound IOP dev client, or locally when it is unbound. */
+void sdfDevPrintText(const char *text) {
     u8 buffer[0x13F];
     u8 *alignedBuffer;
     s32 length;
@@ -451,7 +452,7 @@ s32 sdfPrintFormattedDevMessage(const char *fmt, ...) {
 
     __builtin_stdarg_start(args, fmt);
     length = func_00305B08(buffer, fmt, args);
-    func_002E4B80(buffer);
+    sdfDevPrintText(buffer);
     return length;
 }
 
@@ -595,7 +596,8 @@ s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     return result;
 }
 
-s32 func_002E5398(void *buffer, s32 size) {
+/* Consume up to size disc-file bytes, retaining a partial sector; return the byte count. */
+s32 sdfDevReadDiscFileBytes(void *buffer, s32 size) {
     s32 available = D_003BDA4C;
     u8 *destination = buffer;
     s32 bytes;
@@ -827,7 +829,8 @@ extern char *strchr(const char *, s32);
 
 extern s32 strncmp(const char *, const char *, u32);
 
-char *func_002E5970(char *path) {
+/* Return an allocated device path, normalizing disc-path case and separators. */
+char *sdfDevAllocateNormalizedPath(char *path) {
     s32 length = strlen(path);
     char *result = sdfAllocSizeClassBlock(0x80);
     char *cursor;
@@ -890,7 +893,7 @@ DevState *sdfDevCreateCommandState(const char *path) {
 }
 
 s32 sdfPathExists(char *path) {
-    char *resolved = func_002E5970(path);
+    char *resolved = sdfDevAllocateNormalizedPath(path);
     s32 fd;
 
     if (*resolved == '/') {
@@ -932,8 +935,8 @@ typedef struct DevPathPrefix {
     u16 tail;
 } DevPathPrefix;
 
-/* Set the current device directory: prefix plus path, ending in a slash. */
-void func_002E5CD8(char *path) {
+/* Set the current device directory, ending in a slash; path is assumed nonempty. */
+void sdfDevSetCurrentDirectory(char *path) {
     s32 length = strlen(path);
 
     ((DevPathPrefix *)D_00398820)->head = ((DevPathPrefix *)D_003BD400)->head;
@@ -951,13 +954,15 @@ char *sdfDevGetPathBuffer(void) {
     return D_00398820;
 }
 
-void func_002E5D80(s32 value) {
-    D_003BD3F0 = value;
-    func_002E5D98(value);
+/* Select the default path-construction worker and the no-prefix fallback worker. */
+void sdfDevSetDefaultDeviceWorker(s32 worker) {
+    D_003BD3F0 = worker;
+    sdfDevSetFallbackDeviceWorker(worker);
 }
 
-void func_002E5D98(s32 value) {
-    D_003BD42E = value;
+/* Select the worker used when a file path has no explicit device prefix. */
+void sdfDevSetFallbackDeviceWorker(s32 worker) {
+    D_003BD42E = worker;
 }
 
 extern DevState *D_003BD418;
@@ -1382,7 +1387,7 @@ void D_002E6538(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_READING;
-            result = func_002E5398(state->requestData, state->requestExtra);
+            result = sdfDevReadDiscFileBytes(state->requestData, state->requestExtra);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
                 continue;
@@ -1425,7 +1430,7 @@ void D_002E6538(DevWorkerEntry *worker) {
                 }
                 state->requestData = data;
                 state->state = SDF_DEV_STATE_READING;
-                transferResult = func_002E5398(data, transferResult);
+                transferResult = sdfDevReadDiscFileBytes(data, transferResult);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
@@ -1462,7 +1467,8 @@ extern char D_003BD440[]; /* host0: */
 
 extern char D_003BD448[]; /* pfs0: */
 
-char *func_002E67A8(char *path, s32 worker) {
+/* Allocate a worker-specific device path; an unsupported worker returns NULL. */
+char *sdfDevAllocateWorkerPath(char *path, s32 worker) {
     s32 length = strlen(path);
     char *result;
     s32 index;
@@ -1790,7 +1796,8 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern s32 func_00310C00(const char *, const char *, s32, const void *, s32);
 
-void func_002E7228(char *path) {
+/* Load the HDD/PFS dev modules and mount path before enabling PFS debug mode. */
+void sdfDevInitializeHddPfsDebugMode(char *path) {
     char buffer[0x100];
     s32 resident;
     s32 result;

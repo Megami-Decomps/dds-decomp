@@ -444,7 +444,7 @@ extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(DatPartyRecord *unit);
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 extern u8 btlIsRuntimeAllocated(void);
-extern f32 func_001A4598(void);
+extern f32 btlGetEncounterAdjustmentScale(void);
 extern u32 func_001A4630(void);
 extern s32 btlAverageAllMaximumForMask(u32 arg0);
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
@@ -1662,7 +1662,7 @@ s32 evtPushAvailableFloatValue(void) {
     f32 value = 0.0f;
 
     if (battleAvailable != 0) {
-        value = func_001A4598();
+        value = btlGetEncounterAdjustmentScale();
     }
     scrSetFloatReturnValue(value);
     return 1;

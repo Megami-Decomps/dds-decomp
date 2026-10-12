@@ -1150,10 +1150,11 @@ void func_001EC190(void) {
 
 extern void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
-void func_001EC198(BtlLinkedCommand *action) {
+/* Prepare paired camera poses and blend flags for one target; party actors delegate. */
+void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
     BtlUnit *target;
-    s32 kind;
-    f32 pos[4];
+    s32 poseKind;
+    f32 targetPosition[4];
     if (btlGetIndexListCount(action->targetList) != 1) {
         return;
     }
@@ -1166,14 +1167,14 @@ void func_001EC198(BtlLinkedCommand *action) {
         return;
     }
     btlUnitGetBodyPosVU(target);
-    VU0_STORE_VF(vf10, pos);
-    if (pos[0] > 0.0f) {
-        kind = 2;
+    VU0_STORE_VF(vf10, targetPosition);
+    if (targetPosition[0] > 0.0f) {
+        poseKind = 2;
     } else {
-        kind = 3;
+        poseKind = 3;
     }
-    btlFrameTargetExtremesCameraPose(action, &action->frontCamera, kind, 45.0f, 0.25f);
-    btlFrameTargetExtremesCameraPose(action, &action->backCamera, kind, 1.0f, 0.5f);
+    btlFrameTargetExtremesCameraPose(action, &action->frontCamera, poseKind, 45.0f, 0.25f);
+    btlFrameTargetExtremesCameraPose(action, &action->backCamera, poseKind, 1.0f, 0.5f);
     action->motionParameter = 30.0f;
     action->flags |= 0x41;
 }
