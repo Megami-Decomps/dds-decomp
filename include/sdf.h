@@ -264,6 +264,8 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFo
 s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *node, struct MovObj *movie, s32 operation, void *data, s32 size);
 void sdfAdvanceStreamPlayback(s32 cadence);
+/* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
+void sdfSetStreamFrameDrawMode(u32 mode);
 
 typedef struct SdfMovieDescriptor {
     u16 unk00;

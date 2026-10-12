@@ -5,6 +5,7 @@
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf.h"
 #include "kwln.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
@@ -750,7 +751,6 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
 }
 
-extern void sdfSetStreamFrameDrawMode(u32);
 
 
 extern void mnuReleaseMenuResourceSlots(void);
