@@ -41,7 +41,7 @@ extern char *btlCommandPanelTaskNameRef;
 
 extern void func_001C7DB8(s32, s32);
 
-extern void func_001C35F0(s32, s32, s32);
+extern void btlSetActionActorPanelPresentation(s32, s32, s32);
 
 
 extern void func_00230960(s32);
@@ -1370,7 +1370,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
 }
 
 void btlMarkSceneTaskAfterReset(s32 task) {
-    func_001C35F0(task, 0, 0);
+    btlSetActionActorPanelPresentation(task, 0, 0);
     ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags | 0x20;
 }
 
