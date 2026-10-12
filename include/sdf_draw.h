@@ -12,15 +12,38 @@ typedef f32 (*SdfLightSources[3])[4];
 
 typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
 
-/* Opaque storage for the complete 0xE0 lighting packet built by the renderer. */
+/* DMA/VIF lighting payload: DDS1 002E195C..002E1964 writes the halfword
+ * count and two command words; vectors occupy 0x10..0xDF in both games. */
 typedef struct SdfLightingPacketStorage {
-    u8 bytes[0xE0];
+    u16 quadwordCount; /* 0x00 */
+    u8 pad02[6];
+    u32 flushCode; /* 0x08 */
+    u32 unpackCode; /* 0x0C */
+    f32 normal[4][4]; /* 0x10 */
+    f32 color[3][4]; /* 0x50 */
+    f32 ambient[4]; /* 0x80 */
+    f32 combinedColor[4]; /* 0x90 */
+    f32 basis[4][4]; /* 0xA0 */
 } SdfLightingPacketStorage;
 
 typedef char SdfLightingPacketStorage_size_must_be_0xE0[
     (sizeof(SdfLightingPacketStorage) == 0xE0) ? 1 : -1];
-typedef char SdfLightingPacketStorage_alignment_must_be_1[
-    (__alignof__(SdfLightingPacketStorage) == 1) ? 1 : -1];
+typedef char SdfLightingPacketStorage_quadwordCount_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->quadwordCount == 0x00) ? 1 : -1];
+typedef char SdfLightingPacketStorage_flushCode_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->flushCode == 0x08) ? 1 : -1];
+typedef char SdfLightingPacketStorage_unpackCode_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->unpackCode == 0x0C) ? 1 : -1];
+typedef char SdfLightingPacketStorage_normal_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->normal == 0x10) ? 1 : -1];
+typedef char SdfLightingPacketStorage_color_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->color == 0x50) ? 1 : -1];
+typedef char SdfLightingPacketStorage_ambient_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->ambient == 0x80) ? 1 : -1];
+typedef char SdfLightingPacketStorage_combinedColor_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->combinedColor == 0x90) ? 1 : -1];
+typedef char SdfLightingPacketStorage_basis_offset_check[
+    ((u32)&((SdfLightingPacketStorage *)0)->basis == 0xA0) ? 1 : -1];
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 struct SdfMemBlock;
