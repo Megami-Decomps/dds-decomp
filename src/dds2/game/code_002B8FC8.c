@@ -441,7 +441,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
-extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
 
