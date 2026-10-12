@@ -462,7 +462,51 @@ void fileReqBegin(s32 request) {
     fileRequestEntries[request].unk10 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", fileReqPoll);
+/* Keep the zero-status tail distinct and the ready path after retry work;
+ * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
+s32 fileReqPoll(void) {
+    FileReqEntry *entry = &fileRequestEntries[D_003BD8E8];
+    s32 info[2];
+    s32 result = func_002F6858(1, info, &info[1]);
+    s32 retries;
+
+    if (result == 1) {
+        entry->unk0 = info[1];
+        if (info[1] == -1) {
+            entry->slotMetadataDirty = result;
+            entry->selectedSlot = 0;
+        }
+        switch (entry->unk4) {
+        case 0:
+            entry->slotMetadataDirty = result;
+            entry->status = 0;
+            entry->selectedSlot = 0;
+            break;
+        case 2:
+            if (entry->unkC == 0) {
+                retries = entry->unk10;
+                if (retries < 5) {
+                    entry->unk10 = retries + 1;
+                    fileReqInit(D_003BD8E8);
+                    return 0;
+                }
+                entry->status = 2;
+                entry->slotMetadataDirty = result;
+                entry->selectedSlot = 0;
+            } else {
+                entry->status = result;
+            }
+            break;
+        default:
+            entry->status = 3;
+            entry->slotMetadataDirty = 1;
+            entry->selectedSlot = 0;
+            break;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 u8 fileReqGetStatus(s32 request) {
     return fileRequestEntries[request].status;
