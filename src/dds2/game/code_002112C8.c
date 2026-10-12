@@ -35,13 +35,6 @@ extern BtlAiScratchWork *btlActionScratchWork;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 
-/* AICALC.TBL: each decision tier tests three packed predicates, then
- * selects a route in most-specific-first order; route 8 makes no selection. */
-typedef struct AiDecisionRow {
-    u32 predicates[3];
-    u8 routes[8];
-} AiDecisionRow;
-
 typedef struct AiSpecies {
     u8 pad00[4];
     AiDecisionRow decisions[3];
