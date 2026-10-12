@@ -11930,7 +11930,8 @@ s32 effEditGkColorTrack(s32 request) {
     return result;
 }
 
-void func_00301380(s32 request) {
+/* B-/F-family COLOR callback: edit the request's color and adjacent alpha tracks. */
+void effEditBfColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
@@ -11939,7 +11940,8 @@ void func_00301380(s32 request) {
 
 extern u8 D_00459E30[] __attribute__((aligned(4)));
 
-void func_003013A0(void) {
+/* HELPER's COLOR callback edits the shared default color/alpha data. */
+void effEditHlpColorTrack(void) {
     func_00300578(D_00459E30, D_00459E30 + 0x24, ((EffMappingObject *)D_00459E30)->value34.bits);
 }
 
@@ -12022,35 +12024,40 @@ s32 effResolveMappingWithTemporaryTable(s32 request) {
     return result;
 }
 
-void func_00301590(s32 request) {
+/* COLOR callback shared by the native N-SPIRL/N-CYLND/N-SPHRE descriptors. */
+void effEditNColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_003015B0(s32 request) {
+/* Edit COLOR in the N-family descriptors' nested POLYGON data. */
+void effEditNPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
-void func_003015D8(s32 request) {
+/* Edit the root U-CYLND color and alpha tracks selected by the request. */
+void effEditUCylinderColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_003015F8(s32 request) {
+/* Edit COLOR in U-CYLND's nested POLYGON data. */
+void effEditUCylinderPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
 }
 
-s32 func_00301620(s32 request) {
+/* U-SMOKE/U-SPIRL COLOR uses its own property options; forward editor status. */
+s32 effEditUSmokeSpiralColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -12062,28 +12069,32 @@ s32 func_00301620(s32 request) {
     return result;
 }
 
-void func_00301688(s32 request) {
+/* Edit U-SPHRE's root COLOR tracks using its frame bound. */
+void effEditUSphereColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value70);
 }
 
-void func_003016A8(s32 request) {
+/* COLOR callback for the native CRACK POLYGON descriptor. */
+void effEditCrackPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_003016C8(s32 request) {
+/* COLOR callback for the native FLASH POLYGON descriptor. */
+void effEditFlashPolygonColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_00300578(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
 }
 
-s32 func_003016F0(s32 request) {
+/* 2D's COLOR callback restores its property options and forwards editor status. */
+s32 effEditTwoDimensionalColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -12228,37 +12239,44 @@ void effEditWRotationTrack(s32 *work) {
 
 extern u8 D_004000B8[];
 
-void func_003023B8(s32 *work) {
+/* Edit the SCALE_UV curve in U-CYLND's POLYGON child; native callback is void. */
+void effEditUCylinderPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x90, ((EffMappingObject *)source)->value80, D_00400150, D_004000B8);
 }
 
-void func_003023E8(s32 *work) {
+/* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; native callback is void. */
+void effEditUSmokeSpiralScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x9C, ((EffMappingObject *)source)->valueF4, D_00400150, D_00400068);
 }
 
-void func_00302418(s32 *work) {
+/* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; native callback is void. */
+void effEditUSmokeSpiralRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0xC8, ((EffMappingObject *)source)->valueF4, D_00400250, D_004001A0);
 }
 
-void func_00302448(s32 *work) {
+/* Edit SCALE_UV in their POLYGON children; preserve the native void callback. */
+void effEditUSmokeSpiralPolygonUvScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source, ((EffMappingObject *)source)->valueF4, D_00400150, D_004000B8);
 }
 
-void func_00302478(s32 *work) {
+/* Edit the native U-SPHRE root SCALE curve; native callback is void. */
+void effEditUSphereScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x34, ((EffMappingObject *)source)->value70, D_00400150, D_004000B8);
 }
 
-void func_003024A8(s32 *work) {
+/* Edit the native 2D root SCALE curve; native callback is void. */
+void effEditTwoDimensionalScaleTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x34, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
 
-void func_003024D8(s32 *work) {
+/* Edit the native 2D root ROTATE curve; native callback is void. */
+void effEditTwoDimensionalRotationTrack(s32 *work) {
     u8 *source = (u8 *)work[3];
     func_003018C8(source + 0x60, ((EffMappingObject *)source)->value8C, D_00400150, D_00400068);
 }
@@ -12285,11 +12303,13 @@ void effResetCurveEditorSelection(void) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_003025A8);
 
-void func_00302AD0(s32 work) {
+/* ALPHA callback for POLYGON children of the native S-family descriptors. */
+void effEditSPolygonAlphaTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x3c, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value4C);
 }
 
-void func_00302AF0(s32 work) {
+/* FADE callback for D-/O-family POLYGON children; retain the bound plus one. */
+void effEditDoPolygonFadeTrack(s32 work) {
     func_003025A8(((EffMappingRequest *)work)->object + 0x60, ((EffMappingObject *)((EffMappingRequest *)work)->object)->value3C + 1);
 }
 

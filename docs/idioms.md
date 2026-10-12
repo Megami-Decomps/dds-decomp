@@ -2627,7 +2627,7 @@ function still needs decompilation. Paths below are relative to `build/parked`.
 | DDS2 | `bfOpWaitDispatch` | same two loads as DDS1 | `dds2/script/scrTraceCode/bfOpWaitDispatch_P3_Med3.c` |
 | DDS1 | `func_00199828` | allocation-pointer store / kind-byte store, `+0x3C/+0x40` | `dds1/game/code_00196478/func_00199828_W16_Snd.c` |
 | DDS2 | `func_001A1858` | corresponding sprite-constructor stores | `dds2/game/code_0019E138/func_001A1858_P8_FreshA.c` |
-| DDS1 | `func_002BA058`, `effEditGkColorTrack`, `effEditTBoardColorTrack`, `effEditRColorTrack`, `func_002BA2D0`, `func_002BA3C8`, `func_002BA498` | epilogue `ld s0` / `ld s1` | `dds1/game/code_0029A840/func_002BA058_family_W16_Snd.c` |
+| DDS1 | `func_002BA058`, `effEditGkColorTrack`, `effEditTBoardColorTrack`, `effEditRColorTrack`, `func_002BA2D0`, `effEditUSmokeSpiralColorTrack`, `effEditTwoDimensionalColorTrack` | epilogue `ld s0` / `ld s1` | `dds1/game/code_0029A840/func_002BA058_family_W16_Snd.c` |
 | DDS1 | `func_002D5CD0` | resource-header / packet-source loads, `+0xA8/+0xB0` | `dds1/game/code_002D33C8/func_002D5CD0_P2_Med2.c` |
 | DDS1 | `func_0013D650` | return-address save / actor-task flag store | `dds1/game/code_00126A30/func_0013D650.c` |
 | DDS2 | `func_00140238` | same pair, `+0x18/+0x1C` | `dds2/game/code_00136EF8/func_00140238_P1_Med0.c` |
@@ -2698,7 +2698,7 @@ order requirement to encode in C.
 
 ### Three return-liveness controls
 
-`effEditTBoardColorTrack`, `effEditRColorTrack`, and `func_002BA498` have ordinary `s32`
+`effEditTBoardColorTrack`, `effEditRColorTrack`, and `effEditTwoDimensionalColorTrack` have ordinary `s32`
 returns that forward `func_002B9320`'s result after restoring the mapping
 table. Private controls changing just those wrappers to `void` and ignoring
 the result each reproduce exactly two swapped epilogue loads: `+0x4C/+0x50`,
@@ -8267,4 +8267,54 @@ order at its luid tier. Reversing those C statements produces the wrong
 native restore order and permits cross-jumping to remove two words.
 The exact direct-indexed form preserves both stores and all surrounding
 functions: both complete units report 25 match, 0 differ.
+
+## Nested polygon ownership: effect UV-scale and fade callbacks
+
+The remaining curve callbacks in DDS1 `game/code_0029C530` and DDS2
+`game/code_002DE248` are identified by native descriptor ownership, not
+by guessing meanings from their data offsets. A native `POLYGON` property
+points to a child descriptor with its own `COLOR`, `SCALE_UV`, `ALPHA`,
+or `FADE` callback rows. Follow that pointer back to the named parent:
+
+- `N-SPIRL`, `N-CYLND`, and `N-SPHRE` share `effEditNColorTrack`;
+  their `POLYGON` children share `effEditNPolygonColorTrack`.
+- `U-CYLND` has distinct root COLOR and child POLYGON COLOR callbacks:
+  `effEditUCylinderColorTrack` and `effEditUCylinderPolygonColorTrack`.
+  Its child's explicit `SCALE_UV` row selects
+  `effEditUCylinderPolygonUvScaleTrack`.
+- `U-SMOKE` and `U-SPIRL` share root COLOR/SCALE/ROTATE callbacks and
+  a POLYGON-child SCALE_UV callback. The COLOR entrypoint temporarily
+  selects its property-option table and forwards the native editor's
+  status; the curve records are not those property-option rows.
+- `U-SPHRE` supplies root COLOR/SCALE callbacks. The native `2D`
+  descriptor similarly supplies COLOR/SCALE/ROTATE callbacks. In DDS1,
+  `D_003BD000` begins with `"2D"` and `D_0038DE38` points at its
+  property table; do not mistake the trailing empty padding string for
+  the descriptor name.
+- DDS1's `CRACK` and `FLASH` properties point at their polygon
+  descriptors; DDS2 explicitly names the corresponding descriptors
+  `CRACK POLYGON` and `FLASH POLYGON`. Their COLOR entrypoints are
+  `effEditCrackPolygonColorTrack` and `effEditFlashPolygonColorTrack`.
+- `effEditSPolygonAlphaTrack` is the ALPHA callback shared by POLYGON
+  children of the eight native S-families. `effEditDoPolygonFadeTrack`
+  is the POLYGON FADE callback for D-families, additionally used by
+  O-families in DDS2. The latter passes its stored bound **plus one**
+  to the alpha editor; retain that expression.
+- B-/F-family root COLOR rows select `effEditBfColorTrack`. HELPER's
+  COLOR row selects `effEditHlpColorTrack`, which edits shared default
+  data rather than reading the request's object pointer. `Hlp` follows
+  the existing resource-directory naming convention.
+
+The DDS1 source data contains the literal `SCALE_UV` label at
+`code_0029C530.rodata.s`'s `D_003B2E40`. DDS2's retail descriptor
+pointers independently resolve the same roles, including each nested
+POLYGON parent. Family letters remain literal native identifiers;
+their expansions are not established by these callbacks.
+
+Preserve ABI differences across twins. DDS1's numeric-curve callbacks
+return the native editor's `s32` status; the equivalent DDS2 callbacks
+are `void`. HELPER's COLOR callback has the same return difference.
+The COLOR callbacks that save/restore property options retain their
+explicit status return in both games. Renaming does not justify
+changing types, casts, offsets, declarations, or statement order.
 
