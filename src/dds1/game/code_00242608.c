@@ -1530,7 +1530,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     return limit;
 }
 
-s32 func_00244FA0(ShopScene *context) {
+s32 mnuCampGetAffordablePurchaseCount(ShopScene *context) {
     DatGameState *globalState = datGameState;
     MenuWindowContainer *itemObject = context->window;
     struct MenuList *record = itemObject->list;
@@ -1564,7 +1564,7 @@ s32 func_00244FA0(ShopScene *context) {
     return limit;
 }
 
-void func_00245068(ShopScene *scene) {
+void mnuCampDisableUnavailableItemEntries(ShopScene *scene) {
     s32 index = 0;
     s32 capacity = scene->count8C;
     struct MenuListNode *node = scene->window->list->first;
@@ -2114,7 +2114,7 @@ s32 func_00246220(KwlnTask *task) {
                     if ((cursorNode->flags48 & 1) == 0) {
                         mnuSetCommandPhase((ShopScene *)stateAddress, 7);
                     } else {
-                        if (func_00244FA0((ShopScene *)stateAddress) == -2) {
+                        if (mnuCampGetAffordablePurchaseCount((ShopScene *)stateAddress) == -2) {
                             ((ShopScene *)stateAddress)->menuMode = 1;
                         }
                         inputConsumed = 1;
@@ -2235,7 +2235,7 @@ s32 func_002465F8(KwlnTask *task) {
                     if ((cursor->flags48 & 1) == 0) {
                         mnuSetCommandPhase((ShopScene *)stateAddress, 7);
                     } else {
-                        if (func_00244FA0((ShopScene *)stateAddress) == -2) {
+                        if (mnuCampGetAffordablePurchaseCount((ShopScene *)stateAddress) == -2) {
                             ((ShopScene *)stateAddress)->menuMode = 1;
                         }
                         handled = 1;
@@ -2699,7 +2699,7 @@ s32 evtDispatchShopSelectionAction(KwlnTask *task) {
             switch (selectedOperation) {
             case 1:
             case 2:
-                func_00245068(state);
+                mnuCampDisableUnavailableItemEntries(state);
                 break;
             case 3:
                 evtAccumulateStateScore((s32)state);
