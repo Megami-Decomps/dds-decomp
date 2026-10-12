@@ -8044,3 +8044,6 @@
 0x0021F098	mdlUpdateFaceDivisionEditorTask	inferred	confidence=high; matched-C; Native labels <FACE-DIV>, SOFTEN:, BIAS:, DIVIDE: identify task input/rendering role; preserves native bounds and cursor/blink mask. DDS2 twin 0x00239C08. Namer1 batch 19.
 0x002904C8	fileClampPackedColorByte	inferred	confidence=high; matched-C; Signed downward clamp of low byte or high alpha byte selected by mode; unmasked bound and trace-justified result staging retained. DDS2 twin 0x002CF978. Namer1 batch 19.
 0x001A2608	btlSynchronizePartyActorRecords	inferred	confidence=high; matched-C; Swaps full party records at actor/target slots and refreshes stats/active flags without changing actor index; aligns existing DDS2 name at 0x001AB510. Namer1 batch 19.
+0x00242E70	mnuSampleCampDisplayTrack	inferred	Samples the camp display key track, selects surrounding keys at a frame, uses defaults before the first key, and blends with the frame ratio. DDS2 twin 0x0025E288.
+0x00242F78	mnuSampleCampListLayoutTrack	inferred	Samples the camp list-layout key track, uses layout defaults before the first key, and blends the surrounding key parameters. DDS2 twin 0x0025E390.
+0x00243048	mnuBlendCampDisplayFields	inferred	Interpolates display position, color, and scale while taking enabled and variant from the lower key. DDS2 twin 0x0025E460.

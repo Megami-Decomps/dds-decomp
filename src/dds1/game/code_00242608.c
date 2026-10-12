@@ -474,9 +474,9 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
 }
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
-void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 
-void func_00242E70(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
+void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
     EvtRuntimeChild *lo;
     EvtRuntimeChild *hi;
     s32 startFrame;
@@ -500,7 +500,7 @@ void func_00242E70(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDi
     } else {
         ratio = 0.0f;
     }
-    func_00243048(lo, hi, display, ratio);
+    mnuBlendCampDisplayFields(lo, hi, display, ratio);
 }
 
 
@@ -519,7 +519,7 @@ void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
     layout->z[2] = 0x10;
 }
 
-void func_00242F78(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
+void mnuSampleCampListLayoutTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
     EvtRuntimeChild *lower;
     EvtRuntimeChild *upper;
     EvtCameraColorPayload fallback;
@@ -556,7 +556,7 @@ void func_00242F78(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out)
 }
 
 /* Blend the display fields; control bytes always come from the lower key. */
-void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to,
+void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
                    CampDisplayDefaults *display, f32 ratio) {
     if (from == NULL) {
         mnuCampInitDisplayDefaults(display);

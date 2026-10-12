@@ -92,7 +92,7 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
-extern void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 
@@ -698,7 +698,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
                 ratio = elapsed / span;
             }
         }
-        func_00243048((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
+        mnuBlendCampDisplayFields((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
         mnuDrawCampScaledTexture(node->texture, (CampDisplayDefaults *)out);
     }
 }
@@ -1084,7 +1084,7 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
-extern void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 
