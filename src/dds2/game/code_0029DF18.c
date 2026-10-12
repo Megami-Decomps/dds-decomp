@@ -18,7 +18,7 @@ extern u32 D_004285E0[4];
 extern u32 uiBlendColors(u32, u32, u32);
 
 /* Fade a result row's background in; the row is ready once it is fully opaque. */
-void func_0029DF18(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *unused, s32 context, s32 index) {
     s32 fade = 0x100 - work->fadeProgress;
 
@@ -39,7 +39,7 @@ INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029DFB0);
 INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E220);
 
 /* Fade a result row's portrait in; the row is ready once the opacity reaches 0x60. */
-void func_0029E478(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *unused, s32 context, s32 index) {
     s32 remaining = 0x100 - work->fadeProgress;
 
@@ -59,9 +59,9 @@ INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029E548);
 
 extern void mnuSetTitleSequenceVolumePan(u32);
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
-extern s32 func_002A0278(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
+extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
-void func_0029E820(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *entry, s32 context, s32 index) {
     s32 level = work->levelAnimation[index].level;
     s32 fade = 0x100 - work->fadeProgress;
@@ -91,7 +91,7 @@ void func_0029E820(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
             if (work->levelAnimation[index].drawPhase == 3) {
                 goto flash;
             }
-            work->levelAnimation[index].appliedStep = func_002A0278(work, entry, index, 0);
+            work->levelAnimation[index].appliedStep = brsCalcProgressAnimationStep(work, entry, index, 0);
             currentExp = work->levelAnimation[index].remaining + work->levelAnimation[index].appliedStep;
             work->levelAnimation[index].remaining = currentExp;
             if (currentExp >= (s32)ptyComputeTotalExp(entry->unit, nextLevel - entry->unit->level) && work->levelAnimation[index].drawPhase == 2) {
@@ -155,11 +155,11 @@ flash:
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_0029EE80);
+INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawLevelProgressDetails);
 
 extern f32 sdfSinPoly(f32);
 
-void func_0029F440(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+void brsUpdateLevelProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
     s32 y;
     s32 bob;
 
@@ -232,7 +232,7 @@ void func_0029F440(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *wor
 
 extern u32 D_004285D0[4];
 
-void func_0029FA98(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *row, s32 depth, s32 index) {
     u32 color[4];
     s32 packed;
@@ -259,7 +259,7 @@ void func_0029FA98(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-void func_0029FBE0(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
+void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *work, BrsProgressRow *row, s32 context, s32 index) {
     s32 y;
     s32 bob;
 
@@ -323,7 +323,7 @@ void func_0029FBE0(s32 screenX, s32 screenY, s32 depth, BrsSkillPackageWork *wor
     }
 }
 
-void func_002A0148(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *unused, s32 depth, s32 index) {
     u32 color[4];
     s32 packed;
@@ -349,7 +349,7 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
 
-s32 func_002A0278(BrsSkillPackageWork *work, BrsProgressRow *entry, s32 index, s8 mode) {
+s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entry, s32 index, s8 mode) {
     s32 result = 0;
     s32 levelDelta = work->levelAnimation[index].level - entry->unit->level;
     s32 nextLevelExp = ptyComputeTotalExp(entry->unit, levelDelta + 1);
@@ -541,11 +541,11 @@ typedef struct BrsResultWork {
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16);
-extern s32 func_002A0278(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
+extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 extern u32 uiBlendColors(u32, u32, u32);
 void mnuSetTitleSequenceVolumePan(u32);
 
-void func_002A05C0(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *entry, s32 context, s32 index) {
     s32 fade = 0x100 - work->fadeProgress;
     s32 profileId;
@@ -581,7 +581,7 @@ void func_002A05C0(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         if (work->profileAnimation[index].drawPhase == 2) {
             if (cap != 0) {
                 if (progress < cap) {
-                    work->profileAnimation[index].appliedStep = func_002A0278(work, entry, index, 1);
+                    work->profileAnimation[index].appliedStep = brsCalcProgressAnimationStep(work, entry, index, 1);
                     work->profileAnimation[index].remaining += work->profileAnimation[index].appliedStep;
                     if (work->profileAnimation[index].remaining >= cap) {
                         work->profileAnimation[index].progressIconEnabled = 1;
@@ -609,7 +609,7 @@ void func_002A05C0(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029DF18", func_002A08D8);
+INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProfileProgressDetails);
 
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
