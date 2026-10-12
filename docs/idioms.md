@@ -2002,6 +2002,16 @@ Compile an owned string as a literal or named constant only when its placement,
 sharing and padding agree with retail; do not change the representation just
 to hide a missing generated include.
 
+DDS2 `game/code_0031CA10` covers the native no-sibling-jump run
+`0x31CA10..0x31D680`: 18 functions between sibling-calling `func_0031C940`
+and `itfDrawModelInstanceImage`. The parked `func_0031CE60` and
+`itfDrawUniformlyScaledIndexedImage` bodies both become exact with the flag;
+all existing matched C in the run and its neighbours remains exact. The
+projection/angle `.lit4` values and the `SpriteWork Object Size %d\n` string
+stay together in this run; no literal ownership crosses either cut.
+These are native J-run boundaries, not cuts chosen to isolate the two
+matching candidates. The claimed `func_0031CE60` body remains assembly.
+
 ### Saved-register order: global-alloc priority
 
 This compiler's `allocno_compare` uses `floor_log2(n_refs) * n_refs *
