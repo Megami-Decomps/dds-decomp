@@ -392,7 +392,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     }
 }
 
-void func_001180F8(void) {
+void evtInitializeWorkScriptTask(void) {
     dds3WorkInit(D_003BAAAC);
 }
 
@@ -483,7 +483,7 @@ void sdfResetChannels(void) {
         sdfReloadChannelSegments((SdfResourceTable *)entry);
         entry += 0xA4;
     }
-    func_001180F8();
+    evtInitializeWorkScriptTask();
 }
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,

@@ -404,7 +404,7 @@ void sdfResetGameRuntime(s32 fullReset) {
     }
 }
 
-void func_00118680(void) {
+void evtInitializeWorkScriptTask(void) {
     dds3WorkInit(D_00435E80);
 }
 
@@ -474,7 +474,7 @@ void sdfResetChannels(void) {
     for (i = 0; i < 8; i++) {
         sdfReloadChannelSegments(&D_00385A90[i]);
     }
-    func_00118680();
+    evtInitializeWorkScriptTask();
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
