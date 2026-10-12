@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -206,7 +207,6 @@ extern void sdfSetPacketCursorAligned(s32 cursorAddress);
 
 struct SdfTex;
 
-extern u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
 
 extern u32 D_0040B810[96];
 

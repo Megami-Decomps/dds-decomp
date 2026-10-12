@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf.h"
 #include "ee_mmi.h"
 
 #define SDF_DEVCONS_CELL_BYTES 2
@@ -156,7 +157,6 @@ typedef struct ConsBuf {
 } ConsBuf;
 
 struct SdfTex;
-u64 sdfTexGetPrimaryTextureState(struct SdfTex *texture);
 extern u32 D_00439194;
 
 /* Close the ordered register-list tag in the console's uncached DMA buffer.

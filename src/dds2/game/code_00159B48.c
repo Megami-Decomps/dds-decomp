@@ -1,6 +1,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "sdf.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -524,7 +525,6 @@ struct EffGeneratedTextureDescriptor {
 };
 
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);

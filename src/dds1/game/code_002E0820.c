@@ -260,7 +260,6 @@ typedef struct SdfDrawPacket {
     u64 registerAddressC;
 } SdfDrawPacket;
 
-extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 
