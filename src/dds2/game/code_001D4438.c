@@ -263,18 +263,6 @@ typedef struct BtlUnit BtlUnit;
 extern void btlAdvanceHistoryCounter(ActionStateLink *);
 
 
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[0x14];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
-
-
 typedef struct BtlStateHandler {
     void (*start)(void *);
     void (*update)(void *);

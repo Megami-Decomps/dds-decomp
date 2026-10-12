@@ -4912,18 +4912,6 @@ void btlInitializeSceneLightingAndTint(void) {
     *(u32 *)(context + 0x698) = 0x807E5C5E;
 }
 
-typedef struct BtlActionTableEntry {
-    u8 kind;
-    u8 pad01[2];
-    u8 resourceType;
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;
-    u16 flags;
-    u8 pad1E[2];
-} BtlActionTableEntry;
-
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlActionTableEntry *action;

@@ -78,19 +78,6 @@ typedef struct BtlEffectResource {
     BtlEffectNode nodes[1];
 } BtlEffectResource;
 
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
-
 typedef struct BtlFxSrcA {
     f32 f0;
     f32 f4;

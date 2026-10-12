@@ -78,19 +78,6 @@ typedef struct BtlUnit BtlUnit;
 
 extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
-
 typedef struct SoundEntry {
     u32 unk0;
     u32 unk4;
