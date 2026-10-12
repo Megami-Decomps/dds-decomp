@@ -9099,8 +9099,8 @@ and DDS2 distance-offset additions.
 
 `btlAverageAllLevelsForMask` includes active masked actors even with status
 bit `0x20` set; its callee averages `partyRecord.level`, falling back to `1`
-for an empty group. This naming batch preserves the existing void definition
-and the `s32` extern consumed by the script getter.
+for an empty group. The mask-average forwarding functions return `s32`
+consistently with the script getters; see "Masked-average tail-call return types".
 
 The `__udivdi3` name is load-bearing in both games. The `u64` division in
 `newdata/datCalc.c`'s `evtPushAvailableChoiceRatio` compiles to a call bearing
@@ -9244,4 +9244,27 @@ sandbox paths in repository source. The renewal41 synthesis record holds
 the exact trace lines, controls and failed form. No flag, visibility stub,
 API/type change, invented arm or code-generation annotation is justified
 by these observations.
+
+
+## Masked-average tail-call return types
+
+`btlAverageAllCurrentForMask` and `btlAverageAllLevelsForMask` return the
+signed result of their corresponding average helper, with filtering flag `0`.
+They include active masked actors even when status bit `0x20` is set. The
+helpers average current HP and level respectively, returning `1` for an empty
+group.
+
+All four native forwarding bodies are 24 bytes: DDS1 `0x001A93B8` and
+`0x001A94A0`, DDS2 `0x001B3918` and `0x001B3A00`. Each supplies zero in `a1`,
+restores `ra` and the stack, then tail-jumps to the `s32` helper. The helper's
+`v0` therefore returns unchanged to the wrapper's caller. In both games,
+`scrGetBattleAverageCurrentValueForGroup` and
+`scrGetBattleAverageActorStatForGroup` immediately copy that `v0` and pass it
+to `scrSetIntegerReturnValue`.
+
+The definitions must express this real return with `s32` and
+`return <helper>(mask, 0);`, rather than a void call that discards the result
+in C. The four `datCalc.c` externs already use `s32 (u32)` and remain unchanged.
+Keep the native forwarding form and all flag-1 definitions and externs; those
+are outside this return-type closure.
 
