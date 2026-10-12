@@ -904,8 +904,9 @@ void btlAverageFilteredCurrentForMask(u32 arg0) {
     btlAverageCurrentValueForMask(arg0, 1);
 }
 
-void btlAverageAllCurrentForMask(u32 arg0) {
-    btlAverageCurrentValueForMask(arg0, 0);
+/* Return mean current HP for the mask, including bit-0x20 actors. */
+s32 btlAverageAllCurrentForMask(u32 arg0) {
+    return btlAverageCurrentValueForMask(arg0, 0);
 }
 
 s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
@@ -931,9 +932,9 @@ s32 func_001A9488(u32 arg0) {
     return btlAverageMaskedActorStat(arg0, 1);
 }
 
-/* Include bit-0x20 actors in the masked mean level; preserve the forwarding signature. */
-void btlAverageAllLevelsForMask(u32 actorMask) {
-    btlAverageMaskedActorStat(actorMask, 0);
+/* Return mean level for the mask, including bit-0x20 actors. */
+s32 btlAverageAllLevelsForMask(u32 actorMask) {
+    return btlAverageMaskedActorStat(actorMask, 0);
 }
 
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
