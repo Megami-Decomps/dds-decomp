@@ -274,7 +274,7 @@ typedef struct EffModelCreateRequest {
 extern float effMiscRandUnitFloat(void *);
 
 
-extern s32 func_002FF0B8(EffectStateSnapshot *, s8);
+extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
 
 typedef struct EffKindAssetHolder {
     s32 kind;
@@ -864,7 +864,8 @@ void effUpdateAndDrawSelectionEntries(SdfFlagListWork *p) {
     effDrawSelectionEntryVectors(p);
 }
 
-void func_002DEC78(SdfFlagListWork *work, u32 value) {
+/* Set the selection/drop-list's packed modulation color. */
+void effSetSelectionFlagListColor(SdfFlagListWork *work, u32 value) {
     work->unk04 = value;
 }
 
@@ -5656,7 +5657,8 @@ void effAcquireStripRecord(EffectStripNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EE670);
 
-void func_002EED48(EffectStripNode *node) {
+/* Advance the active strip record, rebuild its geometry, and submit its tracks. */
+void effUpdateAndDrawStripRecord(EffectStripNode *node) {
     effAcquireStripRecord(node);
     func_002EE670(node);
 }
@@ -8545,7 +8547,8 @@ u32 *effAllocateClassResourceSlot(u32 owner) {
     return work;
 }
 
-u32 *func_002F7A00(u32 owner) {
+/* Allocate an owned handle and populate it with a class-kind-four resource. */
+u32 *effCreateOwnedClassResourceSlot(u32 owner) {
     u32 *work = effAllocateClassResourceSlot(owner);
     *work = (u32)effCreateClassResourceWork(4, (void *)owner);
     return work;
@@ -9642,7 +9645,8 @@ void effResetParticleStateWord(EffParticleShared *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F9DF0);
 
-void func_002FA388(u32 *target, u32 value) {
+/* The shared particle header keeps its packed color in its first word. */
+void effSetParticleSharedColor(u32 *target, u32 value) {
     *target = value;
 }
 
@@ -11553,7 +11557,9 @@ extern void func_0020D1E8(f32 *);
 extern s8 D_0040B7DB[];
 extern u32 D_003FFC78[];
 
-s32 func_002FF0B8(EffectStateSnapshot *state, s8 mode) {
+/* Synchronize the diagnostic camera position and calculate its positional guides.
+ * Return input flags; the native diagnostic drawing providers are retail stubs. */
+s32 effUpdateCameraDiagnostics(EffectStateSnapshot *state, s8 mode) {
     f32 vectors[6][4] __attribute__((aligned(16)));
     f32 length;
     f32 deltaY;
@@ -11646,7 +11652,7 @@ u32 effLoadFileSlotAndPoll(void) {
     u32 result;
 
     memcpy(D_0045C110, file, 0x90);
-    result = func_002FF0B8((EffectStateSnapshot *)D_0045C110, 1);
+    result = effUpdateCameraDiagnostics((EffectStateSnapshot *)D_0045C110, 1);
     memcpy(file, D_0045C110, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -11660,7 +11666,7 @@ s32 effRunWithStateBackup(void) {
     s32 result;
 
     PCP_COPY_VECTOR(backup, &D_0045C1F0);
-    result = func_002FF0B8(&snapshot, 0);
+    result = effUpdateCameraDiagnostics(&snapshot, 0);
     PCP_COPY_VECTOR(&D_0045C1F0, backup);
     if (result & 1) {
         result |= 0x800000;
@@ -12308,15 +12314,18 @@ s32 effPollFileQueueRecord(s32 mode) {
     return result;
 }
 
-void func_00302C78(void) {
+/* Poll queued TMX/P2A/general resources with the TLP format enabled. */
+void effPollResourceQueueWithTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_00302C90(void) {
+/* Separate native descriptor callback with the same TLP-enabled queue filter. */
+void effPollAlternateResourceQueueWithTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_00302CA8(void) {
+/* Poll the queue without adding the TLP flag to its format mask. */
+void effPollResourceQueueWithoutTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
 }
 
@@ -12347,23 +12356,28 @@ extern char D_0042CF70[]; /* "/tool/effect/" */
 
 extern char D_0042D140[]; /* "/tool/effect/hlp/" */
 
-void func_00302D70(void) {
+/* Poll the TEXTURE property chooser in /tool/effect/mat/; native callback is void. */
+void effPollTextureResourceFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_00302D90(void) {
+/* Alternate descriptor family's TEXTURE callback; retain its separate entrypoint. */
+void effPollAlternateTextureResourceFile(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_00302DB0(void) {
+/* Poll EP resources from /tool/effect/ep/; native callback drops the status. */
+void effPollEpResourceFile(void) {
     effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
 }
 
-void func_00302DD0(void) {
+/* Poll EPL resources from /tool/effect/; native callback drops the status. */
+void effPollEplResourceFile(void) {
     effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
-void func_00302DF0(void) {
+/* Separate native EP descriptor callback using the same directory and format. */
+void effPollAlternateEpResourceFile(void) {
     effPollFileRecord(D_0042CF58, BTL_RESOURCE_SCAN_EP);
 }
 
@@ -12371,15 +12385,18 @@ void func_00302E10(void) {
     effPollFileRecord(D_0042CF70, BTL_RESOURCE_SCAN_EPL);
 }
 
-void func_00302E30(void) {
+/* First distinct native callback for TMX-only material selection. */
+void effPollMaterialTmxFileA(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
-void func_00302E50(void) {
+/* Second distinct native callback for TMX-only material selection. */
+void effPollMaterialTmxFileB(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
-void func_00302E70(void) {
+/* Third distinct native callback for TMX-only material selection. */
+void effPollMaterialTmxFileC(void) {
     effPollFileRecord(D_0042D128, BTL_RESOURCE_SCAN_TMX);
 }
 
@@ -12389,7 +12406,8 @@ u32 effFileJobSecondaryDataSet(void) {
     return 0x400002;
 }
 
-void func_00302EC8(void) {
+/* Poll PB resources from /tool/effect/hlp/; native callback drops the status. */
+void effPollHlpPbResourceFile(void) {
     effPollFileRecord(D_0042D140, BTL_RESOURCE_SCAN_PB);
 }
 

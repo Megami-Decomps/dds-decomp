@@ -692,7 +692,8 @@ void effUpdateAndDrawSelectionEntries(SdfFlagListWork *work) {
     effDrawSelectionEntryVectors(work);
 }
 
-void func_0029CF30(SdfFlagListWork *work, u32 value) {
+/* Set the selection/drop-list's packed modulation color. */
+void effSetSelectionFlagListColor(SdfFlagListWork *work, u32 value) {
     work->unk04 = value;
 }
 
@@ -5240,7 +5241,8 @@ void effAcquireStripRecord(EffectStripNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AB290);
 
-void func_002AB968(EffectStripNode *node) {
+/* Advance the active strip record, rebuild its geometry, and submit its tracks. */
+void effUpdateAndDrawStripRecord(EffectStripNode *node) {
     effAcquireStripRecord(node);
     func_002AB290(node);
 }
@@ -8306,7 +8308,8 @@ void effResetParticleStateWord(EffParticleShared *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002B4BA0);
 
-void func_002B5128(u32 *dst, u32 value) {
+/* The shared particle header keeps its packed color in its first word. */
+void effSetParticleSharedColor(u32 *dst, u32 value) {
     *dst = value;
 }
 
@@ -9579,7 +9582,7 @@ typedef struct EffectStateSnapshot {
 
 typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) ? 1 : -1];
 
-extern s32 func_002B7E60(EffectStateSnapshot *, s8);
+extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
 
 extern u8 D_0038F4F0[];
 extern s8 D_0039862B[];
@@ -9593,7 +9596,9 @@ extern void func_001FB1F0(void *camera);
 extern void camFollowOffsetVec(u8 *camera, void *destination);
 extern void effComputeBattleCameraPositionVU(u8 *snapshot);
 
-s32 func_002B7E60(EffectStateSnapshot *snapshot, s8 mode) {
+/* Synchronize the diagnostic camera position and calculate its positional guides.
+ * Return input flags; the native diagnostic drawing providers are retail stubs. */
+s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
     u8 *camera = D_0038F4F0;
     f32 vectors[6][4] __attribute__((aligned(16)));
     f32 length;
@@ -9690,7 +9695,7 @@ u32 effLoadFileSlotAndPoll(void) {
     u32 result;
 
     memcpy(D_003DF840, file, 0x90);
-    result = func_002B7E60((EffectStateSnapshot *)D_003DF840, 1);
+    result = effUpdateCameraDiagnostics((EffectStateSnapshot *)D_003DF840, 1);
     memcpy(file, D_003DF840, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -9705,7 +9710,7 @@ s32 effRunWithStateBackup(void) {
     s32 result;
 
     PCP_COPY_VECTOR(backup, &D_003DF920);
-    result = func_002B7E60(&snapshot, 0);
+    result = effUpdateCameraDiagnostics(&snapshot, 0);
     PCP_COPY_VECTOR(&D_003DF920, backup);
     if (result & 1) {
         result |= 0x800000;
@@ -10242,7 +10247,8 @@ s32 func_002BB148(BaObj *p) {
     return func_002BA538(p->x0C + 0x60, ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
 }
 
-void func_002BB178(void) {
+/* Request the mapping update handled by the native dispatcher. */
+void effMarkMappingUpdatePending(void) {
     D_003BD124 = 1;
 }
 
@@ -10305,15 +10311,18 @@ s32 effPollFileQueueRecord(s32 request) {
     return result;
 }
 
-void func_002BB838(void) {
+/* Poll queued TMX/P2A/general resources with the TLP format enabled. */
+void effPollResourceQueueWithTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_002BB850(void) {
+/* Separate native descriptor callback with the same TLP-enabled queue filter. */
+void effPollAlternateResourceQueueWithTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
 }
 
-void func_002BB868(void) {
+/* Poll the queue without adding the TLP flag to its format mask. */
+void effPollResourceQueueWithoutTlp(void) {
     effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
 }
 
@@ -10361,35 +10370,43 @@ s32 effPollFileRecord(char *path, s32 flags) {
     return result;
 }
 
-s32 func_002BB930(void) {
+/* Poll the TEXTURE property chooser in /tool/effect/mat/ and return its status. */
+s32 effPollTextureResourceFile(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
-s32 func_002BB950(void) {
+/* Alternate descriptor family's TEXTURE callback; retain its separate entrypoint. */
+s32 effPollAlternateTextureResourceFile(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
 }
 
-s32 func_002BB970(void) {
+/* Poll EP resources from /tool/effect/ep/ and return the chooser status. */
+s32 effPollEpResourceFile(void) {
     return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
 }
 
-s32 func_002BB990(void) {
+/* Poll EPL resources from /tool/effect/ and return the chooser status. */
+s32 effPollEplResourceFile(void) {
     return effPollFileRecord(D_003B39E0, BTL_RESOURCE_SCAN_EPL);
 }
 
-s32 func_002BB9B0(void) {
+/* Separate native EP descriptor callback using the same directory and format. */
+s32 effPollAlternateEpResourceFile(void) {
     return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
 }
 
-s32 func_002BB9D0(void) {
+/* First distinct native callback for TMX-only material selection. */
+s32 effPollMaterialTmxFileA(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
-s32 func_002BB9F0(void) {
+/* Second distinct native callback for TMX-only material selection. */
+s32 effPollMaterialTmxFileB(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
-s32 func_002BBA10(void) {
+/* Third distinct native callback for TMX-only material selection. */
+s32 effPollMaterialTmxFileC(void) {
     return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
 }
 
@@ -10399,7 +10416,8 @@ u32 effFileJobSecondaryDataSet(void) {
     return 0x400002;
 }
 
-s32 func_002BBA68(void) {
+/* Poll PB resources from /tool/effect/hlp/ and return the chooser status. */
+s32 effPollHlpPbResourceFile(void) {
     return effPollFileRecord(D_003B3BA0, BTL_RESOURCE_SCAN_PB);
 }
 
