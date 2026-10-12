@@ -9986,7 +9986,8 @@ s32 effMapObjectWithTemporaryMappingTable(s32 request) {
     return result;
 }
 
-s32 func_002BA0C0(s32 request) {
+/* Edit the request's G-/K-family COLOR tracks; return the native editor status. */
+s32 effEditGkColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -10009,7 +10010,8 @@ s32 func_002BA148(void) {
     return func_002B9320((s32)D_003DE148, (s32)D_003DE148 + 0x24, ((EffMappingObject *)D_003DE148)->value34.signedValue);
 }
 
-s32 func_002BA170(s32 request) {
+/* Edit T-BOARD color/alpha tracks using the alternate property-option table. */
+s32 effEditTBoardColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -10021,28 +10023,32 @@ s32 func_002BA170(s32 request) {
     return result;
 }
 
-void func_002BA1D0(s32 request) {
+/* Pass the E-RAIN request's color/alpha tracks and frame bound to the editor. */
+void effEditRainColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA1F0(s32 request) {
+/* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
+void effEditFlareColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value38);
 }
 
-void func_002BA210(s32 request) {
+/* COLOR property callback shared by the native S-family descriptors. */
+void effEditSColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-s32 func_002BA230(s32 request) {
+/* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
+s32 effEditRColorTrack(s32 request) {
     s32 result;
     s32 object = ((EffMappingRequest *)request)->object;
 
@@ -10055,14 +10061,16 @@ s32 func_002BA230(s32 request) {
     return result;
 }
 
-void func_002BA290(s32 request) {
+/* COLOR property callback for the native R-TRACK descriptor. */
+void effEditRTrackColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
     func_002B9320(object, object + 0x24, ((EffMappingObject *)object)->value34.bits);
 }
 
-void func_002BA2B0(s32 request) {
+/* D-family COLOR callback; its DDS2 twin also serves O-family descriptors. */
+void effEditDoColorTrack(s32 request) {
     s32 object;
 
     object = ((EffMappingRequest *)request)->object;
@@ -10175,47 +10183,58 @@ void btlResetEffectWork(void) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002BA538);
 
-s32 func_002BAE18(BaObj *p) {
+/* Edit the requested P-family SCALE track; return the native editor status. */
+s32 effEditPScaleTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x60, ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAE48(BaObj *p) {
+/* Edit the requested P-family ROTATE track with its independent editor state. */
+s32 effEditPRotationTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x8C, ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038FAD0, D_0038FA20);
 }
 
-s32 func_002BAE78(BaObj *p) {
+/* SCALE property callback shared by native G-/K-family descriptors. */
+s32 effEditGkScaleTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x7C, ((EffMappingObject *)p->x0C)->valueD4, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAEA8(BaObj *p) {
+/* ROTATE property callback for native K-family descriptors. */
+s32 effEditKRotationTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0xA8, ((EffMappingObject *)p->x0C)->valueD4, D_0038FAD0, D_0038FA20);
 }
 
-s32 func_002BAED8(BaObj *p) {
+/* SCALE property callback for native B-family descriptors. */
+s32 effEditBScaleTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x34, ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAF08(BaObj *p) {
+/* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
+s32 effEditBRotationTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x60, ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAF38(BaObj *p) {
+/* AREA property callback shared by B-/F-family descriptors. */
+s32 effEditBfAreaTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x8C, ((EffMappingObject *)p->x0C)->valueB8.signedValue, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAF68(BaObj *p) {
+/* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
+s32 effEditTBoardScaleTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x34, ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAF98(BaObj *p) {
+/* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
+s32 effEditTBoardRotationTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x60, ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAFC8(BaObj *p) {
+/* SCALE property callback for native W-family descriptors. */
+s32 effEditWScaleTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0x80, ((EffMappingObject *)p->x0C)->valueD8, D_0038F9D0, D_0038F8E8);
 }
 
-s32 func_002BAFF8(BaObj *p) {
+/* ROTATE property callback for native W-family descriptors. */
+s32 effEditWRotationTrack(BaObj *p) {
     return func_002BA538(p->x0C + 0xAC, ((EffMappingObject *)p->x0C)->valueD8, D_0038FAD0, D_0038FA20);
 }
 
@@ -10247,8 +10266,8 @@ s32 func_002BB148(BaObj *p) {
     return func_002BA538(p->x0C + 0x60, ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
 }
 
-/* Request the mapping update handled by the native dispatcher. */
-void effMarkMappingUpdatePending(void) {
+/* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
+void effResetCurveEditorSelection(void) {
     D_003BD124 = 1;
 }
 

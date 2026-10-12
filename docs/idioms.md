@@ -2627,7 +2627,7 @@ function still needs decompilation. Paths below are relative to `build/parked`.
 | DDS2 | `bfOpWaitDispatch` | same two loads as DDS1 | `dds2/script/scrTraceCode/bfOpWaitDispatch_P3_Med3.c` |
 | DDS1 | `func_00199828` | allocation-pointer store / kind-byte store, `+0x3C/+0x40` | `dds1/game/code_00196478/func_00199828_W16_Snd.c` |
 | DDS2 | `func_001A1858` | corresponding sprite-constructor stores | `dds2/game/code_0019E138/func_001A1858_P8_FreshA.c` |
-| DDS1 | `func_002BA058`, `func_002BA0C0`, `func_002BA170`, `func_002BA230`, `func_002BA2D0`, `func_002BA3C8`, `func_002BA498` | epilogue `ld s0` / `ld s1` | `dds1/game/code_0029A840/func_002BA058_family_W16_Snd.c` |
+| DDS1 | `func_002BA058`, `effEditGkColorTrack`, `effEditTBoardColorTrack`, `effEditRColorTrack`, `func_002BA2D0`, `func_002BA3C8`, `func_002BA498` | epilogue `ld s0` / `ld s1` | `dds1/game/code_0029A840/func_002BA058_family_W16_Snd.c` |
 | DDS1 | `func_002D5CD0` | resource-header / packet-source loads, `+0xA8/+0xB0` | `dds1/game/code_002D33C8/func_002D5CD0_P2_Med2.c` |
 | DDS1 | `func_0013D650` | return-address save / actor-task flag store | `dds1/game/code_00126A30/func_0013D650.c` |
 | DDS2 | `func_00140238` | same pair, `+0x18/+0x1C` | `dds2/game/code_00136EF8/func_00140238_P1_Med0.c` |
@@ -2698,7 +2698,7 @@ order requirement to encode in C.
 
 ### Three return-liveness controls
 
-`func_002BA170`, `func_002BA230`, and `func_002BA498` have ordinary `s32`
+`effEditTBoardColorTrack`, `effEditRColorTrack`, and `func_002BA498` have ordinary `s32`
 returns that forward `func_002B9320`'s result after restoring the mapping
 table. Private controls changing just those wrappers to `void` and ignoring
 the result each reproduce exactly two swapped epilogue loads: `+0x4C/+0x50`,
@@ -2707,7 +2707,7 @@ the result each reproduce exactly two swapped epilogue loads: `+0x4C/+0x50`,
 `519 match, 0 differ`, with no PAD or other diagnostics. These wrappers were
 already C before this experiment; this validates a cause, not a new landing.
 
-For `func_002BA170`, the positive sched2 has a legitimate `USE v0`
+For `effEditTBoardColorTrack`, the positive sched2 has a legitimate `USE v0`
 (instruction 85) after the last table-pointer store (66). It emits no extra
 machine word, but becomes the last-issued instruction before restoring
 callee-saved registers. The `s0` and `s1` loads have equal priority 4 and two
@@ -8163,4 +8163,55 @@ owner accesses. Both live whole-unit gates are exact: DDS1 542 match,
 0 differ and DDS2 686 match, 0 differ, preserving all 1,226 previous
 matched functions. This is trace-justified source shape, not a claim that an
 original source declaration was recovered.
+
+## Native property ownership: effect curve editor callbacks
+
+The matched callbacks in DDS1 `game/code_0029C530` and DDS2
+`game/code_002DE248` forward a request's parameter record to interactive curve
+editors. The native property tables identify their roles more precisely than
+their often-identical forwarding bodies:
+
+| Native property / owning descriptor family | Matched callback |
+|---|---|
+| `COLOR`, `G-` / `K-` | `effEditGkColorTrack` |
+| `COLOR`, `T-BOARD` | `effEditTBoardColorTrack` |
+| `COLOR`, `E-RAIN` / `E-FLARE` | `effEditRainColorTrack` / `effEditFlareColorTrack` |
+| `COLOR`, `S-` | `effEditSColorTrack` |
+| `COLOR`, `R-NOMAL` / `R-CRCLE` | `effEditRColorTrack` |
+| `COLOR`, `R-TRACK` | `effEditRTrackColorTrack` |
+| `COLOR`, `D-` / `O-` (`O-` in DDS2) | `effEditDoColorTrack` |
+| `SCALE` / `ROTATE`, `P-` | `effEditPScaleTrack` / `effEditPRotationTrack` |
+| `SCALE`, `G-` / `K-` | `effEditGkScaleTrack` |
+| `ROTATE`, `K-` | `effEditKRotationTrack` |
+| `SCALE` / `ROTATE`, `B-` | `effEditBScaleTrack` / `effEditBRotationTrack` |
+| `AREA`, `B-` / `F-` | `effEditBfAreaTrack` |
+| `SCALE` / `ROTATE`, `T-BOARD` | `effEditTBoardScaleTrack` / `effEditTBoardRotationTrack` |
+| `SCALE` / `ROTATE`, `W-` | `effEditWScaleTrack` / `effEditWRotationTrack` |
+
+Family letters above preserve the literal descriptor names; they are not
+expansions of unknown abbreviations. For example, the DDS1 native property table
+at `0x00380858` registers `effEditGkColorTrack` under `COLOR`, and the owning
+descriptor at `0x003809A8` names `G-SMOKE`. DDS2's corresponding table and owner
+are at `0x003EBEE0` and `0x003EC030`; its additional `G-ASPAK` / `K-ASPAK`
+descriptors share the same callbacks.
+
+The native color editor (`func_002B9320` / `func_00300578`) receives a
+`SdfColorTrack`, its adjacent `SdfAlphaTrack`, and a frame bound. It reads pad
+input and edits curve values/fractions, rather than merely sampling a mapping.
+The temporarily installed eight-entry tables are 24-byte property-option
+records, not keyframe arrays. Preserve their save/restore sequence and the real
+return contracts discussed under “Three return-liveness controls.”
+
+`effEditPScaleTrack` and `effEditBRotationTrack` illustrate why identical code
+alone is insufficient naming evidence: they forward the same offsets and
+context, but their native owners register them under different properties.
+DDS1's numeric callbacks return the native result; several DDS2 definitions are
+`void`. Their existing declarations, casts and forwarding forms remain intact.
+
+`effResetCurveEditorSelection` corrects an earlier pending-update interpretation.
+Its shared word is a selection: the native alpha editor
+(`func_002BB188` / `func_003025A8`) toggles it between one and two on pad input,
+uses one to edit the fade-in fraction instead of the fade-out fraction, and
+shares it with the color editor. The reset stores one; it does not enqueue an
+update.
 
