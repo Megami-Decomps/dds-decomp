@@ -1,5 +1,6 @@
 #include "snd_ring.h"
 #include "common.h"
+#include "eff_random.h"
 
 extern s8 D_003BDA80;
 extern u16 D_00398910[];
@@ -14,10 +15,6 @@ typedef struct ClockTime {
     u8 month; /* 0x5 */
     u16 year; /* 0x6 */
 } ClockTime;
-
-typedef struct EffRandState {
-    u32 x[4];
-} EffRandState;
 
 extern EffRandState D_00398938;
 
@@ -43,15 +40,15 @@ void effMiscSeedRandom(EffRandState *state, u32 seed) {
         state = &D_00398938;
     }
     seed ^= 0x0AED1A0C;
-    state->x[0] = seed;
+    state->words[0] = seed;
     seed = (seed << 24) | (seed >> 8);
-    state->x[1] = seed;
+    state->words[1] = seed;
     seed ^= 0xAA5A02FE;
     seed = (seed << 24) | (seed >> 8);
-    state->x[2] = seed;
+    state->words[2] = seed;
     seed ^= 0x11BE81C7;
     seed = (seed << 24) | (seed >> 8);
-    state->x[3] = seed;
+    state->words[3] = seed;
 }
 
 /* Seeds the generator at `state` from the current clock (time of day in seconds since an epoch). */
