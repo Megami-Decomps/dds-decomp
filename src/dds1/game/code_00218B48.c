@@ -213,7 +213,7 @@ void func_00101A80(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
-extern PacWork *func_00218768(PacWork *, s32, s32, s32);
+extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 
 
 extern u32 D_003BA8EC;
@@ -247,7 +247,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
         sdfPacUsePacketPayloadMemory(&request);
     }
     sdfPacFeedInput(&request, (u8 *)requestFirst, requestSecond);
-    func_00218768(request.queueHead, first, second, flags);
+    mdlApplyGroupedPartPackets(request.queueHead, first, second, flags);
     sdfPacReleasePacketQueueNodes(&request);
 }
 
@@ -422,7 +422,8 @@ u16 mdlGetRecordPartIndex(MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 
-u16 func_002193F0(MdlRecord *record) {
+/* Read the counted group record's number of following entity-slot packets. */
+u16 mdlGetRecordSlotCount(MdlRecord *record) {
     return record->tail.half.unk10;
 }
 
@@ -2529,7 +2530,7 @@ extern u32 D_00367C40[];
 
 extern s32 D_003BBCB8;
 
-extern void func_002EA2E0(s32 packet, s32 arg);
+extern void sdfPrintHexMemoryDump(s32 packet, s32 arg);
 
 /* Submit the selected resource in phase 3; keep the native bitwise input/once-flag test. */
 void mdlSubmitViewerResourceDrawPacket(void) {
@@ -2544,7 +2545,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
         drawPacket = (s32)func_002EF2E0(D_00367C00, D_00367C40, 4, 0x80);
         if ((sdfPadButtonStates[13] < 0) & (D_003BBCB8 == 0)) {
             D_003BBCB8 = 1;
-            func_002EA2E0(drawPacket, 0x100);
+            sdfPrintHexMemoryDump(drawPacket, 0x100);
         }
         sdfAppendPacket(packetList, (u32)(drawPacket));
         D_00325048.append(&D_00325048, packetList);

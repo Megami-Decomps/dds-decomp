@@ -241,7 +241,8 @@ extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
-u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
+/* Handle sound-file/buffer RPC commands and return the shared reply words. */
+u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
     char path[0x100];
 
     switch (command) {
@@ -347,7 +348,7 @@ void sdfSoundStartRpcServer(void) {
         }
     }
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x54524E53, func_002E99A0, D_003FEAC0, 0, 0, queue);
+    sceSifRegisterRpc(server, 0x54524E53, sdfSoundHandleRpcRequest, D_003FEAC0, 0, 0, queue);
     sceSifRpcLoop(queue);
 }
 
@@ -565,7 +566,8 @@ extern char D_003BD510[];
 extern char D_003BD518[];
 extern char D_003BD520[];
 
-void func_002EA2E0(const u8 *data, s32 size) {
+/* Print size bytes in address-aligned, sixteen-column hexadecimal rows. */
+void sdfPrintHexMemoryDump(const u8 *data, s32 size) {
     s32 column = 0;
     s32 i;
 
@@ -595,6 +597,7 @@ void func_002EA2E0(const u8 *data, s32 size) {
         sdfPrintFormattedDevMessage(D_003BD520);
     }
 }
+/* Print a DMA chain, retaining the native two-entry CALL/RET stack limits. */
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4880);
 
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B48A0);
@@ -605,7 +608,7 @@ INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B48E0);
 
 INCLUDE_RODATA(const s32, "game/code_002E9708", D_003B4900);
 
-void func_002EA448(u32 *src) {
+void sdfPrintDmaChain(u32 *src) {
     u32 *callStack[2];
     u32 *cursor;
     u32 tag;
@@ -1535,7 +1538,8 @@ void func_002EC950(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC968);
 
-void func_002ECA40(u32 value) {
+/* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
+void sdfSetStreamFrameDrawMode(u32 value) {
     D_003BD61C = value;
 }
 

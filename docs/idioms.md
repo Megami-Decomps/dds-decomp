@@ -689,7 +689,7 @@ functions use trampolines and are a different case.
   induction-variable pseudo has a different creation order and live range
   from a named source cursor, so the s-register priorities flip. A filtered
   collector writes `out[count]`, not a second output cursor. Verified on
-  DDS2 `func_001B32F8` (input and output indexed), `func_0029D790`,
+  DDS2 `btlCollectAvailableOptionSkills` (input and output indexed), `func_0029D790`,
   `func_002294D0`. Don't apply blindly: indexed motor, particle-replay and
   memory-map loops did not match.
 - DDS1 `func_001BE8A0` (item command rows) likewise indexes its existing byte
@@ -8862,7 +8862,7 @@ checks pass in a sandbox full link; compiler settings remain `-O2 -G8`.
 
 The model packet consumers are `mdlApplyQueuedGroupPackets` (DDS1 `0x002185B0`,
 DDS2 `0x002330C8`, 440 bytes) and the following counted consumers
-`func_00218768` / `func_00233280` (624 bytes).
+`mdlApplyGroupedPartPackets` in both games (624 bytes).
 
 **Property P:** the resource-pointer load must not commute past the preceding
 borrowed-record-pointer store, without overconstraining the later allocation and
@@ -9377,4 +9377,47 @@ The DDS2 command-hook dispatcher now shares DDS1's
 the default command-kind dispatch, including each game's original branches.
 All source edits in this batch are identifiers and comments, without changes
 to types, statement/declaration order, casts, literals or control flow.
+
+## Counted model packets, sound RPC requests and scene reward twins
+
+Namer1 batch 29 aligns nineteen remaining function definitions with their
+observed roles or already-named opposite-game implementations.
+
+`mdlApplyGroupedPartPackets` consumes the header's counted billboard, effect
+and object parts, an optional resource list, the item list and subsequent
+grouped entity-slot packets. It returns the next unconsumed packet; the
+existing queued-group path handles the original fallback cases.
+`mdlGetRecordSlotCount` reads the `u16` bound used by that slot loop. The
+record's generic field, pointer-transport aliasing, retained unknown-part
+metadata stores and allocation/resource ownership are unchanged. See
+"Pointer transport aliasing: queued model packets" above.
+
+`btlCollectAvailableOptionSkills` counts and optionally writes eligible IDs
+from the existing twenty-four skill slots. The explicit ID ranges and
+failure-reason filtering remain intact. The name follows its existing
+has-option and random-option consumers, without inventing a summon mechanic.
+DDS1's advanced input cursor and DDS2's indexed input remain distinct;
+neither loop is normalized to look like the other.
+
+`sdfSoundHandleRpcRequest` is the request callback registered for RPC
+`0x54524E53`, separate from `sdfSoundHandleRpcEvent`. Its file, resident-buffer
+and callback-buffer commands still return the shared reply words and retain
+the existing waits, cache behavior and IOP copies. `sdfPrintDmaChain` retains
+the two-entry CALL/RET stack, tag traversal and native diagnostics.
+The hex-dump, sound-table getter and IPU-handler shutdown names are aligned
+with their existing twins, without changing their function surfaces.
+
+`sdfSetStreamFrameDrawMode` stores the unchanged word consulted by the native
+stream-frame draw consumers at DDS1 `0x002ECD20` / DDS2 `0x00345BC8`.
+Value 1 selects the alternate draw path; movie/title viewport setup selects
+1 and cleanup selects 0. It is not renamed as a draw-enable boolean:
+the other path still draws. Existing argument widths and menu externs remain
+unchanged.
+
+The actor-entry, scene-script selection, final battle rewards and party
+recovery names now agree across games. Task-handle dependencies, restriction
+branches, unsigned reward conversions, per-title recovery skill IDs and
+DDS2's extra reward behavior are all retained. This batch changes only
+identifiers and comments, including the collector's `actorAddress` parameter;
+it introduces no layout, type, control-flow or statement-order changes.
 

@@ -1258,17 +1258,18 @@ PacWork *mdlApplyQueuedGroupPackets(PacWork *work, s32 group, s32 id, s32 mode) 
 }
 
 
-extern PacWork *func_00233280(PacWork *, s32, s32, s32);
+extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 typedef struct MdlPartTagRecord {
     u32 tag;
     u8 state;
     u8 pad05[3];
 } MdlPartTagRecord;
 extern u32 mdlGetViewerRecordPayloadWord(MdlRecord *record);
-extern u16 func_00233F60(MdlRecord *record);
+extern u16 mdlGetRecordSlotCount(MdlRecord *record);
 extern void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, struct SdfMemBlock *allocation, s32 size);
 
-PacWork *func_00233280(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+/* Apply the group's counted parts and entity slots; return the next packet. */
+PacWork *mdlApplyGroupedPartPackets(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     MdlLoadPayload groupSetup;
     MdlPartTagRecord unknownPart;
     PacHead *packetHeader;
@@ -1342,7 +1343,7 @@ PacWork *func_00233280(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     packetWork = sdfPacRemovePacket(packetWork);
     mdlApplyGroupSetup(group, id, mode, &groupSetup);
 
-    slotCount = func_00233F60(record);
+    slotCount = mdlGetRecordSlotCount(record);
     while (slotCount > 0) {
         slotRecord = (MdlRecord *)(packetWork->dataCursor - (u32)&((MdlRecord *)0)->tail);
         mdlConfigureGroupedEntitySlot(group, id, mode, (s16)slotRecord->parameter.word,
@@ -1382,7 +1383,7 @@ extern void btlRemoveGroupId(s32, s32);
  * this function leaves cleanup to the request path. */
 void mdlCompleteGroupedJobAndNotify(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
     completionJob->owner = requestOwner;
-    func_00233280(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
+    mdlApplyGroupedPartPackets(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
     WaitSema(mdlGroupJobSemaphore);
     btlRemoveGroupId(completionJob->group, completionJob->id);
     SignalSema(mdlGroupJobSemaphore);

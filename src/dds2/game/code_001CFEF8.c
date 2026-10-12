@@ -1184,7 +1184,7 @@ extern void dds3WorkClear(void);
 extern s32 btlCountRegisteredTasks(void);
 
 /* Restore the party after all scene tasks finish, then clear battle activity. */
-s32 func_001D2A78(BtlState *scene) {
+s32 btlFinishScenePartyRecovery(BtlState *scene) {
     u32 i;
     if (scene->tasks != NULL) {
         return 0;

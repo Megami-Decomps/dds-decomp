@@ -187,7 +187,7 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-extern PacWork *func_00233280(PacWork *, s32, s32, s32);
+extern PacWork *mdlApplyGroupedPartPackets(PacWork *, s32, s32, s32);
 
 extern u32 D_00435CBC;
 
@@ -296,7 +296,7 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s3
         sdfPacUsePacketPayloadMemory(&request);
     }
     sdfPacFeedInput(&request, (u8 *)(u32)requestFirst, requestSecond);
-    func_00233280(request.queueHead, first, second, flags);
+    mdlApplyGroupedPartPackets(request.queueHead, first, second, flags);
     sdfPacReleasePacketQueueNodes(&request);
 }
 
@@ -524,7 +524,8 @@ u16 mdlGetRecordPartIndex(MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 
-u16 func_00233F60(MdlRecord *record) {
+/* Read the counted group record's number of following entity-slot packets. */
+u16 mdlGetRecordSlotCount(MdlRecord *record) {
     return record->tail.half.unk10;
 }
 

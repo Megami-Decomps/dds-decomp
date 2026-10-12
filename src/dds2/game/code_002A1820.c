@@ -750,7 +750,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
 }
 
-extern void func_003458E8(u32);
+extern void sdfSetStreamFrameDrawMode(u32);
 
 
 extern void mnuReleaseMenuResourceSlots(void);
@@ -762,7 +762,7 @@ extern u32 D_00435BB0;
 
 void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuStopTitleMovieDraw();
-    func_003458E8(0);
+    sdfSetStreamFrameDrawMode(0);
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
@@ -806,7 +806,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
-        func_003458E8(1);
+        sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x80808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 0);
         break;
@@ -818,7 +818,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuSlideBarSetState(mnuMovieMenuState->bar, 2);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
         func_002A50F8(mnuMovieMenuState->movie);
-        func_003458E8(0);
+        sdfSetStreamFrameDrawMode(0);
         mnuStopTitleMovieDraw();
         break;
     case 19:
@@ -841,7 +841,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuTimedSlideBarSetState(&mnuMovieMenuState->timedB, 3, 0);
         mnuSlideBarSetState(mnuMovieMenuState->bar, 3);
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 1);
-        func_003458E8(1);
+        sdfSetStreamFrameDrawMode(1);
         sdfSetGridScaledDrawBounds(-0xA7, 0x5A, 0x200, 0x1C0, 0x808080);
         mnuArmTitleMovieDrawAndResetFrame(0x5B, 1);
         break;
@@ -885,7 +885,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
         mnuSlideBarSetStateB(mnuMovieMenuState->barB, 2);
         func_002A50F8(mnuMovieMenuState->movie);
         mnuStopTitleMovieDraw();
-        func_003458E8(0);
+        sdfSetStreamFrameDrawMode(0);
         break;
     }
     return done;
@@ -1215,7 +1215,7 @@ s32 mnuUpdateTitleMenuTask(KwlnTask *task) {
             mnuMovieMenuState->cursor = 0;
             mnuMovieMenuState->state = 5;
             mnuStopTitleMovieDraw();
-            func_003458E8(0);
+            sdfSetStreamFrameDrawMode(0);
         }
         break;
     case 30:

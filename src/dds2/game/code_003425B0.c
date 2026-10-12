@@ -250,7 +250,8 @@ extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sndCopyToIopAndWait(s32, void *, s32);
 
-u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {
+/* Handle sound-file/buffer RPC commands and return the shared reply words. */
+u32 *sdfSoundHandleRpcRequest(u32 command, SdfSoundRpcRequest *request) {
     char path[0x100];
 
     switch (command) {
@@ -356,7 +357,7 @@ void sdfSoundStartRpcServer(void) {
         }
     }
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x54524E53, func_00342848, D_0047B440, 0, 0, queue);
+    sceSifRegisterRpc(server, 0x54524E53, sdfSoundHandleRpcRequest, D_0047B440, 0, 0, queue);
     sceSifRpcLoop(queue);
 }
 
@@ -465,7 +466,8 @@ void sdfSoundSetTableEntry(u32 kind, u8 *src) {
     sndSendCommandPacket(0x1F0, 0, 0, 0);
 }
 
-void func_00342E58(u32 kind, u8 *dst) {
+/* Refresh the sound table, then copy the selected slice into dst. */
+void sdfSoundGetTableEntry(u32 kind, u8 *dst) {
     u8 *table;
     u8 *src;
     s32 i;
@@ -605,6 +607,7 @@ void sdfPrintHexMemoryDump(const u8 *data, s32 size) {
     }
 }
 
+/* Print a DMA chain, retaining the native two-entry CALL/RET stack limits. */
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E590);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5B0);
@@ -615,7 +618,7 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E5F0);
 
 INCLUDE_RODATA(const s32, "game/code_003425B0", D_0042E610);
 
-void func_003432F0(u32 *dmaTag) {
+void sdfPrintDmaChain(u32 *dmaTag) {
     u32 *returnStack[2];
     u32 *cursor;
     u32 tag;
@@ -1538,7 +1541,8 @@ extern s32 D_00439200;
 extern void func_00328668();
 extern s32 func_00366850();
 
-s32 func_003457A8(void) {
+/* Remove both IPU handlers and forward the final completion-source disable result. */
+s32 sdfSoundShutdownIpuStreamHandlers(void) {
     if (D_004391FC != 0) {
         func_00328668(D_004391FC);
         D_004391FC = 0;
@@ -1557,7 +1561,8 @@ void func_003457F8(void) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345810);
 
-void func_003458E8(u32 value) {
+/* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
+void sdfSetStreamFrameDrawMode(u32 value) {
     D_00438D0C = value;
 }
 

@@ -92,7 +92,7 @@ extern s32 D_00358510[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern s32 func_001A8DD8(s32, s32 *);
+extern s32 btlCollectAvailableOptionSkills(s32, s32 *);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
@@ -726,8 +726,9 @@ s32 func_001A8CE0(BtlUnit *requester) {
     return 1;
 }
 
-s32 func_001A8DD8(s32 object, s32 *choices) {
-    u16 *ids = (u16 *)(object + 0x142);
+/* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
+s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
+    u16 *ids = (u16 *)(actorAddress + 0x142);
     s32 count = 0;
     u32 i;
 
@@ -745,7 +746,7 @@ s32 func_001A8DD8(s32 object, s32 *choices) {
                 continue;
             }
         }
-        if (btlGetCommandFailureReason((BtlUnit *)object, id) != 0) {
+        if (btlGetCommandFailureReason((BtlUnit *)actorAddress, id) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -759,13 +760,13 @@ s32 func_001A8DD8(s32 object, s32 *choices) {
 u8 btlHasAvailableOption(u32 arg0) {
     s64 temp_v0;
 
-    temp_v0 = func_001A8DD8(arg0, 0);
+    temp_v0 = btlCollectAvailableOptionSkills(arg0, 0);
     return temp_v0 != 0;
 }
 
 s32 btlChooseRandomAvailableOption(s32 object) {
     s32 choices[24];
-    s32 count = func_001A8DD8(object, choices);
+    s32 count = btlCollectAvailableOptionSkills(object, choices);
     if (count != 0) {
         return choices[effMiscRandMod(0, count)];
     }
