@@ -14,6 +14,9 @@
 #include "evt_unit.h"
 #include "mdl.h"
 
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
+
 #define BTL_AI_SLOT_COUNT 5
 
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -289,7 +292,35 @@ u32 func_002115B0(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_002115B8);
+/* Normalize the byte index before sampling; see docs/idioms.md,
+ * "Trace-justified narrowing: packed range index". */
+u32 func_002115B8(u32 route) {
+    u8 result = route;
+    u8 first;
+    u8 last;
+    u8 count;
+    s32 i;
+
+    if (!(route & 0x80)) {
+        return result;
+    }
+    last = 0;
+    first = 0;
+    for (i = 0; i < 7; i++) {
+        if (route & (1 << i)) {
+            if (first == 0) {
+                first = i + 1;
+                last = first;
+            } else {
+                last = i + 1;
+            }
+        }
+    }
+    count = last - first + 1;
+    first--;
+    result = first + ((count * (effMiscRand(NULL) >> 8)) >> 24);
+    return result;
+}
 
 extern u32 func_002115B8(u32 route);
 
