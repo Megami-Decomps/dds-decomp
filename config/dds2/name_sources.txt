@@ -274,6 +274,7 @@
 0x0010FAA8	dds3BuildVuTransformFromComponents	inferred	Builds a VU transform from quaternion, scale and translation vectors. [names_reviewed10.tsv]
 0x0010FB00	dds3LoadOrBuildObjectMatrix	inferred	Loads a cached object matrix or builds it and sets its valid flag. [names_reviewed8.tsv]
 0x0010FB70	dds3TestObjectSphereOverlap	inferred	src/dds2/game/code_0010FB00.c func_0010FB70: Computes position-vector distance and compares with sum of stored object radii. Twin of DDS1 func_0010F948. [names_reviewed24.tsv]
+0x0010FBD0	dds3IsPointWithinObjectRadius	inferred	src/dds2/game/code_0010FB00.c and src/dds2/game/code_00113308.c; compares point-to-object distance with the second object radius at +0xC4 for proximity transition selection; paired 0010F9A8.
 0x0010FC28	dds3InvokeWorldCallbackFirst	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA00, input-family pairing. [names_qp10.tsv]
 0x0010FC68	dds3InvokeWorldCallbackSecond	inferred	M141; sources=names_pending_main.tsv; twin=0x0010FA40, input-family pairing. [names_qp10.tsv]
 0x0010FCA8	dds3AdvanceWorldCounter	inferred	Increments the world-side counter while restricting it to the low sixteen bits.

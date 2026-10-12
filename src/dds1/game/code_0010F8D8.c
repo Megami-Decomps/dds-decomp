@@ -42,7 +42,7 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 }
 
 /* vu0 routine: whether the distance between the two points at +0x40 is inside the second object's radius at +0xC4 */
-s32 func_0010F9A8(u8 *left, u8 *right) {
+s32 dds3IsPointWithinObjectRadius(u8 *left, u8 *right) {
     f32 length;
     f32 rightLimit;
     VU0_LOAD_VF(vf10, left + 0x40);

@@ -432,7 +432,7 @@ typedef struct EffectValueObject {
 } EffectValueObject;
 
 struct WorldIndexNode;
-extern s32 func_0010F9A8(f32 *, f32 *);
+extern s32 dds3IsPointWithinObjectRadius(f32 *, f32 *);
 void func_00113AF0(EffWorldNode *obj) {
     EffectObjectData *data = obj->data;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
@@ -456,7 +456,7 @@ void func_00113AF0(EffWorldNode *obj) {
             other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                func_0010F9A8(((f32 *)obj->inner), other->source) == 0 &&
+                dds3IsPointWithinObjectRadius(((f32 *)obj->inner), other->source) == 0 &&
                 data->activeId == other->valueId) {
                 evtEndUnitValueTransitionForObject(obj, 10);
                 data->activeId = -1;
@@ -474,7 +474,7 @@ void func_00113AF0(EffWorldNode *obj) {
             other = (EffectValueObject *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                func_0010F9A8(((f32 *)obj->inner), other->source) != 0) {
+                dds3IsPointWithinObjectRadius(((f32 *)obj->inner), other->source) != 0) {
                 goto attach_transition;
             }
         } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)list) != 0);
