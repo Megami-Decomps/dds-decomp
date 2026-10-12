@@ -1,6 +1,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -1036,18 +1037,6 @@ s32 kwlnEnsureDefaultResource(void) {
     return 0;
 }
 
-typedef struct DmaPacketHeader {
-    u16 quadwords;
-    u16 pad02;
-    u32 address;
-    u32 tag;
-    u32 command;
-    u16 unused10;
-    u8 pad12[6];
-    u32 unused18;
-    u32 unused1C;
-} DmaPacketHeader;
-
 typedef struct ConsMatrixPacket {
     u16 quadwords;
     u8 pad02[6];
@@ -1081,7 +1070,6 @@ typedef struct KwlnFrameDrawBank {
 
 typedef char KwlnFrameDrawBank_size_check[(sizeof(KwlnFrameDrawBank) == 0x1F40) ? 1 : -1];
 typedef char ConsMatrixPacket_size_check[(sizeof(ConsMatrixPacket) == 0xD0) ? 1 : -1];
-typedef char DmaPacketHeader_size_check[(sizeof(DmaPacketHeader) == 0x20) ? 1 : -1];
 
 extern KwlnFrameDrawBank D_00325870[2];
 extern u32 D_003BA8EC;
