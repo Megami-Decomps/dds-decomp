@@ -104,10 +104,26 @@ want_len=${#REPO}
 base=${CC1PROBE_MIRROR_BASE:-$TMPDIR/.c1p/}
 pad=$((want_len - ${#base}))
 [ $pad -ge 1 ] || { echo "cannot build a mirror path as long as $REPO under $base; set TMPDIR to a shorter directory or CC1PROBE_MIRROR_BASE (a path ending in / that is shorter than $want_len characters)" >&2; exit 3; }
-mname=$(printf 'm%.0s' $(seq 1 $pad))
+# Key the mirror by the repo path as well as its length, so clones with equal-length paths never
+# share a mirror; re-point any stale link left by an earlier run.
+key=$(printf '%s' "$REPO" | sha1sum | cut -d' ' -f1)
+if [ $pad -gt ${#key} ]; then
+    mname=$key$(printf 'm%.0s' $(seq 1 $((pad - ${#key}))))
+else
+    mname=${key:0:$pad}
+fi
 mir=$base$mname
 mkdir -p "$mir"
-for d in tools include src config build; do [ -e "$mir/$d" ] || { [ -e "$REPO/$d" ] && ln -s "$REPO/$d" "$mir/$d"; }; done
+for d in tools include src config build; do
+    [ -e "$REPO/$d" ] || continue
+    if [ -L "$mir/$d" ]; then
+        [ "$(readlink "$mir/$d")" = "$REPO/$d" ] || ln -sfn "$REPO/$d" "$mir/$d"
+    elif [ ! -e "$mir/$d" ]; then
+        ln -s "$REPO/$d" "$mir/$d"
+    else
+        echo "mirror entry $mir/$d is not a link; remove it or set CC1PROBE_MIRROR_BASE" >&2; exit 3
+    fi
+done
 
 canon=${as_unit:-}
 case $in in "$REPO"/src/*/*.c) [ -z "$canon" ] && canon=${in#"$REPO"/} ;; esac
