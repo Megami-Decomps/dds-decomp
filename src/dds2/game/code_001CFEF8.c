@@ -1067,7 +1067,7 @@ extern void itfMesClearFlags();
 
 extern void brsTaskAllowUpdate();
 
-extern void func_001AA868();
+extern void btlClearPartyRecordStatusBits();
 
 extern s32 func_0029D000(DatPartyRecord *);
 
@@ -1084,7 +1084,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
     brsTaskAllowUpdate();
     evtBeginSolarOverlayFadeOut(8);
     do {
-        func_001AA868(&datGameState->party[i], -0x45D1);
+        btlClearPartyRecordStatusBits(&datGameState->party[i], -0x45D1);
         if (!(scene->commandRestrictFlags & 0x40)) {
             if (datGameState->party[i].flags & 2) {
                 if (scene->eventReady == 1) {
@@ -1209,7 +1209,7 @@ s32 func_001D2A78(BtlState *scene) {
     dds3WorkClear();
     if (!(scene->commandRestrictFlags & 0x40)) {
         for (i = 0; i < 5; i++) {
-            func_001AA868(&datGameState->party[i], -0x5D1);
+            btlClearPartyRecordStatusBits(&datGameState->party[i], -0x5D1);
         }
     }
     if (btlCountRegisteredTasks() == 0) scene->battleFlags &= ~1;

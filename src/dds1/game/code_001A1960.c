@@ -152,7 +152,8 @@ extern DatPartyRecord *btlGetIndexedPartyEntryRecord(s32);
 
 extern s8 effSharedRandomState[];
 
-void func_001A1960(DatPartyRecord *record, s32 mask) {
+/* Clear the supplied party-record status mask. */
+void btlClearPartyRecordStatusBits(DatPartyRecord *record, s32 mask) {
     datClearUnitStatusBits(record, mask);
 }
 
@@ -272,7 +273,7 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
 extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
 
 /* Insert a complete party record before actors with a larger priority. */
-void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     DatPartyRecord saved;
     s32 insertion = 0;
     s32 i;

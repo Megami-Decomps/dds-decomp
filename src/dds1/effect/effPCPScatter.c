@@ -1049,7 +1049,7 @@ extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void *func_0015FE20(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 
 /* Return the trailing control block after zeroing two record arrays.
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
@@ -1125,14 +1125,14 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     D_003D6580->parameters = D_00354A70;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
-        sdfAppendPacket(packet, (u32)func_0015FE20(D_003D6580));
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
         D_003D6580->positions += 24;
         D_003D6580->colors += 24;
     }
     if (remainingVertices >= 6) {
         D_003D6580->parameterCount = remainingVertices / 6 * 4;
         D_003D6580->vertexCount = remainingVertices;
-        sdfAppendPacket(packet, (u32)func_0015FE20(D_003D6580));
+        sdfAppendPacket(packet, (u32)effCreateVertexDrawPacket(D_003D6580));
     }
     surface = D_00354B80[pool->unk10];
     surface->append(surface, packet);

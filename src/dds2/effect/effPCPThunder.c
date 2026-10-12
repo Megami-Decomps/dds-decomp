@@ -2943,7 +2943,7 @@ void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u12
 
 extern SdfPoolNode *D_003B1210[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void *func_00167A10(EffThunderDrawParams *);
+extern void *effCreateVertexDrawPacket(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
 void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
@@ -2989,14 +2989,14 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
-            sdfAppendPacket(list, (u32)func_00167A10(&D_00451F90));
+            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_00451F90));
             D_00451F90.points += 12;
             D_00451F90.colors += 12;
         }
         if (remaining >= 6) {
             draw->primitiveCount = (remaining / 3) * 4 - 4;
             draw->pointCount = remaining;
-            sdfAppendPacket(list, (u32)func_00167A10(draw));
+            sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(draw));
             draw->colors += remaining;
         }
     }
@@ -3009,7 +3009,7 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
     D_00451FC0.colors = colors;
     D_00451FC0.points = history->endPoints;
     D_00451FC0.color = history->color;
-    sdfAppendPacket(list, (u32)func_00167A10(&D_00451FC0));
+    sdfAppendPacket(list, (u32)effCreateVertexDrawPacket(&D_00451FC0));
     surface = D_003B1210[history->surfaceIndex];
     surface->append(surface, list);
 }

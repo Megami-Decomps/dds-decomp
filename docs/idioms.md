@@ -6700,8 +6700,8 @@ take an `EffectDispatchState *` or shuttle a software pointer through
 This does not change the SDK allocator's address-word return or the
 `u32` packet-address argument to `sdfAppendPacket`.
 
-The existing draw builders `func_0015FE20` / `func_00167A10` also return
-the allocated `void *` packet. Their effect/particle caller declarations
+The existing draw builder `effCreateVertexDrawPacket` in both games also returns
+the allocated `void *` packet. Its effect/particle caller declarations
 must agree; an integer return is not the SDK allocation API. Where a
 caller immediately submits that packet to `sdfAppendPacket`, the explicit
 `u32` conversion belongs only at its physical-address second argument.
@@ -8931,4 +8931,36 @@ background packet and reserves the next tag. `sdfDevConsDrawGlyphGrid` emits
 five register values per visible character/attribute cell with font/color
 lookup and DMA capacity checks. Preserve packed coordinate wrapping, ordered
 cursor accesses and the native do-loops without a zero-dimension guard.
+
+## Dispatch columns, crossfade and party-record forwarding
+
+The native billboard dispatch records are twelve bytes: constructor, update,
+destructor. `billUpdateDispatchedObject` selects the middle column and
+`billDestroyDispatchedObject` selects the last. Polygon lifecycle callbacks
+establish those roles; the old generic indexed-callback description obscured
+destruction. Preserve unprototyped callback forwarding and unchecked indices.
+`billSetDispatchedObjectColor` stores the packed polygon-work color; this does
+not change the basic-ring updater's native decision to ignore that color.
+
+`effAppendOffsetTriangle` appends the supplied position, then offsets Y by five,
+then Z by five for the third point. Optional normals and red colors are filled
+before the count advances by three. Neither capacity checks nor a debug-only
+role are established by the body.
+
+`effCreateVertexDrawPacket` returns the allocated DMA/VIF packet and serializes
+the parameter, position, optional normal, UV and color streams. Preserve vec3
+MMI packing, the optional allocator, UV packing paths, termination and alignment.
+
+`dds3UpdateCrossfade` captures the first frame and draws the held texture with
+decreasing alpha; `dds3EndCrossfade` releases it and clears the active state.
+The native start/end strings explicitly identify crossfade. The previous DDS1
+textured-quad name described a drawing detail rather than this lifecycle.
+
+`btlRaisePartyRecordStatusValue` and `btlClearPartyRecordStatusBits` retain the
+legacy forwarding declarations and call arity. The former raises the packed
+low-fifteen-bit numeric value, preserves the stored high bit and retains the
+callee's status-dependent randomization; it is not rewritten as a bitwise OR.
+`btlInsertPartyActorByPriority` retains record/index shifting and stat copying.
+`btlDispatchActionCursorStepByKind` respects the optional hook before selecting
+approach, target-pose or unmarked-advance paths. DDS2's extra kind is unchanged.
 

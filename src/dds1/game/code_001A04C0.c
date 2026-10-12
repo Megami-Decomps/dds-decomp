@@ -826,7 +826,8 @@ u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
     return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
-void func_001A1948() {
+/* Forward the legacy record/value arguments to the packed low-15-bit status update. */
+void btlRaisePartyRecordStatusValue() {
     sdfRaisePackedChannelValue();
 }
 

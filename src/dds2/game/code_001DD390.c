@@ -165,7 +165,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 btlGetRuntime(void);
 
-extern void func_001AA850(void *, s32);
+extern void btlRaisePartyRecordStatusValue(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
@@ -321,7 +321,7 @@ extern void btlInitUnitFxDefaults(BtlUnit *);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-extern void func_001AA868(void *, s32);
+extern void btlClearPartyRecordStatusBits(void *, s32);
 
 extern void func_001ADFE0(BtlUnit *, u32, s16);
 
@@ -1433,8 +1433,8 @@ s32 btlApplyActorParameterDelta(BtlOperandTaskArgs *arguments) {
         unit->status.flags |= 0x10000000;
     }
     previousStatus = unit->partyRecord.status;
-    func_001AA850(&unit->partyRecord, arguments->operand.addedStatus);
-    func_001AA868(&unit->partyRecord, arguments->operand.removedStatus);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord, arguments->operand.addedStatus);
+    btlClearPartyRecordStatusBits(&unit->partyRecord, arguments->operand.removedStatus);
     defeated = 0;
     if (unit->partyRecord.status != 0 && unit->partyRecord.status != previousStatus) {
         unit->status.stateFlags |= 4;
@@ -1463,7 +1463,7 @@ s32 btlApplyActorParameterDelta(BtlOperandTaskArgs *arguments) {
             unit->status.flags = (unit->status.flags & ~0x10400000) | 0x20000000;
         }
         unit->status.flags &= ~0x10000000;
-        func_001AA868(&unit->partyRecord, 0x1000);
+        btlClearPartyRecordStatusBits(&unit->partyRecord, 0x1000);
     }
     return 1;
 }
@@ -1528,7 +1528,7 @@ u32 btlApplyDeferredUnitStatus(void *arg) {
     if (!(work->battleFlags & 0x80)) {
         return 1;
     }
-    func_001AA850(&unit->partyRecord.flags, args[1]);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, args[1]);
     btlRefreshUnitMotionSelection(unit);
     btlIsUnitDefeatTriggeredByValueDelta(unit, 0);
     return 1;
@@ -1563,7 +1563,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
     if (datCommandRecords[args->category].flags & 8) {
         btlAdjustUnitHp(&unit->partyRecord, -0x7FFF);
-        func_001AA850(&unit->partyRecord.flags, 0x4000);
+    btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, 0x4000);
         unit->status.flags |= 0x20;
     }
     if (args->amount == 0) {
@@ -1902,7 +1902,7 @@ u32 btlRefreshEligibleActors(void) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->status.stateFlags & 8) == 0) {
                                 u16 prior = unit->partyRecord.status;
-                                func_001AA850(&unit->partyRecord.flags, 1);
+                                btlRaisePartyRecordStatusValue(&unit->partyRecord.flags, 1);
                                 btlRefreshUnitMotionSelection(unit);
                                 if (unit->partyRecord.status == 1 && prior != unit->partyRecord.status) {
                                     unit->status.stateFlags |= 4;

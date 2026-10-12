@@ -1536,7 +1536,7 @@ extern void sdfInvertRigidVuTransform(void);
 extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void *func_00167A10(EffPacketParams *);
+extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 func_00353228(f32);
 extern f32 func_00353140(f32);
 extern SdfAsset *D_00436D10;
@@ -1763,7 +1763,7 @@ draw_tile:
                         VU0_ROTATE_VEC($vf10, $vf10);
                         VU0_STORE_VF($vf10, normals[vertex]);
                     }
-                    sdfAppendPacket(tiles, (u32)func_00167A10(&D_00453030));
+                    sdfAppendPacket(tiles, (u32)effCreateVertexDrawPacket(&D_00453030));
                 }
                 x += xStep;
             }

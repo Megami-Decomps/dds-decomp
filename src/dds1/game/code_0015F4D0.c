@@ -27,7 +27,7 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void (*D_0034E680[])();
 extern void (*D_0034E690[])();
 extern void effBattleReleaseParameterBanks(SoundMixer *);
-extern void func_00160690();
+extern void dds3EndCrossfade();
 extern const char D_003A0D70[];
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 extern s32 kwlnTextureSetReferenceFlagIfPresent();
@@ -92,11 +92,13 @@ void *effCreateDispatchStateForHandler(EffectDispatchState *effect) {
     return result;
 }
 
-void billDispatchIndexedObjectCallback(EffectDispatchState *effect) {
+/* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
+void billDestroyDispatchedObject(EffectDispatchState *effect) {
     billObjectCallbacks[effect->handler].func();
 }
 
-void func_0015F5B0(EffectDispatchState *effect) {
+/* Invoke the update column of the selected constructor/update/destructor record. */
+void billUpdateDispatchedObject(EffectDispatchState *effect) {
     D_0034E654[effect->handler].func();
 }
 
@@ -126,7 +128,8 @@ void effComposeBillboardTransformMatrix(u8 *effect, void *matrix) {
     VU0_STORE_MATRIX(effect + 0x20);
 }
 
-void func_0015F6E8(EffectDispatchState *effect, u32 value) {
+/* Set the packed color consumed by the dispatched polygon work. */
+void billSetDispatchedObjectColor(EffectDispatchState *effect, u32 value) {
     effect->value60 = value;
 }
 
@@ -148,7 +151,8 @@ void func_0015F710(BillEntryOwner *owner, u32 value) {
 
 extern f32 D_0034E580[4];
 
-void func_0015F718(void *buffer, const f32 *position) {
+/* Append position, position+(0,5,0), position+(0,5,5), with optional normals/color. */
+void effAppendOffsetTriangle(void *buffer, const f32 *position) {
     u8 *work = buffer;
     s32 count = *(s32 *)(work + 0xC);
     f32 point[4] __attribute__((aligned(16)));
@@ -303,7 +307,8 @@ typedef struct EffPacketParams {
 
 extern u32 D_0034E6A0[];
 
-void *func_0015FE20(EffPacketParams *params) {
+/* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
+void *effCreateVertexDrawPacket(EffPacketParams *params) {
     s32 parameterCount = params->parameterCount;
     s32 vertexCount = params->vertexCount;
     u32 primitive = params->primitive | 0x48;
@@ -435,7 +440,7 @@ void dds3StartCrossfade(s32 frames) {
     u64 clearValue;
 
     if (D_003BB018 != 0) {
-        func_00160690();
+        dds3EndCrossfade();
     }
     if (frames != 0) {
         D_00324850[0] = 0.0f;
@@ -465,7 +470,7 @@ void dds3StartCrossfade(s32 frames) {
 }
 
 /* Capture the first frame, then draw the held texture with a decreasing alpha. */
-void billSubmitTexturedQuadColumns(void) {
+void dds3UpdateCrossfade(void) {
     SdfListHead *list;
     SdfDmaNode *reference;
     u64 *texturePacket;
@@ -478,7 +483,7 @@ void billSubmitTexturedQuadColumns(void) {
         return;
     }
     if (D_003BB01C == D_003BB020) {
-        func_00160690();
+        dds3EndCrossfade();
         return;
     }
     if (D_003BB01C == 0) {
@@ -557,7 +562,8 @@ void billSubmitTexturedQuadColumns(void) {
     D_00325588.append(&D_00325588, list);
 }
 
-void func_00160690(void) {
+/* Release the captured texture and clear the active crossfade state. */
+void dds3EndCrossfade(void) {
     kwlnTextureClearReferenceFlag();
     kwlnTextureReleaseHeldReference();
     D_003BB018 = 0;
