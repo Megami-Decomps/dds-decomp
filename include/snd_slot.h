@@ -6,6 +6,11 @@
 struct FileRequest;
 struct SdfMemBlock;
 
+typedef struct SoundSlotTableEntry {
+    s16 resourceOffset;
+    u16 fileId;
+} SoundSlotTableEntry;
+
 /* Shared motion-SE cache, allocated as 0x108 bytes by DDS1 001F3E70 and
  * DDS2 00204B00. The key and work subobject begin at +0x08. */
 typedef struct SoundSlotWork {

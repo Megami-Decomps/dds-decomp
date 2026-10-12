@@ -1173,7 +1173,46 @@ void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211740);
+extern SoundSlotOwner *sndAcquireSlotOwner(s32, s32);
+extern s32 btlSelectSideIndexedActorParameterTable(s32, s32);
+
+void func_00211740(s32 kind, s32 id) {
+    BattleModelEntry *entry = btlFindModelEntry(kind, id);
+    PacWork *node;
+    SoundSlotTableEntry *parts;
+    s32 i;
+
+    if (entry->state == 0) {
+        if (entry->packRequest != NULL) {
+            entry->soundOwner = sndAcquireSlotOwner(kind, id);
+            if (entry->soundOwner->work.refCount == 1) {
+                s32 count = kind == 0 ? 0x1D : 0x17;
+                parts = (SoundSlotTableEntry *)btlSelectSideIndexedActorParameterTable(kind, id);
+                node = entry->packRequest->packet.queueHead;
+                for (i = 0; i < count; i++) {
+                    /* Capture the row before field access; see docs/idioms.md,
+                     * "Trace-justified pointer staging: sound-table row". */
+                    SoundSlotTableEntry *part = parts + i;
+                    if (part->resourceOffset >= 0) {
+                        entry->soundOwner->work.resourceHandles[i] = (struct SdfMemBlock *)node->resourceHandle;
+                        node = node->next;
+                        entry->soundOwner->work.fileRequests[i] = 0;
+                    } else {
+                        entry->soundOwner->work.resourceHandles[i] = 0;
+                        entry->soundOwner->work.fileRequests[i] = 0;
+                    }
+                }
+            } else {
+                for (node = entry->packRequest->packet.queueHead; node != NULL; node = node->next) {
+                    sdfReleaseResourceAllocation((struct SdfMemBlock *)node->resourceHandle);
+                }
+            }
+            func_00288788(entry->packRequest);
+            entry->packRequest = NULL;
+        }
+        entry->state = 1;
+    }
+}
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {

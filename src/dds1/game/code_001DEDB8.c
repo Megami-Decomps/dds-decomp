@@ -6880,11 +6880,6 @@ void sndClearList(void) {
     }
 }
 
-typedef struct SoundSlotTableEntry {
-    s16 resourceOffset;
-    u16 fileId;
-} SoundSlotTableEntry;
-
 typedef struct SoundTaskArgs {
     BtlUnit *actor;
     s32 option;

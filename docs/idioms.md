@@ -8100,3 +8100,67 @@ The RNG declaration uses the provider's existing `struct EffRandState` tag
 and unsigned return. NULL selects its shared state. There is no new state
 view, assembly, register pin, steering cast or unused staging value.
 
+## Trace-justified pointer staging: sound-table row
+
+DDS1 `func_00211740` (0x00211740, 316 bytes) distributes a model pack's
+resource handles according to its motion-SE descriptor table. The existing
+four-byte `SoundSlotTableEntry` owner is shared with the file loaders;
+capturing `SoundSlotTableEntry *part = parts + i` before reading
+`part->resourceOffset` reproduces the table-base-first `addu` at 0x002117DC.
+The DDS2 semantic counterpart, `func_0022CBA0`, also adds its table base
+first at 0x0022CC38, before its additional debug print.
+
+Property P is that the row address expands as a pointer value before its
+field is accessed, rather than as a folded array-field memory address.
+The verified vendor-cc1 initial RTL and CSE trace distinguish the forms:
+`parts[i].resourceOffset` starts uid130 with `plus(index102, base88)`;
+the captured row starts uid130 with `plus(base88, index103)`, followed by
+the field load through the row pseudo. CSE retains both original orders.
+The deciding stage is RTL expansion, not a scheduler tie or allocation
+priority; scheduling and allocation retain the captured form's native
+operand order. Hooked and unhooked assembly and every RTL dump are identical.
+
+The prior pointer-expression and offset-local forms retain one differing
+word. The row capture closes it with no new instructions or unused value.
+The live consumer gates 80 match, 0 differ; moving the existing table type
+verbatim into `snd_slot.h` leaves its DDS1 and DDS2 original owner units at
+248 match, 0 differ and 231 match, 0 differ respectively.
+
+
+## Trace-justified cursor consumption: copied payload slots
+
+`effInitializeCopiedPayloadSlots` in DDS1 (0x002B3420) and DDS2 (0x002F6A80),
+360 bytes each, consumes kind-9 `FldSpawnBatch` entries from a copied payload.
+The primary `FldFileResource` owner supplies each constructor's id, data and
+name. The constructor's actual ABI is `(id, data, name)`; swapping argument
+meanings is not a solution. Retail loads data at +0x88, id at +0x90 and name
+at +0x98, then advances the 0x24-byte entry cursor at +0x9C before the call.
+
+Both vendor-cc1 traces have identical hooked/unhooked assembly and every
+RTL dump. The deciding scheduler tier is `luid`: the three field loads tie
+on priority, register weight and cost. Property P is that the data load's
+early producer must survive until scheduling, before the id producer.
+An early used `data = entry->data` capture alone is insufficient. The
+`combine` pass deletes its producer (uid65) and forwards the memory read
+into the later argument setup (uid74), restoring id-before-data order and
+leaving two differing words in each twin.
+
+The source captures the entry's three real constructor arguments, then
+consumes the entry with `entry++` before calling the constructor. The old
+cursor is no longer available for forwarding the memory expressions into
+later argument moves, so the three load producers survive `combine`.
+Sched1 selects data/id/name by LUID 23/24/25 with equal priority 8; reload
+coalesces the argument copies without extra instructions. Sched2 then
+selects uid65 (data) before uid68 (id) by LUID 35/37, with equal priority 7,
+weight 1 and cost 2 (the deciding comparison is trace line 1382 in both
+twins). The final instruction sequence matches retail, including cursor
+consumption before the constructor call.
+
+All three locals carry values the constructor actually uses; there is no
+dummy use, altered prototype, alternative struct view or allocator search.
+The effect/target accesses following callbacks remain the existing primary
+owner accesses. Both live whole-unit gates are exact: DDS1 542 match,
+0 differ and DDS2 686 match, 0 differ, preserving all 1,226 previous
+matched functions. This is trace-justified source shape, not a claim that an
+original source declaration was recovered.
+
