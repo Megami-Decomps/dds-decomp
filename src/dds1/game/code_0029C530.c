@@ -94,7 +94,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
 
-extern f32 func_00152560(u8 *, void *);
+extern f32 effCalcViewAxisWidthFactor(u8 *, void *);
 
 
 
@@ -1493,7 +1493,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, &vec);
         angle = effComputeProjectedOffsetAngle((u8 *)work, &vec);
-        scale = func_00152560((u8 *)work, &vec);
+        scale = effCalcViewAxisWidthFactor((u8 *)work, &vec);
         if (scale < 0.3f) {
             scale = 0.3f;
         }

@@ -353,7 +353,7 @@ extern void effSetCurveEmitterEndPosition(s32, void *);
 
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
-extern f32 func_0015A150(void *, void *);
+extern f32 effCalcViewAxisWidthFactor(void *, void *);
 
 
 
@@ -1684,7 +1684,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, &dir);
         angle = effComputeProjectedOffsetAngle(work, &dir);
-        len = func_0015A150(work, &dir);
+        len = effCalcViewAxisWidthFactor(work, &dir);
         if (len < 0.3f) {
             len = 0.3f;
         }

@@ -1053,7 +1053,7 @@
 0x00160A00	effCloneTemplateWithPacketDescriptors	inferred	Copies template and allocates per-packet descriptors and subrecord storage [names_reviewed6.tsv]
 0x00160B58	parReleaseObject	inferred	Releases an optional particle child, its effect resources, and the particle object itself.
 0x001612D8	parInitColorRamp	inferred	Initializes color-ramp data; DDS1 twin. [names_qp9.tsv]
-0x001618C8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
+0x001618C8	parReleaseHistorySlotTable	inferred	high confidence; corrects node misnomer: releases the history-slot table's shared point/slot allocation handle. Paired DDS1 0x00159CD8 and emitter kind-one cleanup confirm ownership. [Namer1 batch 30]
 0x001618E0	parPrependHistorySample	inferred	Shifts the selected slot history backward, captures the current vector sample, and stores color and billboard scale
 0x00161958	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
 0x00161A10	parDrawHistorySlots	inferred	submits each particle slot history as progressively fading billboard points
@@ -7099,7 +7099,7 @@
 0x00153D60	fldCreateGrippedUnitMarker	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001540E8	fldCreateChaseCameraObject	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00158AA0	billFlushPairedQuadStreams	inferred	Inferred from the current C implementation in effect/billManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00161D08	parDrawHistoryCentreStrip	inferred	Inferred from the current C implementation in effect/parManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00161D08	parDrawHistoryRibbonTriangles	inferred	high confidence; aligns DDS1 0x0015A118: constructs three vertices per history segment, center plus opposing cross-product width edges, with triangle-cell alpha/color handling. [Namer1 batch 30]
 0x00165860	polyBuildBasicRadialFan	inferred	Inferred from the current C implementation in effect/polyManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00165B98	polyCreateBandNode	inferred	Inferred from the current C implementation in effect/polyManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00166350	polyCreateArcRingNode	inferred	Inferred from the current C implementation in effect/polyManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -7634,3 +7634,11 @@
 0x002BDA50	mnuGetItemRequirementCount	inferred	Returns zero for item ID zero, otherwise the indexed item-requirement count. [LiteH menu naming batch 11]
 0x002BDA78	mnuGetItemRequirementValue	inferred	Returns zero for item ID zero, otherwise the signed requirement value in its indexed item record. [LiteH menu naming batch 11]
 0x002BE080	mnuDrawMenuTextById	inferred	Loads the text for a menu ID, creates a glyph chain, applies its color and position, then queues it for drawing. [LiteH menu naming batch 11]
+0x0015A150	effCalcViewAxisWidthFactor	inferred	high confidence; returns one minus absolute XYZ dot of normalized eye-target against supplied axis; billboard-frame consumer clamps at 0.3 and scales width. Paired DDS1 0x00152560. [Namer1 batch 30]
+0x0015B270	effSeedEmitterDelayRandomState	inferred	high confidence; clock-seeds effEmitterDelayRandomState during fldCreateFieldEffectTask initialization. Paired DDS1 0x00153680. [Namer1 batch 30]
+0x0015B330	effInitializeEmitterHead	inferred	high confidence; initializes common emitter buffer, optional billboard, color ramp, kind-specific draw resources, restart state, matrix backup and active/color state; used by template clone paths. Paired DDS1 0x00153740. Existing trace-justified body retained. [Namer1 batch 30]
+0x0015C3C8	effInitializeBallisticParticle	inferred	high confidence; initializes indexed ballistic packet position, velocity, gravity, launch delay and jitter, then initializes its subeffect; effEmitterBallisticUpdate consumes it. Paired DDS1 0x001547D8. [Namer1 batch 30]
+0x0015F1C0	effUpdateReflectingRadiusEmitter	inferred	high confidence; advances packet lifetimes and motion, reflects velocity at frame-entry radius and clamps position to the boundary; retains native next-frame radius update. Paired DDS1 0x001575D0. [Namer1 batch 30]
+0x0015F918	effInitializeOffsetGravityParticle	inferred	high confidence; initializes indexed offset-gravity packet native mode-dependent offset, velocity, acceleration, delay and jitter for effEmitterOffsetGravityUpdate. Paired DDS1 0x00157D28. [Namer1 batch 30]
+0x00161B38	parBuildHistoryRibbonStrip	inferred	high confidence; rebuilds a slot's history strip with two opposed vertices per segment using normalized segment/view-axis cross product and width, then sets alpha/color. Paired DDS1 0x00159F48. [Namer1 batch 30]
+0x00161B20	parClearHistorySlotPoints	inferred	high confidence; corrects flag misnomer: clears selected ParSlot.pointCount halfword, consumed as a count by parDrawHistorySlots. Paired DDS1 0x00159F30; no call-surface changes. [Namer1 batch 30]

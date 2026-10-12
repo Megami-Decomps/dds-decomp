@@ -284,7 +284,7 @@ ParTable *func_001617F8(u32 slotCount, u16 pointCapacity, BillObj **billboardRef
 }
 
 /* Release the slot table's allocation handle, not a separate node object. */
-void effParReleaseNodeResource(ParTable *table) {
+void parReleaseHistorySlotTable(ParTable *table) {
     sdfReleaseResourceAllocation(table->allocation);
 }
 
@@ -372,7 +372,7 @@ void parDrawHistorySlots(ParTable *table) {
 }
 
 /* Disable this slot's billboard points by clearing its count, not a bit flag. */
-void parClearSlotFlag(ParTable *table, s32 slotIndex) {
+void parClearHistorySlotPoints(ParTable *table, s32 slotIndex) {
     table->slots[slotIndex].pointCount = 0;
 }
 
@@ -383,7 +383,7 @@ extern void effBillSetEntryValue(ParSystem *system, s32 index, u32 color);
 /* Rebuild one slot's two-vertex strip cells from its point history: each cell is
    the offset point +/- the cross product of the segment direction with the view axis,
    scaled by the strip width. */
-void func_00161B38(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+void parBuildHistoryRibbonStrip(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
     ParHistory *history = &source->records[index];
     ParCell *cell = &system->cells[index];
     u128 *vertex = cell->history;
@@ -439,8 +439,8 @@ void func_00161B38(ParSystem *system, s32 index, const f32 *origin, u32 color, P
 
 extern void func_001638D8(ParSystem *system, s32 index);
 
-/* Triangle-cell variant of parDrawHistoryCentreStrip: three vertices per history segment. */
-void parDrawHistoryCentreStrip(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
+/* Triangle-cell variant of parBuildHistoryRibbonStrip: three vertices per history segment. */
+void parDrawHistoryRibbonTriangles(ParSystem *system, s32 index, const f32 *origin, u32 color, ParHistoryTable *source) {
     ParHistory *history = &source->records[index];
     ParCell *cell = &system->cells[index];
     u128 *vertex = cell->history;

@@ -97,7 +97,7 @@ independently supported contract:
 
 | Observation | Recovered fact | Validation beyond the final instruction diff |
 | --- | --- | --- |
-| Same `abs.s`, different motion of nearby constants | Game module uses the existing `ffabsf` asm helper | Paired `func_00152560` / `func_0015A150`, larger `func_001726E8`, and a kernel builtin counterexample |
+| Same `abs.s`, different motion of nearby constants | Game module uses the existing `ffabsf` asm helper | Paired DDS1/DDS2 `effCalcViewAxisWidthFactor`, larger `func_001726E8`, and a kernel builtin counterexample |
 | Indexed displacement exceeds the apparent scalar remainder | Nested record levels contribute separate offset splits | `BtlState.debug`, its actual extent/offset guards, and multiple related accesses |
 | X/Y pointers share differently despite equal byte offsets | Real coordinate arrays differ from two scalar members | `BattleActorPanelEntry.position[2]`, both title consumers and pass-00 address RTL |
 | A store/reload has unexpected dependencies | Access through a union component differs from access through its actual active member type | Existing `BattleLinkedEffectState` member, lifecycle/mode evidence and scheduler edges |

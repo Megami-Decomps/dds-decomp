@@ -149,7 +149,7 @@ typedef struct ParEmitDesc {
     ParEmitCellState cells; /* 0xC0 */
 } ParEmitDesc;
 
-extern void parClearSlotFlag(s32);
+extern void parClearHistorySlotPoints(s32);
 
 
 
@@ -420,7 +420,7 @@ void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) 
 void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag((s32)work->value.table);
+        parClearHistorySlotPoints((s32)work->value.table);
         return;
     case 2:
         parCellInit(work->primaryDrawSystem, index);
