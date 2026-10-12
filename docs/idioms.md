@@ -7948,3 +7948,37 @@ with the SDK quadword macros. VU operations keep W separate from XYZ, and the
 packet builder stores positions through `EE_MMI_STORE_VEC3_VALUE`, discarding
 W. Preserve this native partial-vector contract rather than inventing a
 fourth-lane initializer.
+
+## Policy capture and transition phases explain scheduler register deaths
+
+`btlSelectCommandTargetPolicy` (DDS1 `0x001A3360`, 412 bytes; DDS2
+`0x001AC360`, 428 bytes) captures target type, options, target flags and
+restriction in the primary roster owner's field order. Its command-record
+arm already uses that same order. The final restriction access consumes the
+roster-base register for the last time, so sched1 promotes that load ahead
+of the three byte loads. Copying fields in disassembly order instead gives
+the register death to the wrong member. Preserve the actual policy prefix,
+not an arbitrary load permutation.
+
+`btlAdvanceTargetPanelAnimation` (DDS1 `0x001BFAD0`, DDS2 `0x001CB498`,
+780 bytes each) enters the next animation phase before initializing its
+fade, scale and row state. The final row-phase clear is then the last use
+of the primary `SceneAiWork` pointer. This explains its early native store
+without overlapping struct views or changes to the existing byte fields.
+
+DDS2 `mnuStaffImageProc` (`0x002A6180`, 764 bytes) advances the image
+selection and resets its delay/hold counters before assigning the restart
+phase. Sched1 promotes the final phase assignment because it consumes the
+last owner-register use. Its empty menu-input arm is also native-evidenced:
+`0x002A6330..0x002A6370` retains six predicate reads with no body effect,
+consistent with a body compiled out in retail. Keep that plain, commented
+arm; a discarded Boolean expression is not equivalent for this compiler.
+
+Observer/unobserved output comparisons for these functions agree. Their
+deciding pre-allocation tier is equal-priority `reg_weight`, followed by
+`luid`; post-allocation sched2 preserves the resulting order through `luid`
+and does not use the displayed register weight as its tie breaker. Neither
+an append-order change nor alternate compiler flags is needed. These are
+specific, evidence-backed capture/transition shapes, not permission to
+search assignment orders.
+

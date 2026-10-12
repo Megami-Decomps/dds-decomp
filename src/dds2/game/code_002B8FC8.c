@@ -357,7 +357,7 @@ s32 mnuFinishPartyClearPopup(s32 callback);
 
 u32 func_002B0D48(void);
 
-void func_002B0D50(u32 context);
+void mnuSelectPartySelectionVisuals(u32 context);
 
 void func_002B0D70(u32 callback);
 
@@ -415,7 +415,7 @@ s32 mnuStepPartySelectionControl(s32 callback);
 
 u8 mnuIsStateNotOne(void);
 
-void func_002B27F0(u32 context);
+void mnuSelectStaffSelectionVisuals(u32 context);
 
 void mnuReleaseMenuWindowHandles(s32 context);
 
@@ -423,11 +423,11 @@ u32 mnuCreateSelectState(u32 unused, s32 flag);
 
 s32 mnuStaffCloseSelectionState(void);
 
-void func_002B29C8(u32 context);
+void mnuOpenStaffSelectionEntry(u32 context);
 
 void func_002B29E0(void);
 
-void func_002B29F8(u32 context);
+void mnuOpenPartySelectionEntry(u32 context);
 
 void func_002B2A10(void);
 
@@ -494,7 +494,7 @@ void mnuSeekFirstAvailableStaffListNode(void);
 
 MenuWindowContainer *mnuSeekSelectedWindowCursor(s32 selectionMode, s32 callback);
 
-void func_002B4270(u32 context);
+void mnuSelectSkillSelectionVisuals(u32 context);
 
 void func_002B4290(s32 context);
 
@@ -512,7 +512,7 @@ extern void func_00315388(u16, SkillInfo *);
 
 u32 *mnuBuildOwnedSkillBits(void);
 
-void func_002B47F8(void);
+void mnuReleaseSkillCodeBitset(void);
 
 s32 mnuIsSkillCodeInBitset(s32 skillCode, u32 *bits);
 
@@ -609,7 +609,7 @@ s32 ptySkillMenuBrowseCandidatePages(s32 callback);
 
 s32 mnuOpenSkillDetailPanel(s32 callback);
 
-s32 func_002B6800(s32 callback);
+s32 mnuStepSkillDetailControl(s32 callback);
 
 void mnuDrawSelectionLabel(u16 id);
 
@@ -639,7 +639,7 @@ void func_002B7588(s32 context);
 
 s32 mnuCampMenuDrawStatus(s32 callback);
 
-s32 func_002B76B0(s32 callback);
+s32 mnuStepCampStatusControl(s32 callback);
 
 
 void mnuInitializeMapPacket(u32 value, u32 *values, s32 count, MapPacket *packet);

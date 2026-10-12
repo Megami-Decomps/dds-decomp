@@ -914,7 +914,7 @@ void effMagatuhiCopyRingMatrix(EffMagatuhiRingWork *work, void *matrix) {
 }
 
 
-extern u32 func_001947F8(void *block);
+extern u32 effGetDispatchType(void *block);
 
 /* Replay the first slot of each three-slot group from a random age. */
 void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
@@ -937,7 +937,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
     f32 radiusStep;
 
     if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (func_001947F8(arg->effect) == EFF_MAGATUHI_REPLAY_RING) {
+        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_RING) {
             work = effGetHandlerArg(arg->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
@@ -1166,7 +1166,7 @@ void effMagatuhiCopyOrbitMatrix(EffMagatuhiOrbitWork *work, void *matrix) {
 }
 
 
-extern u32 func_001947F8(void *block);
+extern u32 effGetDispatchType(void *block);
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
 void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
@@ -1190,7 +1190,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
     f32 radiusStep;
 
     if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (func_001947F8(arg->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
+        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
             work = effGetHandlerArg(arg->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
@@ -1431,7 +1431,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
     f32 scaleStep;
 
     if (arg->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (func_001947F8(arg->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
+        if (effGetDispatchType(arg->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
             work = effGetHandlerArg(arg->effect);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
@@ -1485,12 +1485,12 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
     }
 }
 
-extern u32 func_001947F8(void *block);
+extern u32 effGetDispatchType(void *block);
 
 /* Dispatch replay side effects; retain the native s32 definition's fall-through. */
 s32 effMagatuhiDispatchByKind(EffMagatuhiCallback *work) {
     if (work->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        switch (func_001947F8(work->effect)) {
+        switch (effGetDispatchType(work->effect)) {
         case EFF_MAGATUHI_REPLAY_NONE:
             break;
         case EFF_MAGATUHI_REPLAY_BEZIER:

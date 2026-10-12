@@ -22,7 +22,7 @@ extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
 extern BtlUnit *btlGetEffectActor(void);
 
-extern u32 func_001A3360(void *, BtlIndexList *, s32);
+extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
 /* Command-actor state retained by AI queries; this is not a battle unit.
  * The first queued action is also the word tested by btlActionMatchesUnit. */
@@ -144,7 +144,7 @@ extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitMp(DatPartyRecord *);
 
-extern void func_001A30F8(s32, BtlIndexList *, s32, s32, s32);
+extern s32 func_001A30F8(void *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
@@ -264,7 +264,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
-    result = func_001A3360((void *)actor, list, 0);
+    result = btlSelectCommandTargetPolicy((void *)actor, list, 0);
     *matchingCount = result;
     result = btlGetIndexListCount(list);
     *listCount = result;
@@ -582,7 +582,7 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
         mode = 0;
         break;
     }
-    func_001A30F8(actor, list, 1, 2, 0);
+    func_001A30F8((void *)actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -617,7 +617,7 @@ INCLUDE_ASM(const s32, "game/code_00202178", func_00203E38);
 
 s32 btlAppendSelfAfterTargetScan(s32 actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    func_001A30F8(actor, list, 1, 1, 0);
+    func_001A30F8((void *)actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
     btlFreeIndexList(list);
@@ -3275,7 +3275,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
         if (task == 0) {
             return 0;
         }
-        blocked = func_001A3360(task, 0, 0);
+        blocked = btlSelectCommandTargetPolicy(task, 0, 0);
     } else {
         blocked = datCommandRecords[command].targetType;
     }

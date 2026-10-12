@@ -3261,7 +3261,8 @@ void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32
     descriptor->originY = y;
 }
 
-u32 func_0020DFC0(s32 recordAddress) {
+/* Read the browser descriptor's zero-based selected entry index. */
+u32 btlGetResourceBrowserSelectedIndex(s32 recordAddress) {
     const u32 *recordWords = (const u32 *)recordAddress;
     return recordWords[5];
 }
@@ -3381,7 +3382,8 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
     return record;
 }
 
-void func_0020E368(void *allocation) {
+/* Release the chip allocation used for an editable resource-name record. */
+void btlDestroyResourceNameRecord(void *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
