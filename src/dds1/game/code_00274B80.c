@@ -340,7 +340,7 @@ extern void mnuPopulatePartyPanelSlot(DatPartyRecord *, s32, u32, PartyPanel *);
 extern void func_00280048(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */
-void func_00275030(s32 partyIndex, s32 mode, s32 skipUpdate,
+void mnuTransferPartyEntryToSelection(s32 partyIndex, s32 mode, s32 skipUpdate,
                    CampMenuContext *context) {
     PartyMenuData *menu = (PartyMenuData *)context->menu;
     s32 previousPanelCount = context->partyPanel.unk0;
@@ -390,7 +390,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
 
     for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
         if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
-            func_00275030(entryCounter, -3, 1, (CampMenuContext *)context);
+            mnuTransferPartyEntryToSelection(entryCounter, -3, 1, (CampMenuContext *)context);
         }
         entryCursor++;
     }
@@ -502,7 +502,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
         (MenuScrollPanel *)(u32)((CampMenuContext *)menu)->display,
         (struct EffectSlotSet *)(u32)((CampMenuContext *)menu)->displayVariant, 0, 1);
 }
-s32 func_00275920(s32 callback) {
+s32 mnuHandlePartySelectionInput(s32 callback) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue((KwlnTask *)callback);
     PartyMenuData *menuWork = (PartyMenuData *)context->menu;
     s32 inputFlags = mnuMapPadMaskToFlags(0x33);
@@ -530,7 +530,7 @@ s32 func_00275920(s32 callback) {
             case 0:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
-                    func_00275030(entryIndex, 2, 0, context);
+                    mnuTransferPartyEntryToSelection(entryIndex, 2, 0, context);
                 } else {
                     inputFlags = 0x8000;
                 }
@@ -781,7 +781,7 @@ typedef struct StaffMenuRuntime {
     u8 pad28[8];
 } StaffMenuRuntime;
 
-s32 func_00276368(KwlnTask *task, s32 flag) {
+s32 mnuInitializeStaffSelectionState(KwlnTask *task, s32 flag) {
     s32 context = kwlnTaskGetUserValue(task);
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(StaffMenuRuntime));
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress(allocation);
@@ -814,7 +814,7 @@ s32 mnuStaffCloseSelectionState(KwlnTask *task) {
 
 /* Open selection work in staff-view mode; the task argument is forwarded unchanged. */
 void mnuOpenStaffSelectionEntry(u32 context) {
-    func_00276368(context, 1);
+    mnuInitializeStaffSelectionState(context, 1);
 }
 
 void mnuFinishStaffSelectionEntry(KwlnTask *task) {
@@ -823,7 +823,7 @@ void mnuFinishStaffSelectionEntry(KwlnTask *task) {
 
 /* Open the same selection work in party-view mode. */
 void mnuOpenPartySelectionEntry(u32 context) {
-    func_00276368(context, 0);
+    mnuInitializeStaffSelectionState(context, 0);
 }
 
 void mnuFinishPartySelectionEntry(KwlnTask *task) {
@@ -1782,7 +1782,7 @@ void mnuHighlightSelectedListNode(KwlnTask *task) {
     }
 }
 
-s32 func_00278C90(KwlnTask *task) {
+s32 mnuRestoreSkillMenuSelection(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
     SkillMenuRuntime *menu = (SkillMenuRuntime *)context->menu;
     s32 index = -1;

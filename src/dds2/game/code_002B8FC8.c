@@ -2218,7 +2218,7 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     }
 }
 
-void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
+void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 index, s32 kind) {
     MenuPageSlot *slot = &menu->slots[index];
     DatPartyRecord *actor = &datGameState->party[menu->records->slots[index].index];
     s32 resourceIndex;
@@ -2305,12 +2305,12 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 preserveResourceHandles) {
         PartyPanel *entries = menu->records;
         if (entries->slots[i].unk8 >= 0) {
             if ((s32)i < entries->unk0) {
-                func_002BC690(menu, i, 1);
+                mnuRebuildPartySlotResources(menu, i, 1);
             } else {
-                func_002BC690(menu, i, 2);
+                mnuRebuildPartySlotResources(menu, i, 2);
             }
         } else {
-            func_002BC690(menu, i, 0);
+            mnuRebuildPartySlotResources(menu, i, 0);
         }
     }
 }

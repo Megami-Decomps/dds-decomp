@@ -111,7 +111,7 @@ extern u32 D_0037C330[][2];
 extern u32 D_0037C378[][2];
 
 /* Queue the category, group, party and single staff resources after the base banks. */
-void func_002717D8(StaffMenuWork *menu) {
+void mnuAppendStaffResourceRequests(StaffMenuWork *menu) {
     s32 resourceIndex;
     s32 tableColumn;
     EffectList *resourceList = (EffectList *)menu->resourceQueue;

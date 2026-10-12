@@ -180,7 +180,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, owner->resources.baseResources[1]);
 }
 
-void func_002ABEB0(MenuStaffContext *object) {
+void mnuDestroyStaffBulletItemWindow(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
 }
 
@@ -305,7 +305,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, owner->resources.baseResources[1]);
 }
 
-void func_002AC660(MenuStaffContext *object) {
+void mnuDestroyOrderedStaffItemWindow(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[3]);
 }
 
@@ -414,11 +414,11 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, owner->resources.baseResources[1]);
 }
 
-void func_002ACA98(MenuStaffContext *object) {
+void mnuDestroyOwnedCatalogItemWindow(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[4]);
 }
 
-s32 func_002ACAC0(s32 itemId, MenuStaffContext *owner) {
+s32 mnuRefreshOwnedCatalogItemList(s32 itemId, MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
     if (datGameState->inventory.counts[itemId] == 0) {
@@ -545,7 +545,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 D_003E7050[];
 
-s32 func_002ACE58(KwlnTask *callback) {
+s32 mnuDrawStaffItemSelectionScreen(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(4);
@@ -600,7 +600,7 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
     mnuSetStateValue(&((MenuStaffContext *)context)->unkAA50, 1);
 }
 
-u32 func_002AD0A8(KwlnTask *task) {
+u32 mnuFadeInStaffItemList(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
@@ -608,7 +608,7 @@ u32 func_002AD0A8(KwlnTask *task) {
     return 1;
 }
 
-u32 func_002AD0E8(KwlnTask *task) {
+u32 mnuFadeInActiveStaffWindow(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
@@ -616,7 +616,7 @@ u32 func_002AD0E8(KwlnTask *task) {
     return 1;
 }
 
-s32 func_002AD118(KwlnTask *callback) {
+s32 mnuHandleStaffInventoryListInput(KwlnTask *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;

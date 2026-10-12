@@ -7613,7 +7613,7 @@
 0x0027AD80	mnuLoadBackdropAssetsAndTintSlots	inferred	Inferred from the current C implementation in game/code_00279CC0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0027D850	mnuDrawSlidingPartyPanel	inferred	Inferred from the current C implementation in game/code_0027BF00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0027FAA8	mnuDrawPartyPageGauges	inferred	Inferred from the current C implementation in game/code_0027BF00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x0027FCA0	mnuRebuildPartySlotResources	inferred	Inferred from the current C implementation in game/code_0027BF00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0027FCA0	mnuRebuildPartySlotResources	inferred	Inferred from the current C implementation in game/code_0027BF00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass); DDS2 twin at 0x002BC690.
 0x002812E8	mnuDrawPartyProfileAndExpOverlay	inferred	Inferred from the current C implementation in game/code_0027BF00.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00283D10	mnuUpdatePairedEffectBounds	inferred	Inferred from the current C implementation in game/code_00282850.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00283EE0	mnuDrawAlternatingRatioBarEffects	inferred	Inferred from the current C implementation in game/code_00282850.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -7991,3 +7991,16 @@
 0x002E7228	sdfDevInitializeHddPfsDebugMode	inferred	confidence=high; matched-C; Resets PFS debug mode, loads dev/ATAD/HDD/PFS modules, sets power-off semaphore/thread/callback, mounts hdd0 path at native pfs0 and enables debug mode. DDS2 twin 003400D0. Namer1 batch 17.
 0x001A4598	btlGetEncounterAdjustmentScale	inferred	confidence=high; matched-C; Selected encounter pack/group/entry adjustment clamped to -3..3 indexes datBattleParameters.adjustmentScale; evtPushAvailableFloatValue calls it under runtime guard. DDS2 twin 001AD978. Namer1 batch 17.
 0x001DE960	btlPrepareSingleTargetCameraBlend	inferred	confidence=high; matched-C; Requires one target, delegates for party source actor, otherwise selects paired camera pose kind from target body x and publishes motion parameter30/flags41. DDS2 twin 001EC198. Namer1 batch 17.
+0x00271368	mnuLoadStaffImageResources	inferred	Loads primary and secondary mapped staff images and initializes their status batches. LiteH-2 menu naming batch 2.
+0x002717D8	mnuAppendStaffResourceRequests	inferred	Queues category, group, party and single-image resource requests from the selected staff table column. LiteH-2 menu naming batch 2.
+0x002734C0	mnuHandleStaffDisplayInput	inferred	Handles confirmation, cancellation and directional input for the staff display menu. LiteH-2 menu naming batch 2.
+0x002738A0	mnuHandleStaffInventoryListInput	inferred	Handles item confirmation, target-category checks, cancellation and list navigation for the inventory window. twin=0x002AD118 (DDS2). LiteH-2 menu naming batch 2.
+0x00273A30	mnuRefreshStaffWindowDescription	inferred	Draws the selected staff row description or empty-label fallback from its list node. twin=0x002AD330 (DDS2). LiteH-2 menu naming batch 2.
+0x00275030	mnuTransferPartyEntryToSelection	inferred	Moves a party record into the selection backup and updates party panel selection state. LiteH-2 menu naming batch 2.
+0x00275920	mnuHandlePartySelectionInput	inferred	Handles party-selection input, cursor movement, entry add/remove and transition confirmation. LiteH-2 menu naming batch 2.
+0x00276368	mnuInitializeStaffSelectionState	inferred	Allocates and initializes staff-selection runtime state, then activates the panel for the selected view. LiteH-2 menu naming batch 2.
+0x00278C90	mnuRestoreSkillMenuSelection	inferred	Restores the skill-menu cursor from its mode, clearing the selected-node ID on the selection-flags path. LiteH-2 menu naming batch 2.
+0x0027C7B8	mnuDrawWindowEntryDecorations	inferred	Draws window row separators and the cursor's neighboring decorative sprites. LiteH-2 menu naming batch 2.
+0x0027CA90	mnuDrawWindowFrameAndOverlay	inferred	Draws the window frame, fade decorations and selected overlay or sprite. LiteH-2 menu naming batch 2.
+0x00281688	mnuDrawPartyPanelSlotWithBlend	inferred	Selects a party-panel resource from its blend state and draws the slot with the selected alpha. LiteH-2 menu naming batch 2.
+0x00281780	mnuQueuePartyPanelSlotBlend	inferred	Selects the lower-blend work entry and queues a party-panel transition. LiteH-2 menu naming batch 2.

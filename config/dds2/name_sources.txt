@@ -4470,7 +4470,7 @@
 0x002ACF00	mnuFinishStaffReturnPopup	inferred	medium confidence; src/dds2/game/code_002AB890.c func_002ACF00: Runs completion mode for the return popup referenced by the cancellation paths in the staff selection states. [names_reviewed25.tsv]
 0x002ACF38	mnuUseStaffItem	inferred	L69; sources=names_pending_main.tsv [names_qp10.tsv]
 0x002AD030	mnuApplyResourceSelection	inferred	When func_002ACF38 allows the update, copies the indexed byte to the primary resource's nested field and records the selected index.
-0x002AD330	mnuRefreshStaffWindowDescription	inferred	L13
+0x002AD330	mnuRefreshStaffWindowDescription	inferred	L13; DDS1 twin at 0x00273A30.
 0x002AD3B8	mnuStaffImageEnterA	inferred	R_Names31 B91
 0x002AD4C0	mnuStaffImageExitA	inferred	R_Names31 B91
 0x002AD518	mnuStaffImageInputA	inferred	input handler, func_002C44E8(3); twins 0x002AD708/0x002AD8F8 differ only in the label passed to func_002C42C0 [names_M59_D2Mid.tsv]
@@ -7401,3 +7401,12 @@
 0x003400D0	sdfDevInitializeHddPfsDebugMode	inferred	confidence=high; matched-C; Resets PFS debug mode, loads dev/ATAD/HDD/PFS modules, sets power-off semaphore/thread/callback, mounts hdd0 path at native pfs0 and enables debug mode. DDS1 twin 002E7228. Namer1 batch 17.
 0x001AD978	btlGetEncounterAdjustmentScale	inferred	confidence=high; matched-C; Selected encounter pack/group/entry adjustment clamped to -3..3 indexes datBattleParameters.adjustmentScale; evtPushAvailableFloatValue calls it under runtime guard. DDS1 twin 001A4598. Namer1 batch 17.
 0x001EC198	btlPrepareSingleTargetCameraBlend	inferred	confidence=high; matched-C; Requires one target, delegates for party source actor, otherwise selects paired camera pose kind from target body x and publishes motion parameter30/flags41. DDS1 twin 001DE960. Namer1 batch 17.
+0x002ABEB0	mnuDestroyStaffBulletItemWindow	inferred	Destroys the window stored at staff item-list slot 2. LiteH-2 menu naming batch 2.
+0x002AC660	mnuDestroyOrderedStaffItemWindow	inferred	Destroys the window stored at ordered staff-item slot 3. LiteH-2 menu naming batch 2.
+0x002ACA98	mnuDestroyOwnedCatalogItemWindow	inferred	Destroys the window stored at owned-catalog slot 4. LiteH-2 menu naming batch 2.
+0x002ACAC0	mnuRefreshOwnedCatalogItemList	inferred	Removes a zero-inventory selected row and reports whether the catalog list remains nonempty. LiteH-2 menu naming batch 2.
+0x002ACE58	mnuDrawStaffItemSelectionScreen	inferred	Draws the staff item-selection screen, its current label and grid labels, then enters the next handler. LiteH-2 menu naming batch 2.
+0x002AD0A8	mnuFadeInStaffItemList	inferred	Begins the fade transition for the primary staff-item list window. LiteH-2 menu naming batch 2.
+0x002AD0E8	mnuFadeInActiveStaffWindow	inferred	Begins the fade transition for the active staff window. LiteH-2 menu naming batch 2.
+0x002AD118	mnuHandleStaffInventoryListInput	inferred	Handles item confirmation, target-category checks, cancellation and list navigation for the inventory window. twin=0x002738A0 (DDS1). LiteH-2 menu naming batch 2.
+0x002BC690	mnuRebuildPartySlotResources	inferred	Rebuilds icon and frame resource slots for a party slot from current resources and actor state. twin=0x0027FCA0 (DDS1). LiteH-2 menu naming batch 2.
