@@ -1082,6 +1082,8 @@ void btlPrepareSingleTargetCameraBlend(BtlLinkedCommand *action) {
 void func_001DEA68(void) {
 }
 
+extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);
+
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (action->task->unit->status.flags & 0x400) {
@@ -1108,7 +1110,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
         action->motionParameter = 200.0f;
         action->flags |= 0x10041;
     } else {
-        func_001E5800(action, action);
+        btlInitSkillCommandCursor(action, &action->camera);
     }
 }
 

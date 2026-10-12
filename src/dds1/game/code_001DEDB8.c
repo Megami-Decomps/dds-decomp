@@ -2344,6 +2344,18 @@ void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action, BtlCamStat
 void func_001E57F8(void) {
 }
 
+extern s16 D_003BB670[];
+extern s16 D_003BB678[];
+extern s16 D_003BB680[];
+extern u32 btlNextScaledRandom(u32);
+extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16);
+extern void func_001E6668(BtlLinkedCommand *, BtlCamState *, s32, s32);
+
+/* Four retail flag/boolean sites: 1E5CE4/1E5CF0/1E5D3C/1E5D48; matched DDS2 predicate. */
+static inline s32 btlHasFlag(u32 flags, u32 mask) {
+    return (flags & mask) != 0;
+}
+
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4000);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4180);
@@ -2364,7 +2376,273 @@ INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4408);
 
 INCLUDE_RODATA(const s32, "game/code_001DEDB8", D_003A4468);
 
-INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E5800);
+void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
+    s16 groupChoices[2];
+    s16 pathChoices[4];
+    s16 sideChoices[2];
+    s16 choice;
+    s32 orientation;
+    s32 initialFlags;
+    s32 pathSet;
+    u16 skillId;
+    BtlUnit *entryUnit = command->task->unit;
+    BtlUnit *unit;
+
+    memcpy(groupChoices, D_003BB670, sizeof(groupChoices));
+    initialFlags = entryUnit->status.flags;
+    memcpy(pathChoices, D_003BB678, sizeof(pathChoices));
+    memcpy(sideChoices, D_003BB680, sizeof(sideChoices));
+    if (initialFlags & 0x400) {
+        btlActionAimUserAtTargets(command, &command->frontCamera, &command->backCamera);
+        command->motionParameter = 20.0f;
+        command->flags |= 0x41;
+        return;
+    }
+    memset(CURSOR, 0, sizeof(*CURSOR));
+    skillId = command->task->indexWork.skillId;
+    switch (skillId) {
+    case 0x1D4:
+        CURSOR->unk_0A = 1;
+        CURSOR->unk_0E = 0;
+        if (btlCanUseLinkedActor(command) == 0) {
+            CURSOR->unk_0C = 0x1E;
+        } else {
+            CURSOR->unk_0C = 0x21;
+        }
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1D3:
+        CURSOR->unk_0A = 1;
+        CURSOR->unk_0C = 0x1A;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1DC:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = 0x17;
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1BB:
+        /* Keep the selected path live across preset initialization; see
+         * docs/idioms.md, "Trace-justified skill-camera path selection". */
+        pathSet = 3;
+        CURSOR->unk_0C = 0x1B;
+        CURSOR->unk_0A = pathSet;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1BF:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = 0x16;
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1D2:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = pathChoices[(s16)btlNextScaledRandom(4)];
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1D7:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        if (btlCanUseLinkedActor(command) == 0) {
+            CURSOR->unk_0C = 0x1E;
+        } else {
+            CURSOR->unk_0C = 0xB;
+        }
+        func_001E6668(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1CF:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x1D;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1D1:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x1C;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1DD:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x15;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1DE:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 8;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1E0:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 2;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1E1:
+    case 0x1E2:
+    case 0x1E3:
+    case 0x1E7:
+    case 0x1E8:
+    case 0x1E9:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        unit = command->task->unit;
+        if (unit->lookupId > command->linkedA->lookupId) {
+            orientation = !btlHasFlag(unit->status.flags, 0x1000);
+        } else {
+            orientation = btlHasFlag(unit->status.flags, 0x1000);
+        }
+        if (orientation == 0) {
+            CURSOR->unk_0C = 0x1F;
+            choice = 0;
+        } else {
+            CURSOR->unk_0C = 0x20;
+            choice = 1;
+        }
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1E4:
+    case 0x1E5:
+    case 0x1E6:
+    case 0x1EA:
+    case 0x1EB:
+    case 0x1EC:
+    case 0x1ED:
+    case 0x1EE:
+    case 0x1EF:
+    case 0x1F0:
+    case 0x1F1:
+    case 0x1F2:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        unit = command->task->unit;
+        if (unit->lookupId > command->linkedA->lookupId) {
+            orientation = !btlHasFlag(unit->status.flags, 0x1000);
+        } else {
+            orientation = btlHasFlag(unit->status.flags, 0x1000);
+        }
+        if (orientation == 0) {
+            CURSOR->unk_0C = 0x13;
+            choice = 0;
+        } else {
+            CURSOR->unk_0C = 0x14;
+            choice = 1;
+        }
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask(command);
+        break;
+    case 0x1B3:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
+        CURSOR->unk_0C = 0x11;
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1B7:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
+        CURSOR->unk_0C = 0x12;
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1C3:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[1]);
+        CURSOR->unk_0C = 0xE;
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1D5:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        switch (command->task->unit->lookupId) {
+        case 0: choice = 0; break;
+        case 2: choice = 1; break;
+        default: choice = (s16)btlNextScaledRandom(2); break;
+        }
+        CURSOR->unk_0C = choice + 0xC;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1D6:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        switch (command->task->unit->lookupId) {
+        case 0: CURSOR->unk_0C = 9; break;
+        case 2: CURSOR->unk_0C = 10; break;
+        default: CURSOR->unk_0C = choice + 9; break;
+        }
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1DA:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        switch (command->task->unit->lookupId) {
+        case 0: CURSOR->unk_0C = 0xF; break;
+        case 2: CURSOR->unk_0C = 0x10; break;
+        default: CURSOR->unk_0C = choice + 0xF; break;
+        }
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    case 0x1D8:
+    case 0x1DF:
+        CURSOR->unk_0A = 4;
+        CURSOR->unk_0C = 5;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        choice += 8;
+        btlBuildPresetCameraPose(command, pose, 1, choice);
+        func_001E6668(command, pose, 0, 0xC);
+        break;
+    default:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        CURSOR->unk_0C = 0x19 - choice;
+        btlBuildPresetCameraPose(command, pose, 1, sideChoices[choice]);
+        func_001E6668(command, pose, 0, 5);
+        break;
+    }
+}
 
 extern const BtlCameraTimedInstruction *D_0035DA28[];
 

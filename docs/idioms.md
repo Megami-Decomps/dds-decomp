@@ -9109,3 +9109,50 @@ it merely because its retained C body forwards actor-attribute averaging.
 This is a symbol-binding constraint, not proof of a general-purpose division
 implementation.
 
+## Trace-justified skill-camera path selection
+
+DDS1 `btlInitSkillCommandCursor` (`0x001E5800`, 2236 bytes, in
+`game/code_001DEDB8`) uses the existing `BtlCameraCursor` owner. Its matched
+DDS2 semantic counterpart is `btlInitSkillCommandCursor` at `0x001F41F0`;
+the versions have different skill cases, so the DDS1 body follows its own
+native switch and preset/path tables.
+
+The six remaining words in the direct-store form were all in the `0x1BB`
+case, starting at DDS1 `0x001E5A10` (`+0x210`). Native uses `$3` for the cursor,
+`$5` for path set 3, and `$2` for preset `0x1B`. A qualified, read-only
+`cc1probe` run (hooked and unhooked assembly/RTL identical) explains both
+deciding tiers:
+
+- **sched1, LUID tie-break:** staging the real path selection before preset
+  initialization keeps its defining instruction before the preset load.
+  Writing the preset before consuming that selection likewise gives the
+  preset store the earlier LUID when priority, register weight and cost tie.
+- **local-alloc, quantity priority:** the resulting preset, cursor and path
+  quantities have priorities `10000`, `6666` and `3333`, respectively.
+  The preset has two references over lifetime `[10,12]`, the cursor four over
+  `[4,16]`, and the path selection two over `[8,14]`. They receive `$2`,
+  `$3` and `$5`. Post-reload scheduling recovers the native field-store order.
+
+Property P is therefore to keep the selected path live across preset
+initialization, while consuming the preset before the path selection in the
+pre-reload representation. Ordinary C expresses that grouping directly:
+
+```c
+pathSet = 3;
+CURSOR->unk_0C = 0x1B;
+CURSOR->unk_0A = pathSet;
+CURSOR->unk_0E = 0;
+```
+
+`pathSet` is the actual selection subsequently used by
+`btlAdvancePlayerCursorAnimation` to index `D_0035DA28`; it is neither padding
+nor a discarded value. This single trace-derived form closes all 559 native
+words. Merely widening a preset temporary to `s32` keeps its priority at
+`5000` and leaves six words different. Reusing the existing side-choice local
+for the preset also leaves those six words different. No declaration-order
+search, fabricated clobber, or compiler flag change is involved.
+
+The sole DDS1 caller now passes `&action->camera`, the offset-zero
+`BtlCamState` member, with the same typed API already used by DDS2. Its whole
+unit remains byte-exact.
+
