@@ -1119,7 +1119,7 @@ typedef struct {
 } __attribute__((packed)) FileRecordHeader;
 
 
-extern void func_00161588(BattleEffect *, f32);
+extern void effBattleSetScale(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
@@ -1129,7 +1129,7 @@ EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
     memcpy(work, init, sizeof(*init));
     work->actor = NULL;
     work->effect = func_00160958(owner, kind, 0, 0);
-    func_00161588(work->effect, init->param);
+    effBattleSetScale(work->effect, init->param);
     return work;
 }
 
@@ -1151,7 +1151,7 @@ void effEventCopySerializedRecord(const FileRecordHeader *source, FileRecordHead
 
 /* Forward the effect's scale value without modifying the record's init prefix. */
 void effEventSetScale(EffEventWork *work, f32 scale) {
-    func_00161588(work->effect, scale);
+    effBattleSetScale(work->effect, scale);
 }
 
 void effEventSetState(EffEventWork *work, void *actor) {
