@@ -75,7 +75,7 @@ extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 
 /* Apply and restore a selected group's two-color and direction keyframe. */
-void func_0016A100(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
+void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame) {
     BtlUnit *selected[16];
     f32 direction[4];
     u32 packedStart[4];
@@ -360,7 +360,8 @@ void effParamInitFromGlobal(void *work) {
     mdlProcessContextNodesAndTransforms(work, D_00380828);
 }
 
-void func_0016AA38(void *work) {
+/* Release the model context owned by parameter work. */
+void effParamReleaseModelWork(void *work) {
     mdlDestroyContext(work);
 }
 
@@ -408,7 +409,8 @@ void effParamScatterVectors(MdlCtx *work, void *matrix) {
     VU0_STORE_VF(vf30, thirdVector);
 }
 
-void func_0016AB30(void *work, u32 color) {
+/* Set model color and broadcast its alpha with neutral RGB to the resources. */
+void effParamSetModelColor(void *work, u32 color) {
     mdlBroadcastMasked(work, color);
 }
 

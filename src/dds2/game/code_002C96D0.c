@@ -4301,7 +4301,7 @@ extern u8 sdfViewTargetVector[];
 extern void sdfInvertRigidVuTransform(void);
 
 /* vu0 routine: tests whether vf10 projects within the camera's forward cone. */
-s32 func_002D2D48(void) {
+s32 sdfProjectPointInForwardConeVU(void) {
     f32 distance, facing;
     f32 *projection;
 
@@ -4343,7 +4343,7 @@ s32 func_002D2D48(void) {
 extern u8 sdfViewUpVector[];
 
 /* vu0 routine: distance between the projected view point and a second point offset perpendicular to
-   the camera axis by rate; 0 when either projection (func_002D2D48) fails. Point comes in vf10. */
+   the camera axis by rate; 0 when either projection (sdfProjectPointInForwardConeVU) fails. Point comes in vf10. */
 f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     f32 scale[4];
     f32 second[4];
@@ -4353,7 +4353,7 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     f32 dy;
 
     VU0_STORE_VF(vf10, origin);
-    if (func_002D2D48() == 0) {
+    if (sdfProjectPointInForwardConeVU() == 0) {
         return 0.0f;
     }
     VU0_STORE_VF(vf10, first);
@@ -4369,7 +4369,7 @@ f32 mnuMeasureProjectedPerpendicularDistance(f32 rate) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_MOVE_VF(vf11, vf12);
     VU0_ADD(vf10, vf10, vf11);
-    if (func_002D2D48() == 0) {
+    if (sdfProjectPointInForwardConeVU() == 0) {
         return 0.0f;
     }
     VU0_STORE_VF(vf10, second);
@@ -4922,7 +4922,8 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     return queue;
 }
 
-FileQueue *func_002D4380(u32 unused, FileQueue *source) {
+/* Effect-node creation callback: ignore its option and clone the supplied queue. */
+FileQueue *effCloneQueueForNode(u32 unused, FileQueue *source) {
     return fileCloneQueueEntries(source);
 }
 

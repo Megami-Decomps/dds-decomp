@@ -23,7 +23,7 @@ extern f32 sdfViewTargetVector[4];
 extern f32 D_003B1530[4];
 
 
-extern void func_0017ED50(void *, void *);
+extern void effCopyMatrixVU(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
     parReleaseCellSystem(work->system);
@@ -38,11 +38,13 @@ void effPCPNeedleCreate(void *parameters) {
     effNeedleCreateWork(work);
 }
 
-void func_0017E068(EffPCPNeedleParams *parameters) {
+/* Recreate needle work directly from the parameter prefix used by duplication. */
+void effNeedleCreateFromParams(EffPCPNeedleParams *parameters) {
     effNeedleCreateWork(parameters);
 }
 
-void func_0017E080(EffPCPNeedleWork *work) {
+/* Advance the orbiting needle entries and rebuild their camera-facing trails. */
+void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
     f32 position[4];
     f32 axis[4];
     f32 vertices[2][4];
@@ -216,6 +218,7 @@ void effPCPNeedleCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_0017E668(EffPCPNeedleWork *work, void *matrix) {
-    func_0017ED50(work->resource->matrix, matrix);
+/* Copy the supplied transform into the needle's resource matrix. */
+void effNeedleSetResourceMatrix(EffPCPNeedleWork *work, void *matrix) {
+    effCopyMatrixVU(work->resource->matrix, matrix);
 }

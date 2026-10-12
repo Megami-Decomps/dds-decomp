@@ -259,7 +259,7 @@ void effSetResourceEntryValue(EffResourceWork *effect, s32 index, u32 value) {
 }
 
 /* vu0 routine: copy a 0x40-byte matrix from src to dst through vf28-vf31 */
-void func_0017ED50(void *dst, void *src) {
+void effCopyMatrixVU(void *dst, void *src) {
     VU0_LOAD_MATRIX(src);
     VU0_STORE_MATRIX(dst);
 }
