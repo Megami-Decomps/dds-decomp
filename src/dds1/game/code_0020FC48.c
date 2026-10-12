@@ -13,6 +13,7 @@
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_action.h"
 #include "btl_sound.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
@@ -2127,7 +2128,418 @@ void btlInitDrawTables(void) {
     state->unk_E0E = -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_00214868);
+/* Battle debug editors use the same complete records as their live owners. */
+typedef struct BtlDebugTransform {
+    f32 position[3];
+    f32 overrideEnabled;
+    f32 reach;
+    f32 height;
+} BtlDebugTransform;
+
+typedef struct BtlDebugPosition {
+    f32 value[4];
+} __attribute__((aligned(16))) BtlDebugPosition;
+
+typedef struct BtlParameterEditorRow {
+    u8 pad00[8];
+    void *target;
+    u8 pad0C[0xC];
+} BtlParameterEditorRow;
+
+typedef struct BtlParameterEditor {
+    u32 unk00;
+    s32 x;
+    s32 y;
+    u32 selected;
+    u32 flags;
+    BtlParameterEditorRow *rows;
+    s32 rowCount;
+} BtlParameterEditor;
+
+typedef char BtlDebugTransformSize[sizeof(BtlDebugTransform) == 0x18 ? 1 : -1];
+typedef char BtlParameterEditorRowSize[sizeof(BtlParameterEditorRow) == 0x18 ? 1 : -1];
+
+extern DatPartyRecord *D_003BAA04;
+extern s32 D_003612F0[];
+extern s32 D_00361310[];
+extern BtlParameterEditor D_003615E0, D_00361660, D_00361728, D_00361A00;
+extern BtlParameterEditorRow D_00361760[];
+extern s16 D_003BB93E;
+extern BtlUnit *D_003BB940;
+extern u16 D_003BBA08;
+extern char D_003BBAB0[];
+extern u16 D_003D75D0[7];
+extern DatPartyRecord D_003D75E0;
+extern BtlDebugPosition D_003D7790;
+extern BtlDebugTransform D_003D77A0;
+extern BtlActorStatusRecord D_003D77C0;
+extern BtlActorMotionSlot D_003D7A30;
+extern u8 D_003BD870;
+extern s32 D_003BD874;
+extern s32 fldGetSceneScriptState(void);
+extern BtlIndexList *fldGetSceneScriptValue(void);
+extern void fldMarkActiveSceneScriptState(void);
+extern void fldCreateSceneSpriteTask(s32);
+extern void func_001D6300(BtlUnit *, f32 *);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern u8 *btlCreateControlObject(void);
+extern void btlCopyUnitStats(s32, s32);
+extern void func_001A1990(DatPartyRecord *, s32);
+extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
+extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
+extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern s32 btlGetUnitModelFrameCount(BtlUnit *);
+extern void btlSetUnitPosition(BtlUnit *, void *);
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern s32 btlSelectSharedOrIndexedTransformParameters(s32, s32);
+extern void btlApplyUnitEffectScale(BtlUnit *);
+extern void btlApplyUnitModelScaledValue(BtlUnit *);
+extern void btlSeekUnitModelFrameZero(BtlUnit *);
+extern void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *, s32);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern s32 btlCountTasksForOwner(s64);
+extern void func_001FB130(s32, s32, s32, const char *);
+/* The retail debug primitive receives a float radius in $f12. */
+extern void func_001FB188(f32 *, u32, s32, f32);
+extern void func_001FB1E0(void *);
+extern void func_001FB1A8(void);
+extern void func_001FB1F0(void *);
+extern void func_001FB1B0(void);
+
+s32 func_00214868(void) {
+    f32 position[4];
+    char text[0x70];
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    BtlRuntimeTask *dependent;
+    BtlActorStatusRecord *record;
+    BtlDebugTransform *transform;
+    u32 motion;
+    f32 savedOverride;
+
+    switch (state->debug.unk00) {
+    case 0:
+        state->battleFlags |= 0x80000000;
+        state->battleFlags &= ~0x200;
+        state->debug.unk00 = 1;
+        fldCreateSceneSpriteTask(0);
+        break;
+    case 1: {
+        s32 scene = fldGetSceneScriptState();
+        if (scene == 3) {
+            state->debug.selectedUnit = btlGetIndexListEntry(fldGetSceneScriptValue(), 0);
+            fldMarkActiveSceneScriptState();
+            state->debug.unk00 = 2;
+        } else if (scene == 4) {
+            fldMarkActiveSceneScriptState();
+            state->debug.unk00 = 10;
+        } else {
+            BtlIndexList *list = fldGetSceneScriptValue();
+            if (btlGetIndexListCount(list) == 1) {
+                unit = btlGetIndexListEntry(list, 0);
+                func_001D6300(unit, position);
+                btlBossDebugPrintfN(150, 408, 0, "FLD:[%03d_%02d]",
+                    (s16)state->encounterParamA, (s16)state->encounterParamB);
+                btlBossDebugPrintfN(150, 420, 0, "POS:[%.2f,%.2f,%.2f]",
+                    (double)position[0], (double)position[1], (double)position[2]);
+                if (sdfPadButtonStates[9] & 2) {
+                    btlStartTask(btlCreateEffObjB(unit, D_003BB93E));
+                    D_003BB93E = D_003BB93E < 0xCD ? D_003BB93E + 1 : 0;
+                }
+                if (btlCountTasksByKind(0x3C) != 0) {
+                    btlBossDebugPrintfN(150, 396, 0, "MSG:[%03d]", D_003BB93E);
+                }
+            }
+        }
+        break;
+    }
+    case 2:
+        if (mnuListMoveCursor(&state->debug.actionMenu)) {
+            switch (state->debug.actionMenu.cursor) {
+            case 0: state->debug.unk00 = 3; break;
+            case 1: state->debug.unk00 = 4; break;
+            case 2: state->debug.unk00 = 5; break;
+            case 3: state->debug.unk00 = 6; break;
+            case 4: state->debug.unk00 = 7; break;
+            case 5: state->debug.unk00 = 8; break;
+            case 6: state->debug.unk00 = 9; break;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            state->debug.unk00 = 10;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)256, 100,
+            &state->debug.actionMenu, D_003612F0);
+        break;
+    case 3:
+        unit = state->debug.selectedUnit;
+        if (mnuListMoveCursor(&state->debug.modelMenu)) {
+            BtlRuntimeTask *task;
+            task = btlCreateModelChangeTask(unit, (unit->partyRecord.flags >> 5) & 1,
+                state->debug.modelMenu.cursor, 0, 0, 1);
+            btlStartTask(task);
+            unit->status.flags &= ~2;
+            dependent = (BtlRuntimeTask *)btlCreateControlObject();
+            dependent->startCondition.kind = 4;
+            dependent->startCondition.value.handle = task->handle;
+            btlStartTask(dependent);
+            if (unit->status.flags & 0x200) {
+                u32 index = state->debug.modelMenu.cursor;
+                u32 partyIndex = index < 16 ? index : index - 16;
+                btlCopyUnitStats((s32)unit, (s32)&D_003BAA04[partyIndex]);
+                if (state->debug.modelMenu.cursor >= 16) {
+                    unit->status.flags |= 0x1000;
+                    unit->partyRecord.flags |= 0x1007;
+                } else {
+                    unit->status.flags &= ~0x1000;
+                    unit->partyRecord.flags |= 7;
+                }
+            } else {
+                btlBossDebugPrintf("btl:id=%X\n", state->debug.modelMenu.cursor);
+                func_001A1990(&unit->partyRecord, state->debug.modelMenu.cursor);
+                unit->partyRecord.flags |= 0x23;
+            }
+            state->debug.unk00 = 10;
+        } else if (sdfPadButtonStates[3] < 0) {
+            state->debug.unk00 = 2;
+        }
+        if (unit->partyRecord.flags & 0x20) {
+            if (state->unk_E0C != 0) {
+                state->unk_E0C = 0;
+                state->debug.modelMenu.count = 0x180;
+                state->debug.modelMenu.top = 0;
+                state->debug.modelMenu.cursor = 0;
+            }
+            if (state->debug.modelMenu.cursor >= 0x180) {
+                state->debug.modelMenu.top = 0;
+                state->debug.modelMenu.cursor = 0;
+            }
+        } else {
+            if (state->unk_E0C != 1) {
+                state->unk_E0C = 1;
+                state->debug.modelMenu.count = 0x20;
+                state->debug.modelMenu.top = 0;
+                state->debug.modelMenu.cursor = 0;
+            }
+            if (state->debug.modelMenu.cursor >= 0x20) {
+                state->debug.modelMenu.top = 0;
+                state->debug.modelMenu.cursor = 0;
+            }
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)64, 164, &state->debug.modelMenu,
+            (unit->partyRecord.flags & 0x20) ? state->debug.table1 : state->debug.table0);
+        break;
+    case 4:
+        unit = state->debug.selectedUnit;
+        memcpy(&D_003D75E0, &unit->partyRecord, sizeof(D_003D75E0));
+        D_003D75D0[0] = unit->entrySlots[0].code;
+        D_003D75D0[1] = unit->entrySlots[1].code;
+        D_003D75D0[2] = unit->entrySlots[2].code;
+        D_003D75D0[3] = unit->entrySlots[3].code;
+        D_003D75D0[4] = unit->entrySlots[4].code;
+        D_003D75D0[5] = unit->entrySlots[5].code;
+        D_003D75D0[6] = unit->entrySlots[6].code;
+        D_003BD874 = unit->selectedEntryIndex;
+        func_001FB1E0(&D_003615E0);
+        func_001FB1A8();
+        func_001FB1F0(&D_003615E0);
+        func_001FB1B0();
+        btlDrawUnitAffinityDebug(unit, 256, 32);
+        if (sdfPadButtonStates[0] & 2) {
+            D_003D75E0.hp /= 2;
+            if (D_003D75E0.hp == 0) {
+                D_003D75E0.hp = 1;
+            }
+            D_003D75E0.mp /= 2;
+            if (D_003D75E0.mp == 0) {
+                D_003D75E0.mp = 1;
+            }
+        }
+        if (D_003BD870 != 0) {
+            D_003D75E0.status = 1 << (D_003BD870 - 1);
+        } else {
+            D_003D75E0.status = 0;
+        }
+        memcpy(&unit->partyRecord, &D_003D75E0, sizeof(D_003D75E0));
+        btlRefreshUnitMotionSelection(unit);
+        if (unit->status.flags & 0x200) {
+            memcpy(&datGameState->party[unit->unk2C4], &D_003D75E0, sizeof(D_003D75E0));
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            state->debug.unk00 = 2;
+        }
+        break;
+    case 5:
+        unit = state->debug.selectedUnit;
+        if (mnuListMoveCursor(&state->debug.motionMenu)) {
+            state->unk_E0E = 0;
+        } else if (sdfPadButtonStates[3] < 0) {
+            state->debug.unk00 = 2;
+        }
+        if (sdfPadButtonStates[0] < 0) {
+            state->unk_E0E = state->timingRate * 3;
+        }
+        if (state->unk_E0E > 0) {
+            state->unk_E0E--;
+            func_003014F0(text, D_003BBAB0, state->unk_E0E / state->timingRate + 1);
+            func_001FB130(32, 400, 6, text);
+        }
+        if (state->unk_E0E == 0) {
+            motion = state->debug.motionMenu.cursor;
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                BtlRuntimeTask *task;
+                task = btlCreateMoveOtherUnitsTask((u8 *)unit, motion);
+                btlStartTask(task);
+                dependent = (BtlRuntimeTask *)btlAllocateIndexedUnitEffectTask((u8 *)unit, motion, 0, 1.0f);
+                dependent->startCondition.kind = 4;
+                dependent->startCondition.value.handle = task->handle;
+                btlStartTask(dependent);
+                state->unk_E0E = -1;
+            }
+        }
+        if (state->unk_E0E <= 0) {
+            func_003014F0(text, "%3d/%3d\n", (s32)btlGetUnitModelValue1C(unit),
+                btlGetUnitModelFrameCount(unit));
+            func_001FB130(32, 400, 0, text);
+        }
+        mnuDrawSelectableMenuRows((u8 *)24, (u8 *)32, 164, &state->debug.motionMenu, D_00361310);
+        break;
+    case 6:
+        unit = state->debug.selectedUnit;
+        if (mnuListMoveCursor(&state->debug.gunMenu)) {
+            if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
+                unit->partyRecord.menuValue = state->debug.gunMenu.cursor + 0xA0;
+                btlStartTask(btlCreateGunLoadPollTask((u8 *)unit));
+                state->debug.unk00 = 2;
+            }
+        } else if (sdfPadButtonStates[3] < 0) {
+            state->debug.unk00 = 2;
+        }
+        mnuDrawMenuFrameSizedToRows((u8 *)24, (u8 *)32, 164, &state->debug.gunMenu, state->debug.table2);
+        break;
+    case 7:
+        unit = state->debug.selectedUnit;
+        if (sdfPadButtonStates[3] < 0) {
+            state->battleFlags &= ~0x400000;
+            btlRefreshUnitMotionSelection(unit);
+            state->debug.unk00 = 2;
+        } else {
+            PCP_COPY_VECTOR(D_003D7790.value, unit->position);
+            func_001FB1E0(&D_00361660);
+            func_001FB1A8();
+            func_001FB1F0(&D_00361660);
+            func_001FB1B0();
+            PCP_COPY_VECTOR(unit->position, D_003D7790.value);
+            btlSetUnitPosition(unit, unit->position);
+        }
+        break;
+    case 8:
+        unit = state->debug.selectedUnit;
+        if (unit->status.flags & 0x400) {
+            if (sdfPadButtonStates[3] < 0) {
+                state->battleFlags &= ~0x400000;
+                btlRefreshUnitMotionSelection(unit);
+                state->debug.unk00 = 2;
+            } else {
+                transform = (BtlDebugTransform *)btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->species);
+                if (sdfPadButtonStates[2] < 0) {
+                    record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+                    transform->reach = record->unk18;
+                    transform->height = record->unk1C;
+                    transform->position[0] = record->position[0];
+                    transform->position[1] = record->position[1];
+                    transform->position[2] = record->position[2];
+                }
+                memcpy(&D_003D77A0, transform, sizeof(D_003D77A0));
+                func_001FB1E0(&D_00361728);
+                func_001FB1A8();
+                func_001FB1F0(&D_00361728);
+                func_001FB1B0();
+                memcpy(transform, &D_003D77A0, sizeof(D_003D77A0));
+                state->battleFlags |= 0x400000;
+                savedOverride = transform->overrideEnabled;
+                transform->overrideEnabled = 1.0f;
+                btlApplyUnitEffectScale(unit);
+                transform->overrideEnabled = savedOverride;
+            }
+        } else {
+            btlRefreshUnitMotionSelection(unit);
+            state->debug.unk00 = 2;
+        }
+        break;
+    case 9:
+        unit = state->debug.selectedUnit;
+        D_003BB940 = unit;
+        record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        memcpy(&D_003D77C0, record, sizeof(D_003D77C0));
+        memcpy(&D_003D7A30, &record->motions[D_003BBA08], sizeof(D_003D7A30));
+        func_001FB1E0(&D_00361A00);
+        func_001FB1A8();
+        func_001FB1F0(&D_00361A00);
+        func_001FB1B0();
+        memcpy(record, &D_003D77C0, sizeof(D_003D77C0));
+        if (D_00361760[D_00361A00.selected].target != &D_003BBA08) {
+            memcpy(&record->motions[D_003BBA08], &D_003D7A30, sizeof(D_003D7A30));
+        }
+        mnuQueueColoredGlyphAtPosition(D_003615E0.x,
+            D_003615E0.y + D_003615E0.rowCount * 10 + 4, D_00361310[D_003BBA08]);
+        if (D_00361760[D_00361A00.selected].target == &D_003D77C0.unk20) {
+            state->battleFlags |= 0x800000;
+        } else {
+            state->battleFlags &= ~0x800000;
+        }
+        if (D_00361760[D_00361A00.selected].target == &D_003D77C0.unk24) {
+            btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_001FB188(position, 0x10808080, 0, record->unk24 * unit->scale);
+        }
+        if ((D_00361760[D_00361A00.selected].target >= (void *)D_003D77C0.position &&
+             D_00361760[D_00361A00.selected].target < (void *)&D_003D77C0.scale) ||
+            D_00361760[D_00361A00.selected].target == &D_003D77C0.unk1C ||
+            D_00361760[D_00361A00.selected].target == &D_003D77C0.unk18) {
+            state->unk_1FC |= 0x200;
+        } else {
+            state->unk_1FC &= ~0x200;
+        }
+        if (D_00361760[D_00361A00.selected].target == &D_003D7A30.unk0C) {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            func_001FB188(position, 0x10106020, 0, D_003D7A30.unk0C * D_003D77C0.scale);
+        }
+        if (D_00361A00.flags & 8) {
+            btlApplyUnitModelScaledValue(unit);
+            if (D_00361760[D_00361A00.selected].target != &D_003D77C0.model) {
+                unit->status.flags &= 0x7FFFFFFF;
+                unit->status.flags &= ~0x2000;
+                motion = D_003BBA08;
+            } else {
+                unit->status.flags |= 0x80002000;
+                motion = 0;
+            }
+            btlApplyUnitEffectScale(unit);
+            if (motion < mdlGetNodeRefHalf(unit->ext->owner, 0)) {
+                btlApplyScaledUnitEffectParameter(unit, motion, btlGetSlotRateKind(unit, motion), 1.0f);
+                if (D_003D7A30.kind == 2) {
+                    btlSeekUnitModelFrameZero(unit);
+                }
+            }
+        }
+        if (sdfPadButtonStates[3] < 0) {
+            btlRefreshUnitMotionSelection(unit);
+            state->debug.unk00 = 2;
+        }
+        break;
+    case 10:
+        unit = state->debug.selectedUnit;
+        if (unit == NULL || btlCountTasksForOwner(unit->identity) == 0) {
+            state->battleFlags |= 0x200;
+            state->battleFlags &= 0x7FFFFFFF;
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
 
 extern BtlUnit *D_003BB940;
 
