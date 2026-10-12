@@ -8234,3 +8234,37 @@ Initializing the result outside the mode branches loses those copies and
 remains 11 differing words with one native word absent. Both complete units
 stay exact with the explicit per-mode assignments.
 
+## Trace-justified indexing: billboard update
+
+DDS1 `func_001515E8` (`0x001515E8`) and DDS2 `func_001591D8`
+(`0x001591D8`) are the same 696-byte animation-entry updater; Nocturne debug
+`0x0015E1E0` and US Nocturne `0x0015C650` corroborate the instruction sequence.
+Use the existing `BillObj`, `BillOut`, `BillPluralRecord` and child owners.
+
+The decisive expansion property is that the resolved-entry base is loaded into
+a register **before the index is scaled**, leaving an index-first `PLUS` before
+reload. With `tools/cc1probe.sh --sched --alloc --jump`, hooked and unhooked
+assembly and RTL agree. In the exact form's initial RTL, uid84 loads base
+pseudo 107, uid90/92 scale the index into pseudo 111, and uid94 forms
+`PLUS(111,107)`. Loop strength reduction replaces 111 with induction pseudo
+211 without changing that order. Direct `resolvedEntries[i].frameIndex`
+access, the indexed address argument, and the indexed increment provide this
+ordinary array-access context. Naming an element pointer first instead emits
+the scale before the base load and `PLUS(base,index)`; `p + i`, `i + p` and
+`&p[i]` initializers all retain the one-word residual. The native sums at
+`0x0015167C`, `0x0015926C` and Nocturne `0x0015E274` are index-first.
+
+Two real instance values are also shared across the mutually exclusive modes:
+`savedColor` and `savedAngle`. The common color quantity has 15 references and
+live length 135; global allocation places it in `s3`, rather than allocating
+separate mode-local colors around the loop's `s4` induction quantity.
+
+Restore rotation before color in C, including the plural mode. In sched1,
+uid254's rotation store has register weight -1, while uid257's color store
+has weight -2 because it also owns the last use of the object pointer.
+The register-weight tier issues color first; sched2 preserves the resulting
+order at its luid tier. Reversing those C statements produces the wrong
+native restore order and permits cross-jumping to remove two words.
+The exact direct-indexed form preserves both stores and all surrounding
+functions: both complete units report 25 match, 0 differ.
+

@@ -610,7 +610,95 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 }
 
 
-INCLUDE_ASM(const s32, "effect/billManager", func_001591D8);
+/* Indexed entries and restore order preserve the native PLUS and lifetimes;
+ * see docs/idioms.md, "Trace-justified indexing: billboard update". */
+void func_001591D8(BillObj *obj) {
+    BillChildPayload *child;
+    u32 savedColor;
+    f32 savedAngle;
+    if (obj->animationActive == 0) {
+        return;
+    }
+    if (obj->modeFlags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
+        BillData *data = obj->animationData;
+        u8 *base = data->base;
+        BillAnimationEntry *animation = data->entries + obj->animationEntryIndex;
+        BillPluralRecord *records = (BillPluralRecord *)(base + animation->offset);
+        u32 i = 0;
+        savedColor = obj->childParam;
+        savedAngle = obj->rotationAngle;
+
+        if (obj->entryCount != 0) {
+            BillPluralRecord *record = records;
+            do {
+                if (obj->resolvedEntries[i].frameIndex >= 0) {
+                    f32 savedX;
+                    f32 savedY;
+                    child = billStepAnimationEntryAndUpdateChild(obj, &obj->resolvedEntries[i]);
+                    savedX = child->x;
+                    savedY = child->y;
+                    child->x = record->x;
+                    child->y = -record->y;
+                    obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+                    obj->rotationAngle += savedAngle;
+                    billAppendChildQuad(obj, child);
+                    child->x = savedX;
+                    child->y = savedY;
+                } else {
+                    obj->resolvedEntries[i].frameIndex++;
+                }
+                i++;
+                record++;
+            } while (i < (u32)obj->entryCount);
+        }
+        obj->rotationAngle = savedAngle;
+        obj->childParam = savedColor;
+    } else {
+        if (obj->modeFlags & 0x40) {
+            savedColor = obj->childParam;
+            savedAngle = obj->rotationAngle;
+            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
+            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            obj->rotationAngle += savedAngle;
+            billAppendChildQuad(obj, child);
+            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries + 1);
+            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            obj->rotationAngle += savedAngle;
+            billAppendChildQuad(obj, child);
+            obj->rotationAngle = savedAngle;
+            obj->childParam = savedColor;
+        } else if (obj->modeFlags & 0x80) {
+            u32 flags;
+            savedColor = obj->childParam;
+            savedAngle = obj->rotationAngle;
+            obj->pair.children[0] = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
+            obj->pair.colors[0] = effBillModulateColors(savedColor, obj->childParam);
+            obj->pair.children[1] = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries + 1);
+            obj->pair.colors[1] = effBillModulateColors(savedColor, obj->childParam);
+            flags = obj->resolvedEntries[1].entry->flags;
+            if (flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
+                obj->pair.kind = 2;
+            } else if (flags & BILL_ANIMATION_FLAG_PACKET_LIST_3) {
+                obj->pair.kind = 3;
+            } else {
+                obj->pair.kind = 1;
+            }
+            obj->rotationAngle += savedAngle;
+            func_00158430(obj, &obj->pair);
+            obj->rotationAngle = savedAngle;
+            obj->childParam = savedColor;
+        } else {
+            savedColor = obj->childParam;
+            savedAngle = obj->rotationAngle;
+            child = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
+            obj->childParam = effBillModulateColors(savedColor, obj->childParam);
+            obj->rotationAngle += savedAngle;
+            billAppendChildQuad(obj, child);
+            obj->rotationAngle = savedAngle;
+            obj->childParam = savedColor;
+        }
+    }
+}
 
 /* Resolve a frame list and initialize its signed hold-time counter. */
 void billResolveEntry(BillData *table, s32 index, BillOut *out) {
