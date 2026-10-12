@@ -459,7 +459,8 @@ void btlActionSeqCheckDispatch(u8 *task) {
     }
 }
 
-void func_001C9090(void) {
+/* Empty entry callback for the retail BAD RECOVERY action state. */
+void btlEnterStatusRecoveryState(void) {
 }
 
 void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
@@ -476,7 +477,8 @@ extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
-void func_001C9098(BtlTask *link) {
+/* Roll ailment recovery, queue status removal and advance the acting unit's state. */
+void btlProcessStatusRecoveryAction(BtlTask *link) {
     BtlOperandEntry spec;
     BtlUnit *unit;
     s32 chance;
@@ -627,7 +629,8 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
     *(u32 *)(arg0 + 8) |= 0x200;
 }
 
-void func_001C9628(u32 arg0) {
+/* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
+void btlEnterCommandSelectionState(u32 arg0) {
     btlGetRuntime();
     *(u32 *)((s32)arg0 + 8) = *(u32 *)((s32)arg0 + 8) & 0xfffffffb;
     btlOpenBattleCommandPanel(arg0);
@@ -639,7 +642,8 @@ extern void fldSetSceneObjectAndGroupStates(void);
 
 extern s32 btlAiCheckStatusRollEligibility(BtlTask *task);
 
-void func_001C9660(BtlTask *task) {
+/* Poll command-panel selection and dispatch the selected action state. */
+void btlUpdateCommandSelectionState(BtlTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     s32 state;
 
@@ -970,7 +974,8 @@ void btlDispatchEffectCommandWhenActorReady(u8 *command) {
     btlDispatchCommandViaHookOrDefault(command, command + 0x20);
 }
 
-void func_001CA1F0(void) {
+/* Empty entry callback for the retail ATTACK action state. */
+void btlEnterAttackActionState(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
@@ -1011,7 +1016,7 @@ extern u8 *func_001D9E48(u8 *);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
-void func_001CA1F8(BtlTask *action) {
+void btlScheduleAttackActionTasks(BtlTask *action) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *indexedTarget;
     BtlUnit *resultTarget = NULL;
@@ -1462,7 +1467,8 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CB410);
 
-void func_001CCD10(void) {
+/* Empty entry callback for the retail LINKAGE action state. */
+void btlEnterLinkageActionState(void) {
 }
 
 typedef struct BtlSceneLightParams {
@@ -1527,7 +1533,7 @@ extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 /* Schedule the LINKAGE action task chain (inferred role). */
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A36A8);
 
-void func_001CCD18(BtlTask *action) {
+void btlScheduleLinkageActionTasks(BtlTask *action) {
     BtlUnit *actors[3];
     BtlSceneLightParams light;
     s32 actorFrames[3];
@@ -2145,14 +2151,16 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     }
 }
 
-void func_001CE5D8(s32 arg0) {
+/* Mark the acting unit in progress on entry to the retail DEVIL state. */
+void btlEnterDevilActionState(s32 arg0) {
     ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
     ;
 }
 
 /* Slot-0x10 model-change command: the same flow as btlCommandGunChangeStart, swapping to the unit's
  * unkDC/displaySpecies model and back; the return path only clears flag 0x20000000. */
-void func_001CE5F0(BtlTask *task) {
+/* Retail DEVIL state: schedule the alternate model tuple and its dependent tasks. */
+void btlScheduleDevilStateModelChange(BtlTask *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;
@@ -2260,14 +2268,16 @@ void func_001CE5F0(BtlTask *task) {
     }
 }
 
-void func_001CEA58(s32 arg0) {
+/* Mark the acting unit in progress on entry to the retail BAT state. */
+void btlEnterBatActionState(s32 arg0) {
     ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
     ;
 }
 
 extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
 
-void func_001CEA70(u8 *task) {
+/* Retail BAT state: schedule the status-table model; BAT's meaning is not expanded. */
+void btlScheduleBatStateModelChange(u8 *task) {
     BtlUnit *actor;
     u8 *effectTask;
     u8 *modelTask;
@@ -2577,7 +2587,8 @@ void btlRecordLinkedActorOutcome(BtlTask *object) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CFB10);
 
-void func_001CFD70(void) {
+/* Empty entry callback for the retail BAD DAMAGE action state. */
+void btlEnterStatusDamageState(void) {
 }
 
 extern s32 btlCountTasksForOwner(s64);
@@ -2590,7 +2601,8 @@ extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
 
 
-void func_001CFD78(BtlTask *action) {
+/* After owned tasks finish, queue ailment damage, penalties and their effects. */
+void btlProcessPostActionStatusEffects(BtlTask *action) {
     BtlOperandEntry spec;
     s32 amount;
     BtlUnit *unit;
@@ -2661,7 +2673,8 @@ void func_001CFD78(BtlTask *action) {
 void btlSpawnSceneActionAndSwitchState(void) {
 }
 
-void func_001D0048(u8 *arg0) {
+/* Retail PRESS state: start scene action 0x1194, then enter the owner-task wait. */
+void btlSchedulePressStateSceneAction(u8 *arg0) {
     u8 *task = fldCreateSceneGroupAction(arg0, 0x1194, 1);
 
     btlStartTask(task);
@@ -2683,7 +2696,8 @@ void btlAdvanceStateWhenLinkedTasksFinish(s32 object) {
 void btlAdvanceLinkedUnitWhenOwnerIdle(void) {
 }
 
-void func_001D00E0(s32 object) {
+/* Clear the actor's in-progress bit and return to STANDBY when its tasks finish. */
+void btlResumeStandbyWhenActorTasksFinish(s32 object) {
     BtlUnit *owner = *(BtlUnit **)(object + 0x18);
     if (btlCountTasksForOwner(*(s64 *)((u8 *)owner + 0x108)) == 0) {
         owner->status.flags = (u32)owner->status.flags & (~0x4000);

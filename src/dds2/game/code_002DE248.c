@@ -365,7 +365,7 @@ extern f32 D_0042BC10[4];
 extern u8 D_003E9100[];
 
 struct Matrix4;
-extern void func_002E5E88(EffTrackSet *, struct Matrix4 *);
+extern void effDrawTrackSet(EffTrackSet *, struct Matrix4 *);
 
 struct Matrix4;
 extern void func_002F1888(EffRibbonWork *, struct Matrix4 *);
@@ -1811,7 +1811,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetCellIndices(u8 *owner) {
@@ -1891,7 +1891,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetParticleIndices(u8 *owner) {
@@ -1971,7 +1971,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void effClearAnimatedFrames(u8 *owner) {
@@ -2100,7 +2100,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetEmitterIndices(u8 *owner) {
@@ -2227,7 +2227,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void effClearStripFrames(u8 *owner) {
@@ -2354,7 +2354,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetTrailIndices(u8 *owner) {
@@ -2433,7 +2433,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 void billResetQuadIndices(u8 *owner) {
@@ -2560,7 +2560,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, (Matrix4 *)mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
 }
 
 
@@ -2878,7 +2878,8 @@ extern u32 D_003E9B20[16];
 extern SdfTex *func_002DDD60(void *, RefObj *);
 struct SdfAsset;
 
-void func_002E5E88(EffTrackSet *track, Matrix4 *matrix) {
+/* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
+void effDrawTrackSet(EffTrackSet *track, Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -3436,7 +3437,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002E5E88(out, (Matrix4 *)mtx);
+        effDrawTrackSet(out, (Matrix4 *)mtx);
     }
 }
 
@@ -5987,7 +5988,7 @@ extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
-void func_002EFE20(EffClassWork *work) {
+void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
     EffBillColumnConfig *config = (EffBillColumnConfig *)work->payload;
     EffBillEmitterCommon *common = &config->common;
     u32 frameLimit = work->frame;
@@ -7379,7 +7380,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
             EffTrackSet *references = record->references;
 
             references->color = color;
-            func_002E5E88(references, &matrix);
+            effDrawTrackSet(references, &matrix);
         }
     }
 }
@@ -10078,19 +10079,23 @@ void effSampleSharedEffectModelStartPose(EffSharedEffectWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FB998);
 
-void func_002FC0A8(s128 *dst, s128 *src) {
+/* Copy the vector consumed by the retained model's primary-vector setter. */
+void effCopySharedEffectPrimaryVector(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void func_002FC0B8(s128 *dst, s128 *src) {
+/* Copy the quaternion consumed when rebuilding the retained model's rotation basis. */
+void effCopySharedEffectQuaternion(s128 *dst, s128 *src) {
     PCP_COPY_VECTOR(dst + 1, src);
 }
 
-void func_002FC0D0(s32 work, u32 value) {
+/* Store packed color for the retained model's masked broadcast. */
+void effSetSharedEffectColor(s32 work, u32 value) {
     ((EffSharedEffectWork *)work)->unk20 = value;
 }
 
-void func_002FC0D8(s32 *work, f32 value) {
+/* Store the scalar expanded to equal XYZ scale components by the model updater. */
+void effSetSharedEffectUniformScale(s32 *work, f32 value) {
     ((EffSharedEffectWork *)work)->unk24 = value;
 }
 

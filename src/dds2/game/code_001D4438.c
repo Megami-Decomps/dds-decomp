@@ -929,7 +929,8 @@ void btlActionSeqCheckDispatch(u8 *task) {
     }
 }
 
-void func_001D4C98(void) {
+/* Empty entry callback for the retail BAD RECOVERY action state. */
+void btlEnterStatusRecoveryState(void) {
 }
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
@@ -950,7 +951,7 @@ extern s32 btlRollAiBucket(void);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x252). */
-void func_001D4CA0(ActionStateLink *task) {
+void btlProcessStatusRecoveryAction(ActionStateLink *task) {
     BtlOperandEntry block;
     BtlUnit *unit;
     s32 chance;
@@ -1124,7 +1125,8 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
     }
 }
 
-void func_001D5330(ActionStateLink *task) {
+/* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
+void btlEnterCommandSelectionState(ActionStateLink *task) {
     btlGetRuntime();
     task->pendingFlags = task->pendingFlags & 0xfffffffb;
     func_001CAB60(task);
@@ -1135,7 +1137,8 @@ extern void fldSetSceneObjectAndGroupStates(void);
 extern s32 btlIsSupportedCommandKind(s32 *);
 extern s32 btlAiCheckStatusRollEligibility(ActionStateLink *);
 
-void func_001D5368(ActionStateLink *task) {
+/* Poll command-panel selection and dispatch the selected action state. */
+void btlUpdateCommandSelectionState(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 sceneObjectState;
 
@@ -1497,7 +1500,8 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
     }
 }
 
-void func_001D5FA8(void) {
+/* Empty entry callback for the retail ATTACK action state. */
+void btlEnterAttackActionState(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
@@ -1554,7 +1558,7 @@ extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, u16 frames,
                                           s32 channel, u32 volume);
 
-void func_001D5FB0(ActionStateLink *action) {
+void btlScheduleAttackActionTasks(ActionStateLink *action) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *indexedTarget;
     BtlUnit *resultTarget = NULL;
@@ -2008,7 +2012,8 @@ INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001D7230);
 
-void func_001D8C78(void) {
+/* Empty entry callback for the retail LINKAGE action state. */
+void btlEnterLinkageActionState(void) {
 }
 
 typedef struct BtlSceneLightParams {
@@ -2084,9 +2089,10 @@ BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit,
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, BtlUnit *target,
         s32 index, s32 value, f32 scale);
 
+/* Synchronize up to three LINKAGE actors, then queue skill operands and effects. */
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417398);
 
-void func_001D8C80(ActionStateLink *action) {
+void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     BtlUnit *actors[3];
     BtlUnit *unsorted[3];
     BtlSceneLightParams light;
@@ -2777,13 +2783,15 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
     }
 }
 
-void func_001DA728(ActionStateLink *task) {
+/* Mark the acting unit in progress on entry to the retail DEVIL state. */
+void btlEnterDevilActionState(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
 /* Slot-0x10 model-change command: the same flow as btlCommandGunChangeStart, swapping to the unit's
  * unkDC/combatantKind model and back; the return path only clears flag 0x20000000. */
-void func_001DA740(ActionStateLink *task) {
+/* Retail DEVIL state: schedule the alternate model tuple and its dependent tasks. */
+void btlScheduleDevilStateModelChange(ActionStateLink *task) {
     BtlUnit *unit;
     BtlState *state;
     BtlUnit *other;
@@ -2890,11 +2898,13 @@ void func_001DA740(ActionStateLink *task) {
     }
 }
 
-void func_001DABC0(ActionStateLink *task) {
+/* Mark the acting unit in progress on entry to the retail BAT state. */
+void btlEnterBatActionState(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
-void func_001DABD8(u8 *task) {
+/* Retail BAT state: schedule the status-table model; BAT's meaning is not expanded. */
+void btlScheduleBatStateModelChange(u8 *task) {
     BtlUnit *actor;
     u8 *effectTask;
     BtlRuntimeTask *modelTask;
@@ -3327,7 +3337,8 @@ void btlRecordLinkedActorOutcome(ActionStateLink *unit) {
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC2D8);
 
-void func_001DC538(void) {
+/* Empty entry callback for the retail BAD DAMAGE action state. */
+void btlEnterStatusDamageState(void) {
 }
 
 extern s32 btlSumOtherTargetHitAmounts(u8 *);
@@ -3335,7 +3346,8 @@ extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
-void func_001DC540(void *data) {
+/* After owned tasks finish, queue ailment damage, penalties and their effects. */
+void btlProcessPostActionStatusEffects(void *data) {
     BtlOperandEntry spec;
     s32 amount;
     BtlUnit *unit;
@@ -3409,7 +3421,8 @@ void func_001DC540(void *data) {
 void btlSpawnSceneActionAndSwitchState(void) {
 }
 
-void func_001DC7F8(u8 *unit) {
+/* Retail PRESS state: start scene action 0x1194, then enter the owner-task wait. */
+void btlSchedulePressStateSceneAction(u8 *unit) {
     BtlRuntimeTask *task = fldCreateSceneGroupAction((ActionStateLink *)unit, 0x1194, 1);
 
     btlStartTask(task);
@@ -3428,7 +3441,8 @@ void btlAdvanceStateWhenLinkedTasksFinish(ActionStateLink *unit) {
 void btlAdvanceLinkedUnitWhenOwnerIdle(void) {
 }
 
-void func_001DC890(ActionStateLink *unit) {
+/* Clear the actor's in-progress bit and return to STANDBY when its tasks finish. */
+void btlResumeStandbyWhenActorTasksFinish(ActionStateLink *unit) {
     BtlUnit *owner = unit->unit;
     if (btlCountTasksForOwner(owner->owner) == 0) {
         owner->status.flags &= ~0x4000;
