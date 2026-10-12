@@ -171,7 +171,7 @@ extern u8 *D_0047BC80[16];
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-s32 func_00347988(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
+s32 sdfPacDecodeInputChunk(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;
