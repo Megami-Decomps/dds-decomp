@@ -88,7 +88,7 @@ typedef struct MnuResourceTaskWork {
     u8 pad23C[0xC];
 } MnuResourceTaskWork;
 
-void func_0024E1C8(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
+void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placementIndex,
                   s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
@@ -111,7 +111,7 @@ void func_0024E260(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 conte
                          context);
 }
 
-void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
+void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                   s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
@@ -123,7 +123,7 @@ void func_0024E310(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 mode,
                          context);
 }
 
-void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
+void mnuDrawPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                   s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
@@ -135,7 +135,7 @@ void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
                          context);
 }
 
-void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
+void mnuDrawRotatedPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex,
                    s32 context, f32 rotation) {
     (D_0036C698[
         D_0036B510[placementIndex][MNU_SPRITE_RESOURCE_INDEX]])
@@ -153,7 +153,7 @@ void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 placementIndex
         ->workEntries[D_0036B510[placementIndex][MNU_SPRITE_INDEX]].geometry.angleDegrees = 0.0f;
 }
 
-void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
@@ -200,7 +200,7 @@ void func_0024E5A0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     }
 }
 
-void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+void mnuDrawSpriteAtScaledPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
@@ -252,7 +252,7 @@ void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
     }
 }
 
-void func_0024E8D0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+void mnuDrawScaledPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource =
@@ -444,7 +444,7 @@ void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 place
     }
 }
 
-void func_0024F0D0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawVariantSpriteBySelector(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 selector, s32 flags, s32 context,
                   f32 scaleX, f32 scaleY) {
     s8 spriteMap[15] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 17, 18 };
@@ -465,7 +465,7 @@ void func_0024F0D0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
 }
 
 
-void func_0024F210(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
+void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
                    s32 coordinatePlacementIndex, s32 selector, s32 flags,
                    f32 scaleX, f32 scaleY, s32 context) {
     s8 spriteMap[12] = { -1, 12, 26, 27, 13, 14, 15, 16, 20, 21, 23, 24 };

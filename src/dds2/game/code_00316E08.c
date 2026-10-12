@@ -843,7 +843,7 @@ void func_003191B0(MenuWorkEntry *entry, MnuShootingWork *work) {
 
 movement:
     kind = 3;
-    func_002A2628(0x12);
+    mnuLoadTitleSoundBufferEntry(0x12);
     mnuClearInactiveSoundBufferState();
     parameterIndex = mnuGetMovementRecordByIndex(entry->tag)->parameterTag;
     D_00438928 = (MnuModelNode *)mnuAcquireUnusedModelNode(

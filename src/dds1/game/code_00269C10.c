@@ -70,7 +70,7 @@ extern u32 D_003BC5B0[2];
 
 extern u32 D_003BC5B8;
 
-extern void func_0026A248(void);
+extern void mnuInitializeTitleAudioStreams(void);
 
 extern s32 func_002F5990(s32, s32, ...);
 
@@ -126,7 +126,7 @@ extern TitleAudioStreamState mnuTitleStreamStatus;
 extern TitleAudioStreamState mnuTitleSoundBufferState;
 
 
-void func_00269D18(void) {
+void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_003BC5CC + 1;
     u8 *source;
 
@@ -233,7 +233,7 @@ void mnuRunTitleStreamThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
         WaitSema(mnuTitleStreamSemaphore);
-        func_00269D18();
+        mnuUpdateTitleAudioStreams();
         SignalSema(mnuTitleStreamSemaphore);
     }
 }
@@ -256,7 +256,7 @@ extern u32 D_003DA1A8[];
 extern u8 D_003D8140[];
 extern u8 D_003D9180[];
 
-void func_0026A248(void) {
+void mnuInitializeTitleAudioStreams(void) {
     memset(D_003DA1C0, 0, 0x1000);
 
     mnuTitleStreamStatus.repeatFrame = 0;
@@ -376,7 +376,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
 }
 
 /* Install the fixed title track and queue its compressed frames under the lock. */
-void func_0026A588(void) {
+void mnuStartFixedSoundStream(void) {
     WaitSema(mnuTitleStreamSemaphore);
     mnuTitleStreamStatus.decoder = D_003D9168;
     mnuTitleStreamStatus.samples = (s16 *)D_003DA1C0;
@@ -547,7 +547,7 @@ void mnuInitializeTitleSoundBuffer(void) {
 extern char D_003AFCF0[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
-void func_0026AA28(s32 soundEntryIndex) {
+void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];

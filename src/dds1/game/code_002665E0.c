@@ -667,7 +667,7 @@ extern void func_002E8C30(char *, s32, char *, s32);
 
 extern void sndEnsureMidiBankResident(s32);
 
-extern void func_0026A248(void);
+extern void mnuInitializeTitleAudioStreams(void);
 
 extern void mnuCreateTitleEffectTask(void);
 
@@ -682,7 +682,7 @@ void mnuInitializeTitleAudioAndEffects(void) {
     D_003BC5A8 = 4;
     D_003BD8B0 = -1;
     D_003BC5AC = 0;
-    func_0026A248();
+    mnuInitializeTitleAudioStreams();
     mnuCreateTitleEffectTask();
 }
 

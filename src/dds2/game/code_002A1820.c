@@ -90,7 +90,7 @@ extern u32 D_00437A28;
 
 extern void sndEnsureMidiBankResident(s32);
 
-extern void func_002A1E58(void);
+extern void mnuInitializeTitleAudioStreams(void);
 
 extern char D_00428610[];
 
@@ -140,7 +140,7 @@ extern s32 D_00437A30, D_00437A34, D_00437A38, D_00437A3C;
 extern u32 D_00454D58[], D_00455D98[];
 extern u8 D_00455DB0[], D_003E2760[];
 
-void func_002A1928(void) {
+void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_00437A3C + 1;
     u8 *source;
 
@@ -250,7 +250,7 @@ void mnuRunTitleStreamThread(void) {
     for (;;) {
         sdfSleepThreadCount(1);
         WaitSema(mnuTitleStreamSemaphore);
-        func_002A1928();
+        mnuUpdateTitleAudioStreams();
         SignalSema(mnuTitleStreamSemaphore);
     }
 }
@@ -272,7 +272,7 @@ extern u32 D_00455D98[];
 extern u8 D_00453D30[];
 extern u8 D_00454D70[];
 
-void func_002A1E58(void) {
+void mnuInitializeTitleAudioStreams(void) {
     memset(D_00455DB0, 0, 0x1000);
 
     mnuTitleStreamStatus.repeatFrame = 0;
@@ -567,7 +567,7 @@ extern MnuTitleStreamEntry D_003E0F60[];
 extern char D_00428650[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
-void func_002A2628(s32 soundEntryIndex) {
+void mnuLoadTitleSoundBufferEntry(s32 soundEntryIndex) {
     struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];

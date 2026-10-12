@@ -127,21 +127,21 @@ void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cel
     }
 }
 
-void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+void mnuDrawSpriteAtScaledPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 scaleX, f32 scaleY);
 
 void func_00258A70(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
                    f32 scaleX, f32 scaleY, s32 context) {
     if (flags & 2) {
-        func_0024E728(x, y, z, alpha, 0x20, 0x33, context, scaleX, scaleY);
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x33, context, scaleX, scaleY);
         return;
     }
     if (flags & 4) {
-        func_0024E728(x, y, z, alpha, 0x20, 0x34, context, scaleX, scaleY);
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x34, context, scaleX, scaleY);
         return;
     }
     if (flags & 8) {
-        func_0024E728(x, y, z, alpha, 0x20, 0x35, context, scaleX, scaleY);
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x35, context, scaleX, scaleY);
     }
 }
 
@@ -181,9 +181,9 @@ func_00258B00(MnuGridFeedbackState *voice) {
     }
 }
 
-void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+void mnuDrawPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context);
-void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+void mnuDrawRotatedPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 rotation);
 
 void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
@@ -198,11 +198,11 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
         progress = (f32)state->frame / 30.0f;
         rotation = 6.2831853f;
         degrees = 57.29578f;
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x43, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x43, context);
         rotation = progress * rotation;
-        func_0024E470(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
         rotation += 3.14159265f;
-        func_0024E470(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
         return;
     }
     case 1: {
@@ -214,7 +214,7 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
         progress = (f32)state->frame / 30.0f;
         progress = 1.0f - progress;
         originalAlpha = (f32)alpha;
-        func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x41, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x41, context);
         count = state->frame;
         if (count < 10) {
             progress = (f32)count / 10.0f;
@@ -233,12 +233,12 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
         }
         alpha = (s32)(originalAlpha * fade);
         degrees = 57.29578f;
-        func_0024E470(x, y, z, alpha, 0x20, 0x3F, context, progress * -1.5707963f * degrees);
-        func_0024E470(x, y, z, alpha, 0x20, 0x40, context, progress * 1.5707963f * degrees);
-        func_0024E470(x, y, z, (s32)(originalAlpha * secondary), 0x20, 0x40, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x3F, context, progress * -1.5707963f * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x40, context, progress * 1.5707963f * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, (s32)(originalAlpha * secondary), 0x20, 0x40, context,
                       1.5707963f * 57.29578f);
         progress = (f32)state->frame / 30.0f;
-        func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x43, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x43, context);
         break;
     }
     }
@@ -265,39 +265,39 @@ void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
     switch (mode) {
     case 0:
     case 1:
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x44, context);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x45, context);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x44, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x45, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
 
     case 2: {
         progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
 
-        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
                       progress * -1.0210175f * 57.29578f);
-        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
                       progress * 0.31415924f * 57.29578f);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
     }
 
     case 3:
-        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
                       -1.0210175f * 57.29578f);
-        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
                       0.31415924f * 57.29578f);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
 
     case 4: {
         progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
         progress = 1.0f - progress;
 
-        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
                       progress * -1.0210175f * 57.29578f);
-        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
                       progress * 0.31415924f * 57.29578f);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
     }
 
@@ -309,11 +309,11 @@ void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
         } else {
             progress = (f32)(60 - timer) / 10.0f;
         }
-        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
                       progress * -1.0210175f * 57.29578f);
-        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
                       progress * 0.31415924f * 57.29578f);
-        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         break;
     }
     }
