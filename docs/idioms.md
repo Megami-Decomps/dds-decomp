@@ -8016,3 +8016,18 @@ placements, such as a declaration initializer, a cast or a separate local
 phase copy, keep the 2-word residual. This is accepted under the
 trace-justified rule in CONTRIBUTING.md: ordinary C that meets a property the
 trace proves the compiler needs.
+
+## Trace-justified comparison staging: resource-name editor
+
+`btlUpdateResourceNameEditor` in DDS1 (0x001FC300) and DDS2 (0x0020E380)
+compares edit codes against 41 with a constant-left signed `slt`. The literal
+lower-bound form `42 <= editCode` reaches CSE already expanded as
+`lt(editCode, 42)` plus XORI, leaving three differing words. Actual vendor-cc1
+traces, with hooked/unhooked output identical, show the required property:
+the bound must have a pseudo before comparison expansion. A used `s32 editLimit`
+holding `EDITOR_DELETE_CODE - 1` gives `lt(editLimit, editCode)`; CSE retains
+the register/register comparison (constant producer uid414, comparison uid418).
+Both complete units remain exact. The 13-column, three-row layout constants
+also drive navigation and rendering; no mutable threshold or unused local is
+introduced. The single `next_cell` edge is the native shared blank-cell handler,
+not loop shaping (DDS1 0x001FC4E8→0x001FC538; DDS2 0x0020E568→0x0020E5B8).
