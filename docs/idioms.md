@@ -8901,3 +8901,34 @@ These are present in retail, at DDS1 `0x002188E0` / `0x002188E4` and DDS2
 `0x002333F8` / `0x002333FC`; the local describes their native word/byte layout,
 not invented padding or stores for register allocation.
 
+## Polygon cell lifecycles, field blend state and console packets
+
+The basic polygon path uses `polyInitializeBasicRingCells` to seed inactive
+ages and clear cell history/vertex counts. `polyBuildBasicRadialFan` emits
+origin/radial-point pairs and duplicates the first pair to close the fan;
+it is not a two-radius strip.
+
+`polyUpdateBandCells`, `polyUpdateArcCells` and `polyUpdateRotatingBandCells`
+advance their records, update geometry and queue the cell system. Arc records
+are seeded by `polyInitializeArcRecordAges` and reset individually by
+`polyRandomizeArcRecord`; rotating-band ages are seeded by
+`polyInitializeRotatingBandRecordAges` in spawn-delay groups. Preserve the
+native distinctions: band/arc middle windows retain the previous tint, while
+the rotating-band middle window restores base color; rotating completion is
+tested only when duration is at least two. No zero-group divisor guard is added.
+
+`effSubmitFieldBlendStateTask`, the `effect_f` callback, submits distinct
+TEST/ALPHA state packets to draw surfaces 51 and 52 and resets effect counters.
+Its legacy callback declarations and return surface remain unchanged.
+
+`mdlRequestAssetBlocking` selects the existing blocking request path, including
+waiting for pending/scheduled loads and retaining the SDK address-word cast.
+`mdlGetResourceTableCount` returns the unchanged eight-row bound used by the
+viewer resource-group cursor and last-group reload condition.
+
+`sdfDevConsAppendBackgroundSprite` finalizes the current glyph tag, emits the
+background packet and reserves the next tag. `sdfDevConsDrawGlyphGrid` emits
+five register values per visible character/attribute cell with font/color
+lookup and DMA capacity checks. Preserve packed coordinate wrapping, ordered
+cursor accesses and the native do-loops without a zero-dimension guard.
+

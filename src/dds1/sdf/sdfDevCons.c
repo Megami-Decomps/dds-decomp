@@ -40,8 +40,8 @@ typedef struct ConsBuf {
 void sdfDevConsStoreCharacter(DevConsState *arg0, s32 arg1, s32 arg2);
 void sdfDevConsFinalizeGlyphTag(ConsBuf *arg0);
 void sdfDevConsKickPacketDma(ConsBuf *packetBuffers);
-void func_002E42F8(DevConsState *arg0, ConsBuf *arg1);
-void func_002E4428(DevConsState *arg0, ConsBuf *arg1);
+void sdfDevConsAppendBackgroundSprite(DevConsState *arg0, ConsBuf *arg1);
+void sdfDevConsDrawGlyphGrid(DevConsState *arg0, ConsBuf *arg1);
 void sdfDevConsInitPacketBuffers(ConsBuf *arg0, void *arg1, s32 arg2);
 s32 func_00305B08(char *destination, const char *format, void *args);
 s32 sceDmaSync(void *ch, s32 mode, s32 timeout);
@@ -212,7 +212,7 @@ void sdfDevConsKickPacketDma(ConsBuf *packetBuffers) {
 
 /* Append the console background sprite, then reserve the next glyph tag.
  * Packed coordinates wrap as words before their zero-extended packet writes. */
-void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
+void sdfDevConsAppendBackgroundSprite(DevConsState *console, ConsBuf *packetBuffers) {
     vu64 *packet;
     u32 origin;
     u32 extent;
@@ -242,8 +242,9 @@ void func_002E42F8(DevConsState *console, ConsBuf *packetBuffers) {
     packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
 }
 
-/* Emit five register values per visible cell, advancing packed coordinates. */
-void func_002E4428(DevConsState *console, ConsBuf *buffers) {
+/* Emit five register values per visible cell, advancing packed coordinates.
+ * The native do-loops have no zero-dimension guard. */
+void sdfDevConsDrawGlyphGrid(DevConsState *console, ConsBuf *buffers) {
     u8 *cells;
     vu64 *writeCursor;
     u8 *packetStart;
@@ -262,7 +263,7 @@ void func_002E4428(DevConsState *console, ConsBuf *buffers) {
     }
     buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
     if (console->controlByte & 2) {
-        func_002E42F8(console, buffers);
+        sdfDevConsAppendBackgroundSprite(console, buffers);
     }
     cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
     row = 0;
@@ -352,7 +353,7 @@ void sdfDevConsRenderAll(void) {
     if (D_003BD3C0 != NULL) {
         sdfDevConsInitPacketBuffers(&packetBuffers, storage.data, 0x1000);
         for (console = D_003BD3C0; console != NULL; console = console->unk4) {
-            func_002E4428(console, &packetBuffers);
+            sdfDevConsDrawGlyphGrid(console, &packetBuffers);
         }
         sdfDevConsKickPacketDma(&packetBuffers);
     }

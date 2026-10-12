@@ -529,7 +529,7 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
 
 
 /* Blocking requests return the ready group through the SDK address-word API. */
-BattleGroupNode *func_00231DB0(u32 group, u32 id) {
+BattleGroupNode *mdlRequestAssetBlocking(u32 group, u32 id) {
     return (BattleGroupNode *)mdlRequestAsset(group, id, 1);
 }
 
@@ -590,7 +590,7 @@ extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 /* Instantiate a model context from the group's resource list and item list, then
  * start every populated slot's motion owner. */
 MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
-    BattleGroupNode *node = func_00231DB0(group, id);
+    BattleGroupNode *node = mdlRequestAssetBlocking(group, id);
     MdlCtx *ctx = sdfAllocAndClearQuadwords(sizeof(MdlCtx));
     MdlCtx *head;
     SdfModel *inner;
@@ -1094,7 +1094,8 @@ u16 mdlGetContextResourceId(MdlCtx *ctx) {
     return ctx->sub->type;
 }
 
-u32 func_00232F08(void) {
+/* Number of resource-group tables offered by the viewer's asset selector. */
+u32 mdlGetResourceTableCount(void) {
     return 8;
 }
 

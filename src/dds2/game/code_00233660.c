@@ -1340,7 +1340,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, (s16)state->selectedEntryId, width, height);
 }
 
-extern u32 func_00232F08(void);
+extern u32 mdlGetResourceTableCount(void);
 extern u32 mdlGetTableWord(s32 tableIndex);
 extern void func_00233938(void);
 extern void mdlFreeViewResources(void);
@@ -1407,7 +1407,7 @@ void mdlHandleViewerAssetSelection(void) {
     }
     switch (mdlViewerState.unk20) {
     case 0:
-        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, func_00232F08(), 1) != 0) {
+        if (mdlUpdateViewerCursorWithPageStep(&mdlViewerState.unk1C, mdlGetResourceTableCount(), 1) != 0) {
             entryCount = mdlGetTableWord(mdlViewerState.unk1C);
             if (mdlViewerState.unk1E < entryCount) {
                 return;
@@ -1447,7 +1447,7 @@ void mdlHandleViewerAssetSelection(void) {
         }
         mdlFreeViewResources();
         func_00233938();
-        if (mdlViewerState.resourceGroup == func_00232F08() - 1) {
+        if (mdlViewerState.resourceGroup == mdlGetResourceTableCount() - 1) {
             mdlViewerState.resourceId = 0;
             mdlViewerState.unk1C = mdlViewerState.resourceGroup;
             mdlViewerState.unk1E = 0;

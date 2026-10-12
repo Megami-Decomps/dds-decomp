@@ -143,7 +143,7 @@ typedef union {
 } PolyRing;
 
 void polyUpdateBasicRingCells(PolyNode *obj);
-void func_0015DC70(PolyNode *node, s32 index);
+void polyBuildBasicRadialFan(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -154,8 +154,8 @@ extern void memset();
 extern void memcpy();
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 void polyInitializeBandRecordAges(PolyBand *obj);
-void func_0015E8B8(PolyArc *obj);
-void func_0015EEF0(PolyRotatingBand *obj);
+void polyInitializeArcRecordAges(PolyArc *obj);
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj);
 
 /* Release the cell system, then the basic node itself. */
 void effPolyDestroyWork(PolyNode *obj) {
@@ -164,7 +164,7 @@ void effPolyDestroyWork(PolyNode *obj) {
 }
 
 /* The cell initializer writes the same ages that the basic-ring update reads. */
-void func_0015DA10(PolyNode *node) {
+void polyInitializeBasicRingCells(PolyNode *node) {
     u16 count;
     s32 age;
     s32 *ages;
@@ -220,7 +220,7 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
             s32 age = *ages;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                func_0015DC70(obj, index);
+                polyBuildBasicRadialFan(obj, index);
                 *ages = 0;
             } else if (age >= 0) {
                 entry->color = ((u32)(alphaStep * (f32)(duration - age)) << 24) | 0x808080;
@@ -252,8 +252,8 @@ void polyFinishAndReleaseNodeHandle(PolyNode *obj) {
     parPrependCellNode(obj->strip);
 }
 
-/* Build the closed ring of one basic-ring cell: origin point, then a rotated ring point per pair. */
-void func_0015DC70(PolyNode *node, s32 index) {
+/* Build a closed radial fan: an origin point and rotated ring point per pair. */
+void polyBuildBasicRadialFan(PolyNode *node, s32 index) {
     ParSystem *strip = node->strip;
     ParCell *cell = &strip->cells[index];
     f32 radius = node->radius;
@@ -539,7 +539,7 @@ void effPolyScaleFourComponents(f32 scale, PolyBand *obj) {
 }
 
 /* Advance band ages, fades, geometry, and loop completion. */
-void func_0015E5D8(PolyBand *obj) {
+void polyUpdateBandCells(PolyBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -623,7 +623,7 @@ PolyArc *polyCreateArcRingNode(PolyArc *source) {
     }
     clone->strip = parAllocateCellSystem(clone->head.entryCount, clone->segments, 1, 0);
     parDispatchSub(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
-    func_0015E8B8(clone);
+    polyInitializeArcRecordAges(clone);
     VU0_LOAD_MATRIX(clone->head.matrix);
     VU0_STORE_MATRIX(clone->head.matrixCopy);
     parSetCellDrawBucket(clone->strip, clone->head.unk66);
@@ -637,7 +637,7 @@ void polyReleaseNodeCellSystemAndBuffer(PolyArc *obj) {
 }
 
 /* Seed arc records with staggered inactive ages. */
-void func_0015E8B8(PolyArc *obj) {
+void polyInitializeArcRecordAges(PolyArc *obj) {
     u32 count = obj->head.entryCount;
     PolyArcRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
@@ -656,7 +656,7 @@ void func_0015E8B8(PolyArc *obj) {
 }
 
 /* Reset one arc record and choose its jittered radius. */
-void func_0015E900(PolyArc *obj, s32 index) {
+void polyRandomizeArcRecord(PolyArc *obj, s32 index) {
     PolyArcRecord *record = obj->records;
     f32 spread = obj->radiusJitter;
 
@@ -729,7 +729,8 @@ void polyScaleTransformFirstComponent(f32 scale, PolyArc *obj) {
     obj->radius = obj->radius * scale;
 }
 
-void func_0015EC08(PolyArc *obj) {
+/* Advance arc ages, fades and geometry; no-ramp windows retain the prior tint. */
+void polyUpdateArcCells(PolyArc *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
@@ -753,7 +754,7 @@ void func_0015EC08(PolyArc *obj) {
             s32 age = record->age;
 
             if (age == POLY_INACTIVE_ENTRY_AGE) {
-                func_0015E900(obj, index);
+                polyRandomizeArcRecord(obj, index);
                 age = record->age;
             }
             if (age < 0) {
@@ -813,7 +814,7 @@ PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     }
     band->strip = parAllocateCellSystem(band->head.entryCount, band->segments, 1, 0);
     parDispatchSub(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
-    func_0015EEF0(band);
+    polyInitializeRotatingBandRecordAges(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
     parSetCellDrawBucket(band->strip, band->head.unk66);
@@ -827,7 +828,7 @@ void polyReleaseCellBoundNodeResources(PolyRotatingBand *obj) {
 }
 
 /* Seed rotating-band records, advancing the age after each delay group. */
-void func_0015EEF0(PolyRotatingBand *obj) {
+void polyInitializeRotatingBandRecordAges(PolyRotatingBand *obj) {
     u32 count = obj->head.entryCount;
     PolyRotatingBandRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
@@ -925,7 +926,8 @@ void polyScaleNodeFloatingParameters(f32 scale, PolyRotatingBand *obj) {
     obj->targetRadius = obj->targetRadius * scale;
 }
 
-void func_0015F2D0(PolyRotatingBand *obj) {
+/* Advance rotating-band cells; native completion requires a duration of at least two. */
+void polyUpdateRotatingBandCells(PolyRotatingBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;

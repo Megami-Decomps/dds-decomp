@@ -22,7 +22,7 @@ void effManagerInitializeSubsystems(void) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-s32 func_00157400(KwlnTask *task) {
+s32 effSubmitFieldBlendStateTask(KwlnTask *task) {
     SdfListHead *list;
     SdfGsBlendPacket *state;
     SdfPoolNode *surface;
