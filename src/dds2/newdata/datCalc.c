@@ -585,7 +585,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
-s32 func_0011A220(s32 itemId) {
+s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
     s32 quantity = datGameState->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {
