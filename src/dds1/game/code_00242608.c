@@ -1849,7 +1849,7 @@ extern void evtClearActiveFlag(s32);
 extern s32 evtSetBoundedDisplayValue(s32, s32);
 extern void func_002E96D8(s32);
 
-extern void func_00260670(s32 context);
+extern s32 func_00260670(ShopScene *context);
 
 extern void func_0024DD78(void);
 extern MenuPopupEntry D_0036AA68[];
@@ -2021,7 +2021,7 @@ s32 func_00245DE0(KwlnTask *task) {
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_00260670(stateAddress);
+    func_00260670((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
