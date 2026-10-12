@@ -35,11 +35,15 @@ typedef struct FieldPlayerSceneWork {
     u8 pad60[2];
     s16 sequenceMode; /* 0x62: copied by the sequence initializer */
     u8 pad64[0x1C];
-    s8 resourceName[0x20];
+    char resourceName[0x10]; /* 0x80: sequence note; nonzero source is "elvstart_label". */
+    s32 sequenceOption; /* 0x90: read by DDS2 func_00125380, separately copied from packet options. */
+    u8 pad94[0xC];
 } FieldPlayerSceneWork;
 
 typedef char FieldPlayerSceneWork_size_must_be_0xA0[(sizeof(FieldPlayerSceneWork) == 0xA0) ? 1 : -1];
 typedef char FieldPlayerSceneWork_unk58_at_58[((u32)&((FieldPlayerSceneWork *)0)->unk58 == 0x58) ? 1 : -1];
+typedef char FieldPlayerSceneWork_resourceName_at_80[((u32)&((FieldPlayerSceneWork *)0)->resourceName == 0x80) ? 1 : -1];
+typedef char FieldPlayerSceneWork_sequenceOption_at_90[((u32)&((FieldPlayerSceneWork *)0)->sequenceOption == 0x90) ? 1 : -1];
 
 FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y);
 
