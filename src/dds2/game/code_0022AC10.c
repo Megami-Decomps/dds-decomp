@@ -28,6 +28,12 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "eff_packet_params.h"
+#include "sdf_packet_append.h"
+#include "sdf_asset_state.h"
+#include "sdf_quaternion.h"
+#include "sdf_gs_packet.h"
+#include "fpu.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
@@ -1525,7 +1531,267 @@ void btlReleaseOwnedData(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022D2F8);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void sdfInvertRigidVuTransform(void);
+extern void sdfSetPrimaryIdentityMatrixVU(void);
+extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern void *func_00167A10(EffPacketParams *);
+extern f32 func_00353228(f32);
+extern f32 func_00353140(f32);
+extern SdfAsset *D_00436D10;
+extern EffPacketParams D_00453030;
+extern u32 D_003BFB30[];
+extern f32 D_003BFAF0[6][2];
+extern f32 D_003BFB40[4];
+extern f32 D_00384790[4][4];
+extern SdfPoolNode D_00380708, D_00380628;
+
+typedef struct BtlTileAlphaPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite alpha;
+} BtlTileAlphaPacket;
+typedef char BtlTileAlphaPacketSize[(sizeof(BtlTileAlphaPacket) == 0x30) ? 1 : -1];
+
+/* vu0 routine: animate the captured-screen overlay and its staggered fading tiles. */
+s32 func_0022D2F8(u32 backgroundColor, u32 color) {
+    f32 positions[6][4] __attribute__((aligned(16)));
+    f32 normals[6][4] __attribute__((aligned(16)));
+    f32 coordinates[6][2];
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 center[4] __attribute__((aligned(16)));
+    s32 complete = 1;
+    SdfListHead *list;
+    SdfListHead *tiles;
+    u64 *packet;
+    u32 row;
+    u32 column;
+    u32 vertex;
+    s32 x;
+    s32 y;
+    s32 xStep;
+    s32 yStep;
+    s32 pixelX;
+    s32 pixelY;
+    s32 centerX;
+    s32 centerY;
+    s32 centerOffsetX;
+    s32 centerOffsetY;
+    u32 alpha;
+    f32 height;
+    f32 width;
+    f32 phase;
+    f32 waveRadius;
+    f32 dx;
+    f32 dy;
+    f32 radius;
+    f32 influence;
+    f32 directionX;
+    f32 directionY;
+    f32 depth;
+    f32 size;
+    f32 angle;
+    f32 fade;
+    f32 planarX;
+    f32 planarY;
+
+    if (color & 0xFF000000) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = 0x44;
+        packet[7] = 0x42;
+        sdfAppendPacket(list, (u32)packet);
+        btlBuildOverlayQuadPacket(list, 0x40, backgroundColor, -0x100);
+        D_00380708.append(&D_00380708, list);
+    }
+    if (btlRuntimeState.options & 1) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = ((u64)((u32)color >> 24) << 32) | 0x64;
+        packet[7] = 0x42;
+        sdfAppendPacket(list, (u32)packet);
+        func_0022CE30(list, 0x40, color, -0x100, 1.0f);
+        D_00380608.append(&D_00380608, list);
+        if (D_00436D10 == NULL) {
+            D_00436D10 = sdfCreateAssetWithDrawEntries();
+            btlInitLightParams();
+            memset(&D_00453030, 0, sizeof(D_00453030));
+            D_00453030.primitive = 0x4000;
+            D_00453030.parameters = D_003BFB30;
+            D_00453030.parameterCount = 4;
+            D_00453030.vertexCount = 6;
+        }
+        tiles = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(tiles);
+        VU0_LOAD_MATRIX(D_00384790);
+        sdfInvertRigidVuTransform();
+        waveRadius = 640.0f;
+        sdfConsAppendVuPacket(tiles, NULL);
+        kwlnHeldTextureReference->primaryBuffer->clampState = 0x37C00000008ULL;
+        sdfSetAssetPrimaryTextureAddress(D_00436D10, kwlnHeldTextureReference);
+        sdfConsAppendAssetPacket(tiles, D_00436D10, NULL);
+        D_00453030.color = 0x80808080;
+        D_00453030.positions = (u128 *)positions;
+        D_00453030.normals = (u128 *)normals;
+        D_00453030.texcoords = (u32 *)coordinates;
+        height = func_00353228(D_0037F980.camera.fov * 0.5f) * 1000.0f;
+        width = height * 1.333333254f;
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x30003;
+        packet[5] = 0x47;
+        packet[6] = 0x8000000064ULL;
+        packet[7] = 0x42;
+        sdfAppendPacket(tiles, (u32)packet);
+        xStep = btlRuntimeState.unk20 << 5;
+        yStep = btlRuntimeState.unk24 << 5;
+        phase = -(btlRuntimeState.unk28 / waveRadius) * 1.5707963f;
+        y = 0;
+        for (row = 0; row < (u32)btlRuntimeState.particleRowCount; row++) {
+            x = (row & 1) ? xStep >> 1 : 0;
+            for (column = 0; column < (u32)btlRuntimeState.particlesPerRow; column++) {
+                dx = (f32)(x - 0x1000);
+                dy = (f32)(y - 0xE00);
+                if (dx > 0.0001f || dy > 0.0001f || dx < -0.0001f || dy < -0.0001f) {
+                    radius = fsqrtf(dx * dx + dy * dy);
+                    influence = btlRuntimeState.unk28 / radius;
+                    directionX = dx / radius;
+                    directionY = dy / radius;
+                    if (influence > 1.0f) {
+                        influence = 1.0f;
+                    }
+                    angle = func_00353140(radius / waveRadius * 1.5707963f + phase);
+                    axis[0] = -directionY;
+                    axis[1] = directionX;
+                    axis[2] = 0.0f;
+                    sdfBuildVuRotationFromAxisAngle(angle * 0.78539815f * influence, (RwV3d *)axis);
+                } else {
+                    radius = 0.0f;
+                    influence = 0.0f;
+                    directionX = 0.0f;
+                    directionY = 0.0f;
+                    sdfSetPrimaryIdentityMatrixVU();
+                }
+                if (radius < btlRuntimeState.unk30) {
+                    if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay == 0) {
+                        u32 age;
+                        fade = (f32)btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age / 18.0f;
+                        if (fade > 1.0f) {
+                            fade = 1.0f;
+                        }
+                        size = (1.0f - fade) * 240.0f;
+                        axis[0] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0];
+                        axis[1] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1];
+                        axis[2] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2];
+                        sdfVuLoadRotationMatrixFromAxisAngle((RwV3d *)axis,
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle);
+                        sdfComposeVuMatrixFromRegisters();
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle +=
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed;
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement +=
+                            btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed;
+                        if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha) {
+                            if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age >= 11) {
+                                btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha -= 32;
+                            }
+                            complete = 0;
+                        }
+                        age = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age;
+                        alpha = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha;
+                        depth = 1000.0f - btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement;
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = age + 1;
+                        goto draw_tile;
+                    } else {
+                        btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].delay--;
+                    }
+                }
+                size = 240.0f;
+                alpha = 0x80;
+                depth = 1000.0f;
+                complete = 0;
+draw_tile:
+                if (alpha) {
+                    BtlTileAlphaPacket *alphaPacket = (BtlTileAlphaPacket *)sdfAllocPacketAligned(sizeof(BtlTileAlphaPacket));
+                    alphaPacket->header.dmaTag = 2;
+                    alphaPacket->header.vifCommands = 0x5000000210000000ULL;
+                    alphaPacket->header.gifTag = 0x1000000000008001ULL;
+                    alphaPacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+                    alphaPacket->alpha.value = ((u64)alpha << 32) | 0x64;
+                    alphaPacket->alpha.registerId = SDF_GS_ALPHA_1;
+                    sdfAppendPacket(tiles, (u32)alphaPacket);
+                    planarX = directionX * radius;
+                    centerOffsetX = (s32)(planarX * (1.0f + influence * 0.125f));
+                    planarY = directionY * radius;
+                    centerOffsetY = (s32)(planarY * (1.0f + influence * 0.125f));
+                    center[0] = width * (f32)centerOffsetX / 4096.0f;
+                    center[1] = height * (f32)centerOffsetY / 3584.0f;
+                    center[2] = depth;
+                    centerX = centerOffsetX + 0x1000;
+                    centerY = centerOffsetY + 0xE00;
+                    VU0_LOAD_VF($vf11, center);
+                    for (vertex = 0; vertex < 6; vertex++) {
+                        pixelX = centerX + (s32)(D_003BFAF0[vertex][0] * size);
+                        pixelY = centerY + (s32)(D_003BFAF0[vertex][1] * size);
+                        coordinates[vertex][0] = (f32)pixelX / 8192.0f;
+                        coordinates[vertex][1] = (f32)(pixelY >> 1) * 0.875f / 3584.0f;
+                        positions[vertex][0] = width * (f32)(pixelX - 0x1000) / 4096.0f;
+                        positions[vertex][1] = height * (f32)(pixelY - 0xE00) / 3584.0f;
+                        positions[vertex][2] = depth;
+                        VU0_LOAD_VF($vf10, positions[vertex]);
+                        VU0_SUB($vf10, $vf10, $vf11);
+                        VU0_APPLY_MATRIX($vf10, $vf10);
+                        VU0_ADD($vf10, $vf10, $vf11);
+                        VU0_STORE_VF($vf10, positions[vertex]);
+                        VU0_LOAD_VF($vf10, D_003BFB40);
+                        VU0_ROTATE_VEC($vf10, $vf10);
+                        VU0_STORE_VF($vf10, normals[vertex]);
+                    }
+                    sdfAppendPacket(tiles, (u32)func_00167A10(&D_00453030));
+                }
+                x += xStep;
+            }
+            y += yStep;
+        }
+        btlRuntimeState.unk28 += btlRuntimeState.unk2C;
+        btlRuntimeState.unk2C += -5.877550602f;
+        if (btlRuntimeState.unk2C < 45.71428299f) {
+            btlRuntimeState.unk2C = 45.71428299f;
+        }
+        if ((s32)color >= 0) {
+            btlRuntimeState.unk30 += btlRuntimeState.unk34;
+        }
+        packet = (u64 *)sdfAllocPacketAligned(0x40);
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x717FB;
+        packet[5] = 0x47;
+        packet[6] = 0x44;
+        packet[7] = 0x42;
+        sdfAppendPacket(tiles, (u32)packet);
+        D_00380628.append(&D_00380628, tiles);
+    }
+    return complete;
+}
+
 
 void btlInitFadeColors(void) {
     func_0022D040();
