@@ -194,7 +194,7 @@ extern u32 effBlendColor(u32, u32, f32);
 extern f32 sdfAtan2Poly(f32 ratio);
 
 /* Advance radial particles and build each six-vertex strip in the shared pool. */
-void func_00170F28(PcpScatterRadialWork *work) {
+void effPcpScatterDrawRadialParticles(PcpScatterRadialWork *work) {
     f32 next[4];
     f32 position[4];
     f32 duplicatePosition[4];
@@ -525,7 +525,7 @@ void effScatterSpriteSpawn(PcpScatterSpinWork *work, s32 index)
 
 
 /* Rotate each particle around its seeded axis and build its six-vertex strip. */
-void func_00171B28(PcpScatterSpinWork *work) {
+void effPcpScatterDrawSpinParticles(PcpScatterSpinWork *work) {
     f32 axis[4];
     f32 next[4];
     f32 position[4];
