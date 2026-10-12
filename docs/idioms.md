@@ -9958,3 +9958,45 @@ The unresolved constructors/list insertion and nested clone ASM bodies are
 also unchanged. Existing historical rotation experiments above use the new
 names without changing their recorded compiler results.
 
+## Local-map row pulse lifetime
+
+DDS2 `func_0030CC68` (`game/code_0030B838`, `0x0030CC68`, 644 bytes)
+draws a local-map counter row. Its timer drives a ten-frame quadratic slide,
+a seven-frame opacity fade, and a separate countdown pulse. DDS1
+`func_002C4C88` is the semantic counterpart, but uses textured quads rather
+than DDS2's positioned sprite slots; its implementation is not a byte donor.
+
+The pulse initializer follows the channel's signed `mapNumber` load.
+**Placement was found by Cc1Probe probing; the sched1 LUID tie and
+local-alloc priority property were then confirmed by trace.** This is not
+claimed as trace-first discovery.
+
+With the earlier initializer, sched1 ranks the `0.125f` constant and the
+`channel->display->value` load equally at priority 3, register weight 1 and
+cost 2. The original-order LUID tier issues the constant first. Its local
+quantity consequently has two references and lifetime `[34,46]` (12),
+priority 1666. The ten-frame divisor/quotient quantity has four references
+and lifetime `[4,50]` (46), priority 1739, so it obtains `$f0` first and
+the pulse constant takes `$f3`: the opposite of retail.
+
+**P:** emit the pulse after the signed map-number load so the constant's
+scheduled live range is at most ten allocation units, giving it priority
+greater than 1739. The retained ordinary initializer grouping produces
+lifetime `[38,46]` (8), priority 2500. Local allocation now gives the pulse
+constant `$f0` before the divisor/quotient takes `$f3`, reproducing the
+native floating operations at `0030CC70`, `0030CCCC`, `0030CCE8` and
+`0030CCFC`. Both the discovery trace and the retained-form trace verified
+hooked/unhooked assembly and RTL equality.
+
+Separating the slide/fade locals, writing the canonical quadratic easing
+expression, or separately naming its complement did not close the original
+floating allocation/scheduling residual. None of those forms is retained.
+The landed source keeps real, used animation values and the native signed
+timer/display fields, without altered flags, assembly, pinned registers,
+volatile or unused locals.
+
+The real whole-unit gate reports **56 match, 0 differ**, including the target
+at **0/161 words**; actual objdiff reports **100.0%**. All 55 previously
+matched bodies remain exact. The existing six-argument counter callback
+contract is made explicit, and its obsolete assignment cast is removed.
+
