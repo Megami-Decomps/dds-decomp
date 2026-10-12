@@ -80,9 +80,11 @@ Sample lines (fldTitle):
 loader, ASLR handling, per-unit cflags, canonical scratch names and cc1 argv are
 cc.sh's, not a copy. It runs cc.sh from a symlink mirror of the repository
 root under `$TMPDIR/.c1p/` (the mirror has the same path length as the
-repository, because ee-gcc's output can depend on file-name lengths); cc.sh's
-scratch directories are therefore created in the mirror, never in the working
-tree. If your `TMPDIR` is so long that the mirror cannot be as long as the
+repository, because ee-gcc's output can depend on file-name lengths). The
+mirror name starts with a hash of the repository path, so two clones whose
+paths have equal length get separate mirrors, and links left by an earlier
+run are re-pointed. cc.sh's scratch directories are therefore created in the
+mirror, never in the working tree. If your `TMPDIR` is so long that the mirror cannot be as long as the
 repository path, the script says so; set a shorter `TMPDIR` or
 `CC1PROBE_MIRROR_BASE`.
 
