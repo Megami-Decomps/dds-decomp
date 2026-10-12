@@ -52,11 +52,6 @@ extern BtlAiScratchWork *btlActionScratchWork;
 
 /* Per-species AI table (0x15C bytes each): five rows of five weighted slots. */
 
-typedef struct AiDecisionRow {
-    u32 predicates[3];
-    u8 routes[8];
-} AiDecisionRow;
-
 typedef struct AiSpecies {
     u8 pad00[4];
     AiDecisionRow decisions[3];
