@@ -636,8 +636,8 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
     return 0;
 }
 
-/* Return whether any operand in the live groups has flag bit zero set. */
-s32 func_001D1218(s32 unused, BattleIndexWork *state) {
+/* Return whether any grouped operand has flag bit 0; the selector is unused. */
+s32 btlHasAnyOperandLowFlag(s32 unused, BattleIndexWork *state) {
     u32 groupIndex;
     u32 entryIndex;
     u32 groupCount = btlGetIndexListCount(state->indices);
@@ -1743,47 +1743,51 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     return task;
 }
 
-u32 func_001D3A20(s32 arg0) {
-    if ((datItemSkillRecords[*(s32 *)(arg0 + 4)].unk01 & 4) != 0) {
-        ptyAdjustItemQuantity(*(s32 *)(arg0 + 4), 0xffffffffffffffff);
+/* Consume one item when its table flag 4 is set, then signal task completion. */
+u32 btlConsumeFlaggedCommandItem(s32 argumentAddress) {
+    if ((datItemSkillRecords[*(s32 *)(argumentAddress + 4)].unk01 & 4) != 0) {
+        ptyAdjustItemQuantity(*(s32 *)(argumentAddress + 4), 0xffffffffffffffff);
     }
     return 1;
 }
 
-u8 *btlCreatePermittedBattleVoiceTask(s32 arg0, s32 arg1) {
+/* Queue an actor/item argument pair for conditional inventory consumption. */
+u8 *btlCreateFlaggedCommandItemConsumeTask(s32 actorAddress, s32 itemId) {
     u8 *task = btlAllocTask(8);
     u32 *data;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4D;
-    *(void **)(task + 0x4C) = func_001D3A20;
-    *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
+    *(void **)(task + 0x4C) = btlConsumeFlaggedCommandItem;
+    *(u64 *)(task + 0x40) = *(u64 *)(actorAddress + 0x108);
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
-    data[0] = (u32)arg0;
-    data[1] = (u32)arg1;
+    data[0] = (u32)actorAddress;
+    data[1] = (u32)itemId;
     return task;
 }
 
-u32 btlPlayQueuedBattleVoice(s32 arg0) {
-    ptyAdjustItemQuantity(*(u16 *)(arg0 + 4), 1);
+/* Add one to the argument's 16-bit item ID quantity, then complete the task. */
+u32 btlIncrementCommandItemQuantity(s32 argumentAddress) {
+    ptyAdjustItemQuantity(*(u16 *)(argumentAddress + 4), 1);
     return 1;
 }
 
-u8 *btlCreateQueuedBattleVoiceTask(u8 *arg0, u16 arg1) {
+/* Queue an owner-bound task that increments this item's inventory quantity. */
+u8 *btlCreateItemQuantityIncrementTask(u8 *actor, u16 itemId) {
     u8 *task = btlAllocTask(8);
     u32 *data;
 
     task[0x10] = BTL_TASK_CONDITION_NEVER;
     task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4E;
-    *(void **)(task + 0x4C) = btlPlayQueuedBattleVoice;
-    *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
+    *(void **)(task + 0x4C) = btlIncrementCommandItemQuantity;
+    *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
     *(s32 *)(task + 0x48) = 0;
     data = btlGetTaskArguments(task);
-    data[0] = (u32)arg0;
-    ((u16 *)data)[2] = arg1;
+    data[0] = (u32)actor;
+    ((u16 *)data)[2] = itemId;
     return task;
 }
 
@@ -2374,14 +2378,15 @@ void btlClearTaskLists(void) {
     btlDeferredTaskHead = 0;
 }
 
-u32 func_001D4B28(void) {
+/* Process callback for the zero-argument immediate-completion task. */
+u32 btlCompleteTaskImmediately(void) {
     return 1;
 }
 
 void *btlCreateImmediateCompletionTask(void) {
     u8 *task = btlAllocTask(0);
     task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(void **)(task + 0x4C) = func_001D4B28;
+    *(void **)(task + 0x4C) = btlCompleteTaskImmediately;
     *(u16 *)(task + 0x20) = 0x63;
     *(u32 *)(task + 0x48) = 0;
     task[0x10] = BTL_TASK_CONDITION_NEVER;

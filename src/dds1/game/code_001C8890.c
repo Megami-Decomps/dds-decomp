@@ -1528,7 +1528,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
 s32 sndMapResourceType(s32 category, s32 id);
 extern void *btlCreateCategoryStatDamageTask(u8 *, u32, u32);
-extern u8 *btlCreatePermittedBattleVoiceTask(s32, s32);
+extern u8 *btlCreateFlaggedCommandItemConsumeTask(s32, s32);
 s32 btlFormatActionEventFilename(s32 source, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
 struct ActiveSoundNode *sndAllocListNode(void);
@@ -1643,7 +1643,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             }
             btlStartTask(btlCreateCategoryStatDamageTask((u8 *)actors[groupIndex], skill, action->indexWork.stageValue));
             if (action->indexWork.phase == 4) {
-                btlStartTask(btlCreatePermittedBattleVoiceTask((s32)actors[groupIndex], action->indexWork.reference));
+                btlStartTask(btlCreateFlaggedCommandItemConsumeTask((s32)actors[groupIndex], action->indexWork.reference));
             }
         }
     }

@@ -553,13 +553,14 @@ void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
     }
 }
 
-void func_00335108(SdfMotionKeyFlagBinding *binding, f32 t) {
-    SdfMotionKeyInterval b;
+/* The blend slot resamples the discrete flag; it does not consume blend weight. */
+void sdfMotionApplyKeyFlagDuringBlend(SdfMotionKeyFlagBinding *binding, f32 frame) {
+    SdfMotionKeyInterval keyInterval;
     SdfDrawNode *node;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &b, t);
+    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)binding, &keyInterval, frame);
     node = binding->node;
-    if (*(u8 *)b.firstKey == 0) {
+    if (*(u8 *)keyInterval.firstKey == 0) {
         node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     } else {
         node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
