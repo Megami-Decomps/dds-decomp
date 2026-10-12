@@ -133,7 +133,7 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiDrawHistoryTrails);
 
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
