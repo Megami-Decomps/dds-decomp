@@ -122,7 +122,7 @@ extern void func_0019DD48();
 
 extern s32 frFontMeasureLineWidth();
 
-extern UiSprite *func_001A1858(s32 kind, u32 payload);
+extern UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 payload);
 
 #define ITF_MES_SCRIPT_PANEL_BIT 0x200000
 #define ITF_MES_LOWER_STATUS_PAIR_MASK 0x300
@@ -473,7 +473,7 @@ void itfMesBuildOptionFrame(ItfMesState *mes) {
     bounds[1] = 0x430;
     bounds[2] = 0x1200 + halfWidth;
     bounds[3] = 0x530 + rowsHeight;
-    panelBlock->overlay = func_001A1858(9, (u32)itfMesWork.windowTexture);
+    panelBlock->overlay = itfCreateUiSpriteByKind(9, (u32)itfMesWork.windowTexture);
     itfSetPanelLayoutAndNotify(panelBlock->overlay, bounds[0], bounds[1], bounds[2], bounds[3], mes->renderValue);
     itfPanelUpdateValuesAndNotify(panelBlock->overlay, 0, 0, 0, 0);
     mes->flags = (mes->flags & ~0xC00) | 0x400;
@@ -1541,7 +1541,7 @@ extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *
 
 extern s32 frFontMeasureLineWidth(s32 row, FrFontGlyph *glyph);
 
-extern UiSprite *func_001A1858(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
 
 extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
@@ -1578,7 +1578,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 top;
     if (place->sprite == 0) {
-        place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureLineWidth(0, panel->blk14.glyphChain);
         }
@@ -1596,7 +1596,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = func_001A1858(7, (u32)itfMesWork.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesWork.windowTexture);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->renderValue);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }

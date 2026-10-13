@@ -1591,7 +1591,7 @@ void mnuReportCampProcessHalted(void) {
 
 extern s32 D_00357AB8[];
 
-UiSprite *func_00199828(s32 kind, u32 value) {
+UiSprite *itfCreateUiSpriteByKind(s32 kind, u32 value) {
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(UiSprite));
     UiSprite *work = (UiSprite *)sdfResourceRetainAddress(allocation);
 
