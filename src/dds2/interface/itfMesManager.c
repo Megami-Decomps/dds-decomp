@@ -1742,12 +1742,12 @@ void itfMesUpdatePanelFades(ItfMesState *panel);
 
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
-void func_001A6528(ItfMesState *panel);
+void itfUpdateSoundSelectionTransition(ItfMesState *panel);
 
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
     itfMesAdvanceEntryText(panel);
-    func_001A6528(panel);
+    itfUpdateSoundSelectionTransition(panel);
     btlUpdateFadeIndicator(panel);
 }
 
@@ -1828,7 +1828,7 @@ extern s32 sndSeqSelectPoll(ItfMesState *panel);
 
 extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
 
-void func_001A6528(ItfMesState *panel) {
+void itfUpdateSoundSelectionTransition(ItfMesState *panel) {
     ItfMesBlk40 *selection = &panel->blk40;
     ItfMesEntryBlock *entry = &panel->entryBlock;
     u32 flags = panel->flags;
