@@ -3890,6 +3890,8 @@
 0x00260A58	mnuCampGetRankedItemPrice	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1748; Ranked-item pricing helper called by both ranked-stock builders with the same index/half-price argument shape as DDS1; twin=0x00244D10 (DDS1).
 0x00260B50	mnuCampFindListedItemIndex	inferred	Searches the three-entry camp item table for an ID and returns its index or negative one. [names_reviewed15.tsv]
 0x00260B90	itmClaimFreeSlot	inferred	scans 2 slots of a row for an id whose flag is clear and sets it (mdlFlagTest/mdlFlagSet) [names_M36_SmallSweep5.tsv]
+0x00260C28	mnuCampGetWideRewardRowIndex	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1792; Maps a listed reward row and its weighted three-way option to a wide reward-row index.
+0x00260C38	mnuCampGetCompactRewardRowIndex	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1800; Maps a listed reward row and compact slot to a compact reward-row index.
 0x00260C48	mnuCampChooseSolarWeightedOption	inferred	Chooses a weighted camp table option, switching the weights for a particular solar phase. [names_reviewed15.tsv]
 0x00260CE8	mnuCampChooseWeightedTableValue	inferred	Samples paired values and weights in the camp probability table. [names_reviewed15.tsv]
 0x00260D50	mnuCampFindFreeWideEntryIndex	inferred	Finds the first empty entry in a camp row with sixteen slots, capped at its last slot. [names_reviewed15.tsv]
