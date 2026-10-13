@@ -3660,6 +3660,7 @@ evtCommandQueueBgmWithFade = 0x00243140; // type:func
 evtCommandStartBgmWithFade = 0x00243200; // type:func
 evtCommandSetDrawFlagWhileWaiting = 0x002432A0; // type:func
 evtClearSolarOverlayControl = 0x00243310; // type:func
+evtResetFieldTransitionCounter = 0x00243320; // type:func
 evtGetMirroredSolarPhase = 0x00243330; // type:func
 evtGetSolarPhase = 0x00243358; // type:func
 evtSetSolarPhase = 0x00243368; // type:func

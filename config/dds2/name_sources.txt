@@ -3743,6 +3743,7 @@
 0x00243200	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243200; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002432A0	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_002432A0; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x00243310	evtClearSolarOverlayControl	inferred	Clears the byte at solar-world-state offset 0xA43 while leaving the adjacent phase byte intact.
+0x00243320	evtResetFieldTransitionCounter	inferred	Clears the world-state counter at +0xA4C; the solar-clock update increments this counter while field-transition flag bit 4 is set and consumes that transition after six ticks, then resets the counter. fldClearFieldTransitionFlag also calls this reset. [provider, timer update, and caller, 2026-10-13]
 0x00243330	evtGetMirroredSolarPhase	inferred	Reads the solar-world phase byte at +0xA41 and mirrors phases 9..15 around phase 8.
 0x00243358	evtGetSolarPhase	inferred	Byte-identical dds1 twin 0x002286E8; Returns the solar phase byte at world offset 0xA41. [names_conflicts.tsv]
 0x00243368	evtSetSolarPhase	inferred	Masks the solar-world phase to four bits and resets its phase counter at +0xA44.
