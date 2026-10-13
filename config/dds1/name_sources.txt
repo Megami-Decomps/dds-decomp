@@ -3386,8 +3386,8 @@
 0x001F86E8	btlScriptCmdWithArgD	inferred	Calls btlCmdWithArgD on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F8710	btlScriptCmdSimpleC	inferred	Reads first script parameter and passes it to btlCmdSimpleC; returns script success. [names_R_FuncNames3.tsv]
 0x001F8750	btlScriptCmdSimpleD	inferred	Reads first script parameter and passes it to btlCmdSimpleD; returns script success. [names_R_FuncNames3.tsv]
-0x001F87F8	btlScriptCmdSimpleF	inferred	Calls btlCmdSimpleF on current command context; returns script success. [names_R_FuncNames3.tsv]
-0x001F8828	btlScriptCmdSimpleG	inferred	Calls btlCmdSimpleG on current command context; returns script success. [names_R_FuncNames3.tsv]
+0x001F87F8	btlScriptPickUnlinkedPartyTarget	inferred	confidence=high; Calls btlPickUnlinkedCommandTarget with current script command and0; returns success. DDS2 0020A360 twin, not0020A390: previous DDS2 F/G attribution was reversed. [names_R_FuncNames3.tsv; Namer1 batch53 correction]
+0x001F8828	btlScriptPickLinkedPartyTarget	inferred	confidence=high; Calls btlPickLinkedCommandTarget with current script command and0; returns success. DDS2 0020A390 twin, not0020A360: previous DDS2 F/G attribution was reversed. [names_R_FuncNames3.tsv; Namer1 batch53 correction]
 0x001F8858	btlScriptCmdSimpleH	inferred	Calls btlCmdSimpleH on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F8888	btlScriptCmdWithArgF	inferred	Calls btlCmdWithArgF on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x001F88B0	btlScriptCmdSimpleJ	inferred	Reads first script parameter and passes it to btlCmdSimpleJ; returns script success. [names_R_FuncNames3.tsv]
@@ -3542,8 +3542,8 @@
 0x001FEF10	btlCmdSimpleC	inferred	jal+epilogue passthrough wrapper of func_002033C0
 0x001FEF30	btlCmdSimpleD	inferred	jal+epilogue passthrough wrapper of func_002034D0
 0x001FEF50	btlSelectCommandTargetsByMode	inferred	confidence=high; invokes btlSelectTargetsByMode through the native zero-formal bridge; actual DDS2 twin0x002110E8, not the unit-ID filter at0x002111E8. Corrects prior E-label twin attribution. [Namer1 naming batch45]
-0x001FEF70	btlCmdSimpleF	inferred	jal+epilogue passthrough wrapper of func_00204008
-0x001FEF90	btlCmdSimpleG	inferred	jal+epilogue passthrough wrapper of func_00204028
+0x001FEF70	btlPickUnlinkedCommandTarget	inferred	confidence=high; Short-arity current-command adapter to btlPickUnlinkedPartyTarget, flag1 excludes status1000 in default party-group scan. DDS2 00211208 twin; original void surfaces retained. [Namer1 batch53 correction]
+0x001FEF90	btlPickLinkedCommandTarget	inferred	confidence=high; Short-arity current-command adapter to btlPickLinkedPartyTarget, flag0 requires status1000 in default party-group scan. DDS2 00211228 twin; original void surfaces retained. [Namer1 batch53 correction]
 0x001FEFB0	btlCmdSimpleH	inferred	jal+epilogue passthrough wrapper of func_00203F98
 0x001FEFD0	btlCmdSimpleI	inferred	jal+epilogue passthrough wrapper of func_00203CA8
 0x001FEFF0	btlCmdWithArgF	inferred	jal+epilogue wrapper forwarding arg plus 0 to func_00204048
@@ -8801,3 +8801,7 @@
 0x001859D8	effPcpKinds92And94SourceNoOp	inferred	confidence=high; Same empty source-pointer operation registered in native kind92 row003546E0+10 and kind94 row00354730+10. DDS2 rows003B1010/003B1060+10 share0018D630. [Namer1 batch52]
 0x001859E0	effPcpKinds92And94ValueNoOp	inferred	confidence=high; Same empty value operation registered in native kind92 row003546E0+1C and kind94 row00354730+1C. DDS2 rows003B1010/003B1060+1C share0018D638. [Namer1 batch52]
 0x00185A18	effPcpKind94DispatchNoOp	inferred	confidence=high; Native kind94 row00354730+04 empty dispatch has its own entry, distinct from kind92. DDS2 row003B1060+04/0018D670 twin. [Namer1 batch52]
+0x00204008	btlPickUnlinkedPartyTarget	inferred	confidence=high; btlSelectLinkedTargets(task,input,1) default group200 scan selects candidate without status1000; other mode shortcuts unchanged; returns1. DDS2 00216D10 twin. [Namer1 batch53]
+0x00204028	btlPickLinkedPartyTarget	inferred	confidence=high; btlSelectLinkedTargets(task,input,0) default group200 scan selects candidate with status1000; other mode shortcuts unchanged; returns1. DDS2 00216D30 twin. [Namer1 batch53]
+0x00208668	btlCerberAllowsNonPartyActor	inferred	confidence=high; Mode10A commandAvailabilityOverride returns true only without party-group200 bit; command argument unused. Same owner installs Cerber range override identified by retail CERBER string. [Namer1 batch53]
+0x00208678	btlCerberGetCommandHitCount	inferred	confidence=high; Retail003A5D78 says btl:CERBER hit count = %d; mode10A commandRangeOverride divides eligible command rangeMax by active enemy count, clamps1..count+1, zero falls back to normal range. [Namer1 batch53]

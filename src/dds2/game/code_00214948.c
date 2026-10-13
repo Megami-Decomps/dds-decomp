@@ -918,12 +918,14 @@ u32 btlAppendSelfAfterTargetScan(s32 battle) {
     return 1;
 }
 
-u32 func_00216D10(u32 task, u32 input) {
+/* Default scan picks a party-group candidate without status 0x1000; mode shortcuts stay native. */
+u32 btlPickUnlinkedPartyTarget(u32 task, u32 input) {
     btlSelectLinkedTargets(task, input, 1);
     return 1;
 }
 
-u32 func_00216D30(u32 task, u32 input) {
+/* Default scan picks a party-group candidate with status 0x1000; mode shortcuts stay native. */
+u32 btlPickLinkedPartyTarget(u32 task, u32 input) {
     btlSelectLinkedTargets(task, input, 0);
     return 1;
 }
@@ -4240,7 +4242,7 @@ u64 btlMaskValueWhenSubtaskInactive(u64 value) {
 
 extern void btlSetRuntimeFlag2000(void);
 
-extern u32 func_00220958(void);
+extern u32 btlGetMarkedCommandRequestedState(void);
 
 extern u8 D_003BF6C0[][5];
 
@@ -4642,8 +4644,8 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041AAF8);
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021F848);
 
-/* Same transition for the alternate marked-unit motion (mode 0x11B). */
-void func_00220368(void) {
+/* Commit the requested state, then refresh active enemy-ID 0x11B's motion (not mode 0x11B). */
+void btlApplyMarkedCommandStateMotion(void) {
     BattleActionScene *scene = (BattleActionScene *)btlGetRuntime();
     u8 *state = scene->state;
     BtlUnit *unit;
@@ -4737,17 +4739,17 @@ s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
         return action;
     }
     if (action == 1) {
-        if (func_00220918() == 1) {
+        if (btlGetMarkedCommandCurrentState() == 1) {
             return 0x11;
         }
     }
     if (action == 0) {
-        if (func_00220918() == 1) {
+        if (btlGetMarkedCommandCurrentState() == 1) {
             return 0x10;
         }
     }
     if (action == 0xA) {
-        if (func_00220918() == 1) {
+        if (btlGetMarkedCommandCurrentState() == 1) {
             return 0x12;
         }
     }
@@ -4756,7 +4758,7 @@ s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
     }
     if (action < 0x15) {
         if (action >= 0x13) {
-            return func_00220918() != 0 ? 0x14 : 0x13;
+            return btlGetMarkedCommandCurrentState() != 0 ? 0x14 : 0x13;
         }
     }
     return action;
@@ -4808,7 +4810,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
     if (unit->status.flags & 0x400) {
         if (unit->partyRecord.unitId == 0x11B) {
             if (battle->state[2] != 0) {
-                return func_00220918() != 0 ? 8 : 7;
+                return btlGetMarkedCommandCurrentState() != 0 ? 8 : 7;
             }
         }
     }
@@ -4851,7 +4853,8 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
     return 0;
 }
 
-u32 func_00220918(void) {
+/* Mode 0x314's applied state is byte 1; absent state or another mode returns zero. */
+u32 btlGetMarkedCommandCurrentState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     u8 *data;
     if (battle->mode != 0x314) {
@@ -4864,7 +4867,8 @@ u32 func_00220918(void) {
     return 0;
 }
 
-u32 func_00220958(void) {
+/* Mode 0x314's requested state is byte 0; absent state or another mode returns zero. */
+u32 btlGetMarkedCommandRequestedState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     u8 *data;
     if (battle->mode != 0x314) {

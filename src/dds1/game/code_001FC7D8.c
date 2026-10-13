@@ -40,8 +40,8 @@ extern s32 btlSelectTargetsPassingCheck(s32, s32);
 extern void btlSelectTargetsByActionMask();
 extern void btlSelectTargetsWithoutActionMask();
 extern void btlSelectTargetsByMode();
-extern void func_00204008();
-extern void func_00204028();
+extern void btlPickUnlinkedPartyTarget();
+extern void btlPickLinkedPartyTarget();
 extern void btlAppendSelfAfterTargetScan();
 extern s32 btlSelectTargetsExcludingActorUnit(s32);
 extern void btlAppendEffectActorToCommandIndices(s32, s32);
@@ -1210,12 +1210,14 @@ void btlSelectCommandTargetsByMode(void) {
     btlSelectTargetsByMode();
 }
 
-void btlCmdSimpleF(void) {
-    func_00204008();
+/* Current-command adapter for the unlinked-party selector; retain the short-arity ABI. */
+void btlPickUnlinkedCommandTarget(void) {
+    btlPickUnlinkedPartyTarget();
 }
 
-void btlCmdSimpleG(void) {
-    func_00204028();
+/* Current-command adapter for the linked-party selector; retain the short-arity ABI. */
+void btlPickLinkedCommandTarget(void) {
+    btlPickLinkedPartyTarget();
 }
 
 void btlCmdSimpleH(void) {

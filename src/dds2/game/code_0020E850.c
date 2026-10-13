@@ -54,9 +54,9 @@ extern void btlSelectLowestRankTarget(s32, s32);
 
 extern s32 func_00216888(s32, s32);
 
-extern void func_00216D30();
+extern void btlPickLinkedPartyTarget();
 
-extern void func_00216D10();
+extern void btlPickUnlinkedPartyTarget();
 
 extern void btlAppendSelfAfterTargetScan();
 
@@ -1329,12 +1329,14 @@ void btlFilterCommandTargetsByUnitId(s32 context, s32 value) {
     btlFilterTargetListByUnitId(context, value);
 }
 
-void btlCmdSimpleG(void) {
-    func_00216D10();
+/* Current-command adapter for the unlinked-party selector; retain the short-arity ABI. */
+void btlPickUnlinkedCommandTarget(void) {
+    btlPickUnlinkedPartyTarget();
 }
 
-void func_00211228(void) {
-    func_00216D30();
+/* Current-command adapter for the linked-party selector; retain the short-arity ABI. */
+void btlPickLinkedCommandTarget(void) {
+    btlPickLinkedPartyTarget();
 }
 
 void btlCmdSimpleH(void) {

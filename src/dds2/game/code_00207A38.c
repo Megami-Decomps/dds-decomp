@@ -109,7 +109,7 @@ extern u32 btlButtonIconTexture;
 extern u16 scrReadIntParameter(u32);
 
 
-extern u64 func_00220958(void);
+extern u64 btlGetMarkedCommandRequestedState(void);
 
 extern s32 btlTrackedTaskHandles;
 
@@ -1388,13 +1388,15 @@ u32 func_0020A338(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleG(void) {
-    btlCmdSimpleG(scrGetCurrentCommandWork(), 0);
+/* Run unlinked-party selection; the old F/G attribution was reversed in DDS2. */
+u32 btlScriptPickUnlinkedPartyTarget(void) {
+    btlPickUnlinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
-u32 btlScriptCmdSimpleF(void) {
-    func_00211228(scrGetCurrentCommandWork(), 0);
+/* Run linked-party selection; the old F/G attribution was reversed in DDS2. */
+u32 btlScriptPickLinkedPartyTarget(void) {
+    btlPickLinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
@@ -2318,10 +2320,11 @@ u32 btlScriptReturnEffectActive(void) {
     return 1;
 }
 
-u32 btlCommandReportSpecialModeValue(void) {
+/* Report the requested byte of mode 0x314's marked-command state; return script success. */
+u32 btlScriptReturnMarkedCommandRequestedState(void) {
     u64 result;
 
-    result = func_00220958();
+    result = btlGetMarkedCommandRequestedState();
     scrSetIntegerReturnValue(result);
     return 1;
 }

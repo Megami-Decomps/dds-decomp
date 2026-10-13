@@ -596,12 +596,14 @@ s32 btlAppendSelfAfterTargetScan(s32 actor) {
     return 1;
 }
 
-u32 func_00204008(u32 task, u32 input) {
+/* Default scan picks a party-group candidate without status 0x1000; mode shortcuts stay native. */
+u32 btlPickUnlinkedPartyTarget(u32 task, u32 input) {
     btlSelectLinkedTargets(task, input, 1);
     return 1;
 }
 
-u32 func_00204028(u32 task, u32 input) {
+/* Default scan picks a party-group candidate with status 0x1000; mode shortcuts stay native. */
+u32 btlPickLinkedPartyTarget(u32 task, u32 input) {
     btlSelectLinkedTargets(task, input, 0);
     return 1;
 }
@@ -2985,7 +2987,8 @@ u32 func_00208660(void) {
     return 0xffffffff;
 }
 
-s32 func_00208668(BtlUnit *unit, s32 command) {
+/* Cerber availability override: allow only actors outside party group 0x200. */
+s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command) {
     return (unit->status.flags & 0x200) < 1;
 }
 
@@ -2994,7 +2997,7 @@ extern s32 datRosterDetails;
 extern char D_003A5D78[];
 
 /* Return the Cerber hit allocation, with zero falling back to the normal range. */
-s32 func_00208678(BtlUnit *unit, s32 command) {
+s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 result;
     s32 eligible;
