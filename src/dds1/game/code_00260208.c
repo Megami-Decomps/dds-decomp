@@ -1102,7 +1102,7 @@ extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
-extern void func_002E8DD0(u32 sequence);
+extern void sndQueueSoundId(u32 sequence);
 extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1139,7 +1139,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
             mnuForwardTableByte(
                 work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
-        func_002E8DD0(0x50001);
+        sndQueueSoundId(0x50001);
         sndStartTrackDefault(0x50001);
     }
 

@@ -53,7 +53,7 @@ extern void sndStartTrackExtended(s32 track);
 extern void sndTransitionBgm(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
 extern void sndReleaseTrackHandle(u32 sequence);
-extern void func_002E8DD0(u32 sequence);
+extern void sndQueueSoundId(u32 sequence);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
@@ -5388,7 +5388,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_002E8DD0(sound);
+    sndQueueSoundId(sound);
     return sound;
 }
 

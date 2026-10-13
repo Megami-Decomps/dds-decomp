@@ -143,7 +143,7 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 extern void sndStartTrackExtended(s32 track);
 
 extern void sndReleaseTrackHandle(u32 sound);
-extern void func_00341C78(u32 sound);
+extern void sndQueueSoundId(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
 
@@ -5367,7 +5367,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_00341C78(sound);
+    sndQueueSoundId(sound);
     return sound;
 }
 
