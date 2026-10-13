@@ -541,6 +541,8 @@ u32 effObjGetRoomNumberById(u32 id) {
     return data->roomNumber;
 }
 
+#include "dds3_object_payload.h"
+
 /* Payload word 8 is interpreted by object kind, not always as a pointer. */
 void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value) {
     u32 *payload = object->data;
