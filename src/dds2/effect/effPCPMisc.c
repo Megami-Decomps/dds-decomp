@@ -484,7 +484,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *effect);
-extern void billSetChildParameter(BillObj *effect, u32 color);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 
 
