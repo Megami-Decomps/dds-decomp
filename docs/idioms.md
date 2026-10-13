@@ -11073,3 +11073,29 @@ VU quaternion composition, including all actor-dependent positions/distances,
 motion state and flags. No layout, declaration order, casts or expressions are
 changed by this naming closure.
 
+## Named inactive PCP operation slots
+
+The numeric-kind names identify real registrations, not guessed effect classes.
+Retail `effParameterWorkOperations` starts at DDS1 `0x00353880` and DDS2
+`0x003B01B0`; `EffDispatchEntry` in `include/eff_param_operations.h` defines its
+`0x28`-byte rows and the corresponding runtime consumers dispatch those slots.
+The kind-88 rows are DDS1 `0x00354640` / DDS2 `0x003B0F70`; kind 95 uses
+`0x00354758` / `0x003B1088`. Both register zero-returning create (`+0x00`) and
+duplicate (`+0x0C`) entries, plus empty dispatch (`+0x04`), release (`+0x08`)
+and value (`+0x1C`) operations. Kind 88 also registers an empty scale
+operation (`+0x14`). A present no-op pointer is distinct from an absent slot.
+The original return types, zero-formal surfaces and separate native entries
+remain unchanged.
+
+`effDuplicateRingFan` is kind 85's duplicate slot at DDS1 `0x003545C8+0x0C`
+and DDS2 `0x003B0EF8+0x0C`. It recreates a ring from the source parameter prefix,
+with freshly initialized lifetime and vertex state. Retail tail-jumps to
+`effCreateRingFan`, leaving the constructor's result in `v0`; the original
+void C return and DDS2 short-arity call are intentionally retained.
+
+`btlEnemyMode7FormationNoOp` is independently evidenced by the linkage-formation
+dispatcher: enemy group `0x400` and formation row kind 7 select this empty
+handler in both games. Its distinct game-specific argument types remain intact.
+The other unregistered constant-return/empty PCP entries are not assigned
+invented operation roles merely because they are adjacent.
+

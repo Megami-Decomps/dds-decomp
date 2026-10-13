@@ -140,7 +140,9 @@ void effCreateRingFanFromParams(void *table) {
     effCreateRingFan(parameterBlock);
 }
 
-void func_00177098(void) {
+/* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state.
+ * Retail tail-jumps with its incoming argument; retain this short-arity void C surface. */
+void effDuplicateRingFan(void) {
     effCreateRingFan();
 }
 

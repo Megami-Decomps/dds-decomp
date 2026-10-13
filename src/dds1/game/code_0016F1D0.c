@@ -134,7 +134,9 @@ void effCreateRingFanFromParams(void *table) {
     effCreateRingFan(parameterBlock);
 }
 
-void func_0016F440(EffRingWork *ring) {
+/* Kind 85 duplicate: recreate the parameter prefix, not the live vertex state.
+ * Retail tail-jumps to the constructor, preserving its v0 result despite this void C surface. */
+void effDuplicateRingFan(EffRingWork *ring) {
     effCreateRingFan(ring);
 }
 

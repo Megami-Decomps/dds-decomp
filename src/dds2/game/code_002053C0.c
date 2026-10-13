@@ -880,7 +880,8 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
     }
 }
 
-void func_00206C10(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
+/* Enemy formation row kind 7 deliberately leaves the supplied participants unchanged. */
+void btlEnemyMode7FormationNoOp(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
 }
 
 extern s128 D_003BE0A0;
@@ -1223,7 +1224,7 @@ s32 btlApplyLinkageFormation(u32 *rawArgs) {
         category = D_00435E34[args->commandId - 0x1AB].kind;
         switch (category) {
         case 7:
-            func_00206C10(args->actor, args->first, args->second);
+            btlEnemyMode7FormationNoOp(args->actor, args->first, args->second);
             break;
         case 11:
             btlPlaceBothSidesInRadialFormation(args->actor, args->first, args->second);
