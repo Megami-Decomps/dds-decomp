@@ -143,7 +143,7 @@ extern s8 effSharedRandomState[];
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
-extern void btlUnitGetMuzzlePosVU(void *);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
