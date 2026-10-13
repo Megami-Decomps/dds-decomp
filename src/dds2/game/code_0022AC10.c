@@ -2318,7 +2318,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
 extern s32 D_00435E48;
 extern s32 D_00435E4C;
 extern s32 D_00435E5C;
-void func_0022F068(void) {
+void btlInitializeBattleDebugMenu(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
 
@@ -2427,7 +2427,7 @@ extern BtlActorMotionSlot D_00453530;
 
 /* Advance the battle model/debug editor. The selected state remains active
  * until its pending unit tasks have completed. */
-s32 func_0022F180(void) {
+s32 btlUpdateBattleModelDebugEditor(void) {
     f32 position[4] __attribute__((aligned(16)));
     char text[0x70];
     BtlState *battle;
