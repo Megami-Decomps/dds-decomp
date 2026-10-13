@@ -502,7 +502,8 @@
 0x00112008	dds3SetObjectModeAndDefaultWeight	inferred	src/dds1/basic/dds3ObjectBase.c func_00112008: Sets supported mode and its default weight: modes zero, four and five use one, others zero. [names_reviewed24.tsv]
 0x001120C0	dds3RegisterObjectInHandlerIndex	inferred	readability/matching review (QP16)
 0x00112100	dds3DrawObjectWithGradientOverlay	inferred	confidence=high; matched-C; src/dds1/basic/dds3ObjectBase.c:373; Submits gradient rectangles around processing the object's model context.; twin=0x00112328 (DDS2).
-0x001127C0	dds3InvokeSlot1Handler	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
+0x001127A0	dds3SetObjectSlot1MoverCallback	inferred	Forwards a mover callback to an object's slot-1 handler; current camera/viewer callers pass NULL to clear it.
+0x001127C0	dds3SetSlot1HandlerCallback	inferred	Looks up the object's slot-1 handler, stores the supplied Dds3MoverUpdate callback there, and reports whether the handler exists.
 0x00112800	dds3RunSlot1Handlers	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112848	dds3ReleaseSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
 0x00112868	dds3GetSlot1Data	inferred	dds3 object and resource-slot operations in basic/dds3ObjectBase.c
