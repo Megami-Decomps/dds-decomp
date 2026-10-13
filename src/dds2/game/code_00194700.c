@@ -25,6 +25,7 @@ extern s8 D_0043643D;
 #include "fpu.h"
 #include "sdf_texture_file.h"
 #include "sdf_projection.h"
+#include "eff_dirent.h"
 
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
 #define EFF_DIRECTORY_PATH_BYTES 0x70
@@ -61,16 +62,6 @@ extern char D_00436450[];
 extern EffHandler D_003B2068[];
 
 extern s32 func_0036B420(s32 directory);
-
-/* The SDK directory completion copies 0x140 bytes and one trailing word.
- * Names begin at 0x40; this transmitted record has ordinary word alignment. */
-typedef struct EffDirEnt {
-    u32 flags;      /* 0x00: bit 12 cleared */
-    u8 pad04[0x3C]; /* 0x04 */
-    char name[0x100]; /* 0x40: SDK directory-name buffer */
-    void *privateData; /* 0x140 */
-} EffDirEnt;
-typedef char EffDirEnt_size_must_be_0x144[(sizeof(EffDirEnt) == 0x144) ? 1 : -1];
 
 extern char *D_003B20D8[];
 
