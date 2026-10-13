@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -32,32 +33,6 @@ void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int 
 extern u32 itfMessageFlags;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
-typedef struct SndPad {
-    u8 pad00[0x20];
-    union {
-        s8 buttons[0x20];
-        struct {
-            u8 pad20;
-            s8 confirm;
-            u8 pad22[4];
-            s8 prev;
-            s8 next;
-            u8 pad28[9];
-            s8 unk31;
-            s8 unk32;
-            s8 cancel;
-            s8 coarseDown;
-            s8 coarseUp;
-            s8 unk36;
-            s8 unk37;
-            s8 fineDown;
-            u8 pad39;
-            s8 fineUp;
-            u8 pad3B[5];
-        };
-    };
-} SndPad;
-
 extern SndPad D_0037F510;
 
 typedef struct SndPadStepTarget {

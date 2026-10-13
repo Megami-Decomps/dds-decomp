@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_pad.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -133,16 +134,6 @@ typedef struct SoundTask {
     struct SoundTask *deferPrev;
     u8 pad68[8];
 } SoundTask;
-
-typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    s8 edge22;
-    s8 edge23;
-    u8 pad24[2];
-    s8 prev;
-    s8 next;
-} SndPad;
 
 extern SndPad D_00324510;
 
@@ -1844,13 +1835,13 @@ void btlUpdateAutoMusic(void) {
         return;
     }
     if (flags & 0x8000) {
-        if (D_00324510.edge22 < 0 || D_00324510.edge23 < 0) {
+        if (D_00324510.unk22 < 0 || D_00324510.unk23 < 0) {
             *(u32 *)(context + 0x1F4) = flags & ~0x8000;
             sndSetSequenceVolumePan(6, 0x7F, 0x3F);
             btlSetTrackedTaskDisplayMode(0);
             btlBossDebugPrintf(D_003A3A40);
         }
-    } else if (D_00324510.edge22 < 0) {
+    } else if (D_00324510.unk22 < 0) {
         *(u32 *)(context + 0x1F4) = flags | 0x8000;
         sndSetSequenceVolumePan(5, 0x7F, 0x3F);
         btlSetTrackedTaskDisplayMode(1);
