@@ -298,7 +298,7 @@ void func_0031B748(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) 
     }
 }
 
-extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
+extern void mnuOrientPositionedEffectTowardViewTarget(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *list,
@@ -320,7 +320,7 @@ MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *list,
             if (record->queue != NULL) {
                 fileQueueSetPosition(record->queue, position);
                 fileQueueSetScale(record->queue, scale);
-                func_0031BC10(record, 10.0f, 0.0f, 0.0f);
+                mnuOrientPositionedEffectTowardViewTarget(record, 10.0f, 0.0f, 0.0f);
                 record->flags |= 1;
                 if (step != NULL) {
                     record->positionStep = *step;
@@ -353,7 +353,7 @@ MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *list, s32 delay, 
             if (record->queue != NULL) {
                 fileQueueSetPosition(record->queue, position);
                 fileQueueSetScale(record->queue, 0.2f);
-                func_0031BC10(record, 10.0f, 0.0f, 0.0f);
+                mnuOrientPositionedEffectTowardViewTarget(record, 10.0f, 0.0f, 0.0f);
                 flags = record->flags;
                 record->delay = delay;
                 record->flags = flags | 1;
@@ -414,7 +414,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
 }
 
 /* Only the target direction is normalized; the lateral basis stays fixed at -X. */
-void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) {
+void mnuOrientPositionedEffectTowardViewTarget(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) {
     f32 vector[4];
     f32 left[4];
     f32 up[4];
