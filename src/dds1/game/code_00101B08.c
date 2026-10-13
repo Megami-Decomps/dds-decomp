@@ -394,7 +394,7 @@ extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void kwlnDrawBlurErrorCounters(void);
 extern void kwlnStepBackgroundFade(void);
-extern void func_00106368(void);
+extern void kwlnDrawBackgroundFadeBands(void);
 extern void kwlnFadeUpdate(void);
 extern void func_00105DD8(void);
 extern void kwlnAdvanceDrawFadesAndTransitions(void);
@@ -431,7 +431,7 @@ s32 kwlnRenderFrame(void) {
 
     kwlnDrawBlurErrorCounters();
     kwlnStepBackgroundFade();
-    func_00106368();
+    kwlnDrawBackgroundFadeBands();
     kwlnFadeUpdate();
     func_00105DD8();
     kwlnAdvanceDrawFadesAndTransitions();
