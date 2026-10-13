@@ -2399,7 +2399,7 @@ void btlCommandTaskReturnUpdate(s32 task) {
 void btlStartLinkedActorEffectTask(s32 task) {
     BtlUnit *unit = *(BtlUnit **)(task + 0x18);
     BtlRuntimeTask *entry;
-    if (((u32)unit->status.flags & 0x200) == 0 && func_001A8CE0(unit) == 0) {
+    if (((u32)unit->status.flags & 0x200) == 0 && btlCanSpawnAnotherEnemy(unit) == 0) {
         entry = btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x67);
         entry->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
         entry->startCondition.value.taskKind = 0x40;

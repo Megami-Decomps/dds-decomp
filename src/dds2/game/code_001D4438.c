@@ -3150,7 +3150,7 @@ void btlStartLinkedActorEffectTask(ActionStateLink *unit) {
     BtlUnit *owner = unit->unit;
     u8 *task;
     if (!(owner->status.flags & 0x200)) {
-        if (func_001B3200(owner) == 0) {
+        if (btlCanSpawnAnotherEnemy(owner) == 0) {
             task = (u8 *)btlCreateEffObjB(unit->unit, 0x67);
             task[0] = 0xA;
             *(u16 *)(task + 8) = 0x43;

@@ -176,7 +176,7 @@ extern u8 sdfPfsDebugMode;
 
 extern s32 btlAnyUnitHasActionInSlots();
 
-extern s32 func_001B3200(s32);
+extern s32 btlCanSpawnAnotherEnemy(s32);
 
 extern s32 func_00213F58(s32, s16, s8);
 
@@ -1639,7 +1639,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
 }
 
 s32 func_00214928(void) {
-    return func_001B3200(0);
+    return btlCanSpawnAnotherEnemy(0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419B38);

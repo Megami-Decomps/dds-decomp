@@ -397,7 +397,7 @@ u32 btlIsActorHighStateFlagClear(BtlUnit *actor) {
     return (((s32)actor->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
-s32 func_001B3200(BtlUnit *requester) {
+s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 limit;
     u32 active;

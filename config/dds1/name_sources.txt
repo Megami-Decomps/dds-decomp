@@ -2820,6 +2820,7 @@
 0x001A8850	btlFindCommandPartnersByAffinity	inferred	L13
 0x001A8C68	btlHasAdjacentActorRecordStatus	inferred	Checks two consecutive status bytes for the indexed actor record; established DDS2 name. [names_reviewed16.tsv]
 0x001A8CC8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
+0x001A8CE0	btlCanSpawnAnotherEnemy	inferred	Returns whether active and cumulative spawn caps permit adding an enemy, applying the optional scene override. Two DDS1 callers use the result as an enemy-spawn gate; DDS2 twin 0x001B3200.
 0x001A8EA8	btlHasAvailableOption	inferred	Tests whether collecting selectable battle options yields any choices. [names_reviewed10.tsv]
 0x001A8EC8	btlChooseRandomAvailableOption	inferred	Selects a random member of the object-generated options, or negative one. [names_reviewed8.tsv]
 0x001A8F10	btlChooseEligibleSkill	inferred	btl battle control and actor operations in game/code_0019DB88.c
