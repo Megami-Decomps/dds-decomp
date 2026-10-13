@@ -4,6 +4,7 @@
 #include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -431,8 +432,7 @@ typedef struct SoundSceneEntry {
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
 
-struct SceneLightRestoreArgs;
-extern s64 btlForceSceneLightingRestore(struct SceneLightRestoreArgs *);
+extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
 
 extern s32 sndPlaySkillSeTask(u32 *);

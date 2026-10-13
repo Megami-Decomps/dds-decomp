@@ -11,6 +11,7 @@
 #include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -194,8 +195,6 @@ typedef struct SoundTask {
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
-
-typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
@@ -5382,13 +5381,6 @@ u8 *btlCreateFloorLoadTask(u32 soundId, u32 variant) {
     arguments[4] = 0;
     return task;
 }
-
-typedef struct SceneLightTransitionArgs {
-    f32 direction[4];
-    f32 lightColor[4];
-    f32 ambientColor[4];
-    u32 value;
-} SceneLightTransitionArgs;
 
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
 
