@@ -4277,7 +4277,6 @@ extern void btlSetSpecialEnemyGeometry(void);
 
 extern s32 func_00222450(BtlLinkedCommand *, BtlCamState *, s32);
 
-extern s32 btlSetLinkedDefeatCameraPresetB();
 
 typedef struct BattleActionFlagState {
     u8 active; /* 0x00 */
