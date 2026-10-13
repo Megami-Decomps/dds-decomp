@@ -1443,7 +1443,7 @@ extern void func_0021C0C8(ActionStateLink *handle, s32 unused, u64 completionOwn
 extern s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide);
 extern s32 func_0021E778(BtlLinkedCommand *command);
 extern u8 func_0021F3A0(s32 arg0);
-extern void func_00220368(void);
+extern void btlApplyMarkedCommandStateMotion(void);
 extern void func_00220998(void);
 extern s32 func_00220DD8(BtlUnit *unit, s32 command);
 extern s32 func_00220F68(BtlUnit *unit);
@@ -1707,7 +1707,7 @@ void btlInitializeBossCallbacks(s32 mode) {
     case 0x314: {
         u32 commandFlags;
         commandFlags = battle->commandRestrictFlags;
-        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, func_00220368);
+        BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlApplyMarkedCommandStateMotion);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlToggleMarkedTaskActionState);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapMarkedUnitCommand);
         commandFlags = commandFlags | 0x100000;

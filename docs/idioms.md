@@ -11137,3 +11137,37 @@ Their dispatch slots at `+0x04` still point to distinct empty functions;
 `effPcpKind92DispatchNoOp` and `effPcpKind94DispatchNoOp` retain those
 individual entries. Unregistered neighbors stay unnamed.
 
+## Linked-party target filters and marked-command state
+
+The two `btlSelectLinkedTargets` adapters pass opposite flags: flag 1 selects
+party-group `0x200` candidates without status `0x1000` in its default scan,
+while flag 0 selects those with that status. The other scan-mode shortcuts
+still copy their native groups. `btlPickUnlinkedPartyTarget` and
+`btlPickLinkedPartyTarget` describe this observable distinction, with
+`btlPick*CommandTarget` and `btlScriptPick*PartyTarget` naming their existing
+command and script layers. All short-arity calls, void command surfaces,
+argument order and script-success returns are retained.
+
+The former generic F/G labels in DDS2 had their twins reversed.
+DDS1 `0x001FEF70` / `0x001F87F8` pair with DDS2 `0x00211208` /
+`0x0020A360` (unlinked); DDS1 `0x001FEF90` / `0x001F8828` pair with
+DDS2 `0x00211228` / `0x0020A390` (linked). Provenance now follows the
+actual flags and calls rather than those generic labels.
+
+DDS1's Cerber availability/range hooks are installed together in mode
+`0x10A`; the retail range diagnostic at `0x003A5D78` explicitly says
+`btl:CERBER hit count = %d`. The hit allocation divides eligible command
+range by active enemy count and retains its clamp and zero fallback.
+
+DDS2 mode `0x314` allocates the existing three-byte
+`BattleMarkedCommandState`: requested byte 0, current byte 1 and action flag
+byte 2. `btlGetMarkedCommandCurrentState` and
+`btlGetMarkedCommandRequestedState` retain their mode/null guards.
+`btlApplyMarkedCommandStateMotion` commits requested to current and refreshes
+the active enemy-ID `0x11B` motion; `0x11B` is an enemy ID, not that scene mode.
+`btlScriptReturnMarkedCommandRequestedState` reports the requested byte,
+retaining the script unit's original `u64` extern/local despite the backend's
+`u32` definition. No truthful-type closure is part of this identifier-only
+batch. DDS1's differently behaving general-effect script getter keeps its
+existing name.
+

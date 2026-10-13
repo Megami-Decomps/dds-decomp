@@ -1256,13 +1256,15 @@ u32 func_001F87D0(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleF(void) {
-    btlCmdSimpleF(scrGetCurrentCommandWork(), 0);
+/* Run the current script command's unlinked-party target selection; return script success. */
+u32 btlScriptPickUnlinkedPartyTarget(void) {
+    btlPickUnlinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
-u32 btlScriptCmdSimpleG(void) {
-    btlCmdSimpleG(scrGetCurrentCommandWork(), 0);
+/* Run the current script command's linked-party target selection; return script success. */
+u32 btlScriptPickLinkedPartyTarget(void) {
+    btlPickLinkedCommandTarget(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
