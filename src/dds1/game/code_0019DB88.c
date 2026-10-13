@@ -27,7 +27,7 @@ extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
 extern s32 frFontMeasureGlyphStripWidth();
 
-extern UiSprite *func_00199828(s32, u32);
+extern UiSprite *itfCreateUiSpriteByKind(s32, u32);
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
@@ -74,7 +74,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     ItfMesBlkA4 *place = &panel->blkA4;
     s32 spriteTop;
     if (place->sprite == 0) {
-        place->sprite = func_00199828(6, (u32)itfMesWork.windowTexture);
+        place->sprite = itfCreateUiSpriteByKind(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
             place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
         }
@@ -92,7 +92,7 @@ void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
     if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
-            place->frame = func_00199828(7, (u32)itfMesWork.windowTexture);
+            place->frame = itfCreateUiSpriteByKind(7, (u32)itfMesWork.windowTexture);
             itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xF0, panel->renderValue);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }

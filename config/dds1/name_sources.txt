@@ -2600,6 +2600,7 @@
 0x00199460	itfSendBlendPacket	inferred	0x30-byte packet with value and 0x47/0x48 selector
 0x001994D8	itfSendTablePacket	inferred	0x30-byte packet with D_00357998[index] and 0x42/0x43 selector
 0x001997F0	mnuReportCampProcessHalted	inferred	mnu menu, title, shop, or movie UI in game/code_00196478.c
+0x00199828	itfCreateUiSpriteByKind	inferred	Allocates a UiSprite and kind-sized payload, initializes texture-bearing payloads 6-9 from the supplied value, and returns the sprite; DDS2 twin 0x001A1858.
 0x00199900	itfPanelReleasePrimitiveResources	inferred	Releases panel primitive record handle when present and always releases base handle. [names_reviewed6.tsv]
 0x00199998	itfAdvancePanelLayoutAndNotify	inferred	Adds input deltas to a panel layout and notifies its handler. [names_reviewed8.tsv]
 0x00199AD8	itfPanelDispatchHandler	inferred	dispatches via D_00357A50 table by byte at +0x3C

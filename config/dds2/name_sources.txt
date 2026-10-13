@@ -2137,6 +2137,7 @@
 0x001A0F88	itfEmitColoredLinePacket	inferred	Builds a two-vertex packet with supplied colors and appends it. [names_reviewed8.tsv]
 0x001A1490	itfSendBlendPacket	inferred	twin 0x00199460: packet cmd 0x47/0x48
 0x001A1508	itfSendTablePacket	inferred	twin 0x001994D8: packet cmd 0x42/0x43 with table value
+0x001A1858	itfCreateUiSpriteByKind	inferred	Allocates a UiSprite and kind-sized payload, initializes texture-bearing payloads 6-9 from the supplied value; DDS1 twin 0x00199828.
 0x001A1930	itfPanelReleasePrimitiveResources	inferred	Releases panel primitive record handle when present and always releases base handle. [names_reviewed6.tsv]
 0x001A1980	itfSetPanelLayoutAndNotify	inferred	Stores panel layout fields and invokes its kind-specific handler when present, complementing named incremental layout updater. [names_reviewed19.tsv]
 0x001A19C8	itfAdvancePanelLayoutAndNotify	inferred	Adds input deltas to a panel layout and notifies its handler. [names_reviewed8.tsv]
