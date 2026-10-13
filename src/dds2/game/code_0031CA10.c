@@ -34,7 +34,7 @@ void itfProjectScreenPointToViewPlane(f32 *position, s32 screenX, s32 screenY) {
 }
 
 /* Variant of the screen-point projection with a fixed -300 eye depth and Z. */
-void func_0031CAE8(f32 *position, s32 screenX, s32 screenY) {
+void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) {
     f32 halfViewAngle;
     f32 depth;
 

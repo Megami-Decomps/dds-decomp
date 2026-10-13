@@ -46,7 +46,7 @@ extern MenuWorkEntry D_0040ABF8;
 extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
 extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
-extern void func_0031CAE8(f32 *, s32, s32);
+extern void itfProjectScreenPointToFixedDepth(f32 *, s32, s32);
 extern void mnuUpdateTimedEffectPosition(void);
 
 typedef struct SoundSlot SoundSlot;
@@ -1087,7 +1087,7 @@ void func_00319F48(void) {
     x = origin->x;
     y = origin->y;
     value = mnuEvaluateTimedValue(&D_0040ABF8);
-    func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
+    itfProjectScreenPointToFixedDepth(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
     D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, position[0], position[1], position[2],
                                                NULL, 0.5f, 0);
@@ -1105,7 +1105,7 @@ void mnuUpdateTimedEffectPosition(void) {
         x = origin->x;
         y = origin->y;
         value = mnuEvaluateTimedValue(&D_0040ABF8);
-        func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
+        itfProjectScreenPointToFixedDepth(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
         fileQueueSetPosition(D_00438930->queue, position);
     }
 }

@@ -6082,6 +6082,7 @@
 0x0031C8B0	mnuSetNodeModelBroadcastByte	inferred	Replaces the upper broadcast byte while preserving the remaining model broadcast bits. [names_reviewed15.tsv]
 0x0031C900	mnuSetModelNodeVisibility	inferred	Sets or clears the model inactive bit according to the node visibility selector. [names_reviewed15.tsv]
 0x0031CA10	itfProjectScreenPointToViewPlane	inferred	readability/matching review (QP16)
+0x0031CAE8	itfProjectScreenPointToFixedDepth	inferred	Projects screen coordinates with the current view angle onto Z=-300; the timed menu-effect create/update callers use the resulting XYZ for positioned effect records.
 0x0031CF68	itfDrawUniformlyScaledIndexedImage	inferred	medium confidence; src/dds2/game/code_0031C940.c func_0031CF68: Supplies equal horizontal and vertical scales to the table-indexed image renderer, which temporarily changes quad dimensions and restores them after submission. [names_reviewed25.tsv]
 0x0031D260	itfCreateModelInstanceWork	inferred	confidence=high; matched-C; src/dds2/game/code_0031C940.c:63:func_0031D260; Retail diagnostic says SpriteWork Object Size; allocates and clears the ModelInstanceWork header, group list headers, and contiguous ModelInstance records with counts and retained allocation handle.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0031D380	itfClearModelInstances	inferred	Clears each 0x34-byte model-instance record in the supplied list.
