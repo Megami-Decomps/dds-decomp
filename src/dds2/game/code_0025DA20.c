@@ -1139,7 +1139,7 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
     scene->registeredCount = 0;
 }
 
-void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY) {
+void mnuEvaluateCubicBezierPoint(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY) {
     f32 inverse = 1.0f - parameter;
     f32 parameterSquared = parameter * parameter;
     f32 inverseSquared = inverse * inverse;
@@ -1161,16 +1161,16 @@ void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *ou
     *outY = (s32)yValue;
 }
 
-extern void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY);
+extern void mnuEvaluateCubicBezierPoint(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY);
 
-s32 func_0025F708(s32 target, const s32 *x, const s32 *y) {
+s32 mnuSolveCubicBezierYForX(s32 target, const s32 *x, const s32 *y) {
     s32 currentX;
     s32 resultY;
     s32 nextX;
     f32 parameter = 0.5f;
     f32 step = 0.25f;
 
-    func_0025F640(parameter, x, y, &currentX, &resultY);
+    mnuEvaluateCubicBezierPoint(parameter, x, y, &currentX, &resultY);
     for (;;) {
         if (currentX == target || step < 0.0009999999310821295f) {
             return resultY;
@@ -1182,7 +1182,7 @@ s32 func_0025F708(s32 target, const s32 *x, const s32 *y) {
             parameter -= step;
         }
         step *= 0.5f;
-        func_0025F640(parameter, x, y, &nextX, &resultY);
+        mnuEvaluateCubicBezierPoint(parameter, x, y, &nextX, &resultY);
         currentX = nextX;
     }
 }
