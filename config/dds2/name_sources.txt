@@ -6045,6 +6045,7 @@
 0x00317988	mnuLoadSectionObjectListWithRelocations	inferred	Copies the section-object payload into retained storage, applies relocation offsets from its trailing table, and returns the MnuSectionObjectList descriptor; used for object, player, map, and draw lists. [DDS2 BN analysis, 2026-10-13]
 0x00317E48	mnuDestroyShootingWork	inferred	U2
 0x00318570	mnuReleaseShootingSectionResources	inferred	Deactivates the shooting work entry, releases section object allocations, and destroys model node contexts during initialization completion and shutdown. [DDS2 source/caller analysis, 2026-10-13]
+0x00318660	mnuUpdateShootingWork	inferred	Reads input, updates shooting records and score progress, advances round phases, and updates sound slots; retail callback table entry 0x0040ABE8 points to this function. [DDS2 source/BN/caller analysis, 2026-10-13]
 0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
