@@ -3875,9 +3875,11 @@
 0x0025F640	mnuEvaluateCubicBezierPoint	inferred	Evaluates cubic Bernstein weights for four X and Y control points at the supplied parameter and returns the integer point.
 0x0025F708	mnuSolveCubicBezierYForX	inferred	Bisects the parameter until the cubic Bezier X coordinate approaches the target, then returns the corresponding Y coordinate.
 0x0025F7F0	mnuInitializeShopStatusBatches	inferred	Allocates and initializes the shop scene status graphics batches. [names_reviewed10.tsv]
+0x0025F8B8	mnuInitializeCampEffectResources	inferred	Loads the camp map resource, initializes its map packet, installs the mapped handle, copies effect rows and sets packet flags.
 0x0025FA10	mnuShopDestroyNestedEffectBatch	inferred	Destroys the effect batch referenced by the nested shop scene object. [names_reviewed15.tsv]
 0x0025FC08	mnuShopLoadMessageResource	inferred	readability/matching review (QP16)
 0x0025FCD8	mnuShopReleaseWindowAndEffectResources	inferred	Releases window textures and effect slot sets, including the mode-dependent nested batch. [names_reviewed15.tsv]
+0x0025FD78	mnuDrawShopPanelDecorations	inferred	Draws the standard shop slot decorations or the camp icon backdrop according to the shop layout type.
 0x0025FE70	mnuCampHasEligibleOwnedItems	inferred	Scans owned non-bullet items and reports whether any pass the menu eligibility flags. [names_reviewed15.tsv]
 0x0025FF18	mnuCreateEnabledCampEntryWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:func_0025FF18; Creates a camp list containing enabled source indices and copies selected settings into retained list work. [names_qp9.tsv]
 0x00260138	mnuCampResolveFlagRowValue	inferred	Returns the value paired with the highest-index active flag in a camp row, otherwise its default. [names_reviewed15.tsv]

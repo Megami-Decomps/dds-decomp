@@ -259,7 +259,7 @@ s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
     if (*(s32 *)(context + 0xE0) != 0) {
-        func_0025FD78((MenuTerminalContext *)context);
+        mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     }
     if (*(s32 *)(context + 0xB8) != 0) {
         func_00294758(context, *(s32 *)(context + 0xB8));
@@ -305,7 +305,7 @@ s32 mnuPollMessageWindowBeforeClosing(KwlnTask *callback) {
 s32 func_00265FE8(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
-    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -347,7 +347,7 @@ s32 mnuWaitForFadeBeforePopup(KwlnTask *callback) {
 s32 func_00266188(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
 
-    func_0025FD78((MenuTerminalContext *)context);
+    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
