@@ -444,7 +444,6 @@ extern void FlushCache(s32);
 extern s32 SignalSema(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
-extern s32 sdfReadTimerCount(void);
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
