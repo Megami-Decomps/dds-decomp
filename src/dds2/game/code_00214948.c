@@ -3398,7 +3398,14 @@ s32 rotate;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_0021C7F8);
+s32 func_0021C7F8(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetLinkedDefeatCameraPresetA(command, camera, rotate);
+    /* Retail 0021C800 uses JAL plus restores. This consumed-command reset
+     * is the function-owned state exception in CONTRIBUTING: qualified
+     * cc1probe retains it in 01.sibling, then deletes it in a later pass. */
+    command = NULL;
+    return result;
+}
 
 extern void func_00336798(f32);
 
