@@ -129,11 +129,13 @@ u32 sndSendChannelControlCommand(u32 channel) {
 }
 
 /* Channel-group command packets: the group is bits 3-6 of the channel byte. */
-void func_002E94E0(u8 channel) {
+/* Submit opcode 0x140 for the selected channel group, without a payload. */
+void sndSendChannelGroupCommand140(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x140, 0, 0, 0);
 }
 
-void func_002E9510(u8 channel) {
+/* Submit opcode 0x150 for the selected channel group, without a payload. */
+void sndSendChannelGroupCommand150(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x150, 0, 0, 0);
 }
 

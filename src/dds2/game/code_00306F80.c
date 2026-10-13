@@ -972,7 +972,8 @@ void uiDrawTexturedSurfaceAtFarDepth(u32 context) {
     uiDrawActiveSurfaceRegion(context);
 }
 
-void func_00308F78(s32 mode, s32 surface) {
+/* Prepare the surface and choose GS ALPHA 0x54 for mode zero, 0x58 otherwise. */
+void itfConfigureSurfaceAlphaBlendMode(s32 mode, s32 surface) {
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     sdfSubmitGsTestOneRegisterPacket(0x5000D, surface);
     if (mode == 0) {

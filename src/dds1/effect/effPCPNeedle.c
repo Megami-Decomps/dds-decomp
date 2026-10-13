@@ -12,7 +12,7 @@
 /* Packed effect parameter-set accessor (see game/code_001624D0). */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern u32 func_001619E8(void);
+extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
@@ -81,7 +81,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
     viewOffset[1] = value;
     viewOffset[2] = value;
 
-    if (func_001619E8() != 0) {
+    if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU(effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         sdfVuBuildLookAtBasis(work->params.position, position, D_00354C00);

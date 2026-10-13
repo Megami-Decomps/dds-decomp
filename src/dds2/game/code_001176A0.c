@@ -23,7 +23,7 @@ extern u32 scrGetWorkTaskHandle(void);
 extern void dds3WorkInit(void *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
-extern void func_00117A80(void);
+extern void sdfRuntimeTaskTeardownHook(void);
 
 
 
@@ -216,7 +216,7 @@ void sdfDestroyRuntimeTask(void) {
     struct SdfMemBlock *allocation;
 
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
-    func_00117A80();
+    sdfRuntimeTaskTeardownHook();
     allocation = datGameState->header.backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
     sdfReleaseResourceAllocation(allocation);
@@ -247,7 +247,8 @@ void evtResetWorldAndProfileRuntime(void) {
     btlClearSharedBattleStateWords();
 }
 
-void func_00117A80(void) {
+/* Empty GBWK teardown hook, invoked before its backing allocation is released. */
+void sdfRuntimeTaskTeardownHook(void) {
 }
 
 extern u8 D_0043E5B0[16];

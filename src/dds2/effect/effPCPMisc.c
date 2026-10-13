@@ -2935,7 +2935,7 @@ void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
 
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
-extern u32 func_001695C8(void);
+extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
@@ -2960,7 +2960,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (end < frame) {
         return;
     }
-    if (func_001695C8() && work->frame == 0) {
+    if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
         btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         VU0_STORE_VF(vf10, center);
         btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
@@ -3922,7 +3922,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     f32 distance;
     u8 *params;
 
-    if (func_001695C8() != 0) {
+    if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetVariantSelector());
         VU0_LOAD_VF(vf11, work->pos);
         VU0_SUB(vf10, vf10, vf11);
@@ -4914,7 +4914,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         }
         data = effParamWorkGetData(work->handle[i]);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, work->rotationY[i], 0.0f);
-        if (func_001695C8() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
+        if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             VU0_LOAD_VF(vf11, D_00414610);
             effMiscQuatMultiplyVU();
         }

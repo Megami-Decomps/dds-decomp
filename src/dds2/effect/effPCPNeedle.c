@@ -12,7 +12,7 @@
 /* Parameter block zero supplies the work passed to the needle initializer. */
 extern void *effParamTableGetBlock(void *, s32);
 
-extern u32 func_001695C8(void);
+extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
@@ -80,7 +80,7 @@ void effNeedleUpdateTrails(EffPCPNeedleWork *work) {
     viewOffset[1] = value;
     viewOffset[2] = value;
 
-    if (func_001695C8() != 0) {
+    if (effBTLFieldColorUsesActorSelectors() != 0) {
         btlUnitGetMuzzlePosVU(effBTLFieldColorGetOriginalSelector());
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         sdfVuBuildLookAtBasis(work->params.position, position, D_003B1530);

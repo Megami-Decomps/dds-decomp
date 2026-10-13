@@ -45,7 +45,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed);
 extern char sdfRuntimeTaskName[];
-void func_00117808(void);
+void sdfRuntimeTaskTeardownHook(void);
 s32 sdfBumpTickCounters(KwlnTask *task);
 void evtResetWorldAndProfileRuntime(void);
 
@@ -195,7 +195,7 @@ void sdfDestroyRuntimeTask(void) {
     struct SdfMemBlock *allocation;
 
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
-    func_00117808();
+    sdfRuntimeTaskTeardownHook();
     allocation = datGameState->header.backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
     sdfReleaseResourceAllocation(allocation);
@@ -224,7 +224,8 @@ void evtResetWorldAndProfileRuntime(void) {
     btlClearSharedBattleStateWords();
 }
 
-void func_00117808(void) {
+/* Empty GBWK teardown hook, invoked before its backing allocation is released. */
+void sdfRuntimeTaskTeardownHook(void) {
 }
 
 extern s8 D_003BA9E5;

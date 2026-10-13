@@ -21,7 +21,7 @@ extern PairedEffectResources *effBossCreatePairedChainResources(PairedEffectPara
 extern EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern u32 func_001695C8(void);
+extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern u8 D_003B1FF0[];
@@ -229,7 +229,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
     u128 matrix[4];
     void *direction;
 
-    if (func_001695C8() != 0) {
+    if (effBTLFieldColorUsesActorSelectors() != 0) {
         if (work->frame == 0) {
             btlUnitGetMuzzlePosVU(effBTLFieldColorGetVariantSelector());
             VU0_STORE_VF(vf10, work->position);

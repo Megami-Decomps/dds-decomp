@@ -1386,14 +1386,14 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
-extern void func_00308F78(s32, s32);
+extern void itfConfigureSurfaceAlphaBlendMode(s32, s32);
 void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
 
     uiDrawTexturedSurfaceAtFarDepth(0x53);
     effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, fade, 0x60, sprites, 4, 0x53);
-    func_00308F78(1, 0x53);
+    itfConfigureSurfaceAlphaBlendMode(1, 0x53);
     if (state->scrolling != 0) {
         effDrawTextureSlotWithBlendedCornerColors(0, state->y, 0, fade, 0x60, sprites, 7, 0x53);
     }
