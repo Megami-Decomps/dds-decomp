@@ -188,7 +188,7 @@ extern void mnuHandleCampFieldSkillInput();
 
 extern void mnuDrawStaffCampImageScreen();
 
-extern s32 func_002729C8(s32);
+extern s32 mnuFinishStaffConfigPopup(s32);
 
 extern void kwlnTaskAddChild(s32, s32);
 
@@ -203,7 +203,7 @@ void mnuCreateCampTasks(void) {
     menuAddress = (s32)mnuCreateStaffCampWork();
     kwlnTaskCreate(mnuCampInputTaskName, 0x3F2, 1, 0, mnuHandleCampFieldSkillInput, 0, menuAddress);
     drawTask = kwlnTaskCreate(mnuCampDrawTaskName, 0x2B07, 1, 0, mnuDrawStaffCampImageScreen, 0, menuAddress);
-    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, func_002729C8, mnuDestroyStaffMenuTask, menuAddress);
+    kwlnTaskCreate(mnuCampOwnerTaskName, 0x520B, 1, 0, mnuFinishStaffConfigPopup, mnuDestroyStaffMenuTask, menuAddress);
     kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_fade", 0x2B08, 1, 0, mnuDrawAndStepStaffGradientFade, 0, menuAddress));
     kwlnTaskAddChild(drawTask, kwlnTaskCreate("camp_all_cancel", 0x3F3, 1, 0, mnuStaffCampCancelCheck, 0, menuAddress));
     kwlnFadeOutStart(0, 0, 0, MNU_CAMP_OPEN_FADE_FRAMES);
