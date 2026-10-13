@@ -3177,10 +3177,10 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7750);
+INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestDrawCameraTransformDebug);
 
 u32 evtStageTestCameraUpdate(void) {
-    func_002C7750();
+    evtStageTestDrawCameraTransformDebug();
     return 0;
 }
 
