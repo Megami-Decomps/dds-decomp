@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_math_vector4.h"
+#include "sdf_quaternion.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
 #include "sdf_resource.h"

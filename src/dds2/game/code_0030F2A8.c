@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_trig.h"
 #include "sdf_math_vector4.h"
+#include "sdf_quaternion.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
 #include "sdf_resource.h"
@@ -12,8 +13,6 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern f32 func_003532B8(f32);
-
-extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
 extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
