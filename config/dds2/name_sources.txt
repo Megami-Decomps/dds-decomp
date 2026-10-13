@@ -3702,6 +3702,7 @@
 0x00246FC0	evtEventViewerGetNameObject	inferred	twin of DDS1 0x0022C648 [names_M34_SmallSweep3.tsv]
 0x00247168	evtViewerCreateObjectInFreeSlot	inferred	confidence=high; src/dds2/event/evtEventViewer.c:func_00247168; Finds a free viewer slot, creates/binds the command-selected object, optionally activates it and returns the slot index. [names_qp9.tsv]
 0x00247518	evtViewerApplyInterpolatedNodeKey	inferred	confidence=high; matched-C; src/dds2/game/code_00247518.c:192:func_00247518; For a present starting key, computes glyphAdvancePosition-relative time ratio, generates a thirty-two-byte interpolated key block, subtracts thirty-five from its second output word, and submits it to the node handle.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00247DE0	evtEventViewerApplyDurationScaledEffectAlpha	inferred	confidence=high; src/dds2/event/evtEventViewer.c:1092; For supported effect tracks, computes alpha from elapsed frames divided by key duration and updates the selected effect parameter.
 0x00248000	evtViewerUpdateTimelineGroupState	inferred	Paired event-viewer per-group timeline updater; applies the selected track state from the adjacent key interval.
 0x00249518	evtViewFindGlyphAtOrBefore	inferred	same walk, inclusive comparison
 0x00249598	evtViewerClampMovieTimes	inferred	walks world objects and clamps polygon-movie time from viewer nodes (DDS1 twin 0022EA18)
