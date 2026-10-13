@@ -712,7 +712,7 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
 }
 
 /* Build text with font index 3; retain the existing glyph chain's spacing. */
-FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);

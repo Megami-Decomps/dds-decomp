@@ -489,7 +489,6 @@ void brsNoOpMessageInputCallback(void *work) {
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
 extern s32 func_003014F0(char *, const char *, ...);
-extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 
