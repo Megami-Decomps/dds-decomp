@@ -912,7 +912,109 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     return count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A3CE0);
+typedef struct BtlCommandPartnerOutput {
+    u16 command;
+    u16 pad02;
+    BtlUnit *first;
+    BtlUnit *second;
+} BtlCommandPartnerOutput;
+
+extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
+extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, void **second);
+
+s32 func_001A3CE0(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    s32 *requirementCursor;
+    u32 requiredCount;
+    u32 i;
+    s32 result;
+
+    if (datCommandSelectors[command].kind != 1) {
+        return 0;
+    }
+    if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x55) {
+        return 0;
+    }
+    requiredCount = 0;
+    requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    for (i = 0; i < 3; i++) {
+        if (*requirementCursor++ != -1) {
+            requiredCount++;
+        }
+    }
+    if (requiredCount == 0) {
+        return 0;
+    }
+    if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
+        (datBattleSceneRecords[controller->mode].flags & 1) == 0) {
+        output->command = command;
+        result = btlFindCommandPartnersByAffinity(unit, command, (void **)&output->first, (void **)&output->second);
+    } else {
+        output->command = command;
+        output->first = NULL;
+        output->second = NULL;
+        if (requiredCount == 3) {
+            for (i = 1; i < requiredCount; i++) {
+                BtlTask *entry = fldGetSceneGroupEntry(i);
+                BtlUnit *partner;
+
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                if ((partner->status.flags & 0x400) == 0) {
+                    return 0;
+                }
+                if ((partner->status.flags & 0xE0) != 0) {
+                    return 0;
+                }
+                if ((partner->partyRecord.status & 0x2A0E) != 0) {
+                    return 0;
+                }
+                switch (i) {
+                case 1:
+                    output->first = partner;
+                    break;
+                case 2:
+                    output->second = partner;
+                    break;
+                }
+            }
+            return 1;
+        }
+        if (requiredCount == 2) {
+            BtlTask *entry = fldGetSceneGroupEntry(2);
+
+            if (entry != NULL && (entry->unit->partyRecord.status & 0x2A0E) == 0 &&
+                (btlUnitStatusPair(entry->unit) & 0x4E0) == 0x400) {
+                output->first = entry->unit;
+            } else {
+                BtlUnit *partner;
+
+                entry = fldGetSceneGroupEntry(1);
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                if ((partner->status.flags & 0x400) == 0) {
+                    return 0;
+                }
+                if ((partner->status.flags & 0xE0) != 0) {
+                    return 0;
+                }
+                if ((partner->partyRecord.status & 0x2A0E) == 0) {
+                    output->first = partner;
+                } else {
+                    return 0;
+                }
+            }
+        } else {
+            return 0;
+        }
+        result = 1;
+    }
+    return result;
+}
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     u32 mask;
