@@ -95,7 +95,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     pacWork->allocation = allocation;
     {
         u32 resource = sdfResourceRetainAddress(allocation);
-        pacWork->pendingCursor = (u8 *)resource;
+        pacWork->pacInputBuffer = (u8 *)resource;
         pacWork->pacBuffer = (u8 *)(resource + 0x4000);
         pacWork->ringBuffer = (u8 *)(resource + 0x14000);
     }
