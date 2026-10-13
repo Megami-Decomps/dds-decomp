@@ -1426,7 +1426,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 
-extern EffWorldNode *dds3GetWorldObject(void);
+#include "dds3_world_selection.h"
 
 void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     s32 color;
@@ -1445,7 +1445,7 @@ void evtViewerDrawWorldNodeRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRu
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head; node != NULL; node = node->next) {
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head; node != NULL; node = node->next) {
                 if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
@@ -1468,7 +1468,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = sdfCreateResetPacketList();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head;
+            for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[i].head;
                  node != NULL; node = node->next) {
                 if (node->value != NULL) {
                     count++;
