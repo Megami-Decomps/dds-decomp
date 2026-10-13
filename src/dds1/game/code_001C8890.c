@@ -14572,49 +14572,10 @@ s64 func_001F53F0(void) {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 
-/* Place the three actor slots around the common battle center supplied in vf10. */
-void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit *second) {
-    BtlUnit *slot[3];
-    f32 center[4];
-    f32 pos[4];
-    f32 rotation[4];
-    f32 radius;
-    f32 angle;
-
-    slot[0] = NULL;
-    slot[1] = NULL;
-    slot[2] = NULL;
-    slot[link->unit->lookupId] = link->unit;
-    slot[first->lookupId] = first;
-    slot[second->lookupId] = second;
-    radius = func_001F66D8(0x400, 0, 0) + 200.0f;
-    VU0_STORE_VF_UNCLOBBERED(vf10, center);
-    pos[0] = center[0];
-    pos[1] = 0.0f;
-    pos[2] = center[2] - radius;
-    btlSetUnitPosition(slot[1], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[1], (s128 *)rotation);
-    }
-    angle = 30.0f * 0.017453293f;
-    pos[0] = center[0] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
-    pos[1] = 0.0f;
-    pos[2] = center[2] - sdfSinPoly(angle) * radius;
-    btlSetUnitPosition(slot[0], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[0], (s128 *)rotation);
-    }
-    pos[0] = center[0] + sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
-    pos[1] = 0.0f;
-    pos[2] = center[2] - sdfSinPoly(angle) * radius;
-    btlSetUnitPosition(slot[2], pos);
-    if (btlAimHorizontalDirectionVU((s128 *)pos, (s128 *)center) != 0) {
-        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
-        btlSetUnitRotation(slot[2], (s128 *)rotation);
-    }
-}
+/* Retail retains the incoming stack bits in the fourth position lane.
+ * Keep this helper native until a faithful defined source contract is known. */
+extern void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit *second);
+INCLUDE_ASM(const s32, "game/code_001C8890", btlPlaceTripleFormationAroundCenter);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 extern void btlClearMatchingUnitDefeatCandidates(s32);
