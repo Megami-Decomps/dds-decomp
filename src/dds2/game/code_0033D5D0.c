@@ -683,7 +683,7 @@ s32 sdfDevGetFileSize(void) {
 
 extern s32 func_00369B70();
 
-extern s32 func_00369F78(s32, s32, s32);
+extern s32 sdfDevSeekFile(s32, s32, s32);
 
 extern s32 func_0035A828(s32);
 
@@ -700,8 +700,8 @@ void sdfDevLoadWholeFile(const char *fileName) {
     if (fileHandle < 0) {
         sdfPanicHaltPrintf(D_0042E288, fileName);
     }
-    fileBytes = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
-    func_00369F78(fileHandle, 0, SDF_DEV_SEEK_START);
+    fileBytes = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
+    sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = func_0035A828(fileBytes);
     D_004391A4 = bufferAddress;
     func_0036A1B0(fileHandle, bufferAddress, fileBytes);
@@ -1159,7 +1159,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            endOffset = func_00369F78(state->resourceId, state->operationArg, state->options);
+            endOffset = sdfDevSeekFile(state->resourceId, state->operationArg, state->options);
             if (endOffset < 0) {
                 sdfDevDeactivate(state, endOffset);
                 continue;
@@ -1174,17 +1174,17 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_GET_SIZE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            position = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
+            position = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_CURRENT);
             if (position < 0) {
                 sdfDevDeactivate(state, position);
                 continue;
             }
-            endOffset = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_END);
+            endOffset = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_END);
             if (endOffset < 0) {
                 sdfDevDeactivate(state, endOffset);
                 continue;
             }
-            result = func_00369F78(state->resourceId, position, SDF_DEV_SEEK_START);
+            result = sdfDevSeekFile(state->resourceId, position, SDF_DEV_SEEK_START);
             if (result < 0) {
                 sdfDevDeactivate(state, result);
                 continue;
@@ -1259,12 +1259,12 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             /* A negative count means the whole file; NULL storage is allocated below. */
             if (transferResult < 0) {
                 state->state = SDF_DEV_STATE_SEEKING;
-                transferResult = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
+                transferResult = sdfDevSeekFile(fileHandle, 0, SDF_DEV_SEEK_END);
                 if (transferResult < 0) {
                     sdfDevDeactivate(state, transferResult);
                     continue;
                 }
-                result = func_00369F78(state->resourceId, 0, SDF_DEV_SEEK_START);
+                result = sdfDevSeekFile(state->resourceId, 0, SDF_DEV_SEEK_START);
                 if (result < 0) {
                     sdfDevDeactivate(state, result);
                     continue;
