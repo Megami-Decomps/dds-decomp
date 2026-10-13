@@ -57,7 +57,7 @@ extern void mnuSetGroupPair(struct MenuPanelItem *, u32, u32);
 
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 #define MNU_PANEL_ITEM_COUNT 5
 #define MNU_PANEL_STATE_BYTES 0x8C
@@ -214,7 +214,7 @@ void mnuDrawPanelWindowSurface(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 
     } else {
         resource = resources[0];
     }
-    func_00306CD0(x, y, z, alpha, 1, resource, 0, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, z, alpha, 1, resource, 0, surface);
 }
 
 
@@ -384,12 +384,12 @@ void mnuDrawQueuedCommandScatterEffect(s32 unusedX, s32 unusedY, s32 unusedDepth
     offset = offset * phase / 0x200;
     offset = 0xA00 - offset * offset;
     command->resources->workEntries[0x3D].geometry.bounds[3] = offset;
-    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3D, surface);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, fade, 0, command->resources, 0x3D, surface);
     command->resources->workEntries[0x3E].geometry.bounds[3] = offset;
-    func_00306CD0(0, 0xE00 - offset, 0, fade, 0, command->resources, 0x3E, surface);
-    func_00306CD0(0, 0, 0, fade, 0, command->resources, 0x3C, surface);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0xE00 - offset, 0, fade, 0, command->resources, 0x3E, surface);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, fade, 0, command->resources, 0x3C, surface);
     for (i = 0, position = layout.points; i < 7; i++, position++) {
-        func_00306CD0(position->x, position->y, 0, fade, 0,
+        effDrawTextureSlotWithBlendedCornerColors(position->x, position->y, 0, fade, 0,
                       command->resources, 0x3B, surface);
     }
 }
@@ -464,10 +464,10 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
         return;
     }
 
-    func_00306CD0(iconX, iconY, z, alpha,
+    effDrawTextureSlotWithBlendedCornerColors(iconX, iconY, z, alpha,
                   1, panel->icon[1], 0, surface);
     uiDrawActiveSurfaceRegion(surface);
-    func_00306CD0(x + framePositions[0], y + framePositions[1],
+    effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1],
                   0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     commandArgs.panelIndex = panelIndex;
@@ -479,14 +479,14 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     mnuUpdateAndDrawPartyCommandQueue(x, y, z, panel->commands, &commandArgs, surface);
     uiDrawSurfaceAtNearDepth(surface);
     uiDrawActiveSurfaceRegion(surface);
-    func_00306CD0(x + framePositions[0], y + framePositions[1],
+    effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1],
                   0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
     sdfDispatchSurfaceWithPreparedTexturePacket(surface);
     func_002BD710(x, y, z, menu, panelIndex, 0, menu->fade, surface);
 
     labelX = x + positions[2];
     labelY = y + positions[3];
-    func_00306CD0(labelX, labelY, z, alpha, 1, panel->icon[2], 0, surface);
+    effDrawTextureSlotWithBlendedCornerColors(labelX, labelY, z, alpha, 1, panel->icon[2], 0, surface);
     level = menu->records->slots[panelIndex].level;
     func_0035C860(text, D_00437C68, level);
     glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
@@ -494,16 +494,16 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     frFontDrawGlyphChain(glyph, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (panel->frame[7] == NULL) {
-        func_00306CD0(x + framePositions[0], y + framePositions[1], z,
+        effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
                       alpha, 1, panel->frame[6], 0, surface);
     } else {
-        func_00306CD0(x + framePositions[0], y + framePositions[1], z,
+        effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
                       alpha, 1, panel->frame[7], 0, surface);
     }
     selection = mnuClearWindowPendingFlagAfterSelection(
         x + framePositions[2], y + framePositions[3], z,
         &menu->flags, panelIndex, surface);
-    func_00306CD0(x + framePositions[2], y + framePositions[3], z,
+    effDrawTextureSlotWithBlendedCornerColors(x + framePositions[2], y + framePositions[3], z,
                   alpha, 1, panel->frame[selection + 4], 0, surface);
     if (panel->hp.textures[0] != 0) {
         s32 hp = menu->records->slots[panelIndex].hp;
@@ -895,7 +895,7 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, DatPartyRecord *entry,
                                    group->entries[index], drawFlags);
         offset += 200;
     }
-    func_00306CD0(x + 0xE0, y + 0x3A8, 0, group->initialValue, 0,
+    effDrawTextureSlotWithBlendedCornerColors(x + 0xE0, y + 0x3A8, 0, group->initialValue, 0,
                   group->texture, 6, drawFlags);
     if (group->initialValue < 0x100) {
         group->initialValue += 0x10;
@@ -957,7 +957,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     s32 rangeIndex;
 
     rangeIndex = mnuLookupRangeEntry(rangeId);
-    func_00306CD0(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
@@ -1020,7 +1020,7 @@ void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, E
     s32 i;
 
     for (i = 0; i < count; i++) {
-        func_00306CD0(x, y, depth, fade, 1, drawArg, variant, texture);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 1, drawArg, variant, texture);
         x += 0xA0;
     }
 }
@@ -1083,7 +1083,7 @@ void mnuDrawAndSwapPageBarEffect(s32 x, s32 y, s32 depth, u32 fade, MenuPageBar 
 
     switch (bar->activeEffect) {
     case 0:
-        func_00306CD0(x, y, depth, alpha, 0, bar->textures[3], 0, flags);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, alpha, 0, bar->textures[3], 0, flags);
         if (bar->holdEffectUpdate == 0) {
             itfGridLookupValueOrDefault(bar->textures[3], 0);
             if (bar->textures[3]->workEntries->states[0].source == NULL) {
@@ -1094,7 +1094,7 @@ void mnuDrawAndSwapPageBarEffect(s32 x, s32 y, s32 depth, u32 fade, MenuPageBar 
         }
         break;
     case 1:
-        func_00306CD0(x, y, depth, alpha, 0, bar->textures[4], 0, flags);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, alpha, 0, bar->textures[4], 0, flags);
         if (bar->holdEffectUpdate == 0) {
             itfGridLookupValueOrDefault(bar->textures[4], 0);
             if (bar->textures[4]->workEntries->states[0].source == NULL) {
@@ -1224,7 +1224,7 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
     BdWork *work;
 
     mnuDrawRatioPanelContents(x, y, depth, color, fade, value, limit, pair, flags);
-    func_00306CD0(x, y, depth, fade, 1, pair->textures[0], 0, flags);
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 1, pair->textures[0], 0, flags);
     if (value != 0) {
         texture = pair->textures[1];
         work = texture->workEntries;
@@ -1232,8 +1232,8 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
         quantizedWidth = barWidth * 16;
         work->geometry.bounds[2] = quantizedWidth;
         work->parameters[2] = ~(77 - barWidth);
-        func_00306CD0(x, y, depth, fade, 1, texture, 0, flags);
-        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 1, texture, 0, flags);
+        effDrawTextureSlotWithBlendedCornerColors(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
         mnuDrawAndSwapPageBarEffect(x, y, depth, fade, pair, flags);
     }
     if (pair->fadeOut == 0) {
@@ -1362,17 +1362,17 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     u32 color;
     FrFontGlyph *glyph;
 
-    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[0].set,
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[0].set,
                   item->spriteGridSlots[0].index, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[1].set,
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[1].set,
                   item->spriteGridSlots[1].index, flags);
     func_002C2AE8(x, y, depth, fade, mode, item, flags);
-    func_00306CD0(x, y, depth, fade, 0, item->spriteGridSlots[8].set,
+    effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->spriteGridSlots[8].set,
                   item->spriteGridSlots[8].index, flags);
     if (mode == 1 || (mode == 0 && (item->selection != 0 || item->option != 0))) {
-        func_00306CD0(x, y, depth, fade, 0, item->gridSlots[0].set,
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->gridSlots[0].set,
                       item->gridSlots[0].index, flags);
-        func_00306CD0(x, y, depth, fade, 0, item->gridSlots[4].set,
+        effDrawTextureSlotWithBlendedCornerColors(x, y, depth, fade, 0, item->gridSlots[4].set,
                       item->gridSlots[4].index, flags);
     }
     value = item->value18;

@@ -603,7 +603,7 @@ typedef struct MnuSpriteResource {
 } MnuSpriteResource;
 
 extern s32 D_003CE9D0[][4];
-extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u32, s32, s32);
 
 void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context) {
@@ -615,7 +615,7 @@ void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->textures[D_003CE9D0[placementIndex][1]].flags |= 2;
     }
-    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
                   (y + D_003CE9D0[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -646,7 +646,7 @@ void mnuDrawMantraScaledRotatedCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s3
         ->sprites[D_003CE9D0[placementIndex][1]].height =
         (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -676,7 +676,7 @@ void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale
         ->sprites[D_003CE9D0[placementIndex][1]].height =
         (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -695,7 +695,7 @@ void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale
 void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, f32 rotation, s32 placementIndex, s32 flags, s32 context) {
     ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
         ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
-    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
                   (y + D_003CE9D0[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
