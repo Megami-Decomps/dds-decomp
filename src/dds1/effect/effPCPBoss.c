@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -30,7 +31,6 @@ extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 D_003B9308;
 extern void effBossInitializeModelGroups(EffBossWork *work);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
@@ -132,7 +133,6 @@ typedef struct {
 } ParBurstPacket;
 
 extern s32 effMiscRand(void *);
-extern f32 effMiscRandUnitFloat(void *);
 extern u8 effDefaultRandomState[];
 extern u8 effEmitterDelayRandomState[];
 

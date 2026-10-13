@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 
@@ -56,7 +57,6 @@ typedef struct MtrGrid {
 
 extern void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode);
 extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
-extern f32 effMiscRandUnitFloat(void *state);
 
 void mtrUpdateGridPropagation(MtrGrid *grid) {
     if (grid->remainingDelay == 0) {
@@ -139,7 +139,6 @@ MtrCell *func_00285E98(MtrGrid *grid, MtrCell *source, s8 mode) {
 }
 
 extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
-extern f32 effMiscRandUnitFloat(void *);
 
 void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode) {
     MtrCell *cell;

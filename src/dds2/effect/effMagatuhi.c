@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "eff_random.h"
 #include "eff_math.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -133,7 +134,6 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiDrawHistoryTrails);
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
@@ -251,7 +251,6 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
     }
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];

@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
@@ -1386,7 +1387,6 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
 }
 
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share

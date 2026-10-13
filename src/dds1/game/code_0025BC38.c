@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -27,7 +28,6 @@
 typedef struct MovieCueNode MovieCueNode;
 
 
-extern f32 effMiscRandUnitFloat(s32);
 extern void mnuReleaseOptionalDrawAllocation(void *, void *);
 
 

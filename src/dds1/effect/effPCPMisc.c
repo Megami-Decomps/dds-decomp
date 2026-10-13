@@ -1,5 +1,6 @@
 #include "sdf_projection.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_model.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
@@ -306,7 +307,6 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
     work->scale = val;
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
@@ -3367,7 +3367,6 @@ void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
     }
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Small PCP effect with a 4x4 matrix at 0x10 (0x68 bytes). */

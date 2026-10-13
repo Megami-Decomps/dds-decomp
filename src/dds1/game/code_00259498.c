@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "eff_random.h"
 #include "sdf_task_work.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -14,7 +15,6 @@
 
 
 
-extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);

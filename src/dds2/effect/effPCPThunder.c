@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "eff_pcp_event_place.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
@@ -22,7 +23,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u32 effMiscRand(void *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */

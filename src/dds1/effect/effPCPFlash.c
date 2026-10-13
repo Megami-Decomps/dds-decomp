@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_quaternion.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -310,7 +311,6 @@ void effFlashRotatingStreakSetParticleColors(PcpFlashStreakWork *work, s32 index
     }
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 
 void effFlashSpawnRotatingParticle(PcpFlashStreakWork *work, s32 index, void *orientation) {
@@ -1340,7 +1340,6 @@ void effFlashRotatingQuadSetParticleColors(PcpFlashRotatingQuadWork *work, s32 i
     }
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 void effFlashRotatingQuadSpawnParticle(PcpFlashRotatingQuadWork *work, s32 index, void *orientation) {
     PcpFlashRotatingQuadParticle *part = work->parts + index;

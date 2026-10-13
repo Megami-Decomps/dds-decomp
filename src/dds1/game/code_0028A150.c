@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
 #include "evt_world.h"
@@ -5479,7 +5480,6 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00297658);
 struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 fabsf(f32);
 extern void func_00297658(FileSlotTable *, FileSlot *);
 
