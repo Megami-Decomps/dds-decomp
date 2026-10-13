@@ -20,7 +20,7 @@
 
 u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size);
 
-u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 size);
+u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 size);
 
 void sndEnsureMidiBankResident(s32 trackId);
 
@@ -46,7 +46,7 @@ extern void FlushCache(s32);
 extern s32 sceSifSetDma(void *, s32);
 extern s32 sceSifDmaStat(s32);
 
-u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 payloadBytes) {
+u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
     s32 wakeAttemptsRemaining;
     SndRingPacket *entry;
@@ -90,7 +90,7 @@ void func_002E88F8(u32 unused) {
 }
 
 u32 sndSendCommandPacket(u32 command, u32 channel, void *packet, u32 size) {
-    u32 result = func_002E87A8(command, channel, packet, size);
+    u32 result = sndQueueCommandPacket(command, channel, packet, size);
 
     func_002E88F8(result);
     return result;
@@ -234,7 +234,7 @@ void sndStartTrackDefault(s32 trackId) {
     packet.trackId = trackId;
     packet.unk4 = 0;
     packet.setting = 0x7F;
-    func_002E87A8(0x20, 0, &packet, 0x10);
+    sndQueueCommandPacket(0x20, 0, &packet, 0x10);
 }
 
 /* Sends a single-word command payload in a 16-byte packet. */
@@ -242,7 +242,7 @@ void sndSendSingleWordControlPacket(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
-    func_002E87A8(0x30, 0, packet, 0x10);
+    sndQueueCommandPacket(0x30, 0, packet, 0x10);
 }
 
 /* Starts the alternate track command, leaving the other packet fields untouched. */
@@ -252,12 +252,12 @@ void sndStartTrackAlternate(s32 trackId) {
     sndEnsureMidiBankResident(trackId);
     packet.trackId = trackId;
     packet.setting = 0x7F;
-    func_002E87A8(0x130, 0, &packet, 0x10);
+    sndQueueCommandPacket(0x130, 0, &packet, 0x10);
 }
 
 void func_002E8DD0(u32 value) {
     u32 packet[4];
 
     packet[0] = value;
-    func_002E87A8(0x30, 0, packet, 0x10);
+    sndQueueCommandPacket(0x30, 0, packet, 0x10);
 }

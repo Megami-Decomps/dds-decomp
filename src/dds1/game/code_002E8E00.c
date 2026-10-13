@@ -3,26 +3,26 @@
 
 u32 sndSendCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
-u32 func_002E87A8(u32 arg0, u32 arg1, void *arg2, u32 arg3);
+u32 sndQueueCommandPacket(u32 arg0, u32 arg1, void *arg2, u32 arg3);
 
 void sndEnsureMidiBankResident(s32 arg0);
 
 
 void func_002E8E00(void) {
-    func_002E87A8(0x1a0, 0, 0, 0);
+    sndQueueCommandPacket(0x1a0, 0, 0, 0);
 }
 
 void func_002E8E28(void) {
-    func_002E87A8(0x210, 0, 0, 0);
+    sndQueueCommandPacket(0x210, 0, 0, 0);
 }
 
 void func_002E8E50(void) {
-    func_002E87A8(0x40, 0, 0, 0);
+    sndQueueCommandPacket(0x40, 0, 0, 0);
 }
 
 /* Dispatch the command family selected by the caller, without a payload. */
 void sndDispatchCommandWithoutPayload(u32 command) {
-    func_002E87A8(command | 0x50, 0, 0, 0);
+    sndQueueCommandPacket(command | 0x50, 0, 0, 0);
 }
 
 /* Send a NUL-terminated command string; the transport excludes the terminator. */
@@ -51,7 +51,7 @@ void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan) {
     packet.trackId = trackId;
     packet.volume = volume;
     packet.pan = (u8)pan;
-    func_002E87A8(0x90, 0, &packet, 0xC);
+    sndQueueCommandPacket(0x90, 0, &packet, 0xC);
 }
 
 /* Map a wrapped listener-relative angle and distance onto sequence volume/pan. */
