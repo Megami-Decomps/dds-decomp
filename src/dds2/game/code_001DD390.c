@@ -26,6 +26,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_selected_unit_effect_task_args.h"
 #include "btl_effect_node.h"
 #include "eff_field_color.h"
 #include "file.h"
@@ -4503,19 +4504,11 @@ BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-typedef struct UnitEffectTaskArgs {
-    BtlUnit *unit;
-    SoundMixer *mixer;
-    BattleEffect *effect;
-    s32 duration;
-    s32 counter;
-} UnitEffectTaskArgs;
-
 extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
-s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
+s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
     BtlUnit *unit = args->unit;
     if (!(unit->status.flags & 2)) {
         return 1;
@@ -4545,7 +4538,7 @@ s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
     }
 }
 
-void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
+void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BattleEffect *voice = arguments->effect;
     if (voice != 0) {
         effReleaseBattleVoiceOwner(voice);
@@ -4559,7 +4552,7 @@ void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
 
 BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    UnitEffectTaskArgs *args;
+    BtlSelectedUnitEffectTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x16;
