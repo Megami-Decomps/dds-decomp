@@ -8,6 +8,7 @@
 #include "mdl.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "sdf_dev_state.h"
 #include "fld_transfer_chunk.h"
 #include "sdf_resource.h"
@@ -3748,7 +3749,6 @@ typedef struct FldSparkEntryInfo {
 
 extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
-extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerScale(EffWorldNode *node, u128 *vector);
 extern void func_00147DB0(void *unit);

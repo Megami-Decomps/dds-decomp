@@ -11,6 +11,7 @@
 #include "fld.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "sdf_texture_file.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
@@ -24,7 +25,6 @@ extern void *dds3GetWorldSecondaryObject(void);
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);
 extern void fldSetRecordValueById(s32 id, s32 value);
@@ -729,7 +729,6 @@ extern void func_001486D0(u32, f32 *, f32, f32, f32);
 extern s32 fldSetSparkVectors(s32, const u128 *, const u128 *);
 extern void fldAppendClearEntry(s32, f32, f32, f32, f32);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
-extern void dds3SetWorldNodeValue(EffWorldNode *, u32);
 
 /* Serialized transforms leave the position W component zero. */
 static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32 *source) {
@@ -947,7 +946,6 @@ extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern struct DevRequest *D_003BAC14;
 extern EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void effObjSetRoomNumber(EffWorldNode *, u32);

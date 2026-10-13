@@ -5,6 +5,7 @@
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_value.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "mnu_title_effect.h"
@@ -33,7 +34,6 @@ extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
-extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
