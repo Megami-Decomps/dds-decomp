@@ -68,7 +68,7 @@ extern char D_004388E0[];
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-extern void func_00312E20(void);
+extern void sdfNoOpGridDrawCallback(void);
 
 float sdfQuatLengthSquared(float *quaternion) {
     return *quaternion * *quaternion + quaternion[1] * quaternion[1] +
@@ -439,8 +439,9 @@ extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-/* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
-void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
+/* Submit count XY pairs as a colored GS triangle fan to surfaceIndex.
+ * useFirstColor bit 0 selects colors[0] instead of a color per vertex. */
+void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfDrawPacket *packet;

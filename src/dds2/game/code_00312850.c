@@ -71,7 +71,7 @@ extern void kwlnTaskCreate();
 
 extern void kwlnTaskCreate();
 
-extern void func_00312E20(void);
+extern void sdfNoOpGridDrawCallback(void);
 
 void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
     SdfTaskEntry *item = sdfFindTaskItemValueByKey(work, key);
@@ -263,7 +263,8 @@ void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
     sdfDestroyTaskResourceWork((TaskWork *)kwlnTaskGetUserValue(task));
 }
 
-void func_00312E20(void) {
+/* Default empty grid draw callback; retain its retail zero-argument definition. */
+void sdfNoOpGridDrawCallback(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00312850", func_00312E28);
@@ -283,7 +284,8 @@ void sdfDestroyGridWork(SdfGrid *owner) {
     }
 }
 
-void func_00312FB0(SdfGrid *grid) {
+/* Release all cell values and restore indices, retaining the grid header. */
+void sdfGridClear(SdfGrid *grid) {
     sdfGridReleaseAllCells(grid);
 }
 
@@ -396,7 +398,8 @@ typedef struct SdfGridDirections {
 } SdfGridDirections;
 extern const SdfGridDirections D_004388E8[];
 
-SdfGridCell *func_00313280(SdfGrid *grid) {
+/* Select an occupied cell above and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_004388E8[0];
     u32 cursorValue;
     s32 row;
@@ -440,7 +443,8 @@ SdfGridCell *func_00313280(SdfGrid *grid) {
 
 extern const SdfGridDirections D_004388F0[];
 
-SdfGridCell *func_003133C8(SdfGrid *grid) {
+/* Select an occupied cell below and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_004388F0[0];
     u32 cursorValue;
     u32 count = grid->cellCount;
@@ -494,7 +498,8 @@ SdfGridCell *func_003133C8(SdfGrid *grid) {
 
 extern const SdfGridDirections D_004388F8[];
 
-SdfGridCell *func_00313538(SdfGrid *grid) {
+/* Select an occupied cell to the left and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_004388F8[0];
     SdfGridCell *cell;
     u32 index;
@@ -536,7 +541,8 @@ SdfGridCell *func_00313538(SdfGrid *grid) {
 
 extern const SdfGridDirections D_00438900[];
 
-SdfGridCell *func_003136A0(SdfGrid *grid) {
+/* Select an occupied cell to the right and follow its viewport margins, or return NULL. */
+SdfGridCell *sdfGridCursorRightToFilledCell(SdfGrid *grid) {
     SdfGridDirections directions = D_00438900[0];
     SdfGridCell *cell;
     u32 cursorValue;

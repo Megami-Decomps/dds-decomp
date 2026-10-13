@@ -57,7 +57,7 @@ void func_00243958(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003C90DC[];
 extern s32 D_003C8C90[][3];
 extern SolarOverlayShape D_003C90C0[];
-extern void func_00311F20(s32 *, u32, u32 *, s32, s32, s32);
+extern void sdfDrawColoredTriangleFan(s32 *, u32, u32 *, s32, s32, s32);
 extern void evtPrepareSolarOverlayTestState(s32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 
@@ -173,7 +173,7 @@ void func_00243C68(s32 unused0, s32 unused1, s32 alpha, s32 intensity, s32 objec
     for (i = 1; i < 14; i++) {
         colors[i] = color;
     }
-    func_00311F20(positions, alpha, colors, 14, 0, object);
+    sdfDrawColoredTriangleFan(positions, alpha, colors, 14, 0, object);
 }
 
 /* Scale a selected overlay shape's alpha values and submit it between GS states. */
@@ -195,7 +195,7 @@ void func_00243DB8(s32 unused0, s32 unused1, s32 alpha, s32 alphaScale,
         colors[i] = (color & 0xFFFFFF) |
             ((s32)((f32)((s32)((color & 0xFF000000) >> 24) * alphaScale) * 0.0078125f) << 24);
     }
-    func_00311F20(D_003C90C0[tableIndex].positions, alpha, colors,
+    sdfDrawColoredTriangleFan(D_003C90C0[tableIndex].positions, alpha, colors,
                   D_003C90C0[tableIndex].count, 0, object);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, object);
 }
@@ -214,7 +214,7 @@ void evtDrawIndexedSolarOverlayLayers(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s3
     if (n < 8) {
         p = D_003C90DC + t0 * 8;
         while (n < 8) {
-            func_00311F20((s32 *)p[-1], 0xFF, &tmp, p[0], 1, t2);
+            sdfDrawColoredTriangleFan((s32 *)p[-1], 0xFF, &tmp, p[0], 1, t2);
             n++;
             p += 8;
         }
@@ -238,7 +238,7 @@ void evtDrawPartialSolarOverlay(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0, s32 t1, 
     if (n < 8) {
         p = D_003C90DC + t0 * 8;
         while (n < 8) {
-            func_00311F20((s32 *)p[-1], 0xFF, &tmp, p[0], 1, t2);
+            sdfDrawColoredTriangleFan((s32 *)p[-1], 0xFF, &tmp, p[0], 1, t2);
             n++;
             p += 8;
         }

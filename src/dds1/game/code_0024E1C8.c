@@ -968,7 +968,7 @@ extern SdfGrid *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
 extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
 extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
-extern SdfGridCell *func_002CC0D0(SdfGrid *);
+extern SdfGridCell *sdfGridCursorLeftToFilledCell(SdfGrid *);
 extern void func_00253208(MenuSceneWork *, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 extern void mnuUpdateMantraSelectionPositions(MenuSceneWork *, s32);
@@ -990,7 +990,7 @@ void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
                   &selectedCoordinates[0], &selectedCoordinates[1]);
     if (sdfGridSelectFilledCell(sceneWork->gridHandle,
                                 selectedCoordinates[0], selectedCoordinates[1]) == NULL) {
-        func_002CC0D0(sceneWork->gridHandle);
+        sdfGridCursorLeftToFilledCell(sceneWork->gridHandle);
     }
     sceneWork->scrollX = 0;
     sceneWork->scrollY = 0;
