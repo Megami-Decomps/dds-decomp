@@ -112,7 +112,7 @@ void mnuStepShopWindowTransition(ShopScene *scene, s32 frame) {
 }
 
 /* Draw the fixed shop frame, then its pulsing icon. */
-void func_0025E308(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
+void mnuDrawShopPanelWithPulsingIcon(s32 x, s32 y, s32 z, ShopScene *scene, s32 alpha, s32 mode) {
     struct EffectSlotSet *texture = D_003BC520;
 
     effDrawSpriteWithCornerFade(D_0036C728[32][BRS_ICON_X] << 4,

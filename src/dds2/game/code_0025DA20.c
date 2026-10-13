@@ -3589,7 +3589,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     return result;
 }
 
-extern void func_00294B40(s32, s32, s32, void *, s32, s32);
+extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, void *, s32, s32);
 extern void func_00294D50(s32, s32, s32, void *, s32, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, void *, s32, s32);
 extern void func_00295030(s32, s32, s32, void *, s32, s32, s32);
@@ -3608,7 +3608,7 @@ s32 func_00264480(KwlnTask *callbackContext) {
     func_0025FD78(state);
     switch (state->dispatchMode) {
     case 1:
-        func_00294B40(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
         func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
@@ -3618,14 +3618,14 @@ s32 func_00264480(KwlnTask *callbackContext) {
         break;
     case 2:
         if (state->stateTable == (s32)D_003CE498) {
-            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             func_00294D50(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(
                 0, 0, 0, (u8 *)state->ownedWindows[0]->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             func_00296E98((s32)state, 0x100, 4, 0x53);
         } else {
-            func_00294B40(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithTypeGraphic(0, 0, 0, state, 0x100, 0x53);
             mnuDrawWindowBorderAndScrollBar(0, 0, 0, state, 0x100, 0x53);
             func_00295030(0, 0, 0, state, 0x100, 0, 0x53);
             mnuClearWindowPanelTransitionFlag(state->ownedWindows[0]);

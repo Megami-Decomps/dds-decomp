@@ -1862,7 +1862,7 @@ extern s32 kwlnFadeIsActive(void);
 extern s32 evtGetMessageWindowControlState(void);
 
 
-extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopPanelWithPulsingIcon(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, ShopScene *, s32);
@@ -2734,7 +2734,7 @@ s32 evtRedrawShopSceneSelection(KwlnTask *task) {
         selectedIndex = options.values[state->sprite->list->cursor->index];
     }
 
-    func_0025E308(0, 0, 0, state, 0x100, 0x53);
+    mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(state, 0xA09DC380);
     mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
     mnuDrawShopSelectedRowDetails(0, 0, 0, state, 0x53);
@@ -2826,7 +2826,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
 
     switch (state->menuMode) {
     case 1:
-        func_0025E308(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
         mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
@@ -2836,13 +2836,13 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         break;
     case 2:
         if (state->stateTable == (s32)D_0036AA68) {
-            func_0025E308(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawStatusIconAndCompanion(0, 0, 0, state, 0x100, 0x53);
             mnuDrawListChildrenWithCountdown(0, 0, 0, state->sprite->list, 0x53);
             mnuDrawShopCurrencyBalance(state, 0xA09DC380);
             brsDrawResultIconPairWithAlpha((s32)state, 0x100, 4, 0x53);
         } else {
-            func_0025E308(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopPanelWithPulsingIcon(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
             mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
             mnuClearWindowPanelTransitionFlag(state->sprite);

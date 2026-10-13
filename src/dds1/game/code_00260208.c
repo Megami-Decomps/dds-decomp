@@ -153,7 +153,7 @@ s32 mnuTickCommandPhase(ShopScene *work) {
     return -1;
 }
 
-extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopPanelWithPulsingIcon(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
@@ -165,7 +165,7 @@ s32 func_00260670(ShopScene *scene) {
     f32 opacity;
     f32 position;
 
-    func_0025E308(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopPanelWithPulsingIcon(0, 0, 0, scene, 0x100, 0x53);
     progress = 0.0f;
     opacity = 0.0f;
     switch (scene->action) {
@@ -284,7 +284,7 @@ s32 func_00260AB0(ShopScene *scene) {
     } else {
         category = categoryMap[scene->sprite->list->cursor->index];
     }
-    func_0025E308(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopPanelWithPulsingIcon(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->action) {
     case 4:
@@ -501,7 +501,7 @@ s32 mnuTickCommandWaitPhase(ShopScene *work) {
     return -1;
 }
 
-extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopPanelWithPulsingIcon(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawShopCurrencyBalance(ShopScene *, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
@@ -524,7 +524,7 @@ s32 mnuDrawCommandClosePhase(ShopScene *scene) {
     } else {
         category = categoryMap[scene->sprite->list->cursor->index];
     }
-    func_0025E308(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopPanelWithPulsingIcon(0, 0, 0, scene, 0x100, 0x53);
     mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->action) {
     case 9:
