@@ -10,6 +10,7 @@
 #include "fld_resource_resolver.h"
 #include "fld_transfer_chunk.h"
 #include "fld.h"
+#include "fld_scene_request.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -520,22 +521,6 @@ extern f32 fldLookAtNearPoint[];
 
 extern f32 fldLookAtFarPoint[];
 
-/* Four resource references are copied into the scene's load queue in order. */
-typedef struct FldLoadRecord {
-    u32 unk_0;
-    u32 displayState;
-    void *resourceA;
-    void *resourceB;
-    void *resourceC;
-    void *resourceD;
-} FldLoadRecord;
-
-typedef struct FldLoadRequest {
-    u32 unk_0;
-    u32 unk_4;
-    FldLoadRecord *record;
-} FldLoadRequest;
-
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
 extern void fldSpawnSceneResourceBatches(FldSpawnBatch *, u32);
@@ -989,15 +974,6 @@ typedef struct FldActionSpawn {
     u32 firstValue;
 } FldActionSpawn;
 
-/* Layout shared by the two field-request dispatch paths. */
-typedef struct FldSceneRequest {
-    u32 primaryValue;
-    u32 secondaryValue;
-    FldLoadRecord *record;
-    u32 spawnCount;
-    FldActionSpawn *spawnList;
-} FldSceneRequest;
-
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
     struct EffWorldNode *node;
@@ -1232,7 +1208,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             }
         }
     }
-    fldSpawnSceneResourceBatches((FldSpawnBatch *)request->unk_4, request->unk_0);
+    fldSpawnSceneResourceBatches(request->spawnBatches, request->spawnBatchCount);
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
@@ -1241,12 +1217,12 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     state = fldAreaState.area;
     if (state != 1 && state < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 0);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 0);
     fldAreaState.fallbackResourceName = request->record->displayState;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->secondaryValue, request->primaryValue, 1);
+    fldSpawnPlacementObjectsFromBatches(request->unk04, request->unk00, 1);
 }
 
 s32 fldGetTransferChunkPayload(s32 record) {
