@@ -406,7 +406,7 @@ extern void btlResetActorEntryState(void);
 
 extern void sndResetTransition(void);
 
-extern void func_001F4430(void);
+extern void btlResetSoundLoadFrames(void);
 
 extern void btlResetDeferredTaskQueue(void);
 
@@ -459,7 +459,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->messageWindows[1] = itfMesCreateWindow(&D_0032A520);
     ((BattleInitState *)btlRuntime)->messageWindows[2] = itfMesCreateWindow(&D_0032A210);
     sndResetTransition();
-    func_001F4430();
+    btlResetSoundLoadFrames();
     btlResetDeferredTaskQueue();
     btlResetToInitialScene();
     fldClearSceneSlotsAndGroups();

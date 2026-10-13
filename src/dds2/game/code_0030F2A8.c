@@ -127,7 +127,8 @@ void sdfVec3AddComponents(float x, float y, float z, float *vector) {
     vector[2] = vector[2] + z;
 }
 
-void func_0030F898(f32 x, f32 y, f32 z, f32 *out) {
+/* Store X/Y/Z; preserve this game's scalar-first argument order. */
+void sdfSetVectorComponents(f32 x, f32 y, f32 z, f32 *out) {
     out[0] = x;
     out[1] = y;
     out[2] = z;

@@ -29,7 +29,7 @@ extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
 
-extern MdlCtx *func_002DC1D0(void *, u32);
+extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
 extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 
@@ -59,7 +59,7 @@ extern u32 D_00437E38;
 
 extern u32 D_00437E3C;
 
-extern struct EffExpandedList *func_002DDF48(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 
 extern s32 btlGetRuntime(void);
@@ -94,12 +94,13 @@ void effInitModelVUState(MdlCtx *model) {
     model->flags &= ~MDL_SKIP_TRANSFORMS;
 }
 
-MdlCtx *func_002DC1D0(void *kind, u32 flags) {
+/* Load under an unused group-6 viewer ID and initialize the model's VU state. */
+MdlCtx *effLoadViewerModelWithVUState(void *modelData, u32 parameter) {
     MdlCtx *result;
     while (btlFindGroupedEntity(6, D_00437E2C) != 0) {
         D_00437E2C++;
     }
-    mdlLoadViewerPackage(6, D_00437E2C, 0x101, kind, flags);
+    mdlLoadViewerPackage(6, D_00437E2C, 0x101, modelData, parameter);
     result = mdlCreateContextFromResourceKey(6, D_00437E2C);
     effInitModelVUState(result);
     D_00437E2C++;
@@ -134,7 +135,7 @@ EffModelOwner *effCreateModelOwner(void *input) {
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
         data = fileResolveSecondaryBuffer(source);
         if (data != 0) {
-            owner->model = func_002DC1D0(data, source->secondary.size);
+            owner->model = effLoadViewerModelWithVUState(data, source->secondary.size);
             VU0_SET_ONES_XYZ(vf10);
             VU0_SCALE_VF_MFC1(vf10, owner->scale);
             mdlStoreTertiaryVectorVU(owner->model);
@@ -304,7 +305,8 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     return owner;
 }
 
-void func_002DC808(EffModelOwner *owner) {
+/* Render the model owner with staged GS TEST_2 packets, then restore the tests. */
+void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     SdfListHead *list;
     u64 *packet;
     SdfPoolNode *surface;
@@ -358,7 +360,7 @@ void effMarkFloorModelForUpdate(EffModelOwner *p) {
     p->flags |= 1;
     if (!(p->flags & 4)) {
         if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH)) {
-            func_002DC808(p);
+            effRenderModelOwnerWithGsTests(p);
         }
     } else if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) {
         p->flags |= 0x30;
@@ -406,7 +408,7 @@ void effSweepFloorModelList(void) {
             next = node->next;
             if (!(node->object->flags & 8)) {
                 if ((node->object->flags & 0x31) == 1) {
-                    func_002DC808(node->object);
+                    effRenderModelOwnerWithGsTests(node->object);
                 }
                 node->object->flags &= ~0x20;
             } else {
@@ -509,12 +511,12 @@ typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
 extern u32 sdfCountMapPositionRecords(SdfModel *model);
-extern void *func_002DCCE8(void *);
+extern void *effCreateResourceOwner(void *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
 /* Decode the type-6 configuration, load its model and clone per-position queues. */
-void *func_002DCCE8(void *input) {
+void *effCreateResourceOwner(void *input) {
     FileJobPayload *job = input;
     EffResourceOwner *owner;
     void *resource;
@@ -539,7 +541,7 @@ void *func_002DCCE8(void *input) {
             modelOffset = 0;
             break;
         }
-        owner->model = func_002DC1D0((u8 *)resource + modelOffset, job->primary.size - modelOffset);
+        owner->model = effLoadViewerModelWithVUState((u8 *)resource + modelOffset, job->primary.size - modelOffset);
         if (owner->model->first != NULL) {
             if (owner->base.plainEntry != 0) {
                 mdlAddEntryPlain(owner->model, 0, 0);
@@ -586,7 +588,7 @@ extern void effCopyResourceOwner(void *, void *);
 
 void *effDuplicateModelOwner(void *source, u16 unusedType) {
     EffResourceOwner *src = source;
-    EffResourceOwner *dst = func_002DCCE8(0);
+    EffResourceOwner *dst = effCreateResourceOwner(0);
 
     dst->base = src->base;
     dst->extended = src->extended;
@@ -630,7 +632,8 @@ void effCopyResourceOwner(void *destination, void *source) {
 }
 
 
-void func_002DD3C0(void *work) {
+/* Complete queued jobs, sample the first model motion at zero, and clear the owner word. */
+void effResetModelMotionAndOwnerFlag(void *work) {
     EffResourceOwner *owner = work;
     if (owner->buffer != NULL) {
         u32 count = owner->count;
@@ -794,7 +797,7 @@ typedef struct EffExpandedSource {
 } EffExpandedSource;
 
 /* Copy a serialized list into one allocation and retain a shared texture reference per entry. */
-struct EffExpandedList *func_002DDF48(u32 sourceAddress) {
+struct EffExpandedList *effCreateTextureAnimationSet(u32 sourceAddress) {
     EffExpandedSource *source = (EffExpandedSource *)sourceAddress;
     u32 count = source->count;
     EffExpandedEntry *sourceEntry = source->entries;

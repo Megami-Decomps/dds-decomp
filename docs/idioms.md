@@ -10659,3 +10659,34 @@ table and metadata word. It retains the metadata copy, unused mode parameter,
 original bounds check (including no new negative-ID guard), and every caller's
 existing signature. None of these naming changes alters parsing or codegen.
 
+## Resource owners, actor camera presets and vector-component setters
+
+`effCreateResourceOwner` allocates a cleared owner, optionally loads its model
+from a file job, and builds queues for the map records. The empty-owner request
+from `effDuplicateModelOwner` remains valid. DDS2 additionally selects the
+resource-header layout by the job option; naming the common role does not
+remove those cases. `effLoadViewerModelWithVUState`,
+`effResetModelMotionAndOwnerFlag` and `effCreateTextureAnimationSet` now use
+the established DDS1 names in DDS2 as well, with each game's extra work intact.
+
+`effRenderModelOwnerWithGsTests` corrects the former party-tint description.
+The observable operation stages and restores GS TEST_2 packets (AD register
+`0x47`), attaches computed lighting and processes the model transforms.
+Nothing in this pass establishes a party-specific tint operation.
+
+`btlResetSoundLoadFrames` writes the disabled `-1` sentinel to the motion- and
+skill-SE load-frame counters in both games. The DDS2 actor camera preset
+initializer and advance routine belong to linked-command step `0xC`; their
+actor-ID/mode tables, frame triggers and distance blending are unchanged.
+The separate actor-ID cursor initializer keeps its original implicit return
+type and all existing caller signatures.
+
+`btlCombineCameraSpheresVU` returns a radius and leaves the corresponding
+center in `vf10`. Its native containment branch is deliberately retained:
+the name does not promise a minimum enclosing sphere. The unit/target sphere
+builder uses the same convention and preserves the existing bounds modes.
+
+`sdfSetVectorComponents` stores three supplied scalar components in both games.
+DDS1 takes its vector first, while this DDS2 copy takes it last. The shared name
+does not normalize their calling conventions, types or argument order.
+

@@ -2826,7 +2826,7 @@
 0x001F4D70	btlAdvancePlayerCursorAnimation	inferred	For nonenemy linked unit, updates cursor animation and clamps frame counter. [names_reviewed5.tsv]
 0x001F52D0	btlFindActorLinkByCategory	inferred	Searches primary, secondary and tertiary actor links by byte category at +0x11C
 0x001FDCA8	btlFindActiveActorById	inferred	Byte-identical dds1 twin 0x001ED550; walks battle actor list (ctx+0x228, next at +0x344), returns first alive/playable actor with id byte +0x11C [names_conflicts.tsv]
-0x001FDE60	btlGetUnitTargetDistance	inferred	func_001F5780 distance + btlUnitGetPosVU position fed to func_001FDD20; returns f32 [names_M74_BattleLarge.tsv]
+0x001FDE60	btlGetUnitTargetDistance	inferred	func_001F5780 distance + btlUnitGetPosVU position fed to btlCombineCameraSpheresVU; returns f32 [names_M74_BattleLarge.tsv]
 0x001FF570	btlCountUnitsByFlags	inferred	counts list24C units with flags&1, flags&mask and not flag 0x20
 0x001FF820	btlAdvanceCursorForUnmarkedUnit	inferred	Advances the bounded cursor frame while the linked unit lacks the marked flag. [names_reviewed13.tsv]
 0x001FF8F0	btlClearCommandCursorAndRunAction	inferred	Clears cursor memory then calls action handler for command. [names_R_FuncNames3.tsv]
@@ -5273,7 +5273,7 @@
 0x002DCC68	mdlSetListedObjectFlag	inferred	Sets object flag 0x10 on every node in the model effect object chain.
 0x002DCCA0	mdlMarkAndProcessObjectNodes	inferred	Sets each listed object's 0xA mask bits, then processes its chain node while preserving the next link.
 0x002DD038	effDestroyResourceOwner	inferred	destroys entries via fileQueueDestroy, frees buffer, releases model at +0xC0
-0x002DD0C8	effDuplicateModelOwner	inferred	allocates via func_002DCCE8 and copies 0x3C+0x74 byte blobs
+0x002DD0C8	effDuplicateModelOwner	inferred	allocates via effCreateResourceOwner and copies 0x3C+0x74 byte blobs
 0x002DD258	effCopyResourceOwner	inferred	twin of DDS1 name (QP5 conflict)
 0x002DDA10	effLoadModelPrimaryVector	inferred	Loads a supplied VU vector and stores it to the object's primary model vector. [names_reviewed5.tsv]
 0x002DDA30	effSetModelRotationQuaternion	inferred	confidence=high; matched-C; src/dds2/game/code_002DC138.c:607:func_002DDA30; Loads the supplied quaternion into vf10 and updates the resource-owner model rotation basis.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -8077,3 +8077,15 @@
 0x002A13C0	sndOpSendTitleAudioCommand	inferred	confidence=high; script operation sends fixed no-payload sound command 0x40 via func_00341CF8 and returns success; DDS1 pair 0x002697B0. [LiteH menu naming batch 18]
 0x002A14D0	sndOpResetTitleStreamAfterFileIdle	inferred	confidence=high; script operation invokes mnuResetTitleStreamAfterFileIdle and returns success; address-paired DDS1 0x002698C0 updates/logs BGM state instead. [LiteH menu naming batch 18]
 0x002A1678	mnuConfigureTitleAudioStream	inferred	confidence=high; retail ASM issues title-stream/IOP setup using the caller's 0x400-word request; DDS1 pair 0x00269A68. [LiteH menu naming batch 18]
+0x002DC1D0	effLoadViewerModelWithVUState	inferred	confidence=high; loads a model package under an unused group-6 viewer ID, creates its context, initializes VU state, and advances the ID; alignment with existing DDS1 0x0029A8D8. [Namer1 batch 42]
+0x002DC808	effRenderModelOwnerWithGsTests	inferred	confidence=high; stages/restores GS TEST_2 packets (AD register 0x47), attaches computed lighting, and processes the owner model transforms; matches DDS1 0x0029AE88, whose prior party-tint name is corrected. [Namer1 batch 42]
+0x002DCCE8	effCreateResourceOwner	inferred	confidence=high; allocates/clears the owner, loads its model, and creates per-map-record file queues when given a job; the job option selects the preserved 0x40/0x80 resource-header layouts; DDS1 twin 0x0029B368. [Namer1 batch 42]
+0x002DD3C0	effResetModelMotionAndOwnerFlag	inferred	confidence=high; notifies queued jobs, samples the owner's first model motion at frame zero, and clears its owner word; common role aligns with existing DDS1 0x0029B7E0, preserving the extra DDS2 queue notifications. [Namer1 batch 42]
+0x002DDF48	effCreateTextureAnimationSet	inferred	confidence=high; allocates packed animation entries plus shared texture handles and creates the per-entry texture resources while counting expanded entries; alignment with existing DDS1 0x0029C230. [Namer1 batch 42]
+0x002050D0	btlResetSoundLoadFrames	inferred	confidence=high; sets the motion- and skill-SE load-frame words at 0x288/0x28C to -1; frame increments test for nonnegative values and diagnostics identify the SE counters; DDS1 twin 0x001F4430. [Namer1 batch 42]
+0x001F3C30	btlInitializeActorCameraPreset	inferred	confidence=high; selects the actor-ID/mode preset records, initializes both camera vectors, motion progress and frame state, and marks defeat candidates; caller selects linked-command step 0xC. [Namer1 batch 42]
+0x001F3E48	btlAdvanceActorCameraPreset	inferred	confidence=high; advances the preset's motion/frame-triggered transition, blends camera distance/offset, updates defeat-candidate state, and increments its frame; dispatched for linked-command step 0xC. [Namer1 batch 42]
+0x001FDD20	btlCombineCameraSpheresVU	inferred	confidence=medium; combines two centers and radii, returns the result radius and writes the result center to vf10; the unusual native containment branch is retained and is not described as a minimum enclosing sphere. [Namer1 batch 42]
+0x001FDF18	btlBuildUnitTargetSphereVU	inferred	confidence=medium; combines selected first/second unit bounds and an optional target sphere via the existing camera-bounds provider and sphere combiner, returning radius with center in vf10. [Namer1 batch 42]
+0x001FF5D8	btlInitializeCameraCursorForActorId	inferred	confidence=high; clears the shared sound cursor, switches on the linked unit ID to seed camera descriptors/cursor fields, and falls back to the single-linked-resource camera; preserves the legacy implicit return type. [Namer1 batch 42]
+0x0030F898	sdfSetVectorComponents	inferred	confidence=high; directly stores the supplied X/Y/Z scalars to the output vector; alignment with existing DDS1 0x002C84B8 without normalizing this game's different argument order; genuinely absent symbol row registered. [Namer1 batch 42]

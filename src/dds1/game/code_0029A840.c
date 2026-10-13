@@ -283,7 +283,8 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     return owner;
 }
 
-void effApplyDefaultPartyTint(EffModelOwner *owner) {
+/* Render the model owner with staged GS TEST_2 packets, then restore the tests. */
+void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     SdfListHead *list;
     u64 *packet;
     SdfPoolNode *surface;
@@ -341,7 +342,7 @@ void effMarkFloorModelForUpdate(EffModelOwner *work) {
     work->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) == 0) {
-            effApplyDefaultPartyTint(work);
+            effRenderModelOwnerWithGsTests(work);
         }
     } else if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) != 0) {
         work->flags = previous | 0x31;
@@ -395,7 +396,7 @@ void effSweepFloorModelList(void) {
             next = node->next;
             if (!(node->object->flags & 8)) {
                 if ((node->object->flags & 0x31) == 1) {
-                    effApplyDefaultPartyTint(node->object);
+                    effRenderModelOwnerWithGsTests(node->object);
                 }
                 node->object->flags &= ~0x20;
             } else {
@@ -485,7 +486,8 @@ typedef struct {
 } EffectModelHeaderCopy;
 
 
-u8 *func_0029B368(void *source) {
+/* Create an empty owner, or load its model and per-record queues from a file job. */
+u8 *effCreateResourceOwner(void *source) {
     EffResourceOwner *owner = sdfAllocSizeClassBlock(sizeof(EffResourceOwner));
     u8 *data;
     u32 i;
@@ -538,12 +540,12 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
 }
 
 
-extern u8 *func_0029B368(void *);
+extern u8 *effCreateResourceOwner(void *);
 
 extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
 
 u8 *effDuplicateModelOwner(u8 *source) {
-    u8 *effect = func_0029B368(0);
+    u8 *effect = effCreateResourceOwner(0);
 
     *(EffectModelHeaderCopy *)(effect + 8) = *(EffectModelHeaderCopy *)(source + 8);
     effCopyResourceOwner((EffResourceOwner *)effect, (EffResourceOwner *)source);

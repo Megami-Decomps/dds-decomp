@@ -412,7 +412,7 @@ extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
 
-extern f32 func_001FDD20(f32 *, f32, f32, f32 *);
+extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
 
 extern BtlRuntimeTask *btlDeferredTaskTail;
 
@@ -569,7 +569,7 @@ extern s32 D_003BC0C0[];
 
 extern s32 D_003BC0C8[];
 
-extern void func_001F3E48(BtlLinkedCommand *);
+extern void btlAdvanceActorCameraPreset(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);

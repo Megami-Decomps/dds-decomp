@@ -424,7 +424,7 @@ extern u128 D_00458470[];
 extern SdfLightSources D_003E9F50;
 extern u8 btlIsRuntimeAllocated(void);
 
-extern MdlCtx *func_002DC1D0(void *, u32);
+extern MdlCtx *effLoadViewerModelWithVUState(void *, u32);
 
 extern void dds3DispatchIndexedCallback(s32, f32);
 
@@ -452,7 +452,7 @@ extern u32 D_00437E38;
 extern u32 D_00437E3C;
 
 
-extern struct EffExpandedList *func_002DDF48(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 extern u32 effWindTextureHandle;
 
@@ -4117,7 +4117,7 @@ void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
     if (((EffectSlotNode54 *)node)->resourceHolder != 0) {
         effReleaseReferenceHolder(((EffectSlotNode54 *)node)->resourceHolder);
     }
-    holder = func_002DDF48(resource);
+    holder = effCreateTextureAnimationSet(resource);
     ((EffectSlotNode54 *)node)->resourceHolder = holder;
 }
 
@@ -4373,7 +4373,7 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
             break;
         case 7:
-            work->reference = func_002DDF48((u32)buffer);
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
             break;
         }
         if (work->billHandle != NULL) {
@@ -7302,7 +7302,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     VU0_STORE_VF_UNCLOBBERED($vf0, effect->orientation);
     memcpy(effect->source, source, size);
     if (secondary != NULL) {
-        effect->model = func_002DC1D0(secondary, param);
+        effect->model = effLoadViewerModelWithVUState(secondary, param);
         effect->attributes = param;
         effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
@@ -8600,7 +8600,7 @@ MdlCtx **effAllocateModelObjectSlot(u32 owner) {
 
 MdlCtx **effCreateAndAttachModelEffectObject(u32 *owner, u32 kind, void *source, u32 settings) {
     MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
-    MdlCtx *object = func_002DC1D0(source, settings);
+    MdlCtx *object = effLoadViewerModelWithVUState(source, settings);
     Motion *active = object->first;
     *work = object;
     if (active != 0) {
@@ -8722,7 +8722,7 @@ EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void
     Motion *active;
 
     work->material = effCreateClassResourceWork(4, owner);
-    object = func_002DC1D0(source, settings);
+    object = effLoadViewerModelWithVUState(source, settings);
     active = object->first;
     work->model = object;
     if (active != 0) {
@@ -9484,7 +9484,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
             break;
         case 7:
-            work->reference = func_002DDF48((u32)buffer);
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
             break;
         }
         if (work->billHandle != NULL) {
@@ -9785,7 +9785,7 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, void *s
         sdfReleaseDevSlot(work->deviceSlot, 1, 1);
         work->deviceSlot = 0;
     }
-    model = func_002DC1D0(source, config);
+    model = effLoadViewerModelWithVUState(source, config);
     modelData = model->sub;
     work->model = model;
     deviceSlot = sdfModelCreateWithAlternateItems(modelData->resourceList, modelData->itemList);
