@@ -166,6 +166,7 @@
 0x0010B118	evtToggleDebugTimeGraphTask	inferred	Creates DebugTimeGrph task for mode one or destroys it for mode zero. [names_reviewed7.tsv]
 0x0010B190	sdfDrawHeapSpanOverlay	inferred	U2
 0x0010B780	evtDrawConditionalHeapUsageOverlay	inferred	R_Names31 B94
+0x0010B8D0	evtResourceCountDebugTaskDestroy	inferred	Empty destroy callback registered by evtToggleAlternateDebugTimeGraphTask for the DebugTimeGrph task that draws font, text and GS resource counts; paired DDS1 callback at 0x0010B6A8.
 0x0010B8D8	evtToggleAlternateDebugTimeGraphTask	inferred	confidence=high; matched-C; src/dds2/game/code_00107EF8.c:1228:func_0010B8D8; Creates or destroys the alternate event debug time-graph task according to mode one/zero.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x0010BD50	scrOpenProcessFromResource	inferred	Obtains a resource handle, constructs script process from its ID, and stores the resource handle on the process.
 0x0010BE08	scrClearProcessGlobals	inferred	Clears all 256 integer and float-bit global VM slots; mirrors DDS1 scrClearProcessGlobals.

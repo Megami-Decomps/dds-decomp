@@ -1708,12 +1708,12 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void func_0010B6A8(void) {
+void evtResourceCountDebugTaskDestroy(void) {
 }
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, (void (*)(void))evtDrawResourceCountDebugTask, func_0010B6A8, NULL);
+        D_003BD768 = kwlnTaskCreate(D_0039E238, 0x2710, 1, 1, (void (*)(void))evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_003BD768, 0);
     }
