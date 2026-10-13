@@ -6998,6 +6998,7 @@
 0x002E8D10	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x002E8D58	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x002E8D88	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
+0x002E8E50	sndQueueNoPayloadCommand40	inferred	Queues fixed command 0x40 with no payload; DDS2 twin 0x00341CF8. [LiteH menu naming batch 18]
 0x002E8E78	sndDispatchCommandWithoutPayload	inferred	Byte-identical dds2 twin 0x00341D20; OR caller command with 0x50 and dispatch with null payload and zero length. [names_conflicts.tsv]
 0x002E8EA0	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
 0x002E8EE8	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
@@ -8604,7 +8605,7 @@
 0x00264D90	mnuDrawItemPanelStatusIcons	inferred	confidence=high; retail ASM draws result-item status icons 0x1D/0x1E from panel state; mnuRefreshPanelLayer calls it with the work record. [LiteH menu naming batch 18]
 0x00266668	brsDrawProgressRowEntries	inferred	confidence=high; retail result-row entry renderer called between background fade and portrait fade in brsDrawActiveUnitProgressRows; DDS2 related renderer 0x0029DFB0. [LiteH menu naming batch 18]
 0x00266BC0	brsDrawProgressRowOverlays	inferred	confidence=medium; retail result-row overlay/icon renderer called after portrait fade; DDS2 0x0029E548 has a similar role but different nesting. [LiteH menu naming batch 18]
-0x002697B0	sndOpSendTitleAudioCommand	inferred	confidence=high; script operation sends fixed no-payload sound command 0x40 via func_002E8E50 and returns success; DDS2 pair 0x002A13C0. [LiteH menu naming batch 18]
+0x002697B0	sndOpSendTitleAudioCommand	inferred	confidence=high; script operation sends fixed no-payload sound command 0x40 via sndQueueNoPayloadCommand40 and returns success; DDS2 pair 0x002A13C0. [LiteH menu naming batch 18]
 0x002698C0	sndOpUpdateTitleBgmState	inferred	confidence=high; script operation invokes mnuTitleStreamUpdateAndLogBgm and returns success; address-paired DDS2 0x002A14D0 instead resets the stream after file idle. [LiteH menu naming batch 18]
 0x00269A68	mnuConfigureTitleAudioStream	inferred	confidence=high; retail ASM issues title-stream/IOP setup using the caller's 0x400-word request; DDS2 pair 0x002A1678. [LiteH menu naming batch 18]
 0x00269B80	mnuCopySoundStreamOnStatusChange	inferred	confidence=high; compares status bit 0x01000000 and, only on change, copies to the alternating IOP buffer and flips its slot; DDS2 pair 0x002A1790. [LiteH menu naming batch 18]
