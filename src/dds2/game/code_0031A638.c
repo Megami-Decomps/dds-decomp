@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "mnu_shooting.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 
 
@@ -135,8 +136,6 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
     }
 }
 
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
-extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);

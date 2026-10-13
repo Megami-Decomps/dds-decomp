@@ -11,6 +11,7 @@
 #include "mnu_movie_resource.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
 
 extern u8 D_0037B8BC[];
 
@@ -121,8 +122,6 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
 
 extern char D_003BC628[];
 extern void func_003014F0(char *, const char *, ...);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);

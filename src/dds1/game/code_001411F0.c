@@ -3,6 +3,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
@@ -43,8 +44,6 @@ extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
 extern u32 fldGetSceneReadyFlag(void);
-extern void kwlnFadeStartOut(s32);
-extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 
 
@@ -149,8 +148,6 @@ extern struct FileRequest *D_003BAFE8;
 extern u32 D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 evtGetMessageWindowControlState(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);

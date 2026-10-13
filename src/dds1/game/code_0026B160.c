@@ -46,8 +46,6 @@ extern void mnuDrawMovieMenuBackgroundQuad(s32 alpha);
 extern void mnuInitializeTitleCameraScene(void);
 extern void mnuEnsureMovieMenuSpriteHandle(s32 mode);
 extern u8 mnuHasSpriteHandle(void);
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
-extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void sndStartTrackExtended(s32 trackId);
 extern void mnuDrawMovieMenuSpriteSlot16(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot17(s32 volume);

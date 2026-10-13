@@ -22,6 +22,7 @@
 #include "sdf_model.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
+#include "kwln_fade.h"
 
 
 extern FldFileResource *D_00438EC0;
@@ -4108,7 +4109,6 @@ s32 fldUpdateFieldTransition(void) {
 
 extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
 extern void fldPlayMenuSound(s32 soundId);
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void fldSetSceneControlFlags(u32 mask);
 extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);

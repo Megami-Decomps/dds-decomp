@@ -11,6 +11,7 @@
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -49,7 +50,6 @@ struct MenuListNode {
 };
 
 extern MenuList *mtrBuildUnitSelectionList(void);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuInitializeMantraSelectionWork(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 extern s32 mtrDrawUnitSelectionOverlay(struct MnuStatusResource *);

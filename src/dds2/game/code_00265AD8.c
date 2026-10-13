@@ -96,7 +96,6 @@ extern ShopRankPriceRow D_003CBB70[];
 extern const u8 (*D_00435E5C)[25];
 extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 func_00265A60(MenuTerminalContext *);
 extern void dspSetActive(s32);

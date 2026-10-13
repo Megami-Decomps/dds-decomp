@@ -593,7 +593,6 @@ void mnuReleaseWorkResources(u8 *work) {
     mnuDestroyListState(((MenuTerminalWork *)work)->owner);
 }
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void evtCreateEventScriptProcess(s32);
 
@@ -742,7 +741,6 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
 extern s32 D_003BC3E4;
 extern char D_003AF590[];
 extern char D_003AF620[];
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
@@ -1666,7 +1664,6 @@ u32 func_0024B470(void) {
 }
 
 extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];

@@ -2,6 +2,7 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
@@ -383,7 +384,6 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 /* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
 
 extern void fldPlayFieldSeVolumePan(s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
 /* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
@@ -3976,7 +3976,6 @@ s32 fldUpdateFieldTransition(void) {
 }
 
 extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void fldSetSceneControlFlags(u32 mask);
 

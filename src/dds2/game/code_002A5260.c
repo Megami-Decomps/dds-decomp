@@ -16,6 +16,7 @@
 #include "mnu_list.h"
 #include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
 
 
 /* Title menu's selected page, sequence timers and draw-task state. */
@@ -941,7 +942,6 @@ typedef struct StaffImageTiming {
     s32 holdFrames;
     s32 fadeOutStep;
 } StaffImageTiming;
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 s32 mnuStaffImageProc(KwlnTask *task) {

@@ -37,6 +37,7 @@
 #include "mdl_flag_api.h"
 
 #include "sdf.h"
+#include "kwln_fade.h"
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct MenuListNode;
@@ -153,7 +154,6 @@ extern u32 D_003BD8EC;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void *fileWaitContinuation;
 

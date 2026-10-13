@@ -57,7 +57,6 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuRequestEffectResources(MenuEffectResources *);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern char D_00428358[];
 
@@ -774,7 +773,6 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
 }
 
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 

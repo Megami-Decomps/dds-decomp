@@ -9,6 +9,7 @@
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
+#include "kwln_fade.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -106,7 +107,6 @@ extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldApplyPendingCameraHeading(void);
 extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
