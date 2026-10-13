@@ -95,7 +95,7 @@ extern s32 sndVisitQueuedResources(void);
 
 extern void sndFlushMessageQueue(void);
 
-extern s32 func_0019F6A0(KwlnTask *task);
+extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
@@ -917,7 +917,7 @@ void itfMesInit(void) {
         poolNode->stateAddress = 0;
     }
     kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)sndVisitQueuedResources, (TaskDestroy)sndFlushMessageQueue, 0);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_0019F6A0, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, (TaskDestroy)sndFlushMessageQueue, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */

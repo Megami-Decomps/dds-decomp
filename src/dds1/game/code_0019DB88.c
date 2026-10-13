@@ -722,7 +722,7 @@ s32 sndVisitQueuedResources(void) {
 extern void itfMesDestroyWindow(s32 window);
 extern u32 func_0011E278(void);
 
-s32 func_0019F6A0(KwlnTask *task) {
+s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;
 
     if (func_0011E278() != 0) {

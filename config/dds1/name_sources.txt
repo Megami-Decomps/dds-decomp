@@ -2708,6 +2708,7 @@
 0x0019ED78	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
 0x0019F4C8	itfDrawSoundSelectorFadeLayers	inferred	U3
 0x0019F660	sndVisitQueuedResources	inferred	snd sound tasks and playback in game/code_0019DB88.c
+0x0019F6A0	itfUpdateSoundSelectorPanels	inferred	Registered DrawMsgMng update task gates on pending work, updates active sound-selector panels, advances the message tick, and returns zero.
 0x0019F710	sndFlushMessageQueue	inferred	Walks the D_003D6EA0 node list calling func_0019D0B8 per entry, then releases queue state through func_002D2D00 and clears it.
 0x0019F770	itfQueueSpriteQuadPacket	inferred	Builds a sprite's four-corner vertices, emits the indexed five-quad packet, and appends it to the message draw list.
 0x0019F850	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds1/game/code_0019DB88.c:568:func_0019F850; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
