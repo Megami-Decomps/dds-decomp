@@ -146,7 +146,7 @@ s32 func_0031AF68(MnuShootingWork *object) {
 void func_0031B080(MnuShootingWork *object) {
     FadeNumber *fade = &object->pauseFade;
 
-    func_0031ED68(fade, object->choiceIndex);
+    mnuSetPauseFadeChoice(fade, object->choiceIndex);
     if (object->unk70Bit0) {
         itfSetFadeMode(&fade->fade, 1, 8);
     } else {

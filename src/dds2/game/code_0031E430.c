@@ -180,7 +180,7 @@ void func_0031E8E8(FadeGauge *entry, u32 displayValue) {
 
 INCLUDE_ASM(const s32, "game/code_0031E430", func_0031E8F0);
 
-void func_0031ED68(FadeNumber *entry, u32 displayValue) {
+void mnuSetPauseFadeChoice(FadeNumber *entry, u32 displayValue) {
     entry->displayValue = displayValue;
 }
 
