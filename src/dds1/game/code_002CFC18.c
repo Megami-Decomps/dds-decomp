@@ -3,6 +3,7 @@
 #include "ee_mmi.h"
 #include "sdf.h"
 #include "sdf_thread.h"
+#include "sdf_thread_sleep.h"
 
 #define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
 #define SDF_THREAD_COMPLETION_EVENT 2
