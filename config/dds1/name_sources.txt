@@ -4404,6 +4404,7 @@
 0x00244B30	mnuCampRunPanel0	inferred	mnu camp inits panel then runs mode 0
 0x00244B90	mnuCampRunPanel1	inferred	mnu camp runs panel mode 1
 0x00244BC8	mnuCampRunPanel2	inferred	mnu camp runs panel mode 2
+0x00244D10	mnuCampGetRankedItemPrice	inferred	confidence=high; src/dds1/game/code_00242608.c:1441; Reads the active ranked-stock item and applies its row/item percentage and progress-stage price scales, or returns half the base item price; twin=0x00260A58 (DDS2).
 0x00244E08	mnuShopGetTransactionLimit	inferred	U2
 0x00245190	mnuCampClampSceneCounter	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00245C00	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]

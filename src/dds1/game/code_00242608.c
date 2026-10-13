@@ -1438,7 +1438,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-s32 func_00244D10(s32 index, s32 halfPrice) {
+s32 mnuCampGetRankedItemPrice(s32 index, s32 halfPrice) {
     u32 rowOffset;
     u8 *row;
     u8 *entry;
@@ -1654,7 +1654,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
             func_0027C788(scene->window);
             mnuAdvanceListCursorDefault(scene->window->list);
             params = &node->camp;
-            price = func_00244D10(i, 0);
+            price = mnuCampGetRankedItemPrice(i, 0);
             params->value = price;
             params->id = id;
             params->price = price;
@@ -1717,7 +1717,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
                 func_0027C788(scene->window);
                 mnuAdvanceListCursorDefault(scene->window->list);
                 parameters = &node->camp;
-                price = func_00244D10(i, 0);
+                price = mnuCampGetRankedItemPrice(i, 0);
                 parameters->value = price;
                 parameters->id = itemId;
                 parameters->price = price;

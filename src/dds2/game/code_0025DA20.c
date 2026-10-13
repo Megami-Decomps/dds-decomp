@@ -1745,7 +1745,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     return price;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260A58);
+INCLUDE_ASM(const s32, "game/code_0025DA20", mnuCampGetRankedItemPrice);
 
 s32 mnuCampFindListedItemIndex(s32 id) {
     u16 *entry = (u16 *)mnuCampListedItems;
@@ -2144,7 +2144,7 @@ s32 mnuCampAppendRankedItemRows(MenuTerminalContext *scene) {
         window = scene->window;
         mnuAdvanceListCursorDefault(window->list);
         params = &node->camp;
-        price = func_00260A58(i, 0);
+        price = mnuCampGetRankedItemPrice(i, 0);
         params->id = id;
         params->value = price;
         params->price = price;
@@ -2240,7 +2240,7 @@ s32 mnuCampAppendRankedFilteredRows(MenuTerminalContext *scene, s32 filterMode) 
         func_002B9808(scene->window);
         mnuAdvanceListCursorDefault(scene->window->list);
         params = &node->camp;
-        price = func_00260A58(i, 0);
+        price = mnuCampGetRankedItemPrice(i, 0);
         params->value = price;
         params->id = id;
         params->price = price;

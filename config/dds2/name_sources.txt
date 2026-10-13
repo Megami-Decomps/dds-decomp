@@ -3887,6 +3887,7 @@
 0x002608E0	mnuAdvanceCampPopup	inferred	medium confidence; src/dds2/game/code_0025DA20.c func_002608E0: Dispatches mode 1 for the active camp popup; the retail dispatcher uses its advance callback/result after update activation. [names_reviewed25.tsv]
 0x00260918	mnuFinishCampPopup	inferred	medium confidence; src/dds2/game/code_0025DA20.c func_00260918: Dispatches mode 2 for the active camp popup; the retail dispatcher performs completion-transition cleanup and releases the current entry. [names_reviewed25.tsv]
 0x00260950	mnuCampGetSourceItemPrice	inferred	L13
+0x00260A58	mnuCampGetRankedItemPrice	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1748; Ranked-item pricing helper called by both ranked-stock builders with the same index/half-price argument shape as DDS1; twin=0x00244D10 (DDS1).
 0x00260B50	mnuCampFindListedItemIndex	inferred	Searches the three-entry camp item table for an ID and returns its index or negative one. [names_reviewed15.tsv]
 0x00260B90	itmClaimFreeSlot	inferred	scans 2 slots of a row for an id whose flag is clear and sets it (mdlFlagTest/mdlFlagSet) [names_M36_SmallSweep5.tsv]
 0x00260C48	mnuCampChooseSolarWeightedOption	inferred	Chooses a weighted camp table option, switching the weights for a particular solar phase. [names_reviewed15.tsv]
