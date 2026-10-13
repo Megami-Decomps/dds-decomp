@@ -210,7 +210,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         if (work->choiceIndex > 1) {
             work->choiceIndex = 1;
         }
-        func_0031EE28(&work->choiceFade, work->choiceIndex);
+        itfSetTwoChoiceFadeSelection(&work->choiceFade, work->choiceIndex);
         if (D_0037F510[0x21] < 0) {
             work->phase = 11;
             work->result = work->choiceIndex;

@@ -504,7 +504,8 @@ void parSysReset(void) {
     effMiscSeedRandomFromClock((EffRandState *)&D_003D64B0);
 }
 
-void func_0015B250(void) {
+/* Particle-system startup hook; the empty retail body matches the DDS2 twin. */
+void parInitializeParticleSubsystem(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
