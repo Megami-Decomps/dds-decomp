@@ -910,6 +910,7 @@
 0x001513C0	fldStartDeferredFieldExit	inferred	DDS1 0014D028 twin; starts field exit sequence and sets phase 2 [names_R_FuncNames2.tsv]
 0x00151468	fldIsEventPhaseAtLeastTwo	inferred	DDS1 0014D0D0 twin; tests D_003D62A8[0] phase threshold [names_R_FuncNames2.tsv]
 0x00151480	fldTickWeatherEffectNodes	inferred	Calls the weather-effect node updater; twin 0x0014D0E8. [names_R_FuncNames6.tsv]
+0x00151498	fldGetSparkEncounterSelection	inferred	Returns the signed selector stored in the active spark resource row; fldAdvanceToNextScene assigns it to FieldEncounterRequest.encounterSelection. [LiteH-2]
 0x001514A8	fldGetSparkRewardProfileIndex	inferred	Returns the active spark reward profile index; AP gain and weighted-profile message code use it to select the reward row. [LiteH-2]
 0x001514B8	fldGetSparkPickupCount	inferred	Returns the successful spark-pickup count used by the spark UI and profile-scaled AP/message rewards. [LiteH-2]
 0x001514C8	fldResetViewState	inferred	Clears field view state D_00451D38 and sets the +0x6C sentinel to -1

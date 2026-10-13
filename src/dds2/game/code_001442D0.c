@@ -4794,7 +4794,7 @@ void fldTickWeatherEffectNodes(void) {
 }
 
 /* The serialized resource row retains a signed parameter at +6. */
-s32 func_00151498(void) {
+s32 fldGetSparkEncounterSelection(void) {
     return fldSparkControlState.entry->unk06;
 }
 
