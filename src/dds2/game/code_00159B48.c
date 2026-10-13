@@ -21,6 +21,7 @@ extern s32 effEmitterDelayRandomState[];
 #include "eff_track_poly_list.h"
 #include "par_table.h"
 #include "par_kind_api.h"
+#include "eff_particle_record.h"
 #include "fpu.h"
 
 #define BILL_ENTRY_BYTES 0x14
@@ -59,18 +60,6 @@ typedef struct EffParticle {
     u8 padF4[4];
     EffectBufferTail *buffer; /* 0xF8 */
 } EffParticle;
-
-typedef struct EffParticleRecord {
-    f32 x;              /* 0x00 */
-    f32 y;              /* 0x04 */
-    f32 z;              /* 0x08 */
-    u8 pad0C[0x14];
-    s32 frame;   /* 0x20: starts at -1; zero requests reinitialization before increment */
-    u32 color;   /* 0x24: packed RGBA built from the effect's colour and alpha */
-    f32 speed;
-    f32 angle;
-    u8 pad30[0x10];
-} EffParticleRecord;
 
 extern u32 effParModulateColors(u32, u32);
 

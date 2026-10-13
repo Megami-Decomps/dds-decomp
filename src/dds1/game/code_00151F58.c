@@ -20,6 +20,7 @@ extern void *sdfCreateAssetWithDrawEntries();
 #include "eff_track_poly_list.h"
 #include "par_table.h"
 #include "par_kind_api.h"
+#include "eff_particle_record.h"
 #include "fpu.h"
 
 #define BILL_ENTRY_BYTES 0x14
@@ -33,19 +34,6 @@ extern void *sdfCreateAssetWithDrawEntries();
 /* Header shared by the effect emitters that spawn a ring or spray of packets:
  * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
  * buffer. The kind-specific parameters follow at +0x150. */
-/* Particle record stored at the beginning of the effect's resource buffer. */
-typedef struct EffParticleRecord {
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad0C[0x14];
-    s32 frame;   /* 0x20: starts at -1; zero requests reinitialization before increment */
-    u32 color;   /* 0x24: packed RGBA built from the effect's colour and alpha */
-    f32 speed;
-    f32 angle;
-    u8 pad30[0x10];
-} EffParticleRecord;
-
 extern u8 effDefaultRandomState[];
 
 extern EffectConfig D_0034DF54[];

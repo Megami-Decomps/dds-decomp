@@ -1,6 +1,8 @@
 #include "sdf_gs_header.h"
+#include "sdf_dev_cons.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -205,7 +207,7 @@ typedef struct EvtSelState {
     s32 count;
 } EvtSelState;
 
-extern void func_00109E60(void);
+extern void evtUpdateSelectionStateInterpolation(void);
 
 extern u8 D_0037F590[];
 
@@ -227,9 +229,6 @@ extern void kwlnFadeBackgroundStartOut();
 
 extern s32 sdfDevConsNodeCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-extern s32 sdfDevConsSetControlByte(s32 arg0, s32 arg1);
-
-extern void sdfDevConsSetTextAttribute(s32 arg0, s32 arg1);
 
 extern void dds3AdminSetControlFlag(void);
 
@@ -371,7 +370,7 @@ void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00108318);
+INCLUDE_ASM(const s32, "game/code_00107EF8", kwlnUpdateDrawParameterTransitions);
 
 /* Replace the two scalar targets immediately, or retain start/end values for their blend. */
 void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {
@@ -864,7 +863,7 @@ u32 evtCheckSelectionState(void) {
     }
     selectionState = evtSelectionState;
     if (selectionState->limit > selectionState->count || selectionState->limit == -1) {
-        func_00109E60();
+        evtUpdateSelectionStateInterpolation();
     } else {
         evtSelStateDestroy();
         return 1;
@@ -872,7 +871,7 @@ u32 evtCheckSelectionState(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109E60);
+INCLUDE_ASM(const s32, "game/code_00107EF8", evtUpdateSelectionStateInterpolation);
 
 void evtDestroySelectionState(void) {
     evtSelStateDestroy();
@@ -1439,8 +1438,8 @@ u8 evtWaitFileMenuTaskFour(void) {
 u32 evtEnsureFontResourceChain(void) {
     if (evtConsoleFontResourceChain == 0) {
         evtConsoleFontResourceChain = sdfDevConsNodeCreate(0x7100, 0x7A60, 0x28, 0x14);
-        sdfDevConsSetControlByte(evtConsoleFontResourceChain, 2);
-        sdfDevConsSetTextAttribute(evtConsoleFontResourceChain, 7);
+        sdfDevConsSetControlByte((DevConsState *)evtConsoleFontResourceChain, 2);
+        sdfDevConsSetTextAttribute((DevConsState *)evtConsoleFontResourceChain, 7);
     }
     return 0;
 }
@@ -1512,7 +1511,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct KwlnTask *task) {
     return 0;
 }
 
-void func_0010B110(void) {
+void evtGeneralHeapGraphTaskDestroy(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411370);
@@ -1521,7 +1520,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_00411380);
 
 void evtToggleDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, func_0010B110, NULL);
+        D_00438E64 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, evtDrawGeneralHeapUsageGraph, evtGeneralHeapGraphTaskDestroy, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy(D_00438E64, 0);
     }
@@ -1742,17 +1741,17 @@ s32 evtDrawResourceCountDebugTask(KwlnTask *task) {
     return 0;
 }
 
-void func_0010B8D0(void) {
+void evtResourceCountDebugTaskDestroy(void) {
 }
 
 extern s32 evtDrawResourceCountDebugTask(KwlnTask *task);
-extern void func_0010B8D0(void);
+extern void evtResourceCountDebugTaskDestroy(void);
 extern s32 D_00438E68;
 extern char D_004113B8[]; /* "DebugTimeGrph" */
 
 void evtToggleAlternateDebugTimeGraphTask(s8 mode) {
     if (mode == 1) {
-        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, func_0010B8D0, NULL);
+        D_00438E68 = kwlnTaskCreate(D_004113B8, 0x2710, 1, 1, (s32)evtDrawResourceCountDebugTask, evtResourceCountDebugTaskDestroy, NULL);
     } else if (mode == 0) {
         kwlnTaskDestroyWithHierarchy((void *)D_00438E68, 0);
     }

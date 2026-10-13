@@ -2,6 +2,7 @@
 #include "eff_random.h"
 #include "sdf_timer.h"
 #include "sdf.h"
+#include "sdf_alarm.h"
 #include "sdf_thread.h"
 
 extern u8 D_003BD39C;

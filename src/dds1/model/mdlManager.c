@@ -32,18 +32,13 @@
 #include "mdl_asset_request.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "btl_group_id_entry.h"
 
 #define BTL_GROUP_COUNT 8
 
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
 #define BTL_GROUP_OWNS_RESOURCES_FLAG 1
-
-/* Each group also has an independent, singly-linked list of IDs. */
-typedef struct BattleGroupIdEntry {
-    struct BattleGroupIdEntry *next;
-    s32 id;
-} BattleGroupIdEntry;
 
 extern BattleGroupNode *btlFindGroupedEntity(s32, s32);
 

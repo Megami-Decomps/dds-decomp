@@ -3039,7 +3039,7 @@ void func_00208A50(void) {
 }
 
 void func_00208C20(void) {
-    func_001F53F0();
+    btlArrangeOpponentFormationSlots();
 }
 
 u32 btlIsInSpecialModeRange(u32 unused0, u32 unused1, s32 action) {
@@ -3064,7 +3064,7 @@ u32 btlGetSpecialModeEffectValue(void) {
     return *(u16 *)(effect + 0x4);
 }
 
-extern void func_001F53F0(void);
+extern void btlArrangeOpponentFormationSlots(void);
 
 void btlTriggerSpecialUnitAction(void) {
     u8 *battle = (u8 *)btlGetRuntime();
@@ -3080,7 +3080,7 @@ void btlTriggerSpecialUnitAction(void) {
     if (unit != 0) {
         ((BtlState *)battle)->postPlacementCallback = 0;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
-        func_001F53F0();
+        btlArrangeOpponentFormationSlots();
     }
 }
 
@@ -3417,7 +3417,7 @@ void func_00209528(void) {
             }
             unit = unit->next;
         }
-        func_001F53F0();
+        btlArrangeOpponentFormationSlots();
         unit = state->units;
         while (unit != NULL) {
             flags = unit->status.flags;
@@ -3443,7 +3443,7 @@ void func_00209528(void) {
     }
 }
 
-extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 /* Event entry carrying a battle task and its action kind. */
 typedef struct BtlEventEntry {
@@ -3471,7 +3471,7 @@ s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry) {
     kind = entry->status;
     if (kind < 9) {
         if (kind >= 4) {
-            func_001DF358(entry, &entry->camera);
+            btlSetDefaultActionCameraPose(entry, &entry->camera);
             entry->flags |= 0x1000;
             return 0;
         }

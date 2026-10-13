@@ -1261,11 +1261,11 @@ u8 mnuGetTerminalFrameFade(MenuTerminalWork *scene) {
 
 extern void sndStartTrackExtended(s32);
 
-extern void func_002E9708(void);
+extern void sndStartReducedBgm(void);
 
 extern void sndReleaseTrackHandle(s32);
 
-extern void func_002E9730(void);
+extern void sndStopReducedBgm(void);
 
 
 struct EffectSlotSet;
@@ -1624,12 +1624,12 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
         if (host->mode == 0) {
             sndStartTrackExtended(host->bgmHandle);
         } else {
-            func_002E9708();
+            sndStartReducedBgm();
         }
     } else if (host->mode == 0) {
         sndReleaseTrackHandle(host->bgmHandle);
     } else {
-        func_002E9730();
+        sndStopReducedBgm();
     }
 }
 
@@ -1784,7 +1784,6 @@ u32 evtBeginSelectionExitFade(KwlnTask *task) {
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
-extern void fileSetPreviewLocation();
 extern void fileEnterMcPackScene(s32 mode);
 
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {

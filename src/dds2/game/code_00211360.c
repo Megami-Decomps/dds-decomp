@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -82,7 +83,6 @@ extern s16 btlGetActorEntryCode(BtlUnit *, s32);
 
 extern s32 D_003BF660[];
 
-extern u32 btlPickWeightedAiSlot();
 
 extern s32 fldGetSelectedUnitStat(BtlUnit *);
 

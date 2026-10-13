@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_vector_latch.h"
 #include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"

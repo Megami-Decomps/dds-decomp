@@ -14,6 +14,7 @@ extern s32 iWakeupThread(s32 threadId);
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "sdf_texture_release.h"
+#include "sdf_vu_transform_api.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
 enum {
@@ -301,7 +302,6 @@ void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
 }
 
 extern vu8 sdfCurrentBufferIndex;
-extern void sdfVuClearTransformCache(void);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {

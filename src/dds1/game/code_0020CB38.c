@@ -32,7 +32,6 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
 
-extern s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
@@ -349,7 +348,13 @@ s32 btlOffsetSpecialTargetPositionForAction(BtlLinkedCommand *command, s32 unuse
 
 extern s32 btlOffsetSpecialTargetPositionForAction();
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D668);
+s32 func_0020D668(BtlLinkedCommand *command, s32 modeA, s32 modeB) {
+    s32 result = btlOffsetSpecialTargetPositionForAction(command, (s8)modeA, (s8)modeB);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
+     * consumed local cleanup through sibling selection, then removes it in CSE. */
+    command = NULL;
+    return result;
+}
 
 s32 func_0020D690(BtlUnit *unit, s32 action) {
     if ((unit->status.flags & 0x400) == 0) {
@@ -586,7 +591,13 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
+s32 func_0020DE50(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe retains this
+     * consumed local cleanup through sibling selection, then removes it in CSE. */
+    rotate = 0;
+    return result;
+}
 
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);

@@ -108,7 +108,7 @@ extern SdfSoundCommand D_003BD494;
 
 u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
 
-u32 func_002E87A8(u32 command, u32 value, void *data, u32 size);
+u32 sndQueueCommandPacket(u32 command, u32 value, void *data, u32 size);
 
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
@@ -134,16 +134,16 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
-void func_002E9708(void) {
-    func_002E87A8(0x180, 0, 0, 0);
+void sndStartReducedBgm(void) {
+    sndQueueCommandPacket(0x180, 0, 0, 0);
 }
 
-void func_002E9730(void) {
-    func_002E87A8(400, 0, 0, 0);
+void sndStopReducedBgm(void) {
+    sndQueueCommandPacket(400, 0, 0, 0);
 }
 
-void func_002E9758(s32 channel) {
-    func_002E87A8(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
+void sndTransitionBgm(s32 channel) {
+    sndQueueCommandPacket(((channel + 1U) & 0xf) | 0xe0, 0, 0, 0);
 }
 
 s32 sdfSoundSendNamedCommand(const char *name, u8 channel) {

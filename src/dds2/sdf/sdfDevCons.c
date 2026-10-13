@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_dev_cons.h"
 #include "ee_mmi.h"
 
 #define SDF_DEVCONS_CELL_BYTES 2
@@ -9,23 +10,6 @@
 #define SDF_DMA_QWORD_SHIFT 4
 #define SDF_DMA_CHCR_TTE 0x40
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
-
-typedef struct DevConsState {
-    u8 pad0[4]; /* 0x0 */
-    struct DevConsState *unk4; /* 0x4 */
-    u16 unk8; /* 0x8 */
-    u16 unkA; /* 0xA */
-    s16 columns; /* 0xC */
-    s16 rows; /* 0xE */
-    s16 cursorColumn; /* 0x10: signed coordinates, halfword-wrapping updates */
-    s16 cursorRow; /* 0x12 */
-    u8 controlByte; /* 0x14 */
-    u8 pad15; /* 0x15 */
-    u8 textAttribute; /* 0x16: passed with each printed character */
-    u8 unk17; /* 0x17 */
-    u8 pad18[4]; /* 0x18 */
-    u8 *cells; /* 0x1C: two bytes per character cell */
-} DevConsState;
 
 extern void *memmove(void *dst, const void *src, u32 n);
 
@@ -60,7 +44,7 @@ void sdfDevConsStoreCharacter(DevConsState *console, s32 character, s32 attribut
     switch (character) {
     case 9:
         offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
-        tabWidth = console->unk17;
+        tabWidth = console->tabWidth;
         remainder = console->cursorColumn % tabWidth;
         count = remainder ? remainder : tabWidth;
         do {
@@ -144,17 +128,6 @@ u8 sdfDevConsGetControlByte(DevConsState *console) {
 void sdfDevConsSetControlByte(DevConsState *console, u8 controlByte) {
     console->controlByte = controlByte;
 }
-
-typedef struct ConsBuf {
-    u8 *writeCursor; /* 0x0: next glyph-data write */
-    u8 *packetStart; /* 0x4: beginning of the DMA range */
-    u8 *currentTag; /* 0x8: reserved, not-yet-finalized GIF tag */
-    void *dmaChannel; /* 0xC */
-    u8 *bufferAddresses[2]; /* 0x10: start of each alternating packet buffer */
-    s32 bufferBytes; /* 0x18: byte capacity of each buffer */
-    u16 activeBufferIndex; /* 0x1C */
-    u16 rowStep; /* 0x1E: added when the renderer advances to the next row */
-} ConsBuf;
 
 struct SdfTex;
 extern u32 D_00439194;

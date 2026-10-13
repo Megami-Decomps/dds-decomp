@@ -14,6 +14,14 @@ typedef struct SdfKeyPoolNode {
     s32 kind;                    /* 0x0C */
 } SdfKeyPoolNode;
 
+/* Tree view of a pool node: the link word at +0 becomes the replaced-item
+ * link, +0x4..+0xB stay opaque, and +0xC is compared as a float key. */
+typedef struct SdfKeyTreeItem {
+    struct SdfKeyTreeItem *replaced; /* 0x00 */
+    u8 pad04[8];                     /* 0x04: opaque */
+    f32 key;                         /* 0x0C */
+} SdfKeyTreeItem;
+
 typedef struct SdfKeyTreeNode {
     struct SdfKeyTreeNode *right; /* 0x00 */
     struct SdfKeyTreeNode *left;  /* 0x04 */
@@ -31,6 +39,9 @@ typedef struct SdfPool {
 } SdfPool;
 
 typedef char SdfKeyPoolNode_size_must_be_0x10[(sizeof(SdfKeyPoolNode) == 0x10) ? 1 : -1];
+typedef char SdfKeyTreeItem_size_must_be_0x10[(sizeof(SdfKeyTreeItem) == 0x10) ? 1 : -1];
+typedef char SdfKeyTreeItem_key_must_be_at_C[
+    ((u32)&((SdfKeyTreeItem *)0)->key == 0x0C) ? 1 : -1];
 typedef char SdfKeyTreeNode_size_must_be_0x10[(sizeof(SdfKeyTreeNode) == 0x10) ? 1 : -1];
 typedef char SdfPool_size_must_be_0x1C[(sizeof(SdfPool) == 0x1C) ? 1 : -1];
 

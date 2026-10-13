@@ -97,7 +97,7 @@ extern SoundTask *btlDeferredTaskHead;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
@@ -507,7 +507,7 @@ void func_001DD678(void) {
 
 /* Prepare the embedded primary camera through the existing 27.5f provider. */
 void btlPreparePrimaryActionCamera(BtlLinkedCommand *command) {
-    func_001DF358(command, &command->camera);
+    btlSetDefaultActionCameraPose(command, &command->camera);
 }
 
 void func_001DD698(void) {
@@ -613,7 +613,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
     action->stepKind = 0;
     task = action->task;
     if (btlHasActorCategoryFlag40(action) != 0) {
-        func_001DF358(action, &action->camera);
+        btlSetDefaultActionCameraPose(action, &action->camera);
         action->flags |= 0x800;
     } else {
         hasFlag200 = 0;
@@ -778,7 +778,7 @@ extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -897,7 +897,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 }
             } else {
-                func_001DEFE0(action, &action->camera, 20.0f);
+                btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
             }
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
@@ -973,7 +973,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else {
-        func_001DEFE0(action, &action->camera, 20.0f);
+        btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
     }
 }
 
@@ -995,7 +995,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     if (((BtlState *)btlGetRuntime())->unk_1FC & 1) {
         target = action->task->unit;
         if (target->status.flags & 0x400) {
-            func_001DF358(action, &action->camera);
+            btlSetDefaultActionCameraPose(action, &action->camera);
             return;
         }
     }

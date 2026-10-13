@@ -64,6 +64,7 @@ FileJobPayload *fileCreateJob(u16 type);
 void fileJobDestroy(FileJobPayload *job);
 void fileJobNotifyComplete(FileJobPayload *job);
 void fileJobInvokeTypeCallback(FileJobPayload *job);
+void fileSetPreviewLocation(s16 x, s16 y);
 void fileJobInvokePositionCallback(FileJobPayload *job, void *extra);
 void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra);
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale);

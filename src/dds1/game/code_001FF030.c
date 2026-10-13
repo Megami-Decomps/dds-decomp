@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "btl_task_condition.h"
 #include "eff_transform.h"
@@ -48,7 +49,6 @@ extern AiSpecies *datEnemyAiRecords;
 
 extern s32 btlRunAiAction();
 
-extern u32 btlPickWeightedAiSlot();
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 

@@ -13,7 +13,6 @@ extern s32 datActionAnimationRecords;
 
 extern s32 btlGetRuntime(void);
 
-extern s32 btlSetLinkedDefeatCameraPresetB();
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
@@ -226,7 +225,6 @@ extern s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any20
 extern s32 btlSetLinkFlagOff(BtlUnit *requestedUnit);
 extern s32 btlSetLinkFlagOn(BtlUnit *requestedUnit);
 extern s32 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
-extern s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
 extern void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied, u64 ownerId, u64 prerequisiteHandle, s32 condition);
 extern u64 btlStartSubtaskWithInput(u64 prerequisiteHandle);
 extern void btlStepFocusAngle(void);

@@ -99,7 +99,7 @@ extern void fldInitializeSceneGroups(void);
 
 
 
-extern s32 func_00206090();
+extern s32 btlArrangeOpponentFormationSlots();
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
@@ -251,7 +251,7 @@ INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D0140);
 
 s32 fldSceneStateRestoreDisplay(BtlState *scene) {
     if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {
-        func_00206090();
+        btlArrangeOpponentFormationSlots();
         if (!(scene->battleFlags & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
         }

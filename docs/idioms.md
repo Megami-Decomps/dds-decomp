@@ -1086,7 +1086,27 @@ justify inventing an abstraction solely to inhibit sibling calls. Recover a
 real shared callback helper/API from headers, source, or independent callers
 before applying this explanation to a retail function.
 
-The independent-evidence follow-up remains **unresolved**. DDS2 IDA references
+The callback-inline hypothesis remains **unresolved**. The entry-zero clear
+wrappers `func_0026DB70` and `func_0026DBB8` instead match under the approved
+post-final-call cleanup exception: clear the consumed context parameter after
+the true void provider call. Qualified cc1 RTL retains reset uid30 through
+`01.sibling` and `02.jump`, then deletes it in `03.cse`; both retail bodies
+retain JAL and epilogue. Their complete owner is `7 match, 0 differ`.
+The same exception resolves DDS2 `btlUnitWrapA` (0x002226D0), `btlUnitWrapB`
+(0x002247B0), and `func_00225778` (28B each). They clear the consumed signed
+rotation mode after capturing the true signed provider result. Reset uid38
+survives `01.sibling`/`02.jump` and first disappears in `03.cse`; qualified
+assembly and all 22 RTL dumps agree. Complete owner: `264 match, 0 differ`.
+This preserves the earlier Tidal and Sable forwarder reconstruction.
+
+DDS1 `func_0020DE50` (28B) uses the same consumed-rotation cleanup; its
+`func_0020D668` neighbor (40B) preserves the actual signed-byte argument
+conversions and clears the consumed command reference after the call.
+Both resets survive sibling selection and first disappear in `03.cse`;
+the complete owner is `28 match, 0 differ`. Prior Copper, Sable and Tidal
+reconstructions remain the source lineage.
+
+This does not establish a shared callback-inline API. DDS2 IDA references
 to `scrClearEntryFlag` are exactly the three direct calls above; the setter
 has no references and the tester has three direct jumps plus one direct call.
 No aligned literal pointer to any of these three operation addresses occurs
@@ -10654,7 +10674,7 @@ aligns with the existing DDS2 FILTER editor. DDS2's `kwlnUpdateBlurDebugMenu`
 aligns with the existing DDS1 BLUR editor, which controls overlay alpha, scale
 and position. The four-row FILTER editor's unreachable row/rate branches remain.
 
-`frFontGetBankEntryText` returns encoded text after the bank entry's packed
+`frFontGetEncodedTextData` returns encoded text after the bank entry's packed
 table and metadata word. It retains the metadata copy, unused mode parameter,
 original bounds check (including no new negative-ID guard), and every caller's
 existing signature. None of these naming changes alters parsing or codegen.
@@ -10674,7 +10694,7 @@ The observable operation stages and restores GS TEST_2 packets (AD register
 `0x47`), attaches computed lighting and processes the model transforms.
 Nothing in this pass establishes a party-specific tint operation.
 
-`btlResetSoundLoadFrames` writes the disabled `-1` sentinel to the motion- and
+`btlResetMotionSoundFrameCounters` writes the disabled `-1` sentinel to the motion- and
 skill-SE load-frame counters in both games. The DDS2 actor camera preset
 initializer and advance routine belong to linked-command step `0xC`; their
 actor-ID/mode tables, frame triggers and distance blending are unchanged.

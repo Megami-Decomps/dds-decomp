@@ -2470,7 +2470,7 @@ extern s32 btlHasMarkedEntry14();
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
@@ -2479,7 +2479,7 @@ s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (btlHasMarkedEntry14((s32)command, 0x10c) != 0) {
         if (command->motionProgress >= 0x12) {
             btlClearRuntimeFlag2000();
-            func_001EC868(command, &command->camera, 0.0f);
+            btlBuildBattleUnitFramingCameraPose(command, &command->camera, 0.0f);
         }
         command->motionProgress++;
     }
@@ -3322,7 +3322,7 @@ void btlSetCameraPresetForBossUnitMode(BtlLinkedCommand *fx) {
 s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     BtlCamState *pose = &command->frontCamera;
     command->camera.direction[0] = 1.0f;
-    func_001EC868(command, pose, 25.0f);
+    btlBuildBattleUnitFramingCameraPose(command, pose, 25.0f);
     btlCopyMotionTransform(&command->backCamera, pose);
     func_00336538(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
@@ -3425,7 +3425,7 @@ s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
         return 0;
     }
     if (side != 1 || targetSide == side) {
-        func_001EC868(command, &command->frontCamera, 25.0f);
+        btlBuildBattleUnitFramingCameraPose(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
             func_00336538(-0.87266463f);
@@ -4253,7 +4253,7 @@ extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 
 extern u32 btlIsMarkedActionSceneStateActive(void);
 
-extern void func_001ECBF8(BtlLinkedCommand *, BtlCamState *);
+extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
@@ -4277,7 +4277,6 @@ extern void btlSetSpecialEnemyGeometry(void);
 
 extern s32 func_00222450(BtlLinkedCommand *, BtlCamState *, s32);
 
-extern s32 btlSetLinkedDefeatCameraPresetB();
 
 typedef struct BattleActionFlagState {
     u8 active; /* 0x00 */
@@ -5254,7 +5253,7 @@ u32 btlTickAction6B(BtlLinkedCommand *unit) {
     if (unit->motionProgress >= 0) {
         if (unit->motionProgress >= 0xF) {
             btlClearRuntimeFlag2000();
-            func_001ECBF8(unit, &unit->camera);
+            btlSetDefaultActionCameraPose(unit, &unit->camera);
         } else {
             btlSetRuntimeFlag2000();
         }
@@ -5279,7 +5278,7 @@ u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit) {
     }
     if (btlHasMarkedEntry14((u32)unit) && unit->motionProgress == 0x25) {
         btlClearRuntimeFlag2000();
-        func_001EC868(unit, &unit->camera, 0.0f);
+        btlBuildBattleUnitFramingCameraPose(unit, &unit->camera, 0.0f);
     }
     ++unit->motionProgress;
     return 1;
@@ -5880,7 +5879,13 @@ done:
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapA);
+s32 btlUnitWrapA(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = func_00222450(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 void btlUnitSetCameraOffset(BtlLinkedCommand *unit) {
     btlBuildLinkedCommandCameraPair(unit, &unit->frontCamera, &unit->backCamera, 0.8f, -0.65f, 0.5f, 0, 1);
@@ -6530,7 +6535,13 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapB);
+s32 btlUnitWrapB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetLinkedDefeatCameraPresetB(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002247D0);
 
@@ -6810,7 +6821,13 @@ s32 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *came
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00225778);
+s32 func_00225778(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {
+    s32 result = btlSetSpecialDefeatCameraPreset(command, camera, rotate);
+    /* Retail uses JAL plus an epilogue. Qualified cc1probe shows this consumed
+     * mode reset survives sibling-call selection and disappears in CSE. */
+    rotate = 0;
+    return result;
+}
 
 /* For a group-0x200 owner with one group-0x400 target, mark defeat candidates
  * and clear the action transition. Other owner/target combinations do nothing. */

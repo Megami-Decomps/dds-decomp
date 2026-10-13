@@ -23,6 +23,7 @@
 #include "dat_state.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
+#include "sdf_vu_matrix.h"
 #include "kwln.h"
 #include "fpu.h"
 #include "mnu_list.h"
@@ -5308,7 +5309,239 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_002966D8);
+#include "eff_anim.h"
+
+/* Same complete producer view as the generated-texture packet provider. */
+typedef struct EffGeneratedTextureDescriptor {
+    f32 position[4];
+    f32 scaleX;
+    f32 scaleY;
+    u8 unk18[8];
+    f32 angle;
+    u32 color;
+    SdfTex *texture;
+} EffGeneratedTextureDescriptor;
+
+extern void billInvokeCallback(struct BillObj *);
+extern void effCopyVector(void *, void *);
+extern void fileReadRecordSecondVector(void *, u128 *);
+extern void fileReadVectorPtr20(void *, u128 *);
+extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
+
+void func_002966D8(s32 object) {
+    LoadObj *obj = (LoadObj *)object;
+    EffGeneratedTextureDescriptor params;
+    EffAnimSample sample;
+    f32 transformed[4];
+    f32 origin[4];
+    f32 orientation[4];
+    f32 matrix[16];
+    f32 modulation[4];
+    FileSlotTable *record;
+    FileSlot *slot;
+    struct BillObj *billboard;
+    FileJobPayload **jobs;
+    EffExpandedList *animation;
+    SdfPoolNode *textureSink;
+    s32 previousSegment;
+    s32 count;
+    s32 i;
+    f32 scale;
+    u32 packedColor;
+
+    eeUnpackRGBAWordFloat(obj->color, 0.0078125f);
+    VU0_STORE_VF(vf10, modulation);
+    record = obj->recordWork;
+    count = record->count;
+    if (count != 0) {
+        slot = record->slots;
+        switch (obj->selector) {
+        case 1:
+        case 2:
+        case 4:
+            billboard = obj->deviceHandle;
+            if (!(record->flags & 1)) {
+                for (i = 0; i < count; i++, slot++) {
+                    if (slot->state >= 0) {
+
+                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        packedColor = eePackRGBAWord(128.0f);
+                        scale = slot->scale;
+                        billSetChildParameter(billboard, packedColor);
+                        billSetChildScaleComponents(billboard, scale, scale);
+                        billSetRotationAngle(billboard, slot->angle);
+                        effCopyVector(billboard, slot->pos);
+                        billSetAnimationFrameForImmediateAdvance(billboard, slot->state);
+                        billInvokeCallback(billboard);
+                    }
+                }
+            } else {
+                fileReadRecordSecondVector(obj->recordWork, (u128 *)orientation);
+                fileReadVectorPtr20(obj->recordWork, (u128 *)origin);
+                VU0_LOAD_VF(vf10, orientation);
+                effMiscQuaternionToMatrixVU();
+                VU0_LOAD_VF(vf31, origin);
+                VU0_STORE_MATRIX(matrix);
+                for (i = 0; i < count; i++, slot++) {
+                    if (slot->state >= 0) {
+
+                        VU0_LOAD_MATRIX(matrix);
+                        VU0_LOAD_VF(vf10, slot->pos);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_STORE_VF(vf10, transformed);
+                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        packedColor = eePackRGBAWord(128.0f);
+                        scale = slot->scale;
+                        billSetChildParameter(billboard, packedColor);
+                        billSetChildScaleComponents(billboard, scale, scale);
+                        billSetRotationAngle(billboard, slot->angle);
+                        effCopyVector(billboard, transformed);
+                        billSetAnimationFrameForImmediateAdvance(billboard, slot->state);
+                        billInvokeCallback(billboard);
+                    }
+                }
+            }
+            break;
+        case 5:
+            jobs = obj->jobs;
+            if (!(record->flags & 1)) {
+                for (i = 0; i < count; i++, slot++, jobs++) {
+                    if (slot->state == 0) {
+                        fileJobNotifyComplete(*jobs);
+                    }
+                    if (slot->state >= 0) {
+
+                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        packedColor = eePackRGBAWord(128.0f);
+                        fileDispatchJobTypeCallback(*jobs, packedColor);
+                        fileJobInvokeScaleCallback(*jobs, slot->scale);
+                        fileJobInvokePositionCallback(*jobs, slot->pos);
+                        fileJobInvokeTypeCallback(*jobs);
+                    }
+                }
+            } else {
+                fileReadRecordSecondVector(obj->recordWork, (u128 *)orientation);
+                fileReadVectorPtr20(obj->recordWork, (u128 *)origin);
+                VU0_LOAD_VF(vf10, orientation);
+                effMiscQuaternionToMatrixVU();
+                VU0_LOAD_VF(vf31, origin);
+                VU0_STORE_MATRIX(matrix);
+                for (i = 0; i < count; i++, slot++, jobs++) {
+                    if (slot->state == 0) {
+                        fileJobNotifyComplete(*jobs);
+                    }
+                    if (slot->state >= 0) {
+
+                        VU0_LOAD_MATRIX(matrix);
+                        VU0_LOAD_VF(vf10, slot->pos);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_STORE_VF(vf10, transformed);
+                        eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        packedColor = eePackRGBAWord(128.0f);
+                        fileDispatchJobTypeCallback(*jobs, packedColor);
+                        fileJobInvokeScaleCallback(*jobs, slot->scale);
+                        fileJobInvokePositionCallback(*jobs, transformed);
+                        fileJobInvokeTypeCallback(*jobs);
+                    }
+                }
+            }
+            break;
+        case 7: {
+            u32 directInput[4];
+            u32 directOutput[4];
+            u32 transformedInput[4];
+            u32 transformedOutput[4];
+            s32 directFrame;
+            s32 transformedFrame;
+            animation = obj->referenceHolder;
+            previousSegment = -1;
+            textureSink = effGetPacketSubmissionSurface(((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
+            if (!(((FileSlotTable *)obj->recordWork)->flags & 1)) {
+                for (i = 0; i < count; i++, slot++) {
+                    if (slot->state >= 0) {
+
+                        directInput[0] = slot->color;
+                        EE_MMI_RGBA_UNPACK(directInput, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        {
+                            u32 *__restrict packedOutput = directOutput;
+                            const s32 *__restrict frameInput;
+
+                            EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                            packedColor = packedOutput[0];
+                            params.color = packedColor;
+                            frameInput = &slot->state;
+                            directFrame = *frameInput;
+                        }
+                        effSampleAnimSet(animation, directFrame, &sample);
+                        if (previousSegment != sample.segment) {
+                            params.texture = (struct SdfTex *)effAssignSampledSegmentReference(animation, textureSink, &sample);
+                            previousSegment = sample.segment;
+                        }
+                        scale = slot->scale;
+                        params.scaleX = scale * sample.scaleX;
+                        params.scaleY = scale * sample.scaleY;
+                        params.angle = slot->angle + sample.angle;
+                        PCP_COPY_VECTOR(params.position, slot->pos);
+                        effSubmitGeneratedTexturePacket(textureSink, &params);
+                    }
+                }
+            } else {
+                fileReadRecordSecondVector(obj->recordWork, (u128 *)orientation);
+                fileReadVectorPtr20(obj->recordWork, (u128 *)origin);
+                VU0_LOAD_VF(vf10, orientation);
+                effMiscQuaternionToMatrixVU();
+                VU0_LOAD_VF(vf31, origin);
+                VU0_STORE_MATRIX(matrix);
+                for (i = 0; i < count; i++, slot++) {
+                    if (slot->state >= 0) {
+
+                        VU0_LOAD_MATRIX(matrix);
+                        VU0_LOAD_VF(vf10, slot->pos);
+                        VU0_TRANSFORM_POINT(vf10, vf10);
+                        VU0_STORE_VF(vf10, params.position);
+                        transformedInput[0] = slot->color;
+                        EE_MMI_RGBA_UNPACK(transformedInput, 0.0078125f);
+                        VU0_LOAD_VF(vf11, modulation);
+                        VU0_MUL(vf10, vf10, vf11);
+                        {
+                            u32 *__restrict packedOutput = transformedOutput;
+                            const s32 *__restrict frameInput;
+
+                            EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
+                            packedColor = packedOutput[0];
+                            params.color = packedColor;
+                            frameInput = &slot->state;
+                            transformedFrame = *frameInput;
+                        }
+                        effSampleAnimSet(animation, transformedFrame, &sample);
+                        if (previousSegment != sample.segment) {
+                            params.texture = (struct SdfTex *)effAssignSampledSegmentReference(animation, textureSink, &sample);
+                            previousSegment = sample.segment;
+                        }
+                        scale = slot->scale;
+                        params.scaleX = scale * sample.scaleX;
+                        params.scaleY = scale * sample.scaleY;
+                        params.angle = slot->angle + sample.angle;
+                        effSubmitGeneratedTexturePacket(textureSink, &params);
+                    }
+                }
+            }
+            break;
+        }
+        }
+    }
+}
+
 
 void func_00296E98(s32 object) {
     fileAcquireLoadObjectRecord(object);

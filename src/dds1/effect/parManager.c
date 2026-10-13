@@ -10,6 +10,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "bill_object_api.h"
+#include "par_color_ramp.h"
 
 struct ParSystem;
 struct EffTrackPolyList;
@@ -17,28 +18,6 @@ struct EffTrackPolyList;
 enum {
     PAR_BURST_RANDOM_AXIS = 1
 };
-
-/* Colour-ramp setup for a particle emitter: masks the three colours to 24 bits, derives the fade-in/out
-   steps from the alpha byte, then the per-channel (colour0 -> colour1 -> colour2) steps per frame. */
-typedef struct ParColorRamp {
-    s32 mode;          /* 0x00: 1 = no ramp, 2 = ramp color0->color1 only */
-    u32 color0;        /* 0x04 */
-    u32 color1;        /* 0x08 */
-    u32 color2;        /* 0x0C */
-    u32 alpha;         /* 0x10 */
-    s32 fadeInFrames;  /* 0x14 */
-    s32 fadeOutFrames; /* 0x18 */
-    s32 frames;        /* 0x1C */
-    s32 rampFrames;    /* 0x20 */
-    f32 r01;           /* 0x24 per-channel step color0 -> color1 */
-    f32 r12;           /* 0x28 per-channel step color1 -> color2 */
-    f32 g01;           /* 0x2C */
-    f32 g12;           /* 0x30 */
-    f32 b01;           /* 0x34 */
-    f32 b12;           /* 0x38 */
-    u32 fadeIn;        /* 0x3C */
-    u32 fadeOut;       /* 0x40 */
-} ParColorRamp;
 
 /* Common emitter header. Radial-only fields belong to ParBurstEmitter's tail. */
 typedef struct ParObj {

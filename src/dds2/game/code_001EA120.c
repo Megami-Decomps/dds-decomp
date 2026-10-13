@@ -43,7 +43,7 @@ extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern u8 effSharedRandomState[];
 
-extern void func_001ECBF8();
+extern void btlSetDefaultActionCameraPose();
 
 typedef struct BtlUnit BtlUnit;
 
@@ -555,7 +555,7 @@ void func_001EAC08(void) {
 
 /* Prepare the embedded primary camera through the existing 27.5f provider. */
 void btlPreparePrimaryActionCamera(BtlLinkedCommand *action) {
-    func_001ECBF8(action, &action->camera);
+    btlSetDefaultActionCameraPose(action, &action->camera);
 }
 
 void func_001EAC28(void) {
@@ -665,7 +665,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         return;
     }
     if (btlHasActorCategoryFlag40(action) != 0) {
-        func_001ECBF8(action, action);
+        btlSetDefaultActionCameraPose(action, action);
         action->flags |= 0x800;
     } else {
         hasFlag200 = 0;
@@ -840,7 +840,7 @@ extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
 extern void func_001EF030(void *, void *);
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 
@@ -849,7 +849,7 @@ extern void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *, BtlCamState *);
 extern void func_003364B8(f32);
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 extern void btlSelectActionCameraPose(BtlLinkedCommand *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
@@ -962,7 +962,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
                 }
             } else {
-                func_001EC868(action, &action->camera, 20.0f);
+                btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
             }
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
@@ -1038,7 +1038,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else {
-        func_001EC868(action, &action->camera, 20.0f);
+        btlBuildBattleUnitFramingCameraPose(action, &action->camera, 20.0f);
     }
 }
 
@@ -1061,7 +1061,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
             return;
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {
-            func_001EC868(action, &action->camera, 0.0f);
+            btlBuildBattleUnitFramingCameraPose(action, &action->camera, 0.0f);
             func_003364B8(-(10.0f * 0.017453293f));
             VU0_STORE_VF_UNCLOBBERED(vf10, action->camera.direction);
             VU0_ROTATE_VEC(vf10, vf10);
@@ -1093,7 +1093,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     if (((BtlState *)btlGetRuntime())->unk220 & 1) {
         target = action->link->unit;
         if (target->status.flags & 0x400) {
-            func_001ECBF8(action, &action->camera, target);
+            btlSetDefaultActionCameraPose(action, &action->camera, target);
             return;
         }
     }

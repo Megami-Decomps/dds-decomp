@@ -16,6 +16,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
+#include "eff_event_bill.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_texture_primary_buffer_api.h"
@@ -1317,72 +1318,6 @@ void effEventLoadSelectedAimPositionVu(EffEventInit *src, EffAimParams *param) {
     }
     VU0_LOAD_VF(vf10, out);
 }
-
-/* Billboard emitter parameters (0x7C). Creation/copy clamps startDelaySpread,
-   fadeIn and fadeOut to at least one; motionDelaySpread is left unchanged. */
-typedef struct {
-    f32 position[EFF_EVENT_VECTOR_COMPONENTS];
-    u32 particleCount;
-    s32 duration;
-    s32 startDelaySpread;
-    s32 motionDelaySpread;
-    f32 spawnRadius;
-    u32 color;
-    s16 drawMode; /* Passed to the billboard mode setter in the direct-draw path. */
-    u8 pad2A[2];
-    s32 fadeIn;
-    s32 fadeOut;
-    u8 repeat;
-    u8 pad35[3];
-    f32 baseScale;
-    f32 scaleRandomness;
-    f32 scaleAmplitudeX;
-    f32 scaleAmplitudeY;
-    f32 scalePhaseStep;
-    f32 angularSpeed;
-    f32 verticalSpeed;
-    f32 verticalSpeedRandomness;
-    f32 lateralSpeed;
-    f32 lateralSpeedRandomness;
-    f32 accelerationPercent; /* Speeds multiply by 1 + this / 100 each motion step. */
-    f32 swayPhaseStep;
-    f32 swayAmplitude;
-    f32 swayAmplitudeStep;
-    f32 swayRandomness;
-    s32 colorStartAge; /* Batched path: primary texture RGB fades from black. */
-    s32 colorTransitionFrames;
-} EffEventBillParams;
-
-typedef struct {
-    f32 position[3];
-    u8 pad0C[4];
-    f32 motion[3]; /* X/Z: unit sway direction; Y: accumulated vertical offset. */
-    u8 pad1C[4];
-    s32 age;
-    s32 motionDelay;
-    f32 baseScale;
-    f32 scalePhaseX;
-    f32 scalePhaseStepX;
-    f32 scaleAmplitudeX;
-    f32 scalePhaseY;
-    f32 scalePhaseStepY;
-    f32 scaleAmplitudeY;
-    f32 rotation;
-    f32 angularSpeed;
-    f32 swayAmplitude;
-    f32 swayPhase;
-    f32 verticalSpeed;
-    f32 lateralSpeed;
-    u8 pad5C[4];
-} EffEventBillParticle; /* 0x60 */
-
-typedef struct {
-    EffEventBillParams head;
-    EffEventBillParticle *particles; /* 0x7C */
-    u8 flag;              /* 0x80 */
-    u8 pad81[3];
-    SdfMemBlock *allocationHandle; /* Owner follows its particles in this allocation. */
-} EffEventBillSet; /* 0x88 */
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 

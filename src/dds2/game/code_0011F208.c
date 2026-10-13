@@ -1151,7 +1151,7 @@ s32 fldGetStageBitmapBitCoordinates(s32 scene, s32 floor, f32 xOffset, f32 zOffs
 
 extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
 
-void func_00123B88(s32 room, s32 stage, f32 x, f32 z, f32 unused) {
+void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 z, f32 unused) {
     s32 neighbors[9][2] = {
         {-1, -1}, {0, -1}, {1, -1},
         {-1, 0}, {0, 0}, {1, 0},

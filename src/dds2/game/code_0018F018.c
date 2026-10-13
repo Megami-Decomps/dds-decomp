@@ -12,8 +12,6 @@
 
 
 
-extern void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
-
 /* Reset every slot, then stagger its initial phase by -spacing * index. */
 void effBlurSecondInitSlots(EffBlurScaleWork *work) {
     EffBlurScaleSlot *slot = work->slots;

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_model.h"
+#include "evt_gradient_rect.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -299,7 +301,6 @@ void dds3RebuildObjectModelContext(EffWorldNode *object, s32 resourceGroup, s32 
 extern SdfModel *evtCreateModelFromObject(void *object);
 extern Motion *evtAttachScriptToObject(void *object, SdfModel *model);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
-extern void sdfModelUpdateRootTransforms(SdfModel *model, s32 frame);
 
 void dds3CreateObjectModelAndMotion(void *object) {
     ObjBase *base;
@@ -379,7 +380,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
-extern void evtSubmitGradientRectAtDepth();
 struct SdfPoolNode;
 extern struct SdfPoolNode *D_00380818[4];
 
