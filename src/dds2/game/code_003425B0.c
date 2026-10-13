@@ -176,7 +176,7 @@ void sdfSoundStopNamedPlayback(void) {
     sndSendCommandPacket(0x100, 0, 0, 0);
 }
 
-void func_003426B8(u8 channel) {
+void sndSendChannelGroupCommand110(u8 channel) {
     sndSendCommandPacket(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
