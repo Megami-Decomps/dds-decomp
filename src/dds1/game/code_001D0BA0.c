@@ -287,10 +287,6 @@ typedef struct BtlFadeArgs {
 
 extern s32 effOffsetIfOwnerFlagClear();
 
-extern void sndFreeResourceNode(SoundResourceNode *);
-
-extern void sndFreeListNode(ActiveSoundNode *);
-
 extern s32 btlCountTasksByKind(u16 kind);
 
 void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);

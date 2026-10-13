@@ -687,8 +687,7 @@ void btlUnitTurnEndStateSelect(u8 *task) {
     }
 }
 
-extern void sndFreeResourceNode(SoundResourceNode *);
-extern void sndFreeListNode(ActiveSoundNode *);
+#include "btl_sound_node_api.h"
 extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);

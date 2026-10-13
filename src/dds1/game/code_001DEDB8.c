@@ -293,10 +293,6 @@ typedef struct BattleVoiceEntry {
 
 #define CURSOR (&D_0035F100)
 
-extern void sndFreeResourceNode(SoundResourceNode *);
-
-extern void sndFreeListNode(ActiveSoundNode *);
-
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern void *btlAllocTask(s32);
 

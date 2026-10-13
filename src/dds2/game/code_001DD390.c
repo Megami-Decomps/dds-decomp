@@ -5291,11 +5291,7 @@ BtlUnit *btlCreateUnit(void) {
     return unit;
 }
 
-extern void sndFreeResourceNode(struct SoundResourceNode *);
-
 extern void btlReleaseActorModelResources(BtlUnit *);
-
-extern void sndFreeListNode(struct ActiveSoundNode *);
 
 void btlReleaseUnitResources(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit data free[%p]\n", unit);
