@@ -16,6 +16,7 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
@@ -673,9 +674,6 @@ extern u8 D_0037FA00[];
 
 extern u8 D_00384790[];
 
-extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
-
-extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 
