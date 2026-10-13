@@ -5,6 +5,7 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "eff_object_dispatch_api.h"
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
@@ -757,10 +758,12 @@ extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
 extern void effMagatuhiDispatchByKind(void *bill);
 
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
-   Native implicit-int fall-through leaves the return value unspecified. */
-effObjDispatchReadyState(EffectObj *obj) {
-    if (obj->kind == EFF_OBJ_KIND) {
-        EffectDependencyState *data = obj->data;
+   The legacy s32 result is unspecified and every caller discards it. */
+s32 effObjDispatchReadyState(EffWorldNode *obj) {
+    EffectObj *effect = (EffectObj *)obj;
+
+    if (effect->kind == EFF_OBJ_KIND) {
+        EffectDependencyState *data = effect->data;
 
         switch (data->state) {
         case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:

@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "mnu_camp_display.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "itf_mes_window.h"
@@ -453,16 +454,6 @@ extern s32 D_00368BA8[4];
 extern s32 D_00368BB8[4];
 extern s32 D_00368BC8[4];
 extern SdfPoolNode D_003255A8;
-
-typedef struct CampDisplayDefaults {
-    s32 x;
-    s32 y;
-    u8 color[4];
-    f32 scaleY;
-    f32 scaleX;
-    s32 enabled;
-    s32 variant;
-} CampDisplayDefaults;
 
 void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->x = 0x100;
