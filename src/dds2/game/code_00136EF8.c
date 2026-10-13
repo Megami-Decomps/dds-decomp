@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
+#include "fld_npc_motion.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_vu_matrix.h"
@@ -255,15 +256,6 @@ extern FldRoomState fldRoomRecords[];
 
 extern char D_00413448[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 
-
-typedef struct FldNpcMotion {
-    s32 defaultMotionId;
-    u8 primaryName[0x10];
-    u8 secondaryName[0x10];
-    u8 unk24[0x10];
-    u8 unk34[0x10];
-    s32 unk44;
-} FldNpcMotion; /* 0x48 bytes */
 
 extern FldNpcMotion D_00391FA0[];
 
