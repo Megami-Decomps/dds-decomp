@@ -38,7 +38,7 @@ u32 sndSubmitTextCommandPayloadWithCommandBits60(s32 command, char *text) {
     return sndSendCommandPacket(command | 0x60, 0, text, length);
 }
 
-u32 func_002E8F30(s32 command, char *text) {
+u32 sndSubmitTextCommandPayloadWithCommandBits80(s32 command, char *text) {
     u32 length = strlen(text);
 
     return sndSendCommandPacket(command | 0x80, 0, text, length);
