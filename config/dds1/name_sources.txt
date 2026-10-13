@@ -968,6 +968,7 @@
 0x00131240	fldSetCameraObjectHighlightFlag	inferred	Sets the camera object's 0x800 flag and sets its paired status field to 0x80. [names_reviewed5.tsv]
 0x00131268	fldClearCameraModelColor	inferred	Writes zero to current camera model render color. [names_R_FuncNames6.tsv]
 0x00131278	fldRestoreCameraModelColor	inferred	Writes 0x80808080 to current camera model render color. [names_R_FuncNames6.tsv]
+0x00131290	fldSetCameraObjectTransitionFlag	inferred	Sets player-camera object flag 0x200; camera-follow callers use it during distant-target handling and before smoothed-position updates, while the paired clear helper removes 0x200 with 0x400.
 0x001312B0	fldClearCameraObjectTransitionFlags	inferred	Clears the camera object's 0x400 and 0x200 transition flags. [names_reviewed5.tsv]
 0x001313E0	fldSetCameraNodeModeWithTen	inferred	Selects node mode from location flags and passes constant 10.0 to node setter. [names_R_FuncNames6.tsv]
 0x00131458	fldSetCameraNodeModeWithZero	inferred	Selects same node mode from location flags and passes zero to node setter. [names_R_FuncNames6.tsv]
