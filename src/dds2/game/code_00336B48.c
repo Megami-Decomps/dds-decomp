@@ -74,7 +74,7 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-extern void func_00336EC0(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
+extern void sdfVuBuildPackedColorTransform(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
 extern s32 D_00439180;
 
@@ -206,7 +206,7 @@ void sdfVuRotateObjectBasis(void *vectors) {
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */
-void func_00336EC0(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+void sdfVuBuildPackedColorTransform(SdfVuColorTransform *result, u32 reference, u32 packedColor,
                    u32 firstColor, u32 secondColor,
                    f32 blend, f32 scale, f32 y) {
     f32 scaledY;
@@ -222,7 +222,7 @@ void func_00336EC0(SdfVuColorTransform *result, u32 reference, u32 packedColor,
 }
 
 void sdfVuTransformWorkAtOffset(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
-    func_00336EC0(out, D_00439188, packedColor,
+    sdfVuBuildPackedColorTransform(out, D_00439188, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
                   work->x + deltaX,
