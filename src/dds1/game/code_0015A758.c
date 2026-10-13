@@ -8,6 +8,7 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "eff_vertex_draw_request.h"
 #include "par_kind_api.h"
 #include "par_table.h"
 #include "par_draw_block.h"
@@ -74,21 +75,6 @@ typedef struct ParReleaseRecord {
     SdfAsset *asset;     /* 0x40 */
 } ParReleaseRecord;
 
-typedef struct ParDrawState {
-    u16 width;      /* 0x00 */
-    u16 height;     /* 0x02 */
-    u16 flags;      /* 0x04 */
-    u8 pad06[2];
-    u32 color;      /* 0x08: packed vertex color */
-    const u32 *indices; /* 0x0C: topology index stream */
-    u128 *positions; /* 0x10: current vertex cursor */
-    s32 unk14;      /* 0x14 */
-    s32 unk18;      /* 0x18 */
-    u8 pad1C[4];
-    u32 *colors;     /* 0x20: current color cursor */
-    u8 pad24[8];
-} ParDrawState; /* 0x2C */
-
 /* Free-list links mirror the DDS2 particle unit. */
 struct ParListNode {
     u8 pad00[0x54];
@@ -98,7 +84,7 @@ struct ParListNode {
 
 #include "sdf_packet_alloc.h"
 struct SdfListHead;
-extern void *effCreateVertexDrawPacket(ParDrawState *);
+extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
 
 
 extern ParDispatch parKindConstructorEntries[];
@@ -146,7 +132,7 @@ extern u8 D_003D64B0[];
 
 extern u8 D_003D64B0[];
 
-extern ParDrawState parDrawControl;
+extern EffVertexDrawRequest parDrawControl;
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
@@ -1695,7 +1681,7 @@ void parReleaseDrawBlock(ParBlock *block) {
 
 void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    ParDrawState state;
+    EffVertexDrawRequest state;
     s32 remaining;
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
