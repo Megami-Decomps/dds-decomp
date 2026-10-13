@@ -1230,7 +1230,7 @@ extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
-void func_0025F8B8(EffectSlotSet *object, MenuEffectResources *resources) {
+void mnuInitializeCampEffectResources(EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
@@ -1298,7 +1298,7 @@ void mnuShopLoadSpriteAssets(MenuTerminalContext *scene) {
     case 3:
         scene->effectSlots[1] = effLoadIndexedResource(
             "/facility/spr/shop/", D_003CE470[2], 0);
-        func_0025F8B8(scene->effectSlots[1], &scene->campEffect.resources);
+        mnuInitializeCampEffectResources(scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
     scene->effectSlots[2] = effLoadIndexedResource(
