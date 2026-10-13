@@ -39,12 +39,6 @@ typedef struct PartyFlagPair {
 } PartyFlagPair;
 
 
-/* Encoded name-table rows; keep byte storage and the retail table strides. */
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
 extern PartyFlagPair mnuPartyFlagEventEntries[];
 extern s32 D_00435E5C;

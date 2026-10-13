@@ -250,12 +250,6 @@ void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s
     mnuDrawDisplayPlaceholder(x + 0x18, y + 0x1A, z, alpha, drawContext);
 }
 
-/* Encoded name-table rows; keep byte storage and the retail table strides. */
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);

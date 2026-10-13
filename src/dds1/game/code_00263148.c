@@ -5,6 +5,8 @@
 
 #include "mnu.h"
 #include "prf_profile_cap.h"
+#include "dsp_name.h"
+
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
@@ -57,10 +59,6 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     kwlnItemApplySelection(scene);
     return 1;
 }
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;

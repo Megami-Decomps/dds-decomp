@@ -253,11 +253,6 @@ s32 mnuScheduleUnlockedMantraMessages(MenuSceneWork *work) {
 }
 
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
-
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern const s32 D_003AF840[];
