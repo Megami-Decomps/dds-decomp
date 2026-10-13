@@ -57,7 +57,7 @@ s32 itfMesSetOptionValue(s32 window, s32 arg1, s32 arg2);
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
 
-extern void func_00196BC0();
+extern void itfSetIndexedTextSlot();
 
 
 s32 frFontCountGlyphChainNodes();
@@ -70,9 +70,9 @@ void itfMesCopyGlyphShade();
 
 s8 itfTestTextInterfaceMask(s32 arg0);
 
-s32 func_00196BD8();
+s32 itfGetTextLipsUnitId();
 
-s32 func_00196BE0();
+s32 itfGetTextLipsMotionId();
 
 void evtLipsExecFunction();
 
@@ -1208,8 +1208,8 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
         }
     }
     if (itfTestTextInterfaceMask(8) != 0) {
-        lipsValue = func_00196BD8();
-        evtLipsExecFunction(lipsValue, func_00196BE0());
+        lipsValue = itfGetTextLipsUnitId();
+        evtLipsExecFunction(lipsValue, itfGetTextLipsMotionId());
     }
     itfMesSetNodeChainRenderValue(glyph, mes->renderValue);
     entryBlock->unk16 = itfMesCountSpanSteps(itfMesGetLastNode(glyph), glyph);
@@ -1252,7 +1252,7 @@ void itfMesReplaceTextSlotData(mes, slotIndex, source, byteCount)
 void itfMesInitCharTable(s32 *table) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < ITF_MES_TEXT_SLOT_COUNT; slotIndex++) {
-        func_00196BC0(slotIndex, table[slotIndex]);
+        itfSetIndexedTextSlot(slotIndex, table[slotIndex]);
     }
 }
 

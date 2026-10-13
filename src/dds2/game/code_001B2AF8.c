@@ -44,7 +44,7 @@ typedef struct BattlePanelEdgeWork {
     s16 alpha;
 } BattlePanelEdgeWork;
 
-extern void func_001C4900(BtlUnit *, BattleActorPanelWork *, s32, s8);
+extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
 extern f32 D_00415F80[4];
 
@@ -2184,7 +2184,7 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-extern s32 func_001B8A80(KwlnTask *);
+extern s32 btlUpdateValueMessageWindows(KwlnTask *);
 
 extern void itfMesCloseAllWindows(KwlnTask *);
 
@@ -2217,7 +2217,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->x = 0x20;
     work->y = 0x20;
     task = kwlnTaskCreate(btlMahenPanelTaskNameRef, 0x2B0E, 1, 1,
-                          func_001B8A80, itfMesCloseAllWindows, (u32)work);
+                          btlUpdateValueMessageWindows, itfMesCloseAllWindows, (u32)work);
     kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(10, (s32)task);
     return 1;
@@ -2796,7 +2796,8 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-s32 func_001B8A80(KwlnTask *task) {
+/* Fade and draw the task's enabled label/value windows; return -1 after fade-out. */
+s32 btlUpdateValueMessageWindows(KwlnTask *task) {
     MesWindowSet *work;
     s32 i;
     s32 count;
@@ -5060,7 +5061,7 @@ s32 btlUpdateAndDrawReserveActorPanels(KwlnTask *task) {
             btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
             btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
             btlUpdateActorPanelHighlights(unit, work, i, 1);
-            func_001C4900(unit, work, i, 1);
+            btlDrawActorPanelHighlights(unit, work, i, 1);
             func_001C7020(unit, work, i, 1, work->reserveEntries[i].presentation.fade,
                           work->reserveEntries[i].position[0], work->reserveEntries[i].position[1]);
 
@@ -5518,7 +5519,8 @@ void btlUpdateActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s3
 
 extern void evtSubmitGradientTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_001C4900(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
+/* Draw an active/reserve slot's eight-alpha highlights, then reset primary blending. */
+void btlDrawActorPanelHighlights(BtlUnit *unit, BattleActorPanelWork *work, s32 index, s8 reserve) {
     s32 x;
     s32 y;
     u32 alpha[8];
@@ -7143,7 +7145,8 @@ s32 btlHasSpecialActiveSceneActor(void) {
     return 0;
 }
 
-s32 func_001CA8D8(void) {
+/* Return the first 0xE0..0xFF skill on an actor with both 0x201 bits for Hunt tutorial, or zero. */
+s32 btlFindHuntTutorialSkill(void) {
     u32 requiredFlags = 0x201;
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 i;
@@ -7223,7 +7226,7 @@ s32 fldSelectSceneMode(ActionStateLink *task) {
         }
     }
     if (mdlFlagTest(0x805) == 0 && !(((SceneGlobalState *)btlTrackedTaskHandles)->flags & 0x200)) {
-        if (func_001CA8D8() != 0 && btlHaveActiveSceneActorEntriesCleared() != 0) {
+        if (btlFindHuntTutorialSkill() != 0 && btlHaveActiveSceneActorEntriesCleared() != 0) {
             return 3;
         }
     }
@@ -7337,7 +7340,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
                 memset(text, 0, sizeof(text));
-                func_0035C860(text, D_00436828, D_00435E64 + func_001CA8D8() * 17);
+                func_0035C860(text, D_00436828, D_00435E64 + btlFindHuntTutorialSkill() * 17);
                 evtCopyEntryStringToActiveWindow(0, text);
                 dspStartEntry(2);
                 btlSetCommandPanelFadeMode(0, 8);
@@ -8327,7 +8330,8 @@ void fldSetSceneSlotRange(s32 index) {
 
 extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
 
-void func_001CE5C8(void) {
+/* Step the current bank's slot fades when the task pair permits; slots share a timer. */
+void btlUpdateBankedSlotFadeSequence(void) {
     s32 bank = D_00438F54->bank;
     s32 last = D_00438F54->lastIndex;
     s32 status = btlGetNamedTaskPairStatusOrUnavailable();

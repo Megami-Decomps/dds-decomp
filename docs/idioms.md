@@ -9795,7 +9795,7 @@ Brass, KiB and Sable's earlier source and current-owner recovery credit.
 
 ### Mahen opacity: reuse the real intermediate across fresh color stages
 
-DDS2 `game/code_001B2AF8::func_001B8A80` (848 bytes) retains Garnet,
+DDS2 `game/code_001B2AF8::btlUpdateValueMessageWindows` (848 bytes) retains Garnet,
 Obsidian, Tidal and KiB's earlier complete reconstruction. Its remaining
 14 differing words include three half-alpha temporary register groups and
 one independent rectangle-argument pair.
@@ -10590,4 +10590,39 @@ node-category availability predicate.
 This naming-only closure deliberately retains DDS1's existing `void`
 definition, its caller extern types, and DDS2's distinct typed return/operands;
 it is not a return-type or ABI restructuring.
+
+## Battle value windows and packed font-resource helpers
+
+`btlUpdateValueMessageWindows` is the Mahen task callback, not a generic
+message-window initializer: it advances the fade state and draws enabled
+label/value entries and their common backdrop. Its matched callback-fresh reads
+and recomputed alpha intermediates remain unchanged. `btlDrawActorPanelHighlights`
+uses the active/reserve slot's saved eight-component highlight snapshot to draw
+four gradient triangles, then resets primary blending.
+
+`btlUpdateBankedSlotFadeSequence` retains the task-status gate and the shared
+phase-one timer. That timer advances for each eligible slot, not necessarily once
+per frame. DDS2's `btlFindHuntTutorialSkill` is evidenced by the command panel's
+`Tutorial Hunt!!` path and skill-name formatting: it returns the first
+`0xE0..0xFF` skill from an actor carrying both `0x201` bits, or zero. The range is
+not interpreted as linkage skills.
+
+`itfDecodePackedResourceEntry` follows a bit span through six-byte binary
+prefix-tree records and emits each terminal record's byte. The font clone/cache
+caller uses that output as atlas pixels; it is not a text-string decoder.
+The entry index, output bounds and empty spans are not validated.
+`itfGetLastDecodedByteCount` exposes the count saved by the decoder, preserving
+DDS1's unsigned and DDS2's signed return types. `itfGetPackedResourceHeaderWord`
+reads the opaque word at `0x10`; no size/count role has been established.
+The identity resource accessor and all original casts/calls remain intact.
+
+`itfSetIndexedTextSlot` stores one replacement-text address word in the table
+installed by `itfMesInitCharTable` and consumed by
+`frFontAppendIndexedTextToGlyphChain`. Encoded-text control `0xF416` records the
+values returned by `itfGetTextLipsUnitId` and `itfGetTextLipsMotionId`; the message
+glyph builder passes them to `evtLipsExecFunction`, whose implementation checks a
+unit's unique-chunk ID and the requested motion number. The DDS2 control skipper
+now shares DDS1's existing `itfSkipEncodedTextOpcode` name, without changing its
+game-specific switch cases or stop/voice markers. Existing caller extern return
+types, including the decoder's `void` font externs, are intentionally unchanged.
 

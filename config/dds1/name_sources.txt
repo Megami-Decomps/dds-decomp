@@ -2505,7 +2505,7 @@
 0x001949B0	frFontFillGlyphMetrics	inferred	Fills one glyph's cell dimensions, advance and horizontal bearing, as stated in the adjacent source comment; twin=DDS2 0x0019C640.
 0x00194CD0	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x00194D20	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
-0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then func_00198088 [names_M33_SmallSweep2.tsv]
+0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then itfDecodePackedResourceEntry [names_M33_SmallSweep2.tsv]
 0x00194E80	frFontRetainOrCreateCachedItem	inferred	src/dds1/interface/frFont.c func_00194E80: Retains cached item or clones font resource, creates item and caches it by slot and ID. [names_reviewed24.tsv]
 0x00194F78	frFontSetupGlyph	inferred	initializes glyph record fields from parameters
 0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
@@ -8537,3 +8537,12 @@
 0x0025D2F8	mnuDrawMantraProfileSelectionSurface	inferred	Builds the selection surface and requirement overlays, advances grid animation, then draws the profile grid. [LiteH menu naming batch 17]
 0x0025D628	mnuUpdateMantraSelectionCursorPosition	inferred	Eases the live cursor to the selected entry position and records whether it moved. [LiteH menu naming batch 17]
 0x0025D7F8	mnuUpdateMantraCostNotification	inferred	Advances and draws one transient cost/list node, returning its expiry state. [LiteH menu naming batch 17]
+0x001ADE68	btlUpdateValueMessageWindows	inferred	Mahen task callback fades and draws up to nine enabled label/value message windows; returns -1 after fade-out. DDS2 twin 0x001B8A80. [Namer1 batch 40]
+0x001B96F8	btlDrawActorPanelHighlights	inferred	Uses active/reserve slot presentation state and eight saved highlight alphas to submit four gradient triangles, then resets primary blending. DDS2 twin 0x001C4900. [Namer1 batch 40]
+0x001C3040	btlUpdateBankedSlotFadeSequence	inferred	Steps the current bank's per-slot fade phases under the named-task status gate; slots share the delay timer and the final slot marks completion. DDS2 twin 0x001CE5C8. [Namer1 batch 40]
+0x00198088	itfDecodePackedResourceEntry	inferred	Decodes an entry's bit span through six-byte binary prefix-tree records into terminal bytes; returns and caches byte count. Font clone caller uploads these bytes as atlas pixels. DDS2 twin 0x001A00B8. [Namer1 batch 40]
+0x00198068	itfGetPackedResourceHeaderWord	inferred	Reads the packed-resource base's opaque u32 word at 0x10; its role is not established, so no size/count meaning is asserted. DDS2 twin 0x001A0098. [Namer1 batch 40]
+0x00198028	itfGetLastDecodedByteCount	inferred	Returns the global byte count written by itfDecodePackedResourceEntry; existing DDS1 unsigned return remains unchanged. DDS2 twin 0x001A0058. [Namer1 batch 40]
+0x00196BC0	itfSetIndexedTextSlot	inferred	Installs one replacement-text address word in the fixed table initialized by itfMesInitCharTable and read as strings by frFontAppendIndexedTextToGlyphChain. DDS2 twin 0x0019E8F0. [Namer1 batch 40]
+0x00196BD8	itfGetTextLipsUnitId	inferred	Returns the first value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the unique-unit identifier to evtLipsExecFunction. DDS2 twin 0x0019E908. [Namer1 batch 40]
+0x00196BE0	itfGetTextLipsMotionId	inferred	Returns the second value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the motion number to evtLipsExecFunction. DDS2 twin 0x0019E910. [Namer1 batch 40]
