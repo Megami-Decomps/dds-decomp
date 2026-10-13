@@ -32,8 +32,8 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
 
-extern s32 func_0036B420(s32 directory);
-extern s32 func_0036B588(s32 directory, SceDirent *entry);
+extern s32 sceDclose(s32 directory);
+extern s32 sceDread(s32 directory, SceDirent *entry);
 
 extern u64 btlStartTask();
 
@@ -2872,14 +2872,14 @@ void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
-    func_0036B420(directoryHandle);
+    sceDclose(directoryHandle);
 }
 
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
 s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
     if (sdfPfsDebugMode != 0) {
-        return func_0036B588(directoryHandle, reader);
+        return sceDread(directoryHandle, reader);
     }
     if ((u32)D_00438F80 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;
