@@ -120,7 +120,7 @@ extern s32 sceIpuSync(s32, s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
 extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
-extern void func_002CF7B8(s32);
+extern void sdfRemoveHandler(void *);
 extern s32 func_0030B5D0(s32);
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32);
@@ -1508,12 +1508,12 @@ void sdfSoundInitIpuStream(void) {
 
 s32 sdfSoundShutdownIpuStreamHandlers(void) {
     if (D_003BDA9C != 0) {
-        func_002CF7B8(D_003BDA9C);
+        sdfRemoveHandler((void *)D_003BDA9C);
         D_003BDA9C = 0;
     }
     func_0030B5D0(3);
     if (D_003BDAA0 != 0) {
-        func_002CF7B8(D_003BDAA0);
+        sdfRemoveHandler((void *)D_003BDAA0);
         D_003BDAA0 = 0;
     }
     return func_0030B5D0(4);
