@@ -119,9 +119,6 @@ extern BtlLightParams D_0037FA90;
 extern BtlLightParams D_0037FAD0;
 
 extern BtlLightParams D_0037FB20;
-
-extern s32 btlGetRuntime(void);
-
 extern s32 btlCountTasksByKind(u16);
 
 
@@ -1107,7 +1104,7 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
-    if (*(u32 *)(btlGetRuntime() + 0x220) & 0x800) {
+    if (*(u32 *)((u8 *)btlGetRuntime() + 0x220) & 0x800) {
         return 0;
     }
     if (commandId <= 0) {

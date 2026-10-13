@@ -7,10 +7,6 @@
 #include "scr.h"
 
 extern void func_003014F0(char *, const char *, const char *, s32);
-
-extern s32 btlGetRuntime(void);
-
-
 s32 btlFindScriptResource(char *name) {
     char path[128];
     BtlState *battle = (BtlState *)btlGetRuntime();

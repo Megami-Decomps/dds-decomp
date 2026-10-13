@@ -23,13 +23,6 @@ extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, B
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
-
-
-
-
-
-extern s32 btlGetRuntime(void);
-
 extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u32 btlGetEffectActive(void);
@@ -1110,7 +1103,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
     s32 result = -1;
     s32 state;
 
-    state = *(s32 *)(btlGetRuntime() + 0x718);
+    state = *(s32 *)((u8 *)btlGetRuntime() + 0x718);
     if (*(s8 *)(state + 0) != 0) {
         if (*(s8 *)(state + 1) != 0) {
             *(u8 *)(state + 1) = 0;

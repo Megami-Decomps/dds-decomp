@@ -16,12 +16,7 @@
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
 #include "eff_update_flags.h"
-
-
-
-extern s32 btlGetRuntime(void);
-
-
+#include "btl_runtime.h"
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 typedef struct EffTexTable {

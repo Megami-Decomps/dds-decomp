@@ -70,9 +70,6 @@ extern s32 D_00435DF0;
 extern s32 D_00435DE4;
 
 extern s32 D_00435DF8;
-
-extern s32 btlGetRuntime(void);
-
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s8 D_0037F530[];
@@ -1317,8 +1314,8 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     return 0;
 }
 
-s32 btlGetRuntime(void) {
-    return btlRuntime;
+void *btlGetRuntime(void) {
+    return (void *)(u32)btlRuntime;
 }
 
 /* Read current HP from a unit-entry address. */
@@ -1811,7 +1808,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
 s32 btlResolveUnitValueWithOverride(s32 statusAddress, s32 element) {
-    s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x6B8);
+    s32 (*hook)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x6B8);
     if (hook != 0) {
         s32 value = hook(statusAddress, element);
         if (value != -1) {
@@ -2544,7 +2541,7 @@ f32 btlGetEncounterAdjustmentScale(void) {
 u32 btlGetEscapeAttemptCount(void) {
     s32 controller;
 
-    controller = btlGetRuntime();
+    controller = (s32)(u32)btlGetRuntime();
     return *(u32 *)(controller + 0x278);
 }
 
@@ -3406,7 +3403,7 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
 }
 
 s32 btlTestActorStatusPredicate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x698);
+    s32 (*hook)(BtlUnit *) = *(s32 (**)(BtlUnit *))((u8 *)btlGetRuntime() + 0x698);
     if (hook != 0) {
         if (hook(unit) != 0) {
             return 1;

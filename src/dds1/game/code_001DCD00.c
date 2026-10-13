@@ -101,9 +101,6 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlSetDefaultActionCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 datActionAnimationRecords;
 
 extern s8 effSharedRandomState[];
@@ -111,9 +108,6 @@ extern s8 effSharedRandomState[];
 extern s8 effSharedRandomState[];
 
 s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
-
-extern s32 btlGetRuntime(void);
-
 extern void btlUnitGetBodyPosVU(u8 *);
 
 extern char D_003BB5F8[];
@@ -216,13 +210,10 @@ u32 btlHasMarkedEntry10(u8 *object) {
     }
     return 0;
 }
-
-extern s32 btlGetRuntime(void);
-
 extern f32 btlUnitGetTopY(BtlUnit *);
 
 s32 btlCheckActorDistanceLimit(void) {
-    BtlUnit *actor = *(BtlUnit **)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = *(BtlUnit **)((u8 *)btlGetRuntime() + 0x228);
 
     while (actor != 0) {
         u32 flags = (u32)actor->status.flags;
@@ -569,7 +560,7 @@ extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 /* Let the battle hook intercept the cursor step, then dispatch approach/target/advance kinds. */
 void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
-    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))(btlGetRuntime() + 0x614);
+    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))((u8 *)btlGetRuntime() + 0x614);
 
     if (callback != 0 && callback(actor) != 0) {
         return;
@@ -977,7 +968,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
 }
 
 void btlAdvanceTargetCursorUnlessHookHandles(BtlLinkedCommand *actor) {
-    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))(btlGetRuntime() + 0x634);
+    s32 (*callback)(BtlLinkedCommand *) = *(s32 (**)(BtlLinkedCommand *))((u8 *)btlGetRuntime() + 0x634);
     if (callback != 0 && callback(actor) != 0) {
         return;
     }
@@ -1196,8 +1187,6 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
     }
     btlAdvancePlayerCursorAnimation(action, &action->camera);
 }
-
-extern s32 btlGetRuntime(void);
 extern s32 datActionAnimationRecords;
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern u32 effMiscRandMod(void *,u32);

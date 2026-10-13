@@ -66,9 +66,6 @@ extern SdfTex *sndTestMessageTexture;
 extern u64 D_004366E8;
 
 extern s32 btlRuntime;
-
-extern s32 btlGetRuntime(void);
-
 extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;
@@ -281,7 +278,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
 }
 
 s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
-    s32 work = btlGetRuntime();
+    s32 work = (s32)(u32)btlGetRuntime();
     if (datBattleSceneRecords[*(s32 *)(work + 0x2A0)].unk00 != 0) {
         return 0;
     }
@@ -1329,7 +1326,7 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
 s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
     s32 (*predicate)(s32, s32, s32);
     s32 table;
-    predicate = *(s32 (**)(s32, s32, s32))(btlGetRuntime() + 0x6cc);
+    predicate = *(s32 (**)(s32, s32, s32))((u8 *)btlGetRuntime() + 0x6cc);
     if (predicate != 0 && !predicate(object, other, index)) {
         return 0;
     }
@@ -5095,12 +5092,6 @@ typedef struct UiInputState {
 
 
 extern const char *D_004367CC;
-
-
-
-extern s32 btlGetRuntime(void);
-
-
 extern u8 btlHasRequiredActorStatusBits(BtlUnit *node);
 
 
@@ -6319,10 +6310,6 @@ extern void func_001CE418(EffectSlotSet *, s32, s32 *, s32 *, f32);
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
-
-extern s32 btlGetRuntime(void);
-
-
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 

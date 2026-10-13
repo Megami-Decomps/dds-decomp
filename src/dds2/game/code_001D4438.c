@@ -22,9 +22,6 @@
 #include "mdl_flag_api.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
-
-
-extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 
@@ -406,9 +403,6 @@ extern struct EffWorldNode *evtSpawnActionObj9(s32);
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 
 extern s32 func_0022F180(void);
-
-extern s32 btlGetRuntime(void);
-
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
@@ -1520,7 +1514,6 @@ extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
 extern u32 btlGetIndexListCount(BtlIndexList *list);
 extern void *btlGetIndexListEntry(BtlIndexList *list, s32 index);
-extern s32 btlGetRuntime(void);
 extern s32 btlGetSideIndexedActorStatusTable(s32 arg0, s32 arg1);
 extern s32 btlGetSlotRateKind(u8 *unit, s32 index);
 extern s32 btlMapActionCode(s32 unused, u32 id);

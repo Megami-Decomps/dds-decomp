@@ -53,9 +53,6 @@ typedef struct BtlAt3Entry {
 extern BtlAt3Entry D_003E0F60[];
 
 extern u32 D_00436AD4;
-
-extern s32 btlGetRuntime(void);
-
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern void btlBossDebugPrintf(const char *format, ...);

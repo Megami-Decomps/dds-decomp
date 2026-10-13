@@ -11,10 +11,6 @@
 extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s32 datActionAnimationRecords;
-
-extern s32 btlGetRuntime(void);
-
-
 extern void btlFlagAllUnitDefeatCandidatesTask(void);
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);

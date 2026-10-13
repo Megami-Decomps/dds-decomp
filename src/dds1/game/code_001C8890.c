@@ -123,9 +123,6 @@ u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlSetActionActorPanelPresentation(BtlTask *, s8, s8);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 datActionAnimationRecords;
 
 void btlRaisePartyRecordStatusValue();
@@ -2534,7 +2531,7 @@ extern s32 btlRollEscapeChance(BtlUnit *);
 
 /* Count an escape attempt and record its chance-test result in battle flags. */
 void btlRecordEscapeAttemptOutcome(BtlTask *task) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *target = task->unit;
     *(s32 *)(context + 0x254) += 1;
     if (btlRollEscapeChance(target)) {
@@ -2671,7 +2668,7 @@ void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 extern void btlAdvanceHistoryCounter(s32 task);
 
 void btlUnitTurnEndCommit(s32 task) {
-    void (*hook)(s32) = *(void (**)(s32))(btlGetRuntime() + 0x600);
+    void (*hook)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x600);
     BtlTask *command = (BtlTask *)task;
     BtlUnit *owner = command->unit;
 
@@ -2843,11 +2840,8 @@ void btlFlagLinkedActorActionInProgress(s32 arg0) {
     ((BtlTask *)arg0)->unit->status.flags = (u32)((BtlTask *)arg0)->unit->status.flags | 0x4000
     ;
 }
-
-extern s32 btlGetRuntime(void);
-
 void btlRunHookAndAdvanceUnitState(s32 object) {
-    void (*callback)(s32) = *(void (**)(s32))(btlGetRuntime() + 0x660);
+    void (*callback)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x660);
     if (callback != 0) {
         callback(object);
     }

@@ -47,9 +47,6 @@ extern u8 effSharedRandomState[];
 extern void btlSetDefaultActionCameraPose();
 
 typedef struct BtlUnit BtlUnit;
-
-extern s32 btlGetRuntime(void);
-
 extern struct BtlRuntimeTask *btlDeferredTaskHead;
 
 extern s32 datActionAnimationRecords;
