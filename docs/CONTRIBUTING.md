@@ -40,8 +40,18 @@ bytes, and it has to reach that the way the original developers would have.
   retail frame is larger than the build's by exactly the local's (aligned)
   size; no retail instruction touches that space; and a second function
   shows the same gap, either its other-game twin or a function in the same
-  TU. Cite the gap and the corroborating function in a comment. This is the
-  only exception to the dead-variable ban.
+  TU. Cite the gap and the corroborating function in a comment.
+- **A statement after the final call that blocks a tail call.** ee-gcc 2.96
+  decides sibling calls early, so a statement after the last call stops the
+  `j callee` form even if a later pass deletes the statement as dead. One
+  such statement is allowed only when all of these hold: retail has
+  `jal` + epilogue at that site; either a matched function in the same TU or
+  in the other game's twin shows the same pattern, or a `cc1probe` trace shows
+  the statement being deleted after the sibling-call decision; and the
+  statement updates the function's own state plausibly (for example,
+  resetting a phase or counter local). Use at most one per tail, and cite the
+  evidence in a comment.
+- These two are the only exceptions to the dead-variable and dead-store ban.
 - **Plausible source.** Use structs for recurring layouts, real types
   (no `u64` unless the value is 64-bit), meaningful parameter and local
   names, and natural loops and switches.
