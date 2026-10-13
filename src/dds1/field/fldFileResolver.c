@@ -6,6 +6,7 @@
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
+#include "fld_transfer_chunk.h"
 #include "fld.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
@@ -657,13 +658,6 @@ extern FldIndexPair D_0032EFE0[];
 extern s32 D_003BAE54;
 extern s32 D_003BAE5C;
 extern s32 D_003BAE60;
-
-/* A packed-resource chunk uses an offset from the base and a byte length. */
-typedef struct FldTransferChunk {
-    u32 unk0;
-    s32 offset;
-    u32 size;
-} FldTransferChunk;
 
 /* Four resource references are copied into the scene's load queue in order. */
 typedef struct FldLoadRecord {
