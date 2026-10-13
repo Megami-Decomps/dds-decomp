@@ -38,6 +38,6 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
 
 void btlUpdateResourceNameEditor(struct BtlResourceNameRecord *record);
 
-void btlDestroyResourceNameRecord(void *allocation);
+void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record);
 
 #endif /* BTL_RESOURCE_NAME_H */
