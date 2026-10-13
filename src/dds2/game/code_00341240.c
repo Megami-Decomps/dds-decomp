@@ -152,7 +152,7 @@ extern s32 _StartThread(s32, s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void sdfSoundStartRpcServer(void);
 
-void func_003415A8(void) {
+s32 func_003415A8(void) {
     s32 threadId;
 
     while (func_00367BF0(31) == 0) {
@@ -170,6 +170,6 @@ void func_003415A8(void) {
     _StartThread(threadId, 0);
     threadId = sdfCreateThread(sdfSoundStartRpcServer, D_00479A40, 0x1000, 0x43);
     D_00438B94 = threadId;
-    _StartThread(threadId, 0);
+    return _StartThread(threadId, 0);
 }
 
