@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_trig.h"
@@ -27,7 +28,6 @@ typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
 
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern EffResourceRenderState D_00452080;
 
 void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {

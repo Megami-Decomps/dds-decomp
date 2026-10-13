@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -179,7 +180,6 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 }
 extern EffVertexDrawRequest D_004520E0;
 extern const u32 D_003B2000[];
-extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;
