@@ -8435,3 +8435,5 @@
 0x0024CE28	evtOpenTerminalActionPopupWhenReady	inferred	Runs terminal panel mode zero and flags the popup after task/effect fade conditions permit. [LiteH menu naming batch 15]
 0x00283838	mnuDrawPartyProfilePanelContents	inferred	Draws the profile-panel party preview from the selected record and sprite state; DDS2 twin 0x002C16F0. [LiteH menu naming batch 15]
 0x00284418	mnuDrawRatioPanelContents	inferred	Draws ratio-panel bars and their values; DDS2 twin 0x002C22D0. [LiteH menu naming batch 15]
+0x002453C8	mnuCampRebuildItemStockWindow	inferred	DDS2 twin mnuCampRebuildItemStockWindow at 0x00261670; invoked by evtBuildShopCatalogIfActive when action is one to rebuild the active stock-item window. [LiteG camp naming]
+0x002457E8	mnuCampRebuildFilteredStockWindow	inferred	DDS2 twin mnuCampRebuildFilteredStockWindow at 0x002619A8; invoked by evtBuildFilteredShopCatalogIfActive when action is one to rebuild the filtered stock window. [LiteG camp naming]

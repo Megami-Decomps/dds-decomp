@@ -3882,6 +3882,7 @@
 0x0025FF18	mnuCreateEnabledCampEntryWindow	inferred	confidence=high; src/dds2/game/code_0025DA20.c:func_0025FF18; Creates a camp list containing enabled source indices and copies selected settings into retained list work. [names_qp9.tsv]
 0x00260138	mnuCampResolveFlagRowValue	inferred	Returns the value paired with the highest-index active flag in a camp row, otherwise its default. [names_reviewed15.tsv]
 0x00260380	mnuShopReleaseWindowSprites	inferred	Destroys shop window sprites and buffers, optionally preserving the extra sprite. [names_reviewed15.tsv]
+0x00260458	mnuCampGetProgressStage	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1524; Returns zero; mnuCampGetSourceItemPrice treats a nonzero value as a progress-stage percentage slot. DDS1 twin 0x002447D8.
 0x00260468	mnuCountActivePartyEntries	inferred	Counts active flags across the party entries consulted by the shop menu. [names_reviewed10.tsv]
 0x002604A0	mnuCampResolveProgressTierValue	inferred	Selects a value from the camp tier table using the saved progress threshold. [names_reviewed15.tsv]
 0x00260538	mnuCampClearListedItemCounts	inferred	Resets saved item counts for the three item IDs in a fixed camp table. [names_reviewed15.tsv]
@@ -3920,7 +3921,10 @@
 0x00261E10	evtIsFadeDispatchIdle	inferred	Returns true only when no fade is active and the associated dispatch-status function returns zero.
 0x00261E80	evtInitializeSelectedSlot	inferred	Initializes the context's scene object, retrieves the selected slot, and stores that slot in both the scene record and context.
 0x00261F08	evtAdvancePhaseOne	inferred	When stateCode is 1, sets command phase to 4; DDS1 twin func_00245DA0.
+0x00262A48	mnuInstallNoCapacityStateTable	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2867; Installs D_003CE4EC when dispatchMode is one; the range-filtered poller selects that mode when affordable purchase count reports -2.
+0x00262A88	evtBuildRangeFilteredShopCatalogIfActive	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2873; Rebuilds the filtered stock window with range filter 3 when task phase is one, then returns callback completion. DDS1 filtered-catalog analogue 0x00246538.
 0x00262AC8	mnuResetCommandStepAndSelectPhase	inferred	confidence=high; src/dds2/game/code_00261E10.c:func_00262AC8; Selects command phases from stateCode, conditionally installs a secondary scene callback and resets stateStep. [names_qp9.tsv]
+0x00262B50	mnuShopPollRangeFilteredCommandSelection	inferred	confidence=high; src/dds2/game/code_0025DA20.c:2897; Polls range-filtered shop selection, processing dispatch phase, popup, no-capacity state table and input flags. DDS1 filtered-shop poller analogue 0x002465F8.
 0x00262EF0	evtEnterProgressCommandPhase	inferred	high confidence; src/dds2/game/code_00261E10.c func_00262EF0: Selects command phase 3 or 9 according to stateCode, optionally installs a scene callback, and resets stateStep. [names_reviewed25.tsv]
 0x00263220	evtGetRemainingSlotThreshold	inferred	Returns the positive difference between the indexed threshold and current progress, zero when passed, or -1 for invalid or absent thresholds.
 0x00263270	evtShowResultText	inferred	formats and prints counter/label texts with func_0026C918 then plays a sound
@@ -3929,15 +3933,22 @@
 0x002637E0	evtDispatchProgressCallback	inferred	Passes the context's progress timer to mnuDrawSpriteMenuFadeOut before dispatching the callback through func_002C4038.
 0x00263880	evtApplyBaseRateProgressStep	inferred	Sets the progress multiplier to one and advances the camp counter once. [names_reviewed15.tsv]
 0x00263920	evtPollQuantitySelection	inferred	U3
+0x00263B98	evtAlignDispatchStart	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3329; Calls func_0025FD78, draws the command-close phase and installs the primary event handler. DDS1 twin 0x002470F8.
+0x00263BF0	evtSetupDispatchSyncF	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3336; Calls func_0026C900, then installs the secondary event handler. DDS1 twin 0x00247148.
+0x00263C38	mnuShopBeginTransactionMessage	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3345; Captures currency, resets transaction timing and starts the selected purchase message while configuring the value-list draw state. DDS1 twin 0x00247190.
 0x00263D40	evtUpdateSlotItemCompletionState	inferred	Checks the selected stage and item ownership, then updates the scene completion dispatch mode. [names_reviewed15.tsv]
 0x00263DD0	evtPollStageSelectionAndAdvance	inferred	Polls stage-selection result codes and queues the next scene phase for the advance result. [names_reviewed15.tsv]
 0x00263E60	evtMarkSceneFollowupReadyAndQueueAction	inferred	Switches to the scene follow-up phase, queues an action and marks the scene ready. [names_reviewed15.tsv]
 0x00263EB0	evtAccumulateEligibleStageMultiplierValue	inferred	Accumulates stage times entry multiplier when the selected item ID falls in the eligible range. [names_reviewed15.tsv]
 0x00263F10	evtIsAllowedId	inferred	checks id against a 3-entry u16 table
+0x00264120	evtDispatchShopSelectionAction	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3492; Polls transaction/message completion, applies the selected quantity transaction and queues its follow-up state. DDS1 twin 0x00247588.
 0x00264240	evtDispatchSceneReadyFollowup	inferred	Selects one of two follow-up scene actions according to the scene-ready flag. [names_reviewed15.tsv]
+0x002642B8	evtSetupDispatchSyncG	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3539; Calls func_0026C900 and installs the secondary event handler. DDS1 twin 0x002478B0.
 0x00264300	evtPlayDispatchModeCue	inferred	Selects cue 5 or 6 based on the context's dispatchMode after func_0026C948.
 0x00264378	evtApplyDispatchModeState	inferred	Updates the event state based on dispatchMode and the active state table, then clears dispatchMode.
 0x002643F8	evtSetPopupEntryWhenMessageWindowIdle	inferred	Sets the saved popup state-table entry only when dispatch and the message window are idle. [names_reviewed10.tsv]
+0x00264480	mnuShopDrawMenuState	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3605; Draws the active dispatch menu state, then installs its primary handler. DDS1 twin 0x00247A78.
+0x002646C8	evtSetupDispatchSyncH	inferred	confidence=high; src/dds2/game/code_0025DA20.c:3641; Calls func_0026C900 and installs the secondary event handler. DDS1 twin 0x00247CB0.
 0x00264850	evtAdvancePendingRewards	inferred	L13
 0x00264B58	evtAdvanceSlotFlags	inferred	sets mdlFlag for consecutive slots until func_00263220 reports a hit
 0x00264C00	evtUpdateSlotAdvanceCount	inferred	Stores evtAdvanceSlotFlags's result in the context and plays a cue when the current stage and flag match.

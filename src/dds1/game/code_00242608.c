@@ -1684,7 +1684,7 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
+INCLUDE_ASM(const s32, "game/code_00242608", mnuCampRebuildItemStockWindow);
 
 extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
@@ -1745,7 +1745,7 @@ s32 mnuBuildShopCatalogList(ShopScene *scene) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
+INCLUDE_ASM(const s32, "game/code_00242608", mnuCampRebuildFilteredStockWindow);
 extern char (*D_003BAA84)[25];
 
 extern u32 D_0036A260[][16];
@@ -2042,7 +2042,7 @@ s32 evtBuildShopCatalogIfActive(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
-        func_002453C8(state);
+        mnuCampRebuildItemStockWindow(state);
     }
     return 1;
 }
@@ -2163,7 +2163,7 @@ s32 evtBuildFilteredShopCatalogIfActive(KwlnTask *task) {
     ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
-        func_002457E8(state);
+        mnuCampRebuildFilteredStockWindow(state);
     }
     return 1;
 }
