@@ -420,17 +420,17 @@ void dds3EnsureSlotData(void *object) {
     }
 }
 
-s32 dds3InvokeSlot1Handler(void *, Dds3MoverUpdate);
+s32 dds3SetSlot1HandlerCallback(void *, Dds3MoverUpdate);
 
-void func_001127A0(EffWorldNode *object, Dds3MoverUpdate update) {
-    dds3InvokeSlot1Handler(object, update);
+void dds3SetObjectSlot1MoverCallback(EffWorldNode *object, Dds3MoverUpdate update) {
+    dds3SetSlot1HandlerCallback(object, update);
     /* Retail 001127A8/001129D0 use JAL plus an epilogue.
      * cc1probe keeps this consumed-callback reset through 01.sibling
      * and 02.jump, then deletes it in 03.cse. */
     update = NULL;
 }
 
-s32 dds3InvokeSlot1Handler(void *obj, Dds3MoverUpdate update) {
+s32 dds3SetSlot1HandlerCallback(void *obj, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3GetSlot(obj, 1);
