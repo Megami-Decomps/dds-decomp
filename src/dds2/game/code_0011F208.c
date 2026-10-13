@@ -47,7 +47,7 @@ enum {
 
 extern void func_00122E50(void);
 
-extern void func_001512D8(void);
+extern void fldResetSparkRewardProfileIndex(void);
 
 extern FieldStageCoordinate D_00389170[];
 

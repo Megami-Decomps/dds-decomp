@@ -4714,7 +4714,7 @@ void func_00150F20(void) {
 }
 
 
-void func_001512D8(void) {
+void fldResetSparkRewardProfileIndex(void) {
     fldSparkControlState.unk8 = -1;
 }
 

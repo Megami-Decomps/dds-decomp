@@ -913,6 +913,7 @@
 0x0014F5B0	fldFindResourceRecordIndex	inferred	Scans eight field resource records for category and ID, returning matching index. [names_R_FuncNames6.tsv]
 0x0014F788	fldClearObjectEntryHandles	inferred	Iterates 17 object entries, releases nonzero handles and clears them. [names_R_FuncNames6.tsv]
 0x001509E0	fldFinishEventFieldState	inferred	DDS1 0014C5C8 twin; on active event resets field effects, BGM, visibility and event flag [names_R_FuncNames2.tsv]
+0x001512D8	fldResetSparkRewardProfileIndex	inferred	Sets the spark reward-profile index to its -1 sentinel when entering a normal field scene; fldGetSparkRewardProfileIndex reads the same field. [provider store, named getter and caller, 2026-10-13]
 0x001512E8	fldResetEventSceneState	inferred	DDS1 0014CFC0 twin; clears event flags and visual state while restoring solar visibility [names_R_FuncNames2.tsv]
 0x00151350	fldResetAfterEvent	inferred	sequence of state resets before func_002433B0, twin of func_001512E8
 0x001513C0	fldStartDeferredFieldExit	inferred	DDS1 0014D028 twin; starts field exit sequence and sets phase 2 [names_R_FuncNames2.tsv]

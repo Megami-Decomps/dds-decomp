@@ -81,7 +81,7 @@ extern void fldRebuildFieldScene(void);
 
 extern void fldApplySkyLightSet(u32, s32);
 
-extern void func_001512D8(void);
+extern void fldResetSparkRewardProfileIndex(void);
 
 extern KwlnTask *kwlnTaskFindByPriority(u32);
 
@@ -2233,7 +2233,7 @@ s32 fldUpdateFieldSceneTask(KwlnTask *task) {
             fldApplySkyLightSet(0, 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
         }
-        if (fldAreaState.transitionMode == 0) func_001512D8();
+        if (fldAreaState.transitionMode == 0) fldResetSparkRewardProfileIndex();
         coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
         if (coordinateFlags & 0x40) {
             blur.count = 15;
