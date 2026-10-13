@@ -10992,3 +10992,32 @@ value to the first list of a two-list owner; it does not reset that list.
 These names change neither allocation layout nor cleanup ownership, index
 quirks, expression ordering, casts or types.
 
+## Camera selector adapters and script record values
+
+`btlPrepareCameraMode6Participants` and
+`btlPrepareCameraMode7Participants` are distinct native entries selected by
+`cameraKind` 6 and 7 respectively. Both ultimately perform the same participant
+candidate marking, target facing and command-side flag update. Neither writes
+the supplied camera pose. Retain the extra forwarding call for mode 6 and the
+unused arguments; the names describe the selector difference, not a different
+camera calculation.
+
+`btlInitializeMarkedUnitCameraPair` forwards front/back poses to the existing
+marked-unit initializer. Native selection requires active and marked flags,
+nonzero status bits `0xE0`, and motion index 11, then minimizes model-value 1C;
+an empty selection falls back to the default pose. Its still-unmatched backend
+and the private camera reconstructions are unchanged. The unit-height, tilt
+and approach adapters likewise retain every call and argument.
+The DDS2-only `btlInitializeRotatedPresetCameraPair` supplies the action's
+front/back poses to the existing quaternion-preset builder without changing
+its actor-rotation composition, flags or motion parameter.
+
+`btlScriptReturnActorLevel` publishes the actor's `partyRecord.level`.
+The DDS1 load at actor `+0x134` is the record at `+0x120` plus its `u16 level`
+at `+0x14`; DDS2 already uses that member directly. It is not an action timer.
+`btlScriptReturnTurnCount` publishes the actual battle turn counter
+(DDS1 `+0x250`, DDS2 `+0x274`), also used by initial-turn and threshold checks.
+Both keep their native VM-success result of one and their original load forms.
+The paired `btlRefreshUnitEffects` names do not remove DDS2's additional enemy
+color restoration or draw-control flag update.
+

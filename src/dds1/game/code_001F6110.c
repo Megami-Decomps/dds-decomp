@@ -1980,7 +1980,8 @@ u32 btlScriptReturnSceneSlotCount(void) {
     return 1;
 }
 
-u32 btlScriptReturnWorkParameter(void) {
+/* Publish the battle turn count to the script integer result; return VM success. */
+u32 btlScriptReturnTurnCount(void) {
     s32 battle;
 
     battle = btlGetRuntime();
@@ -1988,7 +1989,8 @@ u32 btlScriptReturnWorkParameter(void) {
     return 1;
 }
 
-u32 btlCmdReturnActorActionTime(void) {
+/* Actor +0x134 is partyRecord.level, not an action timer; return VM success. */
+u32 btlScriptReturnActorLevel(void) {
     s32 context;
 
     context = scrGetCurrentCommandWork();

@@ -444,7 +444,7 @@ void func_001DD4B0(void) {
 
 extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001E4708(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlUpdateTiltedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern void btlFrameLeftmostUnitCameraPair(BtlCamState *, BtlCamState *, BtlCamState *);
 
@@ -486,7 +486,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
             btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             break;
         case 3:
-            func_001E4708(action, &action->frontCamera, &action->backCamera);
+            btlUpdateTiltedActionCameraPose(action, &action->frontCamera, &action->backCamera);
             break;
         }
     } else {
@@ -495,7 +495,7 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
             btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             break;
         case 1:
-            func_001E4708(action, &action->frontCamera, &action->backCamera);
+            btlUpdateTiltedActionCameraPose(action, &action->frontCamera, &action->backCamera);
             break;
         }
     }
@@ -592,8 +592,8 @@ extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E1288(BtlLinkedCommand *, BtlCamState *, u8);
-extern void func_001E5700(BtlLinkedCommand *, BtlCamState *);
-extern void func_001E5460(BtlLinkedCommand *, BtlCamState *);
+extern void btlPrepareCameraMode6Participants(BtlLinkedCommand *, BtlCamState *);
+extern void btlPrepareCameraMode7Participants(BtlLinkedCommand *, BtlCamState *);
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlConfigureBattleCameraAction(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -656,11 +656,11 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 switch (((BtlActionAnimationRecord *)datActionAnimationRecords)[action->actionCode].cameraKind) {
                 case 6:
                     action->stepKind = 7;
-                    func_001E5700(action, &action->camera);
+                    btlPrepareCameraMode6Participants(action, &action->camera);
                     break;
                 case 7:
                     action->stepKind = 8;
-                    func_001E5460(action, &action->camera);
+                    btlPrepareCameraMode7Participants(action, &action->camera);
                     break;
                 default:
                     action->stepKind = 9;
@@ -741,7 +741,7 @@ extern void btlAimEffectPoseAtUnit();
 
 extern void btlBeginActionEndCameraPullback();
 
-extern void func_001E5718(BtlLinkedCommand *, BtlCamState *);
+extern void btlUpdateApproachCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
@@ -766,7 +766,7 @@ void btlDispatchActionCameraStep(u8 *actor) {
         btlBeginActionEndCameraPullback(actor, actor);
         break;
     case 7:
-        func_001E5718((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);
+        btlUpdateApproachCameraPose((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);
         break;
     case 8:
         btlBuildHeightClampedApproachCamera((BtlLinkedCommand *)actor, &((BtlLinkedCommand *)actor)->camera);

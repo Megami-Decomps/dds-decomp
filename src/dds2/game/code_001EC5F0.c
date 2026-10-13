@@ -321,7 +321,7 @@ static inline s32 btlHasFlag(u32 flags, u32 mask) {
 
 extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void func_001F20B0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlUpdateTiltedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern void btlFrameLeftmostUnitCameraPair(BtlCamState *, BtlCamState *, BtlCamState *);
 
@@ -341,7 +341,7 @@ extern extern f32 btlGetActorStateScale(ActionStateLink *);
 
 void btlBeginActionEndCameraPullback();
 
-extern void func_001F34E0(BtlLinkedCommand *, BtlCamState *);
+extern void btlUpdateApproachCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
@@ -437,13 +437,15 @@ void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
     btlAdvanceCommandCursor(action, &action->camera);
 }
 
-void func_001EC650(BtlLinkedCommand *action) {
+/* Initialize front/back framing for the native marked-unit selection path. */
+void btlInitializeMarkedUnitCameraPair(BtlLinkedCommand *action) {
     func_001F2758(action, &action->frontCamera, &action->backCamera);
 }
 
 extern void btlStepUnitHeightFramedCamera(BtlLinkedCommand *);
 
-void func_001EC670(BtlLinkedCommand *action) {
+/* Advance the linked action's unit-height-framed camera. */
+void btlUpdateLinkedHeightCamera(BtlLinkedCommand *action) {
     btlStepUnitHeightFramedCamera(action);
 }
 
@@ -483,7 +485,8 @@ void func_001EC760(void) {
 
 extern void func_001F35C8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void func_001EC768(BtlLinkedCommand *action) {
+/* Initialize the action's front/back pair from presets rotated with its actor. */
+void btlInitializeRotatedPresetCameraPair(BtlLinkedCommand *action) {
     func_001F35C8(action, &action->frontCamera, &action->backCamera);
 }
 
@@ -1972,7 +1975,8 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     }
 }
 
-void func_001F20B0(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
+/* Forward the linked action and both poses to the tilt-rotation preparation. */
+void btlUpdateTiltedActionCameraPose(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
     btlPrepareUnitPoseWithTiltRotation(command, pose, out);
 }
 
@@ -2175,7 +2179,8 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001F2E30);
 
-void func_001F3228(BtlLinkedCommand *action, BtlCamState *camera) {
+/* cameraKind 7 participant preparation; the camera argument is unused. */
+void btlPrepareCameraMode7Participants(BtlLinkedCommand *action, BtlCamState *camera) {
     btlFlagUserAndTargetDefeat(action, action);
 }
 
@@ -2247,11 +2252,13 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
-void func_001F34C8(BtlLinkedCommand *action, BtlCamState *camera) {
-    func_001F3228(action, camera);
+/* cameraKind 6 uses the same participant preparation through this separate entry. */
+void btlPrepareCameraMode6Participants(BtlLinkedCommand *action, BtlCamState *camera) {
+    btlPrepareCameraMode7Participants(action, camera);
 }
 
-void func_001F34E0(BtlLinkedCommand *action, BtlCamState *out) {
+/* Update the supplied pose with height-clamped actor/target approach framing. */
+void btlUpdateApproachCameraPose(BtlLinkedCommand *action, BtlCamState *out) {
     btlBuildHeightClampedApproachCamera(action, out);
 }
 

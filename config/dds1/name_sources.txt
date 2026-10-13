@@ -3106,7 +3106,7 @@
 0x001D9660	btlCreateSelectedEffectUpdateTask	inferred	Twin of dds2 0x001E6620; Creates task with callback that calls effBattleUpdateSelectedValue and cleanup of voice references. [names_R_FuncNames3.tsv]
 0x001D96F8	btlUpdateCommandSoundTask	inferred	Twin of dds2 0x001E66B8; Task callback calls func_00208F78; called through task ID 0x1B. [names_R_FuncNames3.tsv]
 0x001D9718	btlCreateCommandSoundUpdateTask	inferred	Twin of dds2 0x001E66D8; Allocates zero-argument task 0x1B with func_001E66B8 callback. [names_R_FuncNames3.tsv]
-0x001D9760	btlUpdateCommandSoundTaskSecondary	inferred	Twin of dds2 0x001E6720; Task callback invokes func_00209078; distinct second sound task. [names_R_FuncNames3.tsv]
+0x001D9760	btlUpdateCommandSoundTaskSecondary	inferred	Twin of dds2 0x001E6720; Task callback invokes btlRefreshUnitEffects; distinct second sound task. [names_R_FuncNames3.tsv]
 0x001D9780	btlCreateSecondaryCommandSoundTask	inferred	Twin of dds2 0x001E6740; Allocates task ID 0x1C and assigns func_001E6720 callback. [names_R_FuncNames3.tsv]
 0x001D9938	btlCreateUnitBaseLightTask	inferred	Allocates a battle task using the unit base-light callback. [names_reviewed11.tsv]
 0x001D99B0	btlStiffenDamageShakeStep	inferred	Battle actor task applies randomized alternating model position displacement with attenuation; exact sequel twin already named. [names_reviewed19.tsv]
@@ -3441,8 +3441,8 @@
 0x001FA3D0	btlCmdRememberLowerElementBlock	inferred	R_Names31 B93
 0x001FA460	btlCmdReportPartyEmptyMp	inferred	R_Names31 B93
 0x001FA4B0	btlScriptReturnSceneSlotCount	inferred	writes occupied scene slot count to script integer return
-0x001FA4D8	btlScriptReturnWorkParameter	inferred	Returns a battle-work parameter to script VM: DDS1 +0x250 and DDS2 +0x274. [names_R_FuncNames3.tsv]
-0x001FA500	btlCmdReturnActorActionTime	inferred	confidence=high; matched-C; src/dds1/game/code_001F6110.c:1735:func_001FA500; Reads the command actor u16 actionTime member and writes it into the script integer return slot.; source=revalidated-unapplied-names_R_Names31.tsv:23 [names_qp12_apply.tsv]
+0x001FA4D8	btlScriptReturnTurnCount	inferred	confidence=high; Corrects generic work-parameter name: actual BtlState.turnCount at DDS1 +0x250 / DDS2 +0x274, consumed by initial-turn and turn-threshold tests; writes VM integer result, returns1. DDS2 0x0020C508 twin. [Namer1 batch48]
+0x001FA500	btlScriptReturnActorLevel	inferred	confidence=high; Corrects earlier action-time misnomer: actor+0x134 is partyRecord+0x14 level; DDS2 source directly reads partyRecord.level. Writes VM integer result, returns1. DDS2 0x0020C530 twin. [Namer1 batch48]
 0x001FA530	btlCommandReportSpecialModeValue	inferred	confidence=high; src/dds1/game/code_001F6110.c:func_001FA530; Writes the mode-gated battle value to the script integer return slot. [names_qp9.tsv]
 0x001FA558	btlScriptReturnSelectedBossEffectId	inferred	confidence=high; src/dds1/game/code_001F6110.c:func_001FA558; Writes the selected boss effect ID to the script integer return slot and completes the command. CORRECTED: same; 'Read' -> 'Return' to match the btlScriptReturn* family. [names_qp9.tsv]
 0x001FA580	btlScriptReturnEffectActive	inferred	Returns btlGetEffectActive result to script VM. [names_R_FuncNames3.tsv]
@@ -8719,3 +8719,9 @@
 0x0021C2E8	mdlUpdateViewerWorkspaceSetupTask	inferred	confidence=high; Task adapter invokes workspace setup and separate native no-op, returns0. DDS2 0x00236E58 twin. [Namer1 batch47]
 0x0027CA78	mnuDrawMenuEntryDecorationSprites	inferred	Forwards coordinates and MenuWindowContainer to mnuDrawWindowEntryDecorations; source: src/dds1/game/code_0027BF00.c. LiteH-2 b23.
 0x00286A00	mnuIsSolarPricedItemId	inferred	Accepts item IDs 0x60-0x7E in the staff-item path; DDS2 twin 0x002C5498 accepts the solar-price subset 0x60-0x6C. Source: src/dds1/game/code_00282850.c and code_00272D50.c. LiteH-2 b23.
+0x001DEE18	btlInitializeMarkedUnitCameraPair	inferred	confidence=high; Adapter passes action/front/back to untouched native initializer selecting active marked motion11 unit with minimum model-value1C, falling back to default pose when absent. DDS2 0x001EC650 twin. [Namer1 batch48]
+0x001DEE38	btlUpdateLinkedHeightCamera	inferred	confidence=high; Linked-command adapter advances btlStepUnitHeightFramedCamera, preserving its action state and camera staging. DDS2 0x001EC670 twin. [Namer1 batch48]
+0x001E4708	btlUpdateTiltedActionCameraPose	inferred	confidence=high; Forwards command and both poses to btlPrepareUnitPoseWithTiltRotation; height-based selector callers establish camera role. DDS2 0x001F20B0 twin. [Namer1 batch48]
+0x001E5460	btlPrepareCameraMode7Participants	inferred	confidence=high; cameraKind7 switch arm invokes participant candidate marking, target facing and side flag through btlFlagUserAndTargetDefeat; camera argument unused. DDS2 0x001F3228 twin. [Namer1 batch48]
+0x001E5700	btlPrepareCameraMode6Participants	inferred	confidence=high; cameraKind6 switch arm forwards to mode7 participant preparation; observable selector difference, not an invented behavioral difference. DDS2 0x001F34C8 twin. [Namer1 batch48]
+0x001E5718	btlUpdateApproachCameraPose	inferred	confidence=high; Action-camera step adapter fills supplied pose through height-clamped actor/target approach framing. DDS2 0x001F34E0 twin. [Namer1 batch48]
