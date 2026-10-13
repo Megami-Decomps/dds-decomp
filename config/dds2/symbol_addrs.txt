@@ -6483,6 +6483,7 @@ sndStartTrackAlternate = 0x00341C30; // type:func
 sndDispatchCommandWithoutPayload = 0x00341D20; // type:func
 sndSubmitTextCommandPayload = 0x00341D48; // type:func
 sndSubmitTextCommandPayloadWithCommandBits60 = 0x00341D90; // type:func
+sndSubmitTextCommandPayloadWithCommandBits80 = 0x00341DD8; // type:func
 sndSetSpatialSequenceVolumePan = 0x00341E80; // type:func
 sndSendSpatialPosition = 0x00341FE8; // type:func  // dds1 0x002E9140
 sndUpdateScaledListenerState = 0x00342040; // type:func
