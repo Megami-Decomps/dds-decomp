@@ -84,7 +84,7 @@ extern u8 D_003BD39C;
 extern u32 D_003BD680;
 extern u8 D_003BDC90[];
 
-s32 func_00101BD8(void) {
+s32 sdfInitializeRuntimeAndStartMainLoop(void) {
     func_002FC0A8();
     sceSifInitRpc(0);
     sceSifInitIopHeap();

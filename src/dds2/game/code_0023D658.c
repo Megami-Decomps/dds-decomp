@@ -345,7 +345,7 @@ void func_0023E320(s32 slotIndex, f32 x, f32 y) {
 }
 
 /* Copy the second vector of the slot bound to `id` (else the first state-2 slot). */
-s32 func_0023E350(s32 id, f32 *out) {
+s32 evtCopyUnitVectorSlotEndpoint(s32 id, f32 *out) {
     s32 found = -1;
     s32 i;
 
