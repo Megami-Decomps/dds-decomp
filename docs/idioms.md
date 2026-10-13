@@ -10822,3 +10822,29 @@ delay slot exactly as retail does. The 76-byte body and all 39 existing function
 in its unit match. The ordinary and observed compiler runs preserve the complete
 assembly and all generated RTL dumps; no calling convention or compiler flag changes.
 
+
+## Profile contents: coordinate-to-counter workspace
+
+DDS1 `mnuDrawPartyProfilePanelContents` (`0x00283838`, 932 bytes) reuses
+one signed-word workspace, `t`, for the frame's vertical coordinate and then
+the skill-row countdown. Retail uses `$20` for these successive values.
+Both values are consumed by real draws or loop control; there is no dummy
+initialization, dead update, special flag or assembly.
+
+The parity-verified compiler trace identifies global allocation's priority
+tier as the mechanism: the shared pseudo has 17 references, live length 106
+and priority 6415, and `find_reg` assigns it `$20`. The initial frame-row
+counter is separate (7 references, live length 30, priority 4666, `$16`).
+Keeping both loop counters together gave 99/233 differing words; splitting
+the counters and then the coordinate roles alone gave 179/233 and 184/233
+normalized residuals. Reusing the coordinate workspace for the final
+countdown closes every target word and keeps the other 154 functions exact.
+
+The accompanying pointer closure follows the native party-record and effect
+resource consumers through both DDS1 callers. The profile argument stays
+a signed word, as in the native callers; the existing
+`prfBuildRawSkillList(u16, ...)` narrows it at consumption. A proposed
+unsigned-short incoming ABI added caller-side masking and overflowed both
+matched wrappers. With the word formal, the two caller units retain all
+78 and 116 functions exactly; the DDS2 helper contracts already use pointers.
+

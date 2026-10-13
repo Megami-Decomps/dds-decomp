@@ -123,7 +123,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
-extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, MenuSimpleSpriteState *, s32);
 extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
 extern char mnuNumberSpriteFormat[];
@@ -728,10 +728,10 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
     mnuDrawStaffPageMarkerIcons(&work->partyWindow, &work->staffSlots);
     mnuDrawStaffPanelGridBackdrop(0, &work->staffSlots);
     work->partyWindow.flags |= 0x500;
-    mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
+    mnuDrawStageTestList(0, 0, 0, ((DatPartyRecord *)control)->profileId,
         &work->partyWindow, context);
-    mnuDrawPartyProfilePanelContents(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
-        (s32)work->effectResource, context);
+    mnuDrawPartyProfilePanelContents(0, 0, 0, (DatPartyRecord *)control, ((DatPartyRecord *)control)->profileId,
+        work->effectResource, context);
     return 1;
 }
 
