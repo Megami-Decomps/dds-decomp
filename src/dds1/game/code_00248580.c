@@ -137,7 +137,7 @@ typedef struct EffectPair {
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
-extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
+extern u32 itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
@@ -2006,7 +2006,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
     }
-    sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
+    sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }

@@ -2259,7 +2259,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    struct FrFontGlyph *textGlyph = func_0019F448(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+    struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     frFontDrawGlyphChain(textGlyph, 0, 0x60);
     return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
@@ -2281,7 +2281,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
     selectedIndex = ((MenuList *)selectionState)->cursor;
     rowY = (s32)y;
     for (; itemIndex < endIndex; itemIndex++) {
-        struct FrFontGlyph *textGlyph = func_0019F448((s32)x << 4, rowY << 3,
+        struct FrFontGlyph *textGlyph = itfCreateMeasuredTextGlyph((s32)x << 4, rowY << 3,
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);

@@ -368,10 +368,10 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     return result;
 }
 
-extern FrFontGlyph *func_00197A98(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 
 s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *style, s32 width, u32 color) {
-    FrFontGlyph *handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
+    FrFontGlyph *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
     frFontSetChildChainFirstOption(handle, flags);

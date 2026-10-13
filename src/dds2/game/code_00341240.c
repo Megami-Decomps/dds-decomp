@@ -11,7 +11,7 @@ extern u16 D_0040BAC0[];
 extern EffRandState D_0040BAE8;
 
 void effMiscSeedRandom(EffRandState *state, u32 seed);
-s32 func_003413F0(ClockTime *now);
+s32 sdfReadCachedClockTime(ClockTime *now);
 
 extern s8 D_004391E0;
 extern void *sceSifAllocIopHeap(s32);
@@ -49,7 +49,7 @@ void effMiscSeedRandomFromClock(EffRandState *state) {
     ClockTime now;
     s32 t;
 
-    func_003413F0(&now);
+    sdfReadCachedClockTime(&now);
     t = now.year * 0x16E + now.day + D_0040BAC0[now.month + 7] + 0xFFF4FF83;
     t = t * 0x18 + now.hour;
     t = t * 0x3C + now.min;
@@ -61,9 +61,11 @@ extern s32 sdfBcdStrToInt(s32);
 extern u8 D_00438B70;
 extern ClockTime D_00438B78;
 
+/* Copy cached time to now; return 0 for a valid refresh, -1 for failure, or 1 for reuse.
+ * The native 20-tick refresh gate and month-as-year conversion are retained. */
 INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
 
-s32 func_003413F0(ClockTime *now) {
+s32 sdfReadCachedClockTime(ClockTime *now) {
     SdfCdClock clock;
     s32 result = 1;
     s32 year;
@@ -98,7 +100,8 @@ extern vu16 D_004391E2;
 extern vu16 D_004391E4;
 extern s32 sceSifSendCmd(s32 command, void *packet, s32 size, void *source, void *destination, s32 extraSize);
 
-s32 func_003414E8(void) {
+/* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
+s32 sndTrySendQueuedCommandPacket(void) {
     s32 readIndex = (s16)D_004391E2;
     SndRingPacket *packet;
 
@@ -119,7 +122,7 @@ void sdfServiceUnblockedWorkerThread(void) {
         do {
             SleepThread();
         } while (D_004391E0 != 0);
-        while (func_003414E8() == 0) {
+        while (sndTrySendQueuedCommandPacket() == 0) {
         }
     }
 }

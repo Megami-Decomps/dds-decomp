@@ -40,7 +40,7 @@ extern vu16 D_004391E2;
 extern vu16 D_004391E4;
 extern s32 D_004391E8;
 extern s32 WakeupThread(s32 thread);
-extern s32 func_003414E8(void);
+extern s32 sndTrySendQueuedCommandPacket(void);
 extern void *memcpy(void *, const void *, u32);
 extern void FlushCache(s32);
 extern s32 sceSifSetDma(void *, s32);
@@ -77,7 +77,7 @@ u32 sndQueueCommandPacket(u32 command, u32 channel, void *packet, s32 payloadByt
                      (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
     D_004391E4 = nextWriteIndex;
     if (D_004391E0 != 0) {
-        while (func_003414E8() != 0) {
+        while (sndTrySendQueuedCommandPacket() != 0) {
         }
     } else {
         WakeupThread(D_004391E8);

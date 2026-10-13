@@ -23,7 +23,7 @@ extern s8 D_0037F510[];
 
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
-extern FrFontGlyph *func_0019F798(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
@@ -386,7 +386,7 @@ u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
 }
 
 u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
-    FrFontGlyph *handle = func_0019F798(x << 4, y << 3, z, w, text, 0);
+    FrFontGlyph *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, text, 0);
     u32 result = 0;
     frFontSetChildChainFirstOption(handle, flags);
     if (flag & 0x100) {

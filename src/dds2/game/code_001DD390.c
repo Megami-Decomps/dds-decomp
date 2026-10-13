@@ -3528,7 +3528,8 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 const char D_00417AE0[16] = "btl:warp[%p]\n";
 
-void func_001E40F0(BtlUnit *unit, BtlUnit *target, s32 index) {
+/* Try to warp the unit effect to a motion-reach anchor; retain the unit exemptions. */
+void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     f32 bodyPos[4] __attribute__((aligned(16)));
     f32 muzzlePos[4] __attribute__((aligned(16)));
     f32 world[4] __attribute__((aligned(16)));
@@ -5023,7 +5024,7 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
     } else {
         if (unit != target) {
-            func_001E40F0(unit, target, args->previousModelValue);
+            btlWarpUnitToMotionReach(unit, target, args->previousModelValue);
         }
         return 1;
     }

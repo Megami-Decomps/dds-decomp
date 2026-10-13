@@ -57,7 +57,7 @@ extern s32 D_003BD854;
 extern void btlCmdSimpleB(s32, s32);
 extern void btlCmdSimpleI(s32, s32);
 extern void btlCmdSimpleA(s32, u16);
-extern void btlCmdSimpleE(s32, u16);
+extern void btlSelectCommandTargetsByMode(s32, u16);
 extern void btlCmdSimpleD(s32, u16);
 extern void btlCmdSimpleJ(s32, u16);
 extern void btlRunWeightedAiAction(s32, u16);
@@ -1246,10 +1246,11 @@ u32 btlScriptCmdSimpleD(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleE(void) {
+/* Apply script parameter 0 as the command target-selection mode; return VM success. */
+u32 btlScriptSelectTargetsByMode(void) {
     s32 context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleE(context, value);
+    btlSelectCommandTargetsByMode(context, value);
     return 1;
 }
 

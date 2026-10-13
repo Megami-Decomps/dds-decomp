@@ -315,7 +315,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern FrFontGlyph *func_0019F6C8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
@@ -2155,7 +2155,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->progressList->scale);
     }
-    font = func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
+    font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
     frFontDrawGlyphChain(font, 1, 0x52);
     frFontQueueGlyphForCurrentDrawBuffer(font);
 }
