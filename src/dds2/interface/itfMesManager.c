@@ -812,7 +812,7 @@ u32 itfMesGetEntryTableItem(s32 window, s32 entryIndex, s32 itemIndex) {
     return itfMesGetTableItem(itfMesGetEntry(itfWindowSlots[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void func_001A6078(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 arg1, s32 arg2);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * The first value is stored as a halfword; release the old primitive afterward. */
@@ -823,7 +823,7 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue) 
     if ((mes->flags & ITF_MES_CONTENT_STATUS_MASK) == 0) {
         if (mes->unk12 != firstValue || panelBlock->fadeLimit != secondValue) {
             mes->unk12 = firstValue;
-            func_001A6078(panelBlock, firstValue, secondValue);
+            itfMesConfigurePanelBoundsAndFadeLimit(panelBlock, firstValue, secondValue);
             if (panelBlock->sprite != NULL) {
                 itfPanelReleasePrimitiveResources(panelBlock->sprite);
                 panelBlock->sprite = NULL;
@@ -1648,13 +1648,13 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-extern void func_001A6078(ItfMesBlkA4 *, s32, s32);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *, s32, s32);
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     block->frame = NULL;
     block->sprite = NULL;
     block->overlay = NULL;
-    func_001A6078(block, 0, 0);
+    itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
 }
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
@@ -1736,7 +1736,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", func_001A6078);
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesConfigurePanelBoundsAndFadeLimit);
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 

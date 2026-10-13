@@ -2228,6 +2228,7 @@
 0x001A5F18	btlReleaseEffectResourceHandles	inferred	Releases and clears all three BattleEffect resource handles, then clears their effect flag bits.
 0x001A5FA0	itfReleaseUiResourceSlotHandles	inferred	Releases and clears handles in every UI resource slot. [names_reviewed10.tsv]
 0x001A5FF0	txtFormatNumberU16	inferred	writes decimal digits as (digit<<8)-0x6F80 u16 glyph codes, returns end pointer
+0x001A6078	itfMesConfigurePanelBoundsAndFadeLimit	inferred	Selects the panel-layout branch from mode, writes the four bounds, clamps/stores fadeLimit, and initializes related panel fields. Paired title implementation.
 0x001A6128	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x001A6160	itfMesUpdatePanelFades	inferred	U2
 0x001A67E0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]

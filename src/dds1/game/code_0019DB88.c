@@ -144,14 +144,14 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-void func_0019E048(ItfMesBlkA4 *block, s32 mode, s32 value);
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 mode, s32 value);
 
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     block->frame = NULL;
     block->sprite = NULL;
     block->overlay = NULL;
-    func_0019E048(block, 0, 0);
+    itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
 }
 
 void itfClearDrawStateWords(ItfMesTextSlots *slots) {
@@ -232,7 +232,7 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
     return out;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E048);
+INCLUDE_ASM(const s32, "game/code_0019DB88", itfMesConfigurePanelBoundsAndFadeLimit);
 
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);

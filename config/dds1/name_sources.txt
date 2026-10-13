@@ -2698,6 +2698,7 @@
 0x0019DEB8	itfResetBattleFadeState	inferred	Resets a fade phase, timer and alpha, optionally preserving its kind. [names_reviewed8.tsv]
 0x0019DED8	btlSetFadePhaseAlphaTimer	inferred	Stores the supplied phase, alpha and timer in a battle fade. [names_reviewed10.tsv]
 0x0019DF70	itfReleaseUiResourceSlotHandles	inferred	Releases and clears handles in every UI resource slot. [names_reviewed10.tsv]
+0x0019E048	itfMesConfigurePanelBoundsAndFadeLimit	inferred	Selects the panel-layout branch from mode, writes the four bounds, clamps/stores fadeLimit, and initializes related panel fields. Paired title implementation.
 0x0019E0F8	itfUpdateBattleDisplayAndFadeIndicator	inferred	Runs the display update stages and advances the battle fade indicator. [names_reviewed16.tsv]
 0x0019E130	itfMesUpdatePanelFades	inferred	U2
 0x0019E7B0	itfMesShiftPanelVertically	inferred	Shifts a panel and its origin, sprites and child nodes vertically. [names_reviewed11.tsv]
