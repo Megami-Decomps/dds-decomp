@@ -18,7 +18,7 @@ extern s32 func_0030AC10(LmapTaskState *);
 
 extern void fldDrawSkyGradient(void);
 extern void func_00137888(void);
-extern void func_0030C8E8(s32);
+extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAnimatedTransition(s32);
 extern void fldDrawSelectedMapMarker(void);
@@ -778,17 +778,17 @@ void fldDrawLocalMapOverlay(void) {
     switch (D_004388AC) {
     case 1:
     case 2:
-        func_0030C8E8(1);
+        sdfAdjustCounterValueAndRedraw(1);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(0);
         break;
     case 3:
-        func_0030C8E8(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(1);
         break;
     case 4:
-        func_0030C8E8(0);
+        sdfAdjustCounterValueAndRedraw(0);
         mnuDrawAnimatedTransition(1);
         break;
     case 5:

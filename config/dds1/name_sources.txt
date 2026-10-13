@@ -6156,6 +6156,7 @@
 0x002C4630	sdfDestroyActiveCounterRuntime	inferred	Destroys the global counter runtime and its allocated channel displays and timer. [names_reviewed15.tsv]
 0x002C4650	sdfCounterTickCountdownAndMapTimers	inferred	Ticks the counter countdown and map timers before updating its state. [names_reviewed10.tsv]
 0x002C4680	sdfHandleMapCounterSelectionInput	inferred	U3
+0x002C4850	sdfAdjustCounterValueAndRedraw	inferred	Adjusts the selected counter value by one, redraws the counter value and map hints, repositions the wide cursor, and refreshes the selection fade.
 0x002C49F8	sdfCounterGetDisplayWordPointer	inferred	Returns the word pointer in the active counter display reached through its runtime channel.
 0x002C4A28	sdfCounterGetScaledValue	inferred	Returns the timer's integer value scaled by one tenth.
 0x002C4A58	sdfCounterDrawLabelPlateRow	inferred	Draws the counter label-plate row by invoking the channel draw callback for three spaced channels, then submits the timer-faded full-width depth gradient.

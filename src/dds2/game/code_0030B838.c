@@ -497,9 +497,9 @@ s32 sdfPollCounterSelectionInput(void) {
 
 
 /* Adjust the selected counter value, then redraw its label and cursor. */
-s32 func_0030C8E8(s32 decrease) {
+s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     /* Untouched retail 32-byte slot: frame 0x30 rather than 0x10.
-     * DDS1 func_002C4850 has the same 32-byte frame gap. */
+     * DDS1 sdfAdjustCounterValueAndRedraw has the same 32-byte frame gap. */
     s32 drawScratch[8];
     s32 x = (s32)(((f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f) *
                     -32.0f);
