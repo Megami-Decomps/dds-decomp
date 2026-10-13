@@ -2885,7 +2885,7 @@ does not prove its original return width or distinguish zero parameters
 from an unused parameter. Recover independent API evidence rather than
 choosing the declaration with the prettier score.
 
-DDS2 `func_0014D0E8` (660 bytes) is an exact example of branch-local
+DDS2 `fldUpdateObjectActivation` (660 bytes) is an exact example of branch-local
 complete actions. Its stage-29/30 and default branches select different
 effect descriptors, but each creates the node, publishes it, and restarts
 the base instance. Keeping that complete action in each branch lets GCC

@@ -280,7 +280,7 @@ extern FldWaypointBlock fldActorWaypointRows;
 extern FldActorEntry fldActorEntries[256];
 
 /* Actor slots use three transition keys, signed frame counters and two float
-   triples with per-frame increments; func_00142B70 initializes the motion data. */
+   triples with per-frame increments; fldInitializeActorMotionSlots initializes the motion data. */
 typedef struct {
     s32 kind;
     u32 actorId;
@@ -2883,7 +2883,7 @@ void fldCopyActorWaypointTable(FldWaypointBlock *src) {
     fldActorWaypointRows = *src;
 }
 
-void func_00142B70(void) {
+void fldInitializeActorMotionSlots(void) {
     f32 rotation[4];
     f32 angle;
     EffWorldNode *world;
@@ -3478,7 +3478,7 @@ typedef struct FldMenuState {
     u16 pending;
 } FldMenuState;
 
-s32 func_00144028(void *task) {
+s32 fldDrawPendingTitleBannerWhenIdle(void *task) {
     FldMenuState *menu;
 
     if (D_00389780[0] >= 200) {
@@ -3528,7 +3528,7 @@ s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     node[2] = 0;
     node[3] = 0;
     kwlnTaskSetUserValue(task, (u32)node);
-    return (s32)func_00144028;
+    return (s32)fldDrawPendingTitleBannerWhenIdle;
 }
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436174);
