@@ -2031,7 +2031,7 @@ extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
 
 extern void func_001A7120(ItfMesState *);
 
-extern void func_001A6E88(ItfMesState *);
+extern void itfDrawSelectedSoundRow(ItfMesState *);
 
 void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     u32 flags = panel->flags;
@@ -2076,7 +2076,7 @@ void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
         if (panel->unk12 == 3) {
             func_001A7120(panel);
         } else {
-            func_001A6E88(panel);
+            itfDrawSelectedSoundRow(panel);
         }
     }
 }
@@ -2108,7 +2108,7 @@ extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *)
 extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
 
 /* Draw the selected sound row and its expanding fade outline. */
-void func_001A6E88(ItfMesState *panel) {
+void itfDrawSelectedSoundRow(ItfMesState *panel) {
     DrawColorRec uv;
     DrawColorRec color;
     DrawVertex bounds[2];
