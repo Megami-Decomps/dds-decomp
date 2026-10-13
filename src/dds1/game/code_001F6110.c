@@ -2626,7 +2626,7 @@ BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags) {
     }
     if (flags & 8) {
         index = 0;
-        generalCount = func_00151FC0();
+        generalCount = effGetGeneralResourceCount();
         for (; index < generalCount; index++) {
             entry = sdfAllocSizeClassBlock(BTL_RESOURCE_ENTRY_BYTES);
             entry->category = 8;

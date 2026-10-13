@@ -171,7 +171,7 @@ extern void effFillSurfaceGridColorGradient(u32, u32 *);
 
 extern void effReleaseSurfaceGridBuffers(s32);
 
-extern s32 func_00151FC0(void);
+extern s32 effGetGeneralResourceCount(void);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
@@ -10494,7 +10494,7 @@ void effPollResourceBank(s32 flags, void *out) {
         effResourceBankEntries = btlScanDirectory(0, flags);
         if (flags & BTL_RESOURCE_SCAN_GENERAL) {
             u32 i = 0;
-            u32 count = func_00151FC0();
+            u32 count = effGetGeneralResourceCount();
             if (count != 0) {
                 do {
                     char name[0x70];

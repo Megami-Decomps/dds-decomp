@@ -12430,7 +12430,7 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
 
         effResourceBankEntries = btlScanDirectory(0, mode);
         if (mode & BTL_RESOURCE_SCAN_GENERAL) {
-            count = func_00159BB0();
+            count = effGetGeneralResourceCount();
             for (i = 0; i < count; i++) {
                 func_0035C860(name, "GENERAL %d", i);
                 btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
