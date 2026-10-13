@@ -1,11 +1,11 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
-extern u32 effMiscRand(void *);
 extern u8 effDefaultRandomState[];
 
 
@@ -32,7 +32,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = effMiscRand(effDefaultRandomState) % (work->params.delaySpread + 1);
+    slot->delay = effMiscRand((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
     quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;
@@ -84,7 +84,6 @@ struct SdfListHead;
 extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
 extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);
-extern f32 sdfSinPoly(f32 angle);
 extern f64 fabs(f64 value);
 
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)

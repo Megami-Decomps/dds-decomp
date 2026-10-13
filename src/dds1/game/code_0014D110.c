@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "fld_scene_record.h"
 #include "dds3_path.h"
 extern const char *fldGetTaskRecordValue(u32 task);
@@ -180,7 +181,6 @@ extern s32 fldObjectSlotCount;
 
 extern f32 fldBannerColorPhase;
 
-extern f32 sdfSinPoly(f32);
 
 extern s32 fldRoomEffectEntryCount;
 
@@ -368,9 +368,7 @@ extern FldVec3 fldLookAtNearPoint;
 
 extern FldVec3 fldLookAtFarPoint;
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern s32 fldUpdateCameraObjectPose();
 

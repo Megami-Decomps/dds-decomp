@@ -5,6 +5,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
+#include "sdf_pac_reloc.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_texture_file.h"
 
@@ -59,14 +60,6 @@ void sdfPacResetOutputToAllocationEntry(PacState *state);
 
 
 void sdfStoreWordAndSetState(void *decoder, void *destination);
-
-/* Relocation record embedded in the work item's data stream. */
-typedef struct PacReloc {
-    s32 tableOffset; /* 0x00: relocation table displacement from the payload */
-    s32 tableBytes;  /* 0x04: zero after the table has been applied */
-    u8 pad08[8];
-    u8 payload[1]; /* 0x10 */
-} PacReloc;
 
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 

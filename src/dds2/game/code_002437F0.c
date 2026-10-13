@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "evt_solar.h"
 
 
-extern f32 sdfSinPoly(f32 angle);
 extern void evtDrawSolarNoiseLayerAtCenteredScale(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
 
@@ -40,7 +40,6 @@ typedef struct SolarLayerTimer {
 } SolarLayerTimer;
 
 
-u32 effMiscRand(s32 seed);
 
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
     *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
@@ -250,7 +249,6 @@ s32 evtAdvanceSolarLongLayerTimer(SolarLayerTimer *timer) {
 }
 
 extern s32 evtGetMirroredSolarPhase(void);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 void func_002441F8(SolarNoiseState *state) {
     u8 phase = evtGetMirroredSolarPhase();

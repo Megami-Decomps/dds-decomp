@@ -1,6 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
@@ -11,7 +11,6 @@
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -666,7 +665,8 @@ FrFontGlyph *parent;
     return handle;
 }
 
-FrFontGlyph *func_00197748(s32 x, s32 y, s32 depth, s32 colors,
+/* Create positioned, colored text with measured spacing and link it to parent. */
+FrFontGlyph *itfCreateMeasuredTextGlyph(s32 x, s32 y, s32 depth, s32 colors,
                            const char *text, FrFontGlyph *parent) {
     return frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent);
 }
@@ -723,7 +723,8 @@ FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build text with font index 3; retain the existing glyph chain's spacing. */
+FrFontGlyph *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
@@ -736,7 +737,8 @@ FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFo
     return glyph;
 }
 
-FrFontGlyph *func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
+/* Build font-index-3 text with signed spacing -2 and return its glyph chain. */
+FrFontGlyph *itfCreateTightFont3TextGlyph(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_003BB188, 0, 0, 0, previousGlyph);
@@ -1224,7 +1226,6 @@ void itfTranslateStyleEntries(FrFontGlyph *entry, u32 xOffset, u32 yOffset) {
 
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern u64 D_00357998[];

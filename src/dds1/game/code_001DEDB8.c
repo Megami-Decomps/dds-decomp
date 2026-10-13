@@ -1,6 +1,10 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random.h"
+#include "btl_camera_timed_instruction.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
@@ -117,15 +121,6 @@ typedef char BtlCameraCursorExtentCheck[
 
 extern BtlCameraCursor D_0035F100;
 
-/* Serialized camera instructions advance by 0x10 in 001E9DE0. */
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
-
 extern const BtlCameraTimedInstruction *D_0035D9F0[];
 
 extern const BtlCameraTimedInstruction *D_0035DA08[];
@@ -189,9 +184,6 @@ typedef struct SoundTask {
     struct SoundTask *deferPrev;
     u8 pad68[8];
 } SoundTask;
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern char D_003A5158[]; /* "%sMIDI%04X.SMG" */
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
@@ -973,7 +965,6 @@ INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0718);
 
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001E0B68);
 
-extern u32 effMiscRand(void *state);
 
 void btlSetupCameraAimDualUnit(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
 f32 angle, f32 blend) {
@@ -1053,7 +1044,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;
@@ -4287,8 +4278,6 @@ s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose
 INCLUDE_ASM(const s32, "game/code_001DEDB8", func_001EB368);
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
-
-typedef char BtlCameraTimedInstruction_size[(sizeof(BtlCameraTimedInstruction) == 0x10) ? 1 : -1];
 
 typedef char BtlCameraParameterRecord_size[(sizeof(BtlCameraParameterRecord) == 0x80) ? 1 : -1];
 
@@ -7723,9 +7712,7 @@ SoundTask *btlCreateAdvanceTitleStateTask(void) {
 
 extern f32 D_0035F9B0[4];
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Orient party actors and expand their formation when the marked count grows. */
 s32 btlExpandPartyFormationAroundCenter(f32 *center) {
@@ -7928,9 +7915,7 @@ s64 btlArrangeOpponentFormationSlots(void) {
     return btlArrangeFormationSlots(0x400);
 }
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern f32 sdfSinPoly(f32);
 
 /* Place the three actor slots around the common battle center supplied in vf10. */
 void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit *second) {

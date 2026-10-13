@@ -2524,7 +2524,7 @@ explicit casts at legacy interfaces that still transport pointer bits as
 integer words.
 
 For automatic lookup tables, preserve the typed initializer when native data
-and exact neighboring source establish it. DDS2 `func_002805E0` and
+and exact neighboring source establish it. DDS2 `mnuDrawMantraPanelAnimation` and
 `func_00283090` match with numeric sprite-ID and signed-offset array
 initializers. An explicit `memcpy` draft emitted alias-set-zero BLK copies;
 postreload dependency construction ordered the flags load before the first
@@ -4213,7 +4213,7 @@ a second script-data definition or importing the complete script header.
 ## Reward-panel glyph pointer contracts
 
 DDS1 `code_002649B0`'s formatted reward text retains the actual
-`FrFontGlyph *` returned by `func_001979C8`. The font measurement provider
+`FrFontGlyph *` returned by `itfCreateFont3TextGlyph`. The font measurement provider
 returns `u32`, and `frFontSetContextPair` receives that glyph pointer with
 two `u32` coordinates. Importing the canonical interface declaration removes
 the caller's old integer-handle prototypes and pointer casts without changing
@@ -6221,7 +6221,8 @@ has been matched: its current honest C candidate still differs.
 
 ## Shooting input tilt is integer storage with floating-point arithmetic
 
-DDS2's `00318660` controller reads shooting work `+90` as a signed word,
+DDS2's `mnuUpdateShootingWork` controller reads shooting work `+90` as a signed
+word,
 converts it to float, changes it by `1.0f` against the `+/-20.0f` limits,
 then converts back to a word. Keep that field as `s32`, not `f32`.
 The adjacent `+94` selector is a signed halfword populated from the menu
@@ -6635,7 +6636,7 @@ motion byte at `+9` is signed: `00221C48` uses `LB`, and `00221CA4` uses
 
 ## Mantra flag lookups copy their owned constant tables explicitly
 
-DDS2 `func_0028F128` copies four ID/flag tables (14, 4, 8, 8 halfword
+DDS2 `mnuIsMantraNodeModelFlagSetForMember` copies four ID/flag tables (14, 4, 8, 8 halfword
 pairs) and nine signed party offsets into automatic arrays before its
 first-hit scans. Declare the actual source tables at `004272F8`,
 `00427330`, `00427340`, `00427360`, and `00427380`, then copy each with
@@ -9466,7 +9467,7 @@ hooked and unhooked output identity.
 | fldResolveWorldObjectByResourceId | 001287B8 / 272B | Mutable global pointer, then pointer member | Loading D_00438EC0 obtains a pointer value, not the global's address; names at +24 and its +4 member remain indirect. |
 | fldUpdateCameraColorEffect | 001379C0 / 412B | Constant array address using HIGH/LO_SUM | CSE1 retains root-relative +4/+8 stores; array syntax using -> is not evidence of a mutable pointer. |
 | fldSetSceneLifecycleFlags | 00128340 / 20B | GP-small symbol, real read-modify-write | MEM(REG) survives CSE1 at offset zero; this is not proof that a nonzero member load will retain its base. |
-| func_003413F0 | 003413F0 / 224B | Direct ClockTime member addresses | CSE1 reconstructs later addresses as offsets from the first member-address quantity, cache+1. |
+| effMiscReadCachedClockTime | 003413F0 / 224B | Direct ClockTime member addresses | CSE1 reconstructs later addresses as offsets from the first member-address quantity, cache+1. |
 | fldLoadAreaRoomResources | 0012A6F0 / 1440B | Early FieldPlayerSceneWork HIGH/LO_SUM address | CSE1 preserves the late +0x58 read; reload rematerializes LUI / ADDIU / LW without requiring additional member reads. |
 
 ### fldProcDraw: a local fix can create global address sharing
@@ -9786,7 +9787,7 @@ new native lifetime requirement.
 
 ### Shooting-input controller: source last uses can reverse independent pairs
 
-DDS2 `game/code_00316E08::func_00318660` (1,440 bytes) closes the
+DDS2 `game/code_00316E08::mnuUpdateShootingWork` (1,440 bytes) closes the
 KiB/PiM/Brass reconstruction and released Sable continuation. Its last four
 mismatching words were two exchanged pairs, not missing behavior: pause-choice
 2's result/phase halfword stores and the signed action-input loads at 0x22/0x23.
@@ -10821,4 +10822,59 @@ store precedes the `memset` argument setup. With it, the store fills the call's
 delay slot exactly as retail does. The 76-byte body and all 39 existing functions
 in its unit match. The ordinary and observed compiler runs preserve the complete
 assembly and all generated RTL dumps; no calling convention or compiler flag changes.
+
+
+## Profile contents: coordinate-to-counter workspace
+
+DDS1 `mnuDrawPartyProfilePanelContents` (`0x00283838`, 932 bytes) reuses
+one signed-word workspace, `t`, for the frame's vertical coordinate and then
+the skill-row countdown. Retail uses `$20` for these successive values.
+Both values are consumed by real draws or loop control; there is no dummy
+initialization, dead update, special flag or assembly.
+
+The parity-verified compiler trace identifies global allocation's priority
+tier as the mechanism: the shared pseudo has 17 references, live length 106
+and priority 6415, and `find_reg` assigns it `$20`. The initial frame-row
+counter is separate (7 references, live length 30, priority 4666, `$16`).
+Keeping both loop counters together gave 99/233 differing words; splitting
+the counters and then the coordinate roles alone gave 179/233 and 184/233
+normalized residuals. Reusing the coordinate workspace for the final
+countdown closes every target word and keeps the other 154 functions exact.
+
+The accompanying pointer closure follows the native party-record and effect
+resource consumers through both DDS1 callers. The profile argument stays
+a signed word, as in the native callers; the existing
+`prfBuildRawSkillList(u16, ...)` narrows it at consumption. A proposed
+unsigned-short incoming ABI added caller-side masking and overflowed both
+matched wrappers. With the word formal, the two caller units retain all
+78 and 116 functions exactly; the DDS2 helper contracts already use pointers.
+
+## Target-mode bridge attribution and remaining text interfaces
+
+The previous E-labelled cross-game bridge attribution conflated two operations.
+DDS1 `btlSelectCommandTargetsByMode` (`001FEF50`) forwards to
+`btlSelectTargetsByMode`; its true DDS2 counterpart is `002110E8`.
+Their script entries, `btlScriptCmdSelectTargetsByMode`, are `001F8790` and
+`0020A3F0`. DDS2 `btlFilterCommandTargetsByUnitId` (`002111E8`) instead calls
+the unit-ID filter, with script entry `btlScriptFilterTargetsByUnitId`
+(`0020A2F8`). Zero-formal bridge definitions and the existing argument-bearing
+caller declarations remain unchanged; the naming correction does not normalize
+their legacy forwarding ABI.
+
+`itfCreateMeasuredTextGlyph` exposes positioned, colored, parent-linked measured
+text. `itfCreateFont3TextGlyph` selects font index 3 without imposing spacing;
+`itfCreateTightFont3TextGlyph` additionally stores signed spacing -2 and
+remeasures. Existing color signedness and caller/provider declarations remain
+as they were. DDS2 `itfDrawBankTextWithSegmentCounter` advances a segment counter
+every 30 calls, but submits the full encoded stream rather than the copied
+segment. That native quirk remains explicit and unchanged.
+
+`effSetFanRecordPoolColor` and `effSetFanRecordPoolScale` are the five-position
+fan pool setters, separate from the triple-vertex pool's existing generic
+setters. `effMiscReadCachedClockTime` preserves its 20-tick cache gate, three return
+cases and month-as-year input quirk. `sndTryDispatchQueuedCommand` attempts one
+ring send: zero means accepted, one means empty or rejected. Its producer and
+worker loops retain their opposite continuation conditions.
+`sndSubmitTextCommandPayloadWithCommandBits80` forwards `strlen` bytes with command bit 0x80,
+excluding the terminating NUL.
 

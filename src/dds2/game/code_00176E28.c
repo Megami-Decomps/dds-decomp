@@ -1,4 +1,6 @@
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
 #include "sdf_asset_state.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
@@ -81,13 +83,10 @@ typedef struct EffRingBlock {
 
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
-extern u32 effMiscRand(void *state);
 
 extern u8 effDefaultRandomState[];
 extern void *effGetExtendedGroupElement(EffRecordPool *pool, s32 index);
 extern f32 D_003B12B0[];
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 /* Allocate a circular fan group. Zero spread becomes one; count is not guarded. */
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
@@ -126,7 +125,7 @@ EffRingWork *source;
     step = EFFECT_RING_FULL_TURN / ring->count;
     spread = ring->spread;
     for (i = 0; i < ring->count; i++) {
-        ring->vertices[i].age = -(effMiscRand(effDefaultRandomState) % spread);
+        ring->vertices[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         ring->vertices[i].angle = angle;
         angle += step;
     }
@@ -341,7 +340,7 @@ void effUpdateOrbitingRingFan(EffRingWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashWriteRingColorSlots(work, index, color);
@@ -501,12 +500,12 @@ void effSetVectorIncrementBits(EffRecordPool *pool, u32 controlBits) {
 }
 
 /* This pool view uses the control word as a packed modulation color. */
-void func_00177B98(EffRecordPool *pool, u32 color) {
+void effSetFanRecordPoolColor(EffRecordPool *pool, u32 color) {
     pool->color = color;
 }
 
 /* Set the pool scale without changing the native byte-pointer interface. */
-void func_00177BA0(u8 *work, f32 scale) {
+void effSetFanRecordPoolScale(u8 *work, f32 scale) {
     ((EffRecordPool *)work)->scale = scale;
 }
 
@@ -853,7 +852,7 @@ PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParam
     }
     segments = work->params.radialSegments;
     for (i = 0; i < count; i++, particle++) {
-        particle->age = ageOffset - effMiscRand(effDefaultRandomState) % delaySpread;
+        particle->age = ageOffset - effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread;
         if ((i + 1) % segments == 0) {
             ageOffset -= delaySpread;
         }

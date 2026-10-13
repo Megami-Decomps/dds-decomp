@@ -1,5 +1,6 @@
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf_draw.h"
@@ -46,7 +47,6 @@ extern s32 sdfDevReplySemaphore;
 
 extern u8 D_00438B68;
 
-extern f32 sdfSinPoly(f32 arg0);
 
 typedef struct Bytes7 {
     s8 b[7];

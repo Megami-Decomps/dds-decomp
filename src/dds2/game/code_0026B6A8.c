@@ -7,6 +7,7 @@
 #include "eff.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
+#include "eff_random.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -37,12 +38,6 @@ typedef struct PartyFlagPair {
     s32 needFlag;
     s32 doneFlag;
 } PartyFlagPair;
-
-
-/* Encoded name-table rows; keep byte storage and the retail table strides. */
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 
 extern SceneFlagEntry mnuSceneFlagEventEntries[4];
@@ -283,7 +278,6 @@ void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
     }
 }
 
-extern u32 effMiscRand(void *state);
 
 /* Give each scrolling strip a random speed in the requested range. */
 void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {

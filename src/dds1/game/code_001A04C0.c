@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -28,7 +29,6 @@ typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
-extern f32 sdfSinPoly(f32);
 extern u64 *itfCreateVerticalGradientQuadPacket(u32, u32, u32, u32, u32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);

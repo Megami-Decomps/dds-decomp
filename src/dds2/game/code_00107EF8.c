@@ -6,7 +6,7 @@
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
@@ -160,7 +160,6 @@ typedef struct EvtGsCommand {
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 #include "sdf_packet_alloc.h"
 
@@ -170,7 +169,6 @@ extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
@@ -825,7 +823,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
 void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *text) {
     struct FrFontGlyph *glyph;
 
-    glyph = func_0019F448(width << 4, height << 3, 0, colors, text, NULL);
+    glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }

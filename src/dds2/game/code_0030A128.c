@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "file_pac.h"
 #include "file_request_api.h"
 #include "eff_resource_slots.h"
@@ -72,7 +73,7 @@ extern char D_004388A0[];
 extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
-extern void evtCreateWorldObjectForKey(s32, s32);
+
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void fldCreateLocalMapCamera(void);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "sdf_vector_latch.h"
 #include "sdf_counter_channel.h"
 #include "dds3obj.h"
@@ -402,7 +403,6 @@ extern s8 D_00324510[];
 extern s32 D_003BD240;
 extern s8 D_003BD280;
 extern void mnuClearListFlagsOneAndTwo(SdfCounterRuntime *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sdfCounterSetMode(s32);
 extern void sdfCounterStartTimerPositionTransition(s32, s32);
 extern s32 sdfCounterGetSelectionBoundaryFlags(void);

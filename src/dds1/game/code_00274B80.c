@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -15,6 +16,8 @@
 #include "itf.h"
 #include "sdf_chip.h"
 #include "mnu_panel_state.h"
+#include "dsp_name.h"
+#include "eff_random.h"
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -210,7 +213,6 @@ typedef struct MenuSpriteArguments {
 } MenuSpriteArguments;
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuClearWindowListSelectionFlags(s32);
 
@@ -1153,10 +1155,10 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page
     mnuDrawSlotIcons(-0x16, page);
 }
 
-extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, MenuSimpleSpriteState *, s32);
 
-void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
-    mnuDrawPartyProfilePanelContents(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, s32 unused1, MenuSimpleSpriteState *spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
+    mnuDrawPartyProfilePanelContents(0, 0, 0, entry, entry->profileId, spriteGroup, spriteFlags);
     mnuDrawAndAdvanceProfilePanel(0x1200, 0x730, 0, drawGroup, spriteFlags);
 }
 
@@ -1190,8 +1192,8 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
                                         context->sprite, (s32)slots, 0x53);
         mnuDrawStaffGridLabelsForKind(5, (struct EffectSlotSet *)(u32)(context->actor));
     } else {
-        mnuDrawProfilePanelAndSprite((s32)partyEntry, (s32)page,
-                                     (s32)context->effect, (s32)context->extraResource,
+        mnuDrawProfilePanelAndSprite(partyEntry, (s32)page,
+                                     context->effect, (s32)context->extraResource,
                                      (s32)slots, 0x53);
         if (menu->staffImage == 0) {
             mnuDrawStaffGridLabelsForKind(6, (struct EffectSlotSet *)(u32)(context->actor));
@@ -1208,7 +1210,6 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-extern u32 effMiscRand(s32);
 extern s32 evtStageTestHasPendingMotion();
 extern u32 evtStageTestCountFlags(s32);
 extern void evtStageTestQueueMotion(s32, u32);
@@ -1252,7 +1253,7 @@ u32 func_00277638(void) {
 }
 
 void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
-                   s32 actor, u16 rangeId, s32 style, s32 dim,
+                   DatPartyRecord *actor, u16 rangeId, s32 style, s32 dim,
                    EffectSlotSet *specialResource, EffectSlotSet *costResource, u32 texture) {
     char text[16];
     u32 color;
@@ -1270,7 +1271,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         return;
     }
     if (actor != 0) {
-        value = mnuGetAdjustedEntryValue(rangeId, (DatPartyRecord *)actor);
+        value = mnuGetAdjustedEntryValue(rangeId, actor);
     } else {
         value = mnuGetAdjustedPartyRangeValue(rangeId);
     }
@@ -1323,10 +1324,6 @@ typedef struct MenuListDefaultRecord {
     MenuListDefaults defaults;
     u32 unk0C;
 } MenuListDefaultRecord;
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 extern const MenuListDefaultRecord D_003B22E0;
 extern DspUnitName *D_003BAA8C;

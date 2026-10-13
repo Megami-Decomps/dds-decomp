@@ -1,6 +1,9 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
 #include "fld_area_path.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_textured_rect.h"
@@ -183,9 +186,6 @@ extern s32 D_003D62A8[];
 extern s32 fldCurrentBgmId[];
 
 extern void func_002E8DD0();
-
-extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
-
 extern void sndStartTrackDefault(s32 arg0);
 
 
@@ -966,7 +966,7 @@ extern SdfPoolNode *D_00325838[];
 extern void sdfDrawNodeBuildMatrix(SdfDrawNode *);
 
 
-extern void func_002D9238(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
@@ -983,7 +983,7 @@ void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
         VU0_STORE_VF(vf10, emitter->matrix[3]);
     sdfDrawNodeBuildMatrix(handle);
     sdfModelUpdateCurrentFrameTransforms(emitter);
-    func_002D9238(D_00325838, emitter);
+    sdfModelBuildNodeResourcePackets(D_00325838, emitter);
 }
 
 typedef struct {
@@ -999,7 +999,7 @@ typedef struct {
 extern FldProjectedSprite D_0033EBA0[];
 extern SdfTex *D_003D40A0[4];
 
-void func_00142800(f32 x, f32 y, s32 index, u32 color) {
+void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1128,7 +1128,6 @@ extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
 extern void func_001428C0(s32, f32, f32, f32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern f32 sdfSinPoly(f32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
@@ -1538,7 +1537,7 @@ void func_00142D78(void) {
                                 if (offsetX < 80000.0f && offsetZ < 80000.0f) {
                                     fldProjectPointSetupAlt(&projectedX, &projectedY,
                                                             x, D_003BAEF8, z);
-                                    func_00142800(projectedX, projectedY,
+                                    fldDrawProjectedMapIcon(projectedX, projectedY,
                                                   spriteIndex, 0x80808080);
                                 }
                             }
@@ -1704,7 +1703,6 @@ void func_00142D78(void) {
 extern f32 D_003BAF18;
 extern f32 D_00329790[4][4];
 extern f32 sdfViewMatrix[4][4];
-extern f32 sdfSinPoly(f32);
 extern void sdfInvertScaledVuTransform(void);
 extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
@@ -2975,7 +2973,6 @@ extern f32 fldBannerColorPhase;
 
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 
-extern f32 sdfSinPoly(f32);
 
 extern void evtSubmitTexturedRectPacket(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, SdfTex *);
 
@@ -3824,8 +3821,6 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 extern s16 D_0032E4B4[];
 

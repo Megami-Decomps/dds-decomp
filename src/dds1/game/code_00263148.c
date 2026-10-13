@@ -5,6 +5,8 @@
 
 #include "mnu.h"
 #include "prf_profile_cap.h"
+#include "dsp_name.h"
+
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
@@ -57,10 +59,6 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     kwlnItemApplySelection(scene);
     return 1;
 }
-
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
 
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
@@ -331,7 +329,7 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
+extern u32 itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void frFontDrawGlyphChain(u32, s32, s32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
@@ -354,7 +352,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
 
     color = uiBlendColors(0xFFF06480, 0xFFF06400, fade);
     func_003014F0(text, D_003BC550, delta);
-    glyph = func_001979C8(x, 0x408, 0, color, text, 0);
+    glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
     frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
 

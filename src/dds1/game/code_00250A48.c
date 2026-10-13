@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "mnu_scene_work.h"
 #include "mnu_mantra_grid.h"
 
@@ -9,8 +10,6 @@ extern SdfGridCell *sdfGridCursorUpToFilledCell(SdfGrid *grid);
 extern SdfGridCell *sdfGridCursorDownToFilledCell(SdfGrid *grid);
 extern s32 mnuSelectMantraGridLeftNeighbor(SdfGrid *grid);
 extern s32 mnuSelectMantraGridRightNeighbor(SdfGrid *grid);
-extern void sndSetSequenceVolumePan(s32 trackId, s32 volume, s32 pan);
-
 extern u32 *mnuGetSelectedNodeValue(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
@@ -46,7 +45,7 @@ void mnuBeginTransition(MenuSceneWork *work, s32 mode) {
     }
 }
 
-void func_00250B60(MenuSceneWork *work) {
+void mnuHandleMantraGridInput(MenuSceneWork *work) {
     s32 feedback = 0;
     s8 direction;
     MnuMantraGridEntry *entry;

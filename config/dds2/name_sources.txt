@@ -52,6 +52,7 @@
 0x00102BC8	dds3AdminPollModeCompletion	inferred	Fam_Tail twin
 0x00102D48	dds3AdminReleaseTaskWork	inferred	src/dds2/kernel/dds3AdminiProcess.c func_00102D48: Calls mode destroy callback then frees attached data and task user-value block. Twin of DDS1 func_00102E58. [names_reviewed24.tsv]
 0x00102DC8	kwlnDebugTaskCreate	inferred	DDS1 twin func_00102ED8; creates task named by D_00435C18 once [names_M39_SmallSweep7.tsv]
+0x00102E88	kwlnRegisterNamedSlot	inferred	Requires the DebugOwner task, allocates a free named slot, copies its name, initializes slot fields, links it into the active slot chain, and returns the slot index; paired counterpart 0x00102F98. [DDS1/DDS2 BN analysis, 2026-10-13]
 0x00103050	kwlnFindNamedSlot	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:203:func_00103050; M143; source=names_M143.tsv:1; review=Walks linked named slots, requires an exact NUL-terminated string match and returns slot index or -1. [names_qp11.tsv]
 0x00103108	kwlnUnregisterNamedSlot	inferred	Stops the named task when applicable, clears and unlinks its slot record, updates list/active/count state, and reports whether a slot was removed; DDS1 twin 0x00103218.
 0x001034E8	kwlnStepListCursor	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:237:func_001034E8; Updates a list cursor and optional scroll offset from caller-selected pad directions, wrapping on initial presses and bounding repeats.; source=names_pending_main.tsv:122 [names_qp11.tsv]
@@ -3020,7 +3021,7 @@
 0x0020A250	btlScriptCmdWithArgD	inferred	Twin of dds1 0x001F86E8; Calls btlCmdWithArgD on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A278	btlScriptCmdSimpleC	inferred	Twin of dds1 0x001F8710; Reads first script parameter and passes it to btlCmdSimpleC; returns script success. [names_R_FuncNames3.tsv]
 0x0020A2B8	btlScriptCmdSimpleD	inferred	Twin of dds1 0x001F8750; Reads first script parameter and passes it to btlCmdSimpleD; returns script success. [names_R_FuncNames3.tsv]
-0x0020A2F8	btlScriptCmdSimpleE	inferred	Twin of dds1 0x001F8790; Reads first script parameter and passes it to btlCmdSimpleE; returns script success. [names_R_FuncNames3.tsv]
+0x0020A2F8	btlScriptFilterTargetsByUnitId	inferred	confidence=high; reads script parameter0 and current context, then invokes the unit-ID filter bridge at0x002111E8. Corrects prior erroneous attribution as DDS1's mode-selector twin. [Namer1 naming batch45]
 0x0020A360	btlScriptCmdSimpleG	inferred	Twin of dds1 0x001F8828; Calls btlCmdSimpleG on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A390	btlScriptCmdSimpleF	inferred	Twin of dds1 0x001F87F8; Calls btlCmdSimpleF on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A3C0	btlScriptCmdSimpleH	inferred	Twin of dds1 0x001F8858; Calls btlCmdSimpleH on current command context; returns script success. [names_R_FuncNames3.tsv]
@@ -3428,6 +3429,7 @@
 0x0022B510	btlOpStartSelectedUnitModelChange	inferred	Selects a battle unit from script parameters and starts a model-change task. [names_reviewed9.tsv]
 0x0022B600	btlCommandPlayUnitMotion	inferred	script op reading 3 ints: unit, selector, motion index (func_001E2C00 or mdlAddEntryPlainEx) [names_M59_D2Mid.tsv]
 0x0022B6E8	btlCommandSetSequenceVolumePan	inferred	Uses a script-provided sequence index to set volume and pan on a live sequence.
+0x0022B7A0	btlCommandChooseRandomUnflaggedGroupSlot	inferred	Reads a group selector and returns a uniformly selected member index whose model flag is clear; returns -1 when no member qualifies and 0 for an invalid selector. Retail command-function table entry 0x00412360 points to this provider. [DDS2 source/BN analysis, 2026-10-13]
 0x0022B8E0	btlCmdGetIndexedBattleStateValue	inferred	Returns a bounded indexed battle state value through the script integer result. [names_reviewed16.tsv]
 0x0022B928	btlCommandCountModelFlags	inferred	Counts one hundred descending model flags and publishes the count to the script VM.
 0x0022BAA8	btlCreateScriptResourceTask	inferred	Creates a battle task with callback btlRunSceneActorEventTask and initializes its object/group resource-work fields.
@@ -3840,6 +3842,7 @@
 0x002502E0	evtUpdateFrameVariableTask	inferred	game/code_00250010: FrameVar task update; calls func_00101958 on the handle at arg0+0x44 and returns 0 [names_L14_MidUnits.tsv]
 0x00250338	evtDrawMenuFrame	inferred	TaskPurist
 0x00250508	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
+0x00250558	evtDrawFloatValueEditorRow	inferred	DDS1 twin at 0x002357B8; renders the current float and value-editor key instructions through the callback passed to evtDrawMenuFrame. [DDS2/DDS1 source analysis, 2026-10-13]
 0x00250718	evtViewerFloatValueUpdate	inferred	unified with DDS1 twin (was evtDrawFloatValueEntry)
 0x002508D0	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
 0x00250A08	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
@@ -4574,6 +4577,7 @@
 0x002A4E48	mnuAdvanceTimedSlideBar	inferred	Counts down a slide bar timer, then draws and advances its position.
 0x002A4F20	mnuAdvanceMultiSpriteSlideBar	inferred	Draws four sprites with one slide bar position and advances the bar.
 0x002A5128	mnuAdvancePairedSlideBars	inferred	Draws and advances both bars in the two-entry slide bar pair.
+0x002A5890	mnuResetTitleMovieMenuStateAndStartTrack	inferred	Resets the title movie menu phase, selected page, and sequence timer, then starts track 0x310000; called during the title-menu handoff.
 0x002A58C0	mnuClearGlobalMenuStateFields	inferred	Clears three tracked state fields in the global MenuState. [names_reviewed16.tsv]
 0x002A58D8	mnuResetTitlePageAndPhase	inferred	Sets title phase and selected page to zero, leaving sequence timer untouched. [names_reviewed21.tsv]
 0x002A58E8	mnuPollMovieMenuInputAndTimeout	inferred	confidence=high; matched-C; src/dds2/game/code_002A5260.c:84:func_002A58E8; Movie/title-menu input state machine: thirty-frame opening, ninety-frame idle loop, 601-frame inactivity timeout, countdown closing state, and sequence-volume update on acceptance. Same observable role as the DDS1 movie-menu callback.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -5784,6 +5788,7 @@
 0x003064C0	itfDrawRotatedTexturedRect	inferred	readability/matching review (QP16)
 0x00306500	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
 0x003065A0	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
+0x00306970	effDrawTextureSlot	inferred	Resolves the selected slot texture and description, applies draw offsets/flip/preset modes, dispatches textured-slot rendering, and updates timed state when requested; paired with DDS1 0x002BF198. [DDS2 BN analysis, 2026-10-13]
 0x00306F80	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
 0x00307018	itfUpdateGridSlotDescription	inferred	Decrements the current entry's update-call delay or advances its continued description sequence; paired DDS1/DDS2 native wrappers agree.
 0x003071D0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
@@ -6039,7 +6044,10 @@
 0x00316FC8	mdlAdvanceViewerPackageTask	inferred	Checks viewer package work status, updates on success, invokes failure handler on negative status. [names_reviewed19.tsv]
 0x00317010	evtCallShooting	inferred	confidence=high; src/dds2/game/code_00316E08.c:func_00317010; Prints the call_shooting console line, submits admin mode 0x1D and destroys the named script processes. [names_qp9.tsv]
 0x00317958	mdlLoadViewerPackageFromWork	inferred	medium confidence; src/dds2/game/code_00316E08.c func_00317958: Reads the work package ID and two resource values, then loads viewer kind 5 with fixed options 0x101. [names_reviewed25.tsv]
+0x00317988	mnuLoadSectionObjectListWithRelocations	inferred	Copies the section-object payload into retained storage, applies relocation offsets from its trailing table, and returns the MnuSectionObjectList descriptor; used for object, player, map, and draw lists. [DDS2 BN analysis, 2026-10-13]
 0x00317E48	mnuDestroyShootingWork	inferred	U2
+0x00318570	mnuReleaseShootingSectionResources	inferred	Deactivates the shooting work entry, releases section object allocations, and destroys model node contexts during initialization completion and shutdown. [DDS2 source/caller analysis, 2026-10-13]
+0x00318660	mnuUpdateShootingWork	inferred	Reads input, updates shooting records and score progress, advances round phases, and updates sound slots; retail callback table entry 0x0040ABE8 points to this function. [DDS2 source/BN/caller analysis, 2026-10-13]
 0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
@@ -7298,6 +7306,9 @@
 0x00345E18	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
 0x00331590	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
 0x00330DF0	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
+0x00330E60	sdfModelBuildIndexedCommandPackets	inferred	Starts the indexed asset packet, appends root-workspace DMA/VIF references for each listed draw-node ID, writes the sequence terminators, and returns the next packet cursor. Called by sdfCommandListMeasure's consumer dispatcher for command kind 1; paired with DDS1 0x002D7FB0. [code-quality cleanup, 2026-10-13]
+0x00330FE0	sdfModelBuildClippedCommandPackets	inferred	Filters the two clip-result values to select active clipped draw data, builds its DMA/VIF reference packet sequence, and returns the append cursor. Called by the model packet traversal for command kind 2; paired with DDS1 0x002D8130. [code-quality cleanup, 2026-10-13]
+0x00331B68	sdfModelTestTransformedClipVectors	inferred	Transforms two vectors through the supplied VU matrix, issues VU clip tests, and returns the intersection of the CCR clipping bits with the input mask. Called by model render traversal; paired with DDS1 0x002D8CB8. [code-quality cleanup, 2026-10-13]
 0x00333950	sdfInitAssetDrawEntryReferenceNode	inferred	Selects the asset drawEntries[frame] pointer, writes a 16-byte reference header with its physical address, and returns the following packet payload.
 0x00173718	effFlashAccumulatingSetParticleColors	inferred	Writes packed colors for paired particle quad records using the supplied color multiplier.
 0x00173808	effFlashAccumulatingBuildParticleQuads	inferred	Builds paired outer and inner particle quads and advances radius by radialStep.
@@ -8182,4 +8193,37 @@
 0x001E5FF8	btlCreateUnitDefeatFadeInTask	inferred	Allocates battle task kind 0x13, installs btlStepUnitDefeatFadeIn, stores the owning unit and caller option, and initializes fade progress to zero. [code-quality cleanup, 2026-10-13]
 0x001EFEE8	btlBuildRandomizedActionCameraPosePair	inferred	Selects a random camera preset pair, mirrors the quaternions for target group 0x400, frames both action poses, and sets the action motion parameters; animation flag 0x200 selects the alternate preset rows. [code-quality cleanup, 2026-10-13]
 0x00348540	sdfRunStreamIopRpcServer	inferred	Registers synchronous stream RPC command 0x66504F49, requests the SDFIOPFL module, wakes the waiting thread, and enters the RPC loop; sdfStartAndSuspendWorkerThread starts this worker. Paired title counterpart 0x002EF698. [code-quality cleanup, 2026-10-13]
+0x00269B80	mnuBeginTerminalSlotSelection	inferred	Configures terminal slot effects and selection, sets the panel motion/callback state and advances the event task; DDS1 twin 0x0024B3A8. [LiteH menu naming batch 21]
+0x0026AEB0	mnuDrawTerminalSelectionPanel	inferred	Draws the terminal backdrop, panel fade, frame and selected slots while advancing the panel dispatcher; DDS1 twin 0x0024C7E8. [LiteH menu naming batch 21]
+0x0027D3D8	mnuDrawMantraPanelNodeReveal	inferred	Animates a mantra-node reveal by fading the panel, expanding its ring, emitting six shards and revealing neighbor markers. [LiteH menu naming batch 21]
+0x002805E0	mnuDrawMantraPanelAnimation	inferred	Draws staged mantra-panel animations with rotating symbols, node IDs, bursts and orbit effects. [LiteH menu naming batch 21]
+0x00285AC0	mnuDrawMantraSparkleEffects	inferred	Sets GS surface/alpha state and processes active sparkle particles using their remaining-life envelope. [LiteH menu naming batch 21]
+0x0028F128	mnuIsMantraNodeModelFlagSetForMember	inferred	Searches node/flag tables and tests the member-adjusted model flag for a matching mantra node. [LiteH menu naming batch 21]
+0x0029A588	mnuRefreshAndRunResultPanel	inferred	Draws the result-panel layer, then runs request handler mode 1; DDS1 twin 0x00263570. [LiteH menu naming batch 21]
+0x002A6858	mnuAdvanceStaffImageSequence	inferred	Advances the staff-roll image/movie sequence through loading, fade, playback and transition states. DDS1 twin 0x0026F918. [LiteH menu naming batch 21]
+0x002A81C8	mnuCanDrawMovie	inferred	Returns true when the movie draw state is 2 and its associated movie callback state is nonzero; DDS1 twin 0x00270218. [LiteH menu naming batch 21]
+0x002AB448	mnuDrawStaffCampImageScreen	inferred	Draws the staff camp screen after resources are ready, rendering the selected image, grid, transition panel and resource labels; DDS1 twin 0x002728F8. [LiteH menu naming batch 21]
+0x002AB890	mnuDrawStaffBulletItemListEntry	inferred	Forwards a staff bullet-item row to the camp-grid renderer with default mode 0; registered by mnuCreateStaffBulletItemWindow. [LiteH menu naming batch 21]
+0x002AB8C0	mnuDrawStaffItemListEntry	inferred	Forwards a staff-item list row to the camp-grid renderer with mode 0x200; registered by mnuBuildStaffItemWindows. DDS1 twin 0x00272BC0. [LiteH menu naming batch 21]
+0x002BE438	mnuDrawMenuPageSpriteLayers	inferred	Draws three page-slot sprite layers at their table positions unless the caller skips sprite submission. [LiteH menu naming batch 21]
+0x002BEE38	mnuInitializeQueuedMenuCommand	inferred	Initializes the queued command's work values for kind 2: sets +0x0C to 0x18, +0x10 to 5 and +0x00 to 0. [LiteH menu naming batch 21]
+0x0019F448	itfCreateMeasuredTextGlyph	inferred	confidence=high; public positioned/colored text interface uses measured glyph creation and parent linkage; DDS1 twin0x00197748; signature preserved. [Namer1 naming batch45]
+0x0019F6C8	itfCreateFont3TextGlyph	inferred	confidence=high; builds text with fontIndex3, shared-flag staging and supplied position/depth/colors; DDS1 twin0x001979C8. [Namer1 naming batch45]
+0x0019F798	itfCreateTightFont3TextGlyph	inferred	confidence=high; fontIndex3 construction additionally stores spacing-2 and remeasures glyphs; DDS1 twin0x00197A98. [Namer1 naming batch45]
+0x0019FA08	itfDrawBankTextWithSegmentCounter	inferred	confidence=high; cycles a segment counter every30 calls but draws the full bank stream, optionally centered; copied segment is intentionally not submitted; sequel-only variant. [Namer1 naming batch45]
+0x00177B98	effSetFanRecordPoolColor	inferred	confidence=high; stores five-position fan pool modulation color, distinct from the triple-vertex pool setter; DDS1 twin0x0016FF40. [Namer1 naming batch45]
+0x00177BA0	effSetFanRecordPoolScale	inferred	confidence=high; stores five-position fan pool scale; DDS1 twin0x0016FF48; native parameter types retained. [Namer1 naming batch45]
+0x001E40F0	btlWarpUnitToMotionReach	inferred	confidence=high; constructs a reach-based anchor from body/muzzle/orientation and warps the nearby effect origin; same operation as named DDS1 0x001D7258, with sequel-specific unit exemptions. [Namer1 naming batch45]
+0x002110E8	btlSelectCommandTargetsByMode	inferred	confidence=high; invokes btlSelectTargetsByMode through the native zero-formal bridge; actual DDS1 twin0x001FEF50. Corrects prior E-label attribution of the different unit-ID filter. [Namer1 naming batch45]
+0x002111E8	btlFilterCommandTargetsByUnitId	inferred	confidence=high; invokes btlFilterTargetListByUnitId(context,value). Corrects prior false mode-selector twin attribution; signature preserved. [Namer1 naming batch45]
 0x003413F0	effMiscReadCachedClockTime	inferred	Reads and caches the SDF CD clock, validates its status, BCD-decodes date/time fields into ClockTime, and reports read success; called by effMiscSeedRandomFromClock. Paired with DDS1 0x002E8548. [code-quality cleanup, 2026-10-13]
+0x002D7B58	effUpdateGridRecordSlotHistory	inferred	Advances per-instance grid-record history, fades shifted trail colors, and interpolates trailing position, scale, angle, and color samples using linear or Catmull-Rom motion. Reused by seven effect emitter update paths; paired with DDS1 0x00297658. [exact-matched source]
+0x00331C80	sdfModelBuildVisibleNodePackets	inferred	Iterates the model node table, skips disabled or clipped nodes, and builds per-workspace lighting and indexed-asset packet lists; sets the model packet-state bit when any workspace receives packets. Paired with DDS1 0x002D8DD0. [code-quality cleanup, 2026-10-13]
+0x003320E8	sdfModelBuildNodeResourcePackets	inferred	Traverses model nodes and their filtered resource-entry chains, clip-tests node transforms, and builds per-context packet lists for the visible node resources; sets the packet-state bit when packet lists are populated. Called by model update/render paths; paired with DDS1 0x002D9238. [code-quality cleanup, 2026-10-13]
+0x00231E28	mdlCreateDevSlotList	inferred	Releases existing model device slots and, for a positive capacity, allocates and initializes the context MdlDevList owner with slot geometry, byte count, color, and color-step data from the viewer stream record. Called by mdlLoadViewerStreamRecord; paired with DDS1 0x00217310. [code-quality cleanup, 2026-10-13]
+0x00198D00	effEventUpdateBillboardParticles	inferred	Updates the event billboard particle set: ages and respawns particles, integrates position and sway, evaluates scale and color animation, and submits each particle’s billboard transform, rotation, and color. Paired with DDS1 0x001910C8. [code-quality cleanup, 2026-10-13]
+0x001032F0	kwlnConfigureNamedSlotMode3	inferred	Finds the existing named-slot entry, sets kind 3, stores the supplied mode data, clears the other mode fields, and reports success; paired with DDS1 0x00103400. [code-quality cleanup, 2026-10-13]
+0x00103388	kwlnConfigureNamedSlotMode1	inferred	Finds the existing named-slot entry, sets kind 1, stores the three mode arguments, clears the other mode fields, and reports success; used to configure the model-viewer task slots. Paired with DDS1 0x00103498. [code-quality cleanup, 2026-10-13]
+0x00103430	kwlnConfigureNamedSlotMode2	inferred	Finds the existing named-slot entry, sets kind 2, stores the three mode arguments, clears the other mode fields, and reports success; paired with DDS1 0x00103540. [code-quality cleanup, 2026-10-13]
+0x00340CB0	sdfConvertWrappedEulerAnglesToQuaternionVU	inferred	Wraps each of three Euler angles, evaluates half-angle sine/cosine products, composes quaternion components, and loads the quaternion into VF10. Paired with 0x002E7E08; adjacent sdfConvertEulerAnglesToQuaternionVU performs the unwrapped variant. [code-quality cleanup, 2026-10-13]
+0x00145948	fldDrawProjectedMapIcon	inferred	Draws a field-map item icon from projected coordinates using the indexed sprite anchor, dimensions, UVs, color, and texture slot; the map renderer calls it after item visibility and distance checks. Paired with DDS1 0x00142800. [code-quality cleanup, 2026-10-13]

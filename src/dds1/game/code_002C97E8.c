@@ -1,6 +1,8 @@
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
@@ -26,9 +28,7 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern f32 func_002FA1C0(f32);
 
-extern f32 sdfSinPoly(f32);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 extern void sdfQuatMultiply(f32 *, f32 *, f32 *);
 
@@ -368,10 +368,10 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     return result;
 }
 
-extern FrFontGlyph *func_00197A98(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateTightFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 
 s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *style, s32 width, u32 color) {
-    FrFontGlyph *handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
+    FrFontGlyph *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
     frFontSetChildChainFirstOption(handle, flags);
@@ -416,10 +416,8 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
 }
 
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 #include "sdf_packet_alloc.h"
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 

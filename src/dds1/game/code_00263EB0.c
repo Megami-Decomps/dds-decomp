@@ -3,6 +3,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "snd_sequence_volume_pan.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -16,7 +17,6 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern void dspSetActive(s32);
 extern void dspStartEntry(s32);
 extern void evtStageTestQueueMotion(s32, u32);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern char D_003BC550[];
 extern char D_003BC558[];
 extern char *D_0036D3A8[];
@@ -324,7 +324,6 @@ s32 mnuStartRewardDialogAndMotion(BrsSkillPackageWork *work) {
 
 
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 
 void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
@@ -492,7 +491,7 @@ extern u8 *D_003BAA84;
 extern char D_003BC560[];
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern s32 func_003014F0(char *, const char *, ...);
-extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 
@@ -522,7 +521,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             effDrawSpriteWithCornerColors(x + 0xB20, y + 0x28, 0, colors, 0,
                           work->teardownResource, 0x1C, 0x53);
             func_003014F0(formatted, D_003BC560, parameter);
-            valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,
+            valueGlyph = itfCreateFont3TextGlyph(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
             frFontDrawGlyphChain(valueGlyph, 1, textStyle);
             frFontQueueGlyphForCurrentDrawBuffer(valueGlyph);
@@ -536,7 +535,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     FrFontGlyph *glyph;
 
     func_003014F0(text, D_003BC568, info->totalExp);
-    glyph = func_001979C8(x, y, z, w, text, 0);
+    glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
@@ -547,7 +546,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary 
     FrFontGlyph *glyph;
 
     func_003014F0(text, D_003BC568, info->macca);
-    glyph = func_001979C8(x, y, z, w, text, 0);
+    glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frFontSetGlyphPosition(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);

@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "btl_world_camera_view.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -161,9 +162,6 @@ extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-
-extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-
 extern u8 D_0037F510[];
 
 extern char D_004178A8[];
@@ -3333,7 +3331,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
-extern void func_003320E8(SdfPoolNode **, SdfModel *);
+extern void sdfModelBuildNodeResourcePackets(SdfPoolNode **, SdfModel *);
 
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
@@ -3390,7 +3388,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, MdlCtx *model, SdfModel *overl
     } else {
         overlay->lighting = NULL;
     }
-    func_003320E8(surfaces, overlay);
+    sdfModelBuildNodeResourcePackets(surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
@@ -3528,7 +3526,8 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 const char D_00417AE0[16] = "btl:warp[%p]\n";
 
-void func_001E40F0(BtlUnit *unit, BtlUnit *target, s32 index) {
+/* Try to warp the unit effect to a motion-reach anchor; retain the unit exemptions. */
+void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     f32 bodyPos[4] __attribute__((aligned(16)));
     f32 muzzlePos[4] __attribute__((aligned(16)));
     f32 world[4] __attribute__((aligned(16)));
@@ -5023,7 +5022,7 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         btlApplyScaledUnitEffectParameter(unit, args->index, args->value, args->scale);
     } else {
         if (unit != target) {
-            func_001E40F0(unit, target, args->previousModelValue);
+            btlWarpUnitToMotionReach(unit, target, args->previousModelValue);
         }
         return 1;
     }

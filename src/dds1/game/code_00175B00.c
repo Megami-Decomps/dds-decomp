@@ -174,7 +174,6 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
 }
 
 extern void parDispatchSub(u32, s32, s32, s32);
-extern u32 effMiscRand(void *);
 extern u8 effDefaultRandomState[];
 
 /* effNeedleCreateWork */
@@ -210,7 +209,7 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     for (i = 0; i < count; i++, slot++) {
         slot->angle = effMiscRandUnitFloat(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
         slot->radius = radiusBase * (effMiscRandUnitFloat(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
-        slot->age = -(effMiscRand(effDefaultRandomState) % delayRange);
+        slot->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayRange);
         effSetResourceEntryValue(work->resource, i, 0x808080);
     }
     return work;

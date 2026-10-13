@@ -8,6 +8,7 @@
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "eff_vertex_draw_request.h"
 #include "par_kind_api.h"
 #include "par_table.h"
 #include "par_draw_block.h"
@@ -554,21 +555,8 @@ void effParSetAssetRecordTexture(ParReleaseRecord *record, SdfTex *texture) {
 }
 
 /* Draw parameter block filled per strip by parDrawPendingCellSystems. */
-typedef struct ParDrawState {
-    u16 width;    /* 0x00 */
-    u16 height;   /* 0x02 */
-    u16 flags;    /* 0x04 */
-    u8 pad06[2];
-    u32 color; /* 0x08: packed vertex color */
-    const u32 *indices; /* 0x0C: topology index stream */
-    u128 *positions; /* 0x10: current vertex cursor */
-    u8 pad14[0xC];
-    u32 *colors;     /* 0x20: current color cursor */
-    u8 pad24[8];
-} ParDrawState;
-
-extern ParDrawState parDrawControl;
-extern void *effCreateVertexDrawPacket(ParDrawState *);
+extern EffVertexDrawRequest parDrawControl;
+extern void *effCreateVertexDrawPacket(EffVertexDrawRequest *);
 
 void parControlInit(void) {
     memset(&parDrawControl, 0, 0x2C);
@@ -1700,7 +1688,7 @@ void parReleaseDrawBlock(ParBlock *block) {
 
 void parSubmitCellDrawPackets(SdfPoolNode *emitter, ParBlock *cmd) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    ParDrawState state;
+    EffVertexDrawRequest state;
     s32 remaining;
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);

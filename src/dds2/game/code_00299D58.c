@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "dsp_name.h"
 extern s32 mdlFlagTest(u32 flagId);
 
 extern void mdlFlagSet(u32 flagId);
@@ -164,10 +165,6 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
     return 1;
 }
 
-typedef struct DspUnitName {
-    u8 encodedText[17];
-} DspUnitName;
-
 extern DspUnitName *D_00435E48;
 extern DspUnitName *D_00435E64;
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
@@ -321,7 +318,7 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
 }
 
 
-s32 func_0029A588(KwlnTask *request) {
+s32 mnuRefreshAndRunResultPanel(KwlnTask *request) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuTitleRenderFadeAndPanels(context);

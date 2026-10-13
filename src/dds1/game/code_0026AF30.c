@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_world_object_api.h"
 #include "dds3obj.h"
 #include "eff_transform.h"
 
@@ -15,8 +16,6 @@ extern void fldReleaseCameraColorEffect(void);
 extern void func_002CF430(void);
 
 extern void evtDestroySecondaryWorldNode(void);
-
-extern s32 evtCreateWorldObjectForKey(s32, s32);
 
 extern void dds3SetWorldObject(void *);
 

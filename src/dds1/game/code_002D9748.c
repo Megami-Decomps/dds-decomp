@@ -1,6 +1,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
 #include "sdf_model_scalars.h"
@@ -86,8 +87,6 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
-extern f32 sdfSinPoly(f32 angle);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);

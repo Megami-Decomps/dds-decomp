@@ -4,7 +4,7 @@
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
-extern void func_00306970(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, void *, s32);
+extern void effDrawTextureSlot(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, void *, s32);
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 /* 0x80 leaves the copied corner words unchanged. */
@@ -120,13 +120,13 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003065A0", func_00306970);
+INCLUDE_ASM(const s32, "game/code_003065A0", effDrawTextureSlot);
 
 void effDrawSpriteWithWorkCornerColors(s32 a0, s32 a1, s32 a2, s32 a3, EffectSlotSet *a4, s32 a5, void *a6, s32 a7) {
-    func_00306970(a0, a1, a2, (u32 *)((u8 *)a6 + 0x14), a3, a4, a5, a6, a7);
+    effDrawTextureSlot(a0, a1, a2, (u32 *)((u8 *)a6 + 0x14), a3, a4, a5, a6, a7);
 }
 void effDrawSpriteWithCornerColors(s32 a0, s32 a1, s32 a2, u32 *a3, s32 a4, EffectSlotSet *a5, s32 a6, s32 a7) {
-    func_00306970(a0, a1, a2, a3, a4, a5, a6,
+    effDrawTextureSlot(a0, a1, a2, a3, a4, a5, a6,
                   effGetSlotWorkOrOverride(a5, a6), a7);
 }
 
@@ -143,7 +143,7 @@ void func_00306CD0(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
         colors[i] = uiBlendColors(geometry->cornerColors[i],
                                   geometry->cornerColors[i] & 0xFFFFFF00, blend);
     }
-    func_00306970(x, y, depth, colors, flags, set, slotIndex, payload, layer);
+    effDrawTextureSlot(x, y, depth, colors, flags, set, slotIndex, payload, layer);
 }
 
 void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, s32 flags,
@@ -165,7 +165,7 @@ void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, s32
         set->workEntries[slot].geometry.bounds[2] = tileWidth;
     }
     for (i = 0; i < length / tileWidth; i++) {
-        func_00306970(x, y, z, colors, flags, set, slot, draw, layer);
+        effDrawTextureSlot(x, y, z, colors, flags, set, slot, draw, layer);
         x += tileWidth;
     }
     {
@@ -174,5 +174,5 @@ void effDrawRepeatedSpriteTiles(s32 x, s32 y, s32 z, s32 length, u32 weight, s32
         set->workEntries[slot].parameters[2] = -(length >> 4);
         set->workEntries[slot].geometry.bounds[2] = tileWidth - length;
     }
-    func_00306970(x, y, z, colors, flags, set, slot, draw, layer);
+    effDrawTextureSlot(x, y, z, colors, flags, set, slot, draw, layer);
 }

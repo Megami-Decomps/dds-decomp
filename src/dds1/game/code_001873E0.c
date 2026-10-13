@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -9,8 +10,6 @@
 #include "eff_blur_draw_data.h"
 
 
-extern f32 sdfSinPoly(f32);
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 
 /* Reset every slot, then stagger its initial phase by -spacing * index. */

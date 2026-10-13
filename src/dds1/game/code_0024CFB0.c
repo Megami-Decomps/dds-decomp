@@ -1,3 +1,4 @@
+#include "evt_world_object_api.h"
 #include "kwln_task_state.h"
 #include "itf_mes_window.h"
 #include "mnu.h"
@@ -10,6 +11,7 @@
 #include "kwln_task_lifecycle.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
+#include "eff_random.h"
 
 struct SdfTex;
 struct MenuTerminalWork;
@@ -68,7 +70,6 @@ typedef struct {
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
 
-extern u32 effMiscRand(void *);
 
 extern u32 evtDisplayValues[];
 
@@ -266,15 +267,15 @@ s32 mnuUpdateTerminalReadyPopup(KwlnTask *request) {
     return 0;
 }
 
-/* Prepare the current work and dispatch panel mode one; distinct callback role unknown. */
-s32 func_0024D500(KwlnTask *request) {
+/* Draw the available terminal effect, then dispatch panel mode one. */
+s32 mnuDispatchTerminalPanelModeOne(KwlnTask *request) {
     s32 workAddress = kwlnTaskGetUserValue(request);
     mnuDrawTerminalEffectIfAvailable(workAddress);
     return menuRunPanel((void *)workAddress, 1, (void *)request);
 }
 
-/* Dispatch current work in panel mode two without the message transition request. */
-s32 func_0024D550(KwlnTask *request) {
+/* Dispatch the current work in terminal panel mode two. */
+s32 mnuDispatchTerminalPanelModeTwo(KwlnTask *request) {
     s32 workAddress = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)workAddress, 2, (void *)request);

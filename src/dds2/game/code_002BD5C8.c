@@ -294,7 +294,7 @@ typedef char MenuPageSpriteSlot_size_check[
 typedef char MenuPageSpriteSlot_resources_check[
     (u32)&((MenuPageSpriteSlot *)0)->sectionResources == 0xE4 ? 1 : -1];
 
-void func_002BE438(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
+void mnuDrawMenuPageSpriteLayers(s32 x, s32 y, s32 z, MenuPageSpriteSlot *slot,
                    s32 coordinateSet, s32 skipSprites, s32 spriteArg) {
     s32 firstPosition[2];
     s32 alternatePositions[8];

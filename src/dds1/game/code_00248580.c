@@ -5,6 +5,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -123,7 +124,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
-extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPartyProfilePanelContents(s32, s32, s32, DatPartyRecord *, s32, MenuSimpleSpriteState *, s32);
 extern struct FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 
 extern char mnuNumberSpriteFormat[];
@@ -137,7 +138,7 @@ typedef struct EffectPair {
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
-extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
+extern u32 itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
@@ -341,7 +342,7 @@ extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s3
 extern s32 mnuDispatchByFlag(s32, struct MenuListNode *);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
-void func_00248E68(s32 x, s32 y, s32 unused, struct MenuList *list,
+void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
                    struct MenuListNode *node, s32 priority) {
     s32 width = list->scale;
     MenuTerminalWork *host = (MenuTerminalWork *)list->context;
@@ -396,7 +397,7 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
 
 extern MenuSlotKind D_0032EFE0[];
 
-extern void func_00248E68(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern void mnuDrawTerminalListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
 /* Build eligible slot labels for this terminal mode. */
 void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
@@ -406,7 +407,7 @@ void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
 
     list = mnuCreateListState(0, 4, 0x15);
     list->scale = 0;
-    list->drawCallback = func_00248E68;
+    list->drawCallback = mnuDrawTerminalListEntry;
     list->context = host;
     host->owner = list;
     if (host->mode == 0) {
@@ -728,10 +729,10 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
     mnuDrawStaffPageMarkerIcons(&work->partyWindow, &work->staffSlots);
     mnuDrawStaffPanelGridBackdrop(0, &work->staffSlots);
     work->partyWindow.flags |= 0x500;
-    mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],
+    mnuDrawStageTestList(0, 0, 0, ((DatPartyRecord *)control)->profileId,
         &work->partyWindow, context);
-    mnuDrawPartyProfilePanelContents(0, 0, 0, (s32)control, ((s8 *)control)[0x55],
-        (s32)work->effectResource, context);
+    mnuDrawPartyProfilePanelContents(0, 0, 0, (DatPartyRecord *)control, ((DatPartyRecord *)control)->profileId,
+        work->effectResource, context);
     return 1;
 }
 
@@ -1657,7 +1658,7 @@ extern void mnuDrawTerminalSelectedSlots(s32);
 
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024B3A8);
+INCLUDE_ASM(const s32, "game/code_00248580", mnuBeginTerminalSlotSelection);
 
 u32 func_0024B470(void) {
     return 1;
@@ -2006,7 +2007,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
     }
-    sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
+    sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
     frFontDrawGlyphChain(sprite, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
@@ -2255,7 +2256,7 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
     return result;
 }
 
-s32 func_0024C7E8(KwlnTask *item) {
+s32 mnuDrawTerminalSelectionPanel(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
     mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);

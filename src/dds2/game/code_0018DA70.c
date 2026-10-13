@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
@@ -106,8 +107,6 @@ extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s3
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
-extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern f32 sdfSinPoly(f32 angle);
 
 void effBuildBlurTransformedQuad(BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
