@@ -2588,7 +2588,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
 }
 
-s32 func_00141CF0(s32 command, u32 parameter) {
+s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     FieldSequenceRecord record;
     s32 warp;
     s32 stage;
