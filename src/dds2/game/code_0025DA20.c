@@ -1,6 +1,7 @@
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_chip.h"
@@ -150,7 +151,6 @@ extern u8 D_003CDA8C[];
 
 extern u8 mnuCampCompactEntries[];
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 extern u8 D_003CD8DD[];
 

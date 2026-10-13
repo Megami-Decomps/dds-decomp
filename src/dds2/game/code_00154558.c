@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "kwln_task_create.h"
@@ -273,7 +274,6 @@ extern s32 fldIsSceneStateEight(void);
 extern void func_00123DE8(s32, s32, s32, s32, s32, s32);
 
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 fldMirroredSolarThresholds[];
 
