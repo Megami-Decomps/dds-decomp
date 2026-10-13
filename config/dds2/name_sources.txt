@@ -6582,6 +6582,7 @@
 0x00336F88	sdfVuTransformWorkAtOffset	inferred	Passes work parameters and supplied XY offsets into the transform. [names_reviewed8.tsv]
 0x00338D78	sdfBuildChunkedVuNodeTransfer	inferred	Writes VIF and GIF transfer packets for geometry nodes in bounded chunks. [names_reviewed10.tsv]
 0x00339160	sdfVuEmitSelectedNodePacket	inferred	Chooses one of two node-packet writers based on selected flags. [names_reviewed8.tsv]
+0x00339188	sdfVuUpdateSelectedNodeGeometry	inferred	Transforms the selected node rows, applies mode-specific color state, then emits its chunked geometry. [names_reviewed8.tsv]
 0x00339390	sdfVuApplySelectedWorkFlags	inferred	Applies selected work flags by invoking the associated packet stages. [names_reviewed8.tsv]
 0x003393F0	sdfVuBeginPacketFromWork	inferred	Aligns and installs the packet ring cursor before emitting work. [names_reviewed8.tsv]
 0x0033A090	sdfVuSelectTransformMatrix	inferred	Stores the global VU transform matrix address. [names_reviewed8.tsv]
