@@ -4574,6 +4574,7 @@
 0x002A4E48	mnuAdvanceTimedSlideBar	inferred	Counts down a slide bar timer, then draws and advances its position.
 0x002A4F20	mnuAdvanceMultiSpriteSlideBar	inferred	Draws four sprites with one slide bar position and advances the bar.
 0x002A5128	mnuAdvancePairedSlideBars	inferred	Draws and advances both bars in the two-entry slide bar pair.
+0x002A5890	mnuResetTitleMovieMenuStateAndStartTrack	inferred	Resets the title movie menu phase, selected page, and sequence timer, then starts track 0x310000; called during the title-menu handoff.
 0x002A58C0	mnuClearGlobalMenuStateFields	inferred	Clears three tracked state fields in the global MenuState. [names_reviewed16.tsv]
 0x002A58D8	mnuResetTitlePageAndPhase	inferred	Sets title phase and selected page to zero, leaving sequence timer untouched. [names_reviewed21.tsv]
 0x002A58E8	mnuPollMovieMenuInputAndTimeout	inferred	confidence=high; matched-C; src/dds2/game/code_002A5260.c:84:func_002A58E8; Movie/title-menu input state machine: thirty-frame opening, ninety-frame idle loop, 601-frame inactivity timeout, countdown closing state, and sequence-volume update on acceptance. Same observable role as the DDS1 movie-menu callback.; source=fresh-R_Names31-today [names_qp11.tsv]
