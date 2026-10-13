@@ -130,7 +130,7 @@ extern void parClearHistorySlotPoints(s32);
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 
-void func_00162348(ParObj *work, u32 value) {
+void parSetObjectParameterWord(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
@@ -331,7 +331,7 @@ void parRebuildInstanceTransforms(void) {
     parComposeEffectTransformMatrices();
 }
 
-void func_00162980(ParObj *work, u32 value) {
+void effParSetInstanceParameterWord(ParObj *work, u32 value) {
     work->valueF0 = value;
 }
 
@@ -490,7 +490,7 @@ void parUpdateTrackPolygonCrossAxes(EffTrackPolyList *list, s32 index, u32 color
     effTrackPolySetIndexedColor(list, index, (color & 0xFF000000) | 0x808080);
 }
 
-u32 func_00162E10(u16 pointCapacity) {
+u32 parGetEmitterCellGroupDivisor(u16 pointCapacity) {
     return 0;
 }
 

@@ -121,7 +121,7 @@ BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     return effect;
 }
 
-u32 func_00159BB0(void) {
+u32 effGetGeneralResourceCount(void) {
     return 0xf;
 }
 
@@ -821,7 +821,7 @@ void effReleaseBufferAllocation(EffectBufferTail *buffer) {
 struct ParColorRamp;
 extern void parInitColorRamp(struct ParColorRamp *, s32);
 extern ParTable *parCreateHistorySlotTable(u32, u16, BillObj **);
-extern u32 func_00162E10(u16);
+extern u32 parGetEmitterCellGroupDivisor(u16);
 extern void parDispatchSub(void *, s32, void *, void *);
 
 /* Allocate drawing resources and reset the emitter's common runtime state. */
@@ -847,7 +847,7 @@ void effInitializeEmitterHead(EffEmitterHead *owner) {
     case 2:
         owner->sub.primaryDrawSystem = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
-            func_00162E10(owner->sub.templateEntryCount), 0);
+            parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 0);
         parDispatchSub(owner->sub.primaryDrawSystem, 1,
                        owner->sub.dispatchParameter, owner->sub.dispatchParameter);
         parSetCellDrawBucket(owner->sub.primaryDrawSystem, (u16)owner->drawKind);
@@ -855,7 +855,7 @@ void effInitializeEmitterHead(EffEmitterHead *owner) {
     case 3:
         owner->sub.secondaryDraw.system = parAllocateCellSystem(
             owner->particleCount, owner->sub.templateEntryCount,
-            func_00162E10(owner->sub.templateEntryCount), 1);
+            parGetEmitterCellGroupDivisor(owner->sub.templateEntryCount), 1);
         parDispatchSub(owner->sub.secondaryDraw.system, 1,
                        owner->sub.dispatchParameter, owner->sub.primaryDrawSystem);
         parSetCellDrawBucket(owner->sub.secondaryDraw.system, (u16)owner->drawKind);
@@ -2664,7 +2664,7 @@ void effUpdateReflectingRadiusEmitter(EffTemplatePacketList *effect) {
     }
 }
 
-void func_0015F560(void) {
+void effResetSingleParticleTemplate(void) {
     effInitParticleRecord();
 }
 
