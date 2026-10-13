@@ -317,7 +317,7 @@ extern BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *, f32 
 
 extern BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *, f32 *, f32);
 
-extern u8 *func_001D9038(u8 *, u32);
+extern u8 *btlCreateUnitDefeatFadeInTask(u8 *, u32);
 
 extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 
@@ -4303,7 +4303,7 @@ u32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     return 0;
 }
 
-u8 *func_001D9038(u8 *owner, u32 value) {
+u8 *btlCreateUnitDefeatFadeInTask(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 

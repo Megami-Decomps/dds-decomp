@@ -4400,7 +4400,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
     return 0;
 }
 
-BtlRuntimeTask *func_001E5FF8(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;

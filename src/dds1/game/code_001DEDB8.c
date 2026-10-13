@@ -1254,7 +1254,7 @@ extern CameraFramePose D_003A4320[4];
 
 /* Frame the from and to poses around the action's targets from a random preset row
  * (rows 2-3 for animations with flag 0x200); targets in group 0x400 mirror the presets. */
-void func_001E2578(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 direction[4];
     CameraFramePose poses[4];
     u16 animationFlags;
