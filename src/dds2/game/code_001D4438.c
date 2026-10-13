@@ -253,7 +253,7 @@ extern void dds3ClearObjectFlags(s32, s32);
 extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
 
-extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
+extern void btlBuildBattleUnitFramingCameraPose(BtlLinkedCommand *, BtlCamState *, f32);
 
 typedef struct BtlUnit BtlUnit;
 
