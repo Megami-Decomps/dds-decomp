@@ -6691,7 +6691,7 @@ void sndSetStationedSeHighVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
-extern void func_0026A5F0(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern void mnuResetTitleStreamLocked(void);
 
@@ -6718,10 +6718,10 @@ void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
         mnuResetTitleStreamLocked();
     }
     if (selection == 5) {
-        func_0026A5F0(D_0035F998[D_003BB6A8 % 5]);
+        mnuQueueTitleSoundStreamEntry(D_0035F998[D_003BB6A8 % 5]);
         D_003BB6A8++;
     } else {
-        func_0026A5F0(selection - 1);
+        mnuQueueTitleSoundStreamEntry(selection - 1);
     }
 }
 

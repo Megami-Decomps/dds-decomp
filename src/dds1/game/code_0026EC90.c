@@ -348,7 +348,7 @@ extern char D_003B1168[];
 
 
 
-extern void func_0026A5F0(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 
@@ -365,7 +365,7 @@ void mnuMovieCreateTask(void) {
     movie->allocation = allocation;
     movie->phase = 0;
     movie->scrollTicks = 0;
-    func_0026A5F0(0x13);
+    mnuQueueTitleSoundStreamEntry(0x13);
     mnuMovieTaskState = 1;
     kwlnTaskCreate(D_003B1168, 0x408, 0, 0, mnuUpdateStaffRoll, mnuFinishStaffMovieAndFreeState, 0);
 }

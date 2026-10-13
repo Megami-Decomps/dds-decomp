@@ -7808,6 +7808,7 @@
 0x00191450	effMagatuhiUpdateValueHistorySlot	inferred	Copies a new vector into the rolling slot history, advances phase/noise, perturbs replay history, clamps displacement, and advances the saturated valid count; DDS1 twin 0x00189818.
 0x002A1928	mnuUpdateTitleAudioStreams	inferred	Advances title stream states, decodes and mixes sample frames, and updates both stream frame indices. Paired DDS1 0x00269D18. [LiteH b12]
 0x002A1E58	mnuInitializeTitleAudioStreams	inferred	Initializes the title stream and sound-buffer decoder states and starts the stream thread. Paired DDS1 0x0026A248. [LiteH b12]
+0x002A2200	mnuQueueTitleSoundStreamEntry	inferred	Selects the indexed title sound stream format and loop point, configures decoder state, then queues its file path for asynchronous loading. Paired title implementation.
 0x002A2628	mnuLoadTitleSoundBufferEntry	inferred	Allocates and loads the indexed title sound-buffer entry according to its format; paired DDS1 0x0026AA28. [LiteH b12]
 0x001B20C8	btlGetRewardLevelMultiplier	inferred	high confidence; normal/hunt EP callers select reward kinds 1/0; cap acquirer level at 60, clamp enemy-level difference to [-15,15], read the interleaved level multiplier table. Paired DDS1 0x001A7C20. [Namer1 batch 31]
 0x001B4040	btlRollMajinEncounter	inferred	high confidence; Majin encounter chance debug strings, story/scene gates, mirrored solar-phase rate, attempt scaling, party override and final random roll consumed by field scene entry. [Namer1 batch 31]

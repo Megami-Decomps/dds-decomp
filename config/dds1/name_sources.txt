@@ -8358,6 +8358,7 @@
 0x00269D18	mnuUpdateTitleAudioStreams	inferred	Advances title stream states, decodes and mixes sample frames, and updates both stream frame indices. Paired DDS2 0x002A1928. [LiteH b12]
 0x0026A248	mnuInitializeTitleAudioStreams	inferred	Initializes the title stream and sound-buffer decoder states and starts the stream thread. Paired DDS2 0x002A1E58. [LiteH b12]
 0x0026A588	mnuStartFixedSoundStream	inferred	Installs the fixed title track under the stream semaphore; paired DDS2 0x002A2198. [LiteH b12]
+0x0026A5F0	mnuQueueTitleSoundStreamEntry	inferred	Selects the indexed title sound stream format and loop point, configures decoder state, then queues its file path for asynchronous loading. Paired title implementation.
 0x0026AA28	mnuLoadTitleSoundBufferEntry	inferred	Allocates and loads the indexed title sound-buffer entry according to its format; paired DDS2 0x002A2628. [LiteH b12]
 0x0026AF78	mnuInitializeTitleCameraScene	inferred	Creates the secondary title world, sets camera vectors, and initializes its color resource and lighting. [LiteH b12]
 0x0026E240	mnuUpdateMovieSpriteResourceGroup	inferred	Spawns and ticks the active task groups held by the movie sprite resource group. [LiteH b12]
