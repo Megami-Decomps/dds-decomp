@@ -1,5 +1,6 @@
 # addr	name	evidence|inferred	note
 0x00101BD8	sdfInitializeRuntimeAndStartMainLoop	inferred	Reboots and initializes IOP/runtime services, loads system modules, starts device workers and the main-loop thread, then sleeps the bootstrap thread; paired with DDS2 0x00101AC0. [code-quality cleanup, 2026-10-13]
+0x00128780	fldLoadAreaRoomResourcesFromRequest	inferred	Configures field area/room state, optionally builds the texture-offset resource-handle list, relocates and processes the supplied packed field request, loads scene request files, then returns fldCachedRoomF1ResourceAllocation. Called by dds3AttachConstructedResourceToWorldObject from evtCreateWorldObjectFromResource; corresponding DDS2 helper at 0x0012AC90 has the same loader/return role with title-specific callees and globals.
 0x001A1990	btlInitializePartyRecordFromEnemy	inferred	Zeroes and initializes a party record from the indexed enemy record, copying level, base stats and vitals while compacting nonzero skill IDs into effectData. Paired with DDS2 0x001AA898; used by battle model/debug setup and special actor creation. [code-quality cleanup, 2026-10-13]
 0x00124F58	fldUpdateCampMenuTransition	inferred	Advances the delayed camp handoff and field-scene return: updates the camp countdown, camera target, scene-control/lifecycle flags, overlay and fades, then restores camp tasks or resets the player-scene camera as needed. Paired with DDS2 0x001273E8, fldUpdateCampMenuTransition. [code-quality cleanup, 2026-10-13]
 0x001233D0	fldRebuildFieldScene	inferred	DDS1 field-scene rebuild at the fldProcSequence stage-0 call. Builds player/camera transforms, selects the room encounter, sets camera mode and applies location-flag resource setup. Paired with DDS2 0x00125380; see docs/idioms.md section “DDS1 field scene initializer and generated axis ownership”. [code-quality cleanup, 2026-10-13]
@@ -1083,8 +1084,8 @@
 0x001410E8	fldReleasePanelState	inferred	Frees the panel data from func_00101A70 and clears the panel state global.
 0x00141110	fldCreateInputPanelTask	inferred	Creates the task literally named inputpanel with its update and release callbacks. [names_reviewed14.tsv]
 0x00141158	fldDestroyPanelTaskIfPresent	inferred	Destroys existing field panel task and descendants only when task handle is nonzero. [names_reviewed6.tsv]
-0x00141190	fldSetInputPanelStateWord2	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:31; Stores a value in input-panel state word 2 and returns the panel state.; twin=0x00144270 (DDS2).
-0x001411C0	fldSetInputPanelStateWord1	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:39; Stores a value in input-panel state word 1 and returns the panel state.; twin=0x001442A0 (DDS2).
+0x00141190	fldSetTitleBannerPending	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:31; Stores the input-panel pending flag at state offset 4; callers set it after the banner choice, and the draw callback consumes it. Twin=0x00144270 (DDS2).
+0x001411C0	fldSetTitleBannerChoice	inferred	confidence=high; matched-C; src/dds1/field/fldPanel.c:39; Stores the title-banner choice at state offset 2; the draw callback indexes title arrays with this value. Twin=0x001442A0 (DDS2).
 0x00141320	fldFieldTaskUpdate	inferred	Field task callback draws field overlays only when menus, title and camp control are inactive. [names_reviewed13.tsv]
 0x001413A8	fldFieldTaskCreate	inferred	allocates four-word task work and returns field update callback [names_R_FuncNames2.tsv]
 0x001413F8	fldFieldTaskDestroy	inferred	frees task work and clears active task handle [names_R_FuncNames2.tsv]
@@ -1092,7 +1093,7 @@
 0x00141470	fldDestroyTask	inferred	destroys kwln task with hierarchy if handle set, leaves handle
 0x001414A8	fldResetPendingSounds	inferred	Clears the eight pending-sound records and their count before field playback.
 0x001414E0	fldAppendClearEntry	inferred	appends (id, x, y, z, w) record to D_003D3FE0 table at D_003BAE8C++ index; sibling func_001414A8 clears that table
-0x00141540	fldPlayPendingSounds	inferred	flushes flagged D_003D3FE0 clear entries through func_002E8DD0
+0x00141540	fldPlayPendingSounds	inferred	flushes flagged D_003D3FE0 clear entries through sndQueueSoundId
 0x001419A8	fldResolveSpecialBgmTrack	inferred	maps music ids 0x80..0x89 to track offsets, -1 otherwise [names_R_FuncNames2.tsv]
 0x00141A78	fldFindSceneEntryData	inferred	32 records of 0x44 bytes at D_0032E5C8, returns data[idx] of matching id with flag set
 0x00141B10	fldStartSceneBgm	inferred	resolves music from current scene and starts default track [names_R_FuncNames2.tsv]
@@ -1640,6 +1641,7 @@
 0x00167070	effThunderCellUpdate	inferred	counts down cells, fades color, re-randomizes, flushes system [names_M61_EffVu.tsv]
 0x00167178	effThunderChainGroupCreate	inferred	Fam_Mid: allocates group, creates fragments via effThunderFragCreate
 0x00167350	effThunderGroupRelease	inferred	Releases each thunder handle and the group work. [names_qp9.tsv]
+0x001673C0	effGetPairedBlurResourceVectorRecordAddress	inferred	Returns its resource-address argument unchanged; the paired blur updater casts the result to BlurVectorRecord and reads/writes its four interpolated vectors. [DDS1 source/caller analysis, 2026-10-14]
 0x001673C8	effSetResourceBlendColor	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:82:func_001673C8; Writes the resource handle blend-color word consumed by the blur resource caller; no per-channel conversion or multiplication occurs.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00167A78	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:88:func_00167A78; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
 0x00167BF8	effThunderCreateCurveGroup	inferred	Allocates a curve group, clones its mixer, initializes fragment-history slots and creates one event per group slot; called by effApplyParamBlockPair.
@@ -4148,13 +4150,14 @@
 0x002286C0	evtGetMirroredSolarPhase	inferred	Returns the raw phase below nine, otherwise folds the low three bits around eight.
 0x002286E8	evtGetSolarPhase	inferred	Returns the solar phase byte at world offset 0xA41.
 0x002286F8	evtSetSolarPhase	inferred	Stores the phase's low four bits and resets the phase counter.
-0x00228710	evtEnableSolarPhaseAdvance	inferred	Sets solar world flag bit zero, which gates the phase timer and phase increment in func_00228930.
-0x00228728	evtDisableSolarPhaseAdvance	inferred	Clears solar world flag bit zero, disabling periodic phase advances in func_00228930.
+0x00228710	evtEnableSolarPhaseAdvance	inferred	Sets solar world flag bit zero, which gates the phase timer and phase increment in evtAdvanceSolarClockAndExpireControls.
+0x00228728	evtDisableSolarPhaseAdvance	inferred	Clears solar world flag bit zero, disabling periodic phase advances in evtAdvanceSolarClockAndExpireControls.
 0x00228740	evtSetSolarOverlayFullyVisible	inferred	Enables the solar alpha flag, sets overlay alpha to 1.0 and calls func_0022AB00(0).
 0x00228778	evtSetSolarOverlayFullyTransparent	inferred	Disables the solar alpha flag and sets the overlay alpha to 0.0.
 0x00228790	evtEnableSolarOverlayAlpha	inferred	Sets the solar alpha flag, making the solar callback interpolate alpha toward 1.0.
 0x002287A8	evtDisableSolarOverlayAlpha	inferred	Clears the solar alpha flag, making the solar callback interpolate alpha toward 0.0.
 0x002287C0	evtUpdateSolarOverlayFade	inferred	src/dds1/game/code_00228058.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
+0x00228930	evtAdvanceSolarClockAndExpireControls	inferred	Paired DDS1 implementation of DDS2 0x00243568: advances enabled solar phase by player travel distance, resets after 4500 units, and expires field-control flags on phase rollover; fldUpdateTravelAndEncounters passes measured movement distance and consumes the resulting flags.
 0x00228A00	evtCreateSolarOverlayWork	inferred	Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
 0x00228A58	evtFreeSolarOverlayWork	inferred	Releases the solar noise sprite, frees overlay work and clears the task ID.
 0x00228A98	evtStartSolarOverlay	inferred	Creates the task named by D_003BBDC8, initializes the overlay flags and phase and stores its task ID.
@@ -7001,6 +7004,9 @@
 0x002E8D10	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x002E8D58	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x002E8D88	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
+0x002E8DD0	sndQueueSoundId	inferred	Queues one sound ID or handle as the 16-byte payload of sound command 0x30; field callers pass scene-based, archive-packed, and current-BGM identifiers.
+0x002E8E00	sndQueueNoPayloadCommand1A0	inferred	Queues command 0x1A0 with zero arguments, no payload, and length zero; selected by the event viewer command case 6. [DDS1 source/caller analysis, 2026-10-14]
+0x002E8E28	sndQueueNoPayloadCommand210	inferred	Queues command 0x210 with zero arguments, no payload, and length zero; battle title-state cleanup queues it before command 0x1A0. [DDS1 source/caller analysis, 2026-10-14]
 0x002E8E50	sndQueueNoPayloadCommand40	inferred	Queues fixed command 0x40 with no payload; DDS2 twin 0x00341CF8. [LiteH menu naming batch 18]
 0x002E8E78	sndDispatchCommandWithoutPayload	inferred	Byte-identical dds2 twin 0x00341D20; OR caller command with 0x50 and dispatch with null payload and zero length. [names_conflicts.tsv]
 0x002E8EA0	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
@@ -7028,6 +7034,7 @@
 0x002E97E8	sdfSoundStopNamedPlayback	inferred	confidence=medium; matched-C; src/dds1/game/code_002E9708.c:181:func_002E97E8; Sends the no-payload sound command used to preempt existing named playback before starting a title voice or named sound.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002E9810	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS2 0x003426B8. [code-quality cleanup, 2026-10-13]
 0x002E9840	sdfSoundSetChannelCount	inferred	Clamps a channel count to one through sixteen and sends its encoded sound command.
+0x002E98A0	sndTrySendChannelGroupCommand120	inferred	Returns busy status when sdfSoundCommandStatus is set; otherwise sends opcode 0x120 with channel-group bits. Called by paired stream-node callbacks with byte +0x22.
 0x002E9948	sdfSoundHandleRpcEvent	inferred	switch dispatches sound RPC events and signals waiting semaphore
 0x002E9BE8	sdfSoundStartRpcServer	inferred	registers RPC server 0x54524E53 and enters sceSifRpcLoop
 0x002E9C80	sdfSoundSetTableEntry	inferred	Sets a sound-table entry; paired getter provides contrast. [names_qp9.tsv]
@@ -7336,7 +7343,7 @@
 0x003BAE14	fldTaskSlotCount	inferred	high confidence; src/dds1/game/code_00126A30.c fldResetTaskSlots(): for (i = 0; i < D_003BAE14; i++) { Number of field task slots traversed when resetting task state and removing named room tasks. [names_reviewed26.tsv]
 0x003BAE64	fldSelectedActorEntryIndex	inferred	high confidence; src/dds1/game/code_00126A30.c fldSelectCurrentActorOnNextFloor(): D_003BAE64 = index; Selected actor-template index set when resolving a current-floor actor entry. [names_reviewed26.tsv]
 0x003BAE70	fldFieldTaskHandle	inferred	confidence=high; data D_003BAE70; matched-C-users=3; src/dds1/game/code_001411F0.c:268:fldFieldTaskDestroy; src/dds1/game/code_001411F0.c:276:fldEnsureTask; src/dds1/game/code_001411F0.c:282:fldDestroyTask; Field task creator latches task handle; destroy callback clears it; data-twin=D_00436200, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00126A30.sdata.s:882.; seed-placeholder=D_003BAE70; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
-0x003BAE74	fldInputPanelTaskHandle	inferred	confidence=high; data D_003BAE74; matched-C-users=5; src/dds1/field/fldPanel.c:12:fldReleasePanelState; src/dds1/field/fldPanel.c:20:fldCreateInputPanelTask; src/dds1/field/fldPanel.c:24:fldDestroyPanelTaskIfPresent; src/dds1/field/fldPanel.c:31:fldSetInputPanelStateWord2; src/dds1/field/fldPanel.c:39:fldSetInputPanelStateWord1; Input-panel creator stores task handle; release clears it and conditional teardown and state accessors use it; data-twin=D_00436204, supported by 5 independently paired matched functions.; retail-data-start=asm/dds1/data/field/fldPanel.sdata.s:9.; seed-placeholder=D_003BAE74; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003BAE74	fldInputPanelTaskHandle	inferred	confidence=high; data D_003BAE74; matched-C-users=5; src/dds1/field/fldPanel.c:12:fldReleasePanelState; src/dds1/field/fldPanel.c:20:fldCreateInputPanelTask; src/dds1/field/fldPanel.c:24:fldDestroyPanelTaskIfPresent; src/dds1/field/fldPanel.c:31:fldSetTitleBannerPending; src/dds1/field/fldPanel.c:39:fldSetTitleBannerChoice; Input-panel creator stores task handle; release clears it and conditional teardown and state accessors use it; data-twin=D_00436204, supported by 5 independently paired matched functions.; retail-data-start=asm/dds1/data/field/fldPanel.sdata.s:9.; seed-placeholder=D_003BAE74; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BAE80	fldCurrentBgmHandle	inferred	high confidence; src/dds1/game/code_001411F0.c fldStartSceneBgm(): if (D_003BAE80 != handle) { Current field BGM handle changed when starting the resolved scene track. [names_reviewed26.tsv]
 0x003BAE84	fldSceneSoundBase	inferred	high confidence; src/dds1/game/code_001411F0.c fldStartSceneBgm(): D_003BAE84 = D_0033EAB0[stage]; Scene-indexed sound-resource base added to the resolved track index to form the BGM handle. [names_reviewed26.tsv]
 0x003BAE8C	fldPendingSoundCount	inferred	high confidence; src/dds1/game/code_001411F0.c fldAppendClearEntry(): s32 i = D_003BAE8C; Number of occupied pending field-sound entries; append increments it and reset clears it. [names_reviewed26.tsv]
@@ -8850,3 +8857,4 @@
 0x001673C0	effGetPairedBlurResourceVectorRecordAddress	inferred	confidence=high; Adopts upstream spelling at this exact address; returns input address word unchanged. Paired blur caller writes four leading vectors into grouphead.points; native-identical DDS2 twin16F018. No allocation/conversion inferred. [Namer1 b59]
 0x00208C20	btlUpdateNidhoggrOpponentSlots	inferred	confidence=high; Nidhoggr mode116 update callback reapplies opponent formation slots through the existing arranger. Original independent tail-jump entry preserved. [Namer1 b59]
 0x00208EA8	btlFinishRavanaModelUnit	inferred	confidence=high; Ravana finishModelUnit callback reapplies unit dimensions and selected-actor presentation through its existing initializer; no lifecycle semantics beyond registered hook. [Namer1 b59]
+0x001243C0	fldPlayerCameraTargetNoPathUpdate	inferred	Installed as fldPlayerObject slot-1 mover update during fldPreparePlayerSceneCameraTarget, then cleared by fldResetPlayerSceneObjectState. Slot-resource contract uses this callback when no path is retained; mover applies the generated relative transform only if callback returns exactly 1, while this callback returns 0. [registration and mover contract]

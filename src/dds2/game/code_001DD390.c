@@ -44,6 +44,8 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -126,7 +128,6 @@ typedef struct BtlActiveSlot {
     void *unit;         /* 0x18 */
 } BtlActiveSlot;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
 extern void btlRaisePartyRecordStatusValue(void *, s32);
@@ -179,7 +180,6 @@ extern void btlSetCameraCommandMode(u32, ActionStateLink *, BtlUnit *, BtlUnit *
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionNlerpVU(f32);
 
@@ -629,7 +629,7 @@ extern s32 btlGetCommandResultKindFromFlags(u32, u32, s32);
  * aggregate press-turn result. Reflection keeps the original selected target
  * separate from the unit that actually receives the operands. */
 
-void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
+void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *work) {
     BtlUnit combinedUnit;
     BtlState *runtime;
     BtlUnit *source;
@@ -3087,7 +3087,7 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     }
 }
 
-void func_001E3108(void *object, f32 *dst) {
+void btlCopyUnitCurrentPosition(void *object, f32 *dst) {
     PCP_COPY_VECTOR(dst, ((BtlUnit *)object)->currentPosition);
 }
 
@@ -3181,7 +3181,7 @@ void btlSetAlternateEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
 
 s32 btlIsUnitAtStoredPosition(u8 *object) {
     f32 position[4];
-    func_001E3108(object, position);
+    btlCopyUnitCurrentPosition(object, position);
     if (((BtlUnit *)object)->position[0] == position[0] &&
         ((BtlUnit *)object)->position[1] == position[1] &&
         ((BtlUnit *)object)->position[2] == position[2]) {
@@ -3519,7 +3519,6 @@ s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     return 0;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 const char D_00417AE0[16] = "btl:warp[%p]\n";
 
@@ -4726,7 +4725,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             VU0_STORE_VF(vf10, pos);
             pos[0] += scale;
         } else {
-            func_001E3108(actor, pos);
+            btlCopyUnitCurrentPosition(actor, pos);
             pos[0] += scale;
             pos[2] += args->unit->positionZOffset;
         }
@@ -4738,7 +4737,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF(vf10, pos);
         } else {
-            func_001E3108(actor, pos);
+            btlCopyUnitCurrentPosition(actor, pos);
             pos[2] += args->unit->positionZOffset;
         }
         effObjSetInnerPosition(args->unit->effectObject, (u128 *)pos);
@@ -4826,13 +4825,13 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
         delta = task->amount * -velocity;
         task->amount -= delta;
         if (task->amount <= 0.01f) {
-            func_001E3108((u8 *)task->unit, position);
+            btlCopyUnitCurrentPosition((u8 *)task->unit, position);
             position[2] += task->unit->positionZOffset;
             effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
-    func_001E3108((u8 *)task->unit, position);
+    btlCopyUnitCurrentPosition((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->positionZOffset;
     effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
@@ -6262,7 +6261,7 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
     }
     for (unit = work->units; unit != 0; unit = unit->nextActor) {
         if ((unit->status.flags & 0x100) && unit->lookupId != 1) {
-            func_001E3108(unit, pos);
+            btlCopyUnitCurrentPosition(unit, pos);
             pos[2] = unit->position[2] - 90.0f;
             btlSetUnitPosition(unit, pos);
         }

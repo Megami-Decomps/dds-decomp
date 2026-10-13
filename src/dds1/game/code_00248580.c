@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "evt_world.h"
 #include "eff_resource_slots.h"
@@ -6,6 +7,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "sdf_chip.h"
@@ -42,7 +44,6 @@ extern void mnuCreateResourceTask(void);
 
 extern s8 D_003BC3E1;
 
-extern s32 dds3GetWorldObject(void);
 
 
 
@@ -592,7 +593,6 @@ void mnuReleaseWorkResources(u8 *work) {
     mnuDestroyListState(((MenuTerminalWork *)work)->owner);
 }
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void evtCreateEventScriptProcess(s32);
 
@@ -741,7 +741,6 @@ s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context
 extern s32 D_003BC3E4;
 extern char D_003AF590[];
 extern char D_003AF620[];
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
@@ -949,7 +948,6 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
 
 
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 
@@ -1638,7 +1636,6 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
 
 
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void dspRequestMessageWindowModeOne(void);
 
@@ -1666,7 +1663,6 @@ u32 func_0024B470(void) {
 }
 
 extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];

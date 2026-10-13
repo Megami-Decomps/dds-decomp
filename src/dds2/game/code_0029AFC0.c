@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
@@ -7,7 +8,6 @@
 #include "eff_random.h"
 #include "mdl_flag_api.h"
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 
 
@@ -23,7 +23,6 @@ extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 extern char D_003D64C8[];

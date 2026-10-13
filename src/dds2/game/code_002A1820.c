@@ -68,7 +68,6 @@ extern u32 D_004285D0[4];
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern MovieMenuState *mnuMovieMenuState;
 
@@ -778,7 +777,6 @@ extern void mnuSlideBarSetStateB(u32 *state, u32 mode);
 extern void mnuSlideBarSetStateSmall(u32 *state, u32 mode);
 extern void mnuPairedSlideBarSetState(PickList *work, s32 state);
 extern void mnuTimedSlideBarSetState(SlideBarTimed *bar, s32 mode, s32 timer);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value);
 extern void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1);
 extern u32 mnuIsTitleMovieDrawActive(void);
@@ -906,7 +904,6 @@ typedef struct SlideBarPair {
     s32 pos[2];
 } SlideBarPair;
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void kwlnFadeClear(void);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern u8 mnuHasSpriteHandle(void);

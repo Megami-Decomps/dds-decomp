@@ -5,6 +5,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -121,7 +122,7 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 
 
@@ -962,7 +963,7 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C10F0);
+INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemValueMeter);
 
 /* Create the DDS2 simple sprite state from its three resource sets. */
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
@@ -2699,7 +2700,6 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
     rotation[2] = evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].rotation[2];
 }
 
-extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 D_003E7960[];
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
@@ -2873,7 +2873,7 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
     evtStageTestSelectEntry(entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetOption);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
+INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestAdvanceResourceWork);
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     MdlCtx *model = evtStageTestState.model;
@@ -3006,7 +3006,7 @@ void evtStageTestUpdateCamera(void)
 }
 
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
-    s8 result = func_002C6CE8();
+    s8 result = evtStageTestAdvanceResourceWork();
 
     if (result == 1) {
         return 1;
@@ -3177,10 +3177,10 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B548);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B558);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C7750);
+INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestDrawCameraTransformDebug);
 
 u32 evtStageTestCameraUpdate(void) {
-    func_002C7750();
+    evtStageTestDrawCameraTransformDebug();
     return 0;
 }
 

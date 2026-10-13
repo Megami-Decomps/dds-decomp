@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "sdf_vu_matrix.h"
 
 #include "pcp_vu0.h"
 
@@ -69,7 +70,6 @@ s32 dds3DrawCameraObject(EffWorldNode *camera) {
     return 1;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */
@@ -199,7 +199,6 @@ f32 dds3GetCameraFieldOfView(EffWorldNode *camera) {
     return ((CameraData *)camera->data)->fieldOfView;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: update world up and the relative eye, then copy world eye and
  * target position into the four-component output buffers. */

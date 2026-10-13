@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad_step.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
@@ -814,18 +815,6 @@ void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
     }
 }
 
-typedef struct SndPadStepTarget {
-    u8 pad00[0x38];
-    s32 value; /* 0x38 */
-} SndPadStepTarget;
-
-typedef struct SndPadStepper {
-    u8 pad00[4];
-    SndPadStepTarget *target; /* 0x04 */
-    u8 pad08[0x20];
-    s32 index; /* 0x28 */
-} SndPadStepper;
-
 /* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
 void sndStepIndexByPad(SndPadStepper *stepper) {
     s32 step;
@@ -848,7 +837,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
 
         stepper->index = index;
         if (stepper->target != NULL) {
-            stepper->target->value = index;
+            stepper->target->unk38 = index;
         }
     }
 }

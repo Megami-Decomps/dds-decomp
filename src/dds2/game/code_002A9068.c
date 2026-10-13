@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -51,7 +52,6 @@ extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 
 extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
@@ -845,9 +845,8 @@ s32 mnuDrawAndStepStaffGradientFade(KwlnTask *task) {
     return 0;
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern s32 fileConsumeConfigTaskReady(void);
 
@@ -867,7 +866,7 @@ s32 mnuStaffCampCancelCheck(KwlnTask *task) {
     result = 0;
     if (evtGetMessageWindowControlState() == 0) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
-            if (func_002C6CE8() != 1) {
+            if (evtStageTestAdvanceResourceWork() != 1) {
                 if (fileConsumeConfigTaskReady() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);

@@ -1,3 +1,4 @@
+#include "dds3_world_counter.h"
 /* Transport definitions stay in the predecessor; see docs/idioms.md,
  * "Title-audio controller transport boundary". */
 
@@ -5,6 +6,7 @@
 #include "mnu_result.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -30,14 +32,12 @@
 #define MNU_STREAM_COMMIT_READY 3
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
-extern s32 dds3GetWorldSecondaryObject(void);
 
 extern u8 D_003DC1C0[];
 
@@ -61,7 +61,6 @@ extern s32 D_003BC5C8;
 
 extern u8 D_003D9178[];
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern s32 func_003014F0(char *dst, const char *fmt, ...);
 

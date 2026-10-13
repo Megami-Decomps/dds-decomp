@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
@@ -10,6 +11,7 @@
 #include "mnu_movie_resource.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
 
 extern u8 D_0037B8BC[];
 
@@ -68,17 +70,7 @@ void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 tex
     }
 }
 
-typedef struct StaffImage {
-    s32 startFrame;
-    s32 movieIndex;
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-    u32 imageIndex;
-} StaffImage;
-
-extern StaffImage D_0037AFC0[];
+extern MnuStaffImageRecord D_0037AFC0[];
 
 extern u32 D_0037AF70[];
 
@@ -120,9 +112,6 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
 
 extern char D_003BC628[];
 extern void func_003014F0(char *, const char *, ...);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
@@ -348,7 +337,6 @@ extern char D_003B1168[];
 
 
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 

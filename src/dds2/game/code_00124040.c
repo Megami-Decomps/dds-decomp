@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_message.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -26,13 +27,13 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
  * step-before-index, and all callers are verified. */
 extern void evtSubmitEventRequest(s32, s32);
 extern void evtSubmitEventRequestImmediate(s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void *dds3GetWorldObject(void);
 extern void func_00133F08(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
@@ -164,12 +165,11 @@ extern void func_0013DDC0(EffWorldNode *);
 
 extern void func_0014D0E8(void);
 
+#include "mnu_title_stream.h"
 
-extern void mnuMarkTitleStreamResetPending(void);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
+
 
 extern u32 fldSceneControlFlags;
 
@@ -251,8 +251,6 @@ extern void fldFreeDisplayObjects(void);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
-extern u32 dds3AdvanceWorldCounter(void);
-
 struct EffWorldNode;
 
 
@@ -327,8 +325,6 @@ extern u8 D_0037FF88[];
 
 extern u8 D_003807F8[];
 
-struct SdfMsg;
-extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
 typedef struct FldEncEntry {
     s16 stage;
@@ -377,7 +373,7 @@ extern void fldReleaseMenuSlotsAfterWait(void);
 
 void fldSetSceneControlFlags(u32 mask);
 
-s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target);
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
 
 extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
@@ -1386,7 +1382,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, func_001266D8);
+        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldAreaState.unkE8 = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -1613,7 +1609,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
-s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target) {
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
@@ -1787,7 +1783,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_00126B70(void) {
-    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003807F8, (s32)D_0037FF88, (s32)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003807F8, (s32)D_0037FF88, (u32 *)(D_0037FF88 + 0xC0), (s32)(D_0037FF88 + 0x100), (s32)(D_0037FF88 + 0xE0));
 }
 
 enum {
@@ -2021,9 +2017,7 @@ u8 fldGetCampSceneControlMode(void) {
 extern void *dds3GetWorldObject(void);
 
 
-extern void kwlnFadeStartIn(s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void func_00149A00(void);
 
@@ -2035,7 +2029,6 @@ extern void fldSetCameraNodeModeWithTen(void);
 
 extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
 
-extern void kwlnFadeStartOut(s32 duration);
 
 extern void mnuCreateCampTasks(void);
 
@@ -2560,7 +2553,7 @@ extern s8 dds3AdminGetRequestedMode(void);
 
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 
-extern s32 func_00141CF0(s32, u32);
+extern s32 fldStartDeferredActorTransition(s32, u32);
 
 void fldDispatchDeferredFieldCommand(void) {
     if (fldDeferredCommand == 0) {
@@ -2572,7 +2565,7 @@ void fldDispatchDeferredFieldCommand(void) {
     if (dds3AdminGetRequestedMode() < 0 && (dds3AdminReadPreviousUnsignedSample() & 1) != 0) {
         return;
     }
-    if (func_00141CF0(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
+    if (fldStartDeferredActorTransition(fldDeferredCommand, fldDeferredCommandParameter) == 0) {
         fldDeferredCommand = 0;
     }
 }

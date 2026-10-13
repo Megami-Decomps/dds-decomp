@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
@@ -1112,7 +1113,6 @@ s32 mnuIsStaffRequirementUnmet(s32 entryId) {
     return availableCount < ((MenuRequirementRecord *)D_00435E3C)[requirementIndex].requiredCount;
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 extern s32 mnuRefreshOwnedCatalogItemList(s32, MenuStaffContext *);
 extern char D_003E74A4[];
 extern char D_003E754C[];

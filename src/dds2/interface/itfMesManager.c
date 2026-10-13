@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_pad_step.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -35,18 +36,6 @@ extern u32 itfMessageFlags;
 
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad D_0037F510;
-
-typedef struct SndPadStepTarget {
-    u8 pad00[0x38];
-    s32 value; /* 0x38 */
-} SndPadStepTarget;
-
-typedef struct SndPadStepper {
-    u8 pad00[4];
-    SndPadStepTarget *target; /* 0x04 */
-    u8 pad08[0x20];
-    s32 index; /* 0x28 */
-} SndPadStepper;
 
 typedef ItfMesPoolNode ItfMesWindowRec;
 
@@ -2352,7 +2341,7 @@ void sndStepIndexByPad(SndPadStepper *stepper) {
 
         stepper->index = index;
         if (stepper->target != NULL) {
-            stepper->target->value = index;
+            stepper->target->unk38 = index;
         }
     }
 }

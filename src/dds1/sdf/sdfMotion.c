@@ -8,6 +8,7 @@
 #include "sdf_draw.h"
 #include "sdf_motion.h"
 #include "sdf_motion_bindings.h"
+#include "sdf_vu_matrix.h"
 
 typedef struct {
     f32 *unk0;
@@ -46,7 +47,6 @@ void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
 extern void effMiscQuaternionNlerpVU(f32 amount);
-extern void effMiscQuaternionToMatrixVU(void);
 extern s32 (*D_003981B8[])(void *a0, s32 a1);
 extern s32 (*D_00398248[])(void *a0, s32 a1);
 extern SdfMotionBindingDispatch D_003981D0;
@@ -625,7 +625,7 @@ void sdfMotionBlendPrimaryWordSecondKey(SdfMotionIndexedValueBinding *a0, f32 t,
 }
 
 void sdfMotionCapturePrimaryWordSecond(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedWord = a0->target->unk14;
+    a0->capturedWord = a0->target->primaryStateWordSecond;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFirstBinding(Motion *motion, s32 unused, s32 options) {
@@ -656,7 +656,7 @@ void sdfMotionBlendPrimaryWordFirstKey(SdfMotionIndexedValueBinding *a0, f32 t, 
 }
 
 void sdfMotionCapturePrimaryWordFirst(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedWord = a0->target->unk10;
+    a0->capturedWord = a0->target->primaryStateWordFirst;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordThirdBinding(Motion *motion, s32 unused, s32 options) {
@@ -687,7 +687,7 @@ void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *a0, f32 t, 
 }
 
 void sdfMotionCapturePrimaryWordThird(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedWord = a0->target->unk20;
+    a0->capturedWord = a0->target->primaryStateWordThird;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreatePrimaryWordFourthBinding(Motion *motion, s32 unused, s32 options) {
@@ -718,7 +718,7 @@ void sdfMotionBlendPrimaryWordFourthKey(SdfMotionIndexedValueBinding *a0, f32 t,
 }
 
 void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedWord = a0->target->unk28;
+    a0->capturedWord = a0->target->primaryStateWordFourth;
 }
 
 SdfMotionIndexedValueBinding *sdfMotionCreateFloatBinding(Motion *motion, s32 unused, s32 options) {
@@ -745,7 +745,7 @@ void sdfMotionBlendInterpolatedFloat(SdfMotionIndexedValueBinding *a0, f32 t1, f
 
 /* Capture the bound float as the base value for a later blend. */
 void sdfMotionReadBoundFloat(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedFloat = a0->target->unk1C;
+    a0->capturedFloat = a0->target->primaryStateFloat;
 }
 
 SdfMotionIndexedTextBinding *sdfMotionCreateTextBlendBinding(Motion *motion, s32 unused, s32 options) {

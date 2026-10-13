@@ -2,6 +2,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 #define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
 

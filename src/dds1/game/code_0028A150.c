@@ -1,4 +1,6 @@
 #include "common.h"
+#include "dds3_world_selection.h"
+#include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
@@ -36,6 +38,7 @@
 #include "mdl_flag_api.h"
 
 #include "sdf.h"
+#include "kwln_fade.h"
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
 struct MenuListNode;
@@ -85,7 +88,6 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern s32 dds3GetWorldObject();
 
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
@@ -152,7 +154,6 @@ extern u32 D_003BD8EC;
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void *fileWaitContinuation;
 
@@ -453,8 +454,8 @@ typedef struct Cb3714C {
     u8 pad4[8];               /* 0x04 */
     void (*cbC)(void *, void *); /* 0x0C */
     void (*cb10)(void *arg);  /* 0x10 */
-    void (*cb14)(void *arg, void *extra);  /* 0x14 */
-    void (*cb18)(void *arg, void *extra);  /* 0x18 */
+    void (*cb14)(void *arg, f32 position[4]); /* 0x14 */
+    void (*cb18)(void *arg, f32 rotation[4]); /* 0x18 */
     void (*cb1C)(void *arg, f32 scale);  /* 0x1C */
     void (*cb20)(void *arg, u32 color);  /* 0x20 */
     u32 unk24;                /* 0x24 */
@@ -507,7 +508,6 @@ extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 extern FileJob *fileJobCreate(void);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern FileJob *fileQueueFindById(FileQueue *, u32);
 extern s32 fileFindQueuedJobIndex(FileQueue *, FileJob *);
@@ -2689,7 +2689,7 @@ void fileMenuReleaseNoOp(void) {
 void fileReleaseMenuResources(void) {
     s32 *slot;
     s32 i;
-    s32 world;
+    void *world;
     s32 handle;
 
     if (D_003BC7FC != 0) {
@@ -3100,8 +3100,6 @@ typedef struct FileConfigTask {
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
-extern void mnuResetTitleStreamLocked(void);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern void fileDrawConfigurationMenuEntry();
@@ -4042,19 +4040,19 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     D_0037E14C[idx].cb(data);
 }
 
-void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, void *) = D_0037E14C[idx].cb14;
+    void (*cb)(void *, f32 position[4]) = D_0037E14C[idx].cb14;
     if (cb != NULL) {
-        cb(job->data, extra);
+        cb(job->data, position);
     }
 }
 
-void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
+    void (*cb)(void *, f32 rotation[4]) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
-        cb(job->data, extra);
+        cb(job->data, rotation);
     }
 }
 
@@ -4555,7 +4553,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            fileJobInvokePositionCallback((FileJobPayload *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
         }
     }
 }

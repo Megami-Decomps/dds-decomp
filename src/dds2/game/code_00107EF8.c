@@ -2,6 +2,7 @@
 #include "sdf_dev_cons.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "evt_gradient_rect.h"
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
@@ -49,7 +50,7 @@ enum {
     BF_FLW0_SECTION_STRINGS = 4
 };
 
-extern s32 func_00316ED0(void);
+extern s32 mdlViewerPackageTaskExists(void);
 
 extern u32 D_00435D28;
 
@@ -58,7 +59,7 @@ extern u32 kwlnDrawSurfaceIndex;
 extern s32 fileMenuOperationSucceeded(void);
 
 extern s32 fileMenuTaskExists(void);
-extern void func_002CE208(s32 mode);
+extern void fileStartMemoryCardMenuForMode(s32 mode);
 
 extern s32 fldIsFieldResourceWaitFinished(void);
 
@@ -172,8 +173,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 
@@ -899,7 +898,7 @@ u32 func_0010A350(void) {
 }
 
 void evtOpenFileMenuModeThree(void) {
-    func_002CE208(3);
+    fileStartMemoryCardMenuForMode(3);
 }
 
 u32 evtPollFileMenuModeThree(void) {
@@ -941,7 +940,7 @@ u32 func_0010A418(void) {
 }
 
 void evtOpenFileMenuModeOne(void) {
-    func_002CE208(1);
+    fileStartMemoryCardMenuForMode(1);
 }
 
 s32 evtCheckSelectionInput(void) {
@@ -975,7 +974,7 @@ u32 func_0010A4D0(void) {
 }
 
 void evtOpenFileMenuModeTwo(void) {
-    func_002CE208(2);
+    fileStartMemoryCardMenuForMode(2);
 }
 
 u32 evtPollFileMenuModeTwo(void) {
@@ -1391,7 +1390,7 @@ void evtStartShootingGameTask(void) {
 
 /* Destroy that shooting-game task hierarchy and invoke its work callback; return native zero status. */
 u32 evtStopShootingGameTask(void) {
-    func_00316EF8();
+    mdlStopViewerPackageTask();
     return 0;
 }
 
@@ -1399,7 +1398,7 @@ u32 evtStopShootingGameTask(void) {
 u8 evtWaitShootingGameTaskGone(void) {
     s64 taskExists;
 
-    taskExists = func_00316ED0();
+    taskExists = mdlViewerPackageTaskExists();
     return taskExists == 0;
 }
 
@@ -1411,7 +1410,7 @@ void evtOpenFileMenuFromParams(u32 unused, u32 *menuArgs) {
         menuArg = *menuArgs;
     }
     fileMenuWorkCreate(menuArg);
-    func_002CE208(4);
+    fileStartMemoryCardMenuForMode(4);
 }
 
 extern void fileReleaseMenuFlowResource();

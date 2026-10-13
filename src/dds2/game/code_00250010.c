@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_viewer_rows.h"
+#include "sdf_vu_matrix.h"
 
 #include "evt_world.h"
 #include "evt_picture.h"
@@ -142,7 +143,7 @@ extern void sdfDebugPrintf(const char *fmt, ...);
 extern void sndStartTrackExtended(s32 track);
 
 extern void sndReleaseTrackHandle(u32 sound);
-extern void func_00341C78(u32 sound);
+extern void sndQueueSoundId(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
 
@@ -2495,7 +2496,6 @@ void func_00255648(void) {
 
 extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: rotate an event-viewer position about camera axes selected by the pad. */
 void func_00255650(f32 *position)
@@ -5367,7 +5367,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_00341C78(sound);
+    sndQueueSoundId(sound);
     return sound;
 }
 

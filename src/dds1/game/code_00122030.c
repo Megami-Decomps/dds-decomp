@@ -7,6 +7,8 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_message.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
@@ -27,6 +29,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
 extern void fldBeginSelectedValueTransition(u32);
 
@@ -98,8 +101,6 @@ extern u32 fldGetSceneReadyFlag(void);
 
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 
-struct SdfMsg;
-extern void sdfStoreMessageWordsAndNotifyConsumer(struct SdfMsg *message, s32 firstWord, s32 work, s32 thirdWord, s32 fourthWord);
 
 
 extern u32 fldPlayerObject;
@@ -143,7 +144,6 @@ void fldDispatchDeferredFieldCommand(void);
 
 extern FieldPlayerSceneWork D_0032F1A0;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern void dds3WorkClear(void);
 
@@ -1202,7 +1202,7 @@ u32 fldGetPlayerSceneState(void) {
 
 extern s32 dds3SetSlot1HandlerCallback(void *object, Dds3MoverUpdate update);
 
-s32 func_001243C0(ObjectTransform *relativeTransform, EffWorldNode *target);
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target);
 
 extern void func_001372D0(f32 *position);
 
@@ -1215,7 +1215,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
 
     if (fldPlayerObject != 0) {
         fldSetSceneControlFlags(0x40);
-        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, func_001243C0);
+        dds3SetSlot1HandlerCallback((void *)fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldAreaState.unkE8 = 4;
     if (fldAreaState.sceneMode < 4) {
@@ -1410,7 +1410,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
-s32 func_001243C0(ObjectTransform *relativeTransform, EffWorldNode *target) {
+s32 fldPlayerCameraTargetNoPathUpdate(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
@@ -1601,7 +1601,7 @@ u8 fldIsFlagActive(void) {
 }
 
 void func_001248D0(void) {
-    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (s32)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
+    sdfStoreMessageWordsAndNotifyConsumer((struct SdfMsg *)D_003257F8, (s32)D_00324F88, (u32 *)(D_00324F88 + 0xC0), (s32)(D_00324F88 + 0x100), (s32)(D_00324F88 + 0xE0));
 }
 
 typedef struct FldEncEntry {
@@ -1647,14 +1647,13 @@ extern f32 D_0032F250[4];
 extern void *dds3GetWorldObject(void);
 extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
-extern void func_00228930(f32);
+extern void evtAdvanceSolarClockAndExpireControls(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32,s32);
 extern void ptyApplyFieldHpAttrition(s32);
 extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
 extern void dds3WorkClear(void);
-extern void kwlnFadeOutStart(s32,s32,s32,s32);
 extern char D_0039FCA0[], D_0039FCB0[];
 
 /* Advance movement-driven solar/attrition state and queue field encounters.
@@ -1697,7 +1696,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         return 0;
     }
     if (fldAreaState.transitionMode != 0) return 0;
-    func_00228930(distance);
+    evtAdvanceSolarClockAndExpireControls(distance);
     phase = evtGetSolarPhase();
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();
@@ -1818,9 +1817,7 @@ u8 fldGetCampSceneControlMode(void) {
 extern void *dds3GetWorldObject(void);
 
 
-extern void kwlnFadeStartIn(s32);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void fldUpdateSmoothedCameraPose(void);
 
@@ -1828,7 +1825,6 @@ extern u8 fldHasPendingSceneFlags(void);
 
 extern void fldSetCameraNodeModeWithTen(void);
 
-extern void kwlnFadeStartOut(s32);
 
 extern void mnuCreateCampTasks(void);
 
@@ -2076,11 +2072,8 @@ struct KwlnTask;
 
 extern struct KwlnTask *kwlnTaskFindByPriority(u32);
 
-extern void mnuMarkTitleStreamResetPending(void);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
 extern u32 D_003BABE8;
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "dds3obj.h"
@@ -21,6 +22,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "evt_viewer_group_record.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 
@@ -37,15 +39,6 @@ extern void *memset(void *dst, s32 value, u32 size);
 
 
 /* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
-typedef struct EvtGroupRec {
-    u8 pad00[8];
-    s32 group;               /* 0x08 */
-    s32 type;                /* 0x0C */
-    u8 pad10[0x10];
-} EvtGroupRec;
-
-
-
 /* The name table and entry list have the same offsets in both games. */
 
 
@@ -363,7 +356,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer) {
 
     if (viewer->windowContext != NULL) {
         for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
-            btlRemoveCurrentGroupedEntity(((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].type);
+            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
 }
@@ -1016,9 +1009,7 @@ extern u32 kwlnDrawControlFlags;
 void fldInitializeCameraColorResource(void);
 
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern s32 func_0024D760(PolyMovieWork *ctx);
+extern s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
 
 struct EvtRuntime;
 
@@ -3537,7 +3528,7 @@ s32 evtViewerInitializeUpdateSequence(KwlnTask *task) {
     return (s32)(u32)evtViewerScheduleFrameVariableTask;
 }
 
-s32 func_0024D760(PolyMovieWork *ctx) {
+s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx) {
     s32 id = ctx->eventId;
 
     if (id == 0x28B || id == 0x28E) {
@@ -3563,7 +3554,7 @@ s32 evtViewerAdvanceUpdate(KwlnTask *task) {
             kwlnDrawControlFlags |= 0x2000000;
             return 0;
         }
-        if (func_0024D760(window) == 0) {
+        if (evtViewerSkipsTitleStreamWait(window) == 0) {
             if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
                 if (viewer->titleStreamWaitFrames == 0x78) {
                     mnuMarkTitleStreamResetPending();
@@ -3600,7 +3591,7 @@ s32 evtViewerStartUpdate(KwlnTask *task) {
     return (s32)(u32)evtViewerAdvanceUpdate;
 }
 
-u8 func_0024D908(PolyMovieWork *task) {
+u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
     return task->eventId == 0x263;
 }
 
@@ -3620,7 +3611,7 @@ void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 void evtViewerRelease(viewer)
     EvtRuntime *viewer;
 {
-    if (func_0024D908(viewer->windowContext) == 0) {
+    if (evtViewerSkipsCampSceneIdRelease(viewer->windowContext) == 0) {
         mnuReleaseCampSceneRegisteredIds(viewer);
     }
     evtResetUnitVectorSlots();

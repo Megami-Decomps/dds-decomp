@@ -35,6 +35,7 @@
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
+#include "eff_pcp_span.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -155,29 +156,8 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
 
-/* Constructor and aimed update share the 0x78-byte angular-sweep work.
-   The update uses unsigned frame bounds; the initial sweep interval is
-   computed as a signed difference of the parameter words. */
-typedef struct EffPCPSpanParams {
-    f32 anchor[4];
-    u32 holdFrames;
-    u32 activeFrames;
-    s32 fadeFrames;
-    f32 sweepDegrees;
-    f32 radius;
-} EffPCPSpanParams;
-
-typedef struct EffPCPSpanWork {
-    f32 matrix[16];
-    EffPCPSpanParams params;
-    u32 color;
-    u32 frame;
-    f32 angle;
-    f32 spin;
-    struct EffNode *optionalHandle;
-} EffPCPSpanWork;
-
-extern EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams);
+/* The update uses unsigned frame bounds; the initial sweep interval is
+ * computed as a signed difference of the parameter words. */
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);

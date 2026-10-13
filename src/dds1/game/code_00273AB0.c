@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
 #include "snd_sequence_volume_pan.h"
@@ -19,7 +20,6 @@
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
 extern void dspRequestMessageWindowModeOne(void);
-extern s32 evtGetMessageWindowControlState(void);
 
 
 extern void mnuDrawCampScreenDefault(s32);

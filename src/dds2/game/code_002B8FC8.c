@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "dsp_entry_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
@@ -90,12 +91,11 @@ typedef struct MenuIconState MenuIconState;
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
-extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 
 extern char D_003E75C4[];
@@ -122,8 +122,6 @@ extern void evtStageTestQueueMotion();
 extern s32 D_00435E48;
 
 
-
-extern void func_002C10F0();
 
 extern void mnuDrawSlotIcons();
 

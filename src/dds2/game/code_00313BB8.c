@@ -18,6 +18,7 @@ extern void memset();
 #include "dat_state.h"
 #include "mnu_mantra.h"
 #include "prf_profile_cap.h"
+#include "script_flag_slot.h"
 
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -157,12 +158,6 @@ extern s32 scrSetFlag(DatPartyRecord *, u16);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 extern s32 scrFindSlot(DatPartyRecord *, u16);
 extern s32 scrRemoveSlot(DatPartyRecord *, u16);
-
-typedef struct ScriptFlagSlot {
-    u8 id;             /* 0x00 */
-    u8 pad01[3];
-    u32 flag;          /* 0x04 */
-} ScriptFlagSlot;
 
 extern ScriptFlagSlot D_00404AA8[];
 

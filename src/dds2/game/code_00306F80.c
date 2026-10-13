@@ -1,4 +1,5 @@
 #include "sdf_gs_header.h"
+#include "kwln_draw_buffer.h"
 #include "ui_color.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
@@ -55,8 +56,6 @@ extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
 
 extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet *, s32, void *, s32);
-
-extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

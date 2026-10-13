@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "common.h"
@@ -6,7 +7,6 @@
 #include "mnu_list.h"
 
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
-extern s32 evtGetMessageWindowControlState(void);
 extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);

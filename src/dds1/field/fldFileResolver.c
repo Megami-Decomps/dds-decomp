@@ -2,6 +2,8 @@
 #include "eff.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
 #include "fld_bill_config.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
@@ -16,18 +18,20 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
 #include "evt_action_object.h"
 #include "sdf_texture_offset_list.h"
 #include "evt_script_model.h"
 #include "sdf_model.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 
 extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern void *dds3GetWorldSecondaryObject(void);
 struct EffWorldNode;
-extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern char D_0039FD50[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);
@@ -105,22 +109,14 @@ void *fldResolveWorldObjectByResourceEntryName(const char *name) {
 
 #include "eff_light.h"
 #include "fld_area_work.h"
+#include "fld_spawn_collision.h"
 
 struct EffNodeDescriptor;
 
 
 /* Complete serialized descriptors shared with their existing consumers. */
 
-typedef struct FldSpawnCollision {
-    u32 kind;
-    u32 word04;
-    u32 *header;
-    u32 word0C;
-    u32 geometry[8];
-} FldSpawnCollision;
-
 typedef char FldSpawnBatchSize[(sizeof(FldSpawnBatch) == 12) ? 1 : -1];
-typedef char FldSpawnCollisionSize[(sizeof(FldSpawnCollision) == 0x30) ? 1 : -1];
 
 extern FldFileResource *D_003BD7B0;
 extern u32 D_003BD7B4;
@@ -381,7 +377,6 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 /* Packet addresses are 32-bit handles; GS and GIF payload words remain 64-bit. */
 
 extern void fldPlayFieldSeVolumePan(s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldReleaseActorTasksById(s32);
 /* Per-actor slot in the field's actor table; reset by fldResetActorSlots and
@@ -1680,10 +1675,10 @@ u32 fldLoadAreaRoomResources(const char *name) {
     return fldCachedRoomF1ResourceAllocation;
 }
 
-extern u32 func_00128780(u32, u32, u32, u32,
+extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00128780);
+INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
 extern s32 D_003BAC10;
 extern FldTransferChunk *D_003BAC18;
@@ -1825,7 +1820,7 @@ void fldInitDisplayObjects(void) {
         D_003BACD4 = 1;
         object = sdfCreateAssetWithDrawEntries();
         D_003BACEC = (u32)object;
-        object->unk1C = 1.0f;
+        object->primaryStateFloat = 1.0f;
         D_003BD7C0 = (u32)sdfCreateAssetWithDrawEntries();
         fldMarkerTexture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(D_0032F260));
     }
@@ -2498,8 +2493,6 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     descriptor->append(descriptor, command);
 }
 
-extern SdfTexBuf *sdfTexGetPrimaryBuffer(SdfTex *);
-extern s32 sdfTexGetPrimaryBufferSize(SdfTex *);
 extern void sdfConsInitDmaPacketHeader(DmaPacketHeader *, u32, s32);
 extern void func_002DD708(f32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
@@ -3927,10 +3920,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012F578);
 /* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012FC20);
 
-extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
 
 /* Advance the field transition while the camera model's motion drives completion. */
 s32 fldUpdateFieldTransition(void) {
@@ -3977,7 +3967,6 @@ s32 fldUpdateFieldTransition(void) {
 }
 
 extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
 extern void kwlnPadStartMotor(u32 motor, u8 level, s32 duration);
 extern void fldSetSceneControlFlags(u32 mask);
 
@@ -6895,7 +6884,6 @@ u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00138ED0);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];

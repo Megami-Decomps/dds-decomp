@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -432,7 +433,6 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
     mnuSetStateValue(&((StaffDisplayContext *)context)->gradient.active, 1);
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern char D_0037CA1C[];
 extern char D_0037C9AC[];

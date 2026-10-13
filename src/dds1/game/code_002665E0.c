@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "dds3_world_value.h"
@@ -7,6 +8,7 @@
 #include "ui_color.h"
 #include "mnu_result.h"
 #include "brs_result_counter.h"
+#include "dds3_world_counter.h"
 
 
 
@@ -413,7 +415,6 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
 #define MNU_STREAM_COMMIT_READY 3
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
@@ -421,7 +422,6 @@ struct EffWorldNode;
 
 extern void effObjSetInnerFloat(s32 object, f32 value);
 
-extern s32 dds3GetWorldSecondaryObject(void);
 
 
 extern u8 D_003DC1C0[];
@@ -449,7 +449,6 @@ extern s32 D_003BC5C8;
 
 extern u8 D_003D9178[];
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern u32 sdfSoundIsCommandBusy(void);
 

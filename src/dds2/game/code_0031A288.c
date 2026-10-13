@@ -8,7 +8,7 @@ extern struct CompactSlot *itfClaimCompactSlotWithPayload(u32, u32, struct Compa
 extern s32 func_003242D0(MenuWorkEntry *, s32);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern u32 mnuAdvanceWorkEntry(MenuWorkEntry *, s32);
-extern void func_0031A830(MnuShootingWork *);
+extern void mnuUpdateShootingProgressTier(MnuShootingWork *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern MenuWorkEntry D_0040ABF8;
 
@@ -72,7 +72,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
             if (work->completed == 0) {
                 work->progress++;
             }
-            func_0031A830(work);
+            mnuUpdateShootingProgressTier(work);
             score = registry->score * work->step;
             work->currentScore += score;
             evtPrintDeveloperConsoleMessage("Add Score[%d]\n", score);
@@ -89,7 +89,7 @@ void mnuApplyShootingRuntimeRecordEvent(MenuRuntimeRecord *record, MenuWorkEntry
             if (work->completed == 0) {
                 work->progress += registry->progress;
             }
-            func_0031A830(work);
+            mnuUpdateShootingProgressTier(work);
             score = registry->score * work->step;
             work->currentScore += score;
             evtPrintDeveloperConsoleMessage("Add Score[%d]\n", score);

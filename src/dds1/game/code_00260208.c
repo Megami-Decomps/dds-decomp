@@ -790,7 +790,6 @@ extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
 extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     if (work->setupState != 0) {
@@ -810,7 +809,6 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);
 extern void brsOpenSkillPackagePanel(BrsSkillPackageWork *);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 
@@ -1104,7 +1102,7 @@ extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
-extern void func_002E8DD0(u32 sequence);
+extern void sndQueueSoundId(u32 sequence);
 extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1141,7 +1139,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
             mnuForwardTableByte(
                 work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
-        func_002E8DD0(0x50001);
+        sndQueueSoundId(0x50001);
         sndStartTrackDefault(0x50001);
     }
 

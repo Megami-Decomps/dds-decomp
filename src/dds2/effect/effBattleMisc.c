@@ -32,7 +32,6 @@ extern void func_003364B8(f32 value);
 extern void func_00336818(f32 value);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern u32 effFieldColorFlags;
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* The selected position provider leaves its vector in vf10. */
 void effBattleMiscQueryPosition(void *owner, EffectVectorRequest *param, u128 *out) {

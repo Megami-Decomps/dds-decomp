@@ -14,6 +14,7 @@
 #include "eff_ref_obj.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
+#include "bill_object_api.h"
 #include "btl_state.h"
 #include "btl_action.h"
 #include "ee_mmi.h"
@@ -28,6 +29,7 @@
 #include "sce_io.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_matrix.h"
 
 extern s32 func_0036B420(s32 directory);
 extern s32 func_0036B588(s32 directory, SceDirent *entry);
@@ -254,7 +256,6 @@ extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern f32 btlUnitGetTopY(BtlUnit *);
 
@@ -2705,7 +2706,8 @@ void func_0020D1F0(void) {
 void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 }
 
-void func_0020D200(void) {
+/* Retail stub for the two extents and orientation submitted by camera diagnostics. */
+void func_0020D200(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
 void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
@@ -3092,7 +3094,6 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
-extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 
@@ -3402,8 +3403,8 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
 }
 
 /* Release the chip allocation used for an editable resource-name record. */
-void btlDestroyResourceNameRecord(void *allocation) {
-    sdfReleaseChipBlock(allocation);
+void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record) {
+    sdfReleaseChipBlock(record);
 }
 
 extern u8 D_003BEAA0[];

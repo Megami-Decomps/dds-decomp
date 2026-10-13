@@ -11185,7 +11185,7 @@ without that timeline/plane handling. They intentionally have distinct names.
 
 DDS2 camera roles come from the live scene callback installer, literal
 diagnostics and native enemy-name indexes, not speculative skill names:
-`btlQueueVetalaResourceAndSoundOnce`, Vritra action framing, the five-form
+`btlQueueBossScriptResourceAndSound`, Vritra action framing, the five-form
 Brahman party presets, and Satan action/defeat framing. Action 0x211
 retains its numeric identifier in `btlSelectAction211CameraPair`; the
 `3SIK:LKG` strings alone do not establish a skill or boss identity.

@@ -511,7 +511,7 @@ void parSysReset(void) {
     effMiscSeedRandomFromClock((EffRandState *)D_00451F50);
 }
 
-void func_00162E40(void) {
+void parInitializeParticleSubsystem(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);

@@ -13,6 +13,7 @@
 #include "btl_resource_browser.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "bill_object_api.h"
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -26,6 +27,7 @@
 #include "sce_io.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_vu_matrix.h"
 
 extern s32 func_003101B8(s32 directory);
 extern s32 func_00310320(s32 directory, SceDirent *entry);
@@ -143,7 +145,6 @@ extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
 extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern f32 btlTriangleNormalDotEdge(f32 *, f32 *, f32 *);
 
@@ -2795,7 +2796,6 @@ extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0039862B[];
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
-extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, void *);
@@ -3109,8 +3109,8 @@ struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension)
 }
 
 /* Release the chip allocation used for an editable resource-name record. */
-void btlDestroyResourceNameRecord(void *allocation) {
-    sdfReleaseChipBlock(allocation);
+void btlDestroyResourceNameRecord(struct BtlResourceNameRecord *record) {
+    sdfReleaseChipBlock(record);
 }
 
 extern u8 D_003603A0[];

@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_input.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -6,7 +7,6 @@
 #include "mnu_result.h"
 #include "snd_sequence_volume_pan.h"
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 
 extern void dspRequestMessageWindowModeOne(void);
@@ -44,7 +44,6 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0036D440[];
 
@@ -236,7 +235,6 @@ u32 func_00264608(void) {
 }
 
 extern s32 evtStageTestUpdateCamera(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern char D_0036D478[];
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */

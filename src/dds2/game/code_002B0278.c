@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "sdf_chip.h"
 #include "snd_sequence_volume_pan.h"
@@ -99,7 +100,7 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern s32 mnuIsStaffMenuInputBlocked();
 
@@ -129,7 +130,7 @@ extern void evtStageTestQueueMotion();
 extern s32 D_00435E48;
 
 
-extern void func_002C10F0();
+extern void mnuDrawPanelItemValueMeter();
 
 extern void mnuDrawSlotIcons();
 
@@ -1155,7 +1156,7 @@ s32 mnuStepPartySelectionControl(KwlnTask *callback) {
 u8 mnuIsStateNotOne(void) {
     s64 state;
 
-    state = func_002C6CE8();
+    state = evtStageTestAdvanceResourceWork();
     return state != 1;
 }
 
@@ -1444,7 +1445,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
             menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            if (func_002C6CE8() != 1) {
+            if (evtStageTestAdvanceResourceWork() != 1) {
                 evtStageTestStop();
                 menuWork->staffExit = 1;
                 menuWork->active = 1;
@@ -1496,7 +1497,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
     mnuApplyPackedGroupValues(packedGroup, entry->itemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
-    func_002C10F0(0, 0, 0, entry, group, spriteFlags);
+    mnuDrawPanelItemValueMeter(0, 0, 0, entry, group, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, D_00435E48 + entry->unitId * 0x11 + 0x110, spriteFlags);
     mnuDrawSlotIcons(0x14a, id);
 }
@@ -1556,7 +1557,7 @@ s32 mnuDrawSelectedStaffPartyView(KwlnTask *callback) {
 void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     u32 count;
     if (object->motionSelection == -1) {
-        if (func_002C6CE8() != 1) {
+        if (evtStageTestAdvanceResourceWork() != 1) {
             if (evtStageTestHasPendingMotion() == 0) {
                 object->idleFrames += 1;
             }

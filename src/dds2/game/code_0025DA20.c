@@ -1,5 +1,7 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_chip.h"
@@ -141,7 +143,6 @@ extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
 extern void mnuSetStateValue(u32 *, u32);
 
-extern s32 evtGetMessageWindowControlState(void);
 
 extern u8 D_003CD8D0[];
 
@@ -150,7 +151,6 @@ extern u8 D_003CDA8C[];
 
 extern u8 mnuCampCompactEntries[];
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 extern u8 D_003CD8DD[];
 
@@ -2422,7 +2422,6 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 
 extern s32 evtAdvanceSlotFlags(void);
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 
@@ -4000,7 +3999,6 @@ extern void func_0026C900(void);
 
 
 
-extern s32 evtGetMessageWindowControlState(void);
 
 
 extern char D_003CE63C[];
@@ -4012,7 +4010,6 @@ extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
 extern u32 D_003CE460[];

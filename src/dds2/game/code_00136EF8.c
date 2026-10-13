@@ -8,6 +8,8 @@
 #include "fld_waypoint.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_vu_matrix.h"
+#include "kwln_fade.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -105,7 +107,6 @@ extern void fldResetActorSlots(void);
 
 extern u8 *fldFindActorEntryByName(const char *);
 extern void fldPlayMenuSound(s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeSetRGB(s32, s32, s32);
 extern void fldApplyPendingCameraHeading(void);
 extern void fldApplyRoomObjectModeZero(s32, s32, void *, s32);
@@ -1719,7 +1720,6 @@ s32 fldPushDisplayValue(u32 value, EffWorldNode *unusedObject) {
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_0013BAB8);
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     f32 dir[4];
@@ -2588,7 +2588,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
 }
 
-s32 func_00141CF0(s32 command, u32 parameter) {
+s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
     FieldSequenceRecord record;
     s32 warp;
     s32 stage;

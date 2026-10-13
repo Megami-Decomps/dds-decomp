@@ -11,6 +11,7 @@
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "sdf_vu_matrix.h"
 
 
 extern f32 *D_0037F770[];
@@ -19,7 +20,6 @@ extern u8 kwlnDefaultColorVector[];
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 evtRotateUnitTowardTarget(EvtUnit *unit, f32 *dir, f32 angle);

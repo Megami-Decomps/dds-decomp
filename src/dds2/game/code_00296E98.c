@@ -17,7 +17,7 @@ extern u8 brsUiUpdateAllowed;
 
 
 
-extern s32 func_002C6CE8(void);
+extern s32 evtStageTestAdvanceResourceWork(void);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
@@ -57,7 +57,6 @@ extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuRequestEffectResources(MenuEffectResources *);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern char D_00428358[];
 
@@ -774,7 +773,6 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
 }
 
 extern s32 mnuBindCampEffectWhenLoaded(MenuCampEffect *);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
 
@@ -787,7 +785,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
-    if (func_002C6CE8() == 1) {
+    if (evtStageTestAdvanceResourceWork() == 1) {
         return 1;
     }
     if (ctx->unitResource == NULL) {
@@ -995,7 +993,7 @@ s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
         return 0;
     }
-    return func_002C6CE8() != 1;
+    return evtStageTestAdvanceResourceWork() != 1;
 }
 
 void mnuRefreshSelectedUnitPanels(u32 unused, BrsSkillPackageWork *menu) {
@@ -1031,7 +1029,7 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
-extern void func_00341C78(u32 sequence);
+extern void sndQueueSoundId(u32 sequence);
 extern void sndStartTrackDefault(s32 track);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1071,7 +1069,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
             mnuForwardTableByte(
                 work->primaryRewards.rows[*selectedIndex].unit->unitId);
         }
-        func_00341C78(0x50001);
+        sndQueueSoundId(0x50001);
         sndStartTrackDefault(0x50001);
     }
 

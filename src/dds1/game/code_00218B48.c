@@ -19,9 +19,12 @@
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
+#include "mdl_mark_params.h"
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -487,18 +490,6 @@ void mdlAppendViewerRecordSummary(SdfListHead *packetList, s32 x, s32 y, s32 dep
                                                             D_003ABAD0, record->kind)));
     }
 }
-
-typedef struct EffMarkParams {
-    u8 unk0[8];
-    s32 mark0;       /* 0x08 */
-    s32 mark1;       /* 0x0C */
-    u16 start;       /* 0x10 */
-    u16 end;         /* 0x12 */
-    u16 interval;    /* 0x14 */
-    u8 face;         /* 0x16 */
-    u8 blend;        /* 0x17 */
-    u32 colors[4];   /* 0x18 */
-} EffMarkParams;
 
 extern char *D_003679B8[];
 
@@ -1563,7 +1554,6 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 extern void effMiscAxisAngleToQuaternionVf11(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
 extern f32 sdfViewMatrix[];
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
 void mdlUpdateViewerCameraFromPad(void) {
@@ -2834,7 +2824,6 @@ extern void fldDrawRgbEditor(void *, s32, s32, s32, f32 *);
 extern void *func_0011D6B0(s32, s32, s32, s32);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: rotate a viewer position about the camera axes selected by the pad. */
 void func_0021E450(MdlLightEditorState *context, f32 *position)
@@ -3328,7 +3317,6 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 

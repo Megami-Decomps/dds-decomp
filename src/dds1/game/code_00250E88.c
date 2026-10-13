@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "dsp_name.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -509,7 +510,6 @@ s32 mnuBeginMantraProfileSelection(void) {
 extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
-extern u32 evtFinishMessageWindowAndNotify(void);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
@@ -543,7 +543,6 @@ extern void itfDspSignalB(void);
 extern void itfDspSignalC(void);
 extern void itfDspSignalD(void);
 extern void itfDspSignalE(void);
-extern s64 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 s32 mnuUpdateMantraSceneState(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
@@ -650,7 +649,6 @@ extern s32 mnuDrawLoadedProgressPanels(void *, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern s64 evtGetMessageWindowControlState(void);
 extern struct SdfPoolNode *D_00325818[4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 

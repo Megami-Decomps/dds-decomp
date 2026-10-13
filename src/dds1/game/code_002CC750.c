@@ -15,6 +15,7 @@
 #include "prf_profile_cap.h"
 #include "prf_requirement.h"
 #include "mdl_flag_api.h"
+#include "script_flag_slot.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -513,12 +514,6 @@ void prfDecodeFlagPair(u32 v, u32 *a, u32 *b) {
     *a = v;
     *b = lo << 1;
 }
-
-typedef struct ScriptFlagSlot {
-    u8 id;             /* 0x00 */
-    u8 pad01[3];
-    u32 flag;          /* 0x04 */
-} ScriptFlagSlot;
 
 extern ScriptFlagSlot D_00393280[];
 

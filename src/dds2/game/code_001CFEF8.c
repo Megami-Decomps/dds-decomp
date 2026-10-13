@@ -13,6 +13,7 @@
 #include "sdf.h"
 #include "btl_scene_initializer.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 #define FLD_SCENE_INITIAL_ID 1
 #define FLD_SCENE_GROUP_PRIMARY_ID 1
@@ -64,7 +65,6 @@ extern void btlResetDebugEncounterSelection(s32);
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern s32 btlRollMajinEncounter();
 
@@ -131,7 +131,6 @@ extern s32 btlResetSceneSlotFades(void);
 extern s32 func_001B3DD8(void);
 extern void btlAddItemDrop(u16);
 
-extern void kwlnFadeStartIn();
 
 extern s32 fldGetEncounterRuntimeResult();
 

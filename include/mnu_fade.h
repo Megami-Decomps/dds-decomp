@@ -60,6 +60,6 @@ extern void func_0031EEE8(FadeNumber *, u32);
 extern void func_0031F040(FadeNumber *, u32);
 extern void itfSetFadeParameter(FadeGauge *, u32);
 extern void itfSetFadeSecondaryParameter(FadeGauge *, u32);
-extern void func_0031E8E8(FadeGauge *, u32);
+extern void itfSetFadeGaugeDisplayValue(FadeGauge *, u32);
 extern void func_0031E8F0(FadeGauge *);
 #endif

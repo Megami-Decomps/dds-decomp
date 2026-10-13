@@ -379,6 +379,38 @@ typedef char BattleAdjustmentStreamOffsetCheck[(u32)&((BattleAdjustmentRecord *)
 typedef char BattleAdjustmentGroupsOffsetCheck[(u32)&((BattleAdjustmentRecord *)0)->groups == 0x1C ? 1 : -1];
 
 extern BattleAdjustmentRecord *D_003BAA3C;
+#else
+/* DDS2 encounter records carry two background IDs, four opaque bytes, and
+ * three conditional weighted encounter groups (0x190 bytes total). */
+typedef struct BattleAdjustmentEntry {
+    u16 sceneIndex;
+    u16 weight;
+    s8 value;
+    u8 opaque05;
+} BattleAdjustmentEntry;
+
+typedef struct BattleAdjustmentGroup {
+    s32 interval;
+    BattleAdjustmentEntry entries[20];
+} BattleAdjustmentGroup;
+
+typedef struct BattleAdjustmentRecord {
+    u16 encounterParamA; /* 0x00: background major ID read by btlStart. */
+    u16 encounterParamB; /* 0x02: background minor ID read by btlStart. */
+    u16 opaque04[2];     /* 0x04: retained without assigning field meanings. */
+    u32 conditions[3];   /* 0x08 */
+    u8 variantCodes[8];  /* 0x14 */
+    BattleAdjustmentGroup groups[3]; /* 0x1C */
+} BattleAdjustmentRecord;
+
+typedef char BattleAdjustmentEntrySizeCheck[(sizeof(BattleAdjustmentEntry) == 6) ? 1 : -1];
+typedef char BattleAdjustmentGroupSizeCheck[(sizeof(BattleAdjustmentGroup) == 0x7C) ? 1 : -1];
+typedef char BattleAdjustmentRecordSizeCheck[(sizeof(BattleAdjustmentRecord) == 0x190) ? 1 : -1];
+typedef char BattleAdjustmentConditionsOffsetCheck[((u32)&((BattleAdjustmentRecord *)0)->conditions == 0x08) ? 1 : -1];
+typedef char BattleAdjustmentVariantsOffsetCheck[((u32)&((BattleAdjustmentRecord *)0)->variantCodes == 0x14) ? 1 : -1];
+typedef char BattleAdjustmentGroupsOffsetCheck[((u32)&((BattleAdjustmentRecord *)0)->groups == 0x1C) ? 1 : -1];
+
+extern BattleAdjustmentRecord *D_00435E0C;
 #endif
 
 extern DatBattleSceneRecord *datBattleSceneRecords;

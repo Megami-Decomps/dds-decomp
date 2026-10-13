@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "evt_solar.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
 #include "fr_font_measure.h"
@@ -75,7 +76,6 @@ extern char D_00415638[]; /* "btl:hunt mp rec[%d]\n" */
 
 extern s32 sdfDebugPrintf(const char *, ...);
 
-extern s32 evtGetMirroredSolarPhase(void);
 
 extern s32 btlRollAiBucket(void);
 
