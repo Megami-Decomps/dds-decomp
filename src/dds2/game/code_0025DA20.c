@@ -1789,7 +1789,7 @@ s32 itmClaimFreeSlot(s32 row) {
 }
 
 /* Convert a camp reward row and its three-way option to a flat index. */
-s32 func_00260C28(s32 row, s32 option) {
+s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option) {
     s32 index = 3;
 
     index = row * index;
@@ -1797,7 +1797,7 @@ s32 func_00260C28(s32 row, s32 option) {
     return index;
 }
 
-s32 func_00260C38(s32 slot, s32 row) {
+s32 mnuCampGetCompactRewardRowIndex(s32 slot, s32 row) {
     return row * 2 + slot;
 }
 
@@ -3644,7 +3644,7 @@ s32 func_002646C8(KwlnTask *callbackContext) {
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-extern s32 func_00260C28(s32 row, s32 option);
+extern s32 mnuCampGetWideRewardRowIndex(s32 row, s32 option);
 extern u32 mnuCampChooseSolarWeightedOption(s32 row);
 extern u8 mnuCampChooseWeightedTableValue(void);
 extern s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row);
@@ -3668,11 +3668,11 @@ s32 func_00264710(KwlnTask *task) {
         slot = scene->rewardMode;
         scene->padCF = (u8)listedIndex;
         if (slot < 0) {
-            scene->rewardRow = (s8)func_00260C28(
+            scene->rewardRow = (s8)mnuCampGetWideRewardRowIndex(
                 listedIndex, mnuCampChooseSolarWeightedOption(listedIndex));
             scene->remainingRewards = mnuCampChooseWeightedTableValue();
         } else {
-            scene->rewardRow = (s8)func_00260C38(slot, listedIndex);
+            scene->rewardRow = (s8)mnuCampGetCompactRewardRowIndex(slot, listedIndex);
             scene->remainingRewards = (s8)mnuCampFindFreeCompactEntryIndex(
                 slot, listedIndex);
         }
