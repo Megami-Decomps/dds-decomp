@@ -11,6 +11,7 @@
 #include "fld_transfer_chunk.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"

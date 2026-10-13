@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -1740,7 +1741,6 @@ s32 func_002186C0(BtlUnit *unit, s32 action) {
 
 extern void btlFlagAllUnitDefeatCandidatesTask();
 
-extern u32 effMiscRandMod(void *, u32);
 
 extern void btlBossDebugPrintf(const char *, ...);
 
@@ -6643,7 +6643,6 @@ extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32,
 
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 
-extern u32 effMiscRandMod(void *, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

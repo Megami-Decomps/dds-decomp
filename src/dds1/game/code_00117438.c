@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
 #include "sdf_resource.h"
@@ -575,7 +576,6 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
     return evtRunCommandContext7(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
-extern s32 effMiscRandMod(s32 state, s32 modulus);
 
 s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
     s32 healing;
@@ -716,7 +716,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
-extern s32 effMiscRandMod(s32, s32);
 extern void func_003003F0(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
@@ -793,7 +792,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     if (datCommandRecords[index].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
         func_003003F0(D_0039F980, scaled, ratio, mask);
-        hit = effMiscRandMod(0, 100) < scaled;
+        hit = (s32)effMiscRandMod(0, 100) < scaled;
     }
     return hit ? mask : 0;
 }

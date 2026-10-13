@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
 #include "btl_camera_timed_instruction.h"
@@ -264,7 +265,6 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 

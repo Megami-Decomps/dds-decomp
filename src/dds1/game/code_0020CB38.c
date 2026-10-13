@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "evt_unit.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
@@ -20,7 +21,6 @@ extern char D_003BB8A8[];
 extern s32 datActionAnimationRecords;
 
 extern void func_003014F0();
-extern u32 effMiscRandMod(void *, u32);
 
 extern void func_001D6300(void *, void *);
 

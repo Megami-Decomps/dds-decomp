@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "eff_manager_task.h"
 #include "eff_random.h"
@@ -55,7 +56,6 @@ s32 fldCommandClearSelectedFlag(void) {
     return 1;
 }
 
-extern s32 effMiscRandMod(s32, s32);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
@@ -64,7 +64,7 @@ extern s32 fldMirroredSolarThresholds[];
 /* Roll against the threshold associated with the mirrored solar phase. */
 s32 fldCmdRollMirroredSolarThreshold(void) {
     s32 solarPhaseThreshold = fldMirroredSolarThresholds[evtGetMirroredSolarPhase()];
-    if (solarPhaseThreshold >= effMiscRandMod(0, 100)) {
+    if (solarPhaseThreshold >= (s32)effMiscRandMod(0, 100)) {
         scrSetIntegerReturnValue(1);
     } else {
         scrSetIntegerReturnValue(0);

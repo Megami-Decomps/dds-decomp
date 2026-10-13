@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "sdf_chip.h"
 #include "mnu_sprite_resource.h"
 
@@ -22,7 +23,6 @@ void mnuRequestDefaultMovieResource(void) {
 
 extern char D_003AFEC8[];
 
-extern u32 effMiscRandMod(void *, u32);
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
 SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {

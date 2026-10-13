@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
@@ -118,7 +119,6 @@ extern s32 datRosterDetails;
 
 extern s32 fldCountSceneSlots(void);
 
-extern s32 effMiscRandMod(s32, s32);
 
 extern char D_003A1A40[];
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "fpu.h"
 #include "kwln.h"
 #include "pcp_vu0.h"

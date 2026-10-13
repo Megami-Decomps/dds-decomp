@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
@@ -40,7 +41,6 @@
 
 extern u32 btlSelectCommandTargetPolicy(void *, BtlIndexList *, s32);
 
-extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
@@ -1189,7 +1189,6 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
 }
 extern s32 datActionAnimationRecords;
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
-extern u32 effMiscRandMod(void *,u32);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlInitializeActionCamera(BtlLinkedCommand *);
 extern void func_001E0B68(BtlLinkedCommand *,BtlCamState *,BtlCamState *);

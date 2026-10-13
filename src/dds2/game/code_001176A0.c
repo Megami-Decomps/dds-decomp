@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
 #include "sdf_resource.h"
@@ -742,7 +743,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *ite
 
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
-extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void sdfDebugPrintf(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
