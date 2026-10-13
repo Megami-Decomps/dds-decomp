@@ -581,7 +581,7 @@ extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
-extern s32 func_001A2DE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
 
@@ -738,7 +738,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
         if (datCommandSelectors[command].kind != 1) {
             costError = btlGetCommandFailureReason(source, command);
         } else {
-            costError = func_001A2DE8(source, action->unit, action->indexWork.companionA,
+            costError = btlGetLinkedPartyCommandFailureReason(source, action->unit, action->indexWork.companionA,
                                     action->indexWork.companionB, command);
         }
         if (costError == 0) {
