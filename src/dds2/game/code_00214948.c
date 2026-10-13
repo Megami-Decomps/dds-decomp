@@ -427,12 +427,12 @@ extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit 
 
 extern s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
 /* Whether unit can start combo command cmd with two partners, none of which may be
- * blocked by action mask 0x10 or by func_001ABDE8 against the other two. */
+ * blocked by action mask 0x10 or by btlGetPartnerCommandUseError against the other two. */
 s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     BtlUnit *members[3];
     BtlState *state;
@@ -463,7 +463,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
                 }
                 for (i = 0; i < 3; i++) {
                     if (members[i % 3] != NULL &&
-                        func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                        btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
                         return 0;
                     }
                 }
@@ -478,7 +478,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
             }
             for (i = 0; i < 3; i++) {
                 if (members[i % 3] != NULL &&
-                    func_001ABDE8(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                    btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
                     return 0;
                 }
             }

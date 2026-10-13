@@ -67,7 +67,7 @@ extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 
 extern u8 btlHasAvailableOption(u32);
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
@@ -1180,7 +1180,7 @@ s32 btlUnitHasFlag1000(s32 unitAddress) {
 u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
     s64 result;
 
-    result = func_001ABB10(unit, command);
+    result = btlGetCommandUseError(unit, command);
     return result == 0;
 }
 

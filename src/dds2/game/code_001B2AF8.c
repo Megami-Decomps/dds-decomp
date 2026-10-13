@@ -55,7 +55,7 @@ extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, 
 
 extern f32 D_00415F80[4];
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern u32 D_004367F8;
 
@@ -533,7 +533,7 @@ s32 btlCollectAvailableOptionSkills(s32 actorAddress, s32 *choices) {
                 continue;
             }
         }
-        if (func_001ABB10((BtlUnit *)actorAddress, value) != 0) {
+        if (btlGetCommandUseError((BtlUnit *)actorAddress, value) != 0) {
             continue;
         }
         if (choices != NULL) {
@@ -6994,7 +6994,7 @@ typedef struct SceneCheckArgs {
     BtlUnit *second;
 } SceneCheckArgs;
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlCheckCommandVitalCost(BtlUnit *, s32);
 
@@ -7004,9 +7004,9 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
     s32 base;
     s32 resultA = 0;
     s32 resultB = 0;
-    base = func_001ABDE8(self, self, args->first, args->second, args->mode);
+    base = btlGetPartnerCommandUseError(self, self, args->first, args->second, args->mode);
     if (args->first != 0) {
-        resultA = func_001ABDE8(args->first, args->first, self, args->second, args->mode);
+        resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->mode);
         if (resultA == 6 && base == 0) {
             if (btlCheckCommandVitalCost(args->first, args->mode) == 0) {
                 resultA = 0;
@@ -7014,7 +7014,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, SceneCheckArgs *args) {
         }
     }
     if (args->second != 0) {
-        resultB = func_001ABDE8(args->second, args->second, self, args->first, args->mode);
+        resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->mode);
         if (resultB == 6 && base == 0) {
             if (btlCheckCommandVitalCost(args->second, args->mode) == 0) {
                 resultB = 0;

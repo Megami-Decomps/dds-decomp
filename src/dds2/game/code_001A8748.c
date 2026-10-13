@@ -38,7 +38,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
-extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -1667,7 +1667,7 @@ s32 btlCheckCommandVitalCost(BtlUnit *unit, s32 command) {
     return result;
 }
 
-s32 func_001ABB10(BtlUnit *unit, s32 command) {
+s32 btlGetCommandUseError(BtlUnit *unit, s32 command) {
     u32 availableSlots;
 
     if (command == 0) {
@@ -1729,7 +1729,7 @@ s32 btlGetCombinedPartyCommandPower(DatPartyRecord *base, BtlUnit *first, BtlUni
     return btlApplyCommandAbilityMultiplier(&snapshot, command);
 }
 
-s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+s32 btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
     BtlUnit snapshot = *base;
     s32 totalMaxHp = 0;
@@ -1766,7 +1766,7 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
         totalMaxHp += third->partyRecord.maxHp;
     }
     snapshot.partyRecord.maxHp = totalMaxHp / count;
-    return func_001ABB10(&snapshot, command);
+    return btlGetCommandUseError(&snapshot, command);
 }
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
