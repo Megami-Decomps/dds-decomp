@@ -1,6 +1,6 @@
 #include "common.h"
 #include "snd_command_packet.h"
-#include "snd_track_slot.h"
+#include "snd_midi_state_views.h"
 
 extern s32 sndFindPackedTrackLoadStatus(s32 id);
 
@@ -19,25 +19,13 @@ typedef struct {
     /* 0x7 */ u8 unk7;
 } SndTrackVolume;
 
-typedef struct FE0C0 {
-    /* 0x000 */ u8 pad000[0x208];
-    /* 0x208 */ u32 unk208;
-    /* 0x20C */ u32 unk20C;
-} SndMixerBlock;
-
-/* Second view of the same block: the 13 track slots live at 0x190. */
-typedef struct SndMixerBlockSlots {
-    /* 0x000 */ u8 pad000[0x190];
-    /* 0x190 */ SndTrackSlot slots[13];
-} SndMixerBlockSlots;
-
 extern void func_0030B458(void *dst, void *src);
 
 extern SndTrackVolume D_003FE0D0[];
 
 extern SndTrackVolume sndTrackBalanceEntries[];
 
-extern SndMixerBlock sndMidiTrackState;
+extern SndMidiStateWords sndMidiTrackState;
 
 u32 sndSendCommandPacket();
 
@@ -57,26 +45,21 @@ void sndSendSpatialPosition(s32 trackId, s32 parameter, f32 x, f32 y, f32 z) {
     sndSendCommandPacket(0x170, 0, packet, 0x20);
 }
 
-typedef struct SndListenerState {
-    s32 header[2];
-    s32 value[6];
-} SndListenerState;
-
 extern SndListenerState D_003FB030;
 
 /* Scale six world-space values and send them to the sound engine when they changed. */
 void sndUpdateScaledListenerState(f32 a, f32 b, f32 c, f32 d, f32 e, f32 f) {
     SndListenerState state;
 
-    state.value[0] = a * 0.1f;
-    state.value[1] = b * 0.1f;
-    state.value[2] = c * 0.1f;
-    state.value[3] = d * 0.1f;
-    state.value[4] = e * 0.1f;
-    state.value[5] = f * 0.1f;
-    if (D_003FB030.value[0] != state.value[0] || D_003FB030.value[1] != state.value[1] ||
-        D_003FB030.value[2] != state.value[2] || D_003FB030.value[3] != state.value[3] ||
-        D_003FB030.value[4] != state.value[4] || D_003FB030.value[5] != state.value[5]) {
+    state.scaledValues[0] = a * 0.1f;
+    state.scaledValues[1] = b * 0.1f;
+    state.scaledValues[2] = c * 0.1f;
+    state.scaledValues[3] = d * 0.1f;
+    state.scaledValues[4] = e * 0.1f;
+    state.scaledValues[5] = f * 0.1f;
+    if (D_003FB030.scaledValues[0] != state.scaledValues[0] || D_003FB030.scaledValues[1] != state.scaledValues[1] ||
+        D_003FB030.scaledValues[2] != state.scaledValues[2] || D_003FB030.scaledValues[3] != state.scaledValues[3] ||
+        D_003FB030.scaledValues[4] != state.scaledValues[4] || D_003FB030.scaledValues[5] != state.scaledValues[5]) {
         sndSendCommandPacket(0x160, 0, &state, 0x20);
         D_003FB030 = state;
     }
@@ -194,9 +177,9 @@ SndTrackVolume *sndGetTrackSlotTable(void) {
 
 u32 func_002E9610(u32 *outSecondaryValue) {
     if (outSecondaryValue != NULL) {
-        *outSecondaryValue = sndMidiTrackState.unk20C;
+        *outSecondaryValue = sndMidiTrackState.opaque20C;
     }
-    return sndMidiTrackState.unk208;
+    return sndMidiTrackState.opaque208;
 }
 
 void func_002E9630(u8 *out) {
