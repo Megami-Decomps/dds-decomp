@@ -11517,3 +11517,47 @@ completion one. Preserve DDS1's repeated parameter reads and statement order.
 DDS2's `btlCmdStoreActorMpCheckChoiceUnregistered` is identical to the
 registered 0x0020A580 entry and has no registry/call reference; the suffix
 describes observed linkage, not a behavioral variant.
+
+## Command target adapters and counted-payload packing
+
+The command adapter units (`code_001FC7D8`/`code_0020E850`) separate
+target-selection policy from script parameter decoding. Their corresponding
+script providers obtain the current command, optionally read parameter 0 as
+`u16`, invoke the adapter, and return VM completion one. The old letter-only
+labels did not describe those policies:
+
+| Command adapter | Observable default-selection role |
+| --- | --- |
+| `btlChooseCommandActionTargets` | Read command-record attributes, choose from native candidate policies, and append the result. |
+| `btlPickCommandLowestHpTarget` | Minimize nonzero current HP. |
+| `btlPickCommandLowestHpRatioTarget` | Minimize current/skill-adjusted-maximum HP percentage using the native initial bound and fallback. |
+| `btlPickCommandLowestHpBlockTarget` | Minimize nonzero current HP among group element-query 0x200 candidates. |
+| `btlPickCommandElementCheckedTarget` | Choose group element-query 0x200 or 0x400 according to candidate status 0x200. |
+| `btlPickCommandTargetWithStatusMask` | Mark candidates with any status in the supplied mask. |
+| `btlPickCommandTargetWithoutStatusMask` | Mark candidates without those statuses. |
+| `btlPickCommandElementBlockTarget` | Mark candidates passing element query 0x200. |
+
+These names describe the default selection branch, not a guarantee that every
+mode filters the list. Native modes 1/2 can copy a preselected list unchanged;
+fallbacks and tie behavior remain native. The actor-excluding adapter can use
+the actor itself when no other candidate remains, and its per-game mode
+predicates differ. `btlAppendActorToCommandTargets` appends the command's own
+actor after a temporary scan; `btlAddEffectActorTargetToCommand` instead
+appends the global effect actor.
+
+Preserve the zero-formal DDS1 forwarding surfaces, existing unprototyped
+calls, explicit DDS2 arguments, ignored return values, and unused arguments.
+They are native ABI boundaries, not an invitation to normalize signatures.
+The separately registered `btlScriptChooseActionTargetsDuplicate` has the
+same current-command body as `btlScriptChooseActionTargets`: its suffix
+records duplicate code and a distinct builtin entry, not an unknown mode.
+The selected/current-actor append primitive carries a `BtlUnit *`, not an ID.
+The upstream-authored command-adapter name is retained, with that pointer
+evidence recorded in provenance.
+
+`sdfPackCountedPayloadLists` packs two callback lists into one owner-tracked
+`DdsNestedGroup`. Each list region contains its counted-payload headers
+followed by the copied `count * 8` byte payloads; copied data pointers are
+rebased into that allocation. The existing allocator tracks ownership.
+List counts, size arithmetic, empty-list behavior, copy order and types are
+unchanged; no callback invocation or menu-specific payload meaning is assumed.

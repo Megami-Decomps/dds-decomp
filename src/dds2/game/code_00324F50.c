@@ -129,7 +129,7 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list
 INCLUDE_ASM(const s32, "game/code_00324F50", func_003251C0);
 
 /* Pack both callback lists into separate header and eight-byte payload regions. */
-DdsNestedGroup *func_00325398(u32 *owner, MnuCallbackList **firstList,
+DdsNestedGroup *sdfPackCountedPayloadLists(u32 *owner, MnuCallbackList **firstList,
                              MnuCallbackList **secondList) {
     u32 firstBytes = 0;
     u32 secondBytes;

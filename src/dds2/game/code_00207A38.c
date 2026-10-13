@@ -131,16 +131,16 @@ extern s32 D_00438F6C;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern void btlCmdSimpleB(s32, s32);
-extern void btlCmdSimpleI(s32, s32);
+extern void btlPickCommandElementCheckedTarget(s32, s32);
+extern void btlPickCommandTargetExcludingActor(s32, s32);
 
-extern void btlCmdSimpleA(s32, u16);
+extern void btlPickCommandLowestHpBlockTarget(s32, u16);
 
-extern void btlCmdSimpleD(s32, u16);
+extern void btlPickCommandTargetWithoutStatusMask(s32, u16);
 
 extern void btlFilterCommandTargetsByUnitId(s32, u16);
 
-extern void btlCmdSimpleJ(s32, u16);
+extern void btlPickCommandElementBlockTarget(s32, u16);
 
 extern s8 btlHistoryCounter;
 
@@ -183,7 +183,7 @@ extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetSubtaskTargetMode(void);
 
-extern void btlCmdSimpleC(s32, u16);
+extern void btlPickCommandTargetWithStatusMask(s32, u16);
 
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 
@@ -1300,32 +1300,37 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgA(void) {
-    btlCmdWithArgA(scrGetCurrentCommandWork());
+/* Select targets for the current command's action; return VM success. */
+u32 btlScriptChooseActionTargets(void) {
+    btlChooseCommandActionTargets(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleB(void) {
+/* Parameter 0 supplies the group element-check input; return VM success. */
+u32 btlScriptPickElementCheckedTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleB((s32)(u32)context, value);
+    btlPickCommandElementCheckedTarget((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdWithArgB(void) {
-    btlCmdWithArgB(scrGetCurrentCommandWork());
+/* Select the current command's minimum nonzero-HP candidate; return VM success. */
+u32 btlScriptPickLowestHpTarget(void) {
+    btlPickCommandLowestHpTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdWithArgC(void) {
-    btlCmdWithArgC(scrGetCurrentCommandWork());
+/* Select the current command's minimum HP-percentage candidate; return VM success. */
+u32 btlScriptPickLowestHpRatioTarget(void) {
+    btlPickCommandLowestHpRatioTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleA(void) {
+/* Parameter 0 feeds lowest-HP element-block selection; return VM success. */
+u32 btlScriptPickLowestHpBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleA((s32)(u32)context, value);
+    btlPickCommandLowestHpBlockTarget((s32)(u32)context, value);
     return 1;
 }
 
@@ -1334,22 +1339,25 @@ u32 btlScriptCmdWithArgE(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgD(void) {
-    btlCmdWithArgD(scrGetCurrentCommandWork());
+/* Run the current command's minimum-value target selector; return VM success. */
+u32 btlScriptPickLowestLevelTarget(void) {
+    btlPickCommandLowestLevelTarget(scrGetCurrentCommandWork());
     return 1;
 }
 
-u32 btlScriptCmdSimpleC(void) {
+/* Parameter 0 is a status-presence mask for command target selection; return VM success. */
+u32 btlScriptPickTargetWithStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleC((s32)(u32)context, value);
+    btlPickCommandTargetWithStatusMask((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdSimpleD(void) {
+/* Parameter 0 is a status-absence mask for command target selection; return VM success. */
+u32 btlScriptPickTargetWithoutStatusMask(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleD((s32)(u32)context, value);
+    btlPickCommandTargetWithoutStatusMask((s32)(u32)context, value);
     return 1;
 }
 
@@ -1361,8 +1369,9 @@ u32 btlScriptFilterTargetsByUnitId(void) {
     return 1;
 }
 
-u32 func_0020A338(void) {
-    btlCmdWithArgA(scrGetCurrentCommandWork());
+/* Separate builtin entry with the same action-target selection body; return VM success. */
+u32 btlScriptChooseActionTargetsDuplicate(void) {
+    btlChooseCommandActionTargets(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -1378,8 +1387,9 @@ u32 btlScriptPickLinkedPartyTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleH(void) {
-    btlCmdSimpleH(scrGetCurrentCommandWork(), 0);
+/* Append this command's own actor after target scan; return VM success. */
+u32 btlScriptAppendActorToTargets(void) {
+    btlAppendActorToCommandTargets(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
@@ -1390,8 +1400,9 @@ s32 btlScriptCmdSelectTargetsByMode(void) {
     return 1;
 }
 
-u32 btlScriptCmdWithArgF(void) {
-    btlCmdWithArgF(scrGetCurrentCommandWork());
+/* Append the global effect actor to this command's targets; return VM success. */
+u32 btlScriptAddEffectActorTarget(void) {
+    btlAddEffectActorTargetToCommand(scrGetCurrentCommandWork());
     return 1;
 }
 
@@ -1401,15 +1412,17 @@ s32 btlScriptAppendSelectedOrCurrentTarget(void) {
     return 1;
 }
 
-u32 btlScriptCmdSimpleJ(void) {
+/* Parameter 0 feeds element-block target selection; return VM success. */
+u32 btlScriptPickElementBlockTarget(void) {
     void *context = scrGetCurrentCommandWork();
     u16 value = scrReadIntParameter(0);
-    btlCmdSimpleJ((s32)(u32)context, value);
+    btlPickCommandElementBlockTarget((s32)(u32)context, value);
     return 1;
 }
 
-u32 btlScriptCmdSimpleI(void) {
-    btlCmdSimpleI(scrGetCurrentCommandWork(), 0);
+/* Prefer a non-actor target, retaining native self fallback; return VM success. */
+u32 btlScriptPickTargetExcludingActor(void) {
+    btlPickCommandTargetExcludingActor(scrGetCurrentCommandWork(), 0);
     return 1;
 }
 
