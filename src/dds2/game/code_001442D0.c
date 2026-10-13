@@ -37,6 +37,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "kwln_fade.h"
+#include "fr_font.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
 
@@ -1365,7 +1366,6 @@ extern void func_00145A08(s32, f32, f32, f32);
 extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 extern s32 fldFindMapCoordinateIndex(s32, s32);
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
 extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
@@ -1944,7 +1944,7 @@ void fldDrawAutomapScene(void) {
     {
         const u8 *title = (const u8 *)D_0039A1D0[fldAreaState.area % 100].s;
 
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - D_00438ED8 * 6) << 4, 128, 0, 0xA09DC380,
             title, 0);
         frFontStoreShiftedRenderValue(D_00438ED4, 0xFFFFFF);
@@ -1970,7 +1970,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_0043628C);
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - (D_0044FCF0[D_0043628C] / 2) * 12) << 4,
             (D_004362A0 + 44) << 3, 0, labelColor,
             (const u8 *)D_003A25AC[labelIndex].s, 0);
@@ -1992,7 +1992,7 @@ void fldDrawAutomapScene(void) {
         }
         labelColor = labelAlpha | 0x78759B00;
         labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_00436288);
-        D_00438ED4 = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        D_00438ED4 = itfCreateConvertedTextGlyph(
             (450 - (D_0044FCF0[D_00436288] / 2) * 12) << 4,
             (D_0043629C << 3) + 348, 0, labelColor,
             (const u8 *)D_003A25AC[labelIndex].s, 0);

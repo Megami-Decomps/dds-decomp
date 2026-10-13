@@ -5,6 +5,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "itf.h"
+#include "fr_font.h"
 
 
 typedef s16 BrsIconRecord[4];
@@ -208,7 +209,6 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawMenuItemListRow);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawCampItemListRow);
 
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern char D_003BC500[];
 

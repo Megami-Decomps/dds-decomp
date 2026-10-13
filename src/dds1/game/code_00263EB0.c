@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "mnu_result.h"
 #include "snd_sequence_volume_pan.h"
+#include "fr_font.h"
 
 
 
@@ -487,7 +488,6 @@ void brsNoOpMessageInputCallback(void *work) {
 
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *itfCreateFont3TextGlyph(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);

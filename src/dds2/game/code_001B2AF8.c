@@ -2635,8 +2635,6 @@ extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
     const u8 *text;
@@ -3113,14 +3111,14 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                     }
                     break;
                 case 1:
-                    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                    glyph = itfCreateConvertedTextGlyph(
                         (work->x + xOffset) << 4, (work->y - 8) << 3,
                         0xFF0000, 0x80808000 | work->fade, D_00435E60 + datEnemyRecords[work->unit->partyRecord.unitId].pad04 * 7, 0);
                     frFontDrawGlyphWithSharedFlags(glyph, 1);
                     frFontQueueGlyphForCurrentDrawBuffer(glyph);
                     break;
                 case 2:
-                    glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                    glyph = itfCreateConvertedTextGlyph(
                         (work->x + xOffset) << 4, (work->y - 7) << 3,
                         0xFF0000, 0x80808000 | work->fade,
                         D_00435E4C + work->unit->partyRecord.unitId * 17, 0);
@@ -3207,7 +3205,7 @@ s32 btlUpdateAndDrawAnalysisPanel(KwlnTask *task) {
                                 s32 lineX = work->x + xOffset;
                                 s32 lineY = work->y + yOffset;
                                 yOffset += 24;
-                                glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+                                glyph = itfCreateConvertedTextGlyph(
                                     lineX << 4, lineY << 3,
                                     0xFF0000, 0x80808000 | (s32)work->fade, text, 0);
                             }

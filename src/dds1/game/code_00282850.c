@@ -608,8 +608,6 @@ extern const MenuPoint D_003B2450[];
 extern const MenuPoint D_003B2468[];
 extern const u8 *D_003BAA8C;
 extern void mnuDrawRangeCostAndIcon(s32, s32, s32, s32, u32, DatPartyRecord *, u16, s32, s32, EffectSlotSet *, EffectSlotSet *, u32);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
-
 /* Reuse the frame-coordinate workspace for the next phase's row count.
  * See docs/idioms.md, "Profile contents: coordinate-to-counter workspace". */
 void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, DatPartyRecord *actor, s32 profile, MenuSimpleSpriteState *panel, s32 surface) {

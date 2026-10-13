@@ -16,10 +16,9 @@
 #include "sdf_task_work.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
+#include "fr_font.h"
 
 extern s8 D_00324510[];
-
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);

@@ -206,7 +206,6 @@ typedef struct MnuShopListContext {
 } MnuShopListContext;
 
 extern s32 itfSetTextDrawLimit(s32);
-extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
 extern char D_00437970[];
 
