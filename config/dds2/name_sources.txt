@@ -2240,6 +2240,7 @@
 0x001A7120	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
 0x001A7688	itfUpdateActiveMessageWindows	inferred	CalcMsgMng task update: walks active message windows and advances each window's fade, display and selection state.
 0x001A76C8	itfUpdateSoundSelectorPanels	inferred	Registered DrawMsgMng update task gates on pending work, updates active sound-selector panels, advances the message tick, and returns zero.
+0x001A7738	itfMesDestroyActiveWindowsAndReleaseTexture	inferred	Task-destroy callback closes every active message window, releases the shared window texture and clears its owner field.
 0x001A7798	itfQueueSpriteQuadPacket	inferred	Builds a sprite's four-corner vertices, emits the indexed five-quad packet, and appends it to the message draw list.
 0x001A7878	itfAdjustPanelBoundsWithPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:783:func_001A7878; Peer-matched C proposal: P5; source=names_P5.tsv:16 [names_qp13.tsv]
 0x001A7A08	sndStepIndexByPad	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:799:func_001A7A08; Peer-matched C proposal; M141; source=names_pending_main.tsv:132 [names_qp12_apply.tsv]
