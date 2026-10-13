@@ -3,11 +3,11 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 #include "kwln_task_lifecycle.h"
 s32 kwlnDrawSetCd0Clamped(s32 arg0, s32 arg1, s32 arg2, f32 farg0, f32 farg1, f32 farg2, s32 arg3);
 s32 kwlnDrawSetD30Clamped(s32 arg0, f32 farg0, f32 farg1, f32 farg2, f32 farg3, f32 farg4, s32 arg1);
 
-f32 bfWaitReadArgFloat(s32 idx);
 s32 evtToggleSavedDrawVectors(s32 arg0, f32 arg1, f32 arg2);
 s32 kwlnSetDrawColorTarget(s32 arg0, void *arg1);
 void kwlnDrawSetC70FloatTriple(f32 rotation, f32 scale, u32 blendControl);

@@ -11,6 +11,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 #include "evt_solar.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
@@ -103,7 +104,6 @@ void effObjSetFlags(void *unit, s32 flag);
 u32 fldGetPlayerSceneState(void);
 
 
-f32 bfWaitReadArgFloat(s32 idx);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 

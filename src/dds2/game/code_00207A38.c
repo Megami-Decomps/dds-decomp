@@ -18,6 +18,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
+#include "scr_arg_read.h"
 #include "sdf.h"
 #include "btl_resource_name.h"
 #include "dat_command.h"
@@ -210,7 +211,6 @@ typedef struct BtlVec3 {
     f32 x, y, z;
 } BtlVec3;
 
-extern f32 bfWaitReadArgFloat(s32);
 
 extern BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32);
 
