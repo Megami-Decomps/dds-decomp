@@ -7,6 +7,7 @@
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
+#include "eff_bill_column_particle.h"
 #include "eff_ribbon_work.h"
 #include "itf_draw_grid.h"
 #include "fld_transfer_chunk.h"
@@ -6494,24 +6495,6 @@ void effReleaseBillFadeTable(s32 work) {
     effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
-
-typedef struct EffBillColumnParticle {
-    s32 age;
-    u32 unk04;
-    f32 radius;
-    f32 radiusStep;
-    f32 drag;
-    f32 verticalOffset;
-    f32 spin;
-    f32 spinPhase;
-    f32 width;
-    f32 extent;
-    f32 flare;
-    f32 height;
-} EffBillColumnParticle;
-
-typedef char EffBillColumnParticleSizeCheck[(sizeof(EffBillColumnParticle) == 0x30) ? 1 : -1];
-
 
 /* Update the column's particle records and the ribbon vertices for this frame. */
 void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
