@@ -825,7 +825,7 @@ s32 func_001A3008(void) {
 }
 
 
-s32 func_001A3138(void) {
+s32 itfMesScriptWaitForOptionSelection(void) {
     s32 window;
     s32 entry;
     PanelRec *record;

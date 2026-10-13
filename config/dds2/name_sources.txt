@@ -2163,6 +2163,7 @@
 0x001A2EA8	itfPanelAcquireHold	inferred	DDS1 twin 0019AE78 [names_M33_SmallSweep2.tsv]
 0x001A2F08	itfPanelReleaseHold	inferred	DDS1 twin 0019AED8 [names_M33_SmallSweep2.tsv]
 0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/game/code_001A1B08.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]
+0x001A3138	itfMesScriptWaitForOptionSelection	inferred	Message script command table slot 3: builds the selected entry's option list, yields while selection is pending, and returns the chosen clear-bit count before resetting the window.
 0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x001A3458	itfMesFinishScriptWindowIfActive	inferred	For the current script window, finishes active message flags and returns whether status is zero. [names_reviewed6.tsv]
 0x001A34D0	itfMesFinishWindowAndClearStatus	inferred	Marks active status flags then cleans, resets, and clears window status. [names_reviewed6.tsv]

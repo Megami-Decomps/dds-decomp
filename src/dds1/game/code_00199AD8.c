@@ -804,7 +804,7 @@ s32 itfStepHeldPanelMessages(void) {
     return 0;
 }
 
-s32 func_0019B108(void) {
+s32 itfMesScriptWaitForOptionSelection(void) {
     s32 window;
     s32 entry;
     PanelRec *record;
