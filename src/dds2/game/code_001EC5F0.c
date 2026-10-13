@@ -362,7 +362,7 @@ u32 btlGetActiveUnitId(void);
 
 s32 btlGetUnitModelFrameCount(BtlUnit *unit);
 
-f32 btlGetUnitModelValue1C(BtlUnit *unit);
+f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst);
 

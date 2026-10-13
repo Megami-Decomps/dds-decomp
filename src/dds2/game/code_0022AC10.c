@@ -309,7 +309,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern s32 abs(s32);
 
-extern f32 btlGetUnitModelValue1C(BtlUnit *);
+extern f32 btlGetUnitModelCurrentFrame(BtlUnit *);
 
 
 
@@ -390,7 +390,7 @@ void btlUpdateEventPlayback(void) {
             (battle->commandRestrictFlags & 0x800) == 0) {
             BtlUnit *unit = battle->eventUnit;
             if ((unit->status.flags & 2) != 0) {
-                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = (s32)btlGetUnitModelCurrentFrame(unit);
                 frame = abs(frame - 0x1A);
                 if (frame >= 6) {
                     EvtUnit *ext = unit->ext;
@@ -738,7 +738,7 @@ s32 btlCommandSetSequenceVolumePan(void) {
 }
 
 /* Optional hook: it reads its argument (100) straight from $a0 and returns the value passed to scrSetIntegerReturnValue. */
-s32 func_0022B760(void) {
+s32 btlCommandGetScriptReturnHookValue(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 value = 100;
 
@@ -749,12 +749,12 @@ s32 func_0022B760(void) {
     return 1;
 }
 
-typedef struct BtlFlagSlot {
-    u8 key;
+typedef struct BtlGroupSlot {
+    u8 group;
     u8 pad[3];
-} BtlFlagSlot;
+} BtlGroupSlot;
 
-extern BtlFlagSlot D_003BF960[];
+extern BtlGroupSlot D_003BF960[];
 
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
@@ -766,10 +766,10 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
     u32 i;
 
     if (value < 100) {
-        group = D_003BF960[value].key;
+        group = D_003BF960[value].group;
         count = 0;
         for (i = 0; i < 100; i++) {
-            if (group == D_003BF960[i].key) {
+            if (group == D_003BF960[i].group) {
                 if (mdlFlagTest(0x8FF - i) == 0) {
                     count++;
                 }
@@ -778,7 +778,7 @@ s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
         if (count > 0) {
             pick = effMiscRandMod(0, count);
             for (i = 0; i < 100; i++) {
-                if (group == D_003BF960[i].key) {
+                if (group == D_003BF960[i].group) {
                     if (mdlFlagTest(0x8FF - i) == 0) {
                         if (--pick == -1) {
                             break;
@@ -827,7 +827,8 @@ u32 btlCommandCountModelFlags(void) {
     return 1;
 }
 
-u32 func_0022B988(void) {
+/* Return the group slot's auxiliary u16, or one for an unsigned index outside the table. */
+u32 btlCommandGetGroupSlotAuxValue(void) {
     u32 index = scrReadIntParameter(0);
     u32 value = 1;
     if (index < 100) {
@@ -837,7 +838,8 @@ u32 func_0022B988(void) {
     return 1;
 }
 
-u32 func_0022B9D0(void) {
+/* Add one item under the retail signed upper-bound check, then complete the command. */
+u32 btlCommandAddOneItem(void) {
     s32 index = scrReadIntParameter(0);
     if (index < 0x100) {
         ptyAdjustItemQuantity(index, 1);
@@ -2318,7 +2320,8 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
 extern s32 D_00435E48;
 extern s32 D_00435E4C;
 extern s32 D_00435E5C;
-void func_0022F068(void) {
+/* Reset the selected actor, debug-menu rows/label tables, phase and delay before TEST polling. */
+void btlInitDrawTables(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
 
@@ -2400,7 +2403,7 @@ extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
 extern void btlInitializePartyRecordFromEnemy(DatPartyRecord *, u32);
-extern void func_0020D208(f32 *, u32, s32, f32);
+extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 extern void func_0020D228(void);
 extern void func_0020D230(void);
@@ -2427,7 +2430,7 @@ extern BtlActorMotionSlot D_00453530;
 
 /* Advance the battle model/debug editor. The selected state remains active
  * until its pending unit tasks have completed. */
-s32 func_0022F180(void) {
+s32 btlUpdateActorDebugEditor(void) {
     f32 position[4] __attribute__((aligned(16)));
     char text[0x70];
     BtlState *battle;
@@ -2645,7 +2648,7 @@ s32 func_0022F180(void) {
             }
         }
         if (battle->unk_E0E <= 0) {
-            currentFrame = (s32)btlGetUnitModelValue1C(unit);
+            currentFrame = (s32)btlGetUnitModelCurrentFrame(unit);
             func_0035C860(text, "%3d/%3d\n", currentFrame, btlGetUnitModelFrameCount(unit));
             btlDebugDrawText(32, 400, 0, text);
         }
@@ -2746,7 +2749,7 @@ s32 func_0022F180(void) {
         if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_004532C0.unk24) {
             btlSetActorEffectParameterOrMuzzlePosition(unit, 3);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_0020D208(position, 0x10808080, 0, record->unk24 * unit->scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10808080, 0, record->unk24 * unit->scale);
         }
         selectedAddress = D_003BFFC0[D_003C0260.cursor].valueAddress;
         if (((u32)selectedAddress >= (u32)&D_004532C0.position[0] &&
@@ -2759,7 +2762,7 @@ s32 func_0022F180(void) {
         if (D_003BFFC0[D_003C0260.cursor].valueAddress == (u32)&D_00453530.unk0C) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            func_0020D208(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
+            btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, D_00453530.unk0C * D_004532C0.scale);
         }
         if (D_003C0260.flags & 8) {
             btlApplyUnitModelScaledValue(unit);

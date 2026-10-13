@@ -2687,7 +2687,8 @@ void btlDebugDrawRadiusGuide(f32 *position, f32 radius, u32 color, s32 flags) {
 void func_0020D200(f32 *start, f32 firstExtent, f32 secondExtent, u32 color, f32 (*matrix)[4]) {
 }
 
-void func_0020D208(f32 *position, u32 color, s32 mode, f32 scale) {
+/* Retail stub for the position, color, mode and scale submitted by the actor editor. */
+void btlDebugDrawScaledPositionGuide(f32 *position, u32 color, s32 mode, f32 scale) {
 }
 
 void func_0020D210(void) {

@@ -4716,7 +4716,7 @@ extern f32 sdfViewEyeVector[4];
 extern f32 func_002FA1D8(f32);
 
 /* Advance radial five-point wave strips from the class orientation. */
-void func_002A8A90(EffClassWork *work) {
+void effUpdateRadialWavePointRows(EffClassWork *work) {
     f32 offsets[5];
     f32 widths[5];
     f32 direction[4];

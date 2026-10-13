@@ -773,7 +773,7 @@ Confirmed examples:
   match with the recovered distinction.
 - DDS2 `BtlState.debug` starts at `0x728`; its inner table starts at `0x128`.
   The two remainders, `8 + 8`, explain a `0x10` displacement in
-  `func_0022F068`. An invented `aligned(32)` record contradicts the actual
+  `btlInitDrawTables`. An invented `aligned(32)` record contradicts the actual
   allocation and layout guards.
 - `BattleActorPanelEntry.position[2]` and the nested presentation
   `cursorOffset[2]` reproduce the separate x/y address copies in DDS1
@@ -11437,3 +11437,37 @@ previously admitted source form or introduce a new matching lever.
 The channel-group 0x140/0x150 senders now share the existing DDS2 names in
 both games. Preserve their u8 parameters, bits-3-to-6 extraction and empty
 packet payloads; the opcode alone does not establish an IOP-side operation.
+
+## Actor-debug providers, group slots and radial waves
+
+`btlUpdateActorDebugEditor` is the paired eleven-phase actor editor: its
+status/model/motion/gun, position and transform menus display FLD/POS and
+current/total-frame values. `btlInitDrawTables` initializes the selected
+unit, menu rows, label-address tables, phase and delay before TEST polling.
+Keep the per-game capacities and the editor's existing local lifetimes.
+
+`btlGetUnitModelCurrentFrame` reads the model's `currentFrame` when unit
+flag 2 is set and returns zero otherwise. Threshold tasks and the debug
+frame display corroborate that meaning. The corrected local offset
+placeholder retains its original naming credit in both provenance files.
+`btlDebugDrawScaledPositionGuide` remains an empty retail hook; its callers
+establish position, packed color, mode and a scaled row value, not a guide
+shape. Preserve the differing pointer constness in the two definitions.
+
+The DDS2 script-return hook command retains the real default value 100 and
+the unspecified hook prototype. `btlCommandAddOneItem` retains its signed,
+upper-bound-only check. The private `BtlGroupSlot.group` byte drives equal
+group membership in the random unflagged-slot selector; its unchanged
+`u8` plus `pad[3]` declaration remains four bytes. The separate byte/u16
+global overlays stay untouched. `btlCommandGetGroupSlotAuxValue` names
+only the observed auxiliary u16, not an item, reward or flag identifier.
+
+`effUpdateRadialWavePointRows` is registered by native update rows
+0x0037EC74/0x003E9D24 and advances oriented five-point strips, sinusoidal
+heights, bends and fading/respawn state before the paired strip renderer.
+The DDS2 active-surface drawer, slot-record update/draw adapter and empty
+drawable-asset update hook are named from their bodies and native resource
+operation rows; their native callees and existing signatures stay intact.
+The flag-list enable/disable pair now shares the upstream DDS1
+`ViewTargetRelativeMode` spelling: generation subtracts the retained view
+target and drawing adds it back, without changing the raw SDATA word.
