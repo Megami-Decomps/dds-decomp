@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
 #include "ui_color.h"
@@ -8,6 +9,7 @@
 #include "mnu.h"
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
+#include "kwln_fade.h"
 
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
@@ -112,9 +114,7 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
     return 0;
 }
 
-extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
 extern void sndQueueNoPayloadCommand40(void);

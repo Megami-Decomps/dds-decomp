@@ -138,6 +138,9 @@ void effDrawBlurRectangle(EffBlurQuad *source);
 void effBlurDrawFramebufferQuad(EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
+void effCopyTexturedBlurParameters(EffBlurTemplateBody *parameters);
+void effCopyFilterBlurParameters(EffBlurScatterParams *parameters);
+void effCopyStaggeredBlurParameters(EffBlurScaleParams *parameters);
 void effReleaseBlurTemplate(EffBlurTemplate *owner);
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
 

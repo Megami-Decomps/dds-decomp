@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_texture_draw_packet.h"
@@ -110,7 +111,6 @@ struct SdfDmaNode;
 extern SdfPoolNode D_003253E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 
 extern s32 func_0011E278();

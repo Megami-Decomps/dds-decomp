@@ -325,9 +325,9 @@ void itfDrawFullExtentWorkPanels(MnuShootingWork *work) {
     itfSetFadeParameter(&work->gauge, 100);
     itfSetFadeSecondaryParameter(&work->gauge, work->progress);
     if (work->completed > 0) {
-        func_0031E8E8(&work->gauge, 1);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 1);
     } else {
-        func_0031E8E8(&work->gauge, 0);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 0);
     }
     func_0031E8F0(&work->gauge);
     itfSetFadeMode(&work->frame.fade, 1, 0x80);

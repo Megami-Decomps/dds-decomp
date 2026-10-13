@@ -1,4 +1,6 @@
+#include "eff_packet_params.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
@@ -8,11 +10,11 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 kwlnGetDrawBufferIndex(void);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern SdfPoolNode D_00324B88;
@@ -42,18 +44,6 @@ extern s32 D_003BA900;
 extern s8 D_003BB018;
 extern u32 D_003BB01C;
 extern u32 D_003BB020;
-
-typedef struct EffectDispatchState {
-    u8 pad00[0x60];
-    u32 value60;
-    u8 pad64[0x4C];
-    u16 handler;
-    u16 valueB2;
-} EffectDispatchState;
-
-
-
-
 
 typedef struct BillWork {
     u8 pad00[0x64];
@@ -289,21 +279,6 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
     return packet;
 }
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 color;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 extern u32 D_0034E6A0[];
 

@@ -15,6 +15,7 @@
 #include "scr.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
+#include "dds3_world_counter.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
 enum {
@@ -152,7 +153,6 @@ extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 

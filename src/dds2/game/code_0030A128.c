@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "common.h"
 #include "evt_world_object_api.h"
 #include "file_pac.h"
@@ -15,6 +16,7 @@
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 typedef struct SdfSlotSet SdfSlotSet;
 
@@ -70,9 +72,7 @@ extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 extern char D_004388A0[];
-extern s64 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void dds3SetWorldObject(void *);
 extern void *dds3GetWorldSecondaryObject(void);
@@ -89,7 +89,6 @@ extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void func_00316E60(void);
 extern void sndStartTrackDefault(s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void sdfCounterInitializeDisplayAnimation(void);
 extern u32 kwlnDrawControlFlags;
 extern u32 D_00435CBC;
@@ -667,7 +666,6 @@ extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void sdfClearCounterDisplayFlags(void);
 extern s32 sdfCounterGetDisplayValue(void);
 extern void fldSetPendingSceneAction(u32);

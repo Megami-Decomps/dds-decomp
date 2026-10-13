@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
@@ -10,6 +11,7 @@
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -48,7 +50,6 @@ struct MenuListNode {
 };
 
 extern MenuList *mtrBuildUnitSelectionList(void);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuInitializeMantraSelectionWork(struct MnuStatusResource *);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 extern s32 mtrDrawUnitSelectionOverlay(struct MnuStatusResource *);
@@ -396,7 +397,6 @@ extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
 /* Legacy calls forward the selected record to this no-op. */
 extern void func_0026DBB0();
 extern void mnuReleaseMenuVisualWorkResources(MenuProgressHost *);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern void mnuSpawnMantraIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraShortLoopIconFadeIn(struct MantraDrawPool *);
 extern void mnuSpawnMantraIconAtPositionWithShortLoop(u32, u32, struct MantraDrawPool *);
@@ -443,9 +443,7 @@ extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
-extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
 extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
@@ -789,7 +787,6 @@ void mnuReleaseSelectionWorkResources(MnuStatusResource *resourceWork) {
 }
 
 extern s32 mnuHandleMantraSelectionInput(MnuStatusResource *);
-extern s32 evtGetMessageWindowControlState(void);
 
 s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
     MtrSelectionState *selection;

@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -27,6 +28,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "actor_effect_task.h"
 #include "eff_field_color.h"
 #include "file.h"
 #include "eff_update_flags.h"
@@ -46,6 +48,8 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 extern f32 D_003B6DC0[4];
 
@@ -99,7 +103,6 @@ extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask();
 
 extern u32 D_00436AD4;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
@@ -112,13 +115,8 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
-
-extern s32 D_00435E0C;
 
 extern s32 sndFindPackedTrackLoadStatus(u32);
 
@@ -167,7 +165,6 @@ extern u32 btlTintTransitionHoldCount;
 
 
 extern BtlRuntimeTask *btlAllocTask(s32);
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -287,7 +284,6 @@ typedef struct {
     u16 objectId;
 } BattleEntryHeader;
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effBattleUpdate(BattleEffect *);
 
@@ -401,7 +397,7 @@ void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
 void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale);
 
-void func_001E3108(void *object, f32 *dst);
+void btlCopyUnitCurrentPosition(void *object, f32 *dst);
 
 extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
@@ -1707,7 +1703,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
             flags = unit->status.flags;
         } else {
             if (unit->lookupId != 1) {
-                func_001E3108(unit, vectors.position);
+                btlCopyUnitCurrentPosition(unit, vectors.position);
                 vectors.position[2] = unit->position[2] - 45.0f;
                 btlSetUnitPosition(unit, vectors.position);
             }
@@ -2498,7 +2494,7 @@ void btlAdvanceActorCameraPreset(BtlLinkedCommand *action) {
         action->flags &= ~1;
         action->flags &= ~0x80000;
     } else {
-        func_001E3108(user, action->translation);
+        btlCopyUnitCurrentPosition(user, action->translation);
         btlCopyUnitRotationQuaternion(user, action->rotation);
     }
 
@@ -4681,14 +4677,6 @@ BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *s
     return task;
 }
 
-typedef struct ActorEffectTaskArgs {
-    SoundResourceNode *source;
-    BattleEffect *effect;
-    ActorEffectOwner owner;
-    u32 duration;
-    s32 counter;
-} ActorEffectTaskArgs;
-
 void sndStartEffectTask(ActorEffectTaskArgs *args) {
     SoundResourceNode *source;
     BtlUnit *unit;
@@ -5604,7 +5592,7 @@ void btlSelectSceneAudioTrack(s32 soundIndex, s32 sceneIndex) {
     s32 work = (s32)(u32)btlGetRuntime();
     u32 v = 0;
     if (soundIndex != 0) {
-        v = *(u16 *)(D_00435E0C + soundIndex * 0x190 + 4);
+        v = D_00435E0C[soundIndex].opaque04[0];
     }
     if (datBattleSceneRecords[sceneIndex].unk24 != 0) {
         v = datBattleSceneRecords[sceneIndex].unk24;

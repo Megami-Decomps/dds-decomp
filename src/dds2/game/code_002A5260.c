@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -15,6 +16,7 @@
 #include "mnu_list.h"
 #include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_fade.h"
 
 
 /* Title menu's selected page, sequence timers and draw-task state. */
@@ -940,7 +942,6 @@ typedef struct StaffImageTiming {
     s32 holdFrames;
     s32 fadeOutStep;
 } StaffImageTiming;
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 s32 mnuStaffImageProc(KwlnTask *task) {
@@ -1024,9 +1025,7 @@ s32 mnuStaffImageProc(KwlnTask *task) {
     return 1;
 }
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 void mnuUpdateStaffRollStreamState(void)
 {
@@ -1061,16 +1060,7 @@ extern s32 func_002A6580(KwlnTask *);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
 
-typedef struct StaffImage {
-    s32 startFrame;
-    s32 movieIndex;
-    s32 x;
-    s32 y;
-    s32 width;
-    s32 height;
-} StaffImage;
-
-extern StaffImage D_003E4A80[19];
+extern MnuStaffImageRecord D_003E4A80[19];
 extern s32 D_00437AB4;
 extern s32 mnuCheckMovieDecoderStatus(void);
 

@@ -44,6 +44,8 @@
 #include "file_request_api.h"
 #include "dat_affinity.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
@@ -148,7 +150,6 @@ extern void btlDestroyUnit(u8 *);
 
 extern void func_001D4E60(BtlUnit *, BtlUnit *);
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern s32 btlSetActorEffectParameter();
 
@@ -3466,7 +3467,6 @@ s32 btlFormatUnitBedName(BtlUnit *actor, char *filename) {
 
 extern u8 D_0037E110[];
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3BA8);
 
@@ -3641,7 +3641,6 @@ void *btlScheduleThresholdTask(u8 *owner, u32 threshold) {
     return task;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     BtlUnit *unit = args->unit;
@@ -5834,7 +5833,6 @@ void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
     object->fov = fovRadians;
 }
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 

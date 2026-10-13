@@ -1,4 +1,6 @@
 #include "fld_area_work.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "eff_random.h"
@@ -163,27 +165,6 @@ extern s32 btlRollAiBucket(void);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
-
-typedef struct BattleAdjustmentEntry {
-    u16 sceneIndex;
-    u16 weight;
-    s8 value;
-    u8 unk05;
-} BattleAdjustmentEntry;
-
-typedef struct BattleAdjustmentGroup {
-    s32 interval;
-    BattleAdjustmentEntry entries[20];
-} BattleAdjustmentGroup;
-
-typedef struct BattleAdjustmentRecord {
-    u8 pad00[8];
-    u32 conditions[3];
-    u8 variantCodes[8];
-    BattleAdjustmentGroup groups[3];
-} BattleAdjustmentRecord;
-
-extern BattleAdjustmentRecord *D_00435E0C;
 
 extern u32 effMiscRandMod(void *, u32);
 
@@ -4181,8 +4162,6 @@ typedef char BtlTutorialDialogWorkSize[(sizeof(BtlTutorialDialogWork) == 0x18) ?
 extern const BattlePanelColors D_00416650;
 extern u8 *D_00435E64;
 extern u32 btlGetActiveUnitId(void);
-extern s32 dspStartEntry(s32);
-extern s32 evtGetMessageWindowControlState(void);
 extern void func_0026C900(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
@@ -4291,7 +4270,6 @@ dialog_active:
     return 0;
 }
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *handle) {
     u8 *work = (u8 *)btlGetRuntime();
@@ -4305,15 +4283,13 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416680);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C0630);
 
-extern s32 evtGetMessageWindowControlState(void);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern void func_0026C900(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 extern u64 btlStartTask(void *);
-extern void func_001E3108(void *, f32 *);
+extern void btlCopyUnitCurrentPosition(void *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, void *);
 extern void btlSetCommandPanelFadeMode(s8, s32);
-extern s32 dspStartEntry(s32);
 extern s32 dspCloseChannel(void);
 extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
@@ -4451,7 +4427,7 @@ s32 btlUpdateMajinTutorialTask(KwlnTask *task) {
                     break;
                 }
                 if (handled) {
-                    func_001E3108(unit, battle->cameraCommand.translation);
+                    btlCopyUnitCurrentPosition(unit, battle->cameraCommand.translation);
                     btlCopyUnitRotationQuaternion(unit, battle->cameraCommand.rotation);
                 }
             }
@@ -7197,7 +7173,6 @@ extern void mdlFlagSet(s32);
 extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 dspCloseChannel(void);
 extern void evtCreateMessageWindowIfMissing(void *);
-extern s32 dspStartEntry(s32);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void *memset(void *, s32, u32);

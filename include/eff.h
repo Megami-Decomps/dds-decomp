@@ -191,6 +191,8 @@ typedef struct {
     EffResourceRectDrawParams draw;
 } EffResourceRectParams; /* 0x24 */
 
+void effCopyTexturedSquareParameters(EffResourceRectParams *parameters);
+
 typedef struct {
     EffResourceRectParams params;
     SdfTex *texture;

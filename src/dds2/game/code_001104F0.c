@@ -9,7 +9,7 @@ struct WorldIndexNode;
 
 extern u32 fldLoadAreaRoomResources(const char *);
 
-extern u32 func_0012AC90(u32, u32, u32, u32,
+extern u32 fldLoadAreaRoomResourcesFromRequest(u32, u32, u32, u32,
                         const SdfTextureOffsetListHeader *, u32);
 
 
@@ -339,6 +339,6 @@ void dds3AttachConstructedResourceToWorldObject(EffWorldNode *object, u32 arg1, 
     u32 handle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = func_0012AC90(arg1, arg2, arg3, arg4, textureOffsets, arg6);
+    handle = fldLoadAreaRoomResourcesFromRequest(arg1, arg2, arg3, arg4, textureOffsets, arg6);
     data->indexedHandle = handle;
 }

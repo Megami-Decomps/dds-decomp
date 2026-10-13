@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_lifecycle.h"
 #include "btl_stage_task_cleanup.h"
@@ -93,8 +94,6 @@ extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
 extern void *dds3GetWorldSecondaryObject(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
 
 s32 mdlAdvanceViewerPackageTask(KwlnTask *task);
 
@@ -145,11 +144,11 @@ void mdlCreateViewerPackageTask(void) {
     kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
-u8 func_00316ED0(void) {
+u8 mdlViewerPackageTaskExists(void) {
     return kwlnTaskGetTaskByName(D_0042D4D0) != 0;
 }
 
-u32 func_00316EF8(void) {
+u32 mdlStopViewerPackageTask(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
     func_00316FA8(D_0043891C);
@@ -663,7 +662,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
 
 extern u8 D_0037F510[2][2][16];
 extern void func_0031AEB8(MnuShootingWork *);
-extern s32 func_0031AF68(MnuShootingWork *);
+extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
 extern void mnuVisitActiveRecords(s32);
@@ -680,10 +679,10 @@ extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void mnuUpdateShootingCameraVectors(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
 extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
-extern void func_0031A7F8(MnuShootingWork *);
+extern void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *);
 extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
 void func_0031A090(void);
-extern void func_0031A730(MnuShootingWork *);
+extern void mnuClampPendingScoreToPeak(MnuShootingWork *);
 extern void dds3UpdateSoundSlots(void);
 
 s32 mnuUpdateShootingWork(MnuShootingWork *work) {
@@ -702,7 +701,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         func_0031AEB8(work);
     }
     if (work->unk70Bit0) {
-        result = func_0031AF68(work);
+        result = mnuPollPauseChoiceInput(work);
         switch (result) {
         case -1:
             break;
@@ -781,11 +780,11 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->unkB0 = 2;
         work->unk94 = 0;
         work->flags |= 4;
-        func_0031A7F8(work);
+        mnuResetCurrentAndPeakScoresToPending(work);
         work->progress = 0;
         work->completed = 0;
         work->currentScore = 0;
-        func_0031E8E8(&work->gauge, 0);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         work->round = 0;
         return 1;
     case 2:
@@ -798,12 +797,12 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         work->progress = 0;
         work->completed = 0;
         work->unk94 = mode;
-        func_0031E8E8(&work->gauge, 0);
+        itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         mnuClearRuntimeRecordStorage(func_00321ED8());
         func_0031A090();
         if (work->round >= 3) {
             work->state = -1;
-            func_0031A730(work);
+            mnuClampPendingScoreToPeak(work);
         }
         return 1;
     }
@@ -843,7 +842,7 @@ extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
 struct SdfPoolNode;
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
-extern void func_0031B080(MnuShootingWork *work);
+extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
 extern struct SdfPoolNode *D_00380788[13][4];
 
@@ -978,7 +977,7 @@ s32 func_00318C00(MnuShootingWork *work) {
 
     itfDrawFullExtentWorkPanels(work);
     itfDispatchObjectFadeSequenceMode(work);
-    func_0031B080(work);
+    mnuUpdateAndDrawPauseChoiceFade(work);
     return 0;
 }
 

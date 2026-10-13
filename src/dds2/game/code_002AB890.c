@@ -1,3 +1,4 @@
+#include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -472,7 +473,6 @@ extern char D_003E7488[];
 extern char D_003E74A4[];
 extern char D_003E74C0[];
 extern char D_003E7418[];
-extern s32 evtGetMessageWindowControlState(void);
 extern void mnuSetStateValue(u32 *, u32);
 extern char D_003E7434[];
 extern char D_003E74DC[];

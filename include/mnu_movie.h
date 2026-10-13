@@ -39,4 +39,27 @@ typedef char MnuStaffTextRow_size_must_be_0x10[
 extern MnuStaffTextRow D_00379F70[256];
 #endif
 
+/* Static staff-image timing/rectangle rows. DDS1 also stores the image-bank
+ * index consumed when a row starts; DDS2's table has only the six common
+ * words. */
+typedef struct MnuStaffImageRecord {
+    s32 startFrame;
+    s32 movieIndex;
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+#ifdef VERSION_DDS1
+    u32 imageIndex;
+#endif
+} MnuStaffImageRecord;
+
+#ifdef VERSION_DDS1
+typedef char MnuStaffImageRecord_size_must_be_0x1C[
+    (sizeof(MnuStaffImageRecord) == 0x1C) ? 1 : -1];
+#else
+typedef char MnuStaffImageRecord_size_must_be_0x18[
+    (sizeof(MnuStaffImageRecord) == 0x18) ? 1 : -1];
+#endif
+
 #endif /* MNU_MOVIE_H */

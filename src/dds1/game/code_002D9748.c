@@ -15,6 +15,7 @@
 #include "sdf_draw.h"
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
+#include "sdf_draw_packet_groups.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -92,31 +93,6 @@ extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
 extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 
-/* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
- * Each blend builder fills the 0x40-byte packet area after the list head. */
-typedef struct SdfDrawPacketGroup {
-    SdfListHead list;
-    union {
-        SdfGsBlendPacket blend;
-        SdfDmaTagHeader dma;
-    } packet;
-} SdfDrawPacketGroup;
-
-typedef struct SdfDrawPacketGroups {
-    SdfDrawPacketGroup groups[4];
-    SdfListHead syncList;
-    u64 unk1A0;
-    u64 unk1A8;
-} SdfDrawPacketGroups;
-
-typedef char SdfDrawPacketGroup_size_must_be_0x60[
-    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
-typedef char SdfDrawPacketGroup_packet_at_0x20[
-    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
-typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
-    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
-
-
 typedef struct SdfPacketOwner {
     u8 pad00[0x10];
     void (*sync)(struct SdfPacketOwner *, void *);
@@ -192,9 +168,9 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
-    ctx->unk1A0 = 0;
-    ctx->unk1A8 = 0x13000000;
-    sdfAppendPacket(&ctx->syncList, (u32)&ctx->unk1A0);
+    ctx->syncPacketWords[0] = 0;
+    ctx->syncPacketWords[1] = 0x13000000;
+    sdfAppendPacket(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
@@ -533,31 +509,31 @@ void sdfAppendAssetToResourceList(DevRequest *list, SdfAsset *asset) {
 
 /* Store the first primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordFirst(SdfAsset *asset, u32 value) {
-    asset->unk10 = value;
+    asset->primaryStateWordFirst = value;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the second primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordSecond(SdfAsset *asset, u32 value) {
-    asset->unk14 = value;
+    asset->primaryStateWordSecond = value;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the third primary-state word and dirty both draw entries. */
 void sdfSetPrimaryStateWordThird(SdfAsset *asset, u32 value) {
-    asset->unk20 = value;
+    asset->primaryStateWordThird = value;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store raw bits in the fourth primary-state word, without float conversion. */
 void sdfSetPrimaryStateWordFourth(SdfAsset *asset, u32 bits) {
-    asset->unk28 = bits;
+    asset->primaryStateWordFourth = bits;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
 /* Store the primary-state float and dirty both draw entries. */
 void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
-    asset->unk1C = value;
+    asset->primaryStateFloat = value;
     asset->dirtyFlags = asset->dirtyFlags | SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
@@ -689,8 +665,8 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     }
     asset->scalarPairFirst = 0;
     asset->scalarPairSecond = 0;
-    asset->unk10 = 0x80808080;
-    asset->unk14 = 0x80808080;
+    asset->primaryStateWordFirst = 0x80808080;
+    asset->primaryStateWordSecond = 0x80808080;
     asset->secondaryColor = 0x80808080;
     return asset;
 }
@@ -790,15 +766,15 @@ void *sdfInitAssetDrawEntryReferenceNode(SdfAsset *asset, SdfDmaTagHeader *tag, 
 /* Copy primary words and optional GS texture state; only mode one zeros its state word. */
 void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     SdfTex *texture;
-    entry->unk04 = asset->unk10;
-    entry->unk1C = asset->unk1C;
-    entry->unk08 = asset->unk14;
+    entry->unk04 = asset->primaryStateWordFirst;
+    entry->unk1C = asset->primaryStateFloat;
+    entry->unk08 = asset->primaryStateWordSecond;
     if (sdfForcedAssetTextureMode == SDF_FORCED_TEXTURE_ZERO_STATE_MODE) {
         entry->unk10 = 0;
     } else {
-        entry->unk10 = asset->unk20;
+        entry->unk10 = asset->primaryStateWordThird;
     }
-    entry->unk14 = asset->unk28;
+    entry->unk14 = asset->primaryStateWordFourth;
     texture = asset->texture;
     if (texture != NULL) {
         entry->primaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
@@ -966,14 +942,14 @@ void sdfCopyAssetParameterState(SdfAsset *destination, SdfAsset *source) {
     SdfSubParam *subParameters;
 
     destination->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
-    destination->unk10 = source->unk10;
-    destination->unk14 = source->unk14;
-    destination->unk1C = source->unk1C;
+    destination->primaryStateWordFirst = source->primaryStateWordFirst;
+    destination->primaryStateWordSecond = source->primaryStateWordSecond;
+    destination->primaryStateFloat = source->primaryStateFloat;
     destination->secondaryColor = source->secondaryColor;
     destination->unk04 = source->unk04;
     destination->texture = source->texture;
-    destination->unk20 = source->unk20;
-    destination->unk28 = source->unk28;
+    destination->primaryStateWordThird = source->primaryStateWordThird;
+    destination->primaryStateWordFourth = source->primaryStateWordFourth;
     subParameters = source->primarySubParam;
     if (subParameters != NULL) {
         sdfEnsurePrimaryTextSubParam(destination)->scalar = subParameters->scalar;

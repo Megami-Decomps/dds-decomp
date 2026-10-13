@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "fr_font.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -44,7 +45,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 
 
 extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern void evtCreateEventScriptProcess(s32);
 extern void evtClearActiveFlag(s32);
@@ -134,7 +134,6 @@ typedef struct EffectPair {
 
 extern EffectPair D_00437878[];
 
-extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 fldGetModeFrameRecordIndex(s32);
 
@@ -1819,7 +1818,6 @@ u32 func_00269C48(void) {
 }
 
 extern s32 mnuOpenTerminalPopupForAction(s32 action, s32 context);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];
@@ -1915,7 +1913,6 @@ s32 evtBSetupDispatchSync(KwlnTask *request) {
 }
 
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 s32 evtClearDispatchVisualFlag(KwlnTask *task) {
     MenuSlotState *state = (MenuSlotState *)kwlnTaskGetUserValue(task);
@@ -1944,7 +1941,7 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
-extern void func_002CE208(s32 mode);
+extern void fileStartMemoryCardMenuForMode(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
@@ -1961,7 +1958,7 @@ s32 mnuOpenFileMenuFromTerminal(KwlnTask *request) {
     if (state->fileTaskActive == 0 && sdfCheckPendingWorkWithInterrupts() == 0) {
         mnuReleaseResourceGroupTextureHandles((u32)state);
         fileSetPreviewLocation(state->reduced, state->slot);
-        func_002CE208(0);
+        fileStartMemoryCardMenuForMode(0);
         state->fileTaskActive = 1;
     }
     if (state->dispatchStatus == 0 && fileMenuTaskExists() == 0 &&

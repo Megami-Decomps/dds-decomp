@@ -1,12 +1,15 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "mnu_mantra.h"
 #include "prf_requirement.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 extern s32 mtrChkMantraCompleteMaster(DatPartyRecord *);
 extern s32 prfAreAllRequiredProfileFlagsSet(DatPartyRecord *);
@@ -17,9 +20,6 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
 
 typedef struct MantraPanelPool MantraPanelPool;
 extern void mnuQueueNextUnitPanelSelection(struct MantraDrawPool *pool);
@@ -345,7 +345,6 @@ extern s32 func_0028E858(MnuStatusResource *object);
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 
 extern void evtStageTestInit(s32);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 const char D_00426360[16] = "AT3 LOAD!!\n";
 
@@ -636,9 +635,7 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
 
 extern DspUnitName *D_00435E48;
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void mnuActivateMantraNode(MnuStatusResource *, u16);
 extern s32 mnuFindMantraSourceCandidate(MnuStatusResource *, MantraMenuSrc *);

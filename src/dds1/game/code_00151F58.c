@@ -2,6 +2,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_quaternion.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf.h"
@@ -597,7 +598,6 @@ typedef char EffCompositeGsDescriptor_size_must_be_0x68[
     (sizeof(EffCompositeGsDescriptor) == 0x68) ? 1 : -1];
 
 extern u8 kwlnFrameDrawPacketRecords[];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void sdfBuildMaskedFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void sdfBuildFrameRegisterReference(s32, SdfDmaReferenceChainPacket *, s32);
 extern void func_002E2A00(u8 *, const f32 *, u32, u32,

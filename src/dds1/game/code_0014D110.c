@@ -218,8 +218,8 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
@@ -252,8 +252,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         scrSetIntegerReturnValue(0);
         return 1;
     }
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case 1:
@@ -270,8 +270,8 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
 s32 fldCmdReadSceneStatus(void) {
     s32 result;
 
-    fldSetInputPanelStateWord1(scrReadIntParameter(0));
-    fldSetInputPanelStateWord2(1);
+    fldSetTitleBannerChoice(scrReadIntParameter(0));
+    fldSetTitleBannerPending(1);
     result = fldResolvePendingTitleBanner();
     if (result == -1) {
         scrSetIntegerReturnValue(-1);

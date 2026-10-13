@@ -1,3 +1,4 @@
+#include "eff_packet_params.h"
 #include "fld.h"
 #include "btl_command.h"
 #include "sdf_quaternion.h"
@@ -25,6 +26,7 @@
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "file_request_api.h"
+#include "sdf_vu_matrix.h"
 
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -43,6 +45,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_billboard_work.h"
 #include "eff_update_flags.h"
 #include "eff_resource_list.h"
 #include "eff_resource_slots.h"
@@ -56,21 +59,6 @@
 
 extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
-    u32 unk08;
-    u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    u32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
 
 typedef struct EffGsPacket {
     u64 dmaTag;
@@ -98,7 +86,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 typedef struct EffectStateSnapshot {
     s128 vectors[4];
     f32 position[4]; /* 0x40: copied to the debug camera position and follow offset. */
-    s128 unused50;
+    f32 quat[4]; /* 0x50: camera orientation quaternion. */
     u8 pad60[8];
     u32 flags; /* 0x68: transform flags tested by the camera diagnostic. */
     u8 pad6C[0x14];
@@ -342,7 +330,6 @@ typedef struct BillCellDrawWork {
 } BillCellDrawWork;
 
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effSetCurveEmitterStartPosition(s32, void *);
 
@@ -1590,21 +1577,6 @@ EffKindAssetHolder *effRetainKindSecondaryAsset(EffKindAssetHolder *work) {
     work->references = work->references + 1;
     return work;
 }
-
-/* Native 0x68-byte billboard work, shared by construction, cloning and beam update.
- * The copied 0x38-byte configuration begins with height/width scales at 0x2C.
- * Keep natural alignment: both leading vectors are transferred as VU qwords. */
-typedef struct EffBillboardWork {
-    f32 position[4]; /* 0x00 */
-    f32 rotation[4]; /* 0x10: quaternion */
-    f32 scale;      /* 0x20 */
-    u32 color;      /* 0x24 */
-    s32 frame;      /* 0x28 */
-    f32 heightScale; /* 0x2C */
-    f32 widthScale;  /* 0x30 */
-    u8 unk34[0x30];  /* Remaining copied configuration, not alignment padding. */
-    BillObj *billboard; /* 0x64: owned billboard handle. */
-} EffBillboardWork;
 
 u8 *effCreateBillboardWork(u8 *source) {
     u8 *work = (u8 *)sdfAllocSizeClassBlock(0x68);
@@ -3348,7 +3320,7 @@ setTexture:
     D_004582B0.colors = colors;
     D_004582B0.positions = positions;
     D_004582B0.texcoords = texcoords;
-    D_004582B0.unk08 = color;
+    D_004582B0.color = color;
 
     switch (kind) {
     case 0:
@@ -4141,7 +4113,7 @@ void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_004582E0[0].colors = (u32 *)set->tail;
         D_004582E0[0].positions = (u128 *)set->buffer;
-        D_004582E0[0].unk08 = set->color;
+        D_004582E0[0].color = set->color;
         D_004582E0[0].parameterCount = 12;
         D_004582E0[0].vertexCount = 12;
         D_004582E0[0].parameters = D_003E9BE0;
@@ -5004,7 +4976,197 @@ void effFreeIndexedEntries(EffClassWork *work) {
     sdfReleaseChipBlock(table);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB058);
+extern f32 sdfViewTargetVector[4];
+extern f32 sdfViewEyeVector[4];
+extern f32 func_003532D0(f32);
+
+/* Advance radial five-point wave strips from the class orientation. */
+void func_002EB058(EffClassWork *work) {
+    f32 offsets[5];
+    f32 widths[5];
+    f32 direction[4];
+    f32 view[4];
+    f32 axis[4];
+    EffBillPointConfig *config = work->payload;
+    EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
+    u32 progress = config->timed.time.progress;
+    s32 count;
+    s32 remaining;
+    s32 respawnDelay;
+    f32 layers;
+    f32 step;
+    f32 waveStep;
+    f32 amplitude;
+    f32 bendScale;
+    f32 phase;
+    f32 speed;
+    f32 speedJitter;
+
+    if (progress < work->frame && progress != 0) {
+        return;
+    }
+    count = config->timed.count;
+    respawnDelay = config->respawnDelay;
+    speed = config->speed;
+    speedJitter = config->speedJitter;
+    layers = (f32)(u32)config->layers;
+    step = config->unk84 / layers;
+    waveStep = ((f32)config->periods * 3.14159265f) / layers;
+    amplitude = config->amplitude;
+    if (step <= 0.0f) {
+        return;
+    }
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_LOAD_VF(vf11, sdfViewEyeVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, view);
+    VU0_LOAD_VF(vf10, work->vectors.orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, D_003E9140);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF(vf10, direction);
+    bendScale = 0.26179933547973633f;
+    widths[0] = 0;
+    widths[1] = config->edgeWidth;
+    widths[2] = widths[1] + config->halfWidth;
+    widths[3] = widths[2] + config->halfWidth;
+    widths[4] = widths[3] + config->edgeWidth;
+    if (count > 0) {
+        remaining = count;
+        for (; remaining != 0; remaining--, entry++) {
+            if (entry->key == -1) {
+                entry->color = 0xA0808080;
+            } else {
+                f32 r = effMiscRandUnitFloat(effSharedRandomState);
+                f32 bendStep = speed * (r * speedJitter + (1.0f - speedJitter));
+                f32 bend;
+
+                phase = entry->angle;
+                bendStep /= layers;
+                if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                    bendStep = -bendStep;
+                }
+                bend = bendStep;
+                if (entry->color & 0xFF000000) {
+                    entry->color += 0xE0000000;
+                } else {
+                    entry->key = -1;
+                    if (respawnDelay > 0) {
+                        entry->key -= (u32)effMiscRand((struct EffRandState *)effSharedRandomState) % (u32)respawnDelay;
+                    }
+                    continue;
+                }
+                {
+                    EffPointSet *set = entry->set;
+                    f32 *vertices = (f32 *)set->buffer;
+                    s32 rows = set->rows / 5;
+                    f32 stepSquared;
+                    f32 waveAngle;
+                    f32 waveHeight;
+                    f32 waveRadius;
+                    f32 oldSlope;
+                    f32 inner;
+                    f32 width;
+                    f32 newHeight;
+                    f32 delta;
+                    f32 segmentLength;
+                    s32 j;
+                    s32 k;
+
+                    if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                        amplitude = -amplitude;
+                    }
+                    stepSquared = step * step;
+                    waveAngle = effMiscRandUnitFloat(effSharedRandomState) * 3.14159265f;
+                    waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                    waveHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    waveAngle += waveStep;
+                    newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                    delta = newHeight - waveHeight;
+                    waveHeight = newHeight;
+                    segmentLength = fsqrtf(delta * delta + stepSquared);
+                    oldSlope = func_003532D0(delta / segmentLength) + phase;
+                    inner = config->halfWidth;
+                    width = inner + config->edgeWidth;
+                    VU0_LOAD_VF(vf10, direction);
+                    VU0_LOAD_VF(vf11, view);
+                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    VU0_NORMALIZE_VF10();
+                    VU0_MOVE_VF(vf12, vf10);
+                    VU0_LOAD_VF(vf11, direction);
+                    VU0_CROSS_XYZ(vf10, vf10, vf11);
+                    VU0_STORE_VF(vf10, axis);
+                    VU0_MOVE_VF(vf10, vf12);
+                    VU0_MOVE_VF(vf11, vf12);
+                    VU0_SCALE_VF(vf10, width);
+                    VU0_STORE_VF(vf10, vertices);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_STORE_VF(vf10, vertices + 16);
+                    VU0_SCALE_VF(vf11, inner);
+                    VU0_STORE_VF(vf11, vertices + 4);
+                    VU0_NEGATE_XYZ(vf11);
+                    VU0_STORE_VF(vf11, vertices + 12);
+                    VU0_STORE_VF(vf0, vertices + 8);
+                    VU0_MOVE_VF(vf11, vf12);
+                    VU0_SCALE_VF(vf11, waveHeight);
+                    for (j = 0; j < 5; j++) {
+                        VU0_LOAD_VF(vf10, vertices + j * 4);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF(vf10, vertices + j * 4);
+                        offsets[j] = 0;
+                    }
+                    vertices += 20;
+                    for (k = 1; k < rows; k++) {
+                        f32 tilt = bendScale * (effMiscRandUnitFloat(effSharedRandomState) * 0.75 + 0.25);
+                        f32 slope;
+                        f32 tangentScale;
+                        f32 sine;
+
+                        if (effMiscRand((struct EffRandState *)effSharedRandomState) & 1) {
+                            bendScale = -bendScale;
+                        }
+                        waveAngle += waveStep;
+                        if (waveAngle >= 3.14159265f) {
+                            waveAngle -= 3.14159265f;
+                            amplitude = -amplitude;
+                            waveRadius = amplitude * (effMiscRandUnitFloat(effSharedRandomState) * 0.9f + (1.0f - 0.9f));
+                        }
+                        newHeight = sdfSinPoly(waveAngle) * waveRadius;
+                        delta = newHeight - waveHeight;
+                        segmentLength = fsqrtf(delta * delta + stepSquared);
+                        slope = func_003532D0(delta / segmentLength) + (tilt + bend);
+                        sdfBuildVuRotationFromAxisAngle(oldSlope, (const struct RwV3d *)axis);
+                        slope += phase;
+                        VU0_LOAD_VF(vf10, direction);
+                        VU0_ROTATE_VEC(vf10, vf10);
+                        delta = (slope - oldSlope) * 0.5f;
+                        oldSlope = slope;
+                        waveHeight = newHeight;
+                        bend += bendStep;
+                        sine = sdfSinPoly(delta);
+                        tangentScale = sine / sdfEvaluateCosineViaSinePhaseShift(delta);
+                        VU0_MOVE_VF(vf12, vf10);
+                        for (j = 0; j < 5; j++) {
+                            f32 extra = widths[j] * tangentScale;
+                            f32 length;
+                            offsets[j] += extra;
+                            VU0_MOVE_VF(vf11, vf12);
+                            VU0_LOAD_VF(vf10, vertices + j * 4 - 20);
+                            length = segmentLength + offsets[j];
+                            VU0_SCALE_VF(vf11, length);
+                            VU0_ADD(vf10, vf10, vf11);
+                            VU0_STORE_VF(vf10, vertices + j * 4);
+                            offsets[j] = extra;
+                        }
+                        vertices += 20;
+                    }
+                }
+            }
+            entry->key = (s32)((u32)entry->key + 1);
+        }
+    }
+}
+
 
 typedef struct Matrix4 Matrix4;
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
@@ -5926,7 +6088,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_004583A0[0].colors = (u32 *)set->tail;
         D_004583A0[0].positions = (u128 *)set->buffer;
-        D_004583A0[0].unk08 = set->color;
+        D_004583A0[0].color = set->color;
         D_004583A0[0].parameterCount = 0x10;
         D_004583A0[0].vertexCount = 0xF;
         D_004583A0[0].parameters = D_003E9D80;
@@ -7881,7 +8043,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         remaining = set->rows;
         D_00458430[0].colors = (u32 *)set->tail;
         D_00458430[0].positions = (u128 *)set->buffer;
-        D_00458430[0].unk08 = set->color;
+        D_00458430[0].color = set->color;
         D_00458430[0].parameterCount = 0x10;
         D_00458430[0].vertexCount = 0xF;
         D_00458430[0].parameters = (u32 *)D_003E9C40;
@@ -9762,7 +9924,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blendedColor[0] = packed;
-    D_004584C0.unk08 = blendedColor[0];
+    D_004584C0.color = blendedColor[0];
     billSetAnimationFrameForImmediateAdvance(resource->billboard, frame);
     billCopyCurrentRecordToSnapshot(resource->billboard, &snapshot);
     sdfSetAssetPrimaryTextureAddress(resource->asset, snapshot.texture);
@@ -10562,10 +10724,10 @@ void effApplyBattleCameraToObject(work)
 
     effComputeBattleCameraPositionVU(D_0045C270);
     VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[0]);
-    fileJobInvokePositionCallback(work, &rotation[0]);
+    fileJobInvokePositionCallback(work, (f32 *)&rotation[0]);
     effMultiplyQuatWithFlag(D_0045C270);
     VU0_STORE_VF_UNCLOBBERED(vf10, &rotation[1]);
-    fileJobInvokeRotationCallback(work, &rotation[1]);
+    fileJobInvokeRotationCallback(work, (f32 *)&rotation[1]);
     fileJobInvokeScaleCallback(work, ((FileJob *)D_0045C270)->scale * effFileQueue->scaleMultiplier);
     fileDispatchJobTypeCallback(work, ((FileJob *)D_0045C270)->color);
 }
@@ -11987,7 +12149,96 @@ s32 effResetCameraSnapshotSelection(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002FF8A0);
+extern EffCameraMenuState D_003FFD08;
+extern void func_0020D200(f32 *, f32, f32, u32, f32 (*)[4]);
+
+/* Private scratch feeds only VU loads or empty retail debug providers. */
+typedef struct EffectCameraDebugScratch {
+    s128 basePosition;
+    s128 segmentStart;
+    s128 segmentEnd;
+    s128 rotationMatrix[4];
+} EffectCameraDebugScratch;
+
+u32 func_002FF8A0(EffectStateSnapshot *state, s8 useBattlePosition) {
+    EffectCameraDebugScratch scratch;
+    u32 result = 1;
+
+    if ((D_003FFD08.unk10 & 2) == 0) {
+        if (D_0040B7DB[0] < 0) {
+            result = 0;
+        }
+    }
+
+    PCP_COPY_VECTOR(D_0045C300, state->quat);
+    if (useBattlePosition != 0) {
+        effComputeBattleCameraPositionVU((u8 *)state);
+    } else {
+        VU0_LOAD_VF(vf10, state->position);
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.basePosition);
+    VU0_STORE_VF(vf10, D_0045C2F0);
+
+    func_0020D260((u32)&D_003FFD08);
+    func_0020D228();
+    func_0020D270((u32)&D_003FFD08);
+    func_0020D230();
+    PCP_COPY_VECTOR(state->quat, D_0045C300);
+    if (D_003FFD08.unk10 & 8) {
+        result |= 2;
+    }
+    VU0_LOAD_VF(vf10, &scratch.basePosition);
+    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+
+    VU0_LOAD_VF(vf10, state->quat);
+    effMiscQuaternionToMatrixVU();
+    VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
+
+    VU0_LOAD_VF(vf10, &D_003E9140);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_SCALE_VF(vf10, 250.0f);
+    VU0_LOAD_VF(vf11, &scratch.segmentStart);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+
+    func_0020D200((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
+    btlDebugDrawPoint((f32 *)&scratch.segmentStart);
+
+    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    VU0_LOAD_VF(vf31, &scratch.basePosition);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(x, 100.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(x, -100.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    VU0_LOAD_VF(vf11, D_0045C1E0);
+    VU0_LOAD_MATRIX(scratch.rotationMatrix);
+    VU0_LOAD_VF(vf31, &scratch.basePosition);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(z, 25.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_SET_VF10_COMPONENT(z, -25.0f);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    return result;
+}
 
 u32 effLoadFileSlotAndPoll(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
@@ -12016,13 +12267,13 @@ s32 effRunWithStateBackup(void) {
     return result;
 }
 
-extern u32 func_002FF8A0(u8 *, s32);
+extern u32 func_002FF8A0(EffectStateSnapshot *, s8);
 
 u32 effProcessQueuedFileRecordAndPersistChanges(void) {
     FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
     u32 result;
     memcpy(D_0045C110, file, 0x90);
-    result = func_002FF8A0(D_0045C110, 1);
+    result = func_002FF8A0((EffectStateSnapshot *)D_0045C110, 1);
     memcpy(file, D_0045C110, 0x90);
     if (result & 1) {
         result |= 0x800000;
@@ -12510,7 +12761,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_003018C8);
 
 extern u8 D_00400068[];
 
-extern void func_003018C8(void *, s32, const void *, const void *);
+extern s32 func_003018C8(void *, s32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 void effEditPScaleTrack(s32 *work) {

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "mnu_title_stream.h"
+#include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
@@ -20,6 +22,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "evt_viewer_group_record.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 
@@ -37,8 +40,6 @@ void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
@@ -62,7 +63,6 @@ extern s32 D_003BBE94;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);
@@ -109,15 +109,6 @@ extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *displ
 
 
 /* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
-typedef struct EvtGroupRec {
-    u8 pad00[8];
-    s32 group;                 /* 0x8 */
-    s32 type;                  /* 0xC */
-    u8 pad10[0x10];
-} EvtGroupRec;
-
-
-
 /* Event viewer: name table at 0x20, entry list at 0x2030. */
 
 
@@ -458,7 +449,7 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer)
 
     if (viewer->windowContext != NULL) {
         for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
-            btlRemoveCurrentGroupedEntity(((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].type);
+            btlRemoveCurrentGroupedEntity(((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtViewerGroupRecord *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
 }
@@ -826,7 +817,7 @@ extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern void evtTransitionBgm(s32, s32);
 extern void sndStartReducedBgm(void);
 extern void sndStopReducedBgm(void);
-extern void func_002E8E00(void);
+extern void sndQueueNoPayloadCommand1A0(void);
 extern void kwlnFadeSetupFrames(s32, s32);
 extern s32 itfMesSelectTableItemText(s32, s32, s32);
 extern void itfMesBuildOptionList(s32, s32);
@@ -921,7 +912,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             sndStopReducedBgm();
             break;
         case 6:
-            func_002E8E00();
+            sndQueueNoPayloadCommand1A0();
             break;
         }
         break;
@@ -1028,8 +1019,6 @@ void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
@@ -1053,7 +1042,6 @@ extern s32 D_003BBE94;
 extern u32 kwlnDrawControlFlags;
 extern s8 D_0036876A[];
 extern u8 D_003BBE88[3];
-extern u32 kwlnGetDrawBufferIndex(void);
 extern void kwlnFadeSetColor(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, EvtRuntime *arg3);

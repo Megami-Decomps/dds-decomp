@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "kwln_draw_buffer.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
@@ -831,8 +832,6 @@ void itfDrawGradientTriangleVectors(const f32 *first, const f32 *second, const f
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
-
-extern s32 kwlnGetDrawBufferIndex(void);
 
 extern u8 kwlnFrameDrawPacketRecords[];
 

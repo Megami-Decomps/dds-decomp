@@ -255,7 +255,7 @@ void sndStartTrackAlternate(s32 trackId) {
     sndQueueCommandPacket(0x130, 0, &packet, 0x10);
 }
 
-void func_002E8DD0(u32 value) {
+void sndQueueSoundId(u32 value) {
     u32 packet[4];
 
     packet[0] = value;

@@ -1,6 +1,8 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -29,6 +31,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "actor_effect_task.h"
 #include "eff_field_color.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
@@ -45,7 +48,11 @@
 #include "dat_command.h"
 #include "file_request_api.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
 
+extern void sndQueueNoPayloadCommand1A0(void);
+extern void sndQueueNoPayloadCommand210(void);
 extern f32 D_00359EE0[4];
 
 extern s32 func_003014F0(char *dst, const char *format, ...);
@@ -206,7 +213,6 @@ extern u32 sndFinishEarringPlayback(void);
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
@@ -222,7 +228,6 @@ extern u8 D_0035F5D0[];
 
 extern char D_003BB6B0[];
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
@@ -264,11 +269,9 @@ extern void btlCreateRainEffect(u32, u32);
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 
-extern void kwlnFadeStartIn(s32);
 
 extern s32 btlAreWorkBuffersReady(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *entry);
 
@@ -321,9 +324,7 @@ extern s32 btlAimHorizontalDirectionClampedVU(void *, void *, f32);
 
 extern u8 D_0037E110[];
 
-extern void effMiscQuaternionToMatrixVU(void);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effBattleUpdate(BattleEffect *);
 
@@ -331,7 +332,6 @@ extern f32 *D_00324770[];
 
 extern u8 kwlnDefaultColorVector[];
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -5802,14 +5802,6 @@ BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *s
     return task;
 }
 
-typedef struct ActorEffectTaskArgs {
-    SoundResourceNode *source;
-    BattleEffect *effect;
-    ActorEffectOwner owner;
-    u32 duration;
-    s32 counter;
-} ActorEffectTaskArgs;
-
 void sndStartEffectTask(ActorEffectTaskArgs *args) {
     SoundResourceNode *source;
     BtlUnit *unit;
@@ -6675,9 +6667,7 @@ void sndSetStationedSeHighVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
-extern void mnuResetTitleStreamLocked(void);
 
 extern s32 D_0035F998[];
 
@@ -6732,8 +6722,8 @@ void btlAdvanceTitleState(void) {
 
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
-    func_002E8E28();
-    func_002E8E00();
+    sndQueueNoPayloadCommand210();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void btlAdvanceTitleStateTask(void) {

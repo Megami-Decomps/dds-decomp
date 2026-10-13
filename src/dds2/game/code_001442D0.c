@@ -1,8 +1,11 @@
 #include "fld_label_rows.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -26,23 +29,22 @@
 #include "eff_node.h"
 #include "eff_node_descriptor.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "sdf_textured_rect.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "kwln_fade.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
-extern u32 evtFinishMessageWindowAndNotify(void);
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
-extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
-extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
@@ -66,8 +68,6 @@ extern f32 sdfViewTargetVector[4];
 extern u8 D_00435C48[2][2];
 extern f32 sdfViewUpVector[4];
 extern u32 fldGetSceneReadyFlag(void);
-extern void kwlnFadeStartOut(s32);
-extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 typedef struct EffNode EffNode;
 
@@ -297,7 +297,7 @@ extern void sndReleaseTrackHandle(s32 arg0);
 
 extern s32 fldCurrentBgmId[];
 
-extern void func_00341C78(u32);
+extern void sndQueueSoundId(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
@@ -343,7 +343,6 @@ extern u8 D_003A9EB0[];
 
 extern void evtCreateMessageWindowIfMissing(void *arg0);
 
-extern s32 dspStartEntry(s32 arg0);
 
 extern void fldResetPlayerSceneObjectState(void);
 
@@ -518,7 +517,6 @@ extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
-extern s32 dds3GetWorldObject(void);
 
 extern int strcmp(const char *, const char *);
 
@@ -532,7 +530,6 @@ extern u8 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern u32 fldInputPanelTaskHandle;
 extern void fldUpdateCameraHeadingFromXY(void);
-extern void kwlnFadeStartIn(s32 duration);
 extern u32 D_00389988[];
 extern u8 D_0037F510[2][2][16];
 extern s32 D_004361D0;
@@ -701,7 +698,7 @@ void fldPlayPendingSounds(void) {
     for (i = 0; i < fldPendingSoundCount; i++) {
         if (fldPendingSounds[i].flags & 1) {
             fldPendingSounds[i].flags &= ~1;
-            func_00341C78(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
+            sndQueueSoundId(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
         }
     }
 }
@@ -857,7 +854,7 @@ void func_00144F48(void) {
 }
 
 void fldPlayCurrentBgmSound(void) {
-    func_00341C78(fldCurrentBgmHandle);
+    sndQueueSoundId(fldCurrentBgmHandle);
     fldCurrentBgmId[0] = 0;
 }
 
@@ -882,13 +879,13 @@ void fldPlayMenuSound(s32 id) {
 void fldPlayFieldSe(s32 id) {
     if (D_00389780[0] < 50) {
         if (id == 0x100) {
-            func_00341C78(0x6D0060);
+            sndQueueSoundId(0x6D0060);
         } else if (id == 0x101) {
-            func_00341C78(0x6D0061);
+            sndQueueSoundId(0x6D0061);
         } else if (id == 0x102) {
-            func_00341C78(0x6D0064);
+            sndQueueSoundId(0x6D0064);
         } else {
-            func_00341C78(fldSceneSoundBase + id);
+            sndQueueSoundId(fldSceneSoundBase + id);
         }
     }
 }
@@ -907,7 +904,7 @@ void fldSelectBgmMode(s32 selection) {
     switch (selection) {
     case -1:
         if (D_00436228 != selection) {
-            func_00341C78(D_00436228);
+            sndQueueSoundId(D_00436228);
             D_00436228 = selection;
         }
         break;
@@ -998,7 +995,7 @@ void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {
 }
 
 void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
-    func_00341C78(archiveId * 0x10000 + soundId + 0x30000000);
+    sndQueueSoundId(archiveId * 0x10000 + soundId + 0x30000000);
 }
 
 void fldResetArchiveLoadPhase(void) {
@@ -4434,16 +4431,11 @@ extern struct FileRequest *D_004363A0;
 extern u32 D_004363A4;
 extern u32 D_004363A8;
 extern void func_0026C900(void);
-extern s32 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
-extern void mnuQueueTitleSoundStreamEntry(s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void fldSetCameraModelMotionRequest(u32, u32);
 extern void func_00150138(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
@@ -4651,7 +4643,7 @@ void func_00150F20(void) {
 
         func_00150138();
         if (fldSparkControlState.countdown < 31) {
-            func_00341C78(0x680017);
+            sndQueueSoundId(0x680017);
             fldSparkControlState.countdown = 0;
             fldReleaseCameraModel(0);
             fldSetCameraModelMotionRequest(2, 0);
@@ -4746,7 +4738,7 @@ void fldResetEventSceneState(void) {
 /* Restores title/menu and field presentation after an event, then clears the
  * event latch and field gates while retaining the existing reset values. */
 void fldResetAfterEvent(void) {
-    func_00341C78(0x680017);
+    sndQueueSoundId(0x680017);
     mnuAdvanceTitleStateUnderSemaphore();
     D_003899E0[0] = 0;
     fldAreaState.unk118 = 0;
@@ -5301,12 +5293,12 @@ extern void fldReleaseTargetGuideResource(void);
 
 extern void fldResetViewState(void);
 
-extern void func_00341C78(u32);
+extern void sndQueueSoundId(u32);
 
 void fldResetTargetViewAndSound(void) {
     fldReleaseTargetGuideResource();
     fldResetViewState();
-    func_00341C78(0x690061);
+    sndQueueSoundId(0x690061);
 }
 
 extern void fldCalcTargetDistanceYaw(f32 *, f32 *);
@@ -5559,7 +5551,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(2);
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 1:
@@ -5589,7 +5581,7 @@ void fldSetTargetGuideMode(s32 mode) {
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 4:
@@ -5602,7 +5594,7 @@ void fldSetTargetGuideMode(s32 mode) {
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 5:
@@ -5615,7 +5607,7 @@ void fldSetTargetGuideMode(s32 mode) {
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 6:
@@ -5629,7 +5621,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 7:
@@ -5640,7 +5632,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(6);
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         break;
     case 8:
         if (previousMode == 7) {
@@ -5652,7 +5644,7 @@ void fldSetTargetGuideMode(s32 mode) {
             func_001519E8(3);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
-            func_00341C78(0x690061);
+            sndQueueSoundId(0x690061);
             sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         }
         break;
@@ -5667,7 +5659,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags &= ~1;
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     case 10:
@@ -5678,7 +5670,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
         func_001519E8(6);
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         break;
     case 11:
         if (previousMode == 10) {
@@ -5690,7 +5682,7 @@ void fldSetTargetGuideMode(s32 mode) {
             func_001519E8(3);
             fldTargetGuideState.updateFlags |= 2;
             fldUpdateTargetGuideEffects();
-            func_00341C78(0x690061);
+            sndQueueSoundId(0x690061);
             sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         }
         break;
@@ -5705,7 +5697,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         break;
     case 13:
         fldTargetGuideState.gridX = D_003AA6F8[1].x;
@@ -5718,7 +5710,7 @@ void fldSetTargetGuideMode(s32 mode) {
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
         D_00435F20->flags |= 1;
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         break;
     case 14:
         fldTargetGuideState.gridX = 0;
@@ -5743,7 +5735,7 @@ void fldSetTargetGuideMode(s32 mode) {
         func_001519E8(2);
         fldTargetGuideState.updateFlags |= 2;
         fldUpdateTargetGuideEffects();
-        func_00341C78(0x690061);
+        sndQueueSoundId(0x690061);
         sndSetSequenceVolumePan(0x690061, 0, 0x3F);
         break;
     }

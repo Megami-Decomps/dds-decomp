@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_viewer_rows.h"
+#include "sdf_vu_matrix.h"
 
 #include "evt_world.h"
 #include "evt_picture.h"
@@ -52,7 +53,7 @@ extern void sndStartTrackExtended(s32 track);
 extern void sndTransitionBgm(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
 extern void sndReleaseTrackHandle(u32 sequence);
-extern void func_002E8DD0(u32 sequence);
+extern void sndQueueSoundId(u32 sequence);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
@@ -2379,7 +2380,6 @@ void func_0023A798(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *runtime
 
 extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: apply the selected camera-axis rotations to a position. */
 void func_0023A7A0(f32 *position)
@@ -5388,7 +5388,7 @@ s32 evtStartBgmBySoundIdAndFade(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_002E8DD0(sound);
+    sndQueueSoundId(sound);
     return sound;
 }
 

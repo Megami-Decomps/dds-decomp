@@ -1,7 +1,10 @@
 #include "dsp_entry_api.h"
+#include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -12,6 +15,7 @@
 #include "mdl.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_value.h"
 #include "sdf_dev_state.h"
 #include "fld_transfer_chunk.h"
@@ -33,15 +37,15 @@
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
 
+extern void sndQueueNoPayloadCommand1A0(void);
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewUpVector[4];
 extern u32 fldGetSceneReadyFlag(void);
-extern void kwlnFadeStartOut(s32);
-extern void kwlnFadeStartIn(s32);
 extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
 
 
@@ -123,7 +127,6 @@ extern s32 D_0033EB78[];
 extern void sndReleaseTrackHandle(s32 arg0);
 
 
-extern s32 dds3GetWorldObject(void);
 
 
 extern void fldRelocatePackedTransferChunk(u32 buffer, FldTransferChunk *chunk);
@@ -146,17 +149,12 @@ extern struct FileRequest *D_003BAFE8;
 extern u32 D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void fldSetCameraModelMotionRequest(u32, u32);
-extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
-extern s32 evtGetMessageWindowControlState(void);
-extern u32 evtFinishMessageWindowAndNotify(void);
 extern s32 dspCloseChannel(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void *effObjCreateEventNode(void *, f32 *, f32 *);
 extern void effObjClearFlags(void *, s32);
 extern void effObjSetFlags(void *, s32);
 extern void effObjReplaceActiveEventNode(void *, u32);
-extern void mnuMarkTitleStreamResetPending(void);
 extern void fldSetCameraNodeModeWithTen(void);
 extern u8 D_003A0978[];
 extern void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *);
@@ -185,7 +183,7 @@ extern s32 D_003D62A8[];
 
 extern s32 fldCurrentBgmId[];
 
-extern void func_002E8DD0();
+extern void sndQueueSoundId();
 extern void sndStartTrackDefault(s32 arg0);
 
 
@@ -431,7 +429,7 @@ void fldPlayPendingSounds(void) {
     for (i = 0; i < fldPendingSoundCount; i++) {
         if (fldPendingSounds[i].flags & 1) {
             fldPendingSounds[i].flags &= ~1;
-            func_002E8DD0(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
+            sndQueueSoundId(fldStageSoundBaseTable[stage] + fldPendingSounds[i].soundId);
         }
     }
 }
@@ -583,11 +581,11 @@ void fldReleaseCurrentBgm(void) {
 }
 
 void func_00141D80(void) {
-    func_002E8E00();
+    sndQueueNoPayloadCommand1A0();
 }
 
 void fldPlayCurrentBgmSound(void) {
-    func_002E8DD0(fldCurrentBgmHandle);
+    sndQueueSoundId(fldCurrentBgmHandle);
     fldCurrentBgmId[0] = 0;
 }
 
@@ -608,13 +606,13 @@ void fldPlayFieldSeVolumePan(s32 soundId) {
 void fldPlayFieldSe(s32 soundId) {
     if (D_0032E3C0[0] < 50) {
         if (soundId == 0x100) {
-            func_002E8DD0(0x6C0060);
+            sndQueueSoundId(0x6C0060);
         } else if (soundId == 0x101) {
-            func_002E8DD0(0x6C0061);
+            sndQueueSoundId(0x6C0061);
         } else if (soundId == 0x102) {
-            func_002E8DD0(0x6C0064);
+            sndQueueSoundId(0x6C0064);
         } else {
-            func_002E8DD0(fldSceneSoundBase + soundId);
+            sndQueueSoundId(fldSceneSoundBase + soundId);
         }
     }
 }
@@ -635,7 +633,7 @@ void fldSetBgmMode(s32 mode) {
     switch (mode) {
     case -1:
         if (fldCurrentBgmMode != mode) {
-            func_002E8DD0(fldCurrentBgmMode);
+            sndQueueSoundId(fldCurrentBgmMode);
             fldCurrentBgmMode = mode;
         }
         break;
@@ -737,7 +735,7 @@ void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {
 }
 
 void fldPlayArchiveSound(s32 archiveId, s32 soundId) {
-    func_002E8DD0(archiveId * 0x10000 + soundId + 0x30000000);
+    sndQueueSoundId(archiveId * 0x10000 + soundId + 0x30000000);
 }
 
 void fldResetArchiveLoadPhase(void) {
@@ -3742,7 +3740,6 @@ typedef struct FldSparkEntryInfo {
     s16 modelId;
 } FldSparkEntryInfo;
 
-extern u32 dds3AdvanceWorldCounter(void);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32 value, void *position, void *rotation);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerScale(EffWorldNode *node, u128 *vector);
@@ -4113,8 +4110,6 @@ void fldFinishEventFieldState(void) {
 extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
-extern void mnuQueueTitleSoundStreamEntry(s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void fldCreateSparkSlotObjects(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
@@ -4334,7 +4329,7 @@ void fldUpdateSparkEncounterScene(void) {
         fldDrawWeatherLimitTimer();
         if (fldSparkControlState.countdown < 31) {
             fldSparkControlState.countdown = 0;
-            func_002E8DD0(0x670017);
+            sndQueueSoundId(0x670017);
             sndSetSequenceVolumePan(0x670016, 0x7F, 0x3F);
             fldReleaseCameraModel(0);
             fldSetCameraModelMotionRequest(2, 0);
@@ -4350,7 +4345,7 @@ void fldUpdateSparkEncounterScene(void) {
         }
 
         if (fldSparkControlState.terminated != 0) {
-            func_002E8DD0(0x670017);
+            sndQueueSoundId(0x670017);
             mnuMarkTitleStreamResetPending();
             D_0032E4C0[0] = 1;
             fldResetPlayerSceneObjectState();

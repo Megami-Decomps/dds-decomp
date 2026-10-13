@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
@@ -43,7 +44,7 @@ enum { FILE_CONFIG_SET, FILE_CONFIG_FRAME, FILE_CONFIG_X, FILE_CONFIG_Y };
 extern s16 D_003E9028[27][4];
 
 extern s32 D_00437D4C;
-extern s32 func_002C9BD0(void);
+extern s32 fileDrawFileMenuPromptAndCheckDelay(void);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct MenuWork {
@@ -188,7 +189,6 @@ extern s32 D_00437D60;
 extern s32 D_00437D5C;
 extern u8 (*D_00437D54)[32];
 extern u8 (*D_00437D58)[32];
-extern s32 dds3GetWorldObject(void);
 
 
 extern s32 D_00437D38;
@@ -328,7 +328,7 @@ typedef struct EffParamWork {
 } EffParamWork; /* 0x08 */
 
 typedef struct EffDispatchExtra {
-    void (*func)(void *, void *); /* 0x00 handler, may be NULL */
+    void (*func)(void *, f32 vector[4]); /* 0x00 vector handler, may be NULL */
     u8 pad04[0x24];
 } EffDispatchExtra;
 
@@ -661,7 +661,7 @@ s32 fileIsLoadStepComplete(void) {
 }
 
 /* Draw the expanding prompt panel and report when its input delay has elapsed. */
-s32 func_002C9BD0(void) {
+s32 fileDrawFileMenuPromptAndCheckDelay(void) {
     s32 y;
     s32 height;
     s32 value;
@@ -731,7 +731,7 @@ extern char D_003E8C70[];
 extern char D_003E8C98[];
 extern char D_003E8CC0[];
 
-void func_002C9CF8(void) {
+void fileDrawMemoryCardFlowPrompt(void) {
     if (D_00437D3C == 0) {
         return;
     }
@@ -739,7 +739,7 @@ void func_002C9CF8(void) {
         fileSelectedSlotIndex = 0;
         D_00437D28 = 0;
         fileResetLoadContextSlide();
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8058);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8088);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E80A8);
@@ -750,7 +750,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 2) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8158);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8188);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E81A0);
@@ -761,21 +761,21 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 3) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82C0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 4) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82D0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 5) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8358);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8380);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E83A0);
@@ -786,14 +786,14 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 6) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82E0);
             fileDrawPulsingSaveHighlight();
             D_00437CF8 = 0;
         }
     }
     if (D_00437D3C == 7) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             if (mcdOriginalTitleFileMode == 0) {
                 mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8668);
                 mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8698);
@@ -806,7 +806,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 8) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C08);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8990);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E89B8);
@@ -816,7 +816,7 @@ void func_002C9CF8(void) {
         }
     }
     if (D_00437D3C == 9) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8C70);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8C98);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8CC0);
@@ -858,13 +858,13 @@ extern char D_003E8B00[];
 extern char D_003E8B18[];
 extern char D_003E8B60[];
 
-void func_002CA1F0(void) {
+void fileDrawModeSpecificMemoryCardPrompt(void) {
     if (D_00437D38 == 0) {
         return;
     }
 
     if (D_00437D38 == 1) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8200);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E8220);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8238);
@@ -872,7 +872,7 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 2) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82A0);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -880,7 +880,7 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 3) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8290);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -888,14 +888,14 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 4) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8480);
             fileDrawPulsingSaveHighlight();
         }
         D_00437D04 = 1;
     }
     if (D_00437D38 == 5) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E82B0);
             mcdCreateFontDrawHandle(86, 138, 0x89FEFF80U, (u32)D_003E82F0);
             mcdCreateFontDrawHandle(86, 162, 0x89FEFF80U, (u32)D_003E8338);
@@ -903,20 +903,20 @@ void func_002CA1F0(void) {
         }
     }
     if (D_00437D38 == 6) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8498);
             fileDrawPulsingSaveHighlight();
         }
     }
     if (D_00437D38 == 13) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8468);
             fileDrawPulsingSaveHighlight();
         }
         D_00437D04 = 2;
     }
     if (D_00437D38 >= 20) {
-        if (func_002C9BD0() != 0) {
+        if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
             switch (D_00437D38) {
             case 20:
                 mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, (u32)D_003E8A48);
@@ -2610,9 +2610,9 @@ s32 fileDrawMenuFrame(s32 task) {
                       (alpha * 0x80 / 100 << 24) | 0x808080, (alpha * 0x80 / 100 << 24) | 0x808080,
                       (alpha * 0x80 / 100 << 24) | 0x808080, (struct SdfTex *)(u32)(D_00437D74));
     }
-    func_002CA1F0();
+    fileDrawModeSpecificMemoryCardPrompt();
     func_002CEEC0();
-    func_002C9CF8();
+    fileDrawMemoryCardFlowPrompt();
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 5, 0x80, 3, 0, 0, 1, 2);
     return 0;
@@ -2649,13 +2649,13 @@ extern s32 D_00437D80;
 extern void func_002CE738(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-void func_002CE208(s32 mode) {
+void fileStartMemoryCardMenuForMode(s32 mode) {
     FilePacRequest *request;
     PacWork *node;
     u32 index = 0;
     struct SdfMemBlock *titleNamesAllocation;
     u32 titleNamesAddress;
-    s32 world;
+    void *world;
 
     fileSetMemoryCardOperationActive();
     request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
@@ -2780,7 +2780,7 @@ void fileMenuReleaseNoOp(void) {
 void fileReleaseMenuResources(void) {
     s32 *slot;
     s32 i;
-    s32 world;
+    void *world;
     s32 handle;
 
     if (D_00437CE4 != 0) {
@@ -4414,7 +4414,6 @@ extern f32 func_003532B8(f32);
 extern f32 func_003532E8(f32, f32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
-extern void effMiscQuaternionToMatrixVU(void);
 
 /* vu0 routine: camera basis rows vf28-vf31 from eye sdfViewTargetVector, target sdfViewEyeVector and up sdfViewUpVector */
 void vuBuildLookAtBasis(void)
@@ -4576,19 +4575,19 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     D_003E916C[idx].cb(data);
 }
 
-void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 id = job->type;
 
     if (D_003E9180[id].func != NULL) {
-        D_003E9180[id].func(job->data, extra);
+        D_003E9180[id].func(job->data, position);
     }
 }
 
-void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 id = job->type;
 
     if (D_003E9184[id].func != NULL) {
-        D_003E9184[id].func(job->data, extra);
+        D_003E9184[id].func(job->data, rotation);
     }
 }
 
@@ -5087,7 +5086,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            fileJobInvokePositionCallback((FileJobPayload *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
         }
     }
 }

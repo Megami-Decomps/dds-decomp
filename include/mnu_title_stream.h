@@ -18,4 +18,10 @@ typedef struct TitleAudioStreamState {
 } TitleAudioStreamState;
 typedef char TitleAudioStreamState_size[(sizeof(TitleAudioStreamState) == 0x28) ? 1 : -1];
 
+/* Shared title-audio stream operations, implemented by each title. */
+void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
+s32 mnuPollTitleStreamStateLocked(void);
+void mnuMarkTitleStreamResetPending(void);
+void mnuResetTitleStreamLocked(void);
+
 #endif /* MNU_TITLE_STREAM_H */

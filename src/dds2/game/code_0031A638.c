@@ -3,18 +3,19 @@
 #include "dat_state.h"
 #include "mnu_shooting.h"
 #include "mdl_flag_api.h"
+#include "kwln_fade.h"
 
 
 
 
-void func_0031A830(MnuShootingWork *timer);
+void mnuUpdateShootingProgressTier(MnuShootingWork *timer);
 
 /* Advance progress for the selected record mode unless the final-band timer is active. */
-void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShootingWork *timer) {
+void mnuAdvanceShootingProgressFromRecord(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShootingWork *timer) {
     if ((record->state.kind & 0xF) == 4 && timer->completed <= 0) {
         timer->progress++;
         timer->updateCount++;
-        func_0031A830(timer);
+        mnuUpdateShootingProgressTier(timer);
     }
 }
 
@@ -35,7 +36,7 @@ void mnuInitializeHighScoreState(MnuShootingWork *work) {
 
 
 /* Clamp the pending score snapshot to the current high-water mark. */
-void func_0031A730(MnuShootingWork *work) {
+void mnuClampPendingScoreToPeak(MnuShootingWork *work) {
     u32 peakScore = work->peakScore;
     u32 pendingScore = work->pendingScore;
 
@@ -63,7 +64,7 @@ void mnuUpdateHighScoreFlag(MnuShootingWork *work) {
 
 
 /* Reset current and peak scores to the pending snapshot. */
-void func_0031A7F8(MnuShootingWork *work) {
+void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *work) {
     s32 pendingScore = work->pendingScore;
 
     work->peakScore = pendingScore;
@@ -72,7 +73,7 @@ void func_0031A7F8(MnuShootingWork *work) {
 }
 
 /* Clamp/quantize progress; reaching the last band starts the timed completion state. */
-void func_0031A830(MnuShootingWork *timer) {
+void mnuUpdateShootingProgressTier(MnuShootingWork *timer) {
     s32 progress;
     f32 progressRatio;
 
@@ -103,7 +104,7 @@ void func_0031A830(MnuShootingWork *timer) {
 void mnuTickScoreProgressState(MnuShootingWork *work) {
     u32 currentScore;
 
-    func_0031A830(work);
+    mnuUpdateShootingProgressTier(work);
     if (work->completed > 0) {
         work->completed--;
     }
@@ -135,8 +136,6 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
     }
 }
 
-extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
-extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);

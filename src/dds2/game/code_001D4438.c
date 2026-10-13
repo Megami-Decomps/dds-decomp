@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
 #include "sdf_chip.h"
@@ -20,6 +21,9 @@
 #include "active_sound_node.h"
 #include "btl_scene_initializer.h"
 #include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "kwln_fade.h"
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -52,7 +56,6 @@ extern s32 D_003B6940[];
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 btlRollMajinEncounter();
 extern s32 btlRollSurpriseAttack();
 extern void btlRequestSceneEventResources();
@@ -133,7 +136,6 @@ extern void kwlnDrawSetupC70B();
 extern void kwlnDrawEnableCd0();
 extern void kwlnDrawEnableD30();
 extern void btlMarkRuntimeUpdatePending();
-extern void kwlnFadeStartIn();
 extern s32 fldGetEncounterRuntimeResult();
 extern void fldSetEncounterPendingValue();
 extern void evtSetSolarOverlayFullyVisible();
@@ -396,7 +398,6 @@ extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 
 extern u32 D_00436AD4;
 
-extern u32 dds3AdvanceWorldCounter(void);
 
 extern struct EffWorldNode *evtSpawnActionObj9(s32);
 
@@ -417,13 +418,8 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
-
-extern s32 D_00435E0C;
 
 typedef struct SoundSceneEntry {
     u8 pad00[0x24];
@@ -536,7 +532,6 @@ extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void effMiscQuaternionToMatrixVU(void);
 
 extern void effMiscQuaternionNlerpVU(f32);
 
@@ -1431,12 +1426,12 @@ void btlCommandStartSoundTasks(u8 *task) {
     }
 }
 
-extern void func_001DDB60(ActionStateLink *, BattleIndexWork *);
+extern void btlResolveActionTargetResults(ActionStateLink *, BattleIndexWork *);
 
 void btlCommandPrintAndFetchOwner(ActionStateLink *task) {
     s32 command;
     btlBossDebugPrintf("btl:command=%d\n", task->indexWork.phase);
-    func_001DDB60(task, &task->indexWork);
+    btlResolveActionTargetResults(task, &task->indexWork);
     command = task->indexWork.phase;
     if (command > 0) {
         if (command >= 4) {

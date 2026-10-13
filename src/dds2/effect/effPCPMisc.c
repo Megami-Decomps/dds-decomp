@@ -34,6 +34,7 @@
 #include "eff_pcp_cross.h"
 #include "eff_pcp_charge.h"
 #include "eff_pcp_compact_fade.h"
+#include "eff_pcp_span.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -72,10 +73,6 @@ extern u8 D_003B19E8[];
 extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
-
-extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
-
-
 
 extern void func_00336538(f32 scale);
 extern void func_00336818(f32 angle);
@@ -2886,27 +2883,8 @@ void effPcpSetThunderScaleFadeColor(EffPCPFadeWork *work, u32 value) {
     work->color = value;
 }
 
-/* Constructor and aimed update share the 0x78-byte angular-sweep work.
-   The update uses unsigned frame bounds; the initial sweep interval is
-   computed as a signed difference of the parameter words. */
-typedef struct EffPCPSpanParams {
-    f32 anchor[4];
-    u32 holdFrames;
-    u32 activeFrames;
-    s32 fadeFrames;
-    f32 sweepDegrees;
-    f32 radius;
-} EffPCPSpanParams;
-
-typedef struct EffPCPSpanWork {
-    f32 matrix[16];
-    EffPCPSpanParams params;
-    u32 color;
-    u32 frame;
-    f32 angle;
-    f32 spin;
-    struct EffNode *optionalHandle;
-} EffPCPSpanWork;
+/* The update uses unsigned frame bounds; the initial sweep interval is
+ * computed as a signed difference of the parameter words. */
 
 EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams) {
     EffPCPSpanParams *src = params;

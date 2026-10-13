@@ -9,6 +9,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_protocol.h"
 #include "sdf_dev_state.h"
+#include "sdf_dev_worker.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 
@@ -65,16 +66,6 @@
 #define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
 
 extern char D_003B4690[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
-
-/* Native 0x18 worker record; semaphore-only addresses point inside this array,
- * not at a separately allocated table. */
-typedef struct DevWorkerEntry {
-    s32 threadId; /* 0x00 */
-    s32 semaphore; /* 0x04 */
-    struct DevState *first; /* 0x08 */
-    struct DevState *last; /* 0x0C */
-    u8 pad10[8];
-} DevWorkerEntry;
 
 extern u8 sdfDevicePriorityOverrideTicks;
 

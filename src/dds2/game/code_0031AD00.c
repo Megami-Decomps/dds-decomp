@@ -2,8 +2,8 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "mnu_shooting.h"
+#include "dds3_world_counter.h"
 struct EffWorldNode;
-extern u32 dds3AdvanceWorldCounter(void);
 extern struct EffWorldNode *dds3CreateConfiguredCameraObject(s32 value, void *targetPosition, u128 *worldEye, u128 *localUp);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
 extern void effObjSetInnerFloat(s32 arg0, f32 arg1);
@@ -41,7 +41,7 @@ void itfDispatchObjectFadeSequenceMode(MnuShootingWork *object) {
     }
 }
 
-void func_0031ADD8(MnuShootingWork *object) {
+void mnuSetShootingNodeModelDepthsToZero(MnuShootingWork *object) {
     MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
@@ -55,7 +55,7 @@ void func_0031ADD8(MnuShootingWork *object) {
     }
 }
 
-void func_0031AE48(MnuShootingWork *object) {
+void mnuRestoreShootingNodeModelDepths(MnuShootingWork *object) {
     MnuNodeList *entries = object->modelWork->groups;
     s32 i = 0;
 
@@ -79,14 +79,14 @@ void func_0031AEB8(MnuShootingWork *object) {
     if (object->unk70Bit0) {
         func_0031AF58(object);
         mnuPauseEffectQueueFrameAdvance();
-        func_0031ADD8(object);
+        mnuSetShootingNodeModelDepthsToZero(object);
         itfSetFadeMode(&object->pauseFade.fade, 1, 8);
         return;
     }
     if (!object->unk70Bit0) {
         func_0031AF60();
         mnuResumeEffectQueueFrameAdvance();
-        func_0031AE48(object);
+        mnuRestoreShootingNodeModelDepths(object);
         itfSetFadeMode(&object->pauseFade.fade, 0, 8);
     }
 }
@@ -104,7 +104,7 @@ extern SoundSlot *dds3ClaimSoundSlot(u32 sequence, u32 frames);
 extern s8 D_0037F510[];
 
 /* Clamp cursor movement before confirm/cancel override the navigation sound. */
-s32 func_0031AF68(MnuShootingWork *object) {
+s32 mnuPollPauseChoiceInput(MnuShootingWork *object) {
     s32 result = -1;
     s32 sound = 0;
 
@@ -143,7 +143,7 @@ s32 func_0031AF68(MnuShootingWork *object) {
 }
 
 /* Update and draw the pause-menu choice fade. */
-void func_0031B080(MnuShootingWork *object) {
+void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *object) {
     FadeNumber *fade = &object->pauseFade;
 
     mnuSetPauseFadeChoice(fade, object->choiceIndex);

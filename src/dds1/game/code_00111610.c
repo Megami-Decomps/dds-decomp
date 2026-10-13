@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_counter.h"
 
 /* Opaque fixed-size ring entry; this unit only selects its address. */
 typedef struct {
@@ -11,7 +12,6 @@ typedef struct {
 #define DDS3_SLOT_RING_ENTRY_COUNT 10
 
 
-extern u32 dds3AdvanceWorldCounter(void);
 extern SlotEntry dds3SlotRingEntries[];
 extern s32 dds3SlotRingCursor;
 

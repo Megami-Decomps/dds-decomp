@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "dat_state.h"
+#include "dat_party_growth.h"
 #include "mnu_result.h"
 
 extern u32 brsBuildProfileSkillList(DatPartyRecord *, PrfSkillList *);
@@ -344,11 +345,6 @@ s32 btlAddBaseStats(s32 *src, DatPartyRecord *seq) {
     return 1;
 }
 
-typedef struct PartyStatGrowthBank {
-    u8 unk0[5];
-    u8 levelStats[99][DAT_BASE_STAT_COUNT];
-} PartyStatGrowthBank;
-
 extern PartyStatGrowthBank D_003D6518[];
 
 void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, DatPartyRecord *unit) {
@@ -509,7 +505,7 @@ extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
-extern void func_00341C78(u32 sound);
+extern void sndQueueSoundId(u32 sound);
 
 void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
@@ -563,7 +559,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
     }
     if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
         work->resultPhase = 2;
-        func_00341C78(20);
+        sndQueueSoundId(20);
     }
 }
 

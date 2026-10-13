@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_fade.h"
 #include "btl_sound.h"
 #include "btl_task_condition.h"
 #include "btl.h"
@@ -230,7 +231,6 @@ extern void kwlnDrawEnableD30(s32);
 
 extern void btlMarkRuntimeUpdatePending(void);
 
-extern void kwlnFadeStartIn(s32);
 
 extern s32 fldGetEncounterRuntimeResult(void);
 
@@ -1184,7 +1184,6 @@ void fldMarkSceneRefresh(s32 scene) {
 
 extern s32 btlUpdateDebugEncounterSelector(void);
 
-extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 u32 fldBeginFadeWhenSceneReady(void) {
     if (btlUpdateDebugEncounterSelector() != 0) {
