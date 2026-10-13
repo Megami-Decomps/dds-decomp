@@ -4,6 +4,7 @@
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
+#include "prf_profile_cap.h"
 #include "dsp_name.h"
 #include "sdf_task_work.h"
 
@@ -86,7 +87,6 @@ extern void mnuValidateProfileEntry(MantraFlagResource *, DatPartyRecord *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 prfReqCheckWithFallback(DatPartyRecord *, u16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern s32 ptyGetProfileRecordCap(u16);
 extern void func_00314868(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 

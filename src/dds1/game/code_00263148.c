@@ -4,6 +4,7 @@
 #include "mnu_result.h"
 
 #include "mnu.h"
+#include "prf_profile_cap.h"
 extern void ptyRecomputeMaxVitals(DatPartyRecord *, const s32 *);
 
 extern u32 ptyBuildProfileCapSkillList(DatPartyRecord *, PrfSkillList *);
@@ -16,8 +17,6 @@ extern void dspSetActive(s32);
 extern s32 dspStartEntry(s32);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
-
-extern s32 prfGetCapValue(u16);
 
 extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
