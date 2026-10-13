@@ -249,7 +249,7 @@ s32 sdfStepSelectedMapCameraTransition(void) {
 }
 
 /* Step the local-map camera transition toward fixed preset 3. */
-s32 func_002C4160(void) {
+s32 fldAdvanceLocalMapCameraTransition(void) {
     f32 t;
     s32 index = 3;
 

@@ -77,7 +77,7 @@ extern void fldUpdateMapRequestQueues(s32);
 extern void sdfCounterStepDownAnimationValue(void);
 extern void sdfLatchBaseVectorsForSelection(void);
 extern s32 sdfStepSelectedMapCameraTransition(void);
-extern s32 func_002C4160(void);
+extern s32 fldAdvanceLocalMapCameraTransition(void);
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
@@ -529,7 +529,7 @@ s32 fldUpdateLocalMapController(void) {
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
-        func_002C4160();
+        fldAdvanceLocalMapCameraTransition();
         if (result == 0) {
             D_003BD25C = 1;
             sdfLatchBaseVectorsForSelection();
