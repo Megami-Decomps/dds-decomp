@@ -673,7 +673,7 @@ u32 btlIsActorHighStateFlagClear(s32 actor) {
 }
 
 /* Return 1 when the scene can still accept another active enemy: below the active cap and the cumulative spawn limit. */
-s32 func_001A8CE0(BtlUnit *requester) {
+s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BattleController *controller = (BattleController *)btlGetRuntime();
     u32 limit;
     u32 active;

@@ -102,7 +102,7 @@ extern char D_003A5988[];
 
 extern void btlDebugPrintf(const char *, ...);
 
-extern s32 func_001A8CE0(s32);
+extern s32 btlCanSpawnAnotherEnemy(s32);
 extern s32 btlCounterReachedLimit(s32, u32);
 extern s32 btlAnyUnitHasQueuedQuery(s32, s32, u32);
 
@@ -1384,7 +1384,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
 }
 
 s32 func_00202158(void) {
-    return func_001A8CE0(0);
+    return btlCanSpawnAnotherEnemy(0);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", btlRequiredActionCategories);

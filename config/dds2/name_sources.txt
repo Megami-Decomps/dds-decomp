@@ -2362,6 +2362,7 @@
 0x001B2D38	btlAreUnitStatusAndEntryFlagsClear	inferred	Requires the matching unit status and entry permission bits both to be clear. [names_reviewed14.tsv]
 0x001B3188	btlHasAdjacentActorRecordStatus	inferred	Checks two neighboring status bytes for the selected actor record. [names_reviewed14.tsv]
 0x001B31E8	btlIsActorHighStateFlagClear	inferred	Returns whether the checked high actor-state bit is clear in both titles. [names_reviewed17.tsv]
+0x001B3200	btlCanSpawnAnotherEnemy	inferred	Returns whether active and cumulative spawn caps permit adding an enemy, applying the optional scene override. Two DDS2 callers use the result as an enemy-spawn gate; DDS1 twin 0x001A8CE0.
 0x001B33C8	btlHasAvailableOption	inferred	Tests whether collecting selectable battle options yields any choices. [names_reviewed10.tsv]
 0x001B33E8	btlChooseRandomAvailableOption	inferred	Selects a random member of the object-generated options, or negative one. [names_reviewed8.tsv]
 0x001B3430	btlChooseEligibleSkill	inferred	Filters an actor ability list by category and flags before choosing at random. [names_reviewed14.tsv]
