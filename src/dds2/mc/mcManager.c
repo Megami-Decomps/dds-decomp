@@ -145,7 +145,7 @@ McPollResult mcPollCommandStatusWithResult(s32 *resultOut) {
 
 /* Forward the existing no-explicit-argument SDK close call; do not poll it. */
 void mcCloseOpenFile(void) {
-    func_0034F150();
+    mcQueueCloseRequest();
 }
 
 /* Despite its name, poll once rather than waiting; success requires status
@@ -165,7 +165,7 @@ McPollResult mcPollZeroCommandResult(void) {
 
 /* Forward the existing no-explicit-argument SDK read call; do not poll it. */
 void mcReadOpenFile(void) {
-    func_0034F370();
+    mcQueueReadRequest();
 }
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
@@ -190,7 +190,7 @@ McPollResult mcPollCompletionStatus(void) {
 /* Begin the SDK write through the existing unprototyped call. Keep its
  * argument form unchanged; this entry does not report completion. */
 void mcBeginWrite(s32 request, u32 first, u32 second) {
-    func_0034F490();
+    mcQueueWriteRequest();
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes

@@ -7041,6 +7041,9 @@
 0x002F0C00	sceGsExecStoreImage	evidence	strings "sceGsExecStoreImage: DMA Ch.1/GS does not terminate" (Sony libgraph)
 0x002F5850	sceSdRemoteInit	evidence	its message "sceSdRemoteInit() RPC bind error!" (Sony libsdr)
 0x002F61D8	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS2 counterpart is 0x0034EFE0.
+0x002F6338	mcQueueCloseRequest	inferred	Queues memory-card command 3 for the close operation; DDS2 twin 0x0034F150.
+0x002F6558	mcQueueReadRequest	inferred	Queues memory-card command 5 with the read buffer and completion callback; DDS2 twin 0x0034F370.
+0x002F6670	mcQueueWriteRequest	inferred	Queues memory-card command 6 with an aligned write payload; DDS2 twin 0x0034F490.
 0x002F6858	sceMcSync	inferred	Polls the active memory-card RPC command and returns its completion state through the command and result pointers. DDS2 counterpart is 0x0034F680.
 0x002F6B80	sceMcGetDir	inferred	Starts a directory-entry query using port, slot, path, mode, entry limit and output table. DDS2 counterpart is 0x0034F9B0.
 0x002F6D50	sceMcChdir	inferred	Starts a directory change using port, slot, path and mode zero. DDS2 counterpart is 0x0034FB90.

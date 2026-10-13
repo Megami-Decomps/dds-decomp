@@ -6645,6 +6645,9 @@
 0x00348B78	sdfUpdatePoolFreeListByMode	inferred	Resets pool state or returns an owned node to the pool free list. [names_reviewed11.tsv]
 0x00348BD8	sdfInstallPoolNodeReleaseCallbacks	inferred	Registers release and recycling callbacks on a pool work item. [names_reviewed10.tsv]
 0x0034EFE0	sceMcOpen	inferred	Starts an asynchronous open for a path on the selected memory card; callers pass port, slot, path and open flags. DDS1 counterpart is 0x002F61D8.
+0x0034F150	mcQueueCloseRequest	inferred	Queues the paired memory-card close operation; DDS1 twin 0x002F6338.
+0x0034F370	mcQueueReadRequest	inferred	Queues the paired memory-card read operation; DDS1 twin 0x002F6558.
+0x0034F490	mcQueueWriteRequest	inferred	Queues the paired memory-card write operation; DDS1 twin 0x002F6670.
 0x0034F680	sceMcSync	inferred	Polls the active memory-card RPC command and returns its completion state through the command and result pointers. DDS1 counterpart is 0x002F6858.
 0x0034F9B0	sceMcGetDir	inferred	Starts a directory-entry query using port, slot, path, mode, entry limit and output table. DDS1 counterpart is 0x002F6B80.
 0x0034FB90	sceMcChdir	inferred	Starts a directory change using port, slot, path and mode zero. DDS1 counterpart is 0x002F6D50.
