@@ -7300,6 +7300,8 @@
 0x00331590	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
 0x00330DF0	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
 0x00330E60	sdfModelBuildIndexedCommandPackets	inferred	Starts the indexed asset packet, appends root-workspace DMA/VIF references for each listed draw-node ID, writes the sequence terminators, and returns the next packet cursor. Called by sdfCommandListMeasure's consumer dispatcher for command kind 1; paired with DDS1 0x002D7FB0. [code-quality cleanup, 2026-10-13]
+0x00330FE0	sdfModelBuildClippedCommandPackets	inferred	Filters the two clip-result values to select active clipped draw data, builds its DMA/VIF reference packet sequence, and returns the append cursor. Called by the model packet traversal for command kind 2; paired with DDS1 0x002D8130. [code-quality cleanup, 2026-10-13]
+0x00331B68	sdfModelTestTransformedClipVectors	inferred	Transforms two vectors through the supplied VU matrix, issues VU clip tests, and returns the intersection of the CCR clipping bits with the input mask. Called by model render traversal; paired with DDS1 0x002D8CB8. [code-quality cleanup, 2026-10-13]
 0x00333950	sdfInitAssetDrawEntryReferenceNode	inferred	Selects the asset drawEntries[frame] pointer, writes a 16-byte reference header with its physical address, and returns the following packet payload.
 0x00173718	effFlashAccumulatingSetParticleColors	inferred	Writes packed colors for paired particle quad records using the supplied color multiplier.
 0x00173808	effFlashAccumulatingBuildParticleQuads	inferred	Builds paired outer and inner particle quads and advances radius by radialStep.
