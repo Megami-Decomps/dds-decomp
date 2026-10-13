@@ -555,7 +555,7 @@ void mdlUnlinkGroupEntry(MdlCtx *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "model/mdlManager", func_00231E28);
+INCLUDE_ASM(const s32, "model/mdlManager", mdlCreateDevSlotList);
 
 extern void sdfReleaseDevSlot(void *, s32, s32);
 
