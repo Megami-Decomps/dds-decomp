@@ -2288,7 +2288,7 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_00437708);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_00437710);
 
-void func_00254CE0(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 style = 0;
@@ -2334,7 +2334,7 @@ void func_00254CE0(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
 }
 
 
-extern void func_00254CE0();
+extern void evtDrawMotionChangeRow();
 
 /* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
@@ -2345,7 +2345,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = sdfCreateResetPacketList();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
-    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
+    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
         return 0;
