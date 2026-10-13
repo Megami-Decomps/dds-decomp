@@ -4,6 +4,7 @@
 
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "sdf_texture_submit.h"
 #include "sdf_texture_registry.h"
 #include "sdf_pending.h"
 #include "ee_mmi.h"
@@ -164,8 +165,6 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 }
 
 extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
-extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
-extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     SdfTex *texture;
