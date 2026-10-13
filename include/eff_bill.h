@@ -335,7 +335,9 @@ typedef struct EffBillPointConfig {
      * layer word as an unsigned division count for floating-point math. */
     s32 layers;
     s32 respawnDelay;
-    u8 pad44[8];
+    /* Initial lateral-wave amplitude of alternating five-point ribbons. */
+    f32 alternatingAmplitude; /* 0x44 */
+    u8 pad48[4];
     u32 periods;
     f32 amplitude;
     f32 speed;
@@ -641,6 +643,10 @@ typedef char EffBillClass2ConfigSizeCheck[(sizeof(EffBillClass2Config) == 0xD0) 
 typedef char EffBillClass3ConfigSizeCheck[(sizeof(EffBillClass3Config) == 0x68) ? 1 : -1];
 typedef char EffBillQuantizedConfigSizeCheck[(sizeof(EffBillQuantizedConfig) == 0x98) ? 1 : -1];
 typedef char EffBillPointConfigSizeCheck[(sizeof(EffBillPointConfig) == 0x88) ? 1 : -1];
+typedef char EffBillPointAlternatingAmplitudeOffsetCheck[
+    ((u32)&((EffBillPointConfig *)0)->alternatingAmplitude == 0x44) ? 1 : -1];
+typedef char EffBillPointAmplitudeOffsetCheck[
+    ((u32)&((EffBillPointConfig *)0)->amplitude == 0x50) ? 1 : -1];
 typedef char EffBillPointFlagOffsetCheck[((u32)&((EffBillPointConfig *)0)->drawFlag == 0x5C) ? 1 : -1];
 typedef char EffBillRangeConfigSizeCheck[(sizeof(EffBillRangeConfig) == 0xAC) ? 1 : -1];
 typedef char EffBillEmitterHeaderSizeCheck[(sizeof(EffBillEmitterHeader) == 0x90) ? 1 : -1];
