@@ -15,6 +15,7 @@
 #include "btl_state.h"
 #include "btl_action.h"
 #include "btl_model_record.h"
+#include "btl_model_cache_entry.h"
 #include "btl_sound.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
@@ -215,8 +216,7 @@ extern void btlStartSkillEventTask(u32);
 
 extern s32 btlReleaseScriptResource(void);
 
-struct BattleModelEntry;
-extern struct BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
+extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
 struct BattleScriptTaskData;
 
@@ -1270,19 +1270,6 @@ u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
     }
     return btlDetermineCommandCounterEligibility(entryList, count, 0, commandId);
 }
-
-/* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
-typedef struct BattleModelEntry {
-    s32 kind;
-    s32 id;
-    s32 refCount;
-    s8 state;
-    u8 unk_0d[3];
-    FilePacRequest *packRequest;
-    SoundSlotOwner *soundOwner;
-    struct BattleModelEntry *prev;
-    struct BattleModelEntry *next;
-} BattleModelEntry;
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
