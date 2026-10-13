@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fr_font_measure.h"
@@ -1202,8 +1203,6 @@ void mnuFadeSetStateOff(StaffSparkleState *state, u32 mode) {
     state->mode = mode;
 }
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
     EffectSlotSet *sprite = mnuMovieWork->sprite;

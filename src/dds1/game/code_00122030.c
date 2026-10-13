@@ -6,6 +6,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
@@ -1614,7 +1615,6 @@ extern FldEncEntry *fldEncounterRollTable;
 
 extern s32 mdlFlagTest();
 
-extern s32 effMiscRand();
 
 enum {
     FIELD_ENCOUNTER_ROLL_ENTRY_COUNT = 16

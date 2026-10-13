@@ -13,6 +13,10 @@ typedef char EffRandState_size_must_be_0x10[
 typedef char EffRandState_last_word_offset_must_be_0x0C[
     ((u32)&((EffRandState *)0)->words[3] == 0x0C) ? 1 : -1];
 
+/* Advance caller-owned state, returning its next 32-bit value. NULL selects
+ * the shared effect RNG state. */
+u32 effMiscRand(EffRandState *state);
+
 /* Seed caller-owned state from the clock; NULL selects the shared state. */
 void effMiscSeedRandomFromClock(EffRandState *state);
 

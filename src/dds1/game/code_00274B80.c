@@ -17,6 +17,7 @@
 #include "sdf_chip.h"
 #include "mnu_panel_state.h"
 #include "dsp_name.h"
+#include "eff_random.h"
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
@@ -1209,7 +1210,6 @@ s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-extern u32 effMiscRand(s32);
 extern s32 evtStageTestHasPendingMotion();
 extern u32 evtStageTestCountFlags(s32);
 extern void evtStageTestQueueMotion(s32, u32);

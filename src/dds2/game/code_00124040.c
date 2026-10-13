@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "sdf_model_scalars.h"
@@ -340,7 +341,6 @@ extern FldEncEntry *fldEncounterRollTable;
 
 extern s32 mdlFlagTest(s32 flag);
 
-extern s32 effMiscRand();
 
 /* Mode 14 copies this eight-byte request. The packed selection contains
  * group:8, entry:8, and scene:16; its consumer reads both words as signed. */

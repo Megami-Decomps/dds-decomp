@@ -17,6 +17,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "menu_fade_entry.h"
+#include "eff_random.h"
 
 struct StaffMenuRuntime;
 
@@ -111,7 +112,6 @@ extern void mnuClearEntries(MenuPageWindow *);
 
 extern s32 D_00435E54;
 
-extern u32 effMiscRand();
 
 extern u32 evtStageTestCountFlags();
 

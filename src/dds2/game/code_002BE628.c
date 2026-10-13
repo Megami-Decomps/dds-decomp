@@ -4,6 +4,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "evt_world_object_api.h"
 #include "evt_stage_model_scale.h"
@@ -167,8 +168,6 @@ extern char D_00437CB0[];
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 
 extern u16 D_003E78D8[];

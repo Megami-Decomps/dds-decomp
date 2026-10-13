@@ -12,6 +12,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_trig.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
@@ -2470,8 +2471,6 @@ void billReleaseQuadNode(s32 work) {
 }
 
 extern s32 effSharedRandomState[4];
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -4686,8 +4685,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 }
 
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 typedef struct EffPointSetRow {
     EffPointSet *set; /* 0x00 */
@@ -6264,7 +6261,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             }
 
             if (spawnAll) {
-                s32 birthAge = effMiscRand(effSharedRandomState) % life;
+                s32 birthAge = effMiscRand((EffRandState *)effSharedRandomState) % life;
                 f32 gravityDisplacement;
                 ageF = (f32)birthAge;
                 gravityDisplacement = gravity * ageF * ageF * 0.5f;

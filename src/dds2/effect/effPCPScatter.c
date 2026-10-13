@@ -91,7 +91,6 @@ extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
 extern void effPcpScatterReleasePoolResources(PcpScatterPool *work);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
-extern u32 effMiscRand(void *state);
 extern PcpScatterSpinWork *effScatterCreateSpinWork();
 extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
 
@@ -465,7 +464,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -796,7 +795,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         delaySpread = 1;
     }
     for (i = 0; i < count; i++, particle++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -1199,7 +1198,6 @@ extern PcpScatterDraw *effScatterCreateDrawObject(
 
 extern void effCreateScatterResource(PcpScatterDraw *object, u32 resource);
 
-extern u32 effMiscRand(void *state);
 
 extern void *memcpy(void *, const void *, u32);
 
@@ -1239,7 +1237,7 @@ PcpScatterInstanceA *effPcpScatterCreateParticleInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1512,7 +1510,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -1721,7 +1719,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
                 effScatterRingUpdateScaled(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+                particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -1803,7 +1801,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     delayModulus = delayLimit;
     count = inst->params.particleCount;
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;
@@ -2018,7 +2016,7 @@ void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
                 effScatterRingUpdateScaledLong(work, i);
             }
             if (loop != 0 && !(instanceAge < duration)) {
-                particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+                particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             } else {
                 particle->age++;
             }
@@ -2098,7 +2096,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
         delayModulus = 1;
     }
     for (i = 0; i < count; i++) {
-        particle->age = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         particle++;
     }
     return inst;

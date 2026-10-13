@@ -6,7 +6,6 @@
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
-extern u32 effMiscRand(void *);
 extern u8 effDefaultRandomState[];
 
 
@@ -33,7 +32,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = effMiscRand(effDefaultRandomState) % (work->params.delaySpread + 1);
+    slot->delay = effMiscRand((EffRandState *)effDefaultRandomState) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
     quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;

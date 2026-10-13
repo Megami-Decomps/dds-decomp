@@ -109,7 +109,6 @@ typedef struct {
     f32 radiusStep;
 } ParBurstPacket;
 
-extern s32 effMiscRand(void *);
 extern u8 effDefaultRandomState[];
 extern u8 effEmitterDelayRandomState[];
 
@@ -126,7 +125,7 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
 
     packet += particleIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spawnDelayFrames + 1));
     initialRadius = effect->initialRadius;
     jitterFactor = effect->initialRadiusJitter;
     direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;

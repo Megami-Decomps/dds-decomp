@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_chip.h"
 #include "dat_command.h"
@@ -142,7 +143,6 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern u8 D_003CD8D0[];
 
-extern u32 effMiscRand(void *);
 
 extern u8 D_003CDA8C[];
 

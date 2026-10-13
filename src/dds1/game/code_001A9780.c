@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
@@ -323,7 +324,6 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
-extern s32 effMiscRand(void *);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DA0);
 
@@ -358,7 +358,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     }
     flags = record->huntPenaltyFlags;
     if (flags == 0x18) {
-        return (effMiscRand(effSharedRandomState) & 1) ? 0x10 : 8;
+        return (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
     }
     return flags & 0x18;
 }

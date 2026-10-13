@@ -40,7 +40,6 @@ typedef struct SolarLayerTimer {
 } SolarLayerTimer;
 
 
-u32 effMiscRand(s32 seed);
 
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
     *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);

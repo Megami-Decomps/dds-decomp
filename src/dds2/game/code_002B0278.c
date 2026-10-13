@@ -14,6 +14,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "eff_random.h"
 struct MenuListNode;
 struct StaffMenuRuntime;
 #include "fpu.h"
@@ -118,7 +119,6 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 
 extern s32 D_00435E54;
 
-extern u32 effMiscRand();
 
 extern u32 evtStageTestCountFlags();
 
