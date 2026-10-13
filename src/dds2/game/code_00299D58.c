@@ -40,8 +40,8 @@ typedef struct FieldResourceRecord {
 } FieldResourceRecord;
 
 extern FieldResourceRecord *D_00435E18;
-extern s32 func_001514A8(void);
-extern s16 func_001514B8(void);
+extern s32 fldGetSparkRewardProfileIndex(void);
+extern s16 fldGetSparkPickupCount(void);
 extern s32 evtGetMessageWindowControlState(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -247,12 +247,12 @@ s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
     FieldResourceRecord *record;
 
     if (scene->thresholdMessageShown == 0) {
-        profileIndex = func_001514A8();
+        profileIndex = fldGetSparkRewardProfileIndex();
         if (profileIndex == -1) {
             return 0;
         }
         value = scene->rewards.mitama * D_00435E18[profileIndex].unk0E;
-        value += func_001514B8() * D_00435E18[profileIndex].unk0C;
+        value += fldGetSparkPickupCount() * D_00435E18[profileIndex].unk0C;
         record = &D_00435E18[profileIndex];
         rank = 0;
         while (rank < 4 && value < record->thresholds[rank]) {
