@@ -127,7 +127,7 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 s32 btlHasSpecialAbility274(BtlUnit *unit, u32 slot);
 
-s32 func_001ABF50(BtlUnit *battler, s32 element);
+s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 
@@ -174,7 +174,7 @@ u32 func_001B1350(BtlUnit *attacker, BtlUnit *defender, u32 command,
 
     if (guardMask != 0 && result == 0 && reaction == 2) {
         result = guardMask;
-        if (func_001ABF50(defender, btlFlagToElementIndex(guardMask)) & 0x170000) {
+        if (btlGetUnitElementAffinity(defender, btlFlagToElementIndex(guardMask)) & 0x170000) {
             result = 0;
         }
         if ((defender->partyRecord.status & 0x7FFF) >= result) {
@@ -237,7 +237,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     if ((selection & 0xE0000) != 0) {
         return 100;
     }
-    value = func_001ABF50(unit, index);
+    value = btlGetUnitElementAffinity(unit, index);
     ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;

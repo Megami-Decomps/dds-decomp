@@ -8,6 +8,7 @@
 #include "btl_task.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 
 extern char D_003BB8A0[];
@@ -522,7 +523,6 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
 extern void func_002DD608(f32);
 extern void func_002DD968(f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern f32 D_003BB8B0[];
 
 s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate) {

@@ -28,7 +28,7 @@ void dds3ReleaseObjectResource(EffWorldNode *object);
 
 
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
-void func_00111480(EffWorldNode *slot, EffWorldNode *owner);
+void dds3RemoveObjectFromOwnerWorldIndex(EffWorldNode *slot, EffWorldNode *owner);
 void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
 
@@ -51,7 +51,7 @@ void dds3DestroyObjectBase(ObjBase *base) {
     owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
     handler = dds3GetSlot(owner, DDS3_OBJECT_HANDLER_SLOT);
     if (handler != NULL) {
-        func_00111480(handler, owner);
+        dds3RemoveObjectFromOwnerWorldIndex(handler, owner);
     }
     for (slotIndex = 0; slotIndex < DDS3_OBJECT_SLOT_COUNT; slotIndex++) {
         if (slotIndex < DDS3_OBJECT_WORLD_SLOT_LIMIT) {
@@ -180,7 +180,7 @@ extern const char D_00384CF8[18][20];
 extern const char D_00384E60[17][20];
 extern const char D_00384FB8[17][20];
 extern const char D_00435D98[];
-extern const char *func_00332AD8(SdfModel *model, s32 nameId);
+extern const char *sdfNamedChunkGetNameById(SdfModel *model, s32 nameId);
 extern s32 strcmp(const char *left, const char *right);
 extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
 
@@ -197,7 +197,7 @@ void dds3LoadObjectResourceSlotIds(ObjBase *base, MdlCtx *model) {
     s32 *slot;
     const char (*boneNameRow)[20];
 
-    modelName = func_00332AD8(model->inner, 0);
+    modelName = sdfNamedChunkGetNameById(model->inner, 0);
     for (family = 0; family < 5; family++) {
         if (strcmp(modelName, D_00384B20[family]) == 0) {
             for (index = 0; index < 17; index++) {

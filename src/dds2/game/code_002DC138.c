@@ -24,10 +24,6 @@ typedef struct EffModelOwner {
 
 
 extern u32 effModelUpdateControlFlags;
-
-extern void sdfTexReleaseReference(struct SdfTex *texture);
-
-
 extern u8 btlIsRuntimeAllocated(void);
 
 extern s32 btlIsCurrentActorFullyMarked(void);
@@ -235,16 +231,10 @@ typedef struct EffBattleTexHeaders {
     u8 *slot2; // 0x5B4
 } EffBattleTexHeaders;
 
-extern u8 sdfTexGetPaletteCount(SdfTex *texture);
-
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 
 extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
     u32 format, u8 *pixels, s32 borrowPixels);
-
-extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
-
-extern u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;

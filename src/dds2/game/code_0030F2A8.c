@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_mat4.h"
 #include "fr_font.h"
 #include "sdf_resource.h"
 #include "fpu.h"
@@ -19,10 +20,6 @@ extern f32 fldVectorLength(f32 *);
 
 
 extern void *memset(void *, s32, u32);
-
-typedef struct SdfMat4 {
-    f32 m[16];
-} SdfMat4;
 
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle;

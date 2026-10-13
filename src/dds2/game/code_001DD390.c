@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -52,7 +53,6 @@ extern s32 btlIsUnitInActiveList(void *unit);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 extern u8 effSharedRandomState[];
 
@@ -77,19 +77,6 @@ typedef struct BtlEffectResource {
     u16 unk2A;
     BtlEffectNode nodes[1];
 } BtlEffectResource;
-
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
 
 typedef struct BtlFxSrcA {
     f32 f0;
@@ -182,42 +169,6 @@ extern u32 btlApplyDeferredUnitStatus(void *);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    union {
-        s32 option; /* Kind 9: indexed-unit-effect index. */
-        BtlUnit *unitA; /* Kind 0x2A: first linked camera unit. */
-        u16 optionId;
-        f32 scale;
-    };
-    union {
-        u32 unk_08; /* Kind 9: indexed-unit-effect value. */
-        BtlUnit *unitB; /* Kind 0x2A: second linked camera unit. */
-    };
-    union {
-        u32 unk_0C;
-        f32 scale2;
-        s8 mode;
-    };
-    u32 unk_10;
-    union {
-        u32 unk_14;
-        f32 scale14;
-    };
-    union {
-        u32 unk_18;
-        struct {
-            u8 flag18;
-            u8 flag19;
-        };
-    };
-    u32 unk_1C;
-    u32 unk_20;
-    u32 unk_24;
-} SoundTaskArgs;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -627,7 +578,7 @@ extern s32 btlGetActionRecordLookupValue(s32);
 
 extern s32 func_001B17E8(BtlUnit *, BtlUnit *, s32);
 
-extern u8 func_001B0B30(BtlUnit *, s32);
+extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
 extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, u32);
 
@@ -889,7 +840,7 @@ void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
                 if (randomTargets) {
                     hitCount = group->count;
                 } else {
-                    hitCount = func_001B0B30(source, command);
+                    hitCount = btlSelectCommandHitCount(source, command);
                 }
                 maxHits = datCommandRecords[command].rangeMax;
             }
@@ -1518,7 +1469,7 @@ u32 btlApplyDeferredUnitStatus(void *arg) {
 
 BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x4B;
@@ -1565,7 +1516,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
 
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 option) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApplyCategoryStatDamage;
@@ -1770,7 +1721,7 @@ s32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
 /* Queue an actor/item argument pair for conditional inventory consumption. */
 BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x51;
@@ -1792,7 +1743,7 @@ u32 btlIncrementCommandItemQuantity(s32 taskArgs) {
 /* Queue an owner-bound task that increments this item's inventory quantity. */
 BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x52;
@@ -1829,7 +1780,7 @@ extern u32 btlAddEpFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x53;
@@ -1860,7 +1811,7 @@ extern u32 btlAddMoneyFromPacket(s32);
 
 BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x54;
@@ -1922,7 +1873,7 @@ u32 btlApplyQueuedCurrencyReward(s32 taskArgs) {
 
 BtlRuntimeTask *btlCreateCurrencyRewardTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x56;
@@ -3390,7 +3341,7 @@ void btlCopyUnitStats(BtlUnit *unit, DatPartyRecord *source) {
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void func_003325F8(SdfModel *, SdfModel *);
+extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
 extern void func_003320E8(SdfPoolNode **, SdfModel *);
 
@@ -3442,7 +3393,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    func_003325F8(overlay, model->inner);
+    sdfModelCopyRuntimeState(overlay, model->inner);
     if (unit->status.flags & 2) {
         overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {
@@ -3699,17 +3650,17 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
 }
 
 u32 btlApplyIndexedUnitEffectTask(u8 *arguments) {
-    s32 index = ((SoundTaskArgs *)arguments)->option;
+    s32 index = ((BtlRuntimeTaskArgs *)arguments)->option;
     if (index >= 0) {
-        btlApplyScaledUnitEffectParameter(((SoundTaskArgs *)arguments)->actor, index, ((SoundTaskArgs *)arguments)->unk_08,
-                        ((SoundTaskArgs *)arguments)->scale2);
+        btlApplyScaledUnitEffectParameter(((BtlRuntimeTaskArgs *)arguments)->actor, index, ((BtlRuntimeTaskArgs *)arguments)->unk_08,
+                        ((BtlRuntimeTaskArgs *)arguments)->scale2);
     }
     return 1;
 }
 
 BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 value, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 9;
@@ -3731,7 +3682,7 @@ u32 btlApplyScaledUnitModelTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApplyScaledUnitModelTask;
@@ -3755,7 +3706,7 @@ u32 btlPollThresholdTask(s32 *arguments) {
 
 BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0xB;
@@ -3832,7 +3783,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
 
 BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(24);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApproachTargetTask;
@@ -4009,7 +3960,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
 
 BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x18;
@@ -4033,7 +3984,7 @@ u32 btlReleaseUnitModelTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlReleaseUnitModelTask;
@@ -4265,8 +4216,8 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
 }
 
 void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
-    if ((((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->status.flags & 2) != 0) {
-        evtSetUnitStatusFlags(((BtlUnit *)((SoundTaskArgs *)taskArgs)->unk_0C)->ext);
+    if ((((BtlRuntimeTaskArgs *)taskArgs)->unitC->status.flags & 2) != 0) {
+        evtSetUnitStatusFlags(((BtlRuntimeTaskArgs *)taskArgs)->unitC->ext);
         return;
     }
 }
@@ -4280,7 +4231,7 @@ u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateUnitTask0F(BtlUnit *unit, s32 value, s32 option, s32 value08) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0xF;
@@ -4368,7 +4319,7 @@ s32 btlUnitFadeInTask(BtlFadeArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant) {
     BtlRuntimeTask *task = btlAllocTask(20);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlUnitFadeInTask;
@@ -4412,7 +4363,7 @@ s32 btlUnitFadeOutTask(BtlFadeArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *unit, u32 value, u32 variant) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlUnitFadeOutTask;
@@ -4461,7 +4412,7 @@ s32 btlStepUnitDefeatFadeIn(u32 *arguments) {
 
 BtlRuntimeTask *func_001E5FF8(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x13;
@@ -4498,7 +4449,7 @@ s32 btlStepUnitDefeatFadeOut(u32 *arguments) {
 /* Create the owner-bound defeat fade-out task with a zero elapsed count. */
 BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x14;
@@ -4563,7 +4514,7 @@ u32 btlStepUnitExitFade(u32 *arguments) {
 /* Queue the selected exit-fade mode for this owner, starting at tick zero. */
 BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x15;
@@ -4585,7 +4536,7 @@ typedef struct UnitEffectTaskArgs {
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern void func_00168978(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -4614,7 +4565,7 @@ s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
             unit->status.flags = (unit->status.flags & ~0x80) | 0x40;
             return 1;
         }
-        func_00168978(args->effect);
+        effBattleUpdate(args->effect);
         return 0;
     }
 }
@@ -4811,7 +4762,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
 
 BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 value) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x1D;
@@ -4929,7 +4880,7 @@ u32 btlApplyQueuedActorRotation(s32 *taskArgs) {
 
 BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlApplyQueuedActorRotation;
@@ -4948,7 +4899,7 @@ u32 btlRefreshUnitFxVectorTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlRefreshUnitFxVectorTask;
@@ -5003,7 +4954,7 @@ u32 btlPollGunLoad(s32 arg) {
 
 BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x23;
@@ -5150,7 +5101,7 @@ u32 btlFlagDefeatCandidateTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateDefeatCandidateTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlFlagDefeatCandidateTask;
@@ -5169,7 +5120,7 @@ u32 btlClearDefeatCandidateTask(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlClearDefeatCandidateTask;
@@ -5850,14 +5801,14 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     return changed;
 }
 
-u32 btlExecuteCommandSoundTask(SoundTaskArgs *taskArgs) {
+u32 btlExecuteCommandSoundTask(BtlRuntimeTaskArgs *taskArgs) {
     btlSetCameraCommandMode(taskArgs->unk_0C, taskArgs->actor, taskArgs->unitA, taskArgs->unitB, taskArgs->unk_10);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5878,7 +5829,7 @@ BtlRuntimeTask *btlCreateCommandSoundTask(s32 actor, s32 mode) {
 
 BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    SoundTaskArgs *args = btlGetTaskArguments(task);
+    BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
 
     args->unk_10 = command;
     return task;
@@ -5886,7 +5837,7 @@ BtlRuntimeTask *btlCreateTargetedCommandSoundTask(s32 actor, s32 mode, u32 comma
 
 BtlRuntimeTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option, s32 flag, s32 mode, s32 command) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    SoundTaskArgs *args = btlGetTaskArguments(task);
+    BtlRuntimeTaskArgs *args = btlGetTaskArguments(task);
 
     args->unk_10 = command;
     args->option = option;

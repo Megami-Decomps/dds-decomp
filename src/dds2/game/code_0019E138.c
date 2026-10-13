@@ -112,9 +112,6 @@ typedef struct MemRingHeader {
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 extern u32 strlen(const char *str);
-
-extern void sdfTexReleaseReference(SdfTex *);
-
 typedef struct TextPoolNode {
     struct TextPoolNode *previous;
     struct TextPoolNode *next;

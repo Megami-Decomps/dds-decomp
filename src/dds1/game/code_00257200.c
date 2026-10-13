@@ -7,7 +7,7 @@
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void mnuDrawSelectedMantraEntry(MenuSceneWork *, s32, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
-extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 context) {
     itfDspDrawStrip(0, 0, 0, scale, context);
@@ -240,8 +240,8 @@ void mnuDrawMantraGridSelectionMarkers(MenuSceneWork *work, s32 layer) {
     s32 x = work->entryPosition.x - work->cursorPosition.x - 9;
     s32 y = work->entryPosition.y - work->cursorPosition.y + 0x45;
 
-    mnuDrawSpriteFromPlacementTable(x, y, 0, 0x80, 0x3E, layer);
-    mnuDrawSpriteFromPlacementTable(x, y, 0, 0x80, 0x3D, layer);
+    mnuDrawPlacedSpriteFromTable(x, y, 0, 0x80, 0x3E, layer);
+    mnuDrawPlacedSpriteFromTable(x, y, 0, 0x80, 0x3D, layer);
 }
 
 void mnuCopySceneCoordinates(MenuSceneWork *work) {

@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
@@ -13,6 +14,7 @@
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -166,8 +168,6 @@ extern SdfTex *D_003BD37C;
 extern SdfTex *D_003BD380;
 
 extern SdfTex *D_003BD390;
-
-extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 
 extern s32 sdfAllocPacketAligned(s32);
 
@@ -329,22 +329,6 @@ void *sdfConsAllocateColumnPacket(s32 loopCount) {
     return packet;
 }
 
-typedef struct ConsMatrixPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u8 matrixA[0x40];
-    u8 matrixB[0x40];
-    u8 vecC[0x10];
-    u8 vecD[0x10];
-    u8 vecE[0x10];
-    u32 stmodCommand;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-} ConsMatrixPacket;
-
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
 void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
     packet->quadwords = 0xC;
@@ -355,18 +339,18 @@ void sdfConsBuildMatrixPacket(ConsMatrixPacket *packet, SdfProjectionRecord *nod
     sdfPostmultiplyVuMatrixFromMemory(node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
     VU0_LOAD_VF_MEMORY(vf10, &node->camera.halfWidth);
-    VU0_STORE_VF(vf10, packet->vecC);
+    VU0_STORE_VF(vf10, packet->vecA);
     VU0_LOAD_VF_MEMORY(vf10, &node->camera.originX);
-    VU0_STORE_VF(vf10, packet->vecD);
+    VU0_STORE_VF(vf10, packet->vecB);
     VU0_LOAD_MATRIX(transformMatrix);
     sdfInvertRigidVuTransform();
     VU0_MOVE_VF(vf10, vf31);
-    VU0_STORE_VF(vf10, packet->vecE);
+    VU0_STORE_VF(vf10, packet->vecC);
     VU0_STORE_VF(vf10, node->inverseOrigin);
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
-    packet->reservedA = 0;
-    packet->reservedB = 0;
+    packet->unknownC8 = 0;
+    packet->unknownCC = 0;
 }
 
 extern u8 D_003983D0[];

@@ -58,7 +58,7 @@ extern SdfTexResource *sdfTextureBlockListHead;
 extern SdfTexResource *sdfTextureListHead;
 
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
 
@@ -401,7 +401,7 @@ SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode) {
     SdfTexResource *allocated;
     s32 interruptsEnabled;
 
-    interruptsEnabled = func_0036DE70();
+    interruptsEnabled = DIntr();
     for (block = sdfTextureListHead;; block = block->prev) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
@@ -447,7 +447,7 @@ SdfTexResource *sdfTexAllocHeadHigh(s32 size, s32 allocationMode) {
     SdfTexResource *allocated;
     s32 interruptsEnabled;
 
-    interruptsEnabled = func_0036DE70();
+    interruptsEnabled = DIntr();
     for (block = sdfTextureBlockListHead;; block = block->next) {
         if (block == NULL) {
             if (interruptsEnabled != 0) {
@@ -550,7 +550,7 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     if (textureBlock == NULL) {
         return;
     }
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     textureBlock->allocationMode = 0;
     sdfCoalesceUnusedTextureBlocks(textureBlock);
     nextBlock = textureBlock->next;
@@ -1060,7 +1060,6 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-extern void sdfTexAllocatePaletteData(SdfTex *texture);
 extern void sdfTexCopyImageData(SdfTex *texture, void *source);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
@@ -1084,7 +1083,6 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 }
 
 extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
-extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 SdfTex *sdfTexClone(SdfTex *source) {

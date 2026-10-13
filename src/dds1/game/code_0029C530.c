@@ -10,6 +10,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "dds3obj.h"
 #include "sdf_packet_append.h"
@@ -176,9 +177,6 @@ extern u32 effFlashTextureHandles;
 
 
 extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 extern u32 effCreateSurfaceGridNode(u32, u32);
 
 extern void effFillSurfaceGridColorGradient(u32, u32 *);
@@ -3084,7 +3082,6 @@ void effResetClassFrameAndFlags(s32 work) {
 }
 
 extern s8 effSharedRandomState[];
-extern float effMiscRandUnitFloat(void *);
 /* The cached class payload is copied from the 0x5C-byte source prefix. */
 typedef struct EffRingClassConfig {
     EffRingSource ring;
@@ -4581,7 +4578,6 @@ typedef struct EffScaleRange {
 
 
 
-extern float effMiscRandUnitFloat(void *);
 
 void effSeedBillScaleRange(EffClassWork *work) {
     EffBillRangeConfig *config = work->payload;
@@ -6373,7 +6369,6 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     func_002B0B70(out, mtx);
 }
 
-extern float effMiscRandUnitFloat(void *);
 
 /* Per-animation allocation: positions follow this four-word owner header. */
 typedef struct EffAnimationState {
@@ -10840,7 +10835,7 @@ s32 effPollResourceList(EffectList *list) {
                 }
                 list->request = (struct EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
-                    func_00288C50((struct FileRequest *)list->request);
+                    fileWaitForRequestReady((struct FileRequest *)list->request);
                 }
                 node->state = 1;
             } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {

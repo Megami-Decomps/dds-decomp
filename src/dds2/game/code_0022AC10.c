@@ -15,6 +15,7 @@
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
@@ -324,7 +325,7 @@ extern void func_00209078(void);
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 
 
-extern void func_00168978(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 /* Advance the current event through release, preparation, playback and completion. */
 void btlUpdateEventPlayback(void) {
@@ -426,7 +427,7 @@ void btlUpdateEventPlayback(void) {
             } else {
                 s32 selector = (s32)battle->eventUnit;
                 effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
-                func_00168978((BattleEffect *)battle->eventData);
+                effBattleUpdate((BattleEffect *)battle->eventData);
                 return;
             }
         }
@@ -450,7 +451,7 @@ extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 
 extern char D_0041B710[]; /* "btl:BSE free\n" */
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndEnsureMidiBankResident(s32);
@@ -492,7 +493,7 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_0041B6C8, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_0041B6D8, battleState->eventTaskId);
-    func_00101968(battleState->scriptOwner, eventTask);
+    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
         sndReleaseMidiTrack(battleState->sequenceHandle);
@@ -1538,7 +1539,6 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void sdfInvertRigidVuTransform(void);
 extern void sdfSetPrimaryIdentityMatrixVU(void);
 extern void sdfVuLoadRotationMatrixFromAxisAngle(const RwV3d *, f32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffPacketParams *);
 extern f32 func_00353228(f32);
 extern f32 func_00353140(f32);
@@ -2064,7 +2064,7 @@ extern char D_00436EE8[];
 
 extern char D_00436EF0[];
 
-extern s32 func_001ABF50(BtlUnit *, s32);
+extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
@@ -2184,7 +2184,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
             row = ((BtlAffinityRow *)D_00435DFC)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
-            row.value[i] = func_001ABF50(unit, i);
+            row.value[i] = btlGetUnitElementAffinity(unit, i);
             value = row.value[i];
             if ((value & 0xFFFF0000) != 0) {
                 switch (value & 0xFFFF0000) {
@@ -2962,8 +2962,8 @@ extern u32 func_0020D260(u32);
 extern void func_0020D228(void);
 extern void func_0020D270(u32);
 extern void func_0020D230(void);
-extern s32 func_0011E848(s32);
-extern s32 func_0011E930(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void func_00230D90(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
@@ -3090,7 +3090,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         }
     } else {
         btlBossDebugPrintfN(D_003C05E0.x + 185, D_003C05E0.y + 4, 0,
-            D_00436F98, datGameState->unk1444, func_0011E848(D_00436F64));
+            D_00436F98, datGameState->unk1444, btlGetConditionalEncounterInterval(D_00436F64));
     }
     if (sdfPadButtonStates[1] < 0) {
         D_00436F5D = 1;
@@ -3099,7 +3099,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         return 0;
     }
     if (D_00436F5F != 0) {
-        encounter = func_0011E930(200.0f, D_00436F64);
+        encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_00436F64);
         if (encounter == 0) {
             return 0;
         }

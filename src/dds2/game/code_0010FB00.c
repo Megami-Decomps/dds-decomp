@@ -43,7 +43,7 @@ s32 dds3TestObjectSphereOverlap(u8 *left, u8 *right) {
 }
 
 /* vu0 routine: whether the distance between the two points at +0x40 is inside the second object's radius at +0xC4 */
-s32 func_0010FBD0(u8 *left, u8 *right) {
+s32 dds3IsPointWithinObjectRadius(u8 *left, u8 *right) {
     f32 length;
     f32 rightLimit;
 
@@ -179,7 +179,7 @@ u32 dds3DispatchWorldEntryDrawCallback(EffWorldNode *obj) {
 extern EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 extern EffWorldNode *dds3ActiveWorld;
 
-EffWorldNode *func_0010FE50(s32 capacity) {
+EffWorldNode *dds3CreateActiveWorldWithValueCapacity(s32 capacity) {
     EffWorldNode *world;
     WorldInfo *info;
     struct SdfMemBlock *allocation;

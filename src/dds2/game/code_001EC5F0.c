@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -76,19 +77,6 @@ extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 typedef struct BtlUnit BtlUnit;
 
 extern void func_001F2758(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-
-/* Metadata records reached through the battle table pointers. */
-typedef struct BtlActionTableEntry {
-    u8 kind;               /* 0x00 */
-    u8 pad01[2];
-    u8 resourceType;       /* 0x03 */
-    u8 pad04[4];
-    f32 lightColorMode;
-    f32 lightColor[3];
-    s32 defaultValue;      /* 0x18 */
-    u16 flags;             /* 0x1C */
-    u8 pad1E[2];
-} BtlActionTableEntry;
 
 typedef struct SoundEntry {
     u32 unk0;
@@ -192,38 +180,6 @@ typedef struct BtlTintTransition {
 
 extern u32 btlTintTransitionHoldCount;
 
-typedef struct {
-    union {
-        void *actor;
-        s32 value;
-    };
-    union {
-        s32 option;
-        u16 optionId;
-        f32 scale;
-    };
-    u32 unk_08;
-    union {
-        u32 unk_0C;
-        f32 scale2;
-        s8 mode;
-    };
-    u32 unk_10;
-    union {
-        u32 unk_14;
-        f32 scale14;
-    };
-    union {
-        u32 unk_18;
-        struct {
-            u8 flag18;
-            u8 flag19;
-        };
-    };
-    u32 unk_1C;
-    u32 unk_20;
-    u32 unk_24;
-} SoundTaskArgs;
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -390,7 +346,7 @@ typedef struct {
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void func_00168978(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 extern void func_002034A8(struct SoundResourceLink *);
 
@@ -3907,15 +3863,6 @@ void btlInitializeSceneLightingAndTint(void) {
     ((BtlState *)context)->tint71C = 0x807E5C5E;
 }
 
-typedef struct BtlSceneLightParams {
-    f32 position[3];
-    f32 unk0C;
-    f32 color[3];
-    f32 unk1C;
-    f32 secondaryColor[3];
-    f32 unk2C;
-} BtlSceneLightParams;
-
 void btlBuildActionLightParameters(s32 index, BtlSceneLightParams *light) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlActionTableEntry *action;
@@ -4266,7 +4213,7 @@ extern u32 btlPollFieldArchiveLoad();
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0x28);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
@@ -4330,7 +4277,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
 
 BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
@@ -4698,7 +4645,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         }
     }
     if (args->effect != NULL && (owner->status.flags & 2)) {
-        func_00168978(args->effect);
+        effBattleUpdate(args->effect);
     }
     return 0;
 }
@@ -4827,7 +4774,7 @@ s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
         args->effect->flags &= ~8;
     }
     if (unit->status.flags & 2) {
-        func_00168978(args->effect);
+        effBattleUpdate(args->effect);
     }
     args->counter++;
     return 0;
@@ -4975,7 +4922,7 @@ u32 btlWaitUnitListIdle(void) {
 
 BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x33;
     task->callback = btlWaitUnitListIdle;
@@ -5005,7 +4952,7 @@ u32 sndApplyToActiveActors(taskArgs)
 
 BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x34;
     task->callback = sndApplyToActiveActors;
@@ -5071,7 +5018,7 @@ s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
         args->effect->flags &= ~8;
     }
     if (flags & 2) {
-        func_00168978(args->effect);
+        effBattleUpdate(args->effect);
     }
     args->frameCount++;
     return 0;
@@ -5121,7 +5068,7 @@ u32 btlTaskStartFadeIn(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateFadeInTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x38;
     task->callback = btlTaskStartFadeIn;
@@ -5141,7 +5088,7 @@ extern u32 btlTaskStartCustomFadeIn(u8 *);
 
 BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x39;
     task->callback = btlTaskStartCustomFadeIn;
@@ -5214,7 +5161,7 @@ s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
 }
 
 s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return func_00168448(effect->resourceHandle, option);
+    return sndGetMixerBankCallbackFrame(effect->resourceHandle, option);
 }
 
 s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
@@ -5478,7 +5425,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
         EE_MMI_RGBA_PACK(packed);
         blended[0] = packed;
         link->effectHandle->color = blended[0];
-        func_00168978(link->effectHandle);
+        effBattleUpdate(link->effectHandle);
     }
 }
 
@@ -5593,7 +5540,7 @@ void sndLoadSysEffLb(void) {
     s32 node;
     u32 i;
 
-    func_002C81D0((struct FileRequest *)archive);
+    fileWaitForRequestReady((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
     node = *(s32 *)(archive + 0x60);
     i = 0;
@@ -5777,7 +5724,7 @@ s32 sndPlayStationedSe(u32 *sound) {
 
 BtlRuntimeTask *sndCreateStationedSeTask(u32 value) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5A;
     task->callback = sndPlayStationedSe;
@@ -5834,7 +5781,7 @@ s32 sndPlaySkillSeTask(u32 *arg0) {
 
 BtlRuntimeTask *sndCreateSkillSeTask(s32 *taskArgs, u16 optionId) {
     BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x57;
     task->callback = sndPlaySkillSeTask;
@@ -6181,7 +6128,7 @@ s32 sndHasActiveFileLoad(void) {
 }
 
 /* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */
-void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
+void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotTableEntry *table;
     SoundSlotTableEntry *entry;
@@ -6213,7 +6160,7 @@ extern void mnuResetSoundBufferLocked(void);
 
 extern void mnuClearInactiveSoundBufferState(void);
 
-u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
+u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     SoundSlotOwner *owner = (SoundSlotOwner *)((BtlUnit *)args->actor)->unk328;
     SoundSlotWork *soundWork;
@@ -6275,7 +6222,7 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     s32 option;
 {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlRuntimeTaskArgs *args;
     BtlState *work;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;

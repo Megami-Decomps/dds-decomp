@@ -504,7 +504,7 @@ f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
     return (f32)(angle % 360);
 }
 
-INCLUDE_ASM(const s32, "game/code_00122030", func_00122A00);
+INCLUDE_ASM(const s32, "game/code_00122030", fldGetTriangleHeightAtXZ);
 
 f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     f32 dx = ax - bx;
@@ -1058,7 +1058,7 @@ extern void effMiscQuatMultiplyVU(void);
 extern s32 D_0032E4C8[];
 extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
 extern void fldApplySceneLightSet(s32, s32);
-extern s32 func_001312D8(void);
+extern s32 fldUpdateCameraObjectPose(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 extern void fldApplySkyLightSet(u32, s32);
@@ -1132,7 +1132,7 @@ void fldTogglePlayerModel(void) {
     fldApplySceneLightSet(0, 0);
     fldApplySkyLightSet(D_0032E570[0x2C / 4], 0);
     fldBeginSelectedValueTransition(D_0032E570[0x30 / 4]);
-    func_001312D8();
+    fldUpdateCameraObjectPose();
 }
 
 void fldPrepareResourceBuffer(void) {
@@ -1370,7 +1370,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         }
         fldSetCameraObjectActiveFlag(fldAreaState.commandEnabled);
     }
-    func_001312D8();
+    fldUpdateCameraObjectPose();
     evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0032F170, (s32)D_003BABB8);
 }
 
@@ -1642,14 +1642,14 @@ s16 fldRollEncounter(void) {
 
 extern f32 D_0032F250[4];
 extern void *dds3GetWorldObject(void);
-extern void func_00131688(void);
+extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldTestSceneLifecycleFlags(u32);
 extern void func_00228930(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32,s32);
-extern void func_00119CF0(s32);
-extern s32 func_0011CB90(f32,s32);
+extern void ptyApplyFieldHpAttrition(s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32,s32);
 extern void dds3WorkClear(void);
 extern void sndSetSequenceVolumePan(s32,s32,s32);
 extern void kwlnFadeOutStart(s32,s32,s32,s32);
@@ -1700,7 +1700,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (fldAreaState.consumedFlags & 15) {
         fldResetPlayerSceneObjectState();
         evtStartSceneResourceTask(dds3GetWorldObject(), D_0039FCA0);
-        func_00131688();
+        fldUpdateSmoothedCameraPose();
         return 0;
     }
     if (!(fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1) & 0x40) &&
@@ -1726,12 +1726,12 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldAreaState.unk184 = 60;
                     fldAreaState.attritionDistance = 0.0f;
-                    func_00119CF0(2);
+                    ptyApplyFieldHpAttrition(2);
                 }
             } else {
                 fldAreaState.attritionDistance = 0.0f;
                 fldAreaState.unk184 = 60;
-                func_00119CF0(1);
+                ptyApplyFieldHpAttrition(1);
             }
         }
     } else {
@@ -1745,11 +1745,11 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (encounter == 0) encounter = fldAreaState.defaultEncounterId;
     D_003BAC08.tableIndex = encounter;
     selection = &D_003BAC08.encounterSelection;
-    if ((*selection = func_0011CB90(distance, encounter)) != 0) {
+    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) != 0) {
         encounter = fldRollEncounter();
         if (encounter != -1) {
             D_003BAC08.tableIndex = encounter;
-            *selection = func_0011CB90(99999.0f, encounter);
+            *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
             fldAreaState.encounterMode = 1;
         }
         if (D_0032E570[0x44 / 4] == 1) {
@@ -1820,7 +1820,7 @@ extern void kwlnFadeStartIn(s32);
 
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
-extern void func_00131688(void);
+extern void fldUpdateSmoothedCameraPose(void);
 
 extern u8 fldHasPendingSceneFlags(void);
 
@@ -1889,7 +1889,7 @@ s32 func_00124F58(void) {
         sndSetSequenceVolumePan(0xE, 0x7F, 0x3F);
         fldSetSceneLifecycleFlags(1);
         fldResetPlayerSceneObjectState();
-        func_00131688();
+        fldUpdateSmoothedCameraPose();
         evtSetSolarOverlayFullyTransparent();
         scene->sceneMode = 4;
         scene->sceneState = 5;
@@ -1962,7 +1962,7 @@ s32 fldUpdateNextFloorTransition(void) {
                 scene->sceneMode = 4;
                 scene->sceneState = 5;
                 fldResetPlayerSceneObjectState();
-                func_00131688();
+                fldUpdateSmoothedCameraPose();
                 kwlnFadeInStart(0, 0, 0, 4);
                 D_003BABF0 = 5;
                 fldSetCameraNodeModeWithTen();
@@ -2137,7 +2137,7 @@ s32 fldProcSequence(void) {
             return 0;
         }
     }
-    if (fldTestSceneControlFlags(0x40) == 0) func_00131688();
+    if (fldTestSceneControlFlags(0x40) == 0) fldUpdateSmoothedCameraPose();
     switch (controller->stage) {
     case 0:
         D_003BABE8 = 0;

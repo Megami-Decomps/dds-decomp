@@ -371,7 +371,7 @@ extern f32 sdfSinPoly(f32);
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern s32 func_001312D8();
+extern s32 fldUpdateCameraObjectPose();
 
 extern void fldClearCameraObjectHighlightFlag();
 
@@ -396,7 +396,7 @@ s32 fldUpdateLookAtSegment(void) {
     fldLookAtFarPoint.x = far.x;
     fldLookAtFarPoint.y = far.y;
     fldLookAtFarPoint.z = far.z;
-    func_001312D8();
+    fldUpdateCameraObjectPose();
     fldClearCameraObjectHighlightFlag();
     func_0012CB48();
     return 1;

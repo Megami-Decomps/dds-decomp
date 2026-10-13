@@ -94,7 +94,7 @@ void func_0014F1A0(void) {
     scrSetIntegerReturnValue(func_0013CBA8(1));
 }
 
-s32 func_0014F1C0(void) {
+s32 fldCmdStartSelectedActorTask(void) {
     fldStartSelectedActorTask();
     return 1;
 }

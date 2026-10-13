@@ -15,7 +15,7 @@
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
 
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 extern void EIntr(void);
 
 
@@ -32,7 +32,7 @@ void func_00329600(SdfMemBlock *allocation, s32 size) {
     s32 currentSize;
     s32 available;
 
-    interruptsDisabled = func_0036DE70();
+    interruptsDisabled = DIntr();
     nextBlock = allocation->next;
     temporaryAddress = allocation->address;
     currentSize = nextBlock->address - temporaryAddress;
@@ -103,7 +103,7 @@ void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
     if (allocation == NULL) {
         return;
     }
-    interruptsDisabled = func_0036DE70();
+    interruptsDisabled = DIntr();
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
         sdfSkipNextListNode(allocation);
@@ -168,7 +168,7 @@ SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
     SdfMemBlock *block;
     s32 interruptsDisabled;
 
-    interruptsDisabled = func_0036DE70();
+    interruptsDisabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_USED) {
             if (block->state == SDF_HEAP_BLOCK_END) {

@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
+#include "sdf_projection.h"
 
 typedef struct {
     f32 components[4];
@@ -62,7 +63,6 @@ s32 dds3DrawCameraObject(EffWorldNode *camera) {
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
-extern void sdfVuBuildLookAtBasis(void *target, void *origin, void *up);
 
 /* Transform the local eye/up vectors through the inner node and rebuild the
  * world-space look-at basis. */

@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "ui_color.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -415,7 +416,6 @@ s32 itfRunPanelMode2(KwlnTask *request) {
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264B08);
 INCLUDE_ASM(const s32, "game/code_00263EB0", func_00264D90);
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 /* The opacity update latches at its threshold. Keep fadeProgress signed:
  * the decay path converts it through a signed float. */

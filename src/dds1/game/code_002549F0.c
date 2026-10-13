@@ -12,22 +12,22 @@ typedef struct DspWindowContext {
     DspUnit *unit;
 } DspWindowContext;
 
-extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
 void mnuDrawDisplayModeSprites(s32 x, s32 y, s32 layer, s32 scale,
                    DspWindowContext *window, s32 context) {
     switch (window->unit->displayMode) {
     case 3:
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x50, context);
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x53, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x50, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x53, context);
         return;
     case 4:
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x51, context);
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x54, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x51, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x54, context);
         return;
     case 5:
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x52, context);
-        mnuDrawSpriteFromPlacementTable(x, y, layer, scale, 0x55, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x52, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x55, context);
         break;
     }
 }

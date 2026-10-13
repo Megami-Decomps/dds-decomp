@@ -1,6 +1,7 @@
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
@@ -3893,7 +3894,6 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
     return 0;
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 
 
 

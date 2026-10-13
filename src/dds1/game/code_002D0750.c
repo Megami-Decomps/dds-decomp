@@ -14,7 +14,7 @@
 #define SDF_NAMED_RESOURCE_RPC_ID 0x6F496453
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
-extern s32 func_00312C08(void);
+extern s32 DIntr(void);
 extern void EIntr(void);
 
 extern SdfPendingRequest D_003BD9C8;
@@ -30,7 +30,7 @@ void func_002D0750(SdfMemBlock *allocation, s32 size) {
     s32 currentSize;
     s32 available;
 
-    interruptsDisabled = func_00312C08();
+    interruptsDisabled = DIntr();
     nextBlock = allocation->next;
     temporaryAddress = allocation->address;
     currentSize = nextBlock->address - temporaryAddress;
@@ -103,7 +103,7 @@ void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
     if (allocation == NULL) {
         return;
     }
-    interruptsDisabled = func_00312C08();
+    interruptsDisabled = DIntr();
     nextBlock = allocation->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
         sdfSkipNextListNode(allocation);
@@ -169,7 +169,7 @@ SdfMemBlock *sdfFindGeneralBlockByAddress(void *address) {
     SdfMemBlock *block;
     s32 interruptsDisabled;
 
-    interruptsDisabled = func_00312C08();
+    interruptsDisabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_USED) {
             if (block->state == SDF_HEAP_BLOCK_END) {

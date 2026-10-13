@@ -13,7 +13,7 @@ SdfMemHeap sdfGeneralHeap __attribute__((section(".bss"), aligned(8)));
 
 extern void (*D_003BD2DC)(s32);
 
-s32 func_00312C08(void);
+s32 DIntr(void);
 s32 EIntr(void);
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
@@ -30,7 +30,7 @@ s32 sdfMemoryGetBlockSize(SdfMemBlock *block) {
     s32 blockBytes;
     s32 restoreInterrupts;
 
-    restoreInterrupts = func_00312C08();
+    restoreInterrupts = DIntr();
     blockBytes = block->next->address - block->address;
     if (restoreInterrupts) {
         EIntr();
@@ -51,7 +51,7 @@ SdfMemBlock *sdfAllocGeneralBlock(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_00312C08();
+    restoreInterrupts = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
@@ -95,7 +95,7 @@ SdfMemBlock *sdfAllocGeneralBlockHigh(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_00312C08();
+    restoreInterrupts = DIntr();
     for (block = heap->tail.prev;; block = block->prev) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {
@@ -138,7 +138,7 @@ SdfMemBlock *sdfTryAllocGeneralBlock(s32 requestedBytes) {
     s32 restoreInterrupts;
     SdfMemBlock *block;
 
-    restoreInterrupts = func_00312C08();
+    restoreInterrupts = DIntr();
     for (block = heap->head.next;; block = block->next) {
         if (block->state != SDF_HEAP_BLOCK_FREE) {
             if (block->state == SDF_HEAP_BLOCK_END) {

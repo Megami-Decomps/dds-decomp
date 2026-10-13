@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "snd_track_slot.h"
 
 extern s32 sndFindPackedTrackLoadStatus(s32 id);
@@ -17,14 +18,6 @@ typedef struct {
     /* 0x6 */ u8 unk6;
     /* 0x7 */ u8 unk7;
 } SndTrackVolume;
-
-typedef struct CmdPacket {
-    /* 0x0 */ u32 trackId;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 setting;
-    /* 0xA */ u16 unkA;
-    /* 0xC */ u32 unkC;
-} CmdPacket;
 
 typedef struct FE0C0 {
     /* 0x000 */ u8 pad000[0x208];
@@ -234,7 +227,7 @@ void sndStartTrackExtended(s32 trackId) {
     func_002E87A8(0x20, 0, &packet, 0x10);
 }
 
-void func_002E96D8(u32 value) {
+void sndReleaseTrackHandle(u32 value) {
     u32 packet[4];
 
     packet[0] = value;

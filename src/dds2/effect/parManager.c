@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
@@ -8,6 +9,7 @@
 #include "ee_mmi.h"
 
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 #include "eff.h"
 #include "par_table.h"
@@ -131,7 +133,6 @@ typedef struct {
 } ParBurstPacket;
 
 extern s32 effMiscRand(void *);
-extern f32 effMiscRandUnitFloat(void *);
 extern u8 effDefaultRandomState[];
 extern u8 effEmitterDelayRandomState[];
 
@@ -202,7 +203,7 @@ void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
     parDispatchKindInit(&effect->head.kindState, particleIndex);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00160EF8);
+INCLUDE_ASM(const s32, "effect/parManager", parUpdateBurstEmitter);
 
 
 void parInitColorRamp(ParColorRamp *p, s32 frames) {
@@ -250,10 +251,10 @@ void parInitColorRamp(ParColorRamp *p, s32 frames) {
     p->b12 = ((f32)((a >> 16) & 0xFF) - (f32)((b >> 16) & 0xFF)) / span;
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001616A8);
+INCLUDE_ASM(const s32, "effect/parManager", parEvaluateColorRampAtAge);
 
 /* Allocate contiguous point slabs, slot records and the trailing table header. */
-ParTable *func_001617F8(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
+ParTable *parCreateHistorySlotTable(u32 slotCount, u16 pointCapacity, BillObj **billboardRef) {
     u32 pointBytes = pointCapacity * sizeof(u128);
     u32 slabBytes = pointBytes + sizeof(ParSlot);
     u32 totalBytes = slabBytes * slotCount;

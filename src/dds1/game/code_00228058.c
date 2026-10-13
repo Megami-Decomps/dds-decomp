@@ -14,7 +14,7 @@
 
 
 
-void func_00101A80(KwlnTask *parent, KwlnTask *child);
+void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 
 char *scrReadStringParameter(s32 idx);
@@ -26,7 +26,7 @@ extern char D_003ACAE0[];
 extern s32 fileMenuTaskExists(void);
 extern s32 func_0011E278(void);
 extern void fldSelectDisplayBuffer(u32 row);
-extern void func_00129900(s32 arg);
+extern void fldSetGsAlphaBlendEquation(s32 arg);
 extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
 extern u32 kwlnDrawControlFlags;
 extern s32 scrGetCommandTimer(void);
@@ -93,7 +93,7 @@ u32 evtCreateTextureEntryChildTask(void) {
         return 1;
     }
     task = evtCreateTaskWithValue(0x2AFE, entry);
-    func_00101A80(work->task, task);
+    kwlnTaskAddChild(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;
 }
@@ -111,7 +111,7 @@ u32 evtOpcodeCreateWorldChildTask(void) {
         return 1;
     }
     task = evtCreateTask(0x2afe, scrReadStringParameter(0));
-    func_00101A80(work->task, task);
+    kwlnTaskAddChild(work->task, task);
     scrSetIntegerReturnValue((s32)task);
     return 1;
 }
@@ -382,7 +382,7 @@ s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     if ((datGameState->world.flags & 2) != 0) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
         fldSelectDisplayBuffer(0x53);
-        func_00129900(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);

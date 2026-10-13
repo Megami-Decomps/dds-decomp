@@ -20,21 +20,21 @@ extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
 extern void func_00294D50(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
-extern void func_00296B48(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawShopZeroValueIconAndText(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIconFixedEntry(s32, s32, s32, s32, s32, s32);
 
 extern s32 mnuDrawCommandClosePhase(MenuTerminalContext *);
-extern void func_00294B40(s32, s32, s32, MenuTerminalContext *, s32, s32);
-extern void func_00296D90(MenuTerminalContext *, s32);
+extern void mnuDrawShopPanelWithTypeGraphic(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 extern void mnuDrawWindowBorderAndScrollBar(s32, s32, s32, MenuTerminalContext *, s32, s32);
 extern void func_00295030(s32, s32, s32, MenuTerminalContext *, s32, s32, s32);
-extern void func_00296430(s32, s32, s32, MenuTerminalContext *, u32, s32);
+extern void mnuDrawShopSelectedRowDetailsWithAlpha(s32, s32, s32, MenuTerminalContext *, u32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
 extern void itfEmitSelectedGlyph(MenuTerminalContext *, s32, s32, u32, u32);
-extern void func_00296C58(s32, s32, s32, MenuTerminalContext *, s32);
-extern void func_002968B8(s32, s32, s32, MenuTerminalContext *, s32, s32);
-extern void func_00296298(s32, s32, s32, MenuTerminalContext *, s32);
-extern void func_002967A0(s32, s32, s32, MenuTerminalContext *, s32);
+extern void mnuDrawShopSelectedRowTotal(s32, s32, s32, MenuTerminalContext *, s32);
+extern void mnuDrawShopLimitArrowsScaled(s32, s32, s32, MenuTerminalContext *, s32, s32);
+extern void mnuDrawShopSelectedRowDetails(s32, s32, s32, MenuTerminalContext *, s32);
+extern void mnuDrawShopLimitArrows(s32, s32, s32, MenuTerminalContext *, s32);
 
 
 extern void mnuSetValueListTransition(struct MenuList *, u32);
@@ -112,7 +112,7 @@ void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                          D_003D03F0[8][BRS_ICON_ID], option);
 }
 
-void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
+void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     f32 normalized;
     f32 companionPosition;
     struct EffectSlotSet *layer;
@@ -261,8 +261,8 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
     f32 position;
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
-    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
-    func_00296D90(scene, 0xA09DC380);
+    mnuDrawShopPanelWithTypeGraphic(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 4:
         if ((f32)scene->commandFrames > 0.0f) {
@@ -320,10 +320,10 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00297000((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
             break;
         case 4:
-            func_00297000((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
         break;
@@ -386,18 +386,18 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         }
         func_00294D50(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
                       (s32)(opacity * 256.0f), 0x53);
-        func_00297000((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         if (progress > 1.0f) {
             progress = 1.0f;
         }
-        func_00296B48(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, (s32)((1.0f - progress) * 256.0f), 0x53);
         break;
     case 8:
         progress = (f32)scene->commandFrames / 10.0f;
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
-        func_00296430(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)((1.0f - progress) * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 0, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC300 | (s32)(progress * 96.0f), 0x53);
@@ -413,7 +413,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
             func_00296E98((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
-        func_00296B48(0, 0, 0, (s32)scene, 0x100, 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, 0x100, 0x53);
         mnuDrawIconFixedEntry(0, 0, 0, (s32)scene, 0x100, 0x53);
         break;
     case 6:
@@ -430,7 +430,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
             scene->stateStep++;
         }
         progress = (f32)scene->stateStep / 10.0f;
-        func_00296B48(0, 0, 0, (s32)scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopZeroValueIconAndText(0, 0, 0, (s32)scene, (s32)(progress * 256.0f), 0x53);
         if (scene->stateStep < 8) {
             progress = (f32)scene->stateStep * 0.125f;
         } else {
@@ -492,18 +492,18 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
     f32 progress;
 
     category = scene->ownedWindows[0]->list->cursor->camp.value + 1;
-    func_00294B40(0, 0, 0, scene, 0x100, 0x53);
-    func_00296D90(scene, 0xA09DC380);
+    mnuDrawShopPanelWithTypeGraphic(0, 0, 0, scene, 0x100, 0x53);
+    mnuDrawShopCurrencyBalance(scene, 0xA09DC380);
     switch (scene->phase) {
     case 9:
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
-        func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
-        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 1:
         case 2:
@@ -522,11 +522,11 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         progress = 1.0f - progress;
-        func_00296430(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowDetailsWithAlpha(0, 0, 0, scene, (u32)(progress * 256.0f), 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
-        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 1:
         case 2:
@@ -542,15 +542,15 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
         break;
     case 12:
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
-        func_00296298(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         progress = 1.0f - progress;
         func_00295030(0, 0, 0, scene, (s32)(progress * 256.0f), 1, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4,
                             0xA09DC300 | (s32)(progress * 96.0f), 0x53);
-        func_002968B8(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
+        mnuDrawShopLimitArrowsScaled(0, 0, 0, scene, (s32)(progress * 256.0f), 0x53);
         switch (category) {
         case 1:
         case 2:
@@ -565,11 +565,11 @@ s32 mnuDrawCommandClosePhase(MenuTerminalContext *scene) {
     case 11:
         mnuDrawWindowBorderAndScrollBar(0, 0, 0, scene, 0x100, 0x53);
         func_00295030(0, 0, 0, scene, 0x100, 1, 0x53);
-        func_00296298(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowDetails(0, 0, 0, scene, 0x53);
         mnuDrawIfActive(0, 0, 0, scene->window, 0x53);
         itfEmitSelectedGlyph(scene, 1, 4, 0xA09DC360, 0x53);
-        func_00296C58(0, 0, 0, scene, 0x53);
-        func_002967A0(0, 0, 0, scene, 0x53);
+        mnuDrawShopSelectedRowTotal(0, 0, 0, scene, 0x53);
+        mnuDrawShopLimitArrows(0, 0, 0, scene, 0x53);
         switch (category) {
         case 1:
         case 2:

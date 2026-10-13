@@ -204,7 +204,7 @@ extern void billFlushPairedQuadStreams(BillRenderPair *node);
 
 /* Initialize the paired texture/state list, then append one quad to each
  * child stream. The second child owns the geometry and common batch count. */
-void func_00150840(BillObj *obj, BillRenderPair *node) {
+void billAppendPairedQuadEntry(BillObj *obj, BillRenderPair *node) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -604,7 +604,7 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 
 /* Indexed entries and restore order preserve the native PLUS and lifetimes;
  * see docs/idioms.md, "Trace-justified indexing: billboard update". */
-void func_001515E8(BillObj *obj) {
+void billUpdateAnimation(BillObj *obj) {
     BillChildPayload *child;
     u32 savedColor;
     f32 savedAngle;
@@ -676,7 +676,7 @@ void func_001515E8(BillObj *obj) {
                 obj->pair.kind = 1;
             }
             obj->rotationAngle += savedAngle;
-            func_00150840(obj, &obj->pair);
+            billAppendPairedQuadEntry(obj, &obj->pair);
             obj->rotationAngle = savedAngle;
             obj->childParam = savedColor;
         } else {

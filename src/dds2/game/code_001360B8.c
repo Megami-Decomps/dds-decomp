@@ -297,7 +297,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
 
 extern u32 D_00435F1C;
 
-void func_00136718(void) {
+void fldApplyLightSetToChaseCameraUnit(void) {
     FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
     f32 dir[4];
     EvtUnit *unit;

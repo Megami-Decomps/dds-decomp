@@ -1,11 +1,11 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
 extern u32 effMiscRand(void *);
-extern f32 effMiscRandUnitFloat(void *);
 extern u8 effDefaultRandomState[];
 
 

@@ -25,9 +25,6 @@
 
 extern s32 func_003101B8(s32 directory);
 extern s32 func_00310320(s32 directory, SceDirent *entry);
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
     BTL_RESOURCE_NAME_RECORD_BYTES = 0x38,
@@ -2266,7 +2263,7 @@ void btlBindActorSlot(BtlActor *actor, s32 taskArg) {
         BtlUnit *unit = actor->unit;
         itfMesSetTextSlotFromValue(handle, 0, unit->partyRecord.unitId, (unit->partyRecord.flags & 0x20) ? 1 : 2);
     }
-    func_00101A80(state->scriptOwner, slot);
+    kwlnTaskAddChild(state->scriptOwner, slot);
     state->boundTask = slot;
 }
 

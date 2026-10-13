@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "eff_random.h"
 #include "eff_math.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -33,8 +34,6 @@ typedef struct {
     u8 pad04[4];
     EffWork *effect;
 } EffMagatuhiCallback;
-
-extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
@@ -133,15 +132,14 @@ void effMagatuhiReleaseResource(EffMagatuhiValueWork *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_00191010);
+INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagatuhiDrawHistoryTrails);
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfSinPoly(f32 angle);
 
-void func_00191450(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
+void effMagatuhiUpdateValueHistorySlot(EffMagatuhiValueWork *work, s32 index, void *vectorArg) {
     f32 (*newSlot)[4];
     f32 (*replayPosition)[4];
     f32 (*historyPosition)[4];
@@ -253,7 +251,6 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
     }
 }
 
-extern f32 effMiscRandUnitFloat(void *state);
 extern u8 effDefaultRandomState[];
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -261,7 +258,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 
 
-void func_001918B8(EffMagatuhiValueWork *valueWork, s32 index) {
+void effMagatuhiResetValueHistorySlot(EffMagatuhiValueWork *valueWork, s32 index) {
     effResetMagatuhiValueSlot(valueWork, index);
 }
 
@@ -353,7 +350,7 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -466,7 +463,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
                 fade = 1.0f;
             }
             effMagatuhiSetValue(valueWork, i, ((u32)(fade * 127.0f) << 24) | 0x808080);
-            func_00191450(valueWork, i, point);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, point);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -474,7 +471,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
             particle->age++;
         }
     }
-    func_00190DE0(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Update the first family's scattered float parameters without touching gaps. */
@@ -616,7 +613,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     slot->controlPoints[3][0] = point[0];
     slot->controlPoints[3][1] = point[1];
     slot->controlPoints[3][2] = point[2];
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -654,7 +651,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
                 fade = 1.0f;
             }
             effMagatuhiSetValue(valueWork, i, ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB);
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (frame >= life && respawn) {
             *delays = -(effMiscRand(effDefaultRandomState) % spread);
@@ -663,7 +660,7 @@ void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
         }
         delays++;
     }
-    func_00190DE0(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
@@ -719,7 +716,7 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
             VU0_LOAD_VF(vf11, endPosition);
             VU0_LERP_VF10(blendFraction);
             VU0_STORE_VF(vf10, samplePosition);
-            func_00191450(valueWork, i, samplePosition);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, samplePosition);
             blendFraction += blendStep;
         }
         (*ages)++;
@@ -827,7 +824,7 @@ void effMagatuhiInitParticleA(EffMagatuhiRingWork *work, s32 index) {
     blend = work->head.endJitter;
     t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -887,7 +884,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -895,7 +892,7 @@ void effMagatuhiUpdateRingParticles(EffMagatuhiRingWork *work) {
             particle->age++;
         }
     }
-    func_00190DE0(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the ring origin as one quadword, including its fourth component. */
@@ -974,7 +971,7 @@ void effMagatuhiUpdateRingFamily(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     angle += angleStep;
                     radius += radiusStep;
                 }
@@ -1078,7 +1075,7 @@ void effMagatuhiInitOrbitParticle(EffMagatuhiOrbitWork *work, s32 index) {
     blend = work->head.endJitter;
     t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     elem->radiusStep = (work->head.endRadius * t - elem->radius) / (f32)work->head.lifetimeFrames;
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -1139,7 +1136,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -1147,7 +1144,7 @@ void effMagatuhiUpdateOrbitParticles(EffMagatuhiOrbitWork *work) {
             particle->age++;
         }
     }
-    func_00190DE0(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
@@ -1228,7 +1225,7 @@ void effMagatuhiReplayOrbitStartDelays(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     height += heightStep;
                     angle += angleStep;
                     radius += radiusStep;
@@ -1319,7 +1316,7 @@ void effMagatuhiInitializeDriftParticle(EffMagatuhiDriftWork *work, s32 index) {
     particle->liftStep = work->head.initialLift *
         (effMiscRandUnitFloat(effDefaultRandomState) * work->head.initialLiftRandomness +
          (1.0f - work->head.initialLiftRandomness));
-    func_001918B8(work->managedResource->valueWork, index);
+    effMagatuhiResetValueHistorySlot(work->managedResource->valueWork, index);
     effMagatuhiSetValue(work->managedResource->valueWork, index, 0);
 }
 
@@ -1382,7 +1379,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             }
             effMagatuhiSetValue(valueWork, i, effMultiplyPackedColors(
                 ((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
-            func_00191450(valueWork, i, out);
+            effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
         }
         if (age >= life && respawn) {
             particle->age = -(effMiscRand(effDefaultRandomState) % spread);
@@ -1390,7 +1387,7 @@ void effMagatuhiUpdateDriftParticles(EffMagatuhiDriftWork *work) {
             particle->age++;
         }
     }
-    func_00190DE0(work->managedResource);
+    effMagatuhiDrawOwnerHistoryTrails(work->managedResource);
 }
 
 /* Copy the drift origin as one quadword, preserving the source w. */
@@ -1473,7 +1470,7 @@ void effMagatuhiUpdateDriftFamily(EffMagatuhiCallback *arg) {
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_ADD(vf10, vf10, vf11);
                     VU0_STORE_VF(vf10, out);
-                    func_00191450(valueWork, i, out);
+                    effMagatuhiUpdateValueHistorySlot(valueWork, i, out);
                     scale += scaleStep;
                     angle += angleStep;
                 }

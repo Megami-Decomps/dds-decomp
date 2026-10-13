@@ -14,7 +14,7 @@ SdfPendingRequest sdfChipReleaseRequest __attribute__((section(".sbss"), aligned
 SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)));
 
 void *sdfClearQuadwords(void *arg0, s32 arg1);
-s32 func_00312C08(void);
+s32 DIntr(void);
 s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);
 
@@ -40,7 +40,7 @@ void sdfReleaseChipBlock(void *memory) {
     }
     page = (SdfChipPage *)((u8 *)sdfChipPages + (index >> 12) * sizeof(SdfChipPage));
     sizeClass = page->sizeClass;
-    interrupts = func_00312C08();
+    interrupts = DIntr();
     count = page->usedCells;
     page->usedCells = count - 1;
     if (page->usedCells == 0) {

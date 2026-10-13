@@ -21,8 +21,8 @@ void effReleaseMagatuhiOwner(EffMagatuhiOwner *effect) {
     sdfReleaseChipBlock(effect);
 }
 
-void func_00190DE0(EffMagatuhiOwner *effect) {
-    func_00191010(effect->valueWork);
+void effMagatuhiDrawOwnerHistoryTrails(EffMagatuhiOwner *effect) {
+    effMagatuhiDrawHistoryTrails(effect->valueWork);
 }
 
 void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {

@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "eff_random.h"
 #include "sdf_task_work.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -14,14 +15,13 @@
 
 
 
-extern f32 effMiscRandUnitFloat(s32);
 
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
 extern f32 sdfSinPoly(f32);
 
-extern void mnuDrawSpriteFromPlacementTable(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
@@ -179,10 +179,10 @@ void mnuDrawMantraUpNavigationPulse(s32 frame, s32 size, s32 param) {
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawSpriteFromPlacementTable(0, -10, 0, (s32)(scale * t), 0, param);
+    mnuDrawPlacedSpriteFromTable(0, -10, 0, (s32)(scale * t), 0, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 0, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 0, param);
 }
 
 void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 param) {
@@ -192,10 +192,10 @@ void mnuDrawMantraRightNavigationPulse(s32 frame, s32 size, s32 param) {
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawSpriteFromPlacementTable(10, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawPlacedSpriteFromTable(10, 0, 0, (s32)(scale * t), 1, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 1, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 1, param);
 }
 
 void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 param) {
@@ -205,10 +205,10 @@ void mnuDrawMantraDownNavigationPulse(s32 frame, s32 size, s32 param) {
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawSpriteFromPlacementTable(0, 10, 0, (s32)(scale * t), 2, param);
+    mnuDrawPlacedSpriteFromTable(0, 10, 0, (s32)(scale * t), 2, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 2, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 2, param);
 }
 
 void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 param) {
@@ -218,10 +218,10 @@ void mnuDrawMantraLeftNavigationPulse(s32 frame, s32 size, s32 param) {
 
     t = x > 5.0f ? (x - 5.0f) / 40.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.2f + 0.1f;
-    mnuDrawSpriteFromPlacementTable(-10, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawPlacedSpriteFromTable(-10, 0, 0, (s32)(scale * t), 3, param);
     t = x < 35.0f ? x / 35.0f : 0.0f;
     t = sdfSinPoly(t * 3.14159265f) * 0.5f + 0.5f;
-    mnuDrawSpriteFromPlacementTable(0, 0, 0, (s32)(scale * t), 3, param);
+    mnuDrawPlacedSpriteFromTable(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
 void mnuDrawMantraNavigationPulses(MenuSceneWork *display, s32 inputScale, s32 param) {

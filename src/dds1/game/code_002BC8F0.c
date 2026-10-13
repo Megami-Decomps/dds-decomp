@@ -131,10 +131,6 @@ typedef struct EffectResourceEntry {
 extern u16 D_003BC944;
 
 extern u8 *D_003BC958;
-
-extern void sdfTexReleaseReference(SdfTex *texture);
-
-
 extern u32 D_003BC960[2];
 
 extern s8 D_003BC9AC;

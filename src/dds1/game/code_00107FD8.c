@@ -1418,7 +1418,7 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-extern s32 func_00305B08();
+extern s32 sdfVFormatString();
 extern void sdfDevConsPrintf();
 
 /* printf into the dev console node when one exists. */
@@ -1436,7 +1436,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
 
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
-        func_00305B08(messageBuffer, format, formatArgs);
+        sdfVFormatString(messageBuffer, format, formatArgs);
         sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
@@ -1575,7 +1575,7 @@ typedef struct HeapOverlayBlock {
 
 extern s32 sdfGetPacketCursor(void);
 extern void sdfSetPacketCursorAligned(s32);
-extern s32 func_00312C08(void);
+extern s32 DIntr(void);
 extern u32 func_002D0380(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
@@ -1594,7 +1594,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     s32 markerY;
 
     snapshot = (HeapOverlayBlock *)sdfGetPacketCursor();
-    restoreInterrupts = func_00312C08();
+    restoreInterrupts = DIntr();
     block = (SdfMemBlock *)func_002D0380();
     entry = snapshot;
     heapBase = sdfMemoryGetBlockAddress(block);

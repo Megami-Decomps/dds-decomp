@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui_color.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "dat_state.h"
@@ -21,7 +22,6 @@ extern s32 ptyHasSkill(DatPartyRecord *, s32);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 
 
-extern u32 uiBlendColors(u32, u32, s32);
 
 void itfUpdateFadeColor(BrsSkillPackageWork *work);
 

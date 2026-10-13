@@ -8,6 +8,7 @@
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 
+#include "sdf.h"
 extern s8 sdfPadButtonStates[0x20];
 extern s8 D_0040B7DB[];
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -23,6 +24,7 @@ extern s8 D_0043643D;
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
+#include "sdf_projection.h"
 
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
 #define EFF_DIRECTORY_PATH_BYTES 0x70
@@ -33,11 +35,6 @@ extern s8 D_0043643D;
 #define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
-
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
-
-
-
 extern EffCreateHandler D_003B2060[];
 
 extern EffHandler D_003B2064[];

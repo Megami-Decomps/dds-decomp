@@ -56,7 +56,7 @@ extern void dds3ForEachEntry(void);
 extern void mdlFlagClear(s32 flag);
 extern void func_00120C08(s32 mode);
 extern void sdfSaveResetSnapshot(void);
-extern void func_00117C48(void);
+extern void sdfRestoreResetSnapshot(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 
@@ -312,7 +312,7 @@ extern void mdlFlagSet(s32 flag);
 extern void mnuApplyFlagArray(u8 *flags);
 extern void dds3ForEachFlagged(void);
 
-void func_00117C48(void) {
+void sdfRestoreResetSnapshot(void) {
     u32 index;
 
     if (D_003BA9E5 != 0) {
@@ -388,11 +388,11 @@ void sdfResetGameRuntime(s32 fullReset) {
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();
     if (fullReset == 1) {
-        func_00117C48();
+        sdfRestoreResetSnapshot();
     }
 }
 
-void func_001180F8(void) {
+void evtInitializeWorkScriptTask(void) {
     dds3WorkInit(D_003BAAAC);
 }
 
@@ -436,7 +436,7 @@ void sdfReloadChannelSegments(SdfResourceTable *table) {
     s32 i;
 
     /* Copy one segment into *slot and report its length rounded up to 16 bytes. */
-    s32 func_00118170(void **slot, u32 unused) {
+    s32 sdfLoadChannelFileSegment(void **slot, u32 unused) {
         u32 blocks;
         u32 advance;
 
@@ -464,7 +464,7 @@ void sdfReloadChannelSegments(SdfResourceTable *table) {
     sdfDevQueueReadAndWait(command, address, size);
     sdfDevWaitThenReleaseCommandState(command);
     for (i = 0; table->entries[i].slot != 0; i++) {
-        address += func_00118170(table->entries[i].slot, table->entries[i].unused);
+        address += sdfLoadChannelFileSegment(table->entries[i].slot, table->entries[i].unused);
     }
     sdfReleaseResourceAllocation(block);
     func_003003F0(D_0039F930, table->path);
@@ -483,7 +483,7 @@ void sdfResetChannels(void) {
         sdfReloadChannelSegments((SdfResourceTable *)entry);
         entry += 0xA4;
     }
-    func_001180F8();
+    evtInitializeWorkScriptTask();
 }
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,
@@ -565,21 +565,21 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-s32 func_00118620(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext10(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-s32 func_00118648(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 evtRunCommandContext7(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
 s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    return func_00118648(unitIndex, scriptArg, contextArg, (u8)mode);
+    return evtRunCommandContext7(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 extern s32 effMiscRandMod(s32 state, s32 modulus);
 
-s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
+s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital) {
     s32 healing;
     s32 damage;
     u16 current;
@@ -640,7 +640,7 @@ s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 
             healing = sdfDispatchCmd(channel, queryArg, (u32)item, vital);
             break;
         case 1:
-            healing = func_00118620(channel, queryArg, (u32)item, vital);
+            healing = evtRunCommandContext10(channel, queryArg, (u32)item, vital);
             break;
         }
         healing += base;
@@ -702,7 +702,7 @@ s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 
         }
         break;
     case 6:
-        damage = func_00118648(channel, queryArg, (u32)item, vital) + base;
+        damage = evtRunCommandContext7(channel, queryArg, (u32)item, vital) + base;
         if (damage == 0) {
             damage = 1;
         }
@@ -828,7 +828,7 @@ u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     return result;
 }
 
-extern s32 func_00118688(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
+extern s32 sdfCalculateCommandVitalDelta(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
 /* These unused-result legacy mutator calls had no prototype in scope. */
 void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);
@@ -840,8 +840,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 bits;
 
     if (queryArg != 0 && item != NULL) {
-        hpDelta = func_00118688(channel, queryArg, item, 1, 1);
-        mpDelta = func_00118688(channel, queryArg, item, 1, 2);
+        hpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 1);
+        mpDelta = sdfCalculateCommandVitalDelta(channel, queryArg, item, 1, 2);
         value = sdfQueryChannelValue(channel, queryArg, item);
         bits = sdfQueryChannelBits(channel, queryArg, item);
         if (hpDelta == 0 && mpDelta == 0 && value == 0 && bits == 0) {

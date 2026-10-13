@@ -24,5 +24,7 @@ s32 effMathStepBezierSlot(struct EffArrHdr *table, s32 index, f32 *out);
 s32 effMathStepBezierSlotDirect(EffCubicBezierSlot *slot, f32 *out);
 void effMathResetBezierSlot(struct EffArrHdr *table, s32 index);
 EffCubicBezierSlot *effMathGetSlotAt(struct EffArrHdr *table, s32 index);
+/* Blend packed RGBA8888 colors; t >= 1 returns colorB unchanged. */
+u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 #endif

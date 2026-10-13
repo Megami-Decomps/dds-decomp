@@ -1,5 +1,6 @@
 #include "sdf_gs_header.h"
 #include "common.h"
+#include "sdf_vu_color_transform.h"
 #include "kwln.h"
 #include "sdf_asset_packets.h"
 #include "sdf_asset_state.h"
@@ -14,6 +15,7 @@
 #include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 
@@ -71,15 +73,6 @@ typedef struct {
     f32 depth;             /* 0xAC */
 } VuWork;
 
-typedef struct SdfVuColorTransform {
-    u8 pad00[4];
-    f32 scaledY;
-    u8 pad08[4];
-    f32 scale;
-    f32 colorBase[4];
-    f32 colorDelta[4];
-} SdfVuColorTransform;
-
 extern void func_00336EC0(SdfVuColorTransform *, u32, u32, u32, u32, f32, f32, f32);
 
 extern s32 D_00439180;
@@ -132,13 +125,13 @@ void sdfVuCross3(void *outputVector, void *leftVector, void *rightVector) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-/* Build a VU basis from the normalized target-origin direction and up vector. */
+/* Build direction from the first vector relative to the second, then derive up/right. */
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
-void sdfVuBuildLookAtBasis(void *target, void *origin, void *up) {
-    VU0_LOAD_VF(vf10, origin);
+void sdfVuBuildLookAtBasis(const void *directionPoint, const void *basisOrigin, const void *up) {
+    VU0_LOAD_VF(vf10, basisOrigin);
     VU0_MOVE_VF(vf31, vf10);
     VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf10, directionPoint);
     VU0_SUB(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10();
     VU0_MOVE_VF(vf30, vf10);

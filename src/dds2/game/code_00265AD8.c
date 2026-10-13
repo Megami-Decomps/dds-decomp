@@ -320,7 +320,7 @@ u32 mnuStartReturnFadeAndRestoreDisplay(void) {
     evtSetBoundedDisplayValue(0, 1);
     evtSetBoundedDisplayValue(1, 0);
     kwlnFadeInStart(0, 0, 0, 0xF);
-    func_00342580(0x300000);
+    sndReleaseTrackHandle(0x300000);
     return 1;
 }
 

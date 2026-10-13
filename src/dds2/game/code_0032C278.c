@@ -30,6 +30,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_gs_flat_shapes.h"
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
+#include "sdf_model.h"
 
 extern u32 func_003287E0(void);
 extern s32 EIntr(void);
@@ -97,7 +98,7 @@ extern s32 sdfCreateSemaphore(u32, u32, u32);
 
 extern u64 sdfGraphHasPendingWork(void);
 
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 
 extern s32 sdfPacketBufferSize;
 
@@ -537,7 +538,7 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
     s64 interruptState;
     u64 pendingWork;
 
-    interruptState = func_0036DE70();
+    interruptState = DIntr();
     pendingWork = sdfGraphHasPendingWork();
     if (interruptState != 0) {
         EIntr();
@@ -1119,7 +1120,7 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
     while (sdfPacketSlotIndex != 0) {
     }
     D_00438A24 = sdfGetElapsedTimerTicks(start);
-    interrupts = func_0036DE70();
+    interrupts = DIntr();
     index = D_00438A28 + 1;
     if (index == 3) {
         index = 0;

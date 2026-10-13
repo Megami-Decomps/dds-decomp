@@ -500,7 +500,7 @@ s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
-s32 func_00119A00(s32 itemId) {
+s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
     s32 quantity = datGameState->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {
@@ -554,7 +554,7 @@ s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
 extern void sdfRaisePackedChannelValue(DatPartyRecord *, u32);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-void func_00119B08(s32 mode) {
+void ptyApplyEventPenalty(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1 || mode == 4 || mode == 5 || mode == 6) {
         DatPartyRecord *entry = datGameState->party;
@@ -612,7 +612,7 @@ void func_00119B08(s32 mode) {
 
 
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
-void func_00119CF0(s32 mode) {
+void ptyApplyFieldHpAttrition(s32 mode) {
     s32 nextHp, loss, slotIndex;
     if (mode == 1) {
         DatPartyRecord *entry = datGameState->party;
@@ -1678,11 +1678,11 @@ s32 evtPushAvailableIntegerValue(void) {
     return 1;
 }
 
-void func_0011C390(void) {
+void evtPushLevelMaxHpGrowth(void) {
     scrSetFloatReturnValue(datBattleParameters->maxHpGrowth[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C3C0(void) {
+void evtPushLevelMaxMpGrowth(void) {
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
@@ -1716,11 +1716,11 @@ void evtSelectStatGrade(void) {
     scrSetFloatReturnValue(datBattleParameters->hpGradeValues[gradeIndex]);
 }
 
-void func_0011C4C0(void) {
+void evtPushLevelValueA(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesA[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-void func_0011C4F0(void) {
+void evtPushLevelValueB(void) {
     scrSetFloatReturnValue(datBattleParameters->levelValuesB[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
@@ -1932,7 +1932,7 @@ s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
 }
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
-s32 func_0011CAB0(s32 index) {
+s32 btlGetConditionalEncounterInterval(s32 index) {
     s32 variant;
     s32 total;
     s32 i;
@@ -1964,7 +1964,7 @@ extern s32 D_003BAAC0;
 extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
-s32 func_0011CB90(f32 step, s32 index) {
+s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 index) {
     s32 group;
     s32 interval;
     s32 count;
@@ -1979,7 +1979,7 @@ s32 func_0011CB90(f32 step, s32 index) {
         return 0;
     }
     group = btlSelectConditionalEncounterGroup(index);
-    interval = func_0011CAB0(index);
+    interval = btlGetConditionalEncounterInterval(index);
     if (interval == 0) {
         return interval;
     }

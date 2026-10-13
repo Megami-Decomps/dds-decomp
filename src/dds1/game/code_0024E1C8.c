@@ -100,7 +100,7 @@ void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 pl
                          context);
 }
 
-void mnuDrawSpriteFromPlacementTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
+void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036B510[placementIndex][MNU_SPRITE_X_OFFSET]) << 4,
                          (y + D_0036B510[placementIndex][MNU_SPRITE_Y_OFFSET]) << 3,
                          z,

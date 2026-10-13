@@ -177,7 +177,7 @@ extern void effResetSlots(void);
 
 extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
 
-extern void func_00160D88(BattleEffect *effect);
+extern void effBattleUpdate(BattleEffect *effect);
 
 /* Advance the current event through release, preparation, playback and completion. */
 void btlUpdateEventPlayback(void) {
@@ -265,7 +265,7 @@ void btlUpdateEventPlayback(void) {
             } else {
                 s32 selector = (s32)battle->eventUnit;
                 effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
-                func_00160D88((BattleEffect *)battle->eventData);
+                effBattleUpdate((BattleEffect *)battle->eventData);
                 return;
             }
         }
@@ -287,7 +287,7 @@ extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
 
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
 
-extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
@@ -324,7 +324,7 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_003A6758, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
-    func_00101A80(battleState->scriptOwner, eventTask);
+    kwlnTaskAddChild(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {
@@ -1861,7 +1861,7 @@ extern char D_003BBA98[];
 
 extern char D_003BBAA0[];
 
-extern s32 func_001A2F50(BtlUnit *, s32);
+extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
@@ -1981,7 +1981,7 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
             row = ((BtlAffinityRow *)D_003BAA2C)[unit->partyRecord.unitId];
         }
         for (i = 0; i < 16; i++) {
-            row.value[i] = func_001A2F50(unit, i);
+            row.value[i] = btlGetUnitElementAffinity(unit, i);
             value = row.value[i];
             if ((value & 0xFFFF0000) != 0) {
                 switch (value & 0xFFFF0000) {
@@ -2735,8 +2735,8 @@ extern void func_001FB1E0(void *);
 extern void func_001FB1A8(void);
 extern void func_001FB1F0(void *);
 extern void func_001FB1B0(void);
-extern s32 func_0011CAB0(s32);
-extern s32 func_0011CB90(f32, s32);
+extern s32 btlGetConditionalEncounterInterval(s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 extern void btlApplyPartySetupOverride(void);
 extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 
@@ -2844,7 +2844,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         }
     } else {
         btlBossDebugPrintfN(D_00361D68.x + 185, D_00361D68.y + 4, 0,
-            D_003BBB50, datGameState->unk1364, func_0011CAB0(D_003BBB14));
+            D_003BBB50, datGameState->unk1364, btlGetConditionalEncounterInterval(D_003BBB14));
     }
     if (sdfPadButtonStates[1] < 0) {
         D_003BBB0D = 1;
@@ -2853,7 +2853,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
         return 0;
     }
     if (D_003BBB0F != 0) {
-        encounter = func_0011CB90(200.0f, D_003BBB14);
+        encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_003BBB14);
         if (encounter == 0) {
             return 0;
         }

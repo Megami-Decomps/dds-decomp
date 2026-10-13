@@ -36,8 +36,8 @@ extern void evtAdvanceSolarClockAndExpireControls(f32);
 extern void evtUpdateFlaggedStats(void);
 extern s32 evtClearRandomStatusFlags(void);
 extern s32 ptyAnyUnitFlagMatch(u32, s32);
-extern void func_0011A510(s32);
-extern s32 func_0011E930(f32, s32);
+extern void ptyApplyFieldHpAttrition(s32);
+extern s32 btlAdvanceConditionalEncounterRoll(f32, s32);
 
 extern s32 fldDeferredCommand;
 
@@ -77,7 +77,7 @@ extern void fldApplySkyLightSet(u32, s32);
 
 extern void func_001512D8(void);
 
-extern KwlnTask *func_00101820(u32);
+extern KwlnTask *kwlnTaskFindByPriority(u32);
 
 extern s32 func_00153560(s32, s32);
 
@@ -683,7 +683,7 @@ f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
     return (f32)(angle % 360);
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", func_00124A10);
+INCLUDE_ASM(const s32, "game/code_00124040", fldGetTriangleHeightAtXZ);
 
 f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
     f32 dx = ax - bx;
@@ -1451,7 +1451,7 @@ extern void fldActivatePendingSceneCommand(void);
 extern s32 fldGetSceneCommandState(void);
 
 /* The scene reset ignores the command word supplied by this caller. */
-extern void func_00136098();
+extern void fldClearCameraObjectActiveFlag();
 
 
 
@@ -1574,7 +1574,7 @@ void fldSpawnPlayerUnits(f32 *input) {
                 mdlFlagClear(0x818);
                 fldAreaState.sceneCommand = 0;
             }
-            func_00136098(fldAreaState.commandEnabled);
+            fldClearCameraObjectActiveFlag(fldAreaState.commandEnabled);
         }
         func_00133B10();
         evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0038A610, (s32)(u32)D_00435F50);
@@ -1617,7 +1617,7 @@ s32 func_001266D8(ObjectTransform *relativeTransform, EffWorldNode *target) {
     return 0;
 }
 
-u32 func_001266E0(void) {
+u32 fldGetDefaultSceneCommandValue(void) {
     return 100;
 }
 
@@ -1649,7 +1649,7 @@ void fldActivatePendingSceneCommand(void) {
             fldPlayMenuSound(0x29);
         }
         mdlFlagSet(0x818);
-        value = func_001266E0();
+        value = fldGetDefaultSceneCommandValue();
         fldAreaState.sceneCommand = value;
         datGameState->world.fieldFlags |= 8;
         fldAreaState.consumedFlags &= ~1;
@@ -1679,7 +1679,7 @@ void fldUpdateSceneCommandSpeed(void) {
         }
     } else if ((datGameState->world.fieldFlags & 8) != 0) {
         if (scene->sceneCommand == 0) {
-            value = func_001266E0();
+            value = fldGetDefaultSceneCommandValue();
             scene->sceneCommand = value;
             fldApplySceneLightSet((s16)value, 0x14);
         }
@@ -1890,14 +1890,14 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldAreaState.unk190 = 60;
                     fldAreaState.attritionDistance = 0.0f;
-                    if (fldAreaState.unk11C == 3) func_0011A510(3);
-                    else if (fldAreaState.unk11C == 2) func_0011A510(4);
-                    else func_0011A510(2);
+                    if (fldAreaState.unk11C == 3) ptyApplyFieldHpAttrition(3);
+                    else if (fldAreaState.unk11C == 2) ptyApplyFieldHpAttrition(4);
+                    else ptyApplyFieldHpAttrition(2);
                 }
             } else {
                 fldAreaState.attritionDistance = 0.0f;
                 fldAreaState.unk190 = 60;
-                func_0011A510(1);
+                ptyApplyFieldHpAttrition(1);
             }
         }
     } else {
@@ -1948,11 +1948,11 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (encounter == 0) encounter = fldAreaState.defaultEncounterId;
     D_00435F98.tableIndex = encounter;
     selection = &D_00435F98.encounterSelection;
-    if ((*selection = func_0011E930(distance, encounter)) != 0) {
+    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) != 0) {
         encounter = fldRollEncounter();
         if (encounter != -1) {
             D_00435F98.tableIndex = encounter;
-            *selection = func_0011E930(99999.0f, encounter);
+            *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
             fldAreaState.encounterMode = 1;
         }
         if (*selection != 0) {
@@ -2217,7 +2217,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
 
-s32 func_001278D0(void) {
+s32 fldUpdateFieldSceneTask(void) {
     EffBlurScatterParams blur;
     FieldPlayerSceneWork *playerWork = &D_0038A640;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
@@ -2338,7 +2338,7 @@ s32 func_001278D0(void) {
             fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
-        if (func_00101820(0x3EA) == NULL && func_00150F10() == 0) {
+        if (kwlnTaskFindByPriority(0x3EA) == NULL && func_00150F10() == 0) {
             fldPreparePlayerSceneCameraTarget();
         }
         dds3ClearObjectFlags(fldPlayerObject, 0x40);
@@ -2499,7 +2499,7 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         strcpy(scene->resourceName, record->note);
         scene->sequenceOption = record->options;
     }
-    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)func_001278D0, 0, 0);
+    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)fldUpdateFieldSceneTask, 0, 0);
     kwlnTaskCreate((s32)D_00412FE0, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
     D_00435F84 = 1;
     fldTestDrawCreate();

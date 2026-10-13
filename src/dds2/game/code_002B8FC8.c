@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "ui_color.h"
 #include "fr_font_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
@@ -14,6 +15,7 @@
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
+#include "menu_fade_entry.h"
 
 struct StaffMenuRuntime;
 
@@ -441,7 +443,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
-extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
 
@@ -807,7 +808,6 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
 }
 
-extern u32 uiBlendColors(u32 color, u32 previous, s32 blend);
 
 /* Blend the flag-selected packed color with the caller's previous color.
  * Flag one takes precedence over DDS2's additional flag-four color choice. */
@@ -1622,23 +1622,16 @@ void mnuFreeListEntries(s32 *list) {
 void mnuAppendFadingWindowEntry(s32 activeValue, s32 windowAddress, s32 *list) {
     u32 slotIndex = *list;
     s32 *slot = list + slotIndex;
-    s32 *entry;
+    MenuFadeEntry *entry;
 
     if (slotIndex < MNU_FADING_MUTATION_THRESHOLD) {
         return;
     }
-    entry = (s32 *)slot[1];
+    entry = (MenuFadeEntry *)slot[1];
     *list = slotIndex + 1;
-    entry[0] = activeValue;
-    entry[4] = windowAddress;
+    entry->active = activeValue;
+    entry->window = (struct MenuWindowContainer *)windowAddress;
 }
-
-typedef struct MenuFadeEntry {
-    u32 active;
-    u32 pad4[3];
-    void *window;
-    u32 pad14;
-} MenuFadeEntry;
 
 /* Native removal only accepts indices at least five. Propagate the tail
  * record backward to the target, clearing each source's window pointer. */
@@ -1667,8 +1660,8 @@ void mnuRemoveFadingWindowEntry(s32 *list, u32 index) {
 void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < (u32)list[0]; slotIndex++) {
-        s32 *entry = (s32 *)list[slotIndex + 1];
-        mnuDrawWindowContainer(entry[2], entry[3], depth, (MenuWindowContainer *)entry[4], drawArg);
+        MenuFadeEntry *entry = (MenuFadeEntry *)list[slotIndex + 1];
+        mnuDrawWindowContainer(entry->x, entry->y, depth, entry->window, drawArg);
     }
 }
 
@@ -1677,9 +1670,9 @@ void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
 void mnuUpdateFade(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        s32 *entry = (s32 *)list[slotIndex + 1];
-        if (entry[5] != 0) {
-            entry[5] -= MNU_FADING_WORD_STEP;
+        MenuFadeEntry *entry = (MenuFadeEntry *)list[slotIndex + 1];
+        if (entry->fade != 0) {
+            entry->fade -= MNU_FADING_WORD_STEP;
         } else {
             mnuRemoveFadingWindowEntry(list, slotIndex);
         }

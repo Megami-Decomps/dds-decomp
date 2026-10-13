@@ -430,7 +430,7 @@ extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *
 /* The legacy call forwards its request; this initializer reads current task data. */
 extern u32 mnuResetSelectionWidthsFromConfig();
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void func_00342580(u32);
+extern void sndReleaseTrackHandle(u32);
 extern char D_003D6474[];
 extern char D_003D64AC[];
 
@@ -477,7 +477,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             }
             mnuSetPopupEntry(dispatchStatus, D_003D64AC);
         } else {
-            func_00342580(0x50001);
+            sndReleaseTrackHandle(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
             mnuSetPopupEntryFlagged(dispatchStatus, D_003D64E4);
         }

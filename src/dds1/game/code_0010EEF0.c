@@ -10,7 +10,7 @@
 extern s8 ptyReadSignedRosterStatByte(s32);
 extern s32 scrReadIntParameter(s32);
 extern void scrSetIntegerReturnValue(s32);
-extern void func_00119B08(s32);
+extern void ptyApplyEventPenalty(s32);
 
 extern void effMiscNormalizeVU(void);
 extern void effMiscQuatMultiplyVU(void);
@@ -24,7 +24,7 @@ u32 ptyScriptApplyEventPenalty(void) {
     s32 mode;
 
     mode = scrReadIntParameter(0);
-    func_00119B08(mode);
+    ptyApplyEventPenalty(mode);
     return 1;
 }
 
@@ -42,7 +42,7 @@ u32 ptyScriptGetRosterStat(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010EF68);
+INCLUDE_ASM(const s32, "game/code_0010EEF0", dds3DrawWorldNodeTransformDiagnostic);
 
 extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
 extern const char D_0039F5F8[]; /* "FLAG  : 0x%08X" */
@@ -66,7 +66,7 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern s32 func_0010EF68();
+extern s32 dds3DrawWorldNodeTransformDiagnostic();
 extern SdfPoolNode D_00325708;
 extern s8 D_00324543[];
 extern void func_0022AF50();
@@ -87,7 +87,7 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    width = func_0010EF68(node, 3, 0xA, list) + 0xB;
+    width = dds3DrawWorldNodeTransformDiagnostic(node, 3, 0xA, list) + 0xB;
     if (node[0xF] < 0xA) {
         if (node[0xF] >= 4) {
             width += dds3DrawObjectFlagDiagnostic(node, 3, width, list);

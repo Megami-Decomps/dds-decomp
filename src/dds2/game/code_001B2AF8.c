@@ -67,7 +67,7 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;
 
-extern void func_00101968(KwlnTask *parent, KwlnTask *child);
+extern void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
 extern const char *btlAnalyzPanelTaskNameRef;
 
@@ -106,13 +106,6 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void mdlFlagSet(s32);
 
 extern void mdlFlagClear(s32);
-
-typedef struct AiSpecies {
-    u8 unk00;
-    u8 pad01[0x3F];
-    AiSlot slot[25];
-    u8 pad108[0x54];
-} AiSpecies;
 
 extern AiSpecies *datEnemyAiRecords;
 
@@ -321,7 +314,7 @@ s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     if (unit->partyRecord.status & 0x2A0F) {
         return 0;
     }
-    return datEnemyAiRecords[unit->partyRecord.unitId].unk00 == 0;
+    return datEnemyAiRecords[unit->partyRecord.unitId].unknown00[0] == 0;
 }
 
 /* Return true when neither actor status nor its entry flags contain bit 0x40. */
@@ -2253,7 +2246,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     work->y = 0x20;
     task = kwlnTaskCreate(btlMahenPanelTaskNameRef, 0x2B0E, 1, 1,
                           func_001B8A80, itfMesCloseAllWindows, (u32)work);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(10, (s32)task);
     return 1;
 }
@@ -2343,7 +2336,7 @@ s32 btlCreateAnalysisPanelTask(s32 entry, s32 duration) {
     data->frame = 0;
     task = kwlnTaskCreate(btlAnalyzPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateAndDrawAnalysisPanel,
                           btlReleaseTaskAndRefreshCursorIfFlagged, (u32)data);
-    func_00101968(context->scriptOwner, task);
+    kwlnTaskAddChild(context->scriptOwner, task);
     btlSetTrackedTaskHandle(11, (s32)task);
     context->battleFlags &= ~0x100000;
     return 1;
@@ -2435,7 +2428,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     data->entryIndex = entryIndex;
     task = kwlnTaskCreate(D_004367E0, 0x2B0E, 1, 1, func_001BB5C0,
                           btlReleaseMessageWindowTask, (u32)data);
-    func_00101968(context->scriptOwner, task);
+    kwlnTaskAddChild(context->scriptOwner, task);
     btlSetTrackedTaskHandle(9, (s32)task);
     return 1;
 }
@@ -2564,7 +2557,7 @@ extern const BtlPsechgPositions D_00415DC8;
 extern s32 btlUpdatePhaseGatedTaskUntilTimeout(KwlnTask *);
 extern void btlReleasePsechgPanelWork(KwlnTask *);
 extern void btlSetTrackedTaskHandle(s32, s32);
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 
 /* Create the phase-gated PSECHG panel with one of two initial point sets. */
 s32 btlCreatePhaseChangePanelTask(s32 variant) {
@@ -2605,7 +2598,7 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
     }
     task = kwlnTaskCreate(D_004367D8, 0x2B0E, 1, 1, btlUpdatePhaseGatedTaskUntilTimeout,
                           btlReleasePsechgPanelWork, (u32)work);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(6, (s32)task);
     return 1;
 }
@@ -2626,7 +2619,7 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     return 0;
 }
 
-extern void func_00101968(KwlnTask *, KwlnTask *);
+extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 
@@ -2686,7 +2679,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     work->initial[1].y = 0x40;
     task = kwlnTaskCreate(D_004367C8, 0x2B0E, 1, 1,
                           btlUpdateSkillNamePanelTask, btlFreeRegisteredTaskData, (u32)work);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     work->task = task;
     btlSetTrackedTaskHandle(1, (s32)task);
     return 1;
@@ -2751,7 +2744,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 arg0, s32 arg1) {
     data->value = 0x2D;
     task = kwlnTaskCreate(D_004367C4, 0x2B0E, 1, 1, btlDrawTimedDialogTask,
                           btlReleaseDialogTaskData, (u32)data);
-    func_00101968(context->scriptOwner, task);
+    kwlnTaskAddChild(context->scriptOwner, task);
     data->task = task;
     btlSetTrackedTaskHandle(0, (s32)task);
     return 1;
@@ -3531,7 +3524,7 @@ extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
 void btlStartRegisteredChildTask(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
-    func_00101968(work->scriptOwner, task);
+    kwlnTaskAddChild(work->scriptOwner, task);
     btlSetTrackedTaskHandle(7, (s32)task);
 }
 
@@ -3884,7 +3877,7 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
     work->fadeCountdowns[3] = 8;
     task = kwlnTaskCreate(D_004367D4, 0x2B0E, 1, 1, func_001BEBD0,
                           btlReleaseCmsleffPanelWork, (u32)work);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(5, (s32)task);
 }
 
@@ -4661,7 +4654,7 @@ void btlInitializeStaffActorPanels(void) {
     }
     task = kwlnTaskCreate(D_004367CC, 0x2B0E, 1, 1, func_001C1F10,
                           btlReleaseStwrPanelResource, (u32)work);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(3, (s32)task);
 }
 
@@ -4867,7 +4860,7 @@ void btlCreateReserveActorPanelTask(void) {
     memset(memory, 0, 0x368);
     work->reserveUnitAllocation = allocation;
     task = kwlnTaskCreate(D_004367D0, 0x2B0E, 1, 1, btlUpdateAndDrawReserveActorPanels, (TaskDestroy)btlReleaseTrackedTaskResource, (u32)memory);
-    func_00101968(battle->scriptOwner, task);
+    kwlnTaskAddChild(battle->scriptOwner, task);
     btlSetTrackedTaskHandle(8, (s32)task);
     btlSlotBankPromoteStates(work);
     work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
@@ -7294,7 +7287,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
         fldInitializeSceneObject(object, task);
         handle = kwlnTaskCreate(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1, btlUpdateBattleSceneCommands, fldClearBattleSceneObject,
                                 (u32)object);
-        func_00101968(scene->scriptOwner, handle);
+        kwlnTaskAddChild(scene->scriptOwner, handle);
         scene->sceneObject = handle;
         btlSetActionActorPanelPresentation(task, 0, 0);
         btlInitializeSelectionWork();
@@ -7310,7 +7303,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
@@ -7324,7 +7317,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, btlUpdateMajinTutorialTask,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7338,7 +7331,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7352,7 +7345,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7369,7 +7362,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = kwlnTaskCreate(D_004367F0, 0x2B0E, 1, 1, func_001C0630,
                                         btlReleaseDialogTaskAndMarkBattleState, (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xD, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_00385228);
@@ -7383,7 +7376,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 handle = kwlnTaskCreate(D_004367EC, 0x2B0E, 1, 1, btlUpdateLinkageNoticeTask,
                                         btlFinishTrackedBattleTaskAndCloseWindow,
                                         (u32)sdfAllocAndClearQuadwords(0x18));
-                func_00101968(scene->scriptOwner, handle);
+                kwlnTaskAddChild(scene->scriptOwner, handle);
                 btlSetTrackedTaskHandle(0xC, (s32)handle);
                 dspCloseChannel();
                 evtCreateMessageWindowIfMissing(D_003B52D0);
@@ -7941,7 +7934,7 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     scene = (BtlState *)btlGetRuntime();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, fldStepSceneStateMachine,
                           fldReleaseSceneSprite, btlCreateAiWork(sourceTask));
-    func_00101968(scene->scriptOwner, task);
+    kwlnTaskAddChild(scene->scriptOwner, task);
     scene->spriteObject = task;
 }
 
@@ -8788,7 +8781,7 @@ void fldCreateSceneCleanupTask(void) {
     }
     scene = (BtlState *)btlGetRuntime();
     task = kwlnTaskCreate(D_004368B0, 0x2B0E, 1, 1, fldUpdateConditionalSceneCleanup, fldResetSceneStatus, 0);
-    func_00101968(scene->scriptOwner, task);
+    kwlnTaskAddChild(scene->scriptOwner, task);
     scene->sceneStatus = task;
     btlLoadResourceBlock();
     btlStartRegisteredChildTask();

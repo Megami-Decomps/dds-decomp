@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
 #include "evt_world.h"
@@ -26,9 +27,9 @@
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
 
+#include "sdf.h"
 extern void *memset(void *dst, s32 value, s32 size);
 typedef struct MenuResourceWork MenuResourceWork;
-struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
@@ -76,7 +77,6 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 
 extern u8 sdfViewTargetVector[];
@@ -1366,7 +1366,7 @@ s32 mcdFinishFileDetection(void) {
         fileSetMenuFlowState(0);
         D_003BC854 = 0;
         D_003BC810 = 0;
-        func_002E96D8(0x310000);
+        sndReleaseTrackHandle(0x310000);
         if (D_003BD904 == -1) {
             return fileBeginWait((void *)-1);
         }
@@ -5479,7 +5479,6 @@ INCLUDE_ASM(const s32, "game/code_0028A150", func_00297658);
 struct EffRandState;
 extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
-extern f32 effMiscRandUnitFloat(void *state);
 extern f32 fabsf(f32);
 extern void func_00297658(FileSlotTable *, FileSlot *);
 

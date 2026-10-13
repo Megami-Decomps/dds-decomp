@@ -6,6 +6,7 @@
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
 
@@ -44,7 +45,6 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;
 }
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfComposeVuMatrixFromRegisters(void);
 extern void *effCreateVertexDrawPacket(EffResourceRenderState *);
 extern f32 D_003B1540[][4];
 extern u32 D_003B1600[];

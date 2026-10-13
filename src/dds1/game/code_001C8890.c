@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_light_params.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -75,18 +76,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
-
-/* Tagged scheduler predicate, embedded for task entry and exit. */
-typedef struct TaskCondition {
-    u8 kind; /* 0 never, 1 always, 2 counter threshold, 3-10 task queries. */
-    u8 pad01[7];
-    union {
-        s32 count;    /* Kind 2: signed threshold for the supplied counter. */
-        u64 handle;   /* Kinds 3-5: task handle. */
-        u64 owner;    /* Kinds 6-8: task owner; queries select its oldest task. */
-        u16 taskKind; /* Kinds 9-10: registered task kind. */
-    } value;
-} TaskCondition;
 
 /* Generic scheduler header; task-specific arguments follow at byte 0x70.
  * next/prev link registration order, independently of the deferred queue. */
@@ -174,8 +163,6 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSyncPlayerWork(BtlUnit *actor);
-
-void fldAppendTaskToGroup(BtlTask *task);
 
 void fldCreateSceneSpriteTask(s32 arg0);
 
@@ -1446,11 +1433,6 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001CB410);
 void btlEnterLinkageActionState(void) {
 }
 
-typedef struct BtlSceneLightParams {
-    f32 position[3]; f32 unk0C;
-    f32 color[3]; f32 unk1C;
-    f32 secondaryColor[3]; f32 unk2C;
-} BtlSceneLightParams;
 extern char D_003A36A8[];
 extern BtlRuntimeTask *sndCreateReleaseTask(u32);
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);

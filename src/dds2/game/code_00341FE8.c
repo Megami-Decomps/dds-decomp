@@ -1,13 +1,6 @@
 #include "common.h"
+#include "snd_command_packet.h"
 #include "snd_track_slot.h"
-
-typedef struct CmdPacket {
-    /* 0x0 */ u32 trackId;
-    /* 0x4 */ u32 unk4;
-    /* 0x8 */ u16 setting;
-    /* 0xA */ u16 unkA;
-    /* 0xC */ u32 unkC;
-} CmdPacket;
 
 u32 func_00341650(u32 command, u32 channel, void *packet, u32 size);
 
@@ -238,7 +231,7 @@ void sndStartTrackExtended(s32 trackId) {
     func_00341650(0x20, 0, &packet, 0x10);
 }
 
-void func_00342580(u32 value) {
+void sndReleaseTrackHandle(u32 value) {
     u32 packet[4];
 
     packet[0] = value;

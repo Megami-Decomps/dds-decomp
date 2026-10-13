@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "dsp_name.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_resource.h"
 #include "file.h"
 #include "sdf.h"
@@ -1419,7 +1420,6 @@ extern f32 sdfViewTargetVector[4];
 extern u32 D_00438918;
 extern void vuBuildLookAtBasis(void);
 extern f32 sdfAtan2Poly(f32 ratio);
-extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 effSharedRandomState[];
 

@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu.h"
@@ -21,11 +22,9 @@ extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32,
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
-extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void func_00276720(s32, s32, s32, s32);
 
-extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);

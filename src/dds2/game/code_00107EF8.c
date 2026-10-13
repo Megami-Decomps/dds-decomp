@@ -103,7 +103,7 @@ extern void fldStartSequenceRecord(void);
 
 
 
-extern KwlnTask *func_00101820(u32 prio);
+extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 
 extern char D_00435D20[];
 
@@ -1164,7 +1164,7 @@ u32 evtEnsureSelectionTask(void) {
     if (kwlnTaskGetTaskByName(D_00435D20) != NULL) {
         return 0;
     }
-    if (func_00101820(0x3FA) == NULL) {
+    if (kwlnTaskFindByPriority(0x3FA) == NULL) {
         fldDispatchDeferredFieldCommand();
         return 1;
     }
@@ -1453,7 +1453,7 @@ void evtDestroyFontResourceChain(void) {
     }
 }
 
-extern s32 func_00360E78();
+extern s32 sdfVFormatString();
 extern void sdfDevConsPrintf();
 
 /* printf into the dev console node when one exists. */
@@ -1471,7 +1471,7 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
 
     __builtin_stdarg_start(formatArgs, format);
     if (evtConsoleFontResourceChain != 0) {
-        func_00360E78(messageBuffer, format, formatArgs);
+        sdfVFormatString(messageBuffer, format, formatArgs);
         sdfDevConsPrintf(evtConsoleFontResourceChain, "%s", messageBuffer);
     }
 }
@@ -1610,7 +1610,7 @@ typedef struct HeapOverlayBlock {
 
 extern s32 sdfGetPacketCursor(void);
 extern void sdfSetPacketCursorAligned(s32);
-extern s32 func_0036DE70(void);
+extern s32 DIntr(void);
 extern u32 func_00329230(void);
 extern u16 sdfGetMemoryBlockState(SdfMemBlock *);
 extern SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *);
@@ -1629,7 +1629,7 @@ void sdfDrawHeapMapOverlay(void *list, s32 x, s32 y) {
     s32 markerY;
 
     snapshot = (HeapOverlayBlock *)sdfGetPacketCursor();
-    restoreInterrupts = func_0036DE70();
+    restoreInterrupts = DIntr();
     block = (SdfMemBlock *)func_00329230();
     entry = snapshot;
     heapBase = sdfMemoryGetBlockAddress(block);

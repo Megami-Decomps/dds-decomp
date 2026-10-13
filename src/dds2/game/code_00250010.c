@@ -139,7 +139,7 @@ extern void func_0035B6E0(const char *fmt, ...);
 
 extern void sndStartTrackExtended(s32 track);
 
-extern void func_00342580(u32 sound);
+extern void sndReleaseTrackHandle(u32 sound);
 
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
@@ -5349,7 +5349,7 @@ s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_00342580(sound);
+    sndReleaseTrackHandle(sound);
     return sound;
 }
 
@@ -5426,8 +5426,6 @@ void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
 }
 
 extern void effSetCh72Id(SdfTex *);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
     void *address = evtFindTaskResourceEntryByKey(taskId, key);

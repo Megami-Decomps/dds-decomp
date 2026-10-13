@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -86,18 +87,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter();
 extern u8 *btlAllocateIndexedUnitEffectTask(u8 *, s32, s32, f32);
 
 
-
-/* Tagged scheduler predicate, embedded for task entry and exit. */
-typedef struct TaskCondition {
-    u8 kind; /* 0 never, 1 always, 2 counter threshold, 3-10 task queries. */
-    u8 pad01[7];
-    union {
-        s32 count;    /* Kind 2: signed threshold for the supplied counter. */
-        u64 handle;   /* Kinds 3-5: task handle. */
-        u64 owner;    /* Kinds 6-8: task owner; queries select its oldest task. */
-        u16 taskKind; /* Kinds 9-10: registered task kind. */
-    } value;
-} TaskCondition;
 
 /* Kind 0x27: camera-mode task's complete 20-byte argument packet. */
 typedef struct BtlCameraModeArgs {
@@ -636,7 +625,7 @@ extern s32 btlGetActionRecordLookupValue(s32);
 
 extern s32 func_001A7548(BtlUnit *, BtlUnit *, s32);
 
-extern u8 func_001A6968(BtlUnit *, s32);
+extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
 extern s32 func_001A5958(BtlUnit *, BtlUnit *, s32);
 
@@ -886,7 +875,7 @@ void func_001D12A0(BtlTask *action, BattleIndexWork *work) {
                 if (randomTargets) {
                     hitCount = group->count;
                 } else {
-                    hitCount = func_001A6968(source, command);
+                    hitCount = btlSelectCommandHitCount(source, command);
                 }
                 maxHits = datCommandRecords[command].rangeMax;
             }
@@ -3297,7 +3286,7 @@ extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void func_002D9748(SdfModel *, SdfModel *);
+extern void sdfModelCopyRuntimeState(SdfModel *, SdfModel *);
 
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 
@@ -3347,7 +3336,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         sdfAppendPacket(list, (u32)packet);
         surfaces[i]->append(surfaces[i], list);
     }
-    func_002D9748(overlay, model->inner);
+    sdfModelCopyRuntimeState(overlay, model->inner);
     if (unit->status.flags & 2) {
         overlay->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;
     } else {
@@ -4465,7 +4454,7 @@ typedef struct UnitEffectTaskArgs {
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern void func_00160D88(BattleEffect *);
+extern void effBattleUpdate(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -4498,7 +4487,7 @@ u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
             unit->status.flags = (unit->status.flags & ~0x80) | 0x40;
             return 1;
         }
-        func_00160D88(arguments->effect);
+        effBattleUpdate(arguments->effect);
         return 0;
     }
 }
@@ -4640,7 +4629,6 @@ BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *owner) {
 
 extern char D_003A3CA0[];
 
-extern f32 effMiscRandUnitFloat(void *);
 
 typedef struct BtlDamageShakeArgs {
     BtlUnit *unit;

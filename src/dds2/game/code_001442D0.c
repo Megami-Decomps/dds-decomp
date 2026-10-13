@@ -42,7 +42,7 @@ extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern void dds3RebuildObjectModelContext(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 
-extern void func_00136718(void);
+extern void fldApplyLightSetToChaseCameraUnit(void);
 extern void func_001526B8(void);
 extern void func_00153FA0(void);
 extern EffWorldNode *D_00435F1C;
@@ -170,8 +170,6 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 
 extern SdfTex *D_0044F7F0[];
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern u32 D_004363C8;
 
 extern u32 D_004363CC;
@@ -294,7 +292,7 @@ extern FldClear18 fldPendingSounds[];
 
 
 
-extern void func_00342580(s32 arg0);
+extern void sndReleaseTrackHandle(s32 arg0);
 
 extern s32 fldCurrentBgmId[];
 
@@ -798,7 +796,7 @@ void fldStartSceneBgm(void) {
             }
             if (fldAreaState.unk130 != 1) {
                 if (fldCurrentBgmHandle != handle) {
-                    func_00342580(fldCurrentBgmHandle);
+                    sndReleaseTrackHandle(fldCurrentBgmHandle);
                 }
                 fldCurrentBgmHandle = handle;
                 sndStartTrackDefault(handle);
@@ -849,7 +847,7 @@ void fldStopCurrentBgm(void) {
 }
 
 void fldReleaseCurrentBgm(void) {
-    func_00342580(fldCurrentBgmHandle);
+    sndReleaseTrackHandle(fldCurrentBgmHandle);
     if (fldAreaState.sequenceCode >= 0x80) {
         fldAreaState.sequenceCode = 1;
     }
@@ -917,7 +915,7 @@ void fldSelectBgmMode(s32 selection) {
         break;
     case 0:
         if (D_00436228 != -1) {
-            func_00342580(D_00436228);
+            sndReleaseTrackHandle(D_00436228);
             D_00436228 = -1;
         }
         break;
@@ -1342,7 +1340,7 @@ extern void frFontSetSharedRenderFlags(u32);
 extern void sdfInvertScaledVuTransform(void);
 extern s32 fldFindNextMarkedValue(s32), fldFindPreviousMarkedValue(s32);
 extern void fldSelectDisplayBuffer(u32);
-extern void func_0012BE18(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void evtSetDrawSurfaceIndex(u32);
@@ -1361,7 +1359,7 @@ extern s32 D_00436288, D_0043628C, D_00436298, D_0043629C, D_004362A0;
 extern f32 D_00436290, D_004362A4, D_004362A8, D_004362AC;
 
 extern f32 sdfViewMatrix[16];
-extern void func_0012BE18(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSelectDisplayBuffer(u32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
@@ -1443,7 +1441,7 @@ void func_00146250(void) {
     D_0043624C = D_00436288;
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00384790);
     fldSelectDisplayBuffer(0x56);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
     fldSelectDisplayBuffer(0x57);
@@ -1520,7 +1518,7 @@ void func_00146250(void) {
     }
 
     fldSelectDisplayBuffer(0x56);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitPrimaryFramePacket();
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
@@ -1620,7 +1618,7 @@ void func_00146250(void) {
 
 
 
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
     D_004362A8 += 0.4f;
@@ -1813,7 +1811,7 @@ void func_00146250(void) {
 
             fldGetSceneEntryPosition(D_00436248, &sceneX, &sceneZ);
             fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
-            func_0012BE18(1);
+            fldSetGsAlphaBlendEquation(1);
             worldX = fldAreaState.x + sceneX;
             distanceX = focus[0] - worldX;
             if (distanceX < 0.0f) {
@@ -1827,9 +1825,9 @@ void func_00146250(void) {
             fldProjectPointSetupAlt(&playerX, &playerY,
                                     worldX, D_00436290, worldZ);
             if (distanceX < 80000.0f && distanceZ < 80000.0f) {
-                func_0012BE18(1);
+                fldSetGsAlphaBlendEquation(1);
                 func_00145A08(1, playerX, playerY, -fldAreaState.negatedAngle);
-                func_0012BE18(0);
+                fldSetGsAlphaBlendEquation(0);
                 func_00145A08(0, playerX, playerY, fldAreaState.angle);
             }
         }
@@ -1851,12 +1849,12 @@ void func_00146250(void) {
         maskY = (s32)(playerY - 2048.0f);
         fldSelectDisplayBuffer(0x5E);
         fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-        func_0012BE18(1);
+        fldSetGsAlphaBlendEquation(1);
         fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
         fldSubmitGsQuadTagged(maskX + 219, maskY + 93,
                               72, 37, 0, 0, 0, 128);
         fldSubmitFrameQuad(1, 0, 128, 1, 1, 0, 1, 1);
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitGsQuadTagged(0, 0, 512, 224, 26, 17, 8, 128);
         fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
         spriteX = (s32)(playerX - 2048.0f) + 219;
@@ -1865,15 +1863,15 @@ void func_00146250(void) {
                             2, 2, 74, 39, 0x80808080, D_0044F7F0[9]);
         fldSubmitSpriteRect(spriteX, spriteY, 74, 39,
                             2, 41, 74, -39, 0x80808080, D_0044F7F0[9]);
-        func_0012BE18(1);
+        fldSetGsAlphaBlendEquation(1);
         fldSubmitSpriteRect(-27, -23, 560, 180, 1, 36, 62, 27,
                             0x80808080, D_0044F7F0[8]);
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 
     fldSelectDisplayBuffer(0x5E);
-    func_0012BE18(0);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitSpriteRect(341, 403, 22, 22, 48, 2, -22, 22,
                         0x80808080, D_0044F7F0[6]);
     fldSubmitSpriteRect(363, 403, 112, 22, 26, 2, 1, 22,
@@ -1898,7 +1896,7 @@ void func_00146250(void) {
     maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
     minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
     fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 
     if ((f32)D_00436254 < maxZ) {
         fldSubmitSpriteRect(241, 6, 29, 41, 41, 20, 29, 41,
@@ -1961,7 +1959,7 @@ void func_00146250(void) {
     }
 
     fldSelectDisplayBuffer(0x5E);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitFrameQuad(1, 5, 128, 3, 0, 0, 1, 2);
 
     if (D_0043629C != 0 && (u32)D_0043628C - 1U < 40U
@@ -2033,7 +2031,7 @@ extern void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h,
                                     u32 r3, u32 g3, u32 b3, u32 a3);
 extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
-extern void func_0012BE18(s32 mode);
+extern void fldSetGsAlphaBlendEquation(s32 mode);
 
 void fldDrawScrollingLayerOverlay(void) {
     s32 textureRow;
@@ -2046,7 +2044,7 @@ void fldDrawScrollingLayerOverlay(void) {
 
     fldSelectDisplayBuffer(0x56);
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0x40, 0, 0, 0x80);
     fldSubmitSpriteRect(0, 0, 0x200, 0x1C0, 0, 0, 0x80, 0x80, 0x80808080, D_0044F7F8[0]);
 
@@ -2059,10 +2057,10 @@ void fldDrawScrollingLayerOverlay(void) {
 
     fldSubmitPrimaryFramePacket();
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
     fldSubmitFrameQuad(1, 5, 0x10, 0, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 
     for (textureRow = 0; textureRow < 7; textureRow++) {
         s32 y = textureRow * 0x40 + 7;
@@ -2071,7 +2069,7 @@ void fldDrawScrollingLayerOverlay(void) {
     }
     fldSubmitAlternateFramePacket();
     fldSubmitFrameQuad(1, 0, 0x80, 1, 1, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 
     fldSubmitGsGradientQuad(panelOffset, 0, 0x64, 0x1C0,
                             0, 0, 0, 0xC,
@@ -2084,13 +2082,13 @@ void fldDrawScrollingLayerOverlay(void) {
                             0, 0, 0, 0,
                             0, 0, 0, 0xC);
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitPrimaryFramePacket();
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
     fldSubmitFrameQuad(1, 5, 0x10, 0, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 
     for (textureRow = 0; textureRow < 7; textureRow++) {
         s32 y = textureRow * 0x40;
@@ -2100,7 +2098,7 @@ void fldDrawScrollingLayerOverlay(void) {
     }
     fldSubmitAlternateFramePacket();
     fldSubmitFrameQuad(1, 0, 0x80, 1, 1, 0, 1, 1);
-    func_0012BE18(1);
+    fldSetGsAlphaBlendEquation(1);
 
     fldSubmitGsGradientQuad(panelOffset, 0, 0x96, 0x1C0,
                             0x80, 0x80, 0x80, 7,
@@ -2114,13 +2112,13 @@ void fldDrawScrollingLayerOverlay(void) {
                             0x80, 0x80, 0x80, 7);
 
     fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
-    func_0012BE18(0);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
+    fldSetGsAlphaBlendEquation(0);
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     fldSelectDisplayBuffer(0x5E);
     fldSubmitFrameQuad(1, 5, 0x81, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
@@ -2801,7 +2799,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014B0F8);
 
 extern s32 D_003A8E60[];
 
-extern s32 func_001579C8();
+extern s32 effCreateNodeFromParameter();
 
 extern char *D_00413860[4];
 
@@ -2812,7 +2810,7 @@ void fldLoadFieldEffectTextureSlots(void) {
     memcpy(names, D_00413860, sizeof(names));
     for (i = 0; i < 4; i++) {
         fldEffectTextureLoadHandles[i] = sdfReadNamedResource(names[i], &fldEffectTextureData[i], 0);
-        fldEffectTextureNodes[i] = func_001579C8(fldEffectTextureData[i]);
+        fldEffectTextureNodes[i] = effCreateNodeFromParameter(fldEffectTextureData[i]);
         D_003A8E60[i] = 0;
     }
 }
@@ -2902,7 +2900,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
 void mnuInitializeResourceEntries(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
-        mnuPositionedResourceNodes[i] = func_001579C8(D_0043633C);
+        mnuPositionedResourceNodes[i] = effCreateNodeFromParameter(D_0043633C);
         mnuPositionedResourceActive[i] = 0;
     }
 }
@@ -3014,7 +3012,7 @@ void fldParseMixLb(void) {
     D_00438EE4 = sdfReadNamedResource("/fld/f/bin/DAMAGE_2.D3P", &D_00438EE8, 0);
     D_00438EEC = sdfReadNamedResource("/fld/f/bin/DAMAGE_3.D3P", &D_00438EF0, 0);
     lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    func_002C81D0((struct FileRequest *)lb);
+    fileWaitForRequestReady((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 5:
@@ -3298,7 +3296,7 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
 }
 
 extern void fldSelectDisplayBuffer(u32);
-extern void func_0012BE18(s32);
+extern void fldSetGsAlphaBlendEquation(s32);
 extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 ptyAnyUnitFlagMatch(s32, s32);
 extern f32 sdfSinPoly(f32);
@@ -3313,7 +3311,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
 
     if (fldAreaState.unk118 != 1 && fldAreaState.deferredExit != 1) {
         fldSelectDisplayBuffer(0x53);
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitSpriteRect(x + 0x140, y + 0x10, 0x12, 0x19,
                             0x26, 3, 0x12, 0x19, 0x80808080,
@@ -3337,7 +3335,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                               128.0f) + 0x80;
                 color |= (color << 8) | (color << 16);
             }
-            func_0012BE18(1);
+            fldSetGsAlphaBlendEquation(1);
             evtSubmitTexturedRectPacket(x + 0x1B6, y + 0x2E, 0x23, 0xB,
                           0x3B, 0x25, 0x23, 0xB,
                           color | 0x30000000, color | 0x30000000,
@@ -3353,7 +3351,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
                 D_0043634C = 0.0f;
             }
         }
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -3383,7 +3381,7 @@ void fldDrawLocationPanel(void) {
     case 5:
     case 7:
         fldSelectDisplayBuffer(0x53);
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         if (fldAreaState.unk144 > 0) {
             color = ((u32)((20 - fldAreaState.unk144) * 128 / 20) << 24) | 0x808080;
@@ -3400,7 +3398,7 @@ void fldDrawLocationPanel(void) {
                             color, fldAreaState.fieldTextures[3].texture);
         fldResetCameraAndSceneView();
         fldSelectDisplayBuffer(0x5B);
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
         fldSubmitSpriteRect(0x191, 0x11D, 0x1C, 0x16, 0x24, 0x22, 0x1C, 0x16,
                             color, fldAreaState.fieldTextures[0].texture);
@@ -3552,7 +3550,7 @@ s32 fldTitleTaskUpdate(void) {
         fldSelectDisplayBuffer(0x5E);
     }
     fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 1);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     switch (D_00436354) {
     case 0:
         if (D_0043635C > 0) {
@@ -3576,7 +3574,7 @@ s32 fldTitleTaskUpdate(void) {
             }
         }
         if (D_00436350 >= 20 && D_00436350 < 30) {
-            func_0012BE18(1);
+            fldSetGsAlphaBlendEquation(1);
             alpha = (D_00436350 - 20) * 128 / 10;
             if (alpha > 128) {
                 alpha = 128;
@@ -3589,10 +3587,10 @@ s32 fldTitleTaskUpdate(void) {
             if (D_00389780[0] == 12) {
                 fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color | 0x808080, D_0043636C);
             }
-            func_0012BE18(0);
+            fldSetGsAlphaBlendEquation(0);
         }
         if (D_00436350 >= 30) {
-            func_0012BE18(1);
+            fldSetGsAlphaBlendEquation(1);
             alpha = (48 - D_00436350) * 128 / 18;
             if (alpha > 128) {
                 alpha = 128;
@@ -3605,7 +3603,7 @@ s32 fldTitleTaskUpdate(void) {
             if (D_00389780[0] == 12) {
                 fldSubmitSpriteRect(0xC5, 0x149, 0x65, 0x1A, 1, 1, 0x65, 0x1A, color | 0x808080, D_0043636C);
             }
-            func_0012BE18(0);
+            fldSetGsAlphaBlendEquation(0);
         }
         nextFrame = D_00436350 + 1;
         if (nextFrame > 60) {
@@ -3721,7 +3719,7 @@ s32 func_0014EDB8(KwlnTask *task) {
     }
     fldSelectDisplayBuffer(0x53);
     fldSubmitFrameQuad(1, 5, 0x80, 3, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     switch (D_00436374) {
     case 0:
         nextFrame = D_00436370 + 1;
@@ -3965,10 +3963,10 @@ void fldLoadWeatherEffects(void) {
     D_004363B4 = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(data));
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     D_00436380 = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
-    fldDamEffectNode = func_001579C8(D_00436384);
+    fldDamEffectNode = effCreateNodeFromParameter(D_00436384);
     fldDamEffectPositioned = 0;
     D_00436390 = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
-    fldYukEffectNode = func_001579C8(D_00436394);
+    fldYukEffectNode = effCreateNodeFromParameter(D_00436394);
     fldYukEffectPositioned = 0;
 }
 
@@ -5880,7 +5878,7 @@ void fldCreateChaseCameraObject(void) {
     D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
     mdlAddEntryFlagged(D_00435F20, 0, 0x11);
     sdfSetModelScalarOverrides(D_00435F20->inner, 15.0f, 0.0f);
-    func_00136718();
+    fldApplyLightSetToChaseCameraUnit();
     func_001526B8();
     func_00153FA0();
 }

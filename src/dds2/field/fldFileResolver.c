@@ -503,8 +503,6 @@ extern u32 D_00438EC8;
 extern u8 D_0038A700[];
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-
 extern f32 D_004360B0;
 
 extern f32 D_00444980[];
@@ -723,7 +721,7 @@ extern void func_0033B530(u8 *, const f32 *, u32, const BillTextureQuad *, const
 
 extern s32 D_00435F30;
 
-extern void func_00139950(f32 *);
+extern void fldApplyRelativeZoneMotion(f32 *);
 
 
 
@@ -1541,7 +1539,7 @@ void fldLoadAreaPackedResources(void) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
-        func_002C81D0(fldAreaPackedArchive);
+        fileWaitForRequestReady(fldAreaPackedArchive);
         request = (FilePacRequest *)fldAreaPackedArchive;
         for (work = request->packet.queueHead; work != NULL; work = work->next) {
             switch (*(u16 *)(work->packet + 2)) {
@@ -1699,7 +1697,7 @@ u32 fldLoadAreaRoomResources(const char *name) {
             func_0035C860(path, D_004130D8, directory, area, room);
             request = fileQueuePlainDispatchRequest(path);
             D_00435FC8 = request;
-            func_002C81D0(request);
+            fileWaitForRequestReady(request);
         }
         index = 0;
         D_00435FA4 = NULL;
@@ -2224,7 +2222,7 @@ void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag1
 }
 
 /* Write the selected blend equation to GS ALPHA_1, including DDS2's FIX mode. */
-void func_0012BE18(s32 mode) {
+void fldSetGsAlphaBlendEquation(s32 mode) {
     SdfListHead *command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     s32 packet;
     u64 *data;
@@ -2986,7 +2984,7 @@ void fldDrawMarkerQuad(f32 *pos) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -3017,7 +3015,7 @@ void fldDrawMarkerQuadColored(f32 *pos, s32 color) {
     packet.scale = 0.0f;
     fldSelectDisplayBuffer(0x39);
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
     fldSubmitModelPacket(fldMarkerTexture, &packet);
 }
 
@@ -3026,7 +3024,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
     fldSubmitSpriteRect(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitSpriteRect(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, fldMarkerTexture);
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 void fldAllocateBackgroundBuffer(void) {
@@ -3281,7 +3279,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     if (fade != 0) {
         color = fade & 0xFF;
         fldSelectDisplayBuffer(0x39);
-        func_0012BE18(5);
+        fldSetGsAlphaBlendEquation(5);
         if (color > 0x80) {
             color = 0x80;
         }
@@ -3307,7 +3305,7 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
                                 x + sinA, y - 2.0f, z + cosA,
                                 x + sinB, y - 2.0f, z + cosB);
         }
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
     }
 }
 
@@ -3446,7 +3444,7 @@ void fldUpdateLookAtSegmentDistance(void) {
 }
 
 extern u32 fldValueRecords;
-extern f32 func_00124A10(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
+extern f32 fldGetTriangleHeightAtXZ(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
 void fldProbeCameraSupportSurface(void) {
@@ -3492,10 +3490,10 @@ void fldProbeCameraSupportSurface(void) {
     ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
     zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
     x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk5C = cam->y - func_00124A10(x,
+    cam->unk5C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     x = cam->x - sdfSinPoly(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
-    cam->unk17C = cam->y - func_00124A10(x,
+    cam->unk17C = cam->y - fldGetTriangleHeightAtXZ(x,
         cam->z - sdfEvaluateCosineViaSinePhaseShift(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
         cam->unk5C = 0.0f;
@@ -4086,7 +4084,7 @@ void fldUpdateCameraTarget(void) {
         cur[0] = st->x;
         cur[1] = st->y;
         cur[2] = st->z;
-        func_00139950(cur);
+        fldApplyRelativeZoneMotion(cur);
         if (st->positionPending != 0) {
             st->x = st->targetX;
             st->y = st->targetY;
@@ -4592,13 +4590,13 @@ void fldDrawSkyGradient(void) {
     fldSubmitFrameQuad(1, 0, 0x80, 3, 0, 0, 1, 1);
     switch (D_00436104[current].mode) {
     case 0:
-        func_0012BE18(0);
+        fldSetGsAlphaBlendEquation(0);
         break;
     case 1:
-        func_0012BE18(1);
+        fldSetGsAlphaBlendEquation(1);
         break;
     case 2:
-        func_0012BE18(2);
+        fldSetGsAlphaBlendEquation(2);
         break;
     }
 
@@ -4720,7 +4718,7 @@ void fldDrawSkyGradient(void) {
         }
     }
     fldSubmitFrameQuad(1, 5, 0x80, 1, 0, 0, 1, 2);
-    func_0012BE18(0);
+    fldSetGsAlphaBlendEquation(0);
 }
 
 void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
@@ -5136,7 +5134,7 @@ void fldTransitionSkyLightSet(s32 index, s32 mode) {
 }
 /*END fldTransitionSkyLightSet*/
 
-void func_00136098(void) {
+void fldClearCameraObjectActiveFlag(void) {
     dds3ClearObjectFlags(fldPlayerObject, 0x100);
 }
 

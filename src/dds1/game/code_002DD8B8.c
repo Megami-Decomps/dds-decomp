@@ -2,6 +2,7 @@
 #include "sdf_quaternion.h"
 #include "rw_matrix.h"
 #include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
 
 typedef float f32;
 

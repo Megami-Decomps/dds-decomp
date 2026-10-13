@@ -1,6 +1,8 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "eff_random.h"
+#include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -1063,23 +1065,6 @@ s32 kwlnEnsureDefaultResource(void) {
     return 0;
 }
 
-typedef struct ConsMatrixPacket {
-    u16 quadwords;
-    u8 pad02[6];
-    u32 reservedWord;
-    u32 command;
-    u8 matrixA[0x40];
-    u8 matrixB[0x40];
-    u8 vecA[0x10];
-    u8 vecB[0x10];
-    u8 vecC[0x10];
-    u32 stmodCommand;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-} ConsMatrixPacket;
-
-
 /* Two fixed frame banks: thirteen draw groups and their scene/overlay packets. */
 typedef struct KwlnFrameDrawBank {
     SdfListHead initialList;
@@ -1212,8 +1197,6 @@ extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
-extern void sdfTexReleaseReference(SdfTex *texture);
-
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value) {
@@ -1278,7 +1261,6 @@ SdfTex *kwlnTextureGetHeldReference(void) {
 
 extern f32 D_0037F590[];
 extern f32 D_00435D10[];
-extern f32 effMiscRandUnitFloat(void *stream);
 extern f32 fabsf(f32 value);
 
 /* Advance the two bounded shake offsets and taper finite-duration amplitudes. */

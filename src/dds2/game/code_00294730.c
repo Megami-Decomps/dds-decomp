@@ -17,7 +17,7 @@ extern MenuIconPlacement D_003D03F0[];
 extern void func_00306CD0(s32, s32, s32, u32, s32,
                           struct EffectSlotSet *, s32, s32);
 extern void func_00294680(MenuTerminalContext *, s32, s32);
-extern void func_00296D90(MenuTerminalContext *, s32);
+extern void mnuDrawShopCurrencyBalance(MenuTerminalContext *, s32);
 
 extern void mnuDrawFadingValueListRow();
 
@@ -25,7 +25,7 @@ extern void func_002958B0();
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
 
-extern void func_002960F0(s32, s32, s32, s32, u8 *, s32);
+extern void mnuDrawListFlagIndicatorsWithFade(s32, s32, s32, s32, u8 *, s32);
 
 
 
@@ -122,7 +122,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
         alpha = 1.0f;
     }
     alpha = 1.0f - alpha;
-    func_00296D90(object, 0xA09DC300 | (s32)(alpha * 128.0f));
+    mnuDrawShopCurrencyBalance(object, 0xA09DC300 | (s32)(alpha * 128.0f));
 
     index = evtSelectGraphicSlotBySpriteType(object);
     resources = D_00438FC8;
@@ -137,7 +137,7 @@ void mnuDrawSpriteMenuFadeOut(MenuTerminalContext *object, s32 elapsedFrames) {
 
 
 
-void func_00294B40(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
+void mnuDrawShopPanelWithTypeGraphic(s32 x, s32 y, s32 depth, MenuTerminalContext *object,
                    s32 scale, s32 option) {
     u32 index;
 
@@ -282,7 +282,7 @@ void mnuDrawIfActive(s32 x, s32 y, s32 z, MenuWindowContainer *object, s32 drawA
 
     if (inner->count != 0) {
         mnuDrawListChildrenWithCountdown(x, y, z, (u8 *)inner, drawArg);
-        func_002960F0(x, y, z, 0, (u8 *)object, drawArg);
+        mnuDrawListFlagIndicatorsWithFade(x, y, z, 0, (u8 *)object, drawArg);
         object->flags |= 4;
     }
 }
@@ -311,7 +311,7 @@ void mnuDrawListChildrenWithCountdown(s32 x, s32 y, s32 z, u8 *object, s32 drawA
     }
 }
 
-void func_002960F0(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
+void mnuDrawListFlagIndicatorsWithFade(s32 x, s32 y, s32 z, s32 unused, u8 *objectData, s32 option) {
     MenuWindowContainer *object = (MenuWindowContainer *)objectData;
     struct MenuList *inner = object->list;
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
@@ -352,7 +352,7 @@ extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 
 /* Draw the selected row's icons and quantity at full opacity. */
-void func_00296298(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
+void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
@@ -385,7 +385,7 @@ void func_00296298(s32 x, s32 y, s32 depth, MenuTerminalContext *scene, s32 opti
 }
 
 /* Fade the selected row's icons and quantity while preserving its row snapshot. */
-void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
+void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
                    u32 alpha, s32 option) {
     char text[16];
     struct MenuList *list = scene->window->list;
@@ -430,7 +430,7 @@ void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
 }
 
 
-void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopLimitArrows(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -447,7 +447,7 @@ void func_002967A0(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 option) 
     }
 }
 
-void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
+void mnuDrawShopLimitArrowsScaled(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s32 option) {
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     s32 firstIndex = panel->window->list->head->index;
     s32 row = panel->window->list->cursor->index - firstIndex;
@@ -466,7 +466,7 @@ void func_002968B8(s32 x, s32 y, s32 z, MenuTerminalContext *panel, s32 scale, s
 
 extern char D_00437980[];
 
-void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
@@ -499,7 +499,7 @@ void mnuDrawIconFixedEntry(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 optio
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 
-void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
+void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
     struct FrFontGlyph *glyph;
@@ -518,7 +518,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
-void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
+void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 option) {
     char text[16];
     struct EffectSlotSet *texture = D_00438FC8->effectSlots[0];
     MenuWindowContainer *object = panel->window;
@@ -540,7 +540,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
 }
 
 
-void func_00296D90(MenuTerminalContext *state, s32 style) {
+void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
     char text[16];
 
     if (datGameState->header.currency != state->previousValue) {

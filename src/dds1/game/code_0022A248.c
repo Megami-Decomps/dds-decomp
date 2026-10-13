@@ -369,7 +369,7 @@ extern EffResourceRectWork *effGetCh75Work(void);
 extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
-EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     CampDisplayDefaults display;
     EvtBlendKey layout;
     f32 first, second;

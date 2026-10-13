@@ -281,7 +281,7 @@ void* kwlnTaskGetStateList(u32 state)
     }
 }
 
-KwlnTask *func_00101100(u32 state, s32 index)
+KwlnTask *kwlnTaskGetByStateAndIndex(u32 state, s32 index)
 {
     KwlnTask *node = kwlnDelayedStartTaskHead;
     s32 i;
@@ -332,7 +332,7 @@ void kwlnPrintTaskQueueDiagnostics(void)
 extern u8 D_004393C8[];
 extern u8 D_00435C00[];
 
-void func_00101250(KwlnTask *task, s32 depth)
+void kwlnPrintTaskTreeRecursive(KwlnTask *task, s32 depth)
 {
     func_0035B6E0(D_00435C00, D_004393C8, task);
     if (task->childList != NULL) {
@@ -346,18 +346,18 @@ void func_00101250(KwlnTask *task, s32 depth)
             }
         }
         D_004393C8[depth * 4 + 4] = 0;
-        func_00101250(task->childList, depth + 1);
+        kwlnPrintTaskTreeRecursive(task->childList, depth + 1);
         D_004393C8[depth * 4] = 0;
     }
     if (task->next != NULL) {
-        func_00101250(task->next, depth);
+        kwlnPrintTaskTreeRecursive(task->next, depth);
     }
 }
 
 
 
 
-/* Blank the task-name scratch buffer, then run func_00101250 on every parentless task of the three scheduler lists. */
+/* Blank the task-name buffer, then print each root in the three scheduler lists. */
 void kwlnVisitTaskForestRoots(void)
 {
     KwlnTask* task;
@@ -369,19 +369,19 @@ void kwlnVisitTaskForestRoots(void)
     for (task = kwlnDelayedStartTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
-            func_00101250(task, 0);
+            kwlnPrintTaskTreeRecursive(task, 0);
         }
     }
     for (task = kwlnActiveTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
-            func_00101250(task, 0);
+            kwlnPrintTaskTreeRecursive(task, 0);
         }
     }
     for (task = kwlnDelayedDestroyTaskHead; task != NULL; task = task->listNext) {
         if (task->parent == NULL) {
             D_004393C8[0] = 0;
-            func_00101250(task, 0);
+            kwlnPrintTaskTreeRecursive(task, 0);
         }
     }
 }
@@ -523,7 +523,7 @@ KwlnTask* kwlnTaskGetTaskByName(const char* name)
     return NULL;
 }
 
-KwlnTask* func_00101820(u32 value)
+KwlnTask* kwlnTaskFindByPriority(u32 value)
 {
     s32 state;
     KwlnTask* node;
@@ -609,7 +609,7 @@ u32 kwlnTaskGetUserValue(KwlnTask* task)
 void func_00101960(void) {
 }
 
-void func_00101968(KwlnTask* parent, KwlnTask* child)
+void kwlnTaskAddChild(KwlnTask* parent, KwlnTask* child)
 {
     KwlnTask* sibling;
 
