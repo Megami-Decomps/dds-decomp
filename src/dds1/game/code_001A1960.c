@@ -1811,7 +1811,7 @@ f32 func_001A6958(void) {
 
 
 
-u8 func_001A6968(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     BtlState *context = (BtlState *)btlGetRuntime();
     s32 result;
     s32 minimum;
@@ -2029,7 +2029,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     i = 0;
     btlCopyIndexList(copy, targets);
     btlClearIndexList(targets);
-    hitCount = func_001A6968(unit, command);
+    hitCount = btlSelectCommandHitCount(unit, command);
     memset(selected, 0, sizeof(selected));
     while (i < hitCount) {
         index = effMiscRandMod(0, targetCount);
