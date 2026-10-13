@@ -6992,6 +6992,8 @@
 0x002E9418	sndSendFilenameCommand	inferred	Sends the filename and its byte length in a sound command packet.
 0x002E94B0	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
 0x002E9540	sndReleaseMidiTrack	inferred	snd sound tasks and playback in game/code_002E9140.c
+0x002E9598	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
+0x002E95B0	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x002E95C8	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters. [names_reviewed16.tsv]
 0x002E9600	sndGetTrackSlotTable	inferred	confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; confidence=high; matched-C; src/dds1/game/code_002E9140.c:204:func_002E9600; Returns sndTrackBalanceEntries unchanged; semantic DDS2 counterpart is already sndGetTrackSlotTable in game/code_00341FE8.c.; source=names_R_Names36.tsv:13 [names_qp11.tsv]
 0x002E9690	sndStartTrackExtended	inferred	Prepares a track ID and sends command 0x20 with setting 0x17f.
@@ -7613,7 +7615,7 @@
 0x003F9B00	sdfPadPorts	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_003F9B00[i]); Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x003F9B90	sdfDevRpcBuffer	inferred	confidence=high; src/dds1/game/code_002E4720.c:sdfDevStartRpcServer; Receive buffer registered with the device RPC server. [names_qp9.tsv]
 0x003FE0C0	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds1/game/code_002E87A8.c:func_002E8AB0, src/dds1/game/code_002E9140.c:func_002E92C0; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. [names_qp9.tsv]
-0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,func_002E9598; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
+0x003FE250	sndTrackBalanceEntries	inferred	confidence=high; src/dds1/game/code_002E9140.c:D_003FE250; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackBalanceFirstComponent,sndGetTrackBalanceSecondComponent; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
 0x003FEB00	sdfIpuStreamThreadStack	inferred	confidence=high; src/dds1/game/code_002E9708.c:sdfSoundInitIpuStream; Stack buffer passed to the IPU stream thread constructor with size 0x800. [names_qp9.tsv]
 0x001FBF30	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x001FBF48	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.

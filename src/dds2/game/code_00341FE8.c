@@ -153,11 +153,11 @@ void sndReleaseMidiTrack(s32 id) {
     }
 }
 
-u8 func_00342440(s32 index) {
+u8 sndGetTrackBalanceFirstComponent(s32 index) {
     return sndTrackBalanceEntries[index].unk4;
 }
 
-u8 func_00342458(s32 index) {
+u8 sndGetTrackBalanceSecondComponent(s32 index) {
     return sndTrackBalanceEntries[index].unk5;
 }
 
