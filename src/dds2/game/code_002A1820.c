@@ -421,7 +421,7 @@ extern MnuTitleStreamEntry D_003E0B60[];
 extern char D_00428650[];
 
 /* Load the named sound stream for the requested entry format under the lock. */
-void func_002A2200(s32 soundEntryIndex) {
+void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
     WaitSema(mnuTitleStreamSemaphore);

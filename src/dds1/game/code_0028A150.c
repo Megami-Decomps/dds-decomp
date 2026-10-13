@@ -3097,7 +3097,7 @@ extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuResetTitleStreamLocked(void);
-extern void func_0026A5F0(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern void func_002918F8();
@@ -3141,7 +3141,7 @@ s32 fileCreateConfigTask(s32 mode) {
             effRequestResourceByMode(D_003BC8E0, names[i], 0, (u32 *)&task->slots[i]);
         }
         mnuResetTitleStreamLocked();
-        func_0026A5F0(0x14);
+        mnuQueueTitleSoundStreamEntry(0x14);
         mnuTitleStreamUpdateAndLogBgm();
         kwlnFadeOutStart(0, 0, 0, 0xF);
         break;

@@ -426,7 +426,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern void mnuResetTitleStreamLocked(void);
 
-extern void func_002A2200(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 D_00435E0C;
 

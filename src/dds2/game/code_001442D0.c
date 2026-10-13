@@ -4445,7 +4445,7 @@ extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
-extern void func_002A2200(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
@@ -4538,7 +4538,7 @@ void fldUpdateDevilizeEventSequence(void) {
         }
         fldSparkControlState.unk30++;
         if (fldStepArchiveLoad() != 0) {
-            func_002A2200(0x12);
+            mnuQueueTitleSoundStreamEntry(0x12);
             fldSparkControlState.dialogPhase = 3;
         }
         break;

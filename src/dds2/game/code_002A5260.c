@@ -960,7 +960,7 @@ s32 mnuStaffImageProc(void) {
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void func_002A2200(s32);
+extern void mnuQueueTitleSoundStreamEntry(s32);
 
 void mnuUpdateStaffRollStreamState(void)
 {
@@ -977,7 +977,7 @@ void mnuUpdateStaffRollStreamState(void)
         switch (mnuPollTitleStreamStateLocked()) {
         case 0: /* MNU_STREAM_LOAD_IDLE */
             mnuMovieWork->streamPhase = 2;
-            func_002A2200(23);
+            mnuQueueTitleSoundStreamEntry(23);
             break;
         case 1: /* MNU_STREAM_LOAD_PENDING */
             break;
