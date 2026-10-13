@@ -2444,7 +2444,7 @@ insn order, and that order is `prio` in the `-dS -fsched-verbose=5` dependence t
 `abs.s` issues first; the higher prio is picked first, and only an equal prio falls
 back to source order). Reordering or renaming declarations never changes a prio, so
 such residuals (DDS1 `func_0010F9A8`, `effCalcViewAxisWidthFactor`, `func_0017FD30`,
-`func_001725F0`, `func_00205730`) only match when the expression shape changes the
+`func_001725F0`, `btlRestoreLinkedEffectUnitPose`) only match when the expression shape changes the
 latency chain, e.g. one more `add.s` in the limit's path that lifts the load's prio
 above the abs (the sibling `dds3TestObjectSphereOverlap` has such an add and gets
 retail's `lwc1, abs.s, lwc1` order). Check the `prio` column before trying variants.
@@ -5235,7 +5235,8 @@ the movie scanners themselves have matching C.
 
 ## Bound-effect pose synchronization shares the native SDK vector shape
 
-DDS2 `func_00226AB0` is native-identical to matched DDS1 `func_00205730`.
+DDS2 `btlRestoreLinkedEffectUnitPose` (0x00226AB0) is native-identical to
+matched DDS1 `btlRestoreLinkedEffectUnitPose` (0x00205730).
 Reuse its actor reloads, actual translated X/Z/height work, and 16-byte
 aligned quaternion output. The target performs native COP2 vector loads
 and stores around the quaternion helper; use the existing `pcp_vu0.h`
@@ -10907,7 +10908,8 @@ excluding the terminating NUL.
 
 ## Camera target dispatcher: two retained position samples
 
-DDS1 `func_001DE5F8` and DDS2 `func_001EBE30` retain two 16-byte SDK
+DDS1 and DDS2 `btlUpdateActionCameraFromTargetPolicy` (0x001DE5F8 and
+0x001EBE30) retain two 16-byte SDK
 position samples in an 0x80-byte frame. The actor's sample is written to
 SP+0x10 at 001DE74C / 001EBF84; the other eligible actor's sample is written
 to SP+0 at 001DE794 / 001EBFCC. These are actual retail `sqc2` stores, not
@@ -11245,3 +11247,27 @@ Naming the registered callback does not justify changing it to the table's
 signed, instance-taking prototype. Unregistered empty or constant-returning
 neighbors still lack enough evidence for role-based names.
 
+## Boss callback names follow operands, native text and registry roles
+
+Boss identity comes from the indexed `MSG.TBL` enemy-name rows, not from
+equating scene modes with enemy IDs. DDS1 formation centering selects Usas
+(unit ID 0x105); the Cerberus parts use IDs 0x10A/0x12E/0x12F; scale
+staging uses Nidhoggr records 0x10D/0x11D; Ravana configuration assigns
+nonselected units ID 0x10F; and the fixed action-camera keys check
+Harihara ID 0x11B. Rahu and Abaddon operand handlers also have explicit
+`RAHU`/`ABADON` damage diagnostics. The sound-delay override returns two
+only for skill 0x1D7, whose native name is Millennia Curse.
+
+The DDS2 linkage validator retains upstream's
+`btlCanStartCommandWithPartners` spelling. Its native EUC-JP diagnostics
+explicitly distinguish linkage type, linkage skill, press cost and missing
+actors. `btlFindEnemyLinkagePartnersByCount` deliberately uses only the
+number of requirements in its relaxed path, not their IDs.
+`btlClearClaimedCommandUnit` clears the shared selection word used by
+the command-claim producer and ready-unit action consumer.
+
+The paired `btlUpdateActionCameraFromTargetPolicy` functions keep their
+state-seven guard, category-driven poses and original SDK position samples.
+DDS1 adopts the already-named `btlRestoreLinkedEffectUnitPose` twin.
+No widths, signedness, casts, statement ordering, snapshot arrays or
+callback representations change with these identifier-only closures.

@@ -1106,7 +1106,8 @@ void btlClearSpecialEnemyEntryFlags(void) {
     }
 }
 
-void func_00205070(void) {
+/* Center Usas on X=0 and apply the same X translation to the other active enemies. */
+void btlCenterUsasEnemyFormation(void) {
     BtlUnit *target = NULL;
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
@@ -1275,7 +1276,8 @@ extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 
 
-s32 func_002055F8(void) {
+/* Flag the first active unit below 25% HP as party/enemy; return six, or -1 if none. */
+s32 btlSetFirstCriticalHpUnitSideFlag(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->status.flags & 1) {
@@ -1339,7 +1341,7 @@ void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
 }
 
 /* Synchronize the bound actor pose and its offset effect vectors. */
-void func_00205730(BtlUnit *source) {
+void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
     BattleEffectState *effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
     BtlUnit *unit = effect->header.actor;
     f32 position[4];
@@ -1417,7 +1419,8 @@ INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
 
 const char D_003A5D60[] = "btl:RAHU damage = %d\n";
 
-void func_00205918(BtlUnit *actor, BtlOperandEntry *operand) {
+/* Apply Rahu's operand flags, head damage tally and head/body recovery coordination. */
+void btlApplyRahuOperandEffects(BtlUnit *actor, BtlOperandEntry *operand) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleLinkedEffectState *effect =
         (BattleLinkedEffectState *)battle->effect;
@@ -1517,7 +1520,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     return (bits * 2) & 4;
 }
 
-extern void func_00205730(BtlUnit *);
+extern void btlRestoreLinkedEffectUnitPose(BtlUnit *);
 
 extern void btlInitializeEffectVectorsFromSourceRecords();
 
@@ -1589,7 +1592,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             btlSetUnitRotation(first, first->rotation);
             btlInitializeEffectVectorsFromSourceRecords(first, 1, 0x107);
             first->status.stateFlags |= 0x100;
-            func_00205730(first);
+            btlRestoreLinkedEffectUnitPose(first);
             first->status.stateFlags |= 0x200;
             first->bodyOffsetY = -245.0f;
             first->reach = 155.0f;
@@ -1801,7 +1804,8 @@ s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit) {
     return unit->displaySpecies;
 }
 
-void func_00206450(void) {
+/* Lower the bound Rahu effect actor, or raise eligible party effect actors toward Y=0. */
+void btlUpdateRahuEffectActorHeights(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleEffectState *effect;
     f32 vector[4] __attribute__((aligned(16)));
@@ -2666,7 +2670,8 @@ s32 btlDispatchNamedChunkNode(void *query) {
     return D_003BD86C;
 }
 
-void func_00207E68(void) {
+/* Align Cerberus parts and its effect actor with the active enemy at lookup index one. */
+void btlAlignCerberusPartTransforms(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *selected = NULL;
     BtlUnit *head = state->units;
@@ -2708,7 +2713,8 @@ void func_00207E68(void) {
 }
 
 
-s32 func_00207FF0(BtlUnit *unit, s32 animation) {
+/* Select Cerberus part motions using part identity, current motion and enemy HP/state. */
+s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation) {
     BtlState *state;
     BtlUnit *current;
     s32 species;
@@ -2885,7 +2891,7 @@ u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     model = btlCreateUnit();
     *slot = model;
     btlInitializePartyRecordFromEnemy(&model->partyRecord, 0x10a);
-    func_00207E68();
+    btlAlignCerberusPartTransforms();
     entry = btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
@@ -3074,7 +3080,7 @@ s32 btlRemapSpecialUnitCommandIndex(u8 *unit, s32 index) {
 /* Battle setup allocates exactly eight bytes for this callback's state. */
 typedef struct BtlScaleTransitionState {
     f32 targetScale; /* 0x00 */
-    u16 stage;       /* 0x04: advanced by func_00208860 */
+    u16 stage;       /* 0x04: advanced by btlAdvanceNidhoggrScaleStage */
     u8 pad06[2];
 } BtlScaleTransitionState;
 
@@ -3092,7 +3098,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 /* Step the special unit's scale transition: advance (or reset) the stage, retarget the
  * scale from its two model records and rescale its base stats from the enemy record. */
-void func_00208860(s32 unit, BtlScaleStageSource *source) {
+void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlScaleTransitionState *transition = (BtlScaleTransitionState *)battle->effect;
     BtlUnit *selected;
@@ -3149,10 +3155,11 @@ void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
     }
     btlGetRuntime();
     btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
-    func_00208860(unit, 0);
+    btlAdvanceNidhoggrScaleStage(unit, 0);
 }
 
-void func_00208A50(void) {
+/* Ease Nidhoggr's model scale toward the stage target and interpolate its Z offset. */
+void btlUpdateNidhoggrScaleAndPosition(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlScaleTransitionState *transition;
     BtlUnit *unit;
@@ -3304,7 +3311,8 @@ s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
     return command;
 }
 
-void func_00208E10(BtlUnit *unit) {
+/* Set Ravana unit dimensions; nonselected units also adopt the alternate identity. */
+void btlConfigureRavanaUnitDimensions(BtlUnit *unit) {
     u8 *battleData;
     BtlTask *entry;
     if ((unit->status.flags & 0x400) == 0) {
@@ -3326,7 +3334,7 @@ void func_00208E10(BtlUnit *unit) {
 }
 
 void func_00208EA8(BtlUnit *unit) {
-    func_00208E10(unit);
+    btlConfigureRavanaUnitDimensions(unit);
 }
 
 BtlUnit *btlFindActiveMember(u32 group, u32 type) {
@@ -3572,7 +3580,7 @@ s32 btlCheckSelectedBossUnitFlag(void) {
 
 /* Re-seed every selected boss-flagged unit's effect vectors, then copy the
  * selected unit's transform onto the effect's actor and flag it. */
-void func_00209528(void) {
+void btlRefreshRavanaUnitModelsAndPose(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlBossEffectPayload *effect = (BtlBossEffectPayload *)state->effect;
     BtlUnit *unit;
@@ -4498,9 +4506,8 @@ extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamS
 
 extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-/* Boss action camera (proposed btlSelectBossActionCameraPose): aim poses for ally actors, fixed DERUTA/I-E key
- * sets for mode 0x11B. */
-s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
+/* Select Harihara action cameras: party aim poses, fixed boss keys or random fallback. */
+s32 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
     BtlTask *task = command->task;
     s32 kind;
     u32 shot;
@@ -4857,7 +4864,8 @@ s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit) {
     return 0;
 }
 
-u32 func_0020CB28(s32 action) {
+/* Command-sound delay override: two for Millennia Curse, zero for other actions. */
+u32 btlGetMillenniaCurseSoundDelay(s32 action) {
     u32 result;
 
     result = 2;

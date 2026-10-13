@@ -343,7 +343,8 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     return 0;
 }
 
-s32 func_00214C78(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **outSecond) {
+/* Find one or two eligible enemy partners from the linkage requirement count, not its IDs. */
+s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **outSecond) {
     BtlState *state = (BtlState *)btlGetRuntime();
     DatAffinityRecord *affinity = &datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND];
     u32 requiredCount = 0;
@@ -424,7 +425,7 @@ extern u32 fldCountSceneSlots(void);
 
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
-extern s32 func_00214C78(BtlUnit *, s32, BtlUnit **, BtlUnit **);
+extern s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
 extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
@@ -432,7 +433,7 @@ extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
 /* Whether unit can start combo command cmd with two partners, none of which may be
  * blocked by action mask 0x10 or by func_001ABDE8 against the other two. */
-s32 func_00214DF8(BtlUnit *unit, s32 command) {
+s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     BtlUnit *members[3];
     BtlState *state;
     u32 i = 0;
@@ -468,7 +469,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
                 }
                 return 1;
             }
-        } else if (func_00214C78(unit, command, &members[1], &members[2]) != 0) {
+        } else if (btlFindEnemyLinkagePartnersByCount(unit, command, &members[1], &members[2]) != 0) {
             members[0] = unit;
             for (i = 0; i < 3; i++) {
                 if (members[i] != NULL && btlUnitHasAnyStatusInMask(members[i], 0x10)) {
@@ -1548,7 +1549,8 @@ s32 func_00218150(void) {
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_002181E8);
 
-void func_00218250(void) {
+/* Clear the unit word shared by the command-claim and ready-unit action callbacks. */
+void btlClearClaimedCommandUnit(void) {
     s32 battle;
 
     battle = (s32)(u32)btlGetRuntime();
@@ -1708,7 +1710,7 @@ s32 func_00218690(void) {
 extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 /* Enemy forms replace a few action modes according to their health state. */
-s32 func_002186C0(BtlUnit *unit, s32 action) {
+s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action) {
     u32 flags = unit->status.flags;
     if (!(flags & 0x400)) {
         return action;
@@ -1872,7 +1874,8 @@ void btlResetUnitSelectionStateAndSetMode(void) {
     ptyRebalanceFrontline(6);
 }
 
-void func_00218BA8(BtlUnit *unit, u8 *arg1) {
+/* Apply Abaddon's selection operand flags and accumulate its reported damage. */
+void btlApplyAbaddonOperandEffects(BtlUnit *unit, u8 *arg1) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     u8 *sub = (u8 *)work->sub;
     BtlUnit *actor;
