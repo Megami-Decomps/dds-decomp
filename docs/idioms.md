@@ -10457,3 +10457,40 @@ The existing ITF fan/strip constants independently distinguish `0x4D` from
 `0x4C`. Color selection, coordinate scale/bias, packet values, argument types,
 legacy caller declarations and statement order are unchanged.
 
+## Trace-justified pixel conversion reuse: kwlnDebugGraphUpdate
+
+The two timing graphs (`0x00104290` in DDS1 and `0x00104180` in DDS2,
+872 bytes each) display current measurements and held peaks. All four draws
+convert a measurement using `(s32)(value / 224.0f * 200.0f)`, then add the
+appropriate pixel bias and shift into four-bit fixed-point screen coordinates.
+One neutral `s32 pixels` is reused across these four genuine conversion epochs.
+It carries the actual converted value consumed by each draw, not a dummy value.
+
+**Deciding passes:** local allocation, then global allocation. **Property P:**
+the first peak's float-to-integer result must remain a separate quantity from
+its following bias/shift chain. Retail DDS1 `0x001044D0`–`0x001044D8` and DDS2
+`0x001043C0`–`0x001043C8` use `$9` for the conversion and `$7` for that chain.
+At the second peak, retail uses `$9` throughout. Direct expressions tied the
+first conversion, addition and shift into one local quantity. The right endpoint
+writes `$9` before that quantity's final use, so local allocation selected `$7`
+for the entire first chain, leaving two differing words.
+
+Reusing `pixels` makes the conversion destination a multiply-defined pseudo
+instead. The fresh trace shows it outside the local quantities, with eight
+references and a total live length of eight. Global allocation gives it `$9`
+(priority 30000, `$9` preference); the first peak's separate local bias/shift
+quantity still takes `$7`. Both the hooked and ordinary compiler outputs agree.
+This closes the two-word residual without adding instructions, adding a
+helper, or changing declaration order. Sharing only the normalized float leaves
+the old residual; sharing only a peak offset also changes the second peak.
+
+The peak values and hold ages are four independent native halfword scalars:
+DDS1 `0x003BA880/882/884/886`, DDS2 `0x00435C50/52/54/56`. Their symbol rows
+declare two-byte objects, including the previously unnamed second halfwords.
+The existing `INCLUDE_SDATA` storage remains assembly-owned; normal splitting
+emits the individual labels with no data-byte change. Treating these as two
+arrays cached aggregate addresses across the drawing calls and enlarged the
+frame. The scalar declarations reproduce retail's GP-relative halfword accesses
+and its 64-byte frame. The Nocturne debug counterpart at `0x00105D18` corroborates
+the two-meter graph and separate peak-expiry/new-peak reset predicates.
+
