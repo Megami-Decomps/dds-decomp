@@ -68,7 +68,7 @@ extern void func_002945B8(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
 extern void sndEnsureMidiBankResident(s32);
 extern void sndStartTrackExtended(s32);
-extern s32 func_00261198();
+extern s32 mnuCampGetCurrentRowQuantityLimit();
 extern s32 func_002613C8();
 extern s32 ptyCountBulletItem(s32);
 
@@ -1977,7 +1977,7 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
 }
 
 /* Largest number of uses the current camp row allows; zero for unsupported list types. */
-s32 func_00261198(MenuTerminalContext *scene) {
+s32 mnuCampGetCurrentRowQuantityLimit(MenuTerminalContext *scene) {
     s32 count = 0;
     CampWindowParams *item = &scene->window->list->cursor->camp;
     s32 listType = scene->ownedWindows[0]->list->cursor->camp.value + 1;
@@ -2086,7 +2086,7 @@ s32 func_002613C8(s32 level, s32 price) {
 }
 
 s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
-    s32 max = func_00261198(scene);
+    s32 max = mnuCampGetCurrentRowQuantityLimit(scene);
     CampWindowParams *slot = &scene->window->list->cursor->camp;
     s32 sum = scene->multiplier + delta;
     s32 cur;
@@ -2149,7 +2149,7 @@ s32 func_00261538(MenuTerminalContext *scene) {
         params->value = price;
         params->price = price;
         params->mode = mode;
-        if (func_00261198(scene) == 0) {
+        if (mnuCampGetCurrentRowQuantityLimit(scene) == 0) {
             node->flags48 = 1;
         }
     }
@@ -2196,7 +2196,7 @@ s32 func_00261670(MenuTerminalContext *scene) {
         params->id = id;
         params->price = price;
         params->mode = mode;
-        if (func_00261198(scene) == 0) {
+        if (mnuCampGetCurrentRowQuantityLimit(scene) == 0) {
             node->flags48 = 1;
         }
     }
@@ -2245,7 +2245,7 @@ s32 func_00261850(MenuTerminalContext *scene, s32 filterMode) {
         params->id = id;
         params->price = price;
         params->mode = mode;
-        if (func_00261198(scene) == 0) {
+        if (mnuCampGetCurrentRowQuantityLimit(scene) == 0) {
             node->flags48 = 1;
         }
     }
@@ -2296,7 +2296,7 @@ s32 func_002619A8(MenuTerminalContext *scene, s32 filterMode) {
         params->id = id;
         params->price = price;
         params->mode = mode;
-        if (func_00261198(scene) == 0) {
+        if (mnuCampGetCurrentRowQuantityLimit(scene) == 0) {
             node->flags48 = 1;
         }
     }

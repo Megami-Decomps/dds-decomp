@@ -3896,6 +3896,7 @@
 0x00261040	mnuCampResolveOwnedItemVariant	inferred	Replaces a row item ID with its variant when the original qualifies and is owned. [names_reviewed15.tsv]
 0x002610C0	mnuCampGetCompactEntryId	inferred	Returns the ID at the requested column of a compact camp entry row. [names_reviewed15.tsv]
 0x002610E8	mnuCampCountRemainingUses	inferred	Per-mode remaining count (99 or 1 minus the flag byte) clamped at zero. [names_M44_Mid3.tsv]
+0x00261198	mnuCampGetCurrentRowQuantityLimit	inferred	confidence=high; src/dds2/game/code_0025DA20.c:1980; Caps the current row quantity by currency and remaining uses for purchase rows, or by owned inventory and currency for the sell row.
 0x00261310	mnuCampDisableUnavailableItemEntries	inferred	readability/matching review (QP16)
 0x00261480	mnuCampAdvanceCounter	inferred	Adds a delta to the scene counter, clamps to [1, max] and flags saturation; mode 3 also rescales the record value. [names_M44_Mid3.tsv]
 0x00261D78	mnuQueueCampTextGlyphWithChildColor	inferred	Creates a tinted camp glyph and queues it only for nonzero display input. [names_reviewed11.tsv]
