@@ -2142,6 +2142,8 @@
 0x001A1A50	itfPanelUpdateValuesAndNotify	inferred	src/dds2/interface/itfPanel.c:func_001A1A50; Stores four supplied panel values and invokes the kind-specific notification callback with panel context when present. Fully-C unit; corresponding retail matching artifact present. [names_qp9.tsv]
 0x001A1A98	itfBuildAndSubmitPanelPacket	inferred	Allocates panel draw list, appends GS state, dispatches panel handler and submits list via supplied callback. [names_reviewed19.tsv]
 0x001A1B38	itfPanelSetFourColumnVertices	inferred	Writes eight vertices in four columns at x0, x0+0x200, x1-0x200 and x1, collapsing middle columns if they cross. [names_R_Structs24.tsv]
+0x001A1BB0	itfBuildPanelBorderVertexGrid	inferred	Builds the panel's outer border vertex grid and table-spaced rows above and below it; pairs with DDS1 0x00199B80.
+0x001A1D20	itfPanelSetInsetFrameVertices	inferred	Builds the panel's outer border vertex grid and adds three fixed 8-unit inset rows above and below; pairs with DDS1 0x00199CF0.
 0x001A1E68	itfPanelSetRectVerts	inferred	writes the 4 corner vertices of a rect (x0,y0,x1,y1) into a panel record
 0x001A1E98	itfSetPanelCornerGrid	inferred	Writes two rows of three panel coordinates using supplied bounds. [names_reviewed8.tsv]
 0x001A1F08	itfSetPanelInsetVertexColumns	inferred	Writes panel vertex columns at fixed horizontal and inset vertical coordinates. [names_reviewed9.tsv]
