@@ -2621,6 +2621,7 @@
 0x0019AE78	itfPanelAcquireHold	inferred	stores scrGetWindow() into D_00357D90 and calls func_0019C968(window, 3, 0); DDS2 001A2EA8 [names_M33_SmallSweep2.tsv]
 0x0019AED8	itfPanelReleaseHold	inferred	closes the held message window (itfMesCleanupWindow) and resets D_00357D90 (window/counter = -1/0); DDS2 001A2F08 [names_M33_SmallSweep2.tsv]
 0x0019AF30	itfCommandQueueHeldPanelEntry	inferred	src/dds1/game/code_00199AD8.c func_0019AF30: Reads three script integers into held panel queue, ignoring absent hold or full queue. [names_reviewed24.tsv]
+0x0019B108	itfMesScriptWaitForOptionSelection	inferred	Message script command table slot 3: builds the selected entry's option list, yields while selection is pending, and returns the chosen clear-bit count before resetting the window.
 0x0019B1B0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x0019B2E0	itfPanelGetPairFirst	inferred	reads first s16 of pair at record +0x50
 0x0019B300	itfPanelSetPairFirst	inferred	writes first s16 of pair at record +0x50
