@@ -251,7 +251,7 @@ extern ItfFovPanelWork D_00452E70;
 
 extern s8 D_0037F543[];
 
-extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
+extern void *sdfCreateBorderedRectanglePacket(s32, s32, s32, s32, s32, u32, u32);
 
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
@@ -262,7 +262,7 @@ s32 btlEditCameraFieldOfView(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-                    (u32)func_0011F250(0x8500, 0x79C0, 0xFEFFFF,
+                    (u32)sdfCreateBorderedRectanglePacket(0x8500, 0x79C0, 0xFEFFFF,
                                        0xA80, 0x120, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfAppendPacket(list,
@@ -397,7 +397,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-        (u32)func_0011F250(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+        (u32)sdfCreateBorderedRectanglePacket(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet,
         "BLUR:        %s", kwlnDrawOverlayEnabled ? D_00436660 : D_00436668));
@@ -437,7 +437,7 @@ s32 kwlnUpdateBlurDebugMenu(void) {
         y += 0x60;
     }
     sdfAppendPacket(list,
-        (u32)func_0011F250((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
+        (u32)sdfCreateBorderedRectanglePacket((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
 
@@ -582,7 +582,7 @@ s32 itfEditOverlayColor(void) {
 
     list = sdfCreateResetPacketList();
     sdfAppendPacket(list,
-        (u32)func_0011F250(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+        (u32)sdfCreateBorderedRectanglePacket(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfAppendPacket(list, (u32)sdfFormatSifPacket(&packet, D_004366B8));
     if (D_00452E90.editing == 0) {
