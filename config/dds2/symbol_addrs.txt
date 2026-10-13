@@ -7498,6 +7498,7 @@ fldResetSparkTable = 0x0014F8B8; // type:func  // dds1 0x0014B988
 fldSetSparkVectors = 0x0014F940; // type:func  // dds1 0x0014BA10
 fldFreeSparkSlot = 0x0014FB58; // type:func  // dds1 0x0014BC28
 fldUpdateSparkSlots = 0x0014FC88; // type:func  // dds1 0x0014BD58
+fldUpdateSparkSequence = 0x0014FD28; // type:func
 fldIsNearSpark = 0x00150080; // type:func  // dds1 0x0014C158
 fldFinishDeferredExit = 0x00151400; // type:func  // dds1 0x0014D068
 fldUpdateLookAtSegment = 0x00154940; // type:func  // dds1 0x0014D518

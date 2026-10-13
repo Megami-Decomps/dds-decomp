@@ -4217,7 +4217,7 @@ void fldUpdateSparkSlots(void) {
 extern s32 D_004363B8;
 extern void fldReleaseCameraModel(u32);
 
-void func_0014FD28(void) {
+void fldUpdateSparkSequence(void) {
     FldSparkSequence *sequence;
     s32 i;
     s32 slot;
@@ -4653,7 +4653,7 @@ void func_00150F20(void) {
             dspStartEntry(7);
             fldResetPlayerSceneObjectState();
         } else {
-            func_0014FD28();
+            fldUpdateSparkSequence();
         }
         return;
     } else if (phase == 3) {

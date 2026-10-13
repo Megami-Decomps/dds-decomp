@@ -7408,6 +7408,7 @@
 0x00148488	fldDrawScrollingLayerOverlay	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0014B5D8	fldUpdatePositionedTextureNodes	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0014F980	fldAttachSparkSlotToWorldObject	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0014FD28	fldUpdateSparkSequence	inferred	Starts sequence slots when the remaining count reaches zero, advances active spark slots, and handles nearby pickups; called by the spark encounter update. [provider sequence logic and caller, 2026-10-13]
 0x00150A60	fldUpdateDevilizeEventSequence	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00152C88	fldUpdateTargetGuideEffects	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00153410	fldUpdateTargetGuideController	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
