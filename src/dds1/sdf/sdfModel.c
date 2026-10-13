@@ -389,7 +389,7 @@ void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *message, s32 firstWord, s32 w
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTestTransformedClipVectors);
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D8DD0);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelBuildVisibleNodePackets);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D9238);
 
