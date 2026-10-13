@@ -3721,6 +3721,7 @@
 0x00242B40	evtCommandSetUnitScaledValueFlag	inferred	Finds world unit and sets a flag on its nested scaled-value record. [names_reviewed6.tsv]
 0x00242BC0	evtCommandClearUnitScaledValueFlag	inferred	Finds world unit and clears a flag on its nested scaled-value record. [names_reviewed6.tsv]
 0x00242C40	evtCommandMoveLightAlongPathOrWarn	inferred	Moves light along path and prints LIGHT_PATH_MOVE warning on failure. [names_reviewed6.tsv]
+0x00242CB8	evtCommandWaitLightResourceScale	inferred	Waits for the kind-9 LIGHT object resource scale to reach its selected target; absent or unsupported scale state completes immediately. Paired DDS1 0x00228058.
 0x00242D10	evtCreateTextureEntryChildTask	inferred	confidence=high; matched-C; src/dds2/game/code_00242CB8.c:63:func_00242D10; Resolves TEX_BE entry from script IDs, creates task, parents it to current script task and pushes new handle.; twin=0x002280B0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00242DE0	evtOpcodeCreateWorldChildTask	inferred	Creates an event task from the first script argument, attaches it under the world task at offset 0xE4, and selects the new task.
 0x00242E70	evtOpcodeSetTaskContextFlag	inferred	If the script-selected task is registered, its context helper sets flag bit zero on that task's event context.

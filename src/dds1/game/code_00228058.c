@@ -52,7 +52,7 @@ s32 scrReadIntParameter(s32 idx);
 extern void *evtFindWorldObjectByIdAndKind(s32 kind, s32 id);
 extern s32 evtCheckWorldObjectResourceScale(void *object);
 
-s32 func_00228058(void) {
+s32 evtCommandWaitLightResourceScale(void) {
     s32 status = evtCheckWorldObjectResourceScale(
         evtFindWorldObjectByIdAndKind(9, scrReadIntParameter(0)));
 
