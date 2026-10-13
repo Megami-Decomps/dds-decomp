@@ -1,6 +1,8 @@
 #ifndef EE_MMI_H
 #define EE_MMI_H
 
+#include "common.h"
+
 /*
  * EE multimedia (MMI) idioms that retail code gets from Sony's libvu0/SDK
  * inline asm. gcc 2.96 never emits these instructions itself. Each macro
@@ -188,6 +190,24 @@
     "ppacb %0, $0, %0\n" \
     ".set reorder" \
     : "=r"(out) : "f"(128.0f))
+
+/*
+ * SDK word carriers used by effSampleColorAlphaTracks and the bit-scaled
+ * billboard blends. Each conversion owns its native 16-byte workspace.
+ * Other unpack/pack operand contracts keep their existing macros.
+ * See docs/idioms.md, "SDK RGBA word carriers".
+ */
+static inline void eeUnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline u32 eePackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    EE_MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
 
 /*
  * Unaligned three-float vector at p -> vf register (w undefined):
