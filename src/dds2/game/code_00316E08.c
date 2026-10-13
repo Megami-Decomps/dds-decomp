@@ -104,7 +104,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void);
 extern char D_0042D4D0[];
 
 
-void func_00316FA8(MnuShootingWork *work);
+void mdlDestroyOptionalViewerPackageWork(MnuShootingWork *work);
 
 void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
     entry->params.color.initialColor = color & 0xFFFFFF;
@@ -156,7 +156,7 @@ u8 mdlViewerPackageTaskExists(void) {
 u32 mdlStopViewerPackageTask(void) {
     mnuMovieTaskState = 2;
     D_00435BB0 = 1;
-    func_00316FA8(D_0043891C);
+    mdlDestroyOptionalViewerPackageWork(D_0043891C);
     kwlnTaskDestroyWithHierarchyByName(D_0042D4D0, 1);
     return mnuResumeEffectQueueFrameAdvance();
 }
@@ -175,7 +175,7 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void) {
     return work;
 }
 
-void func_00316FA8(MnuShootingWork *work) {
+void mdlDestroyOptionalViewerPackageWork(MnuShootingWork *work) {
     if (work != NULL) {
         mnuDestroyShootingWork(work);
     }
@@ -254,7 +254,7 @@ extern MnuSectionObjectList *mnuLoadSectionObjectListWithRelocations(void *data)
 void mdlLoadViewerPackageFromWork(MnuPackageEntry *entry);
 
 /* Advance the shooting package loader; only the completed state returns one. */
-s32 func_00317058(u8 *workBytes) {
+s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
     MnuShootingWork *work = (MnuShootingWork *)workBytes;
     void *data = NULL;
 
@@ -666,7 +666,7 @@ void mnuReleaseShootingSectionResources(MnuShootingWork *work) {
 }
 
 extern u8 D_0037F510[2][2][16];
-extern void func_0031AEB8(MnuShootingWork *);
+extern void mnuToggleShootingPause(MnuShootingWork *);
 extern s32 mnuPollPauseChoiceInput(MnuShootingWork *);
 extern s32 mnuAdvanceCursorStepUntilThreshold(void);
 extern s32 mnuTriggerProgressResourceRecords(MenuProgressState *);
@@ -703,7 +703,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     if ((s8)D_0037F510[1][0][12] < 0 && work->phase == 2 &&
         !D_0040ABF8.flagsBits.updated && D_0040ABF8.inputCountdown == 0 &&
         !D_0040ABF8.flagsBits.inputDisabled) {
-        func_0031AEB8(work);
+        mnuToggleShootingPause(work);
     }
     if (work->unk70Bit0) {
         result = mnuPollPauseChoiceInput(work);
@@ -711,11 +711,11 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         case -1:
             break;
         case 0:
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             break;
         case 1:
             work->flags |= 4;
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             work->flags |= 0x20;
             work->phase = 11;
             work->result = 0;
@@ -723,7 +723,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             return 1;
         case 2:
             work->flags |= 4;
-            func_0031AEB8(work);
+            mnuToggleShootingPause(work);
             work->flags |= 0x20;
             work->result = 1;
             work->phase = 11;
@@ -851,7 +851,7 @@ extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
 extern struct SdfPoolNode *D_00380788[13][4];
 
-s32 func_00318C00(MnuShootingWork *work) {
+s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
     MenuRuntimeList *list;
     MenuRuntimeRecord *record;
@@ -990,7 +990,7 @@ extern u8 *mnuAcquireUnusedModelNode(u32 *group);
 extern s32 itfClaimFreeModelInstance(ModelInstanceList *list);
 extern MnuModelNode *D_00438928;
 
-void func_003191B0(MenuWorkEntry *entry, MnuShootingWork *work) {
+void mnuCreateShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
     u32 tagClass = entry->tag & MNU_WORK_TAG_CLASS_MASK;
     MnuNodeList *groups = work->modelWork->groups;
     ModelInstanceList *instances = work->work24->lists;
