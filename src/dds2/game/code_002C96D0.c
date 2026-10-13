@@ -27,6 +27,7 @@
 #include "mnu_list.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
+#include "sdf_vu_matrix.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
 #include "file_request_api.h"
