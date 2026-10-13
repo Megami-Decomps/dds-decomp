@@ -908,7 +908,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex)
     asset->dirtyFlags = dirtyFlags & (SDF_ASSET_ENTRY_CHANGE_BITS << (entryIndex ^ 1));
 }
 
-SdfAsset *sdfCreateAssetWithDrawEntries(void);
+#include "sdf_asset_create.h"
 u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 /* Parse the declared number of variable-sized assets, reserving at least the minimum capacity. */
 DevRequest *sdfAssetListParse(DevRequest *lookup, u32 *data) {

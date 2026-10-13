@@ -99,7 +99,7 @@ extern void evtStopTestTasks(void);
 
 extern void evtDestroySkyTask(void);
 
-extern void *sdfCreateAssetWithDrawEntries(void);
+#include "sdf_asset_create.h"
 
 extern s8 evtSelectionStateActive;
 
