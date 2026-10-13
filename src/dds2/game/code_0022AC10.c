@@ -758,7 +758,7 @@ extern BtlFlagSlot D_003BF960[];
 extern u32 effMiscRandMod(void *state, u32 modulus);
 
 /* Script command: picks a random slot of the argument's group whose flag 0x8FF - slot is clear; passes its index (or -1 / 0) to scrSetIntegerReturnValue. */
-s32 func_0022B7A0(void) {
+s32 btlCommandChooseRandomUnflaggedGroupSlot(void) {
     u32 value = scrReadIntParameter(0);
     s32 count;
     s32 pick;
