@@ -46,11 +46,11 @@ s16 mnuSpriteDrawParam(u32 index) {
     return D_003E3792[index * 4];
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
 
 void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
                    s32 spriteIndex, s32 drawContext) {
-    func_00306CD0((x + D_003E3790[spriteIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_003E3790[spriteIndex][2]) << 4,
                   (y + D_003E3790[spriteIndex][3]) << 3,
                   depth,
                   (u32)((f32)alpha * 256.0f * 0.0078125f),

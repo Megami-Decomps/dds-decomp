@@ -942,7 +942,7 @@ typedef struct StaffImageTiming {
 } StaffImageTiming;
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 s32 mnuStaffImageProc(void) {
     StaffImageTiming timing[2] = {
         {60, 0, 1, 150, 2},
@@ -1015,10 +1015,10 @@ s32 mnuStaffImageProc(void) {
     }
     switch (mnuMovieWork->scrollPaused) {
     case 1:
-        func_00306CD0(0, 0, 0, mnuMovieWork->imageAlpha, 0, sprite, 10, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, mnuMovieWork->imageAlpha, 0, sprite, 10, 0x53);
         break;
     case 2:
-        func_00306CD0(0x19D0, 0xC70, 0, mnuMovieWork->imageAlpha, 0, sprite, 11, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0x19D0, 0xC70, 0, mnuMovieWork->imageAlpha, 0, sprite, 11, 0x53);
         break;
     }
     return 1;
@@ -1181,7 +1181,7 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    func_00306CD0(0, 0, 0, bar->pos / 2, 0, sprite, 9, 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, bar->pos / 2, 0, sprite, 9, 0x53);
     if (bar->active == 0) {
         bar->pos -= 8;
     } else {
@@ -1223,7 +1223,7 @@ void mnuUpdateStaffSparkleEffects(StaffSparkleState *state) {
         if (age >= 0x100) {
             age = 0x200 - age;
         }
-        func_00306CD0(state->positions[i][0], state->positions[i][1], 0,
+        effDrawTextureSlotWithBlendedCornerColors(state->positions[i][0], state->positions[i][1], 0,
                       state->alpha * age / 512, 0, sprite, 8, 0x53);
     }
     for (i = 0; i < (s32)state->count; i++) {
@@ -1262,15 +1262,15 @@ void mnuDrawScrollingStaffBackdrop(StaffSparkleState *state) {
 
     y = -phase - 800;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
     }
     y = -phase;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
     }
     y = 800 - phase;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
     }
 
     phase = (s32)((f32)mnuMovieWork->frame * 0.3f);
@@ -1279,15 +1279,15 @@ void mnuDrawScrollingStaffBackdrop(StaffSparkleState *state) {
 
     y = -phase - 800;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
     }
     y = -phase;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
     }
     y = 800 - phase;
     if (lowerClip < y && y < 448) {
-        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
     }
 
     uiConfigureSurfaceAlphaState(0x53);
@@ -1362,10 +1362,10 @@ void mnuDrawAndAdvanceStaffImageBlend(MnuTitlePaletteTransition *state) {
     index = state->phase;
     frame %= 256;
     alpha = state->opacity * (255 - frame) / 512;
-    func_00306CD0(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
     alpha = state->opacity * frame / 512;
     index = (state->phase + 1) % 4;
-    func_00306CD0(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, alpha, 0, sprite, state->spriteIndices[index], 0x53);
     if (frame == 255) {
         if (index == 0) {
             mnuShuffleTitlePaletteSpriteOrder(state, 1);
@@ -1402,10 +1402,10 @@ void mnuAdvanceStaffTextScroll(StaffScrollTransition *state) {
     s32 fade = state->opacity / 2;
 
     uiDrawTexturedSurfaceAtFarDepth(0x53);
-    func_00306CD0(0, 0, 0, fade, 0x60, sprites, 4, 0x53);
+    effDrawTextureSlotWithBlendedCornerColors(0, 0, 0, fade, 0x60, sprites, 4, 0x53);
     func_00308F78(1, 0x53);
     if (state->scrolling != 0) {
-        func_00306CD0(0, state->y, 0, fade, 0x60, sprites, 7, 0x53);
+        effDrawTextureSlotWithBlendedCornerColors(0, state->y, 0, fade, 0x60, sprites, 7, 0x53);
     }
     uiDrawSurfaceAtNearDepth(0x53);
     if (state->scrolling == 0) {

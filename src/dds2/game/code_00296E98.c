@@ -94,7 +94,7 @@ enum {
 };
 
 extern BrsIconRecord D_003D03F0[];
-extern void func_00306CD0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw the selected result icon, then the fixed companion at the same alpha. */
 void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
@@ -104,11 +104,11 @@ void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     layer = D_00438FC8->effectSlots[0];
     strength = (f32)alpha * 0.00390625f;
     iconIndex += 3;
-    func_00306CD0(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[iconIndex][BRS_ICON_X] << 4,
                   D_003D03F0[iconIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(strength * 256.0f), 0, layer,
                   D_003D03F0[iconIndex][BRS_ICON_ID], option);
-    func_00306CD0(D_003D03F0[8][BRS_ICON_X] << 4,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[8][BRS_ICON_X] << 4,
                          D_003D03F0[8][BRS_ICON_Y] << 3, 0,
                          (u32)(strength * 256.0f), 0, layer,
                          D_003D03F0[8][BRS_ICON_ID], option);
@@ -124,7 +124,7 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, 
     layer = D_00438FC8->effectSlots[0];
     normalized = (f32)value * 0.00390625f;
     selectedIndex = entryIndex + 3;
-    func_00306CD0(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
+    effDrawTextureSlotWithBlendedCornerColors(D_003D03F0[selectedIndex][BRS_ICON_X] << 4,
                   D_003D03F0[selectedIndex][BRS_ICON_Y] << 3, 0,
                   (u32)(normalized * 256.0f), 0, layer,
                   D_003D03F0[selectedIndex][BRS_ICON_ID], drawArg);
@@ -138,7 +138,7 @@ void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, 
     companionX = (s32)((f32)D_003D03F0[8][BRS_ICON_X] -
                        (1.0f - companionPosition) * 128.0f);
 
-    func_00306CD0(companionX << 4,
+    effDrawTextureSlotWithBlendedCornerColors(companionX << 4,
                          D_003D03F0[8][BRS_ICON_Y] << 3, 0,
                          (u32)(normalized * 256.0f), 0, layer,
                          D_003D03F0[8][BRS_ICON_ID], drawArg);
