@@ -333,7 +333,7 @@ void evtSetDrawVectorTarget(s32 blendFrames, f32 x, f32 y, f32 z, f32 w) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00107FD8", func_001083F8);
+INCLUDE_ASM(const s32, "game/code_00107FD8", kwlnUpdateDrawParameterTransitions);
 
 /* Replace the two scalar targets immediately, or retain start/end values for their blend. */
 void evtToggleSavedDrawVectors(s32 frames, f32 firstTarget, f32 secondTarget) {

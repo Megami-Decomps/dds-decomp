@@ -212,7 +212,7 @@ extern u8 sdfViewMatrix[0x40];
 extern u8 D_00380788[];
 extern void kwlnAdvanceShakeOffsets(void);
 extern u32 evtCheckSelectionState(void);
-extern void func_00108318(void);
+extern void kwlnUpdateDrawParameterTransitions(void);
 extern void func_00126B70(void);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 #include "sdf_packet_alloc.h"
@@ -237,7 +237,7 @@ s32 kwlnBuildFrameScenePackets(void) {
 
     kwlnAdvanceShakeOffsets();
     evtCheckSelectionState();
-    func_00108318();
+    kwlnUpdateDrawParameterTransitions();
     if (kwlnTextureReferenceFlag != 0) {
         sdfBuildLightingPacket(D_00382500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
             D_0037F940, D_0037F950);
