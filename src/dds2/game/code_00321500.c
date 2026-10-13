@@ -420,7 +420,7 @@ void func_003223F8(void) {
 }
 
 
-void func_00322418(void) {
+void mnuAdvanceRuntimeAnimationRecords(void) {
     mnuAdvanceMovingRuntimeRecords(&D_0045C880);
 }
 
