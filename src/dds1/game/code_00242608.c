@@ -2816,7 +2816,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
 }
 
 extern void mnuDrawStatusIconAndCompanion(s32, s32, s32, ShopScene *, s32, s32);
-extern void func_0025E6B0(s32, s32, s32, ShopScene *, s32, s32);
+extern void mnuDrawShopItemQuantity(s32, s32, s32, ShopScene *, s32, s32);
 extern void func_0025FD50(s32, s32, s32, ShopScene *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
@@ -2828,7 +2828,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
     case 1:
         func_0025E308(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-        func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
+        mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
         mnuDrawIfActive(0, 0, 0, state->window, 0x53);
         func_0025FD50(0, 0, 0, state, 0x53);
         func_00260100(state, 0xA09DC380);
@@ -2844,7 +2844,7 @@ s32 mnuShopDrawMenuState(KwlnTask *callbackContext) {
         } else {
             func_0025E308(0, 0, 0, state, 0x100, 0x53);
             mnuDrawIconTriple(0, 0, 0, 0, 0x100, 0x53);
-            func_0025E6B0(0, 0, 0, state, 0x100, 0x53);
+            mnuDrawShopItemQuantity(0, 0, 0, state, 0x100, 0x53);
             mnuClearWindowPanelTransitionFlag(state->sprite);
             mnuDrawIconFixedEntryWithBadge(0, 0, 0, (s32)state, 0x100, 0x53);
             func_00260100(state, 0xA09DC380);
