@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_pack.h"
@@ -39,7 +40,6 @@ void evtBeginSolarOverlayFadeIn(s32 arg0);
 
 extern char D_003BBDC8[];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
@@ -396,7 +396,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern void mdlFlagClear(s32);
 
 void func_00228930(f32 delta) {
     if ((u8)(datGameState->world.flags & SOLAR_PHASE_ADVANCE_FLAG)) {

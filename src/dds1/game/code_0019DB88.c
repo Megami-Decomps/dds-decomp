@@ -4,6 +4,7 @@
 #include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "pcp_vu0.h"
@@ -878,7 +879,6 @@ ItfMesPoolNode *itfMesFindPreviousWindowWithPanelSprite(ItfMesPoolNode *node) {
     return node;
 }
 
-extern u32 kwlnTaskCreate(u32, u32, u32, u32, s32 (*)(s64), void (*)(s64), u32);
 
 extern u8 D_00358038[];
 
@@ -893,19 +893,19 @@ extern s32 scrCreateTaskForProcessId(s32, u8 *, s32);
 
 extern void sndCycleTestMessageResource(void);
 
-extern s32 itfUpdateTestMessageResourceInput(void);
+extern s32 itfUpdateTestMessageResourceInput(KwlnTask *task);
 
 extern void itfPrintTestMessageCallback(void);
 
-extern s32 sndUpdateTestMsgTask(void);
+extern s32 sndUpdateTestMsgTask(KwlnTask *task);
 
 
 void sndCreateTestMsgTasks(void) {
     D_003BA8EC = 0x80FFFFFF;
     sndCycleTestMessageResource();
     itfMesSetWindowCallbackAddress(((ScrData *)kwlnTaskGetUserValue(scrCreateTaskForProcessId(0x3E8, D_00358038, 0)))->resourceIndex, itfPrintTestMessageCallback);
-    kwlnTaskCreate((u32)D_003A14F0, 0x3EF, 0, 0, (s32 (*)(s64))itfUpdateTestMessageResourceInput, 0, 0);
-    kwlnTaskCreate((u32)D_003A1500, 0x2AFE, 0, 0, (s32 (*)(s64))sndUpdateTestMsgTask, 0, 0);
+    kwlnTaskCreate(D_003A14F0, 0x3EF, 0, 0, itfUpdateTestMessageResourceInput, 0, 0);
+    kwlnTaskCreate(D_003A1500, 0x2AFE, 0, 0, sndUpdateTestMsgTask, 0, 0);
 }
 
 void sndCycleTestMessageResource(void) {
@@ -919,7 +919,7 @@ void sndCycleTestMessageResource(void) {
     }
 }
 
-s32 itfUpdateTestMessageResourceInput(void) {
+s32 itfUpdateTestMessageResourceInput(KwlnTask *task) {
     if (D_00324530[0] < 0) {
         sndCycleTestMessageResource();
     }
@@ -936,7 +936,7 @@ extern u8 D_00358328[];
 extern u8 D_00358338[];
 
 
-s32 sndUpdateTestMsgTask(void) {
+s32 sndUpdateTestMsgTask(KwlnTask *task) {
     SdfListHead *mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
         mem = (SdfListHead *)sdfAllocPacketAligned(0x20);

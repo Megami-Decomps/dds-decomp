@@ -14,6 +14,7 @@
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 #include "itf.h"
 
@@ -347,8 +348,6 @@ typedef struct MantraFileRequest {
     MantraFileEntry *entries;
 } MantraFileRequest;
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
-                                TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -410,7 +409,7 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4C, 0, drawArg);
     if (entryId != 0) {
         memset(buffer, 0, 0x20);
-        func_00314500(entryId, 1, buffer);
+        prfCopyMantraNamePart(entryId, 1, buffer);
         frFontDrawStyledGlyphChainAndMeasure(x + 0x27, y + 0x146, depth, flags, 4, buffer, 0x101, drawArg);
         mnuDrawMantraSprite(x, y, depth, fade, 0x50, 0, drawArg);
     } else {
@@ -603,7 +602,7 @@ typedef struct MnuSpriteResource {
 } MnuSpriteResource;
 
 extern s32 D_003CE9D0[][4];
-extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, u32, s32, s32);
 
 void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context) {
@@ -615,7 +614,7 @@ void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
         ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->textures[D_003CE9D0[placementIndex][1]].flags |= 2;
     }
-    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
                   (y + D_003CE9D0[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -646,7 +645,7 @@ void mnuDrawMantraScaledRotatedCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s3
         ->sprites[D_003CE9D0[placementIndex][1]].height =
         (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -676,7 +675,7 @@ void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale
         ->sprites[D_003CE9D0[placementIndex][1]].height =
         (s32)(scale * (f32)((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight) << 3;
-    func_00306CD0(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
+    effDrawTextureSlotWithBlendedCornerColors(((x + D_003CE9D0[placementIndex][2]) << 4) - (width >> 1),
                   ((y + D_003CE9D0[placementIndex][3]) << 3) - (height >> 1),
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],
@@ -695,7 +694,7 @@ void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale
 void mnuDrawMantraRotatedSprite(s32 x, s32 y, s32 z, s32 alpha, f32 rotation, s32 placementIndex, s32 flags, s32 context) {
     ((MnuSpriteResource *)mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]])
         ->sprites[D_003CE9D0[placementIndex][1]].rotation = rotation;
-    func_00306CD0((x + D_003CE9D0[placementIndex][2]) << 4,
+    effDrawTextureSlotWithBlendedCornerColors((x + D_003CE9D0[placementIndex][2]) << 4,
                   (y + D_003CE9D0[placementIndex][3]) << 3,
                   z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
                   mnuMantraSpriteSlots[D_003CE9D0[placementIndex][0]],

@@ -425,7 +425,7 @@ extern u32 strlen(const char *text);
 extern char *strcpy(char *destination, const char *source);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-void func_002CD0D8(u16 scriptId, s32 mode, char *destination) {
+void prfCopyMantraNamePart(u16 scriptId, s32 mode, char *destination) {
     u8 *name = D_003BAA78[scriptId].encodedText;
     s32 split = 0;
     s32 offset = 0;

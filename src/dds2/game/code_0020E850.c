@@ -356,8 +356,6 @@ void btlSelectHpMpDisplayPositionVU(BtlUnit *unit) {
     }
     VU0_LOAD_VF(vf10, baseline);
 }
-
-extern s32 btlGetRuntime(void);
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
 
 /* Draw a centered decimal value, using optional per-digit offsets. */

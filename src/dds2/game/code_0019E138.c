@@ -3,10 +3,12 @@
 #include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "itf_resource_segments.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
@@ -48,10 +50,9 @@ extern s32 D_00435E70;
 extern void itfSetTextDrawLimit(s32);
 extern FrFontGlyph *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
-extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
-extern void itfReleaseFontTestTaskResources(void);
+extern s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task);
+extern void itfReleaseFontTestTaskResources(KwlnTask *task);
 
 extern u32 D_0043658C;
 
@@ -79,20 +80,6 @@ extern u32 itfFontTestScriptTask;
 extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
 extern u32 D_004528C0[];
-
-/* Field block split by func_00198038. */
-typedef struct MemBlock {
-    s32 firstOffset; /* 0x0 */
-    s32 secondDelta; /* 0x4 */
-    u8 pad08[0x10]; /* 0x8 */
-    s32 thirdDelta; /* 0x18 */
-} MemBlock;
-
-typedef struct MemOut {
-    void *first; /* 0x0 */
-    void *second; /* 0x4 */
-    void *third; /* 0x8 */
-} MemOut;
 
 /* Two consecutive entries in the four-byte-stride offset table bound a span. */
 typedef struct ItfBitRange {
@@ -1030,14 +1017,14 @@ u32 func_001A0060(u32 value) {
 }
 
 /* Resolve three signed, cumulative relative offsets without validating bounds. */
-void itfSplitRelativeSegments(MemBlock *block, MemOut *segments) {
+void itfSplitRelativeSegments(ItfRelativeSegmentResourceView *block, ItfPackedResourceSegments *segments) {
     s32 firstOffset = block->firstOffset;
     s32 secondOffset = firstOffset + block->secondDelta;
     s32 thirdOffset = secondOffset + block->thirdDelta;
 
-    segments->first = (u8 *)block + firstOffset;
-    segments->second = (u8 *)block + secondOffset;
-    segments->third = (u8 *)block + thirdOffset;
+    segments->treeNodes = (u8 *)block + firstOffset;
+    segments->entryBitOffsets = (u8 *)block + secondOffset;
+    segments->packedBitstream = (u8 *)block + thirdOffset;
 }
 
 /* Read the opaque header word at 0x10; its role is not established. */
@@ -1048,10 +1035,10 @@ u32 itfGetPackedResourceHeaderWord(u32 resourceBase) {
 /* Decode entryIndex's bit span through the resource's six-byte prefix-tree records.
  * Write terminal bytes to decodedBytes and return/cache the count. The font atlas
  * uses these bytes as pixels; neither entry nor output bounds are checked. */
-s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, u32 resourceBase, MemOut *segments) {
+s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, void *resourceBase, ItfPackedResourceSegments *segments) {
     ItfBitRange range;
     s32 produced;
-    u8 *table = segments->first;
+    u8 *table = segments->treeNodes;
     u16 *bitWords;
     u32 wordIndex;
     u32 start;
@@ -1060,12 +1047,12 @@ s32 itfDecodePackedResourceEntry(u8 *decodedBytes, s32 entryIndex, u32 resourceB
     u16 *root;
     u16 *node;
 
-    memcpy(&range.start, (u8 *)segments->second + entryIndex * 4, 4);
-    memcpy(&range.end, (u8 *)segments->second + entryIndex * 4 + 4, 4);
+    memcpy(&range.start, (u8 *)segments->entryBitOffsets + entryIndex * 4, 4);
+    memcpy(&range.end, (u8 *)segments->entryBitOffsets + entryIndex * 4 + 4, 4);
     produced = 0;
-    func_001A0060(resourceBase);
+    func_001A0060((u32)resourceBase);
     start = range.start;
-    bitWords = segments->third;
+    bitWords = segments->packedBitstream;
     wordIndex = start >> 4;
     remaining = range.end - start;
     state = (bitWords[wordIndex] | 0x10000) >> (start & 0xF);
@@ -1197,13 +1184,13 @@ void itfStartFontTestScene(void) {
 }
 
 /* Advance/retain the test glyph and release its background texture reference. */
-void itfReleaseFontTestTaskResources(void) {
+void itfReleaseFontTestTaskResources(KwlnTask *task) {
     frFontAdvanceOrRetainFadingGlyph(D_0043658C);
     itfReleaseBackgroundSpriteTexture();
 }
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
-u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
+s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task) {
     s32 taskState;
     u32 readyMask;
 
@@ -1704,7 +1691,7 @@ void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
 }
 
 
-u32 func_001A1810(void) {
+s32 func_001A1810(KwlnTask *task) {
     return 0;
 }
 

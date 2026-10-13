@@ -24,7 +24,6 @@ extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 
 extern void ptyApplyProfile(DatPartyRecord *, u16);
 
-extern void mdlFlagSet(s32);
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
@@ -119,7 +118,7 @@ extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
-extern void func_002E8E50(void);
+extern void sndQueueNoPayloadCommand40(void);
 extern char D_0036D494[];
 extern char D_0036D408[];
 
@@ -161,7 +160,7 @@ s32 prfCapTaskStep(KwlnTask *request) {
             }
             mnuStaffInitPanel(scene);
             mnuSetPopupEntryFlagged(dispatchStatus, D_0036D408);
-            func_002E8E50();
+            sndQueueNoPayloadCommand40();
         }
         result = 0;
     }

@@ -198,7 +198,6 @@ void mnuFreeTaskData(u32 unused, u32 taskData) {
 }
 
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
-extern void mdlFlagSet(s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
 extern u32 prfGetCapValue(u16);

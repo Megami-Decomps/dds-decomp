@@ -128,10 +128,6 @@ typedef struct BtlActiveSlot {
 extern u32 dds3AdvanceWorldCounter(void);
 
 extern s8 btlSetActorEffectParameter(BtlUnit *, s32);
-
-
-extern s32 btlGetRuntime(void);
-
 extern void btlRaisePartyRecordStatusValue(void *, s32);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
@@ -2069,7 +2065,7 @@ s32 btlCountRegisteredTasks(void) {
     s32 task;
     s32 count;
 
-    task = btlGetRuntime();
+    task = (s32)(u32)btlGetRuntime();
     count = 0;
     for (task = (s32)((BtlState *)task)->taskHead; task != 0; task = (s32)((BtlRuntimeTask *)task)->next) {
         count = count + 1;
@@ -2370,7 +2366,7 @@ BtlRuntimeTask *btlCreateImmediateCompletionTask(void) {
 }
 
 void btlDumpTaskQueue(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     s32 node = (s32)((BtlState *)context)->taskHead;
     while (node != 0) {
         btlBossDebugPrintf("btl:packet[%d]\n", ((BtlRuntimeTask *)node)->taskId);
@@ -2969,7 +2965,7 @@ s32 btlGetSlotRateKind(u8 *unit, s32 index) {
 }
 
 void btlUpdateUnitEffects(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *object = ((BtlState *)context)->units;
 
     while (object != 0) {
@@ -2996,7 +2992,7 @@ void btlApplyUnitModelScaledValue(u8 *object) {
     if ((((BtlUnit *)object)->status.flags & 2) == 0) {
         return;
     }
-    context = btlGetRuntime();
+    context = (s32)(u32)btlGetRuntime();
     ((BtlUnit *)object)->updateFlags &= ~1;
     volume = ((BtlUnit *)object)->fF4;
     ((BtlUnit *)object)->ext->owner->first->frameStep =
@@ -5872,7 +5868,7 @@ BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 a, f32 b, f32 c
 }
 
 s32 btlApplyEffectCameraKeyframes(f32 *args) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     btlSetCameraCommandMode(1, *(ActionStateLink **)args, 0, 0, 0);
     btlSetEffectCameraKeys(context + 0x70, args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8],
                   args[9], args[10], args[11], args[12], args[13], args[14], args[15], args[16]);
@@ -5914,7 +5910,7 @@ BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *actor, f32 a1, f32 a2, f32
 u32 btlApplyCameraKeysAndMarkRuntimeChange(u32 taskArgs) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     btlApplyEffectCameraKeyframes(taskArgs);
     ((BtlState *)work)->cameraCommand.flags |= 0x80000;
     return 1;
@@ -5992,7 +5988,7 @@ void btlInitializeWorldCamera(void) {
 }
 
 void btlClearPendingSoundList(void) {
-    s32 context = btlGetRuntime();
+    s32 context = (s32)(u32)btlGetRuntime();
     BtlIndexList *list = ((BtlState *)context)->cameraCommand.targetList;
 
     if (list != 0) {
@@ -6057,7 +6053,7 @@ void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f3
 u32 btlGetActiveUnitId(void) {
     s32 workAddress;
 
-    workAddress = btlGetRuntime();
+    workAddress = (s32)(u32)btlGetRuntime();
     return ((BtlState *)workAddress)->cameraCommand.status;
 }
 
@@ -6085,7 +6081,7 @@ s32 btlIsUnitInActiveList(void *unit) {
 void btlResetActiveUnitList(void) {
     s32 workAddress;
 
-    workAddress = btlGetRuntime();
+    workAddress = (s32)(u32)btlGetRuntime();
     ((BtlState *)workAddress)->cameraCommand.link = 0;
     ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags | 0x400;
     btlClearIndexList(((BtlState *)workAddress)->cameraCommand.targetList);
@@ -6094,21 +6090,21 @@ void btlResetActiveUnitList(void) {
 void btlClearRuntimeFlag2000(void) {
     s32 workAddress;
 
-    workAddress = btlGetRuntime();
+    workAddress = (s32)(u32)btlGetRuntime();
     ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags & 0xffffdfff;
 }
 
 void btlSetRuntimeFlag2000(void) {
     s32 workAddress;
 
-    workAddress = btlGetRuntime();
+    workAddress = (s32)(u32)btlGetRuntime();
     ((BtlState *)workAddress)->cameraCommand.flags = ((BtlState *)workAddress)->cameraCommand.flags | 0x2000;
 }
 
 u32 btlIsRuntimeFlag2000Clear(void) {
     s32 workAddress;
 
-    workAddress = btlGetRuntime();
+    workAddress = (s32)(u32)btlGetRuntime();
     return ((((s32)((BtlState *)workAddress)->cameraCommand.flags >> 0xd)) ^ 1U) & 1;
 }
 
@@ -6170,7 +6166,7 @@ s32 btlIsWorldMotionIdle(void) {
 s32 btlGetCameraVectorWork(void) {
     s32 work;
 
-    work = btlGetRuntime();
+    work = (s32)(u32)btlGetRuntime();
     return work + 0x70;
 }
 

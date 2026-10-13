@@ -16,6 +16,7 @@
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
 #include "eff_update_flags.h"
+#include "btl_runtime.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -61,10 +62,6 @@ extern u32 D_00437E38;
 extern u32 D_00437E3C;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
-
-
-extern s32 btlGetRuntime(void);
-
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);

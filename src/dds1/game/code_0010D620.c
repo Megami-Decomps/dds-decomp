@@ -4,8 +4,6 @@
 
 
 extern s32 scrReadIntParameter(s32);
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 extern void scrSetIntegerReturnValue(s32);
 
 

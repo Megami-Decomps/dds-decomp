@@ -54,7 +54,7 @@ extern void mnuDrawFadeSequenceTwo(FadeNumber *);
 extern void mnuDrawFadeSequenceOffset(FadeNumber *);
 extern void func_0031E7C8(FadeNumber *, u32);
 extern void func_0031E850(FadeNumber *, u32);
-extern void func_0031ED68(FadeNumber *, u32);
+extern void mnuSetPauseFadeChoice(FadeNumber *, u32);
 extern void func_0031EE28(FadeNumber *, u32);
 extern void func_0031EEE8(FadeNumber *, u32);
 extern void func_0031F040(FadeNumber *, u32);

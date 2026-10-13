@@ -1041,16 +1041,6 @@ SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
 void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
     sndReleaseAllVoices(mixer);
 }
-/* Copied event parameters: position, quaternion and aim dimensions (0x30). */
-typedef struct EffEventInit {
-    f32 position[4];       /* 0x00 */
-    f32 orientation[4];    /* 0x10 */
-    f32 range;             /* 0x20 */
-    f32 height;            /* 0x24 */
-    f32 param;             /* 0x28 */
-    u32 color;             /* 0x2C */
-} EffEventInit;
-
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 struct EffEventWork {
     EffEventInit init;
@@ -1114,14 +1104,6 @@ void effEventSetState(EffEventWork *work, void *actor) {
 
 INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateEffectParameters);
 
-
-/* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
-typedef struct EffEventLight {
-    SoundMixer *handle;    /* 0x00 */
-    EffEventWork *owner;   /* 0x04 */
-    EffEventInit init;    /* 0x08 */
-    u8 active;            /* 0x38 */
-} EffEventLight; /* 0x3C */
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
 EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {

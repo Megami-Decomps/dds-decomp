@@ -355,6 +355,7 @@ void fldSpawnSceneResourceBatches(FldSpawnBatch *batch, u32 batchCount) {
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "fld_inf.h"
 #include "sdf_primitive.h"
 #include "dds3obj.h"
@@ -623,7 +624,7 @@ extern u32 D_0043608C;
 
 extern s32 btlGetRuntimeResult(void);
 
-extern s32 fldEncProc(void);
+extern s32 fldEncProc(KwlnTask *task);
 
 extern void btlUpdateRuntimeFadeState(void);
 
@@ -713,7 +714,6 @@ extern char fldEncounterTaskName[];
 
 extern void btlClearRuntimeState(void);
 
-extern s32 kwlnTaskCreate(s32 name, s32 priority, s32, s32, s32, s32, s32);
 
 extern void fldUpdateCameraModelMotion(s32, s32, f32);
 
@@ -3353,7 +3353,7 @@ void fldSetEncounterPendingValue(u32 value) {
     D_00436088 = value;
 }
 
-s32 fldEncProc(void) {
+s32 fldEncProc(KwlnTask *task) {
     s32 state = fldEncounterRuntimeState;
 
     if (state < 3) {
@@ -3390,12 +3390,12 @@ s32 fldSetEncounterMode(s32 mode) {
     }
 }
 
-void fldResetEncounterAsyncState(void) {
+void fldResetEncounterAsyncState(KwlnTask *task) {
     btlResetAsyncState();
 }
 
 void fldCreateEncounterTask(void) {
-    kwlnTaskCreate((s32)fldEncounterTaskName, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)fldResetEncounterAsyncState, 0);
+    kwlnTaskCreate(fldEncounterTaskName, 0x2B0F, 0, 1, fldEncProc, fldResetEncounterAsyncState, 0);
     btlClearRuntimeState();
 }
 

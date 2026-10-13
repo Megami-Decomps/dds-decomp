@@ -1,10 +1,12 @@
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "dds3_world_lifecycle.h"
 #include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "file.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "mnu_work.h"
 #include "sdf.h"
@@ -74,7 +76,6 @@ extern s32 (*D_0040ABE0[])(u8 *work);
 extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
 
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 extern u32 mnuResumeEffectQueueFrameAdvance(void);
 
@@ -92,12 +93,10 @@ extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
 extern void *dds3GetWorldSecondaryObject(void);
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 
-u32 mdlAdvanceViewerPackageTask(void);
+s32 mdlAdvanceViewerPackageTask(KwlnTask *task);
 
 MnuShootingWork *mdlAllocateViewerPackageWork(void);
 
@@ -143,7 +142,7 @@ void mdlCreateViewerPackageTask(void) {
     handle = mdlAllocateViewerPackageWork();
     D_0043891C = handle;
     func_00317AD0(handle);
-    kwlnTaskCreate((s32)D_0042D4D0, 0x2AF8, 0, 0, (s32)mdlAdvanceViewerPackageTask, 0, 0);
+    kwlnTaskCreate(D_0042D4D0, 0x2AF8, 0, 0, mdlAdvanceViewerPackageTask, 0, 0);
 }
 
 u8 func_00316ED0(void) {
@@ -178,7 +177,7 @@ void func_00316FA8(MnuShootingWork *work) {
     }
 }
 
-u32 mdlAdvanceViewerPackageTask(void) {
+s32 mdlAdvanceViewerPackageTask(KwlnTask *task) {
     u32 result;
     s64 status;
 

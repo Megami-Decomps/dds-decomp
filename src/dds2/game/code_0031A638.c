@@ -5,8 +5,6 @@
 #include "mdl_flag_api.h"
 
 
-extern void mdlFlagSet(s32);
-extern void mdlFlagClear(s32);
 
 
 void func_0031A830(MnuShootingWork *timer);

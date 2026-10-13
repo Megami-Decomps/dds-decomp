@@ -18,6 +18,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
@@ -145,7 +146,6 @@ extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 
 /* Create a task with an initialized event payload. */
@@ -2288,7 +2288,7 @@ INCLUDE_SDATA(const s32, "game/code_00250010", D_00437708);
 
 INCLUDE_SDATA(const s32, "game/code_00250010", D_00437710);
 
-void func_00254CE0(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
+void evtDrawMotionChangeRow(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 style = 0;
@@ -2334,7 +2334,7 @@ void func_00254CE0(SdfListHead *list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
 }
 
 
-extern void func_00254CE0();
+extern void evtDrawMotionChangeRow();
 
 /* Motion editor row: ctx->value packs group (byte 0), motion number (byte 1), loop flag (byte 2) and interpolation (byte 3). */
 s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
@@ -2345,7 +2345,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
 
     list = sdfCreateResetPacketList();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
-    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, func_00254CE0);
+    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
         return 0;
@@ -2863,7 +2863,7 @@ extern char *D_003C98F8[];
 /* Draw one row of the shadow-configuration menu. */
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004241C0);
 
-void func_00256AE0(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+void evtViewerDrawShadowConfigRow(SdfListHead *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EvtRuntimeChild *node;
     s32 color;
 
@@ -2895,7 +2895,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, func_00256AE0);
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, evtViewerDrawShadowConfigRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x16) {
         return 0;

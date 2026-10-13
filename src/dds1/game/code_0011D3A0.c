@@ -2,8 +2,10 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "sdf_trig.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
@@ -67,7 +69,7 @@ extern char D_0039FA00[];
 
 extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
-extern s32 fldTestDrawUpdate(void);
+extern s32 fldTestDrawUpdate(KwlnTask *task);
 
 extern void fldClearCameraMoveMode(void);
 
@@ -75,7 +77,6 @@ extern void fldSetCameraMoveMode(s32);
 
 extern u32 fldGetSceneReadyFlag(void);
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 typedef struct FieldActivationRecord {
     s32 kind;
@@ -87,7 +88,6 @@ extern FieldActivationRecord D_0034C8F0[256];
 
 extern void fldActivateObjectById(s32);
 
-extern void mdlFlagSet(s32);
 
 extern void ptyReturnOne(s32);
 
@@ -591,7 +591,7 @@ extern u32 D_0032E570[];
 
 extern void fldSelectDisplayBuffer(u32);
 
-s32 fldTestDrawUpdate(void) {
+s32 fldTestDrawUpdate(KwlnTask *task) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
@@ -621,7 +621,7 @@ s32 fldTestDrawUpdate(void) {
 }
 
 void fldTestDrawCreate(void) {
-    kwlnTaskCreate((s32)D_0039FA00, 0x2AF8, 0, 0, (s32)fldTestDrawUpdate, 0, 0);
+    kwlnTaskCreate(D_0039FA00, 0x2AF8, 0, 0, fldTestDrawUpdate, 0, 0);
 }
 
 void fldTestDrawDestroy(void) {

@@ -92,7 +92,7 @@ extern void func_00314868(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
 /* Recompute every mantra node's unlock state for a party member and report changes. */
-void mtrRecomputePartyMantraUnlockState(DatPartyRecord *record) {
+void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *record) {
     s32 modelFlagState;
     MantraFlagResource *current;
     MantraFlagResource *source;

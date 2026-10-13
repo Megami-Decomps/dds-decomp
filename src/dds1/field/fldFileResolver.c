@@ -375,6 +375,7 @@ extern FldInfTable D_00332E30;
 #include "mdl.h"
 #include "scr.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 
 /* Fixed allocation sizes and native room/actor table dimensions. */
@@ -592,14 +593,13 @@ extern f32 D_003BAD20;
 extern char fldEncounterTaskName[];
 extern f32 D_003C9230[];
 extern f32 D_003C9220[];
-extern s32 fldEncProc(void);
-extern void fldResetEncounterAsyncState(void);
+extern s32 fldEncProc(KwlnTask *task);
+extern void fldResetEncounterAsyncState(KwlnTask *task);
 extern s32 btlUpdateRuntimeFadeState(void);
 extern void btlClearRuntimeState(void);
 extern void dds3TransformCameraVectorsByInnerRotation(EffWorldNode *camera, f32 *worldEyeOut,
                                                       f32 *targetPositionOut);
 extern f32 sdfAtan2(f32 arg0, f32 arg1);
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern struct FileRequest *fldAreaLoadRequest;
 extern u8 D_003BACE0[];
 extern u8 D_003BACE8[];
@@ -3275,7 +3275,7 @@ void fldSetEncounterPendingValue(u32 value) {
     D_003BACF8 = value;
 }
 
-s32 fldEncProc(void) {
+s32 fldEncProc(KwlnTask *task) {
     s32 state = fldEncounterRuntimeState;
 
     if (state < 3) {
@@ -3313,12 +3313,12 @@ s32 fldSetEncounterMode(s32 mode) {
 }
 
 
-void fldResetEncounterAsyncState(void) {
+void fldResetEncounterAsyncState(KwlnTask *task) {
     btlResetAsyncState();
 }
 
 void fldCreateEncounterTask(void) {
-    kwlnTaskCreate((s32)fldEncounterTaskName, 0x2B0F, 0, 1, (s32)fldEncProc, (s32)fldResetEncounterAsyncState, 0);
+    kwlnTaskCreate(fldEncounterTaskName, 0x2B0F, 0, 1, fldEncProc, fldResetEncounterAsyncState, 0);
     btlClearRuntimeState();
 }
 
@@ -8596,7 +8596,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
     return 0;
 }
 
-void * fldInitializeTitleBannerTask(KwlnTask *task) {
+s32 fldInitializeTitleBannerTask(KwlnTask *task) {
     u16 *ticket = sdfAllocSizeClassBlock(8);
 
     ticket[1] = 1;
@@ -8604,7 +8604,7 @@ void * fldInitializeTitleBannerTask(KwlnTask *task) {
     ticket[2] = 0;
     ticket[3] = 0;
     kwlnTaskSetUserValue(task, (u32)ticket);
-    return (void *)fldDrawPendingTitleBannerWhenIdle;
+    return (s32)fldDrawPendingTitleBannerWhenIdle;
 }
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC10);

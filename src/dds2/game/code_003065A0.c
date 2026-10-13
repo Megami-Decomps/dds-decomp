@@ -5,7 +5,7 @@
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
 
 extern void effDrawTextureSlot(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, void *, s32);
-extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 /* 0x80 leaves the copied corner words unchanged. */
 void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValues, u32 edge) {
@@ -132,7 +132,7 @@ void effDrawSpriteWithCornerColors(s32 a0, s32 a1, s32 a2, u32 *a3, s32 a4, Effe
 
 
 
-void func_00306CD0(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
                    EffectSlotSet *set, s32 slotIndex, s32 layer) {
     u32 colors[4];
     void *payload = effGetSlotWorkOrOverride(set, slotIndex);

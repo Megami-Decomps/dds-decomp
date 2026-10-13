@@ -19,7 +19,6 @@ extern void memset();
 #include "mnu_mantra.h"
 #include "prf_profile_cap.h"
 
-extern void mdlFlagSet(s32);
 
 #define SCR_FLAG_ID_MASK 0xFFFF
 #define SCR_FLAG_SLOT_INDEX_MASK 7
@@ -247,7 +246,7 @@ void ptySelectProfileStage(DatPartyRecord *work) {
 
 extern void func_00314868(DatPartyRecord *, u16);
 extern void mtrMantraSetBit(DatPartyRecord *);
-extern void mtrRecomputePartyMantraUnlockState(DatPartyRecord *);
+extern void mtrRecomputeMantraFlagsForPartyUnit(DatPartyRecord *);
 
 /* Choose the least-conflicting group, install its nonzero profile IDs,
  * then complete the native current/preset profile update. */
@@ -304,7 +303,7 @@ void ptyApplyProfilePreset(s32 useCurrentProfile, DatPartyRecord *unit) {
     if (useCurrentProfile == 0) {
         mtrMantraSetBit(unit);
     } else {
-        mtrRecomputePartyMantraUnlockState(unit);
+        mtrRecomputeMantraFlagsForPartyUnit(unit);
     }
 }
 
@@ -462,7 +461,7 @@ extern u32 strlen(const char *text);
 extern char *strcpy(char *destination, const char *source);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-void func_00314500(u16 scriptId, s32 mode, char *destination) {
+void prfCopyMantraNamePart(u16 scriptId, s32 mode, char *destination) {
     u8 *name = D_00435E50[scriptId].encodedText;
     s32 split = 0;
     s32 offset = 0;

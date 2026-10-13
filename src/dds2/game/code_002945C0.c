@@ -34,17 +34,17 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
     }
 }
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, void *, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, s32, s32, void *, s32, s32);
 
 
-void mnuDrawTerminalContextEffectSprites(MenuTerminalContext *w, s32 a1, s32 a2) {
+void mnuDrawType2PanelEffects(MenuTerminalContext *w, s32 a1, s32 a2) {
     BdWork *work;
 
     if (w->type != 2) {
         return;
     }
-    func_00306CD0(0xE30, 0x610, 0, a1, 0, w->effectSlots[2], 1, a2);
+    effDrawTextureSlotWithBlendedCornerColors(0xE30, 0x610, 0, a1, 0, w->effectSlots[2], 1, a2);
     work = w->effectSlots[3]->workEntries;
     work[1].geometry.angleDegrees = 90.0f;
-    func_00306CD0(0x9F0, 0x610, 0, a1, 2, w->effectSlots[3], 1, a2);
+    effDrawTextureSlotWithBlendedCornerColors(0x9F0, 0x610, 0, a1, 2, w->effectSlots[3], 1, a2);
 }

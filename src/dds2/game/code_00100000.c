@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_timer.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 
 extern void kwlnUpdatePadInputState(void);
 
@@ -34,15 +35,14 @@ extern s32 kwlnActiveTaskCount;
 
 extern u8 D_00435BB8[];
 extern u8 D_00435BC0[];
-extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern s32 kwlnPrepareFrameDrawPackets(void);
-extern s32 kwlnBuildFrameScenePackets(void);
-extern s32 kwlnRenderFrame(void);
-extern u32 dds3RunWorldPrimaryCallbacks(void);
-extern u32 dds3RunWorldSecondaryCallbacks(void);
-extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
-extern void frFontReleaseAll(void);
-extern s32 func_001A1810(void);
+extern s32 kwlnPrepareFrameDrawPackets(KwlnTask *task);
+extern s32 kwlnBuildFrameScenePackets(KwlnTask *task);
+extern s32 kwlnRenderFrame(KwlnTask *task);
+extern s32 dds3RunWorldPrimaryCallbacks(KwlnTask *task);
+extern s32 dds3RunWorldSecondaryCallbacks(KwlnTask *task);
+extern s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task);
+extern void frFontReleaseAll(KwlnTask *task);
+extern s32 func_001A1810(KwlnTask *task);
 
 s32 kwlnInitializeRuntime(void) {
     evtResetDisplayProjectionAndVectorState();

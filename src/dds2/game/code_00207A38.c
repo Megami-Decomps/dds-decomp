@@ -102,9 +102,6 @@ typedef struct BtlCommandCtx {
 } BtlCommandCtx;
 
 extern s32 btlRollAiBucket(void);
-
-extern s32 btlGetRuntime(void);
-
 extern u32 btlButtonIconTexture;
 
 
@@ -1317,7 +1314,7 @@ u32 btlScriptSetBattleWorkParameter(void) {
     s32 battleAddress;
     s16 requestArgument;
 
-    battleAddress = btlGetRuntime();
+    battleAddress = (s32)(u32)btlGetRuntime();
     scrGetCurrentCommandWork();
     requestArgument = scrReadIntParameter(0);
     ((BtlState *)battleAddress)->requestMode = 4;
@@ -2291,7 +2288,7 @@ u32 btlScriptReturnSceneSlotCount(void) {
 u32 btlScriptReturnTurnCount(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->turnCount);
     return 1;
 }
@@ -2332,7 +2329,7 @@ u32 btlCommandReportSpecialModeValue(void) {
 u32 btlCmdReturnBattlePhase(void) {
     s32 battle;
 
-    battle = btlGetRuntime();
+    battle = (s32)(u32)btlGetRuntime();
     scrSetIntegerReturnValue(((BtlState *)battle)->phase);
     return 1;
 }
@@ -2576,7 +2573,7 @@ extern void kwlnTaskAddChild(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(s32 actor, s32 option) {
-    s32 battle = btlGetRuntime();
+    s32 battle = (s32)(u32)btlGetRuntime();
     s32 task;
     s32 window;
 
@@ -2625,7 +2622,7 @@ void func_0020CE70(void) {
 }
 
 void btlReleaseActiveUnitEffectsUnlessPaused(void) {
-    s32 state = btlGetRuntime();
+    s32 state = (s32)(u32)btlGetRuntime();
     if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {

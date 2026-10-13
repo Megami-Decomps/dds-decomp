@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "file_request_api.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -837,7 +838,6 @@ extern u32 D_00435CBC;
 extern s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char *path3);
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 extern void evtEventViewerDestroyActiveAlternate(KwlnTask *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */

@@ -27,6 +27,7 @@
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "fpu.h"
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
@@ -3160,7 +3161,7 @@ s32 fileCreateConfigTask(s32 mode) {
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 
-void fileConfigTaskDestroy(void) {
+void fileConfigTaskDestroy(KwlnTask *task) {
     s32 request = 1;
     FileConfigListNode *node;
     s32 i;
@@ -3192,18 +3193,18 @@ void fileConfigTaskDestroy(void) {
 }
 
 extern s32 fileCreateConfigTask(s32 mode);
-extern s32 func_00291418(void);
+extern s32 func_00291418(KwlnTask *task);
 
-extern s32 fileStartQueuedLoad(void);
-extern s32 fileUpdateConfigOwnerTask(void);
-extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, void *update, void *destroy, s32 data);
+extern s32 fileStartQueuedLoad(KwlnTask *task);
+extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
+extern void fileConfigTaskDestroy(KwlnTask *task);
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
     }
 }
@@ -3241,7 +3242,7 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", fileConfigOwnerTaskName);
 
-s32 func_00291418(void) {
+s32 func_00291418(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3361,7 +3362,7 @@ s32 func_00291418(void) {
 }
 
 
-s32 fileStartQueuedLoad(void) {
+s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
         return 0;
     }
@@ -3373,7 +3374,7 @@ s32 fileStartQueuedLoad(void) {
     return 0;
 }
 
-s32 fileUpdateConfigOwnerTask(void) {
+s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
     s32 result;
 
     result = -1;

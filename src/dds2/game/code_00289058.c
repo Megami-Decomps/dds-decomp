@@ -19,7 +19,6 @@ extern void mnuReleaseMiddleMantraSpriteSlots(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
-extern void mdlFlagSet(s32);
 
 typedef struct MantraPanelPool MantraPanelPool;
 extern void mnuQueueNextUnitPanelSelection(struct MantraDrawPool *pool);

@@ -4,6 +4,8 @@
 #include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
+#include "itf_resource_segments.h"
+#include "kwln.h"
 
 
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -32,15 +34,6 @@ extern u8 D_00436578[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
-
-typedef struct FrFontSegments {
-    void *first;
-    void *second;
-    void *third;
-} FrFontSegments;
-
-extern void itfSplitRelativeSegments(void *block, FrFontSegments *out);
-extern void itfDecodePackedResourceEntry(void *decodedBytes, s32 entryIndex, void *resourceBase, FrFontSegments *segments);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
@@ -435,7 +428,7 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
 void *frFontCloneEntryResource(u8 fontIndex, s32 entryIndex) {
     FrFontEntry *entry = &frFontWork.entries[fontIndex];
     void *clonedResource = sdfAllocSizeClassBlock(FR_FONT_RESOURCE_CLONE_BYTES);
-    FrFontSegments segments;
+    ItfPackedResourceSegments segments;
 
     itfSplitRelativeSegments(entry->resource, &segments);
     itfDecodePackedResourceEntry(clonedResource, entryIndex, entry->resource, &segments);
@@ -933,7 +926,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFontReleaseOppositeDrawBufferGlyphs(void) {
+s32 frFontReleaseOppositeDrawBufferGlyphs(KwlnTask *task) {
     s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);

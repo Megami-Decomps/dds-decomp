@@ -3,6 +3,7 @@
 
 #include "btl.h"
 #include "btl_command.h"
+#include "btl_runtime.h"
 
 struct KwlnTask;
 struct BtlRuntimeTask;

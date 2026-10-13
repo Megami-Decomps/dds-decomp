@@ -3758,7 +3758,7 @@ const char D_003A0908[] = "HUNT_MDL_UNIT";
 extern FldVec4 D_003A08E8;
 extern FldVec4 D_003A08F8;
 
-void func_0014B688(void) {
+void fldCreateSparkSlotObjects(void) {
     FldVec4 position = D_003A08E8;
     FldVec4 rotation;
     MdlCtx *resource;
@@ -3928,14 +3928,14 @@ void fldFreeSparkSlot(s32 index) {
 
 extern FldSparkController fldSparkControlState;
 
-extern void func_0014B688();
+extern void fldCreateSparkSlotObjects();
 
 extern s32 fldBindSparkSlotObject(s32, s32);
 
 void fldUpdateSparkSlots(void) {
     s32 i;
 
-    func_0014B688();
+    fldCreateSparkSlotObjects();
     for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             fldBindSparkSlotObject(i, fldSparkSlots[i].unk28);
@@ -4073,7 +4073,6 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 
-extern void mdlFlagSet(s32);
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
 
@@ -4117,7 +4116,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
 extern void mnuQueueTitleSoundStreamEntry(s32);
 extern s32 mnuPollTitleStreamStateLocked(void);
-extern void func_0014B688(void);
+extern void fldCreateSparkSlotObjects(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 
@@ -4241,7 +4240,7 @@ void fldUpdateSparkMessageSequence(void) {
         }
         break;
     case 9:
-        func_0014B688();
+        fldCreateSparkSlotObjects();
         fldLoadWeatherEffects();
         fldTogglePlayerModel();
         fldSetCameraModelMotionRequest(0x66, 0);

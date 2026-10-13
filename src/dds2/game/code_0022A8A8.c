@@ -4,9 +4,6 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
-
-extern s32 btlGetRuntime(void);
-
 extern void btlStartSkillEventTask(u32);
 
 

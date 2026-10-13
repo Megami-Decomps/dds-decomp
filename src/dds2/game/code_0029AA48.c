@@ -21,7 +21,7 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *context) {
 
 struct FrFontGlyph;
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 itfCreateFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
@@ -38,7 +38,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     struct FrFontGlyph *glyph;
     u32 color;
 
-    func_00306CD0(0x1710, 0x8C0, 0, iconFade, 1,
+    effDrawTextureSlotWithBlendedCornerColors(0x1710, 0x8C0, 0, iconFade, 1,
                   (s32)context->unitResource, 8, 0x53);
     delta = context->commitComplete != 0 ? 0 : context->availableStatPoints - context->assignedStatPoints;
     x = 0x19C0;

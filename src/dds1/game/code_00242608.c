@@ -3,6 +3,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
@@ -83,7 +84,6 @@ extern char D_003AF428[]; /* "camp_update" */
 
 extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *memset(void *dst, s32 c, u32 n);
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -2626,7 +2626,6 @@ void evtAccumulateStateScore(s32 stateAddress) {
 
 extern void datAddCurrencyClamped(s32);
 extern u32 func_002CD800(u32);
-extern void mdlFlagSet(s32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
@@ -3113,7 +3112,6 @@ typedef struct FlagEntry {
     s32 secondOn;
 } FlagEntry;
 
-extern void mdlFlagSet(s32);
 
 
 typedef struct FlagPair {

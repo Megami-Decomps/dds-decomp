@@ -910,6 +910,9 @@
 0x001513C0	fldStartDeferredFieldExit	inferred	DDS1 0014D028 twin; starts field exit sequence and sets phase 2 [names_R_FuncNames2.tsv]
 0x00151468	fldIsEventPhaseAtLeastTwo	inferred	DDS1 0014D0D0 twin; tests D_003D62A8[0] phase threshold [names_R_FuncNames2.tsv]
 0x00151480	fldTickWeatherEffectNodes	inferred	Calls the weather-effect node updater; twin 0x0014D0E8. [names_R_FuncNames6.tsv]
+0x00151498	fldGetSparkEncounterSelection	inferred	Returns the signed selector stored in the active spark resource row; fldAdvanceToNextScene assigns it to FieldEncounterRequest.encounterSelection. [LiteH-2]
+0x001514A8	fldGetSparkRewardProfileIndex	inferred	Returns the active spark reward profile index; AP gain and weighted-profile message code use it to select the reward row. [LiteH-2]
+0x001514B8	fldGetSparkPickupCount	inferred	Returns the successful spark-pickup count used by the spark UI and profile-scaled AP/message rewards. [LiteH-2]
 0x001514C8	fldResetViewState	inferred	Clears field view state D_00451D38 and sets the +0x6C sentinel to -1
 0x001515A0	fldReleaseTargetGuideResource	inferred	releases handle and clears target guide entries [names_R_FuncNames2.tsv]
 0x001515E0	fldFindNearestOccupiedMapGridCell	inferred	Scans nonempty map-grid cells and returns the nearest cell to world x/z; adjacent mapper establishes grid coordinates, with -1 reserved for cell (0,0).
@@ -3725,6 +3728,8 @@
 0x00242F48	evtOpcodeSetFadeTarget	inferred	Reads three script operands after resetting fade controls and calls fldSetFadeTarget with them.
 0x00243068	evtCommandAwaitBgmPreload	inferred	src/dds2/game/code_00242CB8.c func_00243068: Starts BGM preload at command timer zero, then polls load status on subsequent calls. Twin of DDS1 func_00228408. [names_reviewed24.tsv]
 0x00243140	evtCommandQueueBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243140; Reads sound-id and fade script parameters and queues the validated BGM change. [names_qp9.tsv]
+0x00243180	evtOpcodeStartReducedBgm	inferred	Starts reduced-mode BGM by invoking sndStartReducedBgm, then returns script-command success. [names_qp9.tsv]
+0x002431A0	evtOpcodeStopReducedBgm	inferred	Stops reduced-mode BGM by invoking sndStopReducedBgm, then returns script-command success. [names_qp9.tsv]
 0x00243200	evtCommandStartBgmWithFade	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_00243200; Reads sound-id and fade script parameters and starts the requested BGM. [names_qp9.tsv]
 0x002432A0	evtCommandSetDrawFlagWhileWaiting	inferred	confidence=high; src/dds2/game/code_00242CB8.c:func_002432A0; Sets draw-control bit 0x02000000 while the script command timer is below the requested duration; returns pending until elapsed. [names_qp9.tsv]
 0x00243310	evtClearSolarOverlayControl	inferred	Clears the byte at solar-world-state offset 0xA43 while leaving the adjacent phase byte intact.
@@ -3737,6 +3742,7 @@
 0x002438F0	evtPrepareSolarOverlayTestState	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:85:func_002438F0; Configures GS alpha/test state around a zero-color full-screen solar-overlay rectangle, then installs the final test state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00243EE8	evtDrawIndexedSolarOverlayLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:100:func_00243EE8; Draws the selected suffix of the solar sprite table between overlay setup/finalization passes, draws the shared layer and restores its test state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00243FD8	evtDrawPartialSolarOverlay	inferred	QP9: twin of dds1
+0x00244408	evtAdvanceLongSolarNoiseLayers	inferred	Updates the long-duration solar-noise layers, spawns from the 15-point position/scale table under the mirrored phase cap, and expires active layers through the long timer. Paired with DDS1 0x00229750. [code-quality cleanup, 2026-10-13]
 0x002446C8	evtDrawShortSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:185:func_002446C8; Draws active solar-noise layers with a sine envelope over sixty frames and a narrow width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00244828	evtDrawLongSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:210:func_00244828; Draws active solar-noise layers with a sine envelope over eighty frames and a wider width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00244988	evtActivateNextSolarPoint	inferred	M141; sources=names_pending_main.tsv; twin=0x00229CD0, input-family pairing. [names_qp10.tsv]
@@ -4081,6 +4087,7 @@
 0x00268178	mnuTerminalCreateScene	inferred	Loads /facility/msg/terminal/mes_data.bmd into the new 0x3F8-byte scene. [names_M44_Mid3.tsv]
 0x00268278	mnuReleaseTerminalWorkAndResumeField	inferred	src/dds2/game/code_002665B0.c func_00268278: Releases terminal menu resources and effect batches, stops resource task and processes deferred field command. Twin of DDS1 func_00249F08. [names_reviewed24.tsv]
 0x00268318	mnuUpdateTerminalMessageWindowIndicator	inferred	Updates terminal task indicator according to current event message-window control state. [names_reviewed18.tsv]
+0x00268380	mnuCreateTerminalSceneTasks	inferred	Creates the terminal scene, registers popup/draw/sync/fade tasks, parents the fade task, then marks terminal task state active. [names_reviewed18.tsv]
 0x002684F0	mnuPrepareTerminalPopupAndDispatch	inferred	confidence=high; matched-C; src/dds2/game/code_002665B0.c:886:func_002684F0; confidence=high; matched-C; src/dds2/game/code_002665B0.c:886:func_002684F0; Sets the terminal popup entry before mode-zero dispatch, matching DDS1 0x0024A0D8. Existing mnuPreparePopupAndDispatchSelection at 0x00260880 is camp-owned and stays named.; resolution=rename; source=names_qp11_conflicts.tsv:2 [names_qp11.tsv]
 0x002685C0	evtIsFadeCompleteAndMessageWindowIdle	inferred	Tests whether fading is finished and the message window is idle. [names_reviewed10.tsv]
 0x002686D0	fldSaveSceneOptionsAndClearFlags	inferred	Copies both current scene options into their previous slots and retains only flag bits 0xFA2F.
@@ -4372,6 +4379,9 @@
 0x002864D0	mtrMantraBitResetUnit	evidence	Prints its own debug string "*****************[mtrMantraBitReset_Unit():[0x%x]]*****************\n" via func_0010AE38 after clearing 0xB0 script entry low flags [names_L1_LiteSweep.tsv]
 0x00286530	mtrMantraBitReset	evidence	Prints its own debug string "*****************[mtrMantraBitReset()]*****************\n" via func_0010AE38 after resetting the 0x20 active mantra records [names_L1_LiteSweep.tsv]
 0x002865A8	mtrMantraEventBitReset	evidence	Prints its own debug string "*****************[mtrMantraEventBitReset()]*****************\n" via func_0010AE38 after clearing model flags 0x920..0x98F and 0x9A0..0x9A5 [names_L1_LiteSweep.tsv]
+0x00286618	mtrRefreshMantraStateForUnit2	inferred	Recomputes roster unit 2 node flags after its mantra/profile data is copied, then synchronizes shared model bits. [LiteH-2]
+0x00286670	mtrRefreshMantraStateForUnit1	inferred	Recomputes roster unit 1 node flags after saved-stock state is copied, then mirrors the shared model bit. [LiteH-2]
+0x00286BA8	mtrRecomputeMantraFlagsForPartyUnit	inferred	Recomputes eligible mantra-node unlock flags and profile caps for one party record; applies changed entry low flags. DDS2 unit-selection and profile/template callers. [LiteH-2]
 0x00286F90	mnuCreateResourceTask	inferred	Creates the resource task with the same task arguments as already-named DDS1 mnuCreateResourceTask.
 0x00286FD8	mnuCheckResourceTask	inferred	Byte-identical DDS1 counterpart: Returns whether the named resource task exists and clears its stored ID when absent.
 0x00287008	mnuStopResourceTask	inferred	Byte-identical DDS1 counterpart: Destroys the stored resource task and clears its ID.
@@ -4549,7 +4559,7 @@
 0x002A3AC0	mnuRestartRuntimeAfterViewer	inferred	Destroys secondary viewer world then restarts runtime task. [names_reviewed8.tsv]
 0x002A3AE8	mnuSpriteGraphicHandle	inferred	returns work->gfx[D_003E3790[index].gfx]: graphic handle of sprite table entry (8-byte entries {gfx,unk2,x,y})
 0x002A3B10	mnuSpriteDrawParam	inferred	returns D_003E3790[index].unk2 (fourth arg of the sprite draw call in func_002A3B28)
-0x002A3B28	mnuDrawSprite	inferred	draws sprite-table entry `item` at (x+e.x, y+e.y) with alpha strength*2 through func_00306CD0; (still asm)
+0x002A3B28	mnuDrawSprite	inferred	draws sprite-table entry `item` at (x+e.x, y+e.y) with alpha strength*2 through effDrawTextureSlotWithBlendedCornerColors; (still asm)
 0x002A3BE0	mnuRecreateMenuSelectionList	inferred	Recreates a menu list, binds its callback and appends three nodes. [names_reviewed8.tsv]
 0x002A3C90	mnuSelectMenuListCursorByAdvance	inferred	Resets a menu list cursor and advances it the requested count. [names_reviewed8.tsv]
 0x002A3CE0	mnuIsAnyMenuInputPressed	inferred	Tests whether any of the configured menu input keys are pressed. [names_reviewed9.tsv]
@@ -4853,7 +4863,7 @@
 0x002B99D8	mnuReleaseWindowTextures	inferred	Destroys all three icon sprite slots then releases resource handle. [names_reviewed5.tsv]
 0x002B9A40	mnuDrawListScrollbar	inferred	Draws list track and thumb sprites using visible count and head index; omitted when the full list fits its viewport
 0x002B9BB0	mnuDrawWindowResourceSpriteRows	inferred	Passes resource sprite, list, and state of window container to resource-row rendering routine. [names_reviewed18.tsv]
-0x002B9BE0	mnuDrawWindowIconRows	inferred	draws the window background icon (originX/originY offset) and one func_00306CD0 per visible row (rowHeight step) [names_M76_MenuLarge.tsv]
+0x002B9BE0	mnuDrawWindowIconRows	inferred	draws the window background icon (originX/originY offset) and one effDrawTextureSlotWithBlendedCornerColors per visible row (rowHeight step) [names_M76_MenuLarge.tsv]
 0x002B9CD8	mnuDrawVisibleWindowIconRows	inferred	Draws icon rows using the current window list visible-count rather than a caller supplied count. [names_reviewed15.tsv]
 0x002B9CF8	mnuDrawWindowDecorations	inferred	U0
 0x002B9DD8	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
@@ -6581,6 +6591,7 @@
 0x00336F88	sdfVuTransformWorkAtOffset	inferred	Passes work parameters and supplied XY offsets into the transform. [names_reviewed8.tsv]
 0x00338D78	sdfBuildChunkedVuNodeTransfer	inferred	Writes VIF and GIF transfer packets for geometry nodes in bounded chunks. [names_reviewed10.tsv]
 0x00339160	sdfVuEmitSelectedNodePacket	inferred	Chooses one of two node-packet writers based on selected flags. [names_reviewed8.tsv]
+0x00339188	sdfVuUpdateSelectedNodeGeometry	inferred	Transforms the selected node rows, applies mode-specific color state, then emits its chunked geometry. [names_reviewed8.tsv]
 0x00339390	sdfVuApplySelectedWorkFlags	inferred	Applies selected work flags by invoking the associated packet stages. [names_reviewed8.tsv]
 0x003393F0	sdfVuBeginPacketFromWork	inferred	Aligns and installs the packet ring cursor before emitting work. [names_reviewed8.tsv]
 0x0033A090	sdfVuSelectTransformMatrix	inferred	Stores the global VU transform matrix address. [names_reviewed8.tsv]
@@ -6669,9 +6680,11 @@
 0x00341570	sdfServiceUnblockedWorkerThread	inferred	Sleeps until signaled, then services worker requests while the gate is clear. [names_reviewed10.tsv]
 0x00341958	sndInitializeChannelAndTrackState	inferred	confidence=high; src/dds2/game/code_00341650.c:func_00341958; Initializes sixteen sound channels, allocates channel-zero storage, and resets thirteen track slots to unused ids. [names_qp9.tsv]
 0x00341A00	sndAllocateAlignedIopBuffers	inferred	queued
+0x00341AD8	sndInitializeIopSoundSystem	inferred	Loads IOP sound modules, initializes the IOP heap and channel/track state, allocates aligned buffers, transfers sound state to IOP, then clears the init gate; paired with 0x002E8C30. [names_reviewed8.tsv]
 0x00341BB8	sndStartTrackDefault	inferred	Prepares a track ID and sends command 0x20 with setting 0x7f.
 0x00341C00	sndSendSingleWordControlPacket	inferred	Submits a 16-byte command packet whose first word is the provided value. [names_reviewed21.tsv]
 0x00341C30	sndStartTrackAlternate	inferred	Prepares the same track ID and sends alternate command 0x130 with setting 0x7f.
+0x00341CF8	sndQueueNoPayloadCommand40	inferred	Queues fixed command 0x40 with no payload; DDS1 twin 0x002E8E50. [LiteH menu naming batch 18]
 0x00341D20	sndDispatchCommandWithoutPayload	inferred	OR caller command with 0x50 and dispatch with null payload and zero length.
 0x00341D48	sndSubmitTextCommandPayload	inferred	Computes a text payload length and submits it with the text-command bits. [names_reviewed17.tsv]
 0x00341D90	sndSubmitTextCommandPayloadWithCommandBits60	inferred	Calculates text byte length and dispatches the payload through sndSendCommandPacket with command ORed with 0x60; paired title counterpart. [code-quality cleanup, 2026-10-13]
@@ -6683,6 +6696,8 @@
 0x003421E8	sndEnsureMidiBankResident	inferred	src/dds2/game/code_00341FE8.c func_003421E8: Queries packed track status, formats MIDI bank path and requests load or waits on current bank. Twin of DDS1 func_002E9340. [names_reviewed24.tsv]
 0x003422C0	sndSendFilenameCommand	inferred	Byte-identical DDS1 counterpart: Sends the filename and its byte length in a sound command packet.
 0x00342358	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
+0x00342388	sndSendChannelGroupCommand140	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x140, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
+0x003423B8	sndSendChannelGroupCommand150	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x150, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
 0x00342440	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342458	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed sndTrackBalanceEntries record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342470	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters; agrees with established DDS1 name. [names_reviewed17.tsv]
@@ -8126,7 +8141,7 @@
 0x0029D790	brsBuildProfileSkillList	inferred	confidence=high; builds the capped profile skill list, applies its script flags, returns the count, and is consumed by mnuProcessItemSelection. [LiteH menu naming batch 18]
 0x0029DFB0	brsDrawProgressRowEntries	inferred	confidence=high; retail result-row entry renderer called between background fade and portrait fade in mnuDrawUnitProgressRows; DDS1 related renderer 0x00266668. [LiteH menu naming batch 18]
 0x0029E548	brsDrawProgressRowOverlays	inferred	confidence=medium; retail result-row overlay/icon draw stage reached from 0x0029DFB0; DDS1 0x00266BC0 has a similar role but different nesting. [LiteH menu naming batch 18]
-0x002A13C0	sndOpSendTitleAudioCommand	inferred	confidence=high; script operation sends fixed no-payload sound command 0x40 via func_00341CF8 and returns success; DDS1 pair 0x002697B0. [LiteH menu naming batch 18]
+0x002A13C0	sndOpSendTitleAudioCommand	inferred	confidence=high; script operation sends fixed no-payload sound command 0x40 via sndQueueNoPayloadCommand40 and returns success; DDS1 pair 0x002697B0. [LiteH menu naming batch 18]
 0x002A14D0	sndOpResetTitleStreamAfterFileIdle	inferred	confidence=high; script operation invokes mnuResetTitleStreamAfterFileIdle and returns success; address-paired DDS1 0x002698C0 updates/logs BGM state instead. [LiteH menu naming batch 18]
 0x002A1678	mnuConfigureTitleAudioStream	inferred	confidence=high; retail ASM issues title-stream/IOP setup using the caller's 0x400-word request; DDS1 pair 0x00269A68. [LiteH menu naming batch 18]
 0x002DC1D0	effLoadViewerModelWithVUState	inferred	confidence=high; loads a model package under an unused group-6 viewer ID, creates its context, initializes VU state, and advances the ID; alignment with existing DDS1 0x0029A8D8. [Namer1 batch 42]
@@ -8263,12 +8278,10 @@
 0x00320D80	dds3InsertIndexedListNodeAfter	inferred	confidence=high; Nullable predecessor inserts at head or after node, updates links/count and increments only nonzero successor indices. Cedar Spark released after cb243313e exact landing. [Namer1 batch47]
 0x00324DF8	dds3AppendFirstResourceListValue	inferred	confidence=high; Appends key0/value to owner[0], used by three owned-record clone builders; corrects misleading reset comments without changing any operation. [Namer1 batch47]
 0x00286A58	mtrMantraSetBit	inferred	Native debug banner spells mtrMantraSetBit; updates one party member's mantra-node flags. Source: src/dds2/game/code_00286A58.c. LiteH-2 b23.
-0x00286BA8	mtrRecomputePartyMantraUnlockState	inferred	Recomputes every mantra node's unlock state for one party member and reports changes, as its source comment states. Source: src/dds2/game/code_00286BA8.c. LiteH-2 b23.
 0x00291400	mnuFindPanelPositionRecordByScriptId	inferred	Searches one 37-record panel-position bank for a record matching the script ID. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x00292B90	mnuAcquireTutorialMantraNodeAndNeighbors	inferred	Acquires tutorial mantra node 8 and unlocks its neighbors; called by tutorial state 14. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x002933A8	mnuBeginMantraTutorialFromNormalMode	inferred	Initializes tutorial state 3 and resets its counters before the normal-mode transition out. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
 0x002945B8	mnuSetCurrentTerminalContext	inferred	Stores the active MenuTerminalContext pointer in D_00438FC8. Source: src/dds2/game/code_0028FD30.c. LiteH-2 b23.
-0x00294680	mnuDrawTerminalContextEffectSprites	inferred	Draws effect slots 2 and 3 only for terminal context type 2. Source: src/dds2/game/code_002945C0.c. LiteH-2 b23.
 0x002AB3A8	mnuRunCampFieldSkillDisplayTask	inferred	Camp field-skill display task callback prepares the display and returns success. Source: src/dds2/game/code_002AAEA0.c. LiteH-2 b23.
 0x002C5498	mnuIsSolarPricedItemId	inferred	Accepts item IDs 0x60-0x6C; used with the solar-phase price table. DDS1 twin 0x00286A00 accepts 0x60-0x7E. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.
 0x002C54B0	mnuIsHighRangeItemId	inferred	Accepts item IDs 0xC0-0xFF; used by staff and camp item filters. Source: src/dds2/game/code_002BE628.c. LiteH-2 b23.
@@ -8290,3 +8303,13 @@
 0x00214230	btlAnyPartyActionMatchesSelector	inferred	confidence=high; Scans linked-action chain, eligible group200 unit and primary action ID; preserves distinct DDS1 record traversal. DDS1 0x00201BD8 twin. [Namer1 batch49]
 0x00214928	btlCheckEnemySpawnCapacity	inferred	confidence=high; Queries active and cumulative scene enemy caps plus override using null requester. DDS1 0x00202158 twin. [Namer1 batch49]
 0x001F35C8	btlBuildActorRotatedCameraPresets	inferred	confidence=high; Actual typed camera presets compose from/to quaternions with actor rotation, publish scaled positions/distances and motion progress/flags/parameter; native VU and all staging retained. DDS2-only builder. [Namer1 batch49]
+0x00306CD0	effDrawTextureSlotWithBlendedCornerColors	inferred	Resolves the indexed slot work, blends each corner color with an alpha-cleared copy using the supplied blend amount, and submits the texture slot through effDrawTextureSlot. Used by DDS2 menu, UI, movie, and file-window drawing callers. [code-quality cleanup, 2026-10-13]
+0x0014F5F0	fldCreateSparkSlotObjects	inferred	Paired DDS1 provider at 0x0014B688; resets the 17 spark object slots, spawns and configures the HUNT_MDL_UNIT world objects, then initializes each nested value. Called by spark-slot update and setup paths. [code-quality cleanup, 2026-10-13]
+0x00314500	prfCopyMantraNamePart	inferred	Paired DDS1 provider at 0x002CD0D8; scans encoded mantra-name bytes for delimiter 0x828A, copies the suffix for mode 1 (falling back to the full name), the prefix for mode 2, and the full name otherwise. Display callers use mode 1. [code-quality cleanup, 2026-10-13]
+0x00213F58	btlActionMatchesStatMask	inferred	Paired DDS1 provider at 0x00201900; compares the action selector stat with the supplied exact mask or each element selected by an element mask. A nonzero force argument bypasses the record-options filter; otherwise only options 1 and 2 match. Used by queued-action and actor-action queries. [code-quality cleanup, 2026-10-13]
+0x0030B1E8	fldUpdateLocalMapCounterSelection	inferred	Advances the local-map selection/counter state machine: polls input, updates countdown and map timers, advances camera/selection animation, handles overlay timeout and return fades, and queues the selected scene action when complete. Called once per task update. [code-quality cleanup, 2026-10-13]
+0x00256AE0	evtViewerDrawShadowConfigRow	inferred	Callback registered by evtViewerEditShadowProperties; draws the shadow configuration heading, mode, alpha and parameter-gated Y offset rows. [LiteH-2]
+0x00254CE0	evtDrawMotionChangeRow	inferred	Callback for evtUpdateMotionChangeRow; draws the packed motion group, motion number, loop/interpolation settings and available maximum frame. [LiteH-2]
+0x001D3ED8	fldAdvanceSceneGroupScheduler	inferred	Runs once per active battle frame; waits for scene/task blockers, dispatches the next eligible front-group task or marks the scene slots finished. [LiteH-2]
+0x00294680	mnuDrawType2PanelEffects	inferred	When terminal type is 2, draws its two panel effect slots at fixed positions and sets the second slot's geometry angle to 90 degrees; used by panel transition, fade-out, and type-graphic rendering. [code-quality cleanup, 2026-10-13]
+0x0031ED68	mnuSetPauseFadeChoice	inferred	Stores the pause-menu choice index in the FadeNumber display value consumed by mnuDrawFadeSequenceThree, which clamps and draws the three available rows. [code-quality cleanup, 2026-10-13]

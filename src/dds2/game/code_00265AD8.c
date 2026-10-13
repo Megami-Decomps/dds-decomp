@@ -28,9 +28,7 @@ typedef struct FlagEntry {
 
 
 
-extern void mdlFlagClear(s32);
 
-extern void mdlFlagSet(s32);
 
 
 typedef struct FlagPair {

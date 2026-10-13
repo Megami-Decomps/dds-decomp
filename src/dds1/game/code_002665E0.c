@@ -373,6 +373,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
 #include "dds3_world_value.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"
@@ -462,7 +463,6 @@ extern char *strcat(char *, char *);
 
 
 extern KwlnTask *mnuTitleSoundTask;
-extern KwlnTask *kwlnTaskCreate();
 
 extern char D_003771D8[];
 
@@ -654,7 +654,7 @@ extern s16 D_003BD8B0;
 
 extern s32 D_003BC5AC;
 
-extern void func_002E8C30(char *, s32, char *, s32);
+extern void sndInitializeIopSoundSystem(char *, s32, char *, s32);
 
 extern void sndEnsureMidiBankResident(s32);
 
@@ -664,11 +664,11 @@ extern void mnuCreateTitleEffectTask(void);
 
 void mnuInitializeTitleAudioAndEffects(void) {
     if (D_003BC58C != 0) {
-        func_002E8E50();
+        sndQueueNoPayloadCommand40();
         return;
     }
     D_003BC58C = 1;
-    func_002E8C30(D_00377318, 4, D_00377338, 4);
+    sndInitializeIopSoundSystem(D_00377318, 4, D_00377338, 4);
     sndEnsureMidiBankResident(D_00370D10[0]);
     D_003BC5A8 = 4;
     D_003BD8B0 = -1;
@@ -681,7 +681,7 @@ u32 func_002694F8(void) {
     return 0x599;
 }
 
-u32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
+s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
     effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);
@@ -780,7 +780,7 @@ u32 sndOpSetTrackDefaultVolumePan(void) {
 }
 
 u32 sndOpSendTitleAudioCommand(void) {
-    func_002E8E50();
+    sndQueueNoPayloadCommand40();
     return 1;
 }
 

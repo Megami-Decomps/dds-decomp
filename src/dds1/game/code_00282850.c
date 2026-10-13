@@ -19,6 +19,7 @@
 #include "sdf_projection.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
@@ -180,7 +181,7 @@ extern StageTestState evtStageTestState;
 
 extern void btlStopStage(void);
 
-extern void *evtBattleStageTestScreen(void);
+extern s32 evtBattleStageTestScreen(KwlnTask *task);
 
 
 typedef struct MenuList MenuList;
@@ -2685,7 +2686,7 @@ extern s32 D_003BC7D4;
 
 /* Draw the battle-stage selector; confirmation creates the selected world object
  * and returns its camera callback before the four trigger-bit ID adjustments. */
-void *evtBattleStageTestScreen(void) {
+s32 evtBattleStageTestScreen(KwlnTask *task) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(EVT_STAGE_SCREEN_WORK_BYTES);
 
     sdfInitPacketList(packetList);
@@ -2697,7 +2698,7 @@ void *evtBattleStageTestScreen(void) {
     D_00325708.append(&D_00325708, packetList);
     if (D_00324510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
-        return evtCreateBattleStageTestCamera;
+        return (s32)evtCreateBattleStageTestCamera;
     }
     if (D_00324510[0x25] & MNU_PAD_TRIGGER_BIT) {
         D_003BC7D0++;
@@ -2714,7 +2715,7 @@ void *evtBattleStageTestScreen(void) {
     return 0;
 }
 
-void evtDestroyBattleStageTestWorldNode(void) {
+void evtDestroyBattleStageTestWorldNode(KwlnTask *task) {
     evtDestroySecondaryWorldNode();
 }
 

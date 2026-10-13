@@ -2,6 +2,7 @@
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
@@ -23,7 +24,6 @@ extern char D_003B1168[]; /* "staffProc" */
 extern MnuMovieResourceEntry D_0037B168[];
 
 extern KwlnTask *mnuMovieDrawTask;
-extern KwlnTask *kwlnTaskCreate();
 
 extern u16 mnuMovieTaskState;
 
@@ -126,8 +126,8 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuInitializeMovieRollViewport(void);
-extern void mnuReleaseMovieResourceAfterPendingWork(void);
-extern s32 mnuStaffImageProc(void);
+extern void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task);
+extern s32 mnuStaffImageProc(KwlnTask *task);
 extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
 
 s32 mnuUpdateStaffRoll(KwlnTask *task) {
@@ -294,7 +294,7 @@ void mnuAdvanceStaffImageSequence(void) {
     }
 }
 
-s32 mnuStaffImageProc(void) {
+s32 mnuStaffImageProc(KwlnTask *task) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
     mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
     mnuDrawStaffRollFrame(0x53);
@@ -302,7 +302,7 @@ s32 mnuStaffImageProc(void) {
     return 0;
 }
 
-void mnuFinishStaffMovieAndFreeState(void) {
+void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     s64 pendingWork;
 
     mnuMovieTaskState = 2;
@@ -316,7 +316,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     mnuMovieWork = NULL;
 }
 
-void mnuReleaseMovieResourceAfterPendingWork(void) {
+void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task) {
     effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
@@ -352,7 +352,7 @@ extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 mnuUpdateStaffRoll(KwlnTask *task);
 
-extern void mnuFinishStaffMovieAndFreeState(void);
+extern void mnuFinishStaffMovieAndFreeState(KwlnTask *task);
 
 void mnuMovieCreateTask(void) {
     struct SdfMemBlock *allocation;
@@ -381,7 +381,7 @@ s32 mnuStopStaffTasks(void) {
     return 0;
 }
 
-s32 mnuMovieDraw(void) {
+s32 mnuMovieDraw(KwlnTask *task) {
     func_002ECCF8(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }

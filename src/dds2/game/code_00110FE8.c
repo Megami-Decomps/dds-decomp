@@ -1,10 +1,8 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_area_callback.h"
 #include "evt_world.h"
-
-s32 dds3InvokeAreaCallback(void *arg);
-
 
 s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value) {
     EffWorldNode *node;

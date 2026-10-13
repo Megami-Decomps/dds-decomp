@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_create.h"
 #include "dds3obj.h"
 #include "sdf_resource.h"
 #include "sdf_dev_state.h"
@@ -25,7 +26,6 @@ extern void func_00117A80(void);
 
 
 
-extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
 extern void scrClearProcessGlobals(void);
 extern void mdlResetViewerFlagsAndSolarOverlay(void);
@@ -39,7 +39,7 @@ extern void mdlFlagSet(s32 flag);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
-s32 sdfBumpTickCounters(void);
+s32 sdfBumpTickCounters(KwlnTask *task);
 
 void evtResetWorldAndProfileRuntime(void);
 
@@ -206,7 +206,7 @@ void sdfCreateRuntimeTask(void) {
     state->header.backingAllocation = mem;
     state->header.firstTick = 0;
     state->header.secondTick = 0;
-    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, (void *)sdfBumpTickCounters, 0, state);
+    kwlnTaskCreate(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
     datGameState = state;
     evtResetWorldAndProfileRuntime();
 }
@@ -222,7 +222,7 @@ void sdfDestroyRuntimeTask(void) {
     datGameState = 0;
 }
 
-s32 sdfBumpTickCounters(void) {
+s32 sdfBumpTickCounters(KwlnTask *task) {
     DatGameState *runtime;
 
     runtime = datGameState;

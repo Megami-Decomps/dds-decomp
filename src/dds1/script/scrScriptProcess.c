@@ -1,15 +1,13 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "scr.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
 extern ScrProcGlobals *datGameState;
 
-KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay,
-                         s32 destroyDelay, TaskUpdate update, TaskDestroy destroy,
-                         u32 userValue);
 ScrData *bfParseFLW0(void *header, s32 procedureIndex);
 /* Load a script resource, create its VM process and retain its resource handle. */
 ScrData *scrOpenProcessFromResource(const char *path, s32 option)

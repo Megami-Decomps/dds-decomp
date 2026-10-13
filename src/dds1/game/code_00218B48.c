@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "sdf_request.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
@@ -208,7 +209,6 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 
 
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 void dds3AdminSetControlFlag(void);
 
@@ -3301,7 +3301,6 @@ void mdlFlagClearAll(void) {
     } while (i >= 0);
 }
 
-void mdlFlagClear(s32 flag);
 
 void mdlClearFlagRanges(void) {
     s32 i = 0;

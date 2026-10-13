@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_vertex_colors.h"
 #include "eff_random.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -852,12 +853,6 @@ void parFadeAlphaUpDownAllCells(ParSystem *system, u32 color) {
     }
 }
 
-typedef struct ParTriangleVertexColors {
-    s32 edge0;
-    s32 middle;
-    s32 edge1;
-} ParTriangleVertexColors;
-
 void parFillTriangleCellColors(ParSystem *system, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;
     s32 count = system->cellCount;
@@ -999,31 +994,6 @@ void parFadeTriangleCellAlphaUpDown(ParSystem *system, u32 middleWord, u32 edgeW
         } while (i != 0);
     }
 }
-
-/* Ordered packed color words for the three particle vertex layouts. */
-typedef struct ParStripVertexColors {
-    s32 edge0;
-    s32 middle0;
-    s32 center0;
-    s32 center1;
-    s32 middle1;
-    s32 edge1;
-} ParStripVertexColors;
-
-typedef struct ParQuadVertexColors {
-    s32 edge0;
-    s32 middle0;
-    s32 middle1;
-    s32 edge1;
-} ParQuadVertexColors;
-
-typedef struct ParSymmetricVertexColors {
-    s32 edge0;
-    s32 middle0;
-    s32 center;
-    s32 middle1;
-    s32 edge1;
-} ParSymmetricVertexColors;
 
 void parFillStripCellColors(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
     s32 words = system->vertexWordCount;

@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_pack.h"
@@ -27,7 +28,6 @@ extern s32 scrGetCommandTimer(void);
 
 extern char D_00437208[];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 
@@ -243,12 +243,12 @@ u32 evtCommandQueueBgmWithFade(void) {
     return 1;
 }
 
-u32 func_00243180(void) {
+u32 evtOpcodeStartReducedBgm(void) {
     sndStartReducedBgm();
     return 1;
 }
 
-u32 func_002431A0(void) {
+u32 evtOpcodeStopReducedBgm(void) {
     sndStopReducedBgm();
     return 1;
 }
@@ -401,7 +401,6 @@ extern void fldConsumePrimarySceneFlag(void);
 extern void fldConsumeSecondarySceneFlag(void);
 extern void fldConsumeFieldTransitionFlag(void);
 extern void fldConsumeSceneCommandFlag(void);
-extern void mdlFlagClear(s32);
 
 /* Advance the enabled solar clock and expire its associated field controls. */
 void evtAdvanceSolarClockAndExpireControls(f32 delta) {

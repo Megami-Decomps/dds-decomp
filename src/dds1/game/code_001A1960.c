@@ -104,9 +104,6 @@ extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
 extern s32 datCalculateCommandBaseValue(DatPartyRecord *, s32);
-
-extern s32 btlGetRuntime(void);
-
 extern s32 D_003BAA14;
 
 extern s32 D_003BAA28;
@@ -524,7 +521,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
 extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
 
 s32 btlResolveUnitValueWithOverride(s32 object, s32 value) {
-    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))(btlGetRuntime() + 0x670);
+    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x670);
     if (handler != 0) {
         s32 result = handler(object, value);
         if (result != -1) {
@@ -1120,7 +1117,7 @@ f32 btlGetEncounterAdjustmentScale(void) {
 u32 btlGetEscapeAttemptCount(void) {
     s32 battleWork;
 
-    battleWork = btlGetRuntime();
+    battleWork = (s32)(u32)btlGetRuntime();
     return *(u32 *)(battleWork + 0x254);
 }
 
@@ -1732,7 +1729,7 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
 }
 
 s32 btlTestActorStatusPredicate(BtlUnit *object) {
-    s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))(btlGetRuntime() + 0x650);
+    s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))((u8 *)btlGetRuntime() + 0x650);
     if (predicate != 0 && predicate(object) != 0) {
         return 1;
     }
