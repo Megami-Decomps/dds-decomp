@@ -1058,7 +1058,7 @@ extern void effMiscQuatMultiplyVU(void);
 extern s32 D_0032E4C8[];
 extern void dds3RebuildObjectModelContext(EffWorldNode *, s32, s32);
 extern void fldApplySceneLightSet(s32, s32);
-extern s32 func_001312D8(void);
+extern s32 fldUpdateCameraObjectPose(void);
 
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 extern void fldApplySkyLightSet(u32, s32);
@@ -1132,7 +1132,7 @@ void fldTogglePlayerModel(void) {
     fldApplySceneLightSet(0, 0);
     fldApplySkyLightSet(D_0032E570[0x2C / 4], 0);
     fldBeginSelectedValueTransition(D_0032E570[0x30 / 4]);
-    func_001312D8();
+    fldUpdateCameraObjectPose();
 }
 
 void fldPrepareResourceBuffer(void) {
@@ -1370,7 +1370,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         }
         fldSetCameraObjectActiveFlag(fldAreaState.commandEnabled);
     }
-    func_001312D8();
+    fldUpdateCameraObjectPose();
     evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0032F170, (s32)D_003BABB8);
 }
 
