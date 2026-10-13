@@ -18,6 +18,7 @@
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
+#include "mdl_mark_params.h"
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
 #include "file_request_api.h"
@@ -253,18 +254,6 @@ extern MdlCtrlState mdlViewerControlState;
 
 void fldDrawPackedRgbEditor();
 
-
-typedef struct EffMarkParams {
-    u8 unk0[8];
-    s32 mark0;       /* 0x08 */
-    s32 mark1;       /* 0x0C */
-    u16 start;       /* 0x10 */
-    u16 end;         /* 0x12 */
-    u16 interval;    /* 0x14 */
-    u8 face;         /* 0x16 */
-    u8 blend;        /* 0x17 */
-    u32 colors[4];   /* 0x18 */
-} EffMarkParams;
 
 extern char *D_003C8768[];
 
