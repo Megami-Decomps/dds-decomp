@@ -2956,6 +2956,7 @@
 0x00205990	btlAdvanceTitleStateAfterSound	inferred	Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x002059B0	btlCreateAdvanceTitleStateTask	inferred	Creates callback task for btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x00206060	btlRepositionPartyAroundBattleCenter	inferred	Passes the battle center vector to the routine spreading party units around it. [names_reviewed14.tsv]
+0x00206090	btlArrangeOpponentFormationSlots	inferred	Calls btlArrangeFormationSlots with status mask 0x400; its other branch selects party spacing/orientation via 0x200, while the special-unit scene path uses this helper for the opponent-side arrangement. DDS1 twin 0x001F53F0. [code-quality cleanup, 2026-10-13]
 0x002060B0	btlMoveOtherUnitsAway	inferred	for every other active unit sharing the caller mask, positions it with Y += 1000000.0 then repositions the owner [names_reviewed2.tsv]
 0x002061B0	btlPlaceTripleFormationAroundCenter	inferred	U1
 0x00206370	btlPlaceTripleFormationAroundTarget	inferred	places up to three units on a circle (radius max(500, reach*scale+100)) around the single target and faces them to it [names_M88_VuBattle.tsv]

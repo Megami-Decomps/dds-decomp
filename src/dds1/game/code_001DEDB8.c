@@ -7917,7 +7917,7 @@ s32 btlRepositionPartyAroundBattleCenter(void) {
     return btlExpandPartyFormationAroundCenter(vector);
 }
 
-s64 func_001F53F0(void) {
+s64 btlArrangeOpponentFormationSlots(void) {
     return btlArrangeFormationSlots(0x400);
 }
 

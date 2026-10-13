@@ -121,7 +121,7 @@ extern SceneSlotFadeWork *D_00438F54;
 
 
 
-extern s32 func_00206090();
+extern s32 btlArrangeOpponentFormationSlots();
 extern s32 btlRepositionPartyAroundBattleCenter(void);
 extern s32 btlMarkInactiveActorCandidates();
 extern void btlRestorePartySlotSnapshots();

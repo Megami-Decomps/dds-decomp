@@ -3316,6 +3316,7 @@
 0x001F4C90	btlPlayStationedSe1C	inferred	Twin of dds2 0x00205930; Calls sndLoadAndPlayStationedSe with code 0x1C. [names_R_FuncNames3.tsv]
 0x001F4CF0	btlAdvanceTitleStateAfterSound	inferred	Twin of dds2 0x00205990; Task callback calls btlAdvanceTitleState. [names_R_FuncNames3.tsv]
 0x001F53C0	btlRepositionPartyAroundBattleCenter	inferred	Passes the battle center vector to the routine spreading party units around it. [names_reviewed14.tsv]
+0x001F53F0	btlArrangeOpponentFormationSlots	inferred	Calls btlArrangeFormationSlots with status mask 0x400; its other branch selects party spacing/orientation via 0x200, while scene restoration and the special-unit action use this helper for the opponent-side arrangement. DDS2 twin 0x00206090. [code-quality cleanup, 2026-10-13]
 0x001F57D0	btlPlaceTripleFormationAroundMiddleActor	inferred	L13
 0x001F5A20	btlOrientFrontAndBackUnitsTowardTargets	inferred	Orients front and back battle units to their respective target positions. [names_reviewed12.tsv]
 0x001F5B50	btlAlignTripleFormationWithTarget	inferred	U1
