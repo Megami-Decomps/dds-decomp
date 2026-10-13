@@ -4167,6 +4167,7 @@
 0x00229410	evtDrawSolarLayerPair	inferred	Draws the requested solar layer and its companion layer for non-base cases.
 0x002294C0	evtAdvanceSolarShortLayerTimer	inferred	Increments a solar layer timer and disables it after 60 frames, shorter than the companion 80-frame timer.
 0x00229500	evtAdvanceSolarLongLayerTimer	inferred	Increments the companion solar layer timer and disables it after 80 frames.
+0x00229750	evtAdvanceLongSolarNoiseLayers	inferred	Updates the long-duration solar-noise layers, spawns from the 15-point position/scale table under the mirrored phase cap, and expires active layers through the long timer. Paired with DDS2 0x00244408. [code-quality cleanup, 2026-10-13]
 0x00229A10	evtDrawShortSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds1/game/code_00228B38.c:168:func_00229A10; Draws active solar-noise layers with a sine envelope over sixty frames and a narrow width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00229B70	evtDrawLongSolarNoiseLayers	inferred	confidence=high; matched-C; src/dds1/game/code_00228B38.c:193:func_00229B70; Draws active solar-noise layers with a sine envelope over eighty frames and a wider width scale.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00229CD0	evtActivateNextSolarPoint	inferred	M141; sources=names_pending_main.tsv; twin=0x00244988, input-family pairing. [names_qp10.tsv]
