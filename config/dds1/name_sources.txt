@@ -67,7 +67,8 @@
 0x00104600	kwlnDebugGraphSetEnabled	inferred	creates or destroys the DebugTimeGrph task by mode
 0x00104678	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104568, input-family pairing. [names_qp10.tsv]
 0x00104798	kwlnTextureDrawPageCounter	inferred	formats TEX VIEWER page counter and submits rendered text
-0x00104A98	kwlnTextureViewerHandlePad	inferred	pad bits 0x14/0x15/0x18/0x19/0x1A/0x1B move the TEX VIEWER page by -1/+1/-10/+10, then func_00104A18 clamps it; D_003BA890 toggles on unk12<0 [names_reviewed2.tsv]
+0x00104A18	kwlnSelectIncompleteResourceAtPageIndex	inferred	Selects the reached incomplete-texture page, stores its resource pointer and returns the reached index; DDS2 twin 0x00104908. DDS1 treats requested index zero as the head directly; DDS2 skips clone-source entries at the head first.
+0x00104A98	kwlnTextureViewerHandlePad	inferred	pad bits 0x14/0x15/0x18/0x19/0x1A/0x1B move the TEX VIEWER page by -1/+1/-10/+10, then kwlnSelectIncompleteResourceAtPageIndex clamps it; D_003BA890 toggles on unk12<0 [names_reviewed2.tsv]
 0x00104D20	kwlnSwapActiveResource	inferred	checks active state then forwards supplied resource and handle to func_00104B88
 0x00104D70	kwlnLoadDefaultResource	inferred	checks active state then loads D_00325748 with active handle
 0x00104DB8	kwlnTextureFindIncompleteResource	inferred	scans resource nodes and returns follow-up callback for incomplete entry
