@@ -2,6 +2,7 @@
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
@@ -15,7 +16,6 @@ extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
 extern void dds3ReplaceObjectResource(EffWorldNode *);
 
-void *dds3GetWorldSecondaryObject(void);
 Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 void sdfFreezeFloatCounter(struct EvtScaledValue *ctx);
 void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
@@ -25,8 +25,6 @@ extern const char D_003AC038[0x28];
 extern void func_003003F0(const char *format, ...);
 
 extern EffWorldNode *dds3AppendWorldNode(void);
-extern void dds3SetWorldSecondaryObject(void *);
-extern void dds3SetWorldObject(void *);
 extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
                                                        const SdfTextureOffsetListHeader *, u32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
