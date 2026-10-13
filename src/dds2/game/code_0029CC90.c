@@ -505,7 +505,7 @@ extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern s32 brsPollResultCounterCompletion(void);
-extern void func_00341C78(u32 sound);
+extern void sndQueueSoundId(u32 sound);
 
 void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
@@ -559,7 +559,7 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
     }
     if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
         work->resultPhase = 2;
-        func_00341C78(20);
+        sndQueueSoundId(20);
     }
 }
 
