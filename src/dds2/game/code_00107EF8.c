@@ -6,7 +6,7 @@
 #include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
@@ -160,7 +160,6 @@ typedef struct EvtGsCommand {
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 #include "sdf_packet_alloc.h"
 
@@ -170,7 +169,6 @@ extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 

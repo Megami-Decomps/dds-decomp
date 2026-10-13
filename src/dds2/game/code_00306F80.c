@@ -4,6 +4,7 @@
 #include "sdf_dma_packet_header.h"
 #include "sdf_resource.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
 #include "sdf_packet_builders.h"
 #include "eff_resource_records.h"
 #include "itf.h"
@@ -211,11 +212,7 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
-                                     s32 registerCount, s64 registerList,
-                                     s32 loopCount);
 extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 
 

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
-#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
@@ -11,7 +11,6 @@
 #include "itf_panel_draw.h"
 #include "sdf_texture_file.h"
 
-typedef struct SdfDrawPacket SdfDrawPacket;
 
 #define ITF_BYTE_MASK 0xFF
 #define ITF_NODE_HEADER_BYTES 8
@@ -42,7 +41,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 #include "sdf_packet_alloc.h"
-extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 
 extern s32 D_00435E6C;
