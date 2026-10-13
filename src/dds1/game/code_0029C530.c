@@ -2320,8 +2320,6 @@ void billReleaseQuadNode(s32 work) {
 }
 
 extern s8 effSharedRandomState[];
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 void billAdvanceQuadInstances(EffClassWork *work) {
     EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
@@ -4425,8 +4423,6 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 }
 
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 
 
 
@@ -5862,7 +5858,7 @@ void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
             }
 
             if (spawnAll) {
-                s32 birthAge = effMiscRand(effSharedRandomState) % life;
+                s32 birthAge = effMiscRand((EffRandState *)effSharedRandomState) % life;
                 f32 gravityDisplacement;
                 ageF = (f32)birthAge;
                 gravityDisplacement = gravity * ageF * ageF * 0.5f;

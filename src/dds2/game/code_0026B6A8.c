@@ -7,6 +7,7 @@
 #include "eff.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
+#include "eff_random.h"
 
 struct MenuSlotState;
 extern void mnuTerminalSelectResourceBank(struct MenuSlotState *);
@@ -277,7 +278,6 @@ void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
     }
 }
 
-extern u32 effMiscRand(void *state);
 
 /* Give each scrolling strip a random speed in the requested range. */
 void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum) {

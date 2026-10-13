@@ -3,6 +3,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "eff_random.h"
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
@@ -274,7 +275,6 @@ s32 mnuAdvanceInactiveItemPanel(KwlnTask *request) {
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-extern u32 effMiscRand(void *);
 extern u16 D_003D6332[][17];
 extern s32 mdlFlagTest(s32);
 

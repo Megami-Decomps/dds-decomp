@@ -1318,7 +1318,6 @@ void effEventReleaseSharedResources(EffEventBillSet *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
@@ -1331,8 +1330,8 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     s32 startDelaySpread = work->head.startDelaySpread;
     s32 motionDelaySpread = work->head.motionDelaySpread;
 
-    particle->age = -(effMiscRand(effDefaultRandomState) % startDelaySpread);
-    particle->motionDelay = -(effMiscRand(effDefaultRandomState) % motionDelaySpread);
+    particle->age = -(effMiscRand((EffRandState *)effDefaultRandomState) % startDelaySpread);
+    particle->motionDelay = -(effMiscRand((EffRandState *)effDefaultRandomState) % motionDelaySpread);
     scaleFactor = effMiscRandUnitFloat(effDefaultRandomState) * work->head.scaleRandomness + (1.0f - work->head.scaleRandomness);
     particle->baseScale = work->head.baseScale * scaleFactor;
     particle->scalePhaseX = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
@@ -1342,7 +1341,7 @@ void effEventRandomizeBillboardParticle(EffEventBillSet *work, s32 index) {
     particle->scaleAmplitudeX = work->head.scaleAmplitudeX * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
     particle->scaleAmplitudeY = work->head.scaleAmplitudeY * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE) * scaleFactor;
     particle->rotation = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_EVENT_HALF_TURN * 2.0f);
-    if (effMiscRand(effDefaultRandomState) & 1) {
+    if (effMiscRand((EffRandState *)effDefaultRandomState) & 1) {
         particle->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE);
     } else {
         particle->angularSpeed = -(work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * EFF_EVENT_JITTER_RANGE + EFF_EVENT_JITTER_BASE));
@@ -1714,11 +1713,11 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
         delayModulus = work->head.spread;
         parameterTemplate = effParamWorkCreate(kind, params);
         record->param = parameterTemplate;
-        record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+        record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
             record->param = effParamWorkDuplicate(parameterTemplate);
-            record->delay = -(effMiscRand(effDefaultRandomState) % delayModulus);
+            record->delay = -(effMiscRand((EffRandState *)effDefaultRandomState) % delayModulus);
             record++;
         }
     }

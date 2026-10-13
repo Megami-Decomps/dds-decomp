@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_item_drop.h"
@@ -2299,7 +2300,7 @@ s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *status, u32 value) {
 s32 btlSelectActorAction(s32 state) {
     s32 selection = btlSelectEnemyDropItem(state, 1);
     if (selection == 0) {
-        selection = (effMiscRand((s32)effSharedRandomState) & 1) ? 2 : 9;
+        selection = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
     return selection;
 }

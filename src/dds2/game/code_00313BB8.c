@@ -1427,7 +1427,6 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 extern f32 sdfViewTargetVector[4];
 extern u32 D_00438918;
 extern f32 sdfAtan2Poly(f32 ratio);
-extern u32 effMiscRand(void *state);
 extern u8 effSharedRandomState[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
@@ -1477,7 +1476,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     sdfAtan2Poly(sdfSceneProjectionParameters.camera.fov);
     sdfAtan2Poly(3.14159265f / 4.0f);
     if (spawnRange != 0) {
-        spawn = effMiscRand(effSharedRandomState) % spawnRange + 1;
+        spawn = effMiscRand((EffRandState *)effSharedRandomState) % spawnRange + 1;
     }
     for (i = 0; i < count; i++, mark++, vertices += 2, colors += 2) {
         timer = mark->timer;

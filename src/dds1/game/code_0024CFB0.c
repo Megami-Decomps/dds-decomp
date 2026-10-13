@@ -11,6 +11,7 @@
 #include "kwln_task_lifecycle.h"
 #include "dds3obj.h"
 #include "sdf_texture_file.h"
+#include "eff_random.h"
 
 struct SdfTex;
 struct MenuTerminalWork;
@@ -69,7 +70,6 @@ typedef struct {
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
 
-extern u32 effMiscRand(void *);
 
 extern u32 evtDisplayValues[];
 

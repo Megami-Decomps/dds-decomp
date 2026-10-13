@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_result.h"
@@ -7,8 +8,6 @@
 extern const char *D_003D62F0[6];
 extern char (*D_00435E48)[17];
 extern char (*D_00435E5C)[25];
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 mnuSelectEventFlagCode(void);
 extern s32 dspStartEntry(s32);

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "btl_task_condition.h"
@@ -3570,7 +3571,6 @@ extern s32 btlCanUseActorCategoryFlag2(s32);
 extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(u8 *);
-extern u32 effMiscRand(void *);
 extern u8 effSharedRandomState[];
 extern char D_0041A5E0[], D_0041A5F8[];
 
@@ -3841,7 +3841,7 @@ flag_defeat_candidates:
             if (link->unit->partyRecord.unitId == 0x111) {
                 switch (targetSlot) {
                 case 0:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
@@ -3854,7 +3854,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 1:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
@@ -3867,7 +3867,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 2:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
@@ -3883,7 +3883,7 @@ flag_defeat_candidates:
             } else {
                 switch (targetSlot) {
                 case 0:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
@@ -3896,7 +3896,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 1:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
@@ -3909,7 +3909,7 @@ flag_defeat_candidates:
                     }
                     return 1;
                 case 2:
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,

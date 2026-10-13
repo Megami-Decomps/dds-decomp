@@ -4,7 +4,6 @@
 #include "clock_time.h"
 #include "sdf_cd_clock.h"
 
-extern u32 effMiscRand(void *state);
 
 extern u16 D_0040BAC0[];
 

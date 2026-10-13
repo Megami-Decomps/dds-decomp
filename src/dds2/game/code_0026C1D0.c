@@ -8,6 +8,7 @@
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"
+#include "eff_random.h"
 
 typedef struct SdfTex SdfTex;
 
@@ -171,7 +172,6 @@ s32 evtCompactFilteredBytes(u8 *buffer, s32 length, u8 excluded) {
     return retainedCount;
 }
 
-extern u32 effMiscRand();
 
 /* Perform the requested number of random swaps, not a Fisher-Yates shuffle.
  * Positive swapCount requires nonzero length; equal positions are allowed. */

@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_camera_timed_instruction.h"
 #include "snd_sequence_volume_pan.h"
 #include "fld_area_path.h"
@@ -930,7 +931,6 @@ INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EDFB8);
 
 INCLUDE_ASM(const s32, "game/code_001EC5F0", func_001EE458);
 
-extern u32 effMiscRand(void *state);
 
 void btlFrameTargetExtremesCameraPose(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
 f32 angle, f32 blend) {
@@ -1010,7 +1010,7 @@ f32 angle, f32 blend) {
         btlSetDefaultActionCameraPose(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (effMiscRand((EffRandState *)effSharedRandomState) & 1))) {
         unit = first;
         first = last;
         last = unit;

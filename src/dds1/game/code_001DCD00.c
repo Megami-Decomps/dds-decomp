@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -587,7 +588,6 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *actor) {
     }
 }
 
-extern u32 effMiscRand(void *);
 extern void func_001E0B68(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E0398(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
@@ -634,7 +634,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
         if (task->unit->status.flags & 0x200) {
             if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
                 if (btlHasSingleLinkedResource(action) == 0) {
-                    if (effMiscRand(effSharedRandomState) & 1) {
+                    if (effMiscRand((EffRandState *)effSharedRandomState) & 1) {
                         func_001E0B68(action, &action->frontCamera, &action->backCamera);
                     } else {
                         func_001E0718(action, &action->frontCamera, &action->backCamera);
@@ -675,7 +675,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = 1;
                 } else {
-                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 1 : 2;
+                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 1 : 2;
                 }
                 switch (action->stepKind) {
                 case 1:
@@ -707,13 +707,13 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
                        (btlCanUseActorCategoryFlag2(action) != 0 ||
-                        ((effMiscRand(effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
+                        ((effMiscRand((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
                 func_001E0B68(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
                     btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
-                    action->stepKind = (effMiscRand(effSharedRandomState) & 1) ? 4 : 5;
+                    action->stepKind = (effMiscRand((EffRandState *)effSharedRandomState) & 1) ? 4 : 5;
                 } else {
                     action->stepKind = 4;
                 }
@@ -787,7 +787,6 @@ extern void func_001E16C0(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitCommandCursorForFirstActor(BtlLinkedCommand *, BtlCamState *);
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern u32 effMiscRand(void *state);
 
 /* Same chooser: DDS1 001DE048..001DE08C and 001DE218..001DE248;
  * DDS2 twins 001EB728..001EB76C and 001EB8F8..001EB928, plus independent
@@ -936,7 +935,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (btlCanUseActorCategoryFlag4(action)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
-                       ((effMiscRand(effSharedRandomState) & 1) ||
+                       ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
                         btlCanUseActorCategoryFlag2(action))) {
                 func_001E0398(action, &action->frontCamera, &action->backCamera);
                 action->motionParameter = 30.0f;
@@ -955,7 +954,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (btlCanUseActorCategoryFlag4(action)) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
-                   ((effMiscRand(effSharedRandomState) & 1) ||
+                   ((effMiscRand((EffRandState *)effSharedRandomState) & 1) ||
                     btlCanUseActorCategoryFlag2(action))) {
             func_001E0718(action, &action->frontCamera, &action->backCamera);
         } else {

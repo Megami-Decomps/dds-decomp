@@ -5965,9 +5965,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
 }
 
 
-struct EffRandState;
 extern struct EffRandState effSharedRandomState;
-extern u32 effMiscRand(struct EffRandState *state);
 extern f32 fabsf(f32);
 extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 

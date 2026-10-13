@@ -210,7 +210,6 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     effDrawTriangleRecordPool(handle);
 }
 
-extern u32 effMiscRand(void *);
 extern u8 effDefaultRandomState[];
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
@@ -237,7 +236,7 @@ PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
     record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -452,7 +451,7 @@ void effFlashUpdateStreak(PcpFlashStreakWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand(effDefaultRandomState) % range);
+                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashRotatingStreakSetParticleColors(work, index, color);
@@ -515,7 +514,7 @@ PcpFlashScalingOrbitWork *effFlashOrbitScalingCreate(PcpFlashScalingOrbitParams 
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].angle = angle;
         angle += step;
     }
@@ -691,7 +690,7 @@ void effFlashOrbitScalingUpdate(PcpFlashScalingOrbitWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand(effDefaultRandomState) % range);
+                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashOrbitScalingSetParticleColors(work, index, color);
@@ -757,7 +756,7 @@ PcpFlashAccumulatingWork *effFlashAccumulatingCreate(PcpFlashAccumulatingParams 
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].orbitAngle = angle;
         angle += step;
     }
@@ -951,7 +950,7 @@ void effFlashAccumulatingParticleUpdate(PcpFlashAccumulatingWork *work)
             part->radius = 0;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashAccumulatingSetParticleColors(work, index, color);
@@ -1016,7 +1015,7 @@ PcpFlashOrbitArcWork *effFlashOrbitArcCreate(PcpFlashOrbitArcParams *params)
     step = EFFECT_RING_FULL_TURN / (u32)ring->particleCount;
     spread = ring->randomRange;
     for (i = 0; i < (u32)ring->particleCount; i++) {
-        ring->parts[i].age = -(effMiscRand(effDefaultRandomState) % spread);
+        ring->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % spread);
         ring->parts[i].accumulator = angle;
         angle += step;
     }
@@ -1214,7 +1213,7 @@ void effFlashOrbitArcUpdate(PcpFlashOrbitArcWork *work)
             part->color = 0x80808080;
         } else if (age >= lifetime) {
             if (restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % randomRange);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % randomRange);
             }
             color = 0;
             effFlashOrbitArcSetParticleColors(work, index, color);
@@ -1270,7 +1269,7 @@ PcpFlashRotatingQuadWork *effFlashRotatingQuadCreate(PcpFlashRotatingQuadParams 
     record->drawMode = work->drawMode;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -1461,7 +1460,7 @@ void effFlashRotatingQuadUpdate(PcpFlashRotatingQuadWork *work) {
         } else {
             if (part->age >= lifetime) {
                 if (restart != 0) {
-                    part->age = ~(effMiscRand(effDefaultRandomState) % range);
+                    part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
                 }
                 color = 0;
                 effFlashRotatingQuadSetParticleColors(work, index, color);
@@ -1722,7 +1721,7 @@ PcpFlashRadialStripWork *effFlashRadialStripCreate(PcpFlashRadialStripParams *pa
     work->resourceHandle = record;
     range = work->randomRange;
     for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
     }
     return work;
 }
@@ -1941,7 +1940,7 @@ void effFlashRadialStripUpdate(PcpFlashRadialStripWork *work) {
                 effFlashRadialStripSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), tintColor));
             }
             if (age == lifetime && restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % range);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
                 effFlashRadialStripSetParticleColors(work, index, 0);
             } else {
                 part->age = part->age + 1;
@@ -1985,7 +1984,7 @@ PcpFlashFadingOrbitWork *effFlashFadingOrbitCreate(PcpFlashFadingOrbitParams *pa
     step = 3.14159265f * 2.0f / (f32)(u32)work->particleCount;
     range = work->randomRange;
     for (i = 0; i < (u32)work->particleCount; i++) {
-        work->parts[i].age = -(effMiscRand(effDefaultRandomState) % range);
+        work->parts[i].age = -(effMiscRand((EffRandState *)effDefaultRandomState) % range);
         work->parts[i].angle = angle;
         angle += step;
     }
@@ -2188,7 +2187,7 @@ void effFlashFadingOrbitUpdate(PcpFlashFadingOrbitWork *work) {
                 effFlashFadingOrbitSetParticleColors(work, index, effMultiplyPackedColors(effBlendColor(0, part->color, blend), tintColor));
             }
             if (age == lifetime && restart != 0) {
-                part->age = ~(effMiscRand(effDefaultRandomState) % range);
+                part->age = ~(effMiscRand((EffRandState *)effDefaultRandomState) % range);
                 effFlashFadingOrbitSetParticleColors(work, index, 0);
             } else {
                 part->age = part->age + 1;

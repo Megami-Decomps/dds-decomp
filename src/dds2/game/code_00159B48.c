@@ -966,7 +966,6 @@ typedef struct EffPacket {
 } EffPacket;
 
 extern u8 effDefaultRandomState[];
-extern u32 effMiscRand(void *state);
 extern u32 parEvaluateColorRampAtAge(void *fade, u32 color, s32 age);
 
 typedef struct EffRingEmitter {
@@ -1201,7 +1200,7 @@ void effEmitterDiscSpawn(EffDiscEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->jitterA + (1.0f - effect->jitterA));
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -1486,7 +1485,7 @@ void effInitializeBallisticParticle(EffBallisticEmitter *effect, s32 index) {
         }
         break;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -1812,7 +1811,7 @@ void effEmitterBurstSpawn(EffBurstEmitter *effect, u32 packetIndex) {
 
     packet += packetIndex;
     packet->color = 0;
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     speed = effect->speed;
     jitter = effect->jitterA;
     directionVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
@@ -2043,7 +2042,7 @@ void effEmitterSphereSpawn(EffSphereEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = ~(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = ~(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -2409,7 +2408,7 @@ void effEmitterConeSpawn(EffConeEmitter *effect, s32 packetIndex) {
         packet->vel[2] = angleSin * cone * speed;
         packet->f38 = gravity;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -2932,7 +2931,7 @@ void effInitializeOffsetGravityParticle(EffOffsetGravityEmitter *effect, s32 ind
         }
         break;
     }
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     jitter = effect->head.speedJitter;
     packet->speed = effect->head.scale[0] * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
@@ -3119,7 +3118,7 @@ void effEmitterDiscAuxSpawn(EffDiscAuxEmitter *effect, u32 packetIndex) {
     packet->f34 = 0;
     packet->f38 = 0;
     packet->f3C = effect->f15C * (effMiscRandUnitFloat(effDefaultRandomState) * effect->f170 + (1.0f - effect->f170));
-    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->age = -(effMiscRand((EffRandState *)effEmitterDelayRandomState) % (effect->spread + 1));
     packet->color = 0;
     PCP_COPY_VECTOR(packet, effect->head.origin);
     jitter = effect->head.speedJitter;

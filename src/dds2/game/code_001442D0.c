@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "fld_area_path.h"
@@ -471,8 +472,6 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *state);
 
 
 typedef struct FldVec4 {
