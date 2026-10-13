@@ -432,7 +432,7 @@ extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
 /* Whether unit can start combo command cmd with two partners, none of which may be
  * blocked by action mask 0x10 or by func_001ABDE8 against the other two. */
-s32 func_00214DF8(BtlUnit *unit, s32 command) {
+s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     BtlUnit *members[3];
     BtlState *state;
     u32 i = 0;
