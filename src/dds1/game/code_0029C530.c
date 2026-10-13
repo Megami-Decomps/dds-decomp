@@ -41,6 +41,7 @@
 #include "sdf.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_billboard_work.h"
 #include "eff_resource_list.h"
 #include "file_request_api.h"
 #include "sdf_texture_file.h"
@@ -1384,21 +1385,6 @@ void effSetAlternateKindColor(EffKindWork *work, u32 color) {
 void effSetAlternateKindScale(EffKindWork *work, float scale) {
     work->scale = scale;
 }
-
-/* Native 0x68-byte billboard work, shared by construction, cloning and beam update.
- * The copied 0x38-byte configuration begins with height/width scales at 0x2C.
- * Keep natural alignment: both leading vectors are transferred as VU qwords. */
-typedef struct EffBillboardWork {
-    f32 position[4]; /* 0x00 */
-    f32 rotation[4]; /* 0x10: quaternion */
-    f32 scale;      /* 0x20 */
-    u32 color;      /* 0x24 */
-    s32 frame;      /* 0x28 */
-    f32 heightScale; /* 0x2C */
-    f32 widthScale;  /* 0x30 */
-    u8 unk34[0x30];  /* Remaining copied configuration, not alignment padding. */
-    BillObj *billboard; /* 0x64: owned billboard handle. */
-} EffBillboardWork;
 
 u8 *effCreateBillboardWork(u8 *source) {
     u8 *work = (u8 *)sdfAllocSizeClassBlock(0x68);
