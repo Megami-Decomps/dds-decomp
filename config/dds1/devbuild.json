@@ -100,9 +100,7 @@
       "object": "build/dds1/dev/code_00288E70.o",
       "expected_symbols": 24,
       "expected_shifted_symbols": 23,
-      "fallback_symbols": [
-        "fileReqInit"
-      ],
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".data",

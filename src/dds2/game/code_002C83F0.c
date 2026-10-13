@@ -10,6 +10,8 @@
 extern s32 D_00437CC0;
 extern s32 D_00439000;
 
+s32 func_0034F7B8(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
+
 void fileReqInit(s32 request);
 
 /* Completion node drained by fileManDispatchDone. */
@@ -461,7 +463,14 @@ void fileManInit(void) {
     fileIdleUpdateCallback = fileManUpdate;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C83F0", fileReqInit);
+void fileReqInit(s32 request) {
+    FileReqEntry *entry = &fileRequestEntries[request];
+    func_0034F7B8(request, 0, &entry->unk4, &entry->sizeKiB, &entry->unkC);
+    /* cc1probe: reset survives 01.sibling, disappears at 13.life, and
+     * retains the retail JAL/epilogue; see the post-call exception in
+     * docs/CONTRIBUTING.md. The other game has the same 76-byte wrapper. */
+    request = -1;
+}
 
 /* Select and reinitialize one file request, then clear its +0x10 byte. */
 void fileReqBegin(s32 request) {
