@@ -46,7 +46,7 @@ void mnuBeginTransition(MenuSceneWork *work, s32 mode) {
     }
 }
 
-void func_00250B60(MenuSceneWork *work) {
+void mnuHandleMantraGridInput(MenuSceneWork *work) {
     s32 feedback = 0;
     s8 direction;
     MnuMantraGridEntry *entry;

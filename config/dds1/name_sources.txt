@@ -7793,7 +7793,7 @@
 0x0026F918	mnuAdvanceStaffImageSequence	inferred	Inferred from the current C implementation in game/code_0026EC90.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002728F8	mnuDrawStaffCampImageScreen	inferred	Inferred from the current C implementation in game/code_00272798.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002729C8	mnuFinishStaffConfigPopup	inferred	Completes the staff configuration popup by submitting its task-owned menu context and callback in dispatcher mode 2; paired DDS2 role is 0x002AB1B0.
-0x00272BC0	mnuDrawStaffBulletItemQuantity	inferred	Inferred from the current C implementation in game/code_00272798.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00272BC0	mnuDrawStaffItemListEntry	inferred	Draws a staff-item list row, displaying its owned quantity when present or both staff-item slots otherwise; registered in the regular and bullet-item windows. DDS2 counterpart 0x002AB8C0 forwards to the camp-grid renderer with mode 0x200. [LiteH menu naming batch 21]
 0x00272D50	mnuCreateStaffItemWindow	inferred	Inferred from the current C implementation in game/code_00272D50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00274050	mnuHandleStaffItemUseInput	inferred	Inferred from the current C implementation in game/code_00273AB0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00275B40	mnuDrawPartyVitalsAndProfile	inferred	Inferred from the current C implementation in game/code_00274B80.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
@@ -8646,3 +8646,8 @@
 0x001E2578	btlBuildRandomizedActionCameraPosePair	inferred	Selects a random camera preset pair, mirrors the quaternions for target group 0x400, frames both action poses, and sets the action motion parameters; animation flag 0x200 selects the alternate preset rows. [code-quality cleanup, 2026-10-13]
 0x002CD240	prfResolveMantraNameOrFallback	inferred	selects encoded DspMantraName text when flag 0x902 is set, otherwise outputs fallback string
 0x002EF698	sdfRunStreamIopRpcServer	inferred	Registers synchronous stream RPC command 0x66504F49, requests the SDFIOPFL module, wakes the waiting thread, and enters the RPC loop; sdfStartAndSuspendWorkerThread starts this worker. Paired title counterpart 0x00348540. [code-quality cleanup, 2026-10-13]
+0x00248E68	mnuDrawTerminalListEntry	inferred	Draws a terminal selection-list entry, adding selected-row sprites and queuing the row title glyph. [LiteH menu naming batch 21]
+0x0024B3A8	mnuBeginTerminalSlotSelection	inferred	Initializes terminal slot effects and selection, registers the list callback, then advances the event task state; DDS2 twin 0x00269B80. [LiteH menu naming batch 21]
+0x0024C7E8	mnuDrawTerminalSelectionPanel	inferred	Draws the terminal backdrop state, frame/gauge and selected slots while advancing the panel dispatcher; DDS2 twin 0x0026AEB0. [LiteH menu naming batch 21]
+0x00250B60	mnuHandleMantraGridInput	inferred	Handles mantra-grid directions, confirm/cancel/page transitions and input-feedback sounds; DDS2 twin 0x0028C8F8. [LiteH menu naming batch 21]
+0x00270218	mnuCanDrawMovie	inferred	Returns whether the movie draw state equals 2; DDS2 twin 0x002A81C8 also checks the associated movie callback state. [LiteH menu naming batch 21]

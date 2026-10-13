@@ -281,7 +281,7 @@ void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
     } while (index < entry->particleCount);
 }
 
-void func_002BEE38(MenuQueuedCommand *entry) {
+void mnuInitializeQueuedMenuCommand(MenuQueuedCommand *entry) {
     entry->unkC = 0x18;
     entry->unk10 = 5;
     entry->unk0 = 0;
@@ -325,7 +325,7 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
         menu->fade = 0;
         break;
     case 2:
-        func_002BEE38(entry);
+        mnuInitializeQueuedMenuCommand(entry);
         break;
     }
 }
@@ -414,7 +414,7 @@ extern const s32 D_0042B140[4];
 extern const s32 D_00437C70[];
 extern char D_00437C68[]; /* "%2d", shared with func_002BF830. */
 struct MenuPageSpriteSlot;
-extern void func_002BE438(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
+extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
 extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
 extern void func_002BD710(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 /* Both native page renderers also forward the surface word; the
@@ -458,7 +458,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     iconX = x + positions[0];
     iconY = y + positions[1];
     if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
-        func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
+        mnuDrawMenuPageSpriteLayers(x, y, z, (struct MenuPageSpriteSlot *)panel,
                       panelIndex, 1, surface);
         return;
     }

@@ -2524,7 +2524,7 @@ explicit casts at legacy interfaces that still transport pointer bits as
 integer words.
 
 For automatic lookup tables, preserve the typed initializer when native data
-and exact neighboring source establish it. DDS2 `func_002805E0` and
+and exact neighboring source establish it. DDS2 `mnuDrawMantraPanelAnimation` and
 `func_00283090` match with numeric sprite-ID and signed-offset array
 initializers. An explicit `memcpy` draft emitted alias-set-zero BLK copies;
 postreload dependency construction ordered the flags load before the first
@@ -6635,7 +6635,7 @@ motion byte at `+9` is signed: `00221C48` uses `LB`, and `00221CA4` uses
 
 ## Mantra flag lookups copy their owned constant tables explicitly
 
-DDS2 `func_0028F128` copies four ID/flag tables (14, 4, 8, 8 halfword
+DDS2 `mnuIsMantraNodeModelFlagSetForMember` copies four ID/flag tables (14, 4, 8, 8 halfword
 pairs) and nine signed party offsets into automatic arrays before its
 first-hit scans. Declare the actual source tables at `004272F8`,
 `00427330`, `00427340`, `00427360`, and `00427380`, then copy each with

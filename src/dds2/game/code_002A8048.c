@@ -107,7 +107,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
 extern u8 func_002A8028(void);
 extern u8 func_002A8038(void);
 
-s32 func_002A81C8(void) {
+s32 mnuCanDrawMovie(void) {
     if (func_002A8028() == 2) {
         if (func_002A8038() != 0) {
             return 1;

@@ -1076,7 +1076,7 @@ extern s32 mnuCheckMovieDecoderStatus(void);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
-void func_002A6858(void) {
+void mnuAdvanceStaffImageSequence(void) {
     s32 x = D_003E4A80[D_00437AB4].x;
     s32 y = D_003E4A80[D_00437AB4].y;
     s32 width = D_003E4A80[D_00437AB4].width;
@@ -1471,7 +1471,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
     mnuDrawScrollingStaffBackdrop(&mnuMovieWork->backdropState);
     mnuDrawAndAdvanceStaffImageBlend(&mnuMovieWork->paletteTransition);
     mnuAdvanceStaffTextScroll(&mnuMovieWork->scrollTransition);
-    func_002A6858();
+    mnuAdvanceStaffImageSequence();
     return 0;
 }
 

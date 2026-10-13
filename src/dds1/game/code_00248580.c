@@ -341,7 +341,7 @@ extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s3
 extern s32 mnuDispatchByFlag(s32, struct MenuListNode *);
 extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
-void func_00248E68(s32 x, s32 y, s32 unused, struct MenuList *list,
+void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
                    struct MenuListNode *node, s32 priority) {
     s32 width = list->scale;
     MenuTerminalWork *host = (MenuTerminalWork *)list->context;
@@ -396,7 +396,7 @@ s32 mnuSlotKindsInSameGroup(s32 index, s32 requestedKind) {
 
 extern MenuSlotKind D_0032EFE0[];
 
-extern void func_00248E68(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern void mnuDrawTerminalListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 
 /* Build eligible slot labels for this terminal mode. */
 void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
@@ -406,7 +406,7 @@ void mnuBuildEligibleSlotList(MenuTerminalWork *host) {
 
     list = mnuCreateListState(0, 4, 0x15);
     list->scale = 0;
-    list->drawCallback = func_00248E68;
+    list->drawCallback = mnuDrawTerminalListEntry;
     list->context = host;
     host->owner = list;
     if (host->mode == 0) {
@@ -1657,7 +1657,7 @@ extern void mnuDrawTerminalSelectedSlots(s32);
 
 
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024B3A8);
+INCLUDE_ASM(const s32, "game/code_00248580", mnuBeginTerminalSlotSelection);
 
 u32 func_0024B470(void) {
     return 1;
@@ -2255,7 +2255,7 @@ s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
     return result;
 }
 
-s32 func_0024C7E8(KwlnTask *item) {
+s32 mnuDrawTerminalSelectionPanel(KwlnTask *item) {
     s32 state = kwlnTaskGetUserValue(item);
     mnuDrawTerminalEffectIfAvailable(state);
     mnuDrawAndStepTerminalPanelFade(0, state);
