@@ -582,7 +582,7 @@ extern void fldDrawSkyGradient(void);
 extern void evtSetDrawSurfaceIndex(s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, s32, s32, s32);
-extern void func_002C4850(s32);
+extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void fldDrawCounterMapMarker(void);
 extern void fldDrawLocalMapTransition(s32);
 extern s32 func_00134CD8(void);
@@ -596,17 +596,17 @@ void fldDrawLocalMapOverlay(void) {
     switch (D_003BD25C) {
     case 1:
     case 2:
-        func_002C4850(1);
+        sdfAdjustCounterValueAndRedraw(1);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(0);
         break;
     case 3:
-        func_002C4850(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(1);
         break;
     case 4:
-        func_002C4850(0);
+        sdfAdjustCounterValueAndRedraw(0);
         fldDrawLocalMapTransition(1);
         break;
     case 5:

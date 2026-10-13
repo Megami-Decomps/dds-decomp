@@ -465,9 +465,9 @@ extern void mnuDrawMapCounterTimerHints(void);
 extern void sdfUpdateCounterSelectionFade(void);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-s32 func_002C4850(s32 decrease) {
+s32 sdfAdjustCounterValueAndRedraw(s32 decrease) {
     /* Untouched retail 32-byte slot: frame 0x70 rather than 0x50.
-     * DDS2 func_0030C8E8 has the same 32-byte frame gap. */
+     * DDS2 sdfAdjustCounterValueAndRedraw has the same 32-byte frame gap. */
     s32 drawScratch[8];
     f32 progress = (f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f;
     s32 x = progress * -32.0f;
