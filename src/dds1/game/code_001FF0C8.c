@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_ai_slot.h"
 #include "sdf_chip.h"
 #include "btl_task_condition.h"
 #include "eff_transform.h"
@@ -112,7 +113,6 @@ extern u32 btlAverageLevelsForMaskExcludingStatus20(s32);
 
 extern s32 btlRunAiAction();
 
-extern u32 btlPickWeightedAiSlot();
 
 extern u32 btlNextScaledRandom(u32);
 
