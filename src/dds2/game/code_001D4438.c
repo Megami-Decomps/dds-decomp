@@ -4,6 +4,7 @@
 #include "btl_scene_light_params.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "btl_task_condition.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
@@ -29,7 +30,6 @@ extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
-extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 extern void kwlnTaskAddChild(s32, s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);

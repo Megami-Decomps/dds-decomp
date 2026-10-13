@@ -15,6 +15,7 @@
 #include "evt_world.h"
 #include "dds3obj.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -99,7 +100,6 @@ extern u32 D_00389988[];
 
 extern char D_00412B90[];
 
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 extern s32 D_00435EE0;
 

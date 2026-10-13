@@ -10,6 +10,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
@@ -190,7 +191,6 @@ extern void *memset(void *destination, s32 value, u32 bytes);
 
 extern s32 D_00435CBC;
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void itfPrintTestMessageCallback();
 

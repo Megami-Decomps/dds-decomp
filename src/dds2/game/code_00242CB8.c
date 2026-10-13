@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "scr.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_pack.h"
@@ -27,7 +28,6 @@ extern s32 scrGetCommandTimer(void);
 
 extern char D_00437208[];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 void kwlnTaskAddChild(KwlnTask *parent, KwlnTask *child);
 

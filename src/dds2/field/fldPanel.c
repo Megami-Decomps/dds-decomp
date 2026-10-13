@@ -2,14 +2,14 @@
 #include "sdf_chip.h"
 
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
 extern u32 fldInputPanelTaskHandle;
 
 
 
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern void fldInitializeTitleBannerTask(void);
+extern s32 fldInitializeTitleBannerTask(KwlnTask *task);
 
 void fldReleasePanelState(KwlnTask *task) {
     void *state;

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 
@@ -12,7 +13,6 @@ extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void mnuLoadTitleMenuAssets(void);
 extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 extern s32 mnuUpdateMovieMenuTask(KwlnTask *);
 extern u32 D_003BA8EC;
 extern char D_003AFD80[];

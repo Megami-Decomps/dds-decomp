@@ -6,6 +6,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
@@ -51,7 +52,6 @@ extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern s32 fldLmapTaskUpdate(KwlnTask *);
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
 extern s32 D_00438890;
 extern void sndReleaseTrackHandle(u32);
 extern void sdfReleaseAllSpriteSlots(void);
@@ -364,7 +364,7 @@ void fldStartLmapTask(s32 mode) {
         D_00438890 = 1;
     }
     fldInitializeLmapTaskVariant(taskData);
-    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, taskData);
+    kwlnTaskCreate(fldLocalMapTaskName, 0x2AF8, 0, 0, fldLmapTaskUpdate, 0, (u32)taskData);
 }
 
 void fldStopLmapTask(void) {

@@ -10,6 +10,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf.h"
 #include "sdf_texture_registry.h"
@@ -75,13 +76,12 @@ extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...)
 
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 kwlnDebugGraphUpdate(void);
+extern s32 kwlnDebugGraphUpdate(KwlnTask *task);
 
-extern void kwlnDebugGraphTaskDestroy(void);
+extern void kwlnDebugGraphTaskDestroy(KwlnTask *task);
 
 typedef s32 (*KwlnTaskUpdateCallback)();
 typedef void (*KwlnTaskDestroyCallback)();
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, KwlnTaskUpdateCallback, KwlnTaskDestroyCallback, u32);
 
 
 
@@ -688,7 +688,7 @@ void kwlnUpdatePadMotorDurations(void) {
     }
 }
 
-u32 func_00104150(void) {
+s32 func_00104150(KwlnTask *task) {
     return 0;
 }
 
@@ -705,7 +705,7 @@ extern u16 D_00435C54;
 extern u16 D_00435C56;
 extern char D_00435C58[];
 
-s32 kwlnDebugGraphUpdate(void) {
+s32 kwlnDebugGraphUpdate(KwlnTask *task) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     SdfGsBlendPacket *blendPacket;
     s32 originX = 0x7100;
@@ -763,7 +763,7 @@ s32 kwlnDebugGraphUpdate(void) {
     return 0;
 }
 
-void kwlnDebugGraphTaskDestroy(void) {
+void kwlnDebugGraphTaskDestroy(KwlnTask *task) {
 }
 
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */

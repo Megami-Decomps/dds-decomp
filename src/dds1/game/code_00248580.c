@@ -15,6 +15,7 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -961,7 +962,6 @@ extern const char D_003AF678[];
 extern s32 D_003BC3E4;
 
 
-extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(KwlnTask *), void (*)(KwlnTask *), void *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 evtRunTerminalPanel(KwlnTask *task);
 extern s32 evtRunTerminalPanelSync(KwlnTask *task);
@@ -973,9 +973,9 @@ s32 mnuTerminalCreateTasks(void) {
     s32 result;
     void *work = mnuTerminalCreateScene();
 
-    D_003BC3E4 = kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, work);
-    kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, work);
-    result = kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, work);
+    D_003BC3E4 = (s32)kwlnTaskCreate(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
+    kwlnTaskCreate(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, (u32)work);
+    result = (s32)kwlnTaskCreate(D_003AF678, 0x5210, 1, 1, evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, (u32)work);
     mnuTerminalTaskState = 1;
     return result;
 }

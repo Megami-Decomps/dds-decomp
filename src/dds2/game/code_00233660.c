@@ -1,6 +1,7 @@
 #include "dds3_path.h"
 #include "sdf_request.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
@@ -2628,7 +2629,6 @@ typedef struct MdlViewerTaskDef {
 
 extern MdlViewerTaskDef D_003C87F0[];
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void kwlnTaskAddChild(s32, s32);
 

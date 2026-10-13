@@ -121,6 +121,7 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "fpu.h"
 struct MenuListNode;
@@ -2647,7 +2648,7 @@ extern void *memset(void *dst, s32 value, s32 size);
 struct SdfMemBlock;
 extern void fileSetMemoryCardOperationActive(void);
 extern s32 D_00437D80;
-extern void func_002CE738(void);
+extern void func_002CE738(KwlnTask *task);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 void func_002CE208(s32 mode) {
@@ -2759,7 +2760,7 @@ void func_002CE208(s32 mode) {
         memcpy(D_00437D58, (void *)(titleNamesAddress + 0x3C0), 0x780);
         sdfReleaseResourceAllocation(titleNamesAllocation);
     }
-    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, NULL);
+    kwlnTaskCreate("FileMentCalc", 0x2B0A, 0, 0, fileRunMenuState, func_002CE738, 0);
     D_00437CE4 = 1;
     fileInitCursorPulse();
     kwlnFadeOutStart(0, 0, 0, 8);
@@ -2771,7 +2772,7 @@ void func_002CE208(s32 mode) {
     }
 }
 
-void func_002CE738(void) {
+void func_002CE738(KwlnTask *task) {
     fileReleaseMenuResources();
 }
 
@@ -3679,7 +3680,7 @@ s32 fileCreateConfigTask(s32 mode) {
 
 
 
-void fileConfigTaskDestroy(void) {
+void fileConfigTaskDestroy(KwlnTask *task) {
     s32 request = 1;
     FileConfigListNode *node;
     s32 i;
@@ -3711,19 +3712,19 @@ void fileConfigTaskDestroy(void) {
 
 extern s32 fileCreateConfigTask(s32 mode);
 
-extern s32 fileStartQueuedLoad(void);
-extern void fileConfigTaskDestroy(void);
-extern s32 func_002D1450(void);
-extern s32 fileUpdateConfigOwnerTask(void);
+extern s32 fileStartQueuedLoad(KwlnTask *task);
+extern void fileConfigTaskDestroy(KwlnTask *task);
+extern s32 func_002D1450(KwlnTask *task);
+extern s32 fileUpdateConfigOwnerTask(KwlnTask *task);
 
 extern s8 fileConfigTaskState;
 
 void mnuCreateConfigTasks(s32 mode) {
     if (fileConfigTaskWork == 0) {
         fileConfigTaskWork = fileCreateConfigTask(mode);
-        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (void *)fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (void *)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_002D1450, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, (u32)fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, (u32)fileConfigTaskWork);
         fileConfigTaskState = 1;
     }
 }
@@ -3759,7 +3760,7 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigLoadTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", fileConfigOwnerTaskName);
 
-s32 func_002D1450(void) {
+s32 func_002D1450(KwlnTask *task) {
     s32 oldIndex;
     s32 index;
     s32 i;
@@ -3880,7 +3881,7 @@ s32 func_002D1450(void) {
 
 extern void func_002D27A0(void *);
 
-s32 fileStartQueuedLoad(void) {
+s32 fileStartQueuedLoad(KwlnTask *task) {
     if (((FileConfigTask *)fileConfigTaskWork)->pending == 0) {
         return 0;
     }
@@ -3892,7 +3893,7 @@ s32 fileStartQueuedLoad(void) {
     return 0;
 }
 
-s32 fileUpdateConfigOwnerTask(void) {
+s32 fileUpdateConfigOwnerTask(KwlnTask *task) {
     s32 result;
 
     result = -1;

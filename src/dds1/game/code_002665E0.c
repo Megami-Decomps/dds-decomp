@@ -373,6 +373,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
 #include "dds3_world_value.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"
@@ -462,7 +463,6 @@ extern char *strcat(char *, char *);
 
 
 extern KwlnTask *mnuTitleSoundTask;
-extern KwlnTask *kwlnTaskCreate();
 
 extern char D_003771D8[];
 
@@ -681,7 +681,7 @@ u32 func_002694F8(void) {
     return 0x599;
 }
 
-u32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
+s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
     effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);

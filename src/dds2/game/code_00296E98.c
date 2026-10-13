@@ -3,6 +3,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_list.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
@@ -910,20 +911,19 @@ void brsStaffTaskDestroy(KwlnTask *taskArg) {
     brsTaskState = 2;
 }
 
-extern s32 kwlnTaskCreate(void *name, s32 flags, s32 prio, s32 stacked, void *update, void *destroy, void *data);
 extern BrsSkillPackageWork *brsCreateRewardTaskWork(void);
-extern s32 brsMessageInputStep(void *);
-extern s32 mnuStaffRunPanel1(s32);
-extern s32 mnuStaffRunPanel2(s32);
+extern s32 brsMessageInputStep(KwlnTask *task);
+extern s32 mnuStaffRunPanel1(KwlnTask *task);
+extern s32 mnuStaffRunPanel2(KwlnTask *task);
 extern void brsStaffTaskDestroy(KwlnTask *task);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
     BrsSkillPackageWork *work = brsCreateRewardTaskWork();
 
-    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, work);
-    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, work);
-    result = kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, work);
+    kwlnTaskCreate(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
+    kwlnTaskCreate(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
+    result = (s32)kwlnTaskCreate(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
     brsTaskState = 1;
     return result;
 }

@@ -10,6 +10,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
@@ -97,13 +98,12 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32);
 
 
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern s32 itfUpdateActiveMessageWindows(void);
+extern s32 itfUpdateActiveMessageWindows(KwlnTask *task);
 
-extern void itfMesDestroyActiveWindowsAndReleaseTexture(void);
+extern void itfMesDestroyActiveWindowsAndReleaseTexture(KwlnTask *task);
 
-extern s32 itfUpdateSoundSelectorPanels(void);
+extern s32 itfUpdateSoundSelectorPanels(KwlnTask *task);
 
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
@@ -912,8 +912,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, NULL);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, NULL);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, itfUpdateActiveMessageWindows, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, itfUpdateSoundSelectorPanels, itfMesDestroyActiveWindowsAndReleaseTexture, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
@@ -2224,7 +2224,7 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     surface->append(surface, packet);
 }
 
-s32 itfUpdateActiveMessageWindows(void) {
+s32 itfUpdateActiveMessageWindows(KwlnTask *task) {
     ItfMesPoolNode *node;
     for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
         itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
@@ -2234,7 +2234,7 @@ s32 itfUpdateActiveMessageWindows(void) {
 
 extern s32 func_001200E0(void);
 
-s32 itfUpdateSoundSelectorPanels(void) {
+s32 itfUpdateSoundSelectorPanels(KwlnTask *task) {
     ItfMesPoolNode *node;
 
     if (func_001200E0() != 0) {
@@ -2247,7 +2247,7 @@ s32 itfUpdateSoundSelectorPanels(void) {
     return 0;
 }
 
-void itfMesDestroyActiveWindowsAndReleaseTexture(void) {
+void itfMesDestroyActiveWindowsAndReleaseTexture(KwlnTask *task) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
     s32 message;
     while (node != 0) {

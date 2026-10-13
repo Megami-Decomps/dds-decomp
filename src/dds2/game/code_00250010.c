@@ -18,6 +18,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
@@ -145,7 +146,6 @@ extern void func_00341C78(u32 sound);
 
 extern s32 (*D_003C9928[])(s32, s32, EvtRuntime *);
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 
 /* Create a task with an initialized event payload. */

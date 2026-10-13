@@ -21,6 +21,7 @@
 #include "dds3obj.h"
 #include "dds3_world_value.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
@@ -269,7 +270,6 @@ extern u32 D_00389988[];
 
 extern u32 D_00389988[];
 
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 extern s32 D_00435EE0;
 
@@ -2216,7 +2216,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F40);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412F58);
 
-s32 fldUpdateFieldSceneTask(void) {
+s32 fldUpdateFieldSceneTask(KwlnTask *task) {
     EffBlurScatterParams blur;
     FieldPlayerSceneWork *playerWork = &D_0038A640;
     FldSequenceController *controller = &fldSceneLifecycleFlags;
@@ -2498,8 +2498,8 @@ void fldStartFieldSceneTasks(FieldSequenceRecord *record, u32 mode) {
         strcpy(scene->resourceName, record->note);
         scene->sequenceOption = record->options;
     }
-    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)fldUpdateFieldSceneTask, 0, 0);
-    kwlnTaskCreate((s32)D_00412FE0, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
+    kwlnTaskCreate(D_00412FD0, 0x3F7, 0, 0, fldUpdateFieldSceneTask, 0, 0);
+    kwlnTaskCreate(D_00412FE0, 0x2B0A, 0, 0, fldProcDraw, 0, 0);
     D_00435F84 = 1;
     fldTestDrawCreate();
 }

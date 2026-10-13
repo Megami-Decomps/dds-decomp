@@ -6,6 +6,7 @@
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -700,7 +701,6 @@ u32 sdfReadPadDirectionMask(void) {
     return flags;
 }
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;

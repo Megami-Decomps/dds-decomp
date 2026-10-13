@@ -10,6 +10,7 @@
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "evt_world.h"
 #include "mnu_list.h"
@@ -34,7 +35,6 @@
 #define MNU_TERMINAL_EXIT_PROCESS 0x322
 #define MNU_COLOR_LOW_BYTE_MASK 0xFF
 
-extern KwlnTask *kwlnTaskCreate();
 extern void kwlnTaskAddChild(KwlnTask *, KwlnTask *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
 extern s32 evtRunTerminalPanel(KwlnTask *task);

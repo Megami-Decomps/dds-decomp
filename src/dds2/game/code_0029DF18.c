@@ -422,6 +422,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *entr
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "mnu_title_effect.h"
 #include "mnu.h"
 #include "file.h"
@@ -474,7 +475,6 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern u32 D_00437A2C;
 
 extern KwlnTask *mnuTitleSoundTask;
-extern KwlnTask *kwlnTaskCreate();
 
 extern TitleAudioStreamState mnuTitleStreamStatus;
 
@@ -728,7 +728,7 @@ u32 func_002A1118(void) {
     return 0x608;
 }
 
-u32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
+s32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
     effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);

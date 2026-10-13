@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_resource.h"
 
 #include "scr.h"
@@ -8,9 +9,6 @@
 #include "kwln_task_lifecycle.h"
 
 
-KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay,
-                         s32 destroyDelay, TaskUpdate update, TaskDestroy destroy,
-                         u32 userValue);
 
 extern ScrProcGlobals *datGameState;
 

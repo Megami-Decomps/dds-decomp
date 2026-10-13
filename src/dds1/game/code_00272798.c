@@ -32,7 +32,7 @@ extern void mnuDrawStaffScrollPanel(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern s32 mnuInitializeCampMenuWhenResourcesReady(s32);
+extern s32 mnuInitializeCampMenuWhenResourcesReady(KwlnTask *task);
 extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -100,7 +100,7 @@ s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     s32 state;
 
     mnuDrawCampScreenDefault(task);
-    state = mnuInitializeCampMenuWhenResourcesReady((s32)task);
+    state = mnuInitializeCampMenuWhenResourcesReady(task);
     if (state == 0) {
         return state;
     }

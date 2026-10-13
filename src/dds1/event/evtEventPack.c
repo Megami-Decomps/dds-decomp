@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "evt_unit.h"
@@ -188,7 +189,6 @@ void evtFreeMotionSeTaskParams(KwlnTask *task)
 }
 
 extern void func_003014F0(char *, const char *, ...);
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 /* Preserve the complete native format record, including its trailing zeros. */
 const char D_003AF260[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 

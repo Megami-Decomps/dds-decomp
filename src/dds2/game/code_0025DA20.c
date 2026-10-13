@@ -16,6 +16,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -157,7 +158,6 @@ extern void evtFormatTaskName(s32 taskId, void *name);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 
 extern s32 func_002C54B0(s32);

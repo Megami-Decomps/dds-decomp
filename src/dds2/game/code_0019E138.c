@@ -3,6 +3,7 @@
 #include "sdf_packet_header.h"
 #include "fr_font.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -48,10 +49,9 @@ extern s32 D_00435E70;
 extern void itfSetTextDrawLimit(s32);
 extern FrFontGlyph *itfDrawBankTextWithSegmentCounter(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
-extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
-extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
-extern void itfReleaseFontTestTaskResources(void);
+extern s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task);
+extern void itfReleaseFontTestTaskResources(KwlnTask *task);
 
 extern u32 D_0043658C;
 
@@ -1197,13 +1197,13 @@ void itfStartFontTestScene(void) {
 }
 
 /* Advance/retain the test glyph and release its background texture reference. */
-void itfReleaseFontTestTaskResources(void) {
+void itfReleaseFontTestTaskResources(KwlnTask *task) {
     frFontAdvanceOrRetainFadingGlyph(D_0043658C);
     itfReleaseBackgroundSpriteTexture();
 }
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
-u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
+s32 itfDrawBackgroundAndGetTaskReadyMask(KwlnTask *task) {
     s32 taskState;
     u32 readyMask;
 
@@ -1704,7 +1704,7 @@ void itfDrawFilledBarQuadRegions(s32 value, s32 limit, s32 highlight,
 }
 
 
-u32 func_001A1810(void) {
+s32 func_001A1810(KwlnTask *task) {
     return 0;
 }
 

@@ -8,6 +8,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf.h"
 #include "mnu.h"
 #include "eff.h"
@@ -15,7 +16,6 @@
 #include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
 
-extern KwlnTask *kwlnTaskCreate();
 
 /* Title menu's selected page, sequence timers and draw-task state. */
 typedef struct MenuTitleState {
@@ -943,7 +943,7 @@ typedef struct StaffImageTiming {
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
-s32 mnuStaffImageProc(void) {
+s32 mnuStaffImageProc(KwlnTask *task) {
     StaffImageTiming timing[2] = {
         {60, 0, 1, 150, 2},
         {0, 240, 2, 240, 4}
@@ -1473,7 +1473,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
     return 0;
 }
 
-void mnuFinishStaffMovieAndFreeState(void) {
+void mnuFinishStaffMovieAndFreeState(KwlnTask *task) {
     s64 pending;
 
     mnuMovieTaskState = 2;
@@ -1487,7 +1487,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     mnuMovieWork = NULL;
 }
 
-void mnuReleaseMovieResourceAfterPendingWork(void) {
+void mnuReleaseMovieResourceAfterPendingWork(KwlnTask *task) {
     effDestroyResourceSlotSet(mnuMovieWork->sprite);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
@@ -1533,7 +1533,7 @@ s32 mnuStopStaffTasks(void) {
     return 0;
 }
 
-s32 mnuMovieDraw(void) {
+s32 mnuMovieDraw(KwlnTask *task) {
     func_00345BA0(&mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
@@ -1585,7 +1585,7 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
     return 0;
 }
 
-s32 func_002A7DB0(void) {
+s32 func_002A7DB0(KwlnTask *task) {
     MovObj *movie;
 
     if (mnuMovieDrawTask == 0) {

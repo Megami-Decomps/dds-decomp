@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_create.h"
 #include "file_pac.h"
 #include "sdf_resource.h"
 #include "file.h"
@@ -49,11 +50,10 @@ s32 WaitSema(s32 sema);
 s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 sceMcSync(s32 arg0, void *arg1, s32 *arg2);
 void func_002F6E90(u32 arg0, s32 arg1);
-s32 fileMan(void);
+s32 fileMan(KwlnTask *task);
 s32 fileManUpdate(void);
 void fileReqInit(s32 arg0);
 extern s32 sdfDevQueueControlRequest(DevState *);
@@ -439,7 +439,7 @@ s32 fileManUpdate(void) {
 
 
 /* Task callback driving asynchronous file work. */
-s32 fileMan(void) {
+s32 fileMan(KwlnTask *task) {
     fileManUpdate();
     return 0;
 }
@@ -449,7 +449,7 @@ void fileManInit(void) {
     fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
     fileManagerWork.buffer = (u8 *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
-    kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
+    kwlnTaskCreate(D_003BC7E0, 0x384, 1, 0, fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }
 

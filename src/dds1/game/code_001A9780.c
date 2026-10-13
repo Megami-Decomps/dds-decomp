@@ -22,6 +22,7 @@
 #include "eff.h"
 #include "btl_action.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
@@ -132,7 +133,6 @@ extern s32 datRosterDetails;
 
 extern s32 effMiscRandMod(s32, s32);
 
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern s8 effSharedRandomState[];
 
@@ -323,7 +323,6 @@ s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     }
     return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
-
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DA0);
 
