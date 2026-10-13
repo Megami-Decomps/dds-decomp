@@ -45,7 +45,6 @@ extern s32 mnuGetItemRequirementCount();
 extern s32 mnuGetItemRequirementValue();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);

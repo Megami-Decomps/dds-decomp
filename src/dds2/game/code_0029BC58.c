@@ -115,7 +115,6 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
 #include "mnu_result.h"
 struct EffectSlotSet;
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain();
 
 

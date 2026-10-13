@@ -84,7 +84,6 @@ extern void fileLoadCtxSlideUpdate(void);
 extern u8 D_003E8B98[];
 extern u8 D_003E8BB0[];
 extern u8 D_003E8BD0[];
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *glyph, u8 flagValue);
 extern void frFontSetChildColors(struct FrFontGlyph *glyph, u32 colorWord);
 typedef struct EffectSurfaceNode {
     u32 capacity;

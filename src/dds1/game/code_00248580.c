@@ -336,7 +336,6 @@ void mnuReleaseSelectedProgressPanel(MenuTerminalWork *work) {
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 extern s32 mnuDispatchByFlag(s32, struct MenuListNode *);
-extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 
 void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
                    struct MenuListNode *node, s32 priority) {
