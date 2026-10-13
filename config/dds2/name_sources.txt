@@ -6234,6 +6234,7 @@
 0x00328470	sdfReleaseChipOrRetainedResource	inferred	Releases a pointer via the chip or retained-resource path as appropriate. [names_reviewed8.tsv]
 0x003284C8	sdfFreeMemorySlotFromEitherHeap	inferred	Byte-identical DDS1 twin nulls its pointer slot then frees it through the selected heap.
 0x00328520	sdfPanicHaltPrintf	inferred	confidence=high; src/dds2/game/code_003283E0.c:func_00328520; Variadic panic printf whose body is an infinite loop; retail never returns from it. [names_qp9.tsv]
+0x00328668	sdfRemoveHandler	inferred	DDS1 twin 0x002CF7B8: unlinks the handler node, unregisters its interrupt/DMA/SBUS endpoint by kind, and releases the node; used by pending-handler drain and sound IPU shutdown.
 0x00328808	sdfRunTickWorkerThread	inferred	Repeatedly sleeps a tick, updates work and calls the registered tick callback.
 0x00328918	sdfStartTrackedThread	inferred	Creates a thread, links it under semaphore protection, and starts it. [names_reviewed8.tsv]
 0x00328A60	sdfFindThreadNode	inferred	Searches the semaphore-protected thread-node list by given or current thread ID.
