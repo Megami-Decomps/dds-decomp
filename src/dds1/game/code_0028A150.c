@@ -354,7 +354,7 @@ extern u32 D_003BC804;
 
 extern void fileSetMemoryCardOperationActive(void);
 
-extern void func_00289D50(u32 handle);
+extern void fileSubmitMemoryCardDetectionRequest(u32 handle);
 
 extern s32 mcHandleDetectionResult(void);
 
@@ -2163,7 +2163,7 @@ s32 mcHandleDetectionResult(void) {
 s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
     fileSetMemoryCardOperationActive();
-    func_00289D50(fileMemoryCardRequestIndex);
+    fileSubmitMemoryCardDetectionRequest(fileMemoryCardRequestIndex);
     return (s32)mcHandleDetectionResult;
 }
 

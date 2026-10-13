@@ -18,9 +18,9 @@ extern struct MantraDrawItem *mnuRegisterMantraUnitPanelDraw(struct MantraDrawPo
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
-extern void func_00291590(MnuStatusResource *, s16, s32, s8, s8, s32);
+extern void mnuUpdateMantraSelectionPanelSlots(MnuStatusResource *, s16, s32, s8, s8, s32);
 extern void mnuInitializeMantraTutorialParty(MnuStatusResource *);
-extern void func_00294060(MnuStatusResource *);
+extern void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *);
 
 
 typedef struct MenuPanelTransition {
@@ -105,7 +105,7 @@ extern MenuPanelEntryPool *mnuPanelSoundEntryPool;
 
 
 
-extern void func_00291338(void);
+extern void mnuPrepareMantraPanelEntriesForTutorial(void);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
 
@@ -600,7 +600,7 @@ s32 mnuValidateProfileEntry(MantraFlagResource *slot, DatPartyRecord *partyRecor
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuPrepareMantraPanelEntriesForTutorial);
 
 /* Updated as a halfword here, and read as signed high-byte flags elsewhere. */
 typedef struct MenuPanelPositionRecord {
@@ -646,7 +646,7 @@ void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
         mnuMoveNodeCursorToTargetIndex(object, selection);
         mnuTransitionActivePanelAnimations(state->resource, 0);
         flags = state->flags;
-        func_00291590(object, 5, 1, selection, (flags >> 28) & 1, 0);
+        mnuUpdateMantraSelectionPanelSlots(object, 5, 1, selection, (flags >> 28) & 1, 0);
         option = (selection & 0xf) << 24;
         state->flags = (state->flags & 0xf0ffffff) | option;
     }
@@ -661,7 +661,7 @@ void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraSelectionPanelSlots);
 
 void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector, u16 id) {
     MantraMenuWork *state = &object->menu;
@@ -877,7 +877,7 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
     case 8:
         mnuTransitionActivePanelAnimations(state->resource, 1);
         flags = state->flags;
-        func_00291590(object, 5, 1, (flags >> 24) & 15,
+        mnuUpdateMantraSelectionPanelSlots(object, 5, 1, (flags >> 24) & 15,
                      (flags >> 28) & 1, 0);
         return 0;
     case 9:
@@ -906,7 +906,7 @@ s32 mnuDispatchMantraPanelCommand(void *context, s32 panelId, s32 action) {
         mnuSpawnMantraIconFadeIn(object->menu.selectionController);
         mnuSpawnMantraShortLoopIconFadeIn(object->menu.selectionController);
         flags = state->flags;
-        func_00291590(object, 5, 1, (flags >> 24) & 15,
+        mnuUpdateMantraSelectionPanelSlots(object, 5, 1, (flags >> 24) & 15,
                      (flags >> 28) & 1, 0);
         {
             u32 drawFlags = state->drawFlags;
@@ -1165,7 +1165,7 @@ void mnuBeginMantraTutorialFromNormalMode(MnuStatusResource *object) {
     object->menu.unk9B5 = 0;
     object->menu.unk9B6 = 0;
     object->menu.flags = (object->menu.flags & 0xF0FFFFFF) | 0x20000000;
-    func_00291338();
+    mnuPrepareMantraPanelEntriesForTutorial();
 }
 
 
@@ -1235,7 +1235,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
         mnuShowMantraInfo(object->menu.selectionController);
         mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
-        func_00291590(object, 0, 0, 0, 0, 0);
+        mnuUpdateMantraSelectionPanelSlots(object, 0, 0, 0, 0, 0);
         state->tutorialNextState = 7;
         state->tutorialWaitFrames = 30;
         state->flagBytes[0] = 37;
@@ -1495,7 +1495,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         }
         break;
     }
-    func_00294060(object);
+    mnuUpdateMantraTutorialPanelSprites(object);
     return finished;
 }
 
@@ -1521,7 +1521,7 @@ s32 func_00293FD0(MnuStatusResource *object, u16 id) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
+INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraTutorialPanelSprites);
 
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */

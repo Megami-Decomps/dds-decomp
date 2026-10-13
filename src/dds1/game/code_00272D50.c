@@ -263,7 +263,7 @@ void mnuSelectStaffDisplayCategory(u32 context) {
     mnuSetStaffDisplayMode(2, context);
 }
 
-void func_002733B0() {
+void mnuNoOpStaffDisplayTeardown() {
 }
 
 s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
@@ -291,7 +291,7 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
     StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
-    func_002733B0(context);
+    mnuNoOpStaffDisplayTeardown(context);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
     return 1;
 }

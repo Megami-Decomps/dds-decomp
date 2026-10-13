@@ -247,7 +247,7 @@ void mnuClearTitleState(BrsSkillPackageWork *work) {
     work->fadeProgress = 0;
 }
 
-void func_0029C878(void *work) {
+void brsNoOpMessageInputCallback(void *work) {
 }
 
 extern u32 D_004379C0[];

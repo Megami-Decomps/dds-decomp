@@ -590,7 +590,7 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     menu->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
 
-void func_0027CEE8(MenuWindowContainer *window) {
+void mnuSpinForWindowListCount(MenuWindowContainer *window) {
     s32 remaining;
 
     remaining = window->list->count;

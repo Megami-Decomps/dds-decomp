@@ -78,7 +78,7 @@ extern u32 evtDisplayValues[];
 extern void mnuDrawTerminalEffectIfAvailable(s32 arg0);
 
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern void *dds3GetWorldSecondaryObject(void);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
@@ -205,7 +205,7 @@ s32 mnuDispatchTerminalPanel(KwlnTask *request) {
 /* Request the message-window transition before dispatching terminal panel mode two. */
 s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
     s32 workAddress = kwlnTaskGetUserValue(request);
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)workAddress, 2, (void *)request);
 }
 
@@ -642,7 +642,7 @@ void dspAdvanceMessageWindowControl(s32 notify) {
 }
 
 /* Request mode one from the existing message-window worker. */
-void func_0024DD78(void) {
+void dspRequestMessageWindowModeOne(void) {
     dspAdvanceMessageWindowControl(1);
 }
 

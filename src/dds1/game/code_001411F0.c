@@ -4110,7 +4110,7 @@ void fldFinishEventFieldState(void) {
     }
 }
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void fldAddCameraModelEntry(s32);
 extern void mnuQueueTitleSoundStreamEntry(s32);
@@ -4133,7 +4133,7 @@ void fldUpdateSparkMessageSequence(void) {
 
     switch (fldSparkControlState.dialogPhase) {
     case 12:
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
@@ -4143,7 +4143,7 @@ void fldUpdateSparkMessageSequence(void) {
         }
         break;
     case 1:
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             choice = evtGetCapturedWindowPanelValue();
             if (choice == 0) {
@@ -4170,7 +4170,7 @@ void fldUpdateSparkMessageSequence(void) {
         }
         break;
     case 4:
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();
@@ -4359,7 +4359,7 @@ void fldUpdateSparkEncounterScene(void) {
         }
         return;
     } else if (phase == 3) {
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
         if (evtGetMessageWindowControlState() != 0) {
             return;
         }
@@ -4453,7 +4453,7 @@ void fldStartDeferredFieldExit(void) {
  * controlled, then closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
     if (fldAreaState.deferredExit == 2) {
-        func_0024DD78();
+        dspRequestMessageWindowModeOne();
         if (!evtGetMessageWindowControlState()) {
             evtFinishMessageWindowAndNotify();
             dspCloseChannel();

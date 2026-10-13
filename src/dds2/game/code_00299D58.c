@@ -47,7 +47,7 @@ extern s32 btlHasPendingRuntimeActivity(void);
 extern char D_003D64E4[];
 extern char D_003D6458[];
 
-extern void func_0029C878(void *);
+extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern s32 brsPollResultCounterCompletion(void);
 extern u8 D_0037F530[];
@@ -70,7 +70,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
         return result;
     }
     if (*window == 0) {
-        func_0029C878(context);
+        brsNoOpMessageInputCallback(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
             mnuClearTitleState(context);

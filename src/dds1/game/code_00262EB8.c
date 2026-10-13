@@ -7,7 +7,7 @@
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
 extern s32 brsTaskIsUiUpdateAllowed(s32);
-extern void func_002650C0(void *);
+extern void brsNoOpMessageInputCallback(void *);
 extern s32 brsPollResultCounterCompletion(void);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern u8 D_00324530[];
@@ -30,7 +30,7 @@ s32 brsMessageInputStep(KwlnTask *input) {
         return result;
     }
     if (*window == 0) {
-        func_002650C0(context);
+        brsNoOpMessageInputCallback(context);
         if (brsPollResultCounterCompletion() != 0 &&
             ((buttons & 1) != 0 || (D_00324530[3] & 2) != 0)) {
             mnuClearTitleState(context);

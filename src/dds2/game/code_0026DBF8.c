@@ -1324,7 +1324,7 @@ s32 mnuDrawMantraBackgroundPulse(s32 unused, MantraDrawItem *drawItem) {
     mnuDrawMantraSprite(0, 0, 0, (s32)((f32)alpha * pulse * 0.5f), 0x5A, 0, 0x4A);
     mnuDrawMantraRotatedSprite(0, 0x140, 0, (s32)((f32)alpha * pulse * 0.5f),
                                180.0f, 0x5A, 0, 0x4A);
-    func_00285148(0x100, 0xBF, 0, alpha, state->burstPool, 0, 0x4A);
+    mnuUpdateAndDrawMantraBackgroundBursts(0x100, 0xBF, 0, alpha, state->burstPool, 0, 0x4A);
 
     if (state->variants.currentVariant != state->variants.nextVariant) {
         alpha = (s32)((f32)state->timing.transitionDelay / 5.0f * 128.0f * state->value);
@@ -3398,14 +3398,14 @@ extern void mnuInitFadedMantraDualCyclePanel(u32, s32);
 extern void mnuInitMantraNodeMasteryFlash(void);
 
 extern void mnuReleaseMantraPanelCTransition(void);
-extern void func_0027AFD8(void);
+extern void mnuNoOpMantraPulseRelease(void);
 extern void mnuDrawOscillatingMantraOverlay(void);
 extern void btlReleasePanelASprite(u32);
 extern void mnuReleaseMantraPanelSpriteView(u32);
 extern void mnuReleaseMantraPanelSpriteTransition(void);
 extern void btlReleasePanelBSprites(s32);
 extern void mnuReleaseMantraPanelBackdropTransition(void);
-extern void func_002803A0(void);
+extern void mnuNoOpMantraPanelAnimationRelease(void);
 extern void mnuReleaseFadedMantraSingleCyclePanel(void);
 extern void mnuReleaseMantraPanelAccentSprite(u32);
 extern void mnuReleaseMantraFourIconPanelTransition(void);
@@ -3463,14 +3463,14 @@ MantraPanelPool *mnuCreateMantraPanelPool(s32 count, s32 userValue) {
     };
     MantraPanelRelease releaseCallbacks[14] = {
         (MantraPanelRelease)mnuReleaseMantraPanelCTransition,
-        (MantraPanelRelease)func_0027AFD8,
+        (MantraPanelRelease)mnuNoOpMantraPulseRelease,
         (MantraPanelRelease)mnuDrawOscillatingMantraOverlay,
         (MantraPanelRelease)btlReleasePanelASprite,
         (MantraPanelRelease)mnuReleaseMantraPanelSpriteView,
         (MantraPanelRelease)mnuReleaseMantraPanelSpriteTransition,
         (MantraPanelRelease)btlReleasePanelBSprites,
         (MantraPanelRelease)mnuReleaseMantraPanelBackdropTransition,
-        (MantraPanelRelease)func_002803A0,
+        (MantraPanelRelease)mnuNoOpMantraPanelAnimationRelease,
         (MantraPanelRelease)mnuReleaseFadedMantraSingleCyclePanel,
         (MantraPanelRelease)mnuReleaseMantraPanelAccentSprite,
         (MantraPanelRelease)mnuReleaseMantraFourIconPanelTransition,
@@ -3907,7 +3907,7 @@ void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
     object[0x22] = table[index];
 }
 
-void func_0027AFD8(void) {
+void mnuNoOpMantraPulseRelease(void) {
 }
 
 extern void *memcpy(void *, const void *, u32);
@@ -5402,7 +5402,7 @@ void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
     ((MantraPanelAnimation *)view)->stateC = 0;
 }
 
-void func_002803A0(void) {
+void mnuNoOpMantraPanelAnimationRelease(void) {
 }
 
 s32 mnuDrawMantraPanelOrbitingSymbols(s32 x, s32 y, u32 z, s32 amount, MantraPanelPool *unused, MantraPanelAnimation *state, u32 packet) {
@@ -6369,7 +6369,7 @@ void mnuReleaseMantraBackgroundBurstPool(MantraBurstPool *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00285148);
+INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuUpdateAndDrawMantraBackgroundBursts);
 
 MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
     s32 base = 0x7A;

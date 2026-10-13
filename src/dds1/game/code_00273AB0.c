@@ -18,7 +18,7 @@
 #define MNU_STAFF_INPUT_PREVIOUS_PAGE 0x100
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 extern s32 evtGetMessageWindowControlState(void);
 
 
@@ -124,7 +124,7 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
     StaffImageChoices *menu = context->menu;
     s32 item;
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     if (evtGetMessageWindowControlState() == 0) {
         item = menu->pendingItem;
         if (item != 0) {
@@ -577,7 +577,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
 s32 mnuExitStaffValuePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 

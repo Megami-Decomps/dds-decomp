@@ -1640,7 +1640,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
 
 extern u32 evtFinishMessageWindowAndNotify(void);
 
-extern void func_0024DD78(void);
+extern void dspRequestMessageWindowModeOne(void);
 
 
 
@@ -1757,7 +1757,7 @@ s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
 s32 evtBSetupDispatchSync(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -1824,7 +1824,7 @@ s32 evtBDispatchStart(KwlnTask *request) {
 s32 evtBSetupDispatchSyncB(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -1913,7 +1913,7 @@ s32 mnuUpdateAndDrawTerminalScene(KwlnTask *item) {
 s32 evtBSetupDispatchSyncC(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -2032,7 +2032,7 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *item) {
 s32 evtBSetupDispatchSyncD(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -2092,7 +2092,7 @@ s32 mnuBeginTerminalExitTransition(KwlnTask *item) {
 s32 evtBSetupDispatchSyncE(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -2269,7 +2269,7 @@ s32 mnuDrawTerminalSelectionPanel(KwlnTask *item) {
 s32 evtBSetupDispatchSyncF(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
@@ -2319,7 +2319,7 @@ s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *item) {
 s32 evtBSetupDispatchSyncG(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
 
-    func_0024DD78();
+    dspRequestMessageWindowModeOne();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 

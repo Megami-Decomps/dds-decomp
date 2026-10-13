@@ -1411,7 +1411,7 @@ s32 mnuCampHasEligibleOwnedItems(void *context) {
     return result;
 }
 
-extern void func_00295400(void);
+extern void mnuDrawMenuItemListRow(void);
 
 MenuWindowContainer *mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext *settings) {
     MenuWindowContainer *window;
@@ -1425,7 +1425,7 @@ MenuWindowContainer *mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, Me
             mnuAppendWindowListNode(window, 0)->camp.value = i;
         }
     }
-    window->list->drawCallback = func_00295400;
+    window->list->drawCallback = mnuDrawMenuItemListRow;
     storage = sdfAllocSizeClassBlock(0x14);
     memset(storage, 0, 0x14);
     window->list->context = storage;
@@ -2145,7 +2145,7 @@ extern u8 *D_00435E5C;
 extern u8 D_003C9BC4[];
 extern void mnuSelectFirstListNode();
 extern void mnuClearWindowListSelectionFlags();
-extern s32 func_002958B0();
+extern s32 mnuDrawCampItemListRow();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
 s32 mnuCampAppendRankedItemRows(MenuTerminalContext *scene) {
@@ -2233,7 +2233,7 @@ s32 mnuCampRebuildItemStockWindow(MenuTerminalContext *scene) {
     }
     mnuCampAppendRankedItemRows(scene);
     mnuSelectFirstListNode(scene->window->list);
-    scene->window->list->drawCallback = func_002958B0;
+        scene->window->list->drawCallback = mnuDrawCampItemListRow;
     buffer = sdfAllocSizeClassBlock(0x14);
     memset(buffer, 0, 0x14);
     scene->window->list->context = buffer;
@@ -2333,7 +2333,7 @@ s32 mnuCampRebuildFilteredStockWindow(MenuTerminalContext *scene, s32 filterMode
     }
     mnuCampAppendRankedFilteredRows(scene, filterMode);
     mnuSelectFirstListNode(scene->window->list);
-    scene->window->list->drawCallback = func_002958B0;
+        scene->window->list->drawCallback = mnuDrawCampItemListRow;
     buffer = sdfAllocSizeClassBlock(0x14);
     memset(buffer, 0, 0x14);
     scene->window->list->context = buffer;
@@ -2383,7 +2383,7 @@ s32 mnuRebuildCampSaleItemWindow(MenuTerminalContext *scene) {
             }
         }
     }
-    scene->window->list->drawCallback = func_002958B0;
+        scene->window->list->drawCallback = mnuDrawCampItemListRow;
     block = sdfAllocSizeClassBlock(0x14);
     memset(block, 0, 0x14);
     scene->window->list->context = block;
@@ -2714,7 +2714,7 @@ s32 mnuShopPollBuyCommandSelection(KwlnTask *task) {
         struct MenuList *phaseList;
         mnuSetCommandPhase(state, 6);
         phaseList = state->window->list;
-        phaseList->drawCallback = func_002958B0;
+        phaseList->drawCallback = mnuDrawCampItemListRow;
         mnuStorePendingMenuCommandValue(phaseList, 0);
         state->stateStep = 10;
         return 0;
@@ -2836,7 +2836,7 @@ s32 mnuShopPollFilteredCommandSelection(KwlnTask *task) {
         case 8:
             mnuSetCommandPhase(state, 6);
             callbackList = state->window->list;
-            callbackList->drawCallback = func_002958B0;
+            callbackList->drawCallback = mnuDrawCampItemListRow;
             mnuStorePendingMenuCommandValue(callbackList, 0);
             state->stateStep = 10;
             break;
@@ -2957,7 +2957,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(KwlnTask *callbackContext) {
         struct MenuList *phaseList;
         mnuSetCommandPhase(state, 6);
         phaseList = state->window->list;
-        phaseList->drawCallback = func_002958B0;
+        phaseList->drawCallback = mnuDrawCampItemListRow;
         mnuStorePendingMenuCommandValue(phaseList, 0);
         state->stateStep = 10;
         return 0;
@@ -3070,7 +3070,7 @@ s32 mnuShopPollSaleCommandSelection(KwlnTask *task) {
         case 8:
             mnuSetCommandPhase(state, 6);
             callbackList = state->window->list;
-            callbackList->drawCallback = func_002958B0;
+            callbackList->drawCallback = mnuDrawCampItemListRow;
             mnuStorePendingMenuCommandValue(callbackList, 0);
             state->stateStep = 10;
             break;
@@ -3267,7 +3267,7 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
         ((MenuTerminalContext *)stateAddress)->stateStep = 0xa;
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 6);
         linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
-        linkedList->drawCallback = func_002958B0;
+        linkedList->drawCallback = mnuDrawCampItemListRow;
         mnuStorePendingMenuCommandValue(linkedList, 0);
     }
     return 1;
@@ -3424,7 +3424,7 @@ s32 evtPollStageSelectionAndAdvance(KwlnTask *task) {
     case 8:
         mnuSetCommandPhase((MenuTerminalContext *)stateAddress, 6);
         linkedList = ((MenuTerminalContext *)stateAddress)->window->list;
-        linkedList->drawCallback = func_002958B0;
+        linkedList->drawCallback = mnuDrawCampItemListRow;
         mnuStorePendingMenuCommandValue(linkedList, 0);
         ((MenuTerminalContext *)stateAddress)->stateStep = 0xa;
         return 0;
