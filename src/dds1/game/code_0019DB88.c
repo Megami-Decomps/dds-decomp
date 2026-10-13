@@ -87,7 +87,6 @@ extern u32 sndTestMessageResourceIndex;
 
 extern SdfTex *sndTestMessageTexture;
 
-extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 
 void frFontEnableNodeContextModes(FrFontGlyph *node) {

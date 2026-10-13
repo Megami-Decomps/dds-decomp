@@ -351,6 +351,9 @@ typedef char ItfMesPoolNode_size_must_be_0x14[(sizeof(ItfMesPoolNode) == 0x14) ?
 typedef char ItfMesPool_size_must_be_0x10[(sizeof(ItfMesPool) == 0x10) ? 1 : -1];
 typedef char ItfMesGlobals_size_must_be_0x520[(sizeof(ItfMesGlobals) == 0x520) ? 1 : -1];
 
+/* Return a retained texture handle after releasing the temporary asset allocation. */
+SdfTex *itfLoadTextureFromAsset(const char *path);
+
 
 
 #endif /* ITF_H */

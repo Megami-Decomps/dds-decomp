@@ -89,7 +89,6 @@ s32 itfMesMaxGroupedExtent(FrFontGlyph *node);
 extern void frFontLoadTemporaryEntry(u32 arg0);
 
 
-extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
 

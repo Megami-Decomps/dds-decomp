@@ -12,6 +12,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "dds3obj.h"
+#include "itf.h"
 
 /* Global event state behind kwlnTaskGetUserValue; the polygon-movie word at 0x0 and
  * the pointer to the shared flag word at 0x8. */
@@ -785,7 +786,6 @@ SdfMemBlock *evtPolygonMovieCreateHeader(void **out)
 #include "file_request_api.h"
 #include "kwln_task_lifecycle.h"
 
-extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 
 
