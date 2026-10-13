@@ -112,7 +112,7 @@ void func_00296E98(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
                          D_003D03F0[8][BRS_ICON_ID], option);
 }
 
-void func_00297000(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
+void mnuDrawCommandCategoryWithCompanion(s32 unused, u32 value, s32 entryIndex, s32 drawArg) {
     f32 normalized;
     f32 companionPosition;
     struct EffectSlotSet *layer;
@@ -320,10 +320,10 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         case 1:
         case 2:
         case 3:
-            func_00297000((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
+            mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 3, 0x53);
             break;
         case 4:
-            func_00297000((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
+            mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 2, 0x53);
             break;
         }
         break;
@@ -386,7 +386,7 @@ s32 mnuDrawCampCommandTransition(MenuTerminalContext *scene) {
         }
         func_00294D50(0, (s32)((1.0f - position) * -48.0f) << 3, 0, scene,
                       (s32)(opacity * 256.0f), 0x53);
-        func_00297000((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
+        mnuDrawCommandCategoryWithCompanion((s32)scene, (u32)(progress * 256.0f), 4, 0x53);
         progress = (f32)scene->commandFrames / 10.0f;
         if (progress > 1.0f) {
             progress = 1.0f;
