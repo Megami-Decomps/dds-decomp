@@ -651,7 +651,104 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, void **first, v
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A7180", btlHasRequiredCommandAffinityPartners);
+extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
+
+s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 result;
+    u32 availableSlots;
+    u32 requiredCount;
+    u32 i;
+    s32 *requirement;
+    BtlTask *entry;
+    BtlUnit *partner;
+    u32 flags;
+
+    if (datCommandSelectors[command].kind != 1) {
+        return 0;
+    }
+    if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x55) {
+        return 0;
+    }
+    availableSlots = fldCountSceneSlots();
+    if (availableSlots < (u32)btlGetLinkageSlotCost(command)) {
+        return 0;
+    }
+    requiredCount = 0;
+    requirement = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    for (i = 0; i < 3; i++) {
+        if (*requirement++ != -1) {
+            requiredCount++;
+        }
+    }
+    if (requiredCount < 2) {
+        return 0;
+    }
+    if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) &&
+        !(datBattleSceneRecords[battle->battleMode].flags & 1)) {
+        result = btlFindCommandPartnersByAffinity(unit, command, NULL, NULL);
+    } else {
+        if (requiredCount == 3) {
+            i = 1;
+            do {
+                u32 loopFlags;
+
+                entry = (BtlTask *)fldGetSceneGroupEntry(i++);
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                loopFlags = partner->status.flags;
+                {
+                    u32 inactiveFlags = loopFlags & 0xE0;
+                    loopFlags &= 0x400;
+                    if (!loopFlags) {
+                        return 0;
+                    }
+                    if (inactiveFlags) {
+                        return 0;
+                    }
+                }
+                result = partner->partyRecord.status & 0x2A0E;
+                if (result) {
+                    result = 0;
+                    break;
+                }
+                if (i >= requiredCount) {
+                    result = 1;
+                    break;
+                }
+            } while (1);
+            return result;
+        }
+        if (requiredCount == 2) {
+            entry = (BtlTask *)fldGetSceneGroupEntry(2);
+            if (entry == NULL ||
+                (entry->unit->partyRecord.status & 0x2A0E) != 0 ||
+                (btlUnitStatusPair(entry->unit) & 0x4E0) != 0x400) {
+                entry = (BtlTask *)fldGetSceneGroupEntry(1);
+                if (entry == NULL) {
+                    return 0;
+                }
+                partner = entry->unit;
+                flags = partner->status.flags;
+                if ((flags & 0x400) == 0) {
+                    return 0;
+                }
+                if (flags & 0xE0) {
+                    return 0;
+                }
+                if (partner->partyRecord.status & 0x2A0E) {
+                    return 0;
+                }
+            }
+        } else {
+            return 0;
+        }
+        result = 1;
+    }
+    return result;
+}
 
 s32 btlHasAdjacentActorRecordStatus(s32 object) {
     u8 *status = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].unk3E;
