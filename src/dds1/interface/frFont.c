@@ -364,7 +364,7 @@ FrFontGlyph *frFontAppendClonedGlyph(FrFontRecord *source, FrFontGlyph *destinat
 
 
 extern FntNode *frFontDetachFirstResourceNode(void);
-extern void func_002D1D80(SdfImageUploadRequest *);
+extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
@@ -394,7 +394,7 @@ FrFontRecord *frFontCreateAtlasItem(s32 width, s32 height, void *pixels, s8 owns
     uploadRequest.destination = frFontWork.atlas.bufferBase << FR_FONT_ATLAS_DEST_SHIFT;
     uploadRequest.x = imagePosition[0];
     uploadRequest.y = imagePosition[1];
-    func_002D1D80(&uploadRequest);
+    sdfTexQueueImageUpload(&uploadRequest);
     return cachedItem;
 }
 

@@ -59,7 +59,7 @@ extern void func_0034D038(u32);
 extern s32 sceSifLoadModule(const char *, s32, const char *);
 extern void sdfDevStartLoad(const char *, const char *);
 extern void sdfLoadIopModulePair(const char *, s32);
-extern void func_00328858(u32, u32, u32);
+extern void sdfInitializeRuntimeServices(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);
 extern void sdfDevSetCurrentDirectory(const char *);
 extern void sdfDevSetDefaultDeviceWorker(s8);
@@ -105,7 +105,7 @@ s32 func_00101AC0(void) {
     }
     sdfDevStartLoad(D_00411108, D_00411118);
     sdfLoadIopModulePair(D_00411130, 1);
-    func_00328858(0x17C0000, 0x200000, 0x335000);
+    sdfInitializeRuntimeServices(0x17C0000, 0x200000, 0x335000);
     D_00438A8C = 1;
     sdfPadRequestMode(0, 3);
     sdfPadRequestMode(1, 3);
@@ -127,7 +127,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern u8 D_00380860[];
 extern u8 D_00380870[];
 extern void sdfWaitAndSelectBuffer(void);
-extern void func_0032D0F0(SdfPoolNode *, s32);
+extern void sdfInitPacketPoolNodeChain(SdfPoolNode *, s32);
 extern void kwlnInitializeFrameDrawPackets(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
@@ -169,7 +169,7 @@ s32 kwlnPrepareFrameDrawPackets(void) {
     SdfPoolNode *drawSink;
 
     sdfWaitAndSelectBuffer();
-    func_0032D0F0(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
+    sdfInitPacketPoolNodeChain(kwlnDrawSurfaces, KWLN_FRAME_POOL_NODE_COUNT);
     sdfClearPacketChain((SdfPacketChain *)D_00380860);
     kwlnInitializeFrameDrawPackets(bufferIndex);
     packetGroups = D_003808B0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES;

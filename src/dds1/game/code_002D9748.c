@@ -90,7 +90,7 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern void sdfBuildSubParameterTransform(SdfDrawTransform *, const SdfSubParam *);
 extern u16 D_00398198[];
 extern SdfTex *sdfTexClone(SdfTex *);
-extern void func_002D33C8(SdfTex *, s32, f32);
+extern void sdfTexBlendPaletteToTintedIntensityVU(SdfTex *, s32, f32);
 
 /* Four 0x60 draw groups and a final sync list/tag occupy one 0x1B0 record.
  * Each blend builder fills the 0x40-byte packet area after the list head. */
@@ -485,7 +485,7 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
         SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            func_002D33C8(texture, arg, value);
+            sdfTexBlendPaletteToTintedIntensityVU(texture, arg, value);
         }
     }
 }

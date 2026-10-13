@@ -82,7 +82,8 @@ void sdfRunTickWorkerThread(void) {
     }
 }
 
-void func_00328858(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
+/* Initialize heaps, textures, pad, graphics/resource services and the tick worker. */
+void sdfInitializeRuntimeServices(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes) {
     *(volatile u32 *)0x10000010 = 0x83;
     *(volatile u32 *)0x10000000 = 0;
     func_00328FA8(initialHeapSize);
@@ -92,7 +93,7 @@ void func_00328858(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
     sdfRegisterTextureReleaseRequestHandler();
     sdfPadInit();
     sdfStartQueuedThreadWakeWorker();
-    sdfInitializeGraphicsWorkers(resourceAddress);
+    sdfInitializeGraphicsWorkers(packetBufferBytes);
     sdfInitializeResourceQueuesAndTextureWords(0x40);
     sdfConsUploadDmaProgram(D_004389C0);
     effMiscSeedRandomFromClock(NULL);

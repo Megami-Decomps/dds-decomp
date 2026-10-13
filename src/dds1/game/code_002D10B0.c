@@ -33,7 +33,7 @@ enum {
 
 
 
-extern void func_002D1D80(SdfImageUploadRequest *);
+extern void sdfTexQueueImageUpload(SdfImageUploadRequest *);
 
 
 
@@ -273,7 +273,8 @@ extern void sdfResizeDoubleBuffer(s32);
 extern void sdfResetPacketSlotState(void);
 extern void sdfRegisterTextureReleaseRequestHandler(void);
 
-void func_002D1590(s32 size) {
+/* Reset GS/buffer state and start graphics workers; packetBufferBytes sizes each packet-buffer half. */
+void sdfInitializeGraphicsWorkers(s32 packetBufferBytes) {
     s32 thread;
     SdfGraphObj *graph = &D_003980E0;
 
@@ -285,7 +286,7 @@ void func_002D1590(s32 size) {
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
     sdfBusyBufferIndex = -1;
     D_003BD9DD = 1;
-    sdfResizeDoubleBuffer(size);
+    sdfResizeDoubleBuffer(packetBufferBytes);
     sdfResetPacketSlotState();
     sdfRegisterTextureReleaseRequestHandler();
     sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
@@ -504,7 +505,8 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block) {
     return 1;
 }
 
-void func_002D1B28(void) {
+/* Walk both list endpoints without returning them or changing either list head. */
+void sdfWalkTextureListEndpoints(void) {
     SdfTexResource *node;
 
     node = sdfTextureListHead;
@@ -622,7 +624,8 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 
 
-void func_002D1D80(SdfImageUploadRequest *request) {
+/* Queue chunked GS image DMA and its pixel/allocation ownership metadata under the semaphore. */
+void sdfTexQueueImageUpload(SdfImageUploadRequest *request) {
     SdfTextureQueue *queue = &sdfTextureQueueWork;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;
@@ -773,7 +776,8 @@ void sdfResetSemaphoreState(SdfTextureQueue *semaphore) {
     semaphore->packetTail = NULL;
 }
 
-s32 func_002D2140(s32 channel, s32 threadId) {
+/* DMA-completion callback for the image-upload waiter; the channel argument is unused. Returns -1. */
+s32 sdfWakeImageUploadThreadOnDmac(s32 channel, s32 threadId) {
     iWakeupThread(threadId);
     EE_ENABLE_INTERRUPTS_SYNC();
     return -1;
@@ -786,7 +790,8 @@ extern void sceDmaSend(void *channel, void *packet);
 extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
 extern u8 D_00398100[];
 
-void func_002D2168(void) {
+/* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */
+void sdfFlushImageUploadQueue(void) {
     SdfTextureQueue *work = &sdfTextureQueueWork;
     SdfTextureReleaseHead *entry;
     SdfTextureDmaTail *packet;
@@ -801,7 +806,7 @@ void func_002D2168(void) {
 
     if (dmaPacket != NULL) {
         s32 threadId = GetThreadId();
-        s32 handlerId = func_0030A740(1, func_002D2140, 0, threadId);
+        s32 handlerId = func_0030A740(1, sdfWakeImageUploadThreadOnDmac, 0, threadId);
         u64 tag = ((u64)((u32)D_00398100 & 0x0FFFFFFF) << 32) | 0x20000000;
         u32 *channel;
 
@@ -995,7 +1000,7 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     request.height = height;
     request.x = 0;
     request.y = 0;
-    func_002D1D80(&request);
+    sdfTexQueueImageUpload(&request);
     return pixels + imageBytes;
 }
 

@@ -45,7 +45,7 @@ typedef struct SdfSceneNode {
     SdfGsContextRegisters contextTwo;
     SdfGsCenteredBoundsRegisters centeredBounds;
     SdfGsSceneBlendRegisters blendState;
-    u64 framePacketWords[4]; /* Separate packet whose internals remain opaque. */
+    u64 framePacketWords[4]; /* FRAME_1/2 writes with FBMSK 0x00FFFFFF. */
     SdfTexBuf texturePackets[2];
 } SdfSceneNode;
 
