@@ -55,13 +55,13 @@ typedef struct MtrGrid {
     void (*draw)(s32, s32, s32, s32, struct MtrGrid *, s32, s32);
 } MtrGrid;
 
-extern void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode);
+extern void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode);
 extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
 
 void mtrUpdateGridPropagation(MtrGrid *grid) {
     if (grid->remainingDelay == 0) {
         if (grid->unk14 < grid->unk16) {
-            func_002860D8(grid, NULL, 1);
+            mtrSpawnGridPropagationCells(grid, NULL, 1);
         }
         grid->remainingDelay = grid->delayRange * effMiscRandUnitFloat(0) + 1.0f;
     } else {
@@ -71,7 +71,7 @@ void mtrUpdateGridPropagation(MtrGrid *grid) {
 }
 extern f32 sdfSinPoly(f32);
 
-void func_00285D78(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
+void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, s32 flags, s32 context) {
     MtrCell *cell = grid->cells;
     s32 i;
 
@@ -140,7 +140,7 @@ MtrCell *func_00285E98(MtrGrid *grid, MtrCell *source, s8 mode) {
 
 extern MtrCell *func_00285E98(MtrGrid *, MtrCell *, s8);
 
-void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode) {
+void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     MtrCell *cell;
     f32 random;
     s32 i;
@@ -200,7 +200,7 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
         if (cell->state != 0) {
             cell->unk04--;
             if (cell->unk04 == cell->unk06 - 5 && cell->remainingDepth != 0) {
-                func_002860D8(grid, cell, cell->state);
+                mtrSpawnGridPropagationCells(grid, cell, cell->state);
             }
             if (cell->unk04 == 0) {
                 cell->state = 0;
@@ -319,7 +319,7 @@ void func_00286670(void) {
     }
 }
 
-void func_002866C8(void) {
+void mtrRefreshMantraStateForPartyUnit(void) {
     DatPartyRecord record;
 
     memset(&record, 0, sizeof(record));
@@ -335,4 +335,4 @@ void func_00286700(void) {
     func_00286BA8(&record);
 }
 
-INCLUDE_ASM(const s32, "game/code_00285CE8", func_00286738);
+INCLUDE_ASM(const s32, "game/code_00285CE8", mtrSynchronizeMantraFlagsAcrossParty);

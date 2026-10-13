@@ -41,7 +41,7 @@ u32 evtSelectGraphicSlotBySpriteType(MenuTerminalContext *object) {
     return result;
 }
 
-void func_00294758(MenuTerminalContext *object, s32 elapsedFrames) {
+void mnuDrawTerminalPanelTransition(MenuTerminalContext *object, s32 elapsedFrames) {
     s32 frames = elapsedFrames;
     s32 frameCount;
     f32 alpha;

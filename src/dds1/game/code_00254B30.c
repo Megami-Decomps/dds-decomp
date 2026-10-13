@@ -434,8 +434,8 @@ void mnuDrawMantraSparkBackdrop(DspParticleState *state, s32 sprite, s32 surface
 #include "sdf_task_work.h"
 
 extern TaskWork *mnuSceneResourceContext;
-extern void func_0025BDD0(struct MnuSpriteResourceGroup *resources);
-extern void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
+extern void mnuUpdateMantraSpriteCueGroups(struct MnuSpriteResourceGroup *resources);
+extern void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
                           struct MnuSpriteResourceGroup *resources, s32 drawArg);
 
 /* Scroll the sprite cues opposite the scene cursor and draw them. */
@@ -446,8 +446,8 @@ void mnuDrawMantraSceneBackground(MenuSceneMetadata *scene, s32 alpha, s32 drawA
         s32 x = 0.0f - (f32)work->cursorPosition.x / 775.0f * 256.0f;
         s32 y = 0.0f - (f32)work->cursorPosition.y / 910.0f * 224.0f;
 
-        func_0025BDD0(scene->spriteResources);
-        func_0025BF18(x, y, 1, (f32)alpha * 0.15f, scene->spriteResources, drawArg);
+        mnuUpdateMantraSpriteCueGroups(scene->spriteResources);
+        mnuDrawMantraSpriteCueGroups(x, y, 1, (f32)alpha * 0.15f, scene->spriteResources, drawArg);
     }
 }
 

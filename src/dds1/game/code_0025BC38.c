@@ -85,7 +85,7 @@ SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     } while (list != NULL);
     return group;
 }
-void func_0025BDD0(MnuSpriteResourceGroup *resources) {
+void mnuUpdateMantraSpriteCueGroups(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
@@ -123,7 +123,7 @@ void func_0025BDD0(MnuSpriteResourceGroup *resources) {
 extern f32 sdfSinPoly(f32);
 
 /* Draw every live cue in the ten task slots using its remaining-life sine fade. */
-void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
+void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
                    MnuSpriteResourceGroup *resources, s32 drawArg) {
     SdfList **slot = resources->tasks;
     s32 i;
@@ -209,7 +209,7 @@ extern MnuSpritePlacement D_0036C268[];
 extern MnuSceneSpriteEntry D_0036BE38[];
 extern s32 D_0036C6CC[];
 
-void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036C268[placementIndex][2]) << 4,
                   (y + D_0036C268[placementIndex][3]) << 3,
@@ -221,7 +221,7 @@ void func_0025C1C8(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                   context);
 }
 
-void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+void mnuDrawSceneEntrySpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 placementIndex, s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] +
                    D_0036C268[placementIndex][2]) << 4,
@@ -235,7 +235,7 @@ void func_0025C278(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                   context);
 }
 
-void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+void mnuDrawSceneEntrySpriteWithOffset(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
     if (D_0036BE38[entryIndex][MNU_SCENE_SPRITE_INDEX] != 0) {
         effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET] + 23) << 4,
@@ -249,7 +249,7 @@ void func_0025C350(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
     }
 }
 
-void func_0025C418(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+void mnuDrawSceneEntrySprite(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
@@ -261,7 +261,7 @@ void func_0025C418(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                   context);
 }
 
-void func_0025C4C8(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
+void mnuDrawSceneEntrySpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 entryIndex,
                    s32 spriteIndex, s32 flags, s32 context) {
     effDrawSpriteWithCornerFade((x + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET]) << 4,
                   (y + D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET]) << 3,
@@ -283,7 +283,7 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
+INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraGridCursorHistory);
 
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 
@@ -314,26 +314,26 @@ void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, Me
     }
 }
 
-extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawSceneEntrySpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
-void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
+void mnuDrawMantraEntryStatusOverlays(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
     u32 flags = mnuGetMantraDisplayFlags(entry, profileAddress);
 
     if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
-        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
     } else if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
-        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, amount, entry->sceneId, MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
     } else if (flags & (MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 |
                         MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2)) {
-        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, amount, entry->sceneId, MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
     }
     if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
-        func_0025C278(x, y, depth, (s32)((f32)amount * 0.5f),
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, (s32)((f32)amount * 0.5f),
                       entry->sceneId, MNU_MANTRA_CAP_OVERLAY_CODE, 0, drawArg);
     }
     if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
-        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
+        mnuDrawSceneEntrySpriteAtPlacement(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
     }
 }
 
@@ -346,7 +346,7 @@ typedef struct MnuProfileIdList {
 extern const MnuProfileIdList D_003AFA00;
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
-extern void func_0025C1C8(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraSceneSpriteAtPlacement(s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw cap markers, with a second marker for the first four profiles. */
 void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
@@ -358,9 +358,9 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
     for (i = 0; i < 22; i++) {
         cap = prfGetCapValue(profiles.ids[i]);
         if (cap == ptyGetProfileRecordValue(owner->partyRecord, profiles.ids[i])) {
-            func_0025C1C8(x, y, depth, alpha, i + 0x10, 0, context);
+            mnuDrawMantraSceneSpriteAtPlacement(x, y, depth, alpha, i + 0x10, 0, context);
             if (i < 4) {
-                func_0025C1C8(x, y, depth, alpha, i + 0x2B, 0x20, context);
+                mnuDrawMantraSceneSpriteAtPlacement(x, y, depth, alpha, i + 0x2B, 0x20, context);
             }
         }
     }
@@ -368,10 +368,10 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
 
 extern void func_0025CA50(s32, s32, s32, s32, s32,
                           MnuProfileProgress *, MnuMantraGridEntry *, s32);
-extern void func_0025C588(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraGridCursorHistory(s32, s32, s32, s32, s32, s32);
 
 /* Draw the grid background and profile markers, then animation and status layers in separate passes. */
-void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
+void mnuDrawMantraProfileGrid(s32 x, s32 y, s32 z, s32 alpha,
                    MnuProfileProgress *profileOwner, MenuSceneWork *gridOwner,
                    s32 context) {
     SdfGrid *grid = gridOwner->gridHandle;
@@ -380,7 +380,7 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
     s32 row;
     s32 column;
 
-    func_0025C1C8(x, y, z, alpha, 0xF, 0x20, context);
+    mnuDrawMantraSceneSpriteAtPlacement(x, y, z, alpha, 0xF, 0x20, context);
     mnuDrawCappedProfileMarkers(x, y, z,
                                 (s32)((f32)alpha * 0.5f),
                                 profileOwner, context);
@@ -400,12 +400,12 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
         for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, cell++) {
             entry = (MnuMantraGridEntry *)(u32)cell->value;
             if (entry != NULL) {
-                func_0025C8D0(x, y, z, alpha,
+                mnuDrawMantraEntryStatusOverlays(x, y, z, alpha,
                               profileOwner, entry, context);
             }
         }
     }
-    func_0025C588(x, y, z, alpha, (s32)gridOwner, context);
+    mnuDrawMantraGridCursorHistory(x, y, z, alpha, (s32)gridOwner, context);
 }
 
 extern void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *, MenuSceneWork *);
@@ -442,7 +442,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 
 /* Build the mantra selection surface, including requirement-dependent panels,
  * then draw the grid and restore the surface state for the caller. */
-void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
+void mnuDrawMantraProfileSelectionSurface(s32 x, s32 y, s32 unusedDepth, s32 alpha,
                    MenuSceneWork *gridOwner, s32 context) {
     MnuProfileProgress *profileOwner = (MnuProfileProgress *)mnuGetSelectedNodeValue();
 
@@ -506,7 +506,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     sdfDispatchSurfaceWithPreparedTexturePacket(context);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
     sdfSubmitGsTestOneRegisterPacket(0x50000, context);
-    func_0025D100(x, y, 1, alpha, profileOwner, gridOwner, context);
+    mnuDrawMantraProfileGrid(x, y, 1, alpha, profileOwner, gridOwner, context);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, context);
@@ -517,7 +517,7 @@ extern f32 sdfVec3NormalizeInPlaceAndGetLength(f32 *);
 extern s32 D_003BC4E0;
 
 /* Ease the live cursor toward the selected scene row and track whether it moved. */
-void func_0025D628(MenuSceneWork *work) {
+void mnuUpdateMantraSelectionCursorPosition(MenuSceneWork *work) {
     MnuMantraGridEntry *selectedEntry;
     s32 entryIndex;
     s32 targetX;
@@ -583,7 +583,7 @@ void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amoun
 }
 
 /* Advance and draw one transient cost/list notification; report expiry at frame 11. */
-s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
+s32 mnuUpdateMantraCostNotification(MnuSceneListNode *node, s32 index, s32 drawArg) {
     s32 frame = node->frame;
     s32 opening = frame < 7;
     s32 context = drawArg;
@@ -695,7 +695,7 @@ s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
     return 1;
 }
 
-extern s32 func_0025D7F8(MnuSceneListNode *, s32, s32);
+extern s32 mnuUpdateMantraCostNotification(MnuSceneListNode *, s32, s32);
 
 s32 mnuAdvanceDisplayList(MnuSceneListHead *head, s32 amount, s32 drawContext) {
     MnuSceneListNode *node = head->first;
@@ -710,7 +710,7 @@ s32 mnuAdvanceDisplayList(MnuSceneListHead *head, s32 amount, s32 drawContext) {
         return 1;
     }
     do {
-        s32 hit = func_0025D7F8(node, index, drawContext);
+        s32 hit = mnuUpdateMantraCostNotification(node, index, drawContext);
 
         index++;
         if (hit != 0) {
