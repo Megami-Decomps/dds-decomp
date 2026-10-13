@@ -68,7 +68,6 @@ extern u32 D_004285D0[4];
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern MovieMenuState *mnuMovieMenuState;
 

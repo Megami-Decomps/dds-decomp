@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_lifecycle.h"
 #include "btl_stage_task_cleanup.h"
@@ -93,8 +94,6 @@ extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
 extern u32 D_00435CBC;
 extern void *dds3GetWorldSecondaryObject(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
 
 s32 mdlAdvanceViewerPackageTask(KwlnTask *task);
 

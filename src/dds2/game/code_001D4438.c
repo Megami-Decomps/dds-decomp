@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "btl_scene_light_params.h"
 #include "sdf_chip.h"
@@ -418,11 +419,8 @@ extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
-extern void mnuResetTitleStreamLocked(void);
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 extern s32 D_00435E0C;
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
@@ -67,9 +68,6 @@ extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
-extern void mnuMarkTitleStreamResetPending(void);
-extern void mnuResetTitleStreamLocked(void);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern MnuSpriteResourceGroup *mnuCreateSpriteResource(s32, u8, u8);
 extern MenuProgressHost *mnuCreateWorkBlock(void);

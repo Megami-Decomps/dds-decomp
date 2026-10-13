@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "sdf_motion.h"
@@ -38,8 +39,6 @@ void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
@@ -1028,8 +1027,6 @@ void kwlnTaskAddChild(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void evtEventViewerPollMovieResources(PolyMovieWork *work);
-extern s32 mnuPollTitleStreamStateLocked(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 

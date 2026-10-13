@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_cursor.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -208,7 +209,6 @@ extern u32 sndFinishEarringPlayback(void);
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
@@ -6673,9 +6673,7 @@ void sndSetStationedSeHighVolume(u32 arg0) {
     sndSetSequenceVolumePan(arg0, 0x7f, 0x3f);
 }
 
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
-extern void mnuResetTitleStreamLocked(void);
 
 extern s32 D_0035F998[];
 

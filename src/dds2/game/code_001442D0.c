@@ -4,6 +4,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -35,7 +36,6 @@
 #include "dds3_world_counter.h"
 
 extern void fldSetCameraNodeModeWithTen(void);
-extern void mnuMarkTitleStreamResetPending(void);
 
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
@@ -4440,8 +4440,6 @@ extern void *effObjCreateEventNode(void *, void *, void *);
 extern void effObjClearFlags(struct EffectObj *, u32);
 extern void effObjSetFlags(struct EffectObj *, u32);
 extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
-extern void mnuQueueTitleSoundStreamEntry(s32);
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
 extern void fldSetCameraModelMotionRequest(u32, u32);

@@ -1,5 +1,6 @@
 #include "mnu_movie.h"
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "eff_random.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
@@ -1024,9 +1025,7 @@ s32 mnuStaffImageProc(KwlnTask *task) {
     return 1;
 }
 
-extern s32 mnuPollTitleStreamStateLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 
 void mnuUpdateStaffRollStreamState(void)
 {

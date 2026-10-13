@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_title_stream.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_scale_params.h"
@@ -3099,8 +3100,6 @@ typedef struct FileConfigTask {
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
-extern void mnuResetTitleStreamLocked(void);
-extern void mnuQueueTitleSoundStreamEntry(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 effRequestResourceByMode(const char *, const char *, s32, u32 *);
 extern void fileDrawConfigurationMenuEntry();
