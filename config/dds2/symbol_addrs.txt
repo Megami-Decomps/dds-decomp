@@ -3552,6 +3552,7 @@ evtSetUnitPathFollow = 0x0023D800; // type:func
 evtStartUnitModeWithValue = 0x0023DA48; // type:func
 evtResetUnitVectorSlots = 0x0023E178; // type:func
 evtSetSlotVectors = 0x0023E220; // type:func
+evtCopyUnitVectorSlotEndpoint = 0x0023E350; // type:func
 evtApplyMatchingUnitSlotEndpoints = 0x0023E460; // type:func
 evtFindUnitSlotAuxCoordinates = 0x0023E648; // type:func
 evtGetWorldObjectId = 0x0023E718; // type:func

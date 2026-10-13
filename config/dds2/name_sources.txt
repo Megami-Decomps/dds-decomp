@@ -3625,6 +3625,7 @@
 0x0023DA48	evtStartUnitModeWithValue	inferred	Stores a nonzero unit value, clears its counter and enters mode four. [names_reviewed8.tsv]
 0x0023E178	evtResetUnitVectorSlots	inferred	Initializes each vector slot and clears its state and object id. [names_reviewed7.tsv]
 0x0023E220	evtSetSlotVectors	inferred	DDS1 twin 0x002235E8 [names_M52_EvtEff.tsv]
+0x0023E350	evtCopyUnitVectorSlotEndpoint	inferred	Searches 10 event unit-vector slots for a unit-bound ID, falls back to the first shared-state slot, copies endpoint XYZ to out, and reports success. Paired with 0x00223718. [code-quality cleanup, 2026-10-13]
 0x0023E460	evtApplyMatchingUnitSlotEndpoints	inferred	Finds active matching or fallback slot, clamps color and applies its endpoints to unit. [names_reviewed7.tsv]
 0x0023E648	evtFindUnitSlotAuxCoordinates	inferred	Returns auxiliary x and y from matching active slot or first fallback slot. [names_reviewed7.tsv]
 0x0023E718	evtGetWorldObjectId	inferred	Byte-identical dds1 twin 0x00223AE0; Gets the primary world object's ID at offset 0x04, uses -1 if absent and writes the result to the script command result. [names_conflicts.tsv]
