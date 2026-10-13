@@ -241,13 +241,13 @@ extern void fldSetEncounterPendingValue(s32);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
-extern s64 func_001F53F0(void);
+extern s64 btlArrangeOpponentFormationSlots(void);
 
 extern void fldCreateSceneCleanupTask(void);
 
 s32 fldSceneStateRestoreDisplay(u8 *scene) {
     if (btlCountTasksForOwner(0x8000000000000002ULL) == 0) {
-        func_001F53F0();
+        btlArrangeOpponentFormationSlots();
         if (!(*(u32 *)(scene + 0x1F4) & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
         }
