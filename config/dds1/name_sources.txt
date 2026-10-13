@@ -6158,6 +6158,7 @@
 0x002C4680	sdfHandleMapCounterSelectionInput	inferred	U3
 0x002C49F8	sdfCounterGetDisplayWordPointer	inferred	Returns the word pointer in the active counter display reached through its runtime channel.
 0x002C4A28	sdfCounterGetScaledValue	inferred	Returns the timer's integer value scaled by one tenth.
+0x002C4A58	sdfCounterDrawLabelPlateRow	inferred	Draws the counter label-plate row by invoking the channel draw callback for three spaced channels, then submits the timer-faded full-width depth gradient.
 0x002C5338	sdfCounterDrawChannelPlate	inferred	Draws the counter channel plate. [names_qp9.tsv]
 0x002C56C0	sdfCounterIncrease	inferred	Increments the counter value only while below ten.
 0x002C56E8	sdfCounterDecrease	inferred	Decrements the counter value only while nonzero.

@@ -509,7 +509,7 @@ float sdfCounterGetScaledValue(void) {
 }
 
 /* Draw the counter's three label plates and submit the frame gradient. */
-void func_002C4A58(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
+void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
     SdfCounterChannel *channelCursor;
     f32 fade;
     s32 plateIndex;
