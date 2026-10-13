@@ -3019,6 +3019,7 @@
 0x0020A360	btlScriptCmdSimpleG	inferred	Twin of dds1 0x001F8828; Calls btlCmdSimpleG on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A390	btlScriptCmdSimpleF	inferred	Twin of dds1 0x001F87F8; Calls btlCmdSimpleF on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A3C0	btlScriptCmdSimpleH	inferred	Twin of dds1 0x001F8858; Calls btlCmdSimpleH on current command context; returns script success. [names_R_FuncNames3.tsv]
+0x0020A3F0	btlScriptCmdSelectTargetsByMode	inferred	Reads target mode parameter zero and dispatches target selection for the active script command. [code-quality cleanup, 2026-10-13]
 0x0020A430	btlScriptCmdWithArgF	inferred	Twin of dds1 0x001F8888; Calls btlCmdWithArgF on current command context; returns script success. [names_R_FuncNames3.tsv]
 0x0020A480	btlScriptCmdSimpleJ	inferred	Twin of dds1 0x001F88B0; Reads first script parameter and passes it to btlCmdSimpleJ; returns script success. [names_R_FuncNames3.tsv]
 0x0020A4C0	btlScriptCmdSimpleI	inferred	Twin of dds1 0x001F88F0; Calls btlCmdSimpleI on current command context; returns script success. [names_R_FuncNames3.tsv]
@@ -3154,6 +3155,7 @@
 0x00210EA0	btlDispatchPackedActionWithScratch	inferred	Creates temporary action work, dispatches the packed action and frees it. [names_reviewed8.tsv]
 0x00210F58	btlRunRandomWeightedAiTableAction	inferred	confidence=high; src/dds2/game/code_0020E850.c:func_00210F58; Allocates action scratch, resolves the species AI row, chooses a weighted slot, executes its action and releases scratch. [names_qp9.tsv]
 0x00211018	btlShiftActorStateHistory	inferred	Shifts the actor state history and inserts a source-dependent new value. [names_reviewed11.tsv]
+0x00211108	btlCmdAppendCurrentUnitIdToCommandIndices	inferred	Appends the current unit ID to the command index list with default mode zero; called by btlScriptAppendSelectedOrCurrentTarget. [code-quality cleanup, 2026-10-13]
 0x002112C8	btlRunWeightedAiAction	inferred	unified with DDS1 twin (was btlRunAiTableEntry)
 0x00211D20	btlPickWeightedAiSlot	inferred	sums u8 slot weights (5 per row of the 0x15C-byte per-species table D_00435DF4) until the total reaches the roll from func_00211DE0; logs "AI_BUGBUGBUG.." and returns 0 when no slot qualifies [names_M42_BattleMid.tsv]
 0x00211DE0	btlRollAiBucket	inferred	unified with DDS1 twin (was btlRollAiWeight)
