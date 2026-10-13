@@ -8546,3 +8546,5 @@
 0x0026DB90	scrTestEntryFlagAtZeroBit0	inferred	Returns scrTestEntryFlag(context, entryId=0, bit=0). The Mantra-node eligibility scan uses it as a gate; stored-state meaning remains unspecified.
 0x0026DBB8	scrClearEntryFlagAtZeroBit1	inferred	Calls scrClearEntryFlag(context, entryId=0, bit=1); source retains the native post-call context reset.
 0x0026DBD8	scrTestEntryFlagAtZeroBit1	inferred	Calls scrTestEntryFlag(context, entryId=0, bit=1) and discards the return value.
+0x002890A8	mnuGetSelectedMantraUnitIndex	inferred	Returns the selected list cursor index used to select the current mantra-unit slot across node eligibility, panel rendering, and unit-selection flows. [provider body and caller dataflow, 2026-10-14]
+0x0028D070	mnuSpawnMantraPanelsFromSelectedUnitFlags	inferred	Walks the mantra node-position table, reads the selected unit slot flags, classifies eligible nodes, and spawns or queues their panel animations. Called after unit selection changes, tutorial updates, and mantra equipment flow. [provider body and caller dataflow, 2026-10-14]

@@ -454,7 +454,7 @@ extern void mnuSetMantraBackgroundVariant(struct MantraDrawPool *pool, s8);
 extern void mnuShowMantraLimitLine(struct MantraDrawPool *pool);
 extern void mnuKeepMantraBackgroundMaskVisible(struct MantraDrawPool *pool);
 /* The native call forwards only the work pointer; later callers pass all three provider inputs. */
-extern void func_0028D070();
+extern void mnuSpawnMantraPanelsFromSelectedUnitFlags();
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
 
@@ -617,7 +617,7 @@ s32 mtrMantraEquipUpdate(void) {
             mnuShowMantraLimitLine(work->menu.selectionController);
         }
         mnuKeepMantraBackgroundMaskVisible(work->menu.selectionController);
-        func_0028D070(work);
+        mnuSpawnMantraPanelsFromSelectedUnitFlags(work);
         sdfSetTaskItemMode(mnuMantraSelectionResource, 2,
                            SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
         return -1;
