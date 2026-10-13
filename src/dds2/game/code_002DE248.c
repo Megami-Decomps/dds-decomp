@@ -12672,7 +12672,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_003018C8);
 
 extern u8 D_00400068[];
 
-extern void func_003018C8(void *, s32, const void *, const void *);
+extern s32 func_003018C8(void *, s32, void *, void *);
 
 /* Pass the requested P-family SCALE track and its frame bound to the editor. */
 void effEditPScaleTrack(s32 *work) {
