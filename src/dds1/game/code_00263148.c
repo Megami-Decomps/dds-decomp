@@ -271,7 +271,7 @@ extern void mnuStaffCopyPanelBlock(DatPartyRecord *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);
 extern u32 mnuInitializeItemSelectionExtent(KwlnTask *task);
 extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
-extern void func_002E96D8(u32);
+extern void sndReleaseTrackHandle(u32);
 extern char D_0036D424[];
 extern char D_0036D45C[];
 
@@ -317,7 +317,7 @@ s32 brsProcessNextPrimaryReward(KwlnTask *request) {
             }
             mnuSetPopupEntry(dispatchStatus, D_0036D45C);
         } else {
-            func_002E96D8(0x50001);
+            sndReleaseTrackHandle(0x50001);
             kwlnFadeInStart(0, 0, 0, 0xF);
             mnuSetPopupEntryFlagged(dispatchStatus, D_0036D494);
         }

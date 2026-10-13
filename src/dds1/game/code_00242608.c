@@ -1847,7 +1847,7 @@ extern s32 func_00260AB0(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
 extern s32 evtSetBoundedDisplayValue(s32, s32);
-extern void func_002E96D8(s32);
+extern void sndReleaseTrackHandle(s32);
 
 extern s32 func_00260670(ShopScene *context);
 
@@ -3034,7 +3034,7 @@ u32 evtResetStateFlags(void) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 1);
     evtSetBoundedDisplayValue(1, 0);
-    func_002E96D8(0x300000);
+    sndReleaseTrackHandle(0x300000);
     return 1;
 }
 

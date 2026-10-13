@@ -68,7 +68,7 @@ extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuDrawMovieMenuBackdrop(void);
 extern void mnuSelectMenuListCursorByAdvance(s32 amount);
 extern void mnuTitleResetSequenceTimers(void);
-extern void func_002E96D8(u32 trackId);
+extern void sndReleaseTrackHandle(u32 trackId);
 extern void func_0026CAB0(void);
 extern s32 func_0026D660(void);
 extern void mnuDrawMovieChoiceTransition(void);
@@ -365,7 +365,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
             mnuMovieMenuState->state = 0x1B;
             mnuMovieMenuState->cursor = 0;
             kwlnFadeInStart(0, 0, 0, 0xF);
-            func_002E96D8(0x310000);
+            sndReleaseTrackHandle(0x310000);
         }
         break;
     case 27:
@@ -425,7 +425,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
             selectedItem = mnuGetMovieMenuSelectionIndex();
             switch (selectedItem) {
             case 1:
-                func_002E96D8(0x310000);
+                sndReleaseTrackHandle(0x310000);
                 kwlnFadeOutStart(0, 0, 0, 0x14);
                 mnuMovieMenuState->state = 0x27;
                 mnuMovieMenuState->cursor = 0;
@@ -436,7 +436,7 @@ s32 mnuUpdateMovieMenuTask(KwlnTask *task) {
                 mnuMovieMenuState->state = 0x2B;
                 break;
             case 2:
-                func_002E96D8(0x310000);
+                sndReleaseTrackHandle(0x310000);
                 mnuMovieMenuState->mode = selectedItem;
                 mnuMovieMenuState->cursor = 0;
                 kwlnFadeOutStart(0, 0, 0, 0xA);

@@ -50,7 +50,7 @@ extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 sequence);
 extern void func_003003F0(char *fmt, ...);
-extern void func_002E96D8(u32 sequence);
+extern void sndReleaseTrackHandle(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
@@ -5368,7 +5368,7 @@ s32 evtQueueValidatedBgmSoundCode(s32 id, s32 fade) {
         return 0;
     }
     sound = evtEncodeBgmSoundCode(id, fade);
-    func_002E96D8(sound);
+    sndReleaseTrackHandle(sound);
     return sound;
 }
 

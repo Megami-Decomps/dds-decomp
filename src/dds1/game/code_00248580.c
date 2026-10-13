@@ -1261,7 +1261,7 @@ extern void sndStartTrackExtended(s32);
 
 extern void func_002E9708(void);
 
-extern void func_002E96D8(s32);
+extern void sndReleaseTrackHandle(s32);
 
 extern void func_002E9730(void);
 
@@ -1625,7 +1625,7 @@ void mnuApplyFadeTrackMode(s32 mode, MenuTerminalWork *host) {
             func_002E9708();
         }
     } else if (host->mode == 0) {
-        func_002E96D8(host->bgmHandle);
+        sndReleaseTrackHandle(host->bgmHandle);
     } else {
         func_002E9730();
     }
@@ -2104,7 +2104,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
     *(s32 *)(context + 0x98) = 0;
     evtFinishMessageWindowAndNotify();
     dspCloseChannel();
-    func_002E96D8(((MenuTerminalWork *)context)->bgmHandle);
+    sndReleaseTrackHandle(((MenuTerminalWork *)context)->bgmHandle);
     return 1;
 }
 
@@ -2332,7 +2332,7 @@ u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
     }
     evtRememberDispatchCallback(0, (MenuTerminalWork *)context);
     ((MenuTerminalWork *)context)->exitPending = 1;
-    func_002E96D8(((MenuTerminalWork *)context)->bgmHandle);
+    sndReleaseTrackHandle(((MenuTerminalWork *)context)->bgmHandle);
     evtClearActiveFlag(0);
     return 1;
 }
