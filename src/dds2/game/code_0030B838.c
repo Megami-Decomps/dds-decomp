@@ -100,7 +100,7 @@ extern void mnuTickMapTimers(void);
 
 extern void sdfCounterTickPositionTransition(void);
 
-extern s32 func_0030BD10();
+extern s32 sdfUpdateSelectedCounterMapCameraTransition();
 
 extern u8 D_00400BB0[];
 
@@ -220,11 +220,11 @@ s8 sdfGetMapCameraTransitionFrame(void) {
 }
 
 void func_0030BCF0(void) {
-    func_0030BD10();
+    sdfUpdateSelectedCounterMapCameraTransition();
 }
 
 /* Apply the selected camera pose while the map-camera transition is active. */
-s32 func_0030BD10(void) {
+s32 sdfUpdateSelectedCounterMapCameraTransition(void) {
     f32 t;
 
     if (D_004388C1 == 0) return 1;

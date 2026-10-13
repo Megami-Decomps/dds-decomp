@@ -81,7 +81,7 @@ extern s32 func_002C4160(void);
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
-extern s32 func_002C3DB0(void);
+extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s32 evtGetCapturedWindowPanelValue(void);
 /* The retail caller passes color bytes as promoted ints; the callee narrows them. */
 extern void kwlnFadeInStart(s32, s32, s32, s32);
@@ -549,7 +549,7 @@ s32 fldUpdateLocalMapController(void) {
                 sdfLatchBaseVectorsForSelection();
             }
         }
-        func_002C3DB0();
+        sdfUpdateSelectedCounterMapCameraTransition();
         break;
     case 4:
         result = evtGetCapturedWindowPanelValue();

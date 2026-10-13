@@ -662,7 +662,7 @@ extern s32 D_00439094;
 extern void sdfCounterAdvanceBoundedAnimationValue(void);
 extern s32 fldLmapToggleOverlay(void);
 extern void fldDisplayLocalMapCounterMessage(void);
-extern s32 func_0030BD10(void);
+extern s32 sdfUpdateSelectedCounterMapCameraTransition(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtBeginSolarOverlayFadeIn(s32);
 /* Legacy calls pass the RGB bytes as promoted integer arguments. */
@@ -733,7 +733,7 @@ s32 func_0030B1E8(void) {
                 sdfLatchBaseVectorsForSelection();
             }
         }
-        func_0030BD10();
+        sdfUpdateSelectedCounterMapCameraTransition();
         break;
     case 4:
         result = evtGetCapturedWindowPanelValue();
