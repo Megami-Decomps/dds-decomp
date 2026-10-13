@@ -5836,6 +5836,7 @@
 0x0030E390	fldDrawTransitionBackdrop	inferred	TaskPurist
 0x0030E880	fldCreateMapRequestQueues	inferred	Creates both local-map request queues, installs the halo and pulse callbacks, resets the update interval, and initializes the request counters; DDS1 counterpart at 0x002C7000.
 0x0030E910	fldDrawMapRequestMarker	inferred	Wave4
+0x0030E940	fldDrawMapRequestHalo	inferred	Draws the first local-map request ring's grey halo callback with progress-based scale and alpha; DDS1 counterpart at 0x002C7180.
 0x0030E958	fldDrawMapRequestPulse	inferred	Draws a map request pulse, scaling and fading the current request while enlarging and fading requests that are not current; DDS1 counterpart at 0x002C7430.
 0x0030EA70	sdfCommitPendingVectorAndMarkChanged	inferred	Copies a pending vector into the active vector and sets its change flag. [names_reviewed17.tsv]
 0x0030EAA8	fldUpdateMapRequestQueues	inferred	U2

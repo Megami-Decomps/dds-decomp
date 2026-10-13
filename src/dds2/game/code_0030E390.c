@@ -15,7 +15,7 @@ extern u32 D_0045C7B0[];
 
 
 
-extern void func_0030E940(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
+extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 
 extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
@@ -104,7 +104,7 @@ void fldCreateMapRequestQueues(void) {
     MapRequestState *state;
     state = sdfCreateLinkedRequestRing(0x14, 0xC);
     D_004390AC = state;
-    D_004390AC->callback = func_0030E940;
+    D_004390AC->callback = fldDrawMapRequestHalo;
     fldSetMapRequestInterval(state, 0);
     D_004390B0 = sdfCreateLinkedRequestRing(0x14, 0x18);
     D_004390B0->callback = fldDrawMapRequestPulse;
@@ -127,7 +127,7 @@ void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
     sdfDrawUniformlyScaledSlotImage(x, y, 0, alpha, 0x20, 0, 0x54, scale);
 }
 
-INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E940);
+INCLUDE_ASM(const s32, "game/code_0030E390", fldDrawMapRequestHalo);
 
 /* The current request pulses; other requests enlarge and fade in later. */
 void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
