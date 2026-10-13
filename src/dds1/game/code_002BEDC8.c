@@ -184,7 +184,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
         effUpdateTimedStates(set, slotIndex, draw);
     }
 }
-void func_002BF400(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
+void effDrawSpriteWithWorkCornerColors(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
     effDrawTextureSlot(x, y, z, (s32)entry->geometry.cornerColors, flags, set, slot, entry, layer);
 }
 void effDrawSpriteWithCornerColors(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *set, s32 slot, s32 layer) {

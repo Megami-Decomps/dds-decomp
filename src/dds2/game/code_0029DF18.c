@@ -13,7 +13,7 @@ extern BurstTable D_00428420;
 
 
 struct EffectSlotSet;
-extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
@@ -247,7 +247,7 @@ void brsDrawLevelProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            func_00306C28(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
+            effDrawSpriteWithCornerColors(x + (work->levelAnimation[index].progressIconPosition[0] << 4),
                          y + (work->levelAnimation[index].progressIconPosition[1] << 3) + 0x40,
                          z, color, 0, work->teardownResource, 0x12, depth);
         }
@@ -339,9 +339,9 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            func_00306C28(x + 0x1180, y + 0x130, z, color, 0,
+            effDrawSpriteWithCornerColors(x + 0x1180, y + 0x130, z, color, 0,
                          work->teardownResource, 0x16, depth);
-            func_00306C28(x + 0x17E0, y + 0x130, z, color, 0,
+            effDrawSpriteWithCornerColors(x + 0x17E0, y + 0x130, z, color, 0,
                          work->teardownResource, 0x17, depth);
         }
     }
