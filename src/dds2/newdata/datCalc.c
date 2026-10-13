@@ -1052,7 +1052,7 @@ extern s32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 extern void evtCopyRosterTableValue(DatPartyRecord *);
 extern void func_00286618(void);
-extern void func_002866C8(void);
+extern void mtrRefreshMantraStateForPartyUnit(void);
 extern void ptyRebuildProfileSkills(s32, DatPartyRecord *);
 void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry);
 
@@ -1192,7 +1192,7 @@ void ptyCloneTemplateSevenToRosterUnitThree(DatPartyRecord *entry, s32 initFlags
     gameState = datGameState;
     memcpy(&gameState->mantraBits[3], &gameState->mantraBits[7], sizeof(gameState->mantraBits[3]));
     memcpy(gameState->profileBanks[3].records, gameState->profileBanks[7].records, sizeof(gameState->profileBanks[3].records));
-    func_002866C8();
+    mtrRefreshMantraStateForPartyUnit();
     if (!(initFlags & 2)) {
         ptyRebuildProfileSkills(1, entry);
     }
@@ -1207,7 +1207,7 @@ extern s32 ptyTestPrimaryProfileFlag(DatPartyRecord *, u16);
 extern void func_00314868(DatPartyRecord *, u16);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern void ptySetProfileRecordValue(DatPartyRecord *, u16, u32);
-extern void func_00286738(void);
+extern void mtrSynchronizeMantraFlagsAcrossParty(void);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 extern s32 scrSetFlag(DatPartyRecord *, u16);
 
@@ -1266,7 +1266,7 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
             ptySetProfileRecordValue(entry, index, ptyGetProfileRecordValue(&second, index));
         }
     }
-    func_00286738();
+    mtrSynchronizeMantraFlagsAcrossParty();
     for (index = 1; index < 0x2A0; index++) {
         present = ptyGetSkillNibbleState(&first, index) != 0;
         if (ptyGetSkillNibbleState(&second, index)) {

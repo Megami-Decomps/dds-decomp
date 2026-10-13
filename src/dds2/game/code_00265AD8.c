@@ -262,7 +262,7 @@ s32 evtAdvancePopupWithOptionalPreparation(KwlnTask *callback) {
         mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
     }
     if (*(s32 *)(context + 0xB8) != 0) {
-        func_00294758(context, *(s32 *)(context + 0xB8));
+        mnuDrawTerminalPanelTransition(context, *(s32 *)(context + 0xB8));
     }
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }

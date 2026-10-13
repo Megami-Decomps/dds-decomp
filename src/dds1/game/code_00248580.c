@@ -720,7 +720,7 @@ void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer) {
     mnuDrawAndAdvanceProfilePanel(x, y, mode, work->currentEffect, layer);
 }
 
-s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
+s32 mnuDrawLoadedProgressPanels(u8 *control, MenuProgressHost *work, s32 context) {
     if (work->loadState != 2) {
         return 0;
     }
@@ -2358,7 +2358,7 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
 }
 
 
-s32 func_0024CB80(KwlnTask *input) {
+s32 mnuUpdateTerminalActionPopup(KwlnTask *input) {
     MenuTerminalWork *context = (MenuTerminalWork *)kwlnTaskGetUserValue(input);
     s32 *state = &context->popupState;
     s32 result;
