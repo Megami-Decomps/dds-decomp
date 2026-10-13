@@ -25,6 +25,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_map_events.h"
 #include "eff_pcp_block_set.h"
 #include "eff_pcp_staggered.h"
 #include "eff_pcp_delayed_pairs.h"
@@ -5768,37 +5769,7 @@ void effPcpSetSpawnRangeColor(EffPCPSpawnRangeWork *work, u32 value) {
     work->color = value;
 }
 
-/* One event per model-map position: latch movement, then run its frame interval. */
-typedef struct {
-    f32 initialPosition[4];
-    u8 hasMoved;
-    u8 pad11[3];
-    s32 age;
-    s32 frameLimit;
-    EffEventWork *event;
-} EffPCPMapEventEntry;
 
-/* Serialized model placement and fade parameters (0x1C bytes). */
-typedef struct {
-    f32 position[4];
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 frameStep;
-} EffPCPEventParamHead;
-
-/* The 0x40 owner and its separate entry allocation serve create/clone/release. */
-typedef struct {
-    EffPCPEventParamHead params;
-    EffPCPMapEventEntry *entries;
-    SdfMemBlock *entriesHandle;
-    SoundMixer *owner;
-    EffParamWork *modelResource;
-    f32 scale;
-    s32 frame;
-    s32 frameLimit;
-    u32 count;
-    u32 color;
-} EffPCPMapEventWork;
 
 void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
