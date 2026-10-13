@@ -1,4 +1,5 @@
 #include "btl_command.h"
+#include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
 #include "sdf_trig.h"
