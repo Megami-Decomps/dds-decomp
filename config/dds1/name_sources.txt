@@ -8428,6 +8428,7 @@
 0x002121E8	btlDrawWindOverlay	inferred	Loads wind texture, interleaves three tinted sweeps and grey frame quads, restores frame packets and advances phase. [Namer1 batch33 high]
 0x00212680	btlDrawFlatGridCell	inferred	Six flat triangles form a cell fan using same rim geometry as adjacent btlDrawTexturedGridCell. [Namer1 batch33 high]
 0x00213808	btlUpdateRuntimeFadeState	inferred	Phase1 setup, phase2 fade-in, phase3 outgoing fade, phase4 cleanup and frame counter; aligns existing DDS2 name at0x0022E0E0. [Namer1 batch33 high]
+0x00213B50	btlGetRuntimeResult	inferred	Returns the signed battle runtime result byte used by fldGetEncounterRuntimeResult.
 0x00213B60	btlIsFadeInPhaseOrIdle	inferred	True for inactive runtime, state0 or state2 initial fade phase; does not claim fading is complete. DDS2 twin0x0022E460. [Namer1 batch33 high]
 0x00213B90	btlIsFadeOutCompleteOrIdle	inferred	True for inactive runtime, state0 or state4 after outgoing phase3 fade, before cleanup. DDS2 twin0x0022E490. [Namer1 batch33 high]
 0x00215FE0	btlResetDebugEncounterSelection	inferred	Clears selector launch confirmation and dds3 work; scene refresh invokes it before polling. DDS2 twin0x00230960. [Namer1 batch33 high]

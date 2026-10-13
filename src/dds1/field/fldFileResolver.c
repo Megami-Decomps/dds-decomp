@@ -612,7 +612,7 @@ extern u32 D_003308B0[];
 
 extern void *memset(void *s, s32 c, u32 n);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
-extern s32 func_00213B50(void);
+extern s32 btlGetRuntimeResult(void);
 extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
 extern s32 D_003BADEC;
@@ -3292,7 +3292,7 @@ s32 fldGetEncounterRuntimeResult(void) {
         if (state < 0) {
             result = D_003BACFC;
         } else {
-            result = func_00213B50();
+            result = btlGetRuntimeResult();
         }
     } else {
         result = D_003BACFC;

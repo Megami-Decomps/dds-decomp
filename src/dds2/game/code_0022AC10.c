@@ -2016,7 +2016,7 @@ void btlResetRuntimeState(void) {
     btlReleaseOwnedData();
 }
 
-s32 func_0022E450(void) {
+s32 btlGetRuntimeResult(void) {
     return D_00453068[0];
 }
 
