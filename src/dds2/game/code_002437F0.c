@@ -10,15 +10,6 @@ typedef struct SolarNoiseDebugData {
     char format[4];
 } SolarNoiseDebugData;
 
-typedef struct SolarSpriteLayer {
-    u8 pad00[0xC];
-    s32 drawWidth;
-    s32 drawHeight;
-    u8 pad14[0x68];
-    s32 width;
-    s32 height;
-    u8 pad84[0x1C];
-} SolarSpriteLayer;
 
 typedef struct SolarSpriteContext {
     u8 pad00[0x18];
