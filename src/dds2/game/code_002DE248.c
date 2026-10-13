@@ -13,6 +13,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "eff_object_node.h"
 #include "btl_effect_position.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -428,12 +429,6 @@ typedef struct EffectObjectFlag {
     u8 pad04[8];
     u32 flags;
 } EffectObjectFlag;
-
-typedef struct EffectObjectNode {
-    EffectObjectFlag *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_object_node.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -47,12 +48,6 @@ typedef struct EffModelOwner {
     u32 flags;
 } EffModelOwner;
 
-
-typedef struct EffectObjectNode {
-    EffModelOwner *object;
-    struct EffectObjectNode *prev;
-    struct EffectObjectNode *next;
-} EffectObjectNode;
 
 extern EffectObjectNode *effFloorModelListHead;
 
@@ -359,7 +354,7 @@ void effFloorModelListPush(EffModelOwner *obj) {
         entry->next = NULL;
     }
     effFloorModelListHead = entry;
-    entry->object->flags |= 4;
+    ((EffModelOwner *)entry->object)->flags |= 4;
 }
 
 extern char D_003B2AA0[];
@@ -390,11 +385,11 @@ void effSweepFloorModelList(void) {
     if (node != NULL) {
         do {
             next = node->next;
-            if (!(node->object->flags & 8)) {
-                if ((node->object->flags & 0x31) == 1) {
+            if (!(((EffModelOwner *)node->object)->flags & 8)) {
+                if ((((EffModelOwner *)node->object)->flags & 0x31) == 1) {
                     effRenderModelOwnerWithGsTests(node->object);
                 }
-                node->object->flags &= ~0x20;
+                ((EffModelOwner *)node->object)->flags &= ~0x20;
             } else {
                 effFloorModelListRemove(node);
             }
