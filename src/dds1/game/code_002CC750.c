@@ -12,6 +12,7 @@
 #include "itf.h"
 #include "dat_state.h"
 #include "file.h"
+#include "prf_profile_cap.h"
 #include "prf_requirement.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -81,8 +82,6 @@ extern void (*sdfTickCallback)(void);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 extern u32 D_003BD2C8;
-
-extern u32 prfGetCapValue(u16);
 
 extern u32 prfIsRequirementExcluded(u16);
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "dat_state.h"
 #include "mnu_mantra.h"
+#include "prf_profile_cap.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern s32 mdlFlagTest(s32);
@@ -10,7 +11,6 @@ extern MantraFlagResource *evtAllocateMantraSelectionWork(DatPartyRecord *, s32)
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 *ptyGetProfileRecordPointer(DatPartyRecord *, u16);
-extern s32 ptyGetProfileRecordCap(u16);
 extern void func_00314868(DatPartyRecord *, u16);
 extern void scrSetEntryLowFlags(DatPartyRecord *, u16, u16);
 
