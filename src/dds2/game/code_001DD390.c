@@ -19,6 +19,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_position_lerp_task_args.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
@@ -3782,15 +3783,6 @@ BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, s32 index, f32 scal
     return task;
 }
 
-typedef struct BtlPosLerpTaskArgs {
-    s128 from;
-    s128 to;
-    f32 rate;
-    f32 t;
-    s32 count;
-    BtlUnit *unit;
-} BtlPosLerpTaskArgs;
-
 s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     s128 pos;
     f32 t = args->t;
@@ -3820,7 +3812,7 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
 
 BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *target, f32 scale) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    u8 *args;
+    BtlPosLerpTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0xC;
@@ -3828,12 +3820,12 @@ BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *ta
     task->callback = btlUpdateUnitPositionInterpolationTask;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    ((BtlVectorTaskArgs *)args)->scale = scale;
-    ((BtlVectorTaskArgs *)args)->unit2C = (u32)unit;
-    ((BtlVectorTaskArgs *)args)->state24 = 0;
-    ((BtlVectorTaskArgs *)args)->state28 = 0;
-    PCP_COPY_VECTOR(args, unit->currentPosition);
-    PCP_COPY_VECTOR(args + 0x10, target);
+    args->rate = scale;
+    args->unit = unit;
+    args->t = 0.0f;
+    args->count = 0;
+    PCP_COPY_VECTOR(&args->from, unit->currentPosition);
+    PCP_COPY_VECTOR(&args->to, target);
     return task;
 }
 
