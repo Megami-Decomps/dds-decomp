@@ -1880,7 +1880,7 @@ typedef char CampWideRewardEntry_size_check[
 
 extern s32 mtrMantraFindIndex(s32);
 
-s32 func_00260DF0(s32 row) {
+s32 mnuCampChooseWideRewardEntry(s32 row) {
     s32 column = 0;
     s32 eligibleCount = 0;
     s32 count = mnuCampFindFreeWideEntryIndex(row);
@@ -1932,13 +1932,13 @@ s32 func_00260DF0(s32 row) {
 
 extern u8 D_003CDA89[];
 
-u8 func_00260FE8(s32 row, s32 column) {
+u8 mnuCampGetWideRewardKind(s32 row, s32 column) {
     return D_003CDA89[column * 0xC + row * 0xC0];
 }
 
 extern u8 D_003CD8F4[];
 
-u8 func_00261018(s32 row, s32 column) {
+u8 mnuCampGetCompactRewardKind(s32 row, s32 column) {
     return D_003CD8F4[column * 8 + row * 0x44];
 }
 
@@ -3697,9 +3697,9 @@ u32 func_00264848(void) {
 }
 
 extern void ptyAdjustItemQuantity(s32, s32);
-extern s32 func_00260DF0(s32);
-extern u8 func_00260FE8(s32, s32);
-extern u8 func_00261018(s32, s32);
+extern s32 mnuCampChooseWideRewardEntry(s32);
+extern u8 mnuCampGetWideRewardKind(s32, s32);
+extern u8 mnuCampGetCompactRewardKind(s32, s32);
 extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
 extern s32 mnuCampGetCompactEntryId(s32, s32);
 extern s32 func_002C54B0(s32);
@@ -3737,11 +3737,11 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                 mnuSetPopupEntryFlagged(dispatchSlot, D_003CE5E8);
             } else if (state->rewardDelay <= 0) {
                 if (state->rewardMode < 0) {
-                    column = func_00260DF0(state->rewardRow);
-                    state->rewardKind = func_00260FE8(state->rewardRow, column);
+                    column = mnuCampChooseWideRewardEntry(state->rewardRow);
+                    state->rewardKind = mnuCampGetWideRewardKind(state->rewardRow, column);
                     state->rewardValue = mnuCampResolveOwnedItemVariant(state->rewardRow, column);
                 } else {
-                    state->rewardKind = func_00261018(state->rewardRow, state->rewardIndex);
+                    state->rewardKind = mnuCampGetCompactRewardKind(state->rewardRow, state->rewardIndex);
                     state->rewardValue = mnuCampGetCompactEntryId(state->rewardRow, state->rewardIndex);
                 }
                 if (state->rewardKind == 0 && func_002C54B0(state->rewardValue) != 0) {
