@@ -711,7 +711,7 @@ void mnuReleaseSoundBufferLocked(void) {
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-void func_002A2AA0(void) {
+void mnuLoadTitleMenuAssets(void) {
     mnuLoadMovieMenuResourceSlots();
     mnuEnsureMovieMenuSpriteHandle(1);
 }
@@ -746,7 +746,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
         mnuSelectMenuListCursorByAdvance(1);
     }
     mnuMovieMenuState->mode = mode;
-    func_002A2AA0();
+    mnuLoadTitleMenuAssets();
     D_00435CBC = 0x80000000;
     return kwlnTaskCreate(D_00428680, 0x2B19, 1, 0, mnuUpdateTitleMenuTask, 0, 0);
 }

@@ -4466,6 +4466,7 @@
 0x002A29D8	mnuResetSoundBuffer	inferred	Resets stream state fields D_00455D70[1,4] then releases the active buffer through func_002A2A00.
 0x002A2A40	mnuResetSoundBufferLocked	inferred	Resets sound buffer while holding sound semaphore. [names_reviewed8.tsv]
 0x002A2A70	mnuReleaseSoundBufferLocked	inferred	Releases sound buffer while holding sound semaphore. [names_reviewed8.tsv]
+0x002A2AA0	mnuLoadTitleMenuAssets	inferred	Loads the title menu's resource slots and ensures its movie-menu sprite handle before the menu task starts.
 0x002A2AC0	mnuCreateTitleMenuTask	inferred	L13
 0x002A2BD0	mnuReleaseTitleMenuAssetsAndMarkClosed	inferred	Releases title menu resources and sprite handles, then marks the title menu closed. [names_reviewed15.tsv]
 0x002A2C28	mnuHandleTitleMenuEvent	inferred	TaskPurist
