@@ -454,8 +454,8 @@ typedef struct Cb3714C {
     u8 pad4[8];               /* 0x04 */
     void (*cbC)(void *, void *); /* 0x0C */
     void (*cb10)(void *arg);  /* 0x10 */
-    void (*cb14)(void *arg, void *extra);  /* 0x14 */
-    void (*cb18)(void *arg, void *extra);  /* 0x18 */
+    void (*cb14)(void *arg, f32 position[4]); /* 0x14 */
+    void (*cb18)(void *arg, f32 rotation[4]); /* 0x18 */
     void (*cb1C)(void *arg, f32 scale);  /* 0x1C */
     void (*cb20)(void *arg, u32 color);  /* 0x20 */
     u32 unk24;                /* 0x24 */
@@ -4040,19 +4040,19 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     D_0037E14C[idx].cb(data);
 }
 
-void fileJobInvokePositionCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, void *) = D_0037E14C[idx].cb14;
+    void (*cb)(void *, f32 position[4]) = D_0037E14C[idx].cb14;
     if (cb != NULL) {
-        cb(job->data, extra);
+        cb(job->data, position);
     }
 }
 
-void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra) {
+void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
     u16 idx = job->type;
-    void (*cb)(void *, void *) = D_0037E14C[idx].cb18;
+    void (*cb)(void *, f32 rotation[4]) = D_0037E14C[idx].cb18;
     if (cb != NULL) {
-        cb(job->data, extra);
+        cb(job->data, rotation);
     }
 }
 
@@ -4553,7 +4553,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
             VU0_SCALAR_OP(total, "vmulx.xyzw vf11, vf11, vf2x");
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, &pos);
-            fileJobInvokePositionCallback((FileJobPayload *)job->id, &pos);
+            fileJobInvokePositionCallback((FileJobPayload *)job->id, (f32 *)&pos);
         }
     }
 }
