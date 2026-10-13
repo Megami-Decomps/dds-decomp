@@ -1385,7 +1385,7 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC520);
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC550);
 
-u32 func_00225880(void) {
+u32 evtOpCreateEffectNodeFromTaskResource(void) {
     f32 position[4];
     f32 scale[4];
     s32 taskId;
@@ -1495,7 +1495,7 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC588);
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC5B0);
 
-u32 func_00225BA0(void) {
+u32 evtOpCreateMagatuhiEffect1FromTaskResource(void) {
     s32 taskId;
     s32 key;
     void *resource;
@@ -1539,7 +1539,7 @@ u32 evtScriptCreateEffectObjectFromResource(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC600);
 
-u32 func_00225CD8(void) {
+u32 evtOpCreateMagatuhiEffect2FromTaskResource(void) {
     s32 taskId;
     s32 key;
     void *resource;
