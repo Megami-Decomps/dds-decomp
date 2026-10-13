@@ -10741,3 +10741,41 @@ Inactive or empty work returns `NULL`. Keep the descriptor explicitly `u32`,
 as discussed in the packet-field width idiom above; the name does not assert
 an unsupported interpretation of the trailing word.
 
+## Trace-justified task roles: special pre-action callbacks
+
+DDS1 `func_002069C0` and DDS2 `func_00227DA8` are 1,400-byte callbacks for
+the `0x170` and `0x189` modes. Their task records have one primary
+`BtlRuntimeTask` type. `timedTask` carries the real custom-sound and fade
+records that receive an `endDelay`; `task` carries the other queued records.
+Both locals are consumed by the scheduler, and neither aliases a second
+structure view or copies an index.
+
+The deciding pass is **global-alloc**, specifically its hard-register conflict
+set and coloring decision. With one local for all those producers, pseudo 94
+has 60 references, a live length of 80, priority 37,500, and conflicts including
+`$5`; it therefore gets `$6`. The custom-sound initialization really uses `$5`
+for its `0xC` delay. The required property is that this timed-producer conflict
+must not be inherited by the ordinary task pointer, while the fade records
+must still share the timed pointer's conflicts. Separating only custom sound
+leaves the fade pointer wrong. The honest neutral `timedTask` reuse closes it:
+the ordinary pointer has conflicts `{$2,$3,$4,$16,$28,$sp}` and gets `$5`;
+the timed pointer also conflicts with `$5` and gets `$6`. This reproduces the
+native custom-sound, chained-task, and final-fade pointer roles in both games.
+
+Group each model task's start-condition kind and handle before its owner
+assignment. Retail loads the refresh handle before storing the new owner at
+DDS1 `0x00206B10`/`0x00206B14` and `0x00206DF8`/`0x00206DFC`, and DDS2
+`0x00227EF8`/`0x00227EFC` and `0x002281E0`/`0x002281E4`. The reverse grouping
+retains a store-to-load ordering dependency in sched1.
+
+The diagnosed sequence was 38/350 differing words, 34 after condition grouping,
+12 after splitting the custom-sound producer, and 0 after timed-task reuse.
+The last change also closes the effect-scale/action-slot scheduling seam;
+no extra scalar-staging form was needed or tested. Final fresh cc1probe runs
+have identical hooked/unhooked assembly and RTL. Trace paths and pass locations
+are in PurC-2's batch36 ledger and callback step record, not in source comments.
+Whole-unit gates are DDS1 151 match/0 differ and DDS2 43 match/0 differ, including
+data and all surrounding C. Objdiff's 11 literal-pool relocation-name differences
+are metadata only: target words are exact, and the normal linked retail SHA-1
+remains the end-to-end gate.
+
