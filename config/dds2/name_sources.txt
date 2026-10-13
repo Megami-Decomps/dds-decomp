@@ -6075,6 +6075,7 @@
 0x00319FF0	mnuUpdateTimedEffectPosition	inferred	TaskPurist4
 0x0031A690	mnuInitializeHighScoreState	inferred	confidence=high; src/dds2/game/code_0031A638.c:22:func_0031A690; Ensures flag-selected high-score minimum and initializes work score fields.; sources=names_M143.tsv [names_qp10.tsv]
 0x0031A770	mnuUpdateHighScoreFlag	inferred	confidence=high; src/dds2/game/code_0031A638.c:47:func_0031A770; Commits improved work score to global high score and sets/clears new-high-score flag.; sources=names_M143.tsv [names_qp10.tsv]
+0x0031A830	mnuUpdateShootingProgressTier	inferred	Clamps shooting progress, selects the score multiplier tier, and starts the completion timer and sound at 100%; called by runtime record processing and score-progress ticking. [DDS2 source/caller analysis, 2026-10-13]
 0x0031A920	mnuTickScoreProgressState	inferred	readability/matching review (QP16)
 0x0031AA10	mnuAdvanceShootingRoundPhase	inferred	U1
 0x0031AD00	itfDispatchObjectFadeSequenceMode	inferred	confidence=high; src/dds2/game/code_0031AD00.c:func_0031AD00; Chooses initial fade setup, sequence-offset drawing, glyph-triplet drawing or a paired sequence from object mode. [names_qp9.tsv]

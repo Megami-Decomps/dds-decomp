@@ -8,14 +8,14 @@
 
 
 
-void func_0031A830(MnuShootingWork *timer);
+void mnuUpdateShootingProgressTier(MnuShootingWork *timer);
 
 /* Advance progress for the selected record mode unless the final-band timer is active. */
 void func_0031A638(MenuRuntimeRecord *record, MenuRuntimeRecord *unused, MnuShootingWork *timer) {
     if ((record->state.kind & 0xF) == 4 && timer->completed <= 0) {
         timer->progress++;
         timer->updateCount++;
-        func_0031A830(timer);
+        mnuUpdateShootingProgressTier(timer);
     }
 }
 
@@ -73,7 +73,7 @@ void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *work) {
 }
 
 /* Clamp/quantize progress; reaching the last band starts the timed completion state. */
-void func_0031A830(MnuShootingWork *timer) {
+void mnuUpdateShootingProgressTier(MnuShootingWork *timer) {
     s32 progress;
     f32 progressRatio;
 
@@ -104,7 +104,7 @@ void func_0031A830(MnuShootingWork *timer) {
 void mnuTickScoreProgressState(MnuShootingWork *work) {
     u32 currentScore;
 
-    func_0031A830(work);
+    mnuUpdateShootingProgressTier(work);
     if (work->completed > 0) {
         work->completed--;
     }
