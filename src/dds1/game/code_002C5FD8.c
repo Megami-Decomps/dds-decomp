@@ -482,7 +482,7 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 }
 
 extern s8 D_003BD281;
-extern void func_002C7BB0(MapRequestState *);
+extern void fldAdvanceMapRequestAges(MapRequestState *);
 
 void fldUpdateMapRequestQueues(s32 enabled) {
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -514,8 +514,8 @@ void fldUpdateMapRequestQueues(s32 enabled) {
         D_003DFED0[1] = (s32)D_0038FE30[index][1];
         D_003DFED0[2] = (s32)D_0038FE30[index][2];
     }
-    func_002C7BB0(D_003BD988);
-    func_002C7BB0(D_003BD98C);
+    fldAdvanceMapRequestAges(D_003BD988);
+    fldAdvanceMapRequestAges(D_003BD98C);
 }
 
 void fldDrawCounterMapMarker(void) {
@@ -600,7 +600,7 @@ void fldSetMapRequestInterval(MapRequestState *state, u16 interval) {
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */
-void func_002C7BB0(MapRequestState *ring) {
+void fldAdvanceMapRequestAges(MapRequestState *ring) {
     s32 remaining;
     s32 pending;
     u16 limit;
